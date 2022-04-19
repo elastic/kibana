@@ -8,8 +8,6 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import {
   RuleType,
   RuleTypeState,
@@ -17,7 +15,13 @@ import {
   AlertInstanceContext,
   RuleExecutorOptions as AlertingRuleExecutorOptions,
   RuleExecutorServices,
-} from '../../../../../alerting/server';
+} from '@kbn/alerting-plugin/server';
+import { ListClient } from '@kbn/lists-plugin/server';
+import { Logger } from '@kbn/core/server';
+import { EcsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
+import { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map';
+import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import { TermAggregationBucket } from '../../types';
 import {
   BaseHit,
@@ -25,14 +29,10 @@ import {
   SearchTypes,
   EqlSequence,
 } from '../../../../common/detection_engine/types';
-import { ListClient } from '../../../../../lists/server';
-import { Logger } from '../../../../../../../src/core/server';
 import { BuildRuleMessage } from './rule_messages';
 import { ITelemetryEventsSender } from '../../telemetry/sender';
 import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
 import { GenericBulkCreateResponse } from '../rule_types/factories';
-import { EcsFieldMap } from '../../../../../rule_registry/common/assets/field_maps/ecs_field_map';
-import { TypeOfFieldMap } from '../../../../../rule_registry/common/field_map';
 import { BuildReasonMessage } from './reason_formatters';
 import {
   BaseFieldsLatest,

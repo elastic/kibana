@@ -9,7 +9,7 @@ import { EuiEmptyPrompt, EuiButtonGroup, EuiHorizontalRule } from '@elastic/eui'
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { groupBy } from 'lodash';
-import { ProcessEvent, Process } from '../../../common/types/process_tree';
+import { ProcessEvent } from '../../../common/types/process_tree';
 import { useStyles } from './styles';
 import { DetailPanelAlertListItem } from '../detail_panel_alert_list_item';
 import { DetailPanelAlertGroupItem } from '../detail_panel_alert_group_item';
@@ -20,9 +20,9 @@ export const VIEW_MODE_TOGGLE = 'sessionView:detailPanelAlertsViewMode';
 
 interface DetailPanelAlertTabDeps {
   alerts: ProcessEvent[];
-  onProcessSelected: (process: Process) => void;
+  onJumpToEvent: (event: ProcessEvent) => void;
   onShowAlertDetails: (alertId: string) => void;
-  investigatedAlert?: ProcessEvent;
+  investigatedAlertId?: string;
 }
 
 const VIEW_MODE_LIST = 'listView';
@@ -33,9 +33,9 @@ const VIEW_MODE_GROUP = 'groupView';
  */
 export const DetailPanelAlertTab = ({
   alerts,
-  onProcessSelected,
+  onJumpToEvent,
   onShowAlertDetails,
-  investigatedAlert,
+  investigatedAlertId,
 }: DetailPanelAlertTabDeps) => {
   const styles = useStyles();
   const [viewMode, setViewMode] = useState(VIEW_MODE_LIST);
@@ -54,18 +54,18 @@ export const DetailPanelAlertTab = ({
     },
   ];
 
-  const filteredAlerts = useMemo(() => {
-    return alerts.filter((event) => {
-      const isInvestigatedAlert =
-        event.kibana?.alert?.uuid &&
-        event.kibana?.alert?.uuid === investigatedAlert?.kibana?.alert?.uuid;
-      return !isInvestigatedAlert;
-    });
-  }, [investigatedAlert, alerts]);
+  const investigatedAlert = useMemo(() => {
+    return (
+      investigatedAlertId &&
+      alerts.find((event) => {
+        return event.kibana?.alert?.uuid === investigatedAlertId;
+      })
+    );
+  }, [investigatedAlertId, alerts]);
 
   const groupedAlerts = useMemo(() => {
-    return groupBy(filteredAlerts, (event) => event.kibana?.alert?.rule?.uuid);
-  }, [filteredAlerts]);
+    return groupBy(alerts, (event) => event.kibana?.alert?.rule?.uuid);
+  }, [alerts]);
 
   if (alerts.length === 0) {
     return (
@@ -109,7 +109,7 @@ export const DetailPanelAlertTab = ({
         <div css={styles.stickyItem} data-test-subj={INVESTIGATED_ALERT_TEST_ID}>
           <DetailPanelAlertListItem
             event={investigatedAlert}
-            onProcessSelected={onProcessSelected}
+            onJumpToEvent={onJumpToEvent}
             onShowAlertDetails={onShowAlertDetails}
             isInvestigated={true}
           />
@@ -118,29 +118,34 @@ export const DetailPanelAlertTab = ({
       )}
 
       {viewMode === VIEW_MODE_LIST
-        ? filteredAlerts.map((event) => {
+        ? alerts.map((event) => {
             const key = event.kibana?.alert?.uuid;
 
-            return (
-              <DetailPanelAlertListItem
-                key={key}
-                event={event}
-                onProcessSelected={onProcessSelected}
-                onShowAlertDetails={onShowAlertDetails}
-              />
-            );
+            if (key && event !== investigatedAlert) {
+              return (
+                <DetailPanelAlertListItem
+                  key={key}
+                  event={event}
+                  onJumpToEvent={onJumpToEvent}
+                  onShowAlertDetails={onShowAlertDetails}
+                />
+              );
+            }
           })
         : Object.keys(groupedAlerts).map((ruleId: string) => {
             const alertsByRule = groupedAlerts[ruleId];
+            const key = alertsByRule[0].kibana?.alert?.rule?.uuid;
 
-            return (
-              <DetailPanelAlertGroupItem
-                key={alertsByRule[0].kibana?.alert?.rule?.uuid}
-                alerts={alertsByRule}
-                onProcessSelected={onProcessSelected}
-                onShowAlertDetails={onShowAlertDetails}
-              />
-            );
+            if (key) {
+              return (
+                <DetailPanelAlertGroupItem
+                  key={key}
+                  alerts={alertsByRule}
+                  onJumpToEvent={onJumpToEvent}
+                  onShowAlertDetails={onShowAlertDetails}
+                />
+              );
+            }
           })}
     </div>
   );

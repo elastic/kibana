@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'kibana/public';
+import { CoreSetup } from '@kbn/core/public';
+import { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { createEditSwimlanePanelAction } from './edit_swimlane_panel_action';
 import { createOpenInExplorerAction } from './open_in_anomaly_explorer_action';
 import { createMLADJobAction } from './open_in_ml_action';
-import { UiActionsSetup } from '../../../../../src/plugins/ui_actions/public';
 import { MlPluginStart, MlStartDependencies } from '../plugin';
-import { CONTEXT_MENU_TRIGGER } from '../../../../../src/plugins/embeddable/public';
 import { createApplyInfluencerFiltersAction } from './apply_influencer_filters_action';
 import {
   entityFieldSelectionTrigger,

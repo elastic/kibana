@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { deleteMigrationSavedObject } from './delete_migration_saved_object';
 import { isMigrationFailed, isMigrationPending, isMigrationSuccess } from './helpers';
 import { applyMigrationCleanupPolicy } from './migration_cleanup';

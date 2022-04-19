@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
   CaseResponse,
@@ -14,8 +13,9 @@ import {
   CommentType,
   ConnectorTypes,
   getCaseUserActionUrl,
-} from '../../../../../../plugins/cases/common/api';
-import { CreateCaseUserAction } from '../../../../../../plugins/cases/common/api/cases/user_actions/create_case';
+} from '@kbn/cases-plugin/common/api';
+import { CreateCaseUserAction } from '@kbn/cases-plugin/common/api/cases/user_actions/create_case';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { postCaseReq, postCommentUserReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,

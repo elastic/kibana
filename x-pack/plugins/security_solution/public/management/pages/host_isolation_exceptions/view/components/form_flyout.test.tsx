@@ -15,7 +15,7 @@ import {
 } from '../../../../../common/mock/endpoint';
 import { getHostIsolationExceptionsListPath } from '../../../../common/routing';
 import { sendGetEndpointSpecificPackagePolicies } from '../../../../services/policies/policies';
-import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../services/policies/test_mock_utilts';
+import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../services/policies/test_mock_utils';
 import {
   createHostIsolationExceptionItem,
   getOneHostIsolationExceptionItem,
@@ -24,7 +24,7 @@ import {
 import { createEmptyHostIsolationException } from '../../utils';
 import { HostIsolationExceptionsFormFlyout } from './form_flyout';
 
-jest.mock('../../service.ts');
+jest.mock('../../service');
 jest.mock('../../../../../common/hooks/use_license');
 jest.mock('../../../../services/policies/policies');
 

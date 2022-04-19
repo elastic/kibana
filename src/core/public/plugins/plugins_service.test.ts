@@ -13,7 +13,7 @@ import {
   mockPluginInitializerProvider,
 } from './plugins_service.test.mocks';
 
-import { PluginName, PluginType } from 'src/core/server';
+import { PluginName, PluginType } from '../../server';
 import { coreMock } from '../mocks';
 import {
   PluginsService,
@@ -37,6 +37,7 @@ import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.
 import { deprecationsServiceMock } from '../deprecations/deprecations_service.mock';
 import { themeServiceMock } from '../theme/theme_service.mock';
 import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
+import { analyticsServiceMock } from '../analytics/analytics_service.mock';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
@@ -84,6 +85,7 @@ describe('PluginsService', () => {
       },
     ];
     mockSetupDeps = {
+      analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
       application: applicationServiceMock.createInternalSetupContract(),
       fatalErrors: fatalErrorsServiceMock.createSetupContract(),
       executionContext: executionContextServiceMock.createSetupContract(),
@@ -100,6 +102,7 @@ describe('PluginsService', () => {
       injectedMetadata: pick(mockSetupDeps.injectedMetadata, 'getInjectedVar'),
     };
     mockStartDeps = {
+      analytics: analyticsServiceMock.createAnalyticsServiceStart(),
       application: applicationServiceMock.createInternalStartContract(),
       docLinks: docLinksServiceMock.createStartContract(),
       executionContext: executionContextServiceMock.createStartContract(),

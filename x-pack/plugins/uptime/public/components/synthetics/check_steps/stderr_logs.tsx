@@ -23,10 +23,10 @@ import { i18n } from '@kbn/i18n';
 import { EuiInMemoryTable } from '@elastic/eui';
 import moment from 'moment';
 import { useSelector } from 'react-redux';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useFetcher } from '@kbn/observability-plugin/public';
 import { useStdErrorLogs } from './use_std_error_logs';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ClientPluginsStart } from '../../../apps/plugin';
-import { useFetcher } from '../../../../../observability/public';
 import { selectDynamicSettings } from '../../../state/selectors';
 import { Ping } from '../../../../common/runtime_types';
 
@@ -36,12 +36,14 @@ export const StdErrorLogs = ({
   timestamp,
   title,
   summaryMessage,
+  hideTitle = false,
 }: {
   configId?: string;
   checkGroup?: string;
   timestamp?: string;
   title?: string;
   summaryMessage?: string;
+  hideTitle?: boolean;
 }) => {
   const columns = [
     {
@@ -95,24 +97,31 @@ export const StdErrorLogs = ({
 
   return (
     <>
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="s">
-            <h3>{title ?? TEST_RUN_LOGS_LABEL}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiLink>
-            <EuiButtonEmpty href={discoverLink} iconType="discoverApp" isDisabled={!discoverLink}>
-              {VIEW_IN_DISCOVER_LABEL}
-            </EuiButtonEmpty>
-          </EuiLink>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiCallOut title={ERROR_SUMMARY_LABEL} color="danger" iconType="alert">
-        <p>{summaryMessage}</p>
-      </EuiCallOut>
+      {!hideTitle && (
+        <>
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="s">
+                <h3>{title ?? TEST_RUN_LOGS_LABEL}</h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiLink>
+                <EuiButtonEmpty
+                  href={discoverLink}
+                  iconType="discoverApp"
+                  isDisabled={!discoverLink}
+                >
+                  {VIEW_IN_DISCOVER_LABEL}
+                </EuiButtonEmpty>
+              </EuiLink>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiCallOut title={ERROR_SUMMARY_LABEL} color="danger" iconType="alert">
+            <p>{summaryMessage}</p>
+          </EuiCallOut>
+        </>
+      )}
 
       <EuiSpacer />
 

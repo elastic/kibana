@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { MockRedux } from '../../../lib/helper/rtl_helpers';
 import { useInlineErrorsCount } from './use_inline_errors_count';
-import * as obsvPlugin from '../../../../../observability/public/hooks/use_es_search';
+import * as obsvPlugin from '@kbn/observability-plugin/public/hooks/use_es_search';
 import { DEFAULT_THROTTLING } from '../../../../common/runtime_types';
 
 function mockNow(date: string | number | Date) {
@@ -62,13 +62,12 @@ describe('useInlineErrorsCount', function () {
           },
           size: 0,
         },
-        index: 'heartbeat-8*,heartbeat-7*,synthetics-*',
+        index: 'synthetics-*',
       },
       [
-        'heartbeat-8*,heartbeat-7*,synthetics-*',
         {
           error: { monitorList: null, serviceLocations: null, enablement: null },
-          list: { monitors: [], page: 1, perPage: 10, total: null },
+          list: { monitors: [], page: 1, perPage: 10, total: null, syncErrors: null },
           enablement: null,
           loading: { monitorList: false, serviceLocations: false, enablement: false },
           locations: [],

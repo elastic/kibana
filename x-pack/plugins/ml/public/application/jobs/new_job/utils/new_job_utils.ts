@@ -14,8 +14,8 @@ import {
   buildQueryFromFilters,
   DataViewBase,
 } from '@kbn/es-query';
-import { IUiSettingsClient } from 'kibana/public';
-import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/public';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../common/constants/search';
 import { SavedSearchSavedObject } from '../../../../../common/types/kibana';
 import { getQueryFromSavedSearchObject } from '../../../util/index_utils';

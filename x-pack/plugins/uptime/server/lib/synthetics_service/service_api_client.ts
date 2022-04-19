@@ -10,7 +10,7 @@ import { forkJoin, from as rxjsFrom, Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import * as https from 'https';
 import { SslConfig } from '@kbn/server-http-tools';
-import { Logger } from '../../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import {
   MonitorFields,
   ServiceLocations,
@@ -74,7 +74,7 @@ export class ServiceAPIClient {
   }
 
   async put(data: ServiceData) {
-    return this.callAPI('POST', data);
+    return this.callAPI('PUT', data);
   }
 
   async delete(data: ServiceData) {
@@ -170,6 +170,9 @@ export class ServiceAPIClient {
             catchError((err) => {
               pushErrors.push({ locationId: id, error: err.response?.data });
               this.logger.error(err);
+              if (err.response?.data?.reason) {
+                this.logger.error(err.response?.data?.reason);
+              }
               // we don't want to throw an unhandled exception here
               return of(true);
             })

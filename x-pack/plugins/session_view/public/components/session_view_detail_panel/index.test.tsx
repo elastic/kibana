@@ -11,18 +11,18 @@ import {
   sessionViewBasicProcessMock,
 } from '../../../common/mocks/constants/session_view_process.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { SessionViewDetailPanel } from './index';
+import { SessionViewDetailPanel } from '.';
 
 describe('SessionView component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
-  let mockOnProcessSelected = jest.fn((process) => process);
+  let mockOnJumpToEvent = jest.fn((process) => process);
   let mockShowAlertDetails = jest.fn((alertId) => alertId);
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
-    mockOnProcessSelected = jest.fn((process) => process);
+    mockOnJumpToEvent = jest.fn((process) => process);
     mockShowAlertDetails = jest.fn((alertId) => alertId);
   });
 
@@ -31,7 +31,7 @@ describe('SessionView component', () => {
       renderResult = mockedContext.render(
         <SessionViewDetailPanel
           selectedProcess={sessionViewBasicProcessMock}
-          onProcessSelected={mockOnProcessSelected}
+          onJumpToEvent={mockOnJumpToEvent}
           onShowAlertDetails={mockShowAlertDetails}
         />
       );
@@ -42,7 +42,7 @@ describe('SessionView component', () => {
       renderResult = mockedContext.render(
         <SessionViewDetailPanel
           selectedProcess={undefined}
-          onProcessSelected={mockOnProcessSelected}
+          onJumpToEvent={mockOnJumpToEvent}
           onShowAlertDetails={mockShowAlertDetails}
         />
       );
@@ -53,7 +53,7 @@ describe('SessionView component', () => {
       renderResult = mockedContext.render(
         <SessionViewDetailPanel
           selectedProcess={sessionViewBasicProcessMock}
-          onProcessSelected={mockOnProcessSelected}
+          onJumpToEvent={mockOnJumpToEvent}
           onShowAlertDetails={mockShowAlertDetails}
         />
       );
@@ -68,7 +68,7 @@ describe('SessionView component', () => {
         <SessionViewDetailPanel
           alerts={mockAlerts}
           selectedProcess={sessionViewBasicProcessMock}
-          onProcessSelected={mockOnProcessSelected}
+          onJumpToEvent={mockOnJumpToEvent}
           onShowAlertDetails={mockShowAlertDetails}
         />
       );
@@ -81,7 +81,7 @@ describe('SessionView component', () => {
         <SessionViewDetailPanel
           alerts={[]}
           selectedProcess={sessionViewBasicProcessMock}
-          onProcessSelected={mockOnProcessSelected}
+          onJumpToEvent={mockOnJumpToEvent}
           onShowAlertDetails={mockShowAlertDetails}
         />
       );

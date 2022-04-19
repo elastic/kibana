@@ -9,7 +9,7 @@ import path from 'path';
 
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
-import type { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 
 import {
   PreconfiguredPackagesSchema,
@@ -39,6 +39,7 @@ export type {
   PostPackagePolicyDeleteCallback,
   PostPackagePolicyCreateCallback,
   FleetRequestHandlerContext,
+  PostPackagePolicyPostCreateCallback,
 } from './types';
 export { AgentNotFoundError, FleetUnauthorizedError } from './errors';
 
@@ -47,7 +48,9 @@ const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
     epm: true,
-    agents: true,
+    agents: {
+      enabled: true,
+    },
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Unused settings before Fleet server exists

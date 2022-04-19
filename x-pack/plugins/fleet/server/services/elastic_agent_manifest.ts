@@ -222,8 +222,7 @@ metadata:
 ---
 `;
 
-export const elasticAgentManagedManifest = `
-apiVersion: apps/v1
+export const elasticAgentManagedManifest = `apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: elastic-agent

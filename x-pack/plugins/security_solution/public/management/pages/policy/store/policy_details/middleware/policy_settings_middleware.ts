@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IHttpFetchError } from 'kibana/public';
+import { IHttpFetchError } from '@kbn/core/public';
 import {
   DefaultPolicyNotificationMessage,
   DefaultPolicyRuleNotificationMessage,
@@ -22,7 +22,7 @@ import {
   sendGetPackagePolicy,
   sendGetFleetAgentStatusForPolicy,
   sendPutPackagePolicy,
-} from '../../services/ingest';
+} from '../../../../../services/policies/ingest';
 import { NewPolicyData, PolicyData } from '../../../../../../../common/endpoint/types';
 import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy';
 

@@ -5,18 +5,15 @@
  * 2.0.
  */
 import { QueryObserverResult, useQuery, UseQueryOptions } from 'react-query';
-import { HttpFetchError } from 'kibana/public';
+import { HttpFetchError } from '@kbn/core/public';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   GetAgentPoliciesResponse,
   GetPackagesResponse,
-} from '../../../../../fleet/common';
+} from '@kbn/fleet-plugin/common';
 import { useHttp } from '../../../common/lib/kibana';
 import { MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
-import {
-  sendGetAgentPolicyList,
-  sendGetEndpointSecurityPackage,
-} from '../../pages/policy/store/services/ingest';
+import { sendGetAgentPolicyList, sendGetEndpointSecurityPackage } from './ingest';
 import { GetPolicyListResponse } from '../../pages/policy/types';
 import { sendGetEndpointSpecificPackagePolicies } from './policies';
 import { ServerApiError } from '../../../common/types';

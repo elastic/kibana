@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import {
   CustomIntegration,
   ROUTES_APPEND_CUSTOM_INTEGRATIONS,
   ROUTES_REPLACEMENT_CUSTOM_INTEGRATIONS,
 } from '../../../common';
-import { KibanaPluginServiceFactory } from '../../../../presentation_util/public';
 
 import { CustomIntegrationsStartDependencies } from '../../types';
 import { CustomIntegrationsFindService, filterCustomIntegrations } from '../find';

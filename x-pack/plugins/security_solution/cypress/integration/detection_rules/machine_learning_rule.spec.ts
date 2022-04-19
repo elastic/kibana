@@ -40,11 +40,7 @@ import {
 } from '../../screens/rule_details';
 
 import { getDetails } from '../../tasks/rule_details';
-import {
-  changeRowsPerPageTo100,
-  filterByCustomRules,
-  goToRuleDetails,
-} from '../../tasks/alerts_detection_rules';
+import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { cleanKibana } from '../../tasks/common';
 import {
   createAndEnableRule,
@@ -53,7 +49,7 @@ import {
   fillScheduleRuleAndContinue,
   selectMachineLearningRuleType,
 } from '../../tasks/create_new_rule';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { RULE_CREATION } from '../../urls/navigation';
 
@@ -64,12 +60,13 @@ describe('Detection rules, machine learning', () => {
   const expectedMitre = formatMitreAttackDescription(getMachineLearningRule().mitre);
   const expectedNumberOfRules = 1;
 
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
+    login();
+    visitWithoutDateRange(RULE_CREATION);
   });
 
   it('Creates and enables a new ml rule', () => {
-    loginAndWaitForPageWithoutDateRange(RULE_CREATION);
     selectMachineLearningRuleType();
     fillDefineMachineLearningRuleAndContinue(getMachineLearningRule());
     fillAboutRuleAndContinue(getMachineLearningRule());
@@ -78,17 +75,10 @@ describe('Detection rules, machine learning', () => {
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-    changeRowsPerPageTo100();
-
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
     });
 
-    filterByCustomRules();
-
-    cy.get(RULES_TABLE).then(($table) => {
-      cy.wrap($table.find(RULES_ROW).length).should('eql', 1);
-    });
     cy.get(RULE_NAME).should('have.text', getMachineLearningRule().name);
     cy.get(RISK_SCORE).should('have.text', getMachineLearningRule().riskScore);
     cy.get(SEVERITY).should('have.text', getMachineLearningRule().severity);
@@ -117,10 +107,11 @@ describe('Detection rules, machine learning', () => {
       );
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Machine Learning');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
-      getMachineLearningRule().machineLearningJobs.forEach((machineLearningJob, jobIndex) => {
-        cy.get(MACHINE_LEARNING_JOB_STATUS).eq(jobIndex).should('have.text', 'Stopped');
-        cy.get(MACHINE_LEARNING_JOB_ID).eq(jobIndex).should('have.text', machineLearningJob);
-      });
+      cy.get(MACHINE_LEARNING_JOB_STATUS).should('have.text', 'StoppedStopped');
+      cy.get(MACHINE_LEARNING_JOB_ID).should(
+        'have.text',
+        getMachineLearningRule().machineLearningJobs.join('')
+      );
     });
     cy.get(SCHEDULE_DETAILS).within(() => {
       getDetails(RUNS_EVERY_DETAILS).should(

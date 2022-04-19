@@ -103,8 +103,9 @@ export type {
   LabelsOrientationConfigResult,
   ReferenceLineLayerConfigResult,
   AxisTitlesVisibilityConfigResult,
-} from '../../../../src/plugins/chart_expressions/expression_xy/common';
-export type { LensEmbeddableInput, LensSavedObjectAttributes } from './embeddable';
+} from '@kbn/expression-xy-plugin/common';
+export type { LensEmbeddableInput. LensSavedObjectAttributes } from './embeddable';
+
 export { layerTypes } from '../common';
 
 export type { LensPublicStart, LensPublicSetup } from './plugin';

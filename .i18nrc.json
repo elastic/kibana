@@ -66,6 +66,8 @@
     "share": "src/plugins/share",
     "sharedUX": "src/plugins/shared_ux",
     "sharedUXComponents": "packages/kbn-shared-ux-components/src",
+    "sharedUXPackages": "packages/shared-ux",
+    "coloring": "packages/kbn-coloring/src",
     "statusPage": "src/legacy/core_plugins/status_page",
     "telemetry": [
       "src/plugins/telemetry",

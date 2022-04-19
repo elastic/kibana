@@ -6,15 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
+import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import { UsageStats } from './types';
 
 export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
-  // sensitive
-  'timelion:quandl.key': {
-    type: 'keyword',
-    _meta: { description: 'Default value of the setting was changed.' },
-  },
   'securitySolution:defaultIndex': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
@@ -34,10 +29,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'notifications:banner': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
-  },
-  'timelion:graphite.url': {
-    type: 'keyword',
-    _meta: { description: 'Default value of the setting changed.' },
   },
   'xpackDashboardMode:roles': {
     type: 'keyword',

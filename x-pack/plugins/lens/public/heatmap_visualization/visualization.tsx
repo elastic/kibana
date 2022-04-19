@@ -11,10 +11,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
-import { ThemeServiceStart } from 'kibana/public';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
-import { PaletteRegistry } from '../../../../../src/plugins/charts/public';
-import { HeatmapIcon } from '../../../../../src/plugins/chart_expressions/expression_heatmap/public';
+import { CUSTOM_PALETTE, PaletteRegistry, CustomPaletteParams } from '@kbn/coloring';
+import { ThemeServiceStart } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { HeatmapIcon } from '@kbn/expression-heatmap-plugin/public';
 import type { OperationMetadata, Visualization } from '../types';
 import type { HeatmapVisualizationState } from './types';
 import { getSuggestions } from './suggestions';
@@ -29,10 +29,8 @@ import {
   LENS_HEATMAP_ID,
 } from './constants';
 import { HeatmapToolbar } from './toolbar_component';
-import { CUSTOM_PALETTE } from '../shared_components';
 import { HeatmapDimensionEditor } from './dimension_editor';
 import { getSafePaletteParams } from './utils';
-import type { CustomPaletteParams } from '../../common';
 import { layerTypes } from '../../common';
 
 const groupLabelForHeatmap = i18n.translate('xpack.lens.heatmapVisualization.heatmapGroupLabel', {

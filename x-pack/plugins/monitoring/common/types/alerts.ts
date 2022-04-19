@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Rule, RuleTypeParams, SanitizedRule } from '../../../alerting/common';
+import { Rule, RuleTypeParams, SanitizedRule } from '@kbn/alerting-plugin/common';
 import {
   AlertParamType,
   AlertMessageTokenType,

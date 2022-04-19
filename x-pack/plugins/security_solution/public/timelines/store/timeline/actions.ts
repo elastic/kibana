@@ -12,7 +12,7 @@ import {
   DataProvider,
   DataProviderType,
   QueryOperator,
-} from '../../../timelines/components/timeline/data_providers/data_provider';
+} from '../../components/timeline/data_providers/data_provider';
 
 import { KqlMode, TimelineModel } from './model';
 import { InsertTimeline } from './types';
@@ -44,8 +44,9 @@ export {
   updateItemsPerPageOptions,
   updateSort,
   upsertColumn,
-} from '../../../../../timelines/public';
+} from '@kbn/timelines-plugin/public';
 import { ResolveTimelineConfig } from '../../components/open_timeline/types';
+import { SessionViewConfig } from '../../components/timeline/session_tab_content/use_session_view';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
 
@@ -83,10 +84,10 @@ export const updateTimelineGraphEventId = actionCreator<{ id: string; graphEvent
   'UPDATE_TIMELINE_GRAPH_EVENT_ID'
 );
 
-export const updateTimelineSessionViewSessionId = actionCreator<{
+export const updateTimelineSessionViewConfig = actionCreator<{
   id: string;
-  eventId: string | null;
-}>('UPDATE_TIMELINE_SESSION_VIEW_SESSION_ID');
+  sessionViewConfig: SessionViewConfig | null;
+}>('UPDATE_TIMELINE_SESSION_VIEW_CONFIG');
 
 export const unPinEvent = actionCreator<{ id: string; eventId: string }>('UN_PIN_EVENT');
 

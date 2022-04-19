@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { SavedObjectsServiceSetup, SavedObjectsType } from 'kibana/server';
+import type { SavedObjectsServiceSetup, SavedObjectsType } from '@kbn/core/server';
 
-import type { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+
 import {
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -118,7 +119,7 @@ const getSavedObjectTypes = (
         config: { type: 'flattened' },
         config_yaml: { type: 'text' },
         is_preconfigured: { type: 'boolean', index: false },
-        ssl: { type: 'flattened', index: false },
+        ssl: { type: 'binary' },
       },
     },
     migrations: {
@@ -310,5 +311,22 @@ export function registerSavedObjects(
 export function registerEncryptedSavedObjects(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) {
+  encryptedSavedObjects.registerType({
+    type: OUTPUT_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set([{ key: 'ssl', dangerouslyExposeValue: true }]),
+    attributesToExcludeFromAAD: new Set([
+      'output_id',
+      'name',
+      'type',
+      'is_default',
+      'is_default_monitoring',
+      'hosts',
+      'ca_sha256',
+      'ca_trusted_fingerprint',
+      'config',
+      'config_yaml',
+      'is_preconfigured',
+    ]),
+  });
   // Encrypted saved objects
 }

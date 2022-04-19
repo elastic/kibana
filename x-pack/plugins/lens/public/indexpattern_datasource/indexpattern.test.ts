@@ -6,15 +6,15 @@
  */
 
 import React from 'react';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { getIndexPatternDatasource, GenericIndexPatternColumn } from './indexpattern';
 import { DatasourcePublicAPI, Datasource, FramePublicAPI, OperationDescriptor } from '../types';
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
-import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
-import { dataViewPluginMocks } from '../../../../../src/plugins/data_views/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { Ast } from '@kbn/interpreter';
-import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { getFieldByNameFactory } from './pure_helpers';
 import {
   operationDefinitionMap,
@@ -28,11 +28,11 @@ import {
   FiltersIndexPatternColumn,
 } from './operations';
 import { createMockedFullReference } from './operations/mocks';
-import { indexPatternFieldEditorPluginMock } from 'src/plugins/data_view_field_editor/public/mocks';
-import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
-import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
+import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { TinymathAST } from '@kbn/tinymath';
-import { SavedObjectReference } from 'kibana/public';
+import { SavedObjectReference } from '@kbn/core/public';
 import { cloneDeep } from 'lodash';
 
 jest.mock('./loader');
@@ -2467,7 +2467,7 @@ describe('IndexPattern Data Source', () => {
   });
   describe('#isTimeBased', () => {
     it('should return true if date histogram exists in any layer', () => {
-      const state = enrichBaseState({
+      let state = enrichBaseState({
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -2520,10 +2520,17 @@ describe('IndexPattern Data Source', () => {
           },
         },
       });
+      state = {
+        ...state,
+        indexPatterns: {
+          ...state.indexPatterns,
+          '1': { ...state.indexPatterns['1'], timeFieldName: undefined },
+        },
+      };
       expect(indexPatternDatasource.isTimeBased(state)).toEqual(true);
     });
     it('should return false if date histogram exists but is detached from global time range in every layer', () => {
-      const state = enrichBaseState({
+      let state = enrichBaseState({
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -2577,9 +2584,44 @@ describe('IndexPattern Data Source', () => {
           },
         },
       });
+      state = {
+        ...state,
+        indexPatterns: {
+          ...state.indexPatterns,
+          '1': { ...state.indexPatterns['1'], timeFieldName: undefined },
+        },
+      };
       expect(indexPatternDatasource.isTimeBased(state)).toEqual(false);
     });
     it('should return false if date histogram does not exist in any layer', () => {
+      let state = enrichBaseState({
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['metric'],
+            columns: {
+              metric: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: '___records___',
+                operationType: 'count',
+              },
+            },
+          },
+        },
+      });
+      state = {
+        ...state,
+        indexPatterns: {
+          ...state.indexPatterns,
+          '1': { ...state.indexPatterns['1'], timeFieldName: undefined },
+        },
+      };
+      expect(indexPatternDatasource.isTimeBased(state)).toEqual(false);
+    });
+    it('should return true if the index pattern is time based even if date histogram does not exist in any layer', () => {
       const state = enrichBaseState({
         currentIndexPatternId: '1',
         layers: {
@@ -2598,7 +2640,7 @@ describe('IndexPattern Data Source', () => {
           },
         },
       });
-      expect(indexPatternDatasource.isTimeBased(state)).toEqual(false);
+      expect(indexPatternDatasource.isTimeBased(state)).toEqual(true);
     });
   });
 

@@ -28,7 +28,7 @@
  */
 const path = require('path');
 const mm = require('micromatch');
-const { resolveKibanaImport } = require('@kbn/eslint-plugin-imports');
+const { getImportResolver } = require('@kbn/eslint-plugin-imports');
 
 function isStaticRequire(node) {
   return (
@@ -90,6 +90,8 @@ module.exports = {
   },
 
   create(context) {
+    const resolver = getImportResolver(context);
+
     const sourcePath = context.getPhysicalFilename
       ? context.getPhysicalFilename()
       : context.getFilename();
@@ -103,7 +105,7 @@ module.exports = {
     }
 
     function checkForRestrictedImportPath(importPath, node) {
-      const resolveReport = resolveKibanaImport(importPath, sourceDirname);
+      const resolveReport = resolver.resolve(importPath, sourceDirname);
 
       if (resolveReport?.type !== 'file' || resolveReport.nodeModule) {
         return;

@@ -8,9 +8,10 @@
 import { createSelector } from 'reselect';
 import { FeatureCollection } from 'geojson';
 import _ from 'lodash';
-import { Adapters } from 'src/plugins/inspector/public';
-import type { Query } from 'src/plugins/data/common';
+import { Adapters } from '@kbn/inspector-plugin/public';
+import type { Query } from '@kbn/data-plugin/common';
 import { Filter } from '@kbn/es-query';
+import { TimeRange } from '@kbn/data-plugin/public';
 import { RasterTileLayer } from '../classes/layers/raster_tile_layer/raster_tile_layer';
 import { EmsVectorTileLayer } from '../classes/layers/ems_vector_tile_layer/ems_vector_tile_layer';
 import {
@@ -55,7 +56,6 @@ import {
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
 import { MapSettings } from '../reducers/map';
-import { TimeRange } from '../../../../../src/plugins/data/public';
 import { ISource } from '../classes/sources/source';
 import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';
@@ -190,11 +190,7 @@ export const getTimeFilters = ({ map }: MapStoreState): TimeRange =>
 export const getTimeslice = ({ map }: MapStoreState) => map.mapState.timeslice;
 
 export const getCustomIcons = ({ map }: MapStoreState): CustomIcon[] => {
-  return (
-    map.settings.customIcons.map((icon) => {
-      return { ...icon, svg: Buffer.from(icon.svg, 'base64').toString('utf-8') };
-    }) ?? []
-  );
+  return map.settings.customIcons;
 };
 
 export const getQuery = ({ map }: MapStoreState): Query | undefined => map.mapState.query;
@@ -274,8 +270,7 @@ export const getDataFilters = createSelector(
 export const getSpatialFiltersLayer = createSelector(
   getFilters,
   getMapSettings,
-  getCustomIcons,
-  (filters, settings, customIcons) => {
+  (filters, settings) => {
     const featureCollection: FeatureCollection = {
       type: 'FeatureCollection',
       features: extractFeaturesFromFilters(filters),
@@ -312,7 +307,7 @@ export const getSpatialFiltersLayer = createSelector(
         }),
       }),
       source: new GeoJsonFileSource(geoJsonSourceDescriptor),
-      customIcons,
+      customIcons: [], // spatial filters layer does not support custom icons
     });
   }
 );
@@ -396,13 +391,12 @@ export const getSelectedLayerJoinDescriptors = createSelector(getSelectedLayer, 
 export const getQueryableUniqueIndexPatternIds = createSelector(
   getLayerList,
   getWaitingForMapReadyLayerListRaw,
-  getCustomIcons,
-  (layerList, waitingForMapReadyLayerList, customIcons) => {
+  (layerList, waitingForMapReadyLayerList) => {
     const indexPatternIds: string[] = [];
 
     if (waitingForMapReadyLayerList.length) {
       waitingForMapReadyLayerList.forEach((layerDescriptor) => {
-        const layer = createLayerInstance(layerDescriptor, customIcons);
+        const layer = createLayerInstance(layerDescriptor, []); // custom icons not needed, layer instance only used to get index pattern ids
         if (layer.isVisible()) {
           indexPatternIds.push(...layer.getQueryableIndexPatternIds());
         }
@@ -421,13 +415,12 @@ export const getQueryableUniqueIndexPatternIds = createSelector(
 export const getGeoFieldNames = createSelector(
   getLayerList,
   getWaitingForMapReadyLayerListRaw,
-  getCustomIcons,
-  (layerList, waitingForMapReadyLayerList, customIcons) => {
+  (layerList, waitingForMapReadyLayerList) => {
     const geoFieldNames: string[] = [];
 
     if (waitingForMapReadyLayerList.length) {
       waitingForMapReadyLayerList.forEach((layerDescriptor) => {
-        const layer = createLayerInstance(layerDescriptor, customIcons);
+        const layer = createLayerInstance(layerDescriptor, []); // custom icons not needed, layer instance only used to get geo field names
         geoFieldNames.push(...layer.getGeoFieldNames());
       });
     } else {

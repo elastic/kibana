@@ -40,7 +40,7 @@ import {
   waitForRulesTableToBeLoaded,
   goToTheRuleDetailsOf,
 } from '../../../tasks/alerts_detection_rules';
-import { loginAndWaitForPage } from '../../../tasks/login';
+import { login, visit } from '../../../tasks/login';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 
@@ -75,7 +75,8 @@ const rule = {
 
 describe('After an upgrade, the custom query rule', () => {
   before(() => {
-    loginAndWaitForPage(DETECTIONS_RULE_MANAGEMENT_URL);
+    login();
+    visit(DETECTIONS_RULE_MANAGEMENT_URL);
     waitForRulesTableToBeLoaded();
     goToTheRuleDetailsOf(rule.name);
     waitForPageToBeLoaded();

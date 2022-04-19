@@ -9,11 +9,11 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { CoreStart } from 'kibana/public';
-import { VisualizationContainer } from '../../../visualizations/public';
-import { ExpressionRenderDefinition } from '../../../expressions/common/expression_renderers';
+import { CoreStart } from '@kbn/core/public';
+import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { TableVisRenderValue } from './table_vis_fn';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 
 const TableVisualizationComponent = lazy(() => import('./components/table_visualization'));
 

@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Modification of Boot Configuration",
+  "note": "## Triage and analysis\n\n### Investigating Modification of Boot Configuration\n\nBoot entry parameters, or boot parameters, are optional, system-specific settings that represent configuration options.\nThese are stored in a boot configuration data (BCD) store, and administrators can use utilities like `bcdedit.exe` to\nconfigure these.\n\nThis rule identifies the usage of `bcdedit.exe` to:\n\n- Disable Windows Error Recovery (recoveryenabled).\n- Ignore errors if there is a failed boot, failed shutdown, or failed checkpoint (bootstatuspolicy ignoreallfailures).\n\nThese are common steps in destructive attacks by adversaries leveraging ransomware.\n\n#### Possible investigation steps\n\n- Investigate the script execution chain (parent process tree).\n- Identify the user account that performed the action and whether it should perform this kind of action.\n- Confirm whether the account owner is aware of the operation.\n- Investigate other alerts related to the user/host in the last 48 hours.\n- Check for similar behavior in other hosts on the environment.\n- Check if any files on the host machine have been encrypted.\n\n### False positive analysis\n\n- The usage of these options is not inherently malicious. Administrators can modify these configurations to force a\nmachine to boot for troubleshooting or data recovery purposes.\n\n### Related rules\n\n- Deleting Backup Catalogs with Wbadmin - 581add16-df76-42bb-af8e-c979bfb39a59\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved host to prevent destructive behavior, which is commonly associated with this activity.\n- Reset the password of the involved accounts.\n- If any other destructive action was identified on the host, it is recommended to prioritize the investigation and look\nfor ransomware preparation and execution activities.\n\n## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  (process.name : \"bcdedit.exe\" or process.pe.original_file_name == \"bcdedit.exe\") and\n  (process.args : \"/set\" and process.args : \"bootstatuspolicy\" and process.args : \"ignoreallfailures\") or\n  (process.args : \"no\" and process.args : \"recoveryenabled\")\n",
   "risk_score": 21,
   "rule_id": "69c251fb-a5d6-4035-b5ec-40438bd829ff",
@@ -42,5 +43,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 9
+  "version": 10
 }

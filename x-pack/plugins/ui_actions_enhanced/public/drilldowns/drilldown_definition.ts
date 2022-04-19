@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { LicenseType } from '@kbn/licensing-plugin/public';
+import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 import {
   ActionFactoryDefinition,
   BaseActionConfig,
   BaseActionFactoryContext,
   SerializedEvent,
 } from '../dynamic_actions';
-import { LicenseType } from '../../../licensing/public';
-import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
-import { PersistableStateDefinition } from '../../../../../src/plugins/kibana_utils/common';
 
 /**
  * This is a convenience interface to register a drilldown. Drilldown has

@@ -61,8 +61,9 @@
         },
         { "id": "kibDevTutorialCI" },
         { "id": "kibDevTutorialServerEndpoint" },
-        { "id": "kibDevTutorialAdvancedSettings"},
-        { "id": "kibDevSharePluginReadme"}
+        { "id": "kibDevTutorialAdvancedSettings" },
+        { "id": "kibDevSharePluginReadme" },
+        { "id": "kibDevTutorialScreenshotting" }
       ]
     },
     {
@@ -103,7 +104,6 @@
         { "id": "kibDataViewsPluginApi" },
         { "id": "kibDataQueryPluginApi" },
         { "id": "kibDataSearchPluginApi" },
-        { "id": "kibDataUiPluginApi" },
         { "id": "kibBfetchPluginApi" },
         { "id": "kibAlertingPluginApi" },
         { "id": "kibTaskManagerPluginApi" },
@@ -147,6 +147,7 @@
         { "id": "kibSavedObjectsTaggingOssPluginApi" },
         { "id": "kibSavedObjectsTaggingPluginApi" },
         { "id": "kibSavedObjectsPluginApi" },
+        { "id": "kibScreenshottingPluginApi" },
         { "id": "kibSecuritySolutionPluginApi" },
         { "id": "kibSecurityPluginApi" },
         { "id": "kibSharePluginApi" },

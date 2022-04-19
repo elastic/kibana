@@ -10,14 +10,15 @@ import type {
   IScopedClusterClient,
   SavedObjectsClientContract,
   UiSettingsServiceStart,
-} from 'kibana/server';
-import type { SpacesPluginStart } from '../../../spaces/server';
-import { KibanaRequest } from '../../.././../../src/core/server';
+} from '@kbn/core/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { KibanaRequest } from '@kbn/core/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { MlLicense } from '../../common/license';
 
-import type { CloudSetup } from '../../../cloud/server';
-import type { PluginStart as DataViewsPluginStart } from '../../../../../src/plugins/data_views/server';
-import type { SecurityPluginSetup } from '../../../security/server';
 import { licenseChecks } from './license_checks';
 import { MlSystemProvider, getMlSystemProvider } from './providers/system';
 import { JobServiceProvider, getJobServiceProvider } from './providers/job_service';
@@ -44,7 +45,6 @@ import {
   getJobsHealthServiceProvider,
   JobsHealthServiceProvider,
 } from '../lib/alerts/jobs_health_service';
-import type { FieldFormatsStart } from '../../../../../src/plugins/field_formats/server';
 import type { FieldFormatsRegistryProvider } from '../../common/types/kibana';
 import { getDataViewsServiceFactory, GetDataViewsService } from '../lib/data_views_utils';
 

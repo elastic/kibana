@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { KibanaFeatureConfig, SubFeatureConfig } from '../common';
 
 export interface BuildOSSFeaturesParams {
@@ -514,7 +514,7 @@ const reportingFeatures: {
               }
             ),
             includeIn: 'all',
-            minimumLicense: 'platinum',
+            minimumLicense: 'gold',
             savedObject: { all: [], read: [] },
             management: { insightsAndAlerting: ['reporting'] },
             api: ['generateReport'],
@@ -550,7 +550,7 @@ const reportingFeatures: {
               }
             ),
             includeIn: 'all',
-            minimumLicense: 'platinum',
+            minimumLicense: 'gold',
             savedObject: { all: [], read: [] },
             management: { insightsAndAlerting: ['reporting'] },
             api: ['generateReport'],

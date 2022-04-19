@@ -11,7 +11,9 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { isTab } from '../../../../timelines/public';
+import { Filter } from '@kbn/es-query';
+import { isTab } from '@kbn/timelines-plugin/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { SecurityPageName } from '../../app/types';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { HeaderPage } from '../../common/components/header_page';
@@ -28,7 +30,6 @@ import { inputsSelectors, State } from '../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { getEsQueryConfig } from '../../../../../../src/plugins/data/common';
 import { UsersTabs } from './users_tabs';
 import { navTabsUsers } from './nav_tabs';
 import * as i18n from './translations';
@@ -49,6 +50,7 @@ import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_us
 import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { LandingPageComponent } from '../../common/components/landing_page';
+import { userNameExistsFilter } from './details/helpers';
 
 const ID = 'UsersQueryId';
 
@@ -86,7 +88,11 @@ const UsersComponent = () => {
   const { uiSettings } = useKibana().services;
 
   const { tabName } = useParams<{ tabName: string }>();
-  const tabsFilters = React.useMemo(() => {
+  const tabsFilters: Filter[] = React.useMemo(() => {
+    if (tabName === UsersTableType.alerts || tabName === UsersTableType.events) {
+      return filters.length > 0 ? [...filters, ...userNameExistsFilter] : userNameExistsFilter;
+    }
+
     if (tabName === UsersTableType.risk) {
       const severityFilter = generateSeverityFilter(severitySelection);
 
@@ -216,6 +222,7 @@ const UsersComponent = () => {
               setQuery={setQuery}
               to={to}
               type={usersModel.UsersType.page}
+              pageFilters={tabsFilters}
             />
           </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>

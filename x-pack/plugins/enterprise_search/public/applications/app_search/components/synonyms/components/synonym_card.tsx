@@ -11,12 +11,12 @@ import { useActions } from 'kea';
 
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiText, EuiButton } from '@elastic/eui';
 
+import { SynonymsLogic } from '..';
 import { MANAGE_BUTTON_LABEL } from '../../../../shared/constants';
 
-import { SynonymsLogic } from '../index';
 import { SynonymSet } from '../types';
 
-import { SynonymIcon } from './';
+import { SynonymIcon } from '.';
 
 export const SynonymCard: React.FC<SynonymSet> = (synonymSet) => {
   const { openModal } = useActions(SynonymsLogic);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { RacRequestHandlerContext } from '../types';
 import { getAlertByIdRoute } from './get_alert_by_id';
 import { updateAlertByIdRoute } from './update_alert_by_id';

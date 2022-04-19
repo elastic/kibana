@@ -7,15 +7,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import {
-  EuiText,
-  EuiSpacer,
-  EuiLink,
-  EuiCodeBlock,
-  EuiButtonGroup,
-  EuiCallOut,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiSpacer, EuiCodeBlock, EuiButtonGroup, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { PLATFORM_TYPE } from '../../../hooks';
@@ -27,7 +19,6 @@ interface Props {
   windowsCommand: string;
   linuxDebCommand: string;
   linuxRpmCommand: string;
-  troubleshootLink: string;
   isK8s: boolean;
 }
 
@@ -44,7 +35,6 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   windowsCommand,
   linuxDebCommand,
   linuxRpmCommand,
-  troubleshootLink,
   isK8s,
 }) => {
   const { platform, setPlatform } = usePlatform();
@@ -62,21 +52,6 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
 
   return (
     <>
-      <EuiText>
-        {isK8s ? (
-          <FormattedMessage
-            id="xpack.fleet.agentEnrollment.stepRunAgentDescriptionk8s"
-            defaultMessage="From the directory where the Kubernetes manifest is downloaded, run the apply command."
-          />
-        ) : (
-          <FormattedMessage
-            id="xpack.fleet.agentEnrollment.stepRunAgentDescription"
-            defaultMessage="From the agent directory, run this command to install, enroll and start an Elastic Agent. You can reuse this command to set up agents on more than one host. Requires administrator privileges."
-          />
-        )}
-      </EuiText>
-      <EuiSpacer size="l" />
-
       {isK8s ? (
         <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
           <CommandCode>{K8S_COMMAND}</CommandCode>
@@ -127,23 +102,6 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
           )}
         </>
       )}
-      <EuiSpacer size="l" />
-      <EuiText>
-        <FormattedMessage
-          id="xpack.fleet.enrollmentInstructions.troubleshootingText"
-          defaultMessage="If you are having trouble connecting, see our {link}."
-          values={{
-            link: (
-              <EuiLink target="_blank" external href={troubleshootLink}>
-                <FormattedMessage
-                  id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
-                  defaultMessage="troubleshooting guide"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiText>
     </>
   );
 };

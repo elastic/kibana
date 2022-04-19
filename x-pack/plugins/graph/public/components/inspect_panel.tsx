@@ -9,8 +9,8 @@ import React, { useMemo, useState } from 'react';
 import { EuiTab, EuiTabs, EuiText } from '@elastic/eui';
 import { monaco, XJsonLang } from '@kbn/monaco';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CodeEditor } from '../../../../../src/plugins/kibana_react/public';
-import type { DataView } from '../../../../../src/plugins/data_views/public';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 interface InspectPanelProps {
   showInspect: boolean;

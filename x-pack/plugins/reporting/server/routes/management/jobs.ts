@@ -7,8 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { ReportingCore } from '../../';
-import { ROUTE_TAG_CAN_REDIRECT } from '../../../../security/server';
+import { ROUTE_TAG_CAN_REDIRECT } from '@kbn/security-plugin/server';
+import { ReportingCore } from '../..';
 import { API_BASE_URL } from '../../../common/constants';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 import { jobsQueryFactory } from '../lib/jobs_query';

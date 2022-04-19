@@ -7,12 +7,13 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { Adapters } from 'src/plugins/inspector/public';
+import { Adapters } from '@kbn/inspector-plugin/public';
 import { Filter } from '@kbn/es-query';
-import { Action, ActionExecutionContext } from 'src/plugins/ui_actions/public';
+import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 
 import { mapboxgl } from '@kbn/mapbox-gl';
 import type { Map as MapboxMap, MapboxOptions, MapMouseEvent } from '@kbn/mapbox-gl';
+import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
 import { DrawFilterControl } from './draw_control/draw_filter_control';
 import { ScaleControl } from './scale_control';
 import { TooltipControl } from './tooltip_control';
@@ -40,7 +41,6 @@ import { getGlyphUrl } from '../../util';
 import { syncLayerOrder } from './sort_layers';
 
 import { getTileMetaFeatures, removeOrphanedSourcesAndLayers } from './utils';
-import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { TileStatusTracker } from './tile_status_tracker';
 import { DrawFeatureControl } from './draw_control/draw_feature_control';
@@ -76,6 +76,8 @@ export interface Props {
   updateMetaFromTiles: (layerId: string, features: TileMetaFeature[]) => void;
   featureModeActive: boolean;
   filterModeActive: boolean;
+  setTileLoadError(layerId: string, errorMessage: string): void;
+  clearTileLoadError(layerId: string): void;
 }
 
 interface State {
@@ -205,8 +207,15 @@ export class MbMap extends Component<Props, State> {
       this._tileStatusTracker = new TileStatusTracker({
         mbMap,
         getCurrentLayerList: () => this.props.layerList,
-        updateTileStatus: (layer: ILayer, areTilesLoaded: boolean) => {
+        updateTileStatus: (layer: ILayer, areTilesLoaded: boolean, errorMessage?: string) => {
           this.props.setAreTilesLoaded(layer.getId(), areTilesLoaded);
+
+          if (errorMessage) {
+            this.props.setTileLoadError(layer.getId(), errorMessage);
+          } else {
+            this.props.clearTileLoadError(layer.getId());
+          }
+
           this._queryForMeta(layer);
         },
       });
@@ -263,7 +272,9 @@ export class MbMap extends Component<Props, State> {
     mbMap.on(
       'moveend',
       _.debounce(() => {
-        this.props.extentChanged(this._getMapExtentState());
+        if (this._isMounted) {
+          this.props.extentChanged(this._getMapExtentState());
+        }
       }, 100)
     );
 
@@ -434,7 +445,9 @@ export class MbMap extends Component<Props, State> {
     // hack to update extent after zoom update finishes moving map.
     if (zoomRangeChanged) {
       setTimeout(() => {
-        this.props.extentChanged(this._getMapExtentState());
+        if (this._isMounted) {
+          this.props.extentChanged(this._getMapExtentState());
+        }
       }, 300);
     }
   }

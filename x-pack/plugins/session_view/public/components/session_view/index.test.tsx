@@ -9,7 +9,7 @@ import { waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import React from 'react';
 import { sessionViewProcessEventsMock } from '../../../common/mocks/responses/session_view_process_events.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { SessionView } from './index';
+import { SessionView } from '.';
 import userEvent from '@testing-library/user-event';
 
 describe('SessionView component', () => {
@@ -84,10 +84,6 @@ describe('SessionView component', () => {
         await waitForApiCall();
 
         expect(renderResult.getAllByTestId('sessionView:processTreeNode')).toBeTruthy();
-
-        const selectionArea = renderResult.queryByTestId('sessionView:processTreeSelectionArea');
-
-        expect(selectionArea?.parentElement?.getAttribute('data-id')).toEqual('test-entity-id');
       });
 
       it('should toggle detail panel visibilty when detail button clicked', async () => {

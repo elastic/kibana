@@ -21,7 +21,7 @@ import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { TimelineTabs } from '../../../../common/types/timeline';
 import { useInvestigationTimeEnrichment } from '../../containers/cti/event_enrichment';
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../lib/kibana');
 jest.mock('../../containers/cti/event_enrichment');
 
 jest.mock('../../../detections/containers/detection_engine/rules/use_rule_with_fallback', () => {
@@ -139,6 +139,21 @@ describe('EventDetails', () => {
     it('renders a "no enrichments" panel view if there are no enrichments', () => {
       alertsWrapper.find('[data-test-subj="threatIntelTab"]').first().simulate('click');
       expect(alertsWrapper.find('[data-test-subj="no-enrichments-found"]').exists()).toEqual(true);
+    });
+    it('does not render if readOnly prop is passed', async () => {
+      const newProps = { ...defaultProps, isReadOnly: true };
+      wrapper = mount(
+        <TestProviders>
+          <EventDetails {...newProps} />
+        </TestProviders>
+      ) as ReactWrapper;
+      alertsWrapper = mount(
+        <TestProviders>
+          <EventDetails {...{ ...alertsProps, ...newProps }} />
+        </TestProviders>
+      ) as ReactWrapper;
+      await waitFor(() => wrapper.update());
+      expect(alertsWrapper.find('[data-test-subj="threatIntelTab"]').exists()).toBeFalsy();
     });
   });
 });

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { RefObject } from 'react';
-import { useRef, useEffect, useState, useLayoutEffect } from 'react';
+import type { Reducer, RefObject } from 'react';
+import { useRef, useEffect, useLayoutEffect, useReducer } from 'react';
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
@@ -53,9 +53,13 @@ export function useExpressionRenderer(
     ...loaderParams
   }: ExpressionRendererParams
 ): ExpressionRendererState {
-  const [isEmpty, setEmpty] = useState(true);
-  const [isLoading, setLoading] = useState(false);
-  const [error, setError] = useState<null | ExpressionRenderError>(null);
+  const [{ error, isEmpty, isLoading }, setState] = useReducer<
+    Reducer<ExpressionRendererState, Partial<ExpressionRendererState>>
+  >((currentState, newState) => ({ ...currentState, ...newState }), {
+    isEmpty: true,
+    isLoading: false,
+    error: null,
+  });
 
   const memoizedOptions = useShallowMemo({ expression, params: useShallowMemo(loaderParams) });
   const [{ expression: debouncedExpression, params: debouncedLoaderParams }, isDebounced] =
@@ -81,9 +85,11 @@ export function useExpressionRenderer(
         // if custom renderError is not provided then we fallback to default error handling from ExpressionLoader
         onRenderError: (domNode, newError, handlers) => {
           errorRenderHandlerRef.current = handlers;
-          setEmpty(false);
-          setError(newError);
-          setLoading(false);
+          setState({
+            error: newError,
+            isEmpty: false,
+            isLoading: false,
+          });
 
           return debouncedLoaderParams.onRenderError?.(domNode, newError, handlers);
         },
@@ -91,7 +97,7 @@ export function useExpressionRenderer(
 
     const subscription = expressionLoaderRef.current?.loading$.subscribe(() => {
       hasHandledErrorRef.current = false;
-      setLoading(true);
+      setState({ isLoading: true });
     });
 
     return () => {
@@ -127,9 +133,11 @@ export function useExpressionRenderer(
     const subscription = expressionLoaderRef.current?.render$
       .pipe(filter(() => !hasHandledErrorRef.current))
       .subscribe((item) => {
-        setEmpty(false);
-        setError(null);
-        setLoading(false);
+        setState({
+          error: null,
+          isEmpty: false,
+          isLoading: false,
+        });
         onRender$?.(item);
       });
 

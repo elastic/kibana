@@ -21,6 +21,19 @@ export const useStyles = ({ hasSearchResults }: StylesDeps) => {
       position: 'absolute',
       top: euiTheme.size.s,
       right: euiTheme.size.xxl,
+      'button[data-test-subj="pagination-button-last"]': {
+        display: 'none',
+      },
+      'button[data-test-subj="pagination-button-first"]': {
+        display: 'none',
+      },
+    };
+
+    const noResults: CSSObject = {
+      position: 'absolute',
+      color: euiTheme.colors.subdued,
+      top: euiTheme.size.m,
+      right: euiTheme.size.xxl,
     };
 
     const searchBarWithResult: CSSObject = {
@@ -33,6 +46,7 @@ export const useStyles = ({ hasSearchResults }: StylesDeps) => {
     return {
       pagination,
       searchBarWithResult,
+      noResults,
     };
   }, [euiTheme, hasSearchResults]);
 

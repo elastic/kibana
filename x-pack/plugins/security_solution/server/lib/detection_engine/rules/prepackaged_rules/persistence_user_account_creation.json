@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Identifies attempts to create new local users. This is sometimes done by attackers to increase access to a system or domain.",
+  "description": "Identifies attempts to create new users. This is sometimes done by attackers to increase access or establish persistence on a system or domain.",
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "User Account Creation",
+  "note": "## Triage and analysis\n\n### Investigating User Account Creation\n\nAttackers may create new accounts (both local and domain) to maintain access to victim systems.\n\nThis rule identifies the usage of `net.exe` to create new accounts.\n\n#### Possible investigation steps\n\n- Investigate the process execution chain (parent process tree).\n- Identify the user account that performed the action and whether it should perform this kind of action.\n- Identify if the account was added to privileged groups or assigned special privileges after creation.\n- Investigate other alerts related to the user/host in the last 48 hours.\n\n### False positive analysis\n\n- Account creation is a common administrative task, so there is a high chance of the activity being legitimate. Before\ninvestigating further, verify that this activity is not benign.\n\n### Related rules\n\n- Creation of a Hidden Local User Account - 2edc8076-291e-41e9-81e4-e3fcbc97ae5e\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved host to prevent further post-compromise behavior.\n- Delete the created account.\n- Reset the password for the user account leveraged to create the new account.\n\n## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : (\"net.exe\", \"net1.exe\") and\n  not process.parent.name : \"net.exe\" and\n  (process.args : \"user\" and process.args : (\"/ad\", \"/add\"))\n",
   "risk_score": 21,
   "rule_id": "1aa9181a-492b-4c01-8b16-fa0735786b2b",
@@ -49,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 9
+  "version": 10
 }

@@ -7,7 +7,7 @@
  */
 
 import { getSupportedFieldsByMetricType } from './get_supported_fields_by_metric_type';
-import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 
 describe('getSupportedFieldsByMetricType', () => {
   const shouldHaveHistogramAndNumbers = (type) =>
