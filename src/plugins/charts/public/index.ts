@@ -42,7 +42,3 @@ export {
   LabelRotation,
   defaultCountLabel,
 } from '../common';
-
-/** @deprecated **/
-/** Please import directly from @kbn/coloring **/
-export type { SeriesLayer, PaletteRegistry, PaletteOutput, PaletteDefinition } from '@kbn/coloring';

@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { prefixIndexPattern } from '../../../../../common/ccs_utils';
+import { prefixIndexPatternWithCcs } from '../../../../../common/ccs_utils';
 import { getStats, getApms } from '../../../../lib/apm';
 import { handleError } from '../../../../lib/errors';
 import { INDEX_PATTERN_BEATS } from '../../../../../common/constants';
@@ -33,7 +33,7 @@ export function apmInstancesRoute(server) {
       const config = server.config;
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
-      const apmIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
+      const apmIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_BEATS, ccs);
 
       try {
         const [stats, apms] = await Promise.all([

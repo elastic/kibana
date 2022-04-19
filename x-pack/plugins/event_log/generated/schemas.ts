@@ -130,7 +130,7 @@ export const EventSchema = schema.maybe(
                     metrics: schema.maybe(
                       schema.object({
                         number_of_triggered_actions: ecsNumber(),
-                        number_of_scheduled_actions: ecsNumber(),
+                        number_of_generated_actions: ecsNumber(),
                         number_of_searches: ecsNumber(),
                         total_indexing_duration_ms: ecsNumber(),
                         es_search_duration_ms: ecsNumber(),
