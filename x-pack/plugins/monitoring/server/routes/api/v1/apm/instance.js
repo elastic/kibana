@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { prefixIndexPattern } from '../../../../../common/ccs_utils';
+import { prefixIndexPatternWithCcs } from '../../../../../common/ccs_utils';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { metricSet } from './metric_set_instance';
 import { handleError } from '../../../../lib/errors';
@@ -37,7 +37,7 @@ export function apmInstanceRoute(server) {
       const config = server.config;
       const clusterUuid = req.params.clusterUuid;
       const ccs = req.payload.ccs;
-      const apmIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
+      const apmIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_BEATS, ccs);
 
       const showCgroupMetrics = config.ui.container.apm.enabled;
       if (showCgroupMetrics) {

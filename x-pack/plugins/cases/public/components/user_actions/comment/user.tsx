@@ -25,6 +25,7 @@ type BuilderArgs = Pick<
   | 'handleSaveComment'
   | 'handleManageQuote'
   | 'commentRefs'
+  | 'handleDeleteComment'
 > & {
   comment: SnakeToCamelCase<CommentResponseUserType>;
   outlined: boolean;
@@ -42,6 +43,7 @@ export const createUserAttachmentUserActionBuilder = ({
   handleManageMarkdownEditId,
   handleSaveComment,
   handleManageQuote,
+  handleDeleteComment,
 }: BuilderArgs): ReturnType<UserActionBuilder> => ({
   // TODO: Fix this manually. Issue #123375
   // eslint-disable-next-line react/display-name
@@ -85,10 +87,13 @@ export const createUserAttachmentUserActionBuilder = ({
           id={comment.id}
           commentMarkdown={comment.comment}
           editLabel={i18n.EDIT_COMMENT}
+          deleteLabel={i18n.DELETE_COMMENT}
+          deleteConfirmTitle={i18n.DELETE_COMMENT_TITLE}
           quoteLabel={i18n.QUOTE}
           isLoading={isLoading}
           onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
           onQuote={handleManageQuote.bind(null, comment.comment)}
+          onDelete={handleDeleteComment.bind(null, comment.id)}
           userCanCrud={userCanCrud}
         />
       ),
