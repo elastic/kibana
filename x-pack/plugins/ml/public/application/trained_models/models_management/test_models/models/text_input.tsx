@@ -19,7 +19,7 @@ export const TextInput: FC<{
     <EuiTextArea
       placeholder={
         placeholder ??
-        i18n.translate('xpack.ml.trainedModels.testModelsFlyout.langIdent.inputText', {
+        i18n.translate('xpack.ml.trainedModels.testModelsFlyout.generalTextInput.inputText', {
           defaultMessage: 'Input text',
         })
       }
