@@ -15,8 +15,8 @@ if [[ "${BAZEL_CACHE_MODE:-none}" == read* ]]; then
   echo "[bazel] enabling caching"
 cat <<EOF >> $KIBANA_DIR/.bazelrc
   build --bes_results_url=https://app.buildbuddy.io/invocation/
-  build --bes_backend=grpcs://cloud.buildbuddy.io
-  build --remote_cache=grpcs://cloud.buildbuddy.io
+  build --bes_backend=grpcs://remote.buildbuddy.io
+  build --remote_cache=grpcs://remote.buildbuddy.io
   build --remote_timeout=3600
   build --remote_header=x-buildbuddy-api-key=$KIBANA_BUILDBUDDY_CI_API_KEY
 EOF
