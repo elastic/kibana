@@ -526,6 +526,3 @@ function OperatorComboBox(props: GenericComboBoxProps<Operator>) {
 }
 
 export const FilterEditor = injectI18n(FilterEditorUI);
-
-// eslint-disable-next-line import/no-default-export
-export default FilterEditor;

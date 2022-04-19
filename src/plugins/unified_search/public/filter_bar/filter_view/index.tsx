@@ -89,6 +89,3 @@ export const FilterView: FC<Props> = ({
     </EuiBadge>
   );
 };
-
-// eslint-disable-next-line import/no-default-export
-export default FilterView;

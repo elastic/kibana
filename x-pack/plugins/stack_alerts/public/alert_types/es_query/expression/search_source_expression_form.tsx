@@ -78,6 +78,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
   const onUpdateFilters = useCallback(
     (newFilters) => {
+      // mutates new filter properties for migration purpose and further proper usage
       data.query.filterManager.setFilters(newFilters, false);
       dispatch({ type: 'filter', payload: newFilters });
     },
