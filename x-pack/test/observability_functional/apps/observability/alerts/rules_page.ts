@@ -13,20 +13,17 @@ export default ({ getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
   const find = getService('find');
-
   const retry = getService('retry');
+  const RULE_ENDPOINT = '/api/alerting/rule';
 
   async function createRule(rule: any): Promise<string> {
-    const ruleResponse = await supertest
-      .post('/api/alerting/rule')
-      .set('kbn-xsrf', 'foo')
-      .send(rule);
+    const ruleResponse = await supertest.post(RULE_ENDPOINT).set('kbn-xsrf', 'foo').send(rule);
     expect(ruleResponse.status).to.eql(200);
     return ruleResponse.body.id;
   }
   async function deleteRuleById(ruleId: string) {
     const ruleResponse = await supertest
-      .delete(`/api/alerting/rule/${ruleId}`)
+      .delete(`${RULE_ENDPOINT}/${ruleId}`)
       .set('kbn-xsrf', 'foo');
     expect(ruleResponse.status).to.eql(204);
     return true;
@@ -83,8 +80,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // eslint-disable-next-line ban/ban
-    describe.only('Rules table', () => {
+    describe('Rules table', () => {
       let uptimeRuleId: string;
       let logThresholdRuleId: string;
       before(async () => {
