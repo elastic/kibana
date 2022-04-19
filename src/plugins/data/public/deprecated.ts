@@ -161,3 +161,4 @@ export const esQuery = {
 };
 
 export type { Filter, Query } from '../common';
+export type { Filter as Banana } from '../common';
