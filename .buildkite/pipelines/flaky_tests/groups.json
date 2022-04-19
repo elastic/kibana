@@ -32,7 +32,7 @@
     {
       "key": "xpack/cigroup",
       "name": "Default CI Group",
-      "ciGroups": 29
+      "ciGroups": 30
     },
     {
       "key": "xpack/firefox",
