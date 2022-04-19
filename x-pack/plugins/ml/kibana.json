@@ -40,7 +40,6 @@
     "dashboard",
     "esUiShared",
     "fieldFormats",
-    "home",
     "kibanaReact",
     "kibanaUtils",
     "maps",

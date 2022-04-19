@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { FeatureCatalogueCategory, FeatureCatalogueRegistry } from './feature_catalogue';
+export { FeatureCatalogueRegistry } from './feature_catalogue';
 
 export type {
+  FeatureCatalogueCategory,
   FeatureCatalogueEntry,
   FeatureCatalogueSolution,
   FeatureCatalogueRegistrySetup,

@@ -10,7 +10,7 @@ import React from 'react';
 import { ManageData } from './manage_data';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { ApplicationStart } from '@kbn/core/public';
-import { FeatureCatalogueEntry, FeatureCatalogueCategory } from '../../../services';
+import { FeatureCatalogueEntry } from '../../../services';
 
 jest.mock('../app_navigation_handler', () => {
   return {
@@ -41,7 +41,7 @@ const addBasePathMock = jest.fn((path: string) => (path ? path : 'path'));
 
 const mockFeatures: FeatureCatalogueEntry[] = [
   {
-    category: FeatureCatalogueCategory.ADMIN,
+    category: 'admin',
     description: 'Control who has access and what tasks they can perform.',
     icon: 'securityApp',
     id: 'security',
@@ -51,7 +51,7 @@ const mockFeatures: FeatureCatalogueEntry[] = [
     showOnHomePage: true,
   },
   {
-    category: FeatureCatalogueCategory.ADMIN,
+    category: 'admin',
     description: 'Track the real-time health and performance of your deployment.',
     icon: 'monitoringApp',
     id: 'monitoring',
@@ -61,7 +61,7 @@ const mockFeatures: FeatureCatalogueEntry[] = [
     showOnHomePage: true,
   },
   {
-    category: FeatureCatalogueCategory.ADMIN,
+    category: 'admin',
     description:
       'Save snapshots to a backup repository, and restore to recover index and cluster state.',
     icon: 'storage',
@@ -72,7 +72,7 @@ const mockFeatures: FeatureCatalogueEntry[] = [
     showOnHomePage: true,
   },
   {
-    category: FeatureCatalogueCategory.ADMIN,
+    category: 'admin',
     description: 'Define lifecycle policies to automatically perform operations as an index ages.',
     icon: 'indexSettings',
     id: 'index_lifecycle_management',

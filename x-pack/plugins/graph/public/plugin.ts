@@ -24,11 +24,7 @@ import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-  HomePublicPluginStart,
-} from '@kbn/home-plugin/public';
+import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import { checkLicense } from '../common/check_license';
 import { ConfigSchema } from '../config';
@@ -67,7 +63,7 @@ export class GraphPlugin
         icon: 'graphApp',
         path: '/app/graph',
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.DATA,
+        category: 'data',
         solutionId: 'kibana',
         order: 600,
       });

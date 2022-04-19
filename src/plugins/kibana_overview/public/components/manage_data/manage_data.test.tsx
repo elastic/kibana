@@ -9,11 +9,10 @@
 import React from 'react';
 import { ManageData } from './manage_data';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
 
 const mockFeatures = [
   {
-    category: FeatureCatalogueCategory.ADMIN,
+    category: 'admin' as const,
     description: 'Control who has access and what tasks they can perform.',
     icon: 'securityApp',
     id: 'security',
@@ -23,7 +22,7 @@ const mockFeatures = [
     showOnHomePage: true,
   },
   {
-    category: FeatureCatalogueCategory.ADMIN,
+    category: 'admin' as const,
     description: 'Track the real-time health and performance of your deployment.',
     icon: 'monitoringApp',
     id: 'monitoring',
@@ -33,7 +32,7 @@ const mockFeatures = [
     showOnHomePage: true,
   },
   {
-    category: FeatureCatalogueCategory.ADMIN,
+    category: 'admin' as const,
     description:
       'Save snapshots to a backup repository, and restore to recover index and cluster state.',
     icon: 'storage',
@@ -44,7 +43,7 @@ const mockFeatures = [
     showOnHomePage: true,
   },
   {
-    category: FeatureCatalogueCategory.ADMIN,
+    category: 'admin' as const,
     description: 'Define lifecycle policies to automatically perform operations as an index ages.',
     icon: 'indexSettings',
     id: 'index_lifecycle_management',

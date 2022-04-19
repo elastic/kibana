@@ -8,8 +8,6 @@
 import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup } from '@kbn/core/public';
-
-import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
 import { ILicense } from '@kbn/licensing-plugin/common/types';
 
 import { PLUGIN } from '../common';
@@ -37,7 +35,7 @@ export class SearchProfilerUIPlugin implements Plugin<void, void, AppPublicPlugi
       icon: 'searchProfilerApp',
       path: '/app/dev_tools#/searchprofiler',
       showOnHomePage: false,
-      category: FeatureCatalogueCategory.ADMIN,
+      category: 'admin',
     });
 
     const devTool = devTools.register({

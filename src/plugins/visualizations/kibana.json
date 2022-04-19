@@ -17,7 +17,7 @@
     "dataViews"
   ],
   "optionalPlugins": ["home", "share", "usageCollection", "spaces", "savedObjectsTaggingOss"],
-  "requiredBundles": ["kibanaUtils", "discover", "kibanaReact", "home"],
+  "requiredBundles": ["kibanaUtils", "discover", "kibanaReact"],
   "extraPublicDirs": ["common/constants", "common/utils", "common/expression_functions"],
   "owner": {
     "name": "Vis Editors",

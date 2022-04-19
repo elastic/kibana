@@ -7,7 +7,7 @@
   "optionalPlugins": ["usageCollection", "home", "cloud", "customIntegrations"],
   "server": true,
   "ui": true,
-  "requiredBundles": ["home", "kibanaReact"],
+  "requiredBundles": ["kibanaReact"],
   "owner": {
     "name": "Enterprise Search",
     "githubTeam": "enterprise-search-frontend"

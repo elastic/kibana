@@ -11,5 +11,5 @@
   "requiredPlugins": ["management", "licensing", "features"],
   "optionalPlugins": ["home", "indexManagement", "usageCollection", "visTypeTimeseries"],
   "configPath": ["xpack", "rollup"],
-  "requiredBundles": ["kibanaUtils", "kibanaReact", "home", "esUiShared", "data"]
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "esUiShared", "data"]
 }

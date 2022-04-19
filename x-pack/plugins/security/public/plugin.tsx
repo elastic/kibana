@@ -15,7 +15,6 @@ import type {
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
@@ -126,7 +125,7 @@ export class SecurityPlugin
         icon: 'securityApp',
         path: '/app/management/security/roles',
         showOnHomePage: true,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin',
         order: 600,
       });
     }
