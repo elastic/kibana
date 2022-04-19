@@ -7,7 +7,7 @@
  */
 
 import { Project } from 'ts-morph';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { splitApisByFolder } from './write_plugin_split_by_folder';
 import { getPluginApi } from '../get_plugin_api';
 import { getKibanaPlatformPlugin } from '../tests/kibana_platform_plugin_mock';

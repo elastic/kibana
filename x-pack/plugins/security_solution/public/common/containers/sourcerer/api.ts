@@ -31,7 +31,7 @@ export const postSourcererDataView = async ({
     signal,
   });
 
-export const getSourcererDataview = async (
+export const getSourcererDataView = async (
   dataViewId: string,
   signal?: AbortSignal
 ): Promise<KibanaDataView> => {

@@ -11,12 +11,9 @@ import React from 'react';
 import { DecoratorFn } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { PluginServiceRegistry } from '@kbn/presentation-util-plugin/public';
-
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common/eui_styled_components';
-import { pluginServices } from '../public/services';
-import { CustomIntegrationsServices } from '../public/services';
-import { providers } from '../public/services/storybook';
+import { servicesFactory } from '../public/services/storybook';
+import { CustomIntegrationsServicesProvider } from '../public/services';
 
 /**
  * Returns a Storybook Decorator that provides both the `I18nProvider` and access to `PluginServices`
@@ -42,7 +39,10 @@ export const getCustomIntegrationsContextDecorator =
  * so components that access `PluginServices` can be rendered.
  */
 export const getCustomIntegrationsContextProvider = () => {
-  const registry = new PluginServiceRegistry<CustomIntegrationsServices>(providers);
-  pluginServices.setRegistry(registry.start({}));
-  return pluginServices.getContextProvider();
+  const services = servicesFactory({});
+  return ({ children }: { children?: React.ReactNode }) => (
+    <CustomIntegrationsServicesProvider {...services}>
+      {children}
+    </CustomIntegrationsServicesProvider>
+  );
 };

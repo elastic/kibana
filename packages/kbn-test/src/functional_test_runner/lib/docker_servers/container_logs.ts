@@ -9,7 +9,8 @@
 import execa from 'execa';
 import * as Rx from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { ToolingLog, observeLines } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { observeLines } from '@kbn/stdio-dev-helpers';
 
 /**
  * Observe the logs for a container, reflecting the log lines
