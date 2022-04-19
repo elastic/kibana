@@ -57,12 +57,16 @@ export const ManageMonitorsBtn = () => {
       title={GETTING_STARTED_LABEL}
       anchorPosition="upCenter"
       maxWidth={416}
-      footerAction={<EuiLink onClick={() => setIsOpen(false)}>{DISMISS_LABEL}</EuiLink>}
+      footerAction={
+        <EuiLink data-test-subj="syntheticsManagementTourDismiss" onClick={() => setIsOpen(false)}>
+          {DISMISS_LABEL}
+        </EuiLink>
+      }
     >
       <EuiHeaderLink
         aria-label={NAVIGATE_LABEL}
         color="text"
-        data-test-subj="synthetics-management-page-link"
+        data-test-subj="syntheticsManagementPageLink"
         onClick={handleOnClick}
       >
         <FormattedMessage

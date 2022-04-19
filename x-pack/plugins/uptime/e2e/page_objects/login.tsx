@@ -38,7 +38,7 @@ export function loginPageProvider({
       await this.waitForLoadingToFinish();
       // Close Monitor Management tour added in 8.2.0
       try {
-        await page.click('text=Dismiss');
+        await page.click('[data-test-subj=syntheticsManagementTourDismiss]');
       } catch (e) {
         return;
       }
