@@ -78,7 +78,7 @@ Lens & Visualizations::
 * Adds ability to navigate to *Lens* with your current *TSVB* configuration {kibana-pull}114794[#114794]
 
 Machine Learning::
-* Anomaly Detection: Add link to maps in charts section of Anomaly Explorer {kibana-pull}128697[#128697]
+* Add link to maps in charts section of Anomaly Explorer {kibana-pull}128697[#128697]
 * Testing trained models in UI {kibana-pull}128359[#128359]
 * Space aware trained models {kibana-pull}123487[#123487]
 
