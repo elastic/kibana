@@ -8,7 +8,6 @@
 import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, PluginInitializerContext, Plugin } from '@kbn/core/public';
-import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
 import { PLUGIN } from '../common/constants';
 import { init as initHttp } from './application/services/http';
 import { init as initUiMetric } from './application/services/ui_metric';
@@ -99,7 +98,7 @@ export class IndexLifecycleManagementPlugin
           icon: 'indexRollupApp',
           path: '/app/management/data/index_lifecycle_management',
           showOnHomePage: true,
-          category: FeatureCatalogueCategory.ADMIN,
+          category: 'admin',
           order: 640,
         });
       }
@@ -117,5 +116,6 @@ export class IndexLifecycleManagementPlugin
   }
 
   public start() {}
+
   public stop() {}
 }

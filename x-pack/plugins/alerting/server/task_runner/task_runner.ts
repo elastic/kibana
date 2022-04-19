@@ -822,8 +822,8 @@ export class TaskRunner<
       );
       set(
         event,
-        'kibana.alert.rule.execution.metrics.number_of_scheduled_actions',
-        executionStatus.numberOfScheduledActions
+        'kibana.alert.rule.execution.metrics.number_of_generated_actions',
+        executionStatus.numberOfGeneratedActions
       );
     }
 

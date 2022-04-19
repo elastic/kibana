@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { HomePublicPluginSetup, FeatureCatalogueCategory } from '@kbn/home-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 
 export const registerFeature = (home: HomePublicPluginSetup) => {
   // register Transforms so it appears on the Kibana home page
@@ -22,6 +22,6 @@ export const registerFeature = (home: HomePublicPluginSetup) => {
     icon: 'managementApp', // there is currently no Transforms icon, so using the general management app icon
     path: '/app/management/data/transform',
     showOnHomePage: false,
-    category: FeatureCatalogueCategory.ADMIN,
+    category: 'admin',
   });
 };
