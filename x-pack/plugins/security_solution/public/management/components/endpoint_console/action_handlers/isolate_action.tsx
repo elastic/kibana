@@ -43,10 +43,17 @@ export const handleIsolateAction = async (
   // Return response
   return {
     result: (
-      <EuiCallOut color="success">
+      <EuiCallOut
+        color="success"
+        iconType="check"
+        title={i18n.translate(
+          'xpack.securitySolution.endpointResponseActions.isolate.successMessageTitle',
+          { defaultMessage: 'Success' }
+        )}
+      >
         <FormattedMessage
           id="xpack.securitySolution.endpointResponseActions.isolate.successMessage"
-          defaultMessage="Success. Host has been isolated"
+          defaultMessage="A host isolation request was sent and an acknowledgement was received from Host."
         />
       </EuiCallOut>
     ),
