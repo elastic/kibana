@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export * from './uptime.journey';
-export * from './alerts';
-export * from './monitor_details';
 export * from './locations';
