@@ -18,7 +18,7 @@ import {
   NodeColorAccessor,
   PartialTheme,
 } from '@elastic/charts';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { useTheme } from './common';
 import { DraggableLegend } from './draggable_legend';
 import { LegendItem } from './draggable_legend_item';
