@@ -52661,25 +52661,19 @@ async function readBazelToolsVersionFile(repoRootPath, versionFilename) {
   return version;
 }
 
-async function isBazelBinAvailable() {
+async function isBazelBinAvailable(repoRootPath) {
   try {
-    await Object(_child_process__WEBPACK_IMPORTED_MODULE_2__["spawn"])('bazel', ['--version'], {
+    const installedVersion = await Object(_child_process__WEBPACK_IMPORTED_MODULE_2__["spawn"])('bazel', ['--version'], {
       stdio: 'pipe'
     });
-    return true;
-  } catch {
-    return false;
-  }
-}
+    const bazelVersion = await readBazelToolsVersionFile(repoRootPath, '.bazelversion');
 
-async function isBazeliskInstalled(bazeliskVersion) {
-  try {
-    const {
-      stdout: bazeliskPkgInstallStdout
-    } = await Object(_child_process__WEBPACK_IMPORTED_MODULE_2__["spawn"])('npm', ['ls', '--global', '--parseable', '--long', `@bazel/bazelisk@${bazeliskVersion}`], {
-      stdio: 'pipe'
-    });
-    return bazeliskPkgInstallStdout.includes(`@bazel/bazelisk@${bazeliskVersion}`);
+    if (installedVersion.stdout === `bazel ${bazelVersion}`) {
+      return true;
+    } else {
+      _log__WEBPACK_IMPORTED_MODULE_4__["log"].info(`[bazel_tools] Bazel is installed (${installedVersion.stdout}), but was expecting ${bazelVersion}`);
+      return false;
+    }
   } catch {
     return false;
   }
@@ -52715,13 +52709,11 @@ async function installBazelTools(repoRootPath) {
 
   _log__WEBPACK_IMPORTED_MODULE_4__["log"].debug(`[bazel_tools] verify if bazelisk is installed`); // Check if we need to remove bazelisk from yarn
 
-  await tryRemoveBazeliskFromYarnGlobal(); // Test if bazelisk is already installed in the correct version
+  await tryRemoveBazeliskFromYarnGlobal(); // Test if bazel bin is available
 
-  const isBazeliskPkgInstalled = await isBazeliskInstalled(bazeliskVersion); // Test if bazel bin is available
+  const isBazelBinAlreadyAvailable = await isBazelBinAvailable(repoRootPath); // Install bazelisk if not installed
 
-  const isBazelBinAlreadyAvailable = await isBazelBinAvailable(); // Install bazelisk if not installed
-
-  if (!isBazeliskPkgInstalled || !isBazelBinAlreadyAvailable) {
+  if (!isBazelBinAlreadyAvailable) {
     _log__WEBPACK_IMPORTED_MODULE_4__["log"].info(`[bazel_tools] installing Bazel tools`);
     _log__WEBPACK_IMPORTED_MODULE_4__["log"].debug(`[bazel_tools] bazelisk is not installed. Installing @bazel/bazelisk@${bazeliskVersion} and bazel@${bazelVersion}`);
     await Object(_child_process__WEBPACK_IMPORTED_MODULE_2__["spawn"])('npm', ['install', '--global', `@bazel/bazelisk@${bazeliskVersion}`], {
@@ -52730,7 +52722,7 @@ async function installBazelTools(repoRootPath) {
       },
       stdio: 'pipe'
     });
-    const isBazelBinAvailableAfterInstall = await isBazelBinAvailable();
+    const isBazelBinAvailableAfterInstall = await isBazelBinAvailable(repoRootPath);
 
     if (!isBazelBinAvailableAfterInstall) {
       throw new Error(dedent__WEBPACK_IMPORTED_MODULE_0___default.a`
@@ -59046,6 +59038,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _child_process__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(221);
 /* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(220);
+/* harmony import */ var _fs__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(231);
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -59053,6 +59046,7 @@ __webpack_require__.r(__webpack_exports__);
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 
 
 
@@ -59083,6 +59077,23 @@ async function isElasticCommitter() {
   }
 }
 
+async function migrateToNewServersIfNeeded(settingsPath) {
+  if (!(await Object(_fs__WEBPACK_IMPORTED_MODULE_5__["isFile"])(settingsPath))) {
+    return false;
+  }
+
+  const readSettingsFile = await Object(_fs__WEBPACK_IMPORTED_MODULE_5__["readFile"])(settingsPath, 'utf8');
+  const newReadSettingsFile = readSettingsFile.replace(/cloud\.buildbuddy\.io/g, 'remote.buildbuddy.io');
+
+  if (newReadSettingsFile === readSettingsFile) {
+    return false;
+  }
+
+  Object(_fs__WEBPACK_IMPORTED_MODULE_5__["writeFile"])(settingsPath, newReadSettingsFile);
+  _log__WEBPACK_IMPORTED_MODULE_4__["log"].info(`[bazel_tools] upgrade remote cache settings to use new server address`);
+  return true;
+}
+
 async function setupRemoteCache(repoRootPath) {
   // The remote cache is only for Elastic employees working locally (CI cache settings are handled elsewhere)
   if (process.env.CI || !(await isElasticCommitter())) {
@@ -59090,7 +59101,13 @@ async function setupRemoteCache(repoRootPath) {
   }
 
   _log__WEBPACK_IMPORTED_MODULE_4__["log"].debug(`[bazel_tools] setting up remote cache settings if necessary`);
-  const settingsPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(repoRootPath, '.bazelrc.cache');
+  const settingsPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(repoRootPath, '.bazelrc.cache'); // Checks if we should upgrade the servers used on .bazelrc.cache
+  //
+  // NOTE: this can be removed in the future once everyone is migrated into the new servers
+
+  if (await migrateToNewServersIfNeeded(settingsPath)) {
+    return;
+  }
 
   if (Object(fs__WEBPACK_IMPORTED_MODULE_1__["existsSync"])(settingsPath)) {
     _log__WEBPACK_IMPORTED_MODULE_4__["log"].debug(`[bazel_tools] remote cache settings already exist, skipping`);
@@ -59125,8 +59142,8 @@ async function setupRemoteCache(repoRootPath) {
     # V1 - This file is automatically generated by 'yarn kbn bootstrap'
     # To regenerate this file, delete it and run 'yarn kbn bootstrap' again.
     build --bes_results_url=https://app.buildbuddy.io/invocation/
-    build --bes_backend=grpcs://cloud.buildbuddy.io
-    build --remote_cache=grpcs://cloud.buildbuddy.io
+    build --bes_backend=grpcs://remote.buildbuddy.io
+    build --remote_cache=grpcs://remote.buildbuddy.io
     build --remote_timeout=3600
     build --remote_header=${apiKey}
   `;
@@ -59208,7 +59225,9 @@ const CleanCommand = {
     id: 'total'
   },
 
-  async run(projects) {
+  async run(projects, projectGraph, {
+    kbn
+  }) {
     _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].warning(dedent__WEBPACK_IMPORTED_MODULE_0___default.a`
       This command is only necessary for the circumstance where you need to recover a consistent
       state when problems arise. If you need to run this command often, please let us know by
@@ -59239,7 +59258,7 @@ const CleanCommand = {
     } // Runs Bazel soft clean
 
 
-    if (await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__["isBazelBinAvailable"])()) {
+    if (await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__["isBazelBinAvailable"])(kbn.getAbsolute())) {
       await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__["runBazel"])(['clean']);
       _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].success('Soft cleaned bazel');
     }
@@ -61477,7 +61496,9 @@ const ResetCommand = {
     id: 'total'
   },
 
-  async run(projects) {
+  async run(projects, projectGraph, {
+    kbn
+  }) {
     _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].warning(dedent__WEBPACK_IMPORTED_MODULE_0___default.a`
       In most cases, 'yarn kbn clean' is all that should be needed to recover a consistent state when
       problems arise. However for the rare cases where something get corrupt on node_modules you might need this command.
@@ -61513,7 +61534,7 @@ const ResetCommand = {
     } // Runs Bazel hard clean and deletes Bazel Cache Folders
 
 
-    if (await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__["isBazelBinAvailable"])()) {
+    if (await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__["isBazelBinAvailable"])(kbn.getAbsolute())) {
       // Hard cleaning bazel
       await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__["runBazel"])(['clean', '--expunge']);
       _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].success('Hard cleaned bazel'); // Deletes Bazel Cache Folders

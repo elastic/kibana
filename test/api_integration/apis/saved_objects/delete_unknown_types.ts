@@ -16,7 +16,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
-  describe('/deprecations/_delete_unknown_types', () => {
+  // FAILING ES 8.2 forward compatibility: https://github.com/elastic/kibana/issues/130474
+  describe.skip('/deprecations/_delete_unknown_types', () => {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
       await esArchiver.load(
