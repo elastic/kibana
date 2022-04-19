@@ -53,8 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const testHistoryIndex = '.kibana_task_manager_test_result';
 
-  // Failing: See https://github.com/elastic/kibana/issues/128065
-  describe.skip('scheduling and running tasks', () => {
+  describe('scheduling and running tasks', () => {
     beforeEach(async () => {
       // clean up before each test
       return await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
@@ -825,7 +824,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(await runNowResultWithExpectedFailure).to.eql({ id: taskThatFailsBeforeRunNow.id });
     });
 
-    async function expectReschedule(
+    function expectReschedule(
       originalRunAt: number,
       task: SerializedConcreteTaskInstance<any, any>,
       expectedDiff: number
