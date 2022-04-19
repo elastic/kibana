@@ -90,11 +90,11 @@ const errorsDetailedStatisticsRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    currentPeriod: import('./../../../../../../node_modules/@types/lodash/ts3.1/index').Dictionary<{
+    currentPeriod: import('./../../../../../../node_modules/@types/lodash/index').Dictionary<{
       groupId: string;
       timeseries: Array<import('./../../../typings/timeseries').Coordinate>;
     }>;
-    previousPeriod: import('./../../../../../../node_modules/@types/lodash/ts3.1/index').Dictionary<{
+    previousPeriod: import('./../../../../../../node_modules/@types/lodash/index').Dictionary<{
       timeseries: Array<{
         x: number;
         y: import('./../../../typings/common').Maybe<number>;

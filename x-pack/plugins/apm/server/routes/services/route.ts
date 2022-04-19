@@ -148,7 +148,7 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    currentPeriod: import('./../../../../../../node_modules/@types/lodash/ts3.1/index').Dictionary<{
+    currentPeriod: import('./../../../../../../node_modules/@types/lodash/index').Dictionary<{
       serviceName: string;
       latency: Array<{
         x: number;
@@ -163,7 +163,7 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
         y: number;
       }>;
     }>;
-    previousPeriod: import('./../../../../../../node_modules/@types/lodash/ts3.1/index').Dictionary<{
+    previousPeriod: import('./../../../../../../node_modules/@types/lodash/index').Dictionary<{
       serviceName: string;
       latency: Array<{
         x: number;
@@ -688,7 +688,7 @@ const serviceInstancesDetailedStatisticsRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    currentPeriod: import('./../../../../../../node_modules/@types/lodash/ts3.1/index').Dictionary<{
+    currentPeriod: import('./../../../../../../node_modules/@types/lodash/index').Dictionary<{
       serviceNodeName: string;
       errorRate?:
         | Array<import('./../../../typings/timeseries').Coordinate>
@@ -706,7 +706,7 @@ const serviceInstancesDetailedStatisticsRoute = createApmServerRoute({
         | Array<import('./../../../typings/timeseries').Coordinate>
         | undefined;
     }>;
-    previousPeriod: import('./../../../../../../node_modules/@types/lodash/ts3.1/index').Dictionary<{
+    previousPeriod: import('./../../../../../../node_modules/@types/lodash/index').Dictionary<{
       cpuUsage: Array<{
         x: number;
         y: import('./../../../typings/common').Maybe<number>;

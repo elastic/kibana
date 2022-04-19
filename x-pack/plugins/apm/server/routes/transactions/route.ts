@@ -115,14 +115,14 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    currentPeriod: import('./../../../../../../node_modules/@types/lodash/ts3.1/index').Dictionary<{
+    currentPeriod: import('./../../../../../../node_modules/@types/lodash/index').Dictionary<{
       transactionName: string;
       latency: Array<import('./../../../typings/timeseries').Coordinate>;
       throughput: Array<import('./../../../typings/timeseries').Coordinate>;
       errorRate: Array<import('./../../../typings/timeseries').Coordinate>;
       impact: number;
     }>;
-    previousPeriod: import('./../../../../../../node_modules/@types/lodash/ts3.1/index').Dictionary<{
+    previousPeriod: import('./../../../../../../node_modules/@types/lodash/index').Dictionary<{
       errorRate: Array<{
         x: number;
         y: import('./../../../typings/common').Maybe<number>;
