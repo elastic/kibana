@@ -54,6 +54,13 @@ const scheduledActionsPercentilesAgg = {
   },
 };
 
+const alertsPercentilesAgg = {
+  percentiles: {
+    field: 'kibana.alert.rule.execution.metrics.total_number_of_alerts',
+    percents: [50, 90, 99],
+  },
+};
+
 const ruleTypeExecutionsWithDurationMetric = {
   scripted_metric: {
     init_script:
@@ -426,6 +433,7 @@ export async function getExecutionsPerDayCount(
           avg: { field: 'kibana.alert.rule.execution.metrics.total_search_duration_ms' },
         },
         percentileScheduledActions: scheduledActionsPercentilesAgg,
+        percentileAlerts: alertsPercentilesAgg,
         aggsByType: {
           terms: {
             field: 'rule.category',
@@ -433,6 +441,7 @@ export async function getExecutionsPerDayCount(
           },
           aggs: {
             percentileScheduledActions: scheduledActionsPercentilesAgg,
+            percentileAlerts: alertsPercentilesAgg,
           },
         },
       },
@@ -468,6 +477,10 @@ export async function getExecutionsPerDayCount(
   const aggsScheduledActionsPercentiles =
     // @ts-expect-error aggegation type is not specified
     searchResult.aggregations.percentileScheduledActions.values;
+
+  const aggsAlertsPercentiles =
+    // @ts-expect-error aggegation type is not specified
+    searchResult.aggregations.percentileAlerts.values;
 
   const aggsByTypeBuckets =
     // @ts-expect-error aggegation type is not specified
@@ -585,6 +598,21 @@ export async function getExecutionsPerDayCount(
     scheduledActionsPercentilesByType: parsePercentileAggsByRuleType(
       aggsByTypeBuckets,
       'percentileScheduledActions.values'
+    ),
+    alertsPercentiles: Object.keys(aggsAlertsPercentiles).reduce(
+      // ES DSL aggregations are returned as `any` by esClient.search
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (acc: any, curr: string) => ({
+        ...acc,
+        ...(percentileFieldNameMapping[curr]
+          ? { [percentileFieldNameMapping[curr]]: aggsAlertsPercentiles[curr] }
+          : {}),
+      }),
+      {}
+    ),
+    alertsPercentilesByType: parsePercentileAggsByRuleType(
+      aggsByTypeBuckets,
+      'percentileAlerts.values'
     ),
   };
 }

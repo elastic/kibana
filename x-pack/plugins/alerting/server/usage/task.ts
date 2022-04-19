@@ -148,6 +148,9 @@ export function telemetryTaskRunner(
                     dailyExecutionCounts.scheduledActionsPercentiles,
                   percentile_num_scheduled_actions_by_type_per_day:
                     dailyExecutionCounts.scheduledActionsPercentilesByType,
+                  percentile_num_alerts_per_day: dailyExecutionCounts.alertsPercentiles,
+                  percentile_num_alerts_by_type_per_day:
+                    dailyExecutionCounts.alertsPercentilesByType,
                 },
                 runAt: new Date(), // getNextMidnight(),
               };

@@ -443,6 +443,61 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
         telemetry.percentile_num_scheduled_actions_by_type_per_day.p99['test__cumulative-firing'] >=
           1
       ).to.be(true);
+
+      // percentile calculations for number of alerts
+      expect(telemetry.percentile_num_alerts_per_day.p50 >= 0).to.be(true);
+      expect(telemetry.percentile_num_alerts_per_day.p90 > 0).to.be(true);
+      expect(telemetry.percentile_num_alerts_per_day.p99 > 0).to.be(true);
+
+      // percentile calculations by rule type. most of these rule types don't generate alerts so they should all be 0
+      expect(
+        telemetry.percentile_num_alerts_by_type_per_day.p50['example__always-firing']
+      ).to.equal(0);
+      expect(
+        telemetry.percentile_num_alerts_by_type_per_day.p90['example__always-firing']
+      ).to.equal(0);
+      expect(
+        telemetry.percentile_num_alerts_by_type_per_day.p99['example__always-firing']
+      ).to.equal(0);
+
+      expect(
+        telemetry.percentile_num_alerts_by_type_per_day.p50.test__onlyContextVariables
+      ).to.equal(0);
+      expect(
+        telemetry.percentile_num_alerts_by_type_per_day.p90.test__onlyContextVariables
+      ).to.equal(0);
+      expect(
+        telemetry.percentile_num_alerts_by_type_per_day.p99.test__onlyContextVariables
+      ).to.equal(0);
+
+      expect(telemetry.percentile_num_alerts_by_type_per_day.p50.test__noop).to.equal(0);
+      expect(telemetry.percentile_num_alerts_by_type_per_day.p90.test__noop).to.equal(0);
+      expect(telemetry.percentile_num_alerts_by_type_per_day.p99.test__noop).to.equal(0);
+
+      expect(telemetry.percentile_num_alerts_by_type_per_day.p50.test__throw).to.equal(0);
+      expect(telemetry.percentile_num_alerts_by_type_per_day.p90.test__throw).to.equal(0);
+      expect(telemetry.percentile_num_alerts_by_type_per_day.p99.test__throw).to.equal(0);
+
+      expect(telemetry.percentile_num_alerts_by_type_per_day.p50.test__multipleSearches).to.equal(
+        0
+      );
+      expect(telemetry.percentile_num_alerts_by_type_per_day.p90.test__multipleSearches).to.equal(
+        0
+      );
+      expect(telemetry.percentile_num_alerts_by_type_per_day.p99.test__multipleSearches).to.equal(
+        0
+      );
+
+      // this rule type does generate alerts so should be least 1 alert
+      expect(
+        telemetry.percentile_num_alerts_by_type_per_day.p50['test__cumulative-firing'] >= 1
+      ).to.be(true);
+      expect(
+        telemetry.percentile_num_alerts_by_type_per_day.p90['test__cumulative-firing'] >= 1
+      ).to.be(true);
+      expect(
+        telemetry.percentile_num_alerts_by_type_per_day.p99['test__cumulative-firing'] >= 1
+      ).to.be(true);
     });
   });
 }
