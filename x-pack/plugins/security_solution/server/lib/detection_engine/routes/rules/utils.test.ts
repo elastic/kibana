@@ -1006,6 +1006,7 @@ describe.each([
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
       ]);
       const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
@@ -1049,6 +1050,7 @@ describe.each([
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
         {
           id: '789',
@@ -1056,6 +1058,7 @@ describe.each([
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
       ]);
       const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
@@ -1105,6 +1108,7 @@ describe.each([
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
         {
           id: '789',
@@ -1112,6 +1116,7 @@ describe.each([
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
       ]);
       const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
@@ -1168,6 +1173,7 @@ describe.each([
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
         {
           id: '789',
@@ -1175,6 +1181,7 @@ describe.each([
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
       ]);
       const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
@@ -1233,6 +1240,7 @@ describe.each([
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
         {
           id: '789',
@@ -1240,6 +1248,7 @@ describe.each([
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
       ]);
       const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
@@ -1339,6 +1348,7 @@ describe.each([
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
         {
           id: '789',
@@ -1346,6 +1356,7 @@ describe.each([
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
       ]);
       const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);

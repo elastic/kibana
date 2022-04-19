@@ -379,6 +379,7 @@ export const createActionResult = (): ActionResult => ({
   name: '',
   config: {},
   isPreconfigured: false,
+  isDeprecated: false,
 });
 
 export const nonRuleAlert = (isRuleRegistryEnabled: boolean) => ({
@@ -432,6 +433,7 @@ export const updateActionResult = (): ActionResult => ({
   name: '',
   config: {},
   isPreconfigured: false,
+  isDeprecated: false,
 });
 
 export const getMockPrivilegesResult = () => ({

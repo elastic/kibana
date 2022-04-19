@@ -151,6 +151,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
           id: createdAction.id,
           is_missing_secrets: false,
           is_preconfigured: false,
+          is_deprecated: false,
           name: 'A swimlane action',
         });
 
@@ -163,6 +164,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
         expect(fetchedAction).to.eql({
           id: fetchedAction.id,
           is_preconfigured: false,
+          is_deprecated: false,
           is_missing_secrets: false,
           name: 'A swimlane action',
           connector_type_id: '.swimlane',

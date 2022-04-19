@@ -62,6 +62,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
       expect(createdAction).to.eql({
         id: createdAction.id,
         is_preconfigured: false,
+        is_deprecated: false,
         name: 'An xmatters action',
         connector_type_id: '.xmatters',
         is_missing_secrets: false,
@@ -95,6 +96,7 @@ export default function xmattersTest({ getService }: FtrProviderContext) {
       expect(createdAction).to.eql({
         id: createdAction.id,
         is_preconfigured: false,
+        is_deprecated: false,
         name: 'An xmatters action',
         connector_type_id: '.xmatters',
         is_missing_secrets: false,

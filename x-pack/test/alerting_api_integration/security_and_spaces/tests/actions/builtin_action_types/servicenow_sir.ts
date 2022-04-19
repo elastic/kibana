@@ -104,6 +104,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
         expect(createdAction).to.eql({
           id: createdAction.id,
           is_preconfigured: false,
+          is_deprecated: false,
           name: 'A servicenow action',
           connector_type_id: '.servicenow-sir',
           is_missing_secrets: false,
@@ -120,6 +121,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
         expect(fetchedAction).to.eql({
           id: fetchedAction.id,
           is_preconfigured: false,
+          is_deprecated: false,
           name: 'A servicenow action',
           connector_type_id: '.servicenow-sir',
           is_missing_secrets: false,
