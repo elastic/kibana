@@ -10,5 +10,5 @@
   "requiredPlugins": ["licensing", "management", "features", "share"],
   "optionalPlugins": ["cloud", "usageCollection", "indexManagement", "home"],
   "configPath": ["xpack", "ilm"],
-  "requiredBundles": ["indexManagement", "kibanaReact", "esUiShared", "home"]
+  "requiredBundles": ["indexManagement", "kibanaReact", "esUiShared"]
 }
