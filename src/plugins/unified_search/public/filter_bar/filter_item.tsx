@@ -19,7 +19,11 @@ import classNames from 'classnames';
 import React, { MouseEvent, useState, useEffect, HTMLAttributes } from 'react';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '@kbn/data-plugin/public';
+import {
+  getIndexPatternFromFilter,
+  getDisplayValueFromFilter,
+  getFieldDisplayValueFromFilter,
+} from '@kbn/data-plugin/public';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
 import { getIndexPatterns } from '../services';
@@ -355,6 +359,7 @@ export function FilterItem(props: FilterItemProps) {
   const filterViewProps = {
     filter,
     valueLabel: valueLabelConfig.title,
+    fieldLabel: getFieldDisplayValueFromFilter(filter, indexPatterns),
     filterLabelStatus: valueLabelConfig.status,
     errorMessage: valueLabelConfig.message,
     className: getClasses(!!filter.meta.negate, valueLabelConfig),

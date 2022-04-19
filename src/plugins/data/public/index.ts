@@ -21,6 +21,7 @@ export * from './deprecated';
 export { getEsQueryConfig, FilterStateStore } from '../common';
 export {
   getDisplayValueFromFilter,
+  getFieldDisplayValueFromFilter,
   generateFilters,
   extractTimeRange,
   getIndexPatternFromFilter,
