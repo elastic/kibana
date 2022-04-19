@@ -7,7 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 import { createRedirectLegacyUrl } from './redirect_legacy_url';
 

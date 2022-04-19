@@ -11,7 +11,7 @@ import { get, groupBy } from 'lodash';
 // @ts-ignore
 import { handleError } from '../../../../lib/errors/handle_error';
 // @ts-ignore
-import { prefixIndexPattern } from '../../../../../common/ccs_utils';
+import { prefixIndexPatternWithCcs } from '../../../../../common/ccs_utils';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 import {
   ElasticsearchResponse,
@@ -216,7 +216,7 @@ export function ccrRoute(server: { route: (p: any) => void; config: MonitoringCo
     async handler(req: LegacyRequest) {
       const config = server.config;
       const ccs = req.payload.ccs;
-      const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
+      const esIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
 
       try {
         const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

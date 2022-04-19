@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from '../../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import { Incident, PartialIncident, ResponseError, ServiceNowError } from './types';
 import { FIELD_PREFIX } from './config';
 import { addTimeZoneToDate, getErrorMessage } from '../lib/axios_utils';

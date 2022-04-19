@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { groupBy } from 'lodash';
 
-import type { ResolvedSimpleSavedObject } from 'src/core/public';
+import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 
 import { Loading, Error, ExtensionWrapper } from '../../../../../components';
 

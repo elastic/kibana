@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { useEffect, useState } from 'react';
+import { createEsParams, useEsSearch, useFetcher } from '@kbn/observability-plugin/public';
 import { JourneyStep } from '../../../../../common/runtime_types';
-import { createEsParams, useEsSearch, useFetcher } from '../../../../../../observability/public';
 import { useTickTick } from '../use_tick_tick';
 import { fetchJourneySteps } from '../../../../state/api/journey';
 import { isStepEnd } from '../../../synthetics/check_steps/steps_list';

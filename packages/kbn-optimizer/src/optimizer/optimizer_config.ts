@@ -8,7 +8,7 @@
 
 import Path from 'path';
 import Os from 'os';
-import { getPluginSearchPaths } from '@kbn/config';
+import { getPluginSearchPaths } from '@kbn/plugin-discovery';
 
 import {
   Bundle,
@@ -109,6 +109,9 @@ interface Options {
 
   /** path to a limits.yml file that should be used to inform ci-stats of metric limits */
   limitsPath?: string;
+
+  /** discover and build test plugins along with the standard plugins */
+  testPlugins?: boolean;
 }
 
 export interface ParsedOptions {
@@ -136,6 +139,7 @@ export class OptimizerConfig {
     const examples = !!options.examples;
     const profileWebpack = !!options.profileWebpack;
     const inspectWorkers = !!options.inspectWorkers;
+    const testPlugins = !!options.testPlugins;
     const cache = options.cache !== false && !process.env.KBN_OPTIMIZER_NO_CACHE;
     const includeCoreBundle = !!options.includeCoreBundle;
     const filters = options.filter || [];
@@ -157,6 +161,7 @@ export class OptimizerConfig {
         rootDir: repoRoot,
         oss,
         examples,
+        testPlugins,
       });
 
     if (!pluginScanDirs.every((p) => Path.isAbsolute(p))) {

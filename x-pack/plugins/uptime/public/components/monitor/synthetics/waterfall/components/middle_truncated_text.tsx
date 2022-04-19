@@ -16,10 +16,10 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { WaterfallTooltipContent } from './waterfall_tooltip_content';
 import { WaterfallChartTooltip } from './styles';
 import { FIXED_AXIS_HEIGHT } from './constants';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { formatTooltipHeading } from '../../step_detail/waterfall/data_formatting';
 
 interface Props {

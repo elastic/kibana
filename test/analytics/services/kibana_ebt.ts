@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from 'test/functional/ftr_provider_context';
-import '../__fixtures__/plugins/analytics_ftr_helpers/public/types';
+import { FtrProviderContext } from '../../functional/ftr_provider_context';
+import '@kbn/analytics-ftr-helpers-plugin/public/types';
 
 export function KibanaEBTServerProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

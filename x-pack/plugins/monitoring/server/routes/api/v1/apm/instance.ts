@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { prefixIndexPattern } from '../../../../../common/ccs_utils';
-import { getMetrics } from '../../../../lib/details/get_metrics';
-import { metricSet } from './metric_set_instance';
-import { handleError } from '../../../../lib/errors';
-import { getApmInfo } from '../../../../lib/apm';
+import { prefixIndexPatternWithCcs } from '../../../../../common/ccs_utils';
 import { INDEX_PATTERN_BEATS } from '../../../../../common/constants';
 import {
   postApmInstanceRequestParamsRT,
   postApmInstanceRequestPayloadRT,
 } from '../../../../../common/http_api/apm';
 import { createValidationFunction } from '../../../../../common/runtime_types';
+import { getApmInfo } from '../../../../lib/apm';
+import { getMetrics } from '../../../../lib/details/get_metrics';
+import { handleError } from '../../../../lib/errors';
 import { MonitoringCore } from '../../../../types';
+import { metricSet } from './metric_set_instance';
 
 export function apmInstanceRoute(server: MonitoringCore) {
   server.route({
@@ -31,7 +31,7 @@ export function apmInstanceRoute(server: MonitoringCore) {
       const config = server.config;
       const clusterUuid = req.params.clusterUuid;
       const ccs = req.payload.ccs;
-      const apmIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
+      const apmIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_BEATS, ccs);
 
       const showCgroupMetrics = config.ui.container.apm.enabled;
       if (showCgroupMetrics) {

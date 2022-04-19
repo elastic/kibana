@@ -9,9 +9,9 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { NotificationsStart } from 'kibana/public';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public/context';
+import { NotificationsStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public/context';
 import type {
   CreateExceptionListItemSchema,
   ExceptionListItemSchema,

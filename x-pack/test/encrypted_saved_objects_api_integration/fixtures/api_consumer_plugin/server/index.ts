@@ -11,12 +11,12 @@ import {
   PluginInitializer,
   SavedObjectsNamespaceType,
   SavedObjectUnsanitizedDoc,
-} from '../../../../../../src/core/server';
+} from '@kbn/core/server';
 import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
-} from '../../../../../plugins/encrypted_saved_objects/server';
-import { SpacesPluginSetup } from '../../../../../plugins/spaces/server';
+} from '@kbn/encrypted-saved-objects-plugin/server';
+import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { registerHiddenSORoutes } from './hidden_saved_object_routes';
 
 const SAVED_OBJECT_WITH_SECRET_TYPE = 'saved-object-with-secret';

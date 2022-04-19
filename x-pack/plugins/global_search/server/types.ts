@@ -13,7 +13,7 @@ import type {
   Capabilities,
   IRouter,
   RequestHandlerContext,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import {
   GlobalSearchBatchedResults,
   GlobalSearchProviderFindOptions,
