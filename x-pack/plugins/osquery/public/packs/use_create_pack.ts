@@ -43,6 +43,7 @@ export const useCreatePack = ({ withRedirect }: UseCreatePackProps) => {
         if (withRedirect) {
           navigateToApp(PLUGIN_ID, { path: pagePathGetters.packs() });
         }
+
         toasts.addSuccess(
           i18n.translate('xpack.osquery.newPack.successToastMessageText', {
             defaultMessage: 'Successfully created "{packName}" pack',
