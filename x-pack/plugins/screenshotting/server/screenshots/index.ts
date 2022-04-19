@@ -24,7 +24,7 @@ import {
   tap,
   toArray,
 } from 'rxjs/operators';
-import type { CloudSetup } from '../../../cloud/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
   LayoutParams,
   SCREENSHOTTING_APP_ID,

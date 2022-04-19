@@ -22,7 +22,7 @@ import {
   SCREENSHOTTING_EXPRESSION,
   SCREENSHOTTING_EXPRESSION_INPUT,
 } from '../../common';
-import type { CloudSetup } from '../../../cloud/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { HeadlessChromiumDriverFactory } from '../browsers';
 import { createMockBrowserDriver, createMockBrowserDriverFactory } from '../browsers/mock';
 import type { ConfigType } from '../config';

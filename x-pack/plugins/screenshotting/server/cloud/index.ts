@@ -6,7 +6,7 @@
  */
 
 import os from 'os';
-import type { CloudSetup } from '../../../cloud/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
 const MIN_CLOUD_OS_MEM_GB: number = 2;
 const MIN_CLOUD_OS_MEM_BYTES: number = MIN_CLOUD_OS_MEM_GB * Math.pow(1024, 3);
