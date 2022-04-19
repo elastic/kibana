@@ -565,7 +565,7 @@ export class TaskRunner<
       metrics: searchMetrics,
       alertExecutionMetrics: {
         numberOfTriggeredActions: alertExecutionStore.getNumberOfTriggeredActions(),
-        numberOfScheduledActions: alertExecutionStore.getNumberOfScheduledActions(),
+        numberOfGeneratedActions: alertExecutionStore.getNumberOfGeneratedActions(),
         triggeredActionsStatus: alertExecutionStore.getTriggeredActionsStatus(),
       },
       alertTypeState: updatedRuleTypeState || undefined,

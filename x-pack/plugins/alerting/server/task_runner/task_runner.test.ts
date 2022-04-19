@@ -2832,7 +2832,7 @@ describe('Task Runner', () => {
         outcome: 'success',
         status: 'warning',
         numberOfTriggeredActions: actionsConfigMap.default.max,
-        numberOfScheduledActions: mockActions.length,
+        numberOfGeneratedActions: mockActions.length,
         reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
         task: true,
         consumer: 'bar',

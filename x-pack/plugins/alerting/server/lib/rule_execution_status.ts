@@ -35,7 +35,7 @@ export function executionStatusFromState(state: RuleExecutionState): RuleExecuti
   return {
     metrics: state.metrics,
     numberOfTriggeredActions: state.alertExecutionMetrics.numberOfTriggeredActions,
-    numberOfScheduledActions: state.alertExecutionMetrics.numberOfScheduledActions,
+    numberOfGeneratedActions: state.alertExecutionMetrics.numberOfGeneratedActions,
     lastExecutionDate: new Date(),
     status,
     ...(hasIncompleteAlertExecution && {

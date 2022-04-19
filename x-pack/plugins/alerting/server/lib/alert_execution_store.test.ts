@@ -16,7 +16,7 @@ describe('AlertExecutionStore', () => {
   test('returns the default values if there is no change', () => {
     expect(alertExecutionStore.getTriggeredActionsStatus()).toBe(ActionsCompletion.COMPLETE);
     expect(alertExecutionStore.getNumberOfTriggeredActions()).toBe(0);
-    expect(alertExecutionStore.getNumberOfScheduledActions()).toBe(0);
+    expect(alertExecutionStore.getNumberOfGeneratedActions()).toBe(0);
     expect(alertExecutionStore.getStatusByConnectorType('any')).toBe(undefined);
   });
 
@@ -25,9 +25,9 @@ describe('AlertExecutionStore', () => {
     expect(alertExecutionStore.getNumberOfTriggeredActions()).toBe(5);
   });
 
-  test('sets and returns numberOfScheduledActions', () => {
-    alertExecutionStore.setNumberOfScheduledActions(15);
-    expect(alertExecutionStore.getNumberOfScheduledActions()).toBe(15);
+  test('sets and returns numberOfGeneratedActions', () => {
+    alertExecutionStore.setNumberOfGeneratedActions(15);
+    expect(alertExecutionStore.getNumberOfGeneratedActions()).toBe(15);
   });
 
   test('sets and returns triggeredActionsStatusByConnectorType', () => {
@@ -47,9 +47,9 @@ describe('AlertExecutionStore', () => {
     expect(alertExecutionStore.getNumberOfTriggeredActions()).toBe(6);
   });
 
-  test('increments incrementNumberOfScheduledActions by x', () => {
-    alertExecutionStore.incrementNumberOfScheduledActions(2);
-    expect(alertExecutionStore.getNumberOfScheduledActions()).toBe(17);
+  test('increments incrementNumberOfGeneratedActions by x', () => {
+    alertExecutionStore.incrementNumberOfGeneratedActions(2);
+    expect(alertExecutionStore.getNumberOfGeneratedActions()).toBe(17);
   });
 
   test('increments numberOfTriggeredActionsByConnectorType by 1', () => {
@@ -59,10 +59,10 @@ describe('AlertExecutionStore', () => {
     ).toBe(1);
   });
 
-  test('increments NumberOfScheduledActionsByConnectorType by 1', () => {
-    alertExecutionStore.incrementNumberOfScheduledActionsByConnectorType(testConnectorId);
+  test('increments NumberOfGeneratedActionsByConnectorType by 1', () => {
+    alertExecutionStore.incrementNumberOfGeneratedActionsByConnectorType(testConnectorId);
     expect(
-      alertExecutionStore.getStatusByConnectorType(testConnectorId).numberOfScheduledActions
+      alertExecutionStore.getStatusByConnectorType(testConnectorId).numberOfGeneratedActions
     ).toBe(1);
   });
 

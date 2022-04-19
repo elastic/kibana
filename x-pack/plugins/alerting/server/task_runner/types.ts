@@ -163,9 +163,3 @@ export enum ActionsCompletion {
   COMPLETE = 'complete',
   PARTIAL = 'partial',
 }
-
-export interface AlertExecutionStore {
-  numberOfTriggeredActions: number;
-  numberOfGeneratedActions: number;
-  triggeredActionsStatus: ActionsCompletion;
-}

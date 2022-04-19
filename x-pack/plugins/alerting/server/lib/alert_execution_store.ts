@@ -11,12 +11,12 @@ import { ActionsCompletion } from '../task_runner/types';
 
 interface State {
   numberOfTriggeredActions: number;
-  numberOfScheduledActions: number;
+  numberOfGeneratedActions: number;
   connectorTypes: {
     [key: string]: {
       triggeredActionsStatus: ActionsCompletion;
       numberOfTriggeredActions: number;
-      numberOfScheduledActions: number;
+      numberOfGeneratedActions: number;
     };
   };
 }
@@ -24,7 +24,7 @@ interface State {
 export class AlertExecutionStore {
   private state: State = {
     numberOfTriggeredActions: 0,
-    numberOfScheduledActions: 0,
+    numberOfGeneratedActions: 0,
     connectorTypes: {},
   };
 
@@ -38,20 +38,20 @@ export class AlertExecutionStore {
   public getNumberOfTriggeredActions = () => {
     return this.state.numberOfTriggeredActions;
   };
-  public getNumberOfScheduledActions = () => {
-    return this.state.numberOfScheduledActions;
+  public getNumberOfGeneratedActions = () => {
+    return this.state.numberOfGeneratedActions;
   };
   public getStatusByConnectorType = (actionTypeId: string) => {
     return this.state.connectorTypes[actionTypeId];
   };
 
   // Setters
-  public setNumberOfTriggeredActions = (numberOfScheduledActions: number) => {
-    this.state.numberOfTriggeredActions = numberOfScheduledActions;
+  public setNumberOfTriggeredActions = (numberOfTriggeredActions: number) => {
+    this.state.numberOfTriggeredActions = numberOfTriggeredActions;
   };
 
-  public setNumberOfScheduledActions = (numberOfScheduledActions: number) => {
-    this.state.numberOfScheduledActions = numberOfScheduledActions;
+  public setNumberOfGeneratedActions = (numberOfGeneratedActions: number) => {
+    this.state.numberOfGeneratedActions = numberOfGeneratedActions;
   };
 
   public setTriggeredActionsStatusByConnectorType = ({
@@ -91,16 +91,16 @@ export class AlertExecutionStore {
     this.state.numberOfTriggeredActions++;
   };
 
-  public incrementNumberOfScheduledActions = (incrementBy: number) => {
-    this.state.numberOfScheduledActions += incrementBy;
+  public incrementNumberOfGeneratedActions = (incrementBy: number) => {
+    this.state.numberOfGeneratedActions += incrementBy;
   };
 
   public incrementNumberOfTriggeredActionsByConnectorType = (actionTypeId: string) => {
     const currentVal = this.state.connectorTypes[actionTypeId]?.numberOfTriggeredActions || 0;
     set(this.state, `connectorTypes["${actionTypeId}"].numberOfTriggeredActions`, currentVal + 1);
   };
-  public incrementNumberOfScheduledActionsByConnectorType = (actionTypeId: string) => {
-    const currentVal = this.state.connectorTypes[actionTypeId]?.numberOfScheduledActions || 0;
-    set(this.state, `connectorTypes["${actionTypeId}"].numberOfScheduledActions`, currentVal + 1);
+  public incrementNumberOfGeneratedActionsByConnectorType = (actionTypeId: string) => {
+    const currentVal = this.state.connectorTypes[actionTypeId]?.numberOfGeneratedActions || 0;
+    set(this.state, `connectorTypes["${actionTypeId}"].numberOfGeneratedActions`, currentVal + 1);
   };
 }

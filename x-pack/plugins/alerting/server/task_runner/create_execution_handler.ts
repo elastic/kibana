@@ -109,7 +109,7 @@ export function createExecutionHandler<
         }),
       }));
 
-    alertExecutionStore.incrementNumberOfScheduledActions(actions.length);
+    alertExecutionStore.incrementNumberOfGeneratedActions(actions.length);
 
     const ruleLabel = `${ruleType.id}:${ruleId}: '${ruleName}'`;
 
@@ -119,7 +119,7 @@ export function createExecutionHandler<
     for (const action of actions) {
       const { actionTypeId } = action;
 
-      alertExecutionStore.incrementNumberOfScheduledActionsByConnectorType(actionTypeId);
+      alertExecutionStore.incrementNumberOfGeneratedActionsByConnectorType(actionTypeId);
 
       if (alertExecutionStore.hasReachedTheExecutableActionsLimit(actionsConfigMap)) {
         alertExecutionStore.setTriggeredActionsStatusByConnectorType({

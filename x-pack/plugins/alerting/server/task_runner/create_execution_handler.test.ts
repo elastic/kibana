@@ -134,7 +134,7 @@ describe('Create Execution Handler', () => {
       alertExecutionStore,
     });
     expect(alertExecutionStore.getNumberOfTriggeredActions()).toBe(1);
-    expect(alertExecutionStore.getNumberOfScheduledActions()).toBe(1);
+    expect(alertExecutionStore.getNumberOfGeneratedActions()).toBe(1);
     expect(mockActionsPlugin.getActionsClientWithRequest).toHaveBeenCalledWith(
       createExecutionHandlerParams.request
     );
@@ -283,7 +283,7 @@ describe('Create Execution Handler', () => {
       alertExecutionStore,
     });
     expect(alertExecutionStore.getNumberOfTriggeredActions()).toBe(1);
-    expect(alertExecutionStore.getNumberOfScheduledActions()).toBe(2);
+    expect(alertExecutionStore.getNumberOfGeneratedActions()).toBe(2);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledWith({
       consumer: 'rule-consumer',
@@ -347,7 +347,7 @@ describe('Create Execution Handler', () => {
       alertExecutionStore,
     });
     expect(alertExecutionStore.getNumberOfTriggeredActions()).toBe(0);
-    expect(alertExecutionStore.getNumberOfScheduledActions()).toBe(2);
+    expect(alertExecutionStore.getNumberOfGeneratedActions()).toBe(2);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(0);
 
     mockActionsPlugin.isActionExecutable.mockImplementation(() => true);
@@ -375,7 +375,7 @@ describe('Create Execution Handler', () => {
       alertExecutionStore,
     });
     expect(alertExecutionStore.getNumberOfTriggeredActions()).toBe(0);
-    expect(alertExecutionStore.getNumberOfScheduledActions()).toBe(0);
+    expect(alertExecutionStore.getNumberOfGeneratedActions()).toBe(0);
     expect(actionsClient.enqueueExecution).not.toHaveBeenCalled();
   });
 
@@ -389,7 +389,7 @@ describe('Create Execution Handler', () => {
       alertExecutionStore,
     });
     expect(alertExecutionStore.getNumberOfTriggeredActions()).toBe(1);
-    expect(alertExecutionStore.getNumberOfScheduledActions()).toBe(1);
+    expect(alertExecutionStore.getNumberOfGeneratedActions()).toBe(1);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
     Array [
@@ -485,7 +485,7 @@ describe('Create Execution Handler', () => {
     );
 
     expect(alertExecutionStore.getNumberOfTriggeredActions()).toBe(0);
-    expect(alertExecutionStore.getNumberOfScheduledActions()).toBe(0);
+    expect(alertExecutionStore.getNumberOfGeneratedActions()).toBe(0);
     expect(alertExecutionStore.getTriggeredActionsStatus()).toBe(ActionsCompletion.COMPLETE);
   });
 
@@ -542,7 +542,7 @@ describe('Create Execution Handler', () => {
     });
 
     expect(alertExecutionStore.getNumberOfTriggeredActions()).toBe(2);
-    expect(alertExecutionStore.getNumberOfScheduledActions()).toBe(3);
+    expect(alertExecutionStore.getNumberOfGeneratedActions()).toBe(3);
     expect(alertExecutionStore.getTriggeredActionsStatus()).toBe(ActionsCompletion.PARTIAL);
     expect(createExecutionHandlerParams.logger.debug).toHaveBeenCalledTimes(1);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(2);
@@ -615,7 +615,7 @@ describe('Create Execution Handler', () => {
     });
 
     expect(alertExecutionStore.getNumberOfTriggeredActions()).toBe(4);
-    expect(alertExecutionStore.getNumberOfScheduledActions()).toBe(5);
+    expect(alertExecutionStore.getNumberOfGeneratedActions()).toBe(5);
     expect(alertExecutionStore.getStatusByConnectorType('test').numberOfTriggeredActions).toBe(1);
     expect(
       alertExecutionStore.getStatusByConnectorType('test-action-type-id').numberOfTriggeredActions
