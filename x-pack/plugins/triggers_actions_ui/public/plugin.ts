@@ -13,7 +13,7 @@ import { PluginInitializerContext } from '@kbn/core/public';
 import { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import { KibanaFeature } from '@kbn/features-plugin/common';
 import { ManagementAppMountParams, ManagementSetup } from '@kbn/management-plugin/public';
-import { FeatureCatalogueCategory, HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -131,7 +131,7 @@ export class Plugin
         icon: 'watchesApp',
         path: '/app/management/insightsAndAlerting/triggersActions',
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin',
       });
     }
 
