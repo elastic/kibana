@@ -32,7 +32,7 @@ import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
-import type { SharePluginSetup } from '../../../../src/plugins/share/public';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import {
   FetchDataParams,
   METRIC_TYPE,

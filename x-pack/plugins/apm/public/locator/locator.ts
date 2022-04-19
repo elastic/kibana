@@ -6,56 +6,50 @@
  */
 
 import { merge } from 'lodash';
-import type { LocatorDefinition } from 'src/plugins/share/common';
-import {
-  apmRouter,
-  ApmRoutes,
-  apmRoutes,
-} from '../components/routing/apm_route_config';
+import type { LocatorDefinition } from '@kbn/share-plugin/common';
 import { getLocatorEnabledRoutes } from './get_locator_enabled_routes';
 import type { APMLocatorPayload } from './types';
-import { LinkFunc } from './types';
 
 export const APM_APP_LOCATOR_ID = 'APM_LOCATOR';
+
+async function loadApmRoutesModule() {
+  const { apmRouter, apmRoutes } = await import(
+    '../components/routing/apm_route_config'
+  );
+  const locatorEnabledRoutes = getLocatorEnabledRoutes(apmRoutes);
+
+  return {
+    apmRouter,
+    locatorEnabledRoutes,
+  };
+}
 
 export class APMLocatorDefinition
   implements LocatorDefinition<APMLocatorPayload>
 {
-  public readonly id = APM_APP_LOCATOR_ID;
+  readonly id = APM_APP_LOCATOR_ID;
+  apmRoutesModule = loadApmRoutesModule();
 
-  private getLink: LinkFunc = this.#getLocatorLinkFunc(apmRoutes);
+  async getLocation(payload: APMLocatorPayload) {
+    const { apmRouter, locatorEnabledRoutes } = await this.apmRoutesModule;
+    const route = locatorEnabledRoutes[payload.pageId];
 
-  public readonly getLocation = async (payload: APMLocatorPayload) => {
-    const path = this.getLink(payload);
+    if (!route) {
+      throw new Error(`Cannot find a matching route for: ${payload.pageId}`);
+    }
+
+    const defaultQueryParams = merge(route.defaults!.query, payload.query);
+
+    // @ts-ignore
+    const path = apmRouter.link(route.path, {
+      path: 'params' in payload ? payload.params : {},
+      query: defaultQueryParams,
+    });
 
     return {
       app: 'apm',
       path,
       state: {},
     };
-  };
-
-  #getLocatorLinkFunc(routes: ApmRoutes): LinkFunc {
-    const locatorEnabledRoutes = getLocatorEnabledRoutes(routes);
-
-    const linkFunc: LinkFunc = (payload) => {
-      const route = locatorEnabledRoutes[payload.pageId];
-
-      if (!route) {
-        throw new Error(`Cannot find a matching route for: ${payload.pageId}`);
-      }
-
-      const defaultQueryParams = merge(route.defaults!.query, payload.query);
-      // @ts-ignore
-      const link = apmRouter.link(route.path, {
-        // @ts-ignore
-        path: payload.params,
-        // @ts-ignore
-        query: defaultQueryParams,
-      });
-      return link;
-    };
-
-    return linkFunc;
   }
 }

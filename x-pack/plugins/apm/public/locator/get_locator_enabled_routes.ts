@@ -28,7 +28,6 @@ function getLocatorEnabledRoutesRec(
     type RouterEntries = Array<[string, RouteWithPath]>;
 
     const childAncestorRoutes = ancestorRoutes.concat(route);
-
     const matchedRoutes = Object.entries(route.children).reduce<RouterEntries>(
       (acc, aRouteEntry) =>
         acc.concat(

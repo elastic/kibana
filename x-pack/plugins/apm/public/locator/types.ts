@@ -60,14 +60,3 @@ type Merge<
   U extends Record<string, unknown>,
   D extends Record<string, unknown> = {}
 > = T & U & D;
-
-export type LinkFunc = (payload: APMLocatorPayload) => string;
-
-export type LocatorRoutePayload<TPageId extends APMLocatorPayload['pageId']> =
-  APMLocatorPayload extends infer TPayload
-    ? TPayload extends APMLocatorPayload
-      ? TPayload['pageId'] extends TPageId
-        ? TPayload
-        : never
-      : never
-    : never;
