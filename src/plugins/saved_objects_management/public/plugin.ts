@@ -12,20 +12,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-<<<<<<< HEAD
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-=======
-import { HomePublicPluginSetup, FeatureCatalogueCategory } from '@kbn/home-plugin/public';
->>>>>>> upstream/main
-import { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import {
-  SavedObjectsManagementActionService,
-  SavedObjectsManagementActionServiceSetup,
-  SavedObjectsManagementActionServiceStart,
-  SavedObjectsManagementColumnService,
-  SavedObjectsManagementColumnServiceSetup,
-  SavedObjectsManagementColumnServiceStart,
-} from './services';
 
 export interface SavedObjectsManagementPluginSetup {
   actions: SavedObjectsManagementActionServiceSetup;

@@ -6,11 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-<<<<<<< HEAD
 import type { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
-=======
-import { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
->>>>>>> upstream/main
 
 export const featureCatalogueEntry = {
   id: 'apm',

@@ -17,11 +17,7 @@ import {
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-<<<<<<< HEAD
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-=======
-import { FeatureCatalogueCategory, HomePublicPluginSetup } from '@kbn/home-plugin/public';
->>>>>>> upstream/main
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 

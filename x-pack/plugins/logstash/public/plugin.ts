@@ -11,11 +11,7 @@ import { map } from 'rxjs/operators';
 import { once } from 'lodash';
 
 import { Capabilities, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-<<<<<<< HEAD
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-=======
-import { HomePublicPluginSetup, FeatureCatalogueCategory } from '@kbn/home-plugin/public';
->>>>>>> upstream/main
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 

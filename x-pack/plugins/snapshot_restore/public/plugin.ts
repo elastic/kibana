@@ -10,11 +10,7 @@ import { CoreSetup, PluginInitializerContext } from '@kbn/core/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
-<<<<<<< HEAD
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-=======
-import { FeatureCatalogueCategory, HomePublicPluginSetup } from '@kbn/home-plugin/public';
->>>>>>> upstream/main
 
 import { PLUGIN } from '../common/constants';
 

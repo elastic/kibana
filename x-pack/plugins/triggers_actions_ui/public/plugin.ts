@@ -13,11 +13,7 @@ import { PluginInitializerContext } from '@kbn/core/public';
 import { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import { KibanaFeature } from '@kbn/features-plugin/common';
 import { ManagementAppMountParams, ManagementSetup } from '@kbn/management-plugin/public';
-<<<<<<< HEAD
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-=======
-import { FeatureCatalogueCategory, HomePublicPluginSetup } from '@kbn/home-plugin/public';
->>>>>>> upstream/main
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
