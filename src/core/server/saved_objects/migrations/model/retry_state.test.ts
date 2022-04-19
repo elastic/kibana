@@ -96,6 +96,49 @@ describe('delayRetryState', () => {
     expect(state.retryDelay).toEqual(64000);
   });
 
+  it('extends the log messages if a doc link is provided', () => {
+    let state = createState({
+      controlState: 'TEST',
+      hello: 'dolly',
+      retryCount: 0,
+      retryDelay: 0,
+      logs: [],
+    });
+
+    for (let i = 0; i < 5; i++) {
+      state = delayRetryState(state, 'some-error', 10, 'docLink');
+    }
+
+    expect(state).toEqual({
+      controlState: 'TEST',
+      hello: 'dolly',
+      retryCount: 5,
+      retryDelay: 32000,
+      logs: [
+        {
+          level: 'error',
+          message: `Action failed with 'some-error'. Retrying attempt 1 in 2 seconds. Refer to docLink for information on how to resolve the issue.`,
+        },
+        {
+          level: 'error',
+          message: `Action failed with 'some-error'. Retrying attempt 2 in 4 seconds. Refer to docLink for information on how to resolve the issue.`,
+        },
+        {
+          level: 'error',
+          message: `Action failed with 'some-error'. Retrying attempt 3 in 8 seconds. Refer to docLink for information on how to resolve the issue.`,
+        },
+        {
+          level: 'error',
+          message: `Action failed with 'some-error'. Retrying attempt 4 in 16 seconds. Refer to docLink for information on how to resolve the issue.`,
+        },
+        {
+          level: 'error',
+          message: `Action failed with 'some-error'. Retrying attempt 5 in 32 seconds. Refer to docLink for information on how to resolve the issue.`,
+        },
+      ],
+    });
+  });
+
   it('returns a FATAL state if the retryCount exceed the max allowed number of attempts', () => {
     const state = createState({
       controlState: 'TEST',
