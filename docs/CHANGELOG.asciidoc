@@ -57,7 +57,7 @@ To review the breaking changes in previous versions, refer to the following:
 Alerting::
 * Keep the number_of_scheduled_actions in event log {kibana-pull}128438[#128438]
 * Remove defaultRuleTaskTimeout and set ruleType specific timeout from kibana.yml {kibana-pull}128294[#128294]
-* Limit the executable actions per Rule execution {kibana-pull}128079[#128079] and {kibana-pull}126902[#126902]
+* Limit the executable actions per rule execution {kibana-pull}128079[#128079] and {kibana-pull}126902[#126902]
 * Adds Cases to the Stack Management page {kibana-pull}125224[#125224]
 
 Dashboard::
