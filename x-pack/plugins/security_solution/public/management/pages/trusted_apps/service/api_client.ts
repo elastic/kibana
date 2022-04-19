@@ -12,7 +12,7 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 
-import { HttpStart } from 'kibana/public';
+import { HttpStart } from '@kbn/core/public';
 import { ConditionEntry } from '../../../../../common/endpoint/types';
 import {
   conditionEntriesToEntries,
