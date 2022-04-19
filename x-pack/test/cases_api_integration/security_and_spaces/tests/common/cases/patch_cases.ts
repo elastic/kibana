@@ -113,9 +113,11 @@ export default ({ getService }: FtrProviderContext): void => {
         const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
         const statusUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
         const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
+        const { duration, ...dataWithoutDuration } = data;
+        const { duration: resDuration, ...resWithoutDuration } = postCaseResp();
 
-        expect(data).to.eql({
-          ...postCaseResp(),
+        expect(dataWithoutDuration).to.eql({
+          ...resWithoutDuration,
           status: CaseStatuses.closed,
           closed_by: defaultUser,
           updated_by: defaultUser,

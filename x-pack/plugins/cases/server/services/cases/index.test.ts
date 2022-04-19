@@ -160,6 +160,7 @@ describe('CasesService', () => {
               "username": "elastic",
             },
             "description": "This is a brand new case of a bad meanie defacing data",
+            "duration": null,
             "owner": "securitySolution",
             "settings": Object {
               "syncAlerts": true,
@@ -500,6 +501,7 @@ describe('CasesService', () => {
               "username": "elastic",
             },
             "description": "This is a brand new case of a bad meanie defacing data",
+            "duration": null,
             "external_service": Object {
               "connector_name": ".jira",
               "external_id": "100",
