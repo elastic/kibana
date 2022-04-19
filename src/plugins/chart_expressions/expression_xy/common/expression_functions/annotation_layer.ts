@@ -36,7 +36,7 @@ export function annotationLayerFunction(): ExpressionFunctionDefinition<
       annotations: {
         types: ['manual_event_annotation'],
         help: i18n.translate('expressionXY.annotationLayer.annotations.help', {
-          defaultMessage: 'Annotationss',
+          defaultMessage: 'Annotations',
         }),
         multi: true,
       },
