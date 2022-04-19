@@ -10,7 +10,7 @@ import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
 import { Maybe } from '@kbn/apm-plugin/typings/common';
 
 export function roundNumber(num: Maybe<number>) {
-  return isFiniteNumber(num) ? num.toPrecision(4) : '';
+  return isFiniteNumber(num) ? Number(num.toPrecision(4)) : null;
 }
 
 export function removeEmptyCoordinates(coordinates: Coordinate[]) {

@@ -267,7 +267,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const lastValue = roundNumber(last(opbeansNode?.currentStats.latency.timeseries)?.y);
 
         expect(firstValue).to.be(roundNumber(20 / 3));
-        expect(lastValue).to.be('1.000');
+        expect(lastValue).to.be(1);
       });
 
       it('returns postgres as an external dependency', () => {
