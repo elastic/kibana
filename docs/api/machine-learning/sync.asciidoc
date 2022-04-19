@@ -4,7 +4,7 @@
 <titleabbrev>Sync {ml} saved objects</titleabbrev>
 ++++
 
-Synchronizes {kib} saved objects for {ml} jobs.
+Synchronizes {kib} saved objects for {ml} jobs and trained models.
 
 [[machine-learning-api-sync-request]]
 ==== Request
@@ -42,14 +42,14 @@ deleted. This list contains the {dfeed} identifiers and indicates whether the
 synchronization was successful.
 
 `savedObjectsCreated`::
-(array) If saved objects are missing for {ml} jobs, they are created. This
-list contains the job identifiers and indicates whether the synchronization was
-successful.
+(array) If saved objects are missing for {ml} jobs or trained models, they are
+created. This list contains the job and model identifiers and indicates whether
+the synchronization was successful.
 
 `savedObjectsDeleted`::
-(array) If saved objects exist for jobs that no longer exist, they are deleted. 
-This list contains the job identifiers and indicates whether the synchronization
-was successful.
+(array) If saved objects exist for {ml} jobs or trained models that no longer
+exist, they are deleted. This list contains the job and model identifiers and
+indicates whether the synchronization was successful.
 
 [[machine-learning-api-sync-codes]]
 ==== Response code
@@ -68,12 +68,12 @@ $ curl -X GET api/ml/saved_objects/sync?simulate=true
 --------------------------------------------------
 // KIBANA
 
-If there are two jobs and a {dfeed} that need to be synchronized, for example,
+If there are two jobs that need to be synchronized, for example,
 the API returns the following:
 
 [source,sh]
 --------------------------------------------------
-{{"savedObjectsCreated":{"myjob1":{"success":true},"myjob2":{"success":true}},"savedObjectsDeleted":{},"datafeedsAdded":{},"datafeedsRemoved":{"myfeed3":{"success":true}}}
+{{"savedObjectsCreated":{"anomaly_detector":{"myjob1":{"success":true},"myjob2":{"success":true}}},"savedObjectsDeleted":{},"datafeedsAdded":{},"datafeedsRemoved":{}}
 --------------------------------------------------
 
 To perform the synchronization, re-run the API and omit the `simulate` parameter.
