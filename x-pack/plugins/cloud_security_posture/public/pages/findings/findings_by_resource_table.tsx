@@ -57,7 +57,7 @@ const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
     name: (
       <FormattedMessage
         id="xpack.csp.findings.groupByResourceTable.resourceIdColumnLabel"
-        defaultMessage="Resource ID"
+        defaultMessage="Resource Id"
       />
     ),
     render: (resourceId: CspFindingsByResource['resource_id']) => (
@@ -82,7 +82,7 @@ const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
     name: (
       <FormattedMessage
         id="xpack.csp.findings.groupByResourceTable.clusterIdColumnLabel"
-        defaultMessage="Cluster ID"
+        defaultMessage="Cluster Id"
       />
     ),
   },
