@@ -15,8 +15,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import './add_message_variables.scss';
+import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { templateActionVariable } from '../lib';
-import { ActionVariable } from '../../../../alerting/common';
 
 interface Props {
   messageVariables?: ActionVariable[];

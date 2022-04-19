@@ -10,13 +10,13 @@
 
 import { keys, each, cloneDeep, clone, uniq, filter, map } from 'lodash';
 // @ts-expect-error
-import realHits from '../../../../../__fixtures__/real_hits.js';
-import { flattenHit } from '../../../../../../../data/public';
-import type { DataView } from '../../../../../../../data_views/public';
+import realHits from '../../../../../__fixtures__/real_hits';
+import { flattenHit } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 // @ts-expect-error
 import { fieldCalculator } from './field_calculator';
-import { stubLogstashDataView as dataView } from '../../../../../../../data_views/common/data_view.stub';
+import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 
 describe('fieldCalculator', function () {
   it('should have a _countMissing that counts nulls & undefineds in an array', function () {

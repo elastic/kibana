@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { METRIC_TYPE } from './';
+import { METRIC_TYPE } from '.';
 
 export type UiCounterMetricType =
   | METRIC_TYPE.CLICK

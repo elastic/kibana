@@ -7,7 +7,7 @@
 
 import { apm, ApmSynthtraceEsClient, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
-import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../plugins/apm/common/index_pattern_constants';
+import { APM_STATIC_INDEX_PATTERN_ID } from '@kbn/apm-plugin/common/index_pattern_constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { SupertestReturnType } from '../../common/apm_api_supertest';
 
@@ -142,8 +142,8 @@ function generateApmData(synthtrace: ApmSynthtraceEsClient) {
     range
       .interval('1s')
       .rate(1)
-      .spans((timestamp) =>
-        instance.transaction('GET /api').timestamp(timestamp).duration(30).success().serialize()
+      .generator((timestamp) =>
+        instance.transaction('GET /api').timestamp(timestamp).duration(30).success()
       ),
   ]);
 }

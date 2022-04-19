@@ -13,8 +13,8 @@ import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PackagePolicy,
-} from '../../../../fleet/common';
-import { IRouter } from '../../../../../../src/core/server';
+} from '@kbn/fleet-plugin/common';
+import { IRouter } from '@kbn/core/server';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { PLUGIN_ID } from '../../../common';
@@ -135,9 +135,11 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                   if (!has(draft, 'inputs[0].streams')) {
                     set(draft, 'inputs[0].streams', []);
                   }
+
                   set(draft, `inputs[0].config.osquery.value.packs.${packSO.attributes.name}`, {
                     queries,
                   });
+
                   return draft;
                 })
               );

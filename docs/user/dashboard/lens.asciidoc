@@ -186,6 +186,8 @@ For a time shift example, refer to <<compare-time-ranges>>.
 [[add-annotations]]
 ==== Add annotations
 
+preview::[]
+
 Annotations allow you to call out specific points in your visualizations that are important, such as a major change in the data. You can add text and icons to annotations and customize the appearance, such as the line format and color. 
 
 [role="screenshot"]

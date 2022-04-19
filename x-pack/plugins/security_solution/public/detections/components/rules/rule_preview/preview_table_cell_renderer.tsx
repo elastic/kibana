@@ -7,18 +7,17 @@
 
 import React, { useMemo } from 'react';
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { CellValueElementProps } from '@kbn/timelines-plugin/common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { StyledContent } from '../../../../common/lib/cell_actions/expanded_cell_value_actions';
 import { getLinkColumnDefinition } from '../../../../common/lib/cell_actions/helpers';
 import { useGetMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
 import { columnRenderers } from '../../../../timelines/components/timeline/body/renderers';
 import { getColumnRenderer } from '../../../../timelines/components/timeline/body/renderers/get_column_renderer';
-import { CellValueElementProps } from '../../../../../../timelines/common';
 
 export const PreviewRenderCellValue: React.FC<
   EuiDataGridCellValueElementProps & CellValueElementProps
 > = ({
-  browserFields,
   columnId,
   data,
   ecsData,
@@ -38,7 +37,6 @@ export const PreviewRenderCellValue: React.FC<
   truncate,
 }) => (
   <PreviewTableCellRenderer
-    browserFields={browserFields}
     columnId={columnId}
     data={data}
     ecsData={ecsData}
@@ -60,7 +58,6 @@ export const PreviewRenderCellValue: React.FC<
 );
 
 export const PreviewTableCellRenderer: React.FC<CellValueElementProps> = ({
-  browserFields,
   data,
   ecsData,
   eventId,
@@ -95,7 +92,6 @@ export const PreviewTableCellRenderer: React.FC<CellValueElementProps> = ({
       <StyledContent className={styledContentClassName} $isDetails={isDetails}>
         {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
           asPlainText,
-          browserFields,
           columnName: header.id,
           ecsData,
           eventId,

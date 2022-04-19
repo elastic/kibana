@@ -14,9 +14,9 @@ import {
 import { BehaviorSubject } from 'rxjs';
 import { rawUiCounters } from './__fixtures__/ui_counter_saved_objects';
 import { rawUsageCounters } from './__fixtures__/usage_counter_saved_objects';
-import { savedObjectsClientMock } from '../../../../../core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { UI_COUNTER_SAVED_OBJECT_TYPE } from './ui_counter_saved_object_type';
-import { USAGE_COUNTERS_SAVED_OBJECT_TYPE } from '../../../../usage_collection/server';
+import { USAGE_COUNTERS_SAVED_OBJECT_TYPE } from '@kbn/usage-collection-plugin/server';
 
 describe('transformRawUsageCounterObject', () => {
   it('transforms usage counters savedObject raw entries', () => {

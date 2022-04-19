@@ -27,9 +27,9 @@ import type {
   SavedObjectsUpdateObjectsSpacesObject,
   SavedObjectsUpdateObjectsSpacesOptions,
   SavedObjectsUpdateOptions,
-} from 'src/core/server';
+} from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core/server';
 
-import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '../../../../../src/core/server';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import type { AuditLogger } from '../audit';
 import { SavedObjectAction, savedObjectEvent } from '../audit';

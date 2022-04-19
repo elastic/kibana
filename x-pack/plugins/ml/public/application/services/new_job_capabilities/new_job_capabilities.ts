@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { Aggregation, Field, NewJobCaps } from '../../../../common/types/fields';
-import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
 
 // create two lists, one removing text fields if there are keyword equivalents and vice versa
 export function processTextAndKeywordFields(fields: Field[]) {

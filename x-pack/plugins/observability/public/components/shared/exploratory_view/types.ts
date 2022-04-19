@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { PaletteOutput } from 'src/plugins/charts/public';
-import { ExistsFilter, PhraseFilter } from '@kbn/es-query';
-import {
+import type { PaletteOutput } from '@kbn/coloring';
+import type { ExistsFilter, PhraseFilter } from '@kbn/es-query';
+import type {
   LastValueIndexPatternColumn,
   DateHistogramIndexPatternColumn,
   FieldBasedIndexPatternColumn,
   SeriesType,
   OperationType,
   YConfig,
-} from '../../../../../lens/public';
+} from '@kbn/lens-plugin/public';
 
-import { PersistableFilter } from '../../../../../lens/common';
-import type { DataView } from '../../../../../../../src/plugins/data_views/common';
+import type { PersistableFilter } from '@kbn/lens-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 export const ReportViewTypes = {
   dist: 'data-distribution',

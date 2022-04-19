@@ -10,8 +10,9 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
-import { inputsModel } from '../../../../common/store';
-import { useKibana } from '../../../../common/lib/kibana';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+import { inputsModel } from '../../../store';
+import { useKibana } from '../../../lib/kibana';
 import {
   TimelineEventsQueries,
   TimelineEventsLastEventTimeRequestOptions,
@@ -19,10 +20,6 @@ import {
   LastTimeDetails,
   LastEventIndexKey,
 } from '../../../../../common/search_strategy/timeline';
-import {
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../../src/plugins/data/common';
 import * as i18n from './translations';
 import { DocValueFields } from '../../../../../common/search_strategy';
 import { useAppToasts } from '../../../hooks/use_app_toasts';

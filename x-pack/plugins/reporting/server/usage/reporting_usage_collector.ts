@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { first, map } from 'rxjs/operators';
-import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { ReportingCore } from '../';
+import { firstValueFrom } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { CollectorFetchContext, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { ReportingCore } from '..';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
-import { GetLicense } from './';
+import { GetLicense } from '.';
 import { getReportingUsage } from './get_reporting_usage';
 import { ReportingUsageType } from './types';
 import { reportingSchema } from './schema';
@@ -44,17 +45,16 @@ export function registerReportingUsageCollector(
   const exportTypesRegistry = reporting.getExportTypesRegistry();
   const getLicense = async () => {
     const { licensing } = await reporting.getPluginStartDeps();
-    return await licensing.license$
-      .pipe(
+    return await firstValueFrom(
+      licensing.license$.pipe(
         map(({ isAvailable, type }) => ({
           isAvailable: () => isAvailable,
           license: {
             getType: () => type,
           },
-        })),
-        first()
+        }))
       )
-      .toPromise();
+    );
   };
   const collectionIsReady = reporting.pluginStartsUp.bind(reporting);
 

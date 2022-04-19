@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { IWaterfallContext } from '../context/waterfall_chart';
 import { WaterfallChartProps } from './waterfall_chart';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 
 interface LegendProps {
   items: Required<IWaterfallContext>['legendItems'];

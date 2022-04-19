@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger, RequestHandlerContext } from 'kibana/server';
-import { ExceptionListClient } from '../../../lists/server';
-import { PluginStartContract as AlertsStartContract } from '../../../alerting/server';
+import { KibanaRequest, Logger, RequestHandlerContext } from '@kbn/core/server';
+import { ExceptionListClient } from '@kbn/lists-plugin/server';
+import { PluginStartContract as AlertsStartContract } from '@kbn/alerting-plugin/server';
 import {
   PostPackagePolicyCreateCallback,
   PostPackagePolicyDeleteCallback,
   PutPackagePolicyUpdateCallback,
-} from '../../../fleet/server';
+} from '@kbn/fleet-plugin/server';
 
-import { NewPackagePolicy, UpdatePackagePolicy } from '../../../fleet/common';
+import { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 
 import { NewPolicyData, PolicyConfig } from '../../common/endpoint/types';
 import { LicenseService } from '../../common/license';
