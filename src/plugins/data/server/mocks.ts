@@ -12,10 +12,6 @@ import {
   createFieldFormatsStartMock,
 } from '@kbn/field-formats-plugin/server/mocks';
 import {
-  createFieldFormatsSetupMock,
-  createFieldFormatsStartMock,
-} from '@kbn/field-formats-plugin/server/mocks';
-import {
   createSearchSetupMock,
   createSearchStartMock,
   createSearchRequestHandlerContext,
