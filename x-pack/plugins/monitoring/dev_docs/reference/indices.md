@@ -33,7 +33,7 @@ When updating the templates, it is important to increment the version number [he
 PRs should add the labels ":Data Management/Monitoring" and "Team:Data Management" to involve the right Elasticsearch members.
 [Reference PR](https://github.com/elastic/elasticsearch/pull/85447)
 
-The `metrics-*` and `metricbeat-*` mappings are managed by metricbeat and elastic agent, **code locations TBD**.
+The `metrics-*` and `metricbeat-*` mappings are managed by metricbeat and elastic agent. The mappings are created by metricbeat programmatically by combining the field definitions of all the contained modules.
 
 ## Fields
 
