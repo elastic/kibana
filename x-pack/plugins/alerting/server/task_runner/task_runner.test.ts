@@ -232,7 +232,7 @@ describe('Task Runner', () => {
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
-      'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":0,"numberOfScheduledActions":0,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}'
+      'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -312,7 +312,7 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         3,
-        'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":1,"numberOfScheduledActions":1,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+        'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
       );
 
       const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
@@ -368,7 +368,7 @@ describe('Task Runner', () => {
           outcome: 'success',
           status: 'active',
           numberOfTriggeredActions: 1,
-          numberOfScheduledActions: 1,
+          numberOfGeneratedActions: 1,
           task: true,
           consumer: 'bar',
         })
@@ -420,7 +420,7 @@ describe('Task Runner', () => {
     );
     expect(logger.debug).nthCalledWith(
       4,
-      'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":0,"numberOfScheduledActions":0,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -463,7 +463,7 @@ describe('Task Runner', () => {
         outcome: 'success',
         status: 'active',
         numberOfTriggeredActions: 0,
-        numberOfScheduledActions: 0,
+        numberOfGeneratedActions: 0,
         task: true,
         consumer: 'bar',
       })
@@ -585,7 +585,7 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         4,
-        'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":1,"numberOfScheduledActions":1,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+        'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
       );
       expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
     }
@@ -774,7 +774,7 @@ describe('Task Runner', () => {
         outcome: 'success',
         status: 'active',
         numberOfTriggeredActions: 0,
-        numberOfScheduledActions: 0,
+        numberOfGeneratedActions: 0,
         task: true,
         consumer: 'bar',
       })
@@ -839,7 +839,7 @@ describe('Task Runner', () => {
           outcome: 'success',
           status: 'active',
           numberOfTriggeredActions: 1,
-          numberOfScheduledActions: 1,
+          numberOfGeneratedActions: 1,
           task: true,
           consumer: 'bar',
         })
@@ -913,7 +913,7 @@ describe('Task Runner', () => {
           outcome: 'success',
           status: 'active',
           numberOfTriggeredActions: 1,
-          numberOfScheduledActions: 1,
+          numberOfGeneratedActions: 1,
           task: true,
           consumer: 'bar',
         })
@@ -1031,7 +1031,7 @@ describe('Task Runner', () => {
           outcome: 'success',
           status: 'active',
           numberOfTriggeredActions: 1,
-          numberOfScheduledActions: 1,
+          numberOfGeneratedActions: 1,
           task: true,
           consumer: 'bar',
         })
@@ -1113,7 +1113,7 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         4,
-        'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":2,"numberOfScheduledActions":2,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+        'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
       );
 
       const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
@@ -1180,7 +1180,7 @@ describe('Task Runner', () => {
           outcome: 'success',
           status: 'active',
           numberOfTriggeredActions: 2,
-          numberOfScheduledActions: 2,
+          numberOfGeneratedActions: 2,
           task: true,
           consumer: 'bar',
         })
@@ -1254,7 +1254,7 @@ describe('Task Runner', () => {
       );
       expect(logger.debug).nthCalledWith(
         4,
-        `ruleExecutionStatus for test:${alertId}: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":2,"numberOfScheduledActions":2,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}`
+        `ruleExecutionStatus for test:${alertId}: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":2,"numberOfGeneratedActions":2,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}`
       );
 
       const eventLogger = customTaskRunnerFactoryInitializerParams.eventLogger;
@@ -1442,7 +1442,7 @@ describe('Task Runner', () => {
         outcome: 'success',
         status: 'active',
         numberOfTriggeredActions: 0,
-        numberOfScheduledActions: 2,
+        numberOfGeneratedActions: 2,
         task: true,
         consumer: 'bar',
       })
@@ -2048,7 +2048,7 @@ describe('Task Runner', () => {
         outcome: 'success',
         status: 'active',
         numberOfTriggeredActions: 0,
-        numberOfScheduledActions: 0,
+        numberOfGeneratedActions: 0,
         task: true,
         consumer: 'bar',
       })
@@ -2151,7 +2151,7 @@ describe('Task Runner', () => {
         outcome: 'success',
         status: 'active',
         numberOfTriggeredActions: 0,
-        numberOfScheduledActions: 0,
+        numberOfGeneratedActions: 0,
         task: true,
         consumer: 'bar',
       })
@@ -2243,7 +2243,7 @@ describe('Task Runner', () => {
         status: 'active',
         consumer: 'bar',
         numberOfTriggeredActions: 0,
-        numberOfScheduledActions: 0,
+        numberOfGeneratedActions: 0,
         task: true,
       })
     );
@@ -2333,7 +2333,7 @@ describe('Task Runner', () => {
         status: 'ok',
         consumer: 'bar',
         numberOfTriggeredActions: 0,
-        numberOfScheduledActions: 0,
+        numberOfGeneratedActions: 0,
         task: true,
       })
     );
@@ -2419,7 +2419,7 @@ describe('Task Runner', () => {
         status: 'ok',
         consumer: 'bar',
         numberOfTriggeredActions: 0,
-        numberOfScheduledActions: 0,
+        numberOfGeneratedActions: 0,
         task: true,
       })
     );
@@ -2481,7 +2481,7 @@ describe('Task Runner', () => {
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
       2,
-      'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":0,"numberOfScheduledActions":0,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}'
+      'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -2816,7 +2816,7 @@ describe('Task Runner', () => {
         outcome: 'success',
         status: 'warning',
         numberOfTriggeredActions: ruleTypeWithConfig.config.run.actions.max,
-        numberOfScheduledActions: mockActions.length,
+        numberOfGeneratedActions: mockActions.length,
         reason: AlertExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
         task: true,
         consumer: 'bar',

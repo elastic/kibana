@@ -112,7 +112,7 @@ export function createExecutionHandler<
         }),
       }));
 
-    alertExecutionStore.numberOfScheduledActions += actions.length;
+    alertExecutionStore.numberOfGeneratedActions += actions.length;
 
     const ruleLabel = `${ruleType.id}:${ruleId}: '${ruleName}'`;
 

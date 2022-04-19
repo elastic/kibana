@@ -330,7 +330,7 @@ describe('Task Runner Cancel', () => {
               metrics: {
                 number_of_searches: 3,
                 number_of_triggered_actions: 0,
-                number_of_scheduled_actions: 0,
+                number_of_generated_actions: 0,
                 es_search_duration_ms: 33,
                 total_search_duration_ms: 23423,
               },
@@ -520,7 +520,7 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       7,
-      'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":0,"numberOfScheduledActions":0,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -614,7 +614,7 @@ describe('Task Runner Cancel', () => {
               metrics: {
                 number_of_searches: 3,
                 number_of_triggered_actions: 0,
-                number_of_scheduled_actions: 0,
+                number_of_generated_actions: 0,
                 es_search_duration_ms: 33,
                 total_search_duration_ms: 23423,
               },
@@ -680,7 +680,7 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       6,
-      'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":1,"numberOfScheduledActions":1,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
+      'ruleExecutionStatus for test:1: {"metrics":{"numSearches":3,"esSearchDurationMs":33,"totalSearchDurationMs":23423},"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}'
     );
 
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
@@ -893,7 +893,7 @@ describe('Task Runner Cancel', () => {
               metrics: {
                 number_of_searches: 3,
                 number_of_triggered_actions: 1,
-                number_of_scheduled_actions: 1,
+                number_of_generated_actions: 1,
                 es_search_duration_ms: 33,
                 total_search_duration_ms: 23423,
               },
