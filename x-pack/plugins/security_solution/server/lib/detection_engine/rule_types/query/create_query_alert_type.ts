@@ -33,6 +33,9 @@ export const createQueryAlertType = (
           }
           return validated;
         },
+        parseValidate: (object: unknown) => {
+          return object;
+        },
       },
     },
     actionGroups: [

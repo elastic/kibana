@@ -130,6 +130,7 @@ export type ExecutorType<
 
 export interface AlertTypeParamsValidator<Params extends AlertTypeParams> {
   validate: (object: unknown) => Params;
+  validateMutatedParams?: (mutatedOject: unknown, origObject?: unknown) => Params;
 }
 export interface RuleType<
   Params extends AlertTypeParams = never,

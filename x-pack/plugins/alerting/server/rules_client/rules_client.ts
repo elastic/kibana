@@ -79,6 +79,13 @@ import { EVENT_LOG_ACTIONS } from '../plugin';
 import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
 import { getDefaultRuleMonitoring } from '../task_runner/task_runner';
 
+
+type BulkUpdateActionsFields = pick<keyof Alert, 'tags'>;
+export interface BulkUpdateOptions<Params extends AlertTypeParams> {
+  filter: KueryNode;
+  actions: Array<{ type: 'add' | 'delete' | 'set', field: BulkUpdateActionsFields, preValidation: (obj: Rule[BulkUpdateActionsFields], field, ) => void, onAfterValidation: (obj: Rule[BulkUpdateActionsFields]) => void, value: string[] }>[]
+}
+
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
 }

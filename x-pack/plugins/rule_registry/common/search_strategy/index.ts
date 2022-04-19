@@ -52,7 +52,7 @@ type DotNestedKeys<T, D extends number = 10> = [D] extends [never]
   ? { [K in keyof T]-?: Join<K, DotNestedKeys<T[K], Prev[D]>> }[keyof T]
   : '';
 
-type EcsFieldsResponse = {
+export type EcsFieldsResponse = {
   [Property in DotNestedKeys<Ecs>]: string[];
 };
 export type RuleRegistrySearchResponse = IEsSearchResponse<EcsFieldsResponse>;
