@@ -118,7 +118,7 @@ describe('AlertsTable', () => {
   });
 
   describe('Alerts table configuration registry', () => {
-    it('should read the configuration from the regsitry', async () => {
+    it('should read the configuration from the registry', async () => {
       render(<AlertsTable {...tableProps} />);
       expect(alertsTableConfigurationRegistryMock.has).toHaveBeenCalledWith(PLUGIN_ID);
       expect(alertsTableConfigurationRegistryMock.get).toHaveBeenCalledWith(PLUGIN_ID);
