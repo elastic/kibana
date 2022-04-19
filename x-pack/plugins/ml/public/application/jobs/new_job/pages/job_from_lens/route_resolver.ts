@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { SimpleSavedObject } from 'kibana/public';
+import type { SimpleSavedObject } from '@kbn/core/public';
 import rison from 'rison-node';
-import type { LensSavedObjectAttributes } from '../../../../../../../lens/public';
+import type { LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
 import { getSavedObjectsClient } from '../../../../util/dependency_cache';
 import { createADJobFromLensSavedObject } from './create_job';
 

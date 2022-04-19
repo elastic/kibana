@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { IEmbeddable } from 'src/plugins/embeddable/public';
-import { createAction } from '../../../../../src/plugins/ui_actions/public';
+import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { createAction } from '@kbn/ui-actions-plugin/public';
 // import { ViewMode } from '../../../../../src/plugins/embeddable/public';
 // import { MlCoreSetup } from '../plugin';
 import {

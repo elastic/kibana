@@ -8,7 +8,7 @@
 // import React from 'react';
 import rison from 'rison-node';
 // import { CoreStart } from 'kibana/public';
-import type { IEmbeddable } from 'src/plugins/embeddable/public';
+import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 // import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
 // import { toMountPoint, wrapWithTheme } from '../../../../../../src/plugins/kibana_react/public';
 // import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';

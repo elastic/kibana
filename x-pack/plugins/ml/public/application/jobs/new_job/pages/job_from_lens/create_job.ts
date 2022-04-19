@@ -6,13 +6,13 @@
  */
 
 import moment from 'moment';
-import type { SimpleSavedObject } from 'kibana/public';
+import type { SimpleSavedObject } from '@kbn/core/public';
 
 import type {
   LensSavedObjectAttributes,
   GenericIndexPatternColumn,
   XYDataLayerConfig,
-} from '../../../../../../../lens/public';
+} from '@kbn/lens-plugin/public';
 import { getUiSettings, getDataViews } from '../../../../util/dependency_cache';
 
 import { createEmptyJob, createEmptyDatafeed } from '../../common/job_creator/util/default_configs';
