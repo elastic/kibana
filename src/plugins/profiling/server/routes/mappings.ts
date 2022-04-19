@@ -78,7 +78,7 @@ export function autoHistogramSumCountOnGroupByField(
           size: topNItems,
         },
         aggs: {
-          Count: {
+          count: {
             sum: {
               field: 'Count',
             },
@@ -89,7 +89,7 @@ export function autoHistogramSumCountOnGroupByField(
   };
 }
 
-function getExeFileName(obj) {
+function getExeFileName(obj: any) {
   if (obj.ExeFileName === undefined) {
     return '';
   }
@@ -120,17 +120,17 @@ function getExeFileName(obj) {
   }
 }
 
-function checkIfStringHasParentheses(s) {
+function checkIfStringHasParentheses(s: string) {
   return /\(|\)/.test(s);
 }
 
-function getFunctionName(obj) {
+function getFunctionName(obj: any) {
   return obj.FunctionName !== '' && !checkIfStringHasParentheses(obj.FunctionName)
     ? `${obj.FunctionName}()`
     : obj.FunctionName;
 }
 
-function getBlockName(obj) {
+function getBlockName(obj: any) {
   if (obj.FunctionName !== '') {
     const sourceFileName = obj.SourceFilename;
     const sourceURL = sourceFileName ? sourceFileName.split('/').pop() : '';
@@ -139,22 +139,22 @@ function getBlockName(obj) {
   return getExeFileName(obj);
 }
 
-const sortFlamechartBySamples = function (a, b) {
+const compareFlamechartSample = function (a: any, b: any) {
   return b.Samples - a.Samples;
 };
 
-const sortFlamechart = function (data) {
-  data.Callees.sort(sortFlamechartBySamples);
+const sortFlamechart = function (data: any) {
+  data.Callees.sort(compareFlamechartSample);
   return data;
 };
 
-const parseFlamechart = function (data) {
+const parseFlamechart = function (data: any) {
   const parsedData = sortFlamechart(data);
   parsedData.Callees = data.Callees.map(parseFlamechart);
   return parsedData;
 };
 
-function extendFlameGraph(node, depth) {
+function extendFlameGraph(node: any, depth: any) {
   node.id = getBlockName(node);
   node.value = node.Samples;
   node.depth = depth;
@@ -164,7 +164,7 @@ function extendFlameGraph(node, depth) {
   }
 }
 
-function flattenTree(root, depth) {
+function flattenTree(root: any, depth: any) {
   if (root.Callees.length === 0) {
     return [
       {
@@ -178,16 +178,16 @@ function flattenTree(root, depth) {
     ];
   }
 
-  const children = root.Callees.flatMap((child) => flattenTree(child, depth + 1));
+  const children = root.Callees.flatMap((child: any) => flattenTree(child, depth + 1));
 
-  children.forEach((child) => {
+  children.forEach((child: any) => {
     child.pathFromRoot[depth] = root.id;
   });
 
   return children;
 }
 
-export function mapFlamechart(src) {
+export function mapFlamechart(src: any) {
   src.ExeFileName = 'root';
 
   const root = parseFlamechart(src);
@@ -195,12 +195,6 @@ export function mapFlamechart(src) {
   extendFlameGraph(root, 0);
 
   const newRoot = flattenTree(root, 0);
-  [].map((node) => ({
-    id: node.id,
-    value: node.value,
-    depth: node.depth,
-    pathFromRoot: node.pathFromRoot,
-  }));
 
   return {
     leaves: newRoot,

@@ -96,6 +96,40 @@ export function createStackFrameMetadata(
   return metadata;
 }
 
+// groupStackFrameMetadataByStackTrace collects all of the per-stack-frame
+// metadata for a given set of trace IDs and their respective stack frames.
+//
+// This is similar to GetTraceMetaData in pf-storage-backend/storagebackend/storagebackendv1/reads_webservice.go
+export function groupStackFrameMetadataByStackTrace(
+  stackTraces: Map<StackTraceID, StackTrace>,
+  stackFrames: Map<StackFrameID, StackFrame>,
+  executables: Map<FileID, Executable>
+): Map<StackTraceID, StackFrameMetadata[]> {
+  const frameMetadataForTraces = new Map<StackTraceID, StackFrameMetadata[]>();
+  for (const [stackTraceID, trace] of stackTraces) {
+    const frameMetadata = new Array<StackFrameMetadata>();
+    for (let i = 0; i < trace.FrameID.length; i++) {
+      const frame = stackFrames.get(trace.FrameID[i])!;
+      const executable = executables.get(trace.FileID[i])!;
+
+      const metadata = createStackFrameMetadata({
+        FileID: Buffer.from(trace.FileID[i], 'base64url').toString('hex'),
+        FrameType: trace.Type[i],
+        AddressOrLine: frame.LineNumber,
+        FunctionName: frame.FunctionName,
+        FunctionOffset: frame.FunctionOffset,
+        SourceLine: frame.LineNumber,
+        ExeFileName: executable.FileName,
+        Index: i,
+      });
+
+      frameMetadata.push(metadata);
+    }
+    frameMetadataForTraces.set(stackTraceID, frameMetadata);
+  }
+  return frameMetadataForTraces;
+}
+
 export type FrameGroup = Pick<
   StackFrameMetadata,
   'FileID' | 'ExeFileName' | 'FunctionName' | 'AddressOrLine' | 'SourceFilename'

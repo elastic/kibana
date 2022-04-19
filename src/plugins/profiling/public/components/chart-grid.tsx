@@ -26,8 +26,8 @@ export interface ChartGridProps {
 
 export const ChartGrid: React.FC<ChartGridProps> = ({ maximum }) => {
   const ctx = useContext(TopNContext);
-  const printSubCharts = (series) => {
-    let keys = Array.from(series.keys());
+  const printSubCharts = (series: any) => {
+    let keys: string[] = Array.from(series.keys());
     const ncharts = Math.min(maximum, series.size);
     keys = keys.slice(0, ncharts);
 

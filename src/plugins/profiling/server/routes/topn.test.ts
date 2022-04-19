@@ -34,31 +34,6 @@ describe('TopN data from Elasticsearch', () => {
     jest.clearAllMocks();
   });
 
-  describe('building the query', () => {
-    it('filters by projectID and aggregates timerange on histogram', async () => {
-      await topNElasticSearchQuery(
-        client,
-        logger,
-        index,
-        '123',
-        '456',
-        '789',
-        200,
-        'field',
-        kibanaResponseFactory
-      );
-      expect(client.search).toHaveBeenCalledWith({
-        index,
-        body: {
-          query: anyQuery,
-          aggs: {
-            histogram: testAgg,
-          },
-        },
-      });
-    });
-  });
-
   describe('when fetching Stack Traces', () => {
     it('should search first then mget', async () => {
       await topNElasticSearchQuery(
@@ -73,7 +48,7 @@ describe('TopN data from Elasticsearch', () => {
         kibanaResponseFactory
       );
       expect(client.search).toHaveBeenCalledTimes(2);
-      expect(client.mget).toHaveBeenCalledTimes(1);
+      expect(client.mget).toHaveBeenCalledTimes(2);
     });
   });
 });

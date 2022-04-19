@@ -7,7 +7,7 @@
  */
 
 import { DownsampledEventsIndex, getSampledTraceEventsIndex } from './downsampling';
-import { extractFileIDFromFrameID, parallelMget } from './flamechart';
+import { parallelMget } from './flamechart';
 import { ElasticsearchClient } from 'kibana/server';
 
 describe('Using down-sampled indexes', () => {
@@ -59,28 +59,6 @@ describe('Using down-sampled indexes', () => {
           initialExp
         )
       ).toEqual(t.expected);
-    }
-  });
-});
-
-describe('Extract FileID from FrameID', () => {
-  test('extractFileIDFromFrameID', () => {
-    const tests: Array<{
-      frameID: string;
-      expected: string;
-    }> = [
-      {
-        frameID: 'aQpJmTLWydNvOapSFZOwKgAAAAAAB924',
-        expected: 'aQpJmTLWydNvOapSFZOwKg==',
-      },
-      {
-        frameID: 'hz_u-HGyrN6qeIk6UIJeCAAAAAAAAAZZ',
-        expected: 'hz_u-HGyrN6qeIk6UIJeCA==',
-      },
-    ];
-
-    for (const t of tests) {
-      expect(extractFileIDFromFrameID(t.frameID)).toEqual(t.expected);
     }
   });
 });

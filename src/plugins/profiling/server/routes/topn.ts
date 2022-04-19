@@ -13,11 +13,13 @@ import {
   AggregationsStringTermsBucket,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { DataRequestHandlerContext } from '../../../data/server';
-import { getRoutePaths } from '../../common';
-import { StackTraceID } from '../../common/profiling';
+import { fromMapToRecord, getRoutePaths } from '../../common';
+import { groupStackFrameMetadataByStackTrace, StackTraceID } from '../../common/profiling';
+import { createTopNBucketsByDate } from '../../common/topn';
 import { findDownsampledIndex } from './downsampling';
 import { logExecutionLatency } from './logger';
 import { autoHistogramSumCountOnGroupByField, newProjectTimeQuery } from './mappings';
+import { mgetExecutables, mgetStackFrames, mgetStackTraces } from './stacktrace';
 
 export async function topNElasticSearchQuery(
   client: ElasticsearchClient,
@@ -45,57 +47,71 @@ export async function topNElasticSearchQuery(
     logger,
     'query to fetch events from ' + eventsIndex.name,
     async () => {
-      return await client.search({
-        index: eventsIndex.name,
-        body: {
+      return await client.search(
+        {
+          index: eventsIndex.name,
+          size: 0,
           query: filter,
           aggs: {
             histogram: autoHistogramSumCountOnGroupByField(searchField, topNItems),
           },
         },
-      });
+        {
+          // Adrien and Dario found out this is a work-around for some bug in 8.1.
+          // It reduces the query time by avoiding unneeded searches.
+          querystring: {
+            pre_filter_shard_size: 1,
+          },
+        }
+      );
     }
   );
+
+  const histogram = resEvents.body.aggregations?.histogram as AggregationsHistogramAggregate;
+  const topN = createTopNBucketsByDate(histogram);
+
+  if (searchField !== 'StackTraceID') {
+    return response.ok({
+      body: topN,
+    });
+  }
 
   let totalCount = 0;
-  const stackTraceEvents = new Set<StackTraceID>();
+  const stackTraceEvents = new Map<StackTraceID, number>();
 
-  (resEvents.body.aggregations?.histogram as AggregationsHistogramAggregate)?.buckets?.forEach(
-    (timeInterval: AggregationsHistogramBucket) => {
-      totalCount += timeInterval.doc_count;
-      timeInterval.group_by.buckets.forEach((stackTraceItem: AggregationsStringTermsBucket) => {
-        stackTraceEvents.add(stackTraceItem.key);
-      });
-    }
-  );
+  const histogramBuckets = (histogram?.buckets as AggregationsHistogramBucket[]) ?? [];
+  for (let i = 0; i < histogramBuckets.length; i++) {
+    totalCount += histogramBuckets[i].doc_count;
+    histogramBuckets[i].group_by.buckets.forEach(
+      (stackTraceItem: AggregationsStringTermsBucket) => {
+        stackTraceEvents.set(stackTraceItem.key, stackTraceItem.count.value);
+      }
+    );
+  }
 
   logger.info('events total count: ' + totalCount);
   logger.info('unique stacktraces: ' + stackTraceEvents.size);
 
-  if (searchField !== 'StackTraceID') {
-    return response.ok({
-      body: {
-        topN: resEvents.body.aggregations,
-      },
-    });
-  }
-
-  const resTraceMetadata = await logExecutionLatency(
+  // profiling-stacktraces is configured with 16 shards
+  const { stackTraces, stackFrameDocIDs, executableDocIDs } = await mgetStackTraces(
     logger,
-    'query for ' + stackTraceEvents.size + ' stacktraces',
-    async () => {
-      return await client.mget({
-        index: 'profiling-stacktraces',
-        body: { ids: [...stackTraceEvents] },
-      });
-    }
+    client,
+    stackTraceEvents
   );
 
-  return response.ok({
-    body: {
-      topN: resEvents.body.aggregations,
-      traceMetadata: resTraceMetadata.body.docs,
-    },
+  return Promise.all([
+    mgetStackFrames(logger, client, stackFrameDocIDs),
+    mgetExecutables(logger, client, executableDocIDs),
+  ]).then(([stackFrames, executables]) => {
+    const metadata = fromMapToRecord(
+      groupStackFrameMetadataByStackTrace(stackTraces, stackFrames, executables)
+    );
+    return response.ok({
+      body: {
+        ...topN,
+        Metadata: metadata,
+      },
+    });
   });
 }
 

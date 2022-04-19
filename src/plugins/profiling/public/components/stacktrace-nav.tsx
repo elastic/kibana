@@ -45,7 +45,7 @@ export const StackTraceNavigation = ({ fetchTopN, setTopN }) => {
 
   const [toggleTopNSelected, setToggleTopNSelected] = useState(`${topnButtonGroupPrefix}__0`);
 
-  const onTopNChange = (optionId) => {
+  const onTopNChange = (optionId: string) => {
     if (optionId === toggleTopNSelected) {
       return;
     }
@@ -84,7 +84,7 @@ export const StackTraceNavigation = ({ fetchTopN, setTopN }) => {
 
   const [toggleDateSelected, setToggleDateSelected] = useState(`${dateButtonGroupPrefix}__0`);
 
-  const onDateChange = (optionId) => {
+  const onDateChange = (optionId: string) => {
     if (optionId === toggleDateSelected) {
       return;
     }

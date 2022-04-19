@@ -32,7 +32,7 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({ id, height }) => {
     }
 
     const { leaves } = ctx;
-    const maxDepth = Math.max(...leaves.map((node) => node.depth));
+    const maxDepth = Math.max(...leaves.map((node: any) => node.depth));
 
     const result = [...new Array(maxDepth)].map((_, depth) => {
       return {
