@@ -5,18 +5,34 @@
  * 2.0.
  */
 import { EuiButton, EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Span } from '../../../../typings/es_schemas/ui/span';
+import { SpanLinksCallout } from './span_links_callout';
+import { useFetcher } from '../../../hooks/use_fetcher';
 
 interface Props {
   span: Span;
 }
 
 export function SpanLinks({ span }: Props) {
+  const { data } = useFetcher(
+    (callApmApi) => {
+      if (span.span.links) {
+        return callApmApi('GET /internal/apm/span_links', {
+          params: {
+            query: { spanLinks: JSON.stringify(span.span.links) },
+          },
+        });
+      }
+    },
+    [span.span.links]
+  );
+
   return (
-    <EuiCallOut title="Proceed with caution!" iconType="help">
-      <p>Here be dragons. Don&rsquo;t wanna mess with no dragons. And </p>
-      <EuiButton href="#">Link button</EuiButton>
-    </EuiCallOut>
+    <div>
+      <SpanLinksCallout />
+    </div>
   );
 }
