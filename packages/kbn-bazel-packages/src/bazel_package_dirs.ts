@@ -19,7 +19,7 @@ import { REPO_ROOT } from '@kbn/utils';
  *   eg. src/vis_editors     => would find a package at src/vis_editors/foo/package.json
  *       src/vis_editors/*   => would find a package at src/vis_editors/foo/bar/package.json
  */
-export const BAZEL_PACKAGE_DIRS = ['packages', 'packages/shared-ux', 'packages/shared-ux/*'];
+export const BAZEL_PACKAGE_DIRS = ['packages', 'packages/shared-ux/*'];
 
 /**
  * Resolve all the BAZEL_PACKAGE_DIRS to absolute paths
