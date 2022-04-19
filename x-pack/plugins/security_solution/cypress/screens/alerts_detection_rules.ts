@@ -96,7 +96,8 @@ export const RULE_DETAILS_DELETE_BTN = '[data-test-subj="rules-details-delete-ru
 
 export const ALERT_DETAILS_CELLS = '[data-test-subj="dataGridRowCell"]';
 
-export const ALERT_DETAILS_PROCESS_NAME_COLUMN = '[data-test-subj="dataGridHeaderCell-process.name"]';
+export const ALERT_DETAILS_PROCESS_NAME_COLUMN =
+  '[data-test-subj="dataGridHeaderCell-process.name"]';
 
 export const ALERT_DETAILS_RULE = '[data-test-subj="formatted-field-signal.rule.name"]';
 

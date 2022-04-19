@@ -39,7 +39,10 @@ import {
 } from '../screens/rule_details';
 
 import { waitForPageToBeLoaded } from '../tasks/common';
-import { waitForRulesTableToBeLoaded, goToRuleDetailsByName } from '../tasks/alerts_detection_rules';
+import {
+  waitForRulesTableToBeLoaded,
+  goToRuleDetailsByName,
+} from '../tasks/alerts_detection_rules';
 import { loginAndWaitForPage } from '../tasks/login';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../urls/navigation';
@@ -113,7 +116,7 @@ describe('After an upgrade, the custom query rule', () => {
     cy.get(ALERT_DETAILS_CELLS).first().focus();
     cy.get(ALERT_DETAILS_RULE).should('have.text', alert.rule);
     cy.get(ALERT_DETAILS_SEVERITY).should('have.text', alert.severity);
-    cy.get(ALERT_DETAILS_RISK_SCORE).should('have.text', alert.riskScore)
+    cy.get(ALERT_DETAILS_RISK_SCORE).should('have.text', alert.riskScore);
     cy.get(ALERT_DETAILS_CELLS).contains(expectedReason).type('{rightarrow}');
     cy.get(ALERT_DETAILS_HOST_NAME).should('have.text', alert.hostName);
     cy.get(ALERT_DETAILS_USER_NAME).should('have.text', alert.username);
