@@ -632,6 +632,7 @@ describe('get()', () => {
               test: 'test1',
             },
             isPreconfigured: true,
+            isDeprecated: false,
             name: 'test',
             config: {
               foo: 'bar',
@@ -689,6 +690,7 @@ describe('get()', () => {
               test: 'test1',
             },
             isPreconfigured: true,
+            isDeprecated: false,
             name: 'test',
             config: {
               foo: 'bar',
@@ -807,6 +809,7 @@ describe('get()', () => {
             test: 'test1',
           },
           isPreconfigured: true,
+          isDeprecated: false,
           name: 'test',
           config: {
             foo: 'bar',
@@ -876,6 +879,7 @@ describe('getAll()', () => {
             actionTypeId: '.slack',
             secrets: {},
             isPreconfigured: true,
+            isDeprecated: false,
             name: 'test',
             config: {
               foo: 'bar',
@@ -1015,6 +1019,7 @@ describe('getAll()', () => {
           actionTypeId: '.slack',
           secrets: {},
           isPreconfigured: true,
+          isDeprecated: false,
           name: 'test',
           config: {
             foo: 'bar',
@@ -1092,6 +1097,7 @@ describe('getBulk()', () => {
             actionTypeId: '.slack',
             secrets: {},
             isPreconfigured: true,
+            isDeprecated: false,
             name: 'test',
             config: {
               foo: 'bar',
@@ -1225,6 +1231,7 @@ describe('getBulk()', () => {
           actionTypeId: '.slack',
           secrets: {},
           isPreconfigured: true,
+          isDeprecated: false,
           name: 'test',
           config: {
             foo: 'bar',
@@ -2000,6 +2007,7 @@ describe('isPreconfigured()', () => {
             test: 'test1',
           },
           isPreconfigured: true,
+          isDeprecated: false,
           name: 'test',
           config: {
             foo: 'bar',
@@ -2035,6 +2043,7 @@ describe('isPreconfigured()', () => {
             test: 'test1',
           },
           isPreconfigured: true,
+          isDeprecated: false,
           name: 'test',
           config: {
             foo: 'bar',

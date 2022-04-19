@@ -7,11 +7,12 @@
 
 import { PreConfiguredAction, RawAction } from '../types';
 
-export const isConnectorDeprecated = (connector: RawAction | PreConfiguredAction): boolean => {
-  if (connector == null) {
-    return false;
-  }
+export type ConnectorWithOptionalDeprecation = Omit<PreConfiguredAction, 'isDeprecated'> &
+  Pick<Partial<PreConfiguredAction>, 'isDeprecated'>;
 
+export const isConnectorDeprecated = (
+  connector: RawAction | ConnectorWithOptionalDeprecation
+): boolean => {
   if (connector.actionTypeId === '.servicenow' || connector.actionTypeId === '.servicenow-sir') {
     /**
      * Connectors after the Elastic ServiceNow application use the
