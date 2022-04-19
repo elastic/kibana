@@ -20,11 +20,13 @@ export const IncomingDataConfirmationStep = ({
   installedPolicy,
   agentDataConfirmed,
   setAgentDataConfirmed,
+  troubleshootLink,
 }: {
   agentIds: string[];
   installedPolicy?: InstalledIntegrationPolicy;
   agentDataConfirmed: boolean;
   setAgentDataConfirmed: (v: boolean) => void;
+  troubleshootLink: string;
 }): EuiContainedStepProps => {
   return {
     title: !agentDataConfirmed
@@ -41,6 +43,7 @@ export const IncomingDataConfirmationStep = ({
           installedPolicy={installedPolicy}
           agentDataConfirmed={agentDataConfirmed}
           setAgentDataConfirmed={setAgentDataConfirmed}
+          troubleshootLink={troubleshootLink}
         />
       ) : null,
     status: agentIds.length > 0 ? (!agentDataConfirmed ? 'loading' : 'complete') : 'disabled',
