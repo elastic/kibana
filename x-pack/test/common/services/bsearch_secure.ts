@@ -88,6 +88,8 @@ export const BSecureSearchFactory = (retry: RetryService) => ({
     // eslint-disable-next-line no-console
     console.log('*** CHRIS RESPONSE ***');
     // eslint-disable-next-line no-console
+    console.log(Object.keys(response));
+    // eslint-disable-next-line no-console
     console.log(JSON.stringify(response));
     const body = response.body; // || response.text;
 
