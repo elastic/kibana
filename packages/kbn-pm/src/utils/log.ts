@@ -12,7 +12,7 @@ import {
   LogLevel,
   parseLogLevel,
   ParsedLogLevel,
-} from '@kbn/dev-utils/tooling_log';
+} from '@kbn/tooling-log';
 
 class Log extends ToolingLog {
   private logLevel!: ParsedLogLevel;

@@ -13,6 +13,7 @@ import type {
 import { PolicyData } from '../../../../common/endpoint/types';
 
 export interface ArtifactListPageUrlParams {
+  /** The page number for the list. Must be 1 based. */
   page?: number;
   pageSize?: number;
   filter?: string;

@@ -16,6 +16,7 @@ import {
   mapExtentChanged,
   mapReady,
   setAreTilesLoaded,
+  setLayerDataLoadErrorStatus,
   setMapInitError,
   setMouseCoordinates,
   updateMetaFromTiles,
@@ -85,6 +86,12 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     },
     updateMetaFromTiles(layerId: string, features: TileMetaFeature[]) {
       dispatch(updateMetaFromTiles(layerId, features));
+    },
+    clearTileLoadError(layerId: string) {
+      dispatch(setLayerDataLoadErrorStatus(layerId, null));
+    },
+    setTileLoadError(layerId: string, errorMessage: string) {
+      dispatch(setLayerDataLoadErrorStatus(layerId, errorMessage));
     },
   };
 }

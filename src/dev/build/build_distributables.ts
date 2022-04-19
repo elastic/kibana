@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { Config, createRunner, Task, GlobalTask } from './lib';
 import * as Tasks from './tasks';

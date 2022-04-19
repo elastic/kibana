@@ -36,6 +36,7 @@ const useRouterNavigate = (
   onClickCallback?: Parameters<typeof reactRouterNavigate>[2]
 ) => {
   const history = useHistory();
+
   return reactRouterNavigate(history, to, onClickCallback);
 };
 
