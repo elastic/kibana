@@ -14,6 +14,7 @@ import {
   getBulkActionEditRequest,
   getFindResultWithSingleHit,
   getFindResultWithMultiHits,
+  getAlertMock,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { performBulkActionRoute } from './perform_bulk_action_route';
@@ -23,9 +24,19 @@ import {
 } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { readRules } from '../../rules/read_rules';
+import { legacyMigrate } from '../../rules/utils';
+import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 jest.mock('../../rules/read_rules', () => ({ readRules: jest.fn() }));
+
+jest.mock('../../rules/utils', () => {
+  const actual = jest.requireActual('../../rules/utils');
+  return {
+    ...actual,
+    legacyMigrate: jest.fn(),
+  };
+});
 
 describe.each([
   ['Legacy', false],
@@ -44,6 +55,9 @@ describe.each([
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+    (legacyMigrate as jest.Mock).mockResolvedValue(
+      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+    );
     performBulkActionRoute(server.router, ml, logger, isRuleRegistryEnabled);
   });
 

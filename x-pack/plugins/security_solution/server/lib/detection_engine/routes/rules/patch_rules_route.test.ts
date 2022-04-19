@@ -21,8 +21,17 @@ import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { patchRulesRoute } from './patch_rules_route';
 import { getPatchRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema.mock';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import { legacyMigrate } from '../../rules/utils';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
+
+jest.mock('../../rules/utils', () => {
+  const actual = jest.requireActual('../../rules/utils');
+  return {
+    ...actual,
+    legacyMigrate: jest.fn(),
+  };
+});
 
 describe.each([
   ['Legacy', false],
@@ -48,6 +57,10 @@ describe.each([
       getRuleExecutionSummarySucceeded()
     );
 
+    (legacyMigrate as jest.Mock).mockResolvedValue(
+      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+    );
+
     patchRulesRoute(server.router, ml, isRuleRegistryEnabled);
   });
 
@@ -59,6 +72,7 @@ describe.each([
 
     test('returns 404 when updating a single rule that does not exist', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
+      (legacyMigrate as jest.Mock).mockResolvedValue(null);
       const response = await server.inject(getPatchRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({
@@ -69,6 +83,7 @@ describe.each([
 
     test('returns error if requesting a non-rule', async () => {
       clients.rulesClient.find.mockResolvedValue(nonRuleFindResult(isRuleRegistryEnabled));
+      (legacyMigrate as jest.Mock).mockResolvedValue(null);
       const response = await server.inject(getPatchRequest(), context);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({

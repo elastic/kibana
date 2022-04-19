@@ -21,6 +21,15 @@ import { installPrepackagedTimelines } from '../../../timeline/routes/prepackage
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import { legacyMigrate } from '../../rules/utils';
+
+jest.mock('../../rules/utils', () => {
+  const actual = jest.requireActual('../../rules/utils');
+  return {
+    ...actual,
+    legacyMigrate: jest.fn(),
+  };
+});
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
   return {
@@ -96,6 +105,8 @@ describe('add_prepackaged_rules_route', () => {
       timelines_updated: 0,
       errors: [],
     });
+
+    (legacyMigrate as jest.Mock).mockResolvedValue(getAlertMock(true, getQueryRuleParams()));
 
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
