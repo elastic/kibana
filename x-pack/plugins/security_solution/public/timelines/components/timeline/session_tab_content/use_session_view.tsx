@@ -9,11 +9,11 @@ import React, { useMemo, useCallback } from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import type { EntityType } from '../../../../../../timelines/common';
+import type { EntityType } from '@kbn/timelines-plugin/common';
 import { timelineSelectors } from '../../../store/timeline';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
-import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
+import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useDetailPanel } from '../../side_panel/hooks/use_detail_panel';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
@@ -22,7 +22,7 @@ import {
   SCROLLING_DISABLED_CLASS_NAME,
   FULL_SCREEN_TOGGLED_CLASS_NAME,
 } from '../../../../../common/constants';
-import { FULL_SCREEN } from '../../timeline/body/column_headers/translations';
+import { FULL_SCREEN } from '../body/column_headers/translations';
 import { EXIT_FULL_SCREEN } from '../../../../common/components/exit_full_screen/translations';
 import {
   useTimelineFullScreen,
@@ -32,7 +32,7 @@ import {
   updateTimelineGraphEventId,
   updateTimelineSessionViewConfig,
   setActiveTabTimeline,
-} from '../../../../timelines/store/timeline/actions';
+} from '../../../store/timeline/actions';
 import { detectionsTimelineIds } from '../../../containers/helpers';
 import * as i18n from './translations';
 
@@ -46,6 +46,7 @@ export interface SessionViewConfig {
 const FullScreenButtonIcon = styled(EuiButtonIcon)`
   margin: 4px 0 4px 0;
 `;
+
 interface NavigationProps {
   fullScreen: boolean;
   globalFullScreen: boolean;
@@ -106,14 +107,7 @@ NavigationComponent.displayName = 'NavigationComponent';
 
 const Navigation = React.memo(NavigationComponent);
 
-export const useSessionView = ({
-  timelineId,
-  entityType,
-}: {
-  timelineId: TimelineId;
-  entityType?: EntityType;
-}) => {
-  const { sessionView } = useKibana().services;
+export const useSessionViewNavigation = ({ timelineId }: { timelineId: TimelineId }) => {
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
@@ -185,33 +179,6 @@ export const useSessionView = ({
     setGlobalFullScreen,
     globalFullScreen,
   ]);
-  const sourcererScope = useMemo(() => {
-    if (timelineId === TimelineId.active) {
-      return SourcererScopeName.timeline;
-    } else if (detectionsTimelineIds.includes(timelineId)) {
-      return SourcererScopeName.detections;
-    } else {
-      return SourcererScopeName.default;
-    }
-  }, [timelineId]);
-  const { openDetailsPanel, shouldShowDetailsPanel, DetailsPanel } = useDetailPanel({
-    isFlyoutView: timelineId !== TimelineId.active,
-    entityType,
-    sourcererScope,
-    timelineId,
-    tabType: timelineId === TimelineId.active ? TimelineTabs.session : TimelineTabs.query,
-  });
-
-  const sessionViewComponent = useMemo(() => {
-    return sessionViewConfig !== null
-      ? sessionView.getSessionView({
-          ...sessionViewConfig,
-          loadAlertDetails: openDetailsPanel,
-          isFullScreen: fullScreen,
-        })
-      : null;
-  }, [fullScreen, openDetailsPanel, sessionView, sessionViewConfig]);
-
   const navigation = useMemo(() => {
     return (
       <Navigation
@@ -238,10 +205,68 @@ export const useSessionView = ({
 
   return {
     onCloseOverlay,
+    Navigation: navigation,
+  };
+};
+
+export const useSessionView = ({
+  timelineId,
+  entityType,
+  height,
+}: {
+  timelineId: TimelineId;
+  entityType?: EntityType;
+  height?: number;
+}) => {
+  const { sessionView } = useKibana().services;
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+
+  const { globalFullScreen } = useGlobalFullScreen();
+  const { timelineFullScreen } = useTimelineFullScreen();
+
+  const { sessionViewConfig, activeTab } = useDeepEqualSelector(
+    (state) => getTimeline(state, timelineId) ?? timelineDefaults
+  );
+
+  const fullScreen = useMemo(
+    () => isFullScreen({ globalFullScreen, timelineId, timelineFullScreen }),
+    [globalFullScreen, timelineId, timelineFullScreen]
+  );
+
+  const sourcererScope = useMemo(() => {
+    if (timelineId === TimelineId.active) {
+      return SourcererScopeName.timeline;
+    } else if (detectionsTimelineIds.includes(timelineId)) {
+      return SourcererScopeName.detections;
+    } else {
+      return SourcererScopeName.default;
+    }
+  }, [timelineId]);
+  const { openDetailsPanel, shouldShowDetailsPanel, DetailsPanel } = useDetailPanel({
+    isFlyoutView: timelineId !== TimelineId.active,
+    entityType,
+    sourcererScope,
+    timelineId,
+    tabType: timelineId === TimelineId.active ? activeTab : TimelineTabs.query,
+  });
+
+  const sessionViewComponent = useMemo(() => {
+    const sessionViewSearchBarHeight = 118;
+    const heightMinusSearchBar = height ? height - sessionViewSearchBarHeight : undefined;
+    return sessionViewConfig !== null
+      ? sessionView.getSessionView({
+          ...sessionViewConfig,
+          loadAlertDetails: openDetailsPanel,
+          isFullScreen: fullScreen,
+          height: heightMinusSearchBar,
+        })
+      : null;
+  }, [fullScreen, openDetailsPanel, sessionView, sessionViewConfig, height]);
+
+  return {
     openDetailsPanel,
     shouldShowDetailsPanel,
     SessionView: sessionViewComponent,
     DetailsPanel,
-    Navigation: navigation,
   };
 };

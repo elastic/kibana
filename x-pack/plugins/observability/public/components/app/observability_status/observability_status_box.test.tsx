@@ -9,8 +9,8 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ObservabilityStatusBox } from './observability_status_box';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { applicationServiceMock } from '../../../../../../../src/core/public/mocks';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
+import { applicationServiceMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 const application = applicationServiceMock.createStartContract();
 

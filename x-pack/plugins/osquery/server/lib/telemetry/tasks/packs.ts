@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import { TELEMETRY_CHANNEL_PACKS } from '../constants';
 import { templatePacks } from '../helpers';
 import { TelemetryEventsSender } from '../sender';

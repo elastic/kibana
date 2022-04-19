@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
+import { RequestHandlerContext } from '..';
 
 import { CoreContext } from '../core_context';
 import {
@@ -98,6 +98,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
           vars: {
             apmConfig,
           },
+          includeExposedConfigKeys: options.includeExposedConfigKeys,
         });
 
         return response.ok({
@@ -112,6 +113,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
           vars: {
             apmConfig,
           },
+          includeExposedConfigKeys: options.includeExposedConfigKeys,
         });
 
         return response.ok({

@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 
-import { SavedObject } from 'kibana/public';
+import { SavedObject } from '@kbn/core/public';
 import { ECSMapping } from '../../../../common/schemas/common';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';

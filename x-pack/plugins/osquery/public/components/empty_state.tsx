@@ -9,9 +9,9 @@ import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton } from '@elastic/eui';
 
-import { KibanaPageTemplate } from '../../../../../src/plugins/kibana_react/public';
-import { INTEGRATIONS_PLUGIN_ID } from '../../../fleet/common';
-import { pagePathGetters } from '../../../fleet/public';
+import { KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
+import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { isModifiedEvent, isLeftClickEvent, useKibana } from '../common/lib/kibana';
 import { OsqueryIcon } from './osquery_icon';
 import { useBreadcrumbs } from '../common/hooks/use_breadcrumbs';

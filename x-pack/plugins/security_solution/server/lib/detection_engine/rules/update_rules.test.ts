@@ -8,7 +8,7 @@
 import { getAlertMock, resolveAlertMock } from '../routes/__mocks__/request_responses';
 import { updateRules } from './update_rules';
 import { getUpdateRulesOptionsMock, getUpdateMlRulesOptionsMock } from './update_rules.mock';
-import { RulesClientMock } from '../../../../../alerting/server/rules_client.mock';
+import { RulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 import { getMlRuleParams, getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
 // Failing with rule registry enabled

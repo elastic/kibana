@@ -6,45 +6,29 @@
  */
 
 import type { Transaction } from 'elastic-apm-node';
-import { defer, forkJoin, throwError, Observable } from 'rxjs';
+import { defer, forkJoin, Observable, throwError } from 'rxjs';
 import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
-import type { Headers, Logger } from 'src/core/server';
+import type { Headers, Logger } from '@kbn/core/server';
 import { errors } from '../../common';
 import type { Context, HeadlessChromiumDriver } from '../browsers';
-import { getChromiumDisconnectedError, DEFAULT_VIEWPORT } from '../browsers';
+import { DEFAULT_VIEWPORT, getChromiumDisconnectedError } from '../browsers';
+import { durationToNumber as toNumber, ConfigType } from '../config';
 import type { Layout } from '../layouts';
 import type { ElementsPositionAndAttribute } from './get_element_position_data';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
 import { getRenderErrors } from './get_render_errors';
-import { getScreenshots } from './get_screenshots';
 import type { Screenshot } from './get_screenshots';
+import { getScreenshots } from './get_screenshots';
 import { getTimeRange } from './get_time_range';
 import { injectCustomCss } from './inject_css';
 import { openUrl } from './open_url';
 import { waitForRenderComplete } from './wait_for_render';
 import { waitForVisualizations } from './wait_for_visualizations';
 
-export interface PhaseTimeouts {
-  /**
-   * Open URL phase timeout.
-   */
-  openUrl: number;
-
-  /**
-   * Timeout of the page readiness phase.
-   */
-  waitForElements: number;
-
-  /**
-   * Timeout of the page render phase.
-   */
-  renderComplete: number;
-
-  /**
-   * An additional delay to wait until the visualizations are ready.
-   */
-  loadDelay: number;
+type CaptureTimeouts = ConfigType['capture']['timeouts'];
+export interface PhaseTimeouts extends CaptureTimeouts {
+  loadDelay: ConfigType['capture']['loadDelay'];
 }
 
 type Url = string;
@@ -62,11 +46,6 @@ export interface ScreenshotObservableOptions {
    * Custom headers to be sent with each request.
    */
   headers?: Headers;
-
-  /**
-   * Timeouts for each phase of the screenshot.
-   */
-  timeouts: PhaseTimeouts;
 
   /**
    * The list or URL to take screenshots of.
@@ -138,6 +117,7 @@ const getDefaultViewPort = () => ({
 export class ScreenshotObservableHandler {
   constructor(
     private readonly driver: HeadlessChromiumDriver,
+    private readonly config: ConfigType,
     private readonly logger: Logger,
     private readonly layout: Layout,
     private options: ScreenshotObservableOptions
@@ -175,18 +155,18 @@ export class ScreenshotObservableHandler {
       return openUrl(
         this.driver,
         this.logger,
-        this.options.timeouts.openUrl,
+        toNumber(this.config.capture.timeouts.openUrl),
         index,
         url,
         { ...(context ?? {}), layout: this.layout.id },
         this.options.headers ?? {}
       );
-    }).pipe(this.waitUntil(this.options.timeouts.openUrl, 'open URL'));
+    }).pipe(this.waitUntil(toNumber(this.config.capture.timeouts.openUrl), 'open URL'));
   }
 
   private waitForElements() {
     const driver = this.driver;
-    const waitTimeout = this.options.timeouts.waitForElements;
+    const waitTimeout = toNumber(this.config.capture.timeouts.waitForElements);
 
     return defer(() => getNumberOfItems(driver, this.logger, waitTimeout, this.layout)).pipe(
       mergeMap(async (itemsCount) => {
@@ -217,7 +197,7 @@ export class ScreenshotObservableHandler {
       await layout.positionElements?.(driver, logger);
       apmPositionElements?.end();
 
-      await waitForRenderComplete(driver, logger, this.options.timeouts.loadDelay, layout);
+      await waitForRenderComplete(driver, logger, toNumber(this.config.capture.loadDelay), layout);
     }).pipe(
       mergeMap(() =>
         forkJoin({
@@ -226,7 +206,7 @@ export class ScreenshotObservableHandler {
           renderErrors: getRenderErrors(driver, logger, layout),
         })
       ),
-      this.waitUntil(this.options.timeouts.renderComplete, 'render complete')
+      this.waitUntil(toNumber(this.config.capture.timeouts.renderComplete), 'render complete')
     );
   }
 

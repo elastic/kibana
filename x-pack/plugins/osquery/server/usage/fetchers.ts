@@ -11,10 +11,14 @@ import {
   AggregationsRateAggregate,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { PackagePolicyServiceInterface } from '../../../fleet/server';
+import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  ListResult,
+  PackagePolicy,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '@kbn/fleet-plugin/common';
 import { getRouteMetric } from '../routes/usage';
-import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../../src/core/server';
-import { ListResult, PackagePolicy, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../fleet/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import { METRICS_INDICES } from './constants';
 import { AgentInfo, BeatMetricsUsage, LiveQueryUsage } from './types';

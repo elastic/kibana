@@ -9,8 +9,8 @@
 import moment from 'moment';
 import * as Rx from 'rxjs';
 import { isSavedObjectOlderThan, rollUiCounterIndices } from './rollups';
-import { savedObjectsRepositoryMock, loggingSystemMock } from '../../../../../../core/server/mocks';
-import { SavedObjectsFindResult } from 'kibana/server';
+import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { SavedObjectsFindResult } from '@kbn/core/server';
 
 import {
   UICounterSavedObjectAttributes,

@@ -20,7 +20,7 @@ import {
   EmbeddableOutput,
   IContainer,
   IEmbeddable,
-} from '../../../../embeddable/public';
+} from '@kbn/embeddable-plugin/public';
 
 export interface GenericEmbeddableReducers<InputType> {
   /**

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { useQuery } from 'react-query';
 
-import { GetOneAgentResponse } from '../../../fleet/common';
+import { GetOneAgentResponse } from '@kbn/fleet-plugin/common';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
 

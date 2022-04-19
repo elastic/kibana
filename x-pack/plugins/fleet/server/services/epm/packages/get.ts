@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
+import type { SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
 
 import {
   isPackageLimited,
@@ -22,13 +22,13 @@ import type {
 } from '../../../../common/types';
 import type { Installation, PackageInfo } from '../../../types';
 import { IngestManagerError, PackageNotFoundError } from '../../../errors';
-import { appContextService } from '../../';
+import { appContextService } from '../..';
 import * as Registry from '../registry';
 import { getEsPackage } from '../archive/storage';
 import { getArchivePackage } from '../archive';
 import { normalizeKuery } from '../../saved_object';
 
-import { createInstallableFrom } from './index';
+import { createInstallableFrom } from '.';
 
 export type { SearchParams } from '../registry';
 export { getFile } from '../registry';

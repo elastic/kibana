@@ -10,10 +10,10 @@ import {
   CoreStart,
   ElasticsearchClient,
   SavedObjectsClientContract,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
+import { AgentClient, AgentPolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/types';
-import { AgentClient, AgentPolicyServiceInterface } from '../../../../fleet/server';
 import type { ESLicense, ESClusterInfo } from './types';
 import { OsqueryAppContextService } from '../osquery_app_context_services';
 

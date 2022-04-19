@@ -11,7 +11,7 @@ import 'brace/theme/tomorrow';
 
 import { EuiCodeEditor, EuiCodeEditorProps } from '../shared_imports';
 
-import './osquery_mode.ts';
+import './osquery_mode';
 
 const EDITOR_SET_OPTIONS = {
   enableBasicAutocompletion: true,

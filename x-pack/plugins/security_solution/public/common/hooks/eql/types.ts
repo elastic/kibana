@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Unit } from '@elastic/datemath';
+import { Unit } from '@kbn/datemath';
 
 import { InspectResponse } from '../../../types';
 import { ChartData } from '../../components/charts/common';
-import { inputsModel } from '../../../common/store';
+import { inputsModel } from '../../store';
 
 export interface EqlPreviewRequest {
   to: string;

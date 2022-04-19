@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { HttpResponse } from '../../../../../core/public';
-import { PluginServiceFactory } from '../../../../presentation_util/public';
+import { HttpResponse } from '@kbn/core/public';
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { ControlsHTTPService } from '../http';
 
 type HttpServiceFactory = PluginServiceFactory<ControlsHTTPService>;

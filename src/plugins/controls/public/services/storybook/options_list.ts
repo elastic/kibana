@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginServiceFactory } from '../../../../presentation_util/public';
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { OptionsListResponse } from '../../control_types/options_list/types';
 import { ControlsOptionsListService, OptionsListRequest } from '../options_list';
 

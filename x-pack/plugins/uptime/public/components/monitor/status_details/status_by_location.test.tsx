@@ -8,7 +8,7 @@
 import React from 'react';
 import { renderWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { MonitorLocation } from '../../../../common/runtime_types';
-import { StatusByLocations } from './index';
+import { StatusByLocations } from '.';
 
 describe('StatusByLocation component', () => {
   let monitorLocations: MonitorLocation[];

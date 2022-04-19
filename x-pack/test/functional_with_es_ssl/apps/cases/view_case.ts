@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import uuid from 'uuid';
+import { CaseStatuses } from '@kbn/cases-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { CaseStatuses } from '../../../../plugins/cases/common';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const common = getPageObject('common');
@@ -19,8 +19,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const comboBox = getService('comboBox');
 
-  // Failing: See https://github.com/elastic/kibana/issues/129248
-  describe.skip('View case', () => {
+  describe('View case', () => {
     describe('properties', () => {
       // create the case to test on
       before(async () => {

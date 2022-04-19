@@ -13,13 +13,11 @@ import { Router } from 'react-router-dom';
 import { getContext, resetContext } from 'kea';
 import { Store } from 'redux';
 
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-} from '../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+
 import { InitialAppData } from '../../common/types';
 import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { IUiSettingsClient } from 'kibana/server';
+import type { IUiSettingsClient } from '@kbn/core/server';
 import { EsQueryConfig } from '@kbn/es-query';
 import type { FetchedIndexPattern, Panel } from '../../../../../common/types';
 import type { SearchCapabilities } from '../../../search_strategies';

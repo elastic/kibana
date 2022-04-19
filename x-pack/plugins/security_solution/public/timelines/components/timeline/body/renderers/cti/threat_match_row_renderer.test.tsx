@@ -54,7 +54,6 @@ describe('threatMatchRowRenderer', () => {
   describe('#renderRow', () => {
     it('renders correctly against snapshot', () => {
       const children = threatMatchRowRenderer.renderRow({
-        browserFields: {},
         data: threatMatchData,
         isDraggable: true,
         timelineId: 'test',

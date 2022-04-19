@@ -38,22 +38,17 @@ import {
 } from '@elastic/charts';
 import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Datatable, DatatableRow, DatatableColumn } from '../../../../expressions/public';
-import { RenderMode } from '../../../../expressions/common';
-import { FieldFormat } from '../../../../field_formats/common';
-import { EmptyPlaceholder } from '../../../../../plugins/charts/public';
+import { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
+import type { Datatable, DatatableRow, DatatableColumn } from '@kbn/expressions-plugin/public';
+import { RenderMode } from '@kbn/expressions-plugin/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { ChartsPluginSetup, ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
+import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
 import type { SeriesType, XYChartProps } from '../../common/types';
 import { isHorizontalChart, getSeriesColor, getAnnotationsLayers, getDataLayers } from '../helpers';
-import { EventAnnotationServiceType } from '../../../../event_annotation/public';
-import {
-  ChartsPluginSetup,
-  ChartsPluginStart,
-  PaletteRegistry,
-  SeriesLayer,
-  useActiveCursor,
-} from '../../../../../plugins/charts/public';
-import { MULTILAYER_TIME_AXIS_STYLE } from '../../../../../plugins/charts/common';
 import {
   getFilteredLayers,
   getReferenceLayers,

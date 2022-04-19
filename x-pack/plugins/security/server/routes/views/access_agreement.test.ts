@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   HttpResources,
   HttpResourcesRequestHandler,
   RequestHandler,
   RouteConfig,
-} from 'src/core/server';
-import { kibanaResponseFactory } from 'src/core/server';
-import { httpResourcesMock, httpServerMock } from 'src/core/server/mocks';
+} from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { httpResourcesMock, httpServerMock } from '@kbn/core/server/mocks';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { SecurityLicense, SecurityLicenseFeatures } from '../../../common/licensing';
 import type { AuthenticationProvider } from '../../../common/model';

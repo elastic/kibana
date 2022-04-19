@@ -9,7 +9,7 @@ import { pickBy, isEmpty } from 'lodash';
 import uuid from 'uuid';
 import moment from 'moment-timezone';
 
-import { IRouter } from '../../../../../../src/core/server';
+import { IRouter } from '@kbn/core/server';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 import { parseAgentSelection, AgentSelection } from '../../lib/parse_agent_groups';

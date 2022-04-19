@@ -9,7 +9,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { Header } from '../header';
+import { Header } from '.';
 
 describe('Header', () => {
   test('should render normally', () => {

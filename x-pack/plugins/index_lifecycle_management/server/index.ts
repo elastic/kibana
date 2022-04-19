@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { IndexLifecycleManagementServerPlugin } from './plugin';
 
 export { config } from './config';
