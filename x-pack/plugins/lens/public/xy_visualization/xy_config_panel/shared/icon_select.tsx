@@ -99,6 +99,7 @@ export const IconSelect = ({
 
   return (
     <EuiComboBox
+      fullWidth
       data-test-subj="lns-icon-select"
       isClearable={false}
       options={customIconSet}

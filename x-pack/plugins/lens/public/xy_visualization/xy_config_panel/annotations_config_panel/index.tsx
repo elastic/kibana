@@ -17,6 +17,7 @@ import {
   EuiButtonGroup,
   EuiFormLabel,
   EuiFormControlLayout,
+  EuiText,
 } from '@elastic/eui';
 import moment from 'moment';
 import {
@@ -333,9 +334,13 @@ const ConfigPanelApplyAsRangeSwitch = ({
     <EuiFormRow display="columnCompressed" className="lnsRowCompressedMargin">
       <EuiSwitch
         data-test-subj="lns-xyAnnotation-rangeSwitch"
-        label={i18n.translate('xpack.lens.xyChart.applyAsRange', {
-          defaultMessage: 'Apply as range',
-        })}
+        label={
+          <EuiText size="xs">
+            {i18n.translate('xpack.lens.xyChart.applyAsRange', {
+              defaultMessage: 'Apply as range',
+            })}
+          </EuiText>
+        }
         checked={isRange}
         onChange={() => {
           if (isRange) {
@@ -396,6 +401,7 @@ const ConfigPanelRangeDatePicker = ({
     <EuiFormRow display="rowCompressed" fullWidth label={label} className="lnsRowCompressedMargin">
       {prependLabel ? (
         <EuiFormControlLayout
+          fullWidth
           className="lnsConfigPanelNoPadding"
           prepend={
             <EuiFormLabel className="lnsConfigPanelDate__label">{prependLabel}</EuiFormLabel>

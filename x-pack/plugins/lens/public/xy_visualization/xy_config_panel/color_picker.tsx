@@ -109,6 +109,7 @@ export const ColorPicker = ({
 
   const colorPicker = (
     <EuiColorPicker
+      fullWidth
       data-test-subj="indexPattern-dimension-colorPicker"
       compressed
       isClearable={Boolean(overwriteColor)}

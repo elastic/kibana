@@ -35,6 +35,7 @@ export const NameInput = ({
       fullWidth
     >
       <EuiFieldText
+        fullWidth
         compressed
         data-test-subj="column-label-edit"
         value={inputValue}
