@@ -41,7 +41,6 @@ import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expr
 import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
 import { getColumnToLabelMap } from './state_helpers';
 import {
-  convertActiveDataFromIndexesToLayers,
   getGroupsAvailableInData,
   getReferenceConfiguration,
   getReferenceSupportedLayer,
@@ -55,6 +54,7 @@ import {
 } from './annotations/helpers';
 import {
   checkXAccessorCompatibility,
+  convertActiveDataFromIndexesToLayers,
   defaultSeriesType,
   getAxisName,
   getDataLayers,
