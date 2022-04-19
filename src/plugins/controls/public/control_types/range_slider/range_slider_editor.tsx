@@ -10,16 +10,16 @@ import useMount from 'react-use/lib/useMount';
 import React, { useEffect, useState } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 
-import { pluginServices } from '../../services';
-import { ControlEditorProps } from '../../types';
-import { RangeSliderEmbeddableInput } from './types';
-import { RangeSliderStrings } from './range_slider_strings';
-import { DataViewListItem, DataView } from '../../../../data_views/common';
+import { DataViewListItem, DataView } from '@kbn/data-views-plugin/common';
 import {
   LazyDataViewPicker,
   LazyFieldPicker,
   withSuspense,
-} from '../../../../presentation_util/public';
+} from '@kbn/presentation-util-plugin/public';
+import { pluginServices } from '../../services';
+import { ControlEditorProps } from '../../types';
+import { RangeSliderEmbeddableInput } from './types';
+import { RangeSliderStrings } from './range_slider_strings';
 
 interface RangeSliderEditorState {
   dataViewListItems: DataViewListItem[];

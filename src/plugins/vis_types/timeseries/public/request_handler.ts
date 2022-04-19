@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { KibanaExecutionContext } from 'src/core/public';
-import type { Adapters } from 'src/plugins/inspector';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import type { Adapters } from '@kbn/inspector-plugin';
+import { KibanaContext, handleResponse } from '@kbn/data-plugin/public';
 import { getTimezone } from './application/lib/get_timezone';
 import { getUISettings, getDataStart, getCoreStart } from './services';
 import { ROUTES, UI_SETTINGS } from '../common/constants';
-import { KibanaContext, handleResponse } from '../../../data/public';
 
 import type { TimeseriesVisParams } from './types';
 import type { TimeseriesVisData } from '../common/types';

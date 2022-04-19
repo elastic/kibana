@@ -6,11 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import type { DetectionMetrics } from '../../../../../../plugins/security_solution/server/usage/detections/types';
+import type { DetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/types';
 import type {
   ThreatMatchCreateSchema,
   ThresholdCreateSchema,
-} from '../../../../../../plugins/security_solution/common/detection_engine/schemas/request';
+} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { getInitialDetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/get_initial_usage';
+import { getInitialEventLogUsage } from '@kbn/security-solution-plugin/server/usage/detections/rules/get_initial_usage';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   createLegacyRuleAction,
@@ -34,8 +36,6 @@ import {
   updateRule,
   deleteAllEventLogExecutionEvents,
 } from '../../../../utils';
-import { getInitialDetectionMetrics } from '../../../../../../plugins/security_solution/server/usage/detections/get_initial_usage';
-import { getInitialEventLogUsage } from '../../../../../../plugins/security_solution/server/usage/detections/rules/get_initial_usage';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {

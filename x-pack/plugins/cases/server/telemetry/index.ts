@@ -11,9 +11,9 @@ import {
   Logger,
   PluginInitializerContext,
   SavedObjectsErrorHelpers,
-} from '../../../../../src/core/server';
-import { TaskManagerSetupContract } from '../../../task_manager/server';
-import { UsageCollectionSetup } from '../../../../../src/plugins/usage_collection/server';
+} from '@kbn/core/server';
+import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { collectTelemetryData } from './collect_telemetry_data';
 import {
   CASE_TELEMETRY_SAVED_OBJECT,

@@ -18,6 +18,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { EntityType } from '@kbn/timelines-plugin/common';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
@@ -32,7 +33,6 @@ import { getFieldValue } from '../../../../detections/components/host_isolation/
 import { ALERT_DETAILS } from './translations';
 import { useWithCaseDetailsRefresh } from '../../../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 import { EventDetailsFooter } from './footer';
-import { EntityType } from '../../../../../../timelines/common';
 import { buildHostNamesFilter } from '../../../../../common/search_strategy';
 import { useHostRiskScore, HostRisk } from '../../../../risk_score/containers';
 

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { isFilterPinned } from '@kbn/es-query';
 
-import type { SavedObjectReference } from 'kibana/public';
+import type { SavedObjectReference } from '@kbn/core/public';
 import { SaveModal } from './save_modal';
 import type { LensAppProps, LensAppServices } from './types';
 import type { SaveProps } from './app';

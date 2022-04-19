@@ -7,7 +7,12 @@
 
 import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } from './types';
 
-import type { ResolvedCase, CaseMetrics, CaseMetricsFeature } from '../../common/ui/types';
+import type {
+  ResolvedCase,
+  CaseMetrics,
+  CaseMetricsFeature,
+  AlertComment,
+} from '../../common/ui/types';
 import {
   Actions,
   ActionTypes,
@@ -65,7 +70,7 @@ export const basicComment: Comment = {
   version: 'WzQ3LDFc',
 };
 
-export const alertComment: Comment = {
+export const alertComment: AlertComment = {
   alertId: 'alert-id-1',
   index: 'alert-index-1',
   type: CommentType.alert,

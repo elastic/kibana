@@ -10,8 +10,8 @@ import axios from 'axios';
 import { createExternalService } from './service';
 import { request, createAxiosResponse } from '../lib/axios_utils';
 import { ExternalService } from './types';
-import { Logger } from '../../../../../../src/core/server';
-import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../../actions_config.mock';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 

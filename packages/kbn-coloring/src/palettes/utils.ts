@@ -12,7 +12,7 @@ import {
   CustomPaletteParams,
   DataBounds,
   ColorStop,
-} from '../palettes/types';
+} from './types';
 
 import {
   DEFAULT_COLOR_STEPS,

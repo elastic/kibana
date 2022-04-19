@@ -15,15 +15,15 @@ import '@kbn/test-jest-helpers/target_node//stub_web_worker';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
+import { CodeEditorField } from '@kbn/kibana-react-plugin/public';
 import type { monaco } from '@kbn/monaco';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import { CodeEditorField } from 'src/plugins/kibana_react/public';
 
 import { AllRule, AnyRule, ExceptAllRule, ExceptAnyRule, FieldRule } from '../../model';
 import { JSONRuleEditor } from './json_rule_editor';
 
-jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => ({
-  ...jest.requireActual('../../../../../../../../src/plugins/kibana_react/public'),
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
   useKibana: jest.fn().mockReturnValue({
     services: { docLinks: { links: { apis: { createRoleMapping: 'createRoleMappingLink' } } } },
   }),

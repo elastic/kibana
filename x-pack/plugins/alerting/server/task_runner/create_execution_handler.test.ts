@@ -7,15 +7,15 @@
 
 import { createExecutionHandler } from './create_execution_handler';
 import { ActionsCompletion, AlertExecutionStore, CreateExecutionHandlerOptions } from './types';
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   actionsClientMock,
   actionsMock,
   renderActionParameterTemplatesDefault,
-} from '../../../actions/server/mocks';
-import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
-import { KibanaRequest } from 'kibana/server';
-import { asSavedObjectExecutionSource } from '../../../actions/server';
+} from '@kbn/actions-plugin/server/mocks';
+import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
+import { KibanaRequest } from '@kbn/core/server';
+import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import { InjectActionParamsOpts } from './inject_action_params';
 import { NormalizedRuleType } from '../rule_type_registry';
 import { AlertInstanceContext, AlertInstanceState, RuleTypeParams, RuleTypeState } from '../types';
@@ -49,7 +49,7 @@ const ruleType: NormalizedRuleType<
   executor: jest.fn(),
   producer: 'alerts',
   config: {
-    execution: {
+    run: {
       actions: { max: 1000 },
     },
   },
@@ -476,7 +476,7 @@ describe('Create Execution Handler', () => {
       ruleType: {
         ...ruleType,
         config: {
-          execution: {
+          run: {
             actions: { max: 2 },
           },
         },
