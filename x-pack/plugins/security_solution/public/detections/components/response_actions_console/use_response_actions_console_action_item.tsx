@@ -5,39 +5,43 @@
  * 2.0.
  */
 
-import { EuiContextMenuItem } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useMemo } from 'react';
+import { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { isAlertFromEndpointEvent } from '../../../common/utils/endpoint_alert_check';
+import { ResponseActionsConsoleContextMenuItem } from './response_actions_console_context_menu_item';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { getFieldValue } from '../host_isolation/helpers';
 
-export const useResponseActionsConsoleActionItem = (): JSX.Element[] => {
+export const useResponseActionsConsoleActionItem = (
+  eventDetailsData: TimelineEventsDetailsItem[] | null,
+  onClick: () => void
+): JSX.Element[] => {
   const isResponseActionsConsoleEnabled = useIsExperimentalFeatureEnabled(
     'responseActionsConsoleEnabled'
   );
 
-  const handleResponseActionsClick = useCallback(() => {
-    //
-  }, []);
+  const isEndpointAlert = useMemo(() => {
+    return isAlertFromEndpointEvent({ data: eventDetailsData || [] });
+  }, [eventDetailsData]);
+
+  const endpointId = useMemo(
+    () => getFieldValue({ category: 'agent', field: 'agent.id' }, eventDetailsData),
+    [eventDetailsData]
+  );
 
   return useMemo(() => {
     const actions: JSX.Element[] = [];
 
+    if (!eventDetailsData || !isEndpointAlert) {
+      return actions;
+    }
+
     if (isResponseActionsConsoleEnabled) {
       actions.push(
-        <EuiContextMenuItem
-          key="endpointResponseActions-action-item"
-          data-test-subj="endpointResponseActions-action-item"
-          disabled={false} // FIXME:PT agentStatus === HostStatus.UNENROLLED
-          onClick={handleResponseActionsClick}
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole"
-            defaultMessage="Response actions"
-          />
-        </EuiContextMenuItem>
+        <ResponseActionsConsoleContextMenuItem endpointId={endpointId} onClick={onClick} />
       );
     }
 
     return actions;
-  }, [handleResponseActionsClick, isResponseActionsConsoleEnabled]);
+  }, [endpointId, eventDetailsData, isEndpointAlert, isResponseActionsConsoleEnabled, onClick]);
 };

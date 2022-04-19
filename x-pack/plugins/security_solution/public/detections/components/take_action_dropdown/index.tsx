@@ -136,7 +136,10 @@ export const TakeActionDropdown = React.memo(
       isHostIsolationPanelOpen,
     });
 
-    const endpointActionsItems = useResponseActionsConsoleActionItem();
+    const endpointResponseActionsConsoleItems = useResponseActionsConsoleActionItem(
+      detailsData,
+      closePopoverHandler
+    );
 
     const handleOnAddExceptionTypeClick = useCallback(
       (type: ExceptionListType) => {
@@ -226,7 +229,7 @@ export const TakeActionDropdown = React.memo(
         ...(tGridEnabled ? addToCaseActionItems : []),
         ...alertsActionItems,
         ...hostIsolationActionItems,
-        ...endpointActionsItems,
+        ...endpointResponseActionsConsoleItems,
         ...(osqueryAvailable ? [osqueryActionItem] : []),
         ...investigateInTimelineActionItems,
       ],
@@ -235,7 +238,7 @@ export const TakeActionDropdown = React.memo(
         addToCaseActionItems,
         alertsActionItems,
         hostIsolationActionItems,
-        endpointActionsItems,
+        endpointResponseActionsConsoleItems,
         osqueryAvailable,
         osqueryActionItem,
         investigateInTimelineActionItems,
