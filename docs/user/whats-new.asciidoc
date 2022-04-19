@@ -170,7 +170,7 @@ You can also do this on a per rule type basis with the `xpack.alerting.run.timeo
 minimum interval or just display warnings on the UI. Check the
  {kibana-ref}/alert-action-settings-kb.html#action-settings[documentation] for the
 
-* Configure the maximum number of actions that a rule can generate. Specify a different cap for your
+* Configure the maximum number of actions that a rule can generate with the `xpack.alerting.rules.run.actions.max` setting. Specify a different cap for your
 different rule types, depending on your needs.
 Check the {kibana-ref}/alert-action-settings-kb.html#action-settings[documentation] for the `xpack.alerting.run.actions.max` setting.
 For more information, refer to {kibana-ref}/alert-action-settings-kb.html#action-settings[Action settings].
