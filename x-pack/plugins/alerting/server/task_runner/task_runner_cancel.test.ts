@@ -6,7 +6,7 @@
  */
 
 import sinon from 'sinon';
-import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import {
   RuleExecutorOptions,
   RuleTypeParams,
@@ -14,10 +14,10 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
 } from '../types';
-import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
+import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { TaskRunner } from './task_runner';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
@@ -26,16 +26,16 @@ import {
   savedObjectsServiceMock,
   elasticsearchServiceMock,
   uiSettingsServiceMock,
-} from '../../../../../src/core/server/mocks';
-import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
-import { actionsMock, actionsClientMock } from '../../../actions/server/mocks';
+} from '@kbn/core/server/mocks';
+import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { actionsMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { alertsMock, rulesClientMock } from '../mocks';
-import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
-import { IEventLogger } from '../../../event_log/server';
+import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
+import { IEventLogger } from '@kbn/event-log-plugin/server';
 import { Rule, RecoveredActionGroup } from '../../common';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
-import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 
 jest.mock('uuid', () => ({
@@ -58,7 +58,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
   config: {
-    execution: {
+    run: {
       actions: { max: 1000 },
     },
   },

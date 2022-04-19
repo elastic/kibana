@@ -6,17 +6,13 @@
  */
 
 import { Query, Filter } from '@kbn/es-query';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Subscription } from 'rxjs';
-import { TimeRange } from '../../../../../../src/plugins/data/public';
-import {
-  Embeddable,
-  EmbeddableInput,
-  IContainer,
-} from '../../../../../../src/plugins/embeddable/public';
-import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
+import { TimeRange } from '@kbn/data-plugin/public';
+import { Embeddable, EmbeddableInput, IContainer } from '@kbn/embeddable-plugin/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CoreProviders } from '../../apps/common_providers';
 import { InfraClientStartDeps, InfraClientStartExports } from '../../types';
 import { datemathToEpochMillis } from '../../utils/datemath';

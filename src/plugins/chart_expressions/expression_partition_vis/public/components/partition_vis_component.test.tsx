@@ -8,10 +8,10 @@
 
 import React from 'react';
 import { Settings, TooltipType, SeriesIdentifier } from '@elastic/charts';
-import { chartPluginMock } from '../../../../charts/public/mocks';
-import { dataPluginMock } from '../../../../data/public/mocks';
-import { fieldFormatsServiceMock } from '../../../../field_formats/public/mocks';
-import type { Datatable } from '../../../../expressions/public';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import { shallow, mount } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
@@ -33,6 +33,17 @@ jest.mock('@elastic/charts', () => {
     getSpecId: jest.fn(() => {}),
   };
 });
+
+const actWithTimeout = (action: Function, timer: number = 1) =>
+  act(
+    () =>
+      new Promise((resolve) =>
+        setTimeout(async () => {
+          await action();
+          resolve();
+        }, timer)
+      )
+  );
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
 const palettesRegistry = chartPluginMock.createPaletteRegistry();
@@ -131,13 +142,12 @@ describe('PartitionVisComponent', function () {
     expect(component).toMatchSnapshot();
   });
 
-  it('renders the legend on the correct position', () => {
-    const component = shallow(<PartitionVisComponent {...wrapperProps} />);
-    expect(component.find(Settings).prop('legendPosition')).toEqual('right');
-  });
-
   it('renders the legend toggle component', async () => {
     const component = mount(<PartitionVisComponent {...wrapperProps} />);
+    await actWithTimeout(async () => {
+      await component.update();
+    });
+
     await act(async () => {
       expect(findTestSubject(component, 'vislibToggleLegend').length).toBe(1);
     });
@@ -145,6 +155,9 @@ describe('PartitionVisComponent', function () {
 
   it('hides the legend if the legend toggle is clicked', async () => {
     const component = mount(<PartitionVisComponent {...wrapperProps} />);
+    await actWithTimeout(async () => {
+      await component.update();
+    });
     findTestSubject(component, 'vislibToggleLegend').simulate('click');
     await act(async () => {
       expect(component.find(Settings).prop('showLegend')).toEqual(false);

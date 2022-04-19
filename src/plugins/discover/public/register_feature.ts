@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
+import { FeatureCatalogueCategory, HomePublicPluginSetup } from '@kbn/home-plugin/public';
 
 export function registerFeature(home: HomePublicPluginSetup) {
   home.featureCatalogue.register({

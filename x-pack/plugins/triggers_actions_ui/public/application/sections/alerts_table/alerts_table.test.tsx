@@ -5,6 +5,8 @@
  * 2.0.
  */
 import React from 'react';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { act } from 'react-dom/test-utils';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { AlertsTable } from './alerts_table';
 import { AlertsData } from '../../../types';

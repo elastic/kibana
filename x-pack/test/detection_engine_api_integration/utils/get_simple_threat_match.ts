@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ThreatMatchCreateSchema } from '../../../plugins/security_solution/common/detection_engine/schemas/request';
+import { ThreatMatchCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 
 /**
  * This is a typical simple indicator match/threat match for testing that is easy for most basic testing

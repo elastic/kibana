@@ -6,7 +6,7 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { keyBy, keys, merge } from 'lodash';
-import type { RequestHandler } from 'src/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 
 import type { DataStream } from '../../types';
 import { KibanaSavedObjectType } from '../../../common';

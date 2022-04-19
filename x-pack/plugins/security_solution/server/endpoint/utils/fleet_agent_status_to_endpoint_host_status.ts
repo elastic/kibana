@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AgentStatus } from '../../../../fleet/common';
+import { AgentStatus } from '@kbn/fleet-plugin/common';
 import { HostStatus } from '../../../common/endpoint/types';
 
 // For an understanding of how fleet agent status is calculated:

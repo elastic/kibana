@@ -14,7 +14,7 @@ import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import type { IndexNotFound } from './';
+import type { IndexNotFound } from '.';
 
 /** @internal */
 export interface SetWriteBlockParams {

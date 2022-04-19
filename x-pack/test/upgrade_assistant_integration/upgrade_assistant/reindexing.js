@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 
-import { ReindexStatus, REINDEX_OP_TYPE } from '../../../plugins/upgrade_assistant/common/types';
-import { generateNewIndexName } from '../../../plugins/upgrade_assistant/server/lib/reindexing/index_settings';
-import { getIndexState } from '../../../plugins/upgrade_assistant/common/get_index_state';
+import { ReindexStatus, REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-plugin/common/types';
+import { generateNewIndexName } from '@kbn/upgrade-assistant-plugin/server/lib/reindexing/index_settings';
+import { getIndexState } from '@kbn/upgrade-assistant-plugin/common/get_index_state';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

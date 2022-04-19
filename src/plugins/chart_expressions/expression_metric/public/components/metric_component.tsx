@@ -7,18 +7,18 @@
  */
 
 import React, { Component } from 'react';
-import { MetricVisValue } from './metric_value';
-import { VisParams, MetricOptions } from '../../common/types';
-import type { IFieldFormat } from '../../../../field_formats/common';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import {
   getColumnByAccessor,
   getAccessor,
   getFormatByAccessor,
-} from '../../../../visualizations/common/utils';
-import { Datatable } from '../../../../expressions/public';
-import { CustomPaletteState } from '../../../../charts/public';
-import { getFormatService, getPaletteService } from '../../../expression_metric/public/services';
-import { ExpressionValueVisDimension } from '../../../../visualizations/public';
+} from '@kbn/visualizations-plugin/common/utils';
+import { Datatable } from '@kbn/expressions-plugin/public';
+import { CustomPaletteState } from '@kbn/charts-plugin/public';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
+import { getFormatService, getPaletteService } from '../services';
+import { VisParams, MetricOptions } from '../../common/types';
+import { MetricVisValue } from './metric_value';
 import { formatValue, shouldApplyColor } from '../utils';
 import { needsLightText } from '../utils/palette';
 import { withAutoScale } from './with_auto_scale';
