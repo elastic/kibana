@@ -6,7 +6,7 @@
  */
 
 import { Logger, CoreSetup } from '@kbn/core/server';
-// import moment from 'moment';
+import moment from 'moment';
 import {
   RunContext,
   TaskManagerSetupContract,
@@ -152,7 +152,7 @@ export function telemetryTaskRunner(
                   percentile_num_alerts_by_type_per_day:
                     dailyExecutionCounts.alertsPercentilesByType,
                 },
-                runAt: new Date(), // getNextMidnight(),
+                runAt: getNextMidnight(),
               };
             }
           )
@@ -160,7 +160,7 @@ export function telemetryTaskRunner(
             logger.warn(`Error executing alerting telemetry task: ${errMsg}`);
             return {
               state: {},
-              runAt: new Date(), // getNextMidnight(),
+              runAt: getNextMidnight(),
             };
           });
       },
@@ -168,6 +168,6 @@ export function telemetryTaskRunner(
   };
 }
 
-// function getNextMidnight() {
-//   return moment().add(1, 'd').startOf('d').toDate();
-// }
+function getNextMidnight() {
+  return moment().add(1, 'd').startOf('d').toDate();
+}
