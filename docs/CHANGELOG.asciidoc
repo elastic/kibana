@@ -167,7 +167,7 @@ Lens & Visualizations::
 
 Machine Learning::
 * Combines annotations into one block if multiple annotations overlap {kibana-pull}128782[#128782]
-* Adds `throughput_last_minute` to the Deployment stats {kibana-pull}128611[#128611]
+* Adds `throughput_last_minute` to the deployment stats {kibana-pull}128611[#128611]
 * Anomaly Charts API endpoint {kibana-pull}128165[#128165]
 * Utilize ML memory stats endpoint for the memory overview chart {kibana-pull}127751[#127751]
 * Deleting trained model space checks {kibana-pull}127438[#127438]
