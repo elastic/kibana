@@ -5,10 +5,16 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { EuiDataGrid } from '@elastic/eui';
+import { EuiDataGrid, EuiEmptyPrompt } from '@elastic/eui';
 import { useSorting, usePagination } from './hooks';
 import { AlertsTableProps } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
+import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from './translations';
+
+const emptyConfiguration = {
+  id: '',
+  columns: [],
+};
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
   const { activePage, alertsCount, onPageChange, onSortChange } = props.useFetchAlertsData();
@@ -20,18 +26,17 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   });
 
   const alertsTableConfigurationRegistry = useKibana().services.alertsTableConfigurationRegistry;
-  if (!alertsTableConfigurationRegistry.has(props.configurationId)) {
-    throw new Error(
-      'This plugin has no registered its alerts table parameters inside TriggersActionsUi'
-    );
-  }
-  const alertsTableConfiguration = alertsTableConfigurationRegistry.get(props.configurationId);
+  const hasAlertsTableConfiguration = alertsTableConfigurationRegistry.has(props.configurationId);
+
+  const alertsTableConfiguration = hasAlertsTableConfiguration
+    ? alertsTableConfigurationRegistry.get(props.configurationId)
+    : emptyConfiguration;
 
   const [visibleColumns, setVisibleColumns] = useState(
     alertsTableConfiguration.columns.map(({ id }) => id)
   );
 
-  return (
+  return hasAlertsTableConfiguration ? (
     <section data-test-subj={props['data-test-subj']}>
       <EuiDataGrid
         aria-label="Alerts table"
@@ -49,6 +54,13 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         }}
       />
     </section>
+  ) : (
+    <EuiEmptyPrompt
+      data-test-subj="alerts-table-no-configuration"
+      iconType="logoSecurity"
+      title={<h2>{ALERTS_TABLE_CONF_ERROR_TITLE}</h2>}
+      body={<p>{ALERTS_TABLE_CONF_ERROR_MESSAGE}</p>}
+    />
   );
 };
 

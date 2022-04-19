@@ -124,13 +124,10 @@ describe('AlertsTable', () => {
       expect(alertsTableConfigurationRegistryMock.get).toHaveBeenCalledWith(PLUGIN_ID);
     });
 
-    it('should fail to render when the plugin id owner is not registered', async () => {
+    it('should render an empty error state when the plugin id owner is not registered', async () => {
       const props = { ...tableProps, configurationId: 'none' };
-      expect(() => {
-        render(<AlertsTable {...props} />);
-      }).toThrow(
-        'This plugin has no registered its alerts table parameters inside TriggersActionsUi'
-      );
+      const result = render(<AlertsTable {...props} />);
+      expect(result.getByTestId('alerts-table-no-configuration')).toBeTruthy();
     });
   });
 });
