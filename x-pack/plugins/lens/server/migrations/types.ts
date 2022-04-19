@@ -269,5 +269,5 @@ export interface XYVisualizationState830 extends VisState820 {
   valueLabels: ValueLabelConfig;
 }
 
-export type VisStatePre830 = XYVisualizationStatePre830 & VisState820;
-export type VisState830 = XYVisualizationState830 & VisState820;
+export type VisStatePre830 = XYVisualizationStatePre830;
+export type VisState830 = XYVisualizationState830;
