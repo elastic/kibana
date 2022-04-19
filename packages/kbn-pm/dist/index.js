@@ -88945,7 +88945,9 @@ function addProjectToTree(tree, pathParts, project) {
 /* harmony import */ var fs_promises__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(fs_promises__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("path");
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _convert_plugin_id_to_package_id__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("./src/utils/convert_plugin_id_to_package_id.ts");
+/* harmony import */ var normalize_path__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("../../node_modules/normalize-path/index.js");
+/* harmony import */ var normalize_path__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(normalize_path__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _convert_plugin_id_to_package_id__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./src/utils/convert_plugin_id_to_package_id.ts");
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -88956,12 +88958,13 @@ function addProjectToTree(tree, pathParts, project) {
 
 
 
+
 async function regenerateBaseTsconfig(plugins, repoRoot) {
   const tsconfigPath = path__WEBPACK_IMPORTED_MODULE_1___default.a.resolve(repoRoot, 'tsconfig.base.json');
   const lines = (await fs_promises__WEBPACK_IMPORTED_MODULE_0___default.a.readFile(tsconfigPath, 'utf-8')).split('\n');
   const packageMap = plugins.slice().sort((a, b) => a.manifestPath.localeCompare(b.manifestPath)).flatMap(p => {
-    const id = Object(_convert_plugin_id_to_package_id__WEBPACK_IMPORTED_MODULE_2__[/* convertPluginIdToPackageId */ "a"])(p.manifest.id);
-    const path = path__WEBPACK_IMPORTED_MODULE_1___default.a.relative(repoRoot, p.directory);
+    const id = Object(_convert_plugin_id_to_package_id__WEBPACK_IMPORTED_MODULE_3__[/* convertPluginIdToPackageId */ "a"])(p.manifest.id);
+    const path = normalize_path__WEBPACK_IMPORTED_MODULE_2___default()(path__WEBPACK_IMPORTED_MODULE_1___default.a.relative(repoRoot, p.directory));
     return [`      "${id}": ["${path}"],`, `      "${id}/*": ["${path}/*"],`];
   });
   const start = lines.findIndex(l => l.trim() === '// START AUTOMATED PACKAGE LISTING');
