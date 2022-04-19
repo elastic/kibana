@@ -10,7 +10,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiProgress } from '@elastic/eui'
 
 import type { FormattedTextClassificationResponse } from './common';
 
-export const TextClassificationOutput: FC<{ result: FormattedTextClassificationResponse }> = ({
+export const getTextClassificationOutputComponent = (
+  output: FormattedTextClassificationResponse
+) => <TextClassificationOutput result={output} />;
+
+const TextClassificationOutput: FC<{ result: FormattedTextClassificationResponse }> = ({
   result,
 }) => {
   return (

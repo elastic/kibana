@@ -7,4 +7,4 @@
 
 export type { FormattedLangIdentResponse } from './lang_ident_inference';
 export { LangIdentInference } from './lang_ident_inference';
-export { LangIdentOutput } from './lang_ident_output';
+export { getLangIdentOutputComponent } from './lang_ident_output';

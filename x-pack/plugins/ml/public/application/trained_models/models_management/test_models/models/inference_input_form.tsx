@@ -15,6 +15,7 @@ import { NerInference } from './ner';
 import {
   TextClassificationInference,
   ZeroShotClassificationInference,
+  FillMaskInference,
 } from './text_classification';
 
 import type { FormattedLangIdentResponse } from './lang_ident';
@@ -35,7 +36,8 @@ type InferResponse =
   | ReturnType<LangIdentInference['infer']>
   | ReturnType<NerInference['infer']>
   | ReturnType<TextClassificationInference['infer']>
-  | ReturnType<ZeroShotClassificationInference['infer']>;
+  | ReturnType<ZeroShotClassificationInference['infer']>
+  | ReturnType<FillMaskInference['infer']>;
 
 interface Props {
   getOutputComponent(output: FormattedInferenceResponse): JSX.Element;
@@ -95,7 +97,7 @@ export const InferenceInputForm: FC<Props> = ({
           fullWidth={false}
         >
           <FormattedMessage
-            id="xpack.ml.trainedModels.testModelsFlyout.langIdent.runButton"
+            id="xpack.ml.trainedModels.testModelsFlyout.inferenceInputForm.runButton"
             defaultMessage="Test"
           />
         </EuiButton>
@@ -109,7 +111,7 @@ export const InferenceInputForm: FC<Props> = ({
               onClick={setSelectedTab.bind(null, TAB.TEXT)}
             >
               <FormattedMessage
-                id="xpack.ml.trainedModels.testModelsFlyout.langIdent.markupTab"
+                id="xpack.ml.trainedModels.testModelsFlyout.inferenceInputForm.markupTab"
                 defaultMessage="Output"
               />
             </EuiTab>
@@ -118,7 +120,7 @@ export const InferenceInputForm: FC<Props> = ({
               onClick={setSelectedTab.bind(null, TAB.RAW)}
             >
               <FormattedMessage
-                id="xpack.ml.trainedModels.testModelsFlyout.langIdent.rawOutput"
+                id="xpack.ml.trainedModels.testModelsFlyout.inferenceInputForm.rawOutput"
                 defaultMessage="Raw output"
               />
             </EuiTab>

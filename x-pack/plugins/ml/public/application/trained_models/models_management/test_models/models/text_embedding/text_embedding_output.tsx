@@ -11,7 +11,11 @@ import { EuiTextArea, EuiCopy, EuiButton } from '@elastic/eui';
 
 import type { FormattedTextEmbeddingResponse } from './text_embedding_inference';
 
-export const TextEmbeddingOutput: FC<{ result: FormattedTextEmbeddingResponse }> = ({ result }) => {
+export const getTextEmbeddingOutputComponent = (output: FormattedTextEmbeddingResponse) => (
+  <TextEmbeddingOutput result={output} />
+);
+
+const TextEmbeddingOutput: FC<{ result: FormattedTextEmbeddingResponse }> = ({ result }) => {
   const value = result.predictedValue.toString();
   return (
     <>

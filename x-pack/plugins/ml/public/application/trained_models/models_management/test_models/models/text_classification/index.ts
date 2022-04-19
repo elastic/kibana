@@ -8,10 +8,10 @@
 export type { TextClassificationResponse, FormattedTextClassificationResponse } from './common';
 
 export { TextClassificationInference } from './text_classification_inference';
-export { TextClassificationOutput } from './text_classification_output';
+export { getTextClassificationOutputComponent } from './text_classification_output';
 
 export { ZeroShotClassificationInference } from './zero_shot_classification_inference';
 export { ZeroShotClassificationInput } from './zero_shot_classification_input';
 
 export { FillMaskInference } from './fill_mask_inference';
-export { FillMaskOutput } from './fill_mask_output';
+export { getFillMaskOutputComponent } from './fill_mask_output';

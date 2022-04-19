@@ -60,7 +60,11 @@ const UNKNOWN_ENTITY_TYPE = {
   borderColor: 'euiColorVis5',
 };
 
-export const NerOutput: FC<{ result: FormattedNerResponse }> = ({ result }) => {
+export const getNerOutputComponent = (output: FormattedNerResponse) => (
+  <NerOutput result={output} />
+);
+
+const NerOutput: FC<{ result: FormattedNerResponse }> = ({ result }) => {
   const { euiTheme } = useCurrentEuiTheme();
   const lineSplit: JSX.Element[] = [];
   result.forEach(({ value, entity }) => {

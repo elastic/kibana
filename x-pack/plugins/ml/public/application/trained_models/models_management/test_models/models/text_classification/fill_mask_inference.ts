@@ -13,7 +13,7 @@ export class FillMaskInference extends InferenceBase<InferResponse> {
   public async infer(inputText: string) {
     const payload = {
       docs: { [this.inputField]: inputText },
-      // inference_config: { fill_mask: { num_top_classes: 5 } },
+      inference_config: { fill_mask: { num_top_classes: 5 } },
     };
     const resp = (await this.trainedModelsApi.inferTrainedModel(
       this.model.model_id,

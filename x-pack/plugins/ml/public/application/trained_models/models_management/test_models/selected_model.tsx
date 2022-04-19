@@ -9,24 +9,20 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { FC, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { NerOutput, NerInference } from './models/ner';
-import type { FormattedNerResponse } from './models/ner';
+import { getNerOutputComponent, NerInference } from './models/ner';
 
-import { LangIdentOutput, LangIdentInference } from './models/lang_ident';
-import type { FormattedLangIdentResponse } from './models/lang_ident';
+import { getLangIdentOutputComponent, LangIdentInference } from './models/lang_ident';
 
 import {
-  TextClassificationOutput,
+  getTextClassificationOutputComponent,
   TextClassificationInference,
   ZeroShotClassificationInference,
   ZeroShotClassificationInput,
   FillMaskInference,
-  FillMaskOutput,
+  getFillMaskOutputComponent,
 } from './models/text_classification';
-import type { FormattedTextClassificationResponse } from './models/text_classification';
 
-import { TextEmbeddingOutput, TextEmbeddingInference } from './models/text_embedding';
-import type { FormattedTextEmbeddingResponse } from './models/text_embedding';
+import { getTextEmbeddingOutputComponent, TextEmbeddingInference } from './models/text_embedding';
 
 import { TextInput } from './models/text_input';
 
@@ -76,24 +72,28 @@ export const SelectedModel: FC<Props> = ({ model }) => {
   if (model.model_type === TRAINED_MODEL_TYPE.PYTORCH) {
     if (Object.keys(model.inference_config)[0] === SUPPORTED_PYTORCH_TASKS.NER) {
       const inferrer = new NerInference(trainedModels, model);
-      const getOutputComponent = (output: FormattedNerResponse) => <NerOutput result={output} />;
 
       return (
         <>
-          {getComp(() => inferrer.infer(inputText), getOutputComponent, getGeneralInputComponent)}
+          {getComp(
+            () => inferrer.infer(inputText),
+            getNerOutputComponent,
+            getGeneralInputComponent
+          )}
         </>
       );
     }
 
     if (Object.keys(model.inference_config)[0] === SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION) {
       const inferrer = new TextClassificationInference(trainedModels, model);
-      const getOutputComponent = (output: FormattedTextClassificationResponse) => (
-        <TextClassificationOutput result={output} />
-      );
 
       return (
         <>
-          {getComp(() => inferrer.infer(inputText), getOutputComponent, getGeneralInputComponent)}
+          {getComp(
+            () => inferrer.infer(inputText),
+            getTextClassificationOutputComponent,
+            getGeneralInputComponent
+          )}
         </>
       );
     }
@@ -103,9 +103,6 @@ export const SelectedModel: FC<Props> = ({ model }) => {
     ) {
       const inferrer = new ZeroShotClassificationInference(trainedModels, model);
 
-      const getOutputComponent = (output: FormattedTextClassificationResponse) => (
-        <TextClassificationOutput result={output} />
-      );
       const getZeroShotInputComponent = () => (
         <ZeroShotClassificationInput
           disabled={isRunning}
@@ -120,7 +117,7 @@ export const SelectedModel: FC<Props> = ({ model }) => {
         <>
           {getComp(
             () => inferrer.infer(inputText, inputText2),
-            getOutputComponent,
+            getTextClassificationOutputComponent,
             getZeroShotInputComponent
           )}
         </>
@@ -129,22 +126,21 @@ export const SelectedModel: FC<Props> = ({ model }) => {
 
     if (Object.keys(model.inference_config)[0] === SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING) {
       const inferrer = new TextEmbeddingInference(trainedModels, model);
-      const getOutputComponent = (output: FormattedTextEmbeddingResponse) => (
-        <TextEmbeddingOutput result={output} />
-      );
 
       return (
         <>
-          {getComp(() => inferrer.infer(inputText), getOutputComponent, getGeneralInputComponent)}
+          {getComp(
+            () => inferrer.infer(inputText),
+            getTextEmbeddingOutputComponent,
+            getGeneralInputComponent
+          )}
         </>
       );
     }
 
     if (Object.keys(model.inference_config)[0] === SUPPORTED_PYTORCH_TASKS.FILL_MASK) {
       const inferrer = new FillMaskInference(trainedModels, model);
-      const getOutputComponent = (output: FormattedTextClassificationResponse) => (
-        <FillMaskOutput result={output} inputText={inputText} />
-      );
+
       const placeholder = i18n.translate(
         'xpack.ml.trainedModels.testModelsFlyout.langIdent.inputText',
         {
@@ -156,7 +152,7 @@ export const SelectedModel: FC<Props> = ({ model }) => {
         <>
           {getComp(
             () => inferrer.infer(inputText),
-            getOutputComponent,
+            getFillMaskOutputComponent(inputText),
             () => getGeneralInputComponent(placeholder)
           )}
         </>
@@ -165,11 +161,16 @@ export const SelectedModel: FC<Props> = ({ model }) => {
   }
   if (model.model_type === TRAINED_MODEL_TYPE.LANG_IDENT) {
     const inferrer = new LangIdentInference(trainedModels, model);
-    const getOutputComponent = (output: FormattedLangIdentResponse) => (
-      <LangIdentOutput result={output} />
-    );
 
-    return <>{getComp(inferrer, getOutputComponent, getGeneralInputComponent)}</>;
+    return (
+      <>
+        {getComp(
+          () => inferrer.infer(inputText),
+          getLangIdentOutputComponent,
+          getGeneralInputComponent
+        )}
+      </>
+    );
   }
 
   return null;

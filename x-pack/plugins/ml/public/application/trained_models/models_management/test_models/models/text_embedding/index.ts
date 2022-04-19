@@ -11,4 +11,4 @@ export type {
 } from './text_embedding_inference';
 
 export { TextEmbeddingInference } from './text_embedding_inference';
-export { TextEmbeddingOutput } from './text_embedding_output';
+export { getTextEmbeddingOutputComponent } from './text_embedding_output';

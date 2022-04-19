@@ -12,7 +12,11 @@ import type { FormattedTextClassificationResponse } from './common';
 
 const MASK = '[MASK]';
 
-export const FillMaskOutput: FC<{
+export const getFillMaskOutputComponent =
+  (inputText: string) => (output: FormattedTextClassificationResponse) =>
+    <FillMaskOutput result={output} inputText={inputText} />;
+
+const FillMaskOutput: FC<{
   result: FormattedTextClassificationResponse;
   inputText: string;
 }> = ({ result, inputText }) => {

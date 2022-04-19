@@ -7,4 +7,4 @@
 
 export type { FormattedNerResponse } from './ner_inference';
 export { NerInference } from './ner_inference';
-export { NerOutput } from './ner_output';
+export { getNerOutputComponent } from './ner_output';

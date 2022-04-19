@@ -14,7 +14,11 @@ import { getLanguage } from './lang_codes';
 
 const PROBABILITY_SIG_FIGS = 3;
 
-export const LangIdentOutput: FC<{ result: FormattedLangIdentResponse }> = ({ result }) => {
+export const getLangIdentOutputComponent = (output: FormattedLangIdentResponse) => (
+  <LangIdentOutput result={output} />
+);
+
+const LangIdentOutput: FC<{ result: FormattedLangIdentResponse }> = ({ result }) => {
   if (result.length === 0) {
     return null;
   }
