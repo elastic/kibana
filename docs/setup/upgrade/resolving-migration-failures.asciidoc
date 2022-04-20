@@ -157,7 +157,7 @@ If the cluster exceeded the low watermark for disk usage, the output should cont
 --------------------------------------------
 Refer to the {es} guide for how to {ref}/fix-common-cluster-issues.html#_error_disk_usage_exceeded_flood_stage_watermark_index_has_read_only_allow_delete_block[fix common cluster issues].
 
-If routing allocation is the issue, you should see an entry similar to this:
+If routing allocation is the issue, the `_cluster/allocation/explain` API will return an entry similar to this:
 
 [source,sh]
 --------------------------------------------
