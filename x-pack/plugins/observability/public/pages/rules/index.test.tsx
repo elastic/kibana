@@ -18,6 +18,8 @@ import { createObservabilityRuleTypeRegistryMock } from '../../rules/observabili
 import { AppMountParameters } from '@kbn/core/public';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { RuleState } from './types';
+import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
 jest.mock('../../utils/kibana_react', () => ({
@@ -167,7 +169,7 @@ describe('empty RulesPage with show only capability', () => {
 describe('RulesPage with items', () => {
   let wrapper: ReactWrapper<any>;
   async function setup() {
-    const mockedRulesData = [
+    const mockedRulesData: Rule[] = [
       {
         id: '1',
         name: 'test rule',
@@ -177,18 +179,20 @@ describe('RulesPage with items', () => {
         schedule: { interval: '1s' },
         actions: [],
         params: { name: 'test rule type name' },
-        scheduledTaskId: null,
         createdBy: null,
         updatedBy: null,
         apiKeyOwner: null,
         throttle: '1m',
         muteAll: false,
         mutedInstanceIds: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        consumer: 'alerts',
+        notifyWhen: 'onActiveAlert',
         executionStatus: {
           status: 'active',
           lastDuration: 500,
           lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-          error: null,
         },
         monitoring: {
           execution: {
@@ -196,14 +200,17 @@ describe('RulesPage with items', () => {
               {
                 success: true,
                 duration: 1000000,
+                timestamp: 1234567,
               },
               {
                 success: true,
                 duration: 200000,
+                timestamp: 1234567,
               },
               {
                 success: false,
                 duration: 300000,
+                timestamp: 1234567,
               },
             ],
             calculated_metrics: {
@@ -224,18 +231,21 @@ describe('RulesPage with items', () => {
         schedule: { interval: '5d' },
         actions: [],
         params: { name: 'test rule type name' },
-        scheduledTaskId: null,
         createdBy: null,
         updatedBy: null,
         apiKeyOwner: null,
         throttle: '1m',
         muteAll: false,
         mutedInstanceIds: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        consumer: 'alerts',
+        notifyWhen: 'onActiveAlert',
         executionStatus: {
           status: 'ok',
           lastDuration: 61000,
           lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-          error: null,
+          error: undefined,
         },
         monitoring: {
           execution: {
@@ -243,10 +253,12 @@ describe('RulesPage with items', () => {
               {
                 success: true,
                 duration: 100000,
+                timestamp: 1234567,
               },
               {
                 success: true,
                 duration: 500000,
+                timestamp: 1234567,
               },
             ],
             calculated_metrics: {
@@ -267,22 +279,24 @@ describe('RulesPage with items', () => {
         schedule: { interval: '5d' },
         actions: [],
         params: { name: 'test rule type name' },
-        scheduledTaskId: null,
         createdBy: null,
         updatedBy: null,
         apiKeyOwner: null,
         throttle: '1m',
         muteAll: false,
         mutedInstanceIds: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        consumer: 'alerts',
+        notifyWhen: 'onActiveAlert',
         executionStatus: {
           status: 'pending',
           lastDuration: 30234,
           lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-          error: null,
         },
         monitoring: {
           execution: {
-            history: [{ success: false, duration: 100 }],
+            history: [{ success: false, duration: 100, timestamp: 1234567 }],
             calculated_metrics: {
               success_ratio: 0,
             },
@@ -355,7 +369,7 @@ describe('RulesPage with items', () => {
 describe('RulesPage with items and show only capability', () => {
   let wrapper: ReactWrapper<any>;
   async function setup() {
-    const mockedRulesData = [
+    const mockedRulesData: Rule[] = [
       {
         id: '1',
         name: 'test rule',
@@ -365,18 +379,20 @@ describe('RulesPage with items and show only capability', () => {
         schedule: { interval: '1s' },
         actions: [],
         params: { name: 'test rule type name' },
-        scheduledTaskId: null,
         createdBy: null,
         updatedBy: null,
         apiKeyOwner: null,
         throttle: '1m',
         muteAll: false,
         mutedInstanceIds: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        consumer: 'alerts',
+        notifyWhen: 'onActiveAlert',
         executionStatus: {
           status: 'active',
           lastDuration: 500,
           lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-          error: null,
         },
         monitoring: {
           execution: {
@@ -384,14 +400,17 @@ describe('RulesPage with items and show only capability', () => {
               {
                 success: true,
                 duration: 1000000,
+                timestamp: 1234567,
               },
               {
                 success: true,
                 duration: 200000,
+                timestamp: 1234567,
               },
               {
                 success: false,
                 duration: 300000,
+                timestamp: 1234567,
               },
             ],
             calculated_metrics: {
@@ -412,18 +431,20 @@ describe('RulesPage with items and show only capability', () => {
         schedule: { interval: '5d' },
         actions: [],
         params: { name: 'test rule type name' },
-        scheduledTaskId: null,
         createdBy: null,
         updatedBy: null,
         apiKeyOwner: null,
         throttle: '1m',
         muteAll: false,
         mutedInstanceIds: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        consumer: 'alerts',
+        notifyWhen: 'onActiveAlert',
         executionStatus: {
           status: 'ok',
           lastDuration: 61000,
           lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-          error: null,
         },
         monitoring: {
           execution: {
@@ -431,10 +452,12 @@ describe('RulesPage with items and show only capability', () => {
               {
                 success: true,
                 duration: 100000,
+                timestamp: 1234567,
               },
               {
                 success: true,
                 duration: 500000,
+                timestamp: 1234567,
               },
             ],
             calculated_metrics: {
@@ -455,22 +478,24 @@ describe('RulesPage with items and show only capability', () => {
         schedule: { interval: '5d' },
         actions: [],
         params: { name: 'test rule type name' },
-        scheduledTaskId: null,
         createdBy: null,
         updatedBy: null,
         apiKeyOwner: null,
         throttle: '1m',
         muteAll: false,
         mutedInstanceIds: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        consumer: 'alerts',
+        notifyWhen: 'onActiveAlert',
         executionStatus: {
           status: 'pending',
           lastDuration: 30234,
           lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
-          error: null,
         },
         monitoring: {
           execution: {
-            history: [{ success: false, duration: 100 }],
+            history: [{ success: false, duration: 100, timestamp: 1234567 }],
             calculated_metrics: {
               success_ratio: 0,
             },
