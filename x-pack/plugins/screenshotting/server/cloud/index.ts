@@ -21,8 +21,12 @@ export function systemHasInsufficientMemory(
   cloud: undefined | CloudSetup,
   logger: Logger
 ): boolean {
+  logger.fatal(`isCloudEnabled ${Boolean(cloud?.isCloudEnabled)}`);
+  logger.fatal(`hasDeploymentId ${Boolean(cloud?.deploymentId)}`);
+  logger.fatal(`has cloud ${Boolean(cloud?.isCloudEnabled || cloud?.deploymentId)}`);
   if (!Boolean(cloud?.isCloudEnabled || cloud?.deploymentId)) return false;
   const limit = readMemoryLimit();
+  logger.fatal(`memory limit from cgroups ${limit}`);
   logger.info(`Memory limit from cgroup (in bytes): ${limit}`);
   return limit < MIN_CLOUD_OS_MEM_BYTES;
 }
