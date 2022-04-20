@@ -207,7 +207,7 @@
               "zone_count": 1,
               "size": {
                 "resource": "memory",
-                "value": 2048
+                "value": 1024
               }
             }
           ],
