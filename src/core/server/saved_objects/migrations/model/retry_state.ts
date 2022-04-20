@@ -10,7 +10,7 @@ import { State } from '../state';
 
 export const delayRetryState = <S extends State>(
   state: S,
-  errorMessage: string, // comes in as "[index_not_yellow_timeout] Timeout waiting for the status of the [${index}] index to become 'yellow'"
+  errorMessage: string,
   /** How many times to retry a step that fails */
   maxRetryAttempts: number
 ): S => {
