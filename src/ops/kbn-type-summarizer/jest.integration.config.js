@@ -10,6 +10,6 @@
 /** @type {JestConfig} */
 module.exports = {
   preset: '@kbn/test/jest_integration_node',
-  rootDir: '../..',
+  rootDir: '../../..',
   roots: ['<rootDir>/src/ops/kbn-type-summarizer'],
 };

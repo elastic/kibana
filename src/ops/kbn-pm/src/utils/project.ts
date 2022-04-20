@@ -93,7 +93,7 @@ export class Project {
     const relativePathToProjectIfBazelPkg = normalizePath(
       Path.relative(
         this.path,
-        `${__dirname}/../../../bazel-bin/packages/${Path.basename(project.path)}`
+        Path.resolve(__dirname, `../../../../bazel-bin/packages/${Path.basename(project.path)}`)
       )
     );
 

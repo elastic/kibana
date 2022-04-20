@@ -8,6 +8,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../..',
+  rootDir: '../../..',
   roots: ['<rootDir>/src/ops/kbn-eslint-plugin-eslint'],
 };

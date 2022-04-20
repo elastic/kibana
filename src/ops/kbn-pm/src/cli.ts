@@ -91,7 +91,7 @@ export async function run(argv: string[]) {
 
   // This `rootPath` is relative to `./dist/` as that's the location of the
   // built version of this tool.
-  const rootPath = resolve(__dirname, '../../../');
+  const rootPath = resolve(__dirname, '../../../..');
 
   const commandName = args[0];
   const extraArgs = args.slice(1);
