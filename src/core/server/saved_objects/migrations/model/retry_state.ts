@@ -12,25 +12,17 @@ export const delayRetryState = <S extends State>(
   state: S,
   errorMessage: string, // comes in as "[index_not_yellow_timeout] Timeout waiting for the status of the [${index}] index to become 'yellow'"
   /** How many times to retry a step that fails */
-  maxRetryAttempts: number,
-  /** optional link to docs */
-  docLink?: string
+  maxRetryAttempts: number
 ): S => {
-  const defaultReason = `Unable to complete the ${state.controlState} step after ${maxRetryAttempts} attempts, terminating.`;
   if (state.retryCount >= maxRetryAttempts) {
     return {
       ...state,
       controlState: 'FATAL',
-      reason: docLink
-        ? `${defaultReason} Refer to ${docLink} for information on how to resolve the issue.`
-        : defaultReason,
+      reason: `Unable to complete the ${state.controlState} step after ${maxRetryAttempts} attempts, terminating. The last failure message was: ${errorMessage}`,
     };
   } else {
     const retryCount = state.retryCount + 1;
     const retryDelay = 1000 * Math.min(Math.pow(2, retryCount), 64); // 2s, 4s, 8s, 16s, 32s, 64s, 64s, 64s ...
-    const defaultLogsActionErrorMessage = `Action failed with '${errorMessage}'. Retrying attempt ${retryCount} in ${
-      retryDelay / 1000
-    } seconds.`;
     return {
       ...state,
       retryCount,
@@ -39,9 +31,9 @@ export const delayRetryState = <S extends State>(
         ...state.logs,
         {
           level: 'error',
-          message: docLink
-            ? `${defaultLogsActionErrorMessage} Refer to ${docLink} for information on how to resolve the issue.`
-            : defaultLogsActionErrorMessage,
+          message: `Action failed with '${errorMessage}'. Retrying attempt ${retryCount} in ${
+            retryDelay / 1000
+          } seconds.`,
         },
       ],
     };

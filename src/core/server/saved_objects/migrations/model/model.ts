@@ -242,15 +242,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // A yellow status timeout could theoretically be temporary for a busy cluster
         // that takes a long time to allocate the primary and we retry the action to see if
         // we get a response.
-        // If the cluster hit the low watermark for disk usage the LEGACY_CREATE_TEINDEX_TARGET action will
+        // If the cluster hit the low watermark for disk usage the LEGACY_CREATE_REINDEX_TARGET action will
         // continue to timeout and eventually lead to a failed migration.
-        // To help users diagnose the problem, we link to the docs from the final error message.
-        return delayRetryState(
-          stateP,
-          left.message,
-          stateP.retryAttempts,
-          stateP.migrationDocLinks.resolveMigrationFailures
-        );
+        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for information on how to resolve the issue.`;
+        return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
       } else {
         return throwBadResponse(stateP, left);
       }
@@ -371,12 +366,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // we get a response.
         // In the event of retries running out, we link to the docs to help with diagnosing
         // the problem.
-        return delayRetryState(
-          stateP,
-          left.message,
-          stateP.retryAttempts,
-          stateP.migrationDocLinks.resolveMigrationFailures
-        );
+        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for information on how to resolve the issue.`;
+        return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
       } else {
         return throwBadResponse(stateP, left);
       }
@@ -470,13 +461,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         //
         // If there is a problem CREATE_REINDEX_TEMP action will
         // continue to timeout and eventually lead to a failed migration.
-        // To help users diagnose the problem, we link to the docs from the final error message.
-        return delayRetryState(
-          stateP,
-          left.message,
-          stateP.retryAttempts,
-          stateP.migrationDocLinks.resolveMigrationFailures
-        );
+        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for information on how to resolve the issue.`;
+        return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
       } else {
         return throwBadResponse(stateP, left);
       }
@@ -709,14 +695,9 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // Identifying the cause requires inspecting the ouput of the
         // `_cluster/allocation/explain?index=${targetIndex}` API.
         // Unless the root cause is identified and addressed, the request will
-        // continue to timeout and eventually lead to a failed migration. We link to the
-        // docs in the final error message to help diagnose the problem.
-        return delayRetryState(
-          stateP,
-          left.message,
-          stateP.retryAttempts,
-          stateP.migrationDocLinks.resolveMigrationFailures
-        );
+        // continue to timeout and eventually lead to a failed migration.
+        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for information on how to resolve the issue.`;
+        return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
       } else {
         throwBadResponse(stateP, left);
       }
@@ -968,17 +949,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // `index_not_yellow_timeout` for the CREATE_NEW_TARGET target index:
         // The cluster might just be busy and we retry the action for a set number of times.
         // If the cluster hit the low watermark for disk usage the action will continue to timeout.
-        // Unless the disc space is addressed, the LEGACY_CREATE_TEINDEX_TARGET action will
+        // Unless the disk space is addressed, the LEGACY_CREATE_REINDEX_TARGET action will
         // continue to timeout and eventually lead to a failed migration.
-        // To help diagnose the issue, the final Error message is clearly labeled and has
-        // a link to the online docs that has more information on how to diagnose
-        // the error.
-        return delayRetryState(
-          stateP,
-          left.message,
-          stateP.retryAttempts,
-          stateP.migrationDocLinks.resolveMigrationFailures
-        );
+        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for information on how to resolve the issue.`;
+        return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
       } else {
         return throwBadResponse(stateP, left);
       }

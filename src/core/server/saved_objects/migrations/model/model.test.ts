@@ -185,7 +185,7 @@ describe('migrations v2 model', () => {
 
       expect(newState.controlState).toEqual('FATAL');
       expect(newState.reason).toMatchInlineSnapshot(
-        `"Unable to complete the INIT step after 15 attempts, terminating."`
+        `"Unable to complete the INIT step after 15 attempts, terminating. The last failure message was: snapshot_in_progress_exception"`
       );
     });
   });

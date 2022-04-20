@@ -149,7 +149,7 @@ GET _cluster/allocation/explain
   "primary": true,
 }
 --------------------------------------------
-If the cluster exceeded the low watermark for disc usage, the output should contain a message similar to this:
+If the cluster exceeded the low watermark for disk usage, the output should contain a message similar to this:
 
 [source,sh]
 --------------------------------------------

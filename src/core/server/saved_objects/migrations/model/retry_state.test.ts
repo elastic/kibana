@@ -106,7 +106,7 @@ describe('delayRetryState', () => {
     });
 
     for (let i = 0; i < 5; i++) {
-      state = delayRetryState(state, 'some-error', 10, 'docLink');
+      state = delayRetryState(state, 'some-error', 10);
     }
 
     expect(state).toEqual({
@@ -117,23 +117,23 @@ describe('delayRetryState', () => {
       logs: [
         {
           level: 'error',
-          message: `Action failed with 'some-error'. Retrying attempt 1 in 2 seconds. Refer to docLink for information on how to resolve the issue.`,
+          message: `Action failed with 'some-error'. Retrying attempt 1 in 2 seconds.`,
         },
         {
           level: 'error',
-          message: `Action failed with 'some-error'. Retrying attempt 2 in 4 seconds. Refer to docLink for information on how to resolve the issue.`,
+          message: `Action failed with 'some-error'. Retrying attempt 2 in 4 seconds.`,
         },
         {
           level: 'error',
-          message: `Action failed with 'some-error'. Retrying attempt 3 in 8 seconds. Refer to docLink for information on how to resolve the issue.`,
+          message: `Action failed with 'some-error'. Retrying attempt 3 in 8 seconds.`,
         },
         {
           level: 'error',
-          message: `Action failed with 'some-error'. Retrying attempt 4 in 16 seconds. Refer to docLink for information on how to resolve the issue.`,
+          message: `Action failed with 'some-error'. Retrying attempt 4 in 16 seconds.`,
         },
         {
           level: 'error',
-          message: `Action failed with 'some-error'. Retrying attempt 5 in 32 seconds. Refer to docLink for information on how to resolve the issue.`,
+          message: `Action failed with 'some-error'. Retrying attempt 5 in 32 seconds.`,
         },
       ],
     });
@@ -152,32 +152,7 @@ describe('delayRetryState', () => {
       hello: 'dolly',
       retryCount: 5,
       retryDelay: 64,
-      reason: `Unable to complete the TEST step after 5 attempts, terminating.`,
-    });
-  });
-
-  it('Extends the message of a FATAL state if a doc link is provided', () => {
-    const state = createState({
-      controlState: 'TEST',
-      hello: 'dolly',
-      retryCount: 5,
-      retryDelay: 64,
-      migrationDocLinks: {
-        specificErrorLink: 'specificErrorLink',
-      },
-    });
-
-    expect(
-      delayRetryState(state, 'some-error', 5, state.migrationDocLinks.specificErrorLink)
-    ).toEqual({
-      controlState: 'FATAL',
-      hello: 'dolly',
-      retryCount: 5,
-      retryDelay: 64,
-      migrationDocLinks: {
-        specificErrorLink: 'specificErrorLink',
-      },
-      reason: `Unable to complete the TEST step after 5 attempts, terminating. Refer to specificErrorLink for information on how to resolve the issue.`,
+      reason: `Unable to complete the TEST step after 5 attempts, terminating. The last failure message was: some-error`,
     });
   });
 });
