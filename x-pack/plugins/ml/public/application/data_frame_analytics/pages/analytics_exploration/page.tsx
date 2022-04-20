@@ -97,7 +97,10 @@ export const Page: FC<{
 
   return (
     <>
-      <AnalyticsIdSelectorControls setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible} />
+      <AnalyticsIdSelectorControls
+        setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
+        selectedId={jobIdToUse}
+      />
       {isIdSelectorFlyoutVisible ? (
         <AnalyticsIdSelector
           setAnalyticsId={setAnalyticsId}

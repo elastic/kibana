@@ -100,7 +100,10 @@ export const Page: FC = () => {
 
   return (
     <>
-      <AnalyticsIdSelectorControls setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible} />
+      <AnalyticsIdSelectorControls
+        setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
+        selectedId={jobId || modelId}
+      />
       {isIdSelectorFlyoutVisible ? (
         <AnalyticsIdSelector
           setAnalyticsId={setAnalyticsId}
