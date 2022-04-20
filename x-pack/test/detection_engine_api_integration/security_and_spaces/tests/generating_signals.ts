@@ -126,7 +126,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         expect(signalsOpen.hits.hits[0]._source![ALERT_RULE_RULE_ID]).eql(
-          getSimpleRule(id).rule_id
+          getSimpleRule(rule.rule_id).rule_id
         );
       });
 
