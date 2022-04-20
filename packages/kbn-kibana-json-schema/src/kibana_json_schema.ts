@@ -29,7 +29,7 @@ export const KibanaJsonSchema: JSONSchema = {
     },
     kibanaVersion: {
       description: dedent`
-        The version of Kibana the plugin is compatible with, defaults to "version".
+        The version of Kibana the plugin is compatible with, defaults to the value of the version field.
       `,
       type: 'string',
       pattern: '^(kibana|)$',
