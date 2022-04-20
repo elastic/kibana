@@ -134,7 +134,6 @@ Enterprise Search::
 For the Elastic Enterprise Search 8.2.0 release information, refer to {enterprise-search-ref}/changelog.html[_Elastic Enterprise Search Documentation Release notes_].
 
 Fleet::
-* Adds link to ILM policy documentation {kibana-pull}128656[#128656]
 * Merge settings & mappings component template in @package {kibana-pull}128498[#128498]
 * Redesign agent flyout {kibana-pull}128381[#128381]
 * Adds a link from agent details page to agent dashboard {kibana-pull}127882[#127882]
