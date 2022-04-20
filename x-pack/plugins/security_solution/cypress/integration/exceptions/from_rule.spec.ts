@@ -11,7 +11,7 @@ import { getNewRule } from '../../objects/rule';
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE, NUMBER_OF_ALERTS } from '../../screens/alerts';
 
 import { goToClosedAlerts, goToOpenedAlerts } from '../../tasks/alerts';
-import { createCustomRule } from '../../tasks/api_calls/rules';
+import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
@@ -37,11 +37,9 @@ describe('From rule', () => {
   beforeEach(() => {
     esArchiverLoad('exceptions');
     deleteAlertsAndRules();
-    createCustomRule(
+    createCustomRuleEnabled(
       { ...getNewRule(), customQuery: 'agent.name:*', index: ['exceptions*'] },
-      'rule_testing',
-      '5s',
-      true
+      'rule_testing'
     );
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
@@ -57,7 +55,7 @@ describe('From rule', () => {
     esArchiverUnload('exceptions_2');
   });
 
-  it('Creates an exception and deletes it', () => {
+  it('Creates an exception from exceptions tab and deletes it', () => {
     // Create an exception from the exception tab that matches
     // the existing alert
     goToExceptionsTab();
