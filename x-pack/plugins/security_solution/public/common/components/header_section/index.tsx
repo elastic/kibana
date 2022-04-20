@@ -16,6 +16,7 @@ import {
 import React, { useCallback } from 'react';
 import styled, { css } from 'styled-components';
 
+import classnames from 'classnames';
 import { InspectButton } from '../inspect';
 
 import { Subtitle } from '../subtitle';
@@ -29,6 +30,16 @@ interface HeaderProps {
 const Header = styled.header.attrs(() => ({
   className: 'siemHeaderSection',
 }))<HeaderProps>`
+  &.toggle-expand {
+    .header-section-content {
+      height: 48px;
+    }
+
+    .header-section-titles {
+      margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
+    }
+  }
+
   ${({ height }) =>
     height &&
     css`
@@ -91,17 +102,27 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
       toggleQuery(!toggleStatus);
     }
   }, [toggleQuery, toggleStatus]);
+
+  const classNames = classnames({
+    'toggle-expand': toggleStatus,
+    'toggle-collapsed': !toggleStatus,
+  });
   return (
-    <Header data-test-subj="header-section" border={border} height={height}>
+    <Header data-test-subj="header-section" border={border} height={height} className={classNames}>
       <EuiFlexGroup
         alignItems={stackHeader ? undefined : 'center'}
         direction={stackHeader ? 'column' : 'row'}
         gutterSize="s"
       >
         <EuiFlexItem grow={growLeftSplit}>
-          <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
+          <EuiFlexGroup
+            alignItems="center"
+            responsive={false}
+            gutterSize="s"
+            className="header-section-content"
+          >
             <EuiFlexItem>
-              <EuiFlexGroup gutterSize={'none'}>
+              <EuiFlexGroup gutterSize={'none'} className="header-section-titles">
                 {toggleQuery && (
                   <EuiFlexItem grow={false}>
                     <EuiButtonIcon
