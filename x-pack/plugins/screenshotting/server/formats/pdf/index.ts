@@ -6,6 +6,7 @@
  */
 
 import { groupBy } from 'lodash';
+import PDFJS from 'pdfjs-dist';
 import type { Values } from '@kbn/utility-types';
 import type { Logger, PackageInfo } from '@kbn/core/server';
 import type { LayoutParams } from '../../../common';
@@ -129,7 +130,7 @@ export async function toPdf(
     }
   } else {
     buffer = results[0].screenshots[0].data; // This buffer is already the PDF
-    pages = -1; // TODO: Figure out how to get page numbers
+    pages = await PDFJS.getDocument(buffer).promise.then((doc) => doc.numPages);
   }
 
   return {
