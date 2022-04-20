@@ -26,7 +26,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe.only('export_rules', () => {
+  describe('export_rules', () => {
     describe('exporting rules', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest, log);
