@@ -167,7 +167,7 @@ Specifically, in the kibana.yml file:
 You can also do this on a per rule type basis with the `xpack.alerting.run.timeout` setting.
 
 * Configure a minimum value for the interval with which your rules run with the `xpack.alerting.rules.minimumScheduleInterval.value` setting. Strictly enforce the
-minimum interval or just display warnings on the UI. Check the
+minimum interval or just display warnings on the UI with the `xpack.alerting.rules.minimumScheduleInterval.enforce` setting.
  {kibana-ref}/alert-action-settings-kb.html#action-settings[documentation] for the
 
 * Configure the maximum number of actions that a rule can generate with the `xpack.alerting.rules.run.actions.max` setting. Specify a different cap for your
