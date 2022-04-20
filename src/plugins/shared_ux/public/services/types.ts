@@ -8,7 +8,6 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { CoreStart, AppUpdater, PluginInitializerContext } from '@kbn/core/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 /**
  * Parameters necessary to create a Kibana-based service, (e.g. during Plugin
@@ -21,7 +20,6 @@ export interface KibanaPluginServiceParams<Start extends {}> {
   startPlugins: Start;
   appUpdater?: BehaviorSubject<AppUpdater>;
   initContext?: PluginInitializerContext;
-  dataViews: DataViewsPublicPluginStart;
 }
 
 /**
