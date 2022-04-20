@@ -5,72 +5,7 @@
  * 2.0.
  */
 
-import { isOnlySingleFeatureType, assignCategoriesToPalette, dynamicRound } from './style_util';
-import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
-
-describe('isOnlySingleFeatureType', () => {
-  describe('source supports single feature type', () => {
-    const supportedFeatures = [VECTOR_SHAPE_TYPE.POINT];
-    const hasFeatureType = {
-      [VECTOR_SHAPE_TYPE.POINT]: false,
-      [VECTOR_SHAPE_TYPE.LINE]: false,
-      [VECTOR_SHAPE_TYPE.POLYGON]: false,
-    };
-
-    test('Is only single feature type when only supported feature type is target feature type', () => {
-      expect(
-        isOnlySingleFeatureType(VECTOR_SHAPE_TYPE.POINT, supportedFeatures, hasFeatureType)
-      ).toBe(true);
-    });
-
-    test('Is not single feature type when only supported feature type is not target feature type', () => {
-      expect(
-        isOnlySingleFeatureType(VECTOR_SHAPE_TYPE.LINE, supportedFeatures, hasFeatureType)
-      ).toBe(false);
-    });
-  });
-
-  describe('source supports multiple feature types', () => {
-    const supportedFeatures = [
-      VECTOR_SHAPE_TYPE.POINT,
-      VECTOR_SHAPE_TYPE.LINE,
-      VECTOR_SHAPE_TYPE.POLYGON,
-    ];
-
-    test('Is only single feature type when data only has target feature type', () => {
-      const hasFeatureType = {
-        [VECTOR_SHAPE_TYPE.POINT]: true,
-        [VECTOR_SHAPE_TYPE.LINE]: false,
-        [VECTOR_SHAPE_TYPE.POLYGON]: false,
-      };
-      expect(
-        isOnlySingleFeatureType(VECTOR_SHAPE_TYPE.POINT, supportedFeatures, hasFeatureType)
-      ).toBe(true);
-    });
-
-    test('Is not single feature type when data has multiple feature types', () => {
-      const hasFeatureType = {
-        [VECTOR_SHAPE_TYPE.POINT]: true,
-        [VECTOR_SHAPE_TYPE.LINE]: true,
-        [VECTOR_SHAPE_TYPE.POLYGON]: true,
-      };
-      expect(
-        isOnlySingleFeatureType(VECTOR_SHAPE_TYPE.LINE, supportedFeatures, hasFeatureType)
-      ).toBe(false);
-    });
-
-    test('Is not single feature type when data does not have target feature types', () => {
-      const hasFeatureType = {
-        [VECTOR_SHAPE_TYPE.POINT]: false,
-        [VECTOR_SHAPE_TYPE.LINE]: true,
-        [VECTOR_SHAPE_TYPE.POLYGON]: false,
-      };
-      expect(
-        isOnlySingleFeatureType(VECTOR_SHAPE_TYPE.POINT, supportedFeatures, hasFeatureType)
-      ).toBe(false);
-    });
-  });
-});
+import { assignCategoriesToPalette, dynamicRound } from './style_util';
 
 describe('assignCategoriesToPalette', () => {
   test('Categories and icons have same length', () => {
