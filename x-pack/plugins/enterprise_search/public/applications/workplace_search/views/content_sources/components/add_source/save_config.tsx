@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { FormEvent } from 'react';
+import React, {FormEvent} from 'react';
 
-import { useActions, useValues } from 'kea';
+import {useActions, useValues} from 'kea';
 
 import {
   EuiButton,
@@ -18,63 +18,68 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSpacer,
+  EuiSplitPanel,
   EuiSteps,
+  EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import {i18n} from '@kbn/i18n';
 
-import { LicensingLogic } from '../../../../../shared/licensing';
-import { ApiKey } from '../../../../components/shared/api_key';
+import {LicensingLogic} from '../../../../../shared/licensing';
+import {ApiKey} from '../../../../components/shared/api_key';
 import {
-  PUBLIC_KEY_LABEL,
-  CONSUMER_KEY_LABEL,
   BASE_URI_LABEL,
   BASE_URL_LABEL,
   CLIENT_ID_LABEL,
   CLIENT_SECRET_LABEL,
+  CLIENT_BASIC_API_KEY_LABEL,
+  CONSUMER_KEY_LABEL,
+  PUBLIC_KEY_LABEL,
   REMOVE_BUTTON,
 } from '../../../../constants';
-import { Configuration } from '../../../../types';
+import {Configuration} from '../../../../types';
 
-import { ExternalConnectorFormFields } from './add_external_connector';
-import { ExternalConnectorDocumentation } from './add_external_connector';
-import { AddSourceLogic } from './add_source_logic';
-import { ConfigDocsLinks } from './config_docs_links';
-import { OAUTH_SAVE_CONFIG_BUTTON, OAUTH_BACK_BUTTON, OAUTH_STEP_2 } from './constants';
+import {ExternalConnectorDocumentation, ExternalConnectorFormFields} from './add_external_connector';
+import {AddSourceLogic} from './add_source_logic';
+import {ConfigDocsLinks} from './config_docs_links';
+import {OAUTH_BACK_BUTTON, OAUTH_SAVE_CONFIG_BUTTON, OAUTH_STEP_2} from './constants';
 
 interface SaveConfigProps {
   header: React.ReactNode;
   name: string;
   configuration: Configuration;
+
   advanceStep(): void;
+
   goBackStep?(): void;
+
   onDeleteConfig?(): void;
 }
 
 export const SaveConfig: React.FC<SaveConfigProps> = ({
-  name,
-  configuration: {
-    isPublicKey,
-    needsBaseUrl,
-    documentationUrl,
-    applicationPortalUrl,
-    applicationLinkTitle,
-    baseUrlTitle,
-  },
-  advanceStep,
-  goBackStep,
-  onDeleteConfig,
-  header,
-}) => {
-  const { hasPlatinumLicense } = useValues(LicensingLogic);
+                                                        name,
+                                                        configuration: {
+                                                          isPublicKey,
+                                                          needsBaseUrl,
+                                                          documentationUrl,
+                                                          applicationPortalUrl,
+                                                          applicationLinkTitle,
+                                                          baseUrlTitle,
+                                                        },
+                                                        advanceStep,
+                                                        goBackStep,
+                                                        onDeleteConfig,
+                                                        header,
+                                                      }) => {
+  const {hasPlatinumLicense} = useValues(LicensingLogic);
 
-  const { setClientIdValue, setClientSecretValue, setBaseUrlValue } = useActions(AddSourceLogic);
+  const {setClientIdValue, setClientSecretValue, setClientBasicApiKeyValue, setBaseUrlValue} = useActions(AddSourceLogic);
 
-  const { sourceConfigData, buttonLoading, clientIdValue, clientSecretValue, baseUrlValue } =
+  const {sourceConfigData, buttonLoading, clientIdValue, clientSecretValue, clientBasicApiKeyValue, baseUrlValue} =
     useValues(AddSourceLogic);
 
   const {
     accountContextOnly,
-    configuredFields: { publicKey, consumerKey },
+    configuredFields: {publicKey, consumerKey},
     serviceType,
   } = sourceConfigData;
 
@@ -118,16 +123,16 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
         applicationPortalUrl={applicationPortalUrl}
         applicationLinkTitle={applicationLinkTitle}
       />
-      <EuiSpacer />
+      <EuiSpacer/>
       <EuiFlexGroup direction="column" justifyContent="flexStart" responsive={false}>
         <EuiFlexItem grow={false}>
-          <ApiKey label={PUBLIC_KEY_LABEL} apiKey={publicKey || ''} />
+          <ApiKey label={PUBLIC_KEY_LABEL} apiKey={publicKey || ''}/>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ApiKey label={CONSUMER_KEY_LABEL} apiKey={consumerKey || ''} />
+          <ApiKey label={CONSUMER_KEY_LABEL} apiKey={consumerKey || ''}/>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer />
+      <EuiSpacer/>
     </EuiFlexGroup>
   );
 
@@ -142,7 +147,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
 
   const publicKeyStep2 = (
     <>
-      {serviceType === 'external' && <ExternalConnectorFormFields />}
+      {serviceType === 'external' && <ExternalConnectorFormFields/>}
       <EuiFormRow label={BASE_URI_LABEL}>
         <EuiFieldText
           value={baseUrlValue}
@@ -153,7 +158,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
           name="base-uri"
         />
       </EuiFormRow>
-      <EuiSpacer />
+      <EuiSpacer/>
       {formActions}
     </>
   );
@@ -162,40 +167,71 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
     <EuiFlexGroup direction="column" responsive={false}>
       <EuiFlexItem>
         <EuiForm>
-          {serviceType === 'external' && <ExternalConnectorFormFields />}
-          <EuiFormRow label={CLIENT_ID_LABEL}>
-            <EuiFieldText
-              value={clientIdValue}
-              required
-              type="text"
-              autoComplete="off"
-              onChange={(e) => setClientIdValue(e.target.value)}
-              name="client-id"
-            />
-          </EuiFormRow>
-          <EuiFormRow label={CLIENT_SECRET_LABEL}>
-            <EuiFieldText
-              value={clientSecretValue}
-              required
-              type="text"
-              autoComplete="off"
-              onChange={(e) => setClientSecretValue(e.target.value)}
-              name="client-secret"
-            />
-          </EuiFormRow>
-          {needsBaseUrl && (
-            <EuiFormRow label={baseUrlTitle || BASE_URL_LABEL}>
-              <EuiFieldText
-                value={baseUrlValue}
-                required
-                type="text"
-                autoComplete="off"
-                onChange={(e) => setBaseUrlValue(e.target.value)}
-                name="base-url"
-              />
-            </EuiFormRow>
-          )}
+          {serviceType === 'external' && <ExternalConnectorFormFields/>}
+          <EuiFlexGroup>
+            <EuiFlexItem color="subdued">
+              {needsBaseUrl && (
+                <EuiFormRow label={baseUrlTitle || BASE_URL_LABEL}>
+                  <EuiFieldText
+                    value={baseUrlValue}
+                    required
+                    type="text"
+                    autoComplete="off"
+                    onChange={(e) => setBaseUrlValue(e.target.value)}
+                    name="base-url"
+                  />
+                </EuiFormRow>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiSpacer />
+          <EuiFlexGroup direction="row">
+            <EuiFlexItem>
+              <EuiTitle size="xs">
+                <h2>
+                  For OAuth (required if you don't set Basic Auth)
+                </h2>
+              </EuiTitle>
+              <EuiFormRow label={CLIENT_ID_LABEL}>
+                <EuiFieldText
+                  value={clientIdValue}
+                  required={!clientBasicApiKeyValue}
+                  type="text"
+                  autoComplete="off"
+                  onChange={(e) => setClientIdValue(e.target.value)}
+                  name="client-id"
+                />
+              </EuiFormRow>
+              <EuiFormRow label={CLIENT_SECRET_LABEL}>
+                <EuiFieldText
+                  value={clientSecretValue}
+                  required={!clientBasicApiKeyValue}
+                  type="text"
+                  autoComplete="off"
+                  onChange={(e) => setClientSecretValue(e.target.value)}
+                  name="client-secret"
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTitle size="xs">
+                <h2>
+                  For Basic Auth (required if you don't set OAuth)
+                </h2>
+              </EuiTitle>
+              <EuiFormRow label={CLIENT_BASIC_API_KEY_LABEL}>
+                <EuiFieldText
+                  value={clientBasicApiKeyValue}
+                  required={!clientIdValue}
+                  type="text"
+                  autoComplete="off"
+                  onChange={(e) => setClientBasicApiKeyValue(e.target.value)}
+                  name="client-basic-api"
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer/>
           {formActions}
         </EuiForm>
       </EuiFlexItem>
@@ -205,7 +241,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
   const oauthSteps = (sourceName: string) => [
     i18n.translate('xpack.enterpriseSearch.workplaceSearch.contentSource.saveConfig.oauthStep1', {
       defaultMessage: "Create an OAuth app in your organization's {sourceName} account",
-      values: { sourceName },
+      values: {sourceName},
     }),
     OAUTH_STEP_2,
   ];
@@ -224,15 +260,15 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
   return (
     <>
       {header}
-      <EuiSpacer size="l" />
+      <EuiSpacer size="l"/>
       {serviceType === 'external' && (
         <>
-          <ExternalConnectorDocumentation name={name} documentationUrl={documentationUrl} />
-          <EuiSpacer size="l" />
+          <ExternalConnectorDocumentation name={name} documentationUrl={documentationUrl}/>
+          <EuiSpacer size="l"/>
         </>
       )}
       <form onSubmit={handleFormSubmission}>
-        <EuiSteps steps={configSteps} className="adding-a-source__config-steps" />
+        <EuiSteps steps={configSteps} className="adding-a-source__config-steps"/>
       </form>
     </>
   );

@@ -555,6 +555,13 @@ export const CLIENT_SECRET_LABEL = i18n.translate(
   }
 );
 
+export const CLIENT_BASIC_API_KEY_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.clientBasicApiKey.label',
+  {
+    defaultMessage: 'Client API key (for basic auth)',
+  }
+);
+
 export const CONFIDENTIAL_LABEL = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.confidential.label',
   {

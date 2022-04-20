@@ -66,6 +66,7 @@ export interface AddSourceActions {
   setSourceConnectData(sourceConnectData: SourceConnectData): SourceConnectData;
   setClientIdValue(clientIdValue: string): string;
   setClientSecretValue(clientSecretValue: string): string;
+  setClientBasicApiKeyValue(clientBasicApiKeyValue: string): string;
   setBaseUrlValue(baseUrlValue: string): string;
   setSourceLoginValue(loginValue: string): string;
   setSourcePasswordValue(passwordValue: string): string;
@@ -117,6 +118,7 @@ export interface SourceConfigData {
     baseUrl?: string;
     clientId?: string;
     clientSecret?: string;
+    clientBasicApiKey?: string;
     externalConnectorUrl?: string;
     externalConnectorApiKey?: string;
   };
@@ -138,8 +140,9 @@ export interface AddSourceValues {
   dataLoading: boolean;
   sectionLoading: boolean;
   buttonLoading: boolean;
-  clientIdValue: string;
-  clientSecretValue: string;
+  clientIdValue?: string;
+  clientSecretValue?: string;
+  clientBasicApiKeyValue?: string;
   baseUrlValue: string;
   loginValue: string;
   passwordValue: string;
@@ -173,6 +176,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
     setSourceConnectData: (sourceConnectData: SourceConnectData) => sourceConnectData,
     setClientIdValue: (clientIdValue: string) => clientIdValue,
     setClientSecretValue: (clientSecretValue: string) => clientSecretValue,
+    setClientBasicApiKeyValue: (clientBasicApiKeyValue: string) => clientBasicApiKeyValue,
     setBaseUrlValue: (baseUrlValue: string) => baseUrlValue,
     setSourceLoginValue: (loginValue: string) => loginValue,
     setSourcePasswordValue: (passwordValue: string) => passwordValue,
@@ -275,6 +279,14 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       {
         setClientSecretValue: (_, clientSecretValue) => clientSecretValue,
         setSourceConfigData: (_, { configuredFields: { clientSecret } }) => clientSecret || '',
+        resetSourceState: () => '',
+      },
+    ],
+    clientBasicApiKeyValue: [
+      '',
+      {
+        setClientBasicApiKeyValue: (_, clientBasicApiKeyValue) => clientBasicApiKeyValue,
+        setSourceConfigData: (_, { configuredFields: { clientBasicApiKey } }) => clientBasicApiKey || '',
         resetSourceState: () => '',
       },
     ],
