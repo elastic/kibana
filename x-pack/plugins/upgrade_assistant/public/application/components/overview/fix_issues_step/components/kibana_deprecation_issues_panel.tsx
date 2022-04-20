@@ -30,20 +30,26 @@ export const KibanaDeprecationIssuesPanel: FunctionComponent<Props> = ({ setIsFi
   const [error, setError] = useState<Error | undefined>(undefined);
 
   useEffect(() => {
+    let isMounted = true;
     async function getAllDeprecations() {
       setIsLoading(true);
 
       try {
         const response = await deprecations.getAllDeprecations();
-        setKibanaDeprecations(response);
+        if (isMounted) setKibanaDeprecations(response);
       } catch (e) {
-        setError(e);
+        if (isMounted) setError(e);
       }
 
-      setIsLoading(false);
+      if (isMounted) setIsLoading(false);
     }
 
     getAllDeprecations();
+
+    return () => {
+      setIsLoading(false);
+      isMounted = false;
+    };
   }, [deprecations]);
 
   const criticalDeprecationsCount =
