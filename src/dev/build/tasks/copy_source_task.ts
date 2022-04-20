@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { getAllRepoRelativeBazelPackageDirs } from '@kbn/bazel-packages';
+import normalizePath from 'normalize-path';
+
 import { copyAll, Task } from '../lib';
 
 export const CopySource: Task = {
@@ -45,6 +48,8 @@ export const CopySource: Task = {
         'tsconfig*.json',
         '.i18nrc.json',
         'kibana.d.ts',
+        // explicitly ignore all package roots, even if they're not selected by previous patterns
+        ...getAllRepoRelativeBazelPackageDirs().map((dir) => `!${normalizePath(dir)}/**`),
       ],
     });
   },

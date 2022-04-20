@@ -2960,6 +2960,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/bazel-runner@link:bazel-bin/packages/kbn-bazel-runner":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ci-stats-client@link:bazel-bin/packages/kbn-ci-stats-client":
   version "0.0.0"
   uid ""
@@ -6033,6 +6037,10 @@
   uid ""
 
 "@types/kbn__bazel-packages@link:bazel-bin/packages/kbn-bazel-packages/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__bazel-runner@link:bazel-bin/packages/kbn-bazel-runner/npm_module_types":
   version "0.0.0"
   uid ""
 

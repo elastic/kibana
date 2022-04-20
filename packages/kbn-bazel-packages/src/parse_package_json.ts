@@ -13,17 +13,18 @@ import Fs from 'fs';
  * by `assertParsedPackageJson()` and extensible as needed in the future
  */
 export interface ParsedPackageJson {
-  /**
-   * The name of the package, usually `@kbn/`+something
-   */
+  /** The name of the package, usually `@kbn/`+something */
   name: string;
   /** "dependenices" property from package.json */
   dependencies?: Record<string, string>;
   /** "devDependenices" property from package.json */
   devDependencies?: Record<string, string>;
-  /**
-   * All other fields in the package.json are typed as unknown as we don't care what they are
-   */
+  /** Some kibana specific properties about this package */
+  kibana?: {
+    /** Is this package only intended for dev? */
+    devOnly?: boolean;
+  };
+  /** All other fields in the package.json are typed as unknown as we don't care what they are */
   [key: string]: unknown;
 }
 
@@ -45,6 +46,17 @@ export function assertParsedPackageJson(v: unknown): asserts v is ParsedPackageJ
 
   if (v.devDependencies && !isObj(v.devDependencies)) {
     throw new Error('Expected "dependencies" to be an object');
+  }
+
+  const kibana = v.kibana;
+  if (kibana !== undefined) {
+    if (!isObj(kibana)) {
+      throw new Error('Expected "kibana" field in package.json to be an object');
+    }
+
+    if (kibana.devOnly !== undefined && typeof kibana.devOnly !== 'boolean') {
+      throw new Error('Expected "kibana.devOnly" field in package.json to be a boolean');
+    }
   }
 }
 

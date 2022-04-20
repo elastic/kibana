@@ -7,8 +7,6 @@
  */
 
 export { run } from './cli';
-export { buildBazelProductionProjects, buildNonBazelProductionProjects } from './production';
 export { getProjects } from './utils/projects';
 export { Project } from './utils/project';
-export { transformDependencies } from './utils/package_json';
 export { getProjectPaths } from './config';

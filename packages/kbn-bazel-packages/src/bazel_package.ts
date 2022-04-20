@@ -71,6 +71,13 @@ export class BazelPackage {
   }
 
   /**
+   * Returns true if the package is not intended to be in the build
+   */
+  isDevOnly() {
+    return !!this.pkg.kibana?.devOnly;
+  }
+
+  /**
    * Custom inspect handler so that logging variables in scripts/generate doesn't
    * print all the BUILD.bazel files
    */

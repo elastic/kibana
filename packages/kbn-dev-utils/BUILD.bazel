@@ -36,7 +36,7 @@ filegroup(
 NPM_MODULE_EXTRA_FILES = [
   "package.json",
   "README.md",
-  ":certs"
+  ":certs",
 ]
 
 RUNTIME_DEPS = [

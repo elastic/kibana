@@ -19,11 +19,10 @@ import {
   isLinkDependency,
   readPackageJson,
 } from './package_json';
-import { installInDir, runScriptInPackage, runScriptInPackageStreaming } from './scripts';
+import { runScriptInPackage, runScriptInPackageStreaming } from './scripts';
 
 interface BuildConfig {
   skip?: boolean;
-  intermediateBuildDirectory?: string;
   oss?: boolean;
 }
 
@@ -135,15 +134,6 @@ export class Project {
     return (this.json.kibana && this.json.kibana.build) || {};
   }
 
-  /**
-   * Returns the directory that should be copied into the Kibana build artifact.
-   * This config can be specified to only include the project's build artifacts
-   * instead of everything located in the project directory.
-   */
-  public getIntermediateBuildDirectory() {
-    return Path.resolve(this.path, this.getBuildConfig().intermediateBuildDirectory || '.');
-  }
-
   public getCleanConfig(): CleanConfig {
     return (this.json.kibana && this.json.kibana.clean) || {};
   }
@@ -214,14 +204,6 @@ export class Project {
 
   public isEveryDependencyLocal() {
     return Object.values(this.allDependencies).every((dep) => isLinkDependency(dep));
-  }
-
-  public async installDependencies(options: { extraArgs?: string[] } = {}) {
-    log.info(`[${this.name}] running yarn`);
-
-    log.write('');
-    await installInDir(this.path, options?.extraArgs);
-    log.write('');
   }
 }
 
