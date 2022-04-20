@@ -33,7 +33,7 @@ default space is used.
 +
 NOTE: All non-ASCII characters must be URL encoded.
 
-==== {api-response-codes-title}
+=== {api-response-codes-title}
 
 `204`::
    Indicates a successful call.

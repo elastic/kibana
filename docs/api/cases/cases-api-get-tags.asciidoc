@@ -32,12 +32,12 @@ default space is used.
 Valid values are: `cases`, `observability`, and `securitySolution`. If this parameter is omitted, the response
 contains tags from all cases that the user has access to read.
 
-==== {api-response-codes-title}
+=== {api-response-codes-title}
 
 `200`::
    Indicates a successful call.
 
-==== {api-examples-title}
+=== {api-examples-title}
 
 [source,sh]
 --------------------------------------------------

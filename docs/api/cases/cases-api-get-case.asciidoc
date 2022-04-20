@@ -35,12 +35,12 @@ default space is used.
 (Optional, boolean) Determines whether case comments are returned. Defaults to 
 `true`. deprecated:[8.1.0, "The `includeComments` query parameter is deprecated and will be removed in a future release."]
 
-==== {api-response-codes-title}
+=== {api-response-codes-title}
 
 `200`::
    Indicates a successful call.
 
-==== {api-examples-title}
+=== {api-examples-title}
 
 Returns case ID `a18b38a0-71b0-11ea-a0b2-c51ea50a58e2` without comments:
 

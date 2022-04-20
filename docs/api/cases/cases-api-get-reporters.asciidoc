@@ -26,12 +26,12 @@ You must have `read` privileges for the *Cases* feature in the *Management*,
 to a specific set of applications. If this parameter is omitted, the response 
 will contain all reporters from cases that the user has access to read.
 
-==== {api-response-codes-title}
+=== {api-response-codes-title}
 
 `200`::
    Indicates a successful call.
 
-==== {api-examples-title}
+=== {api-examples-title}
 
 Returns all case reporters:
 
