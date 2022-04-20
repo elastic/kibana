@@ -6,7 +6,7 @@
  */
 
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { Logger } from 'kibana/server';
+import { Logger } from '@kbn/core/server';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { ActionTypeRegistry } from '../action_type_registry';
 import { BasicConnector } from '../connectors/basic';
@@ -16,7 +16,6 @@ import { buildExecutor } from './executor';
 import { ExecutorParams, HTTPConnectorType, IService } from './types';
 import { buildValidators } from './validators';
 
-// TODO: Add basic connector
 const validateService = <Config, Secrets>(Service: IService<Config, Secrets>) => {
   if (
     !(Service.prototype instanceof CaseConnector) &&

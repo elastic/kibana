@@ -7,7 +7,7 @@
 
 import type { Type } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
-import type { LicenseType } from '../../../licensing/common/types';
+import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { BasicConnector } from '../connectors/basic';
 import { ActionTypeParams, Services } from '../types';

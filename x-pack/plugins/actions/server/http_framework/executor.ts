@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
+import { Logger } from '@kbn/core/server';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { ExecutorType } from '../types';
 import { ExecutorParams, HTTPConnectorType } from './types';

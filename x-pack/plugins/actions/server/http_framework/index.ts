@@ -6,7 +6,7 @@
  */
 
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { Logger } from 'kibana/server';
+import { Logger } from '@kbn/core/server';
 import { ActionsConfigurationUtilities } from '../actions_config';
 
 import { ActionTypeRegistry } from '../action_type_registry';

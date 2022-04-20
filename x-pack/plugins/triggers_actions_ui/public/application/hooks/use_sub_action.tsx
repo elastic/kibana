@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { ActionTypeExecutorResult } from '../../../../../plugins/actions/common';
+import { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
 import { executeAction } from '../lib/action_connector_api';
 
