@@ -1415,10 +1415,6 @@
   dependencies:
     tslib "^2.0.0"
 
-"@elastic/analytics@link:bazel-bin/packages/elastic-analytics":
-  version "0.0.0"
-  uid ""
-
 "@elastic/apm-rum-core@^5.14.1":
   version "5.14.1"
   resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.14.1.tgz#8f65060967c8d68498f2c520e4169ec07eb3b5bb"
@@ -2155,10 +2151,10 @@
     "@hapi/validate" "1.x.x"
     "@hapi/wreck" "17.x.x"
 
-"@hapi/hapi@^20.2.1":
-  version "20.2.1"
-  resolved "https://registry.yarnpkg.com/@hapi/hapi/-/hapi-20.2.1.tgz#7482bc28757cb4671623a61bdb5ce920bffc8a2f"
-  integrity sha512-OXAU+yWLwkMfPFic+KITo+XPp6Oxpgc9WUH+pxXWcTIuvWbgco5TC/jS8UDvz+NFF5IzRgF2CL6UV/KLdQYUSQ==
+"@hapi/hapi@^20.2.2":
+  version "20.2.2"
+  resolved "https://registry.yarnpkg.com/@hapi/hapi/-/hapi-20.2.2.tgz#5810efbf5c0aad367932e86d4066d82ac817e98c"
+  integrity sha512-crhU6TIKt7QsksWLYctDBAXogk9PYAm7UzdpETyuBHC2pCa6/+B5NykiOVLG/3FCIgHo/raPVtan8bYtByHORQ==
   dependencies:
     "@hapi/accept" "^5.0.1"
     "@hapi/ammo" "^5.0.1"
@@ -2173,9 +2169,9 @@
     "@hapi/podium" "^4.1.1"
     "@hapi/shot" "^5.0.5"
     "@hapi/somever" "^3.0.0"
-    "@hapi/statehood" "^7.0.3"
+    "@hapi/statehood" "^7.0.4"
     "@hapi/subtext" "^7.0.3"
-    "@hapi/teamwork" "^5.1.0"
+    "@hapi/teamwork" "^5.1.1"
     "@hapi/topo" "^5.0.0"
     "@hapi/validate" "^1.1.1"
 
@@ -2273,10 +2269,10 @@
     "@hapi/bounce" "2.x.x"
     "@hapi/hoek" "9.x.x"
 
-"@hapi/statehood@^7.0.3":
-  version "7.0.3"
-  resolved "https://registry.yarnpkg.com/@hapi/statehood/-/statehood-7.0.3.tgz#655166f3768344ed3c3b50375a303cdeca8040d9"
-  integrity sha512-pYB+pyCHkf2Amh67QAXz7e/DN9jcMplIL7Z6N8h0K+ZTy0b404JKPEYkbWHSnDtxLjJB/OtgElxocr2fMH4G7w==
+"@hapi/statehood@^7.0.4":
+  version "7.0.4"
+  resolved "https://registry.yarnpkg.com/@hapi/statehood/-/statehood-7.0.4.tgz#6acb9d0817b5c657089356f7d9fd60af0bce4f41"
+  integrity sha512-Fia6atroOVmc5+2bNOxF6Zv9vpbNAjEXNcUbWXavDqhnJDlchwUUwKS5LCi5mGtCTxRhUKKHwuxuBZJkmLZ7fw==
   dependencies:
     "@hapi/boom" "9.x.x"
     "@hapi/bounce" "2.x.x"
@@ -2299,10 +2295,10 @@
     "@hapi/pez" "^5.0.1"
     "@hapi/wreck" "17.x.x"
 
-"@hapi/teamwork@5.x.x", "@hapi/teamwork@^5.1.0":
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/@hapi/teamwork/-/teamwork-5.1.0.tgz#7801a61fc727f702fd2196ef7625eb4e389f4124"
-  integrity sha512-llqoQTrAJDTXxG3c4Kz/uzhBS1TsmSBa/XG5SPcVXgmffHE1nFtyLIK0hNJHCB3EuBKT84adzd1hZNY9GJLWtg==
+"@hapi/teamwork@5.x.x", "@hapi/teamwork@^5.1.1":
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/@hapi/teamwork/-/teamwork-5.1.1.tgz#4d2ba3cac19118a36c44bf49a3a47674de52e4e4"
+  integrity sha512-1oPx9AE5TIv+V6Ih54RP9lTZBso3rP8j4Xhb6iSVwPXtAM+sDopl5TFMv5Paw73UnpZJ9gjcrTE1BXrWt9eQrg==
 
 "@hapi/topo@^5.0.0":
   version "5.0.0"
@@ -2932,6 +2928,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/analytics-client@link:bazel-bin/packages/analytics/client":
+  version "0.0.0"
+  uid ""
+
+"@kbn/analytics-shippers-fullstory@link:bazel-bin/packages/analytics/shippers/fullstory":
+  version "0.0.0"
+  uid ""
+
 "@kbn/analytics@link:bazel-bin/packages/kbn-analytics":
   version "0.0.0"
   uid ""
@@ -2957,6 +2961,10 @@
   uid ""
 
 "@kbn/bazel-packages@link:bazel-bin/packages/kbn-bazel-packages":
+  version "0.0.0"
+  uid ""
+
+"@kbn/bazel-runner@link:bazel-bin/packages/kbn-bazel-runner":
   version "0.0.0"
   uid ""
 
@@ -5602,10 +5610,6 @@
   resolved "https://registry.yarnpkg.com/@types/ejs/-/ejs-3.0.6.tgz#aca442289df623bfa8e47c23961f0357847b83fe"
   integrity sha512-fj1hi+ZSW0xPLrJJD+YNwIh9GZbyaIepG26E/gXvp8nCa2pYokxUYO1sK9qjGxp2g8ryZYuon7wmjpwE2cyASQ==
 
-"@types/elastic__analytics@link:bazel-bin/packages/elastic-analytics/npm_module_types":
-  version "0.0.0"
-  uid ""
-
 "@types/elastic__apm-synthtrace@link:bazel-bin/packages/elastic-apm-synthtrace/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6016,6 +6020,14 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__analytics-client@link:bazel-bin/packages/analytics/client/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__analytics-shippers-fullstory@link:bazel-bin/packages/analytics/shippers/fullstory/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__analytics@link:bazel-bin/packages/kbn-analytics/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6033,6 +6045,10 @@
   uid ""
 
 "@types/kbn__bazel-packages@link:bazel-bin/packages/kbn-bazel-packages/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__bazel-runner@link:bazel-bin/packages/kbn-bazel-runner/npm_module_types":
   version "0.0.0"
   uid ""
 
