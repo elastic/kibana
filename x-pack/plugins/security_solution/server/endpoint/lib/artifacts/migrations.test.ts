@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectUnsanitizedDoc } from 'kibana/server';
-import { migrationMocks } from 'src/core/server/mocks';
+import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { migrationMocks } from '@kbn/core/server/mocks';
 import { ManifestConstants } from './common';
 import { migrations, OldInternalManifestSchema } from './migrations';
 

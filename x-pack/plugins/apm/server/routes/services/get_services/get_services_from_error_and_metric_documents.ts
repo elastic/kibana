@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
-import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup } from '../../../lib/helpers/setup_request';

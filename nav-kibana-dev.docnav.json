@@ -62,7 +62,7 @@
         { "id": "kibDevTutorialCI" },
         { "id": "kibDevTutorialServerEndpoint" },
         { "id": "kibDevTutorialAdvancedSettings" },
-        { "id": "kibDevSharePluginReadme" }
+        { "id": "kibDevSharePluginReadme" },
         { "id": "kibDevTutorialScreenshotting" }
       ]
     },

@@ -7,7 +7,7 @@
  */
 
 import { get, map } from 'lodash';
-import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ConfigSchema } from '../../config';
 import { IFieldType, getFieldSubtypeNested } from '../../common';

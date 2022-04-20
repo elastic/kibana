@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, SavedObjectsCreatePointInTimeFinderOptions } from 'src/core/server';
+import { IRouter, SavedObjectsCreatePointInTimeFinderOptions } from '@kbn/core/server';
 import { chain } from 'lodash';
 import { findAll } from '../lib';
 

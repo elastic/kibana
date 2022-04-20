@@ -24,7 +24,7 @@ import { getFormEntryState, isUninitialisedForm } from '../../../store/selector'
 import { EventFiltersListPageState } from '../../../types';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { licenseService } from '../../../../../../common/hooks/use_license';
-import { getExceptionListItemSchemaMock } from '../../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { of } from 'rxjs';
 
 jest.mock('../../../../../../common/lib/kibana');

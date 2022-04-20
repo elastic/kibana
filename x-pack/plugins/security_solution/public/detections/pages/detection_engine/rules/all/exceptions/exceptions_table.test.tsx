@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../../../../common/mock';
 import { mockHistory } from '../../../../../../common/utils/route/index.test';
-import { getExceptionListSchemaMock } from '../../../../../../../../lists/common/schemas/response/exception_list_schema.mock';
+import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import { useUserData } from '../../../../../components/user_info';
 
 import { ExceptionListsTable } from './exceptions_table';

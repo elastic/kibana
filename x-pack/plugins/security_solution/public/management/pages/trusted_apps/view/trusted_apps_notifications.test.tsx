@@ -9,10 +9,10 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { render } from '@testing-library/react';
 
-import { NotificationsStart } from 'kibana/public';
+import { NotificationsStart } from '@kbn/core/public';
 
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public/context';
+import { coreMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public/context';
 
 import {
   createGlobalNoMiddlewareStore,

@@ -27,6 +27,8 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import { EVENT_FILTERS_OPERATORS } from '@kbn/securitysolution-list-utils';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 
+import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
+import type { OnChangeProps } from '@kbn/lists-plugin/public';
 import { PolicyData } from '../../../../../../../common/endpoint/types';
 import { AddExceptionComments } from '../../../../../../common/components/exceptions/add_exception_comments';
 import { filterIndexPatterns } from '../../../../../../common/components/exceptions/helpers';
@@ -34,8 +36,6 @@ import { Loader } from '../../../../../../common/components/loader';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useFetchIndex } from '../../../../../../common/containers/source';
 import { AppAction } from '../../../../../../common/store/actions';
-import { getExceptionBuilderComponentLazy } from '../../../../../../../../lists/public';
-import type { OnChangeProps } from '../../../../../../../../lists/public';
 import { useEventFiltersSelector } from '../../hooks';
 import { getFormEntryStateMutable, getHasNameError, getNewComment } from '../../../store/selector';
 import {

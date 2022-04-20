@@ -11,7 +11,7 @@ jest.mock('../../../kibana_services');
 jest.mock('./util/load_index_settings');
 
 import { getIndexPatternService, getSearchService, getHttp } from '../../../kibana_services';
-import { SearchSource } from 'src/plugins/data/public';
+import { SearchSource } from '@kbn/data-plugin/public';
 
 import { loadIndexSettings } from './util/load_index_settings';
 
@@ -146,14 +146,21 @@ describe('ESSearchSource', () => {
       });
       expect(esSearchSource.getJoinsDisabledReason()).toBe(null);
     });
+    it('blended layer', () => {
+      const esSearchSource = new ESSearchSource({
+        ...mockDescriptor,
+        scalingType: SCALING_TYPES.CLUSTERS,
+      });
+      expect(esSearchSource.getJoinsDisabledReason()).toBe(
+        'Joins are not supported when scaling by clusters'
+      );
+    });
     it('mvt', () => {
       const esSearchSource = new ESSearchSource({
         ...mockDescriptor,
         scalingType: SCALING_TYPES.MVT,
       });
-      expect(esSearchSource.getJoinsDisabledReason()).toBe(
-        'Joins are not supported when scaling by vector tiles'
-      );
+      expect(esSearchSource.getJoinsDisabledReason()).toBe(null);
     });
   });
 });

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { RulesClient } from '@kbn/alerting-plugin/server';
 import { INTERNAL_IMMUTABLE_KEY } from '../../../../common/constants';
-import { RulesClient } from '../../../../../alerting/server';
 import { RuleAlertType, isAlertTypes } from './types';
 import { findRules } from './find_rules';
 

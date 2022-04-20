@@ -8,9 +8,9 @@
 import type { StoryContext } from '@storybook/addons';
 import React, { useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import type { CoreTheme } from '../../../../../src/core/public';
-import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
+import type { CoreTheme } from '@kbn/core/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 export const useGlobalStorybookTheme = ({ globals: { euiTheme } }: StoryContext) => {
   const theme = useMemo(() => euiThemeFromId(euiTheme), [euiTheme]);

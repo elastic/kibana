@@ -16,7 +16,7 @@ import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { createFilterDateRange } from './create_filter/date_range';
 import { aggDateRangeFnName } from './date_range_fn';
 
-import { KBN_FIELD_TYPES } from '../../../../common/kbn_field_types/types';
+import { KBN_FIELD_TYPES } from '../../../kbn_field_types/types';
 import { BaseAggParams } from '../types';
 
 const dateRangeTitle = i18n.translate('data.search.aggs.buckets.dateRangeTitle', {
