@@ -22,7 +22,6 @@
   "ui": true,
   "requiredBundles": [
     "kibanaUtils",
-    "home",
     "alerting",
     "kibanaReact"
   ]

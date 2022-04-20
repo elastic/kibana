@@ -27,15 +27,18 @@ export const AgentStatusBar: React.FC<{
 }> = ({ agentStatus }) => {
   const palette = useMemo(() => {
     let stop = 0;
+
     return AGENT_STATUSES.reduce((acc, status) => {
       stop += agentStatus[status] || 0;
       acc.push({
         stop,
         color: getColorForAgentStatus(status),
       });
+
       return acc;
     }, [] as Array<{ stop: number; color: string }>);
   }, [agentStatus]);
+
   return (
     <StyledEuiColorPaletteDisplay
       className="osquery-action-agent-status-bar"
