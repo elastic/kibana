@@ -12,12 +12,8 @@ import {
   EmbeddableStateWithType,
 } from '@kbn/embeddable-plugin/common';
 import { SavedObjectReference } from '@kbn/core/types';
-import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
-import {
-  DashboardContainerControlGroupInput,
-  DashboardContainerStateWithType,
-  DashboardPanelState,
-} from '../types';
+import { CONTROL_GROUP_TYPE, PersistableControlGroupInput } from '@kbn/controls-plugin/common';
+import { DashboardContainerStateWithType, DashboardPanelState } from '../types';
 
 const getPanelStatePrefix = (state: DashboardPanelState) => `${state.explicitInput.id}:`;
 
@@ -95,7 +91,7 @@ export const createInject = (
         controlGroupReferences
       );
       workingState.controlGroupInput =
-        injectedControlGroupState as unknown as DashboardContainerControlGroupInput;
+        injectedControlGroupState as unknown as PersistableControlGroupInput;
     }
 
     return workingState as EmbeddableStateWithType;
@@ -160,7 +156,7 @@ export const createExtract = (
           id: controlGroupId,
         });
       workingState.controlGroupInput =
-        extractedControlGroupState as unknown as DashboardContainerControlGroupInput;
+        extractedControlGroupState as unknown as PersistableControlGroupInput;
       const prefixedControlGroupReferences = controlGroupReferences.map((reference) => ({
         ...reference,
         name: `${controlGroupReferencePrefix}${reference.name}`,

@@ -23,6 +23,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { DataView } from './services/data_views';
 import { SharePluginStart } from './services/share';
 import { EmbeddableStart } from './services/embeddable';
@@ -30,11 +31,7 @@ import { DashboardSessionStorage } from './application/lib';
 import { UsageCollectionSetup } from './services/usage_collection';
 import { NavigationPublicPluginStart } from './services/navigation';
 import { Query, RefreshInterval, TimeRange } from './services/data';
-import {
-  DashboardContainerControlGroupInput,
-  DashboardPanelState,
-  SavedDashboardPanel,
-} from '../common/types';
+import { DashboardPanelState, SavedDashboardPanel } from '../common/types';
 import { SavedObjectsTaggingApi } from './services/saved_objects_tagging_oss';
 import { DataPublicPluginStart, DataViewsContract } from './services/data';
 import { ContainerInput, EmbeddableInput, ViewMode } from './services/embeddable';
@@ -74,7 +71,7 @@ export interface DashboardState {
   panels: DashboardPanelMap;
   timeRange?: TimeRange;
 
-  controlGroupInput?: DashboardContainerControlGroupInput;
+  controlGroupInput?: PersistableControlGroupInput;
 }
 
 /**
@@ -84,7 +81,7 @@ export type RawDashboardState = Omit<DashboardState, 'panels'> & { panels: Saved
 
 export interface DashboardContainerInput extends ContainerInput {
   dashboardCapabilities?: DashboardAppCapabilities;
-  controlGroupInput?: DashboardContainerControlGroupInput;
+  controlGroupInput?: PersistableControlGroupInput;
   refreshConfig?: RefreshInterval;
   isEmbeddedExternally?: boolean;
   isFullScreenMode: boolean;

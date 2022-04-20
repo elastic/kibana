@@ -10,8 +10,8 @@ import { xor, omit, isEmpty } from 'lodash';
 import fastIsEqual from 'fast-deep-equal';
 import { compareFilters, COMPARE_ALL_OPTIONS, type Filter, isFilterPinned } from '@kbn/es-query';
 
+import { persistableControlGroupInputIsEqual } from '@kbn/controls-plugin/common';
 import { DashboardContainerInput } from '../..';
-import { controlGroupInputIsEqual } from './dashboard_control_group';
 import { DashboardOptions, DashboardPanelMap, DashboardState } from '../../types';
 import { IEmbeddable } from '../../services/embeddable';
 
@@ -84,7 +84,7 @@ export const diffDashboardState = async ({
   );
   const optionsAreEqual = getOptionsAreEqual(originalState.options, newState.options);
   const filtersAreEqual = getFiltersAreEqual(originalState.filters, newState.filters, true);
-  const controlGroupIsEqual = controlGroupInputIsEqual(
+  const controlGroupIsEqual = persistableControlGroupInputIsEqual(
     originalState.controlGroupInput,
     newState.controlGroupInput
   );

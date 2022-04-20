@@ -6,8 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { isEmpty } from 'lodash';
 import { ISavedObjectsRepository, SavedObjectAttributes } from '@kbn/core/server';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
+import {
+  type ControlGroupTelemetry,
+  CONTROL_GROUP_TYPE,
+  RawControlGroupAttributes,
+} from '@kbn/controls-plugin/common';
+import { initializeControlGroupTelemetry } from '@kbn/controls-plugin/server';
+
 import { SavedDashboardPanel730ToLatest } from '../../common';
 import { injectReferences } from '../../common/saved_dashboard_references';
 export interface DashboardCollectorData {
@@ -26,6 +34,7 @@ export interface DashboardCollectorData {
       };
     };
   };
+  controls: ControlGroupTelemetry;
 }
 
 export const getEmptyDashboardData = (): DashboardCollectorData => ({
@@ -35,6 +44,7 @@ export const getEmptyDashboardData = (): DashboardCollectorData => ({
     by_value: 0,
     by_type: {},
   },
+  controls: initializeControlGroupTelemetry({}),
 });
 
 export const getEmptyPanelTypeData = () => ({
@@ -91,6 +101,19 @@ export async function collectDashboardTelemetry(
     const attributes = injectReferences(dashboard, {
       embeddablePersistableStateService: embeddableService,
     });
+
+    const controlGroupAttributes: RawControlGroupAttributes | undefined =
+      attributes.controlGroupInput as unknown as RawControlGroupAttributes;
+    if (!isEmpty(controlGroupAttributes)) {
+      collectorData.controls = embeddableService.telemetry(
+        {
+          ...controlGroupAttributes,
+          type: CONTROL_GROUP_TYPE,
+          id: `DASHBOARD_${CONTROL_GROUP_TYPE}`,
+        },
+        collectorData.controls
+      ) as ControlGroupTelemetry;
+    }
 
     const panels = JSON.parse(
       attributes.panelsJSON as string
