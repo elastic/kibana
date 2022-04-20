@@ -9,10 +9,10 @@
 import {
   EmbeddableStateWithType,
   EmbeddablePersistableStateService,
-} from '../../../../embeddable/common';
+} from '@kbn/embeddable-plugin/common';
+import { SavedObjectReference } from '@kbn/core/types';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { TimeSliderControlEmbeddableInput } from './types';
-import { SavedObjectReference } from '../../../../../core/types';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../../data_views/common';
 
 type TimeSliderInputWithType = Partial<TimeSliderControlEmbeddableInput> & { type: string };
 const dataViewReferenceName = 'timeSliderDataView';

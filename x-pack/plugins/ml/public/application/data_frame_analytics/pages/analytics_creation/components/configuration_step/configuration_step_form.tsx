@@ -19,6 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { debounce, cloneDeep } from 'lodash';
 
+import { Query } from '@kbn/data-plugin/common/query';
 import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useMlContext } from '../../../../../contexts/ml';
 import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';
@@ -56,7 +57,6 @@ import { ExplorationQueryBar } from '../../../analytics_exploration/components/e
 import { useSavedSearch, SavedSearchQuery } from './use_saved_search';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
 import { ExplorationQueryBarProps } from '../../../analytics_exploration/components/exploration_query_bar/exploration_query_bar';
-import { Query } from '../../../../../../../../../../src/plugins/data/common/query';
 
 import { ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
 import { RuntimeMappings } from '../runtime_mappings';

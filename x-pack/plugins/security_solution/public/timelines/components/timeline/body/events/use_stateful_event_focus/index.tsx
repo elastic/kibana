@@ -13,7 +13,7 @@ import {
   isEscape,
   focusColumn,
   OnColumnFocused,
-} from '../../../../../../../../timelines/public';
+} from '@kbn/timelines-plugin/public';
 
 type FocusOwnership = 'not-owned' | 'owned';
 

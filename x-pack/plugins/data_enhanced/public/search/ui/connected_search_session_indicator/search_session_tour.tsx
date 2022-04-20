@@ -7,12 +7,9 @@
 
 import { useCallback, useEffect } from 'react';
 import { once } from 'lodash';
-import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { SearchSessionState, SearchUsageCollector } from '@kbn/data-plugin/public';
 import { SearchSessionIndicatorRef } from '../search_session_indicator';
-import {
-  SearchSessionState,
-  SearchUsageCollector,
-} from '../../../../../../../src/plugins/data/public';
 
 const TOUR_TAKING_TOO_LONG_TIMEOUT = 10000;
 export const TOUR_TAKING_TOO_LONG_STEP_KEY = `data.searchSession.tour.takingTooLong`;

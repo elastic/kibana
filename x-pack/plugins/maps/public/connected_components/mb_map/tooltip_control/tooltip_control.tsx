@@ -18,7 +18,7 @@ import {
 import uuid from 'uuid/v4';
 import { Geometry } from 'geojson';
 import { Filter } from '@kbn/es-query';
-import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { GEO_JSON_TYPE, LON_INDEX, RawValue } from '../../../../common/constants';
 import {
   GEOMETRY_FILTER_ACTION,
@@ -223,13 +223,10 @@ export class TooltipControl extends Component<Props, {}> {
         }
       }
       if (!match) {
-        // "tags" (aka properties) are optional in .mvt tiles.
-        // It's not entirely clear how mapbox-gl handles those.
-        // - As null value (as defined in https://tools.ietf.org/html/rfc7946#section-3.2)
-        // - As undefined value
-        // - As empty object literal
-        // To avoid ambiguity, normalize properties to empty object literal.
-        const mbProperties = mbFeature.properties ? mbFeature.properties : {};
+        const mbProperties = {
+          ...(mbFeature.properties ? mbFeature.properties : {}),
+          ...(mbFeature.state ? mbFeature.state : {}),
+        };
         const actions: TooltipFeatureAction[] = isLocked
           ? this._getFeatureActions({ layerId, featureId, tooltipId })
           : [];

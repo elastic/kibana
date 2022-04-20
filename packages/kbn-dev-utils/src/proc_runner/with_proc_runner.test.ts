@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '../tooling_log';
+import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from './with_proc_runner';
 import { ProcRunner } from './proc_runner';
 

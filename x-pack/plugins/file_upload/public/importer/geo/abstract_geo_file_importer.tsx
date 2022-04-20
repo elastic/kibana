@@ -8,10 +8,10 @@
 import { ReactNode } from 'react';
 import { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { GeoFileImporter, GeoFilePreview } from './types';
 import { CreateDocsResponse, ImportResults } from '../types';
 import { callImportRoute, Importer, IMPORT_RETRIES, MAX_CHUNK_CHAR_COUNT } from '../importer';
-import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 import { MB } from '../../../common/constants';
 import type { ImportDoc, ImportFailure, ImportResponse } from '../../../common/types';
 // @ts-expect-error

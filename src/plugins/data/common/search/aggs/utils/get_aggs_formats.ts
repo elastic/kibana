@@ -16,7 +16,7 @@ import {
   FieldFormatsContentType,
   IFieldFormat,
   SerializedFieldFormat,
-} from '../../../../../field_formats/common';
+} from '@kbn/field-formats-plugin/common';
 import { DateRange } from '../../expressions';
 import { convertDateRangeToString } from '../buckets/lib/date_range';
 import { convertIPRangeToString, IpRangeKey } from '../buckets/lib/ip_range';

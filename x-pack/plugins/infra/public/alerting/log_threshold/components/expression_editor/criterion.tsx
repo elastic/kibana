@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { isFinite, isNumber } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
-import type { IErrorObject } from '../../../../../../triggers_actions_ui/public';
+import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   Comparator,
   ComparatorToi18nMap,

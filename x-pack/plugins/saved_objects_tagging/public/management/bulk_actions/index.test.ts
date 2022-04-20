@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { coreMock } from '../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { createTagCapabilities } from '../../../common/test_utils';
 import { TagsCapabilities } from '../../../common/capabilities';
 import { tagClientMock } from '../../services/tags/tags_client.mock';
@@ -13,7 +13,7 @@ import { tagsCacheMock } from '../../services/tags/tags_cache.mock';
 import { assignmentServiceMock } from '../../services/assignments/assignment_service.mock';
 import { TagBulkAction } from '../types';
 
-import { getBulkActions } from './index';
+import { getBulkActions } from '.';
 
 describe('getBulkActions', () => {
   let core: ReturnType<typeof coreMock.createStart>;

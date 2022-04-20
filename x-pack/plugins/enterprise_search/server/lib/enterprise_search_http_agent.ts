@@ -10,7 +10,7 @@ import http from 'http';
 import https from 'https';
 import { PeerCertificate } from 'tls';
 
-import { ConfigType } from '../';
+import { ConfigType } from '..';
 
 export type HttpAgent = http.Agent | https.Agent;
 interface AgentOptions {

@@ -8,7 +8,7 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { UiComponent } from '../../../kibana_utils/public';
+import { UiComponent } from '@kbn/kibana-utils-plugin/public';
 import { uiToReactComponent } from './ui_to_react_component';
 import { reactToUiComponent } from './react_to_ui_component';
 

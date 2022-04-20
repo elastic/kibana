@@ -21,13 +21,13 @@ import {
 } from '@elastic/eui';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import type { ApplicationStart } from 'kibana/public';
+import type { ApplicationStart } from '@kbn/core/public';
 import type {
   GlobalSearchPluginStart,
   GlobalSearchResult,
   GlobalSearchFindParams,
-} from '../../../global_search/public';
-import type { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
+} from '@kbn/global-search-plugin/public';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { parseSearchParams } from '../search_syntax';
 import { getSuggestions, SearchSuggestion } from '../suggestions';
 import { resultToOption, suggestionToOption } from '../lib';

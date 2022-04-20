@@ -11,7 +11,7 @@ import {
   SavedObjectSanitizedDoc,
   SavedObjectAttributes,
   SavedObjectReference,
-} from '../../../../../../../src/core/server';
+} from '@kbn/core/server';
 
 // eslint-disable-next-line no-restricted-imports
 import {
