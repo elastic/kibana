@@ -8,7 +8,7 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
 
-import type { PossibleSchemaTypes } from '@elastic/analytics';
+import type { PossibleSchemaTypes } from '@kbn/analytics-client';
 
 export type {
   AllowedSchemaTypes,
@@ -16,7 +16,7 @@ export type {
   AllowedSchemaBooleanTypes,
   AllowedSchemaNumberTypes,
   PossibleSchemaTypes,
-} from '@elastic/analytics';
+} from '@kbn/analytics-client';
 
 /**
  * Helper to find out whether to keep recursively looking or if we are on an end value

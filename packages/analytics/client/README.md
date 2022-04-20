@@ -1,4 +1,4 @@
-# @elastic/analytics
+# @kbn/analytics-client
 
 This module implements the Analytics client used for Event-Based Telemetry. The intention of the client is to be usable on both: the UI and the Server sides.
 
@@ -7,7 +7,7 @@ This module implements the Analytics client used for Event-Based Telemetry. The 
 It all starts by creating the client with the `createAnalytics` API:
 
 ```typescript
-import { createAnalytics } from '@elastic/analytics';
+import { createAnalytics } from '@kbn/analytics-client';
 
 const analytics = createAnalytics({
   // Set to `true` when running in developer mode.
@@ -107,7 +107,7 @@ analytics.registerContextProvider({
 
 ### Setting the user's opt-in consent
 
-The client cannot send any data until the user provides consent. At the beginning, the client will internally enqueue any incoming events until the consent is either granted or refused. 
+The client cannot send any data until the user provides consent. At the beginning, the client will internally enqueue any incoming events until the consent is either granted or refused.
 
 To set the user's selection use the `optIn` API:
 
@@ -145,7 +145,7 @@ There are some prebuilt shippers in this package that can be enabled using the A
 
 #### Prebuilt shippers
 
-TODO when actually implemented
+Refer to the [shippers' documentation](../shippers/README.md) for more information.
 
 #### Custom shippers
 
@@ -158,7 +158,7 @@ import type {
   EventContext, 
   IShipper, 
   TelemetryCounter 
-} from '@elastic/analytics';
+} from '@kbn/analytics-client';
 
 class MyVeryOwnShipper implements IShipper {
   constructor(myOptions: MyOptions, initContext: AnalyticsClientInitContext) {
@@ -188,7 +188,7 @@ analytics.registerShipper(MyVeryOwnShipper, myOptions);
 
 Schemas are a framework that allows us to document the structure of the events that our application will report. It is useful to understand the meaning of the events that we report. And, at the same time, it serves as an extra validation step from the developer's point of view.
 
-The syntax of a schema is a _simplified ES mapping on steroids_: it removes some of the ES mapping complexity, and at the same time, it includes features that are specific to the telemetry collection. 
+The syntax of a schema is a _simplified ES mapping on steroids_: it removes some of the ES mapping complexity, and at the same time, it includes features that are specific to the telemetry collection.
 
 **DISCLAIMER:** **The schema is not a direct mapping to ES indices.** The final structure of how the event is stored will depend on many factors like the context providers, shippers and final analytics solution.
 
@@ -226,7 +226,7 @@ For the `_meta`, refer to [Schema Specification: `_meta`](#schema-specification-
 
 #### Schema Specification: Objects
 
-Declaring the schema of an object contains 2 main attributes: `properties` and an optional `_meta`:  
+Declaring the schema of an object contains 2 main attributes: `properties` and an optional `_meta`:
 
 The `properties` attribute is an object with all the keys that the original object may include:
 
@@ -324,7 +324,7 @@ For the optional `_meta`, refer to [Schema Specification: `_meta`](#schema-speci
 
 #### Schema Specification: `_meta`
 
-The `_meta` adds the invaluable information of a `description` and whether a field is `optional` in the payload. 
+The `_meta` adds the invaluable information of a `description` and whether a field is `optional` in the payload.
 
 It can be attached to any schema definition as seen in the examples above. For high-order types, like arrays or objects, the `_meta` field is optional. For first-order types, like numbers, strings, booleans or `pass_through`, the `_meta` key is mandatory.
 

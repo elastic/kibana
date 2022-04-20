@@ -7,6 +7,3 @@
  */
 
 export type { IShipper } from './types';
-
-export { FullStoryShipper } from './fullstory';
-export type { FullStorySnippetConfig, FullStoryShipperConfig } from './fullstory';

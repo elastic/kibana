@@ -9,7 +9,8 @@
 filegroup(
   name = "build_pkg_code",
   srcs = [
-    "//packages/elastic-analytics:build",
+    "//packages/analytics/client:build",
+    "//packages/analytics/shippers/fullstory:build",
     "//packages/elastic-apm-synthtrace:build",
     "//packages/elastic-eslint-config-kibana:build",
     "//packages/elastic-safer-lodash-set:build",
@@ -112,7 +113,8 @@ filegroup(
 filegroup(
   name = "build_pkg_types",
   srcs = [
-    "//packages/elastic-analytics:build_types",
+    "//packages/analytics/client:build_types",
+    "//packages/analytics/shippers/fullstory:build_types",
     "//packages/elastic-apm-synthtrace:build_types",
     "//packages/elastic-safer-lodash-set:build_types",
     "//packages/kbn-ace:build_types",
