@@ -6,25 +6,19 @@
  * Side Public License, v 1.
  */
 
-// Inspired in a discussion found at https://github.com/facebook/jest/issues/5356 as Jest currently doesn't
-// offer any other option to preserve symlinks.
-//
-// It would be available once https://github.com/facebook/jest/pull/9976 got merged.
-
-const resolve = require('resolve');
+const { ImportResolver } = require('@kbn/import-resolver');
+const { REPO_ROOT } = require('@kbn/utils');
+const resolver = ImportResolver.create(REPO_ROOT);
 
 module.exports = (request, options) => {
-  try {
-    return resolve.sync(request, {
-      basedir: options.basedir,
-      extensions: options.extensions,
-      preserveSymlinks: true,
-    });
-  } catch (error) {
-    if (error.code === 'MODULE_NOT_FOUND') {
-      return options.defaultResolver(request, options);
-    }
+  const result = resolver.resolve(request, options.basedir);
 
-    throw error;
+  if (result?.type === 'built-in') {
+    return request;
   }
+  if (result?.type === 'file') {
+    return result.absolute;
+  }
+
+  return options.defaultResolver(request, options);
 };

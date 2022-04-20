@@ -47,7 +47,9 @@ module.exports = (_, options = {}) => ({
           },
         ],
 
-        [require.resolve('@kbn/babel-plugin-synthetic-packages'), options],
+        ...(options['kibana/syntheticModules'] !== false
+          ? [[require.resolve('@kbn/babel-plugin-synthetic-packages'), options]]
+          : []),
       ],
     },
 

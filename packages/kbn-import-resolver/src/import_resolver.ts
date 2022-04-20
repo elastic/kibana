@@ -37,6 +37,7 @@ export class ImportResolver {
 
   private baseResolveOpts = {
     extensions: ['.js', '.json', '.ts', '.tsx', '.d.ts'],
+    preserveSymlinks: true,
     isFile: (path: string) => !!this.safeStat(path)?.isFile(),
     isDirectory: (path: string) => !!this.safeStat(path)?.isDirectory(),
     readFileSync: memoize(readFileSync),
