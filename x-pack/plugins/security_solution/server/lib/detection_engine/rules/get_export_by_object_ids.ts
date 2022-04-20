@@ -94,9 +94,7 @@ export const getRulesFromObjects = async (
   const chunkedObjects = chunk(objects, 1024);
   const filter = chunkedObjects
     .map((chunkedArray) => {
-      const joinedIds = chunkedArray
-        .map((object) => object.rule_id)
-        .join(' OR ');
+      const joinedIds = chunkedArray.map((object) => object.rule_id).join(' OR ');
       return `alert.attributes.params.ruleId: (${joinedIds})`;
     })
     .join(' OR ');

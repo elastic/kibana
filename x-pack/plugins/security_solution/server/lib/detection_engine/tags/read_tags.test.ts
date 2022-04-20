@@ -186,10 +186,7 @@ describe.each([
       const result1 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result1.params.ruleId = 'rule-1';
-      result1.tags = [
-        `${INTERNAL_IDENTIFIER}_some_value`,
-        'tag 1',
-      ];
+      result1.tags = [`${INTERNAL_IDENTIFIER}_some_value`, 'tag 1'];
 
       const rulesClient = rulesClientMock.create();
       rulesClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1] }));
@@ -214,13 +211,7 @@ describe.each([
       const result2 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result2.params.ruleId = 'rule-2';
-      result2.tags = [
-        `${INTERNAL_IDENTIFIER}_some_value`,
-        'tag 1',
-        'tag 2',
-        'tag 3',
-        'tag 4',
-      ];
+      result2.tags = [`${INTERNAL_IDENTIFIER}_some_value`, 'tag 1', 'tag 2', 'tag 3', 'tag 4'];
 
       const rulesClient = rulesClientMock.create();
       rulesClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1] }));
