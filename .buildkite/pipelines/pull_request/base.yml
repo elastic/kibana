@@ -19,7 +19,7 @@ steps:
     label: 'Default CI Group'
     parallelism: 31
     agents:
-      queue: n2-4-spot-2
+      queue: n2-2-spot
     depends_on: build
     timeout_in_minutes: 150
     key: default-cigroup
@@ -34,7 +34,7 @@ steps:
     label: 'OSS CI Group'
     parallelism: 11
     agents:
-      queue: n2-4-spot
+      queue: n2-2-spot
     depends_on: build
     timeout_in_minutes: 120
     key: oss-cigroup
