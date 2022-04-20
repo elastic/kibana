@@ -13,7 +13,7 @@ import type {
   YConfig,
 } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { Datatable } from '../../../../../src/plugins/expressions/public';
-import type { DatasourcePublicAPI, FramePublicAPI, Visualization } from '../types';
+import type { DatasourceLayers, FramePublicAPI, Visualization } from '../types';
 import { groupAxesByType } from './axes_configuration';
 import { isHorizontalChart, isPercentageSeries, isStackedChart } from './state_helpers';
 import type { XYState, XYDataLayerConfig, XYReferenceLineLayerConfig } from './types';
@@ -40,7 +40,7 @@ export interface ReferenceLineBase {
 export function getGroupsToShow<T extends ReferenceLineBase & { config?: YConfig[] }>(
   referenceLayers: T[],
   state: XYState | undefined,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   tables: Record<string, Datatable> | undefined
 ): Array<T & { valid: boolean }> {
   if (!state) {
@@ -60,7 +60,7 @@ export function getGroupsToShow<T extends ReferenceLineBase & { config?: YConfig
 export function getGroupsRelatedToData<T extends ReferenceLineBase>(
   referenceLayers: T[],
   state: XYState | undefined,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   tables: Record<string, Datatable> | undefined
 ): T[] {
   if (!state) {
@@ -75,7 +75,7 @@ export function getGroupsRelatedToData<T extends ReferenceLineBase>(
  */
 export function getGroupsAvailableInData(
   dataLayers: XYDataLayerConfig[],
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   tables: Record<string, Datatable> | undefined
 ) {
   const hasNumberHistogram = dataLayers.some(
@@ -384,7 +384,7 @@ export const getReferenceConfiguration = ({
   sortedAccessors,
 }: {
   state: XYState;
-  frame: FramePublicAPI;
+  frame: Pick<FramePublicAPI, 'activeData' | 'datasourceLayers'>;
   layer: XYReferenceLineLayerConfig;
   sortedAccessors: string[];
 }) => {
