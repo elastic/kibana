@@ -128,8 +128,9 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
       } catch (error) {
         let value;
         const { response, body } = error as IHttpFetchError;
-        const contentType = response?.headers.get('Content-Type') ?? 'unknown';
+        const contentType = response?.headers.get('Content-Type') ?? '';
         const statusCode = response?.status ?? 500;
+        const statusText = error?.response?.statusText ?? 'error';
 
         if (body) {
           value = JSON.stringify(body, null, 2);
@@ -146,8 +147,8 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
             value,
             contentType,
             timeMs: Date.now() - startTime,
-            statusCode: error?.response?.status ?? 500,
-            statusText: error?.response?.statusText ?? 'error',
+            statusCode,
+            statusText,
           },
           request: {
             data,
