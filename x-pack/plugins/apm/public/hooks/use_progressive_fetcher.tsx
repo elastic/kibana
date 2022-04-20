@@ -10,6 +10,12 @@ import type {
   EndpointOf,
   ReturnOf,
 } from '@kbn/server-route-repository';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  apmProgressiveLoading,
+  getProbabilityFromProgressiveLoadingQuality,
+  ProgressiveLoadingQuality,
+} from '@kbn/observability-plugin/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { APMServerRouteRepository } from '../../server';
 
@@ -18,12 +24,6 @@ import type {
   APMClientOptions,
 } from '../services/rest/create_call_apm_api';
 import { FetcherResult, FETCH_STATUS, useFetcher } from './use_fetcher';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import {
-  apmProgressiveLoading,
-  getProbabilityFromProgressiveLoadingQuality,
-  ProgressiveLoadingQuality,
-} from '../../../observability/common';
 
 type APMProgressivelyLoadingServerRouteRepository = OmitByValue<
   {
