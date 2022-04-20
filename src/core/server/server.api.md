@@ -7,7 +7,7 @@
 /// <reference types="node" />
 
 import { AddConfigDeprecation } from '@kbn/config';
-import { AnalyticsClient } from '@elastic/analytics';
+import { AnalyticsClient } from '@kbn/analytics-client';
 import apm from 'elastic-apm-node';
 import Boom from '@hapi/boom';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -21,7 +21,7 @@ import { ConfigDeprecationFactory } from '@kbn/config';
 import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
 import { ConfigService } from '@kbn/config';
-import { ContextProviderOpts } from '@elastic/analytics';
+import { ContextProviderOpts } from '@kbn/analytics-client';
 import { DetailedPeerCertificate } from 'tls';
 import type { DocLinks } from '@kbn/doc-links';
 import { Duration } from 'moment';
@@ -34,12 +34,12 @@ import { EcsEventType } from '@kbn/logging';
 import { EnvironmentMode } from '@kbn/config';
 import { errors } from '@elastic/elasticsearch';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Event as Event_2 } from '@elastic/analytics';
-import { EventContext } from '@elastic/analytics';
-import { EventType } from '@elastic/analytics';
-import { EventTypeOpts } from '@elastic/analytics';
+import { Event as Event_2 } from '@kbn/analytics-client';
+import { EventContext } from '@kbn/analytics-client';
+import { EventType } from '@kbn/analytics-client';
+import { EventTypeOpts } from '@kbn/analytics-client';
 import { IncomingHttpHeaders } from 'http';
-import { IShipper } from '@elastic/analytics';
+import { IShipper } from '@kbn/analytics-client';
 import { Logger } from '@kbn/logging';
 import { LoggerFactory } from '@kbn/logging';
 import { LogLevel as LogLevel_2 } from '@kbn/logging';
@@ -48,7 +48,7 @@ import { LogRecord } from '@kbn/logging';
 import { MaybePromise } from '@kbn/utility-types';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
-import { OptInConfig } from '@elastic/analytics';
+import { OptInConfig } from '@kbn/analytics-client';
 import { PackageInfo } from '@kbn/config';
 import { PathConfigType } from '@kbn/utils';
 import { PeerCertificate } from 'tls';
@@ -60,10 +60,10 @@ import { ResponseObject } from '@hapi/hapi';
 import { ResponseToolkit } from '@hapi/hapi';
 import { SchemaTypeError } from '@kbn/config-schema';
 import { ShallowPromise } from '@kbn/utility-types';
-import { ShipperClassConstructor } from '@elastic/analytics';
+import { ShipperClassConstructor } from '@kbn/analytics-client';
 import { Stream } from 'stream';
-import { TelemetryCounter } from '@elastic/analytics';
-import { TelemetryCounterType } from '@elastic/analytics';
+import { TelemetryCounter } from '@kbn/analytics-client';
+import { TelemetryCounterType } from '@kbn/analytics-client';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -1464,7 +1464,7 @@ export const kibanaResponseFactory: {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
     }>;
-    customError: (options: CustomHttpResponseOptions<ResponseError>) => KibanaResponse<string | Error | {
+    customError: (options: CustomHttpResponseOptions<ResponseError | Buffer | Stream>) => KibanaResponse<string | Error | Buffer | Stream | {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
     }>;
@@ -2052,8 +2052,10 @@ export interface SavedObjectReferenceWithContext {
         name: string;
     }>;
     isMissing?: boolean;
+    originId?: string;
     spaces: string[];
     spacesWithMatchingAliases?: string[];
+    spacesWithMatchingOrigins?: string[];
     type: string;
 }
 

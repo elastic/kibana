@@ -24,7 +24,8 @@ export class JestConfigs {
 
   constructor(cwd: string, roots: string[]) {
     this.cwd = cwd;
-    this.roots = roots;
+    // sort roots by length so when we use `file.startsWith()` we will find the most specific root first
+    this.roots = roots.slice().sort((a, b) => b.length - a.length);
   }
 
   async files(type: 'unit' | 'integration') {
