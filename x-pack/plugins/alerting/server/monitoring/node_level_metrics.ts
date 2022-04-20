@@ -6,7 +6,7 @@
  */
 
 import { Logger } from '@kbn/logging';
-import { MonitoringCollectionStart } from '../../../monitoring_collection/server';
+import { MonitoringCollectionStart } from '@kbn/monitoring-collection-plugin/server';
 import { RuleExecutionStatusErrorReasons } from '../types';
 
 const PREFIX = `kibana_alerting_node_`;

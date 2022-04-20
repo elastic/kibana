@@ -18,7 +18,7 @@ import {
   takeUntil,
   ignoreElements,
 } from 'rxjs/operators';
-import { observeLines } from '@kbn/dev-utils';
+import { observeLines } from '@kbn/stdio-dev-helpers';
 
 import { usingServerProcess } from './using_server_process';
 import { Watcher } from './watcher';

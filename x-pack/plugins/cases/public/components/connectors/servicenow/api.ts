@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import { getExecuteConnectorUrl } from '../../../../common/utils/connectors_api';
 import {
   ConnectorExecutorResult,

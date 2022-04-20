@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogMeta, SavedObjectMigrationContext } from '../../../../../../src/core/server';
+import { LogMeta, SavedObjectMigrationContext } from '@kbn/core/server';
 
 interface MigrationLogMeta extends LogMeta {
   migrations: {

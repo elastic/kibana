@@ -7,10 +7,10 @@
 
 import { firstValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { ReportingCore } from '../';
+import { CollectorFetchContext, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { ReportingCore } from '..';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
-import { GetLicense } from './';
+import { GetLicense } from '.';
 import { getReportingUsage } from './get_reporting_usage';
 import { ReportingUsageType } from './types';
 import { reportingSchema } from './schema';

@@ -9,7 +9,7 @@ import type { PaletteOutput } from '@kbn/coloring';
 import type {
   NavigateToLensContext,
   VisualizeEditorLayersContext,
-} from '../../../../visualizations/public';
+} from '@kbn/visualizations-plugin/public';
 import type { Panel } from '../../common/types';
 import { PANEL_TYPES } from '../../common/enums';
 import { getDataSourceInfo } from './get_datasource_info';

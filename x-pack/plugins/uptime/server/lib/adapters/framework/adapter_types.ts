@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type {
   SavedObjectsClientContract,
   IScopedClusterClient,
   Logger,
   IBasePath,
-} from 'src/core/server';
-import type { TelemetryPluginSetup, TelemetryPluginStart } from 'src/plugins/telemetry/server';
-import { ObservabilityPluginSetup } from '../../../../../observability/server';
+} from '@kbn/core/server';
+import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
+import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
-} from '../../../../../encrypted_saved_objects/server';
+} from '@kbn/encrypted-saved-objects-plugin/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../../task_manager/server';
-import { UMKibanaRoute } from '../../../rest_api';
-import { PluginSetupContract } from '../../../../../features/server';
-import { MlPluginSetup as MlSetup } from '../../../../../ml/server';
-import { RuleRegistryPluginSetupContract } from '../../../../../rule_registry/server';
+} from '@kbn/task-manager-plugin/server';
+import { PluginSetupContract } from '@kbn/features-plugin/server';
+import { MlPluginSetup as MlSetup } from '@kbn/ml-plugin/server';
+import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
+import { FleetStartContract } from '@kbn/fleet-plugin/server';
 import { UptimeESClient } from '../../lib';
 import type { TelemetryEventsSender } from '../../telemetry/sender';
 import type { UptimeRouter } from '../../../types';
-import { SecurityPluginStart } from '../../../../../security/server';
-import { CloudSetup } from '../../../../../cloud/server';
-import { FleetStartContract } from '../../../../../fleet/server';
+import { UMKibanaRoute } from '../../../rest_api';
 import { UptimeConfig } from '../../../../common/config';
 import { SyntheticsService } from '../../synthetics_service/synthetics_service';
 

@@ -14,7 +14,7 @@ import {
   CoreStart,
   ICustomClusterClient,
   IClusterClient,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import { METRICSET_ALLOWLIST } from './constants';
 import {
   createConfig,

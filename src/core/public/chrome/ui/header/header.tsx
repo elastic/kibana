@@ -22,7 +22,7 @@ import classnames from 'classnames';
 import React, { createRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
-import { LoadingIndicator } from '../';
+import { LoadingIndicator } from '..';
 import {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -37,7 +37,7 @@ import {
   ChromeHelpExtension,
   ChromeUserBanner,
 } from '../../types';
-import { OnIsLockedUpdate } from './';
+import { OnIsLockedUpdate } from '.';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';

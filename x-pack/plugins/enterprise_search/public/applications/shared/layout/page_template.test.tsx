@@ -13,7 +13,8 @@ import { shallow } from 'enzyme';
 
 import { EuiCallOut } from '@elastic/eui';
 
-import { KibanaPageTemplate } from '../../../../../../../src/plugins/kibana_react/public';
+import { KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
+
 import { FlashMessages } from '../flash_messages';
 import { Loading } from '../loading';
 

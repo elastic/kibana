@@ -6,7 +6,7 @@
  */
 
 import { Values } from '@kbn/utility-types';
-import { LicensingPluginSetup, LicensingPluginStart } from '../../../../../licensing/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
 const FEATURES = {
   HOST_ISOLATION: 'Host isolation',

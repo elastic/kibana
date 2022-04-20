@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { validateDurationSchema } from '../../lib';
-import { handleDisabledApiKeysError } from './../lib/error_handler';
+import { handleDisabledApiKeysError } from '../lib/error_handler';
 import {
   SanitizedRule,
   RuleNotifyWhenType,

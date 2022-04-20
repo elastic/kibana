@@ -7,6 +7,7 @@
 
 import React from 'react';
 
+import { IExecutionLogWithErrorsResult } from '@kbn/alerting-plugin/common';
 import {
   Rule,
   RuleType,
@@ -39,7 +40,6 @@ import {
   unsnoozeRule,
   loadMonitoring,
 } from '../../../lib/rule_api';
-import { IExecutionLogWithErrorsResult } from '../../../../../../alerting/common';
 import { useKibana } from '../../../../common/lib/kibana';
 
 export interface ComponentOpts {

@@ -9,7 +9,8 @@
 import { setTimeout } from 'timers/promises';
 
 import Axios from 'axios';
-import { ToolingLog, isAxiosRequestError, isAxiosResponseError } from '@kbn/dev-utils';
+import { isAxiosRequestError, isAxiosResponseError } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { GithubIssueMini } from './github_api';
 import { TestFailure } from './get_failures';

@@ -11,7 +11,7 @@ import { inspect } from 'util';
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { Stats } from '../stats';
 import { deleteKibanaIndices } from './kibana_index';

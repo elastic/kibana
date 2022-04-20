@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { ToolingLog } from '@kbn/dev-utils';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
-import type { RulesSchema } from '../../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema';
+import type { RulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/response/rules_schema';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../plugins/security_solution/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 
 /**
  * Helper to cut down on the noise in some of the tests. This gets

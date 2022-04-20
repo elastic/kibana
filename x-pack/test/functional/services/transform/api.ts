@@ -7,14 +7,14 @@
 
 import expect from '@kbn/expect';
 
-import type { PutTransformsRequestSchema } from '../../../../plugins/transform/common/api_schemas/transforms';
-import { TransformState, TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
-import type { TransformStats } from '../../../../plugins/transform/common/types/transform_stats';
+import type { PutTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
+import { TransformState, TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
+import type { TransformStats } from '@kbn/transform-plugin/common/types/transform_stats';
 
+import { GetTransformsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
+import { PostTransformsUpdateRequestSchema } from '@kbn/transform-plugin/common/api_schemas/update_transforms';
+import { TransformPivotConfig } from '@kbn/transform-plugin/common/types/transform';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { GetTransformsResponseSchema } from '../../../../plugins/transform/common/api_schemas/transforms';
-import { PostTransformsUpdateRequestSchema } from '../../../../plugins/transform/common/api_schemas/update_transforms';
-import { TransformPivotConfig } from '../../../../plugins/transform/common/types/transform';
 
 export async function asyncForEach(array: any[], callback: Function) {
   for (let index = 0; index < array.length; index++) {
