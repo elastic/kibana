@@ -11,7 +11,7 @@ import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
 import { resolve, join } from 'path';
 import { BehaviorSubject, from } from 'rxjs';
 import { schema } from '@kbn/config-schema';
-import { createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 import { REPO_ROOT } from '@kbn/utils';
 
 import { ConfigPath, ConfigService, Env } from '../config';
@@ -1012,14 +1012,16 @@ describe('PluginsService', () => {
 
       const prebootUIConfig$ = preboot.uiPlugins.browserConfigs.get('plugin-with-expose-preboot')!;
       await expect(prebootUIConfig$.pipe(take(1)).toPromise()).resolves.toEqual({
-        sharedProp: 'sharedProp default value plugin-with-expose-preboot',
+        browserConfig: { sharedProp: 'sharedProp default value plugin-with-expose-preboot' },
+        exposedConfigKeys: { sharedProp: 'string' },
       });
 
       const standardUIConfig$ = standard.uiPlugins.browserConfigs.get(
         'plugin-with-expose-standard'
       )!;
       await expect(standardUIConfig$.pipe(take(1)).toPromise()).resolves.toEqual({
-        sharedProp: 'sharedProp default value plugin-with-expose-standard',
+        browserConfig: { sharedProp: 'sharedProp default value plugin-with-expose-standard' },
+        exposedConfigKeys: { sharedProp: 'string' },
       });
     });
 

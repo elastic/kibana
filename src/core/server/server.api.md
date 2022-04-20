@@ -56,7 +56,6 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { Readable } from 'stream';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { Request as Request_2 } from '@hapi/hapi';
-import type { RequestHandlerContext as RequestHandlerContext_2 } from 'src/core/server';
 import { ResponseObject } from '@hapi/hapi';
 import { ResponseToolkit } from '@hapi/hapi';
 import { SchemaTypeError } from '@kbn/config-schema';
@@ -1129,16 +1128,18 @@ export interface HttpAuth {
 
 // @public
 export interface HttpResources {
-    register: <P, Q, B, Context extends RequestHandlerContext_2 = RequestHandlerContext_2>(route: RouteConfig<P, Q, B, 'get'>, handler: HttpResourcesRequestHandler<P, Q, B, Context>) => void;
+    register: <P, Q, B, Context extends RequestHandlerContext = RequestHandlerContext>(route: RouteConfig<P, Q, B, 'get'>, handler: HttpResourcesRequestHandler<P, Q, B, Context>) => void;
 }
 
 // @public
 export interface HttpResourcesRenderOptions {
     headers?: ResponseHeaders;
+    // @internal
+    includeExposedConfigKeys?: boolean;
 }
 
 // @public
-export type HttpResourcesRequestHandler<P = unknown, Q = unknown, B = unknown, Context extends RequestHandlerContext_2 = RequestHandlerContext_2> = RequestHandler<P, Q, B, Context, 'get', KibanaResponseFactory & HttpResourcesServiceToolkit>;
+export type HttpResourcesRequestHandler<P = unknown, Q = unknown, B = unknown, Context extends RequestHandlerContext = RequestHandlerContext> = RequestHandler<P, Q, B, Context, 'get', KibanaResponseFactory & HttpResourcesServiceToolkit>;
 
 // @public
 export type HttpResourcesResponseOptions = HttpResponseOptions;
@@ -1308,6 +1309,8 @@ export interface IntervalHistogram {
 
 // @public (undocumented)
 export interface IRenderOptions {
+    // @internal
+    includeExposedConfigKeys?: boolean;
     isAnonymousPage?: boolean;
     // @internal @deprecated
     vars?: Record<string, any>;
@@ -1461,7 +1464,7 @@ export const kibanaResponseFactory: {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
     }>;
-    customError: (options: CustomHttpResponseOptions<ResponseError>) => KibanaResponse<string | Error | {
+    customError: (options: CustomHttpResponseOptions<ResponseError | Buffer | Stream>) => KibanaResponse<string | Error | Buffer | Stream | {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
     }>;
@@ -2049,8 +2052,10 @@ export interface SavedObjectReferenceWithContext {
         name: string;
     }>;
     isMissing?: boolean;
+    originId?: string;
     spaces: string[];
     spacesWithMatchingAliases?: string[];
+    spacesWithMatchingOrigins?: string[];
     type: string;
 }
 

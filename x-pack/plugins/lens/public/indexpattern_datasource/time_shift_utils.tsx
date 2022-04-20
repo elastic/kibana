@@ -9,15 +9,15 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { uniq } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { Datatable } from '@kbn/expressions-plugin';
+import { search } from '@kbn/data-plugin/public';
+import { parseTimeShift } from '@kbn/data-plugin/common';
 import {
   IndexPattern,
   GenericIndexPatternColumn,
   IndexPatternLayer,
   IndexPatternPrivateState,
 } from './types';
-import { Datatable } from '../../../../../src/plugins/expressions';
-import { search } from '../../../../../src/plugins/data/public';
-import { parseTimeShift } from '../../../../../src/plugins/data/common';
 import { FramePublicAPI } from '../types';
 
 export const timeShiftOptions = [

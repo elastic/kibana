@@ -8,9 +8,9 @@
 
 import deepEqual from 'fast-deep-equal';
 
-import { TIME_SLIDER_CONTROL } from '../../';
+import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
+import { TIME_SLIDER_CONTROL } from '../..';
 import { ControlEmbeddable, IEditableControlFactory } from '../../types';
-import { EmbeddableFactoryDefinition, IContainer } from '../../../../embeddable/public';
 import {
   createOptionsListExtract,
   createOptionsListInject,

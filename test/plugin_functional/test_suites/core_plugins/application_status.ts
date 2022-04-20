@@ -12,9 +12,9 @@ import {
   AppNavLinkStatus,
   AppStatus,
   AppUpdatableFields,
-} from '../../../../src/core/public/application/types';
+} from '@kbn/core/public/application/types';
 import { PluginFunctionalProviderContext } from '../../services';
-import '../../plugins/core_app_status/public/types';
+import '@kbn/core-app-status-plugin/public/types';
 
 const getKibanaUrl = (pathname?: string, search?: string) =>
   Url.format({

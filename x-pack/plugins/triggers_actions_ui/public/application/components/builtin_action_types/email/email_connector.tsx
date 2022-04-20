@@ -21,13 +21,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
+import { AdditionalEmailServices } from '@kbn/actions-plugin/common';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { EmailActionConnector } from '../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 import { getEmailServices } from './email';
 import { useEmailConfig } from './use_email_config';
-import { AdditionalEmailServices } from '../../../../../../actions/common';
 
 const ExchangeFormFields = lazy(() => import('./exchange_form'));
 export const EmailActionConnectorFields: React.FunctionComponent<

@@ -3,37 +3,50 @@
     "dashboard": {
       "properties": {
         "panels": {
-          "type": "long"
-        },
-        "panelsByValue": {
-          "type": "long"
-        },
-        "lensByValue": {
           "properties": {
-            "DYNAMIC_KEY": {
-              "type": "long",
-              "_meta": {
-                "description": "Collection of telemetry metrics for Lens visualizations, which are added to dashboard by \"value\"."
-              }
-            }
-          }
-        },
-        "visualizationByValue": {
-          "properties": {
-            "DYNAMIC_KEY": {
-              "type": "long",
-              "_meta": {
-                "description": "Collection of telemetry metrics for visualizations, which are added to dashboard by \"value\"."
-              }
-            }
-          }
-        },
-        "embeddable": {
-          "properties": {
-            "DYNAMIC_KEY": {
-              "type": "long",
-              "_meta": {
-                "description": "Collection of telemetry metrics that embeddable service reports. Embeddable service internally calls each embeddable, which in turn calls its dynamic actions, which calls each drill down attached to that embeddable."
+            "total": {
+              "type": "long"
+            },
+            "by_reference": {
+              "type": "long"
+            },
+            "by_value": {
+              "type": "long"
+            },
+            "by_type": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of panels that have been added to all dashboards."
+                      }
+                    },
+                    "by_reference": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of \"by reference\" panels that have been added to all dashboards."
+                      }
+                    },
+                    "by_value": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of \"by value\" panels that have been added to all dashboards."
+                      }
+                    },
+                    "details": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Collection of telemetry metrics that embeddable service reports. Embeddable service internally calls each embeddable, which in turn calls its dynamic actions, which calls each drill down attached to that embeddable."
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           }
@@ -7300,12 +7313,6 @@
     },
     "stack_management": {
       "properties": {
-        "timelion:quandl.key": {
-          "type": "keyword",
-          "_meta": {
-            "description": "Default value of the setting was changed."
-          }
-        },
         "securitySolution:defaultIndex": {
           "type": "keyword",
           "_meta": {
@@ -7334,12 +7341,6 @@
           "type": "keyword",
           "_meta": {
             "description": "Default value of the setting was changed."
-          }
-        },
-        "timelion:graphite.url": {
-          "type": "keyword",
-          "_meta": {
-            "description": "Default value of the setting changed."
           }
         },
         "xpackDashboardMode:roles": {

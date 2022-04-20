@@ -12,7 +12,7 @@ import {
   SavedObjectMigrationContext,
   SavedObjectMigrationFn,
   SavedObjectUnsanitizedDoc,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import {
   LensDocShape715,
   LensDocShape810,
@@ -22,7 +22,7 @@ import {
   VisState810,
   VisState820,
 } from './types';
-import { layerTypes } from '../../common';
+import { layerTypes, MetricState } from '../../common';
 import { Filter } from '@kbn/es-query';
 
 describe('Lens migrations', () => {
@@ -2062,6 +2062,55 @@ describe('Lens migrations', () => {
         result.attributes.state.datasourceStates.indexpattern.layers['2'].columns;
       expect(layer2Columns['3'].params).toHaveProperty('includeEmptyRows', true);
       expect(layer2Columns['4'].params).toHaveProperty('includeEmptyRows', true);
+    });
+  });
+  describe('8.3.0 old metric visualization defaults', () => {
+    const context = { log: { warning: () => {} } } as unknown as SavedObjectMigrationContext;
+    const example = {
+      type: 'lens',
+      id: 'mocked-saved-object-id',
+      attributes: {
+        savedObjectId: '1',
+        title: 'MyRenamedOps',
+        description: '',
+        visualizationType: 'lnsMetric',
+        state: {
+          visualization: {},
+        },
+      },
+    } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
+
+    it('preserves current config for existing visualizations that are using the DEFAULTS', () => {
+      const result = migrations['8.3.0'](example, context) as ReturnType<
+        SavedObjectMigrationFn<LensDocShape, LensDocShape>
+      >;
+      const visState = result.attributes.state.visualization as MetricState;
+      expect(visState.textAlign).toBe('center');
+      expect(visState.titlePosition).toBe('bottom');
+      expect(visState.size).toBe('xl');
+    });
+
+    it('preserves current config for existing visualizations that are using CUSTOM settings', () => {
+      const result = migrations['8.3.0'](
+        {
+          ...example,
+          attributes: {
+            ...example.attributes,
+            state: {
+              visualization: {
+                textAlign: 'right',
+                titlePosition: 'top',
+                size: 's',
+              },
+            },
+          },
+        },
+        context
+      ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
+      const visState = result.attributes.state.visualization as MetricState;
+      expect(visState.textAlign).toBe('right');
+      expect(visState.titlePosition).toBe('top');
+      expect(visState.size).toBe('s');
     });
   });
 });

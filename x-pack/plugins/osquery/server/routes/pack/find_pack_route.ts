@@ -8,8 +8,8 @@
 import { filter, map } from 'lodash';
 import { schema } from '@kbn/config-schema';
 
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../fleet/common';
-import { IRouter } from '../../../../../../src/core/server';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { IRouter } from '@kbn/core/server';
 import { packSavedObjectType } from '../../../common/types';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { PLUGIN_ID } from '../../../common';
@@ -53,6 +53,7 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
 
         // @ts-expect-error update types
         pack.policy_ids = policyIds;
+
         return pack;
       });
 

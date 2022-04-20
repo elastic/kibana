@@ -10,7 +10,7 @@ import {
   epmRouteService,
   type GetInfoResponse,
   type DefaultPackagesInstallationError,
-} from '../../../../fleet/common';
+} from '@kbn/fleet-plugin/common';
 import { CIS_KUBERNETES_PACKAGE_NAME } from '../../../common/constants';
 import { useKibana } from '../hooks/use_kibana';
 

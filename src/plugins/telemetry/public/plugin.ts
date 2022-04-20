@@ -16,10 +16,11 @@ import type {
   SavedObjectsBatchResponse,
   ApplicationStart,
   DocLinksStart,
-} from 'src/core/public';
+} from '@kbn/core/public';
 
-import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
 import type {
   TelemetrySavedObjectAttributes,
@@ -31,7 +32,6 @@ import {
   getTelemetrySendUsageFrom,
 } from '../common/telemetry_config';
 import { getNotifyUserAboutOptInDefault } from '../common/telemetry_config/get_telemetry_notify_user_about_optin_default';
-import { HomePublicPluginSetup } from '../../home/public';
 import { renderWelcomeTelemetryNotice } from './render_welcome_telemetry_notice';
 
 /**
@@ -109,6 +109,8 @@ export interface TelemetryPluginConfig {
   telemetryNotifyUserAboutOptInDefault?: boolean;
   /** Does the user have enough privileges to change the settings? **/
   userCanChangeSettings?: boolean;
+  /** Should we hide the privacy statement notice? Useful on some environments, e.g. Cloud */
+  hidePrivacyStatement?: boolean;
 }
 
 function getTelemetryConstants(docLinks: DocLinksStart): TelemetryConstants {
@@ -132,7 +134,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   }
 
   public setup(
-    { http, notifications, getStartServices }: CoreSetup,
+    { analytics, http, notifications, getStartServices }: CoreSetup,
     { screenshotMode, home }: TelemetryPluginSetupDependencies
   ): TelemetryPluginSetup {
     const config = this.config;
@@ -153,9 +155,10 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
     this.telemetrySender = new TelemetrySender(this.telemetryService, async () => {
       await this.refreshConfig();
+      analytics.optIn({ global: { enabled: this.telemetryService!.isOptedIn } });
     });
 
-    if (home) {
+    if (home && !this.config.hidePrivacyStatement) {
       home.welcomeScreen.registerOnRendered(() => {
         if (this.telemetryService?.userCanChangeSettings) {
           this.telemetryNotifications?.setOptedInNoticeSeen();
@@ -177,6 +180,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   }
 
   public start({
+    analytics,
     http,
     overlays,
     application,
@@ -209,6 +213,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
       // Refresh and get telemetry config
       const updatedConfig = await this.refreshConfig();
+
+      analytics.optIn({ global: { enabled: this.telemetryService!.isOptedIn } });
+
       const telemetryBanner = updatedConfig?.banner;
 
       this.maybeStartTelemetryPoller();

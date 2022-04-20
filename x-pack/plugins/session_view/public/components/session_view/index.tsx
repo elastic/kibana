@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   EuiEmptyPrompt,
   EuiButton,
@@ -13,7 +13,9 @@ import {
   EuiPanel,
   EuiHorizontalRule,
   EuiFlexGroup,
+  EuiBetaBadge,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { SectionLoading } from '../../shared_imports';
@@ -35,6 +37,10 @@ import {
   useFetchSessionViewAlerts,
 } from './hooks';
 import { LOCAL_STORAGE_DISPLAY_OPTIONS_KEY } from '../../../common/constants';
+
+const BETA = i18n.translate('xpack.sessionView.beta', {
+  defaultMessage: 'Beta',
+});
 
 /**
  * The main wrapper component for the session view.
@@ -62,7 +68,7 @@ export const SessionView = ({
     LOCAL_STORAGE_DISPLAY_OPTIONS_KEY,
     {
       timestamp: true,
-      verboseMode: true,
+      verboseMode: false,
     }
   );
   const [fetchAlertStatus, setFetchAlertStatus] = useState<string[]>([]);
@@ -71,6 +77,11 @@ export const SessionView = ({
   const [currentJumpToEntityId, setCurrentJumpToEntityId] = useState(jumpToEntityId);
 
   const styles = useStyles({ height, isFullScreen });
+
+  // to give an indication to the user that there may be more search results if they turn on verbose mode.
+  const showVerboseSearchTooltip = useMemo(() => {
+    return !!(!displayOptions?.verboseMode && searchQuery && searchResults?.length === 0);
+  }, [displayOptions?.verboseMode, searchResults, searchQuery]);
 
   const onProcessSelected = useCallback((process: Process | null) => {
     setSelectedProcess(process);
@@ -110,7 +121,7 @@ export const SessionView = ({
 
   const hasData = alerts && data && data.pages?.[0].events.length > 0;
   const hasError = error || alertsError;
-  const renderIsLoading = (isFetching || alertsFetching) && !data;
+  const renderIsLoading = (isFetching || alertsFetching) && !(data && alerts);
   const renderDetails = isDetailOpen && selectedProcess;
   const { data: newUpdatedAlertsStatus } = useFetchAlertStatus(
     updatedAlertsStatus,
@@ -149,7 +160,18 @@ export const SessionView = ({
     [setDisplayOptions]
   );
 
-  if (!isFetching && !hasData) {
+  if (renderIsLoading) {
+    return (
+      <SectionLoading>
+        <FormattedMessage
+          id="xpack.sessionView.loadingProcessTree"
+          defaultMessage="Loading session…"
+        />
+      </SectionLoading>
+    );
+  }
+
+  if (!hasData) {
     return (
       <EuiEmptyPrompt
         data-test-subj="sessionView:sessionViewProcessEventsEmpty"
@@ -177,7 +199,10 @@ export const SessionView = ({
     <>
       <div css={styles.sessionViewerComponent}>
         <EuiPanel css={styles.toolBar} hasShadow={false} borderRadius="none">
-          <EuiFlexGroup>
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge label={BETA} size="s" css={styles.betaBadge} />
+            </EuiFlexItem>
             <EuiFlexItem
               data-test-subj="sessionView:sessionViewProcessEventsSearch"
               css={styles.searchBar}
@@ -190,14 +215,15 @@ export const SessionView = ({
               />
             </EuiFlexItem>
 
-            <EuiFlexItem grow={false} css={styles.buttonsEyeDetail}>
+            <EuiFlexItem grow={false}>
               <SessionViewDisplayOptions
                 displayOptions={displayOptions!}
                 onChange={handleOptionChange}
+                showVerboseSearchTooltip={showVerboseSearchTooltip}
               />
             </EuiFlexItem>
 
-            <EuiFlexItem grow={false} css={styles.buttonsEyeDetail}>
+            <EuiFlexItem grow={false}>
               <EuiButton
                 onClick={toggleDetailPanel}
                 iconType="list"
@@ -221,15 +247,6 @@ export const SessionView = ({
                 minSize="60%"
                 paddingSize="none"
               >
-                {renderIsLoading && (
-                  <SectionLoading>
-                    <FormattedMessage
-                      id="xpack.sessionView.loadingProcessTree"
-                      defaultMessage="Loading session…"
-                    />
-                  </SectionLoading>
-                )}
-
                 {hasError && (
                   <EuiEmptyPrompt
                     iconType="alert"
@@ -273,8 +290,8 @@ export const SessionView = ({
                       setSearchResults={setSearchResults}
                       updatedAlertsStatus={updatedAlertsStatus}
                       onShowAlertDetails={onShowAlertDetails}
-                      timeStampOn={displayOptions?.timestamp}
-                      verboseModeOn={displayOptions?.verboseMode}
+                      showTimestamp={displayOptions?.timestamp}
+                      verboseMode={displayOptions?.verboseMode}
                     />
                   </div>
                 )}

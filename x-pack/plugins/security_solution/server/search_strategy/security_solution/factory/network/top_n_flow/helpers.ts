@@ -7,8 +7,8 @@
 
 import { getOr } from 'lodash/fp';
 
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { assertUnreachable } from '../../../../../../common/utility_types';
-import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import {
   Direction,
   GeoItem,

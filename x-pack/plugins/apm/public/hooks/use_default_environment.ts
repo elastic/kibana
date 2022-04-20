@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { defaultApmServiceEnvironment } from '../../../observability/common';
+import { defaultApmServiceEnvironment } from '@kbn/observability-plugin/common';
 import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
 import { Environment } from '../../common/environment_rt';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';

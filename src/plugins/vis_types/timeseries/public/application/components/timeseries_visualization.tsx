@@ -11,11 +11,10 @@ import './timeseries_visualization.scss';
 import React, { Suspense, useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
 import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
-import { IUiSettingsClient } from 'src/core/public';
-import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { PersistedState } from 'src/plugins/visualizations/public';
-import { PaletteRegistry } from 'src/plugins/charts/public';
-
+import { IUiSettingsClient } from '@kbn/core/public';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
+import { PersistedState } from '@kbn/visualizations-plugin/public';
+import type { PaletteRegistry } from '@kbn/coloring';
 import { TimeseriesLoading } from './timeseries_loading';
 import { TimeseriesVisTypes } from './vis_types';
 import type { FetchedIndexPattern, PanelData, TimeseriesVisData } from '../../../common/types';

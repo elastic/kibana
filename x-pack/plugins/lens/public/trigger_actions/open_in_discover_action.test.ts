@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DiscoverStart } from '../../../../../src/plugins/discover/public';
-import type { IEmbeddable } from '../../../../../src/plugins/embeddable/public';
-import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
+import { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { DOC_TYPE } from '../../common';
 import { Embeddable } from '../embeddable';
 import { createOpenInDiscoverAction } from './open_in_discover_action';

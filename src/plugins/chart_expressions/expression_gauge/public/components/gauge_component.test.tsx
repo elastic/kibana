@@ -7,15 +7,15 @@
  */
 
 import React from 'react';
-import { chartPluginMock } from '../../../../charts/public/mocks';
-import { fieldFormatsServiceMock } from '../../../../field_formats/public/mocks';
-import type { Datatable } from '../../../../expressions/public';
-import { DatatableColumn, DatatableRow } from 'src/plugins/expressions/common';
+import { ColorStop } from '@kbn/coloring';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import {
   GaugeRenderProps,
   GaugeArguments,
-  ColorStop,
   GaugeLabelMajorModes,
   GaugeTicksPositions,
   GaugeColorModes,

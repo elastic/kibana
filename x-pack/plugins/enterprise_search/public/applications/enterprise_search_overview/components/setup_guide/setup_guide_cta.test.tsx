@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { SetupGuideCta } from './';
+import { SetupGuideCta } from '.';
 
 describe('SetupGuideCta', () => {
   it('renders', () => {

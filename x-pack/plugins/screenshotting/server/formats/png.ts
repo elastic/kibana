@@ -24,7 +24,7 @@ export interface PngScreenshotOptions extends CaptureOptions {
    */
   format?: 'png';
 
-  layout: PngLayoutParams;
+  layout?: PngLayoutParams;
 }
 
 /**

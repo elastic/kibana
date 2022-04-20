@@ -12,12 +12,15 @@ import { CSSObject } from '@emotion/react';
 export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
   const cached = useMemo(() => {
-    const detailsPanelLeftBorder: CSSObject = {
-      borderLeft: euiTheme.border.thin,
+    const { border } = euiTheme;
+
+    const detailsPanel: CSSObject = {
+      borderLeft: border.thin,
+      height: '100%',
     };
 
     return {
-      detailsPanelLeftBorder,
+      detailsPanel,
     };
   }, [euiTheme]);
 

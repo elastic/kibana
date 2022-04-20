@@ -22,7 +22,7 @@ import {
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
+import type { PaletteRegistry } from '@kbn/coloring';
 import {
   BasicOptions,
   SwitchOption,
@@ -30,18 +30,17 @@ import {
   PalettePicker,
   LongLegendOptions,
   LegendSizeSettings,
-} from '../../../../../vis_default_editor/public';
-import { VisEditorOptionsProps } from '../../../../../visualizations/public';
-import { TruncateLabelsOption } from './truncate_labels';
-import { PaletteRegistry } from '../../../../../charts/public';
-import { DEFAULT_PERCENT_DECIMALS } from '../../../common';
-import { PieTypeProps } from '../../types';
+} from '@kbn/vis-default-editor-plugin/public';
+import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import {
   PartitionVisParams,
   LabelPositions,
   ValueFormats,
   LegendDisplay,
-} from '../../../../../chart_expressions/expression_partition_vis/common';
+} from '@kbn/expression-partition-vis-plugin/common';
+import { TruncateLabelsOption } from './truncate_labels';
+import { DEFAULT_PERCENT_DECIMALS } from '../../../common';
+import { PieTypeProps } from '../../types';
 
 import { emptySizeRatioOptions, getLabelPositions, getValuesFormats } from '../collections';
 import { getLegendPositions } from '../positions';
@@ -104,8 +103,8 @@ const PieOptions = (props: PieOptionsProps) => {
   );
 
   useEffect(() => {
-    setLegendVisibility(legendUiStateValue);
-  }, [legendUiStateValue]);
+    setLegendVisibility(legendUiStateValue ?? stateParams.legendDisplay === LegendDisplay.SHOW);
+  }, [legendUiStateValue, stateParams.legendDisplay]);
 
   useEffect(() => {
     const fetchPalettes = async () => {

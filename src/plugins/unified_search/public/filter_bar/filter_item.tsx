@@ -17,11 +17,11 @@ import {
 } from '@kbn/es-query';
 import classNames from 'classnames';
 import React, { MouseEvent, useState, useEffect, HTMLAttributes } from 'react';
-import { IUiSettingsClient } from 'src/core/public';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '@kbn/data-plugin/public';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
-import { IIndexPattern } from '../../../data/common';
-import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '../../../data/public';
 import { getIndexPatterns } from '../services';
 
 type PanelOptions = 'pinFilter' | 'editFilter' | 'negateFilter' | 'disableFilter' | 'deleteFilter';
@@ -29,7 +29,7 @@ type PanelOptions = 'pinFilter' | 'editFilter' | 'negateFilter' | 'disableFilter
 export interface FilterItemProps {
   id: string;
   filter: Filter;
-  indexPatterns: IIndexPattern[];
+  indexPatterns: DataView[];
   className?: string;
   onUpdate: (filter: Filter) => void;
   onRemove: () => void;

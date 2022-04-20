@@ -6,9 +6,9 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { IndexDataEnricher } from '../services';
-import { Index } from '../index';
+import { Index } from '..';
 
 async function fetchIndicesCall(
   client: IScopedClusterClient,

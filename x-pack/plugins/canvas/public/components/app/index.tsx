@@ -11,7 +11,7 @@ import PropTypes from 'prop-types';
 import { History } from 'history';
 // @ts-expect-error
 import createHashStateHistory from 'history-extra/dist/createHashStateHistory';
-import { ScopedHistory } from 'kibana/public';
+import { ScopedHistory } from '@kbn/core/public';
 import { skipWhile, timeout, take } from 'rxjs/operators';
 import { useNavLinkService } from '../../services';
 // @ts-expect-error

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import {
   RuleExecutionStatus,
   RuleExecutionStatusValues,
@@ -35,7 +35,7 @@ export function executionStatusFromState(state: RuleExecutionState): RuleExecuti
   return {
     metrics: state.metrics,
     numberOfTriggeredActions: state.alertExecutionStore.numberOfTriggeredActions,
-    numberOfScheduledActions: state.alertExecutionStore.numberOfScheduledActions,
+    numberOfGeneratedActions: state.alertExecutionStore.numberOfGeneratedActions,
     lastExecutionDate: new Date(),
     status,
     ...(hasIncompleteAlertExecution && {

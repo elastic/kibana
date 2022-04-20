@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ML_JOB_FIELD_TYPES } from '@kbn/ml-plugin/common/constants/field_types';
 import { TestData } from './types';
-import { ML_JOB_FIELD_TYPES } from '../../../../../plugins/ml/common/constants/field_types';
 
 export const farequoteDataViewTestData: TestData = {
   suiteTitle: 'farequote index pattern',
