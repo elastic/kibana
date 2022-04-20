@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import {
   EuiBasicTable,
@@ -19,7 +19,9 @@ import {
 
 import { SecurityPageName } from '../../../../app/types';
 import { HeaderSection } from '../../../../common/components/header_section';
+import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
 import { HostDetailsLink } from '../../../../common/components/links';
+import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { useNavigation, NavigateTo, GetAppUrl } from '../../../../common/lib/kibana';
 import * as i18n from '../translations';
@@ -59,33 +61,35 @@ export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableP
   );
 
   return (
-    <EuiPanel hasBorder data-test-subj="severityHostAlertsPanel">
-      <HeaderSection
-        id={DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID}
-        title={i18n.HOST_ALERTS_SECTION_TITLE}
-        subtitle={<LastUpdatedAt updatedAt={updatedAt} isUpdating={isLoading} />}
-        titleSize="s"
-        toggleQuery={setToggleStatus}
-        toggleStatus={toggleStatus}
-      />
-      {toggleStatus && (
-        <>
-          <EuiBasicTable
-            items={items}
-            columns={columns}
-            loading={isLoading}
-            data-test-subj="severityHostAlertsTable"
-            noItemsMessage={
-              <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
-            }
-          />
-          <EuiSpacer size="m" />
-          <EuiButton data-test-subj="severityHostAlertsButton" onClick={navigateToHosts}>
-            {i18n.VIEW_ALL_HOST_ALERTS}
-          </EuiButton>
-        </>
-      )}
-    </EuiPanel>
+    <HoverVisibilityContainer show={true} targetClassNames={[INPECT_BUTTON_CLASS]}>
+      <EuiPanel hasBorder data-test-subj="severityHostAlertsPanel">
+        <HeaderSection
+          id={DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID}
+          title={i18n.HOST_ALERTS_SECTION_TITLE}
+          subtitle={<LastUpdatedAt updatedAt={updatedAt} isUpdating={isLoading} />}
+          titleSize="s"
+          toggleQuery={setToggleStatus}
+          toggleStatus={toggleStatus}
+        />
+        {toggleStatus && (
+          <>
+            <EuiBasicTable
+              items={items}
+              columns={columns}
+              loading={isLoading}
+              data-test-subj="severityHostAlertsTable"
+              noItemsMessage={
+                <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
+              }
+            />
+            <EuiSpacer size="m" />
+            <EuiButton data-test-subj="severityHostAlertsButton" onClick={navigateToHosts}>
+              {i18n.VIEW_ALL_HOST_ALERTS}
+            </EuiButton>
+          </>
+        )}
+      </EuiPanel>
+    </HoverVisibilityContainer>
   );
 });
 
@@ -97,7 +101,9 @@ const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo }) => [
     name: i18n.HOST_ALERTS_HOSTNAME_COLUMN,
     truncateText: true,
     textOnly: true,
-    render: (hostName: string) => <HostDetailsLink hostName={hostName} />,
+    render: (hostName: string) => (
+      <HostDetailsLink hostName={hostName} testingId="hostSeverityAlertsTable-hostName" />
+    ),
   },
   {
     field: 'totalAlerts',

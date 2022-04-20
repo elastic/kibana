@@ -19,6 +19,8 @@ import {
 
 import { SecurityPageName } from '../../../../app/types';
 import { HeaderSection } from '../../../../common/components/header_section';
+import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
+import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
 import { UserDetailsLink } from '../../../../common/components/links';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { useNavigation, NavigateTo, GetAppUrl } from '../../../../common/lib/kibana';
@@ -58,34 +60,36 @@ export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableP
   );
 
   return (
-    <EuiPanel hasBorder data-test-subj="severityUserAlertsPanel">
-      <HeaderSection
-        id={DETECTION_RESPONSE_USER_SEVERITY_QUERY_ID}
-        title={i18n.USER_ALERTS_SECTION_TITLE}
-        titleSize="s"
-        toggleStatus={toggleStatus}
-        toggleQuery={setToggleStatus}
-        subtitle={<LastUpdatedAt updatedAt={updatedAt} isUpdating={isLoading} />}
-      />
+    <HoverVisibilityContainer show={true} targetClassNames={[INPECT_BUTTON_CLASS]}>
+      <EuiPanel hasBorder data-test-subj="severityUserAlertsPanel">
+        <HeaderSection
+          id={DETECTION_RESPONSE_USER_SEVERITY_QUERY_ID}
+          title={i18n.USER_ALERTS_SECTION_TITLE}
+          titleSize="s"
+          toggleStatus={toggleStatus}
+          toggleQuery={setToggleStatus}
+          subtitle={<LastUpdatedAt updatedAt={updatedAt} isUpdating={isLoading} />}
+        />
 
-      {toggleStatus && (
-        <>
-          <EuiBasicTable
-            data-test-subj="severityUserAlertsTable"
-            columns={columns}
-            items={items}
-            loading={isLoading}
-            noItemsMessage={
-              <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
-            }
-          />
-          <EuiSpacer size="m" />
-          <EuiButton data-test-subj="severityUserAlertsButton" onClick={navigateToAlerts}>
-            {i18n.VIEW_ALL_USER_ALERTS}
-          </EuiButton>
-        </>
-      )}
-    </EuiPanel>
+        {toggleStatus && (
+          <>
+            <EuiBasicTable
+              data-test-subj="severityUserAlertsTable"
+              columns={columns}
+              items={items}
+              loading={isLoading}
+              noItemsMessage={
+                <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
+              }
+            />
+            <EuiSpacer size="m" />
+            <EuiButton data-test-subj="severityUserAlertsButton" onClick={navigateToAlerts}>
+              {i18n.VIEW_ALL_USER_ALERTS}
+            </EuiButton>
+          </>
+        )}
+      </EuiPanel>
+    </HoverVisibilityContainer>
   );
 });
 
@@ -99,7 +103,7 @@ const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo }) => [
     textOnly: true,
 
     render: (userName: string) => (
-      <UserDetailsLink data-test-subj="userSeverityAlertsTable-userName" userName={userName} />
+      <UserDetailsLink testingId="userSeverityAlertsTable-userName" userName={userName} />
     ),
   },
   {

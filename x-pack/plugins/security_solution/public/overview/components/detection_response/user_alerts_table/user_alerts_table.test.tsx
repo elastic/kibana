@@ -94,8 +94,9 @@ describe('UserAlertsTable', () => {
     mockUseUserAlertsItemsReturn({ items: [parsedVulnerableUserAlertsResult[0]] });
     const { getByTestId } = renderComponent();
 
-    expect(getByTestId('userSeverityAlertsTable-critical')).toHaveTextContent('4');
+    expect(getByTestId('userSeverityAlertsTable-userName')).toHaveTextContent('crffn20qcs');
     expect(getByTestId('userSeverityAlertsTable-totalAlerts')).toHaveTextContent('4');
+    expect(getByTestId('userSeverityAlertsTable-critical')).toHaveTextContent('4');
     expect(getByTestId('userSeverityAlertsTable-high')).toHaveTextContent('1');
     expect(getByTestId('userSeverityAlertsTable-medium')).toHaveTextContent('1');
     expect(getByTestId('userSeverityAlertsTable-low')).toHaveTextContent('1');

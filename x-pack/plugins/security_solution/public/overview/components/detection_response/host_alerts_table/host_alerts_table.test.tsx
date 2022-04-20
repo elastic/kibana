@@ -94,6 +94,7 @@ describe('HostAlertsTable', () => {
     mockUseHostAlertsItemsReturn({ items: [parsedVulnerableHostsAlertsResult[0]] });
     const { getByTestId } = renderComponent();
 
+    expect(getByTestId('hostSeverityAlertsTable-hostName')).toHaveTextContent('Host-342m5gl1g2');
     expect(getByTestId('hostSeverityAlertsTable-totalAlerts')).toHaveTextContent('100');
     expect(getByTestId('hostSeverityAlertsTable-critical')).toHaveTextContent('5');
     expect(getByTestId('hostSeverityAlertsTable-high')).toHaveTextContent('50');
