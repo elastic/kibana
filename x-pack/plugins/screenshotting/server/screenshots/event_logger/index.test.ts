@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import moment from 'moment';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Actions, EventLogger, ScreenshottingAction } from '.';
 import { ElementPosition } from '../get_element_position_data';
 import { ConfigType } from '../../config';
+
+jest.mock('uuid', () => ({
+  v4: () => 'NEW_UUID',
+}));
 
 type EventLoggerArgs = [message: string, meta: ScreenshottingAction];
 describe('Event Logger', () => {
@@ -66,61 +69,96 @@ describe('Event Logger', () => {
 
     const logs = logSpy.mock.calls.map(([message, data]) => ({
       message,
-      event: data.kibana.screenshotting.action,
       duration: data?.event?.duration,
+      screenshotting: data?.kibana?.screenshotting,
     }));
 
     expect(logs).toMatchInlineSnapshot(`
       Array [
         Object {
           "duration": undefined,
-          "event": "screenshot-pipeline-start",
           "message": "screenshot pipeline - starting",
+          "screenshotting": Object {
+            "action": "screenshot-pipeline-start",
+            "session_id": "NEW_UUID",
+          },
         },
         Object {
           "duration": undefined,
-          "event": "open-url-start",
           "message": "open the url to the Kibana application - starting",
+          "screenshotting": Object {
+            "action": "open-url-start",
+            "session_id": "NEW_UUID",
+          },
         },
         Object {
           "duration": 3000,
-          "event": "open-url-complete",
           "message": "open the url to the Kibana application - completed",
+          "screenshotting": Object {
+            "action": "open-url-complete",
+            "session_id": "NEW_UUID",
+          },
         },
         Object {
           "duration": undefined,
-          "event": "get-element-position-data-start",
           "message": "scan the page to find the boundaries of visualization elements - starting",
+          "screenshotting": Object {
+            "action": "get-element-position-data-start",
+            "session_id": "NEW_UUID",
+          },
         },
         Object {
           "duration": 5000,
-          "event": "get-element-position-data-complete",
           "message": "scan the page to find the boundaries of visualization elements - completed",
+          "screenshotting": Object {
+            "action": "get-element-position-data-complete",
+            "session_id": "NEW_UUID",
+          },
         },
         Object {
           "duration": 20000,
-          "event": "screenshot-pipeline-complete",
           "message": "screenshot pipeline - completed",
+          "screenshotting": Object {
+            "action": "screenshot-pipeline-complete",
+            "byte_length": 0,
+            "cpu": 12,
+            "memory": 450789,
+            "session_id": "NEW_UUID",
+          },
         },
         Object {
           "duration": undefined,
-          "event": "generate-pdf-start",
           "message": "pdf generation - starting",
+          "screenshotting": Object {
+            "action": "generate-pdf-start",
+            "session_id": "NEW_UUID",
+          },
         },
         Object {
           "duration": undefined,
-          "event": "add-pdf-image-start",
           "message": "add image to the PDF file - starting",
+          "screenshotting": Object {
+            "action": "add-pdf-image-start",
+            "session_id": "NEW_UUID",
+          },
         },
         Object {
           "duration": 9000,
-          "event": "add-pdf-image-complete",
           "message": "add image to the PDF file - completed",
+          "screenshotting": Object {
+            "action": "add-pdf-image-complete",
+            "session_id": "NEW_UUID",
+          },
         },
         Object {
           "duration": 27000,
-          "event": "generate-pdf-complete",
           "message": "pdf generation - completed",
+          "screenshotting": Object {
+            "action": "generate-pdf-complete",
+            "byte_length_pdf": 6666,
+            "pdf_pages": 1,
+            "session_id": "NEW_UUID",
+          },
         },
       ]
     `);
@@ -137,7 +175,7 @@ describe('Event Logger', () => {
     const logData = logSpy.mock.calls.map(([message, data]) => ({
       message,
       duration: data.event?.duration,
-      screenshotting: omit(data.kibana.screenshotting, 'session_id'),
+      screenshotting: data.kibana.screenshotting,
     }));
 
     expect(logData).toMatchInlineSnapshot(`
@@ -148,6 +186,7 @@ describe('Event Logger', () => {
           "screenshotting": Object {
             "action": "get-screenshots-start",
             "pixels": 10800000,
+            "session_id": "NEW_UUID",
           },
         },
         Object {
@@ -157,6 +196,7 @@ describe('Event Logger', () => {
             "action": "get-screenshots-complete",
             "byte_length": 4444,
             "pixels": 10800000,
+            "session_id": "NEW_UUID",
           },
         },
       ]
@@ -165,30 +205,45 @@ describe('Event Logger', () => {
 
   it('creates helpful error logs', () => {
     eventLogger.screenshottingTransaction();
+    eventLogger.log('opening the url', Actions.OPEN_URL, 'screenshotting', 'wait');
     eventLogger.error(new Error('Something erroneous happened'), Actions.SCREENSHOTTING);
 
     const logData = logSpy.mock.calls.map(([message, data]) => ({
       message,
-      action: data.kibana.screenshotting.action,
       error: data.error,
+      screenshotting: data.kibana.screenshotting,
     }));
 
     expect(logData).toMatchInlineSnapshot(`
       Array [
         Object {
-          "action": "screenshot-pipeline-start",
           "error": undefined,
           "message": "screenshot pipeline - starting",
+          "screenshotting": Object {
+            "action": "screenshot-pipeline-start",
+            "session_id": "NEW_UUID",
+          },
         },
         Object {
-          "action": "screenshot-pipeline-error",
+          "error": undefined,
+          "message": "opening the url - starting",
+          "screenshotting": Object {
+            "action": "open-url-start",
+            "session_id": "NEW_UUID",
+          },
+        },
+        Object {
           "error": Object {
             "code": undefined,
             "message": "Something erroneous happened",
             "stack_trace": undefined,
             "type": undefined,
           },
-          "message": "an error occurred",
+          "message": "Error: Something erroneous happened",
+          "screenshotting": Object {
+            "action": "screenshot-pipeline-error",
+            "session_id": "NEW_UUID",
+          },
         },
       ]
     `);

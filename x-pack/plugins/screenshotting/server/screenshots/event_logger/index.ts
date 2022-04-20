@@ -82,10 +82,43 @@ type SimpleEvent = Omit<ScreenshottingAction['kibana']['screenshotting'], 'sessi
 
 type LogAdapter = (
   message: string,
-  suffix: 'start' | 'complete',
+  suffix: 'start' | 'complete' | 'error',
   event: Partial<SimpleEvent>,
   startTime?: Date | undefined
 ) => void;
+
+function fillLogData(
+  message: string,
+  event: Partial<SimpleEvent>,
+  suffix: 'start' | 'complete' | 'error',
+  sessionId: string,
+  duration: number | undefined
+) {
+  let newMessage = message;
+  if (suffix !== 'error') {
+    newMessage = `${message} - ${suffix === 'start' ? 'starting' : 'completed'}`;
+  }
+
+  let interpretedAction: string;
+  if (suffix === 'error') {
+    interpretedAction = event.action + '-error';
+  } else {
+    interpretedAction = event.action + `-${suffix}`;
+  }
+
+  const logData: ScreenshottingAction = {
+    message: newMessage,
+    kibana: {
+      screenshotting: {
+        ...event,
+        action: interpretedAction as Actions,
+        session_id: sessionId,
+      },
+    },
+    event: { duration, provider: PLUGIN_ID },
+  };
+  return logData;
+}
 
 function logAdapter(logger: Logger, sessionId: string) {
   const log: LogAdapter = (message, suffix, event, startTime) => {
@@ -95,19 +128,8 @@ function logAdapter(logger: Logger, sessionId: string) {
       duration = new Date(Date.now()).valueOf() - start.valueOf();
     }
 
-    const interpretedAction = (event.action + `-${suffix}`) as Actions;
-    const logData: Omit<ScreenshottingAction, 'message'> = {
-      kibana: {
-        screenshotting: {
-          ...event,
-          action: interpretedAction,
-          session_id: sessionId,
-        },
-      },
-      event: { duration, provider: PLUGIN_ID },
-    };
-    const newMessage = `${message} - ${suffix === 'start' ? 'starting' : 'completed'}`;
-    logger.debug(newMessage, logData);
+    const logData = fillLogData(message, event, suffix, sessionId, duration);
+    logger.debug(logData.message, logData);
   };
   return log;
 }
@@ -228,7 +250,7 @@ export class EventLogger {
     return ({ byteLength }: Required<GetScreenshotOptions>) => {
       this.spans.get(Actions.GET_SCREENSHOT)?.end();
 
-      return this.logEvent(
+      this.logEvent(
         'screenshot capture',
         'complete',
         {
@@ -251,18 +273,24 @@ export class EventLogger {
   public error(error: ErrorAction | string, action: Actions) {
     const isError = typeof error === 'object';
     this.logger.error(error as Error);
+    const message = `Error: ${isError ? error.message : error}`;
 
-    const logData = {
-      message: 'an error occurred',
-      kibana: { screenshotting: { action: `${action}-error` } },
-      event: { provider: PLUGIN_ID },
+    const errorData = {
+      ...fillLogData(
+        message,
+        { action },
+        'error',
+        this.sessionId,
+        undefined //
+      ),
       error: {
-        message: isError ? error.message : undefined,
+        message: isError ? error.message : error,
         code: isError ? error.code : undefined,
         stack_trace: isError ? error.stack_trace : undefined,
         type: isError ? error.type : undefined,
       },
     };
-    this.logger.debug('an error occurred', logData);
+
+    this.logger.debug(message, errorData);
   }
 }
