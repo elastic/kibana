@@ -8,10 +8,12 @@
 import moment from 'moment';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Actions, EventLogger } from '.';
-import { ElementsPositionAndAttribute } from '../get_element_position_data';
+import { ElementPosition } from '../get_element_position_data';
+import { ConfigType } from '../../config';
 
 describe('Event Logger', () => {
   let eventLogger: EventLogger;
+  let config: ConfigType;
 
   beforeEach(() => {
     const testDate = moment(new Date('2021-04-12T16:00:00.000Z'));
@@ -20,7 +22,9 @@ describe('Event Logger', () => {
       return testDate.add(delaySeconds++, 'seconds').valueOf();
     });
 
-    eventLogger = new EventLogger(loggingSystemMock.createLogger());
+    config = { capture: { zoom: 2 } } as ConfigType;
+
+    eventLogger = new EventLogger(loggingSystemMock.createLogger(), config);
   });
 
   it('creates logs for the events and includes durations and event payload data', () => {
@@ -154,24 +158,12 @@ describe('Event Logger', () => {
 
   it('logs number of pixels', () => {
     const logs = [];
-    const elementPositionAndAttribute = {
-      position: {
-        boundingClientRect: { width: 1350, height: 2000 },
-        scroll: {},
-      },
-      zoom: 2,
-    } as ElementsPositionAndAttribute;
-    logs.push(
-      eventLogger.getScreenshotStart({ current: 1, total: 1, elementPositionAndAttribute })
-    );
-    logs.push(
-      eventLogger.getScreenshotEnd({
-        byteLength: 4444,
-        current: 1,
-        total: 1,
-        elementPositionAndAttribute,
-      })
-    );
+    const elementPosition = {
+      boundingClientRect: { width: 1350, height: 2000 },
+      scroll: {},
+    } as ElementPosition;
+    logs.push(eventLogger.getScreenshotStart({ elementPosition }));
+    logs.push(eventLogger.getScreenshotEnd({ byteLength: 4444, elementPosition }));
 
     const logData = logs.map((log) => ({
       message: log.message,

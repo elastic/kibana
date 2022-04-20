@@ -91,8 +91,7 @@ interface PageSetupResults {
 }
 
 const getDefaultElementPosition = (
-  dimensions: { height?: number; width?: number } | null,
-  config: ConfigType
+  dimensions: { height?: number; width?: number } | null
 ): ElementsPositionAndAttribute[] => {
   const height = dimensions?.height || DEFAULT_VIEWPORT.height;
   const width = dimensions?.width || DEFAULT_VIEWPORT.width;
@@ -104,7 +103,6 @@ const getDefaultElementPosition = (
         scroll: { x: 0, y: 0 },
       },
       attributes: {},
-      zoom: config.capture.zoom,
     },
   ];
 };
@@ -237,7 +235,7 @@ export class ScreenshotObservableHandler {
           this.checkPageIsOpen(); // fail the report job if the browser has closed
           const elements =
             data.elementsPositionAndAttributes ??
-            getDefaultElementPosition(this.layout.getViewport(1), this.config);
+            getDefaultElementPosition(this.layout.getViewport(1));
           let screenshots: Screenshot[] = [];
           try {
             screenshots = await getScreenshots(this.driver, this.eventLogger, elements);

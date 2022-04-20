@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
-import apm from 'elastic-apm-node';
 import { Logger, LogMeta } from '@kbn/core/server';
+import apm from 'elastic-apm-node';
+import uuid from 'uuid';
 import { CaptureResult } from '..';
 import { PLUGIN_ID } from '../../../common';
+import { ConfigType } from '../../config';
+import { ElementPosition } from '../get_element_position_data';
 import { Screenshot } from '../get_screenshots';
-import { ElementsPositionAndAttribute } from '../get_element_position_data';
 
 export enum Actions {
   SCREENSHOTTING = 'screenshot-pipeline',
@@ -61,8 +62,6 @@ export interface ScreenshottingAction extends LogMeta {
       pixels?: number;
       byte_length?: number;
       element_positions?: number;
-      screenshot_current?: number;
-      screenshot_total?: number; // should match element_positions
       render_errors?: number;
 
       // pdf stats
@@ -80,9 +79,7 @@ interface ErrorAction {
 }
 
 interface GetScreenshotOptions {
-  current: number; // current screenshot to be taken
-  total: number; // total number of screenshots to be taken
-  elementPositionAndAttribute: ElementsPositionAndAttribute;
+  elementPosition: ElementPosition;
   byteLength?: number; // byte length of completed completed current screenshot
 }
 
@@ -167,7 +164,7 @@ export class EventLogger {
   private logEventEnd: LogAdapter;
   private timings: Partial<Record<Actions, Date>> = {};
 
-  constructor(private readonly logger: Logger) {
+  constructor(private readonly logger: Logger, private readonly config: ConfigType) {
     this.sessionId = uuid.v4();
     this.logEventStart = logAdapter(logger.get('events'), 'start', this.sessionId);
     this.logEventEnd = logAdapter(logger.get('events'), 'complete', this.sessionId);
@@ -341,10 +338,8 @@ export class EventLogger {
     );
   }
 
-  private getPixels(elementPositionAndAttribute: ElementsPositionAndAttribute) {
-    const { width, height } = elementPositionAndAttribute.position.boundingClientRect;
-    const { zoom } = elementPositionAndAttribute;
-
+  private getPixels(elementPosition: ElementPosition, zoom: number) {
+    const { width, height } = elementPosition.boundingClientRect;
     return width * zoom * (height * zoom);
   }
 
@@ -352,7 +347,7 @@ export class EventLogger {
    * @param GetScreenshotOptions - context of the screenshot to be taken
    * @returns void
    */
-  public getScreenshotStart({ current, total, elementPositionAndAttribute }: GetScreenshotOptions) {
+  public getScreenshotStart({ elementPosition }: GetScreenshotOptions) {
     this.spans.getScreenshot = this.transactions.screenshotting?.startSpan(
       Actions.GET_SCREENSHOT,
       SpanTypes.READ
@@ -361,9 +356,7 @@ export class EventLogger {
 
     return this.logEventStart('capturing single screenshot', {
       action: Actions.GET_SCREENSHOT,
-      screenshot_current: current,
-      screenshot_total: total,
-      pixels: this.getPixels(elementPositionAndAttribute),
+      pixels: this.getPixels(elementPosition, this.config.capture.zoom),
     });
   }
 
@@ -371,12 +364,7 @@ export class EventLogger {
    * @param GetScreenshotOptions - context of the screenshot taken
    * @returns void
    */
-  public getScreenshotEnd({
-    byteLength,
-    current,
-    total,
-    elementPositionAndAttribute,
-  }: Required<GetScreenshotOptions>) {
+  public getScreenshotEnd({ byteLength, elementPosition }: Required<GetScreenshotOptions>) {
     this.spans.getScreenshot?.end();
 
     return this.logEventEnd(
@@ -384,9 +372,7 @@ export class EventLogger {
       {
         action: Actions.GET_SCREENSHOT,
         byte_length: byteLength,
-        screenshot_current: current,
-        screenshot_total: total,
-        pixels: this.getPixels(elementPositionAndAttribute),
+        pixels: this.getPixels(elementPosition, this.config.capture.zoom),
       },
       this.timings[Actions.GET_SCREENSHOT]
     );

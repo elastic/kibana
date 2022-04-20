@@ -31,7 +31,6 @@ export interface ElementPosition {
 export interface ElementsPositionAndAttribute {
   position: ElementPosition;
   attributes: AttributesMap;
-  zoom: number;
 }
 
 export const getElementPositionAndAttributes = async (
@@ -71,7 +70,6 @@ export const getElementPositionAndAttributes = async (
                 result[key] = element.getAttribute(attribute);
                 return result;
               }, {} as AttributesMap),
-              zoom: layout.getBrowserZoom(),
             });
           }
           return results;

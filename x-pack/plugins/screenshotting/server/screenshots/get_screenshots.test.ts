@@ -7,6 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createMockBrowserDriver } from '../browsers/mock';
+import { ConfigType } from '../config';
 import { EventLogger } from './event_logger';
 import { getScreenshots } from './get_screenshots';
 
@@ -18,7 +19,6 @@ describe('getScreenshots', () => {
         boundingClientRect: { top: 10, left: 10, height: 100, width: 100 },
         scroll: { x: 100, y: 100 },
       },
-      zoom: 2,
     },
     {
       attributes: { description: 'description2', title: 'title2' },
@@ -26,15 +26,16 @@ describe('getScreenshots', () => {
         boundingClientRect: { top: 10, left: 10, height: 100, width: 100 },
         scroll: { x: 100, y: 100 },
       },
-      zoom: 2,
     },
   ];
   let browser: ReturnType<typeof createMockBrowserDriver>;
   let eventLogger: EventLogger;
+  let config = {} as ConfigType;
 
   beforeEach(async () => {
     browser = createMockBrowserDriver();
-    eventLogger = new EventLogger(loggingSystemMock.createLogger());
+    config = { capture: { zoom: 2 } } as ConfigType;
+    eventLogger = new EventLogger(loggingSystemMock.createLogger(), config);
     browser.evaluate.mockImplementation(({ fn, args }) => (fn as Function)(...args));
   });
 

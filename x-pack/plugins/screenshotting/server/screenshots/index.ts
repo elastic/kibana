@@ -113,9 +113,9 @@ export class Screenshots {
   }
 
   private captureScreenshots(
+    eventLogger: EventLogger,
     layout: Layout,
-    options: ScreenshotObservableOptions,
-    eventLogger: EventLogger
+    options: ScreenshotObservableOptions
   ): Observable<CaptureResult> {
     const { browserTimezone } = options;
 
@@ -217,13 +217,13 @@ export class Screenshots {
   getScreenshots(options: PdfScreenshotOptions): Observable<PdfScreenshotResult>;
   getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult>;
   getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult> {
-    const eventLogger = new EventLogger(this.logger);
+    const eventLogger = new EventLogger(this.logger, this.config);
     eventLogger.screenshottingStart();
 
     const layout = this.createLayout(options);
     const captureOptions = this.getCaptureOptions(options);
 
-    return this.captureScreenshots(layout, captureOptions, eventLogger).pipe(
+    return this.captureScreenshots(eventLogger, layout, captureOptions).pipe(
       tap((results) => {
         eventLogger.screenshottingEnd(results);
       }),

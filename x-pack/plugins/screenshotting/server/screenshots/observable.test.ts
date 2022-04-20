@@ -25,17 +25,13 @@ describe('ScreenshotObservableHandler', () => {
     browser = createMockBrowserDriver();
     config = {
       capture: {
-        timeouts: {
-          openUrl: 30000,
-          waitForElements: 30000,
-          renderComplete: 30000,
-        },
+        timeouts: { openUrl: 30000, waitForElements: 30000, renderComplete: 30000 },
         loadDelay: 5000,
         zoom: 13,
       },
     } as ConfigType;
     layout = createMockLayout();
-    eventLogger = new EventLogger(loggingSystemMock.createLogger());
+    eventLogger = new EventLogger(loggingSystemMock.createLogger(), config);
     options = {
       headers: { testHeader: 'testHeadValue' },
       urls: [],

@@ -7,6 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createMockBrowserDriver } from '../browsers/mock';
+import { ConfigType } from '../config';
 import { createMockLayout } from '../layouts/mock';
 import { EventLogger } from './event_logger';
 import { getElementPositionAndAttributes } from './get_element_position_data';
@@ -15,11 +16,13 @@ describe('getElementPositionAndAttributes', () => {
   let browser: ReturnType<typeof createMockBrowserDriver>;
   let layout: ReturnType<typeof createMockLayout>;
   let eventLogger: EventLogger;
+  let config = {} as ConfigType;
 
   beforeEach(async () => {
     browser = createMockBrowserDriver();
     layout = createMockLayout();
-    eventLogger = new EventLogger(loggingSystemMock.createLogger());
+    config = { capture: { zoom: 2 } } as ConfigType;
+    eventLogger = new EventLogger(loggingSystemMock.createLogger(), config);
     browser.evaluate.mockImplementation(({ fn, args }) => (fn as Function)(...args));
 
     // @see https://github.com/jsdom/jsdom/issues/653
@@ -80,7 +83,6 @@ describe('getElementPositionAndAttributes', () => {
                     "y": 0,
                   },
                 },
-                "zoom": 2,
               },
               Object {
                 "attributes": Object {
@@ -99,7 +101,6 @@ describe('getElementPositionAndAttributes', () => {
                     "y": 0,
                   },
                 },
-                "zoom": 2,
               },
             ]
           `);

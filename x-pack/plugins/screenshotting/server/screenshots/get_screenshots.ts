@@ -36,13 +36,10 @@ export const getScreenshots = async (
 
   const screenshots: Screenshot[] = [];
 
-  const size = elementsPositionAndAttributes.length;
-  for (let i = 0; i < size; i++) {
+  for (let i = 0; i < elementsPositionAndAttributes.length; i++) {
     const item = elementsPositionAndAttributes[i];
     eventLogger.getScreenshotStart({
-      current: size,
-      total: i + 1,
-      elementPositionAndAttribute: item,
+      elementPosition: item.position,
     });
 
     const data = await browser.screenshot(item.position);
@@ -58,9 +55,7 @@ export const getScreenshots = async (
     });
 
     eventLogger.getScreenshotEnd({
-      current: size,
-      total: i + 1,
-      elementPositionAndAttribute: item,
+      elementPosition: item.position,
       byteLength: data.byteLength,
     });
   }
