@@ -41,6 +41,7 @@ import {
   ControlEmbeddable,
   ControlInput,
   ControlWidth,
+  DataControlInput,
   IEditableControlFactory,
 } from '../../types';
 import { CONTROL_WIDTH_OPTIONS } from './editor_constants';
@@ -85,6 +86,11 @@ export const ControlEditor = ({
   const [currentTitle, setCurrentTitle] = useState(title);
   const [currentWidth, setCurrentWidth] = useState(width);
   const [controlEditorValid, setControlEditorValid] = useState(false);
+  const [selectedField, setSelectedField] = useState<string | undefined>(
+    embeddable
+      ? (embeddable.getInput() as DataControlInput).fieldName // CLEAN THIS ONCE OTHER PR GETS IN
+      : undefined
+  );
 
   const getControlTypeEditor = (type: string) => {
     const factory = getControlFactory(type);
@@ -96,6 +102,8 @@ export const ControlEditor = ({
         onChange={onTypeEditorChange}
         setValidState={setControlEditorValid}
         initialInput={embeddable?.getInput()}
+        selectedField={selectedField}
+        setSelectedField={setSelectedField}
         setDefaultTitle={(newDefaultTitle) => {
           if (!currentTitle || currentTitle === defaultTitle) {
             setCurrentTitle(newDefaultTitle);
@@ -120,6 +128,12 @@ export const ControlEditor = ({
           isSelected={selectedType === type}
           onClick={() => {
             setSelectedType(type);
+            if (!isCreate)
+              setSelectedField(
+                embeddable && type === embeddable.type
+                  ? (embeddable.getInput() as DataControlInput).fieldName
+                  : undefined
+              );
           }}
         >
           <EuiIcon type={!icon || icon === 'empty' ? 'controlsHorizontal' : icon} size="l" />
