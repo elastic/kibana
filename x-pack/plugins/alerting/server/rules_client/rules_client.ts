@@ -24,7 +24,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, KueryNode, nodeBuilder } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
+import {
+  Logger,
+  SavedObjectsClientContract,
+  SavedObjectReference,
+  SavedObject,
+  PluginInitializerContext,
+  SavedObjectsUtils,
+  SavedObjectAttributes,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsUpdateResponse,
+} from '@kbn/core/server';
 import { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
 import {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
@@ -39,18 +49,6 @@ import {
   SAVED_OBJECT_REL_PRIMARY,
 } from '@kbn/event-log-plugin/server';
 import { AuditLogger } from '@kbn/security-plugin/server';
-import {
-  Logger,
-  SavedObjectsClientContract,
-  SavedObjectReference,
-  SavedObject,
-  PluginInitializerContext,
-  SavedObjectsUtils,
-  SavedObjectAttributes,
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsUpdateResponse,
-} from '../../../../../src/core/server';
-
 import {
   Rule,
   PartialRule,
@@ -70,7 +68,6 @@ import {
   PartialRuleWithLegacyId,
   RawAlertInstance as RawAlert,
 } from '../types';
-
 import {
   validateRuleTypeParams,
   ruleExecutionStatusFromRaw,
