@@ -27,7 +27,7 @@ describe('HttpResources service', () => {
   let setupDeps: SetupDeps;
   let router: jest.Mocked<IRouter>;
   const kibanaRequest = httpServerMock.createKibanaRequest();
-  const context = { core: Promise.resolve(coreMock.createRequestHandlerContext()) };
+  const context = coreMock.createCustomRequestHandlerContext({});
   const apmConfig = { mockApmConfig: true };
 
   beforeEach(() => {

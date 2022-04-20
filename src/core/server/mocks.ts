@@ -287,12 +287,13 @@ function createCoreRequestHandlerContextMock() {
 
 export type CustomRequestHandlerMock<T> = {
   core: Promise<ReturnType<typeof createCoreRequestHandlerContextMock>>;
+  resolve: jest.MockedFunction<any>;
 } & {
   [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>;
 };
 
 const createCustomRequestHandlerContextMock = <T>(contextParts: T): CustomRequestHandlerMock<T> => {
-  return Object.entries(contextParts).reduce(
+  const mock = Object.entries(contextParts).reduce(
     (context, [key, value]) => {
       // @ts-expect-error type matching from inferred types is hard
       context[key] = isPromise(value) ? value : Promise.resolve(value);
@@ -302,6 +303,20 @@ const createCustomRequestHandlerContextMock = <T>(contextParts: T): CustomReques
       core: Promise.resolve(createCoreRequestHandlerContextMock()),
     } as CustomRequestHandlerMock<T>
   );
+
+  mock.resolve = jest.fn().mockImplementation(async () => {
+    const resolved = {};
+    for (const propName of Object.keys(mock)) {
+      if (propName === 'resolve') {
+        continue;
+      }
+      // @ts-expect-error type matching from inferred types is hard
+      resolved[propName] = await mock[propName];
+    }
+    return resolved;
+  });
+
+  return mock;
 };
 
 export const coreMock = {
