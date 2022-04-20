@@ -88,6 +88,7 @@ export const ACTION_TYPES_URL = `${ACTION_URL}/connector_types` as const;
 export const CONNECTORS_URL = `${ACTION_URL}/connectors` as const;
 
 export const SUPPORTED_CONNECTORS = [
+  `${ConnectorTypes.casesWebhook}`,
   `${ConnectorTypes.serviceNowITSM}`,
   `${ConnectorTypes.serviceNowSIR}`,
   `${ConnectorTypes.jira}`,

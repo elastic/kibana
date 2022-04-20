@@ -13,6 +13,7 @@ import { getServiceNowITSMCaseConnector, getServiceNowSIRCaseConnector } from '.
 import { getCaseConnector as getSwimlaneCaseConnector } from './swimlane';
 
 const mapping: Record<ConnectorTypes, ICasesConnector | null> = {
+  [ConnectorTypes.casesWebhook]: getJiraCaseConnector(),
   [ConnectorTypes.jira]: getJiraCaseConnector(),
   [ConnectorTypes.serviceNowITSM]: getServiceNowITSMCaseConnector(),
   [ConnectorTypes.serviceNowSIR]: getServiceNowSIRCaseConnector(),
