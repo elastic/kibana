@@ -145,7 +145,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     const currentKibanaVersion = this.currentKibanaVersion;
 
     analytics.registerShipper(ElasticV3ServerShipper, {
-      channelName: 'kibana', // TODO: Do we want to send a different channel name for UI and Server?
+      channelName: 'kibana-server',
       version: currentKibanaVersion,
     });
 

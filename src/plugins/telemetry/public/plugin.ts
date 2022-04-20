@@ -156,7 +156,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     });
 
     analytics.registerShipper(ElasticV3BrowserShipper, {
-      channelName: 'kibana', // TODO: Do we want to send a different channel name for UI and Server?
+      channelName: 'kibana-browser',
       version: currentKibanaVersion,
     });
 
