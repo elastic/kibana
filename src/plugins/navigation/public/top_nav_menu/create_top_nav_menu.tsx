@@ -7,15 +7,14 @@
  */
 
 import React from 'react';
-import { I18nStart } from '@kbn/core/public';
+import { I18nProvider } from '@kbn/i18n-react';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { TopNavMenuProps, TopNavMenu } from './top_nav_menu';
 import { RegisteredTopNavMenuData } from './top_nav_menu_data';
 
 export function createTopNav(
   unifiedSearch: UnifiedSearchPublicPluginStart,
-  extraConfig: RegisteredTopNavMenuData[],
-  i18n: I18nStart
+  extraConfig: RegisteredTopNavMenuData[]
 ) {
   return (props: TopNavMenuProps) => {
     const relevantConfig = extraConfig.filter(
@@ -24,9 +23,9 @@ export function createTopNav(
     const config = (props.config || []).concat(relevantConfig);
 
     return (
-      <i18n.Context>
+      <I18nProvider>
         <TopNavMenu {...props} unifiedSearch={unifiedSearch} config={config} />
-      </i18n.Context>
+      </I18nProvider>
     );
   };
 }
