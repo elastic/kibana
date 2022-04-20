@@ -75,6 +75,7 @@
   "resolutions": {
     "**/@babel/runtime": "^7.17.8",
     "**/@types/node": "16.11.7",
+    "**/@types/prop-types": "15.7.1",
     "**/chokidar": "^3.4.3",
     "**/deepmerge": "^4.2.2",
     "**/fast-deep-equal": "^3.1.1",
