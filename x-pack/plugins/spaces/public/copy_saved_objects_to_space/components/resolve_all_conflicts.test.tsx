@@ -109,7 +109,6 @@ describe('ResolveAllConflicts', () => {
         panelPaddingSize="none"
       >
         <EuiContextMenuPanel
-          hasFocus={true}
           items={
             Array [
               <EuiContextMenuItem
