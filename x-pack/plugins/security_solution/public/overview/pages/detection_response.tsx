@@ -18,6 +18,7 @@ import { RuleAlertsTable } from '../components/detection_response/rule_alerts_ta
 import { LandingPageComponent } from '../../common/components/landing_page';
 import * as i18n from './translations';
 import { EmptyPage } from '../../common/components/empty_page';
+import { CasesByStatus } from '../components/detection_response/cases_by_status';
 
 const NoPrivilegePage: React.FC = () => {
   const { docLinks } = useKibana().services;
@@ -68,7 +69,11 @@ const DetectionResponseComponent = () => {
                 <EuiFlexItem>
                   <EuiFlexGroup>
                     {canReadAlerts && <EuiFlexItem>{'[alerts chart]'}</EuiFlexItem>}
-                    {canReadCases && <EuiFlexItem>{'[cases chart]'}</EuiFlexItem>}
+                    {canReadCases && (
+                      <EuiFlexItem>
+                        <CasesByStatus />
+                      </EuiFlexItem>
+                    )}
                   </EuiFlexGroup>
                 </EuiFlexItem>
 

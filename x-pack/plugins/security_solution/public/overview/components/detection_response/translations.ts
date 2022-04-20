@@ -13,6 +13,18 @@ export const UPDATING = i18n.translate('xpack.securitySolution.detectionResponse
 export const UPDATED = i18n.translate('xpack.securitySolution.detectionResponse.updated', {
   defaultMessage: 'Updated',
 });
+
+export const CASES_BY_STATUS_SECTION_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionResponse.casesByStatusSectionTitle',
+  {
+    defaultMessage: 'Cases',
+  }
+);
+
+export const VIEW_CASES = i18n.translate('xpack.securitySolution.detectionResponse.viewCases', {
+  defaultMessage: 'View cases',
+});
+
 export const RULE_ALERTS_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.detectionResponse.ruleAlertsSectionTitle',
   {
