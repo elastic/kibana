@@ -12,9 +12,9 @@ import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common
 import {
   type ControlGroupTelemetry,
   CONTROL_GROUP_TYPE,
-  initializeControlGroupTelemetry,
   RawControlGroupAttributes,
 } from '@kbn/controls-plugin/common';
+import { initializeControlGroupTelemetry } from '@kbn/controls-plugin/server';
 
 import { SavedDashboardPanel730ToLatest } from '../../common';
 import { injectReferences } from '../../common/saved_dashboard_references';

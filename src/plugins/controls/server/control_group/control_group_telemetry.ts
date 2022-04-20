@@ -10,11 +10,24 @@ import { set } from 'lodash';
 import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 import {
   ControlGroupTelemetry,
-  initializeControlGroupTelemetry,
   RawControlGroupAttributes,
   rawControlGroupAttributesToControlGroupInput,
 } from '../../common';
 import { ControlGroupInput } from '../../common/control_group/types';
+
+export const initializeControlGroupTelemetry = (
+  statsSoFar: Record<string, unknown>
+): ControlGroupTelemetry => {
+  return {
+    total: (statsSoFar?.total as number) ?? 0,
+    chaining_system:
+      (statsSoFar?.chaining_system as ControlGroupTelemetry['chaining_system']) ?? {},
+    ignore_settings:
+      (statsSoFar?.ignore_settings as ControlGroupTelemetry['ignore_settings']) ?? {},
+    label_position: (statsSoFar?.label_position as ControlGroupTelemetry['label_position']) ?? {},
+    by_type: (statsSoFar?.by_type as ControlGroupTelemetry['by_type']) ?? {},
+  };
+};
 
 const reportChainingSystemInUse = (
   chainingSystemsStats: ControlGroupTelemetry['chaining_system'],

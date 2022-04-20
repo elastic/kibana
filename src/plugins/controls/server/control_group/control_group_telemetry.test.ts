@@ -7,7 +7,7 @@
  */
 
 import { ControlGroupTelemetry, RawControlGroupAttributes } from '../../common';
-import { controlGroupTelemetry } from './control_group_telemetry';
+import { controlGroupTelemetry, initializeControlGroupTelemetry } from './control_group_telemetry';
 
 // controls attributes with all settings ignored + 3 options lists + hierarchical chaining + label above
 const rawControlAttributes1: RawControlGroupAttributes = {
@@ -38,6 +38,46 @@ const rawControlAttributes3: RawControlGroupAttributes = {
   ignoreParentSettingsJSON:
     '{"ignoreFilters":false,"ignoreQuery":false,"ignoreTimerange":false,"ignoreValidations":false}',
 };
+
+describe('Initialize telemetry', () => {
+  test('initializes telemetry when given blank object', () => {
+    const initializedTelemetry = initializeControlGroupTelemetry({});
+    expect(initializedTelemetry.total).toBe(0);
+    expect(initializedTelemetry.chaining_system).toEqual({});
+    expect(initializedTelemetry.ignore_settings).toEqual({});
+    expect(initializedTelemetry.by_type).toEqual({});
+  });
+
+  test('initializes telemetry without overwriting any keys when given a partial telemetry object', () => {
+    const partialTelemetry: Partial<ControlGroupTelemetry> = {
+      total: 77,
+      chaining_system: { TESTCHAIN: 10, OTHERCHAIN: 1 },
+      by_type: { test1: { total: 10, details: {} } },
+    };
+    const initializedTelemetry = initializeControlGroupTelemetry(partialTelemetry);
+    expect(initializedTelemetry.total).toBe(77);
+    expect(initializedTelemetry.chaining_system).toEqual({ TESTCHAIN: 10, OTHERCHAIN: 1 });
+    expect(initializedTelemetry.ignore_settings).toEqual({});
+    expect(initializedTelemetry.by_type).toEqual({ test1: { total: 10, details: {} } });
+    expect(initializedTelemetry.label_position).toEqual({});
+  });
+
+  test('initiailizes telemetry without overwriting any keys when given a completed telemetry object', () => {
+    const partialTelemetry: Partial<ControlGroupTelemetry> = {
+      total: 5,
+      chaining_system: { TESTCHAIN: 10, OTHERCHAIN: 1 },
+      by_type: { test1: { total: 10, details: {} } },
+      ignore_settings: { ignoreValidations: 12 },
+      label_position: { inline: 10, above: 12 },
+    };
+    const initializedTelemetry = initializeControlGroupTelemetry(partialTelemetry);
+    expect(initializedTelemetry.total).toBe(5);
+    expect(initializedTelemetry.chaining_system).toEqual({ TESTCHAIN: 10, OTHERCHAIN: 1 });
+    expect(initializedTelemetry.ignore_settings).toEqual({ ignoreValidations: 12 });
+    expect(initializedTelemetry.by_type).toEqual({ test1: { total: 10, details: {} } });
+    expect(initializedTelemetry.label_position).toEqual({ inline: 10, above: 12 });
+  });
+});
 
 describe('Control group telemetry function', () => {
   let finalTelemetry: ControlGroupTelemetry;
