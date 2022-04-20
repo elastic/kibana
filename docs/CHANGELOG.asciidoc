@@ -33,6 +33,13 @@ coming::[8.2.0]
 Review the following information about the {kib} 8.2.0 release.
 
 [float]
+[[known-issue-v8.2.0]]
+=== Known issue
+
+Lens & visualizations::
+A change in the Markdown library that {kib} uses to create *TSVB* *Markdown* visualizations and *Text* dashboard panels renders some tables differently. For more information, check out link:https://github.com/markdown-it/markdown-it/pull/767[#767]. 
+
+[float]
 [[breaking-changes-8.2.0]]
 === Breaking changes
 
