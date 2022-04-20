@@ -13,7 +13,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
@@ -27,13 +26,16 @@ const formatNumber = (value: number) => (value < 1000 ? value : numeral(value).f
 type FindingsGroupByResourceProps = CspFindingsByResourceResult;
 type CspFindingsByResource = NonNullable<CspFindingsByResourceResult['data']>['page'][number];
 
+export const getResourceId = (resource: CspFindingsByResource) =>
+  [resource.resource_id, resource.cluster_id, resource.cis_section].join('/');
+
 const FindingsByResourceTableComponent = ({
   error,
   data,
   loading,
 }: FindingsGroupByResourceProps) => {
-  const getRowProps = () => ({
-    'data-test-subj': TEST_SUBJECTS.FINDINGS_BY_RESOURCE_TABLE_ROW,
+  const getRowProps = (row: CspFindingsByResource) => ({
+    'data-test-subj': TEST_SUBJECTS.getFindingsByResourceTableRowTestId(getResourceId(row)),
   });
 
   if (!loading && !data?.page.length)
@@ -53,18 +55,13 @@ const FindingsByResourceTableComponent = ({
 const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
   {
     field: 'resource_id',
-    truncateText: true,
     name: (
       <FormattedMessage
         id="xpack.csp.findings.groupByResourceTable.resourceIdColumnLabel"
-        defaultMessage="Resource Id"
+        defaultMessage="Resource ID"
       />
     ),
-    render: (resourceId: CspFindingsByResource['resource_id']) => (
-      <EuiToolTip position="top" content={resourceId}>
-        <EuiLink>{resourceId}</EuiLink>
-      </EuiToolTip>
-    ),
+    render: (resourceId: CspFindingsByResource['resource_id']) => <EuiLink>{resourceId}</EuiLink>,
   },
   {
     field: 'cis_section',
@@ -82,7 +79,7 @@ const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
     name: (
       <FormattedMessage
         id="xpack.csp.findings.groupByResourceTable.clusterIdColumnLabel"
-        defaultMessage="Cluster Id"
+        defaultMessage="Cluster ID"
       />
     ),
   },

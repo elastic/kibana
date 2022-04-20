@@ -7,7 +7,7 @@
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import * as TEST_SUBJECTS from './test_subjects';
-import { FindingsByResourceTable } from './findings_by_resource_table';
+import { FindingsByResourceTable, getResourceId } from './findings_by_resource_table';
 import * as TEXT from './translations';
 import type { PropsOf } from '@elastic/eui';
 import Chance from 'chance';
@@ -30,7 +30,7 @@ describe('<FindingsByResourceTable />', () => {
   it('renders the zero state when status success and data has a length of zero ', async () => {
     const props: TableProps = {
       loading: false,
-      data: { page: [], total: 0 },
+      data: { page: [] },
       error: null,
     };
 
@@ -44,18 +44,17 @@ describe('<FindingsByResourceTable />', () => {
 
     const props: TableProps = {
       loading: false,
-      data: { page: data, total: 10 },
+      data: { page: data },
       error: null,
     };
 
-    const { container } = render(<FindingsByResourceTable {...props} />);
+    render(<FindingsByResourceTable {...props} />);
 
     data.forEach((item, i) => {
-      const row = container.querySelector<HTMLElement>(
-        `[data-test-subj="${TEST_SUBJECTS.FINDINGS_BY_RESOURCE_TABLE_ROW}"]:nth-child(${i + 1})`
+      const row = screen.getByTestId(
+        TEST_SUBJECTS.getFindingsByResourceTableRowTestId(getResourceId(item))
       );
-      if (!row) throw new Error('missing row');
-
+      expect(row).toBeInTheDocument();
       expect(within(row).getByText(item.resource_id)).toBeInTheDocument();
       expect(within(row).getByText(item.cluster_id)).toBeInTheDocument();
       expect(within(row).getByText(item.cis_section)).toBeInTheDocument();

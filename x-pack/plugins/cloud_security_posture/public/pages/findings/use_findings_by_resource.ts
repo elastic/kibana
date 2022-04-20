@@ -45,7 +45,6 @@ export const getFindingsByResourceAggQuery = ({
   query,
 }: Omit<UseFindingsByResourceOptions, 'enabled'>): estypes.SearchRequest => ({
   index,
-  track_total_hits: true, // TODO: only do this for first request
   size: 0,
   body: {
     query,
@@ -86,7 +85,6 @@ export const useFindingsByResource = ({ enabled, index, query }: UseFindingsByRe
     {
       enabled,
       select: ({ rawResponse }) => ({
-        total: rawResponse.hits.total as number,
         page: rawResponse.aggregations?.groupBy.buckets.map(createFindingsByResource) || [],
       }),
       onError: (err) => showErrorToast(toasts, err),
