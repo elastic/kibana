@@ -20,7 +20,7 @@ export interface RuleTagFilterProps {
   tags: string[];
   selectedTags: string[];
   isLoading?: boolean;
-  loadingMessage?: EuiSelectableProps['loadingMessage']; 
+  loadingMessage?: EuiSelectableProps['loadingMessage'];
   noMatchesMessage?: EuiSelectableProps['noMatchesMessage'];
   emptyMessage?: EuiSelectableProps['emptyMessage'];
   errorMessage?: EuiSelectableProps['errorMessage'];
@@ -33,7 +33,7 @@ export interface RuleTagFilterProps {
 const getOptionDataTestSubj = (tag: string) => `ruleTagFilterOption-${tag}`;
 
 export const RuleTagFilter = (props: RuleTagFilterProps) => {
-  const { 
+  const {
     tags = [],
     selectedTags = [],
     isLoading = false,
@@ -43,17 +43,21 @@ export const RuleTagFilter = (props: RuleTagFilterProps) => {
     errorMessage,
     optionDataTestSubj = getOptionDataTestSubj,
     buttonDataTestSubj = 'ruleTagFilterButton',
-    dataTestSubj = 'ruleTagFilterSelectable', 
+    dataTestSubj = 'ruleTagFilterSelectable',
     onChange = () => {},
   } = props;
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
-  const options: EuiSelectableOption[] = useMemo(() => tags.map(tag => ({
-    label: tag,
-    checked: selectedTags.includes(tag) ? 'on' : undefined,
-    'data-test-subj': optionDataTestSubj(tag),
-  })), [tags, selectedTags]);
+  const options: EuiSelectableOption[] = useMemo(
+    () =>
+      tags.map((tag) => ({
+        label: tag,
+        checked: selectedTags.includes(tag) ? 'on' : undefined,
+        'data-test-subj': optionDataTestSubj(tag),
+      })),
+    [tags, selectedTags]
+  );
 
   const onChangeInternal = (newOptions: EuiSelectableOption[]) => {
     const newSelectedTags = newOptions.reduce<string[]>((result, option) => {
@@ -67,7 +71,7 @@ export const RuleTagFilter = (props: RuleTagFilterProps) => {
   };
 
   const onClosePopover = () => {
-    setIsPopoverOpen(!isPopoverOpen)
+    setIsPopoverOpen(!isPopoverOpen);
   };
 
   const renderButton = () => {
@@ -85,16 +89,12 @@ export const RuleTagFilter = (props: RuleTagFilterProps) => {
           defaultMessage="Tags"
         />
       </EuiFilterButton>
-    )
+    );
   };
-  
+
   return (
     <EuiFilterGroup>
-      <EuiPopover
-        isOpen={isPopoverOpen}
-        closePopover={onClosePopover}
-        button={renderButton()}
-      >
+      <EuiPopover isOpen={isPopoverOpen} closePopover={onClosePopover} button={renderButton()}>
         <EuiSelectable
           searchable
           data-test-subj={dataTestSubj}

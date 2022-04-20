@@ -12,14 +12,7 @@ import { RuleTagFilter } from './rule_tag_filter';
 
 const onChangeMock = jest.fn();
 
-const tags = [
-  'a',
-  'b',
-  'c',
-  'd',
-  'e',
-  'f',
-];
+const tags = ['a', 'b', 'c', 'd', 'e', 'f'];
 
 describe('rule_tag_filter', () => {
   beforeEach(() => {
@@ -28,11 +21,7 @@ describe('rule_tag_filter', () => {
 
   it('renders correctly', () => {
     const wrapper = mountWithIntl(
-      <RuleTagFilter
-        tags={tags}
-        selectedTags={[]}
-        onChange={onChangeMock}
-      />
+      <RuleTagFilter tags={tags} selectedTags={[]} onChange={onChangeMock} />
     );
 
     expect(wrapper.find(EuiFilterButton).exists()).toBeTruthy();
@@ -41,11 +30,7 @@ describe('rule_tag_filter', () => {
 
   it('can open the popover correctly', () => {
     const wrapper = mountWithIntl(
-      <RuleTagFilter
-        tags={tags}
-        selectedTags={[]}
-        onChange={onChangeMock}
-      />
+      <RuleTagFilter tags={tags} selectedTags={[]} onChange={onChangeMock} />
     );
 
     expect(wrapper.find('[data-test-subj="ruleTagFilterSelectable"]').exists()).toBeFalsy();
@@ -58,18 +43,14 @@ describe('rule_tag_filter', () => {
 
   it('can select tags', () => {
     const wrapper = mountWithIntl(
-      <RuleTagFilter
-        tags={tags}
-        selectedTags={[]}
-        onChange={onChangeMock}
-      />
+      <RuleTagFilter tags={tags} selectedTags={[]} onChange={onChangeMock} />
     );
 
     wrapper.find(EuiFilterButton).simulate('click');
 
     wrapper.find('[data-test-subj="ruleTagFilterOption-a"]').at(0).simulate('click');
     expect(onChangeMock).toHaveBeenCalledWith(['a']);
-    
+
     wrapper.setProps({
       selectedTags: ['a'],
     });

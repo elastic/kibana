@@ -14,19 +14,12 @@ export const RuleTagFilterSandbox = () => {
   return (
     <div style={{ flex: 1 }}>
       {getRuleTagFilterLazy({
-        tags: [
-          'tag1',
-          'tag2',
-          'tag3',
-          'tag4',
-        ],
+        tags: ['tag1', 'tag2', 'tag3', 'tag4'],
         selectedTags,
         onChange: setSelectedTags,
       })}
       <EuiSpacer />
-      <div>
-        selected tags: {JSON.stringify(selectedTags)}
-      </div>
+      <div>selected tags: {JSON.stringify(selectedTags)}</div>
     </div>
   );
 };
