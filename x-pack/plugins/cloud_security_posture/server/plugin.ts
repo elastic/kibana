@@ -31,7 +31,7 @@ import {
   onPackagePolicyPostCreateCallback,
   onPackagePolicyDeleteCallback,
 } from './fleet_integration/fleet_integration';
-import { CIS_KUBERNETES_PACKAGE_NAME } from '../common/constants';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 
 export interface CspAppContext {
   logger: Logger;
@@ -87,7 +87,7 @@ export class CspPlugin
           context: RequestHandlerContext,
           request: KibanaRequest
         ): Promise<PackagePolicy> => {
-          if (packagePolicy.package?.name === CIS_KUBERNETES_PACKAGE_NAME) {
+          if (packagePolicy.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME) {
             await onPackagePolicyPostCreateCallback(
               this.logger,
               packagePolicy,
@@ -103,7 +103,7 @@ export class CspPlugin
         'postPackagePolicyDelete',
         async (deletedPackagePolicies: DeepReadonly<DeletePackagePoliciesResponse>) => {
           for (const deletedPackagePolicy of deletedPackagePolicies) {
-            if (deletedPackagePolicy.package?.name === CIS_KUBERNETES_PACKAGE_NAME) {
+            if (deletedPackagePolicy.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME) {
               await onPackagePolicyDeleteCallback(
                 this.logger,
                 deletedPackagePolicy,
