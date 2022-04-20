@@ -89,10 +89,10 @@ export default function ({ getService }: FtrProviderContext) {
       expectSnapshot(reporting.printable_pdf.metrics?.pdf_pages).toMatchInline(`
         Object {
           "values": Object {
-            "50_0": 1,
-            "75_0": 1,
-            "95_0": 1,
-            "99_0": 1,
+            "50_0": 1.5,
+            "75_0": 2,
+            "95_0": 2,
+            "99_0": 2,
           },
         }
       `);
