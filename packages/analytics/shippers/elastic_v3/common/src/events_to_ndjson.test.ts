@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Event } from '../../../events';
+import type { Event } from '@kbn/analytics-client';
 import { eventsToNDJSON } from './events_to_ndjson';
 
 describe('eventsToNDJSON', () => {
