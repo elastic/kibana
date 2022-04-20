@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { HttpSetup, SavedObjectsClientContract } from 'kibana/public';
+import { HttpSetup, SavedObjectsClientContract } from '@kbn/core/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { API_BASE_PATH } from '../../../common/constants';
-import { IIndexPattern } from '../../../../../../src/plugins/data/common';
 
 export class IndexService {
   async canDeleteIndex(http: HttpSetup) {
@@ -18,8 +18,8 @@ export class IndexService {
     return privilege.hasAllPrivileges;
   }
 
-  async indexPatternExists(savedObjectsClient: SavedObjectsClientContract, indexName: string) {
-    const response = await savedObjectsClient.find<IIndexPattern>({
+  async dataViewExists(savedObjectsClient: SavedObjectsClientContract, indexName: string) {
+    const response = await savedObjectsClient.find<DataView>({
       type: 'index-pattern',
       perPage: 1,
       search: `"${indexName}"`,

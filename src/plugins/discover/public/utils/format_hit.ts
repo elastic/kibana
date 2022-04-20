@@ -8,8 +8,9 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
-import { FieldFormatsStart } from '../../../field_formats/public';
-import { DataView, flattenHit } from '../../../data/common';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { flattenHit } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { formatFieldValue } from './format_value';
 
 const formattedHitCache = new WeakMap<estypes.SearchHit, FormattedHit>();

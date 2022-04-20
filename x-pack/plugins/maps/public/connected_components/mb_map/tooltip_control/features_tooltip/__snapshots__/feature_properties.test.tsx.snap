@@ -16,12 +16,9 @@ exports[`FeatureProperties should render 1`] = `
       </td>
       <td
         className="eui-textOverflowWrap"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": "foobar1",
-          }
-        }
-      />
+      >
+        foobar1
+      </td>
       <td />
     </tr>
     <tr
@@ -35,12 +32,9 @@ exports[`FeatureProperties should render 1`] = `
       </td>
       <td
         className="eui-textOverflowWrap"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": "foobar2",
-          }
-        }
-      />
+      >
+        foobar2
+      </td>
       <td />
     </tr>
   </tbody>
@@ -76,12 +70,9 @@ exports[`FeatureProperties should show filter button for filterable properties 1
       </td>
       <td
         className="eui-textOverflowWrap"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": "foobar1",
-          }
-        }
-      />
+      >
+        foobar1
+      </td>
       <td>
         <EuiButtonEmpty
           aria-label="Filter on property"
@@ -107,12 +98,9 @@ exports[`FeatureProperties should show filter button for filterable properties 1
       </td>
       <td
         className="eui-textOverflowWrap"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": "foobar2",
-          }
-        }
-      />
+      >
+        foobar2
+      </td>
       <td />
     </tr>
   </tbody>
@@ -135,12 +123,9 @@ exports[`FeatureProperties should show view actions button when there are availa
       </td>
       <td
         className="eui-textOverflowWrap"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": "foobar1",
-          }
-        }
-      />
+      >
+        foobar1
+      </td>
       <td
         className="mapFeatureTooltip_actionsRow"
       >
@@ -181,12 +166,9 @@ exports[`FeatureProperties should show view actions button when there are availa
       </td>
       <td
         className="eui-textOverflowWrap"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": "foobar2",
-          }
-        }
-      />
+      >
+        foobar2
+      </td>
       <td />
     </tr>
   </tbody>

@@ -7,34 +7,22 @@
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IScopedClusterClient, IUiSettingsClient, Logger } from 'kibana/server';
-import type { IScopedSearchClient } from 'src/plugins/data/server';
-import type { Datatable } from 'src/plugins/expressions/server';
+import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
+import type { IScopedSearchClient } from '@kbn/data-plugin/server';
+import type { Datatable } from '@kbn/expressions-plugin/server';
 import type { Writable } from 'stream';
-import type { ReportingConfig } from '../../..';
-import type {
-  DataView,
-  ISearchSource,
-  ISearchStartSearchSource,
-} from '../../../../../../../src/plugins/data/common';
-import {
-  cellHasFormulas,
-  ES_SEARCH_STRATEGY,
-  tabifyDocs,
-} from '../../../../../../../src/plugins/data/common';
+import { lastValueFrom } from 'rxjs';
+import type { DataView, ISearchSource, ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { cellHasFormulas, ES_SEARCH_STRATEGY, tabifyDocs } from '@kbn/data-plugin/common';
 import type {
   FieldFormat,
   FieldFormatConfig,
   IFieldFormatsRegistry,
-} from '../../../../../../../src/plugins/field_formats/common';
-import { KbnServerError } from '../../../../../../../src/plugins/kibana_utils/server';
+} from '@kbn/field-formats-plugin/common';
+import type { ReportingConfig } from '../../..';
 import type { CancellationToken } from '../../../../common/cancellation_token';
 import { CONTENT_TYPE_CSV } from '../../../../common/constants';
-import {
-  AuthenticationExpiredError,
-  ReportingError,
-  UnknownError,
-} from '../../../../common/errors';
+import { AuthenticationExpiredError, ReportingError } from '../../../../common/errors';
 import { byteSizeValueToNumber } from '../../../../common/schema_utils';
 import type { TaskRunResult } from '../../../lib/tasks';
 import type { JobParamsCSV } from '../types';
@@ -83,7 +71,7 @@ export class CsvGenerator {
     };
 
     const results = (
-      await this.clients.data.search(searchParams, { strategy: ES_SEARCH_STRATEGY }).toPromise()
+      await lastValueFrom(this.clients.data.search(searchParams, { strategy: ES_SEARCH_STRATEGY }))
     ).rawResponse as estypes.SearchResponse<unknown>;
 
     return results;
@@ -368,15 +356,15 @@ export class CsvGenerator {
       }
     } catch (err) {
       this.logger.error(err);
-      if (err instanceof KbnServerError && err.errBody) {
-        throw JSON.stringify(err.errBody.error);
-      }
-
-      if (err instanceof esErrors.ResponseError && [401, 403].includes(err.statusCode ?? 0)) {
-        reportingError = new AuthenticationExpiredError();
-        warnings.push(i18nTexts.authenticationError.partialResultsMessage);
+      if (err instanceof esErrors.ResponseError) {
+        if ([401, 403].includes(err.statusCode ?? 0)) {
+          reportingError = new AuthenticationExpiredError();
+          warnings.push(i18nTexts.authenticationError.partialResultsMessage);
+        } else {
+          warnings.push(i18nTexts.esErrorMessage(err.statusCode ?? 0, String(err.body)));
+        }
       } else {
-        throw new UnknownError(err.message);
+        warnings.push(i18nTexts.unknownError(err?.message));
       }
     } finally {
       // clear scrollID

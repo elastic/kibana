@@ -11,11 +11,11 @@ import { mount } from 'enzyme';
 
 import { UXAppRoot } from './ux_app';
 import { RumHome } from '../components/app/rum_dashboard/rum_home';
-import { coreMock } from '../../../../../src/core/public/mocks';
-import { createObservabilityRuleTypeRegistryMock } from '../../../observability/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { createObservabilityRuleTypeRegistryMock } from '@kbn/observability-plugin/public';
 import { merge } from 'lodash';
-import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
-import { embeddablePluginMock } from '../../../../../src/plugins/embeddable/public/mocks';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 
 jest.mock('../services/rest/data_view', () => ({
   createStaticDataView: () => Promise.resolve(undefined),
@@ -58,7 +58,19 @@ const mockCorePlugins = {
       ),
     },
   },
-  data: {},
+  data: {
+    query: {
+      timefilter: {
+        timefilter: {
+          setTime: jest.fn(),
+          getTime: jest.fn().mockReturnValue({}),
+          getTimeDefaults: jest.fn().mockReturnValue({}),
+          getRefreshIntervalDefaults: jest.fn().mockReturnValue({}),
+          getRefreshInterval: jest.fn().mockReturnValue({}),
+        },
+      },
+    },
+  },
 };
 const coreStart = coreMock.createStart({ basePath: '/basepath' });
 

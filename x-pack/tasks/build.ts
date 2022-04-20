@@ -12,7 +12,8 @@ import { promisify } from 'util';
 import { pipeline } from 'stream';
 
 import { REPO_ROOT } from '@kbn/utils';
-import { ToolingLog, transformFileStream, transformFileWithBabel } from '@kbn/dev-utils';
+import { transformFileStream, transformFileWithBabel } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import gulp from 'gulp';
 import del from 'del';
 import fancyLog from 'fancy-log';
@@ -68,17 +69,24 @@ async function copySourceAndBabelify() {
         buffer: true,
         nodir: true,
         ignore: [
-          '**/*.{md,asciidoc}',
+          '**/*.{md,mdx,asciidoc}',
           '**/jest.config.js',
+          '**/jest.config.dev.js',
+          '**/jest_setup.js',
+          '**/jest.integration.config.js',
+          '**/*.stories.js',
           '**/*.{test,test.mocks,mock,mocks}.*',
           '**/*.d.ts',
           '**/node_modules/**',
           '**/public/**/*.{js,ts,tsx,json,scss}',
-          '**/{__tests__,__mocks__,__snapshots__,__fixtures__,__jest__,cypress}/**',
+          '**/{test,__tests__,__mocks__,__snapshots__,__fixtures__,__jest__,cypress,fixtures}/**',
           'plugins/*/target/**',
           'plugins/canvas/shareable_runtime/test/**',
           'plugins/screenshotting/chromium/**',
           'plugins/telemetry_collection_xpack/schema/**', // Skip telemetry schemas
+          'plugins/apm/ftr_e2e/**',
+          'plugins/apm/scripts/**',
+          'plugins/lists/server/scripts/**',
         ],
         allowEmpty: true,
       }

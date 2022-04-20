@@ -21,6 +21,7 @@ import { EuiIconAxisLeft } from '../assets/axis_left';
 import { EuiIconAxisBottom } from '../assets/axis_bottom';
 import type { HeatmapVisualizationState } from './types';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
+import './toolbar_component.scss';
 
 const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label: string }> = [
   {
@@ -49,9 +50,9 @@ export const HeatmapToolbar = memo(
       frame.datasourceLayers
     ).truncateText;
     return (
-      <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" responsive={false}>
-        <EuiFlexItem>
-          <EuiFlexGroup gutterSize="none" responsive={false}>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
             <ToolbarPopover
               title={i18n.translate('xpack.lens.shared.curveLabel', {
                 defaultMessage: 'Visual options',
@@ -70,6 +71,7 @@ export const HeatmapToolbar = memo(
                 }}
               />
             </ToolbarPopover>
+
             <LegendSettingsPopover
               groupPosition={'right'}
               legendOptions={legendOptions}
@@ -110,11 +112,22 @@ export const HeatmapToolbar = memo(
                   legend: { ...state.legend, shouldTruncate: !current },
                 });
               }}
+              legendSize={state?.legend.legendSize}
+              onLegendSizeChange={(legendSize) => {
+                setState({
+                  ...state,
+                  legend: {
+                    ...state.legend,
+                    legendSize,
+                  },
+                });
+              }}
             />
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup gutterSize="none" responsive={false}>
+
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
             <TooltipWrapper
               tooltipContent={i18n.translate('xpack.lens.heatmap.verticalAxisDisabledHelpText', {
                 defaultMessage: 'This setting only applies when vertical axis is enabled.',
@@ -129,6 +142,7 @@ export const HeatmapToolbar = memo(
                 groupPosition="left"
                 isDisabled={!Boolean(state?.yAccessor)}
                 buttonDataTestSubj="lnsHeatmapVerticalAxisButton"
+                panelClassName="lnsVisToolbarAxis__popover"
               >
                 <AxisTitleSettings
                   axis="yLeft"
@@ -149,6 +163,7 @@ export const HeatmapToolbar = memo(
                 />
               </ToolbarPopover>
             </TooltipWrapper>
+
             <TooltipWrapper
               tooltipContent={i18n.translate('xpack.lens.heatmap.horizontalAxisDisabledHelpText', {
                 defaultMessage: 'This setting only applies when horizontal axis is enabled.',

@@ -12,7 +12,7 @@ import uuid from 'uuid';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { KbnClient } from '@kbn/test';
 import { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Agent, CreatePackagePolicyResponse, GetPackagesResponse } from '../../../../fleet/common';
+import { Agent, CreatePackagePolicyResponse, GetPackagesResponse } from '@kbn/fleet-plugin/common';
 import { EndpointDocGenerator } from '../generate_data';
 import { HostMetadata, HostPolicyResponse } from '../types';
 import {
@@ -22,17 +22,11 @@ import {
   indexFleetAgentForHost,
 } from './index_fleet_agent';
 import {
-  deleteIndexedFleetActions,
-  DeleteIndexedFleetActionsResponse,
-  IndexedFleetActionsForHostResponse,
-  indexFleetActionsForHost,
-} from './index_fleet_actions';
-import {
-  deleteIndexedEndpointActions,
-  DeleteIndexedEndpointActionsResponse,
-  IndexedEndpointActionsForHostResponse,
-  indexEndpointActionsForHost,
-} from './index_endpoint_actions';
+  deleteIndexedEndpointAndFleetActions,
+  DeleteIndexedEndpointFleetActionsResponse,
+  IndexedEndpointAndFleetActionsForHostResponse,
+  indexEndpointAndFleetActionsForHost,
+} from './index_endpoint_fleet_actions';
 
 import {
   deleteIndexedFleetEndpointPolicies,
@@ -45,8 +39,7 @@ import { EndpointDataLoadingError, wrapErrorAndRejectPromise } from './utils';
 
 export interface IndexedHostsResponse
   extends IndexedFleetAgentResponse,
-    IndexedFleetActionsForHostResponse,
-    IndexedEndpointActionsForHostResponse,
+    IndexedEndpointAndFleetActionsForHostResponse,
     IndexedFleetEndpointPolicyResponse {
   /**
    * The documents (1 or more) that were generated for the (single) endpoint host.
@@ -90,7 +83,6 @@ export async function indexEndpointHostDocs({
   metadataIndex,
   policyResponseIndex,
   enrollFleet,
-  addEndpointActions,
   generator,
 }: {
   numDocs: number;
@@ -101,7 +93,6 @@ export async function indexEndpointHostDocs({
   metadataIndex: string;
   policyResponseIndex: string;
   enrollFleet: boolean;
-  addEndpointActions: boolean;
   generator: EndpointDocGenerator;
 }): Promise<IndexedHostsResponse> {
   const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
@@ -194,14 +185,7 @@ export async function indexEndpointHostDocs({
       };
 
       // Create some fleet endpoint actions and .logs-endpoint actions for this Host
-      if (addEndpointActions) {
-        await Promise.all([
-          indexFleetActionsForHost(client, hostMetadata),
-          indexEndpointActionsForHost(client, hostMetadata),
-        ]);
-      } else {
-        await indexFleetActionsForHost(client, hostMetadata);
-      }
+      await indexEndpointAndFleetActionsForHost(client, hostMetadata, undefined);
     }
 
     hostMetadata = {
@@ -259,8 +243,7 @@ const fetchKibanaVersion = async (kbnClient: KbnClient) => {
 
 export interface DeleteIndexedEndpointHostsResponse
   extends DeleteIndexedFleetAgentsResponse,
-    DeleteIndexedFleetActionsResponse,
-    DeleteIndexedEndpointActionsResponse,
+    DeleteIndexedEndpointFleetActionsResponse,
     DeleteIndexedFleetEndpointPoliciesResponse {
   hosts: DeleteByQueryResponse | undefined;
   policyResponses: DeleteByQueryResponse | undefined;
@@ -335,8 +318,7 @@ export const deleteIndexedEndpointHosts = async (
   }
 
   merge(response, await deleteIndexedFleetAgents(esClient, indexedData));
-  merge(response, await deleteIndexedFleetActions(esClient, indexedData));
-  merge(response, await deleteIndexedEndpointActions(esClient, indexedData));
+  merge(response, await deleteIndexedEndpointAndFleetActions(esClient, indexedData));
   merge(response, await deleteIndexedFleetEndpointPolicies(kbnClient, indexedData));
 
   return response;

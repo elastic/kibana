@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { rulesClientMock } from '../../../../../alerting/server/mocks';
-import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
+import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { getFindResultWithSingleHit } from '../routes/__mocks__/request_responses';
 import { updatePrepackagedRules } from './update_prepacked_rules';
 import { patchRules } from './patch_rules';
 import { getAddPrepackagedRulesSchemaDecodedMock } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema.mock';
+import { ruleExecutionLogMock } from '../rule_execution_log/__mocks__';
 
 jest.mock('./patch_rules');
 
@@ -20,10 +21,12 @@ describe.each([
 ])('updatePrepackagedRules - %s', (_, isRuleRegistryEnabled) => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
+  let ruleExecutionLog: ReturnType<typeof ruleExecutionLogMock.forRoutes.create>;
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
     savedObjectsClient = savedObjectsClientMock.create();
+    ruleExecutionLog = ruleExecutionLogMock.forRoutes.create();
   });
 
   it('should omit actions and enabled when calling patchRules', async () => {
@@ -42,10 +45,10 @@ describe.each([
     await updatePrepackagedRules(
       rulesClient,
       savedObjectsClient,
-      'default',
       [{ ...prepackagedRule, actions }],
       outputIndex,
-      isRuleRegistryEnabled
+      isRuleRegistryEnabled,
+      ruleExecutionLog
     );
 
     expect(patchRules).toHaveBeenCalledWith(
@@ -73,10 +76,10 @@ describe.each([
     await updatePrepackagedRules(
       rulesClient,
       savedObjectsClient,
-      'default',
       [{ ...prepackagedRule, ...updatedThreatParams }],
       'output-index',
-      isRuleRegistryEnabled
+      isRuleRegistryEnabled,
+      ruleExecutionLog
     );
 
     expect(patchRules).toHaveBeenCalledWith(

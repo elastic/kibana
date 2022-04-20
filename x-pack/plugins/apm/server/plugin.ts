@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { take } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import {
   CoreSetup,
   CoreStart,
@@ -13,13 +13,13 @@ import {
   Logger,
   Plugin,
   PluginInitializerContext,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import { isEmpty, mapValues } from 'lodash';
-import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
-import { experimentalRuleFieldMap } from '../../rule_registry/common/assets/field_maps/experimental_rule_field_map';
-import { Dataset } from '../../rule_registry/server';
+import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
+import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
+import { Dataset } from '@kbn/rule-registry-plugin/server';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { APMConfig, APM_SERVER_FEATURE_ID } from '.';
-import { UI_SETTINGS } from '../../../../src/plugins/data/common';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
 import { registerApmAlerts } from './routes/alerts/register_apm_alerts';
 import { registerFleetPolicyCallbacks } from './routes/fleet/register_fleet_policy_callbacks';
@@ -29,7 +29,12 @@ import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_
 import { createApmAgentConfigurationIndex } from './routes/settings/agent_configuration/create_agent_config_index';
 import { getApmIndices } from './routes/settings/apm_indices/get_apm_indices';
 import { createApmCustomLinkIndex } from './routes/settings/custom_link/create_custom_link_index';
-import { apmIndices, apmTelemetry, apmServerSettings } from './saved_objects';
+import {
+  apmIndices,
+  apmTelemetry,
+  apmServerSettings,
+  apmServiceGroups,
+} from './saved_objects';
 import type {
   ApmPluginRequestHandlerContext,
   APMRouteHandlerResources,
@@ -75,6 +80,7 @@ export class APMPlugin
     core.savedObjects.registerType(apmIndices);
     core.savedObjects.registerType(apmTelemetry);
     core.savedObjects.registerType(apmServerSettings);
+    core.savedObjects.registerType(apmServiceGroups);
 
     const currentConfig = this.initContext.config.get<APMConfig>();
     this.currentConfig = currentConfig;
@@ -148,7 +154,7 @@ export class APMPlugin
     const boundGetApmIndices = async () =>
       getApmIndices({
         savedObjectsClient: await getInternalSavedObjectsClient(core),
-        config: await config$.pipe(take(1)).toPromise(),
+        config: await firstValueFrom(config$),
       });
 
     boundGetApmIndices().then((indices) => {
@@ -188,6 +194,7 @@ export class APMPlugin
         ml: plugins.ml,
         config$,
         logger: this.logger!.get('rule'),
+        basePath: core.http.basePath,
       });
     }
 

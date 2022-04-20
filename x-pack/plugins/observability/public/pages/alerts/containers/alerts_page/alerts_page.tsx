@@ -13,14 +13,14 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { ALERT_STATUS, AlertStatus } from '@kbn/rule-data-utils';
 
-import { observabilityFeatureId } from '../../../../../common';
-import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
-import { loadRuleAggregations } from '../../../../../../../plugins/triggers_actions_ui/public';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
+import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
+import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 import { AlertStatusFilterButton } from '../../../../../common/typings';
-import { ParsedTechnicalFields } from '../../../../../../rule_registry/common/parse_technical_fields';
-import { ParsedExperimentalFields } from '../../../../../../rule_registry/common/parse_experimental_fields';
+import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
+import { observabilityFeatureId } from '../../../../../common';
 import { ExperimentalBadge } from '../../../../components/shared/experimental_badge';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { useAlertIndexNames } from '../../../../hooks/use_alert_index_names';
@@ -44,7 +44,9 @@ interface RuleStatsState {
   disabled: number;
   muted: number;
   error: number;
+  snoozed: number;
 }
+
 export interface TopAlert {
   fields: ParsedTechnicalFields & ParsedExperimentalFields;
   start: number;
@@ -69,23 +71,27 @@ const ALERT_STATUS_REGEX = new RegExp(
 );
 
 function AlertsPage() {
-  const { core, plugins, ObservabilityPageTemplate } = usePluginContext();
+  const { ObservabilityPageTemplate, config } = usePluginContext();
   const [alertFilterStatus, setAlertFilterStatus] = useState('' as AlertStatusFilterButton);
-  const { prepend } = core.http.basePath;
   const refetch = useRef<() => void>();
   const timefilterService = useTimefilterService();
   const { rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery } =
     useAlertsPageStateContainer();
   const {
+    cases,
+    dataViews,
+    docLinks,
     http,
     notifications: { toasts },
-  } = core;
+  } = useKibana<ObservabilityAppServices>().services;
+
   const [ruleStatsLoading, setRuleStatsLoading] = useState<boolean>(false);
   const [ruleStats, setRuleStats] = useState<RuleStatsState>({
     total: 0,
     disabled: 0,
     muted: 0,
     error: 0,
+    snoozed: 0,
   });
 
   useEffect(() => {
@@ -107,18 +113,21 @@ function AlertsPage() {
       const response = await loadRuleAggregations({
         http,
       });
-      const { ruleExecutionStatus, ruleMutedStatus, ruleEnabledStatus } = response;
-      if (ruleExecutionStatus && ruleMutedStatus && ruleEnabledStatus) {
+      const { ruleExecutionStatus, ruleMutedStatus, ruleEnabledStatus, ruleSnoozedStatus } =
+        response;
+      if (ruleExecutionStatus && ruleMutedStatus && ruleEnabledStatus && ruleSnoozedStatus) {
         const total = Object.values(ruleExecutionStatus).reduce((acc, value) => acc + value, 0);
         const { disabled } = ruleEnabledStatus;
         const { muted } = ruleMutedStatus;
         const { error } = ruleExecutionStatus;
+        const { snoozed } = ruleSnoozedStatus;
         setRuleStats({
           ...ruleStats,
           total,
           disabled,
           muted,
           error,
+          snoozed,
         });
       }
       setRuleStatsLoading(false);
@@ -137,9 +146,9 @@ function AlertsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // In a future milestone we'll have a page dedicated to rule management in
-  // observability. For now link to the settings page.
-  const manageRulesHref = prepend('/app/management/insightsAndAlerting/triggersActions/alerts');
+  const manageRulesHref = config.unsafe.rules.enabled
+    ? http.basePath.prepend('/app/observability/alerts/rules')
+    : http.basePath.prepend('/app/management/insightsAndAlerting/triggersActions/rules');
 
   const dynamicIndexPatternsAsyncState = useAsync(async (): Promise<DataViewBase[]> => {
     if (indexNames.length === 0) {
@@ -150,7 +159,7 @@ function AlertsPage() {
       {
         id: 'dynamic-observability-alerts-table-index-pattern',
         title: indexNames.join(','),
-        fields: await plugins.dataViews.getFieldsForWildcard({
+        fields: await dataViews.getFieldsForWildcard({
           pattern: indexNames.join(','),
           allowNoIndex: true,
         }),
@@ -213,8 +222,7 @@ function AlertsPage() {
   // If there is any data, set hasData to true otherwise we need to wait till all the data is loaded before setting hasData to true or false; undefined indicates the data is still loading.
   const hasData = hasAnyData === true || (isAllRequestsComplete === false ? undefined : false);
 
-  const kibana = useKibana<ObservabilityAppServices>();
-  const CasesContext = kibana.services.cases.getCasesContext();
+  const CasesContext = cases.ui.getCasesContext();
   const userPermissions = useGetUserCasesPermissions();
 
   if (!hasAnyData && !isAllRequestsComplete) {
@@ -223,8 +231,8 @@ function AlertsPage() {
 
   const noDataConfig = getNoDataConfig({
     hasData,
-    basePath: core.http.basePath,
-    docsLink: core.docLinks.links.observability.guide,
+    basePath: http.basePath,
+    docsLink: docLinks.links.observability.guide,
   });
 
   return (
@@ -260,9 +268,9 @@ function AlertsPage() {
             data-test-subj="statDisabled"
           />,
           <EuiStat
-            title={ruleStats.muted}
+            title={ruleStats.muted + ruleStats.snoozed}
             description={i18n.translate('xpack.observability.alerts.ruleStats.muted', {
-              defaultMessage: 'Muted',
+              defaultMessage: 'Snoozed',
             })}
             color="primary"
             titleSize="xs"

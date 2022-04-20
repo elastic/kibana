@@ -9,13 +9,13 @@ import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-consta
 import { schema, TypeOf } from '@kbn/config-schema';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { OperatingSystem, TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
-import { BaseValidator } from './base_validator';
-import { ExceptionItemLikeOptions } from '../types';
 import {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
-} from '../../../../../lists/server';
-import { ConditionEntry } from '../../../../common/endpoint/types';
+} from '@kbn/lists-plugin/server';
+import { BaseValidator } from './base_validator';
+import { ExceptionItemLikeOptions } from '../types';
+import { TrustedAppConditionEntry as ConditionEntry } from '../../../../common/endpoint/types';
 import {
   getDuplicateFields,
   isValidHash,
@@ -230,7 +230,7 @@ export class TrustedAppValidator extends BaseValidator {
 
     await this.validateByPolicyItem(updatedItem);
 
-    return updatedItem as UpdateExceptionListItemOptions;
+    return _updatedItem;
   }
 
   private async validateTrustedAppData(item: ExceptionItemLikeOptions): Promise<void> {

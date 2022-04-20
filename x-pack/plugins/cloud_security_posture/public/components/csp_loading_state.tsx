@@ -8,8 +8,11 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 
-export const CspLoadingState: React.FunctionComponent = ({ children }) => (
-  <EuiFlexGroup direction="column" alignItems="center">
+export const CspLoadingState: React.FunctionComponent<{ ['data-test-subj']?: string }> = ({
+  children,
+  ...rest
+}) => (
+  <EuiFlexGroup direction="column" alignItems="center" data-test-subj={rest['data-test-subj']}>
     <EuiFlexItem>
       <EuiLoadingSpinner size="xl" />
     </EuiFlexItem>

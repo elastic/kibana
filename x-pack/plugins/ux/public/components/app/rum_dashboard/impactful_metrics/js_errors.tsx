@@ -19,11 +19,12 @@ import {
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { I18LABELS } from '../translations';
 import { CsmSharedContext } from '../csm_shared_context';
-import { FETCH_STATUS } from '../../../../../../observability/public';
 
 interface JSErrorItem {
   errorMessage: string;
@@ -32,7 +33,9 @@ interface JSErrorItem {
 }
 
 export function JSErrors() {
-  const { urlParams, uxUiFilters } = useLegacyUrlParams();
+  const { http } = useKibanaServices();
+  const basePath = http.basePath.get();
+  const { rangeId, urlParams, uxUiFilters } = useLegacyUrlParams();
 
   const { start, end, serviceName, searchTerm } = urlParams;
 
@@ -56,7 +59,9 @@ export function JSErrors() {
       }
       return Promise.resolve(null);
     },
-    [start, end, serviceName, uxUiFilters, pagination, searchTerm]
+    // `rangeId` acts as a cache buster for stable ranges like "Today"
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [start, end, serviceName, uxUiFilters, pagination, searchTerm, rangeId]
   );
 
   const {
@@ -68,7 +73,9 @@ export function JSErrors() {
       field: 'errorMessage',
       name: I18LABELS.errorMessage,
       render: (errorMessage: string, item: JSErrorItem) => (
-        <EuiLink href={`/services/${serviceName}/errors/${item.errorGroupId}`}>
+        <EuiLink
+          href={`${basePath}/app/apm/services/${serviceName}/errors/${item.errorGroupId}`}
+        >
           {errorMessage}
         </EuiLink>
       ),

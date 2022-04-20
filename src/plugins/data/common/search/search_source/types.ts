@@ -7,13 +7,14 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AggConfigSerialized, IAggConfigs } from 'src/plugins/data/public';
 import { SerializableRecord } from '@kbn/utility-types';
+import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AggConfigSerialized, IAggConfigs } from '../../../public';
 import { Query } from '../..';
 import { Filter } from '../../es_query';
 import { IndexPattern } from '../..';
 import type { SearchSource } from './search_source';
-import { PersistableStateService } from '../../../../kibana_utils/common';
 
 /**
  * search source interface

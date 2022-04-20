@@ -9,14 +9,13 @@ import { getException } from '../../objects/exception';
 import { getNewRule } from '../../objects/rule';
 
 import { ALERTS_COUNT, EMPTY_ALERT_TABLE, NUMBER_OF_ALERTS } from '../../screens/alerts';
-import { RULE_STATUS } from '../../screens/create_new_rule';
 
 import { addExceptionFromFirstAlert, goToClosedAlerts, goToOpenedAlerts } from '../../tasks/alerts';
 import { createCustomRule } from '../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 import {
   enablesRule,
   addsException,
@@ -27,21 +26,21 @@ import {
 } from '../../tasks/rule_details';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
-import { cleanKibana, reload } from '../../tasks/common';
+import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 
 describe.skip('From alert', () => {
   const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1 alert';
 
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    createCustomRule({ ...getNewRule(), index: ['exceptions-*'] }, 'rule_testing');
-    reload();
-    goToRuleDetails();
-
-    cy.get(RULE_STATUS).should('have.text', '—');
-
+    login();
+  });
+  beforeEach(() => {
     esArchiverLoad('auditbeat_for_exceptions');
+    deleteAlertsAndRules();
+    createCustomRule({ ...getNewRule(), index: ['exceptions-*'] }, 'rule_testing');
+    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+    goToRuleDetails();
     enablesRule();
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
@@ -74,6 +73,7 @@ describe.skip('From alert', () => {
 
     goToExceptionsTab();
     removeException();
+    esArchiverLoad('auditbeat_for_exceptions2');
     goToAlertsTab();
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();

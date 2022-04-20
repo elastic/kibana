@@ -9,12 +9,13 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { ExpressionRenderDefinition } from '../../../../expressions/public';
-import type { PersistedState } from '../../../../visualizations/public';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/public';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import { withSuspense } from '@kbn/presentation-util-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VisTypePieDependencies } from '../plugin';
-import { withSuspense } from '../../../../presentation_util/public';
-import { KibanaThemeProvider } from '../../../../kibana_react/public';
 import { PARTITION_VIS_RENDERER_NAME } from '../../common/constants';
 import { ChartTypes, RenderValue } from '../../common/types';
 
@@ -31,6 +32,12 @@ export const strings = {
 
 const LazyPartitionVisComponent = lazy(() => import('../components/partition_vis_component'));
 const PartitionVisComponent = withSuspense(LazyPartitionVisComponent);
+
+const partitionVisRenderer = css({
+  position: 'relative',
+  width: '100%',
+  height: '100%',
+});
 
 export const getPartitionVisRenderer: (
   deps: VisTypePieDependencies
@@ -50,7 +57,7 @@ export const getPartitionVisRenderer: (
     render(
       <I18nProvider>
         <KibanaThemeProvider theme$={services.kibanaTheme.theme$}>
-          <div css={{ height: '100%' }}>
+          <div css={partitionVisRenderer}>
             <PartitionVisComponent
               chartsThemeService={theme}
               palettesRegistry={palettesRegistry}

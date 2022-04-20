@@ -4,24 +4,47 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useRef, useEffect, useLayoutEffect, useCallback } from 'react';
-import { EuiButton } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { ProcessTreeNode } from '../process_tree_node';
+import { BackToInvestigatedAlert } from '../back_to_investigated_alert';
 import { useProcessTree } from './hooks';
-import { Process, ProcessEventsPage, ProcessEvent } from '../../../common/types/process_tree';
+import { ProcessTreeLoadMoreButton } from '../process_tree_load_more_button';
+import {
+  AlertStatusEventEntityIdMap,
+  Process,
+  ProcessEventsPage,
+  ProcessEvent,
+} from '../../../common/types/process_tree';
 import { useScroll } from '../../hooks/use_scroll';
 import { useStyles } from './styles';
+import { PROCESS_EVENTS_PER_PAGE } from '../../../common/constants';
 
 type FetchFunction = () => void;
 
-interface ProcessTreeDeps {
+const LOAD_NEXT_TEXT = i18n.translate('xpack.sessionView.processTree.loadMore', {
+  defaultMessage: 'Show {pageSize} next events',
+  values: {
+    pageSize: PROCESS_EVENTS_PER_PAGE,
+  },
+});
+
+const LOAD_PREVIOUS_TEXT = i18n.translate('xpack.sessionView.processTree.loadPrevious', {
+  defaultMessage: 'Show {pageSize} previous events',
+  values: {
+    pageSize: PROCESS_EVENTS_PER_PAGE,
+  },
+});
+
+export interface ProcessTreeDeps {
   // process.entity_id to act as root node (typically a session (or entry session) leader).
   sessionEntityId: string;
 
   data: ProcessEventsPage[];
+  alerts: ProcessEvent[];
 
-  jumpToEvent?: ProcessEvent;
+  jumpToEntityId?: string;
+  investigatedAlertId?: string;
   isFetching: boolean;
   hasNextPage: boolean | undefined;
   hasPreviousPage: boolean | undefined;
@@ -33,14 +56,22 @@ interface ProcessTreeDeps {
 
   // currently selected process
   selectedProcess?: Process | null;
-  onProcessSelected: (process: Process) => void;
+  onProcessSelected: (process: Process | null) => void;
   setSearchResults?: (results: Process[]) => void;
+
+  // a map for alerts with updated status and process.entity_id
+  updatedAlertsStatus: AlertStatusEventEntityIdMap;
+  onShowAlertDetails: (alertUuid: string) => void;
+  showTimestamp?: boolean;
+  verboseMode?: boolean;
 }
 
 export const ProcessTree = ({
   sessionEntityId,
   data,
-  jumpToEvent,
+  alerts,
+  jumpToEntityId,
+  investigatedAlertId,
   isFetching,
   hasNextPage,
   hasPreviousPage,
@@ -50,17 +81,52 @@ export const ProcessTree = ({
   selectedProcess,
   onProcessSelected,
   setSearchResults,
+  updatedAlertsStatus,
+  onShowAlertDetails,
+  showTimestamp = true,
+  verboseMode = false,
 }: ProcessTreeDeps) => {
+  const [isInvestigatedEventVisible, setIsInvestigatedEventVisible] = useState<boolean>(true);
+  const [isInvestigatedEventAbove, setIsInvestigatedEventAbove] = useState<boolean>(false);
   const styles = useStyles();
 
   const { sessionLeader, processMap, searchResults } = useProcessTree({
     sessionEntityId,
     data,
+    alerts,
     searchQuery,
+    updatedAlertsStatus,
+    verboseMode,
+    jumpToEntityId,
   });
 
+  const eventsRemaining = useMemo(() => {
+    const total = data?.[0]?.total || 0;
+    const loadedSoFar = data.reduce((prev, current) => {
+      return prev + (current?.events?.length || 0);
+    }, 0);
+
+    return total - loadedSoFar;
+  }, [data]);
+
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const selectionAreaRef = useRef<HTMLDivElement>(null);
+
+  const onChangeJumpToEventVisibility = useCallback(
+    (isVisible: boolean, isAbove: boolean) => {
+      if (isVisible !== isInvestigatedEventVisible) {
+        setIsInvestigatedEventVisible(isVisible);
+      }
+      if (!isVisible && isAbove !== isInvestigatedEventAbove) {
+        setIsInvestigatedEventAbove(isAbove);
+      }
+    },
+    [isInvestigatedEventVisible, isInvestigatedEventAbove]
+  );
+
+  const handleBackToInvestigatedAlert = useCallback(() => {
+    onProcessSelected(null);
+    setIsInvestigatedEventVisible(true);
+  }, [onProcessSelected]);
 
   useEffect(() => {
     if (setSearchResults) {
@@ -77,103 +143,71 @@ export const ProcessTree = ({
     },
   });
 
-  /**
-   * highlights a process in the tree
-   * we do it this way to avoid state changes on potentially thousands of <Process> components
-   */
-  const selectProcess = useCallback(
-    (process: Process) => {
-      if (!selectionAreaRef?.current || !scrollerRef?.current) {
-        return;
-      }
-
-      const selectionAreaEl = selectionAreaRef.current;
-      selectionAreaEl.style.display = 'block';
-
-      // TODO: concept of alert level unknown wrt to elastic security
-      const alertLevel = process.getMaxAlertLevel();
-
-      if (alertLevel && alertLevel >= 0) {
-        selectionAreaEl.style.backgroundColor =
-          alertLevel > 0 ? styles.alertSelected : styles.defaultSelected;
-      } else {
-        selectionAreaEl.style.backgroundColor = '';
-      }
-
-      // find the DOM element for the command which is selected by id
-      const processEl = scrollerRef.current.querySelector<HTMLElement>(`[data-id="${process.id}"]`);
-
-      if (processEl) {
-        processEl.prepend(selectionAreaEl);
-
-        const cTop = scrollerRef.current.scrollTop;
-        const cBottom = cTop + scrollerRef.current.clientHeight;
-
-        const eTop = processEl.offsetTop;
-        const eBottom = eTop + processEl.clientHeight;
-        const isVisible = eTop >= cTop && eBottom <= cBottom;
-
-        if (!isVisible) {
-          processEl.scrollIntoView({ block: 'center' });
-        }
-      }
-    },
-    [styles.alertSelected, styles.defaultSelected]
-  );
-
-  useLayoutEffect(() => {
-    if (selectedProcess) {
-      selectProcess(selectedProcess);
-    }
-  }, [selectedProcess, selectProcess]);
-
   useEffect(() => {
-    // after 2 pages are loaded (due to bi-directional jump to), auto select the process
-    // for the jumpToEvent
-    if (jumpToEvent && data.length === 2) {
-      const process = processMap[jumpToEvent.process.entity_id];
+    if (jumpToEntityId) {
+      const process = processMap[jumpToEntityId];
+      const hasDetails = !!process?.getDetails();
 
-      if (process) {
+      if (!selectedProcess && hasDetails) {
         onProcessSelected(process);
       }
-    }
-  }, [jumpToEvent, processMap, onProcessSelected, data]);
-
-  // auto selects the session leader process if no selection is made yet
-  useEffect(() => {
-    if (!selectedProcess) {
+    } else if (!selectedProcess) {
       onProcessSelected(sessionLeader);
     }
-  }, [sessionLeader, onProcessSelected, selectedProcess]);
+  }, [jumpToEntityId, processMap, onProcessSelected, selectedProcess, sessionLeader]);
 
   return (
-    <div
-      ref={scrollerRef}
-      css={styles.scroller}
-      data-test-subj="sessionView:sessionViewProcessTree"
-    >
-      {hasPreviousPage && (
-        <EuiButton fullWidth onClick={fetchPreviousPage} isLoading={isFetching}>
-          <FormattedMessage id="xpack.sessionView.loadPrevious" defaultMessage="Load previous" />
-        </EuiButton>
-      )}
-      {sessionLeader && (
-        <ProcessTreeNode
-          isSessionLeader
-          process={sessionLeader}
-          onProcessSelected={onProcessSelected}
+    <>
+      <div
+        ref={scrollerRef}
+        css={styles.scroller}
+        data-test-subj="sessionView:sessionViewProcessTree"
+      >
+        {sessionLeader && (
+          <ProcessTreeNode
+            isSessionLeader
+            process={sessionLeader}
+            onProcessSelected={onProcessSelected}
+            jumpToEntityId={jumpToEntityId}
+            investigatedAlertId={investigatedAlertId}
+            selectedProcess={selectedProcess}
+            scrollerRef={scrollerRef}
+            onChangeJumpToEventVisibility={onChangeJumpToEventVisibility}
+            onShowAlertDetails={onShowAlertDetails}
+            showTimestamp={showTimestamp}
+            verboseMode={verboseMode}
+            searchResults={searchResults}
+            loadPreviousButton={
+              hasPreviousPage ? (
+                <ProcessTreeLoadMoreButton
+                  text={LOAD_PREVIOUS_TEXT}
+                  onClick={fetchPreviousPage}
+                  isFetching={isFetching}
+                  eventsRemaining={eventsRemaining}
+                  forward={false}
+                />
+              ) : null
+            }
+            loadNextButton={
+              hasNextPage ? (
+                <ProcessTreeLoadMoreButton
+                  text={LOAD_NEXT_TEXT}
+                  onClick={fetchNextPage}
+                  isFetching={isFetching}
+                  eventsRemaining={eventsRemaining}
+                  forward={true}
+                />
+              ) : null
+            }
+          />
+        )}
+      </div>
+      {!isInvestigatedEventVisible && (
+        <BackToInvestigatedAlert
+          onClick={handleBackToInvestigatedAlert}
+          isDisplayedAbove={isInvestigatedEventAbove}
         />
       )}
-      <div
-        data-test-subj="sessionView:processTreeSelectionArea"
-        ref={selectionAreaRef}
-        css={styles.selectionArea}
-      />
-      {hasNextPage && (
-        <EuiButton fullWidth onClick={fetchNextPage} isLoading={isFetching}>
-          <FormattedMessage id="xpack.sessionView.loadNext" defaultMessage="Load next" />
-        </EuiButton>
-      )}
-    </div>
+    </>
   );
 };

@@ -11,9 +11,9 @@ import { act } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
+import type { SavedObjectReferenceWithContext } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import type { SavedObjectReferenceWithContext } from 'src/core/public';
-import { coreMock } from 'src/core/public/mocks';
 
 import type { Space } from '../../../common';
 import { ALL_SPACES_ID } from '../../../common/constants';
@@ -495,7 +495,7 @@ describe('ShareToSpaceFlyout', () => {
         <EuiBadge
           color="hollow"
         >
-          Current
+          This space
         </EuiBadge>
       `);
       // by definition, the active space will always be checked

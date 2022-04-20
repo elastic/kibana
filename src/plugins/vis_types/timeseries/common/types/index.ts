@@ -7,7 +7,8 @@
  */
 
 import { Filter } from '@kbn/es-query';
-import { IndexPattern, KBN_FIELD_TYPES, Query } from '../../../../data/common';
+import { KBN_FIELD_TYPES, Query } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { Panel } from './panel_model';
 
 export type { Metric, Series, Panel, MetricType } from './panel_model';
@@ -22,7 +23,7 @@ export type {
 } from './vis_data';
 
 export interface FetchedIndexPattern {
-  indexPattern: IndexPattern | undefined | null;
+  indexPattern: DataView | undefined | null;
   indexPatternString: string | undefined;
 }
 

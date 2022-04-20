@@ -7,15 +7,10 @@
  */
 import { ShapeTreeNode } from '@elastic/charts';
 import { isEqual } from 'lodash';
-import type { FieldFormatsStart } from '../../../../../field_formats/public';
-import {
-  SeriesLayer,
-  PaletteRegistry,
-  lightenColor,
-  PaletteDefinition,
-  PaletteOutput,
-} from '../../../../../charts/public';
-import type { Datatable, DatatableRow } from '../../../../../expressions/public';
+import type { PaletteRegistry, SeriesLayer, PaletteOutput, PaletteDefinition } from '@kbn/coloring';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { lightenColor } from '@kbn/charts-plugin/public';
+import type { Datatable, DatatableRow } from '@kbn/expressions-plugin/public';
 import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
 import { DistinctSeries, getDistinctSeries } from '../get_distinct_series';
 
@@ -167,7 +162,7 @@ export const getColor = (
   rows: DatatableRow[],
   visParams: PartitionVisParams,
   palettes: PaletteRegistry | null,
-  byDataPalette: ReturnType<typeof byDataColorPaletteMap>,
+  byDataPalette: ReturnType<typeof byDataColorPaletteMap> | undefined,
   syncColors: boolean,
   isDarkMode: boolean,
   formatter: FieldFormatsStart,
@@ -216,9 +211,13 @@ export const getColor = (
     if (layerIndex < columns.length - 1) {
       return defaultColor;
     }
-    // only use the top level series layer for coloring
+    // for treemap use the top layer for coloring, for mosaic use the second layer
     if (seriesLayers.length > 1) {
-      seriesLayers.pop();
+      if (chartType === ChartTypes.MOSAIC) {
+        seriesLayers.shift();
+      } else {
+        seriesLayers.pop();
+      }
     }
   }
 

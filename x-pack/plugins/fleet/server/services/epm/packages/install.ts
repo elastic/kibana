@@ -8,10 +8,15 @@
 import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import type Boom from '@hapi/boom';
-import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import type {
+  ElasticsearchClient,
+  SavedObject,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
-import { DEFAULT_SPACE_ID } from '../../../../../spaces/common/constants';
 import type {
   BulkInstallPackageInfo,
   EpmPackageInstallStatus,
@@ -22,7 +27,7 @@ import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../../common';
 import { IngestManagerError, PackageOutdatedError } from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import type { KibanaAssetType } from '../../../types';
-import { licenseService } from '../../';
+import { licenseService } from '../..';
 import type {
   Installation,
   AssetType,
@@ -32,14 +37,18 @@ import type {
 } from '../../../types';
 import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
-import { setPackageInfo, parseAndVerifyArchiveEntries, unpackBufferToCache } from '../archive';
+import {
+  setPackageInfo,
+  generatePackageInfoFromArchiveBuffer,
+  unpackBufferToCache,
+} from '../archive';
 import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
 
 import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
 
-import { getInstallation, getInstallationObject } from './index';
+import { getInstallation, getInstallationObject } from '.';
 import { removeInstallation } from './remove';
 import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
@@ -391,7 +400,7 @@ async function installPackageByUpload({
   let installType: InstallType = 'unknown';
   const telemetryEvent: PackageUpdateEvent = getTelemetryEvent('', '');
   try {
-    const { packageInfo } = await parseAndVerifyArchiveEntries(archiveBuffer, contentType);
+    const { packageInfo } = await generatePackageInfoFromArchiveBuffer(archiveBuffer, contentType);
 
     const installedPkg = await getInstallationObject({
       savedObjectsClient,

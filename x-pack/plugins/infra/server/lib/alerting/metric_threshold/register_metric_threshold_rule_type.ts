@@ -7,8 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { ActionGroupIdsOf } from '../../../../../alerting/common';
-import { PluginSetupContract, RuleType } from '../../../../../alerting/server';
+import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
+import { PluginSetupContract, RuleType } from '@kbn/alerting-plugin/server';
 import { Comparator, METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api';
 import { InfraBackendLibs } from '../../infra_types';
@@ -20,6 +20,7 @@ import {
   thresholdActionVariableDescription,
   timestampActionVariableDescription,
   valueActionVariableDescription,
+  viewInAppUrlActionVariableDescription,
 } from '../common/messages';
 import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
 import {
@@ -97,6 +98,7 @@ export async function registerMetricThresholdRuleType(
         { name: 'value', description: valueActionVariableDescription },
         { name: 'metric', description: metricActionVariableDescription },
         { name: 'threshold', description: thresholdActionVariableDescription },
+        { name: 'viewInAppUrl', description: viewInAppUrlActionVariableDescription },
       ],
     },
     producer: 'infrastructure',

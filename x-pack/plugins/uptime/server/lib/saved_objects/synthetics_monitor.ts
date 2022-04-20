@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from 'kibana/server';
+import { SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 
 export const syntheticsMonitorType = 'synthetics-monitor';
@@ -18,24 +18,36 @@ export const syntheticsMonitor: SavedObjectsType = {
     dynamic: false,
     properties: {
       name: {
-        type: 'keyword',
-      },
-      id: {
-        type: 'keyword',
+        type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+            ignore_above: 256,
+          },
+        },
       },
       type: {
-        type: 'keyword',
+        type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+            ignore_above: 256,
+          },
+        },
       },
       urls: {
-        type: 'keyword',
-      },
-      tags: {
-        type: 'keyword',
+        type: 'text',
+        fields: {
+          keyword: {
+            type: 'keyword',
+            ignore_above: 256,
+          },
+        },
       },
     },
   },
   management: {
-    importableAndExportable: true,
+    importableAndExportable: false,
     icon: 'uptimeApp',
     getTitle: (savedObject) =>
       savedObject.attributes.name +

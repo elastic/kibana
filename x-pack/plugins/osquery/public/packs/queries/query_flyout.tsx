@@ -53,21 +53,25 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     defaultValue,
     handleSubmit: async (payload, isValid) => {
       const ecsFieldValue = await ecsFieldRef?.current?.validate();
+      const isEcsFieldValueValid =
+        ecsFieldValue &&
+        Object.values(ecsFieldValue).every((field) => !isEmpty(Object.values(field)[0]));
 
       return new Promise((resolve) => {
-        if (isValid && ecsFieldValue) {
+        if (isValid && isEcsFieldValueValid) {
           onSave({
             ...payload,
             ...(isEmpty(ecsFieldValue) ? {} : { ecs_mapping: ecsFieldValue }),
           });
           onClose();
         }
+
         resolve();
       });
     },
   });
 
-  const { submit, setFieldValue, reset, isSubmitting } = form;
+  const { submit, setFieldValue, reset, isSubmitting, validate } = form;
 
   const [{ query }] = useFormData({
     form,
@@ -102,8 +106,10 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
           setFieldValue('ecs_mapping', savedQuery.ecs_mapping);
         }
       }
+
+      validate();
     },
-    [setFieldValue, reset]
+    [reset, validate, setFieldValue]
   );
   /* Avoids accidental closing of the flyout when the user clicks outside of the flyout */
   const maskProps = useMemo(() => ({ onClick: () => ({}) }), []);

@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { ALERTS_PATH, SecurityPageName } from '../../../../common/constants';
 import { NotFoundPage } from '../../../app/404';
 import * as i18n from './translations';
-import { TrackApplicationView } from '../../../../../../../src/plugins/usage_collection/public';
-import { DetectionEnginePage } from '../../pages/detection_engine/detection_engine';
-import { useKibana } from '../../../common/lib/kibana';
+import { DetectionEnginePage } from '../detection_engine/detection_engine';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
+import { useReadonlyHeader } from '../../../use_readonly_header';
 
 const AlertsRoute = () => (
   <TrackApplicationView viewId={SecurityPageName.alerts}>
@@ -25,24 +24,7 @@ const AlertsRoute = () => (
 );
 
 const AlertsContainerComponent: React.FC = () => {
-  const { chrome } = useKibana().services;
-  const { hasIndexRead, hasIndexWrite } = useAlertsPrivileges();
-
-  useEffect(() => {
-    // if the user is read only then display the glasses badge in the global navigation header
-    if (!hasIndexWrite && hasIndexRead) {
-      chrome.setBadge({
-        text: i18n.READ_ONLY_BADGE_TEXT,
-        tooltip: i18n.READ_ONLY_BADGE_TOOLTIP,
-        iconType: 'glasses',
-      });
-    }
-
-    // remove the icon after the component unmounts
-    return () => {
-      chrome.setBadge();
-    };
-  }, [chrome, hasIndexRead, hasIndexWrite]);
+  useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
 
   return (
     <Switch>

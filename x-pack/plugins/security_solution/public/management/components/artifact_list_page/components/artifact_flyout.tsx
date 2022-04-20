@@ -7,6 +7,7 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { DocLinks } from '@kbn/doc-links';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   EuiButton,
@@ -20,12 +21,13 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
 } from '@elastic/eui';
+
 import { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
-import { useUrlParams } from '../hooks/use_url_params';
+import { HttpFetchError } from '@kbn/core/public';
+import { useUrlParams } from '../../hooks/use_url_params';
 import { useIsFlyoutOpened } from '../hooks/use_is_flyout_opened';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { useSetUrlParams } from '../hooks/use_set_url_params';
-import { useArtifactGetItem } from '../hooks/use_artifact_get_item';
 import {
   ArtifactFormComponentOnChangeCallbackProps,
   ArtifactFormComponentProps,
@@ -33,10 +35,13 @@ import {
 } from '../types';
 import { ManagementPageLoader } from '../../management_page_loader';
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
-import { useToasts } from '../../../../common/lib/kibana';
+import { useKibana, useToasts } from '../../../../common/lib/kibana';
 import { createExceptionListItemForCreate } from '../../../../../common/endpoint/service/artifacts/utils';
 import { useWithArtifactSubmitData } from '../hooks/use_with_artifact_submit_data';
 import { useIsArtifactAllowedPerPolicyUsage } from '../hooks/use_is_artifact_allowed_per_policy_usage';
+import { useIsMounted } from '../../hooks/use_is_mounted';
+import { useGetArtifact } from '../../../hooks/artifacts';
+import type { PolicyData } from '../../../../../common/endpoint/types';
 
 export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
   flyoutEditTitle: i18n.translate('xpack.securitySolution.artifactListPage.flyoutEditTitle', {
@@ -93,12 +98,12 @@ export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
    *   );
    * }
    */
-  flyoutDowngradedLicenseDocsInfo: (): React.ReactNode =>
+  flyoutDowngradedLicenseDocsInfo: (_: DocLinks['securitySolution']): React.ReactNode =>
     i18n.translate('xpack.securitySolution.artifactListPage.flyoutDowngradedLicenseDocsInfo', {
       defaultMessage: 'For more information, see our documentation.',
     }),
 
-  flyoutEditItemLoadFailure: (errorMessage: string) =>
+  flyoutEditItemLoadFailure: (errorMessage: string): string =>
     i18n.translate('xpack.securitySolution.artifactListPage.flyoutEditItemLoadFailure', {
       defaultMessage: 'Failed to retrieve item for edit. Reason: {errorMessage}',
       values: { errorMessage },
@@ -113,9 +118,9 @@ export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
    *    values: { name },
    *  })
    */
-  flyoutCreateSubmitSuccess: ({ name }: ExceptionListItemSchema) =>
+  flyoutCreateSubmitSuccess: ({ name }: ExceptionListItemSchema): string =>
     i18n.translate('xpack.securitySolution.some_page.flyoutCreateSubmitSuccess', {
-      defaultMessage: '"{name}" has been added to your event filters.',
+      defaultMessage: '"{name}" has been added.',
       values: { name },
     }),
 
@@ -129,7 +134,7 @@ export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
    *    values: { name },
    *  })
    */
-  flyoutEditSubmitSuccess: ({ name }: ExceptionListItemSchema) =>
+  flyoutEditSubmitSuccess: ({ name }: ExceptionListItemSchema): string =>
     i18n.translate('xpack.securitySolution.artifactListPage.flyoutEditSubmitSuccess', {
       defaultMessage: '"{name}" has been updated.',
       values: { name },
@@ -149,7 +154,14 @@ const createFormInitialState = (
 export interface ArtifactFlyoutProps {
   apiClient: ExceptionsListApiClient;
   FormComponent: React.ComponentType<ArtifactFormComponentProps>;
+  policies: PolicyData[];
+  policiesIsLoading: boolean;
   onSuccess(): void;
+  onClose(): void;
+  submitHandler?: (
+    item: ArtifactFormComponentOnChangeCallbackProps['item'],
+    mode: ArtifactFormComponentProps['mode']
+  ) => Promise<ExceptionListItemSchema>;
   /**
    * If the artifact data is provided and it matches the id in the URL, then it will not be
    * retrieved again via the API
@@ -164,42 +176,69 @@ export interface ArtifactFlyoutProps {
 /**
  * Show the flyout based on URL params
  */
-export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
+export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
   ({
     apiClient,
     item,
+    policies,
+    policiesIsLoading,
     FormComponent,
     onSuccess,
+    onClose,
+    submitHandler,
     labels: _labels = {},
     'data-test-subj': dataTestSubj,
     size = 'm',
   }) => {
+    const {
+      docLinks: {
+        links: { securitySolution },
+      },
+    } = useKibana().services;
     const getTestId = useTestIdGenerator(dataTestSubj);
     const toasts = useToasts();
     const isFlyoutOpened = useIsFlyoutOpened();
     const setUrlParams = useSetUrlParams();
     const { urlParams } = useUrlParams<ArtifactListPageUrlParams>();
+    const isMounted = useIsMounted();
     const labels = useMemo<typeof ARTIFACT_FLYOUT_LABELS>(() => {
       return {
         ...ARTIFACT_FLYOUT_LABELS,
         ..._labels,
       };
     }, [_labels]);
+    // TODO:PT Refactor internal/external state into the `useEithArtifactSucmitData()` hook
+    const [externalIsSubmittingData, setExternalIsSubmittingData] = useState<boolean>(false);
+    const [externalSubmitHandlerError, setExternalSubmitHandlerError] = useState<
+      HttpFetchError | undefined
+    >(undefined);
 
     const isEditFlow = urlParams.show === 'edit';
     const formMode: ArtifactFormComponentProps['mode'] = isEditFlow ? 'edit' : 'create';
 
     const {
-      isLoading: isSubmittingData,
+      isLoading: internalIsSubmittingData,
       mutateAsync: submitData,
-      error: submitError,
+      error: internalSubmitError,
     } = useWithArtifactSubmitData(apiClient, formMode);
+
+    const isSubmittingData = useMemo(() => {
+      return submitHandler ? externalIsSubmittingData : internalIsSubmittingData;
+    }, [externalIsSubmittingData, internalIsSubmittingData, submitHandler]);
+
+    const submitError = useMemo(() => {
+      return submitHandler ? externalSubmitHandlerError : internalSubmitError;
+    }, [externalSubmitHandlerError, internalSubmitError, submitHandler]);
 
     const {
       isLoading: isLoadingItemForEdit,
       error,
       refetch: fetchItemForEdit,
-    } = useArtifactGetItem(apiClient, urlParams.itemId ?? '', false);
+    } = useGetArtifact(apiClient, urlParams.itemId ?? '', undefined, {
+      // We don't want to run this at soon as the component is rendered. `refetch` is called
+      // a little later if determined we're in `edit` mode
+      enabled: false,
+    });
 
     const [formState, setFormState] = useState<ArtifactFormComponentOnChangeCallbackProps>(
       createFormInitialState.bind(null, apiClient.listId, item)
@@ -225,39 +264,69 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
       }
 
       // `undefined` will cause params to be dropped from url
-      setUrlParams({ id: undefined, show: undefined }, true);
-    }, [isSubmittingData, setUrlParams]);
+      setUrlParams({ ...urlParams, itemId: undefined, show: undefined }, true);
+
+      onClose();
+    }, [isSubmittingData, onClose, setUrlParams, urlParams]);
 
     const handleFormComponentOnChange: ArtifactFormComponentProps['onChange'] = useCallback(
       ({ item: updatedItem, isValid }) => {
-        setFormState({
-          item: updatedItem,
-          isValid,
-        });
+        if (isMounted) {
+          setFormState({
+            item: updatedItem,
+            isValid,
+          });
+        }
       },
-      []
+      [isMounted]
     );
 
-    const handleSubmitClick = useCallback(() => {
-      submitData(formState.item).then((result) => {
+    const handleSuccess = useCallback(
+      (result: ExceptionListItemSchema) => {
         toasts.addSuccess(
           isEditFlow
             ? labels.flyoutEditSubmitSuccess(result)
             : labels.flyoutCreateSubmitSuccess(result)
         );
 
-        // Close the flyout
-        // `undefined` will cause params to be dropped from url
-        setUrlParams({ id: undefined, show: undefined }, true);
-      });
-    }, [formState.item, isEditFlow, labels, setUrlParams, submitData, toasts]);
+        if (isMounted) {
+          // Close the flyout
+          // `undefined` will cause params to be dropped from url
+          setUrlParams({ ...urlParams, itemId: undefined, show: undefined }, true);
+
+          onSuccess();
+        }
+      },
+      [isEditFlow, isMounted, labels, onSuccess, setUrlParams, toasts, urlParams]
+    );
+
+    const handleSubmitClick = useCallback(() => {
+      if (submitHandler) {
+        setExternalIsSubmittingData(true);
+
+        submitHandler(formState.item, formMode)
+          .then(handleSuccess)
+          .catch((submitHandlerError) => {
+            if (isMounted) {
+              setExternalSubmitHandlerError(submitHandlerError);
+            }
+          })
+          .finally(() => {
+            if (isMounted) {
+              setExternalIsSubmittingData(false);
+            }
+          });
+      } else {
+        submitData(formState.item).then(handleSuccess);
+      }
+    }, [formMode, formState.item, handleSuccess, isMounted, submitData, submitHandler]);
 
     // If we don't have the actual Artifact data yet for edit (in initialization phase - ex. came in with an
     // ID in the url that was not in the list), then retrieve it now
     useEffect(() => {
       if (isEditFlow && !hasItemDataForEdit && !error && isInitializing && !isLoadingItemForEdit) {
         fetchItemForEdit().then(({ data: editItemData }) => {
-          if (editItemData) {
+          if (editItemData && isMounted) {
             setFormState(createFormInitialState(apiClient.listId, editItemData));
           }
         });
@@ -270,6 +339,7 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
       isInitializing,
       isLoadingItemForEdit,
       hasItemDataForEdit,
+      isMounted,
     ]);
 
     // If we got an error while trying ot retrieve the item for edit, then show a toast message
@@ -278,7 +348,7 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
         toasts.addWarning(labels.flyoutEditItemLoadFailure(error?.body?.message || error.message));
 
         // Blank out the url params for id and show (will close out the flyout)
-        setUrlParams({ id: undefined, show: undefined });
+        setUrlParams({ itemId: undefined, show: undefined });
       }
     }, [error, isEditFlow, labels, setUrlParams, toasts, urlParams.itemId]);
 
@@ -301,12 +371,13 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
             iconType="help"
             data-test-subj={getTestId('expiredLicenseCallout')}
           >
-            {`${labels.flyoutDowngradedLicenseInfo} ${labels.flyoutDowngradedLicenseDocsInfo()}`}
+            {labels.flyoutDowngradedLicenseInfo}{' '}
+            {labels.flyoutDowngradedLicenseDocsInfo(securitySolution)}
           </EuiCallOut>
         )}
 
         <EuiFlyoutBody>
-          {isInitializing && <ManagementPageLoader data-test-subj={getTestId('pageLoader')} />}
+          {isInitializing && <ManagementPageLoader data-test-subj={getTestId('loader')} />}
 
           {!isInitializing && (
             <FormComponent
@@ -315,6 +386,8 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
               item={formState.item}
               error={submitError ?? undefined}
               mode={formMode}
+              policies={policies}
+              policiesIsLoading={policiesIsLoading}
             />
           )}
         </EuiFlyoutBody>
@@ -351,4 +424,4 @@ export const MaybeArtifactFlyout = memo<ArtifactFlyoutProps>(
     );
   }
 );
-MaybeArtifactFlyout.displayName = 'MaybeArtifactFlyout';
+ArtifactFlyout.displayName = 'ArtifactFlyout';

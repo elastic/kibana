@@ -11,7 +11,7 @@ import uuid from 'uuid';
 
 import type { Filter } from '@kbn/es-query';
 
-import { Sort } from '../../../timelines/components/timeline/body/sort';
+import { Sort } from '../../components/timeline/body/sort';
 import {
   DataProvider,
   QueryOperator,
@@ -19,7 +19,7 @@ import {
   DataProviderType,
   IS_OPERATOR,
   EXISTS_OPERATOR,
-} from '../../../timelines/components/timeline/data_providers/data_provider';
+} from '../../components/timeline/data_providers/data_provider';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import {
   ColumnHeaderOptions,
@@ -49,7 +49,7 @@ import {
 } from '../../components/timeline/body/constants';
 import { activeTimeline } from '../../containers/active_timeline_context';
 import { ResolveTimelineConfig } from '../../components/open_timeline/types';
-
+import { SessionViewConfig } from '../../components/timeline/session_tab_content/use_session_view';
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
 interface AddTimelineHistoryParams {
@@ -283,6 +283,26 @@ export const updateGraphEventId = ({
       ...(graphEventId === '' && id === TimelineId.active
         ? { activeTab: timeline.prevActiveTab, prevActiveTab: timeline.activeTab }
         : {}),
+    },
+  };
+};
+
+export const updateSessionViewConfig = ({
+  id,
+  sessionViewConfig,
+  timelineById,
+}: {
+  id: string;
+  sessionViewConfig: SessionViewConfig | null;
+  timelineById: TimelineById;
+}): TimelineById => {
+  const timeline = timelineById[id];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      sessionViewConfig,
     },
   };
 };

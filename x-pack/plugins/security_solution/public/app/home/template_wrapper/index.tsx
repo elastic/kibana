@@ -9,11 +9,8 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiPanel } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
-import { AppLeaveHandler } from '../../../../../../../src/core/public';
-import {
-  KibanaPageTemplate,
-  NO_DATA_PAGE_TEMPLATE_PROPS,
-} from '../../../../../../../src/plugins/kibana_react/public';
+import { AppLeaveHandler } from '@kbn/core/public';
+import { KibanaPageTemplate, NO_DATA_PAGE_TEMPLATE_PROPS } from '@kbn/kibana-react-plugin/public';
 import { useSecuritySolutionNavigation } from '../../../common/components/navigation/use_security_solution_navigation';
 import { TimelineId } from '../../../../common/types/timeline';
 import { getTimelineShowStatusByIdSelector } from '../../../timelines/components/flyout/selectors';
@@ -79,7 +76,13 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
 
     const userHasSecuritySolutionVisible = useKibana().services.application.capabilities.siem.show;
     const showEmptyState = useShowPagesWithEmptyView();
-    const emptyStateProps = showEmptyState ? NO_DATA_PAGE_TEMPLATE_PROPS : {};
+    const emptyStateProps = showEmptyState
+      ? {
+          ...NO_DATA_PAGE_TEMPLATE_PROPS,
+          template: 'centeredContent',
+          pageContentProps: { verticalPosition: 'top' },
+        }
+      : {};
 
     /*
      * StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header
@@ -101,21 +104,17 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionPageWrapp
         template="default"
         {...emptyStateProps}
       >
-        {showEmptyState ? (
-          children
-        ) : (
-          <>
-            <GlobalKQLHeader />
-            <EuiPanel
-              className="securityPageWrapper"
-              data-test-subj="pageContainer"
-              hasShadow={false}
-              paddingSize="l"
-            >
-              {children}
-            </EuiPanel>
-          </>
-        )}
+        <>
+          <GlobalKQLHeader />
+          <EuiPanel
+            className="securityPageWrapper"
+            data-test-subj="pageContainer"
+            hasShadow={false}
+            paddingSize="l"
+          >
+            {children}
+          </EuiPanel>
+        </>
       </StyledKibanaPageTemplate>
     );
   });

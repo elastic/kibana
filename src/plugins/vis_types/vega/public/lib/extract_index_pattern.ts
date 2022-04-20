@@ -7,13 +7,13 @@
  */
 
 import { flatten } from 'lodash';
-import { getData } from '../services';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { getDataViews } from '../services';
 
 import type { Data, VegaSpec } from '../data_model/types';
-import type { IndexPattern } from '../../../../data/public';
 
 export const extractIndexPatternsFromSpec = async (spec: VegaSpec) => {
-  const { indexPatterns } = getData();
+  const dataViews = getDataViews();
   let data: Data[] = [];
 
   if (Array.isArray(spec.data)) {
@@ -22,11 +22,11 @@ export const extractIndexPatternsFromSpec = async (spec: VegaSpec) => {
     data = [spec.data];
   }
 
-  return flatten<IndexPattern>(
+  return flatten<DataView>(
     await Promise.all(
-      data.reduce<Array<Promise<IndexPattern[]>>>((accumulator, currentValue) => {
+      data.reduce<Array<Promise<DataView[]>>>((accumulator, currentValue) => {
         if (currentValue.url?.index) {
-          accumulator.push(indexPatterns.find(currentValue.url.index));
+          accumulator.push(dataViews.find(currentValue.url.index));
         }
 
         return accumulator;

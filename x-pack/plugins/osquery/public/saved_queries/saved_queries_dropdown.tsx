@@ -8,7 +8,7 @@
 import { find } from 'lodash/fp';
 import { EuiCodeBlock, EuiFormRow, EuiComboBox, EuiTextColor } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { SimpleSavedObject } from 'kibana/public';
+import { SimpleSavedObject } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
@@ -75,6 +75,7 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
       if (!newSelectedOptions.length) {
         onChange(null);
         setSelectedOptions(newSelectedOptions);
+
         return;
       }
 

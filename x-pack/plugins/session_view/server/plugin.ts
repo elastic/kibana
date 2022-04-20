@@ -11,12 +11,14 @@ import {
   Plugin,
   Logger,
   PluginInitializerContext,
-} from '../../../../src/core/server';
+  IRouter,
+} from '@kbn/core/server';
 import { SessionViewSetupPlugins, SessionViewStartPlugins } from './types';
 import { registerRoutes } from './routes';
 
 export class SessionViewPlugin implements Plugin {
   private logger: Logger;
+  private router: IRouter | undefined;
 
   /**
    * Initialize SessionViewPlugin class properties (logger, etc) that is accessible
@@ -28,14 +30,16 @@ export class SessionViewPlugin implements Plugin {
 
   public setup(core: CoreSetup, plugins: SessionViewSetupPlugins) {
     this.logger.debug('session view: Setup');
-    const router = core.http.createRouter();
-
-    // Register server routes
-    registerRoutes(router);
+    this.router = core.http.createRouter();
   }
 
   public start(core: CoreStart, plugins: SessionViewStartPlugins) {
     this.logger.debug('session view: Start');
+
+    // Register server routes
+    if (this.router) {
+      registerRoutes(this.router, plugins.ruleRegistry);
+    }
   }
 
   public stop() {

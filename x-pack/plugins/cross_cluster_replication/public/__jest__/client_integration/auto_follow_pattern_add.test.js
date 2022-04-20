@@ -5,22 +5,17 @@
  * 2.0.
  */
 
-import { indexPatterns } from '../../../../../../src/plugins/data/public';
+import { indexPatterns } from '@kbn/data-plugin/public';
 import './mocks';
 import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
 
 const { setup } = pageHelpers.autoFollowPatternAdd;
 
 describe('Create Auto-follow pattern', () => {
-  let server;
   let httpRequestsMockHelpers;
 
   beforeAll(() => {
-    ({ server, httpRequestsMockHelpers } = setupEnvironment());
-  });
-
-  afterAll(() => {
-    server.restore();
+    ({ httpRequestsMockHelpers } = setupEnvironment());
   });
 
   beforeEach(() => {

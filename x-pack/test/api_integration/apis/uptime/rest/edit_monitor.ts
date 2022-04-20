@@ -5,14 +5,12 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { SimpleSavedObject } from 'kibana/public';
-import {
-  ConfigKey,
-  HTTPFields,
-  MonitorFields,
-} from '../../../../../plugins/uptime/common/runtime_types';
+import { omit } from 'lodash';
+import { SimpleSavedObject } from '@kbn/core/public';
+import { secretKeys } from '@kbn/uptime-plugin/common/constants/monitor_management';
+import { ConfigKey, HTTPFields, MonitorFields } from '@kbn/uptime-plugin/common/runtime_types';
+import { API_URLS } from '@kbn/uptime-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 import { getFixtureJson } from './helper/get_fixture_json';
 export default function ({ getService }: FtrProviderContext) {
   describe('[PUT] /internal/uptime/service/monitors', () => {
@@ -46,14 +44,14 @@ export default function ({ getService }: FtrProviderContext) {
         newMonitor as MonitorFields
       );
 
-      expect(savedMonitor).eql(newMonitor);
+      expect(savedMonitor).eql(omit(newMonitor, secretKeys));
 
       const updates: Partial<HTTPFields> = {
         [ConfigKey.URLS]: 'https://modified-host.com',
         [ConfigKey.NAME]: 'Modified name',
       };
 
-      const modifiedMonitor = { ...savedMonitor, ...updates, revision: 2 };
+      const modifiedMonitor = { ...newMonitor, ...updates };
 
       const editResponse = await supertest
         .put(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
@@ -61,7 +59,9 @@ export default function ({ getService }: FtrProviderContext) {
         .send(modifiedMonitor)
         .expect(200);
 
-      expect(editResponse.body.attributes).eql(modifiedMonitor);
+      expect(editResponse.body.attributes).eql(
+        omit({ ...modifiedMonitor, revision: 2 }, secretKeys)
+      );
     });
 
     it('returns 404 if monitor id is not present', async () => {
@@ -83,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       // Delete a required property to make payload invalid
-      const toUpdate = { ...savedMonitor, 'check.request.headers': undefined };
+      const toUpdate = { ...savedMonitor, 'check.request.headers': null };
 
       const apiResponse = await supertest
         .put(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)

@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { PaletteOutput } from 'src/plugins/charts/common';
+import type { PaletteOutput } from '@kbn/coloring';
 import {
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
-} from '../../../data/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
-import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '../../../visualizations/public';
+} from '@kbn/data-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '@kbn/visualizations-plugin/public';
 import { TagCloudVisParams } from './types';
 
 const prepareDimension = (params: SchemaConfig) => {

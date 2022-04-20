@@ -12,7 +12,7 @@ import type { History } from 'history';
 import { useSavedSearchAliasMatchRedirect } from './saved_search_alias_match_redirect';
 import type { SavedSearch } from './types';
 
-import { spacesPluginMock } from '../../../../../../x-pack/plugins/spaces/public/mocks';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 
 describe('useSavedSearchAliasMatchRedirect', () => {
   let spaces: ReturnType<typeof spacesPluginMock.createStartContract>;
@@ -31,18 +31,21 @@ describe('useSavedSearchAliasMatchRedirect', () => {
   test('should redirect in case of aliasMatch', () => {
     const savedSearch = {
       id: 'id',
+      title: 'my-title',
       sharingSavedObjectProps: {
         outcome: 'aliasMatch',
         aliasTargetId: 'aliasTargetId',
+        aliasPurpose: 'savedObjectConversion',
       },
     } as SavedSearch;
 
     renderHook(() => useSavedSearchAliasMatchRedirect({ spaces, savedSearch, history }));
 
-    expect(spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith(
-      '#/view/aliasTargetId?_g=foo',
-      ' search'
-    );
+    expect(spaces.ui.redirectLegacyUrl).toHaveBeenCalledWith({
+      path: '#/view/aliasTargetId?_g=foo',
+      aliasPurpose: 'savedObjectConversion',
+      objectNoun: 'my-title search',
+    });
   });
 
   test('should not redirect if outcome !== aliasMatch', () => {

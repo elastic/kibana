@@ -5,38 +5,27 @@
  * 2.0.
  */
 
-import React from 'react';
 import { registerTestBed } from '@kbn/test-jest-helpers';
+import { HttpSetup } from '@kbn/core/public';
 
 import { RemoteClusterAdd } from '../../../public/application/sections';
 import { createRemoteClustersStore } from '../../../public/application/store';
 import { AppRouter, registerRouter } from '../../../public/application/services';
-import { createRemoteClustersActions } from '../helpers';
-import { AppContextProvider } from '../../../public/application/app_context';
+import { createRemoteClustersActions, WithAppDependencies } from '../helpers';
 
-const ComponentWithContext = ({ isCloudEnabled }: { isCloudEnabled: boolean }) => {
-  return (
-    <AppContextProvider context={{ isCloudEnabled, cloudBaseUrl: 'test.com' }}>
-      <RemoteClusterAdd />
-    </AppContextProvider>
+const testBedConfig = {
+  store: createRemoteClustersStore,
+  memoryRouter: {
+    onRouter: (router: AppRouter) => registerRouter(router),
+  },
+};
+
+export const setup = async (httpSetup: HttpSetup, overrides?: Record<string, unknown>) => {
+  const initTestBed = registerTestBed(
+    WithAppDependencies(RemoteClusterAdd, httpSetup, overrides),
+    testBedConfig
   );
-};
-
-const testBedConfig = ({ isCloudEnabled }: { isCloudEnabled: boolean }) => {
-  return {
-    store: createRemoteClustersStore,
-    memoryRouter: {
-      onRouter: (router: AppRouter) => registerRouter(router),
-    },
-    defaultProps: { isCloudEnabled },
-  };
-};
-
-const initTestBed = (isCloudEnabled: boolean) =>
-  registerTestBed(ComponentWithContext, testBedConfig({ isCloudEnabled }))();
-
-export const setup = async (isCloudEnabled = false) => {
-  const testBed = await initTestBed(isCloudEnabled);
+  const testBed = await initTestBed();
 
   return {
     ...testBed,

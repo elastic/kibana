@@ -8,7 +8,7 @@
 import { getServiceAgent } from './get_service_agent';
 import { getServiceTransactionTypes } from './get_service_transaction_types';
 import { getServicesItems } from './get_services/get_services_items';
-import { hasHistoricalAgentData } from '../../routes/historical_data/has_historical_agent_data';
+import { hasHistoricalAgentData } from '../historical_data/has_historical_agent_data';
 import {
   SearchParamsMock,
   inspectSearchParams,
@@ -59,6 +59,7 @@ describe('services queries', () => {
         kuery: '',
         start: 0,
         end: 50000,
+        serviceGroup: null,
       })
     );
 

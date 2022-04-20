@@ -8,7 +8,7 @@
 import React from 'react';
 import uuid from 'uuid/v4';
 import type { Map as MbMap, AnyLayer as MbLayer } from '@kbn/mapbox-gl';
-import type { Query } from 'src/plugins/data/common';
+import type { Query } from '@kbn/data-plugin/common';
 import { Feature, GeoJsonProperties, Geometry, Position } from 'geojson';
 import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
@@ -38,6 +38,7 @@ import {
 } from '../../util/mb_filter_expressions';
 import {
   AggDescriptor,
+  CustomIcon,
   DynamicStylePropertyOptions,
   DataFilters,
   ESTermSourceDescriptor,
@@ -70,6 +71,7 @@ export interface VectorLayerArguments {
   source: IVectorSource;
   joins?: InnerJoin[];
   layerDescriptor: VectorLayerDescriptor;
+  customIcons: CustomIcon[];
   chartsPaletteServiceGetColor?: (value: string) => string | null;
 }
 
@@ -133,6 +135,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     layerDescriptor,
     source,
     joins = [],
+    customIcons,
     chartsPaletteServiceGetColor,
   }: VectorLayerArguments) {
     super({
@@ -144,6 +147,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       layerDescriptor.style,
       source,
       this,
+      customIcons,
       chartsPaletteServiceGetColor
     );
   }

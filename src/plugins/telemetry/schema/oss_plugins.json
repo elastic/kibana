@@ -3,37 +3,50 @@
     "dashboard": {
       "properties": {
         "panels": {
-          "type": "long"
-        },
-        "panelsByValue": {
-          "type": "long"
-        },
-        "lensByValue": {
           "properties": {
-            "DYNAMIC_KEY": {
-              "type": "long",
-              "_meta": {
-                "description": "Collection of telemetry metrics for Lens visualizations, which are added to dashboard by \"value\"."
-              }
-            }
-          }
-        },
-        "visualizationByValue": {
-          "properties": {
-            "DYNAMIC_KEY": {
-              "type": "long",
-              "_meta": {
-                "description": "Collection of telemetry metrics for visualizations, which are added to dashboard by \"value\"."
-              }
-            }
-          }
-        },
-        "embeddable": {
-          "properties": {
-            "DYNAMIC_KEY": {
-              "type": "long",
-              "_meta": {
-                "description": "Collection of telemetry metrics that embeddable service reports. Embeddable service internally calls each embeddable, which in turn calls its dynamic actions, which calls each drill down attached to that embeddable."
+            "total": {
+              "type": "long"
+            },
+            "by_reference": {
+              "type": "long"
+            },
+            "by_value": {
+              "type": "long"
+            },
+            "by_type": {
+              "properties": {
+                "DYNAMIC_KEY": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of panels that have been added to all dashboards."
+                      }
+                    },
+                    "by_reference": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of \"by reference\" panels that have been added to all dashboards."
+                      }
+                    },
+                    "by_value": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of \"by value\" panels that have been added to all dashboards."
+                      }
+                    },
+                    "details": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Collection of telemetry metrics that embeddable service reports. Embeddable service internally calls each embeddable, which in turn calls its dynamic actions, which calls each drill down attached to that embeddable."
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           }
@@ -2006,6 +2019,137 @@
           }
         },
         "enterpriseSearch": {
+          "properties": {
+            "appId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "The application being tracked"
+              }
+            },
+            "viewId": {
+              "type": "keyword",
+              "_meta": {
+                "description": "Always `main`"
+              }
+            },
+            "clicks_total": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application since we started counting them"
+              }
+            },
+            "clicks_7_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 7 days"
+              }
+            },
+            "clicks_30_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 30 days"
+              }
+            },
+            "clicks_90_days": {
+              "type": "long",
+              "_meta": {
+                "description": "General number of clicks in the application over the last 90 days"
+              }
+            },
+            "minutes_on_screen_total": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen since we started counting them."
+              }
+            },
+            "minutes_on_screen_7_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 7 days"
+              }
+            },
+            "minutes_on_screen_30_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 30 days"
+              }
+            },
+            "minutes_on_screen_90_days": {
+              "type": "float",
+              "_meta": {
+                "description": "Minutes the application is active and on-screen over the last 90 days"
+              }
+            },
+            "views": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "appId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application being tracked"
+                    }
+                  },
+                  "viewId": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "The application view being tracked"
+                    }
+                  },
+                  "clicks_total": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the application sub view since we started counting them"
+                    }
+                  },
+                  "clicks_7_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 7 days"
+                    }
+                  },
+                  "clicks_30_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 30 days"
+                    }
+                  },
+                  "clicks_90_days": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "General number of clicks in the active application sub view over the last 90 days"
+                    }
+                  },
+                  "minutes_on_screen_total": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application sub view is active and on-screen since we started counting them."
+                    }
+                  },
+                  "minutes_on_screen_7_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 7 days"
+                    }
+                  },
+                  "minutes_on_screen_30_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 30 days"
+                    }
+                  },
+                  "minutes_on_screen_90_days": {
+                    "type": "float",
+                    "_meta": {
+                      "description": "Minutes the application is active and on-screen active application sub view over the last 90 days"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "enterpriseSearchContent": {
           "properties": {
             "appId": {
               "type": "keyword",
@@ -7169,12 +7313,6 @@
     },
     "stack_management": {
       "properties": {
-        "timelion:quandl.key": {
-          "type": "keyword",
-          "_meta": {
-            "description": "Default value of the setting was changed."
-          }
-        },
         "securitySolution:defaultIndex": {
           "type": "keyword",
           "_meta": {
@@ -7203,12 +7341,6 @@
           "type": "keyword",
           "_meta": {
             "description": "Default value of the setting was changed."
-          }
-        },
-        "timelion:graphite.url": {
-          "type": "keyword",
-          "_meta": {
-            "description": "Default value of the setting changed."
           }
         },
         "xpackDashboardMode:roles": {
@@ -7332,6 +7464,12 @@
           }
         },
         "securitySolution:enableNewsFeed": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "securitySolution:enableCcsWarning": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
@@ -7803,6 +7941,12 @@
           }
         },
         "observability:enableInfrastructureView": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:enableServiceGroups": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."

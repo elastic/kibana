@@ -6,12 +6,11 @@
  */
 
 import { schema, type TypeOf } from '@kbn/config-schema';
-import type { PluginConfigDescriptor } from 'kibana/server';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
 });
-
 type CloudSecurityPostureConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<CloudSecurityPostureConfig> = {

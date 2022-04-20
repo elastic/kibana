@@ -22,7 +22,12 @@ import {
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
-import { MachineLearningCreateSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
+import { MachineLearningCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import {
+  ALERT_ANCESTORS,
+  ALERT_DEPTH,
+  ALERT_ORIGINAL_TIME,
+} from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
@@ -36,11 +41,6 @@ import {
   deleteListsIndex,
   importFile,
 } from '../../../lists_api_integration/utils';
-import {
-  ALERT_ANCESTORS,
-  ALERT_DEPTH,
-  ALERT_ORIGINAL_TIME,
-} from '../../../../plugins/security_solution/common/field_maps/field_names';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -92,8 +92,7 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
-  describe.skip('Generating signals from ml anomalies', () => {
+  describe('Generating signals from ml anomalies', () => {
     before(async () => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start

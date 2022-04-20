@@ -30,8 +30,8 @@ import { find, sumBy } from 'lodash';
 import { rgba } from 'polished';
 import React, { useMemo, useState } from 'react';
 import seedrandom from 'seedrandom';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { useChartTheme } from '../../../../../observability/public';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useChartTheme } from '@kbn/observability-plugin/public';
 import {
   getValueTypeConfig,
   ProfileNode,
@@ -387,7 +387,7 @@ export function ServiceProfilingFlamegraph({
               }}
               pagination={{
                 pageSize: 20,
-                hidePerPageOptions: true,
+                showPerPageOptions: false,
               }}
               compressed
               columns={[

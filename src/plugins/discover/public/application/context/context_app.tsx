@@ -12,9 +12,11 @@ import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiPageContent, EuiPage, EuiSpacer } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { generateFilters } from '@kbn/data-plugin/public';
 import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
 import { ContextErrorMessage } from './components/context_error_message';
-import { DataView, DataViewField } from '../../../../data/common';
 import { LoadingStatus } from './services/context_query_state';
 import { AppState, isEqualFilters } from './services/context_state';
 import { useColumns } from '../../utils/use_data_grid_columns';
@@ -25,8 +27,6 @@ import { ContextAppContent } from './context_app_content';
 import { SurrDocType } from './services/context';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { useDiscoverServices } from '../../utils/use_discover_services';
-import { useExecutionContext } from '../../../../kibana_react/public';
-import { generateFilters } from '../../../../data/public';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 

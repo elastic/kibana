@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { IBasePath, IClusterClient, LoggerFactory } from '@kbn/core/server';
+import { KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { IBasePath, IClusterClient, LoggerFactory } from 'src/core/server';
 
-import { KibanaRequest } from '../../../../../src/core/server';
 import type { AuthenticatedUser, AuthenticationProvider, SecurityLicense } from '../../common';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,

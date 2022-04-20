@@ -10,22 +10,23 @@ import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
 import fs from 'fs';
 import path from 'path';
-import { Calendar } from '../../../../plugins/ml/server/models/calendar/index';
-import { Annotation } from '../../../../plugins/ml/common/types/annotations';
-import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { DATAFEED_STATE, JOB_STATE } from '../../../../plugins/ml/common/constants/states';
-import { DataFrameTaskStateType } from '../../../../plugins/ml/common/types/data_frame_analytics';
-import { DATA_FRAME_TASK_STATE } from '../../../../plugins/ml/common/constants/data_frame_analytics';
-import { Datafeed, Job } from '../../../../plugins/ml/common/types/anomaly_detection_jobs';
-import { JobType } from '../../../../plugins/ml/common/types/saved_objects';
-export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
+import { Calendar } from '@kbn/ml-plugin/server/models/calendar';
+import { Annotation } from '@kbn/ml-plugin/common/types/annotations';
+import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
+import { DATAFEED_STATE, JOB_STATE } from '@kbn/ml-plugin/common/constants/states';
+import { DataFrameTaskStateType } from '@kbn/ml-plugin/common/types/data_frame_analytics';
+import { DATA_FRAME_TASK_STATE } from '@kbn/ml-plugin/common/constants/data_frame_analytics';
+import { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
-} from '../../../../plugins/ml/common/constants/index_patterns';
-import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
-import { PutTrainedModelConfig } from '../../../../plugins/ml/common/types/trained_models';
+} from '@kbn/ml-plugin/common/constants/index_patterns';
+import { PutTrainedModelConfig } from '@kbn/ml-plugin/common/types/trained_models';
+import { COMMON_REQUEST_HEADERS } from './common_api';
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
 
 type ModelType = 'regression' | 'classification';
 
@@ -38,6 +39,15 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   return {
+    assertResponseStatusCode(expectedStatus: number, actualStatus: number, responseBody: object) {
+      expect(actualStatus).to.eql(
+        expectedStatus,
+        `Expected status code ${expectedStatus}, got ${actualStatus} with body '${JSON.stringify(
+          responseBody
+        )}'`
+      );
+    },
+
     async hasJobResults(jobId: string): Promise<boolean> {
       const body = await es.search({
         index: '.ml-anomalies-*',
@@ -225,10 +235,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async getADJobStats(jobId: string): Promise<any> {
       log.debug(`Fetching anomaly detection job stats for job ${jobId}...`);
-      const jobStats = await esSupertest
-        .get(`/_ml/anomaly_detectors/${jobId}/_stats`)
-        .expect(200)
-        .then((res: any) => res.body);
+      const { body: jobStats, status } = await esSupertest.get(
+        `/_ml/anomaly_detectors/${jobId}/_stats`
+      );
+      this.assertResponseStatusCode(200, status, jobStats);
 
       log.debug('> AD job stats fetched.');
       return jobStats;
@@ -251,10 +261,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async getDatafeedState(datafeedId: string): Promise<DATAFEED_STATE> {
       log.debug(`Fetching datafeed state for datafeed ${datafeedId}`);
-      const datafeedStats = await esSupertest
-        .get(`/_ml/datafeeds/${datafeedId}/_stats`)
-        .expect(200)
-        .then((res: any) => res.body);
+      const { body: datafeedStats, status } = await esSupertest.get(
+        `/_ml/datafeeds/${datafeedId}/_stats`
+      );
+      this.assertResponseStatusCode(200, status, datafeedStats);
 
       expect(datafeedStats.datafeeds).to.have.length(
         1,
@@ -286,10 +296,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async getDFAJobStats(analyticsId: string): Promise<any> {
       log.debug(`Fetching data frame analytics job stats for job ${analyticsId}...`);
-      const analyticsStats = await esSupertest
-        .get(`/_ml/data_frame/analytics/${analyticsId}/_stats`)
-        .expect(200)
-        .then((res: any) => res.body);
+      const { body: analyticsStats, status } = await esSupertest.get(
+        `/_ml/data_frame/analytics/${analyticsId}/_stats`
+      );
+      this.assertResponseStatusCode(200, status, analyticsStats);
 
       log.debug('> DFA job stats fetched.');
       return analyticsStats;
@@ -398,7 +408,9 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     },
 
     async getCalendar(calendarId: string, expectedCode = 200) {
-      return await esSupertest.get(`/_ml/calendars/${calendarId}`).expect(expectedCode);
+      const response = await esSupertest.get(`/_ml/calendars/${calendarId}`);
+      this.assertResponseStatusCode(expectedCode, response.status, response.body);
+      return response;
     },
 
     async createCalendar(
@@ -406,7 +418,11 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       requestBody: Partial<Calendar> = { description: '', job_ids: [] }
     ) {
       log.debug(`Creating calendar with id '${calendarId}'...`);
-      await esSupertest.put(`/_ml/calendars/${calendarId}`).send(requestBody).expect(200);
+      const { body, status } = await esSupertest
+        .put(`/_ml/calendars/${calendarId}`)
+        .send(requestBody);
+      this.assertResponseStatusCode(200, status, body);
+
       await this.waitForCalendarToExist(calendarId);
       log.debug('> Calendar created.');
     },
@@ -441,13 +457,19 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async createCalendarEvents(calendarId: string, events: estypes.MlCalendarEvent[]) {
       log.debug(`Creating events for calendar with id '${calendarId}'...`);
-      await esSupertest.post(`/_ml/calendars/${calendarId}/events`).send({ events }).expect(200);
+      const { body, status } = await esSupertest
+        .post(`/_ml/calendars/${calendarId}/events`)
+        .send({ events });
+      this.assertResponseStatusCode(200, status, body);
+
       await this.waitForEventsToExistInCalendar(calendarId, events);
       log.debug('> Calendar events created.');
     },
 
     async getCalendarEvents(calendarId: string, expectedCode = 200) {
-      return await esSupertest.get(`/_ml/calendars/${calendarId}/events`).expect(expectedCode);
+      const response = await esSupertest.get(`/_ml/calendars/${calendarId}/events`);
+      this.assertResponseStatusCode(expectedCode, response.status, response.body);
+      return response;
     },
 
     assertAllEventsExistInCalendar: (
@@ -509,7 +531,9 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     },
 
     async getAnomalyDetectionJob(jobId: string) {
-      return await esSupertest.get(`/_ml/anomaly_detectors/${jobId}`).expect(200);
+      const response = await esSupertest.get(`/_ml/anomaly_detectors/${jobId}`);
+      this.assertResponseStatusCode(200, response.status, response.body);
+      return response;
     },
 
     async adJobExist(jobId: string) {
@@ -534,7 +558,9 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async waitForAnomalyDetectionJobNotToExist(jobId: string, timeout: number = 5 * 1000) {
       await retry.waitForWithTimeout(`'${jobId}' to not exist`, timeout, async () => {
-        if (await esSupertest.get(`/_ml/anomaly_detectors/${jobId}`).expect(404)) {
+        const { status } = await esSupertest.get(`/_ml/anomaly_detectors/${jobId}`);
+
+        if (status === 404) {
           return true;
         } else {
           throw new Error(`expected anomaly detection job '${jobId}' not to exist`);
@@ -550,11 +576,11 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         }...`
       );
 
-      await kbnSupertest
+      const { body, status } = await kbnSupertest
         .put(`${space ? `/s/${space}` : ''}/api/ml/anomaly_detectors/${jobId}`)
         .set(COMMON_REQUEST_HEADERS)
-        .send(jobConfig)
-        .expect(200);
+        .send(jobConfig);
+      this.assertResponseStatusCode(200, status, body);
 
       await this.waitForAnomalyDetectionJobToExist(jobId);
       log.debug('> AD job created.');
@@ -564,7 +590,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       const jobId = jobConfig.job_id;
       log.debug(`Creating anomaly detection job with id '${jobId}' via ES API...`);
 
-      await esSupertest.put(`/_ml/anomaly_detectors/${jobId}`).send(jobConfig).expect(200);
+      const { body, status } = await esSupertest
+        .put(`/_ml/anomaly_detectors/${jobId}`)
+        .send(jobConfig);
+      this.assertResponseStatusCode(200, status, body);
 
       await this.waitForAnomalyDetectionJobToExist(jobId);
       log.debug('> AD job created.');
@@ -583,18 +612,19 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         await this.deleteDatafeedES(datafeedId);
       }
 
-      await esSupertest
+      const { body, status } = await esSupertest
         .delete(`/_ml/anomaly_detectors/${jobId}`)
-        .query({ force: true })
-        .expect(200);
+        .query({ force: true });
+      this.assertResponseStatusCode(200, status, body);
 
       await this.waitForAnomalyDetectionJobNotToExist(jobId);
       log.debug('> AD job deleted.');
     },
 
     async getDatafeed(datafeedId: string) {
-      return await esSupertest.get(`/_ml/datafeeds/${datafeedId}`).expect(200);
-      // return await kbnSupertest.get(`/api/ml/datafeeds/${datafeedId}`).expect(200);
+      const response = await esSupertest.get(`/_ml/datafeeds/${datafeedId}`);
+      this.assertResponseStatusCode(200, response.status, response.body);
+      return response;
     },
 
     async datafeedExist(datafeedId: string) {
@@ -631,11 +661,11 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       log.debug(
         `Creating datafeed with id '${datafeedId}' ${space ? `in space '${space}' ` : ''}...`
       );
-      await kbnSupertest
+      const { body, status } = await kbnSupertest
         .put(`${space ? `/s/${space}` : ''}/api/ml/datafeeds/${datafeedId}`)
         .set(COMMON_REQUEST_HEADERS)
-        .send(datafeedConfig)
-        .expect(200);
+        .send(datafeedConfig);
+      this.assertResponseStatusCode(200, status, body);
 
       await this.waitForDatafeedToExist(datafeedId);
       log.debug('> Datafeed created.');
@@ -644,7 +674,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async createDatafeedES(datafeedConfig: Datafeed) {
       const datafeedId = datafeedConfig.datafeed_id;
       log.debug(`Creating datafeed with id '${datafeedId}' via ES API ...`);
-      await esSupertest.put(`/_ml/datafeeds/${datafeedId}`).send(datafeedConfig).expect(200);
+      const { body, status } = await esSupertest
+        .put(`/_ml/datafeeds/${datafeedId}`)
+        .send(datafeedConfig);
+      this.assertResponseStatusCode(200, status, body);
 
       await this.waitForDatafeedToExist(datafeedId);
       log.debug('> Datafeed created.');
@@ -652,7 +685,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async deleteDatafeedES(datafeedId: string) {
       log.debug(`Deleting datafeed with id '${datafeedId}' ...`);
-      await esSupertest.delete(`/_ml/datafeeds/${datafeedId}`).query({ force: true }).expect(200);
+      const { body, status } = await esSupertest
+        .delete(`/_ml/datafeeds/${datafeedId}`)
+        .query({ force: true });
+      this.assertResponseStatusCode(200, status, body);
 
       await this.waitForDatafeedToNotExist(datafeedId);
       log.debug('> Datafeed deleted.');
@@ -660,12 +696,11 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async openAnomalyDetectionJob(jobId: string) {
       log.debug(`Opening anomaly detection job '${jobId}'...`);
-      const openResponse = await esSupertest
+      const { body: openResponse, status } = await esSupertest
         .post(`/_ml/anomaly_detectors/${jobId}/_open`)
         .send({ timeout: '10s' })
-        .set({ 'Content-Type': 'application/json' })
-        .expect(200)
-        .then((res: any) => res.body);
+        .set({ 'Content-Type': 'application/json' });
+      this.assertResponseStatusCode(200, status, openResponse);
 
       expect(openResponse)
         .to.have.property('opened')
@@ -675,12 +710,11 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async closeAnomalyDetectionJob(jobId: string) {
       log.debug(`Closing anomaly detection job '${jobId}'...`);
-      const closeResponse = await esSupertest
+      const { body: closeResponse, status } = await esSupertest
         .post(`/_ml/anomaly_detectors/${jobId}/_close`)
         .send({ timeout: '10s' })
-        .set({ 'Content-Type': 'application/json' })
-        .expect(200)
-        .then((res: any) => res.body);
+        .set({ 'Content-Type': 'application/json' });
+      this.assertResponseStatusCode(200, status, closeResponse);
 
       expect(closeResponse)
         .to.have.property('closed')
@@ -695,12 +729,11 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       log.debug(
         `Starting datafeed '${datafeedId}' with start: '${startConfig.start}', end: '${startConfig.end}'...`
       );
-      const startResponse = await esSupertest
+      const { body: startResponse, status } = await esSupertest
         .post(`/_ml/datafeeds/${datafeedId}/_start`)
         .send(startConfig)
-        .set({ 'Content-Type': 'application/json' })
-        .expect(200)
-        .then((res: any) => res.body);
+        .set({ 'Content-Type': 'application/json' });
+      this.assertResponseStatusCode(200, status, startResponse);
 
       expect(startResponse)
         .to.have.property('started')
@@ -710,11 +743,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async stopDatafeed(datafeedId: string) {
       log.debug(`Stopping datafeed '${datafeedId}'...`);
-      const stopResponse = await esSupertest
+      const { body: stopResponse, status } = await esSupertest
         .post(`/_ml/datafeeds/${datafeedId}/_stop`)
-        .set({ 'Content-Type': 'application/json' })
-        .expect(200)
-        .then((res: any) => res.body);
+        .set({ 'Content-Type': 'application/json' });
+      this.assertResponseStatusCode(200, status, stopResponse);
 
       expect(stopResponse)
         .to.have.property('stopped')
@@ -737,9 +769,9 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async getDataFrameAnalyticsJob(analyticsId: string, statusCode = 200) {
       log.debug(`Fetching data frame analytics job '${analyticsId}'...`);
-      const response = await esSupertest
-        .get(`/_ml/data_frame/analytics/${analyticsId}`)
-        .expect(statusCode);
+      const response = await esSupertest.get(`/_ml/data_frame/analytics/${analyticsId}`);
+      this.assertResponseStatusCode(statusCode, response.status, response.body);
+
       log.debug('> DFA job fetched.');
       return response;
     },
@@ -781,11 +813,11 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           space ? `in space '${space}' ` : ''
         }...`
       );
-      await kbnSupertest
+      const { body, status } = await kbnSupertest
         .put(`${space ? `/s/${space}` : ''}/api/ml/data_frame/analytics/${analyticsId}`)
         .set(COMMON_REQUEST_HEADERS)
-        .send(analyticsConfig)
-        .expect(200);
+        .send(analyticsConfig);
+      this.assertResponseStatusCode(200, status, body);
 
       await this.waitForDataFrameAnalyticsJobToExist(analyticsId);
       log.debug('> DFA job created.');
@@ -794,11 +826,11 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async createDataFrameAnalyticsJobES(jobConfig: DataFrameAnalyticsConfig) {
       const { id: analyticsId, ...analyticsConfig } = jobConfig;
       log.debug(`Creating data frame analytic job with id '${analyticsId}' via ES API...`);
-      await esSupertest
+      const { body, status } = await esSupertest
         .put(`/_ml/data_frame/analytics/${analyticsId}`)
         .set(COMMON_REQUEST_HEADERS)
-        .send(analyticsConfig)
-        .expect(200);
+        .send(analyticsConfig);
+      this.assertResponseStatusCode(200, status, body);
 
       await this.waitForDataFrameAnalyticsJobToExist(analyticsId);
       log.debug('> DFA job created.');
@@ -812,10 +844,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         return;
       }
 
-      await esSupertest
+      const { body, status } = await esSupertest
         .delete(`/_ml/data_frame/analytics/${analyticsId}`)
-        .query({ force: true })
-        .expect(200);
+        .query({ force: true });
+      this.assertResponseStatusCode(200, status, body);
 
       await this.waitForDataFrameAnalyticsJobNotToExist(analyticsId);
       log.debug('> DFA job deleted.');
@@ -851,12 +883,15 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     },
 
     async getFilter(filterId: string, expectedCode = 200) {
-      return await esSupertest.get(`/_ml/filters/${filterId}`).expect(expectedCode);
+      const response = await esSupertest.get(`/_ml/filters/${filterId}`);
+      this.assertResponseStatusCode(expectedCode, response.status, response.body);
+      return response;
     },
 
     async createFilter(filterId: string, requestBody: object) {
       log.debug(`Creating filter with id '${filterId}'...`);
-      await esSupertest.put(`/_ml/filters/${filterId}`).send(requestBody).expect(200);
+      const { body, status } = await esSupertest.put(`/_ml/filters/${filterId}`).send(requestBody);
+      this.assertResponseStatusCode(200, status, body);
 
       await this.waitForFilterToExist(filterId, `expected filter '${filterId}' to be created`);
       log.debug('> Filter created.');
@@ -969,11 +1004,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async runDFAJob(dfaId: string) {
       log.debug(`Starting data frame analytics job '${dfaId}'...`);
-      const startResponse = await esSupertest
+      const { body: startResponse, status } = await esSupertest
         .post(`/_ml/data_frame/analytics/${dfaId}/_start`)
-        .set({ 'Content-Type': 'application/json' })
-        .expect(200)
-        .then((res: any) => res.body);
+        .set({ 'Content-Type': 'application/json' });
+      this.assertResponseStatusCode(200, status, startResponse);
 
       expect(startResponse)
         .to.have.property('acknowledged')
@@ -986,6 +1020,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       await this.runDFAJob(dfaConfig.id);
       await this.waitForDFAJobTrainingRecordCountToBePositive(dfaConfig.id);
       await this.waitForAnalyticsState(dfaConfig.id, DATA_FRAME_TASK_STATE.STOPPED, timeout);
+      await this.syncSavedObjects();
     },
 
     async updateJobSpaces(
@@ -995,20 +1030,20 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       spacesToRemove: string[],
       space?: string
     ) {
-      const { body } = await kbnSupertest
+      const { body, status } = await kbnSupertest
         .post(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/update_jobs_spaces`)
         .set(COMMON_REQUEST_HEADERS)
-        .send({ jobType, jobIds: [jobId], spacesToAdd, spacesToRemove })
-        .expect(200);
+        .send({ jobType, jobIds: [jobId], spacesToAdd, spacesToRemove });
+      this.assertResponseStatusCode(200, status, body);
 
-      expect(body).to.eql({ [jobId]: { success: true } });
+      expect(body).to.eql({ [jobId]: { success: true, type: jobType } });
     },
 
     async assertJobSpaces(jobId: string, jobType: JobType, expectedSpaces: string[]) {
-      const { body } = await kbnSupertest
+      const { body, status } = await kbnSupertest
         .get('/api/ml/saved_objects/jobs_spaces')
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(200);
+        .set(COMMON_REQUEST_HEADERS);
+      this.assertResponseStatusCode(200, status, body);
 
       if (expectedSpaces.length > 0) {
         // Should list expected spaces correctly
@@ -1024,13 +1059,86 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       }
     },
 
-    async createTrainedModel(modelId: string, body: PutTrainedModelConfig) {
+    async updateTrainedModelSpaces(
+      modelId: string,
+      spacesToAdd: string[],
+      spacesToRemove: string[],
+      space?: string
+    ) {
+      const { body, status } = await kbnSupertest
+        .post(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/update_trained_models_spaces`)
+        .set(COMMON_REQUEST_HEADERS)
+        .send({ modelIds: [modelId], spacesToAdd, spacesToRemove });
+      this.assertResponseStatusCode(200, status, body);
+
+      expect(body).to.eql({
+        [modelId]: { success: true, type: 'trained-model' },
+      });
+    },
+
+    async assertTrainedModelSpaces(modelId: string, expectedSpaces: string[]) {
+      const { body, status } = await kbnSupertest
+        .get('/api/ml/saved_objects/trained_models_spaces')
+        .set(COMMON_REQUEST_HEADERS);
+      this.assertResponseStatusCode(200, status, body);
+      if (expectedSpaces.length > 0) {
+        // Should list expected spaces correctly
+        expect(body).to.have.property('trainedModels');
+        expect(body.trainedModels).to.have.property(modelId);
+        expect(body.trainedModels[modelId]).to.eql(expectedSpaces);
+      } else {
+        // The job is expected to be not connected to any space. So either the 'trainedModels'
+        // section should be missing or if it exists, it should not show the modelId
+        if ('trainedModels' in body) {
+          expect(body.trainedModels).to.not.have.property(modelId);
+        }
+      }
+    },
+
+    async syncSavedObjects(simulate: boolean = false, space?: string) {
+      const { body, status } = await kbnSupertest
+        .get(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/sync?simulate=${simulate}`)
+        .set(COMMON_REQUEST_HEADERS);
+      this.assertResponseStatusCode(200, status, body);
+
+      return body;
+    },
+
+    async initSavedObjects(simulate: boolean = false, space?: string) {
+      const { body, status } = await kbnSupertest
+        .get(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/initialize?simulate=${simulate}`)
+        .set(COMMON_REQUEST_HEADERS);
+      this.assertResponseStatusCode(200, status, body);
+      return body;
+    },
+
+    async createTrainedModel(modelId: string, body: PutTrainedModelConfig, space?: string) {
       log.debug(`Creating trained model with id "${modelId}"`);
-      const model = await esSupertest
+      const { body: model, status } = await kbnSupertest
+        .put(`${space ? `/s/${space}` : ''}/api/ml/trained_models/${modelId}`)
+        .set(COMMON_REQUEST_HEADERS)
+        .send(body);
+      this.assertResponseStatusCode(200, status, model);
+
+      log.debug('> Trained model created');
+      return model;
+    },
+
+    async createTrainedModelES(modelId: string, body: PutTrainedModelConfig) {
+      log.debug(`Creating trained model with id "${modelId}"`);
+      const { body: model, status } = await esSupertest
         .put(`/_ml/trained_models/${modelId}`)
-        .send(body)
-        .expect(200)
-        .then((res: any) => res.body);
+        .send(body);
+      this.assertResponseStatusCode(200, status, model);
+
+      log.debug('> Trained model created');
+      return model;
+    },
+
+    async deleteTrainedModelES(modelId: string) {
+      log.debug(`Creating trained model with id "${modelId}"`);
+      const { body: model, status } = await esSupertest.delete(`/_ml/trained_models/${modelId}`);
+      this.assertResponseStatusCode(200, status, model);
 
       log.debug('> Trained model created');
       return model;
@@ -1088,9 +1196,11 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async createModelAlias(modelId: string, modelAlias: string) {
       log.debug(`Creating alias for model "${modelId}"`);
-      await esSupertest
-        .put(`/_ml/trained_models/${modelId}/model_aliases/${modelAlias}`)
-        .expect(200);
+      const { body, status } = await esSupertest.put(
+        `/_ml/trained_models/${modelId}/model_aliases/${modelAlias}?reassign=true`
+      );
+      this.assertResponseStatusCode(200, status, body);
+
       log.debug('> Model alias created');
     },
 
@@ -1100,7 +1210,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
      */
     async createIngestPipeline(modelId: string) {
       log.debug(`Creating ingest pipeline for trained model with id "${modelId}"`);
-      const ingestPipeline = await esSupertest
+      const { body: ingestPipeline, status } = await esSupertest
         .put(`/_ingest/pipeline/pipeline_${modelId}`)
         .send({
           processors: [
@@ -1110,9 +1220,8 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
               },
             },
           ],
-        })
-        .expect(200)
-        .then((res) => res.body);
+        });
+      this.assertResponseStatusCode(200, status, ingestPipeline);
 
       log.debug('> Ingest pipeline crated');
       return ingestPipeline;
@@ -1120,7 +1229,9 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async deleteIngestPipeline(modelId: string) {
       log.debug(`Deleting ingest pipeline for trained model with id "${modelId}"`);
-      await esSupertest.delete(`/_ingest/pipeline/pipeline_${modelId}`).expect(200);
+      const { body, status } = await esSupertest.delete(`/_ingest/pipeline/pipeline_${modelId}`);
+      this.assertResponseStatusCode(200, status, body);
+
       log.debug('> Ingest pipeline deleted');
     },
   };

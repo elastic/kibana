@@ -7,9 +7,15 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { HttpFetchError } from '../../../../../../src/core/public';
-import type { IndexPattern } from '../../../../../../src/plugins/data/public';
+import { HttpFetchError } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
+import {
+  DEFAULT_CONTINUOUS_MODE_DELAY,
+  DEFAULT_TRANSFORM_FREQUENCY,
+  DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND,
+  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
+} from '../../../common/constants';
 import type {
   PivotTransformPreviewRequestSchema,
   PostTransformsPreviewRequestSchema,
@@ -19,7 +25,7 @@ import type {
 } from '../../../common/api_schemas/transforms';
 import { isPopulatedObject } from '../../../common/shared_imports';
 import { DateHistogramAgg, HistogramAgg, TermsAgg } from '../../../common/types/pivot_group_by';
-import { isIndexPattern } from '../../../common/types/index_pattern';
+import { isDataView } from '../../../common/types/data_view';
 
 import type { SavedSearchQuery } from '../hooks/use_search_items';
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
@@ -34,7 +40,7 @@ import {
   GroupByConfigWithUiSupport,
   PivotAggsConfig,
   PivotGroupByConfig,
-} from './';
+} from '.';
 
 export interface SimpleQuery {
   query_string: {
@@ -78,14 +84,14 @@ export function isDefaultQuery(query: PivotQuery): boolean {
 }
 
 export function getCombinedRuntimeMappings(
-  indexPattern: IndexPattern | undefined,
+  dataView: DataView | undefined,
   runtimeMappings?: StepDefineExposedState['runtimeMappings']
 ): StepDefineExposedState['runtimeMappings'] | undefined {
   let combinedRuntimeMappings = {};
 
   // And runtime field mappings defined by index pattern
-  if (isIndexPattern(indexPattern)) {
-    const computedFields = indexPattern.getComputedFields();
+  if (isDataView(dataView)) {
+    const computedFields = dataView.getComputedFields();
     if (computedFields?.runtimeFields !== undefined) {
       const ipRuntimeMappings = computedFields.runtimeFields;
       if (isPopulatedObject(ipRuntimeMappings)) {
@@ -167,12 +173,12 @@ export const getRequestPayload = (
 };
 
 export function getPreviewTransformRequestBody(
-  indexPatternTitle: IndexPattern['title'],
+  dataViewTitle: DataView['title'],
   query: PivotQuery,
   partialRequest?: StepDefineExposedState['previewRequest'] | undefined,
   runtimeMappings?: StepDefineExposedState['runtimeMappings']
 ): PostTransformsPreviewRequestSchema {
-  const index = indexPatternTitle.split(',').map((name: string) => name.trim());
+  const index = dataViewTitle.split(',').map((name: string) => name.trim());
 
   return {
     source: {
@@ -188,10 +194,16 @@ export const getCreateTransformSettingsRequestBody = (
   transformDetailsState: Partial<StepDetailsExposedState>
 ): { settings?: PutTransformsRequestSchema['settings'] } => {
   const settings: PutTransformsRequestSchema['settings'] = {
-    ...(transformDetailsState.transformSettingsMaxPageSearchSize
+    // conditionally add optional max_page_search_size, skip if default value
+    ...(transformDetailsState.transformSettingsMaxPageSearchSize &&
+    transformDetailsState.transformSettingsMaxPageSearchSize !==
+      DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE
       ? { max_page_search_size: transformDetailsState.transformSettingsMaxPageSearchSize }
       : {}),
-    ...(transformDetailsState.transformSettingsDocsPerSecond
+    // conditionally add optional docs_per_second, skip if default value
+    ...(transformDetailsState.transformSettingsDocsPerSecond &&
+    transformDetailsState.transformSettingsDocsPerSecond !==
+      DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND
       ? { docs_per_second: transformDetailsState.transformSettingsDocsPerSecond }
       : {}),
   };
@@ -199,12 +211,12 @@ export const getCreateTransformSettingsRequestBody = (
 };
 
 export const getCreateTransformRequestBody = (
-  indexPatternTitle: IndexPattern['title'],
+  dataViewTitle: DataView['title'],
   pivotState: StepDefineExposedState,
   transformDetailsState: StepDetailsExposedState
 ): PutTransformsPivotRequestSchema | PutTransformsLatestRequestSchema => ({
   ...getPreviewTransformRequestBody(
-    indexPatternTitle,
+    dataViewTitle,
     getPivotQuery(pivotState.searchQuery),
     pivotState.previewRequest,
     pivotState.runtimeMappings
@@ -213,8 +225,9 @@ export const getCreateTransformRequestBody = (
   ...(transformDetailsState.transformDescription !== ''
     ? { description: transformDetailsState.transformDescription }
     : {}),
-  // conditionally add optional frequency
-  ...(transformDetailsState.transformFrequency !== ''
+  // conditionally add optional frequency, skip if default value
+  ...(transformDetailsState.transformFrequency !== '' &&
+  transformDetailsState.transformFrequency !== DEFAULT_TRANSFORM_FREQUENCY
     ? { frequency: transformDetailsState.transformFrequency }
     : {}),
   dest: {
@@ -229,8 +242,11 @@ export const getCreateTransformRequestBody = (
     ? {
         sync: {
           time: {
+            // conditionally add continuous mode delay, skip if default value
+            ...(transformDetailsState.continuousModeDelay !== DEFAULT_CONTINUOUS_MODE_DELAY
+              ? { delay: transformDetailsState.continuousModeDelay }
+              : {}),
             field: transformDetailsState.continuousModeDateField,
-            delay: transformDetailsState.continuousModeDelay,
           },
         },
       }

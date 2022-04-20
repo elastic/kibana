@@ -11,31 +11,15 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export function UptimeMonitorProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const find = getService('find');
 
   const PageObjects = getPageObjects(['header']);
 
   return {
-    async locationMissingExists() {
-      return await testSubjects.existOrFail('xpack.uptime.locationMap.locationMissing', {
-        timeout: 3000,
-      });
-    },
     async displayOverallAvailability(availabilityVal: string) {
       return retry.tryForTime(60 * 1000, async () => {
         await testSubjects.existOrFail('uptimeOverallAvailability');
         const availability = await testSubjects.getVisibleText('uptimeOverallAvailability');
         expect(availability).to.be(availabilityVal);
-      });
-    },
-    async locationMapIsRendered() {
-      return retry.tryForTime(15000, async () => {
-        await testSubjects.existOrFail('xpack.uptime.locationMap.embeddedPanel', {
-          timeout: 3000,
-        });
-        const mapPanel = await testSubjects.find('xpack.uptime.locationMap.embeddedPanel');
-
-        await find.descendantExistsByCssSelector('canvas.mapboxgl-canvas', mapPanel);
       });
     },
     async setPingListLocation(location: string) {
@@ -55,9 +39,6 @@ export function UptimeMonitorProvider({ getService, getPageObjects }: FtrProvide
           )
         );
       });
-    },
-    async toggleToMapView() {
-      await testSubjects.click('uptimeMonitorToggleMapBtn');
     },
     async hasRedirectInfo() {
       return retry.tryForTime(30000, async () => {

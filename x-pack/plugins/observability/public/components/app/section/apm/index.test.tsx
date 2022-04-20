@@ -7,16 +7,15 @@
 
 import React from 'react';
 import * as fetcherHook from '../../../../hooks/use_fetcher';
-import { render } from '../../../../utils/test_helper';
-import { APMSection } from './';
+import { render, data as dataMock } from '../../../../utils/test_helper';
+import { APMSection } from '.';
 import { response } from './mock_data/apm.mock';
 import * as hasDataHook from '../../../../hooks/use_has_data';
 import * as pluginContext from '../../../../hooks/use_plugin_context';
 import { HasDataContextValue } from '../../../../context/has_data_context';
-import { AppMountParameters, CoreStart } from 'kibana/public';
-import { ObservabilityPublicPluginsStart } from '../../../../plugin';
+import { AppMountParameters } from '@kbn/core/public';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../rules/observability_rule_type_registry_mock';
-import { KibanaPageTemplate } from '../../../../../../../../src/plugins/kibana_react/public';
+import { KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
@@ -36,35 +35,26 @@ describe('APMSection', () => {
         },
       },
     } as HasDataContextValue);
+
+    // @ts-expect-error `dataMock` is not properly propagating the mock types
+    dataMock.query.timefilter.timefilter.getTime.mockReturnValue({
+      from: '2020-10-08T06:00:00.000Z',
+      to: '2020-10-08T07:00:00.000Z',
+    });
+
     jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
-      core: {
-        uiSettings: { get: jest.fn() },
-        http: { basePath: { prepend: jest.fn() } },
-      } as unknown as CoreStart,
       appMountParameters: {} as AppMountParameters,
       config: {
         unsafe: {
           alertingExperience: { enabled: true },
           cases: { enabled: true },
           overviewNext: { enabled: false },
+          rules: { enabled: true },
         },
       },
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
-      plugins: {
-        data: {
-          query: {
-            timefilter: {
-              timefilter: {
-                getTime: jest.fn().mockImplementation(() => ({
-                  from: '2020-10-08T06:00:00.000Z',
-                  to: '2020-10-08T07:00:00.000Z',
-                })),
-              },
-            },
-          },
-        },
-      } as unknown as ObservabilityPublicPluginsStart,
       ObservabilityPageTemplate: KibanaPageTemplate,
+      kibanaFeatures: [],
     }));
   });
 
@@ -91,7 +81,7 @@ describe('APMSection', () => {
     expect(getByRole('heading')).toHaveTextContent('Services');
     expect(getByText('Show service inventory')).toBeInTheDocument();
     expect(getByText('Services 11')).toBeInTheDocument();
-    expect(getByText('Throughput 900.0 tpm')).toBeInTheDocument();
+    expect(getByText('900.0 tpm')).toBeInTheDocument();
     expect(queryAllByTestId('loading')).toEqual([]);
   });
 
@@ -108,7 +98,7 @@ describe('APMSection', () => {
     expect(getByRole('heading')).toHaveTextContent('Services');
     expect(getByText('Show service inventory')).toBeInTheDocument();
     expect(getByText('Services 11')).toBeInTheDocument();
-    expect(getByText('Throughput 312.00k tpm')).toBeInTheDocument();
+    expect(getByText('312.00k tpm')).toBeInTheDocument();
     expect(queryAllByTestId('loading')).toEqual([]);
   });
   it('shows loading state', () => {
@@ -125,6 +115,6 @@ describe('APMSection', () => {
     expect(getByTestId('loading')).toBeInTheDocument();
     expect(queryAllByText('Show service inventory')).toEqual([]);
     expect(queryAllByText('Services 11')).toEqual([]);
-    expect(queryAllByText('Throughput 312.00k tpm')).toEqual([]);
+    expect(queryAllByText('312.00k tpm')).toEqual([]);
   });
 });

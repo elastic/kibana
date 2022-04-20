@@ -24,8 +24,8 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { useChartTheme } from '@kbn/observability-plugin/public';
 import { Annotation } from '../../../../../common/annotations';
-import { useChartTheme } from '../../../../../../observability/public';
 import {
   asAbsoluteDateTime,
   asPercent,
@@ -36,14 +36,14 @@ import { useChartPointerEventContext } from '../../../../context/chart_pointer_e
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 import { unit } from '../../../../utils/style';
-import { ChartContainer } from '../../charts/chart_container';
-import { isTimeseriesEmpty, onBrushEnd } from '../../charts/helper/helper';
+import { ChartContainer } from '../chart_container';
+import { isTimeseriesEmpty, onBrushEnd } from '../helper/helper';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import {
   getMaxY,
   getResponseTimeTickFormatter,
-} from '../../../shared/charts/transaction_charts/helper';
+} from '../transaction_charts/helper';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getTimeZone } from '../helper/timezone';
 
@@ -97,7 +97,7 @@ export function BreakdownChart({
     <ChartContainer height={height} hasData={!isEmpty} status={fetchStatus}>
       <Chart ref={chartRef}>
         <Settings
-          tooltip={{ stickTo: 'top' }}
+          tooltip={{ stickTo: 'top', showNullValues: true }}
           onBrushEnd={(event) =>
             onBrushEnd({ x: (event as XYBrushEvent).x, history })
           }

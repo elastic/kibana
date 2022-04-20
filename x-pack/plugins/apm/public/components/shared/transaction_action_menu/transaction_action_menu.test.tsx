@@ -8,7 +8,7 @@
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { License } from '../../../../../licensing/common/license';
+import { License } from '@kbn/licensing-plugin/common/license';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
@@ -47,7 +47,10 @@ function Wrapper({ children }: { children?: React.ReactNode }) {
 
 const renderTransaction = async (transaction: Record<string, any>) => {
   const rendered = render(
-    <TransactionActionMenu transaction={transaction as Transaction} />,
+    <TransactionActionMenu
+      isLoading={false}
+      transaction={transaction as Transaction}
+    />,
     {
       wrapper: Wrapper,
     }
@@ -271,6 +274,7 @@ describe('TransactionActionMenu component', () => {
       return render(
         <LicenseContext.Provider value={license}>
           <TransactionActionMenu
+            isLoading={false}
             transaction={Transactions.transactionWithMinimalData as Transaction}
           />
         </LicenseContext.Provider>,
@@ -308,6 +312,7 @@ describe('TransactionActionMenu component', () => {
       const component = render(
         <LicenseContext.Provider value={license}>
           <TransactionActionMenu
+            isLoading={false}
             transaction={Transactions.transactionWithMinimalData as Transaction}
           />
         </LicenseContext.Provider>,

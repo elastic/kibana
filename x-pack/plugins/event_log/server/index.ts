@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
+import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 import { ConfigSchema, IEventLogConfig } from './types';
 import { Plugin } from './plugin';
 
@@ -17,6 +17,7 @@ export type {
   IValidatedEvent,
   IEventLogClient,
   QueryEventsBySavedObjectResult,
+  AggregateEventsBySavedObjectResult,
 } from './types';
 export { SAVED_OBJECT_REL_PRIMARY } from './types';
 

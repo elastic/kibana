@@ -27,7 +27,6 @@ import { LinkAnchor } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { getRuleDetailsUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { PopoverItems } from '../../../../../common/components/popover_items';
-import { useStateToaster } from '../../../../../common/components/toasters';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { canEditRuleWithActions, getToolTipContent } from '../../../../../common/utils/privileges';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
@@ -45,6 +44,7 @@ import {
   DurationMetric,
   RuleExecutionSummary,
 } from '../../../../../../common/detection_engine/schemas/common';
+import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
@@ -160,13 +160,13 @@ const TAGS_COLUMN: TableColumn = {
 const useActionsColumn = (): EuiTableActionsColumnType<Rule> => {
   const { navigateToApp } = useKibana().services.application;
   const hasActionsPrivileges = useHasActionsPrivileges();
-  const [, dispatchToaster] = useStateToaster();
+  const toasts = useAppToasts();
   const { reFetchRules, setLoadingRules } = useRulesTableContext().actions;
 
   return useMemo(
     () => ({
       actions: getRulesTableActions(
-        dispatchToaster,
+        toasts,
         navigateToApp,
         reFetchRules,
         hasActionsPrivileges,
@@ -174,7 +174,7 @@ const useActionsColumn = (): EuiTableActionsColumnType<Rule> => {
       ),
       width: '40px',
     }),
-    [dispatchToaster, hasActionsPrivileges, navigateToApp, reFetchRules, setLoadingRules]
+    [hasActionsPrivileges, navigateToApp, reFetchRules, setLoadingRules, toasts]
   );
 };
 
@@ -346,7 +346,7 @@ export const useMonitoringColumns = ({ hasPermissions }: ColumnsProps): TableCol
                               href={`${docLinks.links.siem.troubleshootGaps}`}
                               target="_blank"
                             >
-                              {'see documentation'}
+                              {i18n.COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION}
                             </EuiLink>
                           ),
                         }}

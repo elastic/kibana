@@ -5,16 +5,32 @@
  * 2.0.
  */
 
-import { uptimeOverviewLocatorID } from '../../../../observability/public';
-import { OVERVIEW_ROUTE } from '../../../common/constants';
+import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/public';
+import { OVERVIEW_ROUTE } from '../../../common/constants/ui';
 
 const formatSearchKey = (key: string, value: string) => `${key}: "${value}"`;
 
-async function navigate({ ip, hostname }: { ip?: string; hostname?: string }) {
+async function navigate({
+  ip,
+  host,
+  container,
+  pod,
+}: {
+  ip?: string;
+  host?: string;
+  container?: string;
+  pod?: string;
+}) {
   const searchParams: string[] = [];
 
-  if (ip) searchParams.push(formatSearchKey('monitor.ip', ip));
-  if (hostname) searchParams.push(formatSearchKey('url.domain', hostname));
+  if (host) searchParams.push(formatSearchKey('host.name', host));
+  if (container) searchParams.push(formatSearchKey('container.id', container));
+  if (pod) searchParams.push(formatSearchKey('kubernetes.pod.uid', pod));
+
+  if (ip) {
+    const root = host ? 'host' : 'monitor';
+    searchParams.push(formatSearchKey(`${root}.ip`, ip));
+  }
 
   const searchString = searchParams.join(' OR ');
 

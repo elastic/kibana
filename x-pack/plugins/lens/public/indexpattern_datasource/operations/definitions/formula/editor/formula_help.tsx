@@ -20,7 +20,7 @@ import {
   EuiHighlight,
   EuiSpacer,
 } from '@elastic/eui';
-import { Markdown } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { Markdown } from '@kbn/kibana-react-plugin/public';
 import { IndexPattern } from '../../../../types';
 import { tinymathFunctions } from '../util';
 import { getPossibleFunctions } from './math_completion';
@@ -31,7 +31,7 @@ import type {
   GenericIndexPatternColumn,
   OperationDefinition,
   ParamEditorProps,
-} from '../../index';
+} from '../..';
 import type { FormulaIndexPatternColumn } from '../formula';
 
 function FormulaHelp({

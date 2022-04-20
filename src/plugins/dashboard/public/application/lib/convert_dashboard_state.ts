@@ -7,7 +7,8 @@
  */
 
 import _ from 'lodash';
-import type { KibanaExecutionContext } from 'src/core/public';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import { ControlGroupInput } from '@kbn/controls-plugin/public';
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { getTagsFromSavedDashboard, migrateAppState } from '.';
 import { EmbeddablePackageState, ViewMode } from '../../services/embeddable';
@@ -22,7 +23,6 @@ import {
 } from '../../types';
 import { convertSavedPanelsToPanelMap } from './convert_dashboard_panels';
 import { deserializeControlGroupFromDashboardSavedObject } from './dashboard_control_group';
-import { ControlGroupInput } from '../../../../controls/public';
 
 interface SavedObjectToDashboardStateProps {
   version: string;

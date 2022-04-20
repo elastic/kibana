@@ -6,16 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RequestHandlerContext } from 'kibana/server';
+import { RequestHandlerContext } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   INDEX_PATTERN_KIBANA,
   INDEX_PATTERN_LOGSTASH,
 } from '../../../../../../common/constants';
-// @ts-ignore
-import { prefixIndexPattern } from '../../../../../../common/ccs_utils';
-// @ts-ignore
+import { prefixIndexPatternWithCcs } from '../../../../../../common/ccs_utils';
 import { handleError } from '../../../../../lib/errors';
 import { RouteDependencies, LegacyServer } from '../../../../../types';
 
@@ -89,9 +87,9 @@ export function internalMonitoringCheckRoute(server: LegacyServer, npRoute: Rout
 
         const config = server.config;
         const { ccs } = request.body;
-        const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
-        const kbnIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_KIBANA, ccs);
-        const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);
+        const esIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
+        const kbnIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_KIBANA, ccs);
+        const lsIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_LOGSTASH, ccs);
         const indexCounts = await Promise.all([
           checkLatestMonitoringIsLegacy(context, esIndexPattern),
           checkLatestMonitoringIsLegacy(context, kbnIndexPattern),

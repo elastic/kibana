@@ -7,22 +7,24 @@
  */
 
 import { identity } from 'lodash';
-import { AnyExpressionFunctionDefinition } from './types';
-import { ExpressionFunctionParameter } from './expression_function_parameter';
-import { ExpressionValue } from '../expression_types/types';
-import { ExpressionAstFunction } from '../ast';
-import { SavedObjectReference } from '../../../../core/types';
+import { SavedObjectReference } from '@kbn/core/types';
 import {
   MigrateFunctionsObject,
   GetMigrationFunctionObjectFn,
   PersistableState,
-} from '../../../kibana_utils/common';
+} from '@kbn/kibana-utils-plugin/common';
+import { AnyExpressionFunctionDefinition } from './types';
+import { ExpressionFunctionParameter } from './expression_function_parameter';
+import { ExpressionValue } from '../expression_types/types';
+import { ExpressionAstFunction } from '../ast';
 
 export class ExpressionFunction implements PersistableState<ExpressionAstFunction['arguments']> {
   /**
    * Name of function
    */
   name: string;
+
+  namespace?: string;
 
   /**
    * Aliases that can be used instead of `name`.
@@ -90,9 +92,11 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
       inject,
       extract,
       migrations,
+      namespace,
     } = functionDefinition;
 
     this.name = name;
+    this.namespace = namespace;
     this.type = type;
     this.aliases = aliases || [];
     this.fn = fn as ExpressionFunction['fn'];

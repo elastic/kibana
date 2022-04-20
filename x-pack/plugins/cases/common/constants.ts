@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { ConnectorTypes } from './api';
-import { CasesContextFeatures } from './ui/types';
+import { CasesFeaturesAllRequired } from './ui/types';
 
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
@@ -51,6 +51,7 @@ export const SAVED_OBJECT_TYPES = [
  */
 
 export const CASES_URL = '/api/cases' as const;
+export const CASE_FIND_URL = `${CASES_URL}/_find` as const;
 export const CASE_DETAILS_URL = `${CASES_URL}/{case_id}` as const;
 export const CASE_CONFIGURE_URL = `${CASES_URL}/configure` as const;
 export const CASE_CONFIGURE_DETAILS_URL = `${CASES_URL}/configure/{configuration_id}` as const;
@@ -58,6 +59,7 @@ export const CASE_CONFIGURE_CONNECTORS_URL = `${CASE_CONFIGURE_URL}/connectors` 
 
 export const CASE_COMMENTS_URL = `${CASE_DETAILS_URL}/comments` as const;
 export const CASE_COMMENT_DETAILS_URL = `${CASE_DETAILS_URL}/comments/{comment_id}` as const;
+export const CASE_COMMENT_DELETE_URL = `${CASE_DETAILS_URL}/comments/{comment_id}` as const;
 export const CASE_PUSH_URL = `${CASE_DETAILS_URL}/connector/{connector_id}/_push` as const;
 export const CASE_REPORTERS_URL = `${CASES_URL}/reporters` as const;
 export const CASE_STATUS_URL = `${CASES_URL}/status` as const;
@@ -68,6 +70,14 @@ export const CASE_ALERTS_URL = `${CASES_URL}/alerts/{alert_id}` as const;
 export const CASE_DETAILS_ALERTS_URL = `${CASE_DETAILS_URL}/alerts` as const;
 
 export const CASE_METRICS_DETAILS_URL = `${CASES_URL}/metrics/{case_id}` as const;
+
+/**
+ * Internal routes
+ */
+
+export const CASES_INTERNAL_URL = '/internal/cases' as const;
+export const INTERNAL_BULK_CREATE_ATTACHMENTS_URL =
+  `${CASES_INTERNAL_URL}/{case_id}/attachments/_bulk_create` as const;
 
 /**
  * Action routes
@@ -88,8 +98,11 @@ export const SUPPORTED_CONNECTORS = [
 /**
  * Alerts
  */
-export const MAX_ALERTS_PER_CASE = 5000 as const;
+export const MAX_ALERTS_PER_CASE = 1000 as const;
 
+/**
+ * Owner
+ */
 export const SECURITY_SOLUTION_OWNER = 'securitySolution' as const;
 export const OBSERVABILITY_OWNER = 'observability' as const;
 
@@ -104,6 +117,9 @@ export const OWNER_INFO = {
   },
 } as const;
 
+/**
+ * Searching
+ */
 export const MAX_DOCS_PER_PAGE = 10000 as const;
 export const MAX_CONCURRENT_SEARCHES = 10 as const;
 
@@ -117,7 +133,19 @@ export const MAX_TITLE_LENGTH = 64 as const;
  * Cases features
  */
 
-export const DEFAULT_FEATURES: CasesContextFeatures = Object.freeze({
-  alerts: { sync: true },
+export const DEFAULT_FEATURES: CasesFeaturesAllRequired = Object.freeze({
+  alerts: { sync: true, enabled: true },
   metrics: [],
 });
+
+/**
+ * Task manager
+ */
+
+export const CASES_TELEMETRY_TASK_NAME = 'cases-telemetry-task';
+
+/**
+ * Telemetry
+ */
+export const CASE_TELEMETRY_SAVED_OBJECT = 'cases-telemetry';
+export const CASE_TELEMETRY_SAVED_OBJECT_ID = 'cases-telemetry';

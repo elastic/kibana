@@ -32,7 +32,7 @@ import {
 } from '../constants/labels';
 import { MobileFields } from './mobile_fields';
 
-export function getMobileKPIConfig({ indexPattern }: ConfigProps): SeriesConfig {
+export function getMobileKPIConfig({ dataView }: ConfigProps): SeriesConfig {
   return {
     reportType: ReportTypes.KPI,
     defaultSeriesType: 'line',
@@ -50,7 +50,7 @@ export function getMobileKPIConfig({ indexPattern }: ConfigProps): SeriesConfig 
     filterFields: [...Object.keys(MobileFields), LABEL_FIELDS_FILTER],
     breakdownFields: Object.keys(MobileFields),
     baseFilters: [
-      ...buildPhrasesFilter('agent.name', ['iOS/swift', 'open-telemetry/swift'], indexPattern),
+      ...buildPhrasesFilter('agent.name', ['iOS/swift', 'open-telemetry/swift'], dataView),
     ],
     labels: {
       ...FieldLabels,

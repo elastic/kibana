@@ -9,8 +9,7 @@ import { pickBy, isEmpty } from 'lodash';
 import uuid from 'uuid';
 import moment from 'moment-timezone';
 
-import { PLUGIN_ID } from '../../../common';
-import { IRouter } from '../../../../../../src/core/server';
+import { IRouter } from '@kbn/core/server';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 import { parseAgentSelection, AgentSelection } from '../../lib/parse_agent_groups';
@@ -22,6 +21,7 @@ import {
 
 import { incrementCount } from '../usage';
 import { getInternalSavedObjectsClient } from '../../usage/collector';
+import { savedQuerySavedObjectType } from '../../../common/types';
 
 export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
@@ -33,9 +33,6 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
           CreateActionRequestBodySchema
         >(createActionRequestBodySchema),
       },
-      options: {
-        tags: [`access:${PLUGIN_ID}-readLiveQueries`, `access:${PLUGIN_ID}-runSavedQueries`],
-      },
     },
     async (context, request, response) => {
       const esClient = context.core.elasticsearch.client.asInternalUser;
@@ -43,16 +40,44 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
       const internalSavedObjectsClient = await getInternalSavedObjectsClient(
         osqueryContext.getStartServices
       );
+      const [coreStartServices] = await osqueryContext.getStartServices();
+      let savedQueryId = request.body.saved_query_id;
+
+      const {
+        osquery: { writeLiveQueries, runSavedQueries },
+      } = await coreStartServices.capabilities.resolveCapabilities(request);
+
+      const isInvalid = !(writeLiveQueries || (runSavedQueries && request.body.saved_query_id));
+
+      if (isInvalid) {
+        return response.forbidden();
+      }
+
+      if (request.body.saved_query_id && runSavedQueries) {
+        const savedQueries = await soClient.find({
+          type: savedQuerySavedObjectType,
+        });
+        const actualSavedQuery = savedQueries.saved_objects.find(
+          (savedQuery) => savedQuery.id === request.body.saved_query_id
+        );
+
+        if (actualSavedQuery) {
+          savedQueryId = actualSavedQuery.id;
+        }
+      }
 
       const { agentSelection } = request.body as { agentSelection: AgentSelection };
-      const selectedAgents = await parseAgentSelection(soClient, osqueryContext, agentSelection);
+      const selectedAgents = await parseAgentSelection(
+        internalSavedObjectsClient,
+        osqueryContext,
+        agentSelection
+      );
       incrementCount(internalSavedObjectsClient, 'live_query');
       if (!selectedAgents.length) {
         incrementCount(internalSavedObjectsClient, 'live_query', 'errors');
+
         return response.badRequest({ body: new Error('No agents found for selection') });
       }
-
-      // TODO: Add check for `runSavedQueries` only
 
       try {
         const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
@@ -68,7 +93,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
             {
               id: uuid.v4(),
               query: request.body.query,
-              saved_query_id: request.body.saved_query_id,
+              saved_query_id: savedQueryId,
               ecs_mapping: request.body.ecs_mapping,
             },
             (value) => !isEmpty(value)
@@ -87,6 +112,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
         });
       } catch (error) {
         incrementCount(internalSavedObjectsClient, 'live_query', 'errors');
+
         return response.customError({
           statusCode: 500,
           body: new Error(`Error occurred while processing ${error}`),

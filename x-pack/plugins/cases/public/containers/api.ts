@@ -9,6 +9,7 @@ import { omit } from 'lodash';
 
 import { StatusAll, ResolvedCase } from '../../common/ui/types';
 import {
+  BulkCreateCommentRequest,
   CasePatchRequest,
   CasePostRequest,
   CaseResponse,
@@ -26,12 +27,14 @@ import {
   getCaseUserActionUrl,
   User,
   CaseMetricsResponse,
+  getCaseCommentDeleteUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
   CASE_STATUS_URL,
   CASE_TAGS_URL,
   CASES_URL,
+  INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -271,6 +274,21 @@ export const patchComment = async ({
   return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
 };
 
+export const deleteComment = async ({
+  caseId,
+  commentId,
+  signal,
+}: {
+  caseId: string;
+  commentId: string;
+  signal: AbortSignal;
+}): Promise<void> => {
+  await KibanaServices.get().http.fetch<CaseResponse>(getCaseCommentDeleteUrl(caseId, commentId), {
+    method: 'DELETE',
+    signal,
+  });
+};
+
 export const deleteCases = async (caseIds: string[], signal: AbortSignal): Promise<string> => {
   const response = await KibanaServices.get().http.fetch<string>(CASES_URL, {
     method: 'DELETE',
@@ -307,4 +325,20 @@ export const getActionLicense = async (signal: AbortSignal): Promise<ActionLicen
   );
 
   return convertArrayToCamelCase(response) as ActionLicense[];
+};
+
+export const createAttachments = async (
+  attachments: BulkCreateCommentRequest,
+  caseId: string,
+  signal: AbortSignal
+): Promise<Case> => {
+  const response = await KibanaServices.get().http.fetch<CaseResponse>(
+    INTERNAL_BULK_CREATE_ATTACHMENTS_URL.replace('{case_id}', caseId),
+    {
+      method: 'POST',
+      body: JSON.stringify(attachments),
+      signal,
+    }
+  );
+  return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
 };

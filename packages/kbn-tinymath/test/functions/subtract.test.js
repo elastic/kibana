@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { subtract } = require('../../src/functions/subtract.js');
+const { subtract } = require('../../src/functions/subtract');
 
 describe('Subtract', () => {
   it('number, number', () => {

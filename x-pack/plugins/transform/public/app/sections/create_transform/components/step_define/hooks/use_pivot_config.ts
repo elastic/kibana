@@ -8,6 +8,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
 import { AggName } from '../../../../../../../common/types/aggregations';
 import { dictionaryToArray } from '../../../../../../../common/types/common';
 
@@ -33,7 +34,6 @@ import {
 } from '../../../../../common/pivot_aggs';
 import { TransformPivotConfig } from '../../../../../../../common/types/transform';
 import { PIVOT_SUPPORTED_AGGS } from '../../../../../../../common/types/pivot_aggs';
-import { KBN_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/common';
 import { isPivotAggConfigWithUiSupport } from '../../../../../common/pivot_group_by';
 
 /**
@@ -100,13 +100,13 @@ function getRootAggregation(item: PivotAggsConfig) {
 
 export const usePivotConfig = (
   defaults: StepDefineExposedState,
-  indexPattern: StepDefineFormProps['searchItems']['indexPattern']
+  dataView: StepDefineFormProps['searchItems']['dataView']
 ) => {
   const toastNotifications = useToastNotifications();
 
   const { aggOptions, aggOptionsData, groupByOptions, groupByOptionsData, fields } = useMemo(
-    () => getPivotDropdownOptions(indexPattern, defaults.runtimeMappings),
-    [defaults.runtimeMappings, indexPattern]
+    () => getPivotDropdownOptions(dataView, defaults.runtimeMappings),
+    [defaults.runtimeMappings, dataView]
   );
 
   // The list of selected aggregations

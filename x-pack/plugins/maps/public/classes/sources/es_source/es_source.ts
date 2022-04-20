@@ -8,9 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { Filter } from '@kbn/es-query';
-import { DataViewField, DataView, ISearchSource } from 'src/plugins/data/common';
-import type { Query } from 'src/plugins/data/common';
-import type { KibanaExecutionContext } from 'kibana/public';
+import { DataViewField, DataView, ISearchSource } from '@kbn/data-plugin/common';
+import type { Query } from '@kbn/data-plugin/common';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import { lastValueFrom } from 'rxjs';
+import { TimeRange } from '@kbn/data-plugin/common';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { AbstractVectorSource, BoundsRequestMeta } from '../vector_source';
 import {
   getAutocompleteService,
@@ -24,7 +27,6 @@ import { copyPersistentState } from '../../../reducers/copy_persistent_state';
 import { DataRequestAbortError } from '../../util/data_request';
 import { expandToTileBoundaries } from '../../util/geo_tile_utils';
 import { IVectorSource } from '../vector_source';
-import { TimeRange } from '../../../../../../../src/plugins/data/common';
 import {
   AbstractESSourceDescriptor,
   AbstractSourceDescriptor,
@@ -37,7 +39,6 @@ import { IVectorStyle } from '../../styles/vector/vector_style';
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { IField } from '../../fields/field';
 import { FieldFormatter } from '../../../../common/constants';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { makePublicExecutionContext } from '../../../util';
 
@@ -176,8 +177,8 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     registerCancelCallback(() => abortController.abort());
 
     try {
-      const { rawResponse: resp } = await searchSource
-        .fetch$({
+      const { rawResponse: resp } = await lastValueFrom(
+        searchSource.fetch$({
           abortSignal: abortController.signal,
           sessionId: searchSessionId,
           legacyHitsTotal: false,
@@ -189,7 +190,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
           },
           executionContext,
         })
-        .toPromise();
+      );
       return resp;
     } catch (error) {
       if (isSearchSourceAbortError(error)) {
@@ -279,11 +280,13 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     try {
       const abortController = new AbortController();
       registerCancelCallback(() => abortController.abort());
-      const esResp = await searchSource.fetch({
-        abortSignal: abortController.signal,
-        legacyHitsTotal: false,
-        executionContext: makePublicExecutionContext('es_source:bounds'),
-      });
+      const { rawResponse: esResp } = await lastValueFrom(
+        searchSource.fetch$({
+          abortSignal: abortController.signal,
+          legacyHitsTotal: false,
+          executionContext: makePublicExecutionContext('es_source:bounds'),
+        })
+      );
 
       if (!esResp.aggregations) {
         return null;
@@ -341,7 +344,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
 
   getGeoFieldName(): string {
     if (!this._descriptor.geoField) {
-      throw new Error('Should not call');
+      throw new Error(`Required field 'geoField' not provided in '_descriptor'`);
     }
     return this._descriptor.geoField;
   }

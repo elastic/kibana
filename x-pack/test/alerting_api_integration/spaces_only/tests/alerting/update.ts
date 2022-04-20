@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { Spaces } from '../../scenarios';
-import { checkAAD, getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
+import { checkAAD, getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -23,7 +23,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       const { body: createdAlert } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
+        .send(getTestRuleData())
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
@@ -94,7 +94,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       const { body: createdAlert } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
+        .send(getTestRuleData())
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
@@ -124,7 +124,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         const { body: createdAlert } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
-          .send(getTestAlertData())
+          .send(getTestRuleData())
           .expect(200);
         objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 

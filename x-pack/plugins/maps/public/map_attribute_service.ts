@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from 'src/core/types';
-import { AttributeService } from '../../../../src/plugins/embeddable/public';
+import { SavedObjectReference } from '@kbn/core/types';
+import type { SavedObjectsResolveResponse } from '@kbn/core/public';
+import { AttributeService } from '@kbn/embeddable-plugin/public';
+import { checkForDuplicateTitle, OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { MapSavedObjectAttributes } from '../common/map_saved_object_type';
 import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
 import { getMapEmbeddableDisplayName } from '../common/i18n_getters';
-import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved_objects/public';
 import { getCoreOverlays, getEmbeddableService, getSavedObjectsClient } from './kibana_services';
 import { extractReferences, injectReferences } from '../common/migrations/references';
 import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 
 export interface SharingSavedObjectProps {
-  outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
-  aliasTargetId?: string;
+  outcome?: SavedObjectsResolveResponse['outcome'];
+  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
   sourceId?: string;
 }
 
@@ -84,6 +86,7 @@ export function getMapAttributeService(): MapAttributeService {
         saved_object: savedObject,
         outcome,
         alias_target_id: aliasTargetId,
+        alias_purpose: aliasPurpose,
       } = await getSavedObjectsClient().resolve<MapSavedObjectAttributes>(
         MAP_SAVED_OBJECT_TYPE,
         savedObjectId
@@ -103,6 +106,7 @@ export function getMapAttributeService(): MapAttributeService {
           sharingSavedObjectProps: {
             aliasTargetId,
             outcome,
+            aliasPurpose,
             sourceId: savedObjectId,
           },
         },

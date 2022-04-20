@@ -7,58 +7,47 @@
  */
 
 import * as ts from 'typescript';
-import { ValueNode, ExportFromDeclaration } from '../ts_nodes';
+import { ValueNode, DecSymbol } from '../ts_nodes';
 import { ResultValue } from './result_value';
-import { ImportedSymbols } from './imported_symbols';
+import { ImportedSymbol } from './imported_symbol';
 import { Reference, ReferenceKey } from './reference';
 import { SourceMapper } from '../source_mapper';
+import { ExportInfo } from '../export_info';
 
-export type CollectorResult = Reference | ImportedSymbols | ResultValue;
+export type CollectorResult =
+  | Reference
+  | { type: 'imports'; imports: ImportedSymbol[] }
+  | ResultValue;
 
 export class CollectorResults {
-  imports: ImportedSymbols[] = [];
-  importsByPath = new Map<string, ImportedSymbols>();
+  importedSymbols = new Set<ImportedSymbol>();
 
   nodes: ResultValue[] = [];
   nodesByAst = new Map<ValueNode, ResultValue>();
 
   constructor(private readonly sourceMapper: SourceMapper) {}
 
-  addNode(exported: boolean, node: ValueNode) {
+  addNode(exportInfo: ExportInfo | undefined, node: ValueNode) {
     const existing = this.nodesByAst.get(node);
     if (existing) {
-      existing.exported = existing.exported || exported;
+      existing.exportInfo ||= exportInfo;
       return;
     }
 
-    const result = new ResultValue(exported, node);
+    const result = new ResultValue(exportInfo, node);
     this.nodesByAst.set(node, result);
     this.nodes.push(result);
   }
 
-  ensureExported(node: ValueNode) {
-    this.addNode(true, node);
-  }
-
-  addImport(
-    exported: boolean,
-    node: ts.ImportDeclaration | ExportFromDeclaration,
-    symbol: ts.Symbol
+  addImportFromNodeModules(
+    exportInfo: ExportInfo | undefined,
+    sourceSymbol: DecSymbol,
+    importSymbol: DecSymbol,
+    moduleId: string
   ) {
-    const literal = node.moduleSpecifier;
-    if (!ts.isStringLiteral(literal)) {
-      throw new Error('import statement with non string literal module identifier');
-    }
-
-    const existing = this.importsByPath.get(literal.text);
-    if (existing) {
-      existing.symbols.push(symbol);
-      return;
-    }
-
-    const result = new ImportedSymbols(exported, node, [symbol]);
-    this.importsByPath.set(literal.text, result);
-    this.imports.push(result);
+    const imp = ImportedSymbol.fromSymbol(sourceSymbol, importSymbol, moduleId);
+    imp.exportInfo ||= exportInfo;
+    this.importedSymbols.add(imp);
   }
 
   private getReferencesFromNodes() {
@@ -88,6 +77,10 @@ export class CollectorResults {
   }
 
   getAll(): CollectorResult[] {
-    return [...this.getReferencesFromNodes(), ...this.imports, ...this.nodes];
+    return [
+      ...this.getReferencesFromNodes(),
+      { type: 'imports', imports: Array.from(this.importedSymbols) },
+      ...this.nodes,
+    ];
   }
 }

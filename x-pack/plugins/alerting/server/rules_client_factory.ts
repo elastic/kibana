@@ -10,15 +10,16 @@ import {
   Logger,
   SavedObjectsServiceStart,
   PluginInitializerContext,
-} from 'src/core/server';
-import { PluginStartContract as ActionsPluginStartContract } from '../../actions/server';
-import { RulesClient } from './rules_client';
+} from '@kbn/core/server';
+import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { IEventLogClientService, IEventLogger } from '@kbn/event-log-plugin/server';
 import { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
-import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
-import { EncryptedSavedObjectsClient } from '../../encrypted_saved_objects/server';
-import { TaskManagerStartContract } from '../../task_manager/server';
-import { IEventLogClientService, IEventLogger } from '../../../plugins/event_log/server';
+import { RulesClient } from './rules_client';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
+import { AlertingRulesConfig } from './config';
 export interface RulesClientFactoryOpts {
   logger: Logger;
   taskManager: TaskManagerStartContract;
@@ -33,7 +34,7 @@ export interface RulesClientFactoryOpts {
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   authorization: AlertingAuthorizationClientFactory;
   eventLogger?: IEventLogger;
-  minimumScheduleInterval: string;
+  minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
 }
 
 export class RulesClientFactory {
@@ -51,7 +52,7 @@ export class RulesClientFactory {
   private kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
   private authorization!: AlertingAuthorizationClientFactory;
   private eventLogger?: IEventLogger;
-  private minimumScheduleInterval!: string;
+  private minimumScheduleInterval!: AlertingRulesConfig['minimumScheduleInterval'];
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {

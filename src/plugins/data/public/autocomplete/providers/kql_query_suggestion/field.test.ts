@@ -9,12 +9,8 @@
 import indexPatternResponse from './__fixtures__/index_pattern_response.json';
 
 import { setupGetFieldSuggestions } from './field';
-import {
-  indexPatterns as indexPatternsUtils,
-  QuerySuggestionGetFnArgs,
-  KueryNode,
-} from '../../../../../../../src/plugins/data/public';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { indexPatterns as indexPatternsUtils, QuerySuggestionGetFnArgs, KueryNode } from '../../..';
+import { coreMock } from '@kbn/core/public/mocks';
 
 const mockKueryNode = (kueryNode: Partial<KueryNode>) => kueryNode as unknown as KueryNode;
 
@@ -116,7 +112,7 @@ describe('Kuery field suggestions', () => {
     expect(keywordIndex).toBeLessThan(analyzedIndex);
   });
 
-  test('should have descriptions', async () => {
+  test('should not have descriptions', async () => {
     const prefix = '';
     const suffix = '';
     const suggestions = await getSuggestions(
@@ -125,7 +121,7 @@ describe('Kuery field suggestions', () => {
     );
     expect(suggestions.length).toBeGreaterThan(0);
     suggestions.forEach((suggestion) => {
-      expect(suggestion).toHaveProperty('description');
+      expect(suggestion).not.toHaveProperty('description');
     });
   });
 

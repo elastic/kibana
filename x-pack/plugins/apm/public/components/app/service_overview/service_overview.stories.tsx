@@ -8,15 +8,15 @@
 import { Meta, Story } from '@storybook/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import type { CoreStart } from '../../../../../../../src/core/public';
-import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
+import type { CoreStart } from '@kbn/core/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import {
   APMServiceContext,
   APMServiceContextValue,
 } from '../../../context/apm_service/apm_service_context';
-import { ServiceOverview } from './';
+import { ServiceOverview } from '.';
 
 const stories: Meta<{}> = {
   title: 'app/ServiceOverview',
@@ -44,7 +44,6 @@ const stories: Meta<{}> = {
         uiSettings: { get: () => 'Browser' },
       } as unknown as CoreStart;
       const serviceContextValue = {
-        alerts: [],
         serviceName,
       } as unknown as APMServiceContextValue;
       const KibanaReactContext = createKibanaReactContext(mockCore);

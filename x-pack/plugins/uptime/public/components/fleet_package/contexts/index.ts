@@ -14,10 +14,12 @@ import { initialValues as defaultBrowserSimpleFields } from './browser_context';
 import { initialValues as defaultBrowserAdvancedFields } from './browser_context_advanced';
 import { initialValues as defaultTLSFields } from './tls_fields_context';
 
+export type { IPolicyConfigContextProvider } from './policy_config_context';
 export {
   PolicyConfigContext,
   PolicyConfigContextProvider,
   initialValue as defaultPolicyConfig,
+  defaultContext as defaultPolicyConfigValues,
   usePolicyConfigContext,
 } from './policy_config_context';
 export {

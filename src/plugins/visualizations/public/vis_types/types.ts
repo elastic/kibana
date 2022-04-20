@@ -8,15 +8,10 @@
 
 import type { IconType } from '@elastic/eui';
 import type { ReactNode } from 'react';
-import type { Adapters } from 'src/plugins/inspector';
-import type {
-  IndexPattern,
-  AggGroupNames,
-  AggParam,
-  AggGroupName,
-  Query,
-} from '../../../data/public';
-import { PaletteOutput } from '../../../charts/public';
+import type { PaletteOutput } from '@kbn/coloring';
+import type { Adapters } from '@kbn/inspector-plugin';
+import type { AggGroupNames, AggParam, AggGroupName, Query } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Vis, VisEditorOptionsProps, VisParams, VisToExpressionAst } from '../types';
 import { VisGroups } from './vis_groups_enum';
 
@@ -107,6 +102,7 @@ export interface VisualizeEditorLayersContext {
   format?: string;
   label?: string;
   layerId?: string;
+  dropPartialBuckets?: boolean;
 }
 
 interface AxisExtents {
@@ -180,7 +176,7 @@ export interface VisTypeDefinition<TVisParams> {
    * Some visualizations are created without SearchSource and may change the used indexes during the visualization configuration.
    * Using this method we can rewrite the standard mechanism for getting used indexes
    */
-  readonly getUsedIndexPattern?: (visParams: VisParams) => IndexPattern[] | Promise<IndexPattern[]>;
+  readonly getUsedIndexPattern?: (visParams: VisParams) => DataView[] | Promise<DataView[]>;
 
   readonly isAccessible?: boolean;
   /**

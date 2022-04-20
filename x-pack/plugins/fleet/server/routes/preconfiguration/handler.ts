@@ -16,7 +16,7 @@ import type {
 } from '../../types';
 import { defaultIngestErrorHandler } from '../../errors';
 import { ensurePreconfiguredPackagesAndPolicies, outputService } from '../../services';
-import { resetPreconfiguredAgentPolicies } from '../../services/preconfiguration/index';
+import { resetPreconfiguredAgentPolicies } from '../../services/preconfiguration/reset_agent_policies';
 
 export const updatePreconfigurationHandler: FleetRequestHandler<
   undefined,

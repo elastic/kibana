@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { PluginConfigDescriptor } from 'kibana/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { PluginConfigDescriptor } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { sslSchema } from '@kbn/server-http-tools';
 
@@ -21,28 +22,12 @@ const serviceConfig = schema.object({
 
 const uptimeConfig = schema.object({
   index: schema.maybe(schema.string()),
-  ui: schema.maybe(
-    schema.object({
-      monitorManagement: schema.maybe(
-        schema.object({
-          enabled: schema.boolean(),
-        })
-      ),
-    })
-  ),
   service: schema.maybe(serviceConfig),
 });
 
 export const config: PluginConfigDescriptor = {
-  exposeToBrowser: {
-    ui: true,
-  },
   schema: uptimeConfig,
 };
 
 export type UptimeConfig = TypeOf<typeof uptimeConfig>;
 export type ServiceConfig = TypeOf<typeof serviceConfig>;
-
-export interface UptimeUiConfig {
-  ui?: TypeOf<typeof config.schema>['ui'];
-}

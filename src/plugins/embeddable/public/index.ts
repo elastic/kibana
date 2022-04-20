@@ -8,7 +8,7 @@
 
 import './index.scss';
 
-import { PluginInitializerContext } from 'src/core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { EmbeddablePublicPlugin } from './plugin';
 
 export type {
@@ -36,6 +36,7 @@ export type {
   EmbeddablePackageState,
   EmbeddableRendererProps,
   EmbeddableContainerContext,
+  EmbeddableContainerSettings,
 } from './lib';
 export {
   ACTION_ADD_PANEL,

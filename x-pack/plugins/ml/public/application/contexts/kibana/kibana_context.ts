@@ -5,25 +5,23 @@
  * 2.0.
  */
 
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
-import type { CoreStart } from 'kibana/public';
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import {
-  useKibana,
-  KibanaReactContextValue,
-} from '../../../../../../../src/plugins/kibana_react/public';
-import type { SecurityPluginSetup } from '../../../../../security/public';
-import type { LicenseManagementUIPluginSetup } from '../../../../../license_management/public';
-import type { SharePluginStart } from '../../../../../../../src/plugins/share/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { useKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
+import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { MapsStartApi } from '@kbn/maps-plugin/public';
+import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import type { DashboardSetup } from '@kbn/dashboard-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { MlServicesContext } from '../../app';
-import type { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
-import type { EmbeddableStart } from '../../../../../../../src/plugins/embeddable/public';
-import type { MapsStartApi } from '../../../../../maps/public';
-import type { DataVisualizerPluginStart } from '../../../../../data_visualizer/public';
-import type { TriggersAndActionsUIPublicPluginStart } from '../../../../../triggers_actions_ui/public';
-import type { FieldFormatsRegistry } from '../../../../../../../src/plugins/field_formats/common';
-import type { DashboardSetup } from '../../../../../../../src/plugins/dashboard/public';
-import type { ChartsPluginStart } from '../../../../../../../src/plugins/charts/public';
 
 interface StartPlugins {
   data: DataPublicPluginStart;
@@ -37,6 +35,7 @@ interface StartPlugins {
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsRegistry;
   dashboard: DashboardSetup;
+  spacesApi: SpacesPluginStart;
   charts?: ChartsPluginStart;
 }
 export type StartServices = CoreStart &

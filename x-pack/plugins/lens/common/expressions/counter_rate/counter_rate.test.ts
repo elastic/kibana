@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { counterRate, CounterRateArgs } from './index';
+import { counterRate, CounterRateArgs } from '.';
 
-import { Datatable } from 'src/plugins/expressions/public';
-import { functionWrapper } from 'src/plugins/expressions/common/expression_functions/specs/tests/utils';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { Datatable } from '@kbn/expressions-plugin/public';
+import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 
 describe('lens_counter_rate', () => {
   const fn = functionWrapper(counterRate);

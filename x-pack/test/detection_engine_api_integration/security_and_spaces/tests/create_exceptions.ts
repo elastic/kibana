@@ -16,18 +16,13 @@ import {
   QueryCreateSchema,
   ThreatMatchCreateSchema,
   ThresholdCreateSchema,
-} from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
-import { getCreateExceptionListItemMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_item_schema.mock';
-import {
-  createListsIndex,
-  deleteAllExceptions,
-  deleteListsIndex,
-  importFile,
-} from '../../../lists_api_integration/utils';
-import { RulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/response';
-import { getCreateExceptionListMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_schema.mock';
+} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
+import { RulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/response';
+import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -52,7 +47,12 @@ import {
   getEqlRuleForSignalTesting,
   getThresholdRuleForSignalTesting,
 } from '../../utils';
-import { ROLES } from '../../../../plugins/security_solution/common/test';
+import {
+  createListsIndex,
+  deleteAllExceptions,
+  deleteListsIndex,
+  importFile,
+} from '../../../lists_api_integration/utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
 // eslint-disable-next-line import/no-default-export
@@ -63,8 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
-  describe.skip('create_rules_with_exceptions', () => {
+  describe('create_rules_with_exceptions', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
     });

@@ -45,4 +45,67 @@ describe('SimpleSavedObject', () => {
     const savedObject = new SimpleSavedObject(client, { version } as SavedObject);
     expect(savedObject._version).toEqual(version);
   });
+
+  it('save() changes updatedAt field on existing SimpleSavedObject with an id', async function () {
+    const date = new Date();
+    const initialDate = date.toISOString();
+    date.setDate(date.getDate() + 1);
+    const secondDate = date.toISOString();
+
+    const config = {
+      attributes: {},
+      id: 'id',
+      type: 'type',
+    };
+
+    const initialSavedObject = new SimpleSavedObject(client, {
+      ...config,
+      updated_at: initialDate,
+    } as SavedObject);
+
+    const updatedSavedObject = new SimpleSavedObject(client, {
+      ...config,
+      updated_at: secondDate,
+    } as SavedObject);
+
+    (client.update as jest.Mock).mockReturnValue(Promise.resolve(updatedSavedObject));
+
+    const initialValue = initialSavedObject.updatedAt;
+    await initialSavedObject.save();
+    const updatedValue = updatedSavedObject.updatedAt;
+
+    expect(initialValue).not.toEqual(updatedValue);
+    expect(initialSavedObject.updatedAt).toEqual(updatedValue);
+  });
+
+  it('save() changes updatedAt field on existing SimpleSavedObject without an id', async () => {
+    const date = new Date();
+    const initialDate = date.toISOString();
+    date.setDate(date.getDate() + 1);
+    const secondDate = date.toISOString();
+
+    const config = {
+      attributes: {},
+      type: 'type',
+    };
+
+    const initialSavedObject = new SimpleSavedObject(client, {
+      ...config,
+      updated_at: initialDate,
+    } as SavedObject);
+
+    const updatedSavedObject = new SimpleSavedObject(client, {
+      ...config,
+      updated_at: secondDate,
+    } as SavedObject);
+
+    (client.create as jest.Mock).mockReturnValue(Promise.resolve(updatedSavedObject));
+
+    const initialValue = initialSavedObject.updatedAt;
+    await initialSavedObject.save();
+    const updatedValue = updatedSavedObject.updatedAt;
+
+    expect(initialValue).not.toEqual(updatedValue);
+    expect(initialSavedObject.updatedAt).toEqual(updatedValue);
+  });
 });

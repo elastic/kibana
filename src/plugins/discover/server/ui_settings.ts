@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import type { DocLinksServiceSetup, UiSettingsParams } from 'kibana/server';
+import type { DocLinksServiceSetup, UiSettingsParams } from '@kbn/core/server';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   DEFAULT_COLUMNS_SETTING,
@@ -167,8 +167,17 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
     value: false,
     description: i18n.translate('discover.advancedSettings.disableDocumentExplorerDescription', {
       defaultMessage:
-        'To use the new Document Explorer instead of the classic view, turn off this option. ' +
+        'To use the new {documentExplorerDocs} instead of the classic view, turn off this option. ' +
         'The Document Explorer offers better data sorting, resizable columns, and a full screen view.',
+      values: {
+        documentExplorerDocs:
+          `<a href=${docLinks.links.discover.documentExplorer} style="font-weight: 600;"
+            target="_blank" rel="noopener">` +
+          i18n.translate('discover.advancedSettings.documentExplorerLinkText', {
+            defaultMessage: 'Document Explorer',
+          }) +
+          '</a>',
+      },
     }),
     category: ['discover'],
     schema: schema.boolean(),
@@ -277,5 +286,6 @@ export const getUiSettings: (docLinks: DocLinksServiceSetup) => Record<string, U
         'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation.',
     }),
     schema: schema.number({ min: 0 }),
+    requiresPageReload: true,
   },
 });

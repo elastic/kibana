@@ -17,7 +17,7 @@ import {
   DATA_ROWINDEX_ATTRIBUTE,
   isTab,
   onKeyDownFocusHandler,
-} from '../../../../../timelines/public';
+} from '@kbn/timelines-plugin/public';
 
 import { ADD_TIMELINE_BUTTON_CLASS_NAME } from '../../../timelines/components/flyout/add_timeline_button';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
@@ -37,6 +37,7 @@ interface Props {
   isDraggable?: boolean;
   timelineId: string;
   timelineTabType: TimelineTabs | 'flyout';
+  isReadOnly?: boolean;
 }
 
 const TableWrapper = styled.div`
@@ -137,7 +138,7 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
 
 /** Renders a table view or JSON view of the `ECS` `data` */
 export const EventFieldsBrowser = React.memo<Props>(
-  ({ browserFields, data, eventId, isDraggable, timelineTabType, timelineId }) => {
+  ({ browserFields, data, eventId, isDraggable, timelineTabType, timelineId, isReadOnly }) => {
     const containerElement = useRef<HTMLDivElement | null>(null);
     const dispatch = useDispatch();
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -219,6 +220,7 @@ export const EventFieldsBrowser = React.memo<Props>(
           toggleColumn,
           getLinkValue,
           isDraggable,
+          isReadOnly,
         }),
       [
         browserFields,
@@ -230,6 +232,7 @@ export const EventFieldsBrowser = React.memo<Props>(
         toggleColumn,
         getLinkValue,
         isDraggable,
+        isReadOnly,
       ]
     );
 
@@ -276,6 +279,7 @@ export const EventFieldsBrowser = React.memo<Props>(
         <StyledEuiInMemoryTable
           className={EVENT_FIELDS_TABLE_CLASS_NAME}
           items={items}
+          itemId="field"
           columns={columns}
           pagination={false}
           rowProps={onSetRowProps}

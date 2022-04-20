@@ -6,52 +6,97 @@
  */
 
 import {
-  CreateExceptionListItemSchema,
-  UpdateExceptionListItemSchema,
+  ExceptionListItemSchema,
+  FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import uuid from 'uuid';
 import {
   AppContextTestRender,
   createAppRootMockRenderer,
 } from '../../../../../common/mock/endpoint';
-import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../services/policies/test_mock_utilts';
-import { GetPolicyListResponse } from '../../../policy/types';
-import { createEmptyHostIsolationException } from '../../utils';
-import { HostIsolationExceptionsForm } from './form';
+import { HostIsolationExceptionsList } from '../host_isolation_exceptions_list';
+import { act, waitFor } from '@testing-library/react';
+import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../../common/constants';
+import {
+  exceptionsListAllHttpMocks,
+  fleetGetEndpointPackagePolicyListHttpMock,
+} from '../../../mocks';
+import {
+  clickOnEffectedPolicy,
+  isEffectedPolicySelected,
+} from '../../../../components/effected_policy_select/test_utils';
+import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../../../common/endpoint/service/artifacts';
+import { HttpFetchOptionsWithPath } from '@kbn/core/public';
+
+jest.mock('../../../../../common/components/user_privileges');
 
 describe('When on the host isolation exceptions entry form', () => {
-  let render: (
-    exception: CreateExceptionListItemSchema | UpdateExceptionListItemSchema
-  ) => ReturnType<AppContextTestRender['render']>;
-  let renderResult: ReturnType<typeof render>;
-  const onChange = jest.fn();
-  const onError = jest.fn();
-  let policiesRequest: GetPolicyListResponse;
+  let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
+  let renderResult: ReturnType<AppContextTestRender['render']>;
+  let history: AppContextTestRender['history'];
+  let mockedContext: AppContextTestRender;
+  let exceptionsApiMock: ReturnType<typeof exceptionsListAllHttpMocks>;
+  let fleetApiMock: ReturnType<typeof fleetGetEndpointPackagePolicyListHttpMock>;
 
-  beforeEach(async () => {
-    onChange.mockReset();
-    onError.mockReset();
-    const mockedContext = createAppRootMockRenderer();
-    policiesRequest = await sendGetEndpointSpecificPackagePoliciesMock();
-    render = (exception) => {
-      return mockedContext.render(
-        <HostIsolationExceptionsForm
-          exception={exception}
-          policies={policiesRequest.items}
-          onChange={onChange}
-          onError={onError}
-        />
-      );
+  const formRowHasError = (testId: string): boolean => {
+    const formRow = renderResult.getByTestId(testId);
+
+    return formRow.querySelector('.euiFormErrorText') !== null;
+  };
+
+  const submitButtonDisabledState = (): boolean => {
+    return (
+      renderResult.getByTestId(
+        'hostIsolationExceptionsListPage-flyout-submitButton'
+      ) as HTMLButtonElement
+    ).disabled;
+  };
+
+  beforeEach(() => {
+    mockedContext = createAppRootMockRenderer();
+    ({ history } = mockedContext);
+    render = async () => {
+      renderResult = mockedContext.render(<HostIsolationExceptionsList />);
+
+      await waitFor(async () => {
+        await expect(
+          renderResult.findAllByTestId('hostIsolationExceptionsListPage-card')
+        ).resolves.toHaveLength(10);
+      });
+
+      await act(async () => {
+        await waitFor(() => {
+          userEvent.click(
+            renderResult.getByTestId('hostIsolationExceptionsListPage-pageAddButton')
+          );
+        });
+      });
+
+      await act(async () => {
+        await waitFor(() => {
+          expect(renderResult.getByTestId('hostIsolationExceptions-form')).toBeTruthy();
+        });
+
+        await waitFor(() => {
+          expect(fleetApiMock.responseProvider.endpointPackagePolicyList).toHaveBeenCalled();
+        });
+      });
+
+      return renderResult;
     };
+
+    exceptionsApiMock = exceptionsListAllHttpMocks(mockedContext.coreStart.http);
+    fleetApiMock = fleetGetEndpointPackagePolicyListHttpMock(mockedContext.coreStart.http);
+
+    act(() => {
+      history.push(HOST_ISOLATION_EXCEPTIONS_PATH);
+    });
   });
 
-  describe('When creating a new exception', () => {
-    let newException: CreateExceptionListItemSchema;
-    beforeEach(() => {
-      newException = createEmptyHostIsolationException();
-      renderResult = render(newException);
+  describe('and creating a new exception', () => {
+    beforeEach(async () => {
+      await render();
     });
 
     it('should render the form with empty inputs', () => {
@@ -63,18 +108,30 @@ describe('When on the host isolation exceptions entry form', () => {
     });
 
     it.each(['not an ip', '100', '900.0.0.1', 'x.x.x.x', '10.0.0'])(
-      'should call onError with true when a wrong ip value is introduced. Case: "%s"',
-      (value: string) => {
+      'should show validation error when a wrong ip value is entered. Case: "%s"',
+      async (value: string) => {
         const nameInput = renderResult.getByTestId('hostIsolationExceptions-form-name-input');
         const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
+
         userEvent.type(nameInput, 'test name');
+
+        await waitFor(() => {
+          expect(submitButtonDisabledState()).toBe(true);
+        });
+
         userEvent.type(ipInput, value);
-        expect(onError).toHaveBeenCalledWith(true);
+        userEvent.tab();
+
+        await waitFor(() =>
+          expect(formRowHasError('hostIsolationExceptions-form-ip-input-formRow')).toBe(true)
+        );
+
+        await waitFor(() => expect(submitButtonDisabledState()).toBe(true));
       }
     );
 
     it.each(['192.168.0.1', '10.0.0.1', '100.90.1.1/24', '192.168.200.6/30'])(
-      'should call onError with false when a correct ip value is introduced. Case: "%s"',
+      'should NOT show validation error when a correct ip value is entered. Case: "%s"',
       (value: string) => {
         const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
         const nameInput = renderResult.getByTestId('hostIsolationExceptions-form-name-input');
@@ -82,19 +139,10 @@ describe('When on the host isolation exceptions entry form', () => {
         userEvent.type(nameInput, 'test name');
         userEvent.type(ipInput, value);
 
-        expect(onError).toHaveBeenLastCalledWith(false);
+        expect(formRowHasError('hostIsolationExceptions-form-ip-input-formRow')).toBe(false);
+        expect(submitButtonDisabledState()).toBe(false);
       }
     );
-
-    it('should call onChange with the partial change when a value is introduced in a field', () => {
-      const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
-      userEvent.type(ipInput, '10.0.0.1');
-      expect(onChange).toHaveBeenLastCalledWith({
-        entries: [
-          { field: 'destination.ip', operator: 'included', type: 'match', value: '10.0.0.1' },
-        ],
-      });
-    });
 
     it('should select the "global" policy by default', () => {
       expect(
@@ -102,86 +150,76 @@ describe('When on the host isolation exceptions entry form', () => {
           .getByTestId('effectedPolicies-select-global')
           .classList.contains('euiButtonGroupButton-isSelected')
       ).toBe(true);
-      // policy selector should be hidden
-      expect(renderResult.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeFalsy();
     });
 
-    it('should display the policy list when "per policy" is selected', () => {
+    it('should show policy as selected when user clicks on it', async () => {
       userEvent.click(renderResult.getByTestId('perPolicy'));
+      await clickOnEffectedPolicy(renderResult);
 
-      // policy selector should show up
-      expect(renderResult.getByTestId('effectedPolicies-select-policiesSelectable')).toBeTruthy();
+      await expect(isEffectedPolicySelected(renderResult)).resolves.toBe(true);
     });
 
-    it('should call onChange when a policy is selected from the policy selectiion', () => {
-      const policyId = policiesRequest.items[0].id;
-      userEvent.click(renderResult.getByTestId('perPolicy'));
-      userEvent.click(renderResult.getByTestId(`policy-${policyId}`));
-      expect(onChange).toHaveBeenLastCalledWith({
-        tags: [`policy:${policyId}`],
-      });
-    });
-
-    it('should retain the previous policy selection when switching from per-policy to global', () => {
-      const policyId = policiesRequest.items[0].id;
-
+    it('should retain the previous policy selection when switching from per-policy to global', async () => {
       // move to per-policy and select the first
       userEvent.click(renderResult.getByTestId('perPolicy'));
-      userEvent.click(renderResult.getByTestId(`policy-${policyId}`));
-      expect(renderResult.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeTruthy();
-      expect(onChange).toHaveBeenLastCalledWith({
-        tags: [`policy:${policyId}`],
-      });
+      await clickOnEffectedPolicy(renderResult);
+
+      await expect(isEffectedPolicySelected(renderResult)).resolves.toBe(true);
 
       // move back to global
       userEvent.click(renderResult.getByTestId('globalPolicy'));
+
       expect(renderResult.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeFalsy();
-      expect(onChange).toHaveBeenLastCalledWith({
-        tags: [`policy:all`],
-      });
 
       // move back to per-policy
       userEvent.click(renderResult.getByTestId('perPolicy'));
-      // the previous selected policy should be selected
-      expect(renderResult.getByTestId(`policy-${policyId}`)).toHaveAttribute(
-        'data-test-selected',
-        'true'
-      );
-      // on change called with the previous policy
-      expect(onChange).toHaveBeenLastCalledWith({
-        tags: [`policy:${policyId}`],
-      });
+      await expect(isEffectedPolicySelected(renderResult)).resolves.toBe(true);
     });
   });
 
-  /**
-   * NOTE: fewer tests exists for update as the form component
-   * behaves the same for edit and add with the only
-   * difference of having pre-filled fields
-   */
-  describe('When editing an existing exception with global policy', () => {
-    let existingException: UpdateExceptionListItemSchema;
+  describe('and editing an existing exception with global policy', () => {
+    let existingException: ExceptionListItemSchema;
+
     beforeEach(() => {
-      existingException = {
-        ...createEmptyHostIsolationException(),
-        name: 'name edit me',
-        description: 'initial description',
-        id: uuid.v4(),
-        item_id: uuid.v4(),
-        tags: ['policy:all'],
-        entries: [
-          {
-            field: 'destination.ip',
-            operator: 'included',
-            type: 'match',
-            value: '10.0.0.1',
-          },
-        ],
-      };
+      const generateExceptionsFindResponse =
+        exceptionsApiMock.responseProvider.exceptionsFind.getMockImplementation()!;
+
+      exceptionsApiMock.responseProvider.exceptionsFind.mockImplementation((options) => {
+        const response: FoundExceptionListItemSchema = generateExceptionsFindResponse(options);
+
+        Object.assign(response.data[0], {
+          name: 'name edit me',
+          description: 'initial description',
+          item_id: '123-321',
+          tags: ['policy:all'],
+          entries: [
+            {
+              field: 'destination.ip',
+              operator: 'included',
+              type: 'match',
+              value: '10.0.0.1',
+            },
+          ],
+        });
+
+        return response;
+      });
+
+      existingException = exceptionsApiMock.responseProvider.exceptionsFind({
+        query: {},
+      } as HttpFetchOptionsWithPath).data[0];
+
+      exceptionsApiMock.responseProvider.exceptionGetOne.mockImplementation(() => {
+        return existingException;
+      });
+
+      act(() => {
+        history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?itemId=123-321&show=edit`);
+      });
     });
 
-    it('should render the form with pre-filled inputs', () => {
-      renderResult = render(existingException);
+    it('should render the form with pre-filled inputs', async () => {
+      await render();
       expect(renderResult.getByTestId('hostIsolationExceptions-form-name-input')).toHaveValue(
         'name edit me'
       );
@@ -193,59 +231,54 @@ describe('When on the host isolation exceptions entry form', () => {
       ).toHaveValue('initial description');
     });
 
-    it('should call onChange with the partial change when a value is introduced in a field', () => {
-      renderResult = render(existingException);
+    it('should update field with new value', async () => {
+      await render();
       const ipInput = renderResult.getByTestId('hostIsolationExceptions-form-ip-input');
       userEvent.clear(ipInput);
       userEvent.type(ipInput, '10.0.100.1');
-      expect(onChange).toHaveBeenCalledWith({
-        entries: [
-          { field: 'destination.ip', operator: 'included', type: 'match', value: '10.0.100.1' },
-        ],
-      });
+
+      expect(
+        (renderResult.getByTestId('hostIsolationExceptions-form-ip-input') as HTMLInputElement)
+          .value
+      ).toBe('10.0.100.1');
     });
 
-    it('should show global pre-selected', () => {
-      renderResult = render(existingException);
+    it('should show global pre-selected', async () => {
+      await render();
+
       expect(
         renderResult
           .getByTestId('effectedPolicies-select-global')
           .classList.contains('euiButtonGroupButton-isSelected')
       ).toBe(true);
-      // policy selector should be hidden
-      expect(renderResult.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeFalsy();
     });
 
-    it('should show pre-selected policies', () => {
-      const policyId1 = policiesRequest.items[0].id;
-      const policyId2 = policiesRequest.items[3].id;
-      existingException.tags = [`policy:${policyId1}`, `policy:${policyId2}`];
+    it('should show pre-selected policies', async () => {
+      const policyApiResponse = fleetApiMock.responseProvider.endpointPackagePolicyList();
+      const policyId1 = policyApiResponse.items[0].id;
+      const policyId2 = policyApiResponse.items[3].id;
 
-      renderResult = render(existingException);
+      existingException.tags = [
+        `${BY_POLICY_ARTIFACT_TAG_PREFIX}${policyId1}`,
+        `${BY_POLICY_ARTIFACT_TAG_PREFIX}${policyId2}`,
+      ];
 
-      expect(renderResult.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeTruthy();
-      expect(renderResult.getByTestId(`policy-${policyId1}`)).toHaveAttribute(
-        'data-test-selected',
-        'true'
-      );
-      expect(renderResult.getByTestId(`policy-${policyId2}`)).toHaveAttribute(
-        'data-test-selected',
-        'true'
-      );
+      await render();
+
+      await expect(isEffectedPolicySelected(renderResult, 0)).resolves.toBe(true);
+      await expect(isEffectedPolicySelected(renderResult, 3)).resolves.toBe(true);
     });
 
-    it('should show the policies selector when no policy is selected', () => {
+    it('should show the policies selector when no policy is selected', async () => {
       existingException.tags = [];
-
-      renderResult = render(existingException);
+      await render();
 
       expect(renderResult.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeTruthy();
     });
 
-    it('should show the policies selector when no policy is selected and there are previous tags', () => {
+    it('should show the policies selector when no policy is selected and there are previous tags', async () => {
       existingException.tags = ['non-a-policy-tag'];
-
-      renderResult = render(existingException);
+      await render();
 
       expect(renderResult.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeTruthy();
     });

@@ -7,10 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  METRIC_TYPE,
-  useUiTracker,
-} from '../../../../../../../../../observability/public';
+import { METRIC_TYPE, useUiTracker } from '@kbn/observability-plugin/public';
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -34,12 +31,8 @@ interface Props {
 
 export function StickySpanProperties({ span, transaction }: Props) {
   const { query } = useApmParams('/services/{serviceName}/transactions/view');
-  const {
-    environment,
-    latencyAggregationType,
-    comparisonEnabled,
-    comparisonType,
-  } = query;
+  const { environment, latencyAggregationType, comparisonEnabled, offset } =
+    query;
 
   const trackEvent = useUiTracker();
 
@@ -88,7 +81,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
               environment={nextEnvironment}
               latencyAggregationType={latencyAggregationType}
               comparisonEnabled={comparisonEnabled}
-              comparisonType={comparisonType}
+              offset={offset}
             >
               {transaction.transaction.name}
             </TransactionDetailLink>

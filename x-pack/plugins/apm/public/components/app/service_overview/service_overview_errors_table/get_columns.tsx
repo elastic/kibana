@@ -9,7 +9,7 @@ import { EuiBasicTableColumn, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { asInteger } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { truncate } from '../../../../utils/style';
@@ -35,11 +35,13 @@ type ErrorGroupDetailedStatistics =
 
 export function getColumns({
   serviceName,
+  errorGroupDetailedStatisticsLoading,
   errorGroupDetailedStatistics,
   comparisonEnabled,
   query,
 }: {
   serviceName: string;
+  errorGroupDetailedStatisticsLoading: boolean;
   errorGroupDetailedStatistics: ErrorGroupDetailedStatistics;
   comparisonEnabled?: boolean;
   query: TypeOf<ApmRoutes, '/services/{serviceName}/errors'>['query'];
@@ -129,6 +131,7 @@ export function getColumns({
         return (
           <SparkPlot
             color={currentPeriodColor}
+            isLoading={errorGroupDetailedStatisticsLoading}
             series={currentPeriodTimeseries}
             valueLabel={i18n.translate(
               'xpack.apm.serviceOveriew.errorsTableOccurrences',

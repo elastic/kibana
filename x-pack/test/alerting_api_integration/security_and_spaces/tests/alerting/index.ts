@@ -32,27 +32,35 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
         await tearDown(getService);
       });
 
-      loadTestFile(require.resolve('./find'));
-      loadTestFile(require.resolve('./create'));
-      loadTestFile(require.resolve('./delete'));
-      loadTestFile(require.resolve('./disable'));
-      loadTestFile(require.resolve('./enable'));
-      loadTestFile(require.resolve('./execution_status'));
-      loadTestFile(require.resolve('./get'));
-      loadTestFile(require.resolve('./get_alert_state'));
-      loadTestFile(require.resolve('./get_alert_summary'));
-      loadTestFile(require.resolve('./rule_types'));
-      loadTestFile(require.resolve('./mute_all'));
-      loadTestFile(require.resolve('./mute_instance'));
-      loadTestFile(require.resolve('./unmute_all'));
-      loadTestFile(require.resolve('./unmute_instance'));
-      loadTestFile(require.resolve('./update'));
-      loadTestFile(require.resolve('./update_api_key'));
-      loadTestFile(require.resolve('./alerts'));
-      loadTestFile(require.resolve('./event_log'));
-      loadTestFile(require.resolve('./mustache_templates'));
-      loadTestFile(require.resolve('./health'));
-      loadTestFile(require.resolve('./excluded'));
+      describe('', function () {
+        this.tags('ciGroup17');
+        loadTestFile(require.resolve('./find'));
+        loadTestFile(require.resolve('./create'));
+        loadTestFile(require.resolve('./delete'));
+        loadTestFile(require.resolve('./disable'));
+        loadTestFile(require.resolve('./enable'));
+        loadTestFile(require.resolve('./execution_status'));
+        loadTestFile(require.resolve('./get'));
+        loadTestFile(require.resolve('./get_alert_state'));
+        loadTestFile(require.resolve('./get_alert_summary'));
+        loadTestFile(require.resolve('./rule_types'));
+      });
+
+      describe('', function () {
+        this.tags('ciGroup30');
+        loadTestFile(require.resolve('./mute_all'));
+        loadTestFile(require.resolve('./mute_instance'));
+        loadTestFile(require.resolve('./unmute_all'));
+        loadTestFile(require.resolve('./unmute_instance'));
+        loadTestFile(require.resolve('./update'));
+        loadTestFile(require.resolve('./update_api_key'));
+        loadTestFile(require.resolve('./alerts'));
+        loadTestFile(require.resolve('./event_log'));
+        loadTestFile(require.resolve('./mustache_templates'));
+        loadTestFile(require.resolve('./health'));
+        loadTestFile(require.resolve('./excluded'));
+        loadTestFile(require.resolve('./snooze'));
+      });
     });
   });
 }

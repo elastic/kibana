@@ -21,7 +21,6 @@ import {
   EuiFieldText,
   EuiForm,
   EuiFormErrorText,
-  EuiButtonGroup,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import styled from 'styled-components';
@@ -34,7 +33,6 @@ import {
   useDefaultOutput,
   sendGenerateServiceToken,
   usePlatform,
-  PLATFORM_OPTIONS,
   useGetAgentPolicies,
   useGetSettings,
   sendPutSettings,
@@ -48,9 +46,12 @@ import { FleetServerOnPremRequiredCallout } from '../../components';
 
 import { policyHasFleetServer } from '../../services/has_fleet_server';
 
+import { PlatformSelector } from '../../../../../../components/enrollment_instructions/manual/platform_selector';
+
+import type { CommandsByPlatform } from './install_command_utils';
 import { getInstallCommandForPlatform } from './install_command_utils';
 
-const URL_REGEX = /^(https?):\/\/[^\s$.?#].[^\s]*$/gm;
+const URL_REGEX = /^(https):\/\/[^\s$.?#].[^\s]*$/gm;
 const REFRESH_INTERVAL = 10000;
 
 type DeploymentMode = 'production' | 'quickstart';
@@ -162,7 +163,7 @@ export const FleetServerCommandStep = ({
   setPlatform,
 }: {
   serviceToken?: string;
-  installCommand: string;
+  installCommand: CommandsByPlatform;
   platform: string;
   setPlatform: (platform: PLATFORM_TYPE) => void;
 }): EuiStepProps => {
@@ -196,41 +197,14 @@ export const FleetServerCommandStep = ({
           />
         </EuiText>
         <EuiSpacer size="l" />
-        <EuiButtonGroup
-          options={PLATFORM_OPTIONS}
-          idSelected={platform}
-          onChange={(id) => setPlatform(id as PLATFORM_TYPE)}
-          legend={i18n.translate('xpack.fleet.fleetServerSetup.platformSelectAriaLabel', {
-            defaultMessage: 'Platform',
-          })}
+        <PlatformSelector
+          linuxCommand={installCommand.linux}
+          macCommand={installCommand.mac}
+          windowsCommand={installCommand.windows}
+          linuxDebCommand={installCommand.deb}
+          linuxRpmCommand={installCommand.rpm}
+          isK8s={false}
         />
-        <EuiSpacer size="s" />
-        <EuiCodeBlock
-          fontSize="m"
-          isCopyable={true}
-          paddingSize="m"
-          language="console"
-          whiteSpace="pre-wrap"
-        >
-          <CommandCode>{installCommand}</CommandCode>
-        </EuiCodeBlock>
-        <EuiSpacer size="s" />
-        <EuiText>
-          <FormattedMessage
-            id="xpack.fleet.enrollmentInstructions.troubleshootingText"
-            defaultMessage="If you are having trouble connecting, see our {link}."
-            values={{
-              link: (
-                <EuiLink target="_blank" external href={docLinks.links.fleet.troubleshooting}>
-                  <FormattedMessage
-                    id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
-                    defaultMessage="troubleshooting guide"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiText>
       </>
     ) : null,
   };
@@ -248,13 +222,18 @@ export const useFleetServerInstructions = (policyId?: string) => {
   const esHost = output?.hosts?.[0];
   const sslCATrustedFingerprint: string | undefined = output?.ca_trusted_fingerprint;
 
-  const installCommand = useMemo((): string => {
+  const installCommand = useMemo((): CommandsByPlatform => {
     if (!serviceToken || !esHost) {
-      return '';
+      return {
+        linux: '',
+        mac: '',
+        windows: '',
+        deb: '',
+        rpm: '',
+      };
     }
 
     return getInstallCommandForPlatform(
-      platform,
       esHost,
       serviceToken,
       policyId,
@@ -262,15 +241,7 @@ export const useFleetServerInstructions = (policyId?: string) => {
       deploymentMode === 'production',
       sslCATrustedFingerprint
     );
-  }, [
-    serviceToken,
-    esHost,
-    platform,
-    policyId,
-    fleetServerHost,
-    deploymentMode,
-    sslCATrustedFingerprint,
-  ]);
+  }, [serviceToken, esHost, policyId, fleetServerHost, deploymentMode, sslCATrustedFingerprint]);
 
   const getServiceToken = useCallback(async () => {
     setIsLoadingServiceToken(true);
@@ -318,36 +289,16 @@ export const useFleetServerInstructions = (policyId?: string) => {
 };
 
 const AgentPolicySelectionStep = ({
-  policyId,
+  selectedPolicy,
   setPolicyId,
+  agentPolicies,
+  refreshAgentPolicies,
 }: {
-  policyId?: string;
-  setPolicyId: (v: string) => void;
+  selectedPolicy?: AgentPolicy;
+  setPolicyId: (v?: string) => void;
+  agentPolicies: AgentPolicy[];
+  refreshAgentPolicies: () => void;
 }): EuiStepProps => {
-  const { data, resendRequest: refreshAgentPolicies } = useGetAgentPolicies({ full: true });
-
-  const agentPolicies = useMemo(
-    () => (data ? data.items.filter((item) => policyHasFleetServer(item)) : []),
-    [data]
-  );
-
-  useEffect(() => {
-    // Select default value
-    if (agentPolicies.length && !policyId) {
-      setPolicyId(agentPolicies[0].id);
-    }
-  }, [agentPolicies, policyId, setPolicyId]);
-
-  const onChangeCallback = useCallback(
-    (key: string | undefined, policy?: AgentPolicy) => {
-      if (policy) {
-        refreshAgentPolicies();
-      }
-      setPolicyId(key!);
-    },
-    [setPolicyId, refreshAgentPolicies]
-  );
-
   return {
     title:
       agentPolicies.length === 0
@@ -363,9 +314,11 @@ const AgentPolicySelectionStep = ({
         <SelectCreateAgentPolicy
           agentPolicies={agentPolicies}
           withKeySelection={false}
-          onAgentPolicyChange={onChangeCallback}
           excludeFleetServer={false}
           isFleetServerPolicy={true}
+          selectedPolicy={selectedPolicy}
+          setSelectedPolicyId={setPolicyId}
+          refreshAgentPolicies={refreshAgentPolicies}
         />
       </>
     ),
@@ -407,7 +360,7 @@ export const AddFleetServerHostStepContent = ({
       } else {
         setError(
           i18n.translate('xpack.fleet.fleetServerSetup.addFleetServerHostInvalidUrlError', {
-            defaultMessage: 'Invalid URL',
+            defaultMessage: 'Valid https URL required.',
           })
         );
         return false;
@@ -670,9 +623,28 @@ const CompleteStep = (): EuiStepProps => {
   };
 };
 
+const findPolicyById = (policies: AgentPolicy[], id: string | undefined) => {
+  if (!id) return undefined;
+  return policies.find((p) => p.id === id);
+};
+
 export const OnPremInstructions: React.FC = () => {
   const { notifications } = useStartServices();
-  const [policyId, setPolicyId] = useState<string | undefined>();
+
+  const { data, resendRequest: refreshAgentPolicies } = useGetAgentPolicies({ full: true });
+
+  const agentPolicies = useMemo(
+    () => (data ? data.items.filter((item) => policyHasFleetServer(item)) : []),
+    [data]
+  );
+
+  // Select default value
+  let defaultValue = '';
+  if (agentPolicies.length) {
+    defaultValue = agentPolicies[0].id;
+  }
+  const [policyId, setPolicyId] = useState<string | undefined>(defaultValue);
+  const selectedPolicy = findPolicyById(agentPolicies, policyId);
 
   const {
     serviceToken,
@@ -748,7 +720,12 @@ export const OnPremInstructions: React.FC = () => {
       <EuiSteps
         className="eui-textLeft"
         steps={[
-          AgentPolicySelectionStep({ policyId, setPolicyId }),
+          AgentPolicySelectionStep({
+            selectedPolicy,
+            setPolicyId,
+            agentPolicies,
+            refreshAgentPolicies,
+          }),
           DownloadStep(true),
           deploymentModeStep({ deploymentMode, setDeploymentMode }),
           addFleetServerHostStep({ addFleetServerHost }),

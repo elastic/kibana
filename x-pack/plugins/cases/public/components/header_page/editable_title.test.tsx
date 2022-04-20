@@ -221,6 +221,49 @@ describe('EditableTitle', () => {
     );
   });
 
+  it('does not show an error after a previous edit error was displayed', () => {
+    const longTitle =
+      'This is a title that should not be saved as it is longer than 64 characters.';
+
+    const shortTitle = 'My title';
+    const wrapper = mount(
+      <TestProviders>
+        <EditableTitle {...defaultProps} />
+      </TestProviders>
+    );
+
+    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.update();
+
+    // simualte a long title
+    wrapper
+      .find('input[data-test-subj="editable-title-input-field"]')
+      .simulate('change', { target: { value: longTitle } });
+
+    wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
+    wrapper.update();
+    expect(wrapper.find('.euiFormErrorText').text()).toBe(
+      'The length of the title is too long. The maximum length is 64.'
+    );
+
+    // write a shorter one
+    wrapper
+      .find('input[data-test-subj="editable-title-input-field"]')
+      .simulate('change', { target: { value: shortTitle } });
+    wrapper.update();
+
+    // submit the form
+    wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
+    wrapper.update();
+
+    // edit again
+    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.update();
+
+    // no error should appear
+    expect(wrapper.find('.euiFormErrorText').length).toBe(0);
+  });
+
   describe('Badges', () => {
     let appMock: AppMockRenderer;
 

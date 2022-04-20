@@ -13,7 +13,7 @@ import type {
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import type { AuditLogger } from '../audit';
 import { auditLoggerMock } from '../audit/mocks';
@@ -215,6 +215,7 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.bulk).not.toHaveBeenCalled();
       expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.refresh).not.toHaveBeenCalled(); // since the search failed, we don't refresh the index
     });
 
     it('throws if bulk delete call to Elasticsearch fails', async () => {
@@ -227,7 +228,20 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.openPointInTime).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
-      expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1); // since we attempted to delete sessions, we still refresh the index
+    });
+
+    it('does not throw if index refresh call to Elasticsearch fails', async () => {
+      const failureReason = new errors.ResponseError(
+        securityMock.createApiResponse(securityMock.createApiResponse({ body: { type: 'Uh oh.' } }))
+      );
+      mockElasticsearchClient.indices.refresh.mockRejectedValue(failureReason);
+
+      await sessionIndex.cleanUp();
+      expect(mockElasticsearchClient.openPointInTime).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1); // since we attempted to delete sessions, we still refresh the index
     });
 
     it('when neither `lifespan` nor `idleTimeout` is configured', async () => {
@@ -388,6 +402,7 @@ describe('Session index', () => {
         }
       );
       expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.refresh).toHaveBeenCalledTimes(1);
     });
 
     it('when only `idleTimeout` is configured', async () => {
@@ -474,6 +489,7 @@ describe('Session index', () => {
         }
       );
       expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.refresh).toHaveBeenCalledTimes(1);
     });
 
     it('when both `lifespan` and `idleTimeout` are configured', async () => {
@@ -570,6 +586,7 @@ describe('Session index', () => {
         }
       );
       expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.refresh).toHaveBeenCalledTimes(1);
     });
 
     it('when both `lifespan` and `idleTimeout` are configured and multiple providers are enabled', async () => {
@@ -714,6 +731,7 @@ describe('Session index', () => {
         }
       );
       expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.refresh).toHaveBeenCalledTimes(1);
     });
 
     it('should clean up sessions in batches of 10,000', async () => {
@@ -729,6 +747,7 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(2);
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(2);
       expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.refresh).toHaveBeenCalledTimes(1);
     });
 
     it('should limit number of batches to 10', async () => {
@@ -742,6 +761,7 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(10);
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(10);
       expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.refresh).toHaveBeenCalledTimes(1);
     });
 
     it('should log audit event', async () => {

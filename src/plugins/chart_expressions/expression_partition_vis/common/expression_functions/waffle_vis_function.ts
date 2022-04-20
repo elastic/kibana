@@ -7,9 +7,8 @@
  */
 
 import { Position } from '@elastic/charts';
+import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { LegendDisplay, PartitionVisParams } from '../types/expression_renderers';
-import { prepareLogTable } from '../../../../visualizations/common/utils';
-import { validateOptions } from '../../../../charts/common';
 import { ChartTypes, WaffleVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
@@ -54,12 +53,18 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
       help: strings.getLegendDisplayArgHelp(),
       options: [LegendDisplay.SHOW, LegendDisplay.HIDE, LegendDisplay.DEFAULT],
       default: LegendDisplay.HIDE,
+      strict: true,
     },
     legendPosition: {
       types: ['string'],
       default: Position.Right,
       help: strings.getLegendPositionArgHelp(),
       options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
+      strict: true,
+    },
+    legendSize: {
+      types: ['number'],
+      help: strings.getLegendSizeArgHelp(),
     },
     truncateLegend: {
       types: ['boolean'],
@@ -96,8 +101,16 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
       throw new Error(errors.splitRowAndSplitColumnAreSpecifiedError());
     }
 
-    validateOptions(args.legendDisplay, LegendDisplay, errors.invalidLegendDisplayError);
-    validateOptions(args.legendPosition, Position, errors.invalidLegendPositionError);
+    validateAccessor(args.metric, context.columns);
+    if (args.bucket) {
+      validateAccessor(args.bucket, context.columns);
+    }
+    if (args.splitColumn) {
+      args.splitColumn.forEach((splitColumn) => validateAccessor(splitColumn, context.columns));
+    }
+    if (args.splitRow) {
+      args.splitRow.forEach((splitRow) => validateAccessor(splitRow, context.columns));
+    }
 
     const buckets = args.bucket ? [args.bucket] : [];
     const visConfig: PartitionVisParams = {
@@ -116,12 +129,16 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
     };
 
     if (handlers?.inspectorAdapters?.tables) {
-      const logTable = prepareLogTable(context, [
-        [[args.metric], strings.getSliceSizeHelp()],
-        [buckets, strings.getSliceHelp()],
-        [args.splitColumn, strings.getColumnSplitHelp()],
-        [args.splitRow, strings.getRowSplitHelp()],
-      ]);
+      const logTable = prepareLogTable(
+        context,
+        [
+          [[args.metric], strings.getSliceSizeHelp()],
+          [buckets, strings.getSliceHelp()],
+          [args.splitColumn, strings.getColumnSplitHelp()],
+          [args.splitRow, strings.getRowSplitHelp()],
+        ],
+        true
+      );
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
 

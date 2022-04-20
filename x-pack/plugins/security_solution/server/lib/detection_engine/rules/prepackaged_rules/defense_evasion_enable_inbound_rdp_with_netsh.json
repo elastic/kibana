@@ -11,7 +11,8 @@
   ],
   "language": "eql",
   "license": "Elastic License v2",
-  "name": "Remote Desktop Enabled in Windows Firewall",
+  "name": "Remote Desktop Enabled in Windows Firewall by Netsh",
+  "note": "## Triage and analysis\n\n### Investigating Remote Desktop Enabled in Windows Firewall by Netsh\n\nMicrosoft Remote Desktop Protocol (RDP) is a proprietary Microsoft protocol that enables remote connections to other\ncomputers, typically over TCP port 3389.\n\nAttackers can use RDP to conduct their actions interactively. Ransomware operators frequently use RDP to access\nvictim servers, often using privileged accounts.\n\nThis rule detects the creation of a Windows Firewall inbound rule that would allow inbound RDP traffic using the\n`netsh.exe` utility.\n\n#### Possible investigation steps\n\n- Identify the user account which performed the action and whether it should perform this kind of action.\n- Contact the user to check if they are aware of the operation.\n- Investigate the script execution chain (parent process tree).\n- Investigate other alerts related to the user/host in the last 48 hours.\n- Check whether it makes sense to enable RDP to this host, given its role in the environment.\n- Check if the host is directly exposed to the internet.\n- Check whether privileged accounts accessed the host shortly after the modification.\n\n### False positive analysis\n\n- The `netsh.exe` utility can be used legitimately. Check whether the user should be performing this kind of activity, whether the user is aware\nof it, whether RDP should be open, and whether the action exposes the environment to unnecessary risks.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- If RDP is needed, make sure to secure it:\n  - Allowlist RDP traffic to specific trusted hosts.\n  - Restrict RDP logins to authorized non-administrator accounts, where possible.\n- Quarantine the implicated host to prevent further post-compromise behavior.\n- Review the implicated account's privileges.\n\n## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n (process.name : \"netsh.exe\" or process.pe.original_file_name == \"netsh.exe\") and\n process.args : (\"localport=3389\", \"RemoteDesktop\", \"group=\\\"remote desktop\\\"\") and\n process.args : (\"action=allow\", \"enable=Yes\", \"enable\")\n",
   "risk_score": 47,
   "rule_id": "074464f9-f30d-4029-8c03-0ed237fffec7",
@@ -49,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 5
 }

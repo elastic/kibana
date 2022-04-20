@@ -8,12 +8,12 @@
 import expect from '@kbn/expect';
 import { first, last, sumBy } from 'lodash';
 import moment from 'moment';
-import { isFiniteNumber } from '../../../../../plugins/apm/common/utils/is_finite_number';
+import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
 import {
   APIClientRequestParamsOf,
   APIReturnType,
-} from '../../../../../plugins/apm/public/services/rest/create_call_apm_api';
-import { RecursivePartial } from '../../../../../plugins/apm/typings/common';
+} from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { config, generateData } from './generate_data';
 import { getErrorGroupIds } from './get_error_group_ids';
@@ -141,8 +141,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 groupIds: JSON.stringify(errorIds),
                 start: moment(end).subtract(7, 'minutes').toISOString(),
                 end: new Date(end).toISOString(),
-                comparisonStart: new Date(start).toISOString(),
-                comparisonEnd: moment(start).add(7, 'minutes').toISOString(),
+                offset: '7m',
               },
             });
             errorGroupsDetailedStatistics = response.body;

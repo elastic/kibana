@@ -12,7 +12,10 @@ import {
   Logger,
   SavedObjectsClient,
   SavedObjectsClientContract,
-} from '../../../../src/core/server';
+} from '@kbn/core/server';
+import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
+import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
+import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { uptimeRuleFieldMap } from '../common/rules/uptime_rule_field_map';
 import { initServerWithKibana } from './kibana.index';
 import {
@@ -23,9 +26,6 @@ import {
 } from './lib/adapters';
 import { TelemetryEventsSender } from './lib/telemetry/sender';
 import { registerUptimeSavedObjects, savedObjectsAdapter } from './lib/saved_objects/saved_objects';
-import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
-import { experimentalRuleFieldMap } from '../../rule_registry/common/assets/field_maps/experimental_rule_field_map';
-import { Dataset } from '../../rule_registry/server';
 import { UptimeConfig } from '../common/config';
 import { SyntheticsService } from './lib/synthetics_service/synthetics_service';
 import { syntheticsServiceApiKey } from './lib/saved_objects/service_api_key';
@@ -39,14 +39,11 @@ export class Plugin implements PluginType {
   private server?: UptimeServerSetup;
   private syntheticService?: SyntheticsService;
   private readonly telemetryEventsSender: TelemetryEventsSender;
-  private readonly isServiceEnabled?: boolean;
 
   constructor(initializerContext: PluginInitializerContext<UptimeConfig>) {
     this.initContext = initializerContext;
     this.logger = initializerContext.logger.get();
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
-    const config = this.initContext.config.get<UptimeConfig>();
-    this.isServiceEnabled = config?.ui?.monitorManagement?.enabled && Boolean(config.service);
   }
 
   public setup(core: CoreSetup, plugins: UptimeCorePluginsSetup) {
@@ -78,11 +75,13 @@ export class Plugin implements PluginType {
       router: core.http.createRouter(),
       cloud: plugins.cloud,
       kibanaVersion: this.initContext.env.packageInfo.version,
+      basePath: core.http.basePath,
       logger: this.logger,
       telemetry: this.telemetryEventsSender,
+      isDev: this.initContext.env.mode.dev,
     } as UptimeServerSetup;
 
-    if (this.isServiceEnabled && this.server.config.service) {
+    if (this.server.config.service) {
       this.syntheticService = new SyntheticsService(
         this.logger,
         this.server,
@@ -98,7 +97,7 @@ export class Plugin implements PluginType {
     registerUptimeSavedObjects(
       core.savedObjects,
       plugins.encryptedSavedObjects,
-      Boolean(this.isServiceEnabled)
+      Boolean(this.server.config.service)
     );
 
     KibanaTelemetryAdapter.registerUsageCollector(
@@ -112,7 +111,7 @@ export class Plugin implements PluginType {
   }
 
   public start(coreStart: CoreStart, plugins: UptimeCorePluginsStart) {
-    if (this.isServiceEnabled) {
+    if (this.server?.config.service) {
       this.savedObjectsClient = new SavedObjectsClient(
         coreStart.savedObjects.createInternalRepository([syntheticsServiceApiKey.name])
       );
@@ -129,7 +128,7 @@ export class Plugin implements PluginType {
       this.server.savedObjectsClient = this.savedObjectsClient;
     }
 
-    if (this.isServiceEnabled) {
+    if (this.server?.config.service) {
       this.syntheticService?.init();
       this.syntheticService?.scheduleSyncTask(plugins.taskManager);
       if (this.server && this.syntheticService) {

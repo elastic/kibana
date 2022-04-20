@@ -23,7 +23,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FieldFormatsStart } from '../../../src/plugins/field_formats/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import * as example1 from './examples/1_using_existing_format';
 import * as example2 from './examples/2_creating_custom_formatter';
 // @ts-ignore
@@ -32,8 +32,10 @@ import example1SampleCode from '!!raw-loader!./examples/1_using_existing_format'
 import example2SampleCodePart1 from '!!raw-loader!../common/example_currency_format';
 // @ts-ignore
 import example2SampleCodePart2 from '!!raw-loader!./examples/2_creating_custom_formatter';
+/* eslint-disable @kbn/eslint/no-restricted-paths */
 // @ts-ignore
 import example2SampleCodePart3 from '!!raw-loader!../server/examples/2_creating_custom_formatter';
+/* eslint-enable @kbn/eslint/no-restricted-paths */
 // @ts-ignore
 import example3SampleCode from '!!raw-loader!./examples/3_creating_custom_format_editor';
 

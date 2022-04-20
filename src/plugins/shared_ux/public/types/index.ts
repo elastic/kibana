@@ -8,8 +8,8 @@
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
-import { FC } from 'react';
-import { DataViewEditorStart } from 'src/plugins/data_view_editor/public';
+import { SharedUxServices } from '@kbn/shared-ux-services';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 
 /** @internal */
 export interface SharedUXPluginSetup {}
@@ -20,9 +20,40 @@ export interface SharedUXPluginSetup {}
  */
 export interface SharedUXPluginStart {
   /**
-   * A React component that provides a pre-wired `React.Context` which connects components to Shared UX services.
+   * A set of pre-wired services for use with `SharedUxServicesProvider`.
+   *
+   * ```
+   * import { SharedUxServicesProvider } from '@kbn/shared-ux-services';
+   *
+   * public start(coreStart: CoreStart, startPlugins: MyPluginStartDeps): MyPluginStart {
+   *   const services = startPlugins.sharedUX.getContextServices();
+   *   return {
+   *     ServicesContext: ({ children }) => <SharedUxServicesProvider {...services}>{children}</SharedUxServicesProvider>,
+   *   };
+   * }
+   * ```
+   *
+   * or
+   *
+   * ```
+   * import { SharedUxServicesProvider } from '@kbn/shared-ux-services';
+   *
+   * public setup(coreSetup: CoreSetup, setupPlugins: MyPluginSetupDeps): MyPluginSetup {
+   *   const [coreStart, startPlugins] = await coreSetup.getStartServices();
+   *   coreSetup.application.register({
+   *     mount: async (params: AppMountParameters) => {
+   *       ReactDOM.render(
+   *         <SharedUxServicesProvider {...startPlugins.sharedUX.getContextServices()}>
+   *           <MyApp />
+   *         </SharedUxServicesProvider>,
+   *         params.element
+   *       );
+   *     }
+   *   );
+   * }
+   * ```
    */
-  ServicesContext: FC<{}>;
+  getContextServices: () => SharedUxServices;
 }
 
 /** @internal */

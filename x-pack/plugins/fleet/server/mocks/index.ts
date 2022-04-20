@@ -12,15 +12,17 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
   savedObjectsServiceMock,
-} from '../../../../../src/core/server/mocks';
-import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
-import { licensingMock } from '../../../../plugins/licensing/server/mocks';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
-import { securityMock } from '../../../security/server/mocks';
+} from '@kbn/core/server/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+
 import type { PackagePolicyServiceInterface } from '../services/package_policy';
 import type { AgentPolicyServiceInterface } from '../services';
 import type { FleetAppContext } from '../plugin';
 import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
+import type { FleetConfigType } from '../../common';
 import { createFleetAuthzMock } from '../../common';
 import { agentServiceMock } from '../services/agents/agent_service.mock';
 import type { FleetRequestHandlerContext } from '../types';
@@ -39,11 +41,14 @@ export interface MockedFleetAppContext extends FleetAppContext {
   logger: ReturnType<ReturnType<typeof loggingSystemMock.create>['get']>;
 }
 
-export const createAppContextStartContractMock = (): MockedFleetAppContext => {
+export const createAppContextStartContractMock = (
+  configOverrides: Partial<FleetConfigType> = {}
+): MockedFleetAppContext => {
   const config = {
     agents: { enabled: true, elasticsearch: {} },
     enabled: true,
     agentIdVerificationEnabled: true,
+    ...configOverrides,
   };
 
   const config$ = of(config);

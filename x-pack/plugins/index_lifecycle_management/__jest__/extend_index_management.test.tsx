@@ -10,7 +10,7 @@ import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { usageCollectionPluginMock } from '../../../../src/plugins/usage_collection/public/mocks';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import { Index } from '../common/types';
 import {
   retryLifecycleActionExtension,
@@ -31,8 +31,8 @@ import { init as initUiMetric } from '../public/application/services/ui_metric';
 initHttp(axios.create({ adapter: axiosXhrAdapter }));
 initUiMetric(usageCollectionPluginMock.createSetupContract());
 
-jest.mock('../../../plugins/index_management/public', async () => {
-  const { indexManagementMock } = await import('../../../plugins/index_management/public/mocks');
+jest.mock('@kbn/index-management-plugin/public', async () => {
+  const { indexManagementMock } = await import('@kbn/index-management-plugin/public/mocks');
   return indexManagementMock.createSetup();
 });
 
@@ -113,7 +113,6 @@ const indexWithLifecycleError = {
     step_info: {
       type: 'illegal_argument_exception',
       reason: 'setting [index.lifecycle.rollover_alias] for index [testy3] is empty or not defined',
-      stack_trace: 'fakestacktrace',
     },
     phase_execution: {
       policy: 'testy',

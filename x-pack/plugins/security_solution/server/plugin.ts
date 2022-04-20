@@ -17,16 +17,16 @@ import {
   THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
 
-import { Logger, SavedObjectsClient } from '../../../../src/core/server';
-import { UsageCounter } from '../../../../src/plugins/usage_collection/server';
+import { Logger, SavedObjectsClient } from '@kbn/core/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
-import { ECS_COMPONENT_TEMPLATE_NAME } from '../../rule_registry/common/assets';
-import { FieldMap } from '../../rule_registry/common/field_map';
-import { technicalRuleFieldMap } from '../../rule_registry/common/assets/field_maps/technical_rule_field_map';
-import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
-import { IRuleDataClient, Dataset } from '../../rule_registry/server';
-import { ListPluginSetup } from '../../lists/server';
-import { ILicense } from '../../licensing/server';
+import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/rule-registry-plugin/common/assets';
+import { FieldMap } from '@kbn/rule-registry-plugin/common/field_map';
+import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
+import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
+import { IRuleDataClient, Dataset } from '@kbn/rule-registry-plugin/server';
+import { ListPluginSetup } from '@kbn/lists-plugin/server';
+import { ILicense } from '@kbn/licensing-plugin/server';
 
 import {
   createEqlAlertType,
@@ -168,6 +168,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     initUsageCollectors({
       core,
+      eventLogIndex: eventLogService.getIndexPattern(),
       signalsIndex: DEFAULT_ALERTS_INDEX,
       ml: plugins.ml,
       usageCollection: plugins.usageCollection,
@@ -452,6 +453,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       core,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       this.kibanaIndex!,
+      DEFAULT_ALERTS_INDEX,
       this.endpointAppContextService,
       exceptionListClient
     );

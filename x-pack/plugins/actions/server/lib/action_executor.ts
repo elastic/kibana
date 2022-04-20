@@ -6,9 +6,12 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { Logger, KibanaRequest } from 'src/core/server';
+import { Logger, KibanaRequest } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
+import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import {
   validateParams,
   validateConfig,
@@ -22,10 +25,7 @@ import {
   PreConfiguredAction,
   RawAction,
 } from '../types';
-import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
-import { SpacesServiceStart } from '../../../spaces/server';
 import { EVENT_LOG_ACTIONS } from '../constants/event_log';
-import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { ActionsClient } from '../actions_client';
 import { ActionExecutionSource } from './action_execution_source';
 import { RelatedSavedObjects } from './related_saved_objects';
@@ -61,6 +61,7 @@ export interface ExecuteOptions<Source = unknown> {
   source?: ActionExecutionSource<Source>;
   taskInfo?: TaskInfo;
   executionId?: string;
+  consumer?: string;
   relatedSavedObjects?: RelatedSavedObjects;
 }
 
@@ -70,6 +71,7 @@ export class ActionExecutor {
   private isInitialized = false;
   private actionExecutorContext?: ActionExecutorContext;
   private readonly isESOCanEncrypt: boolean;
+
   private actionInfo: ActionInfo | undefined;
 
   constructor({ isESOCanEncrypt }: { isESOCanEncrypt: boolean }) {
@@ -92,6 +94,7 @@ export class ActionExecutor {
     isEphemeral,
     taskInfo,
     executionId,
+    consumer,
     relatedSavedObjects,
   }: ExecuteOptions): Promise<ActionTypeExecutorResult<unknown>> {
     if (!this.isInitialized) {
@@ -187,9 +190,11 @@ export class ActionExecutor {
         const event = createActionEventLogRecordObject({
           actionId,
           action: EVENT_LOG_ACTIONS.execute,
+          consumer,
           ...namespace,
           ...task,
           executionId,
+          spaceId,
           savedObjects: [
             {
               type: 'action',
@@ -198,17 +203,8 @@ export class ActionExecutor {
               relation: SAVED_OBJECT_REL_PRIMARY,
             },
           ],
+          relatedSavedObjects,
         });
-
-        for (const relatedSavedObject of relatedSavedObjects || []) {
-          event.kibana?.saved_objects?.push({
-            rel: SAVED_OBJECT_REL_PRIMARY,
-            type: relatedSavedObject.type,
-            id: relatedSavedObject.id,
-            type_id: relatedSavedObject.typeId,
-            namespace: relatedSavedObject.namespace,
-          });
-        }
 
         eventLogger.startTiming(event);
 
@@ -288,6 +284,7 @@ export class ActionExecutor {
     source,
     executionId,
     taskInfo,
+    consumer,
   }: {
     actionId: string;
     request: KibanaRequest;
@@ -295,6 +292,7 @@ export class ActionExecutor {
     executionId?: string;
     relatedSavedObjects: RelatedSavedObjects;
     source?: ActionExecutionSource<Source>;
+    consumer?: string;
   }) {
     const {
       spaces,
@@ -326,6 +324,7 @@ export class ActionExecutor {
     // Write event log entry
     const event = createActionEventLogRecordObject({
       actionId,
+      consumer,
       action: EVENT_LOG_ACTIONS.executeTimeout,
       message: `action: ${this.actionInfo.actionTypeId}:${actionId}: '${
         this.actionInfo.name ?? ''
@@ -333,6 +332,7 @@ export class ActionExecutor {
       ...namespace,
       ...task,
       executionId,
+      spaceId,
       savedObjects: [
         {
           type: 'action',
@@ -341,17 +341,9 @@ export class ActionExecutor {
           relation: SAVED_OBJECT_REL_PRIMARY,
         },
       ],
+      relatedSavedObjects,
     });
 
-    for (const relatedSavedObject of (relatedSavedObjects || []) as RelatedSavedObjects) {
-      event.kibana?.saved_objects?.push({
-        rel: SAVED_OBJECT_REL_PRIMARY,
-        type: relatedSavedObject.type,
-        id: relatedSavedObject.id,
-        type_id: relatedSavedObject.typeId,
-        namespace: relatedSavedObject.namespace,
-      });
-    }
     eventLogger.logEvent(event);
   }
 }

@@ -6,13 +6,9 @@
  */
 import { EuiCodeBlock, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HttpStart } from 'kibana/public';
+import { HttpStart } from '@kbn/core/public';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import {
-  isPrereleaseVersion,
-  SUPPORTED_APM_PACKAGE_VERSION,
-} from '../../../common/fleet';
 import { APIReturnType } from '../../services/rest/create_call_apm_api';
 import { getCommands } from './commands/get_commands';
 import { getPolicyOptions, PolicyOption } from './get_policy_options';
@@ -72,9 +68,7 @@ function getFleetLink({
       }
     : {
         label: GET_STARTED_WITH_FLEET_LABEL,
-        href: isPrereleaseVersion(kibanaVersion)
-          ? `${basePath}/app/integrations#/detail/apm/overview`
-          : `${basePath}/app/integrations#/detail/apm-${SUPPORTED_APM_PACKAGE_VERSION}/overview`,
+        href: `${basePath}/app/integrations#/detail/apm/overview`,
       };
 }
 

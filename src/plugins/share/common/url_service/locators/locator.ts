@@ -7,9 +7,10 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { SavedObjectReference } from 'kibana/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { SavedObjectReference } from '@kbn/core/server';
 import { DependencyList } from 'react';
-import type { PersistableState } from 'src/plugins/kibana_utils/common';
+import type { PersistableState } from '@kbn/kibana-utils-plugin/common';
 import { useLocatorUrl } from './use_locator_url';
 import type {
   LocatorDefinition,

@@ -7,19 +7,24 @@
 
 import { transformConnectorsForExport } from './transform_connectors_for_export';
 import { ActionTypeRegistry, ActionTypeRegistryOpts } from '../action_type_registry';
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
-import { licensingMock } from '../../../licensing/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
-import { taskManagerMock } from '../../../task_manager/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ActionExecutor, TaskRunnerFactory } from '../lib';
 import { registerBuiltInActionTypes } from '../builtin_action_types';
+import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 
 describe('transform connector for export', () => {
+  const inMemoryMetrics = inMemoryMetricsMock.create();
   const actionTypeRegistryParams: ActionTypeRegistryOpts = {
     licensing: licensingMock.createSetup(),
     taskManager: taskManagerMock.createSetup(),
-    taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor({ isESOCanEncrypt: true })),
+    taskRunnerFactory: new TaskRunnerFactory(
+      new ActionExecutor({ isESOCanEncrypt: true }),
+      inMemoryMetrics
+    ),
     actionsConfigUtils: actionsConfigMock.create(),
     licenseState: licenseStateMock.create(),
     preconfiguredActions: [],

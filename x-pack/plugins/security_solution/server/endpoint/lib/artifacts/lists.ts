@@ -22,7 +22,7 @@ import {
   ENDPOINT_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
-import { ExceptionListClient } from '../../../../../lists/server';
+import { ExceptionListClient } from '@kbn/lists-plugin/server';
 import {
   InternalArtifactCompleteSchema,
   TranslatedEntry,
@@ -187,11 +187,16 @@ function getMatcherFunction({
   matchAny?: boolean;
   os: ExceptionListItemSchema['os_types'][number];
 }): TranslatedEntryMatcher {
+  const doesFieldEndWith: boolean =
+    field.endsWith('.caseless') || field.endsWith('.name') || field.endsWith('.text');
+
   return matchAny
-    ? field.endsWith('.caseless')
-      ? 'exact_caseless_any'
+    ? doesFieldEndWith
+      ? os === 'linux'
+        ? 'exact_cased_any'
+        : 'exact_caseless_any'
       : 'exact_cased_any'
-    : field.endsWith('.caseless')
+    : doesFieldEndWith
     ? os === 'linux'
       ? 'exact_cased'
       : 'exact_caseless'
@@ -213,7 +218,9 @@ function getMatcherWildcardFunction({
 }
 
 function normalizeFieldName(field: string): string {
-  return field.endsWith('.caseless') ? field.substring(0, field.lastIndexOf('.')) : field;
+  return field.endsWith('.caseless') || field.endsWith('.text')
+    ? field.substring(0, field.lastIndexOf('.'))
+    : field;
 }
 
 function translateItem(
@@ -223,7 +230,7 @@ function translateItem(
   const itemSet = new Set();
   const getEntries = (): TranslatedExceptionListItem['entries'] => {
     return item.entries.reduce<TranslatedEntry[]>((translatedEntries, entry) => {
-      const translatedEntry = translateEntry(schemaVersion, entry, item.os_types[0]);
+      const translatedEntry = translateEntry(schemaVersion, item.entries, entry, item.os_types[0]);
 
       if (translatedEntry !== undefined) {
         if (translatedEntryType.is(translatedEntry)) {
@@ -256,12 +263,11 @@ function translateItem(
   };
 }
 
-function appendProcessNameEntry({
-  wildcardProcessEntry,
+function appendOptimizedEntryForEndpoint({
   entry,
   os,
+  wildcardProcessEntry,
 }: {
-  wildcardProcessEntry: TranslatedEntryMatchWildcard;
   entry: {
     field: string;
     operator: 'excluded' | 'included';
@@ -269,11 +275,15 @@ function appendProcessNameEntry({
     value: string;
   };
   os: ExceptionListItemSchema['os_types'][number];
+  wildcardProcessEntry: TranslatedEntryMatchWildcard;
 }): TranslatedPerformantEntries {
   const entries: TranslatedPerformantEntries = [
     wildcardProcessEntry,
     {
-      field: normalizeFieldName('process.name'),
+      field:
+        entry.field === 'file.path.text'
+          ? normalizeFieldName('file.name')
+          : normalizeFieldName('process.name'),
       operator: entry.operator,
       type: (os === 'linux' ? 'exact_cased' : 'exact_caseless') as Extract<
         TranslatedEntryMatcher,
@@ -291,6 +301,7 @@ function appendProcessNameEntry({
 
 function translateEntry(
   schemaVersion: string,
+  exceptionListItemEntries: ExceptionListItemSchema['entries'],
   entry: Entry | EntryNested,
   os: ExceptionListItemSchema['os_types'][number]
 ): TranslatedEntry | TranslatedPerformantEntries | undefined {
@@ -298,7 +309,12 @@ function translateEntry(
     case 'nested': {
       const nestedEntries = entry.entries.reduce<TranslatedEntryNestedEntry[]>(
         (entries, nestedEntry) => {
-          const translatedEntry = translateEntry(schemaVersion, nestedEntry, os);
+          const translatedEntry = translateEntry(
+            schemaVersion,
+            exceptionListItemEntries,
+            nestedEntry,
+            os
+          );
           if (nestedEntry !== undefined && translatedEntryNestedEntry.is(translatedEntry)) {
             entries.push(translatedEntry);
           }
@@ -354,11 +370,21 @@ function translateEntry(
             type: entry.type,
             value: entry.value,
           });
-          if (hasExecutableName) {
+
+          const existingFields = exceptionListItemEntries.map((e) => e.field);
+          const doAddPerformantEntries = !(
+            existingFields.includes('process.name') || existingFields.includes('file.name')
+          );
+
+          if (hasExecutableName && doAddPerformantEntries) {
             // when path has a full executable name
             // append a process.name entry based on os
             // `exact_cased` for linux and `exact_caseless` for others
-            return appendProcessNameEntry({ entry, os, wildcardProcessEntry });
+            return appendOptimizedEntryForEndpoint({
+              entry,
+              os,
+              wildcardProcessEntry,
+            });
           } else {
             return wildcardProcessEntry;
           }

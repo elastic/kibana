@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState, useMemo, useCallback } from 'react';
 import { omit, pick } from 'lodash';
 import {
   EuiBadge,
@@ -17,18 +17,19 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTabbedContent,
-  EuiTitle,
   EuiTabbedContentTab,
+  EuiTitle,
 } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type { ModelItemFull } from './models_list';
-import { timeFormatter } from '../../../../common/util/date_utils';
 import { isDefined } from '../../../../common/types/guards';
 import { isPopulatedObject } from '../../../../common';
 import { ModelPipelines } from './pipelines';
 import { AllocatedModels } from '../nodes_overview/allocated_models';
 import type { AllocatedModel } from '../../../../common/types/trained_models';
+import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 
 interface ExpandedRowProps {
   item: ModelItemFull;
@@ -47,47 +48,61 @@ const badgeFormatter = (items: string[]) => {
   );
 };
 
-const formatterDictionary: Record<string, (value: any) => JSX.Element | string | undefined> = {
-  tags: badgeFormatter,
-  roles: badgeFormatter,
-  create_time: timeFormatter,
-  timestamp: timeFormatter,
-};
+export function useListItemsFormatter() {
+  const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
+  const dateFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DATE);
 
-export function formatToListItems(
-  items: Record<string, unknown> | object
-): EuiDescriptionListProps['listItems'] {
-  return Object.entries(items)
-    .filter(([, value]) => isDefined(value))
-    .map(([title, value]) => {
-      if (title in formatterDictionary) {
-        return {
-          title,
-          description: formatterDictionary[title](value),
-        };
-      }
-      return {
-        title,
-        description:
-          typeof value === 'object' ? (
-            <EuiCodeBlock
-              language="json"
-              fontSize="s"
-              paddingSize="s"
-              overflowHeight={300}
-              isCopyable={false}
-            >
-              {JSON.stringify(value, null, 2)}
-            </EuiCodeBlock>
-          ) : (
-            value.toString()
-          ),
-      };
-    });
+  const formatterDictionary: Record<string, (value: any) => JSX.Element | string | undefined> =
+    useMemo(
+      () => ({
+        tags: badgeFormatter,
+        roles: badgeFormatter,
+        create_time: dateFormatter,
+        timestamp: dateFormatter,
+        model_size_bytes: bytesFormatter,
+        required_native_memory_bytes: bytesFormatter,
+      }),
+      []
+    );
+
+  return useCallback(
+    (items: Record<string, unknown> | object): EuiDescriptionListProps['listItems'] => {
+      return Object.entries(items)
+        .filter(([, value]) => isDefined(value))
+        .map(([title, value]) => {
+          if (title in formatterDictionary) {
+            return {
+              title,
+              description: formatterDictionary[title](value),
+            };
+          }
+          return {
+            title,
+            description:
+              typeof value === 'object' ? (
+                <EuiCodeBlock
+                  language="json"
+                  fontSize="s"
+                  paddingSize="s"
+                  overflowHeight={300}
+                  isCopyable={false}
+                >
+                  {JSON.stringify(value, null, 2)}
+                </EuiCodeBlock>
+              ) : (
+                value.toString()
+              ),
+          };
+        });
+    },
+    [formatterDictionary]
+  );
 }
 
 export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
   const [modelItems, setModelItems] = useState<AllocatedModel[]>([]);
+
+  const formatToListItems = useListItemsFormatter();
 
   const {
     inference_config: inferenceConfig,
@@ -140,6 +155,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                 'last_access',
                 'number_of_pending_requests',
                 'start_time',
+                'throughput_last_minute',
               ]),
               name: nodeName,
             } as AllocatedModel['node'],

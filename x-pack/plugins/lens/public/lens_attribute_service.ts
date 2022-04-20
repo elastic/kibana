@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { CoreStart } from '../../../../src/core/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { AttributeService } from '@kbn/embeddable-plugin/public';
+import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { LensPluginStartDependencies } from './plugin';
-import type { AttributeService } from '../../../../src/plugins/embeddable/public';
 import type {
   LensSavedObjectAttributes,
   LensByValueInput,
@@ -16,7 +17,6 @@ import type {
   LensByReferenceInput,
 } from './embeddable/embeddable';
 import { SavedObjectIndexStore, checkForDuplicateTitle } from './persistence';
-import { OnSaveProps } from '../../../../src/plugins/saved_objects/public';
 import { DOC_TYPE } from '../common/constants';
 
 export type LensAttributeService = AttributeService<
@@ -50,6 +50,7 @@ export function getLensAttributeService(
         saved_object: savedObject,
         outcome,
         alias_target_id: aliasTargetId,
+        alias_purpose: aliasPurpose,
       } = await savedObjectStore.load(savedObjectId);
       const { attributes, references, id } = savedObject;
       const document = {
@@ -60,6 +61,7 @@ export function getLensAttributeService(
       const sharingSavedObjectProps = {
         aliasTargetId,
         outcome,
+        aliasPurpose,
         sourceId: id,
       };
 

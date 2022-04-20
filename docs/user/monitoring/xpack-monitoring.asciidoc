@@ -17,9 +17,6 @@ instance, and Beat is considered unique based on its persistent
 UUID, which is written to the <<settings,`path.data`>> directory when the node
 or instance starts. 
 
-NOTE: Watcher must be enabled to view cluster alerts. If you have a Basic
-license, Top Cluster Alerts are not displayed.
-
 For more information, see <<configuring-monitoring>> and 
 {ref}/monitor-elasticsearch-cluster.html[Monitor a cluster].  
 

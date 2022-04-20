@@ -8,9 +8,9 @@ import { i18n } from '@kbn/i18n';
 
 import React, { useMemo } from 'react';
 import { EuiFilterButton, hexToRgb } from '@elastic/eui';
-import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { useSeriesFilters } from '../../hooks/use_series_filters';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import FieldValueSuggestions from '../../../field_value_suggestions';
 import { SeriesUrl } from '../../types';
 import { NestedFilterOpen } from './filter_expanded';
@@ -41,7 +41,7 @@ export function FilterValueButton({
   nestedField,
   allSelectedValues,
 }: Props) {
-  const { indexPatterns } = useAppIndexPatternContext(series.dataType);
+  const { dataViews } = useAppDataViewContext(series.dataType);
 
   const { setFilter, removeFilter } = useSeriesFilters({ seriesId, series });
 
@@ -103,7 +103,7 @@ export function FilterValueButton({
       anchorPosition="rightCenter"
       time={series.time}
       asCombobox={false}
-      indexPatternTitle={indexPatterns[series.dataType]?.title}
+      dataViewTitle={dataViews[series.dataType]?.title}
     />
   ) : (
     button

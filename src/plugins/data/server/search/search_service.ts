@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { from, Observable, throwError } from 'rxjs';
+import { firstValueFrom, from, Observable, throwError } from 'rxjs';
 import { pick } from 'lodash';
 import moment from 'moment';
 import {
@@ -18,10 +18,13 @@ import {
   PluginInitializerContext,
   SharedGlobalConfig,
   StartServicesAccessor,
-} from 'src/core/server';
-import { first, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
-import { BfetchServerSetup } from 'src/plugins/bfetch/server';
-import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
+} from '@kbn/core/server';
+import { map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
+import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type {
   IScopedSearchClient,
   ISearchSetup,
@@ -34,12 +37,10 @@ import type {
 
 import { AggsService } from './aggs';
 
-import { FieldFormatsStart } from '../../../field_formats/server';
 import { IndexPatternsServiceStart } from '../data_views';
 import { registerSearchRoute } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './strategies/es_search';
 import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
-import { UsageCollectionSetup } from '../../../usage_collection/server';
 import { registerUsageCollector } from './collectors/register';
 import { usageProvider } from './collectors/usage';
 import { searchTelemetry } from '../saved_objects';
@@ -77,6 +78,7 @@ import {
   eqlRawResponse,
   ENHANCED_ES_SEARCH_STRATEGY,
   EQL_SEARCH_STRATEGY,
+  SQL_SEARCH_STRATEGY,
 } from '../../common/search';
 import { getEsaggs, getEsdsl, getEql } from './expressions';
 import {
@@ -86,13 +88,13 @@ import {
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
 import { ISearchSessionService, SearchSessionService } from './session';
-import { KbnServerError } from '../../../kibana_utils/server';
 import { registerBsearchRoute } from './routes/bsearch';
 import { getKibanaContext } from './expressions/kibana_context';
 import { enhancedEsSearchStrategyProvider } from './strategies/ese_search';
 import { eqlSearchStrategyProvider } from './strategies/eql_search';
 import { NoSearchIdInSessionError } from './errors/no_search_id_in_session';
 import { CachedUiSettingsClient } from './services';
+import { sqlSearchStrategyProvider } from './strategies/sql_search';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -176,6 +178,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     );
 
     this.registerSearchStrategy(EQL_SEARCH_STRATEGY, eqlSearchStrategyProvider(this.logger));
+    this.registerSearchStrategy(SQL_SEARCH_STRATEGY, sqlSearchStrategyProvider(this.logger));
 
     registerBsearchRoute(
       bfetch,
@@ -218,16 +221,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     const aggs = this.aggsService.setup({ registerFunction: expressions.registerFunction });
 
-    this.initializerContext.config
-      .create<ConfigSchema>()
-      .pipe(first())
-      .toPromise()
-      .then((value) => {
-        if (value.search.aggs.shardDelay.enabled) {
-          aggs.types.registerBucket(SHARD_DELAY_AGG_NAME, getShardDelayBucketAgg);
-          expressions.registerFunction(aggShardDelay);
-        }
-      });
+    firstValueFrom(this.initializerContext.config.create<ConfigSchema>()).then((value) => {
+      if (value.search.aggs.shardDelay.enabled) {
+        aggs.types.registerBucket(SHARD_DELAY_AGG_NAME, getShardDelayBucketAgg);
+        expressions.registerFunction(aggShardDelay);
+      }
+    });
 
     return {
       __enhance: (enhancements: SearchEnhancements) => {

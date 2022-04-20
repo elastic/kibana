@@ -32,6 +32,9 @@ import {
   CASE_DETAILS_USERNAMES,
   PARTICIPANTS,
   REPORTER,
+  EXPECTED_METRICS,
+  CASES_METRIC,
+  UNEXPECTED_METRICS,
 } from '../../screens/case_details';
 import { TIMELINE_DESCRIPTION, TIMELINE_QUERY, TIMELINE_TITLE } from '../../screens/timeline';
 
@@ -46,13 +49,12 @@ import {
   fillCasesMandatoryfields,
   filterStatusOpen,
 } from '../../tasks/create_new_case';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { CASES_URL } from '../../urls/navigation';
 
-// Flaky: https://github.com/elastic/kibana/issues/69847
-describe.skip('Cases', () => {
-  beforeEach(() => {
+describe('Cases', () => {
+  before(() => {
     cleanKibana();
     createTimeline(getCase1().timeline).then((response) =>
       cy
@@ -68,7 +70,8 @@ describe.skip('Cases', () => {
   });
 
   it('Creates a new case with timeline and opens the timeline', function () {
-    loginAndWaitForPageWithoutDateRange(CASES_URL);
+    login();
+    visitWithoutDateRange(CASES_URL);
     goToCreateNewCase();
     fillCasesMandatoryfields(this.mycase);
     attachTimeline(this.mycase);
@@ -85,8 +88,8 @@ describe.skip('Cases', () => {
     cy.get(ALL_CASES_TAGS_COUNT).should('have.text', 'Tags2');
     cy.get(ALL_CASES_NAME).should('have.text', this.mycase.name);
     cy.get(ALL_CASES_REPORTER).should('have.text', this.mycase.reporter);
-    (this.mycase as TestCase).tags.forEach((tag, index) => {
-      cy.get(ALL_CASES_TAGS(index)).should('have.text', tag);
+    (this.mycase as TestCase).tags.forEach((tag) => {
+      cy.get(ALL_CASES_TAGS(tag)).should('have.text', tag);
     });
     cy.get(ALL_CASES_COMMENTS_COUNT).should('have.text', '0');
     cy.get(ALL_CASES_OPENED_ON).should('include.text', 'ago');
@@ -106,6 +109,14 @@ describe.skip('Cases', () => {
     cy.get(CASE_DETAILS_USERNAMES).eq(REPORTER).should('have.text', this.mycase.reporter);
     cy.get(CASE_DETAILS_USERNAMES).eq(PARTICIPANTS).should('have.text', this.mycase.reporter);
     cy.get(CASE_DETAILS_TAGS).should('have.text', expectedTags);
+
+    EXPECTED_METRICS.forEach((metric) => {
+      cy.get(CASES_METRIC(metric)).should('exist');
+    });
+
+    UNEXPECTED_METRICS.forEach((metric) => {
+      cy.get(CASES_METRIC(metric)).should('not.exist');
+    });
 
     openCaseTimeline();
 

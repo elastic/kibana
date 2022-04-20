@@ -9,8 +9,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile }: FtrProviderContext): void => {
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
-  describe.skip('detection engine api security and spaces enabled', function () {
+  describe('detection engine api security and spaces enabled', function () {
     describe('', function () {
       this.tags('ciGroup11');
 
@@ -26,13 +25,13 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
       loadTestFile(require.resolve('./create_rules_bulk'));
       loadTestFile(require.resolve('./create_ml'));
       loadTestFile(require.resolve('./create_threat_matching'));
-      loadTestFile(require.resolve('./create_exceptions'));
       loadTestFile(require.resolve('./delete_rules'));
       loadTestFile(require.resolve('./delete_rules_bulk'));
       loadTestFile(require.resolve('./export_rules'));
       loadTestFile(require.resolve('./find_rules'));
       loadTestFile(require.resolve('./generating_signals'));
       loadTestFile(require.resolve('./get_prepackaged_rules_status'));
+      loadTestFile(require.resolve('./get_rule_execution_events'));
       loadTestFile(require.resolve('./import_rules'));
       loadTestFile(require.resolve('./import_export_rules'));
       loadTestFile(require.resolve('./read_rules'));
@@ -55,24 +54,30 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
       loadTestFile(require.resolve('./migrations'));
     });
 
+    describe('', function () {
+      this.tags('ciGroup14');
+
+      loadTestFile(require.resolve('./create_exceptions'));
+    });
+
     // That split here enable us on using a different ciGroup to run the tests
     // listed on ./exception_operators_data_types/index
     describe('', function () {
-      loadTestFile(require.resolve('./exception_operators_data_types/index'));
+      loadTestFile(require.resolve('./exception_operators_data_types'));
     });
 
     // That split here enable us on using a different ciGroup to run the tests
     // listed on ./keyword_family/index
     describe('', function () {
-      loadTestFile(require.resolve('./keyword_family/index'));
+      loadTestFile(require.resolve('./keyword_family'));
     });
 
     describe('', function () {
-      loadTestFile(require.resolve('./alerts/index'));
+      loadTestFile(require.resolve('./alerts'));
     });
 
     describe('', function () {
-      loadTestFile(require.resolve('./telemetry/index'));
+      loadTestFile(require.resolve('./telemetry'));
     });
   });
 };

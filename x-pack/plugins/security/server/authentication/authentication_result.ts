@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AuthHeaders } from 'src/core/server';
+import type { AuthHeaders } from '@kbn/core/server';
 
 import type { AuthenticatedUser } from '../../common';
 import type { UserProfileGrant } from '../user_profile';

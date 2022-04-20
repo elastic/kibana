@@ -6,17 +6,14 @@
  * Side Public License, v 1.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/109902
-/* eslint-disable @kbn/eslint/no_export_all */
-
 import './index.scss';
 
-import { PluginInitializerContext } from '../../../core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { ExpressionsPublicPlugin } from './plugin';
 
 // Kibana Platform.
 export { ExpressionsPublicPlugin as Plugin };
-export * from './plugin';
+export type { ExpressionsSetup, ExpressionsStart } from './plugin';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new ExpressionsPublicPlugin(initializerContext);
 }
@@ -32,10 +29,11 @@ export type { ExpressionLoader } from './loader';
 export type { ExpressionRenderHandler } from './render';
 export type {
   ExpressionRendererComponent,
+  ExpressionRendererParams,
   ReactExpressionRendererProps,
   ReactExpressionRendererType,
-  useExpressionRenderer,
 } from './react_expression_renderer';
+export { useExpressionRenderer } from './react_expression_renderer';
 export type {
   AnyExpressionFunctionDefinition,
   AnyExpressionTypeDefinition,

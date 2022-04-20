@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { chunk, debounce } from 'lodash';
 
-import { IHttpFetchError, ResponseErrorBody } from 'src/core/public';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 
 import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../common/event_outcome';
@@ -77,6 +77,7 @@ export function useFailedTransactionsCorrelations() {
       // and histogram data for statistically significant results.
       const responseUpdate: FailedTransactionsCorrelationsResponse = {
         ccsWarning: false,
+        fallbackResult: undefined,
       };
 
       const [overallHistogramResponse, errorHistogramRespone] =
@@ -149,6 +150,7 @@ export function useFailedTransactionsCorrelations() {
 
       const failedTransactionsCorrelations: FailedTransactionsCorrelation[] =
         [];
+      let fallbackResult: FailedTransactionsCorrelation | undefined;
       const fieldsToSample = new Set<string>();
       const chunkSize = 10;
       let chunkLoadCounter = 0;
@@ -177,6 +179,21 @@ export function useFailedTransactionsCorrelations() {
             getFailedTransactionsCorrelationsSortedByScore([
               ...failedTransactionsCorrelations,
             ]);
+        } else {
+          // If there's no significant correlations found and there's a fallback result
+          // Update the highest ranked/scored fall back result
+          if (pValues.fallbackResult) {
+            if (!fallbackResult) {
+              fallbackResult = pValues.fallbackResult;
+            } else {
+              if (
+                pValues.fallbackResult.normalizedScore >
+                fallbackResult.normalizedScore
+              ) {
+                fallbackResult = pValues.fallbackResult;
+              }
+            }
+          }
         }
 
         chunkLoadCounter++;
@@ -209,7 +226,12 @@ export function useFailedTransactionsCorrelations() {
       );
 
       responseUpdate.fieldStats = stats;
-      setResponse({ ...responseUpdate, loaded: LOADED_DONE, isRunning: false });
+      setResponse({
+        ...responseUpdate,
+        fallbackResult,
+        loaded: LOADED_DONE,
+        isRunning: false,
+      });
       setResponse.flush();
     } catch (e) {
       if (!abortCtrl.current.signal.aborted) {

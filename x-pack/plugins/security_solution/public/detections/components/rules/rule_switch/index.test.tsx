@@ -9,22 +9,30 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
-import { enableRules } from '../../../containers/detection_engine/rules';
-import { RuleSwitchComponent } from './index';
+import { performBulkAction } from '../../../containers/detection_engine/rules';
+import { RuleSwitchComponent } from '.';
 import { getRulesSchemaMock } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
-import { useStateToaster, displayErrorToast } from '../../../../common/components/toasters';
 import { useRulesTableContextOptional } from '../../../pages/detection_engine/rules/all/rules_table/rules_table_context';
 import { useRulesTableContextMock } from '../../../pages/detection_engine/rules/all/rules_table/__mocks__/rules_table_context';
 import { TestProviders } from '../../../../common/mock';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 
-jest.mock('../../../../common/components/toasters');
+jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../containers/detection_engine/rules');
 jest.mock('../../../pages/detection_engine/rules/all/rules_table/rules_table_context');
 
+const useAppToastsValueMock = useAppToastsMock.create();
+
 describe('RuleSwitch', () => {
   beforeEach(() => {
-    (useStateToaster as jest.Mock).mockImplementation(() => [[], jest.fn()]);
-    (enableRules as jest.Mock).mockResolvedValue([getRulesSchemaMock()]);
+    (useAppToasts as jest.Mock).mockReturnValue(useAppToastsValueMock);
+    (performBulkAction as jest.Mock).mockResolvedValue({
+      attributes: {
+        summary: { created: 0, updated: 1, deleted: 0 },
+        results: { updated: [getRulesSchemaMock()] },
+      },
+    });
     (useRulesTableContextOptional as jest.Mock).mockReturnValue(null);
   });
 
@@ -65,7 +73,7 @@ describe('RuleSwitch', () => {
 
   test('it dispatches error toaster if "enableRules" call rejects', async () => {
     const mockError = new Error('uh oh');
-    (enableRules as jest.Mock).mockRejectedValue(mockError);
+    (performBulkAction as jest.Mock).mockRejectedValue(mockError);
 
     const wrapper = mount(<RuleSwitchComponent enabled={false} isDisabled={false} id={'7'} />, {
       wrappingComponent: TestProviders,
@@ -74,25 +82,7 @@ describe('RuleSwitch', () => {
 
     await waitFor(() => {
       wrapper.update();
-      expect(displayErrorToast).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  test('it dispatches error toaster if "enableRules" call resolves with some errors', async () => {
-    (enableRules as jest.Mock).mockResolvedValue([
-      getRulesSchemaMock(),
-      { error: { status_code: 400, message: 'error' } },
-      { error: { status_code: 400, message: 'error' } },
-    ]);
-
-    const wrapper = mount(<RuleSwitchComponent enabled={false} isDisabled={false} id={'7'} />, {
-      wrappingComponent: TestProviders,
-    });
-    wrapper.find('[data-test-subj="ruleSwitch"]').at(2).simulate('click');
-
-    await waitFor(() => {
-      wrapper.update();
-      expect(displayErrorToast).toHaveBeenCalledTimes(1);
+      expect(useAppToastsValueMock.addError).toHaveBeenCalledTimes(1);
     });
   });
 

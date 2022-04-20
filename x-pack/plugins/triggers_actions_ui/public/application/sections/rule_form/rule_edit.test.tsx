@@ -8,7 +8,7 @@
 import * as React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import {
   ValidationResult,
@@ -20,7 +20,7 @@ import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
 import RuleEdit from './rule_edit';
 import { useKibana } from '../../../common/lib/kibana';
-import { ALERTS_FEATURE_ID } from '../../../../../alerting/common';
+import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -36,7 +36,9 @@ jest.mock('../../lib/rule_api', () => ({
 }));
 
 jest.mock('../../../common/lib/config_api', () => ({
-  triggersActionsUiConfig: jest.fn().mockResolvedValue({ minimumScheduleInterval: '1m' }),
+  triggersActionsUiConfig: jest
+    .fn()
+    .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
 }));
 
 jest.mock('./rule_errors', () => ({
@@ -229,6 +231,6 @@ describe('rule_edit', () => {
     await setup();
     const lastCall = getRuleErrors.mock.calls[getRuleErrors.mock.calls.length - 1];
     expect(lastCall[2]).toBeDefined();
-    expect(lastCall[2]).toEqual({ minimumScheduleInterval: '1m' });
+    expect(lastCall[2]).toEqual({ minimumScheduleInterval: { value: '1m', enforce: false } });
   });
 });

@@ -6,10 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { EntityIterable } from '../..';
 import { apm } from '../../lib/apm';
+import { ApmFields } from '../../lib/apm/apm_fields';
 import { timerange } from '../../lib/timerange';
 
 describe('simple trace', () => {
+  let iterable: EntityIterable<ApmFields>;
   let events: Array<Record<string, any>>;
 
   beforeEach(() => {
@@ -17,14 +20,14 @@ describe('simple trace', () => {
     const javaInstance = javaService.instance('instance-1');
 
     const range = timerange(
-      new Date('2021-01-01T00:00:00.000Z').getTime(),
-      new Date('2021-01-01T00:15:00.000Z').getTime()
+      new Date('2021-01-01T00:00:00.000Z'),
+      new Date('2021-01-01T00:15:00.000Z')
     );
 
-    events = range
+    iterable = range
       .interval('1m')
       .rate(1)
-      .flatMap((timestamp) =>
+      .generator((timestamp) =>
         javaInstance
           .transaction('GET /api/product/list')
           .duration(1000)
@@ -37,10 +40,11 @@ describe('simple trace', () => {
               .duration(900)
               .timestamp(timestamp + 50)
           )
-          .serialize()
       );
+    events = iterable.toArray();
   });
 
+  // TODO this is not entirely factual, since id's are generated of a global sequence number
   it('generates the same data every time', () => {
     expect(events).toMatchSnapshot();
   });

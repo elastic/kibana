@@ -57,22 +57,39 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
   // Handle retryable_es_client_errors. Other left values need to be handled
   // by the control state specific code below.
-  if (
-    Either.isLeft<unknown, unknown>(resW) &&
-    isLeftTypeof(resW.left, 'retryable_es_client_error')
-  ) {
-    // Retry the same step after an exponentially increasing delay.
-    return delayRetryState(stateP, resW.left.message, stateP.retryAttempts);
+  if (Either.isLeft<unknown, unknown>(resW)) {
+    if (isLeftTypeof(resW.left, 'retryable_es_client_error')) {
+      // Retry the same step after an exponentially increasing delay.
+      return delayRetryState(stateP, resW.left.message, stateP.retryAttempts);
+    }
   } else {
-    // If the action didn't fail with a retryable_es_client_error, reset the
-    // retry counter and retryDelay state
+    // If any action returns a right response, reset the retryCount and retryDelay state
     stateP = resetRetryState(stateP);
   }
 
   if (stateP.controlState === 'INIT') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
 
-    if (Either.isRight(res)) {
+    if (Either.isLeft(res)) {
+      const left = res.left;
+      if (isLeftTypeof(left, 'unsupported_cluster_routing_allocation')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {"transient": {"cluster.routing.allocation.enable": null}, "persistent": {"cluster.routing.allocation.enable": null}}`,
+          logs: [
+            ...stateP.logs,
+            {
+              level: 'error',
+              message: `The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. Ensure that the persistent and transient Elasticsearch configuration option 'cluster.routing.allocation.enable' is not set or set it to a value of 'all'.`,
+            },
+          ],
+        };
+      } else {
+        return throwBadResponse(stateP, left);
+      }
+    } else if (Either.isRight(res)) {
+      // cluster routing allocation is enabled and we can continue with the migration as normal
       const indices = res.right;
       const aliases = getAliases(indices);
 

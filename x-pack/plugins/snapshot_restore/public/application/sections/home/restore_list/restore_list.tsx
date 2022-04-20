@@ -20,6 +20,7 @@ import {
   EuiLoadingSpinner,
   EuiLink,
 } from '@elastic/eui';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { APP_RESTORE_INDEX_PRIVILEGES } from '../../../../../common';
 import {
   WithPrivileges,
@@ -27,14 +28,13 @@ import {
   PageError,
   PageLoading,
   Error,
+  useExecutionContext,
 } from '../../../../shared_imports';
 import { UIM_RESTORE_LIST_LOAD } from '../../../constants';
 import { useLoadRestores } from '../../../services/http';
 import { linkToSnapshots } from '../../../services/navigation';
-import { useServices } from '../../../app_context';
+import { useAppContext, useServices } from '../../../app_context';
 import { RestoreTable } from './restore_table';
-
-import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 
 const ONE_SECOND_MS = 1000;
 const TEN_SECONDS_MS = 10 * 1000;
@@ -63,11 +63,17 @@ export const RestoreList: React.FunctionComponent = () => {
   } = useLoadRestores(currentInterval);
 
   const { uiMetricService, history } = useServices();
+  const { core } = useAppContext();
 
   // Track component loaded
   useEffect(() => {
     uiMetricService.trackUiMetric(UIM_RESTORE_LIST_LOAD);
   }, [uiMetricService]);
+
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'snapshotRestoreRestoreTab',
+  });
 
   let content: JSX.Element;
 

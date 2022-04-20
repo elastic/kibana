@@ -38,7 +38,6 @@
     "xpack.logstash": ["plugins/logstash"],
     "xpack.main": "legacy/plugins/xpack_main",
     "xpack.maps": ["plugins/maps"],
-    "xpack.metricsEntities": "plugins/metrics_entities",
     "xpack.ml": ["plugins/ml"],
     "xpack.monitoring": ["plugins/monitoring"],
     "xpack.osquery": ["plugins/osquery"],
@@ -71,6 +70,7 @@
   "exclude": ["examples"],
   "translations": [
     "plugins/translations/translations/zh-CN.json",
-    "plugins/translations/translations/ja-JP.json"
+    "plugins/translations/translations/ja-JP.json",
+    "plugins/translations/translations/fr-FR.json"
   ]
 }

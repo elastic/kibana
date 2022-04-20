@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
@@ -67,6 +67,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.timePicker.setDefaultAbsoluteRange();
           await queryBar.setQuery('extension.raw : ');
           await queryBar.expectSuggestions({ count: 5, contains: '"jpg"' });
+        });
+
+        it('also displays descriptions for operators', async () => {
+          await PageObjects.timePicker.setDefaultAbsoluteRange();
+          await queryBar.setQuery('extension.raw');
+          await queryBar.expectSuggestionsDescription({ count: 2 });
         });
       });
 

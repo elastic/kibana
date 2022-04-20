@@ -34,7 +34,7 @@ export default async function ({ readConfigFile }) {
 
     esTestCluster: {
       ...commonConfig.get('esTestCluster'),
-      serverArgs: ['xpack.security.enabled=false'],
+      serverArgs: [`xpack.security.enabled=${process.env.ES_SECURITY_ENABLED ? 'true' : 'false'}`],
     },
 
     kbnTestServer: {
@@ -207,6 +207,21 @@ export default async function ({ readConfigFile }) {
             indices: [
               {
                 names: ['version-test'],
+                privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
+        context_encoded_param: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['context-encoded-param'],
                 privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
                 field_security: { grant: ['*'], except: [] },
               },

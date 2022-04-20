@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { DataView } from '../../../../data/common';
+import type { DataView } from '@kbn/data-plugin/common';
 import type { Panel, Series } from '../../common/types';
-import { triggerTSVBtoLensConfiguration } from './';
+import { triggerTSVBtoLensConfiguration } from '.';
 
 const dataViewsMap: Record<string, DataView> = {
   test1: { id: 'test1', title: 'test1', timeFieldName: 'timeField1' } as DataView,
@@ -22,14 +22,12 @@ const dataViewsMap: Record<string, DataView> = {
 const getDataview = (id: string): DataView | undefined => dataViewsMap[id];
 jest.mock('../services', () => {
   return {
-    getDataStart: jest.fn(() => {
+    getDataViewsStart: jest.fn(() => {
       return {
-        dataViews: {
-          getDefault: jest.fn(() => {
-            return { id: '12345', title: 'default', timeFieldName: '@timestamp' };
-          }),
-          get: getDataview,
-        },
+        getDefault: jest.fn(() => {
+          return { id: '12345', title: 'default', timeFieldName: '@timestamp' };
+        }),
+        get: getDataview,
       };
     }),
   };
@@ -136,6 +134,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
           splitWithDateHistogram: false,
           timeFieldName: 'timeField2',
           timeInterval: 'auto',
+          dropPartialBuckets: false,
         },
       },
     });
@@ -254,6 +253,15 @@ describe('triggerTSVBtoLensConfiguration', () => {
     expect(triggerOptions?.layers[0]?.timeInterval).toBe('1h');
   });
 
+  test('should return dropPartialbuckets if enabled', async () => {
+    const modelWithDropBuckets = {
+      ...model,
+      drop_last_bucket: 1,
+    };
+    const triggerOptions = await triggerTSVBtoLensConfiguration(modelWithDropBuckets);
+    expect(triggerOptions?.layers[0]?.dropPartialBuckets).toBe(true);
+  });
+
   test('should return the correct chart configuration', async () => {
     const modelWithConfig = {
       ...model,
@@ -299,6 +307,7 @@ describe('triggerTSVBtoLensConfiguration', () => {
           splitWithDateHistogram: false,
           timeFieldName: 'timeField2',
           timeInterval: 'auto',
+          dropPartialBuckets: false,
         },
       },
     });

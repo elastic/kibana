@@ -7,19 +7,20 @@
  */
 
 import { cloneDeep, isEqual } from 'lodash';
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   DEFAULT_COLUMNS_SETTING,
+  DOC_HIDE_TIME_COLUMN_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../common';
 import { SavedSearch } from '../../../services/saved_searches';
-import { DataPublicPluginStart } from '../../../../../data/public';
 
 import { AppState } from '../services/discover_state';
 import { getDefaultSort, getSortArray } from '../../../components/doc_table';
 import { CHART_HIDDEN_KEY } from '../components/chart/discover_chart';
-import { Storage } from '../../../../../kibana_utils/public';
 
 function getDefaultColumns(savedSearch: SavedSearch, config: IUiSettingsClient) {
   if (savedSearch.columns && savedSearch.columns.length > 0) {
@@ -53,7 +54,11 @@ export function getStateDefaults({
   const defaultState = {
     query,
     sort: !sort.length
-      ? getDefaultSort(indexPattern, config.get(SORT_DEFAULT_ORDER_SETTING, 'desc'))
+      ? getDefaultSort(
+          indexPattern,
+          config.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
+          config.get(DOC_HIDE_TIME_COLUMN_SETTING, false)
+        )
       : sort,
     columns,
     index: indexPattern?.id,

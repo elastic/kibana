@@ -12,17 +12,17 @@ import type {
   IScopedClusterClient,
   RequestHandler,
   SavedObjectsClientContract,
-} from 'kibana/server';
-import type { SpacesPluginSetup } from '../../../spaces/server';
-import type { SecurityPluginSetup } from '../../../security/server';
+} from '@kbn/core/server';
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
-import { jobSavedObjectServiceFactory, JobSavedObjectService } from '../saved_objects';
+import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
+import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import { mlSavedObjectServiceFactory, MLSavedObjectService } from '../saved_objects';
 import type { MlLicense } from '../../common/license';
 
-import { MlClient, getMlClient } from '../lib/ml_client';
-import type { AlertingApiRequestHandlerContext } from '../../../alerting/server';
-import type { PluginStart as DataViewsPluginStart } from '../../../../../src/plugins/data_views/server';
-import type { DataViewsService } from '../../../../../src/plugins/data_views/common';
+import { MlClient, getMlClient } from './ml_client';
 import { getDataViewsServiceFactory } from './data_views_utils';
 
 type MLRequestHandlerContext = RequestHandlerContext & {
@@ -34,7 +34,7 @@ type Handler<P = unknown, Q = unknown, B = unknown> = (handlerParams: {
   request: KibanaRequest<P, Q, B>;
   response: KibanaResponseFactory;
   context: MLRequestHandlerContext;
-  jobSavedObjectService: JobSavedObjectService;
+  mlSavedObjectService: MLSavedObjectService;
   mlClient: MlClient;
   getDataViewsService(): Promise<DataViewsService>;
 }) => ReturnType<RequestHandler<P, Q, B>>;
@@ -96,11 +96,12 @@ export class RouteGuard {
         });
       }
 
-      const jobSavedObjectService = jobSavedObjectServiceFactory(
+      const mlSavedObjectService = mlSavedObjectServiceFactory(
         mlSavedObjectClient,
         internalSavedObjectsClient,
         this._spacesPlugin !== undefined,
         this._authorization,
+        client,
         this._isMlReady
       );
 
@@ -109,8 +110,8 @@ export class RouteGuard {
         request,
         response,
         context,
-        jobSavedObjectService,
-        mlClient: getMlClient(client, jobSavedObjectService),
+        mlSavedObjectService,
+        mlClient: getMlClient(client, mlSavedObjectService),
         getDataViewsService: getDataViewsServiceFactory(
           this._getDataViews,
           context.core.savedObjects.client,

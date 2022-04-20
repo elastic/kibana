@@ -8,15 +8,15 @@
 import { schema } from '@kbn/config-schema';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { validateDurationSchema } from '../../lib';
-import { handleDisabledApiKeysError } from './../lib/error_handler';
+import { handleDisabledApiKeysError } from '../lib/error_handler';
 import {
-  SanitizedAlert,
-  AlertNotifyWhenType,
-  AlertTypeParams,
+  SanitizedRule,
+  RuleNotifyWhenType,
+  RuleTypeParams,
   LEGACY_BASE_ALERT_API_PATH,
   validateNotifyWhenType,
 } from '../../types';
-import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
+import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
 import { RouteOptions } from '..';
 import { countUsageOfPredefinedIds } from '../lib';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
@@ -67,7 +67,7 @@ export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOp
         const rulesClient = context.alerting.getRulesClient();
         const alert = req.body;
         const params = req.params;
-        const notifyWhen = alert?.notifyWhen ? (alert.notifyWhen as AlertNotifyWhenType) : null;
+        const notifyWhen = alert?.notifyWhen ? (alert.notifyWhen as RuleNotifyWhenType) : null;
 
         trackLegacyRouteUsage('create', usageCounter);
 
@@ -78,16 +78,15 @@ export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOp
         });
 
         try {
-          const alertRes: SanitizedAlert<AlertTypeParams> =
-            await rulesClient.create<AlertTypeParams>({
-              data: { ...alert, notifyWhen },
-              options: { id: params?.id },
-            });
+          const alertRes: SanitizedRule<RuleTypeParams> = await rulesClient.create<RuleTypeParams>({
+            data: { ...alert, notifyWhen },
+            options: { id: params?.id },
+          });
           return res.ok({
             body: alertRes,
           });
         } catch (e) {
-          if (e instanceof AlertTypeDisabledError) {
+          if (e instanceof RuleTypeDisabledError) {
             return e.sendResponse(res);
           }
           throw e;

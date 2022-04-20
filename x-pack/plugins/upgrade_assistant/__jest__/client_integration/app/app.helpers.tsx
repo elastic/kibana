@@ -8,6 +8,7 @@
 import { act } from 'react-dom/test-utils';
 import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 
+import { HttpSetup } from '@kbn/core/public';
 import { App } from '../../../public/application/app';
 import { WithAppDependencies } from '../helpers';
 
@@ -39,8 +40,14 @@ const createActions = (testBed: TestBed) => {
   };
 };
 
-export const setupAppPage = async (overrides?: Record<string, unknown>): Promise<AppTestBed> => {
-  const initTestBed = registerTestBed(WithAppDependencies(App, overrides), testBedConfig);
+export const setupAppPage = async (
+  httpSetup: HttpSetup,
+  overrides?: Record<string, unknown>
+): Promise<AppTestBed> => {
+  const initTestBed = registerTestBed(
+    WithAppDependencies(App, httpSetup, overrides),
+    testBedConfig
+  );
   const testBed = await initTestBed();
 
   return {

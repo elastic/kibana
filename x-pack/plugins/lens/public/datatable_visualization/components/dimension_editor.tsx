@@ -19,18 +19,17 @@ import {
   EuiFieldText,
   EuiComboBox,
 } from '@elastic/eui';
-import { PaletteRegistry } from 'src/plugins/charts/public';
+import { CustomizablePalette, PaletteRegistry, FIXED_PROGRESSION } from '@kbn/coloring';
 import { VisualizationDimensionEditorProps } from '../../types';
 import { DatatableVisualizationState } from '../visualization';
+
 import {
-  CustomizablePalette,
   applyPaletteParams,
   defaultPaletteParams,
-  FIXED_PROGRESSION,
   useDebouncedValue,
   PalettePanelContainer,
   findMinMaxByColumnId,
-} from '../../shared_components/';
+} from '../../shared_components';
 import type { ColumnState } from '../../../common/expressions';
 import {
   isNumericFieldForDatatable,

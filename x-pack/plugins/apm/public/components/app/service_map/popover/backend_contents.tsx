@@ -10,14 +10,13 @@ import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import { METRIC_TYPE } from '@kbn/analytics';
 import React from 'react';
-import { useUiTracker } from '../../../../../../observability/public';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 import { ContentsProps } from '.';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { ApmRoutes } from '../../../routing/apm_route_config';
 import { StatsList } from './stats_list';
-import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
 type BackendReturn = APIReturnType<'GET /internal/apm/service-map/backend'>;
@@ -38,14 +37,7 @@ export function BackendContents({
     '/services/{serviceName}/service-map'
   );
 
-  const { comparisonEnabled, comparisonType } = query;
-
-  const { offset } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonEnabled,
-    comparisonType,
-  });
+  const { offset, comparisonEnabled } = query;
 
   const apmRouter = useApmRouter();
 
@@ -61,13 +53,13 @@ export function BackendContents({
               environment,
               start,
               end,
-              offset,
+              offset: comparisonEnabled ? offset : undefined,
             },
           },
         });
       }
     },
-    [environment, backendName, start, end, offset]
+    [environment, backendName, start, end, offset, comparisonEnabled]
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;

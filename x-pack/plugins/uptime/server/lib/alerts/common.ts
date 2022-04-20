@@ -7,6 +7,7 @@
 
 import { isRight } from 'fp-ts/lib/Either';
 import Mustache from 'mustache';
+import { IBasePath } from '@kbn/core/server';
 import { UptimeCommonState, UptimeCommonStateType } from '../../../common/runtime_types';
 
 export type UpdateUptimeAlertState = (
@@ -60,3 +61,7 @@ export const updateState: UpdateUptimeAlertState = (state, isTriggeredNow) => {
 export const generateAlertMessage = (messageTemplate: string, fields: Record<string, any>) => {
   return Mustache.render(messageTemplate, { state: { ...fields } });
 };
+export const getViewInAppUrl = (relativeViewInAppUrl: string, basePath: IBasePath) =>
+  basePath.publicBaseUrl
+    ? new URL(basePath.prepend(relativeViewInAppUrl), basePath.publicBaseUrl).toString()
+    : relativeViewInAppUrl;

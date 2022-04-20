@@ -1,0 +1,45 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies a modification on the dsHeuristics attribute on the bit that holds the configuration of groups excluded from the SDProp process. The SDProp compares the permissions on protected objects with those defined on the AdminSDHolder object. If the permissions on any of the protected accounts and groups do not match, the permissions on the protected accounts and groups are reset to match those of the domain's AdminSDHolder object, meaning that groups excluded will remain unchanged. Attackers can abuse this misconfiguration to maintain long-term access to privileged accounts in these groups.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-system.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "AdminSDHolder SDProp Exclusion Added",
+  "note": "## Triage and analysis\n\n### Investigating AdminSDHolder SDProp Exclusion Added\n\nThe SDProp process compares the permissions on protected objects with those defined on the AdminSDHolder object. If the\npermissions on any of the protected accounts and groups do not match, it resets the permissions on the protected\naccounts and groups to match those defined in the domain AdminSDHolder object.\n\nThe dSHeuristics is a Unicode string attribute, in which each character in the string represents a heuristic that is\nused to determine the behavior of Active Directory.\n\nAdministrators can use the dSHeuristics attribute to exclude privilege groups from the SDProp process by setting the\n16th bit (dwAdminSDExMask) of the string to a certain value, which represents the group(s):\n\n* For example, to exclude the Account Operators group, an administrator would modify the string, so the 16th character\nis set to 1 (i.e., 0000000001000001).\n\nThe usage of this exclusion can leave the accounts unprotected and facilitate the misconfiguration of privileges for the\nexcluded groups, enabling attackers to add accounts to these groups to maintain long-term persistence with high\nprivileges.\n\nThis rule matches changes of the dsHeuristics object where the 16th bit is set to a value other than zero.\n\n#### Possible investigation steps\n\n- Identify the user account that performed the action and whether it should perform this kind of action.\n- Contact the account owner and confirm whether they are aware of this activity.\n- Investigate other alerts associated with the user/host during the past 48 hours.\n- Check the value assigned to the 16th bit of the string on the `winlog.event_data.AttributeValue` field:\n    - Account Operators eq 1\n    - Server Operators eq 2\n    - Print Operators eq 4\n    - Backup Operators eq 8\n    The field value can range from 0 to f (15). If more than one group is specified, the values will be summed together;\n    for example, Backup Operators and Print Operators will set the `c` value on the bit.\n\n### False positive analysis\n\n- While this modification can be done legitimately, it is not best practice. Any potential benign true positive (B-TP)\nshould be mapped and reviewed by the security team for alternatives as this weakens the security of the privileged group.\n\n### Response and remediation\n\n- The change can be reverted by setting the dwAdminSDExMask (16th bit) to 0 in dSHeuristics.\n\n## Config\n\nThe 'Audit Directory Service Changes' logging policy must be configured for (Success).\nSteps to implement the logging policy with Advanced Audit Configuration:\n\n```\nComputer Configuration > \nPolicies >\nWindows Settings >\nSecurity Settings >\nAdvanced Audit Policies Configuration >\nAudit Policies >\nDS Access >\nAudit Directory Service Changes (Success)\n```\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
+  "query": "any where event.action == \"Directory Service Changes\" and\n  event.code == \"5136\" and\n  length(winlog.event_data.AttributeValue) > 15 and\n  winlog.event_data.AttributeValue regex~ \"[0-9]{15}([1-9a-f]).*\"\n",
+  "references": [
+    "https://www.cert.ssi.gouv.fr/uploads/guide-ad.html#dsheuristics_bad",
+    "https://petri.com/active-directory-security-understanding-adminsdholder-object"
+  ],
+  "risk_score": 73,
+  "rule_id": "61d29caf-6c15-4d1e-9ccb-7ad12ccc0bc7",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Persistence",
+    "Active Directory"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": []
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

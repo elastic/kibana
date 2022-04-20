@@ -9,9 +9,9 @@ import expect from '@kbn/expect';
 import {
   DEFAULT_ALERTS_INDEX,
   DETECTION_ENGINE_INDEX_URL,
-} from '../../../../plugins/security_solution/common/constants';
+} from '@kbn/security-solution-plugin/common/constants';
 
-import { SIGNALS_FIELD_ALIASES_VERSION } from '../../../../plugins/security_solution/server/lib/detection_engine/routes/index/get_signals_template';
+import { SIGNALS_FIELD_ALIASES_VERSION } from '@kbn/security-solution-plugin/server/lib/detection_engine/routes/index/get_signals_template';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { deleteSignalsIndex } from '../../utils';
@@ -38,6 +38,7 @@ export default ({ getService }: FtrProviderContext) => {
           await esArchiver.unload('x-pack/test/functional/es_archives/signals/index_alias_clash');
         });
 
+        // This fails and should be investigated or removed if it no longer applies
         it.skip('should report that signals index does not exist', async () => {
           const { body } = await supertest.get(DETECTION_ENGINE_INDEX_URL).send().expect(404);
           expect(body).to.eql({ message: 'index for this space does not exist', status_code: 404 });

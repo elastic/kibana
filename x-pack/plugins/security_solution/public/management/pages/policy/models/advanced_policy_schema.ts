@@ -873,4 +873,15 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'linux.advanced.kernel.capture_mode',
+    first_supported_version: '8.2',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.kernel.capture_mode',
+      {
+        defaultMessage:
+          'Allows users to control whether kprobes or ebpf are used to gather data. Possible options are kprobes, ebpf, or auto. Default: kprobes',
+      }
+    ),
+  },
 ];

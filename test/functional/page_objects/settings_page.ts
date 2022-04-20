@@ -273,8 +273,12 @@ export class SettingsPageObject extends FtrService {
 
   async clearFieldTypeFilter(type: string) {
     await this.testSubjects.clickWhenNotDisabled('indexedFieldTypeFilterDropdown');
-    await this.testSubjects.existOrFail('indexedFieldTypeFilterDropdown-popover');
-    await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail('indexedFieldTypeFilterDropdown-popover');
+    });
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
+    });
     await this.testSubjects.click(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
     await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}`);
     await this.browser.pressKeys(this.browser.keys.ESCAPE);
@@ -291,10 +295,14 @@ export class SettingsPageObject extends FtrService {
 
   async clearScriptedFieldLanguageFilter(type: string) {
     await this.testSubjects.clickWhenNotDisabled('scriptedFieldLanguageFilterDropdown');
-    await this.testSubjects.existOrFail('scriptedFieldLanguageFilterDropdown-popover');
-    await this.testSubjects.existOrFail(
-      `scriptedFieldLanguageFilterDropdown-option-${type}-checked`
-    );
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail('scriptedFieldLanguageFilterDropdown-popover');
+    });
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail(
+        `scriptedFieldLanguageFilterDropdown-option-${type}-checked`
+      );
+    });
     await this.testSubjects.click(`scriptedFieldLanguageFilterDropdown-option-${type}-checked`);
     await this.testSubjects.existOrFail(`scriptedFieldLanguageFilterDropdown-option-${type}`);
     await this.browser.pressKeys(this.browser.keys.ESCAPE);
@@ -357,7 +365,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clickIndexPatternByName(name: string) {
-    const indexLink = await this.find.byXPath(`//a[descendant::*[text()='${name}']]`);
+    const indexLink = await this.find.byXPath(`//a[text()='${name}']`);
     await indexLink.click();
   }
 
@@ -453,9 +461,9 @@ export class SettingsPageObject extends FtrService {
     await this.common.scrollKibanaBodyTop();
 
     // if flyout is open
-    const flyoutView = await this.testSubjects.exists('createIndexPatternButtonFlyout');
+    const flyoutView = await this.testSubjects.exists('createDataViewButtonFlyout');
     if (flyoutView) {
-      await this.testSubjects.click('createIndexPatternButtonFlyout');
+      await this.testSubjects.click('createDataViewButtonFlyout');
       return;
     }
 
@@ -463,9 +471,9 @@ export class SettingsPageObject extends FtrService {
     if (tableView) {
       await this.testSubjects.click('createIndexPatternButton');
     }
-    const flyoutView2 = await this.testSubjects.exists('createIndexPatternButtonFlyout');
+    const flyoutView2 = await this.testSubjects.exists('createDataViewButtonFlyout');
     if (flyoutView2) {
-      await this.testSubjects.click('createIndexPatternButtonFlyout');
+      await this.testSubjects.click('createDataViewButtonFlyout');
     }
   }
 

@@ -8,8 +8,8 @@
 import nodeCrypto from '@elastic/node-crypto';
 import crypto from 'crypto';
 
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
 
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { ConfigSchema, createConfig } from '../config';

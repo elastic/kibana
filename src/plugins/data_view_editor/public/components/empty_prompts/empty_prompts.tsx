@@ -9,19 +9,19 @@
 import React, { useState, FC, useEffect } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
+import { NoDataViewsComponent } from '@kbn/shared-ux-components';
+import { EuiFlyoutBody } from '@elastic/eui';
+import { DEFAULT_ASSETS_TO_IGNORE } from '@kbn/data-plugin/common';
 import { useKibana } from '../../shared_imports';
 
-import { MatchedItem, ResolveIndexResponseItemAlias, DataViewEditorContext } from '../../types';
+import { MatchedItem, DataViewEditorContext } from '../../types';
 
 import { getIndices } from '../../lib';
 
 import { EmptyIndexListPrompt } from './empty_index_list_prompt';
-import { EmptyIndexPatternPrompt } from './empty_index_pattern_prompt';
 import { PromptFooter } from './prompt_footer';
-import { FLEET_ASSETS_TO_IGNORE } from '../../../../data/common';
 
-const removeAliases = (item: MatchedItem) =>
-  !(item as unknown as ResolveIndexResponseItemAlias).indices;
+const removeAliases = (mItem: MatchedItem) => !mItem.item.indices;
 
 interface Props {
   onCancel: () => void;
@@ -33,10 +33,11 @@ export function isUserDataIndex(source: MatchedItem) {
   // filter out indices that start with `.`
   if (source.name.startsWith('.')) return false;
 
-  // filter out sources from FLEET_ASSETS_TO_IGNORE
-  if (source.name === FLEET_ASSETS_TO_IGNORE.LOGS_DATA_STREAM_TO_IGNORE) return false;
-  if (source.name === FLEET_ASSETS_TO_IGNORE.METRICS_DATA_STREAM_TO_IGNORE) return false;
-  if (source.name === FLEET_ASSETS_TO_IGNORE.METRICS_ENDPOINT_INDEX_TO_IGNORE) return false;
+  // filter out sources from DEFAULT_ASSETS_TO_IGNORE
+  if (source.name === DEFAULT_ASSETS_TO_IGNORE.LOGS_DATA_STREAM_TO_IGNORE) return false;
+  if (source.name === DEFAULT_ASSETS_TO_IGNORE.METRICS_DATA_STREAM_TO_IGNORE) return false;
+  if (source.name === DEFAULT_ASSETS_TO_IGNORE.METRICS_ENDPOINT_INDEX_TO_IGNORE) return false;
+  if (source.name === DEFAULT_ASSETS_TO_IGNORE.ENT_SEARCH_LOGS_DATA_STREAM_TO_IGNORE) return false;
 
   // filter out empty sources created by apm server
   if (source.name.startsWith('apm-')) return false;
@@ -66,7 +67,6 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
         isRollupIndex: () => false,
         pattern: '*:*',
         showAllIndices: false,
-        searchClient,
       }).then((dataSources) => {
         setRemoteClustersExist(!!dataSources.filter(removeAliases).length);
       });
@@ -80,14 +80,16 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
       // load data
       return (
         <>
-          <EmptyIndexListPrompt
-            onRefresh={loadSources}
-            closeFlyout={onCancel}
-            createAnyway={() => setGoToForm(true)}
-            canSaveIndexPattern={application.capabilities.indexPatterns.save as boolean}
-            navigateToApp={application.navigateToApp}
-            addDataUrl={docLinks.links.indexPatterns.introduction}
-          />
+          <EuiFlyoutBody>
+            <EmptyIndexListPrompt
+              onRefresh={loadSources}
+              closeFlyout={onCancel}
+              createAnyway={() => setGoToForm(true)}
+              canSaveIndexPattern={!!application.capabilities.indexPatterns.save}
+              navigateToApp={application.navigateToApp}
+              addDataUrl={docLinks.links.indexPatterns.introduction}
+            />
+          </EuiFlyoutBody>
           <PromptFooter onCancel={onCancel} />
         </>
       );
@@ -95,11 +97,14 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
       // first time
       return (
         <>
-          <EmptyIndexPatternPrompt
-            goToCreate={() => setGoToForm(true)}
-            indexPatternsIntroUrl={docLinks.links.indexPatterns.introduction}
-            canSaveIndexPattern={dataViews.getCanSaveSync()}
-          />
+          <EuiFlyoutBody>
+            <NoDataViewsComponent
+              onClickCreate={() => setGoToForm(true)}
+              canCreateNewDataView={application.capabilities.indexPatterns.save as boolean}
+              dataViewsDocLink={docLinks.links.indexPatterns.introduction}
+              emptyPromptColor={'subdued'}
+            />
+          </EuiFlyoutBody>
           <PromptFooter onCancel={onCancel} />
         </>
       );

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsUpdateResponse } from 'kibana/server';
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { SavedObjectsUpdateResponse } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { AlertAction } from '../../../../../alerting/common';
+import { RuleAction } from '@kbn/alerting-plugin/common';
 
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings';
@@ -343,7 +343,7 @@ describe('legacy_utils', () => {
 
   describe('legacyTransformActionToReference', () => {
     type FuncReturn = ReturnType<typeof legacyTransformActionToReference>;
-    const alertAction: AlertAction = {
+    const alertAction: RuleAction = {
       id: '123',
       group: 'group_1',
       params: {

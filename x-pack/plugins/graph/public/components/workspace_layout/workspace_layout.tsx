@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { connect } from 'react-redux';
 import { useLocation } from 'react-router-dom';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { SearchBar } from '../search_bar';
 import {
   GraphState,
@@ -17,7 +18,6 @@ import {
   workspaceInitializedSelector,
 } from '../../state_management';
 import { FieldManager } from '../field_manager';
-import { IndexPattern } from '../../../../../../src/plugins/data/public';
 import {
   ControlType,
   IndexPatternProvider,
@@ -89,7 +89,7 @@ export const WorkspaceLayoutComponent = ({
   sharingSavedObjectProps,
   spaces,
 }: WorkspaceLayoutProps & WorkspaceLayoutStateProps) => {
-  const [currentIndexPattern, setCurrentIndexPattern] = useState<IndexPattern>();
+  const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView>();
   const [showInspect, setShowInspect] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [mergeCandidates, setMergeCandidates] = useState<TermIntersect[]>([]);
@@ -112,7 +112,7 @@ export const WorkspaceLayoutComponent = ({
   }, []);
 
   const onIndexPatternChange = useCallback(
-    (indexPattern?: IndexPattern) => setCurrentIndexPattern(indexPattern),
+    (indexPattern?: DataView) => setCurrentIndexPattern(indexPattern),
     []
   );
 

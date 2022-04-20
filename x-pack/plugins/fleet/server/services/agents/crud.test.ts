@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from 'kibana/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
 
@@ -30,7 +30,7 @@ describe('Agents CRUD test', () => {
     function getEsResponse(ids: string[], total: number) {
       return {
         hits: {
-          total: { value: total },
+          total,
           hits: ids.map((id: string) => ({
             _id: id,
             _source: {},

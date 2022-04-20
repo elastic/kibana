@@ -6,7 +6,7 @@
  */
 
 import { createMockedIndexPattern } from '../../../mocks';
-import { formulaOperation, GenericOperationDefinition, GenericIndexPatternColumn } from '../index';
+import { formulaOperation, GenericOperationDefinition, GenericIndexPatternColumn } from '..';
 import { FormulaIndexPatternColumn } from './formula';
 import { insertOrReplaceFormulaColumn } from './parse';
 import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../../types';
@@ -343,6 +343,7 @@ describe('formula', () => {
           formula: 'moving_average(average(bytes), window=3)',
         },
         references: [],
+        timeScale: 'd',
       });
     });
 

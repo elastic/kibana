@@ -7,8 +7,8 @@
  */
 
 import { map, uniq } from 'lodash';
+import { DataView, DataViewField, IIndexPatternFieldList } from '@kbn/data-views-plugin/public';
 import { flights } from './flights_data';
-import { DataView, DataViewField, IIndexPatternFieldList } from '../../../../data_views/public';
 
 export type Flight = typeof flights[number];
 export type FlightField = keyof Flight;
@@ -43,12 +43,22 @@ export const flightFieldNames: FlightField[] = [
   'timestamp',
 ];
 
+const numberFields = [
+  'AvgTicketPrice',
+  'dayOfWeek',
+  'DistanceKilometers',
+  'DistanceMiles',
+  'FlightDelayMin',
+  'FlightTimeHour',
+  'FlightTimeMin',
+];
+
 export const flightFieldByName: { [key: string]: DataViewField } = {};
 flightFieldNames.forEach(
   (flightFieldName) =>
     (flightFieldByName[flightFieldName] = {
       name: flightFieldName,
-      type: 'string',
+      type: numberFields.includes(flightFieldName) ? 'number' : 'string',
       aggregatable: true,
     } as unknown as DataViewField)
 );
