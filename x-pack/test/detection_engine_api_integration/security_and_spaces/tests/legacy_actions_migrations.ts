@@ -129,7 +129,7 @@ export default ({ getService }: FtrProviderContext) => {
       ]);
     });
 
-    it.only('migrates legacy actions for rule with action run hourly', async () => {
+    it('migrates legacy actions for rule with action run hourly', async () => {
       const soId = '064e3160-b076-11ec-bb3f-1f063f8e06cf';
       const ruleId = '4c056b05-75ac-4209-be32-82100f771eb4';
       const legacySidecarId = '07aa8d10-b076-11ec-bb3f-1f063f8e06cf';
