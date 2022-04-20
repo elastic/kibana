@@ -130,6 +130,16 @@ Fixes an issue that prevented Gold license users from accessing PDF and PNG repo
 Review the following information about the 7.17.2 release.
 
 [float]
+[[known-issues-v7.17.2]]
+=== Known issues
+
+Before you upgrade, review the known issues, then mitigate the impact to your application. 
+
+There are no known issues in 7.17.2. 
+
+For the known issues in the previous releases, refer to the <<known-issue-7.17.0, known issues in 7.17.0>.
+
+[float]
 [[breaking-changes-v7.17.2]]
 === Breaking changes
 
@@ -187,6 +197,8 @@ Review the following information about the 7.17.1 release.
 Lens & visualizations::
 A change in the Markdown library that {kib} uses to create *TSVB* *Markdown* visualizations and *Text* dashboard panels renders some tables differently. For more information, check out link:https://github.com/markdown-it/markdown-it/pull/767[#767]. 
 
+For the known issues in the previous releases, refer to the <<known-issue-7.17.0, known issues in 7.17.0>.
+
 [float]
 [[breaking-changes-v7.17.1]]
 === Breaking changes
@@ -228,6 +240,21 @@ Security::
 == {kib} 7.17.0
 
 Review the following information about the 7.17.0 release.
+
+[float]
+[[known-issue-7.17.0]]
+=== Known issue
+
+Before you upgrade, review the known issue, then mitigate the impact to your application.
+
+.Hidden dashboard titles now appear
+[%collapsible]
+====
+*Details*  +
+If you are using {kib} 7.9.x and earlier, and you upgrade to 7.10.0 to 7.17.2, all hidden panel titles now appear on your dashboards.
+*Impact* +
+Upgrade to {kib} 7.17.3 or later.
+====
 
 [float]
 [[breaking-changes-v7.17.0]]
