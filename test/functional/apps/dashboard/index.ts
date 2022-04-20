@@ -115,7 +115,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     // TODO: Remove when vislib is removed
     // https://github.com/elastic/kibana/issues/56143
     describe('new charts library', function () {
-      this.tags('ciGroup6');
+      this.tags('ciGroup5');
 
       before(async () => {
         await loadLogstash();
