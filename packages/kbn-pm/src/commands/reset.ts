@@ -11,11 +11,12 @@ import del from 'del';
 import ora from 'ora';
 import { join, relative } from 'path';
 
+import { runBazel } from '@kbn/bazel-runner';
+
 import {
   getBazelDiskCacheFolder,
   getBazelRepositoryCacheFolder,
   isBazelBinAvailable,
-  runBazel,
 } from '../utils/bazel';
 import { isDirectory } from '../utils/fs';
 import { log } from '../utils/log';
@@ -66,7 +67,10 @@ export const ResetCommand: ICommand = {
     // Runs Bazel hard clean and deletes Bazel Cache Folders
     if (await isBazelBinAvailable(kbn.getAbsolute())) {
       // Hard cleaning bazel
-      await runBazel(['clean', '--expunge']);
+      await runBazel({
+        bazelArgs: ['clean', '--expunge'],
+        log,
+      });
       log.success('Hard cleaned bazel');
 
       // Deletes Bazel Cache Folders
