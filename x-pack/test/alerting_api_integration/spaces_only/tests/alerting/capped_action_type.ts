@@ -90,6 +90,8 @@ export default function createCappedActionsTests({ getService }: FtrProviderCont
         )
         .expect(200);
 
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
       await getRuleEvents(createdRule.id);
       const [executionEvent] = await getRuleEvents(createdRule.id, 1);
 
