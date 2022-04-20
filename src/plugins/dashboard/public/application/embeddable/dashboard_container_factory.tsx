@@ -30,8 +30,7 @@ import {
   ControlGroupOutput,
   CONTROL_GROUP_TYPE,
 } from '../../../../controls/public';
-
-import { getDefaultDashboardControlGroupInput } from '../../../common/embeddable/dashboard_control_group';
+import { getDefaultControlGroupInput } from '../../../../controls/common';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   DashboardContainerInput,
@@ -90,7 +89,7 @@ export class DashboardContainerFactoryDefinition
     const { filters, query, timeRange, viewMode, controlGroupInput, id } = initialInput;
     const controlGroup = await controlsGroupFactory?.create({
       id: `control_group_${id ?? 'new_dashboard'}`,
-      ...getDefaultDashboardControlGroupInput(),
+      ...getDefaultControlGroupInput(),
       ...pickBy(controlGroupInput, identity), // undefined keys in initialInput should not overwrite defaults
       timeRange,
       viewMode,
