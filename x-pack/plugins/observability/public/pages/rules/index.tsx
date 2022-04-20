@@ -27,9 +27,9 @@ import {
   RuleTableItem,
   enableRule,
   disableRule,
-  muteRule,
+  snoozeRule,
   useLoadRuleTypes,
-  unmuteRule,
+  unsnoozeRule,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { RuleExecutionStatus, ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -40,7 +40,6 @@ import { RulesTable } from './components/rules_table';
 import { Name } from './components/name';
 import { LastResponseFilter } from './components/last_response_filter';
 import { TypeFilter } from './components/type_filter';
-import { StatusContext } from './components/status_context';
 import { ExecutionStatus } from './components/execution_status';
 import { LastRun } from './components/last_run';
 import { EditRuleFlyout } from './components/edit_rule_flyout';
@@ -214,17 +213,17 @@ export function RulesPage() {
         name: STATUS_COLUMN_TITLE,
         sortable: true,
         render: (_enabled: boolean, item: RuleTableItem) => {
-          return (
-            <StatusContext
-              disabled={!item.isEditable || !item.enabledInLicense}
-              item={item}
-              onStatusChanged={() => reload()}
-              enableRule={async () => await enableRule({ http, id: item.id })}
-              disableRule={async () => await disableRule({ http, id: item.id })}
-              muteRule={async () => await muteRule({ http, id: item.id })}
-              unMuteRule={async () => await unmuteRule({ http, id: item.id })}
-            />
-          );
+          return triggersActionsUi.getRuleStatusDropdown({
+            rule: item,
+            enableRule: async () => await enableRule({ http, id: item.id }),
+            disableRule: async () => await disableRule({ http, id: item.id }),
+            onRuleChanged: () => reload(),
+            isEditable: true, // TODO don't hardcode
+            snoozeRule: async (snoozeEndTime: string | -1, interval: string | null) => {
+              await snoozeRule({ http, id: item.id, snoozeEndTime });
+            },
+            unsnoozeRule: async () => await unsnoozeRule({ http, id: item.id }),
+          });
         },
       },
       {
