@@ -277,18 +277,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('validate functionality of the single alert actions button', async () => {
+          await observability.alerts.common.setWorkflowStatusFilter('acknowledged');
           const singleActions = await testSubjects.findAll('alerts-table-row-action-more');
           await singleActions[0].click();
 
           const closeAlertAction = await testSubjects.find('close-alert-status');
           await closeAlertAction.click();
 
-          await observability.alerts.common.setWorkflowStatusFilter('closed');
+          await observability.alerts.common.setWorkflowStatusFilter('acknowledged');
 
           await retry.try(async () => {
             const enabledCheckBoxes =
               await observability.alerts.common.getAllEnabledCheckBoxInTable();
-            expect(enabledCheckBoxes.length).to.eql(1);
+            expect(enabledCheckBoxes.length).to.eql(2);
           });
         });
       });
