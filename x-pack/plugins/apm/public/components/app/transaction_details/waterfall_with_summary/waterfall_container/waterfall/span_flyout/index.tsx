@@ -20,25 +20,26 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment } from 'react';
-import { isEmpty } from 'lodash';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { CompositeSpanDurationSummaryItem } from '../../../../../../shared/summary/composite_span_duration_summary_item';
+import { isEmpty } from 'lodash';
+import React, { Fragment } from 'react';
+import { SpanLinks as SpanLinksType } from '../../../../../../../../typings/es_schemas/raw/fields/span_links';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { DiscoverSpanLink } from '../../../../../../shared/links/discover_links/discover_span_link';
 import { SpanMetadata } from '../../../../../../shared/metadata_table/span_metadata';
+import { getSpanLinksTabContent } from '../../../../../../shared/span_links/span_links_tab_content';
 import { Stacktrace } from '../../../../../../shared/stacktrace';
 import { Summary } from '../../../../../../shared/summary';
+import { CompositeSpanDurationSummaryItem } from '../../../../../../shared/summary/composite_span_duration_summary_item';
 import { DurationSummaryItem } from '../../../../../../shared/summary/duration_summary_item';
 import { HttpInfoSummaryItem } from '../../../../../../shared/summary/http_info_summary_item';
 import { TimestampTooltip } from '../../../../../../shared/timestamp_tooltip';
-import { ResponsiveFlyout } from '../responsive_flyout';
 import { SyncBadge } from '../badge/sync_badge';
+import { FailureBadge } from '../failure_badge';
+import { ResponsiveFlyout } from '../responsive_flyout';
 import { SpanDatabase } from './span_db';
 import { StickySpanProperties } from './sticky_span_properties';
-import { FailureBadge } from '../failure_badge';
-import { SpanLinks } from '../../../../../../shared/span_links';
 
 function formatType(type: string) {
   switch (type) {
@@ -87,6 +88,7 @@ interface Props {
   parentTransaction?: Transaction;
   totalDuration?: number;
   onClose: () => void;
+  outgoingSpanLinks?: SpanLinksType;
 }
 
 export function SpanFlyout({
@@ -94,6 +96,7 @@ export function SpanFlyout({
   parentTransaction,
   totalDuration,
   onClose,
+  outgoingSpanLinks,
 }: Props) {
   if (!span) {
     return null;
@@ -107,6 +110,12 @@ export function SpanFlyout({
     span.http?.response?.status_code || span.span?.http?.response?.status_code;
   const spanHttpUrl = span.url?.original || span.span?.http?.url?.original;
   const spanHttpMethod = span.http?.request?.method || span.span?.http?.method;
+
+  const incomingSpanLinks = span.span?.links;
+  const spanLinksTabContent = getSpanLinksTabContent({
+    incomingSpanLinks,
+    outgoingSpanLinks,
+  });
 
   return (
     <EuiPortal>
@@ -255,24 +264,7 @@ export function SpanFlyout({
                     },
                   ]
                 : []),
-              {
-                id: 'span_links',
-                name: (
-                  <>
-                    {i18n.translate(
-                      'xpack.apm.propertiesTable.tabs.spanLinks',
-                      { defaultMessage: 'Span links' }
-                    )}{' '}
-                    <EuiBadge>{span.span.links?.length}</EuiBadge>
-                  </>
-                ),
-                content: (
-                  <>
-                    <EuiSpacer size="m" />
-                    <SpanLinks span={span} />
-                  </>
-                ),
-              },
+              ...(spanLinksTabContent ? [spanLinksTabContent] : []),
             ]}
           />
         </EuiFlyoutBody>

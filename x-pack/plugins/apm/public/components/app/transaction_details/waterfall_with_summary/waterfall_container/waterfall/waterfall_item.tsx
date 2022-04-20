@@ -205,6 +205,9 @@ export function WaterfallItem({
   const isServerlessColdstart =
     item.docType === 'transaction' && item.doc.faas?.coldstart;
 
+  const outgoingSpanLinksSize = item.outgoingSpanLinks?.length;
+  const incomingSpanLinksSize = item.doc.span?.links?.length;
+
   return (
     <Container
       type={item.docType}
@@ -238,8 +241,11 @@ export function WaterfallItem({
             agentName={item.doc.agent.name}
           />
         )}
-        {item.docType === 'span' && item.doc.span.links?.length && (
-          <SpanLinksBadge size={item.doc.span.links.length} />
+        {(outgoingSpanLinksSize || incomingSpanLinksSize) && (
+          <SpanLinksBadge
+            outgoingSpanLinksSize={outgoingSpanLinksSize}
+            incomingSpanLinksSize={incomingSpanLinksSize}
+          />
         )}
         {isServerlessColdstart && <ColdStartBadge />}
       </ItemText>
