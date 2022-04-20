@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { UserAtSpaceScenarios } from '../../scenarios';
 import {
   checkAAD,
@@ -16,7 +17,6 @@ import {
   getProducerUnauthorizedErrorMessage,
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import type { SanitizedRule } from '../../../../../plugins/alerting/common';
 
 // eslint-disable-next-line import/no-default-export
 export default function createUpdateTests({ getService }: FtrProviderContext) {

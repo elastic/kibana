@@ -10,7 +10,7 @@ import {
   retryIfBulkEditConflicts,
   RetryForConflictsAttempts,
 } from './retry_if_bulk_edit_conflicts';
-import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 const mockFilter: KueryNode = {
   type: 'function',

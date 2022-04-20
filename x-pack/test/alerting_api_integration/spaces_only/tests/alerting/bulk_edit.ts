@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { Spaces } from '../../scenarios';
 import { checkAAD, getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import type { SanitizedRule } from '../../../../../plugins/alerting/common';
 
 // eslint-disable-next-line import/no-default-export
 export default function createUpdateTests({ getService }: FtrProviderContext) {
