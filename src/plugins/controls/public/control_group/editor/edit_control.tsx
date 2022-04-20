@@ -64,13 +64,13 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
 
   const editControl = async () => {
     const panel = panels[embeddableId];
-    const factory = getControlFactory(panel.type);
+    let factory = getControlFactory(panel.type);
+    if (!factory) throw new EmbeddableFactoryNotFoundError(panel.type);
+
     const embeddable = await untilEmbeddableLoaded(embeddableId);
     const controlGroup = embeddable.getRoot() as ControlGroupContainer;
 
     let inputToReturn: Partial<ControlInput> = {};
-
-    if (!factory) throw new EmbeddableFactoryNotFoundError(panel.type);
 
     let removed = false;
     const onCancel = (ref: OverlayRef) => {
@@ -101,11 +101,13 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
     };
 
     const onSave = (type: string, ref: OverlayRef) => {
-      const newFactory = getControlFactory(type) as IEditableControlFactory;
-      if (!newFactory) throw new EmbeddableFactoryNotFoundError(type);
-
-      if (newFactory.presaveTransformFunction) {
-        inputToReturn = newFactory.presaveTransformFunction(inputToReturn);
+      if (latestPanelState.current.type !== type) {
+        factory = getControlFactory(type);
+        if (!factory) throw new EmbeddableFactoryNotFoundError(type);
+      }
+      const editableFactory = factory as IEditableControlFactory;
+      if (editableFactory.presaveTransformFunction) {
+        inputToReturn = editableFactory.presaveTransformFunction(inputToReturn, embeddable);
       }
       promiseResolve({ type, controlInput: inputToReturn });
       ref.close();
@@ -155,7 +157,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
 
     initialInputPromise.then(
       async (promise) => {
-        replaceEmbeddable(
+        await replaceEmbeddable(
           embeddable.id,
           inputToReturn,
           promise.type === embeddable.type ? undefined : promise.type
