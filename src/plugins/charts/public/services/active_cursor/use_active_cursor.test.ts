@@ -6,70 +6,63 @@
  * Side Public License, v 1.
  */
 
-import { from, of, delay, concatMap } from 'rxjs';
+import { TestScheduler } from 'rxjs/testing';
 import { renderHook } from '@testing-library/react-hooks';
+import type { Chart, PointerEvent } from '@elastic/charts';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { RefObject } from 'react';
 
-import { ActiveCursor } from './active_cursor';
+import type { ActiveCursor } from './active_cursor';
 import { useActiveCursor } from './use_active_cursor';
 
 import type { ActiveCursorSyncOption, ActiveCursorPayload } from './types';
-import type { Chart, PointerEvent } from '@elastic/charts';
-import type { Datatable } from '@kbn/expressions-plugin/public';
 
 /** @internal **/
 type DispatchExternalPointerEventFn = (pointerEvent: PointerEvent) => void;
 
 describe('useActiveCursor', () => {
+  let testScheduler: TestScheduler;
+
+  beforeEach(() => {
+    testScheduler = new TestScheduler((actual, expected) => expect(actual).toEqual(expected));
+  });
+
   const act = async (
     syncOption: ActiveCursorSyncOption,
-    events: Array<Partial<ActiveCursorPayload>>,
-    eventsTimeout = 5
-  ): Promise<{ dispatchExternalPointerEvent: DispatchExternalPointerEventFn }> => {
-    const activeCursor = new ActiveCursor();
-    const cursor = {} as ActiveCursorPayload['cursor'];
-    const dispatchExternalPointerEvent: DispatchExternalPointerEventFn = jest.fn();
-    const debounce = syncOption.debounce ?? 5;
+    events: Record<string, Partial<ActiveCursorPayload>>
+  ): Promise<{ dispatchExternalPointerEvent: DispatchExternalPointerEventFn }> =>
+    new Promise((res) => {
+      testScheduler.run(({ cold }) => {
+        const marble = `${Object.keys(events).join(`-`)} |`;
+        const activeCursor$ = cold(marble, events);
+        const dispatchExternalPointerEvent: DispatchExternalPointerEventFn = jest.fn();
 
-    activeCursor.setup();
+        renderHook(() =>
+          useActiveCursor(
+            {
+              activeCursor$,
+            } as unknown as ActiveCursor,
+            {
+              current: {
+                dispatchExternalPointerEvent,
+              },
+            } as RefObject<Chart>,
+            { ...syncOption, debounce: syncOption.debounce ?? 1 }
+          )
+        );
 
-    renderHook(() =>
-      useActiveCursor(
-        activeCursor,
-        {
-          current: {
-            dispatchExternalPointerEvent,
-          },
-        } as RefObject<Chart>,
-        { ...syncOption, debounce }
-      )
-    );
-
-    return new Promise((res, rej) =>
-      from(events)
-        .pipe(concatMap((x) => of(x).pipe(delay(eventsTimeout))))
-        .subscribe({
-          next: (item) => {
-            activeCursor.activeCursor$!.next({
-              cursor,
-              ...item,
-            });
-          },
+        activeCursor$.subscribe({
           complete: () => {
-            /** We have to wait before resolving the promise to make sure the debouncedEvent gets fired.  **/
-            setTimeout(() => res({ dispatchExternalPointerEvent }), eventsTimeout + debounce + 30);
+            res({ dispatchExternalPointerEvent });
           },
-          error: (error) => {
-            rej(error);
-          },
-        })
-    );
-  };
+        });
+      });
+    });
 
   test('should debounce events', async () => {
     const { dispatchExternalPointerEvent } = await act(
       {
-        debounce: 10,
+        debounce: 5,
         datatables: [
           {
             columns: [
@@ -83,21 +76,24 @@ describe('useActiveCursor', () => {
           },
         ] as Datatable[],
       },
-      [
-        { accessors: ['foo_index:foo_field'] },
-        { accessors: ['foo_index:foo_field'] },
-        { accessors: ['foo_index:foo_field'] },
-        { accessors: ['foo_index:foo_field'] },
-      ]
+      {
+        a: { accessors: ['foo_index:foo_field'] },
+        b: { accessors: ['foo_index:foo_field'] },
+        c: { accessors: ['foo_index:foo_field'] },
+        d: { accessors: ['foo_index:foo_field'] },
+      }
     );
 
     expect(dispatchExternalPointerEvent).toHaveBeenCalledTimes(1);
   });
 
   test('should trigger cursor pointer update (chart type: time, event type: time)', async () => {
-    const { dispatchExternalPointerEvent } = await act({ isDateHistogram: true }, [
+    const { dispatchExternalPointerEvent } = await act(
       { isDateHistogram: true },
-    ]);
+      {
+        a: { isDateHistogram: true },
+      }
+    );
 
     expect(dispatchExternalPointerEvent).toHaveBeenCalledTimes(1);
   });
@@ -121,7 +117,7 @@ describe('useActiveCursor', () => {
           },
         ] as unknown as Datatable[],
       },
-      [{ isDateHistogram: true }, { accessors: ['foo_index:foo_field'] }]
+      { a: { isDateHistogram: true }, b: { accessors: ['foo_index:foo_field'] } }
     );
 
     expect(dispatchExternalPointerEvent).toHaveBeenCalledTimes(2);
@@ -143,7 +139,7 @@ describe('useActiveCursor', () => {
           },
         ] as Datatable[],
       },
-      [{ isDateHistogram: true }, { accessors: ['foo_index:foo_field'] }]
+      { a: { isDateHistogram: true }, b: { accessors: ['foo_index:foo_field'] } }
     );
 
     expect(dispatchExternalPointerEvent).toHaveBeenCalledTimes(1);
@@ -175,7 +171,7 @@ describe('useActiveCursor', () => {
           },
         ] as Datatable[],
       },
-      [{ accessors: ['foo_index:foo_field', 'ib:fb'] }]
+      { a: { accessors: ['foo_index:foo_field', 'ib:fb'] } }
     );
 
     expect(dispatchExternalPointerEvent).toHaveBeenCalledTimes(1);

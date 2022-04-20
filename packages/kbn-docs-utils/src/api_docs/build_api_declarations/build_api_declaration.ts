@@ -7,7 +7,7 @@
  */
 
 import { FunctionTypeNode, Node } from 'ts-morph';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { buildClassDec } from './build_class_dec';
 import { buildFunctionDec } from './build_function_dec';
 import { isNamedNode } from '../tsmorph_utils';

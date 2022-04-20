@@ -8,7 +8,7 @@
 
 // @ts-expect-error
 import { getOptimizerBuiltPaths } from '@kbn/optimizer/target_node/optimizer/optimizer_built_paths';
-import { createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 

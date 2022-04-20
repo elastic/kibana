@@ -21,6 +21,12 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let http: AppContextTestRender['coreStart']['http'];
+  const artifactCards = Object.freeze([
+    'trustedApps-fleetCard',
+    'eventFilters-fleetCard',
+    'hostIsolationExceptions-fleetCard',
+    'blocklists-fleetCard',
+  ]);
 
   beforeEach(() => {
     const mockedTestContext = createFleetContextRendererMock();
@@ -38,18 +44,32 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
   });
 
   afterEach(() => {
-    useEndpointPrivilegesMock.mockReturnValue(getEndpointPrivilegesInitialStateMock());
+    useEndpointPrivilegesMock.mockImplementation(getEndpointPrivilegesInitialStateMock);
   });
 
-  it.each([
-    ['trusted apps', 'trustedApps-fleetCard'],
-    ['event filters', 'eventFilters-fleetCard'],
-    ['host isolation exceptions', 'hostIsolationExceptions-fleetCard'],
-    ['bLocklist', 'blocklists-fleetCard'],
-  ])('should show %s card', (_, testId) => {
+  it('should show artifact cards', async () => {
     render();
 
-    expect(renderResult.getByTestId(testId)).toBeTruthy();
+    await waitFor(() => {
+      artifactCards.forEach((artifactCard) => {
+        expect(renderResult.getByTestId(artifactCard)).toBeTruthy();
+      });
+    });
+  });
+
+  it('should NOT show artifact cards if no endpoint management authz', async () => {
+    useEndpointPrivilegesMock.mockReturnValue({
+      ...getEndpointPrivilegesInitialStateMock(),
+      canAccessEndpointManagement: false,
+    });
+    render();
+
+    await waitFor(() => {
+      artifactCards.forEach((artifactCard) => {
+        expect(renderResult.queryByTestId(artifactCard)).toBeNull();
+      });
+      expect(renderResult.queryByTestId('noIngestPermissions')).toBeTruthy();
+    });
   });
 
   it('should show Host Isolations Exceptions if user has no authz but entries exist', async () => {
@@ -57,8 +77,7 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
       ...getEndpointPrivilegesInitialStateMock(),
       canIsolateHost: false,
     });
-    // Mock APIs. Using Trusted Apps http mock here, which will still work
-    // for exceptions since the mocks don't currently check for list id
+    // Mock APIs
     exceptionsListAllHttpMocks(http);
     render();
 
@@ -67,13 +86,15 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
     });
   });
 
-  it('should NOT show Host Isolation Exceptions if user has no authz and no entries exist', () => {
+  it('should NOT show Host Isolation Exceptions if user has no authz and no entries exist', async () => {
     useEndpointPrivilegesMock.mockReturnValue({
       ...getEndpointPrivilegesInitialStateMock(),
       canIsolateHost: false,
     });
     render();
 
-    expect(renderResult.queryByTestId('hostIsolationExceptions-fleetCard')).toBeNull();
+    await waitFor(() => {
+      expect(renderResult.queryByTestId('hostIsolationExceptions-fleetCard')).toBeNull();
+    });
   });
 });
