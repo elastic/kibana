@@ -58,7 +58,7 @@ export function NoDataPrompt({
             />
           </EuiButton>,
           <EuiButtonEmpty color="primary">
-            <EuiLink href={documentationLink} target="_blank">
+            <EuiLink data-test-subj="documentationLink" href={documentationLink} target="_blank">
               Documentation
             </EuiLink>
           </EuiButtonEmpty>,

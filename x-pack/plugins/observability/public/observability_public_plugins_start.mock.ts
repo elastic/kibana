@@ -32,12 +32,26 @@ const embeddableStartMock = {
   },
 };
 
+const triggersActionsUiStartMock = {
+  createStart() {
+    return {
+      getAddAlertFlyout: jest.fn(),
+      ruleTypeRegistry: {
+        has: jest.fn(),
+        register: jest.fn(),
+        get: jest.fn(),
+        list: jest.fn(),
+      },
+    };
+  },
+};
+
 export const observabilityPublicPluginsStartMock = {
   createStart() {
     return {
       cases: casesUiStartMock.createStart(),
       embeddable: embeddableStartMock.createStart(),
-      triggersActionsUi: null,
+      triggersActionsUi: triggersActionsUiStartMock.createStart(),
       data: null,
       lens: null,
       discover: null,
