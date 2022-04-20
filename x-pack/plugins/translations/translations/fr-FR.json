@@ -26818,8 +26818,6 @@
     "xpack.securitySolution.trustedApps.assignmentSectionDescription": "Affectez cette application de confiance globalement à toutes les politiques, ou de façon spécifique à certaines politiques.",
     "xpack.securitySolution.trustedapps.card.operator.is": "est",
     "xpack.securitySolution.trustedapps.card.operator.matches": "correspond à",
-    "xpack.securitySolution.trustedApps.conditionsSectionDescription": "Sélectionnez un système d'exploitation et ajoutez des conditions. La disponibilité des conditions peut dépendre de votre système d’exploitation.",
-    "xpack.securitySolution.trustedApps.conditionsSectionTitle": "Conditions",
     "xpack.securitySolution.trustedapps.create.conditionFieldDegradedPerformanceMsg": "[{row}] L'utilisation d'un caractère générique dans le nom de fichier affectera les performances du point de terminaison",
     "xpack.securitySolution.trustedapps.create.conditionFieldDuplicatedMsg": "{field} ne peut pas être ajouté plus d'une fois",
     "xpack.securitySolution.trustedapps.create.conditionFieldInvalidHashMsg": "[{row}] Valeur de hachage non valide",
