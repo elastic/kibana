@@ -27,6 +27,10 @@ export function TrustedAppsPageProvider({ getService, getPageObjects }: FtrProvi
       await testSubjects.existOrFail('trustedAppsListPage-list');
     },
 
+    async ensureIsOnTrustedAppsEmptyPage() {
+      await testSubjects.existOrFail('trustedAppsListPage-emptyState');
+    },
+
     /**
      * Returns the Back button displayed on the Trusted Apps list page when page is loaded
      * with route state that triggers return button to be displayed
