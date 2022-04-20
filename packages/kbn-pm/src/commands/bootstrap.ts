@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { resolve, sep } from 'path';
+import Path from 'path';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
+import { runBazel } from '@kbn/bazel-runner';
 
 import { log } from '../utils/log';
 import { spawnStreaming } from '../utils/child_process';
 import { linkProjectExecutables } from '../utils/link_project_executables';
-import { getNonBazelProjectsOnly, topologicallyBatchProjects } from '../utils/projects';
 import { ICommand } from '.';
 import { readYarnLock } from '../utils/yarn_lock';
 import { validateDependencies } from '../utils/validate_dependencies';
-import { installBazelTools, removeYarnIntegrityFileIfExists, runBazel } from '../utils/bazel';
+import { installBazelTools, removeYarnIntegrityFileIfExists } from '../utils/bazel';
 import { setupRemoteCache } from '../utils/bazel/setup_remote_cache';
 
 export const BootstrapCommand: ICommand = {
@@ -29,10 +29,8 @@ export const BootstrapCommand: ICommand = {
   },
 
   async run(projects, projectGraph, { options, kbn, rootPath }) {
-    const nonBazelProjectsOnly = await getNonBazelProjectsOnly(projects);
-    const batchedNonBazelProjects = topologicallyBatchProjects(nonBazelProjectsOnly, projectGraph);
     const kibanaProjectPath = projects.get('kibana')?.path || '';
-    const runOffline = options?.offline === true;
+    const offline = options?.offline === true;
     const reporter = CiStatsReporter.fromEnv(log);
 
     const timings: Array<{ id: string; ms: number }> = [];
@@ -69,14 +67,22 @@ export const BootstrapCommand: ICommand = {
 
     if (forceInstall) {
       await time('force install dependencies', async () => {
-        await removeYarnIntegrityFileIfExists(resolve(kibanaProjectPath, 'node_modules'));
-        await runBazel(['clean', '--expunge']);
-        await runBazel(['run', '@nodejs//:yarn'], runOffline, {
-          env: {
-            SASS_BINARY_SITE:
-              'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-sass',
-            RE2_DOWNLOAD_MIRROR:
-              'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2',
+        await removeYarnIntegrityFileIfExists(Path.resolve(kibanaProjectPath, 'node_modules'));
+        await runBazel({
+          bazelArgs: ['clean', '--expunge'],
+          log,
+        });
+        await runBazel({
+          bazelArgs: ['run', '@nodejs//:yarn'],
+          offline,
+          log,
+          execaOpts: {
+            env: {
+              SASS_BINARY_SITE:
+                'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-sass',
+              RE2_DOWNLOAD_MIRROR:
+                'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2',
+            },
           },
         });
       });
@@ -84,34 +90,12 @@ export const BootstrapCommand: ICommand = {
 
     // build packages
     await time('build packages', async () => {
-      await runBazel(['build', '//packages:build', '--show_result=1'], runOffline);
+      await runBazel({
+        bazelArgs: ['build', '//packages:build', '--show_result=1'],
+        log,
+        offline,
+      });
     });
-
-    // Install monorepo npm dependencies outside of the Bazel managed ones
-    for (const batch of batchedNonBazelProjects) {
-      for (const project of batch) {
-        const isExternalPlugin = project.path.includes(`${kibanaProjectPath}${sep}plugins`);
-
-        if (!project.hasDependencies()) {
-          continue;
-        }
-
-        if (isExternalPlugin) {
-          await project.installDependencies();
-          continue;
-        }
-
-        if (
-          !project.isSinglePackageJsonProject &&
-          !project.isEveryDependencyLocal() &&
-          !isExternalPlugin
-        ) {
-          throw new Error(
-            `[${project.name}] is not eligible to hold non local dependencies. Move the non local dependencies into the top level package.json.`
-          );
-        }
-      }
-    }
 
     const yarnLock = await time('read yarn.lock', async () => await readYarnLock(kbn));
 
