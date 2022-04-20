@@ -9,14 +9,14 @@ import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
-import { RulesPage } from './index';
+import { RulesPage } from '.';
 import { RulesTable } from './components/rules_table';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import * as pluginContext from '../../hooks/use_plugin_context';
-import { KibanaPageTemplate } from '../../../../../../src/plugins/kibana_react/public';
+import { KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
-import { AppMountParameters } from 'kibana/public';
-import { ALERTS_FEATURE_ID } from '../../../../alerting/common';
+import { AppMountParameters } from '@kbn/core/public';
+import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
@@ -33,7 +33,7 @@ jest.mock('../../hooks/use_fetch_rules', () => ({
   useFetchRules: jest.fn(),
 }));
 
-jest.mock('../../../../triggers_actions_ui/public', () => ({
+jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
   useLoadRuleTypes: jest.fn(),
 }));
 
@@ -53,7 +53,7 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
 }));
 
 const { useFetchRules } = jest.requireMock('../../hooks/use_fetch_rules');
-const { useLoadRuleTypes } = jest.requireMock('../../../../triggers_actions_ui/public');
+const { useLoadRuleTypes } = jest.requireMock('@kbn/triggers-actions-ui-plugin/public');
 
 describe('empty RulesPage', () => {
   let wrapper: ReactWrapper<any>;
@@ -106,7 +106,7 @@ describe('empty RulesPage', () => {
     expect(wrapper.find('EuiLink[data-test-subj="documentationLink"]')).toHaveLength(1);
     expect(
       wrapper.find('EuiLink[data-test-subj="documentationLink"]').getElement().props.href
-    ).toContain('create-and-manage-rules.html');
+    ).toContain('create-alerts.html');
   });
 });
 
