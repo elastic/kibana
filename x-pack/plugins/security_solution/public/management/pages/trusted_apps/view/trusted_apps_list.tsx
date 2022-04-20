@@ -14,7 +14,7 @@ import { EuiLink } from '@elastic/eui';
 import { useHttp } from '../../../../common/lib/kibana';
 import { ArtifactListPage, ArtifactListPageProps } from '../../../components/artifact_list_page';
 import { TrustedAppsApiClient } from '../service';
-import { Form } from './components/form';
+import { TrustedAppsForm } from './components/form';
 
 const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   pageTitle: i18n.translate('xpack.securitySolution.trustedApps.pageTitle', {
@@ -54,7 +54,7 @@ const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   ),
   flyoutCreateSubmitSuccess: ({ name }) =>
     i18n.translate('xpack.securitySolution.trustedApps.flyoutCreateSubmitSuccess', {
-      defaultMessage: '"{name}" has been added to your trusted applications.', // FIXME: match this to design (needs count of items)
+      defaultMessage: '"{name}" has been added to your trusted applications.',
       values: { name },
     }),
   flyoutEditSubmitSuccess: ({ name }) =>
@@ -73,7 +73,7 @@ const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
         />
         <EuiLink target="_blank" href={`${securitySolutionDocsLinks.trustedApps}`}>
           <FormattedMessage
-            id="xpack.securitySolution.blocklist.flyoutDowngradedLicenseDocsLink"
+            id="xpack.securitySolution.trustedApps.flyoutDowngradedLicenseDocsLink"
             defaultMessage="Trusted applications documentation"
           />
         </EuiLink>
@@ -111,7 +111,7 @@ export const TrustedAppsList = memo(() => {
   return (
     <ArtifactListPage
       apiClient={trustedAppsApiClient}
-      ArtifactFormComponent={Form}
+      ArtifactFormComponent={TrustedAppsForm}
       labels={TRUSTED_APPS_PAGE_LABELS}
       data-test-subj="trustedAppsListPage"
       flyoutSize="m"

@@ -16,7 +16,7 @@ import { paginationFromUrlParams } from '../components/hooks/use_url_pagination'
 import { EndpointIndexUIQueryParams } from '../pages/endpoint_hosts/types';
 import { EventFiltersPageLocation } from '../pages/event_filters/types';
 import { PolicyDetailsArtifactsPageLocation } from '../pages/policy/types';
-import { ArtifactListPageLocation, AdministrationSubTab } from '../types';
+import { AdministrationSubTab } from '../types';
 import {
   MANAGEMENT_DEFAULT_PAGE,
   MANAGEMENT_DEFAULT_PAGE_SIZE,
@@ -241,20 +241,7 @@ export const extractArtifactsListPaginationParams = (query: querystring.ParsedUr
   included_policies: extractIncludedPolicies(query),
 });
 
-export const extractTrustedAppsListPageLocation = (
-  query: querystring.ParsedUrlQuery
-): ArtifactListPageLocation => {
-  const showParamValue = extractFirstParamValue(query, 'show') as ArtifactListPageLocation['show'];
-
-  return {
-    ...extractTrustedAppsListPaginationParams(query),
-    show:
-      showParamValue && ['edit', 'create'].includes(showParamValue) ? showParamValue : undefined,
-    id: extractFirstParamValue(query, 'id'),
-  };
-};
-
-export const getTrustedAppsListPath = (location?: Partial<ArtifactListPageLocation>): string => {
+export const getTrustedAppsListPath = (location?: Partial<ArtifactListPageUrlParams>): string => {
   const path = generatePath(MANAGEMENT_ROUTING_TRUSTED_APPS_PATH, {
     tabName: AdministrationSubTab.trustedApps,
   });

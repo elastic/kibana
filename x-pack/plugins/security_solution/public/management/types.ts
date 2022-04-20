@@ -49,14 +49,3 @@ export interface ManagementRoutePolicyListParams {
 export interface ManagementRoutePolicyDetailsParams extends ManagementRoutePolicyListParams {
   policyId: string;
 }
-
-export interface ArtifactListPageLocation {
-  page_index: number;
-  page_size: number;
-  show?: 'create' | 'edit';
-  /** Used for editing. The ID of the selected trusted app */
-  id?: string;
-  filter: string;
-  // A string with comma delimiter-ed list of included policy IDs
-  included_policies: string;
-}

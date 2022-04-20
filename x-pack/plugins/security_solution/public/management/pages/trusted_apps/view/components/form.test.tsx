@@ -15,7 +15,7 @@ import {
 } from '@kbn/securitysolution-utils';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 
-import { Form } from './form';
+import { TrustedAppsForm } from './form';
 import {
   ArtifactFormComponentOnChangeCallbackProps,
   ArtifactFormComponentProps,
@@ -53,7 +53,7 @@ describe('Trusted apps form', () => {
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let latestUpdatedItem: ArtifactFormComponentProps['item'];
 
-  const getUI = () => <Form {...formProps} />;
+  const getUI = () => <TrustedAppsForm {...formProps} />;
   const render = () => {
     return (renderResult = mockedContext.render(getUI()));
   };

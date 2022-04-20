@@ -34,7 +34,10 @@ import {
   getDuplicateFields,
 } from '../../../../../../common/endpoint/service/artifacts/validations';
 
-import { isArtifactGlobal } from '../../../../../../common/endpoint/service/artifacts';
+import {
+  isArtifactGlobal,
+  getPolicyIdsFromArtifact,
+} from '../../../../../../common/endpoint/service/artifacts';
 import {
   isMacosLinuxTrustedAppCondition,
   isWindowsTrustedAppCondition,
@@ -186,7 +189,7 @@ const defaultConditionEntry = (): TrustedAppConditionEntry<ConditionEntryField.H
   value: '',
 });
 
-export const Form = memo<ArtifactFormComponentProps>(
+export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
   ({ item, policies, policiesIsLoading, onChange, mode }) => {
     const getTestId = useTestIdGenerator('trustedApps-form');
     const [visited, setVisited] = useState<
@@ -209,13 +212,17 @@ export const Form = memo<ArtifactFormComponentProps>(
 
     // select policies if editing
     useEffect(() => {
-      if (hasFormChanged) return;
-      const policyIds = item.tags?.map((tag) => tag.split(':')[1]) ?? [];
-      if (!policyIds.length) return;
+      if (hasFormChanged) {
+        return;
+      }
+      const policyIds = item.tags ? getPolicyIdsFromArtifact({ tags: item.tags }) : [];
+      if (!policyIds.length) {
+        return;
+      }
       const policiesData = policies.filter((policy) => policyIds.includes(policy.id));
 
       setSelectedPolicies(policiesData);
-    }, [hasFormChanged, item.tags, policies]);
+    }, [hasFormChanged, item, policies]);
 
     const showAssignmentSection = useMemo(() => {
       return (
@@ -508,3 +515,5 @@ export const Form = memo<ArtifactFormComponentProps>(
     );
   }
 );
+
+TrustedAppsForm.displayName = 'TrustedAppsForm';

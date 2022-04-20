@@ -38,7 +38,6 @@ import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
   GLOBAL_ARTIFACT_TAG,
 } from '../../../../common/endpoint/service/artifacts/constants';
-import { entriesToConditionEntries } from '../../../common/utils/exception_list_items/mappers';
 
 interface FindExceptionListItemSchemaQueryParams
   extends Omit<FindExceptionListItemSchema, 'page' | 'per_page'> {
@@ -148,11 +147,6 @@ export const trustedAppsGetOneHttpMocks =
         exceptionItem.item_id = apiQueryParams.item_id ?? exceptionItem.item_id;
         exceptionItem.namespace_type =
           apiQueryParams.namespace_type ?? exceptionItem.namespace_type;
-
-        // map process.hash entries to have * as suffix
-        exceptionItem.entries = entriesToConditionEntries(
-          exceptionItem.entries
-        ) as ExceptionListItemSchema['entries'];
 
         return exceptionItem;
       },
