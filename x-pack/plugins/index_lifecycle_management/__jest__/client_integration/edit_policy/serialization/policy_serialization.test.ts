@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { HttpFetchOptionsWithPath } from 'kibana/public';
+import { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { setupEnvironment } from '../../helpers';
 import { API_BASE_PATH } from '../../../../common/constants';
 import {
@@ -566,7 +566,6 @@ describe('<EditPolicy /> serialization', () => {
         const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
         const [requestUrl, requestBody] = lastReq;
         const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
-
 
         console.log(parsedReqBody);
 

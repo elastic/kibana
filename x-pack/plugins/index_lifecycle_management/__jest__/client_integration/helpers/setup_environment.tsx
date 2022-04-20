@@ -8,8 +8,8 @@
 import React from 'react';
 import { merge } from 'lodash';
 
-import { HttpSetup } from 'src/core/public';
-import { docLinksServiceMock } from 'src/core/public/mocks';
+import { HttpSetup } from '@kbn/core/public';
+import { docLinksServiceMock } from '@kbn/core/public/mocks';
 
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import { notificationServiceMock, fatalErrorsServiceMock } from '@kbn/core/public/mocks';

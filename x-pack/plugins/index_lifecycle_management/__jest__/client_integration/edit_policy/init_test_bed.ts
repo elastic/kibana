@@ -9,7 +9,7 @@ import { registerTestBed, TestBedConfig } from '@kbn/test-jest-helpers';
 
 import '../helpers/global_mocks';
 
-import { HttpSetup } from 'src/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import { WithAppDependencies } from '../helpers';
 import { EditPolicy } from '../../../public/application/sections/edit_policy';
 import { AppServicesContext } from '../../../public/types';
