@@ -21,6 +21,7 @@ interface UseAgentDetails {
 export const useAgentDetails = ({ agentId, silent, skip }: UseAgentDetails) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
+
   return useQuery<GetOneAgentResponse, unknown, GetOneAgentResponse['item']>(
     ['agentDetails', agentId],
     () => http.get(`/internal/osquery/fleet_wrapper/agents/${agentId}`),

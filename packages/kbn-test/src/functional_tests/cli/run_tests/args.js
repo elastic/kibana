@@ -9,7 +9,7 @@
 import { resolve } from 'path';
 
 import dedent from 'dedent';
-import { ToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
+import { ToolingLog, pickLevelFromFlags } from '@kbn/tooling-log';
 import { EsVersion } from '../../../functional_test_runner';
 
 const options = {

@@ -38,12 +38,14 @@ export const useSavedQueryForm = ({
     const res = new Set<string>(ids);
     // @ts-expect-error update types
     if (defaultValue && defaultValue.id) res.delete(defaultValue.id);
+
     return res;
   }, [ids, defaultValue]);
   const formSchema = useMemo<ReturnType<typeof createFormSchema>>(
     () => createFormSchema(idSet),
     [idSet]
   );
+
   return useForm({
     id: SAVED_QUERY_FORM_ID + uuid.v4(),
     schema: formSchema,
@@ -70,6 +72,7 @@ export const useSavedQueryForm = ({
           // @ts-expect-error update types
           delete draft.platform;
         }
+
         if (isArray(draft.version)) {
           if (!draft.version.length) {
             // @ts-expect-error update types
@@ -78,12 +81,15 @@ export const useSavedQueryForm = ({
             draft.version = draft.version[0];
           }
         }
+
         if (isEmpty(draft.ecs_mapping)) {
           // @ts-expect-error update types
           delete draft.ecs_mapping;
         }
+
         // @ts-expect-error update types
         draft.interval = draft.interval + '';
+
         return draft;
       }),
     // @ts-expect-error update types

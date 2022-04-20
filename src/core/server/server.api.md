@@ -1464,7 +1464,7 @@ export const kibanaResponseFactory: {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
     }>;
-    customError: (options: CustomHttpResponseOptions<ResponseError>) => KibanaResponse<string | Error | {
+    customError: (options: CustomHttpResponseOptions<ResponseError | Buffer | Stream>) => KibanaResponse<string | Error | Buffer | Stream | {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
     }>;
@@ -2052,8 +2052,10 @@ export interface SavedObjectReferenceWithContext {
         name: string;
     }>;
     isMissing?: boolean;
+    originId?: string;
     spaces: string[];
     spacesWithMatchingAliases?: string[];
+    spacesWithMatchingOrigins?: string[];
     type: string;
 }
 

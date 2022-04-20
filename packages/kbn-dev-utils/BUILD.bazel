@@ -37,16 +37,16 @@ NPM_MODULE_EXTRA_FILES = [
   "package.json",
   "README.md",
   ":certs",
-  "ci_stats_reporter/package.json",
-  "sort_package_json/package.json",
-  "stdio/package.json",
-  "tooling_log/package.json"
 ]
 
 RUNTIME_DEPS = [
   "//packages/kbn-std",
   "//packages/kbn-utils",
   "//packages/kbn-plugin-discovery",
+  "//packages/kbn-tooling-log",
+  "//packages/kbn-stdio-dev-helpers",
+  "//packages/kbn-ci-stats-reporter",
+  "//packages/kbn-jest-serializers",
   "@npm//@babel/core",
   "@npm//axios",
   "@npm//chalk",
@@ -73,6 +73,10 @@ TYPES_DEPS = [
   "//packages/kbn-std:npm_module_types",
   "//packages/kbn-utils:npm_module_types",
   "//packages/kbn-plugin-discovery:npm_module_types",
+  "//packages/kbn-tooling-log:npm_module_types",
+  "//packages/kbn-stdio-dev-helpers:npm_module_types",
+  "//packages/kbn-ci-stats-reporter:npm_module_types",
+  "//packages/kbn-jest-serializers:npm_module_types",
   "@npm//@babel/parser",
   "@npm//@babel/types",
   "@npm//@types/babel__core",
