@@ -17,7 +17,7 @@ import { KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { AppMountParameters } from '@kbn/core/public';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
-
+import { RuleState } from './types';
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
 jest.mock('../../utils/kibana_react', () => ({
@@ -58,7 +58,7 @@ const { useLoadRuleTypes } = jest.requireMock('@kbn/triggers-actions-ui-plugin/p
 describe('empty RulesPage', () => {
   let wrapper: ReactWrapper<any>;
   async function setup() {
-    const rulesState = {
+    const rulesState: RuleState = {
       isLoading: false,
       data: [],
       error: null,
@@ -113,7 +113,7 @@ describe('empty RulesPage', () => {
 describe('empty RulesPage with show only capability', () => {
   let wrapper: ReactWrapper<any>;
   async function setup() {
-    const rulesState = {
+    const rulesState: RuleState = {
       isLoading: false,
       data: [],
       error: null,
@@ -291,7 +291,7 @@ describe('RulesPage with items', () => {
       },
     ];
 
-    const rulesState = {
+    const rulesState: RuleState = {
       isLoading: false,
       data: mockedRulesData,
       error: null,
@@ -478,7 +478,7 @@ describe('RulesPage with items and show only capability', () => {
         },
       },
     ];
-    const rulesState = {
+    const rulesState: RuleState = {
       isLoading: false,
       data: mockedRulesData,
       error: null,
