@@ -96,7 +96,7 @@ function fillLogData(
 ) {
   let newMessage = message;
   if (suffix !== 'error') {
-    newMessage = `${message} - ${suffix === 'start' ? 'starting' : 'completed'}`;
+    newMessage = `${suffix === 'start' ? 'starting' : 'completed'}: ${message}`;
   }
 
   let interpretedAction: string;

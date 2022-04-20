@@ -77,7 +77,7 @@ describe('Event Logger', () => {
       Array [
         Object {
           "duration": undefined,
-          "message": "screenshot pipeline - starting",
+          "message": "starting: screenshot pipeline",
           "screenshotting": Object {
             "action": "screenshot-pipeline-start",
             "session_id": "NEW_UUID",
@@ -85,7 +85,7 @@ describe('Event Logger', () => {
         },
         Object {
           "duration": undefined,
-          "message": "open the url to the Kibana application - starting",
+          "message": "starting: open the url to the Kibana application",
           "screenshotting": Object {
             "action": "open-url-start",
             "session_id": "NEW_UUID",
@@ -93,7 +93,7 @@ describe('Event Logger', () => {
         },
         Object {
           "duration": 3000,
-          "message": "open the url to the Kibana application - completed",
+          "message": "completed: open the url to the Kibana application",
           "screenshotting": Object {
             "action": "open-url-complete",
             "session_id": "NEW_UUID",
@@ -101,7 +101,7 @@ describe('Event Logger', () => {
         },
         Object {
           "duration": undefined,
-          "message": "scan the page to find the boundaries of visualization elements - starting",
+          "message": "starting: scan the page to find the boundaries of visualization elements",
           "screenshotting": Object {
             "action": "get-element-position-data-start",
             "session_id": "NEW_UUID",
@@ -109,7 +109,7 @@ describe('Event Logger', () => {
         },
         Object {
           "duration": 5000,
-          "message": "scan the page to find the boundaries of visualization elements - completed",
+          "message": "completed: scan the page to find the boundaries of visualization elements",
           "screenshotting": Object {
             "action": "get-element-position-data-complete",
             "session_id": "NEW_UUID",
@@ -117,7 +117,7 @@ describe('Event Logger', () => {
         },
         Object {
           "duration": 20000,
-          "message": "screenshot pipeline - completed",
+          "message": "completed: screenshot pipeline",
           "screenshotting": Object {
             "action": "screenshot-pipeline-complete",
             "byte_length": 0,
@@ -128,7 +128,7 @@ describe('Event Logger', () => {
         },
         Object {
           "duration": undefined,
-          "message": "pdf generation - starting",
+          "message": "starting: pdf generation",
           "screenshotting": Object {
             "action": "generate-pdf-start",
             "session_id": "NEW_UUID",
@@ -136,7 +136,7 @@ describe('Event Logger', () => {
         },
         Object {
           "duration": undefined,
-          "message": "add image to the PDF file - starting",
+          "message": "starting: add image to the PDF file",
           "screenshotting": Object {
             "action": "add-pdf-image-start",
             "session_id": "NEW_UUID",
@@ -144,7 +144,7 @@ describe('Event Logger', () => {
         },
         Object {
           "duration": 9000,
-          "message": "add image to the PDF file - completed",
+          "message": "completed: add image to the PDF file",
           "screenshotting": Object {
             "action": "add-pdf-image-complete",
             "session_id": "NEW_UUID",
@@ -152,7 +152,7 @@ describe('Event Logger', () => {
         },
         Object {
           "duration": 27000,
-          "message": "pdf generation - completed",
+          "message": "completed: pdf generation",
           "screenshotting": Object {
             "action": "generate-pdf-complete",
             "byte_length_pdf": 6666,
@@ -182,7 +182,7 @@ describe('Event Logger', () => {
       Array [
         Object {
           "duration": undefined,
-          "message": "screenshot capture - starting",
+          "message": "starting: screenshot capture",
           "screenshotting": Object {
             "action": "get-screenshots-start",
             "pixels": 10800000,
@@ -191,7 +191,7 @@ describe('Event Logger', () => {
         },
         Object {
           "duration": 2000,
-          "message": "screenshot capture - completed",
+          "message": "completed: screenshot capture",
           "screenshotting": Object {
             "action": "get-screenshots-complete",
             "byte_length": 4444,
@@ -218,7 +218,7 @@ describe('Event Logger', () => {
       Array [
         Object {
           "error": undefined,
-          "message": "screenshot pipeline - starting",
+          "message": "starting: screenshot pipeline",
           "screenshotting": Object {
             "action": "screenshot-pipeline-start",
             "session_id": "NEW_UUID",
@@ -226,7 +226,7 @@ describe('Event Logger', () => {
         },
         Object {
           "error": undefined,
-          "message": "opening the url - starting",
+          "message": "starting: opening the url",
           "screenshotting": Object {
             "action": "open-url-start",
             "session_id": "NEW_UUID",
