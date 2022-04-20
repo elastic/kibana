@@ -13,7 +13,6 @@ import {
   EuiButton,
   EuiCallOut,
   EuiCode,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -104,6 +103,13 @@ const GettingStartedStepContent: React.FunctionComponent<{
               singleSelection={{ asPlainText: true }}
               placeholder="https://fleet-server-host.com:8220"
               options={fleetServerHostSettings.map((host) => ({ label: host, value: host }))}
+              customOptionText={i18n.translate(
+                'xpack.fleet.fleetServerSetup.addFleetServerHostCustomOptionText',
+                {
+                  defaultMessage: 'Add {searchValuePlaceholder} as a new Fleet Server host',
+                  values: { searchValuePlaceholder: '{searchValue}' },
+                }
+              )}
               selectedOptions={
                 fleetServerHost ? [{ label: fleetServerHost, value: fleetServerHost }] : []
               }

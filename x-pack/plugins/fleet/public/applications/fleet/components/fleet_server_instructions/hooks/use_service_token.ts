@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { useStartServices, sendGenerateServiceToken } from '../../../hooks';
