@@ -1415,10 +1415,6 @@
   dependencies:
     tslib "^2.0.0"
 
-"@elastic/analytics@link:bazel-bin/packages/elastic-analytics":
-  version "0.0.0"
-  uid ""
-
 "@elastic/apm-rum-core@^5.14.1":
   version "5.14.1"
   resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.14.1.tgz#8f65060967c8d68498f2c520e4169ec07eb3b5bb"
@@ -1454,10 +1450,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@46.0.0":
-  version "46.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-46.0.0.tgz#1714ae3d0cbbaf2d7319170577a429bd1776a190"
-  integrity sha512-saWKUg+UNF47sLw3WFeGppcZwB58qm3hLJzX/dwfI9dxZmba/PsYGSTuQXiGWuDQeHoMPlRXLe1lA+hD1cETzw==
+"@elastic/charts@46.0.1":
+  version "46.0.1"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-46.0.1.tgz#2d3bd3de9e4f294ddd9d9969dca1dc1ed5c6f278"
+  integrity sha512-CWiyEHaxEk9zKOPOm4ISyAluXSxu6pqLdG+ARBu4jQx0t1ROe93vssICHq6JIrQdiMHn44pleQnWZzKzanZtDw==
   dependencies:
     "@popperjs/core" "^2.4.0"
     chroma-js "^2.1.0"
@@ -2932,6 +2928,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/analytics-client@link:bazel-bin/packages/analytics/client":
+  version "0.0.0"
+  uid ""
+
+"@kbn/analytics-shippers-fullstory@link:bazel-bin/packages/analytics/shippers/fullstory":
+  version "0.0.0"
+  uid ""
+
 "@kbn/analytics@link:bazel-bin/packages/kbn-analytics":
   version "0.0.0"
   uid ""
@@ -2957,6 +2961,22 @@
   uid ""
 
 "@kbn/bazel-packages@link:bazel-bin/packages/kbn-bazel-packages":
+  version "0.0.0"
+  uid ""
+
+"@kbn/bazel-runner@link:bazel-bin/packages/kbn-bazel-runner":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ci-stats-client@link:bazel-bin/packages/kbn-ci-stats-client":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ci-stats-core@link:bazel-bin/packages/kbn-ci-stats-core":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ci-stats-reporter@link:bazel-bin/packages/kbn-ci-stats-reporter":
   version "0.0.0"
   uid ""
 
@@ -3053,6 +3073,10 @@
   uid ""
 
 "@kbn/io-ts-utils@link:bazel-bin/packages/kbn-io-ts-utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/jest-serializers@link:bazel-bin/packages/kbn-jest-serializers":
   version "0.0.0"
   uid ""
 
@@ -3184,11 +3208,19 @@
   version "0.0.0"
   uid ""
 
+"@kbn/sort-package-json@link:bazel-bin/packages/kbn-sort-package-json":
+  version "0.0.0"
+  uid ""
+
 "@kbn/spec-to-console@link:bazel-bin/packages/kbn-spec-to-console":
   version "0.0.0"
   uid ""
 
 "@kbn/std@link:bazel-bin/packages/kbn-std":
+  version "0.0.0"
+  uid ""
+
+"@kbn/stdio-dev-helpers@link:bazel-bin/packages/kbn-stdio-dev-helpers":
   version "0.0.0"
   uid ""
 
@@ -3221,6 +3253,10 @@
   uid ""
 
 "@kbn/tinymath@link:bazel-bin/packages/kbn-tinymath":
+  version "0.0.0"
+  uid ""
+
+"@kbn/tooling-log@link:bazel-bin/packages/kbn-tooling-log":
   version "0.0.0"
   uid ""
 
@@ -5574,10 +5610,6 @@
   resolved "https://registry.yarnpkg.com/@types/ejs/-/ejs-3.0.6.tgz#aca442289df623bfa8e47c23961f0357847b83fe"
   integrity sha512-fj1hi+ZSW0xPLrJJD+YNwIh9GZbyaIepG26E/gXvp8nCa2pYokxUYO1sK9qjGxp2g8ryZYuon7wmjpwE2cyASQ==
 
-"@types/elastic__analytics@link:bazel-bin/packages/elastic-analytics/npm_module_types":
-  version "0.0.0"
-  uid ""
-
 "@types/elastic__apm-synthtrace@link:bazel-bin/packages/elastic-apm-synthtrace/npm_module_types":
   version "0.0.0"
   uid ""
@@ -5988,6 +6020,14 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__analytics-client@link:bazel-bin/packages/analytics/client/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__analytics-shippers-fullstory@link:bazel-bin/packages/analytics/shippers/fullstory/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__analytics@link:bazel-bin/packages/kbn-analytics/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6005,6 +6045,22 @@
   uid ""
 
 "@types/kbn__bazel-packages@link:bazel-bin/packages/kbn-bazel-packages/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__bazel-runner@link:bazel-bin/packages/kbn-bazel-runner/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ci-stats-client@link:bazel-bin/packages/kbn-ci-stats-client/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ci-stats-core@link:bazel-bin/packages/kbn-ci-stats-core/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ci-stats-reporter@link:bazel-bin/packages/kbn-ci-stats-reporter/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6085,6 +6141,10 @@
   uid ""
 
 "@types/kbn__io-ts-utils@link:bazel-bin/packages/kbn-io-ts-utils/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__jest-serializers@link:bazel-bin/packages/kbn-jest-serializers/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6212,7 +6272,15 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__sort-package-json@link:bazel-bin/packages/kbn-sort-package-json/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__std@link:bazel-bin/packages/kbn-std/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__stdio-dev-helpers@link:bazel-bin/packages/kbn-stdio-dev-helpers/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6229,6 +6297,10 @@
   uid ""
 
 "@types/kbn__test@link:bazel-bin/packages/kbn-test/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__tooling-log@link:bazel-bin/packages/kbn-tooling-log/npm_module_types":
   version "0.0.0"
   uid ""
 

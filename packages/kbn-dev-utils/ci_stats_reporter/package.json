@@ -1,4 +1,0 @@
-{
-  "main": "../target_node/ci_stats_reporter/ci_stats_reporter",
-  "types": "../target_types/ci_stats_reporter/ci_stats_reporter"
-}
