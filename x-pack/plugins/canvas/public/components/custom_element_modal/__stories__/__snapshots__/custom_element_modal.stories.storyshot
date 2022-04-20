@@ -58,7 +58,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
               className="euiFlexItem euiFlexItem--flexGrow2 canvasCustomElementForm"
             >
               <div
-                className="euiFormRow euiFormRow--compressed"
+                className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
                 id="generated-id-row"
               >
                 <div
@@ -104,7 +104,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
                 </div>
               </div>
               <div
-                className="euiFormRow"
+                className="euiFormRow euiFormRow--hasLabel"
                 id="generated-id-row"
               >
                 <div
@@ -141,7 +141,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
                 </div>
               </div>
               <div
-                className="euiFormRow euiFormRow--compressed canvasCustomElementForm__thumbnail"
+                className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed canvasCustomElementForm__thumbnail"
                 id="generated-id-row"
               >
                 <div
@@ -375,7 +375,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
               className="euiFlexItem euiFlexItem--flexGrow2 canvasCustomElementForm"
             >
               <div
-                className="euiFormRow euiFormRow--compressed"
+                className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
                 id="generated-id-row"
               >
                 <div
@@ -421,7 +421,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
                 </div>
               </div>
               <div
-                className="euiFormRow"
+                className="euiFormRow euiFormRow--hasLabel"
                 id="generated-id-row"
               >
                 <div
@@ -458,7 +458,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
                 </div>
               </div>
               <div
-                className="euiFormRow euiFormRow--compressed canvasCustomElementForm__thumbnail"
+                className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed canvasCustomElementForm__thumbnail"
                 id="generated-id-row"
               >
                 <div
@@ -687,7 +687,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
               className="euiFlexItem euiFlexItem--flexGrow2 canvasCustomElementForm"
             >
               <div
-                className="euiFormRow euiFormRow--compressed"
+                className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
                 id="generated-id-row"
               >
                 <div
@@ -733,7 +733,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
                 </div>
               </div>
               <div
-                className="euiFormRow"
+                className="euiFormRow euiFormRow--hasLabel"
                 id="generated-id-row"
               >
                 <div
@@ -770,7 +770,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
                 </div>
               </div>
               <div
-                className="euiFormRow euiFormRow--compressed canvasCustomElementForm__thumbnail"
+                className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed canvasCustomElementForm__thumbnail"
                 id="generated-id-row"
               >
                 <div
@@ -996,7 +996,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
               className="euiFlexItem euiFlexItem--flexGrow2 canvasCustomElementForm"
             >
               <div
-                className="euiFormRow euiFormRow--compressed"
+                className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
                 id="generated-id-row"
               >
                 <div
@@ -1042,7 +1042,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
                 </div>
               </div>
               <div
-                className="euiFormRow"
+                className="euiFormRow euiFormRow--hasLabel"
                 id="generated-id-row"
               >
                 <div
@@ -1079,7 +1079,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
                 </div>
               </div>
               <div
-                className="euiFormRow euiFormRow--compressed canvasCustomElementForm__thumbnail"
+                className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed canvasCustomElementForm__thumbnail"
                 id="generated-id-row"
               >
                 <div
