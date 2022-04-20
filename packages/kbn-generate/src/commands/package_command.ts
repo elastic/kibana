@@ -11,6 +11,7 @@ import Path from 'path';
 
 import normalizePath from 'normalize-path';
 import globby from 'globby';
+import { ESLint } from 'eslint';
 
 import micromatch from 'micromatch';
 import { REPO_ROOT } from '@kbn/utils';
@@ -128,6 +129,15 @@ ${BAZEL_PACKAGE_DIRS.map((dir) => `                          ./${dir}/*\n`).join
     }
 
     log.info('Wrote plugin files to', packageDir);
+
+    log.info('Linting files');
+    const eslint = new ESLint({
+      cache: false,
+      cwd: REPO_ROOT,
+      fix: true,
+      extensions: ['.js', '.mjs', '.ts', '.tsx'],
+    });
+    await ESLint.outputFixes(await eslint.lintFiles([packageDir]));
 
     const packageJsonPath = Path.resolve(REPO_ROOT, 'package.json');
     const packageJson = JSON.parse(await Fsp.readFile(packageJsonPath, 'utf8'));
