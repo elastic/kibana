@@ -6,16 +6,24 @@
  */
 
 import React from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { LastUpdated } from './last_updated';
 import { REFRESH_LABEL } from '../exploratory_view';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 
 export function RefreshButton() {
-  const { setLastRefresh } = useSeriesStorage();
+  const { setLastRefresh, chartTimeRangeContext } = useSeriesStorage();
 
   return (
-    <EuiButton iconType="refresh" onClick={() => setLastRefresh(Date.now())}>
-      {REFRESH_LABEL}
-    </EuiButton>
+    <EuiFlexGroup alignItems="center" gutterSize="xs">
+      <EuiFlexItem style={{ textAlign: 'right', minWidth: 280 }}>
+        <LastUpdated chartTimeRange={chartTimeRangeContext} />
+      </EuiFlexItem>
+      <EuiFlexItem style={{ textAlign: 'right' }}>
+        <EuiButton iconType="refresh" onClick={() => setLastRefresh(Date.now())}>
+          {REFRESH_LABEL}
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

@@ -25,7 +25,6 @@ import { useAppDataViewContext } from './hooks/use_app_data_view';
 import { SeriesViews } from './views/series_views';
 import { LensEmbeddable } from './lens_embeddable';
 import { EmptyView } from './components/empty_view';
-import { ChartTimeRange, LastUpdated } from './header/last_updated';
 import { useExpViewTimeRange } from './hooks/use_time_range';
 import { ExpViewActionMenu } from './components/action_menu';
 import { useExploratoryView } from './contexts/exploratory_view_config';
@@ -48,15 +47,14 @@ export function ExploratoryView({
 
   const { isEditMode } = useExploratoryView();
 
-  const [chartTimeRangeContext, setChartTimeRangeContext] = useState<ChartTimeRange | undefined>();
-
   const [lensAttributes, setLensAttributes] = useState<TypedLensByValueInput['attributes'] | null>(
     null
   );
 
   const { loadDataView, loading } = useAppDataViewContext();
 
-  const { firstSeries, allSeries, lastRefresh, reportType } = useSeriesStorage();
+  const { firstSeries, allSeries, lastRefresh, reportType, setChartTimeRangeContext } =
+    useSeriesStorage();
 
   const lensAttributesT = useLensAttributes();
   const timeRange = useExpViewTimeRange();
@@ -126,13 +124,6 @@ export function ExploratoryView({
                       {hiddenPanel === 'chartPanel' ? SHOW_CHART_LABEL : HIDE_CHART_LABEL}
                     </EuiButtonEmpty>
                   </EuiFlexItem>
-                  {hiddenPanel === 'chartPanel' ? null : (
-                    <>
-                      <EuiFlexItem style={{ textAlign: 'right' }}>
-                        <LastUpdated chartTimeRange={chartTimeRangeContext} />
-                      </EuiFlexItem>
-                    </>
-                  )}
                 </EuiFlexGroup>
 
                 <EuiResizablePanel
@@ -199,9 +190,11 @@ const ResizableContainer = styled(EuiResizableContainer)`
   #chartPanel {
     > .euiPanel {
       padding-bottom: 0;
+      padding-top: 0;
     }
     .expExpressionRenderer__expression {
       padding-bottom: 0 !important;
+      padding-top: 0 !important;
     }
   }
 `;
