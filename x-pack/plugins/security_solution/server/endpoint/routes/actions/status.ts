@@ -17,7 +17,7 @@ import {
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
 import { EndpointAppContext } from '../../types';
-import { getPendingActionCounts } from '../../services';
+import { getActionDetailsById, getPendingActionCounts } from '../../services';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 
 /**
@@ -51,24 +51,25 @@ export function registerActionStatusRoutes(
     withEndpointAuthz(
       { all: ['canAccessEndpointManagement'] },
       endpointContext.logFactory.get('hostIsolationDetails'),
-      actionDetailsRequestHandler(endpointContext)
+      getActionDetailsRequestHandler()
     )
   );
 }
 
-export const actionDetailsRequestHandler = (
-  endpointContext: EndpointAppContext
-): RequestHandler<
+export const getActionDetailsRequestHandler = (): RequestHandler<
   TypeOf<typeof ActionDetailsRequestSchema.params>,
   never,
   never,
   SecuritySolutionRequestHandlerContext
 > => {
   return async (context, req, res) => {
-    // FIXME:PT code it
-
     return res.ok({
-      body: { message: `TODO: ${req.params.action_id}` },
+      body: {
+        data: await getActionDetailsById(
+          context.core.elasticsearch.client.asInternalUser,
+          req.params.action_id
+        ),
+      },
     });
   };
 };

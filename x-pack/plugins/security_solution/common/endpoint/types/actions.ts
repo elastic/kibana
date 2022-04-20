@@ -168,3 +168,29 @@ export interface PendingActionsResponse {
 }
 
 export type PendingActionsRequestQuery = TypeOf<typeof ActionStatusRequestSchema.query>;
+
+export interface ActionDetails {
+  /** The action id */
+  id: string;
+  /**
+   * The Endpoint ID (and fleet agent ID - they are the same) for which the action was created for.
+   * This is an Array because the action could have been sent to multiple endpoints.
+   */
+  endpointIds: string[];
+  /** The type of action (ex. `isolate`) */
+  actionType: string;
+  isExpired: boolean;
+  isCompleted: boolean;
+  /** The date when the initial action request was submitted */
+  startedAt: string;
+  /** The date when the action was completed (a response ack was received) */
+  completedAt: string;
+  /**
+   * The list of items (actions and responses) received thus far for the action.
+   */
+  items: ActivityLogEntry[];
+}
+
+export interface ActionDetailsResponse {
+  data: ActionDetails;
+}

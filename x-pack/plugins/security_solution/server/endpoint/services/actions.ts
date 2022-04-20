@@ -9,6 +9,7 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TransportResult } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import { EndpointError } from '../../../common/endpoint/errors';
 import { ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN } from '../../../common/endpoint/constants';
 import { SecuritySolutionRequestHandlerContext } from '../../types';
 import {
@@ -19,8 +20,11 @@ import {
   EndpointActionResponse,
   EndpointPendingActions,
   LogsEndpointActionResponse,
+  ActionDetails,
 } from '../../../common/endpoint/types';
 import {
+  ACTION_REQUEST_INDICES,
+  ACTION_RESPONSE_INDICES,
   catchAndWrapError,
   categorizeActionResults,
   categorizeResponseResults,
@@ -397,4 +401,52 @@ const fetchActionResponses = async (
   }
 
   return actionResponsesByAgentId;
+};
+
+export const getActionDetailsById = async (
+  esClient: ElasticsearchClient,
+  actionId: string
+): Promise<ActionDetails> => {
+  // Get Action request
+  let actionRequest;
+  let actionResponses;
+
+  try {
+    actionRequest = await esClient.search(
+      {
+        index: ACTION_REQUEST_INDICES,
+        body: {
+          query: {
+            bool: {
+              filter: [{ term: { action_id: actionId } }],
+            },
+          },
+        },
+      },
+      {
+        ignore: [404],
+      }
+    );
+
+    actionResponses = await esClient.search(
+      {
+        index: ACTION_RESPONSE_INDICES,
+        size: 1000,
+        body: {
+          query: {
+            bool: {
+              filter: [{ term: { action_id: actionId } }],
+            },
+          },
+        },
+      },
+      { ignore: [404] }
+    );
+  } catch (error) {
+    throw new EndpointError(error.message, error);
+  }
+
+  return [actionRequest, actionResponses];
+
+  // get action responses
 };
