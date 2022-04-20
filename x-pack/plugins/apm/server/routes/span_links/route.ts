@@ -8,10 +8,10 @@ import { jsonRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { getSpanLinks } from './get_span_links';
+import { getSpanLinksDetails, SpanLinkDetails } from './get_span_links_details';
 
 const spanLinksRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/span_links',
+  endpoint: 'GET /internal/apm/span_links/details',
   params: t.type({
     query: t.type({
       spanLinks: jsonRt.pipe(
@@ -28,14 +28,15 @@ const spanLinksRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    spanLinks: Array<
-      import('../../../common/span_links/span_links_types').SpanLink
-    >;
+    spanLinksDetails: SpanLinkDetails[];
   }> => {
     const { params } = resources;
     const setup = await setupRequest(resources);
     return {
-      spanLinks: await getSpanLinks({ setup }),
+      spanLinksDetails: await getSpanLinksDetails({
+        setup,
+        spanLinks: params.query.spanLinks,
+      }),
     };
   },
 });

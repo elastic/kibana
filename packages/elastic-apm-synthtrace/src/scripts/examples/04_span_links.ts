@@ -14,9 +14,9 @@ function generateExternalSpanLinks() {
   // randomly creates external span links 0 - 10
   return Array(Math.floor(Math.random() * 11))
     .fill(0)
-    .map(() => ({ span: { id: uuid.v4() }, trance: { id: uuid() } }));
+    .map(() => ({ span: { id: uuid.v4() }, trace: { id: uuid() } }));
 }
-function generateEventsSpanLinks() {
+function generateIncomeEventsSpanLinks() {
   const range = timerange(
     new Date('2022-04-12T19:00:00.000Z'),
     new Date('2022-04-12T19:05:00.000Z')
@@ -43,23 +43,26 @@ function generateEventsSpanLinks() {
   return events;
 }
 
+function getSpanLinksFromEvents(events: ApmFields[]) {
+  return events
+    .map((event) => {
+      const spanId = event['span.id'];
+      return spanId ? { span: { id: spanId }, trace: { id: event['trace.id'] } } : undefined;
+    })
+    .filter((_) => _) as Array<{ span: { id: string }; trace?: { id: string } }>;
+}
+
 const scenario: Scenario<ApmFields> = async () => {
   return {
     generate: ({ from, to }) => {
       const externalSpanLinks = generateExternalSpanLinks();
-      let eventsSpanLinks = generateEventsSpanLinks().toArray();
+      let eventsSpanLinks = generateIncomeEventsSpanLinks().toArray();
       if (from > to) eventsSpanLinks = eventsSpanLinks.reverse();
 
-      const spanLinks = eventsSpanLinks
-        .map((event) => {
-          const spanId = event['span.id'];
-          return spanId ? { span: { id: spanId }, trace: { id: event['trace.id'] } } : undefined;
-        })
-        .filter((_) => _) as Array<{ span: { id: string }; trace?: { id: string } }>;
+      const incomingSpanLinks = getSpanLinksFromEvents(eventsSpanLinks);
 
-      const consumerRange = timerange(from, to);
       const instanceJava = apm.service('synth-java', 'production', 'java').instance('instance-b');
-      const events = consumerRange
+      const events = timerange(from, to)
         .interval('1m')
         .rate(1)
         .generator((timestamp) => {
@@ -71,14 +74,39 @@ const scenario: Scenario<ApmFields> = async () => {
             .children(
               instanceJava
                 .span('Span links', 'external')
-                .defaults({ 'span.links': [...externalSpanLinks, ...spanLinks] })
+                .defaults({ 'span.links': [...externalSpanLinks, ...incomingSpanLinks] })
                 .timestamp(timestamp + 50)
                 .duration(900)
-                .destination('elasticsearch')
                 .success()
             );
         });
-      return events.merge(new EntityArrayIterable(eventsSpanLinks));
+
+      const incomingEvents = events.toArray();
+      const outgoingSpanLinks = getSpanLinksFromEvents(incomingEvents);
+
+      const instanceRuby = apm.service('synth-ruby', 'production', 'ruby').instance('instance-c');
+      const outgoingEvents = timerange(from, to)
+        .interval('1m')
+        .rate(1)
+        .generator((timestamp) => {
+          return instanceRuby
+            .transaction('Outgoing transaction')
+            .timestamp(timestamp)
+            .duration(1000)
+            .success()
+            .children(
+              instanceJava
+                .span('Outgoing span links', 'external')
+                .defaults({ 'span.links': outgoingSpanLinks })
+                .timestamp(timestamp + 50)
+                .duration(900)
+                .success()
+            );
+        });
+
+      return new EntityArrayIterable(incomingEvents)
+        .merge(outgoingEvents)
+        .merge(new EntityArrayIterable(eventsSpanLinks));
     },
   };
 };

@@ -6,9 +6,8 @@
  */
 
 export interface SpanLink {
-  traceId: string;
-  spanId: string;
-  serviceName?: string;
-  spanName?: string;
-  duration?: number;
+  trace: { id: string };
+  span: { id: string };
 }
+
+export type SpanLinks = SpanLink[];
