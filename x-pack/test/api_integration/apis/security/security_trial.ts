@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('security (trial license)', function () {
-    this.tags('ciGroup6');
+    this.tags('ciGroup5');
 
     // THIS TEST NEEDS TO BE LAST. IT IS DESTRUCTIVE! IT REMOVES TRIAL LICENSE!!!
     loadTestFile(require.resolve('./license_downgrade'));
