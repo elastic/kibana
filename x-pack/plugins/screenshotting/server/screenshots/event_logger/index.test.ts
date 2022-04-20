@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import moment from 'moment';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Actions, EventLogger, ScreenshottingAction } from '.';
@@ -125,7 +126,7 @@ describe('Event Logger', () => {
     `);
   });
 
-  it('logs number of pixels', () => {
+  it('logs the number of pixels', () => {
     const elementPosition = {
       boundingClientRect: { width: 1350, height: 2000 },
       scroll: {},
@@ -136,7 +137,7 @@ describe('Event Logger', () => {
     const logData = logSpy.mock.calls.map(([message, data]) => ({
       message,
       duration: data.event?.duration,
-      screenshotting: data.kibana.screenshotting,
+      screenshotting: omit(data.kibana.screenshotting, 'session_id'),
     }));
 
     expect(logData).toMatchInlineSnapshot(`
@@ -147,7 +148,6 @@ describe('Event Logger', () => {
           "screenshotting": Object {
             "action": "get-screenshots-start",
             "pixels": 10800000,
-            "session_id": "89336347-677b-444b-8e94-4c5d026395ad",
           },
         },
         Object {
@@ -157,7 +157,6 @@ describe('Event Logger', () => {
             "action": "get-screenshots-complete",
             "byte_length": 4444,
             "pixels": 10800000,
-            "session_id": "89336347-677b-444b-8e94-4c5d026395ad",
           },
         },
       ]
