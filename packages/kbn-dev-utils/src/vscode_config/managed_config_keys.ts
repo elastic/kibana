@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { KibanaJsonSchema } from '@kbn/kibana-json-schema';
+
 export interface ManagedConfigKey {
   key: string;
   value: string | Record<string, any> | boolean | number;
@@ -58,4 +60,17 @@ export const MANAGED_CONFIG_KEYS: ManagedConfigKey[] = [
     key: 'typescript.tsserver.maxTsServerMemory',
     value: 4096,
   },
+  {
+    key: 'json.schemas',
+    value: [
+      {
+        fileMatch: ['kibana.json'],
+        url: './.vscode/kibana-json-schema.json',
+      },
+    ],
+  },
+];
+
+export const MANAGED_CONFIG_FILES = [
+  { name: 'kibana-json-schema.json', content: JSON.stringify(KibanaJsonSchema, null, 2) },
 ];
