@@ -18,7 +18,7 @@ import {
   createSignalsIndex,
   deleteAllAlerts,
   deleteSignalsIndex,
-  getSlackAction,
+  getWebHookAction,
   getRuleWithWebHookAction,
   createRule,
   getSimpleRule,
@@ -61,7 +61,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: hookAction } = await supertest
             .post('/api/actions/action')
             .set('kbn-xsrf', 'true')
-            .send(getSlackAction())
+            .send(getWebHookAction())
             .expect(200);
 
           const rule = await createRule(supertest, log, getRuleWithWebHookAction(hookAction.id));
@@ -90,7 +90,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: hookAction } = await supertest
             .post('/api/actions/action')
             .set('kbn-xsrf', 'true')
-            .send(getSlackAction())
+            .send(getWebHookAction())
             .expect(200);
 
           const ruleWithThrottle: CreateRulesSchema = {
@@ -133,7 +133,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: hookAction } = await supertest
             .post('/api/actions/action')
             .set('kbn-xsrf', 'true')
-            .send(getSlackAction())
+            .send(getWebHookAction())
             .expect(200);
 
           const ruleWithThrottle: CreateRulesSchema = {
@@ -166,7 +166,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: hookAction } = await supertest
             .post('/api/actions/action')
             .set('kbn-xsrf', 'true')
-            .send(getSlackAction())
+            .send(getWebHookAction())
             .expect(200);
 
           const ruleWithThrottle: CreateRulesSchema = {
@@ -188,7 +188,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: hookAction } = await supertest
             .post('/api/actions/action')
             .set('kbn-xsrf', 'true')
-            .send(getSlackAction())
+            .send(getWebHookAction())
             .expect(200);
 
           const rule = await createRule(supertest, log, getRuleWithWebHookAction(hookAction.id));
@@ -222,7 +222,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: hookAction } = await supertest
             .post('/api/actions/action')
             .set('kbn-xsrf', 'true')
-            .send(getSlackAction())
+            .send(getWebHookAction())
             .expect(200);
 
           const rule = await createRule(supertest, log, getRuleWithWebHookAction(hookAction.id));
@@ -242,7 +242,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: hookAction } = await supertest
             .post('/api/actions/action')
             .set('kbn-xsrf', 'true')
-            .send(getSlackAction())
+            .send(getWebHookAction())
             .expect(200);
 
           const ruleWithWebHookAction = getRuleWithWebHookAction(hookAction.id);
@@ -257,7 +257,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: hookAction } = await supertest
             .post('/api/actions/action')
             .set('kbn-xsrf', 'true')
-            .send(getSlackAction())
+            .send(getWebHookAction())
             .expect(200);
 
           const ruleWithWebHookAction = getRuleWithWebHookAction(hookAction.id);
@@ -277,7 +277,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: hookAction } = await supertest
             .post('/api/actions/action')
             .set('kbn-xsrf', 'true')
-            .send(getSlackAction())
+            .send(getWebHookAction())
             .expect(200);
 
           const ruleWithWebHookAction = getRuleWithWebHookAction(hookAction.id);
@@ -294,7 +294,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: hookAction } = await supertest
             .post('/api/actions/action')
             .set('kbn-xsrf', 'true')
-            .send(getSlackAction())
+            .send(getWebHookAction())
             .expect(200);
 
           const ruleWithWebHookAction = getRuleWithWebHookAction(hookAction.id);
@@ -314,7 +314,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: hookAction } = await supertest
             .post('/api/actions/action')
             .set('kbn-xsrf', 'true')
-            .send(getSlackAction())
+            .send(getWebHookAction())
             .expect(200);
 
           const ruleWithWebHookAction = getRuleWithWebHookAction(hookAction.id);
@@ -338,7 +338,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: hookAction } = await supertest
             .post('/api/actions/action')
             .set('kbn-xsrf', 'true')
-            .send(getSlackAction())
+            .send(getWebHookAction())
             .expect(200);
 
           const ruleWithWebHookAction = getRuleWithWebHookAction(hookAction.id);

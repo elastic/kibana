@@ -8,7 +8,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 
-import { getSlackAction } from './get_slack_action';
+import { getWebHookAction } from './get_web_hook_action';
 
 /**
  * Helper to cut down on the noise in some of the tests. This
@@ -22,7 +22,7 @@ export const createNewAction = async (
   const response = await supertest
     .post('/api/actions/action')
     .set('kbn-xsrf', 'true')
-    .send(getSlackAction());
+    .send(getWebHookAction());
   if (response.status !== 200) {
     log.error(
       `Did not get an expected 200 "ok" when creating a new action. CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(

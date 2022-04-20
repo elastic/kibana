@@ -24,7 +24,7 @@ import {
   getSimpleRule,
   getSimpleRuleAsNdjson,
   getSimpleRuleOutput,
-  getSlackAction,
+  getWebHookAction,
   removeServerGeneratedProperties,
   ruleToNdjson,
 } from '../../utils';
@@ -139,7 +139,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body: hookAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'true')
-          .send(getSlackAction())
+          .send(getWebHookAction())
           .expect(200);
         const simpleRule: ReturnType<typeof getSimpleRule> = {
           ...getSimpleRule('rule-1'),
@@ -173,7 +173,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body: hookAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'true')
-          .send(getSlackAction())
+          .send(getWebHookAction())
           .expect(200);
         const simpleRule: ReturnType<typeof getSimpleRule> = {
           ...getSimpleRule('rule-1'),
@@ -574,7 +574,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body: hookAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'true')
-          .send(getSlackAction())
+          .send(getWebHookAction())
           .expect(200);
         const simpleRule: ReturnType<typeof getSimpleRule> = {
           ...getSimpleRule('rule-1'),
@@ -607,7 +607,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body: hookAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'true')
-          .send(getSlackAction())
+          .send(getWebHookAction())
           .expect(200);
 
         const rule1: ReturnType<typeof getSimpleRule> = {
@@ -658,7 +658,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body: hookAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'true')
-          .send(getSlackAction())
+          .send(getWebHookAction())
           .expect(200);
 
         const rule1: ReturnType<typeof getSimpleRule> = {

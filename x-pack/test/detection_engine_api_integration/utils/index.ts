@@ -75,6 +75,7 @@ export * from './get_stats_url';
 export * from './get_threat_match_rule_for_signal_testing';
 export * from './get_threshold_rule_for_signal_testing';
 export * from './get_slack_action';
+export * from './get_web_hook_action';
 export * from './index_event_log_execution_events';
 export * from './install_prepackaged_rules';
 export * from './refresh_index';

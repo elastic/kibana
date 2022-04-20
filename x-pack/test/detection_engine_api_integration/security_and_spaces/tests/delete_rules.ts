@@ -21,6 +21,7 @@ import {
   getSimpleRuleOutputWithoutRuleId,
   getSimpleRuleWithoutRuleId,
   getSlackAction,
+  getWebHookAction,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
 } from '../../utils';
@@ -112,7 +113,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body: hookAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'true')
-          .send(getSlackAction())
+          .send(getWebHookAction())
           .expect(200);
 
         // create a rule without actions
@@ -185,7 +186,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body: hookAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'true')
-          .send(getSlackAction())
+          .send(getWebHookAction())
           .expect(200);
 
         // create a rule without actions
