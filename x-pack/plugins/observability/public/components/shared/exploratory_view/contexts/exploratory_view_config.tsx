@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { AppMountParameters } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { AppDataType, ConfigProps, ReportViewType, SeriesConfig } from '../types';
@@ -22,6 +22,8 @@ interface ExploratoryViewContextValue {
   reportConfigMap: ReportConfigMap;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   theme$: AppMountParameters['theme$'];
+  isEditMode?: boolean;
+  setIsEditMode?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const ExploratoryViewContext = createContext<ExploratoryViewContextValue>({
@@ -37,6 +39,8 @@ export function ExploratoryViewContextProvider({
   setHeaderActionMenu,
   theme$,
 }: { children: JSX.Element } & ExploratoryViewContextValue) {
+  const [isEditMode, setIsEditMode] = useState(false);
+
   const value = {
     reportTypes,
     dataTypes,
@@ -44,6 +48,8 @@ export function ExploratoryViewContextProvider({
     reportConfigMap,
     setHeaderActionMenu,
     theme$,
+    isEditMode,
+    setIsEditMode,
   };
 
   return (
