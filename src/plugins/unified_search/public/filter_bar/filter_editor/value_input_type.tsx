@@ -26,6 +26,16 @@ interface Props {
 }
 
 class ValueInputTypeUI extends Component<Props> {
+  private getValueForNumberField = (value?: string | number) => {
+    if (typeof value === 'string') {
+      const parsedValue = parseFloat(value);
+      if (!isNaN(parsedValue)) {
+        return parsedValue;
+      }
+      return value;
+    }
+    return value;
+  };
   public render() {
     const value = this.props.value;
     const type = this.props.field.type;
@@ -50,7 +60,7 @@ class ValueInputTypeUI extends Component<Props> {
           <EuiFieldNumber
             fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
-            value={typeof value === 'string' ? parseFloat(value) : value}
+            value={this.getValueForNumberField(value)}
             onChange={this.onChange}
             controlOnly={this.props.controlOnly}
             className={this.props.className}
