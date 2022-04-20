@@ -24,6 +24,10 @@ is being formed. This can result in parts of the vis being cut out.
     padding-top: $visPadding;
     padding-bottom: $visPadding;
   }
+
+  &:last-child {
+    page-break-after: avoid;
+  }
 }
 
 @media screen, projection {
