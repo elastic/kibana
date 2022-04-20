@@ -38,7 +38,7 @@ export const getScreenshots = async (
 
   for (let i = 0; i < elementsPositionAndAttributes.length; i++) {
     const item = elementsPositionAndAttributes[i];
-    eventLogger.getScreenshotStart({
+    const spanEnd = eventLogger.screenshot({
       elementPosition: item.position,
     });
 
@@ -54,7 +54,7 @@ export const getScreenshots = async (
       description: item.attributes.description,
     });
 
-    eventLogger.getScreenshotEnd({
+    spanEnd({
       elementPosition: item.position,
       byteLength: data.byteLength,
     });

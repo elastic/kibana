@@ -8,14 +8,19 @@
 import type { HeadlessChromiumDriver } from '../browsers';
 import { Layout } from '../layouts';
 import { CONTEXT_GETTIMERANGE } from './constants';
-import { EventLogger } from './event_logger';
+import { Actions, EventLogger } from './event_logger';
 
 export const getTimeRange = async (
   browser: HeadlessChromiumDriver,
   eventLogger: EventLogger,
   layout: Layout
 ): Promise<string | null> => {
-  eventLogger.getTimeRangeStart();
+  const spanEnd = eventLogger.log(
+    'looking for time range',
+    Actions.GET_TIMERANGE,
+    'screenshotting',
+    'read'
+  );
 
   const timeRange = await browser.evaluate(
     {
@@ -43,7 +48,7 @@ export const getTimeRange = async (
     eventLogger.kbnLogger.info(`timeRange: ${timeRange}`);
   }
 
-  eventLogger.getTimeRangeEnd();
+  spanEnd();
 
   return timeRange;
 };

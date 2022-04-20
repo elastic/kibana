@@ -38,7 +38,12 @@ export const getElementPositionAndAttributes = async (
   eventLogger: EventLogger,
   layout: Layout
 ): Promise<ElementsPositionAndAttribute[] | null> => {
-  eventLogger.getElementPositionsStart();
+  const spanEnd = eventLogger.log(
+    'get element position data',
+    Actions.GET_ELEMENT_POSITION_DATA,
+    'screenshotting',
+    'read'
+  );
 
   const { screenshot: screenshotSelector } = layout.selectors; // data-shared-items-container
   let elementsPositionAndAttributes: ElementsPositionAndAttribute[] | null;
@@ -90,7 +95,7 @@ export const getElementPositionAndAttributes = async (
     elementsPositionAndAttributes = null;
   }
 
-  eventLogger.getElementPositionsEnd({ elementPositions: elementsPositionAndAttributes?.length });
+  spanEnd({ element_positions: elementsPositionAndAttributes?.length });
 
   return elementsPositionAndAttributes;
 };

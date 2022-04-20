@@ -218,14 +218,14 @@ export class Screenshots {
   getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult>;
   getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult> {
     const eventLogger = new EventLogger(this.logger, this.config);
-    eventLogger.screenshottingStart();
+    const transactionEnd = eventLogger.screenshottingTransaction();
 
     const layout = this.createLayout(options);
     const captureOptions = this.getCaptureOptions(options);
 
     return this.captureScreenshots(eventLogger, layout, captureOptions).pipe(
       tap((results) => {
-        eventLogger.screenshottingEnd(results);
+        transactionEnd(results);
       }),
       mergeMap((result) => {
         switch (options.format) {

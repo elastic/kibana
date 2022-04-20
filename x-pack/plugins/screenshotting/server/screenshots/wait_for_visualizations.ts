@@ -41,7 +41,12 @@ export const waitForVisualizations = async (
   toEqual: number,
   layout: Layout
 ): Promise<void> => {
-  eventLogger.waitForVisualizationStart();
+  const spanEnd = eventLogger.log(
+    'waiting for each visualization to complete rendering',
+    Actions.WAIT_VISUALIZATIONS,
+    'screenshotting',
+    'wait'
+  );
 
   const { renderComplete: renderCompleteSelector } = layout.selectors;
 
@@ -64,5 +69,5 @@ export const waitForVisualizations = async (
     throw newError;
   }
 
-  eventLogger.waitForVisualizationEnd();
+  spanEnd();
 };

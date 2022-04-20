@@ -8,14 +8,19 @@
 import type { HeadlessChromiumDriver } from '../browsers';
 import type { Layout } from '../layouts';
 import { CONTEXT_GETRENDERERRORS } from './constants';
-import { EventLogger } from './event_logger';
+import { Actions, EventLogger } from './event_logger';
 
 export const getRenderErrors = async (
   browser: HeadlessChromiumDriver,
   eventLogger: EventLogger,
   layout: Layout
 ): Promise<undefined | string[]> => {
-  eventLogger.getRenderErrorsStart();
+  const spanEnd = eventLogger.log(
+    'look for render errors',
+    Actions.GET_RENDER_ERRORS,
+    'screenshotting',
+    'read'
+  );
 
   const { kbnLogger } = eventLogger;
   const errorsFound: undefined | string[] = await browser.evaluate(
@@ -44,7 +49,7 @@ export const getRenderErrors = async (
     kbnLogger.warn(`Found ${renderErrors} error messages. See report object for more information.`);
   }
 
-  eventLogger.getRenderErrorsEnd({ renderErrors });
+  spanEnd({ render_errors: renderErrors });
 
   return errorsFound;
 };

@@ -24,7 +24,12 @@ export const injectCustomCss = async (
     return;
   }
 
-  eventLogger.injectCssStart();
+  const spanEnd = eventLogger.log(
+    'inject CSS into the page',
+    Actions.INJECT_CSS,
+    'screenshotting',
+    'correction'
+  );
 
   const buffer = await fsp.readFile(filePath);
   try {
@@ -48,5 +53,5 @@ export const injectCustomCss = async (
     );
   }
 
-  eventLogger.injectCssEnd();
+  spanEnd();
 };

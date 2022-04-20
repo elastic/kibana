@@ -16,7 +16,12 @@ export const getNumberOfItems = async (
   timeout: number,
   layout: Layout
 ): Promise<number> => {
-  eventLogger.getNumberOfItemsStart();
+  const spanEnd = eventLogger.log(
+    'get the number of visualization items on the page',
+    Actions.GET_NUMBER_OF_ITEMS,
+    'screenshotting',
+    'read'
+  );
 
   const { renderComplete: renderCompleteSelector, itemsCountAttribute } = layout.selectors;
   let itemsCount: number;
@@ -60,7 +65,7 @@ export const getNumberOfItems = async (
     throw newError;
   }
 
-  eventLogger.getNumberOfItemsEnd({ itemsCount });
+  spanEnd({ items_count: itemsCount });
 
   return itemsCount;
 };

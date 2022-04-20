@@ -19,7 +19,7 @@ export const openUrl = async (
   context: Context,
   headers: Headers
 ): Promise<void> => {
-  eventLogger.openUrlStart();
+  const spanEnd = eventLogger.log('open url', Actions.OPEN_URL, 'screenshotting', 'wait');
 
   // If we're moving to another page in the app, we'll want to wait for the app to tell us
   // it's loaded the next page.
@@ -36,5 +36,5 @@ export const openUrl = async (
     throw newError;
   }
 
-  eventLogger.openUrlEnd();
+  spanEnd();
 };

@@ -7,214 +7,179 @@
 
 import moment from 'moment';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { Actions, EventLogger } from '.';
+import { Actions, EventLogger, ScreenshottingAction } from '.';
 import { ElementPosition } from '../get_element_position_data';
 import { ConfigType } from '../../config';
 
+type EventLoggerArgs = [message: string, meta: ScreenshottingAction];
 describe('Event Logger', () => {
   let eventLogger: EventLogger;
   let config: ConfigType;
+  let logSpy: jest.SpyInstance<void, EventLoggerArgs>;
 
   beforeEach(() => {
     const testDate = moment(new Date('2021-04-12T16:00:00.000Z'));
     let delaySeconds = 1;
+
     jest.spyOn(global.Date, 'now').mockImplementation(() => {
       return testDate.add(delaySeconds++, 'seconds').valueOf();
     });
 
+    const logger = loggingSystemMock.createLogger();
     config = { capture: { zoom: 2 } } as ConfigType;
+    eventLogger = new EventLogger(logger, config);
 
-    eventLogger = new EventLogger(loggingSystemMock.createLogger(), config);
+    logSpy = jest.spyOn(logger, 'debug') as jest.SpyInstance<void, EventLoggerArgs>;
   });
 
   it('creates logs for the events and includes durations and event payload data', () => {
-    const logs = [];
-    logs.push(eventLogger.screenshottingStart());
-    logs.push(eventLogger.openUrlStart());
-    logs.push(eventLogger.openUrlEnd());
-    logs.push(eventLogger.getElementPositionsStart());
-    logs.push(eventLogger.getElementPositionsEnd({ elementPositions: 44 }));
+    const screenshottingEnd = eventLogger.screenshottingTransaction();
+    const openUrlEnd = eventLogger.log(
+      'open the url to the Kibana application',
+      Actions.OPEN_URL,
+      'screenshotting',
+      'wait'
+    );
+    openUrlEnd();
+    const getElementPositionsEnd = eventLogger.log(
+      'scan the page to find the boundaries of visualization elements',
+      Actions.GET_ELEMENT_POSITION_DATA,
+      'screenshotting',
+      'wait'
+    );
+    getElementPositionsEnd();
+    screenshottingEnd({
+      metrics: { cpu: 12, cpuInPercentage: 0, memory: 450789, memoryInMegabytes: 449 },
+      results: [],
+    });
 
-    logs.push(eventLogger.getNumberOfItemsStart());
-    logs.push(eventLogger.getNumberOfItemsEnd({ itemsCount: 3 }));
-    logs.push(eventLogger.getRenderErrorsStart());
-    logs.push(eventLogger.getRenderErrorsEnd({ renderErrors: 0 }));
-    logs.push(eventLogger.getTimeRangeStart());
-    logs.push(eventLogger.getTimeRangeEnd());
-    logs.push(eventLogger.injectCssStart());
-    logs.push(eventLogger.injectCssEnd());
-    logs.push(eventLogger.positionElementsStart());
-    logs.push(eventLogger.positionElementsEnd());
-    logs.push(eventLogger.waitForRenderStart());
-    logs.push(eventLogger.waitForRenderEnd());
-    logs.push(eventLogger.pdfStart());
-    logs.push(eventLogger.addPdfImageStart());
-    logs.push(eventLogger.addPdfImageEnd());
-    logs.push(eventLogger.compilePdfStart());
-    logs.push(eventLogger.compilePdfEnd());
-    logs.push(eventLogger.pdfEnd({ pdfPages: 1, byteLengthPdf: 6666 }));
+    const pdfEnd = eventLogger.pdfTransaction();
+    const addImageEnd = eventLogger.log(
+      'add image to the PDF file',
+      Actions.ADD_IMAGE,
+      'generatePdf',
+      'output'
+    );
+    addImageEnd();
+    pdfEnd({ pdf_pages: 1, byte_length_pdf: 6666 });
 
-    const logData = logs.map((log) => ({
-      event: log.kibana.screenshotting.action,
-      duration: log.event?.duration,
+    const logs = logSpy.mock.calls.map(([message, data]) => ({
+      message,
+      event: data.kibana.screenshotting.action,
+      duration: data?.event?.duration,
     }));
-    expect(logData).toMatchInlineSnapshot(`
+
+    expect(logs).toMatchInlineSnapshot(`
       Array [
         Object {
           "duration": undefined,
           "event": "screenshot-pipeline-start",
+          "message": "screenshot pipeline - starting",
         },
         Object {
           "duration": undefined,
           "event": "open-url-start",
+          "message": "open the url to the Kibana application - starting",
         },
         Object {
           "duration": 3000,
           "event": "open-url-complete",
+          "message": "open the url to the Kibana application - completed",
         },
         Object {
           "duration": undefined,
           "event": "get-element-position-data-start",
+          "message": "scan the page to find the boundaries of visualization elements - starting",
         },
         Object {
           "duration": 5000,
           "event": "get-element-position-data-complete",
+          "message": "scan the page to find the boundaries of visualization elements - completed",
         },
         Object {
-          "duration": undefined,
-          "event": "get-number-of-items-start",
-        },
-        Object {
-          "duration": 7000,
-          "event": "get-number-of-items-complete",
-        },
-        Object {
-          "duration": undefined,
-          "event": "get-render-errors-start",
-        },
-        Object {
-          "duration": 9000,
-          "event": "get-render-errors-complete",
-        },
-        Object {
-          "duration": undefined,
-          "event": "get-timerange-start",
-        },
-        Object {
-          "duration": 11000,
-          "event": "get-timerange-complete",
-        },
-        Object {
-          "duration": undefined,
-          "event": "inject-css-start",
-        },
-        Object {
-          "duration": 13000,
-          "event": "inject-css-complete",
-        },
-        Object {
-          "duration": undefined,
-          "event": "position-elements-start",
-        },
-        Object {
-          "duration": 15000,
-          "event": "position-elements-complete",
-        },
-        Object {
-          "duration": undefined,
-          "event": "wait-for-render-start",
-        },
-        Object {
-          "duration": 17000,
-          "event": "wait-for-render-complete",
+          "duration": 20000,
+          "event": "screenshot-pipeline-complete",
+          "message": "screenshot pipeline - completed",
         },
         Object {
           "duration": undefined,
           "event": "generate-pdf-start",
+          "message": "pdf generation - starting",
         },
         Object {
           "duration": undefined,
           "event": "add-pdf-image-start",
+          "message": "add image to the PDF file - starting",
         },
         Object {
-          "duration": 20000,
+          "duration": 9000,
           "event": "add-pdf-image-complete",
+          "message": "add image to the PDF file - completed",
         },
         Object {
-          "duration": undefined,
-          "event": "compile-pdf-start",
-        },
-        Object {
-          "duration": 22000,
-          "event": "compile-pdf-complete",
-        },
-        Object {
-          "duration": 105000,
+          "duration": 27000,
           "event": "generate-pdf-complete",
+          "message": "pdf generation - completed",
         },
       ]
     `);
   });
 
   it('logs number of pixels', () => {
-    const logs = [];
     const elementPosition = {
       boundingClientRect: { width: 1350, height: 2000 },
       scroll: {},
     } as ElementPosition;
-    logs.push(eventLogger.getScreenshotStart({ elementPosition }));
-    logs.push(eventLogger.getScreenshotEnd({ byteLength: 4444, elementPosition }));
+    const endScreenshot = eventLogger.screenshot({ elementPosition });
+    endScreenshot({ byteLength: 4444, elementPosition });
 
-    const logData = logs.map((log) => ({
-      message: log.message,
-      duration: log.event?.duration,
-      screenshotting: log.kibana.screenshotting,
+    const logData = logSpy.mock.calls.map(([message, data]) => ({
+      message,
+      duration: data.event?.duration,
+      screenshotting: data.kibana.screenshotting,
     }));
 
-    expect(
-      logData.map((l) => ({
-        duration: l.duration,
-        message: l.message,
-        action: l.screenshotting.action,
-        byte_length: l.screenshotting.byte_length,
-        pixels: l.screenshotting.pixels,
-      }))
-    ).toMatchInlineSnapshot(`
+    expect(logData).toMatchInlineSnapshot(`
       Array [
         Object {
-          "action": "get-screenshots-start",
-          "byte_length": undefined,
           "duration": undefined,
-          "message": "capturing single screenshot",
-          "pixels": 10800000,
+          "message": "screenshot capture - starting",
+          "screenshotting": Object {
+            "action": "get-screenshots-start",
+            "pixels": 10800000,
+            "session_id": "89336347-677b-444b-8e94-4c5d026395ad",
+          },
         },
         Object {
-          "action": "get-screenshots-complete",
-          "byte_length": 4444,
           "duration": 2000,
-          "message": "single screenshot captured",
-          "pixels": 10800000,
+          "message": "screenshot capture - completed",
+          "screenshotting": Object {
+            "action": "get-screenshots-complete",
+            "byte_length": 4444,
+            "pixels": 10800000,
+            "session_id": "89336347-677b-444b-8e94-4c5d026395ad",
+          },
         },
       ]
     `);
   });
 
   it('creates helpful error logs', () => {
-    const logs = [];
-    logs.push(eventLogger.screenshottingStart());
-    logs.push(eventLogger.error(new Error('Something erroneous happened'), Actions.SCREENSHOTTING));
+    eventLogger.screenshottingTransaction();
+    eventLogger.error(new Error('Something erroneous happened'), Actions.SCREENSHOTTING);
 
-    const logData = logs.map((log) => ({
-      action: log.kibana.screenshotting.action,
-      message: log.message,
-      error: log.error,
+    const logData = logSpy.mock.calls.map(([message, data]) => ({
+      message,
+      action: data.kibana.screenshotting.action,
+      error: data.error,
     }));
+
     expect(logData).toMatchInlineSnapshot(`
       Array [
         Object {
           "action": "screenshot-pipeline-start",
           "error": undefined,
-          "message": "screenshot-pipeline starting",
+          "message": "screenshot pipeline - starting",
         },
         Object {
           "action": "screenshot-pipeline-error",
