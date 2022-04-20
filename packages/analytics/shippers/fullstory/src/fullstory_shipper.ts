@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { IShipper } from '../types';
-import type { AnalyticsClientInitContext } from '../../analytics_client';
-import type { EventContext, Event } from '../../events';
+import type {
+  AnalyticsClientInitContext,
+  EventContext,
+  Event,
+  IShipper,
+} from '@kbn/analytics-client';
 import type { FullStoryApi } from './types';
 import type { FullStorySnippetConfig } from './load_snippet';
 import { getParsedVersion } from './get_parsed_version';
