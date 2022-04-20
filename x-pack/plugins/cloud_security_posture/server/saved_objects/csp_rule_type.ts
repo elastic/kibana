@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SavedObjectsType, SavedObjectsValidationMap } from '../../../../../src/core/server';
+import type { SavedObjectsType, SavedObjectsValidationMap } from '@kbn/core/server';
 import {
   type CspRuleSchema,
   cspRuleSchema,
@@ -28,6 +28,12 @@ export const ruleAssetSavedObjectMappings: SavedObjectsType<CspRuleSchema>['mapp
           type: 'keyword', // sort
         },
       },
+    },
+    package_policy_id: {
+      type: 'keyword',
+    },
+    policy_id: {
+      type: 'keyword',
     },
     description: {
       type: 'text',

@@ -7,13 +7,13 @@
 /// <reference types="node" />
 
 import { Action } from 'history';
-import { AnalyticsClient } from '@elastic/analytics';
+import { AnalyticsClient } from '@kbn/analytics-client';
 import Boom from '@hapi/boom';
 import type { ButtonColor } from '@elastic/eui';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { Client } from '@elastic/elasticsearch';
 import { ConfigPath } from '@kbn/config';
-import { ContextProviderOpts } from '@elastic/analytics';
+import { ContextProviderOpts } from '@kbn/analytics-client';
 import { DetailedPeerCertificate } from 'tls';
 import type { DocLinks } from '@kbn/doc-links';
 import { EnvironmentMode } from '@kbn/config';
@@ -24,15 +24,15 @@ import { EuiConfirmModalProps } from '@elastic/eui';
 import { EuiFlyoutSize } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
 import { EuiOverlayMaskProps } from '@elastic/eui';
-import { Event as Event_2 } from '@elastic/analytics';
-import { EventContext } from '@elastic/analytics';
-import { EventType } from '@elastic/analytics';
-import { EventTypeOpts } from '@elastic/analytics';
+import { Event as Event_2 } from '@kbn/analytics-client';
+import { EventContext } from '@kbn/analytics-client';
+import { EventType } from '@kbn/analytics-client';
+import { EventTypeOpts } from '@kbn/analytics-client';
 import { History as History_2 } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
 import { IncomingHttpHeaders } from 'http';
-import { IShipper } from '@elastic/analytics';
+import { IShipper } from '@kbn/analytics-client';
 import { Location as Location_2 } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { Logger } from '@kbn/logging';
@@ -40,20 +40,19 @@ import { LogMeta } from '@kbn/logging';
 import { MaybePromise } from '@kbn/utility-types';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
-import { OptInConfig } from '@elastic/analytics';
+import { OptInConfig } from '@kbn/analytics-client';
 import { PackageInfo } from '@kbn/config';
 import { Path } from 'history';
 import { PeerCertificate } from 'tls';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { PublicUiSettingsParams as PublicUiSettingsParams_2 } from 'src/core/server/types';
 import { default as React_2 } from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { Request as Request_2 } from '@hapi/hapi';
 import * as Rx from 'rxjs';
 import { SchemaTypeError } from '@kbn/config-schema';
-import { ShipperClassConstructor } from '@elastic/analytics';
-import { TelemetryCounter } from '@elastic/analytics';
-import { TelemetryCounterType } from '@elastic/analytics';
+import { ShipperClassConstructor } from '@kbn/analytics-client';
+import { TelemetryCounter } from '@kbn/analytics-client';
+import { TelemetryCounterType } from '@kbn/analytics-client';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import { TransitionPromptHook } from 'history';
 import { Type } from '@kbn/config-schema';
@@ -61,7 +60,6 @@ import { TypeOf } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { UnregisterCallback } from 'history';
 import { URL as URL_2 } from 'url';
-import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
 // @internal (undocumented)
 export function __kbnBootstrap__(): Promise<void>;
@@ -782,7 +780,7 @@ export type IToasts = Pick<ToastsApi, 'get$' | 'add' | 'remove' | 'addSuccess' |
 export interface IUiSettingsClient {
     get$: <T = any>(key: string, defaultOverride?: T) => Observable<T>;
     get: <T = any>(key: string, defaultOverride?: T) => T;
-    getAll: () => Readonly<Record<string, PublicUiSettingsParams_2 & UserProvidedValues_2>>;
+    getAll: () => Readonly<Record<string, PublicUiSettingsParams & UserProvidedValues>>;
     getUpdate$: <T = any>() => Observable<{
         key: string;
         newValue: T;
@@ -1091,8 +1089,10 @@ export interface SavedObjectReferenceWithContext {
         name: string;
     }>;
     isMissing?: boolean;
+    originId?: string;
     spaces: string[];
     spacesWithMatchingAliases?: string[];
+    spacesWithMatchingOrigins?: string[];
     type: string;
 }
 
@@ -1568,7 +1568,7 @@ export interface UiSettingsParams<T = unknown> {
 // @public (undocumented)
 export interface UiSettingsState {
     // (undocumented)
-    [key: string]: PublicUiSettingsParams_2 & UserProvidedValues_2;
+    [key: string]: PublicUiSettingsParams & UserProvidedValues;
 }
 
 // @public

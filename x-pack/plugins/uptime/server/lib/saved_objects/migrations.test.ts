@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { add820Indices } from './migrations';
-import { SavedObject, SavedObjectMigrationContext } from 'src/core/server';
+import { SavedObject, SavedObjectMigrationContext } from '@kbn/core/server';
 import { DynamicSettings } from '../../../common/runtime_types';
 
 describe('add820Indices migration', () => {

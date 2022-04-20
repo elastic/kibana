@@ -7,14 +7,14 @@
  */
 
 import {
+  createFieldFormatsSetupMock,
+  createFieldFormatsStartMock,
+} from '@kbn/field-formats-plugin/server/mocks';
+import {
   createSearchSetupMock,
   createSearchStartMock,
   createSearchRequestHandlerContext,
 } from './search/mocks';
-import {
-  createFieldFormatsSetupMock,
-  createFieldFormatsStartMock,
-} from '../../field_formats/server/mocks';
 import { createIndexPatternsStartMock } from './data_views/mocks';
 import { createDatatableUtilitiesMock } from './datatable_utilities/mock';
 import { DataRequestHandlerContext } from './search';

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ToolingLog } from '@kbn/dev-utils';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 
-import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../plugins/security_solution/common/constants';
+import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '@kbn/security-solution-plugin/common/constants';
 
 interface CreateMigrationResponse {
   index: string;

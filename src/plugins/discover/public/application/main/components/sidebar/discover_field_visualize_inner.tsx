@@ -9,7 +9,7 @@
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataViewField } from '../../../../../../data_views/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { VisualizeInformation } from './lib/visualize_trigger_utils';
 
 interface DiscoverFieldVisualizeInnerProps {

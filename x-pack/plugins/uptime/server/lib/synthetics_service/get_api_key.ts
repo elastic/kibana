@@ -8,9 +8,9 @@ import type {
   SecurityClusterPrivilege,
   SecurityIndexPrivilege,
 } from '@elastic/elasticsearch/lib/api/types';
-import { KibanaRequest, SavedObjectsClientContract } from '../../../../../../src/core/server';
+import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { SecurityPluginStart } from '../../../../security/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   getSyntheticsServiceAPIKey,
   deleteSyntheticsServiceApiKey,

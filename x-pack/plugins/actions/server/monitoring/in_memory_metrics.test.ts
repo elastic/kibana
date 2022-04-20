@@ -6,7 +6,7 @@
  */
 
 import { InMemoryMetrics, IN_MEMORY_METRICS } from '.';
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 describe('inMemoryMetrics', () => {
   const logger = loggingSystemMock.createLogger();

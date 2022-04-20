@@ -15,7 +15,7 @@ import type {
   IBasePath,
   ExecutionContextStart,
   AnalyticsServiceSetup,
-} from 'src/core/public';
+} from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, from, of, Subscription } from 'rxjs';
@@ -26,7 +26,8 @@ import type {
   AuthenticatedUser,
   SecurityPluginSetup,
   SecurityPluginStart,
-} from '../../security/public';
+} from '@kbn/security-plugin/public';
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import {
   ELASTIC_SUPPORT_LINK,
@@ -34,7 +35,6 @@ import {
   GET_CHAT_USER_DATA_ROUTE_PATH,
 } from '../common/constants';
 import type { GetChatUserDataResponseBody } from '../common/types';
-import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { createUserMenuLinks } from './user_menu_links';
 import { getFullCloudUrl } from './utils';
 import { ChatConfig, ServicesProvider } from './services';
@@ -255,7 +255,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     }
 
     // Keep this import async so that we do not load any FullStory code into the browser when it is disabled.
-    const { FullStoryShipper } = await import('@elastic/analytics');
+    const { FullStoryShipper } = await import('@kbn/analytics-shippers-fullstory');
     analytics.registerShipper(FullStoryShipper, {
       fullStoryOrgId,
       // Load an Elastic-internally audited script. Ideally, it should be hosted on a CDN.

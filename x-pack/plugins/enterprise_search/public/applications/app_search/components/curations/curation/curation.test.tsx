@@ -23,7 +23,7 @@ import { AutomatedCuration } from './automated_curation';
 
 import { ManualCuration } from './manual_curation';
 
-import { Curation } from './';
+import { Curation } from '.';
 
 describe('Curation', () => {
   const values = {
