@@ -8,7 +8,9 @@
 
 const { ImportResolver } = require('@kbn/import-resolver');
 const { REPO_ROOT } = require('@kbn/utils');
-const resolver = ImportResolver.create(REPO_ROOT);
+const resolver = ImportResolver.create(REPO_ROOT, {
+  disableTypesFallback: true,
+});
 
 module.exports = (request, options) => {
   const result = resolver.resolve(request, options.basedir);

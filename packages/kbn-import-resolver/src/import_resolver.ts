@@ -22,37 +22,24 @@ import { memoize } from './helpers/memoize';
 
 const NODE_MODULE_SEG = Path.sep + 'node_modules' + Path.sep;
 
+interface ImportResolverOptions {
+  disableTypesFallback?: boolean;
+}
+
 export class ImportResolver {
-  static create(repoRoot: string) {
+  static create(repoRoot: string, options?: ImportResolverOptions) {
     const pkgMap = new Map();
     for (const dir of discoverBazelPackageLocations(repoRoot)) {
       const pkg = JSON.parse(Fs.readFileSync(Path.resolve(dir, 'package.json'), 'utf8'));
       pkgMap.set(pkg.name, normalizePath(Path.relative(repoRoot, dir)));
     }
 
-    return new ImportResolver(repoRoot, pkgMap, readPackageMap());
+    return new ImportResolver(repoRoot, pkgMap, readPackageMap(), options);
   }
 
   private safeStat = memoize(safeStat);
 
-  private baseResolveOpts = {
-    extensions: ['.js', '.json', '.ts', '.tsx', '.d.ts'],
-    preserveSymlinks: true,
-    isFile: (path: string) => !!this.safeStat(path)?.isFile(),
-    isDirectory: (path: string) => !!this.safeStat(path)?.isDirectory(),
-    readFileSync: memoize(readFileSync),
-    packageFilter(pkg: Record<string, unknown>) {
-      if (!pkg.main && pkg.types) {
-        // for the purpose of resolving files, a "types" file is adequate
-        return {
-          ...pkg,
-          main: pkg.types,
-        };
-      }
-
-      return pkg;
-    },
-  };
+  private baseResolveOpts: Resolve.SyncOpts;
 
   constructor(
     /**
@@ -69,8 +56,33 @@ export class ImportResolver {
      * Map of synthetic package names to normalized root-relative directories
      * for each simulated package
      */
-    private readonly synthPkgMap: PackageMap
-  ) {}
+    private readonly synthPkgMap: PackageMap,
+    /**
+     * Options to tweak ImportResolver behavior
+     */
+    options?: ImportResolverOptions
+  ) {
+    this.baseResolveOpts = {
+      extensions: ['.js', '.json', '.ts', '.tsx', '.d.ts'],
+      preserveSymlinks: true,
+      isFile: (path) => !!this.safeStat(path)?.isFile(),
+      isDirectory: (path) => !!this.safeStat(path)?.isDirectory(),
+      readFileSync: memoize(readFileSync),
+      packageFilter: options?.disableTypesFallback
+        ? undefined
+        : (pkg) => {
+            if (pkg.main && pkg.types) {
+              // for the purpose of resolving files, a "types" file is adequate
+              return {
+                ...pkg,
+                main: pkg.types,
+              };
+            }
+
+            return pkg;
+          },
+    };
+  }
 
   getPackageIdForPath(path: string) {
     const relative = normalizePath(Path.relative(this.cwd, path));
