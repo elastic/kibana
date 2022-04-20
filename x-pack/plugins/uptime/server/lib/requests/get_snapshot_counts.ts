@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { ESFilter } from '@kbn/core/types/elasticsearch';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { CONTEXT_DEFAULTS } from '../../../common/constants';
 import { Snapshot } from '../../../common/runtime_types';
 import { QueryContext } from './search';
-import { ESFilter } from '../../../../../../src/core/types/elasticsearch';
 import { EXCLUDE_RUN_ONCE_FILTER } from '../../../common/constants/client_defaults';
 
 export interface GetSnapshotCountParams {

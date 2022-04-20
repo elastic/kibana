@@ -15,9 +15,9 @@ import {
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
+import { useFetcher } from '@kbn/observability-plugin/public';
 import { TestRunResult } from './test_run_results';
 import { MonitorFields } from '../../../../common/runtime_types';
-import { useFetcher } from '../../../../../observability/public';
 import { runOnceMonitor } from '../../../state/api';
 import { kibanaService } from '../../../state/kibana_service';
 

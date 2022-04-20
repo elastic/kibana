@@ -10,7 +10,7 @@ import {
   SavedObjectAttributes,
   SavedObjectsResolveResponse,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from 'kibana/server';
+} from '@kbn/core/server';
 import { RuleExecutionMetrics } from '.';
 import { RuleNotifyWhenType } from './rule_notify_when_type';
 
@@ -50,7 +50,7 @@ export enum RuleExecutionStatusWarningReasons {
 export interface RuleExecutionStatus {
   status: RuleExecutionStatuses;
   numberOfTriggeredActions?: number;
-  numberOfScheduledActions?: number;
+  numberOfGeneratedActions?: number;
   metrics?: RuleExecutionMetrics;
   lastExecutionDate: Date;
   lastDuration?: number;

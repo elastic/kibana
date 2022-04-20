@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { HttpServiceSetup } from 'src/core/server';
+import { HttpServiceSetup } from '@kbn/core/server';
 import { ISavedObjectsManagement } from '../services';
 import { registerFindRoute } from './find';
 import { registerBulkGetRoute } from './bulk_get';

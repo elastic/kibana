@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 // @ts-ignore
-import { Fields } from '../../models/fields/index';
+import { Fields } from '../../models/fields';
 import { RouteDependencies } from '../../types';
 
 const bodySchema = schema.object({

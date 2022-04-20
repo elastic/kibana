@@ -8,7 +8,7 @@
 
 // @ts-expect-error
 import { getOptimizerBuiltPaths } from '@kbn/optimizer/target_node/optimizer/optimizer_built_paths';
-import { createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
@@ -22,6 +22,7 @@ it(`finds all the optimizer files relative to it's path`, async () => {
       <absolute path>/node_modules/@kbn/optimizer/target_node/common/bundle_refs.js,
       <absolute path>/node_modules/@kbn/optimizer/target_node/common/bundle.js,
       <absolute path>/node_modules/@kbn/optimizer/target_node/common/compiler_messages.js,
+      <absolute path>/node_modules/@kbn/optimizer/target_node/common/dll_manifest.js,
       <absolute path>/node_modules/@kbn/optimizer/target_node/common/event_stream_helpers.js,
       <absolute path>/node_modules/@kbn/optimizer/target_node/common/hashes.js,
       <absolute path>/node_modules/@kbn/optimizer/target_node/common/index.js,

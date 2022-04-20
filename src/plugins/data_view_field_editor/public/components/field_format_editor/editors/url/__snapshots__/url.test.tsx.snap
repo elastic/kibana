@@ -29,7 +29,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
           class="euiFormControlLayout__childrenWrapper"
         >
           <select
-            class="euiSelect"
+            class="euiSelect euiFormControlLayout--1icons"
             data-test-subj="urlEditorType"
             id="generated-id"
           >

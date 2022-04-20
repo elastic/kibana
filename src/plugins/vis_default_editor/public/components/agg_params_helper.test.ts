@@ -12,8 +12,8 @@ import {
   IAggConfig,
   IAggType,
   IndexPattern,
-} from 'src/plugins/data/public';
-import type { Schema } from 'src/plugins/visualizations/public';
+} from '@kbn/data-plugin/public';
+import type { Schema } from '@kbn/visualizations-plugin/public';
 
 import {
   getAggParamsToRender,

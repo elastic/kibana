@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Trigger } from '../../../ui_actions/public';
+import { Trigger } from '@kbn/ui-actions-plugin/public';
 
 export const APPLY_FILTER_TRIGGER = 'FILTER_TRIGGER';
 export const applyFilterTrigger: Trigger = {

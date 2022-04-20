@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import uuid from 'uuid';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { Spaces } from '../../scenarios';
 import {
   getUrlPrefix,
@@ -16,7 +17,6 @@ import {
   ESTestIndexTool,
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { IValidatedEvent } from '../../../../../plugins/event_log/server';
 
 const NANOS_IN_MILLIS = 1000 * 1000;
 

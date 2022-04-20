@@ -5,7 +5,7 @@
  * 2.0.
  */
 import pMap from 'p-map';
-import { HttpFetchError } from 'kibana/public';
+import { HttpFetchError } from '@kbn/core/public';
 import {
   UpdateExceptionListItemSchema,
   ExceptionListItemSchema,

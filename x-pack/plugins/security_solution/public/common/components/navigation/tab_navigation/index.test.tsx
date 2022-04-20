@@ -13,12 +13,12 @@ import { navTabsHostDetails } from '../../../../hosts/pages/details/nav_tabs';
 import { HostsTableType } from '../../../../hosts/store/model';
 import { RouteSpyState } from '../../../utils/route/types';
 import { CONSTANTS } from '../../url_state/constants';
-import { TabNavigationComponent } from './';
+import { TabNavigationComponent } from '.';
 import { TabNavigationProps } from './types';
 
 jest.mock('../../link_to');
 jest.mock('../../../lib/kibana/kibana_react', () => {
-  const originalModule = jest.requireActual('../../../../common/lib/kibana/kibana_react');
+  const originalModule = jest.requireActual('../../../lib/kibana/kibana_react');
   return {
     ...originalModule,
     useKibana: jest.fn().mockReturnValue({
@@ -125,5 +125,23 @@ describe('Table Navigation', () => {
     expect(firstTab.props().href).toBe(
       `/app/securitySolutionUI/hosts/siem-window/authentications${SEARCH_QUERY}`
     );
+  });
+
+  test('it renders a EuiBetaBadge only on the sessions tab', () => {
+    Object.keys(HostsTableType).forEach((tableType) => {
+      if (tableType !== HostsTableType.sessions) {
+        const wrapper = mount(<TabNavigationComponent {...mockProps} />);
+
+        const betaBadge = wrapper.find(
+          `EuiTab[data-test-subj="navigation-${tableType}"] EuiBetaBadge`
+        );
+
+        if (tableType === HostsTableType.sessions) {
+          expect(betaBadge).toBeTruthy();
+        } else {
+          expect(betaBadge).toEqual({});
+        }
+      }
+    });
   });
 });

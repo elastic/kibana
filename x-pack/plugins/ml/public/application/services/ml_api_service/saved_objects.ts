@@ -12,7 +12,7 @@ import { useMlKibana } from '../../contexts/kibana';
 
 import { HttpService } from '../http_service';
 
-import { basePath } from './index';
+import { basePath } from '.';
 import type {
   JobType,
   MlSavedObjectType,

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/core/server';
 import { ITelemetryEventsSender } from '../../telemetry/sender';
 import { TelemetryEvent } from '../../telemetry/types';
 import { BuildRuleMessage } from './rule_messages';
 import { SignalSearchResponse, SignalSource } from './types';
-import { Logger } from '../../../../../../../src/core/server';
 
 interface SearchResultSource {
   _source: SignalSource;

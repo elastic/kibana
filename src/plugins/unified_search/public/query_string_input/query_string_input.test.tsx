@@ -23,10 +23,10 @@ import { EuiTextArea, EuiIcon } from '@elastic/eui';
 import { QueryLanguageSwitcher } from './language_switcher';
 import QueryStringInputUI from './query_string_input';
 
-import { coreMock } from '../../../../core/public/mocks';
-import { dataPluginMock } from '../../../data/public/mocks';
-import { stubIndexPattern } from '../../../data/public/stubs';
-import { KibanaContextProvider, withKibana } from '../../../kibana_react/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
+import { KibanaContextProvider, withKibana } from '@kbn/kibana-react-plugin/public';
 
 jest.useFakeTimers();
 

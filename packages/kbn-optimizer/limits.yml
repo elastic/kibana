@@ -3,7 +3,7 @@ pageLoadAssetSize:
   alerting: 106936
   apm: 64385
   canvas: 1066647
-  charts: 95000
+  charts: 55000
   cloud: 21076
   console: 46091
   core: 435325
@@ -30,7 +30,7 @@ pageLoadAssetSize:
   inputControlVis: 172675
   inspector: 148711
   kibanaOverview: 56279
-  lens: 96624
+  lens: 35000
   licenseManagement: 41817
   licensing: 29004
   lists: 22900
@@ -56,7 +56,7 @@ pageLoadAssetSize:
   telemetry: 51957
   telemetryManagementSection: 38586
   transform: 41007
-  triggersActionsUi: 102400
+  triggersActionsUi: 103400
   upgradeAssistant: 81241
   uptime: 40825
   urlForwarding: 32579

@@ -7,7 +7,7 @@
  */
 
 import { getSavedDashboardMock } from '../test_helpers';
-import { dataPluginMock } from '../../../../data/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createSessionRestorationDataProvider, savedObjectToDashboardState } from '.';
 
 describe('createSessionRestorationDataProvider', () => {

@@ -6,7 +6,7 @@
  */
 
 import { groupBy, keyBy, memoize } from 'lodash';
-import { KibanaRequest, Logger, SavedObjectsClientContract } from 'kibana/server';
+import { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { MlJob } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MlClient } from '../ml_client';

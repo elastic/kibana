@@ -20,8 +20,9 @@ import type {
   SearchRequest as SearchRequestWithBody,
   AggregationsAggregate,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IScopedClusterClient, ElasticsearchClient, Logger } from 'src/core/server';
-import { ISearchSource } from 'src/plugins/data/common';
+import { IScopedClusterClient, ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ISearchSource } from '@kbn/data-plugin/common';
+import { IScopedClusterClient, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { RuleExecutionMetrics } from '../types';
 import { Rule } from '../types';
 

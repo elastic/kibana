@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { BENCHMARK_SCORE_INDEX_PATTERN } from '../../../common/constants';
 import { Stats } from '../../../common/types';
 import { calculatePostureScore } from './get_stats';
@@ -25,7 +25,7 @@ export interface ScoreTrendDoc {
   >;
 }
 
-export const getTrendsAggsQuery = () => ({
+export const getTrendsQuery = () => ({
   index: BENCHMARK_SCORE_INDEX_PATTERN,
   size: 5,
   sort: '@timestamp:desc',
@@ -60,7 +60,7 @@ export const getTrendsFromQueryResult = (scoreTrendDocs: ScoreTrendDoc[]): Trend
   }));
 
 export const getTrends = async (esClient: ElasticsearchClient): Promise<Trends> => {
-  const trendsQueryResult = await esClient.search<ScoreTrendDoc>(getTrendsAggsQuery());
+  const trendsQueryResult = await esClient.search<ScoreTrendDoc>(getTrendsQuery());
 
   if (!trendsQueryResult.hits.hits) throw new Error('missing trend results from score index');
 

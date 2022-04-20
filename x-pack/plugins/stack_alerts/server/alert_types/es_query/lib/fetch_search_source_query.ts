@@ -5,18 +5,20 @@
  * 2.0.
  */
 import { buildRangeFilter, Filter } from '@kbn/es-query';
-import { Logger } from 'kibana/server';
+import { Logger } from '@kbn/core/server';
 import {
   AggregationsAggregate,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { OnlySearchSourceAlertParams } from '../types';
+import { Logger } from '@kbn/core/server';
 import {
   getTime,
   ISearchSource,
   ISearchStartSearchSource,
   SortDirection,
-} from '../../../../../../../src/plugins/data/common';
+} from '@kbn/data-plugin/common';
+import { OnlySearchSourceAlertParams } from '../types';
+import { OnlySearchSourceAlertParams } from '../types';
 
 interface SearchSourceUtils {
   searchSourceClient: ISearchStartSearchSource;

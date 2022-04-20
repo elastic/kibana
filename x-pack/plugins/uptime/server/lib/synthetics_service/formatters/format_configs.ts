@@ -7,7 +7,7 @@
 
 import { isNil, omitBy } from 'lodash';
 import { ConfigKey, MonitorFields } from '../../../../common/runtime_types';
-import { formatters } from './index';
+import { formatters } from '.';
 
 const UI_KEYS_TO_SKIP = [
   ConfigKey.METADATA,

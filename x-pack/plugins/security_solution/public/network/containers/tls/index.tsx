@@ -10,6 +10,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { inputsModel } from '../../../common/store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -22,7 +23,6 @@ import {
   NetworkTlsRequestOptions,
   NetworkTlsStrategyResponse,
 } from '../../../../common/search_strategy/security_solution/network';
-import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
 
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../helpers';
