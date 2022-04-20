@@ -37,7 +37,9 @@ export const getPackagePolicy = async (
     throw new Error(`package policy Id '${packagePolicyId}' is not exist`);
   }
   if (packagePolicies[0].package?.name !== CLOUD_SECURITY_PACKAGE_NAME) {
-    throw new Error(`Package Policy Id '${packagePolicyId}' is not of type cloud security posture package`);
+    throw new Error(
+      `Package Policy Id '${packagePolicyId}' is not of type cloud security posture package`
+    );
   }
 
   return packagePolicies![0];
