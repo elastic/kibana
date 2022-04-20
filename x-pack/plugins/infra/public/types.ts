@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin as PluginClass } from 'kibana/public';
-import { IHttpFetchError } from 'src/core/public';
-import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import type { DataViewsPublicPluginStart } from '../../../../src/plugins/data_views/public';
-import type { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import type { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
+import type { CoreSetup, CoreStart, Plugin as PluginClass } from '@kbn/core/public';
+import { IHttpFetchError } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   UsageCollectionSetup,
   UsageCollectionStart,
-} from '../../../../src/plugins/usage_collection/public';
+} from '@kbn/usage-collection-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
-} from '../../../plugins/triggers_actions_ui/public';
-import { MlPluginSetup, MlPluginStart } from '../../ml/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
+import { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
-} from '../../observability/public';
+} from '@kbn/observability-plugin/public';
 // import type { OsqueryPluginStart } from '../../osquery/public';
-import type { SpacesPluginStart } from '../../spaces/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { UnwrapPromise } from '../common/utility_types';
 import type {
   SourceProviderProps,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ILLEGAL_CHARACTERS_VISIBLE } from '../../../../data_views/public';
+import { ILLEGAL_CHARACTERS_VISIBLE } from '@kbn/data-views-plugin/public';
 
 export const INDEX_ILLEGAL_CHARACTERS_VISIBLE = [...ILLEGAL_CHARACTERS_VISIBLE, '*'];
 

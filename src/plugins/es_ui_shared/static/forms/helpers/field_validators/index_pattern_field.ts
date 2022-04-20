@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { validateDataView } from '@kbn/data-views-plugin/public';
 import { ValidationFunc } from '../../hook_form_lib';
 import { containsChars } from '../../../validators/string';
 import { ERROR_CODE } from './types';
-
-import { validateDataView } from '../../../../../data_views/public';
 
 export const indexPatternField =
   (i18n: any) =>
