@@ -201,3 +201,17 @@ export const ACTIONS_FIELD_NOT_FOUND_ERROR = i18n.translate(
     defaultMessage: "Cannot find field 'kibana.alert.rule.execution.uuid' in alerts index.",
   }
 );
+
+export const DURATION_NOT_AVAILABLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.durationNotAvailableDescription',
+  {
+    defaultMessage: 'N/A',
+  }
+);
+
+export const GREATER_THAN_YEAR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.durationGreaterThanYearDescription',
+  {
+    defaultMessage: '> 1 Year',
+  }
+);

@@ -117,7 +117,7 @@ export const GET_EXECUTION_LOG_METRICS_COLUMNS = (
       />
     ),
     render: (value: number) => (
-      <>{value ? <RuleDurationFormat duration={value} isMillis={true} /> : getEmptyValue()}</>
+      <>{value ? <RuleDurationFormat duration={value} isSeconds={true} /> : getEmptyValue()}</>
     ),
     sortable: true,
     truncateText: false,
