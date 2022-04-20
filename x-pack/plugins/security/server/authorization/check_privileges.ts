@@ -120,7 +120,11 @@ export function checkPrivilegesWithRequestFactory(
         .map(([key, val]) => {
           // we need to turn the resource responses back into the space ids
           const resource =
-            key !== GLOBAL_RESOURCE ? ResourceSerializer.deserializeSpaceResource(key!) : undefined;
+            key !== GLOBAL_RESOURCE
+              ? ResourceSerializer.isSerializedSpaceResource(key)
+                ? ResourceSerializer.deserializeSpaceResource(key!)
+                : ResourceSerializer.deserializePackageResource(key)
+              : undefined;
           return Object.entries(val).map(([privilege, authorized]) => ({
             resource,
             privilege,

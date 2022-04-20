@@ -9,6 +9,7 @@ import type { HttpStart } from '@kbn/core/public';
 
 import type { Role, RoleIndexPrivilege } from '../../../common/model';
 import { copyRole } from '../../../common/model';
+import type { RoleKibanaPrivilege } from '../../../common/model/role';
 
 export class RolesAPIClient {
   constructor(private readonly http: HttpStart) {}
@@ -42,11 +43,14 @@ export class RolesAPIClient {
     // Remove any placeholder query entries
     role.elasticsearch.indices.forEach((index) => index.query || delete index.query);
 
-    role.kibana.forEach((kibanaPrivilege) => {
+    role.kibana.forEach((kibanaPrivilege: RoleKibanaPrivilege) => {
       // If a base privilege is defined, then do not persist feature privileges
       if (kibanaPrivilege.base.length > 0) {
         kibanaPrivilege.feature = {};
       }
+      if (kibanaPrivilege.feature!.integrations) kibanaPrivilege.packages = ['endpoint'];
+
+      // console.log(JSON.stringify(kibanaPrivilege, null, 2));
     });
 
     // @ts-expect-error

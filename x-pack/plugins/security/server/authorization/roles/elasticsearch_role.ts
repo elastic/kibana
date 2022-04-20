@@ -173,7 +173,9 @@ function transformRoleApplicationsToKibanaPrivileges(
   if (
     allResources.some(
       (resource) =>
-        resource !== GLOBAL_RESOURCE && !ResourceSerializer.isSerializedSpaceResource(resource)
+        resource !== GLOBAL_RESOURCE &&
+        !ResourceSerializer.isSerializedSpaceResource(resource) &&
+        !ResourceSerializer.isSerializedPackageResource(resource)
     )
   ) {
     return {
@@ -193,6 +195,7 @@ function transformRoleApplicationsToKibanaPrivileges(
     roleKibanaApplications.some(
       (entry) =>
         !entry.resources.includes(GLOBAL_RESOURCE) &&
+        !entry.resources.includes('space:*') &&
         features.some((f) =>
           Object.entries(f.privileges ?? {}).some(
             ([privName, featurePrivilege]) =>
@@ -286,7 +289,12 @@ function transformRoleApplicationsToKibanaPrivileges(
             ]),
           };
         }, {} as RoleKibanaPrivilege['feature']),
-        spaces: resources.map((resource) => ResourceSerializer.deserializeSpaceResource(resource)),
+        spaces: resources
+          .filter((resource) => ResourceSerializer.isSerializedSpaceResource(resource))
+          .map((resource) => ResourceSerializer.deserializeSpaceResource(resource)),
+        packages: resources
+          .filter((resource) => ResourceSerializer.isSerializedPackageResource(resource))
+          .map((resource) => ResourceSerializer.deserializePackageResource(resource)),
       };
     }),
   };

@@ -133,6 +133,8 @@ export function getPutPayloadSchema(
              */
             spaces: spacesSchema,
 
+            packages: spacesSchema,
+
             /**
              * An optional list of Kibana base privileges. If this entry applies to special "global"
              * space (all spaces) then specified base privileges should be within known base "global"
@@ -259,28 +261,7 @@ const transformPrivilegesToElasticsearchPrivileges = (
   application: string,
   kibanaPrivileges: PutPayloadSchemaType['kibana'] = []
 ) => {
-  return kibanaPrivileges.map(({ base, feature, spaces }) => {
-    if (spaces.length === 1 && spaces[0] === GLOBAL_RESOURCE) {
-      return {
-        privileges: [
-          ...(base
-            ? base.map((privilege) => PrivilegeSerializer.serializeGlobalBasePrivilege(privilege))
-            : []),
-          ...(feature
-            ? Object.entries(feature)
-                .map(([featureName, featurePrivileges]) =>
-                  featurePrivileges.map((privilege) =>
-                    PrivilegeSerializer.serializeFeaturePrivilege(featureName, privilege)
-                  )
-                )
-                .flat()
-            : []),
-        ],
-        application,
-        resources: [GLOBAL_RESOURCE],
-      };
-    }
-
+  return kibanaPrivileges.map(({ base, feature, spaces, packages }) => {
     return {
       privileges: [
         ...(base
@@ -297,9 +278,14 @@ const transformPrivilegesToElasticsearchPrivileges = (
           : []),
       ],
       application,
-      resources: (spaces as string[]).map((resource) =>
-        ResourceSerializer.serializeSpaceResource(resource)
-      ),
+      resources: [
+        ...(spaces as string[]).map((resource) =>
+          ResourceSerializer.serializeSpaceResource(resource)
+        ),
+        ...(packages as string[]).map((resource) =>
+          ResourceSerializer.serializePackageResource(resource)
+        ),
+      ],
     };
   });
 };

@@ -15,7 +15,7 @@ import type {
   OnPostAuthHandler,
 } from '@kbn/core/server';
 
-import type { HasPrivilegesResponse } from '../../../security/server';
+import type { HasPrivilegesResponse } from '@kbn/security-plugin/server';
 
 import type { FleetAuthz, FleetPackageAuthz } from '../../common';
 import { calculateAuthz, INTEGRATIONS_PLUGIN_ID } from '../../common';
@@ -58,7 +58,7 @@ function getAuthorizationFromPrivileges(
   const privilege = kibanaPrivileges.find((p) => p.privilege.includes(searchPrivilege));
   return privilege ? privilege.authorized : false;
 }
-
+// req has no body at this point, only at handler
 export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuthz> {
   const security = appContextService.getSecurity();
 
@@ -72,6 +72,7 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
         security.authz.actions.api.get('fleet-setup'),
       ],
     });
+    // console.log(JSON.stringify(privileges, null, 2));
     const fleetAllAuth = getAuthorizationFromPrivileges(privileges.kibana, `${PLUGIN_ID}-all`);
     const intAllAuth = getAuthorizationFromPrivileges(
       privileges.kibana,
@@ -304,16 +305,16 @@ export const hasRoutePrivileges = async (
 
   const packagePrivileges = [];
   if (packageAuthz?.executePackageAction) {
-    packagePrivileges.push('execute_package_action');
+    packagePrivileges.push('feature_integrations.execute_package_action');
   }
   if (packageAuthz?.managePackagePolicy) {
-    packagePrivileges.push('manage_package_policy');
+    packagePrivileges.push('feature_integrations.manage_package_policy');
   }
   if (packageAuthz?.manageAgentPolicy) {
-    packagePrivileges.push('manage_agent_policy');
+    packagePrivileges.push('feature_integrations.manage_agent_policy');
   }
   if (packageAuthz?.readPackageActionResult) {
-    packagePrivileges.push('read_package_action_result');
+    packagePrivileges.push('feature_integrations.read_package_action_result');
   }
 
   // this is working
@@ -339,7 +340,7 @@ export const hasRoutePrivileges = async (
                   // specific actions from packageAuthz?.packageActions
                   // which privilege indicates "package:endpoint:action:*" ?,
                   resources: [
-                    'package:' + packageAuthz?.packageName + ':*',
+                    'package:' + packageAuthz?.packageName, //  + ':*',
                     spaceId ? 'space:' + spaceId : 'space:*',
                   ],
                   privileges: packagePrivileges,
@@ -381,7 +382,9 @@ async function authHandler(
   if (!(await hasRoutePrivileges(request, fleetAuthzConfig, context.fleet.spaceId))) {
     return response.forbidden();
   }
-  // return response.forbidden();
+
+  // TODO remove, for testing
+  return response.forbidden();
 
   return nextHandler(context, request, response);
 }

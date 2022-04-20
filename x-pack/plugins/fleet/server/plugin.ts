@@ -313,6 +313,79 @@ export class FleetPlugin
           },
         },
       });
+
+      deps.features.registerKibanaFeature({
+        id: 'integrations',
+        name: 'Integration packages',
+        category: DEFAULT_APP_CATEGORIES.management,
+        app: ['packages'],
+        catalogue: ['fleet'],
+        privilegesTooltip: i18n.translate(
+          'xpack.fleet.serverPlugin.integrationsPrivilegesTooltip',
+          {
+            defaultMessage: 'All Spaces is required for All Integrations access.',
+          }
+        ),
+        privileges: {
+          all: {
+            api: [`${'packages'}-read`, `${'packages'}-all`],
+            app: ['packages'],
+            catalogue: ['fleet'],
+            savedObject: {
+              all: allSavedObjectTypes,
+              read: [],
+            },
+            ui: ['read', 'all'],
+          },
+          read: {
+            api: [`${'packages'}-read`],
+            app: ['packages'],
+            catalogue: ['fleet'],
+            savedObject: {
+              all: [],
+              read: allSavedObjectTypes,
+            },
+            ui: ['read'],
+          },
+        },
+        subFeatures: [
+          {
+            name: 'Packages',
+            privilegeGroups: [
+              {
+                groupType: 'independent',
+                privileges: [
+                  {
+                    id: 'manage_package_policy',
+                    name: 'Manage package policy',
+                    includeIn: 'all',
+                    savedObject: {
+                      all: [],
+                      read: [],
+                    },
+                    ui: ['manage_package_policy'],
+                  },
+                ],
+              },
+              {
+                groupType: 'independent',
+                privileges: [
+                  {
+                    id: 'execute_package_action',
+                    name: 'Execute package action',
+                    includeIn: 'all',
+                    savedObject: {
+                      all: [],
+                      read: [],
+                    },
+                    ui: ['execute_package_action'],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
     }
 
     core.http.registerRouteHandlerContext<FleetRequestHandlerContext, typeof PLUGIN_ID>(
