@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-jest.mock('os', () => {
+jest.mock('../cloud/read_cgroup_mem_limit', () => {
   return {
-    ...jest.requireActual('os'),
-    totalmem: jest.fn(() => 1 * Math.pow(1024, 3)), // 1GB in bytes
+    ...jest.requireActual('../cloud/read_cgroup_mem_limit'),
+    readMemoryLimit: jest.fn(() => 1 * Math.pow(1024, 3)), // 1GB in bytes
   };
 });
 
-import os from 'os';
+import { readMemoryLimit } from '../cloud/read_cgroup_mem_limit';
 import type { Logger, PackageInfo } from '@kbn/core/server';
 import { httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { lastValueFrom, of, throwError } from 'rxjs';
@@ -225,7 +225,7 @@ describe('Screenshot Observable Pipeline', () => {
     });
 
     it('generates a report when OS memory is 2GB on cloud', async () => {
-      (os.totalmem as jest.Mock).mockImplementation(() => 2 * Math.pow(1024, 3));
+      (readMemoryLimit as jest.Mock).mockImplementation(() => 2 * Math.pow(1024, 3));
       await lastValueFrom(
         screenshots.getScreenshots({
           ...options,
