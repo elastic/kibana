@@ -122,7 +122,7 @@
     "@hapi/cookie": "^11.0.2",
     "@hapi/good-squeeze": "6.0.0",
     "@hapi/h2o2": "^9.1.0",
-    "@hapi/hapi": "^20.2.1",
+    "@hapi/hapi": "^20.2.2",
     "@hapi/hoek": "^9.2.1",
     "@hapi/inert": "^6.0.4",
     "@hapi/podium": "^4.1.3",
