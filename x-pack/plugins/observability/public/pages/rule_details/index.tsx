@@ -6,7 +6,10 @@
  */
 
 import React from 'react';
+import moment from 'moment';
+
 import { useParams } from 'react-router-dom';
+
 import { i18n } from '@kbn/i18n';
 import {
   EuiText,
@@ -52,6 +55,31 @@ function PageTitle(rule: Rule) {
       </EuiPanel>
     </>
   );
+}
+
+interface ItemTitleRuleSummaryProps {
+  translationKey: string;
+  defaultMessage: string;
+}
+
+function ItemTitleRuleSummary({ translationKey, defaultMessage }: ItemTitleRuleSummaryProps) {
+  return (
+    <EuiTitle size="xs">
+      <EuiFlexItem grow={1}>
+        {i18n.translate(translationKey, {
+          defaultMessage,
+        })}
+      </EuiFlexItem>
+    </EuiTitle>
+  );
+}
+interface ItemValueRuleSummaryProps {
+  itemValue: string;
+  extraSpace?: boolean;
+}
+
+function ItemValueRuleSummary({ itemValue, extraSpace = true }: ItemValueRuleSummaryProps) {
+  return <EuiFlexItem grow={extraSpace ? 3 : 1}>{itemValue}</EuiFlexItem>;
 }
 interface RuleDetailsPathParams {
   ruleId: string;
@@ -110,7 +138,10 @@ export function RuleDetailsPage() {
     notifyWhen,
     actions,
   } = rule;
+
   const { description } = ruleTypeRegistry.get(rule?.ruleTypeId);
+  const uniqueActions = Array.from(new Set(actions.map((action: any) => action.actionTypeId)));
+
   console.log(rule);
   return (
     rule &&
@@ -126,45 +157,46 @@ export function RuleDetailsPage() {
           <EuiFlexItem grow={1}>
             <EuiPanel color={getColorStatusBased(status)} hasBorder={false} paddingSize={'l'}>
               <EuiFlexGroup direction="column">
+                <EuiFlexItem>
+                  <EuiTitle size="m">
+                    <EuiHealth textSize="inherit" color={getColorStatusBased(status)}>
+                      {status}
+                    </EuiHealth>
+                  </EuiTitle>
+                </EuiFlexItem>
+
+                <EuiSpacer size="l" />
+
                 <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <EuiTitle size="m">
-                      <EuiHealth textSize="inherit" color={getColorStatusBased(status)}>
-                        {status}
-                      </EuiHealth>
-                    </EuiTitle>
-                  </EuiFlexItem>
+                  <ItemTitleRuleSummary
+                    translationKey="xpack.observability.ruleDetails.lastRun"
+                    defaultMessage="Last Run"
+                  />
+                  <ItemValueRuleSummary
+                    extraSpace={false}
+                    itemValue={moment(lastExecutionDate).fromNow()}
+                  />
                 </EuiFlexGroup>
 
                 <EuiSpacer size="l" />
 
                 <EuiFlexGroup>
-                  <EuiFlexItem>
-                    {i18n.translate('xpack.observability.ruleDetails.lastRun', {
-                      defaultMessage: 'Last Run ',
-                    })}
-                  </EuiFlexItem>
-                  <EuiFlexItem>{lastExecutionDate}</EuiFlexItem>
+                  <ItemTitleRuleSummary
+                    translationKey="xpack.observability.ruleDetails.last24hAlerts"
+                    defaultMessage="Alerts (last 24 h)"
+                  />
+                  <ItemValueRuleSummary extraSpace={false} itemValue={'TODO'} />
                 </EuiFlexGroup>
+
                 <EuiSpacer size="l" />
 
                 <EuiFlexGroup>
-                  <EuiFlexItem>
-                    {i18n.translate('xpack.observability.ruleDetails.last24hAlerts', {
-                      defaultMessage: 'Alerts (last 24 h)',
-                    })}
-                  </EuiFlexItem>
-                  <EuiFlexItem>{0} - TODO</EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer size="l" />
+                  <ItemTitleRuleSummary
+                    translationKey="xpack.observability.ruleDetails.last25hExecution"
+                    defaultMessage="Executions (last 24 h)"
+                  />
 
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    {i18n.translate('xpack.observability.ruleDetails.last25hExecution', {
-                      defaultMessage: 'Executions (last 24 h)',
-                    })}
-                  </EuiFlexItem>
-                  <EuiFlexItem>{0} - TODO</EuiFlexItem>
+                  <ItemValueRuleSummary extraSpace={false} itemValue={'TODO'} />
                 </EuiFlexGroup>
                 <EuiSpacer size="l" />
               </EuiFlexGroup>
@@ -185,70 +217,68 @@ export function RuleDetailsPage() {
 
               <EuiSpacer size="l" />
 
-              <EuiFlexGroup>
+              <EuiFlexGroup alignItems="baseline">
                 <EuiFlexItem>
                   <EuiFlexGroup>
-                    <EuiFlexItem>
-                      {i18n.translate('xpack.observability.ruleDetails.ruleType', {
-                        defaultMessage: 'Rule type',
-                      })}
-                    </EuiFlexItem>
-                    <EuiFlexItem>{ruleTypeId}</EuiFlexItem>
+                    <ItemTitleRuleSummary
+                      translationKey="xpack.observability.ruleDetails.ruleType"
+                      defaultMessage="Rule type"
+                    />
+                    <ItemValueRuleSummary itemValue={ruleTypeId} />
+                  </EuiFlexGroup>
+
+                  <EuiSpacer size="l" />
+
+                  <EuiFlexGroup alignItems="flexStart">
+                    <ItemTitleRuleSummary
+                      translationKey="xpack.observability.ruleDetails.description"
+                      defaultMessage="Description"
+                    />
+                    <ItemValueRuleSummary itemValue={description} />
                   </EuiFlexGroup>
 
                   <EuiSpacer size="l" />
 
                   <EuiFlexGroup>
-                    <EuiFlexItem>
-                      {i18n.translate('xpack.observability.ruleDetails.description', {
-                        defaultMessage: 'Description',
-                      })}
-                    </EuiFlexItem>
-                    <EuiFlexItem>{description}</EuiFlexItem>
-                  </EuiFlexGroup>
+                    <ItemTitleRuleSummary
+                      translationKey="xpack.observability.ruleDetails.conditions"
+                      defaultMessage="Conditions"
+                    />
 
-                  <EuiSpacer size="l" />
-
-                  <EuiFlexGroup>
-                    <EuiFlexItem>
-                      {i18n.translate('xpack.observability.ruleDetails.conditions', {
-                        defaultMessage: 'Conditions',
-                      })}
-                    </EuiFlexItem>
-                    <EuiFlexItem>{(params.criteria as any[]).length}</EuiFlexItem>
+                    <ItemValueRuleSummary itemValue={String((params.criteria as any[]).length)} />
                   </EuiFlexGroup>
 
                   <EuiSpacer size="l" />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFlexGroup>
-                    <EuiFlexItem>
-                      {i18n.translate('xpack.observability.ruleDetails.runsEvery', {
-                        defaultMessage: 'Runs every',
-                      })}
-                    </EuiFlexItem>
-                    <EuiFlexItem>{interval}</EuiFlexItem>
+                    <ItemTitleRuleSummary
+                      translationKey="xpack.observability.ruleDetails.runsEvery"
+                      defaultMessage="Runs every"
+                    />
+
+                    <ItemValueRuleSummary itemValue={interval} />
                   </EuiFlexGroup>
 
                   <EuiSpacer size="l" />
 
                   <EuiFlexGroup>
-                    <EuiFlexItem>
-                      {i18n.translate('xpack.observability.ruleDetails.notifyWhen', {
-                        defaultMessage: 'Notify',
-                      })}
-                    </EuiFlexItem>
-                    <EuiFlexItem>{notifyWhen}</EuiFlexItem>
+                    <ItemTitleRuleSummary
+                      translationKey="xpack.observability.ruleDetails.notifyWhen"
+                      defaultMessage="Notify"
+                    />
+
+                    <ItemValueRuleSummary itemValue={String(notifyWhen)} />
                   </EuiFlexGroup>
 
                   <EuiSpacer size="l" />
                   <EuiFlexGroup>
-                    <EuiFlexItem>
-                      {i18n.translate('xpack.observability.ruleDetails.actions', {
-                        defaultMessage: 'Actions',
-                      })}
-                    </EuiFlexItem>
-                    <EuiFlexItem>{actions.length}</EuiFlexItem>
+                    <ItemTitleRuleSummary
+                      translationKey="xpack.observability.ruleDetails.actions"
+                      defaultMessage="Actions"
+                    />
+
+                    <ItemValueRuleSummary itemValue={String(uniqueActions.length)} />
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
