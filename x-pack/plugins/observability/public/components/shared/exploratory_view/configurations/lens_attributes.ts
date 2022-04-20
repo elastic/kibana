@@ -785,7 +785,7 @@ export class LensAttributes {
     };
   }
 
-  getJSON(lastRefresh: number): TypedLensByValueInput['attributes'] {
+  getJSON(lastRefresh?: number): TypedLensByValueInput['attributes'] {
     const uniqueIndexPatternsIds = Array.from(
       new Set([...this.layerConfigs.map(({ indexPattern }) => indexPattern.id)])
     );

@@ -63,7 +63,6 @@ describe('ExploratoryView', () => {
 
   it('shows/hides the chart', async () => {
     render(<ExploratoryView />);
-    expect(screen.queryByText('Refresh')).toBeInTheDocument();
 
     const toggleButton = await screen.findByText('Hide chart');
     expect(toggleButton).toBeInTheDocument();
