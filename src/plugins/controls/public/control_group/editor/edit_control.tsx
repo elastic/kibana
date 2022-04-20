@@ -101,6 +101,8 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
     };
 
     const onSave = (type: string, ref: OverlayRef) => {
+      // if the control now has a new type, need to replace the old factory with
+      // one of the correct new type
       if (latestPanelState.current.type !== type) {
         factory = getControlFactory(type);
         if (!factory) throw new EmbeddableFactoryNotFoundError(type);
@@ -157,11 +159,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
 
     initialInputPromise.then(
       async (promise) => {
-        await replaceEmbeddable(
-          embeddable.id,
-          inputToReturn,
-          promise.type === embeddable.type ? undefined : promise.type
-        );
+        await replaceEmbeddable(embeddable.id, inputToReturn, promise.type);
       },
       () => {} // swallow promise rejection because it can be part of normal flow
     );

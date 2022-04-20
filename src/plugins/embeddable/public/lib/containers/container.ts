@@ -132,6 +132,11 @@ export abstract class Container<
     return this.createAndSaveEmbeddable(type, panelState);
   }
 
+  /**
+   * This can be used if replacing an emeddable has different consquences than adding one -
+   * for example, adding a new control embeddable will cause re-ordering but replacing an
+   * existing control embeddable will not
+   */
   protected getReplacementPanelState<
     EEI extends EmbeddableInput = EmbeddableInput,
     EEO extends EmbeddableOutput = EmbeddableOutput,
@@ -155,9 +160,7 @@ export abstract class Container<
       throw new PanelNotFoundError();
     }
 
-    if (!newType) {
-      this.updateInputForChild(id, newExplicitInput);
-    } else {
+    if (newType && newType !== this.input.panels[id].type) {
       const factory = this.getFactory(newType) as EmbeddableFactory<EEI, EEO, E> | undefined;
       if (!factory) {
         throw new EmbeddableFactoryNotFoundError(newType);
@@ -170,7 +173,10 @@ export abstract class Container<
           [id]: newPanelState,
         },
       } as Partial<TContainerInput>);
+    } else {
+      this.updateInputForChild(id, newExplicitInput);
     }
+
     await this.untilEmbeddableLoaded<E>(id);
   }
 
