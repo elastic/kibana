@@ -12,7 +12,7 @@ import type {
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
   SavedObjectsImportSuccess,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
 export interface CopyOptions {
   objects: Array<{ type: string; id: string }>;

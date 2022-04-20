@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { FieldFormat } from 'src/plugins/field_formats/common';
-import type { Datatable } from 'src/plugins/expressions';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin';
 import { DatatableArgs } from './datatable';
 
 import { transposeTable } from './transpose_helpers';

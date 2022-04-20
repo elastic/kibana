@@ -7,7 +7,7 @@
  */
 
 import { loggerMock, MockedLogger } from '../../../logging/logger.mock';
-import type { SavedObjectsFindResult } from '../';
+import type { SavedObjectsFindResult } from '..';
 import { savedObjectsRepositoryMock } from './repository.mock';
 
 import {

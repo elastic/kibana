@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import listingFixture from './fixtures/listing';
+import listingFixture from './fixtures/listing.json';
 import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {

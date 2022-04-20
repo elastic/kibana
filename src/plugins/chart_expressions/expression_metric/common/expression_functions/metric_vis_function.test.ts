@@ -7,9 +7,9 @@
  */
 
 import { metricVisFunction } from './metric_vis_function';
-import type { MetricArguments } from '../../common';
-import { functionWrapper } from '../../../../expressions/common/expression_functions/specs/tests/utils';
-import { Datatable } from '../../../../expressions/common/expression_types/specs';
+import type { MetricArguments } from '..';
+import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
+import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { LabelPosition } from '../constants';
 
 describe('interpreter/functions#metric', () => {

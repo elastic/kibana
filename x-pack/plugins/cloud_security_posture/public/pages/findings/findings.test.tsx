@@ -7,18 +7,19 @@
 import React from 'react';
 import type { UseQueryResult } from 'react-query';
 import { render, screen } from '@testing-library/react';
+import { of } from 'rxjs';
 import { useKubebeatDataView } from '../../common/api/use_kubebeat_data_view';
 import { Findings } from './findings';
 import { TestProvider } from '../../test/test_provider';
-import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
-import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
-import { UnifiedSearchPublicPluginStart } from '../../../../../../src/plugins/unified_search/public';
-import { unifiedSearchPluginMock } from '../../../../../../src/plugins/unified_search/public/mocks';
-import { createStubDataView } from '../../../../../../src/plugins/data_views/public/data_views/data_view.stub';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { createStubDataView } from '@kbn/data-views-plugin/public/data_views/data_view.stub';
 import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
 import * as TEST_SUBJECTS from './test_subjects';
 import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes_integration';
-import type { DataView } from '../../../../../../src/plugins/data/common';
+import type { DataView } from '@kbn/data-plugin/common';
 
 jest.mock('../../common/api/use_kubebeat_data_view');
 jest.mock('../../common/api/use_cis_kubernetes_integration');
@@ -48,9 +49,7 @@ describe('<Findings />', () => {
     (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
       data: { item: { status: 'installed' } },
     }));
-    (source.fetch$ as jest.Mock).mockReturnValue({
-      toPromise: () => Promise.resolve({ rawResponse: { hits: { hits: [] } } }),
-    });
+    (source.fetch$ as jest.Mock).mockReturnValue(of({ rawResponse: { hits: { hits: [] } } }));
 
     (useKubebeatDataView as jest.Mock).mockReturnValue({
       status: 'success',

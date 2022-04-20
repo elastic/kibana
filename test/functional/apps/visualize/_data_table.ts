@@ -93,6 +93,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    it('should show correct data when partial rows is on', async () => {
+      const expectedChartData = [
+        ['0B', '2,088'],
+        ['1.953KB', '2,748'],
+        ['3.906KB', '2,707'],
+        ['5.859KB', '2,876'],
+        ['7.813KB', '2,863'],
+        ['9.766KB', '147'],
+        ['11.719KB', '148'],
+        ['13.672KB', '129'],
+        ['15.625KB', '161'],
+        ['17.578KB', '137'],
+      ];
+      await PageObjects.visEditor.clickOptionsTab();
+      await PageObjects.visEditor.checkSwitch('showPartialRows');
+      await PageObjects.visEditor.clickGo();
+
+      return retry.try(async function () {
+        await inspector.open();
+        await inspector.expectTableData(expectedChartData);
+        await inspector.close();
+        await PageObjects.visEditor.uncheckSwitch('showPartialRows');
+      });
+    });
+
     it('should show percentage columns', async () => {
       async function expectValidTableData() {
         const data = await PageObjects.visChart.getTableVisContent();

@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type {
   AggregationsMultiBucketAggregateBase as Aggregation,
   QueryDslQueryContainer,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ComplianceDashboardData } from '../../../common/types';
+import { Cluster } from '../../../common/types';
 import { getResourceTypeFromAggs, resourceTypeAggQuery } from './get_resources_types';
 import type { ResourceTypeQueryResult } from './get_resources_types';
-import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
 import { findingsEvaluationAggsQuery, getStatsFromFindingsEvaluationsAggs } from './get_stats';
 import { KeyDocCount } from './compliance_dashboard';
 
@@ -35,8 +34,9 @@ interface ClustersQueryResult {
   aggs_by_cluster_id: Aggregation<ClusterBucket>;
 }
 
-export const getClustersQuery = (query: QueryDslQueryContainer): SearchRequest => ({
-  index: CSP_KUBEBEAT_INDEX_PATTERN,
+export type ClusterWithoutTrend = Omit<Cluster, 'trend'>;
+
+export const getClustersQuery = (query: QueryDslQueryContainer, pitId: string): SearchRequest => ({
   size: 0,
   query,
   aggs: {
@@ -64,11 +64,12 @@ export const getClustersQuery = (query: QueryDslQueryContainer): SearchRequest =
       },
     },
   },
+  pit: {
+    id: pitId,
+  },
 });
 
-export const getClustersFromAggs = (
-  clusters: ClusterBucket[]
-): ComplianceDashboardData['clusters'] =>
+export const getClustersFromAggs = (clusters: ClusterBucket[]): ClusterWithoutTrend[] =>
   clusters.map((cluster) => {
     // get cluster's meta data
     const benchmarks = cluster.benchmarks.buckets;
@@ -102,13 +103,14 @@ export const getClustersFromAggs = (
 
 export const getClusters = async (
   esClient: ElasticsearchClient,
-  query: QueryDslQueryContainer
-): Promise<ComplianceDashboardData['clusters']> => {
-  const queryResult = await esClient.search<unknown, ClustersQueryResult>(getClustersQuery(query), {
-    meta: true,
-  });
+  query: QueryDslQueryContainer,
+  pitId: string
+): Promise<ClusterWithoutTrend[]> => {
+  const queryResult = await esClient.search<unknown, ClustersQueryResult>(
+    getClustersQuery(query, pitId)
+  );
 
-  const clusters = queryResult.body.aggregations?.aggs_by_cluster_id.buckets;
+  const clusters = queryResult.aggregations?.aggs_by_cluster_id.buckets;
   if (!Array.isArray(clusters)) throw new Error('missing aggs by cluster id');
 
   return getClustersFromAggs(clusters);

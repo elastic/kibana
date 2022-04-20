@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
 import { GetExecutionLogByIdParams } from '../rules_client';
@@ -25,7 +25,7 @@ const sortFieldSchema = schema.oneOf([
   schema.object({ es_search_duration: schema.object({ order: sortOrderSchema }) }),
   schema.object({ schedule_delay: schema.object({ order: sortOrderSchema }) }),
   schema.object({ num_triggered_actions: schema.object({ order: sortOrderSchema }) }),
-  schema.object({ num_scheduled_actions: schema.object({ order: sortOrderSchema }) }),
+  schema.object({ num_generated_actions: schema.object({ order: sortOrderSchema }) }),
 ]);
 
 const sortFieldsSchema = schema.arrayOf(sortFieldSchema, {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getRegistryUrl as getRegistryUrlFromIngest } from '../../../../plugins/fleet/server';
+import { getRegistryUrl as getRegistryUrlFromIngest } from '@kbn/fleet-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   isRegistryEnabled,
@@ -16,6 +16,7 @@ export default function (providerContext: FtrProviderContext) {
   const { loadTestFile, getService } = providerContext;
 
   describe('endpoint', function () {
+    this.tags('ciGroup7');
     const ingestManager = getService('ingestManager');
     const log = getService('log');
     const endpointTestResources = getService('endpointTestResources');

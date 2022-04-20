@@ -12,7 +12,8 @@ import React, { useCallback, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { Filter } from '@kbn/es-query';
-import { isTab } from '../../../../timelines/public';
+import { isTab } from '@kbn/timelines-plugin/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { SecurityPageName } from '../../app/types';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { HeaderPage } from '../../common/components/header_page';
@@ -29,7 +30,6 @@ import { inputsSelectors, State } from '../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { getEsQueryConfig } from '../../../../../../src/plugins/data/common';
 import { UsersTabs } from './users_tabs';
 import { navTabsUsers } from './nav_tabs';
 import * as i18n from './translations';

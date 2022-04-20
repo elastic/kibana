@@ -7,11 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { INDEX_NAMES } from '../../../common/constants';
 import { RouteDependencies } from '../../types';
 // @ts-ignore
-import { WatchHistoryItem } from '../../models/watch_history_item/index';
+import { WatchHistoryItem } from '../../models/watch_history_item';
 
 const paramsSchema = schema.object({
   id: schema.string(),

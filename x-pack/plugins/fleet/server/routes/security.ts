@@ -13,7 +13,7 @@ import type {
   RequestHandler,
   RequestHandlerContext,
   OnPostAuthHandler,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
 import type { HasPrivilegesResponse } from '../../../security/server';
 

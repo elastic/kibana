@@ -9,7 +9,7 @@
 import { cloneDeep } from 'lodash';
 
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
-import { configDeprecationsMock } from '../../../core/server/mocks';
+import { configDeprecationsMock } from '@kbn/core/server/mocks';
 
 import { autocompleteConfigDeprecationProvider } from './config_deprecations';
 

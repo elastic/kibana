@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { StartServicesAccessor } from 'kibana/server';
-import { Logger } from 'src/core/server';
-import { IRuleDataClient, RuleDataPluginService } from '../../../rule_registry/server';
+import { StartServicesAccessor, Logger } from '@kbn/core/server';
+import { IRuleDataClient, RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 
 import { SecuritySolutionPluginRouter } from '../types';
 
@@ -112,10 +111,10 @@ export const initRoutes = (
 
   addPrepackedRulesRoute(router);
   getPrepackagedRulesStatusRoute(router, config, security, isRuleRegistryEnabled);
-  createRulesBulkRoute(router, ml, isRuleRegistryEnabled);
-  updateRulesBulkRoute(router, ml, isRuleRegistryEnabled);
-  patchRulesBulkRoute(router, ml, isRuleRegistryEnabled);
-  deleteRulesBulkRoute(router, isRuleRegistryEnabled);
+  createRulesBulkRoute(router, ml, isRuleRegistryEnabled, logger);
+  updateRulesBulkRoute(router, ml, isRuleRegistryEnabled, logger);
+  patchRulesBulkRoute(router, ml, isRuleRegistryEnabled, logger);
+  deleteRulesBulkRoute(router, isRuleRegistryEnabled, logger);
   performBulkActionRoute(router, ml, logger, isRuleRegistryEnabled);
 
   getRuleExecutionEventsRoute(router);

@@ -18,35 +18,33 @@ import type {
   ScopedHistory,
   AppMountParameters,
   ThemeServiceStart,
-} from 'kibana/public';
+} from '@kbn/core/public';
 
+import type {
+  Storage,
+  IKbnUrlStateStorage,
+  ReduxLikeStateContainer,
+} from '@kbn/kibana-utils-plugin/public';
+
+import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
+import type { Filter } from '@kbn/es-query';
+import type { Query, DataPublicPluginStart, TimeRange } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { EmbeddableStart, EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { SavedSearch } from '@kbn/discover-plugin/public';
 import type {
   Vis,
   VisualizeEmbeddableContract,
   VisSavedObject,
   PersistedState,
   VisParams,
-} from 'src/plugins/visualizations/public';
-
-import type {
-  Storage,
-  IKbnUrlStateStorage,
-  ReduxLikeStateContainer,
-} from 'src/plugins/kibana_utils/public';
-
-import type { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
-import type { Filter } from '@kbn/es-query';
-import type { Query, DataPublicPluginStart, TimeRange } from 'src/plugins/data/public';
-import type { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
-import type { SharePluginStart } from 'src/plugins/share/public';
-import type { SavedObjectsStart } from 'src/plugins/saved_objects/public';
-import type { EmbeddableStart, EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
-import type { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
-import type { PresentationUtilPluginStart } from 'src/plugins/presentation_util/public';
-import type { SpacesPluginStart } from '../../../../../x-pack/plugins/spaces/public';
-import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
-import type { UsageCollectionStart } from '../../../usage_collection/public';
-import type { SavedSearch } from '../../../discover/public';
+} from '..';
 
 import type { SavedVisState } from '../types';
 import type { createVisEmbeddableFromObject } from '../embeddable';
@@ -97,7 +95,6 @@ export interface VisualizeServices extends CoreStart {
   share?: SharePluginStart;
   visualizeCapabilities: Record<string, boolean | Record<string, boolean>>;
   dashboardCapabilities: Record<string, boolean | Record<string, boolean>>;
-  savedObjectsPublic: SavedObjectsStart;
   setActiveUrl: (newUrl: string) => void;
   createVisEmbeddableFromObject: ReturnType<typeof createVisEmbeddableFromObject>;
   restorePreviousUrl: () => void;

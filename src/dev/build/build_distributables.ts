@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { Config, createRunner, Task, GlobalTask } from './lib';
 import * as Tasks from './tasks';
@@ -74,7 +74,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.CreateEmptyDirsAndFiles);
     await run(Tasks.CreateReadme);
     await run(Tasks.BuildBazelPackages);
-    await run(Tasks.BuildPackages);
+    await run(Tasks.BuildXpack);
     await run(Tasks.BuildKibanaPlatformPlugins);
     await run(Tasks.TranspileBabel);
     await run(Tasks.CreatePackageJson);

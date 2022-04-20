@@ -21,7 +21,7 @@ import { PolicyArtifactsLayout } from './policy_artifacts_layout';
 import { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
 import { parsePoliciesAndFilterToKql } from '../../../../../common/utils';
 import { eventFiltersListQueryHttpMock } from '../../../../event_filters/test_utils';
-import { getFoundExceptionListItemSchemaMock } from '../../../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
+import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
 import { POLICY_ARTIFACT_EVENT_FILTERS_LABELS } from '../../tabs/event_filters_translations';
 import { EventFiltersApiClient } from '../../../../event_filters/service/event_filters_api_client';

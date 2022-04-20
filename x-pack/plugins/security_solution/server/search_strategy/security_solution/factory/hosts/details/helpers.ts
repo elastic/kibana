@@ -7,11 +7,7 @@
 
 import { set } from '@elastic/safer-lodash-set/fp';
 import { get, has, head } from 'lodash/fp';
-import {
-  IScopedClusterClient,
-  KibanaRequest,
-  SavedObjectsClientContract,
-} from '../../../../../../../../../src/core/server';
+import { IScopedClusterClient, KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
 import { Direction } from '../../../../../../common/search_strategy/common';
 import {

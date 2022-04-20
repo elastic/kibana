@@ -7,19 +7,32 @@
  */
 
 import { $Values } from '@kbn/utility-types';
-import { AggConfigs } from '../../../../data/common';
-import { NEW_HEATMAP_CHARTS_LIBRARY, NEW_GAUGE_CHARTS_LIBRARY } from '../constants';
+import { AggConfigs } from '@kbn/data-plugin/common';
+import {
+  NEW_HEATMAP_CHARTS_LIBRARY,
+  NEW_GAUGE_CHARTS_LIBRARY,
+  NEW_PIE_CHARTS_LIBRARY,
+  NEW_TIMELION_CHARTS_LIBRARY,
+} from '../constants';
 
 export const CHARTS_WITHOUT_SMALL_MULTIPLES = {
   heatmap: 'heatmap',
   gauge: 'gauge',
 } as const;
 
+export const CHARTS_TO_BE_DEPRECATED = {
+  pie: 'pie',
+  timelion: 'timelion',
+} as const;
+
 export type CHARTS_WITHOUT_SMALL_MULTIPLES = $Values<typeof CHARTS_WITHOUT_SMALL_MULTIPLES>;
+export type CHARTS_TO_BE_DEPRECATED = $Values<typeof CHARTS_TO_BE_DEPRECATED>;
 
 export const CHARTS_CONFIG_TOKENS = {
   [CHARTS_WITHOUT_SMALL_MULTIPLES.heatmap]: NEW_HEATMAP_CHARTS_LIBRARY,
   [CHARTS_WITHOUT_SMALL_MULTIPLES.gauge]: NEW_GAUGE_CHARTS_LIBRARY,
+  [CHARTS_TO_BE_DEPRECATED.pie]: NEW_PIE_CHARTS_LIBRARY,
+  [CHARTS_TO_BE_DEPRECATED.timelion]: NEW_TIMELION_CHARTS_LIBRARY,
 } as const;
 
 export const isSplitChart = (chartType: string | undefined, aggs?: AggConfigs) => {

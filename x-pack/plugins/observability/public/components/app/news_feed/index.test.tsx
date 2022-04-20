@@ -8,7 +8,7 @@
 import React from 'react';
 import { NewsItem } from '../../../services/get_news_feed';
 import { render } from '../../../utils/test_helper';
-import { NewsFeed } from './';
+import { NewsFeed } from '.';
 
 const newsFeedItems = [
   {

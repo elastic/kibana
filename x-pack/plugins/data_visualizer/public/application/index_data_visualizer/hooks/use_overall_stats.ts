@@ -9,8 +9,13 @@ import { useCallback, useEffect, useState, useRef, useMemo, useReducer } from 'r
 import { from, of, Subscription, Observable } from 'rxjs';
 import { mergeMap, last, map, toArray } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import type { ToastsStart } from 'kibana/public';
+import type { ToastsStart } from '@kbn/core/public';
 import { chunk } from 'lodash';
+import type {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchOptions,
+} from '@kbn/data-plugin/common';
 import { useDataVisualizerKibana } from '../../kibana_context';
 import {
   AggregatableFieldOverallStats,
@@ -20,11 +25,6 @@ import {
   processAggregatableFieldsExistResponse,
   processNonAggregatableFieldsExistResponse,
 } from '../search_strategy/requests/overall_stats';
-import type {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-  ISearchOptions,
-} from '../../../../../../../src/plugins/data/common';
 import type { OverallStats } from '../types/overall_stats';
 import { getDefaultPageState } from '../components/index_data_visualizer_view/index_data_visualizer_view';
 import { extractErrorProperties } from '../utils/error_utils';

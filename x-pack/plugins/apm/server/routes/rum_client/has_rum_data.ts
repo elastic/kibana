@@ -6,13 +6,13 @@
  */
 
 import moment from 'moment';
+import { rangeQuery } from '@kbn/observability-plugin/server';
 import { SetupUX } from './route';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeQuery } from '../../../../observability/server';
 import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
 
 export async function hasRumData({

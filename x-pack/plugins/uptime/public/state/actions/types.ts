@@ -6,8 +6,8 @@
  */
 
 import { Action } from 'redux-actions';
-import { IHttpFetchError } from 'src/core/public';
-import type { Rule } from '../../../../triggers_actions_ui/public';
+import { IHttpFetchError } from '@kbn/core/public';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { UptimeAlertTypeParams } from '../alerts/alerts';
 
 export interface AsyncAction<Payload, SuccessPayload> {

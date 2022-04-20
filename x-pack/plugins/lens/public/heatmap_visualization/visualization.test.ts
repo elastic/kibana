@@ -20,10 +20,10 @@ import {
 } from './constants';
 import { Position } from '@elastic/charts';
 import type { HeatmapVisualizationState } from './types';
-import type { DatasourcePublicAPI, OperationDescriptor } from '../types';
-import { chartPluginMock } from 'src/plugins/charts/public/mocks';
+import type { DatasourceLayers, OperationDescriptor } from '../types';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { layerTypes } from '../../common';
-import { themeServiceMock } from '../../../../../src/core/public/mocks';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 
 function exampleState(): HeatmapVisualizationState {
   return {
@@ -355,7 +355,7 @@ describe('heatmap', () => {
   });
 
   describe('#toExpression', () => {
-    let datasourceLayers: Record<string, DatasourcePublicAPI>;
+    let datasourceLayers: DatasourceLayers;
 
     beforeEach(() => {
       const mockDatasource = createMockDatasource('testDatasource');
@@ -476,7 +476,7 @@ describe('heatmap', () => {
   });
 
   describe('#toPreviewExpression', () => {
-    let datasourceLayers: Record<string, DatasourcePublicAPI>;
+    let datasourceLayers: DatasourceLayers;
 
     beforeEach(() => {
       const mockDatasource = createMockDatasource('testDatasource');

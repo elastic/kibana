@@ -43,6 +43,7 @@ interface Props {
   onChange: (selectedSpaceIds: string[]) => void;
   enableCreateNewSpaceLink: boolean;
   enableSpaceAgnosticBehavior: boolean;
+  prohibitedSpaces: Set<string>;
 }
 
 type SpaceOption = EuiSelectableOption & { ['data-space-id']: string };
@@ -73,6 +74,18 @@ const APPEND_CANNOT_DESELECT = (
     type="iInCircle"
   />
 );
+const APPEND_PROHIBITED = (
+  <EuiIconTip
+    title={i18n.translate('xpack.spaces.shareToSpace.prohibitedSpaceTooltipTitle', {
+      defaultMessage: 'Cannot share to this space',
+    })}
+    content={i18n.translate('xpack.spaces.shareToSpace.prohibitedSpaceTooltip', {
+      defaultMessage: 'A copy of this saved object exists in this space.',
+    })}
+    position="left"
+    type="iInCircle"
+  />
+);
 const APPEND_FEATURE_IS_DISABLED = (
   <EuiIconTip
     content={i18n.translate('xpack.spaces.shareToSpace.featureIsDisabledTooltip', {
@@ -85,8 +98,14 @@ const APPEND_FEATURE_IS_DISABLED = (
 );
 
 export const SelectableSpacesControl = (props: Props) => {
-  const { spaces, shareOptions, onChange, enableCreateNewSpaceLink, enableSpaceAgnosticBehavior } =
-    props;
+  const {
+    spaces,
+    shareOptions,
+    onChange,
+    enableCreateNewSpaceLink,
+    enableSpaceAgnosticBehavior,
+    prohibitedSpaces,
+  } = props;
   const { services } = useSpaces();
   const { application, docLinks } = services;
   const { selectedSpaceIds, initiallySelectedSpaceIds } = shareOptions;
@@ -108,7 +127,8 @@ export const SelectableSpacesControl = (props: Props) => {
         space,
         activeSpaceId,
         checked,
-        isGlobalControlChecked
+        isGlobalControlChecked,
+        prohibitedSpaces
       );
       return {
         label: space.name,
@@ -246,7 +266,8 @@ function getAdditionalProps(
   space: SpacesDataEntry,
   activeSpaceId: string | false,
   checked: boolean,
-  isGlobalControlChecked: boolean
+  isGlobalControlChecked: boolean,
+  prohibitedSpaces: Set<string>
 ) {
   if (space.id === activeSpaceId) {
     return {
@@ -260,6 +281,18 @@ function getAdditionalProps(
       append: (
         <>
           {checked ? APPEND_CANNOT_DESELECT : APPEND_CANNOT_SELECT}
+          {space.isFeatureDisabled ? APPEND_FEATURE_IS_DISABLED : null}
+        </>
+      ),
+      ...(space.isFeatureDisabled && { isAvatarDisabled: true }),
+      disabled: true,
+    };
+  }
+  if (prohibitedSpaces.has(space.id) || prohibitedSpaces.has(ALL_SPACES_ID)) {
+    return {
+      append: (
+        <>
+          {APPEND_PROHIBITED}
           {space.isFeatureDisabled ? APPEND_FEATURE_IS_DISABLED : null}
         </>
       ),
