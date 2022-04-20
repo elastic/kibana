@@ -1455,6 +1455,20 @@ module.exports = {
       plugins: ['react', '@typescript-eslint'],
       files: ['x-pack/plugins/osquery/**/*.{js,mjs,ts,tsx}'],
       rules: {
+        'padding-line-between-statements': [
+          'error',
+          {
+            blankLine: 'always',
+            prev: ['block-like'],
+            next: ['*'],
+          },
+          {
+            blankLine: 'always',
+            prev: ['*'],
+            next: ['return'],
+          },
+        ],
+        'padded-blocks': ['error', 'always'],
         'arrow-body-style': ['error', 'as-needed'],
         'prefer-arrow-callback': 'error',
         'no-unused-vars': 'off',

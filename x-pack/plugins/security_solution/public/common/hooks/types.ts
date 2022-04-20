@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SimpleSavedObject } from '../../../../../../src/core/public';
+import { SimpleSavedObject } from '@kbn/core/public';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type IndexPatternSavedObjectAttributes = { title: string };

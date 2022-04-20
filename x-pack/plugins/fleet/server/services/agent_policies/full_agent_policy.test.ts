@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { AgentPolicy, Output } from '../../types';
 

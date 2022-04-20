@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kqlQuery, rangeQuery } from '../../../../../observability/server';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
@@ -23,7 +23,7 @@ import {
   getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
-import { calculateThroughput } from '../../../lib/helpers/calculate_throughput';
+import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
 import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
@@ -154,7 +154,7 @@ export async function getServiceTransactionStats({
         transactionErrorRate: calculateFailedTransactionRate(
           topTransactionTypeBucket.outcomes
         ),
-        throughput: calculateThroughput({
+        throughput: calculateThroughputWithRange({
           start,
           end,
           value: topTransactionTypeBucket.doc_count,

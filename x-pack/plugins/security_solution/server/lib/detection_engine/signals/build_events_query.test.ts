@@ -6,7 +6,7 @@
  */
 
 import { buildEqlSearchRequest, buildEventsSearchQuery } from './build_events_query';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 
 describe('create_signals', () => {
   test('it builds a now-5m up to today filter', () => {

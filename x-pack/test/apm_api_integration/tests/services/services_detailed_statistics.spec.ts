@@ -6,10 +6,10 @@
  */
 import expect from '@kbn/expect';
 import moment from 'moment';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { APIReturnType } from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
-import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
 import { ApmApiError } from '../../common/apm_api_supertest';
 
 type ServicesDetailedStatisticsReturn =

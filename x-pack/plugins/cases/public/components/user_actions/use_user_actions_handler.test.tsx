@@ -56,24 +56,6 @@ describe('useUserActionsHandler', () => {
     });
   });
 
-  it('init', async () => {
-    const { result } = renderHook<UseUserActionsHandlerArgs, UseUserActionsHandler>(() =>
-      useUserActionsHandler({ fetchUserActions, updateCase })
-    );
-
-    expect(result.current).toEqual({
-      loadingCommentIds: [],
-      selectedOutlineCommentId: '',
-      manageMarkdownEditIds: [],
-      commentRefs: result.current.commentRefs,
-      handleManageMarkdownEditId: result.current.handleManageMarkdownEditId,
-      handleOutlineComment: result.current.handleOutlineComment,
-      handleSaveComment: result.current.handleSaveComment,
-      handleManageQuote: result.current.handleManageQuote,
-      handleUpdate: result.current.handleUpdate,
-    });
-  });
-
   it('should saves a comment', async () => {
     const { result } = renderHook<UseUserActionsHandlerArgs, UseUserActionsHandler>(() =>
       useUserActionsHandler({ fetchUserActions, updateCase })

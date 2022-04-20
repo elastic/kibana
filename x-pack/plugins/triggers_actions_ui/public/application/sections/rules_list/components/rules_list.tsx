@@ -47,6 +47,15 @@ import { useHistory } from 'react-router-dom';
 
 import { isEmpty } from 'lodash';
 import {
+  RuleExecutionStatus,
+  RuleExecutionStatusValues,
+  ALERTS_FEATURE_ID,
+  RuleExecutionStatusErrorReasons,
+  formatDuration,
+  parseDuration,
+  MONITORING_HISTORY_LIMIT,
+} from '@kbn/alerting-plugin/common';
+import {
   ActionType,
   Rule,
   RuleTableItem,
@@ -78,15 +87,6 @@ import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capab
 import { routeToRuleDetails, DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { DeleteModalConfirmation } from '../../../components/delete_modal_confirmation';
 import { EmptyPrompt } from '../../../components/prompts/empty_prompt';
-import {
-  RuleExecutionStatus,
-  RuleExecutionStatusValues,
-  ALERTS_FEATURE_ID,
-  RuleExecutionStatusErrorReasons,
-  formatDuration,
-  parseDuration,
-  MONITORING_HISTORY_LIMIT,
-} from '../../../../../../alerting/common';
 import { rulesStatusesTranslationsMapping, ALERT_STATUS_LICENSE_ERROR } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../common/constants';
@@ -160,7 +160,6 @@ export const RulesList: React.FunctionComponent = () => {
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
   const [tagPopoverOpenIndex, setTagPopoverOpenIndex] = useState<number>(-1);
-  const [previousSnoozeInterval, setPreviousSnoozeInterval] = useState<string | null>(null);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
   );
@@ -355,13 +354,11 @@ export const RulesList: React.FunctionComponent = () => {
         enableRule={async () => await enableRule({ http, id: item.id })}
         snoozeRule={async (snoozeEndTime: string | -1, interval: string | null) => {
           await snoozeRule({ http, id: item.id, snoozeEndTime });
-          setPreviousSnoozeInterval(interval);
         }}
         unsnoozeRule={async () => await unsnoozeRule({ http, id: item.id })}
-        item={item}
+        rule={item}
         onRuleChanged={() => loadRulesData()}
         isEditable={item.isEditable && isRuleTypeEditableInContext(item.ruleTypeId)}
-        previousSnoozeInterval={previousSnoozeInterval}
       />
     );
   };
@@ -832,8 +829,8 @@ export const RulesList: React.FunctionComponent = () => {
       {
         field: 'enabled',
         name: i18n.translate(
-          'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.triggerActionsTitle',
-          { defaultMessage: 'Trigger actions' }
+          'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.stateTitle',
+          { defaultMessage: 'State' }
         ),
         sortable: true,
         truncateText: false,

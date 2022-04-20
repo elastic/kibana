@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { SanitizedRule, RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { RulesClient } from '@kbn/alerting-plugin/server';
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
-import { SanitizedRule, RuleTypeParams } from '../../../../../alerting/common';
-import { RulesClient } from '../../../../../alerting/server';
 import { createRules } from './create_rules';
 import { PartialFilter } from '../types';
 

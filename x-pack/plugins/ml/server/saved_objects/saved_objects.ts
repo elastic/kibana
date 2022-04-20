@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsServiceSetup } from 'kibana/server';
+import { SavedObjectsServiceSetup } from '@kbn/core/server';
 import { mlJob, mlTrainedModel, mlModule } from './mappings';
 
 import { migrations } from './migrations';

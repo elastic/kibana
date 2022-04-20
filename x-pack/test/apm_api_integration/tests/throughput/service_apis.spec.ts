@@ -7,7 +7,7 @@
 import { apm, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { meanBy, sumBy } from 'lodash';
-import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
+import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
 
@@ -120,22 +120,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_RATE)
-            .spans((timestamp) =>
+            .generator((timestamp) =>
               serviceGoProdInstance
                 .transaction('GET /api/product/list')
                 .duration(1000)
                 .timestamp(timestamp)
-                .serialize()
             ),
           timerange(start, end)
             .interval('1m')
             .rate(GO_DEV_RATE)
-            .spans((timestamp) =>
+            .generator((timestamp) =>
               serviceGoDevInstance
                 .transaction('GET /api/product/:id')
                 .duration(1000)
                 .timestamp(timestamp)
-                .serialize()
             ),
         ]);
       });

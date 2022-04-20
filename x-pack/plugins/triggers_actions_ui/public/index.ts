@@ -9,7 +9,7 @@
 /* eslint-disable @kbn/eslint/no_export_all */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { PluginInitializerContext } from 'kibana/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { Plugin } from './plugin';
 
 export type {
@@ -57,6 +57,8 @@ export { enableRule } from './application/lib/rule_api/enable';
 export { disableRule } from './application/lib/rule_api/disable';
 export { muteRule } from './application/lib/rule_api/mute';
 export { unmuteRule } from './application/lib/rule_api/unmute';
+export { snoozeRule } from './application/lib/rule_api/snooze';
+export { unsnoozeRule } from './application/lib/rule_api/unsnooze';
 export { loadRuleAggregations } from './application/lib/rule_api/aggregate';
 export { useLoadRuleTypes } from './application/hooks/use_load_rule_types';
 
@@ -64,4 +66,4 @@ export { loadActionTypes } from './application/lib/action_connector_api/connecto
 
 export type { TIME_UNITS } from './application/constants';
 export { getTimeUnitLabel } from './common/lib/get_time_unit_label';
-export type { TriggersAndActionsUiServices } from '../public/application/app';
+export type { TriggersAndActionsUiServices } from './application/app';

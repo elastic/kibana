@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'kibana/public';
+import { CoreSetup } from '@kbn/core/public';
 import React from 'react';
 import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2, PNG_REPORT_TYPE_V2 } from '../../common/constants';
 import { ReportingAPIClient } from '../lib/reporting_api_client';

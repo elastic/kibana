@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { RequestHandler } from 'kibana/server';
+import { RequestHandler } from '@kbn/core/server';
 import { TypeOf } from '@kbn/config-schema';
 import { validateEntities } from '../../../../common/endpoint/schema/resolver';
 import { ResolverEntityIndex, ResolverSchema } from '../../../../common/endpoint/types';

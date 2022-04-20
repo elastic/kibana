@@ -10,13 +10,13 @@ import { AxiosResponse } from 'axios';
 import { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { KbnClient } from '@kbn/test';
-import { HostMetadata } from '../types';
 import {
   Agent,
   AGENT_API_ROUTES,
   FleetServerAgent,
   GetOneAgentResponse,
-} from '../../../../fleet/common';
+} from '@kbn/fleet-plugin/common';
+import { HostMetadata } from '../types';
 import { FleetAgentGenerator } from '../data_generators/fleet_agent_generator';
 import { wrapErrorAndRejectPromise } from './utils';
 

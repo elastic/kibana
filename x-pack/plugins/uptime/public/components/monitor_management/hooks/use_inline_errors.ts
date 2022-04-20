@@ -8,8 +8,8 @@
 import { useSelector } from 'react-redux';
 import moment from 'moment';
 import { useMemo } from 'react';
+import { useEsSearch } from '@kbn/observability-plugin/public';
 import { monitorManagementListSelector } from '../../../state/selectors';
-import { useEsSearch } from '../../../../../observability/public';
 import { Ping } from '../../../../common/runtime_types';
 import { EXCLUDE_RUN_ONCE_FILTER } from '../../../../common/constants/client_defaults';
 import { useUptimeRefreshContext } from '../../../contexts/uptime_refresh_context';
@@ -17,8 +17,9 @@ import { useInlineErrorsCount } from './use_inline_errors_count';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
 
 const sortFieldMap: Record<string, string> = {
-  name: 'monitor.name',
-  urls: 'url.full',
+  ['name.keyword']: 'monitor.name',
+  ['urls.keyword']: 'url.full',
+  ['type.keyword']: 'monitor.type',
   '@timestamp': '@timestamp',
 };
 

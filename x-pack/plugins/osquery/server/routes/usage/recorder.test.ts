@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { usageMetricSavedObjectType } from '../../../common/types';
 
@@ -82,6 +82,7 @@ describe('Usage metric recorder', () => {
           count: 0,
           errors: 0,
         };
+
         return acc;
       }, {} as { [key: string]: CounterValue });
       get.mockClear();

@@ -9,6 +9,13 @@ import Boom from '@hapi/boom';
 import { isoToEpochRt, jsonRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { uniq } from 'lodash';
+import {
+  UnknownMLCapabilitiesError,
+  InsufficientMLCapabilities,
+  MLPrivilegesUninitialized,
+} from '@kbn/ml-plugin/server';
+import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
+import { Annotation } from '@kbn/observability-plugin/common/annotations';
 import { latencyAggregationTypeRt } from '../../../common/latency_aggregation_types';
 import { ProfilingValueType } from '../../../common/profiling';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
@@ -39,18 +46,11 @@ import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_pr
 import { getServicesDetailedStatistics } from './get_services_detailed_statistics';
 import { getServiceDependenciesBreakdown } from './get_service_dependencies_breakdown';
 import { getAnomalyTimeseries } from '../../lib/anomaly_detection/get_anomaly_timeseries';
-import {
-  UnknownMLCapabilitiesError,
-  InsufficientMLCapabilities,
-  MLPrivilegesUninitialized,
-} from '../../../../ml/server';
 import { getServiceInstancesDetailedStatisticsPeriods } from './get_service_instances/detailed_statistics';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
-import { ScopedAnnotationsClient } from '../../../../observability/server';
-import { Annotation } from './../../../../observability/common/annotations';
-import { ConnectionStatsItemWithImpact } from './../../../common/connections';
+import { ConnectionStatsItemWithImpact } from '../../../common/connections';
 import { getSortedAndFilteredServices } from './get_services/get_sorted_and_filtered_services';
-import { ServiceHealthStatus } from './../../../common/service_health_status';
+import { ServiceHealthStatus } from '../../../common/service_health_status';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { offsetRt } from '../../../common/offset_rt';
 

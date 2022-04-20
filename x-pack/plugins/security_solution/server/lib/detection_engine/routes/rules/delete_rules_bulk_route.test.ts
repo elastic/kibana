@@ -17,7 +17,7 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { deleteRulesBulkRoute } from './delete_rules_bulk_route';
-import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 describe.each([
   ['Legacy', false],
