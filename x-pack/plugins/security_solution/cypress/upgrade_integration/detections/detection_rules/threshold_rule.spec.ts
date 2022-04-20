@@ -5,7 +5,7 @@
  * 2.0.
  */
 import semver from 'semver';
-import { HOST_NAME, REASON, RISK_SCORE, RULE_NAME, SEVERITY } from '../../../screens/alerts';
+import { REASON, RISK_SCORE, RULE_NAME, SEVERITY } from '../../../screens/alerts';
 import { SERVER_SIDE_EVENT_COUNT } from '../../../screens/alerts_detection_rules';
 import {
   ADDITIONAL_LOOK_BACK_DETAILS,
@@ -35,7 +35,6 @@ import { login, visit } from '../../../tasks/login';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import {
-  OVERVIEW_HOST_NAME,
   OVERVIEW_RISK_SCORE,
   OVERVIEW_RULE,
   OVERVIEW_SEVERITY,
@@ -117,7 +116,8 @@ describe('After an upgrade, the threshold rule', () => {
     cy.get(SEVERITY).should('have.text', alert.severity);
     cy.get(RISK_SCORE).should('have.text', alert.riskScore);
     cy.get(REASON).contains(expectedReason);
-    cy.get(HOST_NAME).should('have.text', alert.hostName);
+    // TODO: Needs data-test-subj
+    // cy.get(HOST_NAME).should('have.text', alert.hostName);
   });
 
   it('Displays the Overview alert details in the alert flyout', () => {
@@ -127,7 +127,8 @@ describe('After an upgrade, the threshold rule', () => {
     cy.get(OVERVIEW_RULE).should('have.text', alert.rule);
     cy.get(OVERVIEW_SEVERITY).contains(alert.severity, { matchCase: false });
     cy.get(OVERVIEW_RISK_SCORE).should('have.text', alert.riskScore);
-    cy.get(OVERVIEW_HOST_NAME).should('have.text', alert.hostName);
+    // TODO: Find out what this is
+    // cy.get(OVERVIEW_HOST_NAME).should('have.text', alert.hostName);
     // TODO: Needs data-test-subj
     // cy.get(OVERVIEW_THRESHOLD_COUNT).should('have.text', alert.thresholdCount);
     cy.get(OVERVIEW_RULE_TYPE).should('have.text', rule.ruleType);
