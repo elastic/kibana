@@ -11,7 +11,7 @@ import { populateContext } from '../autocomplete/engine';
 
 import '../../application/models/sense_editor/sense_editor.test.mocks';
 import * as kb from '.';
-import * as mappings from '../mappings/mappings';
+import * as mappings from '../mappings';
 
 describe('Knowledge base', () => {
   beforeEach(() => {

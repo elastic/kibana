@@ -12,7 +12,7 @@ import _ from 'lodash';
 import $ from 'jquery';
 
 import * as kb from '../../../lib/kb/kb';
-import * as mappings from '../../../lib/mappings/mappings';
+import * as mappings from '../../../lib/mappings';
 
 describe('Integration', () => {
   let senseEditor;

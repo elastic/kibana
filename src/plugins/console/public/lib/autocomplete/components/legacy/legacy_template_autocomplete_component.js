@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getLegacyTemplates } from '../../../mappings/mappings';
+import { getLegacyTemplates } from '../../../mappings';
 import { ListComponent } from '../list_component';
 
 export class LegacyTemplateAutocompleteComponent extends ListComponent {

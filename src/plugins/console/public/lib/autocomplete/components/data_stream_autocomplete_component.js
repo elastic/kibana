@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getDataStreams } from '../../mappings/mappings';
+import { getDataStreams } from '../../mappings';
 import { ListComponent } from './list_component';
 
 export class DataStreamAutocompleteComponent extends ListComponent {

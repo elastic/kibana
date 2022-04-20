@@ -12,7 +12,7 @@ import type { HttpSetup } from '@kbn/core/public';
 import { AutocompleteOptions, DevToolsSettingsModal } from '../components';
 
 // @ts-ignore
-import { retrieveAutoCompleteInfo } from '../../lib/mappings/mappings';
+import { retrieveAutoCompleteInfo } from '../../lib/mappings';
 import { useServicesContext, useEditorActionContext } from '../contexts';
 import { DevToolsSettings, Settings as SettingsService } from '../../services';
 import type { SenseEditor } from '../models';

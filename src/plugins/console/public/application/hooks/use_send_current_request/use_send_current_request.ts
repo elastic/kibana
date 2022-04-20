@@ -12,7 +12,7 @@ import { useCallback } from 'react';
 import { toMountPoint } from '../../../shared_imports';
 import { isQuotaExceededError } from '../../../services/history';
 // @ts-ignore
-import { retrieveAutoCompleteInfo } from '../../../lib/mappings/mappings';
+import { retrieveAutoCompleteInfo } from '../../../lib/mappings';
 import { instance as registry } from '../../contexts/editor_context/editor_registry';
 import { useRequestActionContext, useServicesContext } from '../../contexts';
 import { StorageQuotaError } from '../../components/storage_quota_error';

@@ -16,7 +16,7 @@ jest.mock('../../../../contexts/editor_context/editor_registry', () => ({
   },
 }));
 jest.mock('../../../../components/editor_example', () => {});
-jest.mock('../../../../../lib/mappings/mappings', () => ({
+jest.mock('../../../../../lib/mappings', () => ({
   retrieveAutoCompleteInfo: () => {},
   clearSubscriptions: () => {},
 }));

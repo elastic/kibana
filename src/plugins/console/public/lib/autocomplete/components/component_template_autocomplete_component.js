@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getComponentTemplates } from '../../mappings/mappings';
+import { getComponentTemplates } from '../../mappings';
 import { ListComponent } from './list_component';
 
 export class ComponentTemplateAutocompleteComponent extends ListComponent {

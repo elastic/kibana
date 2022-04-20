@@ -8,13 +8,23 @@
 
 import '../../application/models/sense_editor/sense_editor.test.mocks';
 import * as mappings from './mappings';
+import {
+  loadLegacyTemplates,
+  loadIndexTemplates,
+  loadComponentTemplates,
+  getLegacyTemplates,
+  getComponentTemplates,
+  getIndexTemplates,
+} from './templates';
+import { loadDataStreams, getDataStreams } from './data_streams';
+import { clear } from './settings';
 
 describe('Mappings', () => {
   beforeEach(() => {
-    mappings.clear();
+    clear();
   });
   afterEach(() => {
-    mappings.clear();
+    clear();
   });
 
   function fc(f1, f2) {
@@ -242,17 +252,17 @@ describe('Mappings', () => {
   });
 
   test('Templates', function () {
-    mappings.loadLegacyTemplates({
+    loadLegacyTemplates({
       test_index1: { order: 0 },
       test_index2: { order: 0 },
       test_index3: { order: 0 },
     });
 
-    mappings.loadIndexTemplates({
+    loadIndexTemplates({
       index_templates: [{ name: 'test_index1' }, { name: 'test_index2' }, { name: 'test_index3' }],
     });
 
-    mappings.loadComponentTemplates({
+    loadComponentTemplates({
       component_templates: [
         { name: 'test_index1' },
         { name: 'test_index2' },
@@ -262,17 +272,17 @@ describe('Mappings', () => {
 
     const expectedResult = ['test_index1', 'test_index2', 'test_index3'];
 
-    expect(mappings.getLegacyTemplates()).toEqual(expectedResult);
-    expect(mappings.getIndexTemplates()).toEqual(expectedResult);
-    expect(mappings.getComponentTemplates()).toEqual(expectedResult);
+    expect(getLegacyTemplates()).toEqual(expectedResult);
+    expect(getIndexTemplates()).toEqual(expectedResult);
+    expect(getComponentTemplates()).toEqual(expectedResult);
   });
 
   test('Data streams', function () {
-    mappings.loadDataStreams({
+    loadDataStreams({
       data_streams: [{ name: 'test_index1' }, { name: 'test_index2' }, { name: 'test_index3' }],
     });
 
     const expectedResult = ['test_index1', 'test_index2', 'test_index3'];
-    expect(mappings.getDataStreams()).toEqual(expectedResult);
+    expect(getDataStreams()).toEqual(expectedResult);
   });
 });

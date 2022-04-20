@@ -6,15 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { getIndexTemplates } from '../../mappings';
-import { ListComponent } from './list_component';
-
-export class IndexTemplateAutocompleteComponent extends ListComponent {
-  constructor(name, parent) {
-    super(name, getIndexTemplates, parent, true, true);
-  }
-
-  getContextKey() {
-    return 'index_template';
-  }
-}
+export * from './mappings';
+export * from './templates';
+export * from './data_streams';
+export {
+  SettingsToRetrieve,
+  retrieveSettings,
+  retrieveAutoCompleteInfo,
+  clearSubscriptions,
+  clear,
+} from './settings';
