@@ -93,7 +93,7 @@ export const getCertSummary = (
 };
 
 export const tlsLegacyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server, libs) => ({
-  id: 'xpack.uptime.alerts.tls',
+  id: 'xpack.synthetics..alerts.tls',
   producer: 'uptime',
   name: tlsTranslations.legacyAlertFactoryName,
   validate: {

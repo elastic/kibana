@@ -32,7 +32,7 @@ export const ScheduleField = ({ number, onChange, onBlur, unit }: Props) => {
       <EuiFlexItem>
         <EuiFieldNumber
           aria-label={i18n.translate(
-            'xpack.uptime.createPackagePolicy.stepConfigure.scheduleField.number',
+            'xpack.synthetics..createPackagePolicy.stepConfigure.scheduleField.number',
             {
               defaultMessage: 'Number',
             }
@@ -60,7 +60,7 @@ export const ScheduleField = ({ number, onChange, onBlur, unit }: Props) => {
       <EuiFlexItem>
         <EuiSelect
           aria-label={i18n.translate(
-            'xpack.uptime.createPackagePolicy.stepConfigure.scheduleField.unit',
+            'xpack.synthetics..createPackagePolicy.stepConfigure.scheduleField.unit',
             {
               defaultMessage: 'Unit',
             }
@@ -82,15 +82,21 @@ export const ScheduleField = ({ number, onChange, onBlur, unit }: Props) => {
 
 const allOptions = [
   {
-    text: i18n.translate('xpack.uptime.createPackagePolicy.stepConfigure.scheduleField.seconds', {
-      defaultMessage: 'Seconds',
-    }),
+    text: i18n.translate(
+      'xpack.synthetics..createPackagePolicy.stepConfigure.scheduleField.seconds',
+      {
+        defaultMessage: 'Seconds',
+      }
+    ),
     value: ScheduleUnit.SECONDS,
   },
   {
-    text: i18n.translate('xpack.uptime.createPackagePolicy.stepConfigure.scheduleField.minutes', {
-      defaultMessage: 'Minutes',
-    }),
+    text: i18n.translate(
+      'xpack.synthetics..createPackagePolicy.stepConfigure.scheduleField.minutes',
+      {
+        defaultMessage: 'Minutes',
+      }
+    ),
     value: ScheduleUnit.MINUTES,
   },
 ];

@@ -43,7 +43,7 @@ export const syntheticsServiceApiKey: SavedObjectsType = {
     importableAndExportable: false,
     icon: 'uptimeApp',
     getTitle: () =>
-      i18n.translate('xpack.uptime.synthetics.service.apiKey', {
+      i18n.translate('xpack.synthetics..synthetics.service.apiKey', {
         defaultMessage: 'Synthetics service api key',
       }),
   },

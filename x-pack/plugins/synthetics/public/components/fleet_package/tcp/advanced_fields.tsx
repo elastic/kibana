@@ -44,14 +44,14 @@ export const TCPAdvancedFields = memo<Props>(({ children, minColumnWidth, onFiel
         title={
           <h4>
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.tcpAdvacnedSettings.requestConfiguration.title"
+              id="xpack.synthetics..createPackagePolicy.stepConfigure.tcpAdvacnedSettings.requestConfiguration.title"
               defaultMessage="Request configuration"
             />
           </h4>
         }
         description={
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.tcpAdvacnedSettings.requestConfiguration.description"
+            id="xpack.synthetics..createPackagePolicy.stepConfigure.tcpAdvacnedSettings.requestConfiguration.description"
             defaultMessage="Configure the payload sent to the remote host."
           />
         }
@@ -60,14 +60,14 @@ export const TCPAdvancedFields = memo<Props>(({ children, minColumnWidth, onFiel
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.proxyURL.label"
+              id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.proxyURL.label"
               defaultMessage="Proxy URL"
             />
           }
           labelAppend={<OptionalLabel />}
           helpText={
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.proxyUrl.tcp.helpText"
+              id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.proxyUrl.tcp.helpText"
               defaultMessage="The URL of the SOCKS5 proxy to use when connecting to the server. The value must be a URL with a scheme of socks5://."
             />
           }
@@ -91,7 +91,7 @@ export const TCPAdvancedFields = memo<Props>(({ children, minColumnWidth, onFiel
               checked={fields[ConfigKey.PROXY_USE_LOCAL_RESOLVER]}
               label={
                 <FormattedMessage
-                  id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.resolveHostnamesLocally"
+                  id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.resolveHostnamesLocally"
                   defaultMessage="Resolve hostnames locally"
                 />
               }
@@ -107,14 +107,14 @@ export const TCPAdvancedFields = memo<Props>(({ children, minColumnWidth, onFiel
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.tcpAdvacnedSettings.requestConfiguration.requestPayload.label"
+              id="xpack.synthetics..createPackagePolicy.stepConfigure.tcpAdvacnedSettings.requestConfiguration.requestPayload.label"
               defaultMessage="Request payload"
             />
           }
           labelAppend={<OptionalLabel />}
           helpText={
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.tcpAdvacnedSettings.requestConfiguration.requestPayload.helpText"
+              id="xpack.synthetics..createPackagePolicy.stepConfigure.tcpAdvacnedSettings.requestConfiguration.requestPayload.helpText"
               defaultMessage="A payload string to send to the remote host."
             />
           }
@@ -139,14 +139,14 @@ export const TCPAdvancedFields = memo<Props>(({ children, minColumnWidth, onFiel
         title={
           <h4>
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.tcpAdvancedOptions.responseConfiguration.title"
+              id="xpack.synthetics..createPackagePolicy.stepConfigure.tcpAdvancedOptions.responseConfiguration.title"
               defaultMessage="Response checks"
             />
           </h4>
         }
         description={
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.tcpAdvancedOptions.responseConfiguration.description"
+            id="xpack.synthetics..createPackagePolicy.stepConfigure.tcpAdvancedOptions.responseConfiguration.description"
             defaultMessage="Configure the expected response from the remote host."
           />
         }
@@ -154,14 +154,14 @@ export const TCPAdvancedFields = memo<Props>(({ children, minColumnWidth, onFiel
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.tcpAdvacnedSettings.responseConfiguration.responseContains.label"
+              id="xpack.synthetics..createPackagePolicy.stepConfigure.tcpAdvacnedSettings.responseConfiguration.responseContains.label"
               defaultMessage="Check response contains"
             />
           }
           labelAppend={<OptionalLabel />}
           helpText={
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.tcpAdvacnedSettings.responseConfiguration.responseContains.helpText"
+              id="xpack.synthetics..createPackagePolicy.stepConfigure.tcpAdvacnedSettings.responseConfiguration.responseContains.helpText"
               defaultMessage="The expected remote host response."
             />
           }

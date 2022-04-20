@@ -62,7 +62,7 @@ export function TestResultHeader({
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText size="xs" color="subdued">
-                {i18n.translate('xpack.uptime.monitorManagement.timeTaken', {
+                {i18n.translate('xpack.synthetics..monitorManagement.timeTaken', {
                   defaultMessage: 'Took {timeTaken}',
                   values: { timeTaken: formatDuration(duration) },
                 })}
@@ -93,26 +93,26 @@ export function TestResultHeader({
   );
 }
 
-export const PENDING_LABEL = i18n.translate('xpack.uptime.monitorManagement.pending', {
+export const PENDING_LABEL = i18n.translate('xpack.synthetics..monitorManagement.pending', {
   defaultMessage: 'PENDING',
 });
 
-const TEST_RESULT = i18n.translate('xpack.uptime.monitorManagement.testResult', {
+const TEST_RESULT = i18n.translate('xpack.synthetics..monitorManagement.testResult', {
   defaultMessage: 'Test result',
 });
 
-const COMPLETED_LABEL = i18n.translate('xpack.uptime.monitorManagement.completed', {
+const COMPLETED_LABEL = i18n.translate('xpack.synthetics..monitorManagement.completed', {
   defaultMessage: 'COMPLETED',
 });
 
-const FAILED_LABEL = i18n.translate('xpack.uptime.monitorManagement.failed', {
+const FAILED_LABEL = i18n.translate('xpack.synthetics..monitorManagement.failed', {
   defaultMessage: 'FAILED',
 });
 
-export const IN_PROGRESS_LABEL = i18n.translate('xpack.uptime.monitorManagement.inProgress', {
+export const IN_PROGRESS_LABEL = i18n.translate('xpack.synthetics..monitorManagement.inProgress', {
   defaultMessage: 'IN PROGRESS',
 });
 
-const VIEW_DETAILS = i18n.translate('xpack.uptime.monitorManagement.viewTestRunDetails', {
+const VIEW_DETAILS = i18n.translate('xpack.synthetics..monitorManagement.viewTestRunDetails', {
   defaultMessage: 'View test result details',
 });

@@ -18,7 +18,7 @@ export const PingListHeader = () => {
         <EuiTitle size="s">
           <h4>
             <FormattedMessage
-              id="xpack.uptime.pingList.checkHistoryTitle"
+              id="xpack.synthetics..pingList.checkHistoryTitle"
               defaultMessage="History"
             />
           </h4>

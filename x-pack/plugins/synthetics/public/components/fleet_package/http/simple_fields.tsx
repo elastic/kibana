@@ -38,14 +38,14 @@ export const HTTPSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.URL"
+            id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.URL"
             defaultMessage="URL"
           />
         }
         isInvalid={!!validate[ConfigKey.URLS]?.(fields)}
         error={
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.URL.error"
+            id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.URL.error"
             defaultMessage="URL is required"
           />
         }
@@ -63,14 +63,14 @@ export const HTTPSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
         id="syntheticsFleetScheduleField"
         label={
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval"
+            id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval"
             defaultMessage="Frequency"
           />
         }
         isInvalid={!!validate[ConfigKey.SCHEDULE]?.(fields)}
         error={
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error"
+            id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error"
             defaultMessage="Monitor frequency is required"
           />
         }
@@ -90,21 +90,21 @@ export const HTTPSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.maxRedirects"
+            id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.maxRedirects"
             defaultMessage="Max redirects"
           />
         }
         isInvalid={!!validate[ConfigKey.MAX_REDIRECTS]?.(fields)}
         error={
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.maxRedirects.error"
+            id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.maxRedirects.error"
             defaultMessage="Max redirects must be 0 or greater"
           />
         }
         labelAppend={<OptionalLabel />}
         helpText={
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.maxRedirects.helpText"
+            id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.maxRedirects.helpText"
             defaultMessage="The total number of redirections to follow."
           />
         }

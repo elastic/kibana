@@ -22,25 +22,29 @@ interface Props {
 const TimeRangeOptions: TimeRangeOption[] = [
   {
     'aria-label': labels.DAYS_TIME_RANGE,
-    'data-test-subj': 'xpack.uptime.alerts.monitorStatus.availability.timerangeUnit.daysOption',
+    'data-test-subj':
+      'xpack.synthetics..alerts.monitorStatus.availability.timerangeUnit.daysOption',
     key: 'd',
     label: labels.DAYS,
   },
   {
     'aria-label': labels.WEEKS_TIME_RANGE,
-    'data-test-subj': 'xpack.uptime.alerts.monitorStatus.availability.timerangeUnit.weeksOption',
+    'data-test-subj':
+      'xpack.synthetics..alerts.monitorStatus.availability.timerangeUnit.weeksOption',
     key: 'w',
     label: labels.WEEKS,
   },
   {
     'aria-label': labels.MONTHS_TIME_RANGE,
-    'data-test-subj': 'xpack.uptime.alerts.monitorStatus.availability.timerangeUnit.monthsOption',
+    'data-test-subj':
+      'xpack.synthetics..alerts.monitorStatus.availability.timerangeUnit.monthsOption',
     key: 'M',
     label: labels.MONTHS,
   },
   {
     'aria-label': labels.YEARS_TIME_RANGE,
-    'data-test-subj': 'xpack.uptime.alerts.monitorStatus.availability.timerangeUnit.yearsOption',
+    'data-test-subj':
+      'xpack.synthetics..alerts.monitorStatus.availability.timerangeUnit.yearsOption',
     key: 'y',
     label: labels.YEARS,
   },
@@ -115,7 +119,7 @@ export const AvailabilityExpressionSelect: React.FC<Props> = ({
               }}
             />
           }
-          data-test-subj="xpack.uptime.alerts.monitorStatus.availability.threshold"
+          data-test-subj="xpack.synthetics..alerts.monitorStatus.availability.threshold"
           description={
             hasFilters
               ? labels.ENTER_AVAILABILITY_THRESHOLD_DESCRIPTION
@@ -135,13 +139,13 @@ export const AvailabilityExpressionSelect: React.FC<Props> = ({
               content={
                 <AlertFieldNumber
                   aria-label={labels.ENTER_AVAILABILITY_RANGE_UNITS_ARIA_LABEL}
-                  data-test-subj="xpack.uptime.alerts.monitorStatus.availability.timerangeValueField"
+                  data-test-subj="xpack.synthetics..alerts.monitorStatus.availability.timerangeValueField"
                   disabled={false}
                   fieldValue={range}
                   setFieldValue={setRange}
                 />
               }
-              data-test-subj="xpack.uptime.alerts.monitorStatus.availability.timerangeExpression"
+              data-test-subj="xpack.synthetics..alerts.monitorStatus.availability.timerangeExpression"
               description={labels.ENTER_AVAILABILITY_RANGE_UNITS_DESCRIPTION}
               id="range"
               isEnabled={isEnabled}
@@ -150,11 +154,11 @@ export const AvailabilityExpressionSelect: React.FC<Props> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <AlertExpressionPopover
-              aria-label="xpack.uptime.alerts.monitorStatus.availability.timerangeUnit"
+              aria-label="xpack.synthetics..alerts.monitorStatus.availability.timerangeUnit"
               content={
                 <TimeUnitSelectable
                   aria-label={labels.ENTER_AVAILABILITY_RANGE_SELECT_ARIA}
-                  data-test-subj="xpack.uptime.alerts.monitorStatus.availability.timerangeUnit.select"
+                  data-test-subj="xpack.synthetics..alerts.monitorStatus.availability.timerangeUnit.select"
                   headlineText={labels.ENTER_AVAILABILITY_RANGE_SELECT_HEADLINE}
                   // TODO: this should not be `any`
                   onChange={(newOptions: any) => {
@@ -168,7 +172,7 @@ export const AvailabilityExpressionSelect: React.FC<Props> = ({
                   timeRangeOptions={timerangeUnitOptions}
                 />
               }
-              data-test-subj="xpack.uptime.alerts.monitorStatus.availability.timerangeUnit"
+              data-test-subj="xpack.synthetics..alerts.monitorStatus.availability.timerangeUnit"
               description=""
               id="availability-unit"
               isEnabled={isEnabled}

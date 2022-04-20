@@ -45,14 +45,14 @@ export function CommonFields({ fields, onChange, onFieldBlur, validate }: Props)
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.APMServiceName.label"
+            id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.APMServiceName.label"
             defaultMessage="APM service name"
           />
         }
         labelAppend={<OptionalLabel />}
         helpText={
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.APMServiceName.helpText"
+            id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.APMServiceName.helpText"
             defaultMessage="APM service name for this monitor. Corresponds to the service.name ECS field. Set this when monitoring an app that is also using APM to enable integrations between Uptime and APM data in Kibana."
           />
         }
@@ -73,7 +73,7 @@ export function CommonFields({ fields, onChange, onFieldBlur, validate }: Props)
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.label"
+              id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.label"
               defaultMessage="Timeout in seconds"
             />
           }
@@ -81,19 +81,19 @@ export function CommonFields({ fields, onChange, onFieldBlur, validate }: Props)
           error={
             parseInt(fields[ConfigKey.TIMEOUT] || '', 10) < 0 ? (
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.moreThanZeroError"
+                id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.moreThanZeroError"
                 defaultMessage="Timeout must be greater than or equal to 0"
               />
             ) : (
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.lessThanIntervalError"
+                id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.lessThanIntervalError"
                 defaultMessage="Timeout must be less than the monitor frequency"
               />
             )
           }
           helpText={
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.helpText"
+              id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.helpText"
               defaultMessage="The total time allowed for testing the connection and exchanging data."
             />
           }
@@ -115,14 +115,14 @@ export function CommonFields({ fields, onChange, onFieldBlur, validate }: Props)
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.tags.label"
+            id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.tags.label"
             defaultMessage="Tags"
           />
         }
         labelAppend={<OptionalLabel />}
         helpText={
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.tags.helpText"
+            id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.tags.helpText"
             defaultMessage="A list of tags that will be sent with the monitor event. Press enter to add a new tag. Displayed in Uptime and enables searching by tag."
           />
         }

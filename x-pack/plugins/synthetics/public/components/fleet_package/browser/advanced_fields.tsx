@@ -57,14 +57,14 @@ export const BrowserAdvancedFields = memo<Props>(
             title={
               <h4>
                 <FormattedMessage
-                  id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.filtering.title"
+                  id="xpack.synthetics..createPackagePolicy.stepConfigure.browserAdvancedSettings.filtering.title"
                   defaultMessage="Selective tests"
                 />
               </h4>
             }
             description={
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.filtering.description"
+                id="xpack.synthetics..createPackagePolicy.stepConfigure.browserAdvancedSettings.filtering.description"
                 defaultMessage="Use these options to apply the selected monitor settings to a subset of the tests in your suite. Only the configured subset will be run by this monitor."
               />
             }
@@ -73,14 +73,14 @@ export const BrowserAdvancedFields = memo<Props>(
             <EuiFormRow
               label={
                 <FormattedMessage
-                  id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.journeyFiltersMatch.label"
+                  id="xpack.synthetics..createPackagePolicy.stepConfigure.browserAdvancedSettings.journeyFiltersMatch.label"
                   defaultMessage="Filter match"
                 />
               }
               labelAppend={<OptionalLabel />}
               helpText={
                 <FormattedMessage
-                  id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.journeyFiltersMatch.helpText"
+                  id="xpack.synthetics..createPackagePolicy.stepConfigure.browserAdvancedSettings.journeyFiltersMatch.helpText"
                   defaultMessage="Run only journeys with a name that matches the provided glob with this monitor."
                 />
               }
@@ -100,14 +100,14 @@ export const BrowserAdvancedFields = memo<Props>(
             <EuiFormRow
               label={
                 <FormattedMessage
-                  id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.journeyFiltersTags.label"
+                  id="xpack.synthetics..createPackagePolicy.stepConfigure.browserAdvancedSettings.journeyFiltersTags.label"
                   defaultMessage="Filter tags"
                 />
               }
               labelAppend={<OptionalLabel />}
               helpText={
                 <FormattedMessage
-                  id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.journeyFiltersTags.helpText"
+                  id="xpack.synthetics..createPackagePolicy.stepConfigure.browserAdvancedSettings.journeyFiltersTags.helpText"
                   defaultMessage="Run only journeys with the given tags with this monitor."
                 />
               }
@@ -128,14 +128,14 @@ export const BrowserAdvancedFields = memo<Props>(
           title={
             <h4>
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.title"
+                id="xpack.synthetics..createPackagePolicy.stepConfigure.browserAdvancedSettings.title"
                 defaultMessage="Synthetics agent options"
               />
             </h4>
           }
           description={
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.description"
+              id="xpack.synthetics..createPackagePolicy.stepConfigure.browserAdvancedSettings.description"
               defaultMessage="Provide fine-tuned configuration for the synthetics agent."
             />
           }
@@ -145,7 +145,7 @@ export const BrowserAdvancedFields = memo<Props>(
             helpText={
               <>
                 <FormattedMessage
-                  id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.ignoreHttpsErrors.helpText"
+                  id="xpack.synthetics..createPackagePolicy.stepConfigure.browserAdvancedSettings.ignoreHttpsErrors.helpText"
                   defaultMessage="Set this option to true to disable TLS/SSL validation in the synthetics browser. This is useful for testing sites that use self-signed certs."
                 />
               </>
@@ -157,7 +157,7 @@ export const BrowserAdvancedFields = memo<Props>(
               checked={fields[ConfigKey.IGNORE_HTTPS_ERRORS]}
               label={
                 <FormattedMessage
-                  id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.ignoreHttpsErrors.label"
+                  id="xpack.synthetics..createPackagePolicy.stepConfigure.browserAdvancedSettings.ignoreHttpsErrors.label"
                   defaultMessage="Ignore HTTPS errors"
                 />
               }
@@ -174,14 +174,14 @@ export const BrowserAdvancedFields = memo<Props>(
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.screenshots.label"
+                id="xpack.synthetics..createPackagePolicy.stepConfigure.browserAdvancedSettings.screenshots.label"
                 defaultMessage="Screenshot options"
               />
             }
             labelAppend={<OptionalLabel />}
             helpText={
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.screenshots.helpText"
+                id="xpack.synthetics..createPackagePolicy.stepConfigure.browserAdvancedSettings.screenshots.helpText"
                 defaultMessage="Set this option to manage the screenshots captured by the synthetics agent."
               />
             }
@@ -202,14 +202,14 @@ export const BrowserAdvancedFields = memo<Props>(
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.syntheticsArgs.label"
+                id="xpack.synthetics..createPackagePolicy.stepConfigure.browserAdvancedSettings.syntheticsArgs.label"
                 defaultMessage="Synthetics args"
               />
             }
             labelAppend={<OptionalLabel />}
             helpText={
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.syntheticsArgs.helpText"
+                id="xpack.synthetics..createPackagePolicy.stepConfigure.browserAdvancedSettings.syntheticsArgs.helpText"
                 defaultMessage="Extra arguments to pass to the synthetics agent package. Takes a list of strings. This is useful in rare scenarios, and should not ordinarily need to be set."
               />
             }

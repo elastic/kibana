@@ -40,7 +40,7 @@ export const MonitorNameAndLocation = ({ validate, onFieldBlur }: Props) => {
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.uptime.monitorManagement.monitorNameFieldLabel"
+            id="xpack.synthetics..monitorManagement.monitorNameFieldLabel"
             defaultMessage="Monitor name"
           />
         }
@@ -51,7 +51,7 @@ export const MonitorNameAndLocation = ({ validate, onFieldBlur }: Props) => {
             NAME_ALREADY_EXISTS
           ) : (
             <FormattedMessage
-              id="xpack.uptime.monitorManagement.monitorNameFieldError"
+              id="xpack.synthetics..monitorManagement.monitorNameFieldError"
               defaultMessage="Monitor name is required"
             />
           )
@@ -79,6 +79,9 @@ export const MonitorNameAndLocation = ({ validate, onFieldBlur }: Props) => {
   );
 };
 
-const NAME_ALREADY_EXISTS = i18n.translate('xpack.uptime.monitorManagement.duplicateNameError', {
-  defaultMessage: 'Monitor name already exists.',
-});
+const NAME_ALREADY_EXISTS = i18n.translate(
+  'xpack.synthetics..monitorManagement.duplicateNameError',
+  {
+    defaultMessage: 'Monitor name already exists.',
+  }
+);

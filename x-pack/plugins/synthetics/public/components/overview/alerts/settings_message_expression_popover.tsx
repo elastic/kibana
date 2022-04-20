@@ -31,7 +31,7 @@ export const SettingsMessageExpressionPopover: React.FC<SettingsMessageExpressio
   const [isOpen, setIsOpen] = useState(false);
   return (
     <EuiPopover
-      data-test-subj={`xpack.uptime.alerts.tls.expressionPopover.${id}`}
+      data-test-subj={`xpack.synthetics..alerts.tls.expressionPopover.${id}`}
       id={id}
       anchorPosition="downLeft"
       button={
@@ -48,13 +48,13 @@ export const SettingsMessageExpressionPopover: React.FC<SettingsMessageExpressio
       closePopover={() => setIsOpen(false)}
     >
       <FormattedMessage
-        id="xpack.uptime.alerts.tls.settingsPageNav.text"
+        id="xpack.synthetics..alerts.tls.settingsPageNav.text"
         defaultMessage="You can edit these thresholds on the {settingsPageLink}."
         values={{
           settingsPageLink: (
             // this link is wrapped around a span so we can also change the UI state
             // and hide the alert flyout before triggering the navigation to the settings page
-            <EuiLink href={path} data-test-subj="xpack.uptime.alerts.tlsFlyout.linkToSettings">
+            <EuiLink href={path} data-test-subj="xpack.synthetics..alerts.tlsFlyout.linkToSettings">
               <span
                 onClick={() => {
                   setAlertFlyoutVisible(false);

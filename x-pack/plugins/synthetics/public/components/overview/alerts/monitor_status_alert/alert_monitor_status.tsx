@@ -71,7 +71,7 @@ export const AlertMonitorStatusComponent: React.FC<AlertMonitorStatusProps> = (p
         title={
           <span>
             <FormattedMessage
-              id="xpack.uptime.alerts.monitorStatus.monitorCallOut.title"
+              id="xpack.synthetics..alerts.monitorStatus.monitorCallOut.title"
               defaultMessage="This alert will apply to approximately {snapshotCount} monitors."
               values={{ snapshotCount: snapshotLoading ? '...' : snapshotCount }}
             />{' '}

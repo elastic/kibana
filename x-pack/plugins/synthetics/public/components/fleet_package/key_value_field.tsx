@@ -120,7 +120,7 @@ export const KeyValuePairsField = ({
                     <EuiFlexItem>
                       {
                         <FormattedMessage
-                          id="xpack.uptime.keyValuePairsField.key.label"
+                          id="xpack.synthetics..keyValuePairsField.key.label"
                           defaultMessage="Key"
                         />
                       }
@@ -128,7 +128,7 @@ export const KeyValuePairsField = ({
                     <EuiFlexItem>
                       {
                         <FormattedMessage
-                          id="xpack.uptime.keyValuePairsField.value.label"
+                          id="xpack.synthetics..keyValuePairsField.value.label"
                           defaultMessage="Value"
                         />
                       }
@@ -151,7 +151,7 @@ export const KeyValuePairsField = ({
                     <EuiButtonIcon
                       iconType="trash"
                       aria-label={i18n.translate(
-                        'xpack.uptime.keyValuePairsField.deleteItem.label',
+                        'xpack.synthetics..keyValuePairsField.deleteItem.label',
                         {
                           defaultMessage: 'Delete item number {index}, {key}:{value}',
                           values: { index: index + 1, key, value },
@@ -163,9 +163,12 @@ export const KeyValuePairsField = ({
                 }
                 startControl={
                   <StyledField
-                    aria-label={i18n.translate('xpack.uptime.keyValuePairsField.key.ariaLabel', {
-                      defaultMessage: 'Key',
-                    })}
+                    aria-label={i18n.translate(
+                      'xpack.synthetics..keyValuePairsField.key.ariaLabel',
+                      {
+                        defaultMessage: 'Key',
+                      }
+                    )}
                     data-test-subj={`keyValuePairsKey${index}`}
                     value={key}
                     onChange={(event) => handleOnChange(event, index, true)}
@@ -174,9 +177,12 @@ export const KeyValuePairsField = ({
                 }
                 endControl={
                   <StyledField
-                    aria-label={i18n.translate('xpack.uptime.keyValuePairsField.value.ariaLabel', {
-                      defaultMessage: 'Value',
-                    })}
+                    aria-label={i18n.translate(
+                      'xpack.synthetics..keyValuePairsField.value.ariaLabel',
+                      {
+                        defaultMessage: 'Value',
+                      }
+                    )}
                     data-test-subj={`keyValuePairsValue${index}`}
                     value={value}
                     onChange={(event) => handleOnChange(event, index, false)}

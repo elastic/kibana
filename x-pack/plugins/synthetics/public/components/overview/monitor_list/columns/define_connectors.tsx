@@ -36,7 +36,7 @@ export const DefineAlertConnectors = ({
             helpText={
               showHelpText ? (
                 <FormattedMessage
-                  id="xpack.uptime.monitorList.defineConnector.description"
+                  id="xpack.synthetics..monitorList.defineConnector.description"
                   defaultMessage="Define a default connector in {link} to enable monitor status alerts."
                   values={{
                     link: (
@@ -46,7 +46,7 @@ export const DefineAlertConnectors = ({
                         target="_blank"
                       >
                         <FormattedMessage
-                          id="xpack.uptime.page_header.defineConnector.settingsLink"
+                          id="xpack.synthetics..page_header.defineConnector.settingsLink"
                           defaultMessage="Settings"
                         />
                       </ReactRouterEuiLink>
@@ -80,12 +80,12 @@ export const DefineAlertConnectors = ({
           data-test-subj={'uptimeSettingsLink'}
         >
           <FormattedMessage
-            id="xpack.uptime.page_header.defineConnector.popover.defaultLink"
+            id="xpack.synthetics..page_header.defineConnector.popover.defaultLink"
             defaultMessage="Define a default connector"
           />
         </ReactRouterEuiLink>{' '}
         <FormattedMessage
-          id="xpack.uptime.monitorList.defineConnector.popover.description"
+          id="xpack.synthetics..monitorList.defineConnector.popover.description"
           defaultMessage="to receive status alerts."
         />
       </EuiText>

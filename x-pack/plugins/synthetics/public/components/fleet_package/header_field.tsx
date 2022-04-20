@@ -57,7 +57,7 @@ export const HeaderField = ({
     <KeyValuePairsField
       addPairControlLabel={
         <FormattedMessage
-          id="xpack.uptime.createPackagePolicy.stepConfigure.headerField.addHeader.label"
+          id="xpack.synthetics..createPackagePolicy.stepConfigure.headerField.addHeader.label"
           defaultMessage="Add header"
         />
       }

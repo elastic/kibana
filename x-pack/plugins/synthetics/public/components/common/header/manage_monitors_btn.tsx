@@ -19,7 +19,7 @@ import { ClientPluginsSetup } from '../../../apps/plugin';
 import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 
 export const ManageMonitorsBtn = () => {
-  const [isOpen, setIsOpen] = useLocalStorage('xpack.uptime.monitorManagement.openTour', true);
+  const [isOpen, setIsOpen] = useLocalStorage('xpack.synthetics..monitorManagement.openTour', true);
 
   const history = useHistory();
 
@@ -70,7 +70,7 @@ export const ManageMonitorsBtn = () => {
         onClick={handleOnClick}
       >
         <FormattedMessage
-          id="xpack.uptime.page_header.manageMonitors"
+          id="xpack.synthetics..page_header.manageMonitors"
           defaultMessage="Monitor Management"
         />
       </EuiHeaderLink>
@@ -79,23 +79,23 @@ export const ManageMonitorsBtn = () => {
 };
 
 const GETTING_STARTED_LABEL = i18n.translate(
-  'xpack.uptime.monitorManagement.gettingStarted.label',
+  'xpack.synthetics..monitorManagement.gettingStarted.label',
   {
     defaultMessage: 'Get started with Synthetic Monitoring',
   }
 );
 
-const MONITOR_MANAGEMENT_LABEL = i18n.translate('xpack.uptime.monitorManagement.try.label', {
+const MONITOR_MANAGEMENT_LABEL = i18n.translate('xpack.synthetics..monitorManagement.try.label', {
   defaultMessage: 'Try Monitor Management',
 });
-const DISMISS_LABEL = i18n.translate('xpack.uptime.monitorManagement.try.dismiss', {
+const DISMISS_LABEL = i18n.translate('xpack.synthetics..monitorManagement.try.dismiss', {
   defaultMessage: 'Dismiss',
 });
 
-const NAVIGATE_LABEL = i18n.translate('xpack.uptime.page_header.manageLink.label', {
+const NAVIGATE_LABEL = i18n.translate('xpack.synthetics..page_header.manageLink.label', {
   defaultMessage: 'Navigate to the Uptime Monitor Management page',
 });
 
-const NEW_LABEL = i18n.translate('xpack.uptime.monitorManagement.new.label', {
+const NEW_LABEL = i18n.translate('xpack.synthetics..monitorManagement.new.label', {
   defaultMessage: 'New',
 });

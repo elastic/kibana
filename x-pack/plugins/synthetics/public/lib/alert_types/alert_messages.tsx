@@ -25,14 +25,14 @@ export const simpleAlertEnabled = (
   const alertUrl = getUrlForAlert(rule.id, kibanaService.core.http.basePath.get());
 
   return {
-    title: i18n.translate('xpack.uptime.overview.alerts.enabled.success', {
+    title: i18n.translate('xpack.synthetics..overview.alerts.enabled.success', {
       defaultMessage: 'Rule successfully enabled ',
     }),
     text: toMountPoint(
       <RedirectAppLinks application={kibanaService.core.application}>
         <EuiText>
           <FormattedMessage
-            id="xpack.uptime.overview.alerts.enabled.success.description"
+            id="xpack.synthetics..overview.alerts.enabled.success.description"
             defaultMessage="A message will be sent to {actionConnectors} when this monitor is down."
             values={{
               actionConnectors: (
@@ -43,7 +43,7 @@ export const simpleAlertEnabled = (
         </EuiText>
         <EuiSpacer size="xs" />
         <EuiLink href={alertUrl}>
-          {i18n.translate('xpack.uptime.enableAlert.editAlert', {
+          {i18n.translate('xpack.synthetics..enableAlert.editAlert', {
             defaultMessage: 'Edit alert',
           })}
         </EuiLink>

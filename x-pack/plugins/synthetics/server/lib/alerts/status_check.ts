@@ -223,9 +223,9 @@ export const getInstanceId = (monitorInfo: Ping, monIdByLoc: string) => {
 };
 
 export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (server, libs) => ({
-  id: 'xpack.uptime.alerts.monitorStatus',
+  id: 'xpack.synthetics..alerts.monitorStatus',
   producer: 'uptime',
-  name: i18n.translate('xpack.uptime.alerts.monitorStatus', {
+  name: i18n.translate('xpack.synthetics..alerts.monitorStatus', {
     defaultMessage: 'Uptime monitor status',
   }),
   validate: {

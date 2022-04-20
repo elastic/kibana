@@ -52,7 +52,7 @@ export const syntheticsMonitor: SavedObjectsType = {
     getTitle: (savedObject) =>
       savedObject.attributes.name +
       ' - ' +
-      i18n.translate('xpack.uptime.syntheticsMonitors', {
+      i18n.translate('xpack.synthetics..syntheticsMonitors', {
         defaultMessage: 'Uptime - Monitor',
       }),
   },

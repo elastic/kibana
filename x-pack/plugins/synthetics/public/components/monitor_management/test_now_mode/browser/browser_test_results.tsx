@@ -115,7 +115,7 @@ function getButtonContent({
       <EuiText size="s">
         <p>
           <EuiText color="subdued">
-            {i18n.translate('xpack.uptime.monitorManagement.stepCompleted', {
+            {i18n.translate('xpack.synthetics..monitorManagement.stepCompleted', {
               defaultMessage:
                 '{stepCount, number} {stepCount, plural, one {step} other {steps}}  completed',
               values: {
@@ -129,10 +129,10 @@ function getButtonContent({
   );
 }
 
-const FAILED_TO_RUN = i18n.translate('xpack.uptime.monitorManagement.failedRun', {
+const FAILED_TO_RUN = i18n.translate('xpack.synthetics..monitorManagement.failedRun', {
   defaultMessage: 'Failed to run steps',
 });
 
-const LOADING_STEPS = i18n.translate('xpack.uptime.monitorManagement.loadingSteps', {
+const LOADING_STEPS = i18n.translate('xpack.synthetics..monitorManagement.loadingSteps', {
   defaultMessage: 'Loading steps...',
 });

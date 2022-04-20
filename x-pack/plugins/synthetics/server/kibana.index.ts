@@ -49,10 +49,10 @@ export const initServerWithKibana = (
       insightsAndAlerting: ['triggersActions'],
     },
     alerting: [
-      'xpack.uptime.alerts.tls',
-      'xpack.uptime.alerts.tlsCertificate',
-      'xpack.uptime.alerts.monitorStatus',
-      'xpack.uptime.alerts.durationAnomaly',
+      'xpack.synthetics..alerts.tls',
+      'xpack.synthetics..alerts.tlsCertificate',
+      'xpack.synthetics..alerts.monitorStatus',
+      'xpack.synthetics..alerts.durationAnomaly',
     ],
     privileges: {
       all: {
@@ -66,18 +66,18 @@ export const initServerWithKibana = (
         alerting: {
           rule: {
             all: [
-              'xpack.uptime.alerts.tls',
-              'xpack.uptime.alerts.tlsCertificate',
-              'xpack.uptime.alerts.monitorStatus',
-              'xpack.uptime.alerts.durationAnomaly',
+              'xpack.synthetics..alerts.tls',
+              'xpack.synthetics..alerts.tlsCertificate',
+              'xpack.synthetics..alerts.monitorStatus',
+              'xpack.synthetics..alerts.durationAnomaly',
             ],
           },
           alert: {
             all: [
-              'xpack.uptime.alerts.tls',
-              'xpack.uptime.alerts.tlsCertificate',
-              'xpack.uptime.alerts.monitorStatus',
-              'xpack.uptime.alerts.durationAnomaly',
+              'xpack.synthetics..alerts.tls',
+              'xpack.synthetics..alerts.tlsCertificate',
+              'xpack.synthetics..alerts.monitorStatus',
+              'xpack.synthetics..alerts.durationAnomaly',
             ],
           },
         },
@@ -97,18 +97,18 @@ export const initServerWithKibana = (
         alerting: {
           rule: {
             read: [
-              'xpack.uptime.alerts.tls',
-              'xpack.uptime.alerts.tlsCertificate',
-              'xpack.uptime.alerts.monitorStatus',
-              'xpack.uptime.alerts.durationAnomaly',
+              'xpack.synthetics..alerts.tls',
+              'xpack.synthetics..alerts.tlsCertificate',
+              'xpack.synthetics..alerts.monitorStatus',
+              'xpack.synthetics..alerts.durationAnomaly',
             ],
           },
           alert: {
             read: [
-              'xpack.uptime.alerts.tls',
-              'xpack.uptime.alerts.tlsCertificate',
-              'xpack.uptime.alerts.monitorStatus',
-              'xpack.uptime.alerts.durationAnomaly',
+              'xpack.synthetics..alerts.tls',
+              'xpack.synthetics..alerts.tlsCertificate',
+              'xpack.synthetics..alerts.monitorStatus',
+              'xpack.synthetics..alerts.durationAnomaly',
             ],
           },
         },

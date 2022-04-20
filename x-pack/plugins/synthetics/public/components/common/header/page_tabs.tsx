@@ -17,7 +17,7 @@ import { stringifyUrlParams } from '../../../lib/helper/stringify_url_params';
 const tabs = [
   {
     id: OVERVIEW_ROUTE,
-    name: i18n.translate('xpack.uptime.overviewPage.headerText', {
+    name: i18n.translate('xpack.synthetics..overviewPage.headerText', {
       defaultMessage: 'Overview',
       description: `The text that will be displayed in the app's heading when the Overview page loads.`,
     }),

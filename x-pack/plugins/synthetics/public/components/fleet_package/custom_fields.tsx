@@ -47,7 +47,7 @@ const dataStreamToString = [
   {
     value: DataStream.BROWSER,
     text: i18n.translate(
-      'xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browserLabel',
+      'xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browserLabel',
       {
         defaultMessage: 'Browser (Beta)',
       }
@@ -104,14 +104,14 @@ export const CustomFields = memo<Props>(
           title={
             <h4>
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSectionTitle"
+                id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSectionTitle"
                 defaultMessage="Monitor settings"
               />
             </h4>
           }
           description={
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSectionDescription"
+              id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSectionDescription"
               defaultMessage="Configure your monitor with the following options."
             />
           }
@@ -124,7 +124,7 @@ export const CustomFields = memo<Props>(
                 <EuiFormRow
                   label={
                     <FormattedMessage
-                      id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType"
+                      id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType"
                       defaultMessage="Monitor Type"
                     />
                   }
@@ -135,7 +135,7 @@ export const CustomFields = memo<Props>(
                   }
                   error={
                     <FormattedMessage
-                      id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.error"
+                      id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.error"
                       defaultMessage="Monitor type is required"
                     />
                   }
@@ -154,7 +154,7 @@ export const CustomFields = memo<Props>(
                 <EuiCallOut
                   title={
                     <FormattedMessage
-                      id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.description"
+                      id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.description"
                       defaultMessage='To create a "Browser" monitor, please ensure you are using the elastic-agent-complete Docker container, which contains the dependencies to run these monitors. For more information, please visit our {link}.'
                       values={{
                         link: (
@@ -164,7 +164,7 @@ export const CustomFields = memo<Props>(
                             external
                           >
                             <FormattedMessage
-                              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.link"
+                              id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.browser.warning.link"
                               defaultMessage="synthetics documentation"
                             />
                           </EuiLink>
@@ -187,14 +187,14 @@ export const CustomFields = memo<Props>(
             title={
               <h4>
                 <FormattedMessage
-                  id="xpack.uptime.createPackagePolicy.stepConfigure.tlsSettings.label"
+                  id="xpack.synthetics..createPackagePolicy.stepConfigure.tlsSettings.label"
                   defaultMessage="TLS settings"
                 />
               </h4>
             }
             description={
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.tlsSettings.description"
+                id="xpack.synthetics..createPackagePolicy.stepConfigure.tlsSettings.description"
                 defaultMessage="Configure TLS options, including verification mode, certificate authorities, and client certificates."
               />
             }
@@ -206,7 +206,7 @@ export const CustomFields = memo<Props>(
               checked={!!isTLSEnabled}
               label={
                 <FormattedMessage
-                  id="xpack.uptime.createPackagePolicy.stepConfigure.certificateSettings.enableSSLSettings.label"
+                  id="xpack.synthetics..createPackagePolicy.stepConfigure.certificateSettings.enableSSLSettings.label"
                   defaultMessage="Enable TLS configuration"
                 />
               }

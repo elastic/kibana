@@ -45,19 +45,19 @@ export const AddMonitorPage: React.FC = () => {
   );
 };
 
-const LOADING_LABEL = i18n.translate('xpack.uptime.monitorManagement.addMonitorLoadingLabel', {
+const LOADING_LABEL = i18n.translate('xpack.synthetics..monitorManagement.addMonitorLoadingLabel', {
   defaultMessage: 'Loading Monitor Management',
 });
 
 const ERROR_HEADING_LABEL = i18n.translate(
-  'xpack.uptime.monitorManagement.addMonitorLoadingError',
+  'xpack.synthetics..monitorManagement.addMonitorLoadingError',
   {
     defaultMessage: 'Error loading Monitor Management',
   }
 );
 
 const ERROR_BODY_LABEL = i18n.translate(
-  'xpack.uptime.monitorManagement.addMonitorServiceLocationsLoadingError',
+  'xpack.synthetics..monitorManagement.addMonitorServiceLocationsLoadingError',
   {
     defaultMessage: 'Service locations were not able to be loaded. Please try again later.',
   }

@@ -72,18 +72,18 @@ type RouteProps = {
   };
 } & EuiPageTemplateProps;
 
-const baseTitle = i18n.translate('xpack.uptime.routes.baseTitle', {
+const baseTitle = i18n.translate('xpack.synthetics..routes.baseTitle', {
   defaultMessage: 'Uptime - Kibana',
 });
 
-export const MONITORING_OVERVIEW_LABEL = i18n.translate('xpack.uptime.overview.heading', {
+export const MONITORING_OVERVIEW_LABEL = i18n.translate('xpack.synthetics..overview.heading', {
   defaultMessage: 'Monitors',
 });
 
 const getRoutes = (): RouteProps[] => {
   return [
     {
-      title: i18n.translate('xpack.uptime.monitorRoute.title', {
+      title: i18n.translate('xpack.synthetics..monitorRoute.title', {
         defaultMessage: 'Monitor | {baseTitle}',
         values: { baseTitle },
       }),
@@ -98,7 +98,7 @@ const getRoutes = (): RouteProps[] => {
       },
     },
     {
-      title: i18n.translate('xpack.uptime.settingsRoute.title', {
+      title: i18n.translate('xpack.synthetics..settingsRoute.title', {
         defaultMessage: `Settings | {baseTitle}`,
         values: { baseTitle },
       }),
@@ -108,14 +108,17 @@ const getRoutes = (): RouteProps[] => {
       telemetryId: UptimePage.Settings,
       pageHeader: {
         pageTitle: (
-          <FormattedMessage id="xpack.uptime.settings.heading" defaultMessage="Uptime settings" />
+          <FormattedMessage
+            id="xpack.synthetics..settings.heading"
+            defaultMessage="Uptime settings"
+          />
         ),
       },
       bottomBar: <SettingsBottomBar />,
       bottomBarProps: { paddingSize: 'm' as const },
     },
     {
-      title: i18n.translate('xpack.uptime.certificatesRoute.title', {
+      title: i18n.translate('xpack.synthetics..certificatesRoute.title', {
         defaultMessage: `Certificates | {baseTitle}`,
         values: { baseTitle },
       }),
@@ -129,7 +132,7 @@ const getRoutes = (): RouteProps[] => {
       },
     },
     {
-      title: i18n.translate('xpack.uptime.stepDetailRoute.title', {
+      title: i18n.translate('xpack.synthetics..stepDetailRoute.title', {
         defaultMessage: 'Synthetics detail | {baseTitle}',
         values: { baseTitle },
       }),
@@ -166,7 +169,7 @@ const getRoutes = (): RouteProps[] => {
       },
     },
     {
-      title: i18n.translate('xpack.uptime.mappingErrorRoute.title', {
+      title: i18n.translate('xpack.synthetics..mappingErrorRoute.title', {
         defaultMessage: 'Synthetics | mapping error',
       }),
       path: MAPPING_ERROR_ROUTE,
@@ -177,7 +180,7 @@ const getRoutes = (): RouteProps[] => {
         pageTitle: (
           <div>
             <FormattedMessage
-              id="xpack.uptime.mappingErrorRoute.pageHeader.title"
+              id="xpack.synthetics..mappingErrorRoute.pageHeader.title"
               defaultMessage="Mapping error"
             />
           </div>
@@ -186,7 +189,7 @@ const getRoutes = (): RouteProps[] => {
       },
     },
     {
-      title: i18n.translate('xpack.uptime.addMonitorRoute.title', {
+      title: i18n.translate('xpack.synthetics..addMonitorRoute.title', {
         defaultMessage: 'Add Monitor | {baseTitle}',
         values: { baseTitle },
       }),
@@ -201,7 +204,7 @@ const getRoutes = (): RouteProps[] => {
       pageHeader: {
         pageTitle: (
           <FormattedMessage
-            id="xpack.uptime.addMonitor.pageHeader.title"
+            id="xpack.synthetics..addMonitor.pageHeader.title"
             defaultMessage="Add Monitor"
           />
         ),
@@ -210,7 +213,7 @@ const getRoutes = (): RouteProps[] => {
       bottomBarProps: { paddingSize: 'm' as const },
     },
     {
-      title: i18n.translate('xpack.uptime.editMonitorRoute.title', {
+      title: i18n.translate('xpack.synthetics..editMonitorRoute.title', {
         defaultMessage: 'Edit Monitor | {baseTitle}',
         values: { baseTitle },
       }),
@@ -225,7 +228,7 @@ const getRoutes = (): RouteProps[] => {
       pageHeader: {
         pageTitle: (
           <FormattedMessage
-            id="xpack.uptime.editMonitor.pageHeader.title"
+            id="xpack.synthetics..editMonitor.pageHeader.title"
             defaultMessage="Edit Monitor"
           />
         ),
@@ -234,7 +237,7 @@ const getRoutes = (): RouteProps[] => {
       bottomBarProps: { paddingSize: 'm' as const },
     },
     {
-      title: i18n.translate('xpack.uptime.monitorManagementRoute.title', {
+      title: i18n.translate('xpack.synthetics..monitorManagementRoute.title', {
         defaultMessage: 'Monitor Management | {baseTitle}',
         values: { baseTitle },
       }),
@@ -251,17 +254,20 @@ const getRoutes = (): RouteProps[] => {
           <EuiFlexGroup alignItems="center" gutterSize="xs">
             <EuiFlexItem grow={false}>
               <FormattedMessage
-                id="xpack.uptime.monitorManagement.pageHeader.title"
+                id="xpack.synthetics..monitorManagement.pageHeader.title"
                 defaultMessage="Monitor Management"
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiBetaBadge
                 label="Beta"
-                tooltipContent={i18n.translate('xpack.uptime.routes.monitorManagement.betaLabel', {
-                  defaultMessage:
-                    'This functionality is in beta and is subject to change. The design and code is less mature than official generally available features and is being provided as-is with no warranties. Beta features are not subject to the support service level agreement of official generally available features.',
-                })}
+                tooltipContent={i18n.translate(
+                  'xpack.synthetics..routes.monitorManagement.betaLabel',
+                  {
+                    defaultMessage:
+                      'This functionality is in beta and is subject to change. The design and code is less mature than official generally available features and is being provided as-is with no warranties. Beta features are not subject to the support service level agreement of official generally available features.',
+                  }
+                )}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

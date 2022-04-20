@@ -80,7 +80,7 @@ export const AddConnectorFlyout = ({ focusInput, isDisabled }: Props) => {
         isDisabled={isDisabled || !canEdit}
       >
         <FormattedMessage
-          id="xpack.uptime.alerts.settings.addConnector"
+          id="xpack.synthetics..alerts.settings.addConnector"
           defaultMessage="Add connector"
         />
       </EuiButtonEmpty>

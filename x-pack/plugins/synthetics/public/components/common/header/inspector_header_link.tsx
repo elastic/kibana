@@ -34,7 +34,7 @@ export function InspectorHeaderLink() {
 
   return (
     <EuiHeaderLink color="primary" onClick={inspect}>
-      {i18n.translate('xpack.uptime.inspectButtonText', {
+      {i18n.translate('xpack.synthetics..inspectButtonText', {
         defaultMessage: 'Inspect',
       })}
     </EuiHeaderLink>

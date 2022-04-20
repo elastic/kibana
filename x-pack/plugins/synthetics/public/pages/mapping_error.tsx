@@ -23,7 +23,7 @@ export const MappingErrorPage = () => {
 
   useBreadcrumbs([
     {
-      text: i18n.translate('xpack.uptime.mappingErrorRoute.breadcrumb', {
+      text: i18n.translate('xpack.synthetics..mappingErrorRoute.breadcrumb', {
         defaultMessage: 'Mapping error',
       }),
     },
@@ -31,14 +31,14 @@ export const MappingErrorPage = () => {
 
   return (
     <EuiEmptyPrompt
-      data-test-subj="xpack.uptime.mappingsErrorPage"
+      data-test-subj="xpack.synthetics..mappingsErrorPage"
       iconColor="danger"
       iconType="cross"
       title={
         <EuiTitle>
           <h3>
             <FormattedMessage
-              id="xpack.uptime.public.pages.mappingError.title"
+              id="xpack.synthetics..public.pages.mappingError.title"
               defaultMessage="Heartbeat mappings missing"
             />
           </h3>
@@ -48,7 +48,7 @@ export const MappingErrorPage = () => {
         <div>
           <p>
             <FormattedMessage
-              id="xpack.uptime.public.pages.mappingError.bodyMessage"
+              id="xpack.synthetics..public.pages.mappingError.bodyMessage"
               defaultMessage="Incorrect mappings detected! Perhaps you forgot to run the heartbeat {setup} command?"
               values={{ setup: <EuiCode>setup</EuiCode> }}
             />
@@ -56,7 +56,7 @@ export const MappingErrorPage = () => {
           {docLinks && (
             <p>
               <FormattedMessage
-                id="xpack.uptime.public.pages.mappingError.bodyDocsLink"
+                id="xpack.synthetics..public.pages.mappingError.bodyDocsLink"
                 defaultMessage="You can learn how to troubleshoot this issue in the {docsLink}."
                 values={{
                   docsLink: (

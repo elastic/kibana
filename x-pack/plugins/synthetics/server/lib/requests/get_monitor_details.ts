@@ -31,7 +31,7 @@ export const getMonitorAlerts = async ({
   const options: any = {
     page: 1,
     perPage: 500,
-    filter: 'alert.attributes.alertTypeId:(xpack.uptime.alerts.monitorStatus)',
+    filter: 'alert.attributes.alertTypeId:(xpack.synthetics..alerts.monitorStatus)',
     defaultSearchOperator: 'AND',
     sortField: 'name.keyword',
   };

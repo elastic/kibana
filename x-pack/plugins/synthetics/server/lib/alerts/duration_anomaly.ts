@@ -77,7 +77,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
   libs,
   plugins
 ) => ({
-  id: 'xpack.uptime.alerts.durationAnomaly',
+  id: 'xpack.synthetics..alerts.durationAnomaly',
   producer: 'uptime',
   name: durationAnomalyTranslations.alertFactoryName,
   validate: {

@@ -62,6 +62,6 @@ export const Actions = ({ id, name, onUpdate, isDisabled, errorSummaries, monito
   );
 };
 
-const EDIT_MONITOR_LABEL = i18n.translate('xpack.uptime.monitorManagement.editMonitorLabel', {
+const EDIT_MONITOR_LABEL = i18n.translate('xpack.synthetics..monitorManagement.editMonitorLabel', {
   defaultMessage: 'Edit monitor',
 });

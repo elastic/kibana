@@ -16,7 +16,7 @@ import { useCertSearch } from '../components/certificates/use_cert_search';
 import { setCertificatesTotalAction } from '../state/certificates/certificates';
 
 const DEFAULT_PAGE_SIZE = 10;
-const LOCAL_STORAGE_KEY = 'xpack.uptime.certList.pageSize';
+const LOCAL_STORAGE_KEY = 'xpack.synthetics..certList.pageSize';
 const getPageSizeValue = () => {
   const value = parseInt(localStorage.getItem(LOCAL_STORAGE_KEY) ?? '', 10);
   if (isNaN(value)) {

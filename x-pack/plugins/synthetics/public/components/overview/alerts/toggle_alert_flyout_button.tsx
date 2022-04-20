@@ -33,7 +33,7 @@ const ALERT_CONTEXT_MAIN_PANEL_ID = 0;
 const ALERT_CONTEXT_SELECT_TYPE_PANEL_ID = 1;
 
 const noWritePermissionsTooltipContent = i18n.translate(
-  'xpack.uptime.alertDropdown.noWritePermissions',
+  'xpack.synthetics..alertDropdown.noWritePermissions',
   {
     defaultMessage: 'You need read-write access to Uptime to create alerts in this app.',
   }
@@ -53,7 +53,7 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
 
   const monitorStatusAlertContextMenuItem: EuiContextMenuPanelItemDescriptor = {
     'aria-label': ToggleFlyoutTranslations.toggleMonitorStatusAriaLabel,
-    'data-test-subj': 'xpack.uptime.toggleAlertFlyout',
+    'data-test-subj': 'xpack.synthetics..toggleAlertFlyout',
     name: ToggleFlyoutTranslations.toggleMonitorStatusContent,
     onClick: () => {
       setAlertFlyoutVisible(CLIENT_ALERT_TYPES.MONITOR_STATUS);
@@ -63,7 +63,7 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
 
   const tlsAlertContextMenuItem: EuiContextMenuPanelItemDescriptor = {
     'aria-label': ToggleFlyoutTranslations.toggleTlsAriaLabel,
-    'data-test-subj': 'xpack.uptime.toggleTlsAlertFlyout',
+    'data-test-subj': 'xpack.synthetics..toggleTlsAlertFlyout',
     name: ToggleFlyoutTranslations.toggleTlsContent,
     onClick: () => {
       setAlertFlyoutVisible(CLIENT_ALERT_TYPES.TLS);
@@ -73,11 +73,11 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
 
   const managementContextItem: EuiContextMenuPanelItemDescriptor = {
     'aria-label': ToggleFlyoutTranslations.navigateToAlertingUIAriaLabel,
-    'data-test-subj': 'xpack.uptime.navigateToAlertingUi',
+    'data-test-subj': 'xpack.synthetics..navigateToAlertingUi',
     name: (
       <EuiLink color="text" href={manageRulesUrl.href}>
         <FormattedMessage
-          id="xpack.uptime.navigateToAlertingButton.content"
+          id="xpack.synthetics..navigateToAlertingButton.content"
           defaultMessage="Manage rules"
         />
       </EuiLink>
@@ -115,7 +115,7 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
         items: [
           {
             'aria-label': ToggleFlyoutTranslations.openAlertContextPanelAriaLabel,
-            'data-test-subj': 'xpack.uptime.openAlertContextPanel',
+            'data-test-subj': 'xpack.synthetics..openAlertContextPanel',
             name: ToggleFlyoutTranslations.openAlertContextPanelLabel,
             icon: 'bell',
             panel: ALERT_CONTEXT_SELECT_TYPE_PANEL_ID,
@@ -139,13 +139,13 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
         <EuiHeaderLink
           color="text"
           aria-label={ToggleFlyoutTranslations.toggleButtonAriaLabel}
-          data-test-subj="xpack.uptime.alertsPopover.toggleButton"
+          data-test-subj="xpack.synthetics..alertsPopover.toggleButton"
           iconType="arrowDown"
           iconSide="right"
           onClick={() => setIsOpen(!isOpen)}
         >
           <FormattedMessage
-            id="xpack.uptime.alerts.toggleAlertFlyoutButtonText"
+            id="xpack.synthetics..alerts.toggleAlertFlyoutButtonText"
             defaultMessage="Alerts and rules"
           />
         </EuiHeaderLink>

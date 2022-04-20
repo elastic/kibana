@@ -103,27 +103,30 @@ export const DeleteMonitor = ({
 };
 
 const DELETE_DESCRIPTION_LABEL = i18n.translate(
-  'xpack.uptime.monitorManagement.confirmDescriptionLabel',
+  'xpack.synthetics..monitorManagement.confirmDescriptionLabel',
   {
     defaultMessage:
       'This action will delete the monitor but keep any data collected. This action cannot be undone.',
   }
 );
 
-const YES_LABEL = i18n.translate('xpack.uptime.monitorManagement.yesLabel', {
+const YES_LABEL = i18n.translate('xpack.synthetics..monitorManagement.yesLabel', {
   defaultMessage: 'Delete',
 });
 
-const NO_LABEL = i18n.translate('xpack.uptime.monitorManagement.noLabel', {
+const NO_LABEL = i18n.translate('xpack.synthetics..monitorManagement.noLabel', {
   defaultMessage: 'Cancel',
 });
 
-const DELETE_MONITOR_LABEL = i18n.translate('xpack.uptime.monitorManagement.deleteMonitorLabel', {
-  defaultMessage: 'Delete monitor',
-});
+const DELETE_MONITOR_LABEL = i18n.translate(
+  'xpack.synthetics..monitorManagement.deleteMonitorLabel',
+  {
+    defaultMessage: 'Delete monitor',
+  }
+);
 
 const MONITOR_DELETE_SUCCESS_LABEL = i18n.translate(
-  'xpack.uptime.monitorManagement.monitorDeleteSuccessMessage',
+  'xpack.synthetics..monitorManagement.monitorDeleteSuccessMessage',
   {
     defaultMessage: 'Monitor deleted successfully.',
   }
@@ -131,14 +134,14 @@ const MONITOR_DELETE_SUCCESS_LABEL = i18n.translate(
 
 // TODO: Discuss error states with product
 const MONITOR_DELETE_FAILURE_LABEL = i18n.translate(
-  'xpack.uptime.monitorManagement.monitorDeleteFailureMessage',
+  'xpack.synthetics..monitorManagement.monitorDeleteFailureMessage',
   {
     defaultMessage: 'Monitor was unable to be deleted. Please try again later.',
   }
 );
 
 const MONITOR_DELETE_LOADING_LABEL = i18n.translate(
-  'xpack.uptime.monitorManagement.monitorDeleteLoadingMessage',
+  'xpack.synthetics..monitorManagement.monitorDeleteLoadingMessage',
   {
     defaultMessage: 'Deleting monitor...',
   }

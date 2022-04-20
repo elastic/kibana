@@ -47,7 +47,7 @@ export const PingStatusColumn = ({ pingStatus, item }: Props) => {
   }
 
   return (
-    <div data-test-subj={`xpack.uptime.pingList.ping-${item.docId}`}>
+    <div data-test-subj={`xpack.synthetics..pingList.ping-${item.docId}`}>
       <EuiBadge
         className="eui-textCenter"
         color={pingStatus === STATUS.UP ? 'success' : dangerBehindText}
@@ -56,7 +56,7 @@ export const PingStatusColumn = ({ pingStatus, item }: Props) => {
       </EuiBadge>
       <EuiSpacer size="xs" />
       <EuiText size="xs" color="subdued">
-        {i18n.translate('xpack.uptime.pingList.recencyMessage', {
+        {i18n.translate('xpack.synthetics..pingList.recencyMessage', {
           values: { fromNow: checkedTime },
           defaultMessage: 'Checked {fromNow}',
           description:

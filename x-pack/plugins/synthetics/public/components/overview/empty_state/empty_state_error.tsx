@@ -30,14 +30,14 @@ export const EmptyStateError = ({ errors }: EmptyStateErrorProps) => {
               <EuiTitle size="m">
                 {unauthorized ? (
                   <h3>
-                    {i18n.translate('xpack.uptime.emptyStateError.notAuthorized', {
+                    {i18n.translate('xpack.synthetics..emptyStateError.notAuthorized', {
                       defaultMessage:
                         'You are not authorized to view Uptime data, please contact your system administrator.',
                     })}
                   </h3>
                 ) : (
                   <h3>
-                    {i18n.translate('xpack.uptime.emptyStateError.title', {
+                    {i18n.translate('xpack.synthetics..emptyStateError.title', {
                       defaultMessage: 'Error',
                     })}
                   </h3>

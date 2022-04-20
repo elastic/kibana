@@ -97,7 +97,7 @@ export const TLSOptions: React.FunctionComponent<Props> = memo(
             <EuiScreenReaderOnly>
               <span>
                 <FormattedMessage
-                  id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.legend"
+                  id="xpack.synthetics..createPackagePolicy.stepConfigure.certsField.legend"
                   defaultMessage="Certificate settings"
                 />
               </span>
@@ -108,7 +108,7 @@ export const TLSOptions: React.FunctionComponent<Props> = memo(
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.verificationMode.label"
+              id="xpack.synthetics..createPackagePolicy.stepConfigure.certsField.verificationMode.label"
               defaultMessage="Verification mode"
             />
           }
@@ -135,7 +135,7 @@ export const TLSOptions: React.FunctionComponent<Props> = memo(
             <EuiCallOut
               title={
                 <FormattedMessage
-                  id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.verificationMode.warning.title"
+                  id="xpack.synthetics..createPackagePolicy.stepConfigure.certsField.verificationMode.warning.title"
                   defaultMessage="Disabling TLS"
                 />
               }
@@ -144,7 +144,7 @@ export const TLSOptions: React.FunctionComponent<Props> = memo(
             >
               <p>
                 <FormattedMessage
-                  id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.verificationMode.warning.description"
+                  id="xpack.synthetics..createPackagePolicy.stepConfigure.certsField.verificationMode.warning.description"
                   defaultMessage="This mode disables many of the security benefits of SSL/TLS and should only be used
                   after cautious consideration."
                 />
@@ -156,7 +156,7 @@ export const TLSOptions: React.FunctionComponent<Props> = memo(
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.version.label"
+              id="xpack.synthetics..createPackagePolicy.stepConfigure.certsField.version.label"
               defaultMessage="Supported TLS protocols"
             />
           }
@@ -165,7 +165,7 @@ export const TLSOptions: React.FunctionComponent<Props> = memo(
         >
           <EuiComboBox
             placeholder={i18n.translate(
-              'xpack.uptime.createPackagePolicy.stepConfigure.certsField.version.placeholder',
+              'xpack.synthetics..createPackagePolicy.stepConfigure.certsField.version.placeholder',
               {
                 defaultMessage: 'Select one or more TLS protocols.',
               }
@@ -183,13 +183,13 @@ export const TLSOptions: React.FunctionComponent<Props> = memo(
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificateAuthorities.label"
+              id="xpack.synthetics..createPackagePolicy.stepConfigure.certsField.certificateAuthorities.label"
               defaultMessage="Certificate authorities"
             />
           }
           helpText={
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificateAuthorities.helpText"
+              id="xpack.synthetics..createPackagePolicy.stepConfigure.certsField.certificateAuthorities.helpText"
               defaultMessage="PEM formatted custom certificate authorities."
             />
           }
@@ -219,14 +219,14 @@ export const TLSOptions: React.FunctionComponent<Props> = memo(
             <>
               {tlsRoleLabels[tlsRole]}{' '}
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificate.label"
+                id="xpack.synthetics..createPackagePolicy.stepConfigure.certsField.certificate.label"
                 defaultMessage="certificate"
               />
             </>
           }
           helpText={
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificate.helpText"
+              id="xpack.synthetics..createPackagePolicy.stepConfigure.certsField.certificate.helpText"
               defaultMessage="PEM formatted certificate for TLS client authentication."
             />
           }
@@ -256,14 +256,14 @@ export const TLSOptions: React.FunctionComponent<Props> = memo(
             <>
               {tlsRoleLabels[tlsRole]}{' '}
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificateKey.label"
+                id="xpack.synthetics..createPackagePolicy.stepConfigure.certsField.certificateKey.label"
                 defaultMessage="key"
               />
             </>
           }
           helpText={
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificateKey.helpText"
+              id="xpack.synthetics..createPackagePolicy.stepConfigure.certsField.certificateKey.helpText"
               defaultMessage="PEM formatted certificate key for TLS client authentication."
             />
           }
@@ -293,14 +293,14 @@ export const TLSOptions: React.FunctionComponent<Props> = memo(
             <>
               {tlsRoleLabels[tlsRole]}{' '}
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificateKeyPassphrase.label"
+                id="xpack.synthetics..createPackagePolicy.stepConfigure.certsField.certificateKeyPassphrase.label"
                 defaultMessage="key passphrase"
               />
             </>
           }
           helpText={
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificateKeyPassphrase.helpText"
+              id="xpack.synthetics..createPackagePolicy.stepConfigure.certsField.certificateKeyPassphrase.helpText"
               defaultMessage="Certificate key passphrase for TLS client authentication."
             />
           }
@@ -326,13 +326,13 @@ export const TLSOptions: React.FunctionComponent<Props> = memo(
 const tlsRoleLabels = {
   client: (
     <FormattedMessage
-      id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.tlsRole.client"
+      id="xpack.synthetics..createPackagePolicy.stepConfigure.certsField.tlsRole.client"
       defaultMessage="Client"
     />
   ),
   server: (
     <FormattedMessage
-      id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.tlsRole.server"
+      id="xpack.synthetics..createPackagePolicy.stepConfigure.certsField.tlsRole.server"
       defaultMessage="Server"
     />
   ),
@@ -340,28 +340,28 @@ const tlsRoleLabels = {
 
 const verificationModeHelpText = {
   [VerificationMode.CERTIFICATE]: i18n.translate(
-    'xpack.uptime.createPackagePolicy.stepConfigure.certsField.verificationMode.certificate.description',
+    'xpack.synthetics..createPackagePolicy.stepConfigure.certsField.verificationMode.certificate.description',
     {
       defaultMessage:
         'Verifies that the provided certificate is signed by a trusted authority (CA), but does not perform any hostname verification.',
     }
   ),
   [VerificationMode.FULL]: i18n.translate(
-    'xpack.uptime.createPackagePolicy.stepConfigure.certsField.verificationMode.full.description',
+    'xpack.synthetics..createPackagePolicy.stepConfigure.certsField.verificationMode.full.description',
     {
       defaultMessage:
         'Verifies that the provided certificate is signed by a trusted authority (CA) and also verifies that the server’s hostname (or IP address) matches the names identified within the certificate.',
     }
   ),
   [VerificationMode.NONE]: i18n.translate(
-    'xpack.uptime.createPackagePolicy.stepConfigure.certsField.verificationMode.none.description',
+    'xpack.synthetics..createPackagePolicy.stepConfigure.certsField.verificationMode.none.description',
     {
       defaultMessage:
         'Performs no verification of the server’s certificate. It is primarily intended as a temporary diagnostic mechanism when attempting to resolve TLS errors; its use in production environments is strongly discouraged.',
     }
   ),
   [VerificationMode.STRICT]: i18n.translate(
-    'xpack.uptime.createPackagePolicy.stepConfigure.certsField.verificationMode.strict.description',
+    'xpack.synthetics..createPackagePolicy.stepConfigure.certsField.verificationMode.strict.description',
     {
       defaultMessage:
         'Verifies that the provided certificate is signed by a trusted authority (CA) and also verifies that the server’s hostname (or IP address) matches the names identified within the certificate. If the Subject Alternative Name is empty, it returns an error.',
@@ -371,25 +371,25 @@ const verificationModeHelpText = {
 
 const verificationModeLabels = {
   [VerificationMode.CERTIFICATE]: i18n.translate(
-    'xpack.uptime.createPackagePolicy.stepConfigure.certsField.verificationMode.certificate.label',
+    'xpack.synthetics..createPackagePolicy.stepConfigure.certsField.verificationMode.certificate.label',
     {
       defaultMessage: 'Certificate',
     }
   ),
   [VerificationMode.FULL]: i18n.translate(
-    'xpack.uptime.createPackagePolicy.stepConfigure.certsField.verificationMode.full.label',
+    'xpack.synthetics..createPackagePolicy.stepConfigure.certsField.verificationMode.full.label',
     {
       defaultMessage: 'Full',
     }
   ),
   [VerificationMode.NONE]: i18n.translate(
-    'xpack.uptime.createPackagePolicy.stepConfigure.certsField.verificationMode.none.label',
+    'xpack.synthetics..createPackagePolicy.stepConfigure.certsField.verificationMode.none.label',
     {
       defaultMessage: 'None',
     }
   ),
   [VerificationMode.STRICT]: i18n.translate(
-    'xpack.uptime.createPackagePolicy.stepConfigure.certsField.verificationMode.strict.label',
+    'xpack.synthetics..createPackagePolicy.stepConfigure.certsField.verificationMode.strict.label',
     {
       defaultMessage: 'Strict',
     }

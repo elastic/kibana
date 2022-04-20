@@ -38,14 +38,14 @@ export const ICMPSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.icmp.hosts"
+            id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.icmp.hosts"
             defaultMessage="Host"
           />
         }
         isInvalid={!!validate[ConfigKey.HOSTS]?.(fields)}
         error={
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.icmp.hosts.error"
+            id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.icmp.hosts.error"
             defaultMessage="Host is required"
           />
         }
@@ -66,14 +66,14 @@ export const ICMPSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
         id="syntheticsFleetScheduleField--number syntheticsFleetScheduleField--unit"
         label={
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval"
+            id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval"
             defaultMessage="Frequency"
           />
         }
         isInvalid={!!validate[ConfigKey.SCHEDULE]?.(fields)}
         error={
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error"
+            id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error"
             defaultMessage="Monitor frequency is required"
           />
         }
@@ -93,21 +93,21 @@ export const ICMPSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.wait.label"
+            id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.wait.label"
             defaultMessage="Wait in seconds"
           />
         }
         isInvalid={!!validate[ConfigKey.WAIT]?.(fields)}
         error={
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.wait.error"
+            id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.wait.error"
             defaultMessage="Wait must be 0 or greater"
           />
         }
         labelAppend={<OptionalLabel />}
         helpText={
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.wait.helpText"
+            id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.wait.helpText"
             defaultMessage="The duration to wait before emitting another ICMP Echo Request if no response is received."
           />
         }
