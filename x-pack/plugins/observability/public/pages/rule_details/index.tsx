@@ -19,9 +19,12 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiButtonIcon,
+  EuiIcon,
   EuiPanel,
   EuiTitle,
   EuiHealth,
+  EuiPopover,
+  EuiContextMenu,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 // import { hasExecuteActionsCapability } from './config';
@@ -96,6 +99,7 @@ export function RuleDetailsPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
   const { isLoading, rule, error, reload } = useFetchRule({ ruleId });
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
+  const [isRuleEditPopoverOpen, setIsRuleEditPopoverOpen] = useState(false);
 
   const getColorStatusBased = (ruleStatus: string) => {
     switch (ruleStatus) {
@@ -171,17 +175,38 @@ export function RuleDetailsPage() {
         rightSideItems: isRuleTypeEditableInContext(ruleTypeId)
           ? [
               <>
-                <EuiButtonEmpty
-                  data-test-subj="openEditRuleFlyoutButton"
-                  iconType="pencil"
-                  onClick={() => setEditFlyoutVisible(true)}
-                  name="edit"
+                <EuiPopover
+                  id="contextRuleEditMenu"
+                  isOpen={isRuleEditPopoverOpen}
+                  closePopover={() => setIsRuleEditPopoverOpen(false)}
+                  button={
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        size="m"
+                        data-test-subj="openEditRuleFlyoutButton"
+                        iconType="menu"
+                        onClick={() => setIsRuleEditPopoverOpen(true)}
+                        name="edit"
+                        color="primary"
+                      />
+                    </EuiFlexItem>
+                  }
                 >
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel"
-                    defaultMessage="Edit"
-                  />
-                </EuiButtonEmpty>
+                  <EuiButtonEmpty
+                    size="m"
+                    iconType="pencil"
+                    onClick={() => {
+                      setIsRuleEditPopoverOpen(false);
+                      setEditFlyoutVisible(true);
+                    }}
+                  >
+                    <EuiText size="m">
+                      {i18n.translate('xpack.observability.ruleDetails.editRule', {
+                        defaultMessage: 'Edit rule',
+                      })}
+                    </EuiText>
+                  </EuiButtonEmpty>
+                </EuiPopover>
               </>,
             ]
           : [],
