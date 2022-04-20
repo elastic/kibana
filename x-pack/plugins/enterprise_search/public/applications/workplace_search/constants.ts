@@ -228,6 +228,12 @@ export const SOURCE_NAMES = {
   CUSTOM: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.custom', {
     defaultMessage: 'Custom API Source',
   }),
+  CUSTOM_CONNECTOR_PACKAGE: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.customConnectorPackage',
+    {
+      defaultMessage: 'Custom Connector Package',
+    }
+  ),
 };
 
 export const SOURCE_OBJ_TYPES = {

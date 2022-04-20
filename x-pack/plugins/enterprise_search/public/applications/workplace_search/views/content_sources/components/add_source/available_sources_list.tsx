@@ -28,7 +28,7 @@ import { SourceIcon } from '../../../../components/shared/source_icon';
 import { ADD_CUSTOM_PATH, getAddPath, getSourcesPath } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
 
-import { staticCustomSourceData } from '../../source_data';
+import { staticCustomSourceData, staticGenericExternalSourceData } from '../../source_data';
 
 import {
   AVAILABLE_SOURCE_EMPTY_STATE,
@@ -73,10 +73,7 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
       } else {
         return (
           <EuiButtonEmptyTo
-            to={
-              getSourcesPath(addPath, true) +
-              (serviceType !== 'external' && serviceType !== 'custom' ? '/intro' : '')
-            }
+            to={getSourcesPath(addPath, true) + (serviceType === 'custom' ? '' : '/intro')}
           >
             Connect
           </EuiButtonEmptyTo>
@@ -117,6 +114,15 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
             </EuiFlexGroup>
           </EuiFlexItem>
         ))}
+        <EuiFlexItem grow={false} data-test-subj="AvailableSourceListItem">
+          <EuiFlexGroup
+            justifyContent="center"
+            alignItems="stretch"
+            data-test-subj="AvailableSourceCard"
+          >
+            <EuiFlexItem>{getSourceCard(staticGenericExternalSourceData)}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
         <EuiFlexItem grow={false} data-test-subj="AvailableSourceListItem">
           <EuiFlexGroup
             justifyContent="center"

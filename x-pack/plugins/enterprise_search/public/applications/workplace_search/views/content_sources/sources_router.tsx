@@ -24,7 +24,6 @@ import {
   SOURCES_PATH,
   getSourcesPath,
   getAddPath,
-  ADD_CUSTOM_PATH,
 } from '../../routes';
 
 import { AddSource, AddSourceList, GitHubViaApp } from './components/add_source';
@@ -72,7 +71,10 @@ export const SourcesRouter: React.FC = () => {
     (sourceData) => sourceData.serviceType !== 'custom' && sourceData.serviceType !== 'external'
   );
   const externalSources = sources.filter((sourceData) => sourceData.serviceType === 'external');
-  const customSources = sources.filter((sourceData) => sourceData.serviceType === 'custom');
+  const customSources = [
+    ...sources.filter((sourceData) => sourceData.serviceType === 'custom'),
+    staticCustomSourceData,
+  ];
   const internalAndExternalSources = [...internalSources, ...externalSources];
 
   return (
@@ -89,25 +91,6 @@ export const SourcesRouter: React.FC = () => {
       <Route exact path={getAddPath(GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE)}>
         <GitHubViaApp isGithubEnterpriseServer />
       </Route>
-      <Route exact path={getSourcesPath(ADD_CUSTOM_PATH, isOrganization)}>
-        <AddCustomSource sourceData={staticCustomSourceData} />
-      </Route>
-      {internalSources.map((sourceData, i) => {
-        const { serviceType, accountContextOnly } = sourceData;
-        return (
-          <Route
-            key={i}
-            exact
-            path={`${getSourcesPath(getAddPath(serviceType), isOrganization)}/intro`}
-          >
-            {!hasPlatinumLicense && accountContextOnly ? (
-              <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
-            ) : (
-              <AddSourceIntro sourceData={sourceData} />
-            )}
-          </Route>
-        );
-      })}
       {internalSources.map((sourceData, i) => {
         const { serviceType, accountContextOnly } = sourceData;
         return (
@@ -125,9 +108,32 @@ export const SourcesRouter: React.FC = () => {
         );
       })}
       {internalAndExternalSources.map((sourceData, i) => {
-        const { serviceType, accountContextOnly } = sourceData;
+        const { baseServiceType, serviceType, accountContextOnly } = sourceData;
         return (
-          <Route key={i} exact path={`${getSourcesPath(getAddPath(serviceType), isOrganization)}/`}>
+          <Route
+            key={i}
+            exact
+            path={`${getSourcesPath(
+              getAddPath(serviceType, baseServiceType),
+              isOrganization
+            )}/intro`}
+          >
+            {!hasPlatinumLicense && accountContextOnly ? (
+              <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
+            ) : (
+              <AddSourceIntro sourceData={sourceData} />
+            )}
+          </Route>
+        );
+      })}
+      {internalAndExternalSources.map((sourceData, i) => {
+        const { baseServiceType, serviceType, accountContextOnly } = sourceData;
+        return (
+          <Route
+            key={i}
+            exact
+            path={`${getSourcesPath(getAddPath(serviceType, baseServiceType), isOrganization)}/`}
+          >
             {!hasPlatinumLicense && accountContextOnly ? (
               <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
             ) : (

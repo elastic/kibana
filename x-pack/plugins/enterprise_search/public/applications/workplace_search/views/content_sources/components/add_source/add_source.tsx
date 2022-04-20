@@ -35,15 +35,22 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
   const { initializeAddSource, setAddSourceStep, saveSourceConfig, resetSourceState } =
     useActions(AddSourceLogic);
   const { addSourceCurrentStep, sourceConfigData, dataLoading } = useValues(AddSourceLogic);
-  const { name, categories, needsPermissions, accountContextOnly, privateSourcesEnabled } =
-    sourceConfigData;
-  const { baseServiceType, serviceType, configuration, features, objTypes } = props.sourceData;
+  const { needsPermissions, accountContextOnly, privateSourcesEnabled } = sourceConfigData;
+  const {
+    name,
+    categories = [],
+    baseServiceType,
+    serviceType,
+    configuration,
+    features,
+    objTypes,
+  } = props.sourceData;
   const { isOrganization } = useValues(AppLogic);
-
   useEffect(() => {
     initializeAddSource(props);
     return resetSourceState;
   }, []);
+
   const goToConfigurationIntro = () =>
     KibanaLogic.values.navigateToUrl(
       `${getSourcesPath(getAddPath(baseServiceType || serviceType), isOrganization)}/intro`
@@ -64,7 +71,13 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
     flashSuccessToast(FORM_SOURCE_ADDED_SUCCESS_MESSAGE);
   };
 
-  const header = <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />;
+  const header = (
+    <AddSourceHeader
+      name={name}
+      serviceType={baseServiceType || serviceType}
+      categories={categories}
+    />
+  );
   const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
 
   return (

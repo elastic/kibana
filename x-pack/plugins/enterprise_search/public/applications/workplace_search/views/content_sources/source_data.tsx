@@ -17,6 +17,32 @@ import {
 } from '../../constants';
 import { FeatureIds, SourceDataItem } from '../../types';
 
+export const staticGenericExternalSourceData: SourceDataItem = {
+  name: SOURCE_NAMES.CUSTOM_CONNECTOR_PACKAGE,
+  iconName: SOURCE_NAMES.CUSTOM,
+  categories: ['API', 'Custom'],
+  serviceType: 'external',
+  configuration: {
+    isPublicKey: false,
+    hasOauthRedirect: true,
+    needsBaseUrl: false,
+    documentationUrl: docLinks.workplaceSearchCustomSources, // TODO Update this when we have a doclink
+    applicationPortalUrl: '',
+  },
+  objTypes: [],
+  features: {
+    basicOrgContext: [
+      FeatureIds.SyncFrequency,
+      FeatureIds.SyncedItems,
+      FeatureIds.GlobalAccessPermissions,
+    ],
+    platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
+    platinumPrivateContext: [FeatureIds.Private, FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
+  },
+  accountContextOnly: false,
+  isBeta: true,
+};
+
 export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.BOX,
@@ -699,6 +725,7 @@ export const staticSourceData: SourceDataItem[] = [
     },
     accountContextOnly: false,
   },
+  staticGenericExternalSourceData,
 ];
 
 export const staticCustomSourceData: SourceDataItem = {
@@ -716,25 +743,13 @@ export const staticCustomSourceData: SourceDataItem = {
   accountContextOnly: false,
 };
 
-export const staticGenericExternalSourceData: SourceDataItem = {
-  name: SOURCE_NAMES.CUSTOM,
-  iconName: SOURCE_NAMES.CUSTOM,
-  categories: ['API', 'Custom'],
-  serviceType: 'external',
-  configuration: {
-    isPublicKey: false,
-    hasOauthRedirect: false,
-    needsBaseUrl: false,
-    documentationUrl: docLinks.workplaceSearchCustomSources,
-    applicationPortalUrl: '',
-  },
-  accountContextOnly: false,
-};
-
 export const getSourceData = (
   serviceType: string,
   baseServiceType?: string
 ): SourceDataItem | undefined => {
+  if (serviceType === 'custom' && typeof baseServiceType === 'undefined') {
+    return staticCustomSourceData;
+  }
   return staticSourceData.find(
     (staticSource) =>
       staticSource.serviceType === serviceType && staticSource.baseServiceType === baseServiceType

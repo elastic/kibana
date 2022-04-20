@@ -48,10 +48,13 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({
   goBack,
   onDeleteConfig,
 }) => {
-  const { saveExternalConnectorConfig } = useActions(ExternalConnectorLogic);
+  const externalConnectorLogic = ExternalConnectorLogic({
+    baseServiceType: sourceData.baseServiceType,
+  });
+  const { saveExternalConnectorConfig } = useActions(externalConnectorLogic);
 
   const { formDisabled, buttonLoading, externalConnectorUrl, externalConnectorApiKey, urlValid } =
-    useValues(ExternalConnectorLogic);
+    useValues(externalConnectorLogic);
 
   const handleFormSubmission = (e: FormEvent) => {
     e.preventDefault();

@@ -53,8 +53,12 @@ export interface ExternalConnectorValues {
   showInsecureUrlCallout: boolean;
 }
 
+export interface ExternalConnectorProps {
+  baseServiceType?: string;
+}
+
 export const ExternalConnectorLogic = kea<
-  MakeLogicType<ExternalConnectorValues, ExternalConnectorActions>
+  MakeLogicType<ExternalConnectorValues, ExternalConnectorActions, ExternalConnectorProps>
 >({
   path: ['enterprise_search', 'workplace_search', 'external_connector_logic'],
   actions: {
@@ -120,7 +124,7 @@ export const ExternalConnectorLogic = kea<
       },
     ],
   },
-  listeners: ({ actions, values }) => ({
+  listeners: ({ actions, values, props }) => ({
     fetchExternalSource: async () => {
       const route = '/internal/workplace_search/org/settings/connectors/external';
 
@@ -166,7 +170,10 @@ export const ExternalConnectorLogic = kea<
           // TODO: Once we have multiple external connector types, use response data instead
           actions.saveExternalConnectorConfigSuccess('external');
           KibanaLogic.values.navigateToUrl(
-            getSourcesPath(`${getAddPath('external')}`, AppLogic.values.isOrganization)
+            getSourcesPath(
+              `${getAddPath('external', props.baseServiceType)}`,
+              AppLogic.values.isOrganization
+            )
           );
         } catch (e) {
           actions.saveExternalConnectorConfigError();
