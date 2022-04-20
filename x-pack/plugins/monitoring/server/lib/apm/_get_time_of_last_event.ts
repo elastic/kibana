@@ -21,8 +21,8 @@ export async function getTimeOfLastEvent({
   req: LegacyRequest;
   callWithRequest: (_req: any, endpoint: string, params: any) => Promise<ElasticsearchResponse>;
   apmIndexPattern: string;
-  start: number;
-  end: number;
+  start?: number;
+  end?: number;
   clusterUuid: string;
 }) {
   const params = {

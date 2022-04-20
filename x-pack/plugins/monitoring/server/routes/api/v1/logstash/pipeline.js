@@ -38,7 +38,7 @@ export function logstashPipelineRoute(server) {
           pipelineId: schema.string(),
           pipelineHash: schema.maybe(schema.string()),
         }),
-        payload: schema.object({
+        body: schema.object({
           ccs: schema.maybe(schema.string()),
           detailVertexId: schema.maybe(schema.string()),
         }),

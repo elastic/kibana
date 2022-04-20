@@ -6,8 +6,16 @@
  */
 
 import { getApmsForClusters } from '../../../../lib/apm/get_apms_for_clusters';
+import { LegacyRequest } from '../../../../types';
 
-export const getApmClusterStatus = (req, { clusterUuid }) => {
+export const getApmClusterStatus = (
+  req: LegacyRequest,
+  {
+    clusterUuid,
+  }: {
+    clusterUuid: string;
+  }
+) => {
   const clusters = [{ cluster_uuid: clusterUuid }];
   return getApmsForClusters(req, clusters).then((apms) => {
     const [{ stats, config }] = apms;

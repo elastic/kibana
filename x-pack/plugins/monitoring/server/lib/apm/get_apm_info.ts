@@ -85,8 +85,8 @@ export async function getApmInfo(
   }: {
     clusterUuid: string;
     apmUuid: string;
-    start: number;
-    end: number;
+    start?: number;
+    end?: number;
   }
 ) {
   checkParam(apmIndexPattern, 'apmIndexPattern in beats/getBeatSummary');
