@@ -2932,6 +2932,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/analytics-shippers-elastic-v3-common@link:bazel-bin/packages/analytics/shippers/elastic_v3/common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/analytics-shippers-elastic-v3-server@link:bazel-bin/packages/analytics/shippers/elastic_v3/server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/analytics-shippers-elastic-v3-ui@link:bazel-bin/packages/analytics/shippers/elastic_v3/ui":
+  version "0.0.0"
+  uid ""
+
 "@kbn/analytics-shippers-fullstory@link:bazel-bin/packages/analytics/shippers/fullstory":
   version "0.0.0"
   uid ""
@@ -6021,6 +6033,18 @@
   uid ""
 
 "@types/kbn__analytics-client@link:bazel-bin/packages/analytics/client/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__analytics-shippers-elastic-v3-common@link:bazel-bin/packages/analytics/shippers/elastic_v3/common/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__analytics-shippers-elastic-v3-server@link:bazel-bin/packages/analytics/shippers/elastic_v3/server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__analytics-shippers-elastic-v3-ui@link:bazel-bin/packages/analytics/shippers/elastic_v3/ui/npm_module_types":
   version "0.0.0"
   uid ""
 
