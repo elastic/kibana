@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import { DataViewField } from '@kbn/data-views-plugin/public';
@@ -47,12 +47,6 @@ export const RangeSliderComponent: FC<Props> = ({ componentStateSubject }) => {
 
   const { value, id, title } = useEmbeddableSelector((state) => state);
 
-  const [selectedValue, setSelectedValue] = useState<RangeValue>(value || ['', '']);
-
-  useEffect(() => {
-    setSelectedValue(value ?? ['', '']);
-  }, [value]);
-
   const onChangeComplete = useCallback(
     (range: RangeValue) => {
       dispatch(selectRange(range));
@@ -67,7 +61,7 @@ export const RangeSliderComponent: FC<Props> = ({ componentStateSubject }) => {
       min={min}
       max={max}
       title={title}
-      value={selectedValue}
+      value={value ?? ['', '']}
       onChange={onChangeComplete}
       fieldFormatter={fieldFormatter}
     />
