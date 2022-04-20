@@ -13,11 +13,15 @@ import {
   EuiContextMenuPanel,
   EuiPopover,
   useGeneratedHtmlId,
+  EuiButtonIconProps,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Filter, Query } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange, SavedQueryService, SavedQuery } from '@kbn/data-plugin/public';
 import { QueryBarMenuPanels } from './query_bar_menu_panels';
+import { FilterEditorWrapper } from './filter_editor_wrapper';
 
 export interface QueryBarMenuProps {
   language: string;
@@ -40,6 +44,9 @@ export interface QueryBarMenuProps {
   showQueryInput?: boolean;
   showFilterBar?: boolean;
   showSaveQuery?: boolean;
+  timeRangeForSuggestionsOverride?: boolean;
+  indexPatterns?: Array<DataView | string>;
+  buttonProps?: Partial<EuiButtonIconProps>;
 }
 
 export function QueryBarMenu({
@@ -63,6 +70,9 @@ export function QueryBarMenu({
   showQueryInput,
   showFilterBar,
   showSaveQuery,
+  indexPatterns,
+  timeRangeForSuggestionsOverride,
+  buttonProps,
 }: QueryBarMenuProps) {
   const [renderedComponent, setRenderedComponent] = useState('menu');
 
@@ -88,15 +98,17 @@ export function QueryBarMenu({
   });
 
   const button = (
-    <EuiButtonIcon
-      size="m"
-      display="base"
-      onClick={onButtonClick}
-      iconType="filter"
-      aria-label={buttonLabel}
-      title={buttonLabel}
-      data-test-subj="showQueryBarMenu"
-    />
+    <EuiToolTip delay="long" content={buttonLabel}>
+      <EuiButtonIcon
+        size="m"
+        display="empty"
+        onClick={onButtonClick}
+        {...buttonProps}
+        iconType="filter"
+        aria-label={buttonLabel}
+        data-test-subj="showQueryBarMenu"
+      />
+    </EuiToolTip>
   );
 
   const panels = QueryBarMenuPanels({
@@ -138,6 +150,20 @@ export function QueryBarMenu({
             items={[<div style={{ padding: 16 }}>{saveAsNewQueryFormComponent}</div>]}
           />
         );
+      case 'addFilter':
+        return (
+          <EuiContextMenuPanel
+            items={[
+              <FilterEditorWrapper
+                indexPatterns={indexPatterns}
+                filters={filters!}
+                timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+                onFiltersUpdated={onFiltersUpdated}
+                closePopover={closePopover}
+              />,
+            ]}
+          />
+        );
     }
   };
 
@@ -149,7 +175,7 @@ export function QueryBarMenu({
         isOpen={openQueryBarMenu}
         closePopover={closePopover}
         panelPaddingSize="none"
-        anchorPosition="rightUp"
+        anchorPosition="downLeft"
         repositionOnScroll
         data-test-subj="queryBarMenuPopover"
       >

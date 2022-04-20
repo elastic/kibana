@@ -17,18 +17,17 @@ import memoizeOne from 'memoize-one';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { Query, Filter } from '@kbn/es-query';
 import { withKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
-
 import type { TimeHistoryContract, SavedQuery } from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
 import { IDataPluginServices } from '@kbn/data-plugin/public';
 import { TimeRange } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { FilterBar } from '../filter_bar';
-import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementList } from '../saved_query_management';
 import { QueryBarMenu } from '../query_string_input/query_bar_menu';
 import type { DataViewPickerProps } from '../dataview_picker';
+import QueryBarTopRow from '../query_string_input/query_bar_top_row';
+import { FilterBar, FilterBadgesWrapper } from '../filter_bar';
 
 export interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
@@ -341,6 +340,10 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     }
   };
 
+  private shouldShowDatePickerAsBadge() {
+    return this.shouldRenderFilterBar() && !this.props.showQueryInput;
+  }
+
   public render() {
     const timeRangeForSuggestionsOverride = this.props.showDatePicker ? undefined : false;
 
@@ -386,6 +389,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         showQueryInput={this.props.showQueryInput}
         showFilterBar={this.props.showFilterBar}
         showSaveQuery={this.props.showSaveQuery}
+        buttonProps={{ size: this.shouldShowDatePickerAsBadge() ? 's' : 'm' }}
+        indexPatterns={this.props.indexPatterns}
+        timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
         manageFilterSetComponent={
           this.props.showFilterBar && this.state.query
             ? this.renderSavedQueryManagement(
@@ -435,6 +441,16 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           filters={this.props.filters!}
           onFiltersUpdated={this.props.onFiltersUpdated}
           dataViewPickerComponentProps={this.props.dataViewPickerComponentProps}
+          filterBar={
+            this.shouldShowDatePickerAsBadge() ? (
+              <FilterBadgesWrapper
+                filters={this.props.filters!}
+                onFiltersUpdated={this.props.onFiltersUpdated}
+                indexPatterns={this.props.indexPatterns!}
+                timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+              />
+            ) : undefined
+          }
         />
       );
     }
@@ -452,7 +468,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             filters={this.props.filters!}
             onFiltersUpdated={this.props.onFiltersUpdated}
             indexPatterns={this.props.indexPatterns!}
-            appName={this.services.appName}
             timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           />
         </div>
@@ -466,7 +481,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     return (
       <div className={globalQueryBarClasses} data-test-subj="globalQueryBar">
         {queryBar}
-        {filterBar}
+        {!this.shouldShowDatePickerAsBadge() && filterBar}
       </div>
     );
   }

@@ -11,12 +11,8 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import classNames from 'classnames';
 import React, { useRef } from 'react';
-
-import { METRIC_TYPE } from '@kbn/analytics';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { IDataPluginServices } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { FilterItem } from './filter_item';
+import FilterBadgesWrapper from './filter_badges_wrapper';
 
 export interface Props {
   filters: Filter[];
@@ -24,56 +20,11 @@ export interface Props {
   className: string;
   indexPatterns: DataView[];
   intl: InjectedIntl;
-  appName: string;
   timeRangeForSuggestionsOverride?: boolean;
 }
 
 const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   const groupRef = useRef<HTMLDivElement>(null);
-  const kibana = useKibana<IDataPluginServices>();
-  const { appName, usageCollection, uiSettings } = kibana.services;
-  if (!uiSettings) return null;
-
-  const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
-
-  function onFiltersUpdated(filters: Filter[]) {
-    if (props.onFiltersUpdated) {
-      props.onFiltersUpdated(filters);
-    }
-  }
-
-  function renderItems() {
-    return props.filters.map((filter, i) => (
-      <EuiFlexItem key={i} grow={false} className="globalFilterBar__flexItem">
-        <FilterItem
-          id={`${i}`}
-          intl={props.intl}
-          filter={filter}
-          onUpdate={(newFilter) => onUpdate(i, newFilter)}
-          onRemove={() => onRemove(i)}
-          indexPatterns={props.indexPatterns}
-          uiSettings={uiSettings!}
-          timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-        />
-      </EuiFlexItem>
-    ));
-  }
-
-  function onRemove(i: number) {
-    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:removed`);
-    const filters = [...props.filters];
-    filters.splice(i, 1);
-    onFiltersUpdated(filters);
-    groupRef.current?.focus();
-  }
-
-  function onUpdate(i: number, filter: Filter) {
-    reportUiCounter?.(METRIC_TYPE.CLICK, `filter:edited`);
-    const filters = [...props.filters];
-    filters[i] = filter;
-    onFiltersUpdated(filters);
-  }
-
   const classes = classNames('globalFilterBar', props.className);
 
   return (
@@ -93,7 +44,12 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           alignItems="center"
           tabIndex={-1}
         >
-          {renderItems()}
+          <FilterBadgesWrapper
+            filters={props.filters!}
+            onFiltersUpdated={props.onFiltersUpdated}
+            indexPatterns={props.indexPatterns!}
+            timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+          />
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -7,8 +7,6 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiFlexItem, EuiButtonIcon, EuiPopover } from '@elastic/eui';
 import { Filter, buildEmptyFilter } from '@kbn/es-query';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -19,23 +17,24 @@ import { FILTER_EDITOR_WIDTH } from '../filter_bar/filter_item';
 import { FilterEditor } from '../filter_bar/filter_editor';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 
-interface AddFilterPopoverProps {
+interface FilterEditorWrapperProps {
   indexPatterns?: Array<DataView | string>;
   filters: Filter[];
   timeRangeForSuggestionsOverride?: boolean;
+  closePopover?: () => void;
   onFiltersUpdated?: (filters: Filter[]) => void;
 }
 
-export const AddFilterPopover = React.memo(function AddFilterPopover({
+export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
   indexPatterns,
   filters,
   timeRangeForSuggestionsOverride,
+  closePopover,
   onFiltersUpdated,
-}: AddFilterPopoverProps) {
+}: FilterEditorWrapperProps) {
   const kibana = useKibana<IDataPluginServices>();
   const { uiSettings, data, usageCollection, appName } = kibana.services;
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
-  const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
   const [dataViews, setDataviews] = useState<DataView[]>([]);
   const isPinned = uiSettings!.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT);
   const [dataView] = dataViews;
@@ -64,50 +63,22 @@ export const AddFilterPopover = React.memo(function AddFilterPopover({
 
   function onAdd(filter: Filter) {
     reportUiCounter?.(METRIC_TYPE.CLICK, `filter:added`);
-    setIsAddFilterPopoverOpen(false);
+    closePopover?.();
     const updatedFilters = [...filters, filter];
     onFiltersUpdated?.(updatedFilters);
   }
 
-  const button = (
-    <EuiButtonIcon
-      display="base"
-      iconType="plusInCircleFilled"
-      aria-label={i18n.translate('unifiedSearch.filter.filterBar.addFilterButtonLabel', {
-        defaultMessage: 'Add filter',
-      })}
-      data-test-subj="addFilter"
-      onClick={() => setIsAddFilterPopoverOpen(!isAddFilterPopoverOpen)}
-      size="m"
-    />
-  );
-
   return (
-    <EuiFlexItem grow={false}>
-      <EuiPopover
-        id="addFilterPopover"
-        button={button}
-        isOpen={isAddFilterPopoverOpen}
-        closePopover={() => setIsAddFilterPopoverOpen(false)}
-        anchorPosition="downLeft"
-        panelPaddingSize="none"
-        initialFocus=".filterEditor__hiddenItem"
-        ownFocus
-        repositionOnScroll
-      >
-        <EuiFlexItem grow={false}>
-          <div style={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }}>
-            <FilterEditor
-              filter={newFilter}
-              indexPatterns={dataViews}
-              onSubmit={onAdd}
-              onCancel={() => setIsAddFilterPopoverOpen(false)}
-              key={JSON.stringify(newFilter)}
-              timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-            />
-          </div>
-        </EuiFlexItem>
-      </EuiPopover>
-    </EuiFlexItem>
+    <div style={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }}>
+      <FilterEditor
+        filter={newFilter}
+        indexPatterns={dataViews}
+        onSubmit={onAdd}
+        onCancel={() => closePopover?.()}
+        key={JSON.stringify(newFilter)}
+        timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+        mode="add"
+      />
+    </div>
   );
 });

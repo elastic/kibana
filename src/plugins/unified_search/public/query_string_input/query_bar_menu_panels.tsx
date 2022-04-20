@@ -226,6 +226,15 @@ export function QueryBarMenuPanels({
 
   const filtersRelatedPanels = [
     {
+      name: i18n.translate('unifiedSearch.filter.options.addFilterButtonLabel', {
+        defaultMessage: 'Add filter',
+      }),
+      icon: 'plus',
+      onClick: () => {
+        setRenderedComponent('addFilter');
+      },
+    },
+    {
       name: i18n.translate('unifiedSearch.filter.options.applyAllFiltersButtonLabel', {
         defaultMessage: 'Apply to all',
       }),

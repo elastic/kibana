@@ -24,6 +24,7 @@ import {
   EuiTextArea,
   htmlIdGenerator,
   PopoverAnchorPosition,
+  toSentenceCase,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { compact, debounce, isEqual, isFunction } from 'lodash';
@@ -684,6 +685,25 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
     this.handleAutoHeight();
   };
 
+  getSearchInputPlaceholder = () => {
+    let placeholder = '';
+    if (!this.props.query.language || this.props.query.language === 'text') {
+      placeholder = i18n.translate('unifiedSearch.query.queryBar.searchInputPlaceholderForText', {
+        defaultMessage: 'Filter your data',
+      });
+    } else {
+      const language =
+        this.props.query.language === 'kuery' ? 'KQL' : toSentenceCase(this.props.query.language);
+
+      placeholder = i18n.translate('unifiedSearch.query.queryBar.searchInputPlaceholder', {
+        defaultMessage: 'Filter your data using {language} syntax',
+        values: { language },
+      });
+    }
+
+    return placeholder;
+  };
+
   public render() {
     const isSuggestionsVisible = this.state.isSuggestionsVisible && {
       'aria-controls': 'kbnTypeahead__items',
@@ -722,12 +742,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
           >
             <div role="search" className={inputWrapClassName} ref={this.assignQueryInputDivRef}>
               <EuiTextArea
-                placeholder={
-                  this.props.placeholder ||
-                  i18n.translate('unifiedSearch.query.queryBar.searchInputPlaceholder', {
-                    defaultMessage: 'Start typing to search or filter...',
-                  })
-                }
+                placeholder={this.props.placeholder || this.getSearchInputPlaceholder()}
                 value={this.forwardNewValueIfNeeded(this.getQueryString())}
                 onKeyDown={this.onKeyDown}
                 onKeyUp={this.onKeyUp}

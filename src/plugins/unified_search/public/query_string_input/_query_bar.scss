@@ -73,3 +73,18 @@
     }
   }
 }
+
+.kbnQueryBar__buttonGroup {
+  height: $euiFormControlHeight;
+  background-color: $euiFormInputGroupLabelBackground;
+  border-radius: $euiFormControlBorderRadius;
+  box-shadow: 0 0 1px inset rgba($euiFormBorderOpaqueColor, .4);
+
+  &--small {
+    height: $euiFormControlCompressedHeight;
+  }
+
+  > *:not(:last-of-type) {
+    border-right: 1px solid $euiFormBorderColor;
+  }
+}
