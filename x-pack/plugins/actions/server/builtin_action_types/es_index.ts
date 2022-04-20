@@ -8,7 +8,7 @@
 import { curry, find } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { Logger } from '../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { renderMustacheObject } from '../lib/mustache_renderer';
 import { buildAlertHistoryDocument, AlertHistoryEsIndexConnectorId } from '../../common';

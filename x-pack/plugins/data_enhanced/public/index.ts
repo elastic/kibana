@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { DataEnhancedPlugin, DataEnhancedSetup, DataEnhancedStart } from './plugin';
 import { ConfigSchema } from '../config';
 
@@ -14,7 +14,4 @@ export const plugin = (initializerContext: PluginInitializerContext<ConfigSchema
 
 export type { DataEnhancedSetup, DataEnhancedStart };
 
-export {
-  ENHANCED_ES_SEARCH_STRATEGY,
-  EQL_SEARCH_STRATEGY,
-} from '../../../../src/plugins/data/common';
+export { ENHANCED_ES_SEARCH_STRATEGY, EQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';

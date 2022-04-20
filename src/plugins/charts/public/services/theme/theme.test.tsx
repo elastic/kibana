@@ -16,7 +16,7 @@ import { LIGHT_THEME, DARK_THEME } from '@elastic/charts';
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 
 import { ThemeService } from './theme';
-import { coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 const { uiSettings: setupMockUiSettings } = coreMock.createSetup();
 

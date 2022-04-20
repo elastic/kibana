@@ -12,10 +12,10 @@ import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query'
 import { debounceTime, distinctUntilChanged, distinctUntilKeyChanged } from 'rxjs/operators';
 
 import { pick } from 'lodash';
+import { ControlGroupContainer, ControlGroupInput } from '@kbn/controls-plugin/public';
 import { DashboardContainer, DashboardContainerControlGroupInput } from '..';
 import { DashboardState } from '../../types';
 import { DashboardContainerInput, DashboardSavedObject } from '../..';
-import { ControlGroupContainer, ControlGroupInput } from '../../../../controls/public';
 import {
   controlGroupInputToRawAttributes,
   getDefaultDashboardControlGroupInput,

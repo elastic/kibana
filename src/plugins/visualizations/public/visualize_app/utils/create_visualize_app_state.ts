@@ -8,12 +8,12 @@
 
 import { isFunction, omitBy, union } from 'lodash';
 
-import { migrateAppState } from './migrate_app_state';
 import {
   createStateContainer,
   syncState,
   IKbnUrlStateStorage,
-} from '../../../../kibana_utils/public';
+} from '@kbn/kibana-utils-plugin/public';
+import { migrateAppState } from './migrate_app_state';
 import type { SavedVisState } from '../../types';
 import type { VisualizeAppState, VisualizeAppStateTransitions } from '../types';
 

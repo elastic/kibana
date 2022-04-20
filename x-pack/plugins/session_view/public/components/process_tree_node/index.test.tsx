@@ -14,7 +14,7 @@ import {
   sessionViewAlertProcessMock,
 } from '../../../common/mocks/constants/session_view_process.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { ProcessDeps, ProcessTreeNode } from './index';
+import { ProcessDeps, ProcessTreeNode } from '.';
 import { Cancelable } from 'lodash';
 import { DEBOUNCE_TIMEOUT } from '../../../common/constants';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiDescribedFormGroup } from '@elastic/eui';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 /**
  * EuiForm group doesn't expose props to control the flex wrapping on flex groups defining form rows.

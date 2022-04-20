@@ -7,8 +7,8 @@
 
 import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeGetWorkpadRoute } from './get';
-import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
-import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
+import { kibanaResponseFactory, RequestHandler } from '@kbn/core/server';
+import { savedObjectsClientMock, httpServerMock } from '@kbn/core/server/mocks';
 import { workpadWithGroupAsElement } from '../../../__fixtures__/workpads';
 import { CanvasWorkpad } from '../../../types';
 import { getMockedRouterDeps } from '../test_helpers';

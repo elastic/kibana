@@ -27,6 +27,10 @@ You access the options from the *Share* menu in the toolbar. The sharing options
 
 * *Embed code* &mdash; Embed a fully interactive dashboard or visualization as an iframe on a web page.
 
+[[reporting-on-cloud-resource-requirements]]
+NOTE: For Elastic Cloud deployments, Kibana instances require a minimum of 2GB RAM to generate PDF or PNG reports. To
+change Kibana sizing, {ess-console}[edit the deployment].
+
 [float]
 [[manually-generate-reports]]
 == Create reports
