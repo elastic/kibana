@@ -17,7 +17,8 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
   const kibanaServer = getService('kibanaServer');
   const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/filter';
 
-  describe('filters', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/117060
+  describe.skip('filters', function () {
     // there is an issue with FF not properly clicking on workpad elements
     this.tags('skipFirefox');
 
