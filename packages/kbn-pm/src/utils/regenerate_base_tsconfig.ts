@@ -9,6 +9,7 @@
 import Fs from 'fs/promises';
 import Path from 'path';
 
+import normalizePath from 'normalize-path';
 import { KibanaPlatformPlugin } from '@kbn/plugin-discovery';
 import { convertPluginIdToPackageId } from './convert_plugin_id_to_package_id';
 
@@ -21,7 +22,7 @@ export async function regenerateBaseTsconfig(plugins: KibanaPlatformPlugin[], re
     .sort((a, b) => a.manifestPath.localeCompare(b.manifestPath))
     .flatMap((p) => {
       const id = convertPluginIdToPackageId(p.manifest.id);
-      const path = Path.relative(repoRoot, p.directory);
+      const path = normalizePath(Path.relative(repoRoot, p.directory));
       return [`      "${id}": ["${path}"],`, `      "${id}/*": ["${path}/*"],`];
     });
 

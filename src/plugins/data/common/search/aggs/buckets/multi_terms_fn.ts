@@ -87,6 +87,12 @@ export const aggMultiTerms = (): FunctionDefinition => ({
         defaultMessage: 'Max number of buckets to retrieve',
       }),
     },
+    shardSize: {
+      types: ['number'],
+      help: i18n.translate('data.search.aggs.buckets.terms.shardSize.help', {
+        defaultMessage: 'Number of terms to evaluate during the aggregation.',
+      }),
+    },
     otherBucket: {
       types: ['boolean'],
       help: i18n.translate('data.search.aggs.buckets.multiTerms.otherBucket.help', {
