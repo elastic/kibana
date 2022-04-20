@@ -15,7 +15,7 @@ import { rulesClientMock } from '../rules_client.mock';
 import { SanitizedRule } from '../types';
 
 const rulesClient = rulesClientMock.create();
-jest.mock('../lib/license_api_access.ts', () => ({
+jest.mock('../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 beforeEach(() => {
