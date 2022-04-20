@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { ClusterComponentTemplate } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  ClusterComponentTemplate,
+  IndicesGetIndexTemplateIndexTemplateItem,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type { InstallablePackage, RegistryDataStream } from '../../../../types';
@@ -62,8 +65,60 @@ const _deleteComponentTemplates = async (params: {
   }
 };
 
+export const _getIndexTemplatesToUsedByMap = (
+  indexTemplates: IndicesGetIndexTemplateIndexTemplateItem[]
+) => {
+  const lookupMap: Map<string, string[]> = new Map();
+
+  indexTemplates.forEach(({ name: indexTemplateName, index_template: indexTemplate }) => {
+    const composedOf = indexTemplate?.composed_of;
+
+    if (!composedOf) return;
+
+    composedOf.forEach((componentTemplateName) => {
+      const existingEntry = lookupMap.get(componentTemplateName) || [];
+
+      lookupMap.set(componentTemplateName, existingEntry.concat(indexTemplateName));
+    });
+  });
+  return lookupMap;
+};
+
 const _getAllComponentTemplates = async (esClient: ElasticsearchClient) =>
   esClient.cluster.getComponentTemplate().then((result) => result.component_templates);
+
+const _getAllIndexTemplatesWithComposedOf = async (esClient: ElasticsearchClient) =>
+  esClient.indices
+    .getIndexTemplate()
+    .then((result) =>
+      result.index_templates.filter((tmpl) => tmpl.index_template.composed_of?.length)
+    );
+
+export const _filterComponentTemplatesInUse = ({
+  componentTemplateNames,
+  indexTemplates,
+  logger,
+}: {
+  componentTemplateNames: string[];
+  indexTemplates: IndicesGetIndexTemplateIndexTemplateItem[];
+  logger: Logger;
+}): string[] => {
+  const usedByLookup = _getIndexTemplatesToUsedByMap(indexTemplates);
+
+  return componentTemplateNames.filter((componentTemplateName) => {
+    const indexTemplatesUsingComponentTemplate = usedByLookup.get(componentTemplateName);
+
+    if (indexTemplatesUsingComponentTemplate?.length) {
+      const prettyTemplates = indexTemplatesUsingComponentTemplate.join(', ');
+      logger.debug(
+        `Not deleting legacy template ${componentTemplateName} as it is in use by index templates: ${prettyTemplates}`
+      );
+      return false;
+    }
+
+    return true;
+  });
+};
 
 export const removeLegacyTemplates = async (params: {
   packageInfo: InstallablePackage;
@@ -81,8 +136,23 @@ export const removeLegacyTemplates = async (params: {
 
   if (!legacyComponentTemplateNames.length) return;
 
+  // all index templates that are composed of at least one component template
+  const allIndexTemplatesWithComposedOf = await _getAllIndexTemplatesWithComposedOf(esClient);
+
+  let templatesToDelete = legacyComponentTemplateNames;
+  if (allIndexTemplatesWithComposedOf.length) {
+    // get the component templates not in use by any index templates
+    templatesToDelete = _filterComponentTemplatesInUse({
+      componentTemplateNames: legacyComponentTemplateNames,
+      indexTemplates: allIndexTemplatesWithComposedOf,
+      logger,
+    });
+  }
+
+  if (!templatesToDelete.length) return;
+
   await _deleteComponentTemplates({
-    templateNames: legacyComponentTemplateNames,
+    templateNames: templatesToDelete,
     esClient,
     logger,
   });
