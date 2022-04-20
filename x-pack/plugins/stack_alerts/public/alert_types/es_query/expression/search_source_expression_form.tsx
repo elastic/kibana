@@ -18,11 +18,13 @@ import {
   ValueExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { FilterAdd } from '@kbn/unified-search-plugin/public';
+import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { DataViewOption, EsQueryAlertParams, SearchType } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
 import { useTriggersAndActionsUiDeps } from '../util';
 import { FiltersList } from '../../components/filters_list';
+import { QueryPopover } from '../../components/query_popover';
 
 interface SearchSourceParamsState {
   index: DataView;
@@ -32,7 +34,7 @@ interface SearchSourceParamsState {
 
 interface SearchSourceAction {
   type: 'index' | 'filter' | 'query';
-  payload: DataView | Filter | Query;
+  payload: DataView | Filter[] | Query;
 }
 
 type SearchSourceStateReducer = (
@@ -77,13 +79,28 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   );
 
   const onUpdateFilters = useCallback(
-    (newFilters) => {
-      // mutates new filter properties for migration purpose and further proper usage
-      data.query.filterManager.setFilters(newFilters, false);
-      dispatch({ type: 'filter', payload: newFilters });
-    },
-    [data.query.filterManager]
+    (newFilters) => dispatch({ type: 'filter', payload: mapAndFlattenFilters(newFilters) }),
+    []
   );
+
+  const onAddFilter = (newFilter: Filter) => onUpdateFilters([...filters, newFilter]);
+
+  const onChangeQuery = (newQuery: Query) => dispatch({ type: 'query', payload: newQuery });
+
+  const renderAddFilterPopoverButton = (onClick: () => void) => {
+    return (
+      <EuiExpression
+        className="dscExpressionParam searchSourceAlertFilters"
+        title={'sas'}
+        description={'Filter'}
+        value={
+          <FiltersList filters={filters} dataView={dataView} onUpdateFilters={onUpdateFilters} />
+        }
+        display="columns"
+        onClick={onClick}
+      />
+    );
+  };
 
   return (
     <Fragment>
@@ -111,29 +128,14 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         selectedDataViewTitle={dataView.title}
         onSelectDataView={onSelectDataView}
       />
-      {query.query !== '' && (
-        <EuiExpression
-          className="dscExpressionParam"
-          description={'Query'}
-          value={query.query}
-          display="columns"
-        />
-      )}
 
-      <EuiExpression
-        className="dscExpressionParam searchSourceAlertFilters"
-        title={'sas'}
-        description={'Filter'}
-        value={
-          filters.length > 0 ? (
-            <FiltersList filters={filters} dataView={dataView} onUpdateFilters={onUpdateFilters} />
-          ) : (
-            <FilterAdd dataViews={dataViews} onAdd={() => {}} />
-          )
-        }
-        display="columns"
+      <QueryPopover query={query} dataViews={dataViews} onChangeQuery={onChangeQuery} />
+
+      <FilterAdd
+        renderButton={renderAddFilterPopoverButton}
+        dataViews={dataViews}
+        onAdd={onAddFilter}
       />
-
       <EuiSpacer size="s" />
       <EuiTitle size="xs">
         <h5>

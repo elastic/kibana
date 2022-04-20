@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import {
   Filter,
   enableFilter,
@@ -134,6 +134,21 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
 
   const classes = classNames('globalFilterBar', props.className);
 
+  const renderOpenPopoverButton = (onClick: () => void) => (
+    <EuiButtonEmpty
+      size="s"
+      onClick={onClick}
+      data-test-subj="addFilter"
+      className="globalFilterBar__addButton"
+    >
+      +{' '}
+      <FormattedMessage
+        id="unifiedSearch.filter.filterBar.addFilterButtonLabel"
+        defaultMessage="Add filter"
+      />
+    </EuiButtonEmpty>
+  );
+
   return (
     <EuiFlexGroup
       className="globalFilterGroup"
@@ -165,6 +180,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
         >
           {renderItems()}
           <FilterAdd
+            renderButton={renderOpenPopoverButton}
             dataViews={props.indexPatterns}
             timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
             onAdd={onAdd}

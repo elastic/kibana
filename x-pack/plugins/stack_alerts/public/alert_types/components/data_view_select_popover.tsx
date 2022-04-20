@@ -74,7 +74,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
         <EuiPopoverTitle>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem>
-              {i18n.translate('xpack.stackAlerts.components.ui.alertParams.dataViewButtonLabel', {
+              {i18n.translate('xpack.stackAlerts.components.ui.alertParams.dataViewPopoverTitle', {
                 defaultMessage: 'Data view',
               })}
             </EuiFlexItem>
