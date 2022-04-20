@@ -19,5 +19,4 @@ export type DocLinksServiceFactory = ServiceFactory<SharedUxDocLinksService>;
  */
 export const docLinksServiceFactory: DocLinksServiceFactory = () => ({
   dataViewsDocLink: 'docs',
-  kibanaGuideDocLink: 'kibanaGuideDocs',
 });

@@ -12,6 +12,4 @@
 export interface SharedUxDocLinksService {
   /** A link to information about Data Views in Kibana */
   dataViewsDocLink: string;
-  /** A link to Kibana guide starting page */
-  kibanaGuideDocLink: string;
 }
