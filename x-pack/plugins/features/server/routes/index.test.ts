@@ -15,12 +15,9 @@ import { RequestHandler } from '@kbn/core/server';
 import { FeatureKibanaPrivileges, KibanaFeatureConfig, SubFeatureConfig } from '../../common';
 
 function createContextMock(licenseType: LicenseType = 'platinum') {
-  return {
-    core: Promise.resolve(coreMock.createRequestHandlerContext()),
-    licensing: Promise.resolve(
-      licensingMock.createRequestHandlerContext({ license: { type: licenseType } })
-    ),
-  };
+  return coreMock.createCustomRequestHandlerContext({
+    licensing: licensingMock.createRequestHandlerContext({ license: { type: licenseType } }),
+  });
 }
 
 function createPrivilege(partial: Partial<FeatureKibanaPrivileges> = {}): FeatureKibanaPrivileges {

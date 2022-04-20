@@ -75,9 +75,11 @@ describe('saved query route handler context', () => {
   let context: Awaited<ReturnType<typeof registerSavedQueryRouteHandlerContext>>;
 
   beforeEach(async () => {
-    context = await registerSavedQueryRouteHandlerContext({
-      core: Promise.resolve(mockContext.core),
-    });
+    context = await registerSavedQueryRouteHandlerContext(
+      coreMock.createCustomRequestHandlerContext({
+        core: mockContext.core,
+      })
+    );
 
     mockSavedObjectsClient.create.mockClear();
     mockSavedObjectsClient.resolve.mockClear();
