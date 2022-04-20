@@ -169,7 +169,7 @@ describe('Event Logger', () => {
       boundingClientRect: { width: 1350, height: 2000 },
       scroll: {},
     } as ElementPosition;
-    const endScreenshot = eventLogger.screenshot({ elementPosition });
+    const endScreenshot = eventLogger.startScreenshot({ elementPosition });
     endScreenshot({ byteLength: 4444, elementPosition });
 
     const logData = logSpy.mock.calls.map(([message, data]) => ({

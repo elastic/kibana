@@ -16,6 +16,7 @@ export const getNumberOfItems = async (
   timeout: number,
   layout: Layout
 ): Promise<number> => {
+  const { kbnLogger } = eventLogger;
   const spanEnd = eventLogger.log(
     'get the number of visualization items on the page',
     Actions.GET_NUMBER_OF_ITEMS,
@@ -34,7 +35,7 @@ export const getNumberOfItems = async (
       `${renderCompleteSelector},[${itemsCountAttribute}]`,
       { timeout },
       { context: CONTEXT_READMETADATA },
-      eventLogger.kbnLogger
+      kbnLogger
     );
 
     // returns the value of the `itemsCountAttribute` if it's there, otherwise
@@ -55,14 +56,15 @@ export const getNumberOfItems = async (
         args: [renderCompleteSelector, itemsCountAttribute],
       },
       { context: CONTEXT_GETNUMBEROFITEMS },
-      eventLogger.kbnLogger
+      kbnLogger
     );
   } catch (error) {
-    const newError = new Error(
-      `An error occurred when trying to read the page for visualization panel info: ${error.message}`
+    kbnLogger.error(error);
+    eventLogger.error(
+      `An error occurred when trying to read the page for visualization panel info: ${error.message}`,
+      Actions.GET_NUMBER_OF_ITEMS
     );
-    eventLogger.error(newError, Actions.GET_NUMBER_OF_ITEMS);
-    throw newError;
+    throw error;
   }
 
   spanEnd({ items_count: itemsCount });

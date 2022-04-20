@@ -272,7 +272,6 @@ export class EventLogger {
    */
   public error(error: ErrorAction | string, action: Actions) {
     const isError = typeof error === 'object';
-    this.logger.error(error as Error);
     const message = `Error: ${isError ? error.message : error}`;
 
     const errorData = {
