@@ -43,5 +43,5 @@ export function useFetchRule({ ruleId }: FetchRuleSummaryProps) {
     fetchRuleSummary();
   }, [fetchRuleSummary]);
 
-  return ruleSummary;
+  return { ...ruleSummary, reload: fetchRuleSummary };
 }
