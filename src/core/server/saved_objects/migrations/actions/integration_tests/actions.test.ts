@@ -324,8 +324,9 @@ describe('migration actions', () => {
     afterEach(async () => {
       try {
         await client.indices.delete({ index: 'red_then_yellow_index' });
+        await client.indices.delete({ index: 'red_index' });
       } catch (e) {
-        // index probably doesn't exist.
+        /** ignore */
       }
     });
     it('resolves right after waiting for an index status to be yellow if the index already existed', async () => {
@@ -374,33 +375,30 @@ describe('migration actions', () => {
       // Create a red index
       await client.indices
         .create({
-          index: 'red_then_yellow_index',
+          index: 'red_index',
           timeout: '5s',
           body: {
             mappings: { properties: {} },
             settings: {
-              // Allocate 1 replica so that this index stays yellow
-              number_of_replicas: '1',
+              // Allocate no replicas so that this index stays red
+              number_of_replicas: '0',
               // Disable all shard allocation so that the index status is red
               index: { routing: { allocation: { enable: 'none' } } },
             },
           },
         })
         .catch((e) => {});
-
-      // Try to clone into an existing index to ensure that we reach a timeout waiting for index status yellow
-      const cloneIndexPromise = cloneIndex({
+      // try to wait for index status yellow:
+      const task = waitForIndexStatusYellow({
         client,
-        source: 'existing_index_with_write_block',
-        target: 'red_then_yellow_index',
+        index: 'red_index',
         timeout: '1s',
-      })();
-
-      await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
+      });
+      await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Left",
           "left": Object {
-            "message": "[index_not_yellow_timeout] Timeout waiting for the status of the [red_then_yellow_index] index to become 'yellow'",
+            "message": "[index_not_yellow_timeout] Timeout waiting for the status of the [red_index] index to become 'yellow'",
             "type": "index_not_yellow_timeout",
           },
         }
