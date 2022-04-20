@@ -14,7 +14,6 @@ import type {
 import { Cluster } from '../../../common/types';
 import { getResourceTypeFromAggs, resourceTypeAggQuery } from './get_resources_types';
 import type { ResourceTypeQueryResult } from './get_resources_types';
-import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
 import { findingsEvaluationAggsQuery, getStatsFromFindingsEvaluationsAggs } from './get_stats';
 import { KeyDocCount } from './compliance_dashboard';
 
@@ -37,8 +36,7 @@ interface ClustersQueryResult {
 
 export type ClusterWithoutTrend = Omit<Cluster, 'trend'>;
 
-export const getClustersQuery = (query: QueryDslQueryContainer): SearchRequest => ({
-  index: CSP_KUBEBEAT_INDEX_PATTERN,
+export const getClustersQuery = (query: QueryDslQueryContainer, pitId: string): SearchRequest => ({
   size: 0,
   query,
   aggs: {
@@ -65,6 +63,9 @@ export const getClustersQuery = (query: QueryDslQueryContainer): SearchRequest =
         ...findingsEvaluationAggsQuery,
       },
     },
+  },
+  pit: {
+    id: pitId,
   },
 });
 
@@ -102,13 +103,14 @@ export const getClustersFromAggs = (clusters: ClusterBucket[]): ClusterWithoutTr
 
 export const getClusters = async (
   esClient: ElasticsearchClient,
-  query: QueryDslQueryContainer
+  query: QueryDslQueryContainer,
+  pitId: string
 ): Promise<ClusterWithoutTrend[]> => {
-  const queryResult = await esClient.search<unknown, ClustersQueryResult>(getClustersQuery(query), {
-    meta: true,
-  });
+  const queryResult = await esClient.search<unknown, ClustersQueryResult>(
+    getClustersQuery(query, pitId)
+  );
 
-  const clusters = queryResult.body.aggregations?.aggs_by_cluster_id.buckets;
+  const clusters = queryResult.aggregations?.aggs_by_cluster_id.buckets;
   if (!Array.isArray(clusters)) throw new Error('missing aggs by cluster id');
 
   return getClustersFromAggs(clusters);

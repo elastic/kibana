@@ -10,8 +10,9 @@ import dedent from 'dedent';
 import del from 'del';
 import ora from 'ora';
 import { join, relative } from 'path';
+import { runBazel } from '@kbn/bazel-runner';
 
-import { isBazelBinAvailable, runBazel } from '../utils/bazel';
+import { isBazelBinAvailable } from '../utils/bazel';
 import { isDirectory } from '../utils/fs';
 import { log } from '../utils/log';
 import { ICommand } from '.';
@@ -54,7 +55,10 @@ export const CleanCommand: ICommand = {
 
     // Runs Bazel soft clean
     if (await isBazelBinAvailable(kbn.getAbsolute())) {
-      await runBazel(['clean']);
+      await runBazel({
+        bazelArgs: ['clean'],
+        log,
+      });
       log.success('Soft cleaned bazel');
     }
 

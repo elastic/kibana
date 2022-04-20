@@ -7,11 +7,19 @@
  */
 
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { get } from 'lodash';
+import { get, mergeWith } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
 
 import { FormHook, FieldHook, FormData, FieldsMap, FormConfig } from '../types';
-import { mapFormFields, unflattenObject, flattenObject, Subject, Subscription } from '../lib';
+import {
+  mapFormFields,
+  unflattenObject,
+  flattenObject,
+  stripOutUndefinedValues,
+  Subject,
+  Subscription,
+} from '../lib';
+import { createArrayItem, getInternalArrayFieldPath } from '../components/use_array';
 
 const DEFAULT_OPTIONS = {
   valueChangeDebounceTime: 500,
@@ -37,23 +45,23 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
 
   // Strip out any "undefined" value and run the deserializer
   const initDefaultValue = useCallback(
-    (_defaultValue?: Partial<T>): I | undefined => {
+    (_defaultValue?: Partial<T>, runDeserializer: boolean = true): I | undefined => {
       if (_defaultValue === undefined || Object.keys(_defaultValue).length === 0) {
         return undefined;
       }
 
-      const filtered = Object.entries(_defaultValue as object)
-        .filter(({ 1: value }) => value !== undefined)
-        .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {} as T);
+      const filtered = stripOutUndefinedValues<T>(_defaultValue);
 
-      return deserializer ? deserializer(filtered) : (filtered as unknown as I);
+      return runDeserializer && deserializer
+        ? stripOutUndefinedValues(deserializer(filtered))
+        : (filtered as unknown as I);
     },
     [deserializer]
   );
 
   // We create this stable reference to be able to initialize our "defaultValueDeserialized" ref below
   // as we can't initialize useRef by calling a function (e.g. useRef(initDefaultValue()))
-  const defaultValueMemoized = useMemo<I | undefined>(() => {
+  const defaultValueInitialized = useMemo<I | undefined>(() => {
     return initDefaultValue(defaultValue);
   }, [defaultValue, initDefaultValue]);
 
@@ -91,7 +99,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
    * Keep a reference to the form defaultValue once it has been deserialized.
    * This allows us to reset the form and put back the initial value of each fields
    */
-  const defaultValueDeserialized = useRef(defaultValueMemoized);
+  const defaultValueDeserialized = useRef(defaultValueInitialized);
 
   /**
    * We have both a state and a ref for the error messages so the consumer can, in the same callback,
@@ -440,6 +448,77 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     []
   );
 
+  const updateFieldValues: FormHook<T, I>['updateFieldValues'] = useCallback(
+    (updatedFormData, { runDeserializer = true } = {}) => {
+      if (
+        !updatedFormData ||
+        typeof updatedFormData !== 'object' ||
+        Object.keys(updatedFormData).length === 0
+      ) {
+        return;
+      }
+
+      const updatedFormDataInitialized = initDefaultValue(updatedFormData, runDeserializer);
+
+      const mergedDefaultValue = mergeWith(
+        {},
+        defaultValueDeserialized.current,
+        updatedFormDataInitialized,
+        (_, srcValue) => {
+          if (Array.isArray(srcValue)) {
+            // Arrays are returned as provided, we don't want to merge
+            // previous array values with the new ones.
+            return srcValue;
+          }
+        }
+      );
+
+      defaultValueDeserialized.current = stripOutUndefinedValues<I>(mergedDefaultValue);
+
+      const doUpdateValues = (obj: object, currentObjPath: string[] = []) => {
+        Object.entries(obj).forEach(([key, value]) => {
+          const fullPath = [...currentObjPath, key].join('.');
+          const internalArrayfieldPath = getInternalArrayFieldPath(fullPath);
+
+          // Check if there is an **internal array** (created by <UseArray />) defined at this key.
+          // If there is one, we update that field value and don't go any further as from there it will
+          // be the individual fields (children) declared inside the UseArray that will read the "defaultValue"
+          // object of the form (which we've updated above).
+          if (Array.isArray(value) && fieldsRefs.current[internalArrayfieldPath]) {
+            const field = fieldsRefs.current[internalArrayfieldPath];
+            const fieldValue = value.map((_, index) => createArrayItem(fullPath, index, false));
+            field.setValue(fieldValue);
+            return;
+          }
+
+          if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+            // We make sure that at least _some_ leaf fields are present in the fieldsRefs object
+            // If not, we should not consider this as a multi fields but single field (e.g. a select field whose value is { label: 'Foo', value: 'foo' })
+            const hasSomeLeafField = Object.keys(value).some(
+              (leaf) => fieldsRefs.current[`${fullPath}.${leaf}`] !== undefined
+            );
+
+            if (hasSomeLeafField) {
+              // Recursively update internal objects
+              doUpdateValues(value, [...currentObjPath, key]);
+              return;
+            }
+          }
+
+          const field = fieldsRefs.current[fullPath];
+          if (!field) {
+            return;
+          }
+
+          field.setValue(value);
+        });
+      };
+
+      doUpdateValues(updatedFormDataInitialized!);
+    },
+    [initDefaultValue]
+  );
+
   const submit: FormHook<T, I>['submit'] = useCallback(
     async (e) => {
       if (e) {
@@ -536,6 +615,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
       getFieldDefaultValue,
       getFormData,
       getErrors,
+      updateFieldValues,
       reset,
       validateFields,
       __options: formOptions,
@@ -563,6 +643,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     getErrors,
     getFormDefaultValue,
     getFieldDefaultValue,
+    updateFieldValues,
     reset,
     formOptions,
     getFormData$,
@@ -578,16 +659,6 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   // ----------------------------------
   // -- EFFECTS
   // ----------------------------------
-
-  useEffect(() => {
-    if (!isMounted.current) {
-      return;
-    }
-
-    // Whenever the "defaultValue" prop changes, reinitialize our ref
-    defaultValueDeserialized.current = defaultValueMemoized;
-  }, [defaultValueMemoized]);
-
   useEffect(() => {
     isMounted.current = true;
 
