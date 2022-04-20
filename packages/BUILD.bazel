@@ -107,6 +107,8 @@ filegroup(
     "//packages/kbn-utility-types:build",
     "//packages/kbn-utils:build",
     "//packages/shared-ux/button/exit_full_screen:build",
+    "//src/plugins/location_free_pkg_three:build",
+    "//src/plugins/location_free_pkg_two:build",
     "//src/plugins/location-free-pkg:build",
   ],
 )
@@ -198,6 +200,8 @@ filegroup(
     "//packages/kbn-utility-types:build_types",
     "//packages/kbn-utils:build_types",
     "//packages/shared-ux/button/exit_full_screen:build_types",
+    "//src/plugins/location_free_pkg_three:build_types",
+    "//src/plugins/location_free_pkg_two:build_types",
     "//src/plugins/location-free-pkg:build_types",
   ],
 )

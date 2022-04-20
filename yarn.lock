@@ -3084,7 +3084,15 @@
   version "0.0.0"
   uid ""
 
+"@kbn/location-free-pkg-two@link:bazel-bin/src/plugins/location_free_pkg_two":
+  version "0.0.0"
+  uid ""
+
 "@kbn/location-free-pkg@link:bazel-bin/src/plugins/location-free-pkg":
+  version "0.0.0"
+  uid ""
+
+"@kbn/location_free_pkg_three@link:bazel-bin/src/plugins/location_free_pkg_three":
   version "0.0.0"
   uid ""
 
@@ -6160,7 +6168,15 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__location-free-pkg-two@link:bazel-bin/src/plugins/location_free_pkg_two/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__location-free-pkg@link:bazel-bin/src/plugins/location-free-pkg/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__location_free_pkg_three@link:bazel-bin/src/plugins/location_free_pkg_three/npm_module_types":
   version "0.0.0"
   uid ""
 
