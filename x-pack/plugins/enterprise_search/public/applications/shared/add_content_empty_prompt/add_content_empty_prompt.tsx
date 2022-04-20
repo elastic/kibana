@@ -69,6 +69,7 @@ export const AddContentEmptyPrompt: React.FC = () => {
                   </EuiLinkTo>
                 </EuiFlexItem>
                 <EuiFlexItem>
+                {/* TODO need link for Learn More link*/}
                   <EuiLink href="#" target="_blank">
                     {i18n.translate('xpack.enterpriseSearch.overview.emptyState.footerLinkTitle', {
                       defaultMessage: 'Learn more',

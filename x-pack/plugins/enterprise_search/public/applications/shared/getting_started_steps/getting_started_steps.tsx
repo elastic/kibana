@@ -98,6 +98,7 @@ export const GettingStartedSteps: React.FC = () => {
                         isOpen={isPopoverOpen}
                         closePopover={() => setIsPopoverOpen(false)}
                       >
+                        {/* TODO add onclick for these links*/}
                         <EuiContextMenuPanel
                           items={[
                             <EuiContextMenuItem key="" onClick={() => {}}>
