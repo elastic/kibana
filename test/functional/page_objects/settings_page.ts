@@ -192,18 +192,15 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clickDefaultIndexButton() {
-    await this.testSubjects.click('openDataViewActions');
     await this.testSubjects.click('setDefaultIndexPatternButton');
     await this.header.waitUntilLoadingHasFinished();
   }
 
   async clickEditIndexButton() {
-    await this.testSubjects.click('openDataViewActions');
     await this.testSubjects.click('editIndexPatternButton');
   }
 
   async clickDeletePattern() {
-    await this.testSubjects.click('openDataViewActions');
     await this.testSubjects.click('deleteIndexPatternButton');
   }
 
