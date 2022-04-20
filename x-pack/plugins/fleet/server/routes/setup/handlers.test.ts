@@ -30,7 +30,7 @@ jest.mock('../../services/setup', () => {
 const mockSetupFleet = setupFleet as jest.MockedFunction<typeof setupFleet>;
 
 describe('FleetSetupHandler', () => {
-  let context: AwaitedProperties<FleetRequestHandlerContext>;
+  let context: AwaitedProperties<Omit<FleetRequestHandlerContext, 'resolve'>>;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
 
