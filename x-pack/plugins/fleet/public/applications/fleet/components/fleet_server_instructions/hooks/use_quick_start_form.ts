@@ -21,6 +21,7 @@ export interface QuickStartCreateForm {
   error?: string;
   submit: () => void;
   fleetServerHost?: string;
+  fleetServerHostSettings: string[];
   isFleetServerHostSubmitted: boolean;
   onFleetServerHostChange: (value: string) => void;
   fleetServerPolicyId?: string;
@@ -39,6 +40,7 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
 
   const {
     fleetServerHost,
+    fleetServerHostSettings,
     isFleetServerHostSubmitted,
     setFleetServerHost,
     validateFleetServerHost,
@@ -55,13 +57,7 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
 
   const { notifications } = useStartServices();
   const { fleetServerPolicyId, setFleetServerPolicyId } = useSelectFleetServerPolicy();
-  const { serviceToken, generateServiceToken } = useServiceToken({ fleetServerPolicyId });
-
-  useEffect(() => {
-    if (fleetServerPolicyId) {
-      setStatus('success');
-    }
-  }, [fleetServerPolicyId]);
+  const { serviceToken, generateServiceToken } = useServiceToken();
 
   const onFleetServerHostChange = useCallback(
     (value: string) => {
@@ -121,6 +117,7 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
     submit,
     fleetServerPolicyId,
     fleetServerHost,
+    fleetServerHostSettings,
     isFleetServerHostSubmitted,
     onFleetServerHostChange,
     serviceToken,

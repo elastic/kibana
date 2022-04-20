@@ -8,6 +8,7 @@
 import React from 'react';
 
 import type { EuiStepProps } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 import {
   EuiButton,
   EuiCallOut,
@@ -47,7 +48,8 @@ const GettingStartedStepContent: React.FunctionComponent<{
 }> = ({ quickStartCreateForm }) => {
   const { getHref } = useLink();
 
-  const { fleetServerHost, onFleetServerHostChange } = quickStartCreateForm;
+  const { fleetServerHost, fleetServerHostSettings, onFleetServerHostChange } =
+    quickStartCreateForm;
 
   if (quickStartCreateForm.status === 'success') {
     return (
@@ -97,13 +99,14 @@ const GettingStartedStepContent: React.FunctionComponent<{
       <EuiForm onSubmit={quickStartCreateForm.submit}>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiFieldText
+            <EuiComboBox<string>
               fullWidth
-              placeholder={'https://fleet-server-host.com:8220'}
-              value={fleetServerHost}
-              isInvalid={!!quickStartCreateForm.error}
-              onChange={(e) => onFleetServerHostChange(e.target.value)}
-              disabled={quickStartCreateForm.status === 'loading'}
+              singleSelection={{ asPlainText: true }}
+              placeholder="https://fleet-server-host.com:8220"
+              options={fleetServerHostSettings.map((host) => ({ label: host, value: host }))}
+              selectedOptions={
+                fleetServerHost ? [{ label: fleetServerHost, value: fleetServerHost }] : []
+              }
               prepend={
                 <EuiText>
                   <FormattedMessage
@@ -112,7 +115,14 @@ const GettingStartedStepContent: React.FunctionComponent<{
                   />
                 </EuiText>
               }
+              noSuggestions={fleetServerHostSettings.length === 0}
               data-test-subj="fleetServerHostInput"
+              isDisabled={quickStartCreateForm.status === 'loading'}
+              isInvalid={!!quickStartCreateForm.error}
+              onChange={(selectedOptions) =>
+                selectedOptions.length && onFleetServerHostChange(selectedOptions[0].value!)
+              }
+              onCreateOption={(option) => onFleetServerHostChange(option)}
             />
 
             {quickStartCreateForm.status === 'error' && (

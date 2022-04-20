@@ -15,6 +15,7 @@ const URL_REGEX = /^(https):\/\/[^\s$.?#].[^\s]*$/gm;
 export interface FleetServerHostForm {
   saveFleetServerHost: () => Promise<void>;
   fleetServerHost?: string;
+  fleetServerHostSettings: string[];
   isFleetServerHostSubmitted: boolean;
   setFleetServerHost: React.Dispatch<React.SetStateAction<string | undefined>>;
   error?: string;
@@ -91,6 +92,7 @@ export const useFleetServerHost = (): FleetServerHostForm => {
   return {
     saveFleetServerHost,
     fleetServerHost,
+    fleetServerHostSettings: settings?.item.fleet_server_hosts ?? [],
     isFleetServerHostSubmitted,
     setFleetServerHost,
     error,

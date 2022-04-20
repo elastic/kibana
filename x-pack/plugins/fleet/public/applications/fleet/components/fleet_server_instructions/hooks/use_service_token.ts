@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useStartServices, sendGenerateServiceToken } from '../../../hooks';
 
-export const useServiceToken = ({ fleetServerPolicyId }: { fleetServerPolicyId?: string } = {}) => {
+export const useServiceToken = () => {
   const { notifications } = useStartServices();
   const [serviceToken, setServiceToken] = useState<string>();
   const [isLoadingServiceToken, setIsLoadingServiceToken] = useState<boolean>(false);
@@ -32,13 +32,6 @@ export const useServiceToken = ({ fleetServerPolicyId }: { fleetServerPolicyId?:
       setIsLoadingServiceToken(false);
     }
   }, [notifications.toasts]);
-
-  // Set the initial service token value to the first one found for the given policy if possible
-  useEffect(() => {
-    if (fleetServerPolicyId && !serviceToken) {
-      generateServiceToken();
-    }
-  }, [fleetServerPolicyId, generateServiceToken, serviceToken]);
 
   return { serviceToken, isLoadingServiceToken, generateServiceToken };
 };
