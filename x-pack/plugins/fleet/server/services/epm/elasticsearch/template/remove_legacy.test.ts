@@ -16,14 +16,16 @@ import { _getLegacyComponentTemplatesForPackage } from './remove_legacy';
 const pickRandom = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)];
 const pickRandomType = pickRandom.bind(null, ['logs', 'metrics']);
 const createMockDataStream = ({
-  packageName = 'somepkg',
+  packageName,
+  type,
   dataset,
 }: {
-  packageName?: string;
+  packageName: string;
+  type?: string;
   dataset?: string;
-} = {}) => {
+}) => {
   return {
-    type: pickRandomType(),
+    type: type || pickRandomType(),
     dataset: dataset || uuid.v4(),
     title: packageName,
     package: packageName,
@@ -33,16 +35,16 @@ const createMockDataStream = ({
 };
 const createMockTemplate = ({
   name = 'templateName',
-  packageName = 'somePackage',
+  packageName,
 }: {
   name?: string;
-  packageName?: string;
-} = {}) => {
+  packageName: string;
+}) => {
   return {
     name,
     component_template: {
       _meta: {
-        package: packageName,
+        package: { name: packageName },
       },
       template: {
         settings: {},
@@ -55,17 +57,19 @@ const makeArrayOf = (arraySize: number, fn = (i: any) => i) => {
   return [...Array(arraySize)].map(fn);
 };
 describe('_getLegacyComponentTemplatesForPackage', () => {
-  it('should handle empty array', () => {
+  it('should handle empty templates array', () => {
     const templates = [] as ClusterComponentTemplate[];
-    const pkg = {} as InstallablePackage;
+    const pkg = { name: 'testPkg', data_streams: [] as RegistryDataStream[] } as InstallablePackage;
 
     const result = _getLegacyComponentTemplatesForPackage(templates, pkg);
     expect(result).toEqual([]);
   });
   it('should return empty array if no legacy templates', () => {
-    const templates = makeArrayOf(1000, createMockTemplate);
+    const packageName = 'testPkg';
+    const templates = makeArrayOf(1000, () => createMockTemplate({ packageName }));
     const pkg = {
-      data_streams: makeArrayOf(100, createMockDataStream),
+      name: packageName,
+      data_streams: makeArrayOf(100, () => createMockDataStream({ packageName })),
     } as InstallablePackage;
 
     const result = _getLegacyComponentTemplatesForPackage(templates, pkg);
@@ -73,26 +77,52 @@ describe('_getLegacyComponentTemplatesForPackage', () => {
   });
 
   it('should find legacy templates', () => {
-    const packageName = 'myPkg';
+    const packageName = 'testPkg';
     const legacyTemplates = [
-      'logs-mypkg.dataset@settings',
-      'logs-mypkg.dataset@mappings',
-      'logs-mypkg.dataset2@mappings',
-      'logs-mypkg.dataset2@settings',
+      'logs-testPkg.dataset@settings',
+      'logs-testPkg.dataset@mappings',
+      'metrics-testPkg.dataset2@mappings',
+      'metrics-testPkg.dataset2@settings',
     ];
     const templates = [
-      ...makeArrayOf(100, createMockTemplate),
+      ...makeArrayOf(100, () => createMockTemplate({ packageName })),
       ...legacyTemplates.map((name) => createMockTemplate({ name, packageName })),
     ];
     const pkg = {
+      name: packageName,
       data_streams: [
-        ...makeArrayOf(20, createMockDataStream),
-        createMockDataStream({ packageName, dataset: 'mypkg.dataset' }),
-        createMockDataStream({ packageName, dataset: 'mypkg.dataset2' }),
+        ...makeArrayOf(20, () => createMockDataStream({ packageName })),
+        createMockDataStream({ type: 'logs', packageName, dataset: 'testPkg.dataset' }),
+        createMockDataStream({ type: 'metrics', packageName, dataset: 'testPkg.dataset2' }),
       ],
     } as InstallablePackage;
 
     const result = _getLegacyComponentTemplatesForPackage(templates, pkg);
     expect(result).toEqual(legacyTemplates);
+  });
+
+  it('should only return templates if package name matches as well', () => {
+    const packageName = 'testPkg';
+    const legacyTemplates = [
+      'logs-testPkg.dataset@settings',
+      'logs-testPkg.dataset@mappings',
+      'metrics-testPkg.dataset2@mappings',
+      'metrics-testPkg.dataset2@settings',
+    ];
+    const templates = [
+      ...makeArrayOf(20, () => createMockTemplate({ packageName })),
+      ...legacyTemplates.map((name) => createMockTemplate({ name, packageName: 'someOtherPkg' })),
+    ];
+    const pkg = {
+      name: packageName,
+      data_streams: [
+        ...makeArrayOf(20, () => createMockDataStream({ packageName })),
+        createMockDataStream({ type: 'logs', packageName, dataset: 'testPkg.dataset' }),
+        createMockDataStream({ type: 'metrics', packageName, dataset: 'testPkg.dataset2' }),
+      ],
+    } as InstallablePackage;
+
+    const result = _getLegacyComponentTemplatesForPackage(templates, pkg);
+    expect(result).toEqual([]);
   });
 });
