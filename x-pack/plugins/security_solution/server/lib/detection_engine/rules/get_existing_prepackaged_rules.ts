@@ -6,12 +6,11 @@
  */
 
 import { RulesClient } from '@kbn/alerting-plugin/server';
-import { INTERNAL_IMMUTABLE_KEY } from '../../../../common/constants';
 import { RuleAlertType, isAlertTypes } from './types';
 import { findRules } from './find_rules';
 
-export const FILTER_NON_PREPACKED_RULES = `alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:false"`;
-export const FILTER_PREPACKED_RULES = `alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:true"`;
+export const FILTER_NON_PREPACKED_RULES = 'alert.attributes.params.immutable: false';
+export const FILTER_PREPACKED_RULES = 'alert.attributes.params.immutable: true';
 
 export const getNonPackagedRulesCount = async ({
   isRuleRegistryEnabled,

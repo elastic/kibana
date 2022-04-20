@@ -6,7 +6,6 @@
  */
 
 import { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
-import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
 import { RuleParams } from '../schemas/rule_schemas';
 import { findRules } from './find_rules';
 import { isAlertType, ReadRuleOptions } from './types';
@@ -51,7 +50,7 @@ export const readRules = async ({
     const ruleFromFind = await findRules({
       isRuleRegistryEnabled,
       rulesClient,
-      filter: `alert.attributes.tags: "${INTERNAL_RULE_ID_KEY}:${ruleId}"`,
+      filter: `alert.attributes.params.ruleId: "${ruleId}"`,
       page: 1,
       fields: undefined,
       perPage: undefined,

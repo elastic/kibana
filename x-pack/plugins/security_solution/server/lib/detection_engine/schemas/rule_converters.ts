@@ -29,7 +29,6 @@ import {
   ResponseTypeSpecific,
 } from '../../../../common/detection_engine/schemas/request';
 import { AppClient } from '../../../types';
-import { addTags } from '../rules/add_tags';
 import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { transformTags } from '../routes/rules/utils';
@@ -134,7 +133,7 @@ export const convertCreateAPIToInternalSchema = (
   const newRuleId = input.rule_id ?? uuid.v4();
   return {
     name: input.name,
-    tags: addTags(input.tags ?? [], newRuleId, false),
+    tags: input.tags ?? [],
     alertTypeId: isRuleRegistryEnabled ? ruleTypeMappings[input.type] : SIGNALS_ID,
     consumer: SERVER_APP_ID,
     params: {

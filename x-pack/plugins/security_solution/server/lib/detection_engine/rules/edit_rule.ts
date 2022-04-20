@@ -11,7 +11,6 @@ import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { RuleAlertType } from './types';
 import { InternalRuleUpdate, internalRuleUpdate } from '../schemas/rule_schemas';
-import { addTags } from './add_tags';
 
 class EditRuleError extends Error {
   public readonly statusCode: number;
@@ -103,10 +102,7 @@ const validateAndSanitizeChanges = (
     throw new EditRuleError(`Internal rule editing error: can't change "params.version"`, 500);
   }
 
-  return {
-    ...changed,
-    tags: addTags(changed.tags, changed.params.ruleId, changed.params.immutable),
-  };
+  return changed;
 };
 
 const isRuleChanged = (originalRule: RuleAlertType, editedRule: RuleAlertType): boolean => {

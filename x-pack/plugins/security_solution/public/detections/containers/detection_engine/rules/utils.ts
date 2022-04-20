@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { INTERNAL_IMMUTABLE_KEY } from '../../../../../common/constants';
 import { escapeKuery } from '../../../../common/lib/keury';
 import { FilterOptions } from './types';
 
@@ -36,11 +35,11 @@ export const convertRulesFilterToKQL = ({
   const filters: string[] = [];
 
   if (showCustomRules) {
-    filters.push(`alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:false"`);
+    filters.push(`alert.attributes.params.immutable: false`);
   }
 
   if (showElasticRules) {
-    filters.push(`alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:true"`);
+    filters.push(`alert.attributes.params.immutable: true`);
   }
 
   if (tags.length > 0) {

@@ -13,7 +13,6 @@ import { ruleTypeMappings, SIGNALS_ID } from '@kbn/securitysolution-rules';
 import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { SERVER_APP_ID } from '../../../../common/constants';
 import { InternalRuleCreate, RuleParams } from '../schemas/rule_schemas';
-import { addTags } from './add_tags';
 
 const DUPLICATE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.cloneRule.duplicateTitle',
@@ -29,7 +28,7 @@ export const duplicateRule = (
   const newRuleId = uuid.v4();
   return {
     name: `${rule.name} [${DUPLICATE_TITLE}]`,
-    tags: addTags(rule.tags, newRuleId, false),
+    tags: rule.tags,
     alertTypeId: isRuleRegistryEnabled ? ruleTypeMappings[rule.params.type] : SIGNALS_ID,
     consumer: SERVER_APP_ID,
     params: {

@@ -19,7 +19,6 @@ import {
   SERVER_APP_ID,
 } from '../../../../common/constants';
 import { CreateRulesOptions } from './types';
-import { addTags } from './add_tags';
 import { PartialFilter } from '../types';
 import { transformToAlertThrottle, transformToNotifyWhen } from './utils';
 
@@ -84,7 +83,7 @@ export const createRules = async ({
     },
     data: {
       name,
-      tags: addTags(tags, ruleId, immutable),
+      tags,
       alertTypeId: isRuleRegistryEnabled ? ruleTypeMappings[type] : SIGNALS_ID,
       consumer: SERVER_APP_ID,
       params: {

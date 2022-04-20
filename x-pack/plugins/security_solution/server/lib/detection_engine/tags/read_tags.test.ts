@@ -7,7 +7,7 @@
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import { getAlertMock, getFindResultWithMultiHits } from '../routes/__mocks__/request_responses';
-import { INTERNAL_RULE_ID_KEY, INTERNAL_IDENTIFIER } from '../../../../common/constants';
+import { INTERNAL_IDENTIFIER } from '../../../../common/constants';
 import { readRawTags, readTags, convertTagsToSet, convertToTags, isTags } from './read_tags';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
@@ -188,7 +188,6 @@ describe.each([
       result1.params.ruleId = 'rule-1';
       result1.tags = [
         `${INTERNAL_IDENTIFIER}_some_value`,
-        `${INTERNAL_RULE_ID_KEY}_some_value`,
         'tag 1',
       ];
 
@@ -205,7 +204,6 @@ describe.each([
       result1.params.ruleId = 'rule-1';
       result1.tags = [
         `${INTERNAL_IDENTIFIER}_some_value`,
-        `${INTERNAL_RULE_ID_KEY}_some_value`,
         'tag 1',
         'tag 2',
         'tag 3',
@@ -218,7 +216,6 @@ describe.each([
       result2.params.ruleId = 'rule-2';
       result2.tags = [
         `${INTERNAL_IDENTIFIER}_some_value`,
-        `${INTERNAL_RULE_ID_KEY}_some_value`,
         'tag 1',
         'tag 2',
         'tag 3',

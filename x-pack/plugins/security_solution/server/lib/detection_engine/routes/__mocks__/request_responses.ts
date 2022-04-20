@@ -17,8 +17,6 @@ import {
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
   DETECTION_ENGINE_PRIVILEGES_URL,
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
-  INTERNAL_RULE_ID_KEY,
-  INTERNAL_IMMUTABLE_KEY,
   DETECTION_ENGINE_PREPACKAGED_URL,
   DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
@@ -395,7 +393,7 @@ export const getAlertMock = <T extends RuleParams>(
 ): SanitizedRule<T> => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   name: 'Detect Root/Admin Users',
-  tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`, `${INTERNAL_IMMUTABLE_KEY}:false`],
+  tags: [],
   alertTypeId: isRuleRegistryEnabled ? ruleTypeMappings[params.type] : 'siem.signals',
   consumer: 'siem',
   params,

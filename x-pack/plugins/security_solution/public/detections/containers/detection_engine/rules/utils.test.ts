@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { INTERNAL_IMMUTABLE_KEY } from '../../../../../common/constants';
 import { FilterOptions } from './types';
 import { convertRulesFilterToKQL } from './utils';
 
@@ -42,13 +41,13 @@ describe('convertRulesFilterToKQL', () => {
   it('handles presence of "showCustomRules" properly', () => {
     const kql = convertRulesFilterToKQL({ ...filterOptions, showCustomRules: true });
 
-    expect(kql).toBe(`alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:false"`);
+    expect(kql).toBe(`alert.attributes.params.immutable: false`);
   });
 
   it('handles presence of "showElasticRules" properly', () => {
     const kql = convertRulesFilterToKQL({ ...filterOptions, showElasticRules: true });
 
-    expect(kql).toBe(`alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:true"`);
+    expect(kql).toBe(`alert.attributes.params.immutable: true`);
   });
 
   it('handles presence of "tags" properly', () => {
@@ -66,7 +65,7 @@ describe('convertRulesFilterToKQL', () => {
     });
 
     expect(kql).toBe(
-      `alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:true" AND alert.attributes.tags:("tag1" AND "tag2") AND (alert.attributes.name: "foo" OR alert.attributes.params.index: "foo" OR alert.attributes.params.threat.tactic.id: "foo" OR alert.attributes.params.threat.tactic.name: "foo" OR alert.attributes.params.threat.technique.id: "foo" OR alert.attributes.params.threat.technique.name: "foo" OR alert.attributes.params.threat.technique.subtechnique.id: "foo" OR alert.attributes.params.threat.technique.subtechnique.name: "foo")`
+      `alert.attributes.params.immutable: true AND alert.attributes.tags:("tag1" AND "tag2") AND (alert.attributes.name: "foo" OR alert.attributes.params.index: "foo" OR alert.attributes.params.threat.tactic.id: "foo" OR alert.attributes.params.threat.tactic.name: "foo" OR alert.attributes.params.threat.technique.id: "foo" OR alert.attributes.params.threat.technique.name: "foo" OR alert.attributes.params.threat.technique.subtechnique.id: "foo" OR alert.attributes.params.threat.technique.subtechnique.name: "foo")`
     );
   });
 });
