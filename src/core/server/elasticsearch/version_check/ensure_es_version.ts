@@ -11,8 +11,8 @@
  * that defined in Kibana's package.json.
  */
 
-import { timer, of, from, Observable } from 'rxjs';
-import { map, distinctUntilChanged, catchError, exhaustMap } from 'rxjs/operators';
+import { timer, from, Observable } from 'rxjs';
+import { map, distinctUntilChanged, exhaustMap } from 'rxjs/operators';
 import {
   esVersionCompatibleWithKibana,
   esVersionEqualsKibana,
@@ -142,6 +142,15 @@ function compareNodes(prev: NodesVersionCompatibility, curr: NodesVersionCompati
   );
 }
 
+function obtainNodesInfo(client: ElasticsearchClient): Observable<NodesInfo> {
+  const infoPromise: Promise<NodesInfo> =
+    client.nodes.info({
+      filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
+    }) || Promise.reject('Elasticsearch client returned no information for the nodes');
+
+  return from(infoPromise.catch((nodesInfoRequestError) => ({ nodes: {}, nodesInfoRequestError })));
+}
+
 /** @public */
 export const pollEsNodesVersion = ({
   internalClient,
@@ -152,17 +161,7 @@ export const pollEsNodesVersion = ({
 }: PollEsNodesVersionOptions): Observable<NodesVersionCompatibility> => {
   log.debug('Checking Elasticsearch version');
   return timer(0, healthCheckInterval).pipe(
-    exhaustMap(() => {
-      return from(
-        internalClient.nodes.info({
-          filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
-        })
-      ).pipe(
-        catchError((nodesInfoRequestError) => {
-          return of({ nodes: {}, nodesInfoRequestError });
-        })
-      );
-    }),
+    exhaustMap(() => obtainNodesInfo(internalClient)),
     map((nodesInfoResponse: NodesInfo & { nodesInfoRequestError?: Error }) =>
       mapNodesVersionCompatibility(nodesInfoResponse, kibanaVersion, ignoreVersionMismatch)
     ),

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { nextTick } from '@kbn/test-jest-helpers';
 import { REPO_ROOT } from '@kbn/utils';
 import { LoggerFactory } from '@kbn/logging';
 import { Env } from '@kbn/config';
@@ -14,6 +13,10 @@ import { getEnvOptions } from '../config/mocks';
 import { configServiceMock, loggingSystemMock } from '../mocks';
 
 import { PrebootService } from './preboot_service';
+
+function nextTick() {
+  return new Promise((resolve) => setImmediate(resolve));
+}
 
 describe('PrebootService', () => {
   describe('#preboot()', () => {

@@ -138,7 +138,7 @@ export class HttpService
   public async setup(deps: SetupDeps) {
     this.requestHandlerContext = deps.context.createContextContainer();
     this.configSubscription = this.config$.subscribe(() => {
-      if (this.httpServer.isListening()) {
+      if (this.httpServer?.isListening()) {
         // If the server is already running we can't make any config changes
         // to it, so we warn and don't allow the config to pass through.
         this.log.warn(
@@ -191,7 +191,7 @@ export class HttpService
   public getStartContract(): InternalHttpServiceStart {
     return {
       ...pick(this.internalSetup!, ['auth', 'basePath', 'getServerInfo']),
-      isListening: () => this.httpServer.isListening(),
+      isListening: () => this.httpServer?.isListening(),
     };
   }
 

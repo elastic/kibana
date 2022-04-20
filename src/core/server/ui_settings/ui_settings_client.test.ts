@@ -56,7 +56,14 @@ describe('ui settings', () => {
     };
   }
 
-  afterEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.clearAllTimers();
+  });
 
   describe('#setMany()', () => {
     it('returns a promise', () => {
@@ -709,14 +716,6 @@ describe('ui settings', () => {
 
   describe('caching', () => {
     describe('read operations cache user config', () => {
-      beforeEach(() => {
-        jest.useFakeTimers();
-      });
-
-      afterEach(() => {
-        jest.clearAllTimers();
-      });
-
       it('get', async () => {
         const esDocSource = {};
         const { uiSettings, savedObjectsClient } = setup({ esDocSource });

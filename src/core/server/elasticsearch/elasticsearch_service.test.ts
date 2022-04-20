@@ -16,6 +16,9 @@ jest.mock('./version_check/ensure_es_version', () => ({
   pollEsNodesVersion: jest.fn(),
 }));
 
+// Mocking the module to disable caching for tests
+jest.mock('../ui_settings/cache');
+
 import { MockClusterClient, isScriptingEnabledMock } from './elasticsearch_service.test.mocks';
 
 import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
@@ -90,6 +93,8 @@ afterEach(() => {
 });
 
 describe('#preboot', () => {
+  afterEach(async () => elasticsearchService?.stop());
+
   describe('#config', () => {
     it('exposes `hosts`', async () => {
       const prebootContract = await elasticsearchService.preboot();
@@ -176,6 +181,8 @@ describe('#preboot', () => {
 });
 
 describe('#setup', () => {
+  afterEach(async () => elasticsearchService?.stop());
+
   it('returns legacy Elasticsearch config as a part of the contract', async () => {
     const setupContract = await elasticsearchService.setup(setupDeps);
 
@@ -196,8 +203,9 @@ describe('#setup', () => {
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
 
     return new Promise<void>((done) => {
-      setupContract.esNodesCompatibility$.subscribe(() => {
+      const subscription = setupContract.esNodesCompatibility$.subscribe(() => {
         expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
+        subscription.unsubscribe();
         done();
       });
     });
@@ -214,8 +222,8 @@ describe('#setup', () => {
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
 
     return new Promise<void>((done) => {
-      const sub = setupContract.esNodesCompatibility$.subscribe(async () => {
-        sub.unsubscribe();
+      const subscription = setupContract.esNodesCompatibility$.subscribe(async () => {
+        subscription.unsubscribe();
         await delay(100);
         expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
         done();
@@ -225,6 +233,8 @@ describe('#setup', () => {
 });
 
 describe('#start', () => {
+  afterEach(async () => elasticsearchService?.stop());
+
   it('throws if called before `setup`', async () => {
     await expect(() => elasticsearchService.start()).rejects.toMatchInlineSnapshot(
       `[Error: ElasticsearchService needs to be setup before calling start]`
@@ -265,6 +275,7 @@ describe('#start', () => {
   });
 
   describe('skipStartupConnectionCheck', () => {
+    afterEach(async () => elasticsearchService?.stop());
     it('should validate the connection by default', async () => {
       await elasticsearchService.setup(setupDeps);
       expect(isValidConnectionMock).not.toHaveBeenCalled();
@@ -417,7 +428,7 @@ describe('#stop', () => {
     const setupContract = await elasticsearchService.setup(setupDeps);
 
     return new Promise<void>((done) => {
-      setupContract.esNodesCompatibility$.subscribe(async () => {
+      const subscription = setupContract.esNodesCompatibility$.subscribe(async () => {
         expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
         await delay(10);
         expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
@@ -425,6 +436,7 @@ describe('#stop', () => {
         await elasticsearchService.stop();
         await delay(100);
         expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
+        subscription.unsubscribe();
         done();
       });
     });
