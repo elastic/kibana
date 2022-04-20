@@ -73,9 +73,6 @@ const SECOND_ALERT_UPDATE = 2;
 const INCIDENT_MANAGEMENT_SYSTEM_UPDATE = 3;
 const EXPECTED_NUMBER_OF_UPDATES = 4;
 const REPORTER = 0;
-const FIRST_PARTICIPANT = 1;
-const SECOND_PARTICIPANT = 2;
-const THIRD_PARTICIPANT = 3;
 
 describe('Import case after upgrade', () => {
   before(() => {
