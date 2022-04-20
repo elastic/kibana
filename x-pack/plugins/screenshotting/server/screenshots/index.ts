@@ -232,11 +232,21 @@ export class Screenshots {
     );
   }
 
+  systemHasInsufficientMemory(): boolean {
+    try {
+      return systemHasInsufficientMemory(this.cloud, this.logger.get('cloud'));
+    } catch (e) {
+      // Best effort, if we are unable to check system memory we should not
+      // block the ability to generate reports.
+      return false;
+    }
+  }
+
   getScreenshots(options: PngScreenshotOptions): Observable<PngScreenshotResult>;
   getScreenshots(options: PdfScreenshotOptions): Observable<PdfScreenshotResult>;
   getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult>;
   getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult> {
-    if (systemHasInsufficientMemory(this.cloud, this.logger.get('cloud'))) {
+    if (this.systemHasInsufficientMemory()) {
       return throwError(() => new errors.InsufficientMemoryAvailableOnCloudError());
     }
     const transaction = apm.startTransaction('screenshot-pipeline', 'screenshotting');

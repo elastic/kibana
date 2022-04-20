@@ -24,14 +24,14 @@ const cgroupMemLimitPaths = [
  * Cloud guarantees that memory limits will be enforced by cgroups. `os.totalmem` does
  * not currently read memory values respecting cgroups.
  *
- * Until we are able to get the actual instance size from Cloud we must rely on reading
- * these cgroup files.
+ * Until we are able to get the actual instance size from Cloud we rely on reading
+ * cgroup files.
  *
  * If successful it will return the memory limit in bytes.
  *
  * Taken from https://github.com/adobe/node-cgroup-metrics/blob/f43d6cf8a4a71d19c81c15bd4c3478583392cb8a/lib/memory.js#L36
  */
-export function readMemoryLimit(): undefined | number {
+export function readMemoryLimit(): number {
   for (const path of cgroupMemLimitPaths) {
     const fileContents = tryReadFile(path);
     if (!fileContents) continue;
@@ -39,5 +39,5 @@ export function readMemoryLimit(): undefined | number {
     if (isNaN(limit)) continue;
     return limit;
   }
-  return undefined;
+  throw new Error('Unable to read memory limit!');
 }
