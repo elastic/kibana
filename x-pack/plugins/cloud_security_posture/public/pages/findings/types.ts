@@ -4,6 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { BoolQuery, Filter, Query } from '@kbn/es-query';
+import { UseQueryResult } from 'react-query';
+
+export type FindingsGroupByKind = 'none' | 'resource';
+
+export interface FindingsBaseURLQuery {
+  groupBy: FindingsGroupByKind;
+  query: Query;
+  filters: Filter[];
+}
+
+export interface FindingsBaseEsQuery {
+  index: string;
+  query?: {
+    bool: BoolQuery;
+  };
+}
+
+export interface FindingsQueryStatus {
+  enabled: boolean;
+}
+
+export interface FindingsQueryResult<TData = unknown, TError = unknown> {
+  loading: UseQueryResult['isLoading'];
+  error: TError;
+  data: TData;
+}
 
 // TODO: this needs to be defined in a versioned schema
 export interface CspFinding {

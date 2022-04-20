@@ -4,41 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type UseQueryResult, useQuery } from 'react-query';
+import { useQuery } from 'react-query';
 import { number } from 'io-ts';
-import type { Filter } from '@kbn/es-query';
 import { lastValueFrom } from 'rxjs';
-import type {
-  EsQuerySortValue,
-  IEsSearchResponse,
-  SerializedSearchSourceFields,
-} from '@kbn/data-plugin/common';
+import type { EsQuerySortValue, IEsSearchResponse } from '@kbn/data-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { extractErrorMessage } from '../../../common/utils/helpers';
 import * as TEXT from './translations';
-import type { CspFinding } from './types';
+import type { CspFinding, FindingsQueryResult } from './types';
 import { useKibana } from '../../common/hooks/use_kibana';
-import type { FindingsBaseQuery } from './findings_container';
+import type { FindingsBaseEsQuery, FindingsQueryStatus } from './types';
 
-export interface CspFindingsRequest
-  extends Required<Pick<SerializedSearchSourceFields, 'sort' | 'size' | 'from' | 'query'>> {
-  filters: Filter[];
+interface UseFindingsOptions
+  extends FindingsBaseEsQuery,
+    FindingsGroupByNoneQuery,
+    FindingsQueryStatus {}
+
+export interface FindingsGroupByNoneQuery {
+  from: NonNullable<estypes.SearchRequest['from']>;
+  size: NonNullable<estypes.SearchRequest['size']>;
+  sort: EsQuerySortValue[];
 }
-
-type UseFindingsOptions = FindingsBaseQuery & Omit<CspFindingsRequest, 'filters' | 'query'>;
 
 interface CspFindingsData {
   page: CspFinding[];
   total: number;
 }
 
-type Result = UseQueryResult<CspFindingsData, unknown>;
-
-export interface CspFindingsResult {
-  loading: Result['isLoading'];
-  error: Result['error'];
-  data: CspFindingsData | undefined;
-}
+export type CspFindingsResult = FindingsQueryResult<CspFindingsData | undefined, unknown>;
 
 const FIELDS_WITHOUT_KEYWORD_MAPPING = new Set(['@timestamp']);
 
@@ -77,7 +71,7 @@ export const getFindingsQuery = ({
   size,
   from,
   sort,
-}: Omit<UseFindingsOptions, 'error'>) => ({
+}: Omit<UseFindingsOptions, 'enabled'>) => ({
   index,
   query,
   size,
@@ -85,14 +79,14 @@ export const getFindingsQuery = ({
   sort: mapEsQuerySortKey(sort),
 });
 
-export const useFindings = ({ error, index, query, sort, from, size }: UseFindingsOptions) => {
+export const useFindings = ({ enabled, index, query, sort, from, size }: UseFindingsOptions) => {
   const {
     data,
     notifications: { toasts },
   } = useKibana().services;
 
   return useQuery(
-    ['csp_findings', { from, size, query, sort }],
+    ['csp_findings', { index, query, sort, from, size }],
     () =>
       lastValueFrom<IEsSearchResponse<CspFinding>>(
         data.search.search({
@@ -100,9 +94,8 @@ export const useFindings = ({ error, index, query, sort, from, size }: UseFindin
         })
       ),
     {
-      enabled: !error,
+      enabled,
       select: ({ rawResponse: { hits } }) => ({
-        // TODO: use 'fields' instead of '_source' ?
         page: hits.hits.map((hit) => hit._source!),
         total: number.is(hits.total) ? hits.total : 0,
       }),

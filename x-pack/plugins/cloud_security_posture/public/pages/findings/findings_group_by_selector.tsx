@@ -7,12 +7,12 @@
 import React from 'react';
 import { EuiComboBox, EuiFormLabel, type EuiComboBoxOptionOption } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { GroupBy } from './findings_container';
+import type { FindingsGroupByKind } from './types';
 
 interface Props {
-  type: GroupBy;
-  options: Array<EuiComboBoxOptionOption<GroupBy>>;
-  onChange(selectedOptions: Array<EuiComboBoxOptionOption<GroupBy>>): void;
+  type: FindingsGroupByKind;
+  options: Array<EuiComboBoxOptionOption<FindingsGroupByKind>>;
+  onChange(selectedOptions: Array<EuiComboBoxOptionOption<FindingsGroupByKind>>): void;
 }
 
 export const FindingsGroupBySelector = ({ type, options, onChange }: Props) => (
