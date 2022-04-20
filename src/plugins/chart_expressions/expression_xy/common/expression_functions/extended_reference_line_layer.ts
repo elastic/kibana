@@ -23,6 +23,10 @@ export const extendedReferenceLineLayerFunction: ExtendedReferenceLineLayerFn = 
       types: ['datatable'],
       help: strings.getTableHelp(),
     },
+    layerId: {
+      types: ['string'],
+      help: strings.getLayerIdHelp(),
+    },
   },
   fn(input, args) {
     return {

@@ -14,7 +14,7 @@ import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { LayerTypes } from '../../common/constants';
 import {
   ReferenceLineLayerArgs,
-  ReferenceLineLayerConfigResult,
+  ReferenceLineLayerConfig,
   ExtendedYConfig,
 } from '../../common/types';
 import { ReferenceLineAnnotations, ReferenceLineAnnotationsProps } from './reference_lines';
@@ -41,11 +41,10 @@ const data: Datatable = {
   })),
 };
 
-function createLayers(
-  yConfigs: ReferenceLineLayerArgs['yConfig']
-): ReferenceLineLayerConfigResult[] {
+function createLayers(yConfigs: ReferenceLineLayerArgs['yConfig']): ReferenceLineLayerConfig[] {
   return [
     {
+      layerId: 'first',
       accessors: (yConfigs || []).map(({ forAccessor }) => forAccessor),
       yConfig: yConfigs,
       type: 'referenceLineLayer',

@@ -7,20 +7,20 @@
  */
 
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { LayerTypes, ANNOTATION_LAYER } from '../constants';
-import { AnnotationLayerArgs, AnnotationLayerConfigResult } from '../types';
+import { LayerTypes, EXTENDED_ANNOTATION_LAYER } from '../constants';
+import { ExtendedAnnotationLayerConfigResult, ExtendedAnnotationLayerArgs } from '../types';
 import { strings } from '../i18n';
 
-export function annotationLayerFunction(): ExpressionFunctionDefinition<
-  typeof ANNOTATION_LAYER,
+export function extendedAnnotationLayerFunction(): ExpressionFunctionDefinition<
+  typeof EXTENDED_ANNOTATION_LAYER,
   Datatable,
-  AnnotationLayerArgs,
-  AnnotationLayerConfigResult
+  ExtendedAnnotationLayerArgs,
+  ExtendedAnnotationLayerConfigResult
 > {
   return {
-    name: ANNOTATION_LAYER,
+    name: EXTENDED_ANNOTATION_LAYER,
     aliases: [],
-    type: ANNOTATION_LAYER,
+    type: EXTENDED_ANNOTATION_LAYER,
     inputTypes: ['datatable'],
     help: strings.getAnnotationLayerFnHelp(),
     args: {
@@ -34,10 +34,14 @@ export function annotationLayerFunction(): ExpressionFunctionDefinition<
         help: strings.getAnnotationLayerAnnotationsHelp(),
         multi: true,
       },
+      layerId: {
+        types: ['string'],
+        help: strings.getLayerIdHelp(),
+      },
     },
     fn: (input, args) => {
       return {
-        type: ANNOTATION_LAYER,
+        type: EXTENDED_ANNOTATION_LAYER,
         ...args,
         annotations: args.annotations ?? [],
         layerType: LayerTypes.ANNOTATIONS,

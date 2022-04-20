@@ -30,6 +30,7 @@ import {
   annotationLayerFunction,
   labelsOrientationConfigFunction,
   axisTitlesVisibilityConfigFunction,
+  extendedAnnotationLayerFunction,
 } from '../common/expression_functions';
 import { GetStartDepsFn, getXyChartRenderer } from './expression_renderers';
 
@@ -63,6 +64,7 @@ export class ExpressionXyPlugin {
     expressions.registerFunction(axisExtentConfigFunction);
     expressions.registerFunction(tickLabelsConfigFunction);
     expressions.registerFunction(annotationLayerFunction);
+    expressions.registerFunction(extendedAnnotationLayerFunction);
     expressions.registerFunction(labelsOrientationConfigFunction);
     expressions.registerFunction(referenceLineLayerFunction);
     expressions.registerFunction(extendedReferenceLineLayerFunction);

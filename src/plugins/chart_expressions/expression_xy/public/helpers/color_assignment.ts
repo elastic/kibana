@@ -10,7 +10,7 @@ import { uniq, mapValues } from 'lodash';
 import { euiLightVars } from '@kbn/ui-theme';
 import { FormatFactory } from '../types';
 import { isDataLayer } from './visualization';
-import { CommonXYDataLayerConfigResult, CommonXYLayerConfigResult } from '../../common';
+import { CommonXYDataLayerConfig, CommonXYLayerConfig } from '../../common';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
 
@@ -20,28 +20,17 @@ export type ColorAssignments = Record<
   string,
   {
     totalSeriesCount: number;
-    getRank(
-      sortedLayer: CommonXYDataLayerConfigResult,
-      layerId: number,
-      seriesKey: string,
-      yAccessor: string
-    ): number;
+    getRank(sortedLayer: CommonXYDataLayerConfig, seriesKey: string, yAccessor: string): number;
   }
 >;
 
 export function getColorAssignments(
-  layers: CommonXYLayerConfigResult[],
+  layers: CommonXYLayerConfig[],
   formatFactory: FormatFactory
 ): ColorAssignments {
-  const layersPerPalette: Record<
-    string,
-    Array<{
-      index: number;
-      layer: CommonXYDataLayerConfigResult;
-    }>
-  > = {};
+  const layersPerPalette: Record<string, CommonXYDataLayerConfig[]> = {};
 
-  layers.forEach((layer, index) => {
+  layers.forEach((layer) => {
     if (!isDataLayer(layer)) {
       return;
     }
@@ -50,11 +39,11 @@ export function getColorAssignments(
     if (!layersPerPalette[palette]) {
       layersPerPalette[palette] = [];
     }
-    layersPerPalette[palette].push({ layer, index });
+    layersPerPalette[palette].push(layer);
   });
 
   return mapValues(layersPerPalette, (paletteLayers) => {
-    const seriesPerLayer = paletteLayers.map(({ layer }) => {
+    const seriesPerLayer = paletteLayers.map((layer) => {
       if (!layer.splitAccessor) {
         return { numberOfSeries: layer.accessors.length, splits: [] };
       }
@@ -83,13 +72,10 @@ export function getColorAssignments(
     );
     return {
       totalSeriesCount,
-      getRank(
-        sortedLayer: CommonXYDataLayerConfigResult,
-        layerId: number,
-        seriesKey: string,
-        yAccessor: string
-      ) {
-        const layerIndex = paletteLayers.findIndex(({ index }) => layerId === index);
+      getRank(sortedLayer: CommonXYDataLayerConfig, seriesKey: string, yAccessor: string) {
+        const layerIndex = paletteLayers.findIndex(
+          (layer) => sortedLayer.layerId === layer.layerId
+        );
         const currentSeriesPerLayer = seriesPerLayer[layerIndex];
         const splitRank = currentSeriesPerLayer.splits.indexOf(seriesKey);
         return (

@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { DataLayerConfigResult, XYChartProps } from '../../common';
+import { DataLayerConfig, XYChartProps } from '../../common';
 import { sampleArgs } from '../../common/__mocks__';
 import { calculateMinInterval } from './interval';
 
 describe('calculateMinInterval', () => {
   let xyProps: XYChartProps;
-  let layer: DataLayerConfigResult;
+  let layer: DataLayerConfig;
   beforeEach(() => {
     const { layers, ...restArgs } = sampleArgs().args;
 
     xyProps = { args: { ...restArgs, layers } };
-    layer = xyProps.args.layers[0] as DataLayerConfigResult;
+    layer = xyProps.args.layers[0] as DataLayerConfig;
     layer.xScaleType = 'time';
   });
   it('should use first valid layer and determine interval', async () => {

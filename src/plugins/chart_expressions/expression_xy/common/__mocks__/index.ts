@@ -10,7 +10,7 @@ import { Position } from '@elastic/charts';
 import type { PaletteOutput } from '@kbn/coloring';
 import { Datatable, DatatableRow } from '@kbn/expressions-plugin';
 import { LayerTypes } from '../constants';
-import { DataLayerConfigResult, XYProps } from '../types';
+import { DataLayerConfig, XYProps } from '../types';
 
 export const mockPaletteOutput: PaletteOutput = {
   type: 'palette',
@@ -46,7 +46,8 @@ export const createSampleDatatableWithRows = (rows: DatatableRow[]): Datatable =
   rows,
 });
 
-export const sampleLayer: DataLayerConfigResult = {
+export const sampleLayer: DataLayerConfig = {
+  layerId: 'first',
   type: 'dataLayer',
   layerType: LayerTypes.DATA,
   seriesType: 'line',
@@ -62,7 +63,7 @@ export const sampleLayer: DataLayerConfigResult = {
 };
 
 export const createArgsWithLayers = (
-  layers: DataLayerConfigResult | DataLayerConfigResult[] = sampleLayer
+  layers: DataLayerConfig | DataLayerConfig[] = sampleLayer
 ): XYProps => ({
   xTitle: '',
   yTitle: '',

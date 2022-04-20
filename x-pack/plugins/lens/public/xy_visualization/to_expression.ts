@@ -407,6 +407,7 @@ const referenceLineLayerToExpression = (
         type: 'function',
         function: 'extendedReferenceLineLayer',
         arguments: {
+          layerId: [layer.layerId],
           yConfig: layer.yConfig
             ? layer.yConfig.map((yConfig) =>
                 extendedYConfigToExpression(yConfig, defaultReferenceLineColor)
@@ -430,9 +431,10 @@ const annotationLayerToExpression = (
     chain: [
       {
         type: 'function',
-        function: 'annotationLayer',
+        function: 'extendedAnnotationLayer',
         arguments: {
           hide: [Boolean(layer.hide)],
+          layerId: [layer.layerId],
           annotations: layer.annotations
             ? layer.annotations.map(
                 (ann): Ast =>
@@ -479,6 +481,7 @@ const dataLayerToExpression = (
         type: 'function',
         function: 'extendedDataLayer',
         arguments: {
+          layerId: [layer.layerId],
           hide: [Boolean(layer.hide)],
           xAccessor: layer.xAccessor ? [layer.xAccessor] : [],
           yScaleType: [

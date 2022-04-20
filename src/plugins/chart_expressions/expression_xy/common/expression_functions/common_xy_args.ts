@@ -42,14 +42,17 @@ export const commonXYArgs: Omit<
   yLeftExtent: {
     types: [AXIS_EXTENT_CONFIG],
     help: strings.getYLeftExtentHelp(),
+    default: `{${AXIS_EXTENT_CONFIG}}`,
   },
   yRightExtent: {
     types: [AXIS_EXTENT_CONFIG],
     help: strings.getYRightExtentHelp(),
+    default: `{${AXIS_EXTENT_CONFIG}}`,
   },
   legend: {
     types: [LEGEND_CONFIG],
     help: strings.getLegendHelp(),
+    default: `{${LEGEND_CONFIG}}`,
   },
   fittingFunction: {
     types: ['string'],
@@ -61,6 +64,7 @@ export const commonXYArgs: Omit<
     types: ['string'],
     options: [...Object.values(EndValues)],
     help: strings.getEndValueHelp(),
+    strict: true,
   },
   emphasizeFitting: {
     types: ['boolean'],
@@ -72,6 +76,7 @@ export const commonXYArgs: Omit<
     options: [...Object.values(ValueLabelModes)],
     help: strings.getValueLabelsHelp(),
     strict: true,
+    default: ValueLabelModes.HIDE,
   },
   tickLabelsVisibilitySettings: {
     types: [TICK_LABELS_CONFIG],

@@ -7,7 +7,7 @@
  */
 
 import { getColorAssignments } from './color_assignment';
-import type { DataLayerConfigResult } from '../../common';
+import type { DataLayerConfig } from '../../common';
 import type { FormatFactory } from '../types';
 import { LayerTypes } from '../../common/constants';
 import { Datatable } from '@kbn/expressions-plugin';
@@ -48,8 +48,9 @@ describe('color_assignment', () => {
     },
   };
 
-  const layers: DataLayerConfigResult[] = [
+  const layers: DataLayerConfig[] = [
     {
+      layerId: 'first',
       type: 'dataLayer',
       yScaleType: 'linear',
       xScaleType: 'linear',
@@ -62,6 +63,7 @@ describe('color_assignment', () => {
       table: tables['1'],
     },
     {
+      layerId: 'second',
       type: 'dataLayer',
       yScaleType: 'linear',
       xScaleType: 'linear',
@@ -155,18 +157,18 @@ describe('color_assignment', () => {
     it('should return the correct rank for a series key', () => {
       const assignments = getColorAssignments(layers, formatFactory);
       // 3 series in front of 2/y2 - 1/y1, 1/y2 and 2/y1
-      expect(assignments.palette1.getRank(layers[0], 0, '2', 'y2')).toEqual(3);
+      expect(assignments.palette1.getRank(layers[0], '2', 'y2')).toEqual(3);
       // 1 series in front of 1/y4 - 1/y3
-      expect(assignments.palette2.getRank(layers[1], 1, '1', 'y4')).toEqual(1);
+      expect(assignments.palette2.getRank(layers[1], '1', 'y4')).toEqual(1);
     });
 
     it('should return the correct rank for a series key spanning multiple layers', () => {
       const newLayers = [layers[0], { ...layers[1], palette: layers[0].palette }];
       const assignments = getColorAssignments(newLayers, formatFactory);
       // 3 series in front of 2/y2 - 1/y1, 1/y2 and 2/y1
-      expect(assignments.palette1.getRank(newLayers[0], 0, '2', 'y2')).toEqual(3);
+      expect(assignments.palette1.getRank(newLayers[0], '2', 'y2')).toEqual(3);
       // 2 series in front for the current layer (1/y3, 1/y4), plus all 6 series from the first layer
-      expect(assignments.palette1.getRank(newLayers[1], 1, '2', 'y3')).toEqual(8);
+      expect(assignments.palette1.getRank(newLayers[1], '2', 'y3')).toEqual(8);
     });
 
     it('should return the correct rank for a series without a split', () => {
@@ -176,9 +178,9 @@ describe('color_assignment', () => {
       ];
       const assignments = getColorAssignments(newLayers, formatFactory);
       // 3 series in front of 2/y2 - 1/y1, 1/y2 and 2/y1
-      expect(assignments.palette1.getRank(newLayers[0], 0, '2', 'y2')).toEqual(3);
+      expect(assignments.palette1.getRank(newLayers[0], '2', 'y2')).toEqual(3);
       // 1 series in front for the current layer (y3), plus all 6 series from the first layer
-      expect(assignments.palette1.getRank(newLayers[1], 1, 'Metric y4', 'y4')).toEqual(7);
+      expect(assignments.palette1.getRank(newLayers[1], 'Metric y4', 'y4')).toEqual(7);
     });
 
     it('should return the correct rank for a series with a non-primitive value', () => {
@@ -198,7 +200,7 @@ describe('color_assignment', () => {
           } as unknown)) as FormatFactory
       );
       // 3 series in front of (complex object)/y1 - abc/y1, abc/y2
-      expect(assignments.palette1.getRank(layers[0], 0, 'formatted', 'y1')).toEqual(2);
+      expect(assignments.palette1.getRank(layers[0], 'formatted', 'y1')).toEqual(2);
     });
 
     it('should handle missing tables', () => {
@@ -207,7 +209,7 @@ describe('color_assignment', () => {
         formatFactory
       );
       // if there is no data, assume it is the first splitted series. One series in front - 0/y1
-      expect(assignments.palette1.getRank(layers[0], 0, '2', 'y2')).toEqual(1);
+      expect(assignments.palette1.getRank(layers[0], '2', 'y2')).toEqual(1);
     });
 
     it('should handle missing columns', () => {
@@ -216,7 +218,7 @@ describe('color_assignment', () => {
       const assignments = getColorAssignments(newLayers, formatFactory);
 
       // if the split column is missing, assume it is the first splitted series. One series in front - 0/y1
-      expect(assignments.palette1.getRank(layers[0], 0, '2', 'y2')).toEqual(1);
+      expect(assignments.palette1.getRank(layers[0], '2', 'y2')).toEqual(1);
     });
   });
 });

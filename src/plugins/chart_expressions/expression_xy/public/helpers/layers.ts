@@ -8,15 +8,15 @@
 
 import { Datatable } from '@kbn/expressions-plugin/common';
 import {
-  CommonXYDataLayerConfigResult,
-  CommonXYLayerConfigResult,
-  CommonXYReferenceLineLayerConfigResult,
-} from '../../common';
+  CommonXYDataLayerConfig,
+  CommonXYLayerConfig,
+  CommonXYReferenceLineLayerConfig,
+} from '../../common/types';
 import { isDataLayer, isReferenceLayer } from './visualization';
 
-export function getFilteredLayers(layers: CommonXYLayerConfigResult[]) {
-  return layers.filter<CommonXYReferenceLineLayerConfigResult | CommonXYDataLayerConfigResult>(
-    (layer): layer is CommonXYReferenceLineLayerConfigResult | CommonXYDataLayerConfigResult => {
+export function getFilteredLayers(layers: CommonXYLayerConfig[]) {
+  return layers.filter<CommonXYReferenceLineLayerConfig | CommonXYDataLayerConfig>(
+    (layer): layer is CommonXYReferenceLineLayerConfig | CommonXYDataLayerConfig => {
       let table: Datatable | undefined;
       let accessors: string[] = [];
       let xAccessor: undefined | string | number;

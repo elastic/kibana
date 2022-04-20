@@ -42,6 +42,7 @@ import {
   AvailableReferenceLineIcons,
   XY_VIS,
   LAYERED_XY_VIS,
+  EXTENDED_ANNOTATION_LAYER,
 } from '../constants';
 import { XYRender } from './expression_renderers';
 
@@ -112,6 +113,7 @@ export interface ValidLayer extends DataLayerConfigResult {
 }
 
 export interface ExtendedDataLayerArgs {
+  layerId?: string;
   accessors: string[];
   seriesType: SeriesType;
   xAccessor?: string;
@@ -193,7 +195,7 @@ export interface XYArgs {
   valueLabels: ValueLabelMode;
   dataLayers: DataLayerConfigResult[];
   referenceLineLayers: ReferenceLineLayerConfigResult[];
-  annotationLayers: CommonXYAnnotationLayerConfigResult[];
+  annotationLayers: AnnotationLayerConfigResult[];
   fittingFunction?: FittingFunction;
   axisTitlesVisibilitySettings?: AxisTitlesVisibilityConfigResult;
   tickLabelsVisibilitySettings?: TickLabelsConfigResult;
@@ -237,7 +239,7 @@ export interface XYProps {
   yRightExtent: AxisExtentConfigResult;
   legend: LegendConfigResult;
   valueLabels: ValueLabelMode;
-  layers: CommonXYLayerConfigResult[];
+  layers: CommonXYLayerConfig[];
   endValue?: EndValue;
   emphasizeFitting?: boolean;
   fittingFunction?: FittingFunction;
@@ -257,8 +259,17 @@ export interface AnnotationLayerArgs {
   hide?: boolean;
 }
 
-export type CommonXYAnnotationLayerConfigResult = AnnotationLayerArgs & {
+export type ExtendedAnnotationLayerArgs = AnnotationLayerArgs & {
+  layerId?: string;
+};
+
+export type AnnotationLayerConfigResult = AnnotationLayerArgs & {
   type: typeof ANNOTATION_LAYER;
+  layerType: typeof LayerTypes.ANNOTATIONS;
+};
+
+export type ExtendedAnnotationLayerConfigResult = ExtendedAnnotationLayerArgs & {
+  type: typeof EXTENDED_ANNOTATION_LAYER;
   layerType: typeof LayerTypes.ANNOTATIONS;
 };
 
@@ -269,6 +280,7 @@ export interface ReferenceLineLayerArgs {
 }
 
 export interface ExtendedReferenceLineLayerArgs {
+  layerId?: string;
   accessors: string[];
   columnToLabel?: string;
   yConfig?: ExtendedYConfigResult[];
@@ -276,16 +288,20 @@ export interface ExtendedReferenceLineLayerArgs {
 }
 
 export type XYLayerArgs = DataLayerArgs | ReferenceLineLayerArgs | AnnotationLayerArgs;
+export type XYLayerConfig = DataLayerConfig | ReferenceLineLayerConfig | AnnotationLayerConfig;
+export type XYExtendedLayerConfig =
+  | ExtendedDataLayerConfig
+  | ExtendedReferenceLineLayerConfig
+  | ExtendedAnnotationLayerConfig;
 
 export type XYLayerConfigResult =
   | DataLayerConfigResult
   | ReferenceLineLayerConfigResult
-  | CommonXYAnnotationLayerConfigResult;
-
+  | AnnotationLayerConfigResult;
 export type XYExtendedLayerConfigResult =
   | ExtendedDataLayerConfigResult
   | ExtendedReferenceLineLayerConfigResult
-  | CommonXYAnnotationLayerConfigResult;
+  | ExtendedAnnotationLayerConfigResult;
 
 export interface LensMultiTable {
   type: typeof MULTITABLE;
@@ -315,6 +331,18 @@ export type DataLayerConfigResult = Omit<DataLayerArgs, 'palette'> & {
   table: Datatable;
 };
 
+export interface WithLayerId {
+  layerId: string;
+}
+
+export type DataLayerConfig = DataLayerConfigResult & WithLayerId;
+export type ReferenceLineLayerConfig = ReferenceLineLayerConfigResult & WithLayerId;
+export type AnnotationLayerConfig = AnnotationLayerConfigResult & WithLayerId;
+
+export type ExtendedDataLayerConfig = ExtendedDataLayerConfigResult & WithLayerId;
+export type ExtendedReferenceLineLayerConfig = ExtendedReferenceLineLayerConfigResult & WithLayerId;
+export type ExtendedAnnotationLayerConfig = ExtendedAnnotationLayerConfigResult & WithLayerId;
+
 export type ExtendedDataLayerConfigResult = Omit<ExtendedDataLayerArgs, 'palette'> & {
   type: typeof EXTENDED_DATA_LAYER;
   layerType: typeof LayerTypes.DATA;
@@ -338,11 +366,18 @@ export type AxisExtentConfigResult = AxisExtentConfig & { type: typeof AXIS_EXTE
 export type GridlinesConfigResult = AxesSettingsConfig & { type: typeof GRID_LINES_CONFIG };
 export type TickLabelsConfigResult = AxesSettingsConfig & { type: typeof TICK_LABELS_CONFIG };
 
-export type CommonXYLayerConfigResult = XYLayerConfigResult | XYExtendedLayerConfigResult;
+export type CommonXYLayerConfig = XYLayerConfig | XYExtendedLayerConfig;
 export type CommonXYDataLayerConfigResult = DataLayerConfigResult | ExtendedDataLayerConfigResult;
 export type CommonXYReferenceLineLayerConfigResult =
   | ReferenceLineLayerConfigResult
   | ExtendedReferenceLineLayerConfigResult;
+
+export type CommonXYDataLayerConfig = DataLayerConfig | ExtendedDataLayerConfig;
+export type CommonXYReferenceLineLayerConfig =
+  | ReferenceLineLayerConfig
+  | ExtendedReferenceLineLayerConfig;
+
+export type CommonXYAnnotationLayerConfig = AnnotationLayerConfig | ExtendedAnnotationLayerConfig;
 
 export type XyVisFn = ExpressionFunctionDefinition<
   typeof XY_VIS,

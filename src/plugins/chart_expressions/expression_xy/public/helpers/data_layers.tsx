@@ -24,7 +24,7 @@ import {
 } from '@kbn/field-formats-plugin/common';
 import { Datatable, DatatableRow } from '@kbn/expressions-plugin';
 import { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
-import { CommonXYDataLayerConfigResult, XScaleType } from '../../common';
+import { CommonXYDataLayerConfig, XScaleType } from '../../common';
 import { FormatFactory } from '../types';
 import { getSeriesColor } from './state';
 import { ColorAssignments } from './color_assignment';
@@ -33,8 +33,7 @@ import { GroupsConfiguration } from './axes_configuration';
 type SeriesSpec = LineSeriesProps & BarSeriesProps & AreaSeriesProps;
 
 type GetSeriesPropsFn = (config: {
-  layer: CommonXYDataLayerConfigResult;
-  layerId: number;
+  layer: CommonXYDataLayerConfig;
   accessor: string;
   chartHasMoreThanOneBarSeries?: boolean;
   formatFactory: FormatFactory;
@@ -52,7 +51,7 @@ type GetSeriesPropsFn = (config: {
 type GetSeriesNameFn = (
   data: XYChartSeriesIdentifier,
   config: {
-    layer: CommonXYDataLayerConfigResult;
+    layer: CommonXYDataLayerConfig;
     splitHint: SerializedFieldFormat<FieldFormatParams> | undefined;
     splitFormatter: FieldFormat;
     alreadyFormattedColumns: Record<string, boolean>;
@@ -63,8 +62,7 @@ type GetSeriesNameFn = (
 type GetColorFn = (
   seriesIdentifier: XYChartSeriesIdentifier,
   config: {
-    layer: CommonXYDataLayerConfigResult;
-    layerId: number;
+    layer: CommonXYDataLayerConfig;
     accessor: string;
     colorAssignments: ColorAssignments;
     columnToLabelMap: Record<string, string>;
@@ -99,7 +97,7 @@ export const getFormattedTable = (
 });
 
 export const getIsAlreadyFormattedLayerInfo = (
-  { table, xAccessor, xScaleType }: CommonXYDataLayerConfigResult,
+  { table, xAccessor, xScaleType }: CommonXYDataLayerConfig,
   formatFactory: FormatFactory
 ): Record<string, boolean> => {
   const formattedTable = getFormattedTable(table, formatFactory, xAccessor, xScaleType);
@@ -118,13 +116,13 @@ export const getIsAlreadyFormattedLayerInfo = (
 };
 
 export const getAreAlreadyFormattedLayersInfo = (
-  layers: CommonXYDataLayerConfigResult[],
+  layers: CommonXYDataLayerConfig[],
   formatFactory: FormatFactory
-): Record<number, Record<string, boolean>> =>
-  layers.reduce<Record<number, Record<string, boolean>>>(
-    (areAlreadyFormatted, layer, index) => ({
+): Record<string, Record<string, boolean>> =>
+  layers.reduce<Record<string, Record<string, boolean>>>(
+    (areAlreadyFormatted, layer) => ({
       ...areAlreadyFormatted,
-      [index]: getIsAlreadyFormattedLayerInfo(layer, formatFactory),
+      [layer.layerId]: getIsAlreadyFormattedLayerInfo(layer, formatFactory),
     }),
     {}
   );
@@ -172,7 +170,7 @@ const getLineConfig = () => ({ visible: true, stroke: ColorVariant.Series, opaci
 
 const getColor: GetColorFn = (
   { yAccessor, seriesKeys },
-  { layer, layerId, accessor, colorAssignments, columnToLabelMap, paletteService, syncColors }
+  { layer, accessor, colorAssignments, columnToLabelMap, paletteService, syncColors }
 ) => {
   const overwriteColor = getSeriesColor(layer, accessor);
   if (overwriteColor !== null) {
@@ -183,12 +181,7 @@ const getColor: GetColorFn = (
     {
       name: layer.splitAccessor ? String(seriesKeys[0]) : columnToLabelMap[seriesKeys[0]],
       totalSeriesAtDepth: colorAssignment.totalSeriesCount,
-      rankAtDepth: colorAssignment.getRank(
-        layer,
-        layerId,
-        String(seriesKeys[0]),
-        String(yAccessor)
-      ),
+      rankAtDepth: colorAssignment.getRank(layer, String(seriesKeys[0]), String(yAccessor)),
     },
   ];
   return paletteService.get(layer.palette.name).getCategoricalColor(
@@ -205,7 +198,6 @@ const getColor: GetColorFn = (
 
 export const getSeriesProps: GetSeriesPropsFn = ({
   layer,
-  layerId,
   accessor,
   chartHasMoreThanOneBarSeries,
   colorAssignments,
@@ -276,7 +268,6 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     color: (series) =>
       getColor(series, {
         layer,
-        layerId,
         accessor,
         colorAssignments,
         columnToLabelMap,

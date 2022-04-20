@@ -11,28 +11,27 @@ import { Dimension, prepareLogTable } from '@kbn/visualizations-plugin/common/ut
 import { LayerTypes } from '../constants';
 import { strings } from '../i18n';
 import {
-  CommonXYDataLayerConfigResult,
-  CommonXYLayerConfigResult,
-  CommonXYReferenceLineLayerConfigResult,
+  CommonXYDataLayerConfig,
+  CommonXYLayerConfig,
+  CommonXYReferenceLineLayerConfig,
 } from '../types';
 
-export const logDatatables = (layers: CommonXYLayerConfigResult[], handlers: ExecutionContext) => {
+export const logDatatables = (layers: CommonXYLayerConfig[], handlers: ExecutionContext) => {
   if (!handlers?.inspectorAdapters?.tables) {
     return;
   }
 
-  layers.forEach((layer, index) => {
+  layers.forEach((layer) => {
     if (layer.layerType === LayerTypes.ANNOTATIONS) {
       return;
     }
     const logTable = prepareLogTable(layer.table, getLayerDimensions(layer), true);
-
-    handlers.inspectorAdapters.tables.logDatatable(index, logTable);
+    handlers.inspectorAdapters.tables.logDatatable(layer.layerId, logTable);
   });
 };
 
 export const getLayerDimensions = (
-  layer: CommonXYDataLayerConfigResult | CommonXYReferenceLineLayerConfigResult
+  layer: CommonXYDataLayerConfig | CommonXYReferenceLineLayerConfig
 ): Dimension[] => {
   let xAccessor;
   let splitAccessor;

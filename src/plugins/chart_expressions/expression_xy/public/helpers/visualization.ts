@@ -8,40 +8,38 @@
 
 import { LayerTypes } from '../../common/constants';
 import {
-  CommonXYDataLayerConfigResult,
-  CommonXYLayerConfigResult,
-  CommonXYAnnotationLayerConfigResult,
-  CommonXYReferenceLineLayerConfigResult,
-} from '../../common';
+  CommonXYLayerConfig,
+  CommonXYDataLayerConfig,
+  CommonXYReferenceLineLayerConfig,
+  CommonXYAnnotationLayerConfig,
+} from '../../common/types';
 
-export const isDataLayer = (
-  layer: CommonXYLayerConfigResult
-): layer is CommonXYDataLayerConfigResult =>
+export const isDataLayer = (layer: CommonXYLayerConfig): layer is CommonXYDataLayerConfig =>
   layer.layerType === LayerTypes.DATA || !layer.layerType;
 
-export const getDataLayers = (layers: CommonXYLayerConfigResult[]) =>
-  (layers || []).filter((layer): layer is CommonXYDataLayerConfigResult => isDataLayer(layer));
+export const getDataLayers = (layers: CommonXYLayerConfig[]) =>
+  (layers || []).filter((layer): layer is CommonXYDataLayerConfig => isDataLayer(layer));
 
 export const isReferenceLayer = (
-  layer: CommonXYLayerConfigResult
-): layer is CommonXYReferenceLineLayerConfigResult => layer.layerType === LayerTypes.REFERENCELINE;
+  layer: CommonXYLayerConfig
+): layer is CommonXYReferenceLineLayerConfig => layer.layerType === LayerTypes.REFERENCELINE;
 
-export const getReferenceLayers = (layers: CommonXYLayerConfigResult[]) =>
-  (layers || []).filter((layer): layer is CommonXYReferenceLineLayerConfigResult =>
+export const getReferenceLayers = (layers: CommonXYLayerConfig[]) =>
+  (layers || []).filter((layer): layer is CommonXYReferenceLineLayerConfig =>
     isReferenceLayer(layer)
   );
 
 const isAnnotationLayerCommon = (
-  layer: CommonXYLayerConfigResult
-): layer is CommonXYAnnotationLayerConfigResult => layer.layerType === LayerTypes.ANNOTATIONS;
+  layer: CommonXYLayerConfig
+): layer is CommonXYAnnotationLayerConfig => layer.layerType === LayerTypes.ANNOTATIONS;
 
 export const isAnnotationsLayer = (
-  layer: CommonXYLayerConfigResult
-): layer is CommonXYAnnotationLayerConfigResult => isAnnotationLayerCommon(layer);
+  layer: CommonXYLayerConfig
+): layer is CommonXYAnnotationLayerConfig => isAnnotationLayerCommon(layer);
 
 export const getAnnotationsLayers = (
-  layers: CommonXYLayerConfigResult[]
-): CommonXYAnnotationLayerConfigResult[] =>
-  (layers || []).filter((layer): layer is CommonXYAnnotationLayerConfigResult =>
+  layers: CommonXYLayerConfig[]
+): CommonXYAnnotationLayerConfig[] =>
+  (layers || []).filter((layer): layer is CommonXYAnnotationLayerConfig =>
     isAnnotationsLayer(layer)
   );

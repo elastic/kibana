@@ -165,6 +165,10 @@ export const strings = {
     i18n.translate('expressionXY.layers.table.help', {
       defaultMessage: 'Table',
     }),
+  getLayerIdHelp: () =>
+    i18n.translate('expressionXY.layers.layerId.help', {
+      defaultMessage: 'Layer ID',
+    }),
   getRLAccessorsHelp: () =>
     i18n.translate('expressionXY.referenceLineLayer.accessors.help', {
       defaultMessage: 'The columns to display on the y axis.',
@@ -192,5 +196,17 @@ export const strings = {
   getColorHelp: () =>
     i18n.translate('expressionXY.yConfig.color.help', {
       defaultMessage: 'The color of the series',
+    }),
+  getAnnotationLayerFnHelp: () =>
+    i18n.translate('expressionXY.annotationLayer.help', {
+      defaultMessage: `Configure an annotation layer in the xy chart`,
+    }),
+  getAnnotationLayerHideHelp: () =>
+    i18n.translate('expressionXY.annotationLayer.hide.help', {
+      defaultMessage: 'Show / hide details',
+    }),
+  getAnnotationLayerAnnotationsHelp: () =>
+    i18n.translate('expressionXY.annotationLayer.annotations.help', {
+      defaultMessage: 'Annotations',
     }),
 };

@@ -9,12 +9,8 @@
 import { i18n } from '@kbn/i18n';
 import { Dimension, prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
 import { AxisExtentModes, LayerTypes, ValueLabelModes, XY_VIS_RENDERER } from '../constants';
-import {
-  AxisExtentConfigResult,
-  DataLayerConfigResult,
-  XYLayerConfigResult,
-  XyVisFn,
-} from '../types';
+import { appendLayerIds } from '../helpers';
+import { AxisExtentConfigResult, DataLayerConfigResult, XYLayerConfig, XyVisFn } from '../types';
 import { getLayerDimensions } from '../utils';
 
 const errors = {
@@ -65,15 +61,11 @@ const validateExtent = (
 
 export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   const { dataLayers = [], referenceLineLayers = [], annotationLayers = [], ...restArgs } = args;
-  const inputLayers: Array<XYLayerConfigResult | undefined> = [
-    ...dataLayers,
-    ...referenceLineLayers,
-    ...annotationLayers,
+  const layers: XYLayerConfig[] = [
+    ...appendLayerIds(dataLayers, 'dataLayers'),
+    ...appendLayerIds(referenceLineLayers, 'referenceLineLayers'),
+    ...appendLayerIds(annotationLayers, 'annotationLayers'),
   ];
-
-  const layers: XYLayerConfigResult[] = inputLayers.filter(
-    (layer): layer is XYLayerConfigResult => layer !== undefined
-  );
 
   if (handlers.inspectorAdapters.tables) {
     const layerDimensions = layers.reduce<Dimension[]>((dimensions, layer) => {

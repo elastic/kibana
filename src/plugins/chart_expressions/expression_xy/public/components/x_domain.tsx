@@ -11,7 +11,7 @@ import React from 'react';
 import moment from 'moment';
 import { Endzones } from '@kbn/charts-plugin/public';
 import { search } from '@kbn/data-plugin/public';
-import type { CommonXYDataLayerConfigResult } from '../../common';
+import type { CommonXYDataLayerConfig } from '../../common';
 
 export interface XDomain {
   min?: number;
@@ -19,7 +19,7 @@ export interface XDomain {
   minInterval?: number;
 }
 
-export const getAppliedTimeRange = (layers: CommonXYDataLayerConfigResult[]) => {
+export const getAppliedTimeRange = (layers: CommonXYDataLayerConfig[]) => {
   return layers
     .map(({ xAccessor, table }) => {
       const xColumn = table.columns.find((col) => col.id === xAccessor);
@@ -28,7 +28,7 @@ export const getAppliedTimeRange = (layers: CommonXYDataLayerConfigResult[]) => 
       if (timeRange) {
         return {
           timeRange,
-          field: xColumn.meta.field,
+          field: xColumn?.meta.field,
         };
       }
     })
@@ -36,7 +36,7 @@ export const getAppliedTimeRange = (layers: CommonXYDataLayerConfigResult[]) => 
 };
 
 export const getXDomain = (
-  layers: CommonXYDataLayerConfigResult[],
+  layers: CommonXYDataLayerConfig[],
   minInterval: number | undefined,
   isTimeViz: boolean,
   isHistogram: boolean

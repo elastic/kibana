@@ -10,6 +10,7 @@ export * from './xy_vis';
 export * from './layered_xy_vis';
 export * from './legend_config';
 export * from './annotation_layer';
+export * from './extended_annotation_layer';
 export * from './y_axis_config';
 export * from './extended_y_axis_config';
 export * from './data_layer';

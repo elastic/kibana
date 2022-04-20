@@ -18,7 +18,7 @@ import { PaletteRegistry } from '@kbn/coloring';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin';
 import {
-  CommonXYDataLayerConfigResult,
+  CommonXYDataLayerConfig,
   EndValue,
   FittingFunction,
   ValueLabelMode,
@@ -34,7 +34,7 @@ import {
 } from '../helpers';
 
 interface Props {
-  layers: CommonXYDataLayerConfigResult[];
+  layers: CommonXYDataLayerConfig[];
   formatFactory: FormatFactory;
   chartHasMoreThanOneBarSeries?: boolean;
   yAxesConfiguration: GroupsConfiguration;
@@ -42,7 +42,7 @@ interface Props {
   fittingFunction?: FittingFunction;
   endValue?: EndValue | undefined;
   paletteService: PaletteRegistry;
-  areLayersAlreadyFormatted: Record<number, Record<string, boolean>>;
+  areLayersAlreadyFormatted: Record<string, Record<string, boolean>>;
   syncColors?: boolean;
   timeZone?: string;
   emphasizeFitting?: boolean;
@@ -71,7 +71,7 @@ export const DataLayers: FC<Props> = ({
   const colorAssignments = getColorAssignments(layers, formatFactory);
   return (
     <>
-      {layers.flatMap((layer, layerIndex) =>
+      {layers.flatMap((layer) =>
         layer.accessors.map((accessor, accessorIndex) => {
           const { splitAccessor, seriesType, xAccessor, table, columnToLabel, xScaleType } = layer;
           const columnToLabelMap: Record<string, string> = columnToLabel
@@ -116,14 +116,13 @@ export const DataLayers: FC<Props> = ({
 
           const seriesProps = getSeriesProps({
             layer,
-            layerId: layerIndex,
             accessor,
             chartHasMoreThanOneBarSeries,
             colorAssignments,
             formatFactory,
             columnToLabelMap,
             paletteService,
-            alreadyFormattedColumns: areLayersAlreadyFormatted[layerIndex] ?? {},
+            alreadyFormattedColumns: areLayersAlreadyFormatted[layer.layerId] ?? {},
             syncColors,
             yAxis,
             timeZone,
@@ -131,7 +130,7 @@ export const DataLayers: FC<Props> = ({
             fillOpacity,
           });
 
-          const index = `${layerIndex}-${accessorIndex}`;
+          const index = `${layer.layerId}-${accessorIndex}`;
 
           const curve = curveType ? CurveType[curveType] : undefined;
 
