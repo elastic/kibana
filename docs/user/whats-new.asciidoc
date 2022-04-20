@@ -79,7 +79,7 @@ image::images/highlights-lens-discover.gif[Seamlessly move from Lens to Discover
 [float]
 ==== Enhancements to visualization editors
 
-{kib} offers even more ways to create visualizations:
+{kib} now offers even more ways to create visualizations:
 
 * **Metric visualization.** Use the new Metric visualization type in **Lens**
 to show the latest or earliest data, or the last value.
