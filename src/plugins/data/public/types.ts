@@ -15,6 +15,9 @@ import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { Setup as InspectorSetup } from '@kbn/inspector-plugin/public';
+import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
 import { DatatableUtilitiesService } from '../common';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
@@ -22,9 +25,6 @@ import type { ISearchSetup, ISearchStart } from './search';
 import { QuerySetup, QueryStart } from './query';
 import { DataViewsContract } from './data_views';
 import { NowProviderPublicContract } from './now_provider';
-import { ScreenshotModePluginStart } from '../../screenshot_mode/public';
-import { SharePluginStart } from '../../share/public';
-import { ManagementSetup } from '../../management/public';
 
 export interface DataSetupDependencies {
   bfetch: BfetchPublicSetup;

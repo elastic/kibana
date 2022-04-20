@@ -8,12 +8,9 @@
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
 
-import type { CoreSetup, Logger } from 'kibana/server';
-import { coreMock, httpServerMock } from '../../../../../core/server/mocks';
-import type {
-  PluginStart as DataPluginStart,
-  DataRequestHandlerContext,
-} from 'src/plugins/data/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import type { PluginStart as DataPluginStart, DataRequestHandlerContext } from '../..';
 import { dataPluginMock } from '../../mocks';
 import { registerSessionRoutes } from './session';
 

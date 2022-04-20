@@ -9,14 +9,14 @@
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment } from 'react';
-import { CoreStart } from 'kibana/public';
-import { UISession } from '../../types';
-import { IClickActionDescriptor } from '..';
+import { CoreStart } from '@kbn/core/public';
 import {
   CodeEditor,
   createKibanaReactContext,
   toMountPoint,
-} from '../../../../../../../kibana_react/public';
+} from '@kbn/kibana-react-plugin/public';
+import { UISession } from '../../types';
+import { IClickActionDescriptor } from '..';
 import './inspect_button.scss';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 

@@ -7,15 +7,15 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
-import { CoreSetup, CoreStart } from 'kibana/public';
+import { CoreSetup, CoreStart } from '@kbn/core/public';
 import moment from 'moment';
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { SavedObjectsFindResponse } from 'src/core/server';
-import { SessionsClient } from 'src/plugins/data/public/search';
-import { SearchSessionStatus } from 'src/plugins/data/common';
-import { sharePluginMock } from 'src/plugins/share/public/mocks';
-import { SharePluginStart } from 'src/plugins/share/public';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
+import { SessionsClient } from '../../..';
+import { SearchSessionStatus } from '../../../../../common';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import { SearchSessionsMgmtAPI } from './api';
 import { SearchSessionsConfigSchema } from '../../../../../config';
 

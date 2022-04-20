@@ -18,15 +18,12 @@ import {
   SavedObject,
   SavedObjectsFindOptions,
   SavedObjectsErrorHelpers,
-} from '../../../../../core/server';
-import type {
-  AuthenticatedUser,
-  SecurityPluginSetup,
-} from '../../../../../../x-pack/plugins/security/server';
+} from '@kbn/core/server';
+import type { AuthenticatedUser, SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../../../x-pack/plugins/task_manager/server';
+} from '@kbn/task-manager-plugin/server';
 import {
   IKibanaSearchRequest,
   ISearchOptions,
@@ -36,10 +33,7 @@ import {
   SearchSessionSavedObjectAttributes,
   SearchSessionStatus,
 } from '../../../common';
-import {
-  ISearchSessionService,
-  NoSearchIdInSessionError,
-} from '../../../../../../src/plugins/data/server';
+import { ISearchSessionService, NoSearchIdInSessionError } from '../..';
 import { createRequestHash } from './utils';
 import { ConfigSchema, SearchSessionsConfigSchema } from '../../../config';
 import {

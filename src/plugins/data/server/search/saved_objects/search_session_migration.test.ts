@@ -12,9 +12,9 @@ import {
   SearchSessionSavedObjectAttributesPre$7$14$0,
   SearchSessionSavedObjectAttributesPre$8$0$0,
 } from './search_session_migration';
-import { SavedObject } from 'src/core/types';
-import { SEARCH_SESSION_TYPE, SearchSessionStatus } from 'src/plugins/data/common';
-import { SavedObjectMigrationContext } from 'kibana/server';
+import { SavedObject } from '@kbn/core/types';
+import { SEARCH_SESSION_TYPE, SearchSessionStatus } from '../../../common';
+import { SavedObjectMigrationContext } from '@kbn/core/server';
 
 describe('7.12.0 -> 7.13.0', () => {
   const mockCompletedSessionSavedObject: SavedObject<SearchSessionSavedObjectAttributesPre$7$13$0> =

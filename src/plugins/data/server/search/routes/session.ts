@@ -7,8 +7,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Logger } from 'src/core/server';
-import { reportServerError } from '../../../../kibana_utils/server';
+import { Logger } from '@kbn/core/server';
+import { reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { DataPluginRouter } from '../types';
 
 const STORE_SEARCH_SESSIONS_ROLE_TAG = `access:store_search_session`;

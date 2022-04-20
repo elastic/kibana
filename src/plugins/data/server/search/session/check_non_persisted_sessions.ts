@@ -17,7 +17,7 @@ import {
   SearchSessionSavedObjectAttributes,
   SearchSessionStatus,
   KueryNode,
-} from '@kbn/data-plugin/common';
+} from '../../../common';
 import { checkSearchSessionsByPage, getSearchSessionsPage$ } from './get_search_session_page';
 import { CheckSearchSessionsDeps, SearchStatus } from './types';
 import { bulkUpdateSessions, getAllSessionsStatusUpdates } from './update_session_status';

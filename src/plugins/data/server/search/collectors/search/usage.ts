@@ -7,7 +7,7 @@
  */
 
 import { once, debounce } from 'lodash';
-import type { CoreSetup, Logger } from 'kibana/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { IEsSearchResponse, ISearchOptions } from '../../../../common';
 import { isCompleteResponse } from '../../../../common';
 import { CollectedUsage } from './register';

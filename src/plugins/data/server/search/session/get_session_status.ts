@@ -7,10 +7,7 @@
  */
 
 import moment from 'moment';
-import {
-  SearchSessionSavedObjectAttributes,
-  SearchSessionStatus,
-} from '../../../../../../src/plugins/data/common/';
+import { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '../../../common';
 import { SearchStatus } from './types';
 import { SearchSessionsConfigSchema } from '../../../config';
 

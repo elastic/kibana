@@ -18,14 +18,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { capitalize } from 'lodash';
 import React from 'react';
-import { RedirectAppLinks } from '../../../../../../kibana_react/public';
+import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import { SearchSessionStatus } from '../../../../../common';
 import { OnActionComplete, PopoverActionsMenu, TableText } from '../components';
 import { StatusIndicator } from '../components/status';
-import { dateString } from '../lib/date_string';
+import { dateString } from './date_string';
 import { SearchSessionsMgmtAPI } from './api';
 import { getExpirationStatus } from './get_expiration_status';
 import { UISession } from '../types';

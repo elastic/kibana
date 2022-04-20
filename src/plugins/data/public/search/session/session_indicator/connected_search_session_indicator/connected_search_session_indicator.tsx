@@ -11,10 +11,10 @@ import { debounce, distinctUntilChanged, mapTo, switchMap, tap } from 'rxjs/oper
 import { merge, of, timer } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
+import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { ApplicationStart, IBasePath } from '@kbn/core/public';
 import { SearchSessionIndicator, SearchSessionIndicatorRef } from '../search_session_indicator';
-import { RedirectAppLinks } from '../../../../../../kibana_react/public';
-import { IStorageWrapper } from '../../../../../../kibana_utils/public';
-import { ApplicationStart, IBasePath } from '../../../../../../../core/public';
 import { useSearchSessionTour } from './search_session_tour';
 import { SearchUsageCollector } from '../../../collectors';
 import { ISessionService } from '../../session_service';

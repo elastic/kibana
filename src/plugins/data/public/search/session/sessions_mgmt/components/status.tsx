@@ -12,7 +12,7 @@ import React, { ReactElement } from 'react';
 import { SearchSessionStatus } from '../../../../../common';
 import { dateString } from '../lib/date_string';
 import { UISession } from '../types';
-import { StatusDef as StatusAttributes, TableText } from './';
+import { StatusDef as StatusAttributes, TableText } from '.';
 
 // Shared helper function
 export const getStatusText = (statusType: string): string => {

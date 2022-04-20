@@ -12,11 +12,17 @@ import {
   Plugin,
   PluginInitializerContext,
   StartServicesAccessor,
-} from 'src/core/public';
+} from '@kbn/core/public';
 import { BehaviorSubject } from 'rxjs';
 import React from 'react';
 import moment from 'moment';
-import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
+import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
 import type { ISearchSetup, ISearchStart } from './types';
 
 import { handleResponse } from './fetch';
@@ -52,9 +58,7 @@ import { AggsService, AggsStartDependencies } from './aggs';
 import { IKibanaSearchResponse, IndexPatternsContract, SearchRequest } from '..';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { createUsageCollector, SearchUsageCollector } from './collectors';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { getEsaggs, getEsdsl, getEql } from './expressions';
-import { ExpressionsSetup } from '../../../expressions/public';
 import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
 import { ConfigSchema } from '../../config';
 import {
@@ -65,13 +69,9 @@ import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { DataPublicPluginStart, DataStartDependencies } from '../types';
 import { NowProviderInternalContract } from '../now_provider';
 import { getKibanaContext } from './expressions/kibana_context';
-import { toMountPoint } from '../../../kibana_react/public';
 import { createConnectedSearchSessionIndicator } from './session/session_indicator';
 
-import { Storage } from '../../../kibana_utils/public';
-import { ScreenshotModePluginStart } from '../../../screenshot_mode/public';
 import { registerSearchSessionsMgmt } from './session/sessions_mgmt';
-import { ManagementSetup } from '../../../management/public';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {

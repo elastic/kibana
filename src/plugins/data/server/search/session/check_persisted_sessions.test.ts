@@ -7,9 +7,9 @@
  */
 
 import { checkPersistedSessionsProgress } from './check_persisted_sessions';
-import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import moment from 'moment';
-import { SavedObjectsClientContract } from '../../../../../../src/core/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import { SearchSessionsConfigSchema } from '../../../config';
 
 describe('checkPersistedSessionsProgress', () => {

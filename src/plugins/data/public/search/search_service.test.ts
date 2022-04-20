@@ -7,13 +7,13 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
-import { coreMock } from '../../../../core/public/mocks';
-import { CoreSetup, CoreStart } from '../../../../core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { CoreSetup, CoreStart } from '@kbn/core/public';
 
 import { SearchService, SearchServiceSetupDependencies } from './search_service';
-import { bfetchPluginMock } from '../../../bfetch/public/mocks';
-import { managementPluginMock } from '../../../management/public/mocks';
-import { screenshotModePluginMock } from '../../../screenshot_mode/public/mocks';
+import { bfetchPluginMock } from '@kbn/bfetch-plugin/public/mocks';
+import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
+import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 
 describe('Search service', () => {
   let searchService: SearchService;

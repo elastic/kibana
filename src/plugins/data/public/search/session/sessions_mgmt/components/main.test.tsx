@@ -8,18 +8,18 @@
 
 import { MockedKeys } from '@kbn/utility-types/jest';
 import { mount, ReactWrapper } from 'enzyme';
-import { CoreSetup, CoreStart, DocLinksStart } from 'kibana/public';
+import { CoreSetup, CoreStart, DocLinksStart } from '@kbn/core/public';
 import moment from 'moment';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { coreMock } from 'src/core/public/mocks';
-import { SearchUsageCollector, SessionsClient } from 'src/plugins/data/public/search';
+import { coreMock } from '@kbn/core/public/mocks';
+import { SearchUsageCollector, SessionsClient } from '../../..';
 import { SearchSessionsMgmtAPI } from '../lib/api';
 import { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { LocaleWrapper } from '../__mocks__';
 import { SearchSessionsMgmtMain } from './main';
-import { SharePluginStart } from 'src/plugins/share/public';
-import { sharePluginMock } from 'src/plugins/share/public/mocks';
+import { SharePluginStart } from '@kbn/share-plugin/public';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { SearchSessionsConfigSchema } from '../../../../../config';
 import { createSearchUsageCollectorMock } from '../../../collectors/mocks';
 

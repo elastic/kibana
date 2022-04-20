@@ -7,14 +7,11 @@
  */
 
 import { checkSearchSessionsByPage, getSearchSessionsPage$ } from './get_search_session_page';
-import {
-  ENHANCED_ES_SEARCH_STRATEGY,
-  SearchSessionStatus,
-} from '../../../../../../src/plugins/data/common';
-import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { ENHANCED_ES_SEARCH_STRATEGY, SearchSessionStatus } from '../../../common';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SearchStatus } from './types';
 import moment from 'moment';
-import { SavedObjectsClientContract } from '../../../../../../src/core/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import { of, Subject, throwError } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { SearchSessionsConfigSchema } from '../../../config';

@@ -10,7 +10,7 @@ import { createHash } from 'crypto';
 import stringify from 'json-stable-stringify';
 import { SavedObjectsFindResult } from '@kbn/core/server';
 import moment from 'moment';
-import { SearchSessionSavedObjectAttributes } from '@kbn/data-plugin/common';
+import { SearchSessionSavedObjectAttributes } from '../../../common';
 
 /**
  * Generate the hash for this request so that, in the future, this hash can be used to look up

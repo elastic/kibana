@@ -12,15 +12,15 @@ import {
   SearchSessionSavedObjectAttributes,
   ENHANCED_ES_SEARCH_STRATEGY,
   EQL_SEARCH_STRATEGY,
-} from '../../../../../../src/plugins/data/common';
-import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+} from '../../../common';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { CheckSearchSessionsDeps, SearchStatus } from './types';
 import moment from 'moment';
 import {
   SavedObjectsBulkUpdateObject,
   SavedObjectsDeleteOptions,
   SavedObjectsClientContract,
-} from '../../../../../../src/core/server';
+} from '@kbn/core/server';
 import { SearchSessionsConfigSchema } from '../../../config';
 
 jest.useFakeTimers();

@@ -17,15 +17,14 @@ import {
   ElasticsearchClient,
   Logger,
   SavedObjectsClientContract,
-} from 'kibana/server';
-import { KueryNode, SearchSessionSavedObjectAttributes } from '../../../common';
-import { IKibanaSearchRequest, ISearchOptions } from '../../../common/search';
-import { SearchSessionsConfigSchema, ConfigSchema } from '../../../config';
-
+} from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../../../../x-pack/plugins/task_manager/server';
+} from '@kbn/task-manager-plugin/server';
+import { KueryNode, SearchSessionSavedObjectAttributes } from '../../../common';
+import { IKibanaSearchRequest, ISearchOptions } from '../../../common/search';
+import { SearchSessionsConfigSchema, ConfigSchema } from '../../../config';
 
 export interface IScopedSearchSessionsClient<T = unknown> {
   getId: (request: IKibanaSearchRequest, options: ISearchOptions) => Promise<string>;

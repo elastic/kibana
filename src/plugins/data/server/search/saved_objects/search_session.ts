@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsType } from 'kibana/server';
+import { SavedObjectsType } from '@kbn/core/server';
 import { SEARCH_SESSION_TYPE } from '../../../common';
 import { searchSessionSavedObjectMigrations } from './search_session_migration';
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectMigrationMap, SavedObjectUnsanitizedDoc } from 'kibana/server';
+import { SavedObjectMigrationMap, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import {
   SearchSessionSavedObjectAttributes as SearchSessionSavedObjectAttributesLatest,
   SearchSessionStatus,

@@ -8,7 +8,7 @@
 
 import { useCallback, useEffect } from 'react';
 import { once } from 'lodash';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { SearchSessionIndicatorRef } from '../search_session_indicator';
 import { SearchSessionState } from '../../search_session_state';
 import { SearchUsageCollector } from '../../../collectors';

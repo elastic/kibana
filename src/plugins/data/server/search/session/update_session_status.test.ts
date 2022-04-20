@@ -7,7 +7,7 @@
  */
 
 import { bulkUpdateSessions, updateSessionStatus } from './update_session_status';
-import { SearchSessionStatus, SearchSessionSavedObjectAttributes } from '@kbn/data-plugin/common';
+import { SearchSessionStatus, SearchSessionSavedObjectAttributes } from '../../../common';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SearchStatus } from './types';
 import moment from 'moment';

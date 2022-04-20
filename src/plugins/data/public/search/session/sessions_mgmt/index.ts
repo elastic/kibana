@@ -7,11 +7,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { CoreStart, HttpStart, I18nStart, IUiSettingsClient } from 'kibana/public';
-import { CoreSetup } from 'kibana/public';
-import type { ISessionsClient, SearchUsageCollector } from 'src/plugins/data/public';
-import type { ManagementSetup } from 'src/plugins/management/public';
-import type { SharePluginStart } from 'src/plugins/share/public';
+import type { CoreStart, HttpStart, I18nStart, IUiSettingsClient } from '@kbn/core/public';
+import { CoreSetup } from '@kbn/core/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { ISessionsClient, SearchUsageCollector } from '../../..';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from '../constants';
 import type { SearchSessionsMgmtAPI } from './lib/api';
 import type { AsyncSearchIntroDocumentation } from './lib/documentation';

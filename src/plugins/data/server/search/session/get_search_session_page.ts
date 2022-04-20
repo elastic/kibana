@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract, Logger } from 'kibana/server';
+import { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import { from, Observable, EMPTY } from 'rxjs';
 import { concatMap } from 'rxjs/operators';
 import {
   SearchSessionSavedObjectAttributes,
   SEARCH_SESSION_TYPE,
   KueryNode,
-} from '../../../../../../src/plugins/data/common';
+} from '../../../common';
 import { CheckSearchSessionsDeps, CheckSearchSessionsFn } from './types';
 import { SearchSessionsConfigSchema } from '../../../config';
 

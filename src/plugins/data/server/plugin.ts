@@ -12,6 +12,11 @@ import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { ConfigSchema } from '../config';
 import type { ISearchSetup, ISearchStart } from './search';
 import { DatatableUtilitiesService } from './datatable_utilities';
@@ -23,11 +28,6 @@ import { AutocompleteService } from './autocomplete';
 import { getUiSettings } from './ui_settings';
 import { QuerySetup } from './query';
 import { AutocompleteSetup } from './autocomplete/autocomplete_service';
-import type {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '../../../../x-pack/plugins/task_manager/server';
-import type { SecurityPluginSetup } from '../../../../x-pack/plugins/security/server';
 
 export interface DataPluginSetup {
   autocomplete: AutocompleteSetup;

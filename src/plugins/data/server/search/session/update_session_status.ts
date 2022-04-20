@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsFindResult, SavedObjectsUpdateResponse } from 'kibana/server';
-import { SearchSessionsConfigSchema } from 'src/plugins/data/config';
+import { SavedObjectsFindResult, SavedObjectsUpdateResponse } from '@kbn/core/server';
+import { SearchSessionsConfigSchema } from '../../../config';
 import {
   SearchSessionRequestInfo,
   SearchSessionSavedObjectAttributes,
   SearchSessionStatus,
-} from '../../../../../../src/plugins/data/common';
+} from '../../../common';
 import { getSearchStatus } from './get_search_status';
 import { getSessionStatus } from './get_session_status';
 import { CheckSearchSessionsDeps, SearchSessionsResponse, SearchStatus } from './types';

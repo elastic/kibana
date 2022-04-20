@@ -9,7 +9,7 @@
 import { EuiTextProps, EuiToolTipProps } from '@elastic/eui';
 import { mount } from 'enzyme';
 import React from 'react';
-import { SearchSessionStatus } from 'src/plugins/data/common';
+import { SearchSessionStatus } from '../../../../../common';
 import { UISession } from '../types';
 import { LocaleWrapper } from '../__mocks__';
 import { getStatusText, StatusIndicator } from './status';
