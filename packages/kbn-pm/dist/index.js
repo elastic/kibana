@@ -52652,7 +52652,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 async function readBazelToolsVersionFile(repoRootPath, versionFilename) {
-  const version = (await Object(_fs__WEBPACK_IMPORTED_MODULE_3__["readFile"])(Object(path__WEBPACK_IMPORTED_MODULE_1__["resolve"])(repoRootPath, versionFilename))).toString().split('\n')[0];
+  const version = (await Object(_fs__WEBPACK_IMPORTED_MODULE_3__["readFile"])(Object(path__WEBPACK_IMPORTED_MODULE_1__["resolve"])(repoRootPath, versionFilename))).toString().trim();
 
   if (!version) {
     throw new Error(`[bazel_tools] Failed on reading bazel tools versions\n ${versionFilename} file do not contain any version set`);
