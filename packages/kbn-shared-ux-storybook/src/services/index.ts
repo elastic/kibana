@@ -14,7 +14,7 @@ import { editorsServiceFactory } from './editors';
 import { httpServiceFactory } from './http';
 import { platformServiceFactory } from './platform';
 import { userPermissionsServiceFactory } from './permissions';
-import { dataServiceFactory } from './data';
+import { dataServiceFactory, DataServiceFactoryConfig } from './data';
 
 export { applicationServiceFactory } from './application';
 export { docLinksServiceFactory } from './doc_links';
@@ -34,5 +34,7 @@ export const servicesFactory: ServiceFactory<SharedUxServices, {}> = (params) =>
   http: httpServiceFactory(params),
   permissions: userPermissionsServiceFactory(),
   platform: platformServiceFactory(params),
-  data: dataServiceFactory(),
+  data: dataServiceFactory(params as DataServiceFactoryConfig),
 });
+
+export type { DataServiceFactoryConfig } from './data';

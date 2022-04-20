@@ -31,15 +31,15 @@ export { userPermissionsServiceFactory } from './permissions.mock';
 export { platformServiceFactory } from './platform.mock';
 export { dataServiceFactory } from './data.mock';
 
-export interface MockServicesFactoryConfig {
+export interface MockServicesFactoryParams {
   config: MockDataServiceFactoryConfig;
 }
 
 /**
  * A factory function for creating a Jest-based implementation of `SharedUxServices`.
  */
-export const mockServicesFactory: (params?: MockServicesFactoryConfig) => SharedUxServices = (
-  params?: MockServicesFactoryConfig
+export const mockServicesFactory: (params?: MockServicesFactoryParams) => SharedUxServices = (
+  params?: MockServicesFactoryParams
 ) => ({
   application: applicationServiceFactory(),
   docLinks: docLinksServiceFactory(),

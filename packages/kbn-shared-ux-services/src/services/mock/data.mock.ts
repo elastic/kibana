@@ -26,7 +26,7 @@ export interface MockDataServiceFactoryConfig {
 export const dataServiceFactory: (config?: MockDataServiceFactoryConfig) => SharedUxDataService = (
   config?: MockDataServiceFactoryConfig
 ) => ({
-  hasESData: () => Promise.resolve(config?.hasESData || true),
+  hasESData: () => Promise.resolve(config?.hasESData || false),
   hasDataView: () => Promise.resolve(config?.hasDataView || false),
   hasUserDataView: () => Promise.resolve(config?.hasUserDataView || false),
 });

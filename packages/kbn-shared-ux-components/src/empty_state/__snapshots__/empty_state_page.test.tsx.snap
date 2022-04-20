@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`empty state page renders NoDataPage 1`] = `
+exports[`empty state page renders NoDataConfigPage 1`] = `
 <SharedUxServicesProvider
   application={
     Object {

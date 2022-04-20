@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/dom';
 import { act } from 'react-dom/test-utils';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -31,7 +30,7 @@ describe('empty state page', () => {
   };
   const onDataViewCreated = jest.fn();
   const config = {
-    hasESData: true,
+    hasESData: false,
     hasDataView: false,
     hasUserDataView: false,
   };
@@ -40,7 +39,7 @@ describe('empty state page', () => {
     jest.resetAllMocks();
   });
 
-  test('renders NoDataPage', async () => {
+  test('renders NoDataConfigPage', async () => {
     const services = mockServicesFactory({ config: { ...config, hasESData: false } });
     const component = mountWithIntl(
       <SharedUxServicesProvider {...services}>
@@ -48,15 +47,16 @@ describe('empty state page', () => {
       </SharedUxServicesProvider>
     );
 
-    await waitFor(() => {
-      expect(component).toMatchSnapshot();
-      expect(component.find(NoDataConfigPage).length).toBe(1);
-      expect(component.find(NoDataViews).length).toBe(0);
-    });
+    await act(() => new Promise(setImmediate));
+    component.update();
+
+    expect(component).toMatchSnapshot();
+    expect(component.find(NoDataConfigPage).length).toBe(1);
+    expect(component.find(NoDataViews).length).toBe(0);
   });
 
   test('renders NoDataViews', async () => {
-    const services = mockServicesFactory({ config });
+    const services = mockServicesFactory({ config: { ...config, hasESData: true } });
     const component = mountWithIntl(
       <SharedUxServicesProvider {...services}>
         <EmptyStatePage noDataConfig={noDataConfig} onDataViewCreated={onDataViewCreated} />

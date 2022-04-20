@@ -1,0 +1,14 @@
+**id:** sharedUX/Components/EmptyStatePage
+**slug:** /shared-ux-components/empty_state_page
+**title:** Empty State Page
+**summary:** A page to be displayed when there is no data in Elasticsearch, or no data views
+**tags:** ['shared-ux', 'component']
+**date:** 2022-04-20
+
+---
+
+When there is no data in Elasticsearch, or there haven't been any data views created yet, we want to display an appropriate message to the user and facilitate addition of integrations and creation of data views.
+
+The component uses a data service from the `shared_ux` plugin to check for data.  You must wrap your plugin app in the `ServicesContext` provided by the start contract of the `shared_ux` plugin to use it.
+
+Based on the result of the data service check, the component renders either a `NoDataViews` component, or a `PageTemplate > NoDataConfigPage` component.

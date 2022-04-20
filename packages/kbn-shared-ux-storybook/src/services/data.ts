@@ -8,16 +8,27 @@
 
 import { ServiceFactory, SharedUxDataService } from '@kbn/shared-ux-services';
 
-/**
- * A factory function for creating a Storybook implementation of `SharedUxDataService`.
- */
-export type SharedUxDataServiceFactory = ServiceFactory<SharedUxDataService>;
+export interface DataServiceFactoryConfig {
+  hasESData: boolean;
+  hasDataView: boolean;
+  hasUserDataView: boolean;
+}
 
 /**
  * A factory function for creating a Storybook implementation of `SharedUxDataService`.
  */
-export const dataServiceFactory: SharedUxDataServiceFactory = () => ({
-  hasESData: () => Promise.resolve(true),
-  hasDataView: () => Promise.resolve(false),
-  hasUserDataView: () => Promise.resolve(false),
-});
+export type SharedUxDataServiceFactory = ServiceFactory<
+  SharedUxDataService,
+  DataServiceFactoryConfig
+>;
+
+/**
+ * A factory function for creating a Storybook implementation of `SharedUxDataService`.
+ */
+export const dataServiceFactory: SharedUxDataServiceFactory = (params) => {
+  return {
+    hasESData: () => Promise.resolve(params.hasESData || false),
+    hasDataView: () => Promise.resolve(params.hasDataView || false),
+    hasUserDataView: () => Promise.resolve(params.hasUserDataView || false),
+  };
+};

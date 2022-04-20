@@ -18,3 +18,5 @@ export {
   userPermissionsServiceFactory,
   dataServiceFactory,
 } from './services';
+
+export type { DataServiceFactoryConfig } from './services';
