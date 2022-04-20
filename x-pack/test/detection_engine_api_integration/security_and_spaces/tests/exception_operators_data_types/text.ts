@@ -558,7 +558,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         runner.test('will return 3 results if we have a list that includes 1 text', async () => {
           const filename = await importFile(supertest, log, 'text', ['one']);
-          const rule = getRuleForSignalTesting(['text_no_spaces']);
+          const rule = getRuleForSignalTesting(['text_no_spaces'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -581,7 +581,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         runner.test('will return 2 results if we have a list that includes 2 text', async () => {
           const filename = await importFile(supertest, log, 'text', ['one', 'three']);
-          const rule = getRuleForSignalTesting(['text_no_spaces']);
+          const rule = getRuleForSignalTesting(['text_no_spaces'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -609,7 +609,7 @@ export default ({ getService }: FtrProviderContext) => {
             'three',
             'four',
           ]);
-          const rule = getRuleForSignalTesting(['text_no_spaces']);
+          const rule = getRuleForSignalTesting(['text_no_spaces'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -746,7 +746,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         runner.test('will return 1 result if we have a list that excludes 1 text', async () => {
           const filename = await importTextFile(supertest, log, 'text', ['one']);
-          const rule = getRuleForSignalTesting(['text_no_spaces']);
+          const rule = getRuleForSignalTesting(['text_no_spaces'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -769,7 +769,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         runner.test('will return 2 results if we have a list that excludes 2 text', async () => {
           const filename = await importTextFile(supertest, log, 'text', ['one', 'three']);
-          const rule = getRuleForSignalTesting(['text_no_spaces']);
+          const rule = getRuleForSignalTesting(['text_no_spaces'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -797,7 +797,7 @@ export default ({ getService }: FtrProviderContext) => {
             'three',
             'four',
           ]);
-          const rule = getRuleForSignalTesting(['text_no_spaces']);
+          const rule = getRuleForSignalTesting(['text_no_spaces'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {

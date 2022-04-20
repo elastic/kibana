@@ -516,7 +516,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         runner.test('will return 3 results if we have a list that includes 1 long', async () => {
           const filename = await importFile(supertest, log, 'long', ['1']);
-          const rule = getRuleForSignalTesting(['long_as_string']);
+          const rule = getRuleForSignalTesting(['long_as_string'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -539,7 +539,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         runner.test('will return 2 results if we have a list that includes 2 long', async () => {
           const filename = await importFile(supertest, log, 'long', ['1', '3']);
-          const rule = getRuleForSignalTesting(['long_as_string']);
+          const rule = getRuleForSignalTesting(['long_as_string'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -562,7 +562,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         runner.test('will return 0 results if we have a list that includes all long', async () => {
           const filename = await importFile(supertest, log, 'long', ['1', '2', '3', '4']);
-          const rule = getRuleForSignalTesting(['long_as_string']);
+          const rule = getRuleForSignalTesting(['long_as_string'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -590,7 +590,7 @@ export default ({ getService }: FtrProviderContext) => {
               '2',
               '3',
             ]);
-            const rule = getRuleForSignalTesting(['long_as_string']);
+            const rule = getRuleForSignalTesting(['long_as_string'], '');
             const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
               [
                 {
@@ -697,7 +697,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         runner.test('will return 1 result if we have a list that excludes 1 long', async () => {
           const filename = await importFile(supertest, log, 'long', ['1']);
-          const rule = getRuleForSignalTesting(['long_as_string']);
+          const rule = getRuleForSignalTesting(['long_as_string'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -720,7 +720,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         runner.test('will return 2 results if we have a list that excludes 2 long', async () => {
           const filename = await importFile(supertest, log, 'long', ['1', '3']);
-          const rule = getRuleForSignalTesting(['long_as_string']);
+          const rule = getRuleForSignalTesting(['long_as_string'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -743,7 +743,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         runner.test('will return 4 results if we have a list that excludes all long', async () => {
           const filename = await importFile(supertest, log, 'long', ['1', '2', '3', '4']);
-          const rule = getRuleForSignalTesting(['long_as_string']);
+          const rule = getRuleForSignalTesting(['long_as_string'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -772,7 +772,7 @@ export default ({ getService }: FtrProviderContext) => {
               '2',
               '3',
             ]);
-            const rule = getRuleForSignalTesting(['long_as_string']);
+            const rule = getRuleForSignalTesting(['long_as_string'], '');
             const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
               [
                 {
