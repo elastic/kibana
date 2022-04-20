@@ -11,7 +11,8 @@ import { PassThrough } from 'stream';
 import * as Rx from 'rxjs';
 import { toArray } from 'rxjs/operators';
 import { OptimizerUpdate } from '@kbn/optimizer';
-import { observeLines, createReplaceSerializer } from '@kbn/dev-utils';
+import { observeLines } from '@kbn/stdio-dev-helpers';
+import { createReplaceSerializer } from '@kbn/jest-serializers';
 
 import { Optimizer, Options } from './optimizer';
 
