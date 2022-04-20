@@ -157,21 +157,29 @@ image::images/highlights-alerts-rule-history.png[Rule history table in Alerting]
 ==== Configure rules
 
 *Alerting* introduces configurable guardrails so that as an admin,
-you can apply your policies on a level deeper than role-based access control (RBAC) and fully stay on top of
-the stress that the alerting system may put on your instance, in case your users misconfigured rules.
-This way you have peace of mind that your instance remains performant.
+you can apply your policies on a level deeper than role-based access control
+(RBAC) and fully stay on top of the stress that the alerting system may put on
+your instance, in case your users misconfigured rules. This way you have peace
+of mind that your instance remains performant.
 
-Specifically, in the kibana.yml file:
+Specifically, in the `kibana.yml` file:
 
-* Configure your rule queries to timeout after a custom time expires without the query returning.
-You can also do this on a per rule type basis with the `xpack.alerting.run.timeout` setting.
+* Configure your rule queries to timeout after a custom time expires without the
+query returning. You can also do this on a per rule type basis with the
+`xpack.alerting.run.timeout` setting.
+* Configure a minimum value for the interval with which your rules run with the
+`xpack.alerting.rules.minimumScheduleInterval.value` setting. Strictly enforce
+the minimum interval or just display warnings on the UI with the
+`xpack.alerting.rules.minimumScheduleInterval.enforce` setting.
 
-* Configure a minimum value for the interval with which your rules run with the `xpack.alerting.rules.minimumScheduleInterval.value` setting. Strictly enforce the
-minimum interval or just display warnings on the UI with the `xpack.alerting.rules.minimumScheduleInterval.enforce` setting.
+* Configure the maximum number of actions that a rule can generate with the
+`xpack.alerting.rules.run.actions.max` setting. Specify a different cap for your
+different rule types with the `xpack.alerting.rules.run.ruleTypeOverrides`
+setting, depending on your needs.
 
-* Configure the maximum number of actions that a rule can generate with the `xpack.alerting.rules.run.actions.max` setting. Specify a different cap for your
-different rule types with the `xpack.alerting.rules.run.ruleTypeOverrides` setting, depending on your needs.
-For more information, refer to {kibana-ref}/alert-action-settings-kb.html#action-settings[Action settings].
+For more information, refer to
+{kibana-ref}/alert-action-settings-kb.html#action-settings[Action settings].
+
 [float]
 ==== New xMatters connector
 
