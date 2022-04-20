@@ -124,6 +124,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
         // but fallback to bytes just in case
         size_in_bytes_formatted: dataStream.store_size || `${dataStream.store_size_bytes}b`,
         dashboards: [],
+        serviceDetails: null,
       };
 
       // Query backing indices to extract data stream dataset, namespace, and type values
@@ -171,6 +172,18 @@ export const getListHandler: RequestHandler = async (context, request, response)
                 size: 1,
               },
             },
+            serviceName: {
+              terms: {
+                field: 'service.name',
+                size: 1,
+              },
+            },
+            environment: {
+              terms: {
+                field: 'service.environment',
+                size: 1,
+              },
+            },
           },
         },
       });
@@ -179,7 +192,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
         string,
         estypes.AggregationsRateAggregate
       >;
-      const { dataset, namespace, type } = dataStreamAggs as Record<
+      const { dataset, namespace, type, serviceName, environment } = dataStreamAggs as Record<
         string,
         estypes.AggregationsMultiBucketAggregateBase<{ key?: string; value?: number }>
       >;
@@ -195,6 +208,17 @@ export const getListHandler: RequestHandler = async (context, request, response)
         (namespace.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '';
       dataStreamResponse.type =
         (type.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '';
+      const serviceNameValue =
+        (serviceName.buckets as Array<{ key?: string; value?: number }>)[0]?.key || null;
+      const environmentValue =
+        (environment.buckets as Array<{ key?: string; value?: number }>)[0]?.key || null;
+
+      if (serviceNameValue && environmentValue) {
+        dataStreamResponse.serviceDetails = {
+          serviceName: serviceNameValue,
+          environment: environmentValue,
+        };
+      }
 
       // Find package saved object
       const pkgName = dataStreamResponse.package;

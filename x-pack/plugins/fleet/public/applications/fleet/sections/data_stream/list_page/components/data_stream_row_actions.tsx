@@ -8,10 +8,14 @@
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import useAsync from 'react-use/lib/useAsync';
 
 import type { DataStream } from '../../../../types';
 import { useKibanaLink } from '../../../../hooks';
+import { useLocator } from '../../../../../../hooks/use_locator';
 import { ContextMenuActions } from '../../../../components';
+
+import { isAPMIntegration, getAPMServicenHrefFor } from './helpers';
 
 export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastream }) => {
   const { dashboards } = datastream;
@@ -33,7 +37,28 @@ export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastre
     defaultMessage: 'View dashboards',
   });
 
-  if (!dashboards || dashboards.length === 0) {
+  const viewServiceInApmActionTitle = i18n.translate(
+    'xpack.fleet.dataStreamList.viewServiceInApmActionText',
+    {
+      defaultMessage: 'View Service in APM',
+    }
+  );
+
+  const apmLocator = useLocator('APM_LOCATOR');
+  const apmLinkState = useAsync(() => getAPMServicenHrefFor(datastream, apmLocator));
+
+  if (isAPMIntegration(datastream) && !(apmLinkState.loading || apmLinkState.error)) {
+    panels.push({
+      id: 0,
+      items: [
+        {
+          icon: 'apmApp',
+          href: apmLinkState.value,
+          name: viewServiceInApmActionTitle,
+        },
+      ],
+    });
+  } else if (!dashboards || dashboards.length === 0) {
     panels.push({
       id: 0,
       items: [
@@ -57,28 +82,30 @@ export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastre
       ],
     });
   } else {
-    panels.push({
-      id: 0,
-      items: [
-        {
-          icon: 'dashboardApp',
-          panel: 1,
-          name: actionNamePlural,
-        },
-      ],
-    });
-    panels.push({
-      id: 1,
-      title: panelTitle,
-      items: dashboards.map((dashboard) => {
-        return {
-          icon: 'dashboardApp',
-          /* eslint-disable-next-line react-hooks/rules-of-hooks */
-          href: useKibanaLink(`/dashboard/${dashboard.id || ''}`),
-          name: dashboard.title,
-        };
-      }),
-    });
+    panels.push(
+      {
+        id: 0,
+        items: [
+          {
+            icon: 'dashboardApp',
+            panel: 1,
+            name: actionNamePlural,
+          },
+        ],
+      },
+      {
+        id: 1,
+        title: panelTitle,
+        items: dashboards.map((dashboard) => {
+          return {
+            icon: 'dashboardApp',
+            /* eslint-disable-next-line react-hooks/rules-of-hooks */
+            href: useKibanaLink(`/dashboard/${dashboard.id || ''}`),
+            name: dashboard.title,
+          };
+        }),
+      }
+    );
   }
 
   return <ContextMenuActions panels={panels} />;
