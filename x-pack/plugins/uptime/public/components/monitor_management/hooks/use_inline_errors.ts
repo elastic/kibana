@@ -19,6 +19,7 @@ import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
 const sortFieldMap: Record<string, string> = {
   ['name.keyword']: 'monitor.name',
   ['urls.keyword']: 'url.full',
+  ['type.keyword']: 'monitor.type',
   '@timestamp': '@timestamp',
 };
 
