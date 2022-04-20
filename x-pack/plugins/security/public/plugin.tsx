@@ -5,23 +5,22 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type {
   CoreSetup,
   CoreStart,
   HttpSetup,
   Plugin,
   PluginInitializerContext,
-} from 'src/core/public';
-import type { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
-import type { HomePublicPluginSetup } from 'src/plugins/home/public';
-import type { ManagementSetup, ManagementStart } from 'src/plugins/management/public';
+} from '@kbn/core/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { i18n } from '@kbn/i18n';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
-import type { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
-import type { FeaturesPluginStart } from '../../features/public';
-import type { LicensingPluginSetup } from '../../licensing/public';
-import type { SpacesPluginStart } from '../../spaces/public';
 import { SecurityLicenseService } from '../common/licensing';
 import type { SecurityLicense } from '../common/licensing';
 import { accountManagementApp } from './account_management';
@@ -126,7 +125,7 @@ export class SecurityPlugin
         icon: 'securityApp',
         path: '/app/management/security/roles',
         showOnHomePage: true,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin',
         order: 600,
       });
     }

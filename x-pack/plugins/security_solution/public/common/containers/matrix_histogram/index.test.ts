@@ -6,12 +6,12 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana } from '../../lib/kibana';
 import { useMatrixHistogram, useMatrixHistogramCombined } from '.';
 import { MatrixHistogramType } from '../../../../common/search_strategy';
 import { TestProviders } from '../../mock/test_providers';
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../lib/kibana');
 
 const basicResponse = {
   isPartial: false,

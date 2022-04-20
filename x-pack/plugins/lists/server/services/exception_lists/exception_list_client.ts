@@ -10,7 +10,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsClosePointInTimeResponse,
   SavedObjectsOpenPointInTimeResponse,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import {
   ExceptionListItemSchema,
   ExceptionListSchema,

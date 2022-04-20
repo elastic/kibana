@@ -9,7 +9,6 @@ import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import { BrowserFields } from '../../../../../../common/containers/source';
 import { Ecs } from '../../../../../../../common/ecs';
 import { DraggableBadge } from '../../../../../../common/components/draggables';
 import { OverflowField } from '../../../../../../common/components/tables/helpers';
@@ -251,7 +250,6 @@ export const SystemGenericFileLine = React.memo<Props>(
 SystemGenericFileLine.displayName = 'SystemGenericFileLine';
 
 interface GenericDetailsProps {
-  browserFields: BrowserFields;
   contextId: string;
   data: Ecs;
   isDraggable?: boolean;

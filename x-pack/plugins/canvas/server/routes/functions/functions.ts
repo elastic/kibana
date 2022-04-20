@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { serializeProvider } from '../../../../../../src/plugins/expressions/common';
-import { RouteInitializerDeps } from '../';
+import { serializeProvider } from '@kbn/expressions-plugin/common';
+import { RouteInitializerDeps } from '..';
 import { API_ROUTE_FUNCTIONS } from '../../../common/lib/constants';
 
 interface FunctionCall {

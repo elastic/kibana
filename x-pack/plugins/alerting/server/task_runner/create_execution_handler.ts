@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
+import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plugin/server';
 import { transformActionParams } from './transform_action_params';
-import { asSavedObjectExecutionSource } from '../../../actions/server';
-import { SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { injectActionParams } from './inject_action_params';
 import { AlertInstanceContext, AlertInstanceState, RuleTypeParams, RuleTypeState } from '../types';
 
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import { isEphemeralTaskRejectedDueToCapacityError } from '../../../task_manager/server';
 import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
 import { ActionsCompletion, CreateExecutionHandlerOptions, ExecutionHandlerOptions } from './types';
 
@@ -107,7 +107,7 @@ export function createExecutionHandler<
         }),
       }));
 
-    alertExecutionStore.numberOfScheduledActions += actions.length;
+    alertExecutionStore.numberOfGeneratedActions += actions.length;
 
     const ruleLabel = `${ruleType.id}:${ruleId}: '${ruleName}'`;
 
@@ -115,7 +115,7 @@ export function createExecutionHandler<
     let ephemeralActionsToSchedule = maxEphemeralActionsPerRule;
 
     for (const action of actions) {
-      if (alertExecutionStore.numberOfTriggeredActions >= ruleType.config!.execution.actions.max) {
+      if (alertExecutionStore.numberOfTriggeredActions >= ruleType.config!.run.actions.max) {
         alertExecutionStore.triggeredActionsStatus = ActionsCompletion.PARTIAL;
         break;
       }

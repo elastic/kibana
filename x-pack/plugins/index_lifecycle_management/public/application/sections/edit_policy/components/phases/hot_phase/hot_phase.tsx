@@ -21,7 +21,7 @@ import { useEditPolicyContext } from '../../../edit_policy_context';
 
 import { ROLLOVER_FORM_PATHS, isUsingDefaultRolloverPath } from '../../../constants';
 
-import { LearnMoreLink, DescribedFormRow } from '../../';
+import { LearnMoreLink, DescribedFormRow } from '../..';
 
 import {
   ForcemergeField,

@@ -6,17 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ApplicationStart, NotificationsStart, SavedObject } from 'kibana/public';
+import type { ApplicationStart, NotificationsStart, SavedObject } from '@kbn/core/public';
 import moment from 'moment';
 import { from, race, timer } from 'rxjs';
 import { mapTo, tap } from 'rxjs/operators';
-import type { SharePluginStart } from 'src/plugins/share/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { SerializableRecord } from '@kbn/utility-types';
-import {
-  ISessionsClient,
-  SearchUsageCollector,
-} from '../../../../../../../src/plugins/data/public';
-import { SearchSessionStatus } from '../../../../../../../src/plugins/data/common';
+import { ISessionsClient, SearchUsageCollector } from '@kbn/data-plugin/public';
+import { SearchSessionStatus } from '@kbn/data-plugin/common';
 import { ACTION } from '../components/actions';
 import {
   PersistedSearchSessionSavedObjectAttributes,

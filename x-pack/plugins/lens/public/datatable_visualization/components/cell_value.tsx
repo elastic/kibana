@@ -7,7 +7,7 @@
 
 import React, { useContext, useEffect } from 'react';
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import classNames from 'classnames';
 import type { FormatFactory } from '../../../common';
 import { getOriginalId } from '../../../common/expressions';

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   CoreSetup,
   CoreStart,
@@ -18,19 +18,15 @@ import {
   Plugin,
   PluginInitializerContext,
   ThemeServiceStart,
-} from 'src/core/public';
-import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
-import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-  HomePublicPluginStart,
-} from '../../../../src/plugins/home/public';
-import { ManagementSetup, ManagementStart } from '../../../../src/plugins/management/public';
-import { LicensingPluginStart } from '../../licensing/public';
+} from '@kbn/core/public';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
+import { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { durationToNumber } from '../common/schema_utils';
 import { JobId, JobSummarySet } from '../common/types';
-import { ReportingSetup, ReportingStart } from './';
+import { ReportingSetup, ReportingStart } from '.';
 import { ReportingAPIClient } from './lib/reporting_api_client';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
 import { getGeneralErrorToast } from './notifier';
@@ -170,7 +166,7 @@ export class ReportingPublicPlugin
       icon: 'reportingApp',
       path: '/app/management/insightsAndAlerting/reporting',
       showOnHomePage: false,
-      category: FeatureCatalogueCategory.ADMIN,
+      category: 'admin',
     });
 
     management.sections.section.insightsAndAlerting.registerApp({

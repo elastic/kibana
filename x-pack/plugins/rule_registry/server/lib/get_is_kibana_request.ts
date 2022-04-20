@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Headers } from 'kibana/server';
+import type { Headers } from '@kbn/core/server';
 
 /**
  * Taken from

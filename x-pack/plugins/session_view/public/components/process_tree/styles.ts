@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import { transparentize, useEuiTheme } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
+import { euiLightVars } from '@kbn/ui-theme'; // using this temporarily until the euiTheme hook is updated to include proper hex values
 
 export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -21,7 +22,7 @@ export const useStyles = () => {
       fontFamily: font.familyCode,
       overflow: 'auto',
       height: '100%',
-      backgroundColor: colors.lightestShade,
+      backgroundColor: euiLightVars.euiColorLightestShade,
       paddingTop: size.base,
       paddingLeft: size.s,
     };

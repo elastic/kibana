@@ -6,7 +6,7 @@
  */
 
 import apm from 'elastic-apm-node';
-import type { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { HeadlessChromiumDriver } from '../browsers';
 import { Layout } from '../layouts';
 import { CONTEXT_WAITFORRENDER } from './constants';

@@ -32,11 +32,7 @@
     {
       "key": "xpack/cigroup",
       "name": "Default CI Group",
-      "ciGroups": 27
-    },
-    {
-      "key": "xpack/cigroup/Docker",
-      "name": "Default CI Group Docker"
+      "ciGroups": 30
     },
     {
       "key": "xpack/firefox",

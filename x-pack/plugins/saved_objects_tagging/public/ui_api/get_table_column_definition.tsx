@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { SavedObject, SavedObjectReference } from 'src/core/public';
+import { SavedObject, SavedObjectReference } from '@kbn/core/public';
 import {
   SavedObjectsTaggingApiUi,
   SavedObjectsTaggingApiUiComponent,
-} from '../../../../../src/plugins/saved_objects_tagging_oss/public';
+} from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { ITagsCache } from '../services';
 import { getTagsFromReferences, byNameTagSorter } from '../utils';
 
