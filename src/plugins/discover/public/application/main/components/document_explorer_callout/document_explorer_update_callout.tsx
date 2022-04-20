@@ -61,7 +61,9 @@ export const DocumentExplorerUpdateCallout = () => {
     <EuiCallOut
       className="dscDocumentExplorerCallout"
       title={<CalloutTitle onCloseCallout={onCloseCallout} />}
-      iconType="search"
+      iconType="tableDensityNormal"
+      heading="h3"
+      size="s"
     >
       <p>
         <FormattedMessage
@@ -94,13 +96,13 @@ export const DocumentExplorerUpdateCallout = () => {
       </p>
       <EuiButton
         data-test-subj="document-explorer-update-callout-dismiss-button"
-        iconType="tableDensityNormal"
+        iconType="check"
         size="s"
         onClick={onCloseCallout}
       >
         <FormattedMessage
           id="discover.docExplorerUpdateCallout.dismissButtonLabel"
-          defaultMessage="Dismiss"
+          defaultMessage="Got it"
         />
       </EuiButton>
     </EuiCallOut>
