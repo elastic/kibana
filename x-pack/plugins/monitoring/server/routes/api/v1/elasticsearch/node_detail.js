@@ -12,9 +12,10 @@ import { getNodeSummary } from '../../../../lib/elasticsearch/nodes';
 import { getShardStats, getShardAllocation } from '../../../../lib/elasticsearch/shards';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors/handle_error';
-import { prefixIndexPattern } from '../../../../../common/ccs_utils';
+import { prefixIndexPatternWithCcs } from '../../../../../common/ccs_utils';
 import { metricSets } from './metric_set_node_detail';
 import { getLogs } from '../../../../lib/logs/get_logs';
+import { CCS_REMOTE_PATTERN } from '../../../../../common/constants';
 
 const { advanced: metricSetAdvanced, overview: metricSetOverview } = metricSets;
 
@@ -28,7 +29,7 @@ export function esNodeRoute(server) {
           clusterUuid: schema.string(),
           nodeUuid: schema.string(),
         }),
-        payload: schema.object({
+        body: schema.object({
           ccs: schema.maybe(schema.string()),
           showSystemIndices: schema.boolean({ defaultValue: false }), // show/hide system indices in shard allocation table
           timeRange: schema.object({
@@ -47,7 +48,11 @@ export function esNodeRoute(server) {
       const nodeUuid = req.params.nodeUuid;
       const start = req.payload.timeRange.min;
       const end = req.payload.timeRange.max;
-      const filebeatIndexPattern = prefixIndexPattern(config, config.ui.logs.index, '*');
+      const filebeatIndexPattern = prefixIndexPatternWithCcs(
+        config,
+        config.ui.logs.index,
+        CCS_REMOTE_PATTERN
+      );
       const isAdvanced = req.payload.is_advanced;
 
       let metricSet;
