@@ -42,6 +42,7 @@ export interface BoundsRequestMeta {
   sourceQuery?: Query;
   timeFilters: TimeRange;
   timeslice?: Timeslice;
+  joinKeyFilter?: Filter;
 }
 
 export interface IVectorSource extends ISource {

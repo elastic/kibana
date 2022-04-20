@@ -146,14 +146,21 @@ describe('ESSearchSource', () => {
       });
       expect(esSearchSource.getJoinsDisabledReason()).toBe(null);
     });
+    it('blended layer', () => {
+      const esSearchSource = new ESSearchSource({
+        ...mockDescriptor,
+        scalingType: SCALING_TYPES.CLUSTERS,
+      });
+      expect(esSearchSource.getJoinsDisabledReason()).toBe(
+        'Joins are not supported when scaling by clusters'
+      );
+    });
     it('mvt', () => {
       const esSearchSource = new ESSearchSource({
         ...mockDescriptor,
         scalingType: SCALING_TYPES.MVT,
       });
-      expect(esSearchSource.getJoinsDisabledReason()).toBe(
-        'Joins are not supported when scaling by vector tiles'
-      );
+      expect(esSearchSource.getJoinsDisabledReason()).toBe(null);
     });
   });
 });

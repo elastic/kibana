@@ -24,6 +24,7 @@ exports[`should render 1`] = `
     fields={
       Array [
         Object {
+          "isUnsupported": false,
           "label": "field0",
           "name": "field0",
           "origin": "source",
@@ -82,6 +83,7 @@ exports[`should render 1`] = `
     fields={
       Array [
         Object {
+          "isUnsupported": false,
           "label": "field0",
           "name": "field0",
           "origin": "source",
@@ -168,6 +170,7 @@ exports[`should render 1`] = `
     fields={
       Array [
         Object {
+          "isUnsupported": false,
           "label": "field0",
           "name": "field0",
           "origin": "source",
@@ -212,6 +215,7 @@ exports[`should render 1`] = `
     fields={
       Array [
         Object {
+          "isUnsupported": false,
           "label": "field0",
           "name": "field0",
           "origin": "source",
@@ -306,6 +310,7 @@ exports[`should render 1`] = `
     fields={
       Array [
         Object {
+          "isUnsupported": false,
           "label": "field0",
           "name": "field0",
           "origin": "source",

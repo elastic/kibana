@@ -34,6 +34,7 @@ export async function syncBoundsData({
     timeFilters: dataFilters.timeFilters,
     timeslice: dataFilters.timeslice,
     filters: dataFilters.filters,
+    joinKeyFilter: dataFilters.joinKeyFilter,
     applyGlobalQuery: source.getApplyGlobalQuery(),
     applyGlobalTime: source.getApplyGlobalTime(),
   };

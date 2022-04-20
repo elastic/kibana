@@ -87,6 +87,7 @@ export default function ({ loadTestFile, getService }) {
       this.tags('ciGroup10');
       loadTestFile(require.resolve('./es_pew_pew_source'));
       loadTestFile(require.resolve('./joins'));
+      loadTestFile(require.resolve('./mvt_joins'));
       loadTestFile(require.resolve('./mapbox_styles'));
       loadTestFile(require.resolve('./mvt_scaling'));
       loadTestFile(require.resolve('./mvt_geotile_grid'));

@@ -106,6 +106,35 @@
 
 {
   "attributes": {
+    "description": "",
+    "layerListJSON": "[{\"id\":\"n1t6f\",\"label\":null,\"minZoom\":0,\"maxZoom\":24,\"sourceDescriptor\":{\"id\":\"62eca1fc-fe42-11e8-8eb2-f2801f1b9fd1\",\"type\":\"ES_SEARCH\",\"geoField\":\"geometry\",\"limit\":2048,\"filterByMapBounds\":false,\"showTooltip\":true,\"tooltipProperties\":[\"name\"],\"applyGlobalQuery\":false,\"scalingType\":\"MVT\",\"indexPatternRefName\":\"layer_0_source_index_pattern\"},\"visible\":true,\"temporary\":false,\"style\":{\"type\":\"VECTOR\",\"properties\":{\"fillColor\":{\"type\":\"DYNAMIC\",\"options\":{\"fieldMetaOptions\":{\"isEnabled\":false,\"sigma\":3},\"field\":{\"label\":\"max(prop1) group by meta_for_geo_shapes*.runtime_shape_name\",\"name\":\"__kbnjoin__max_of_prop1__855ccb86-fe42-11e8-8eb2-f2801f1b9fd1\",\"origin\":\"join\"},\"color\":\"Blues\"}},\"iconSize\":{\"type\":\"STATIC\",\"options\":{\"size\":10}},\"symbolizeAs\":{\"options\":{\"value\":\"circle\"}},\"icon\":{\"type\":\"STATIC\",\"options\":{\"value\":\"marker\"}}},\"temporary\":true,\"previousStyle\":null},\"type\":\"MVT_VECTOR\",\"joins\":[{\"leftField\":\"name\",\"right\":{\"id\":\"855ccb86-fe42-11e8-8eb2-f2801f1b9fd1\",\"indexPatternTitle\":\"meta_for_geo_shapes*\",\"term\":\"runtime_shape_name\",\"metrics\":[{\"type\":\"max\",\"field\":\"prop1\"}],\"applyGlobalQuery\":true,\"type\":\"ES_TERM_SOURCE\",\"indexPatternRefName\":\"layer_0_join_0_index_pattern\"}}]}]",
+    "mapStateJSON": "{\"zoom\":3.02,\"center\":{\"lon\":77.33426,\"lat\":-0.04647},\"timeFilters\":{\"from\":\"now-17m\",\"to\":\"now\",\"mode\":\"quick\"},\"refreshConfig\":{\"isPaused\":true,\"interval\":1000},\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filters\":[],\"settings\":{\"autoFitToDataBounds\":false,\"backgroundColor\":\"#ffffff\",\"customIcons\":[],\"disableInteractive\":false,\"disableTooltipControl\":false,\"hideToolbarOverlay\":false,\"hideLayerControl\":false,\"hideViewControl\":false,\"initialLocation\":\"LAST_SAVED_LOCATION\",\"fixedLocation\":{\"lat\":0,\"lon\":0,\"zoom\":2},\"browserLocation\":{\"zoom\":2},\"maxZoom\":24,\"minZoom\":0,\"showScaleControl\":false,\"showSpatialFilters\":true,\"showTimesliderToggleButton\":true,\"spatialFiltersAlpa\":0.3,\"spatialFiltersFillColor\":\"#DA8B45\",\"spatialFiltersLineColor\":\"#DA8B45\"}}",
+    "title": "mvt join example",
+    "uiStateJSON": "{\"isLayerTOCOpen\":true,\"openTOCDetails\":[\"n1t6f\"]}"
+  },
+  "coreMigrationVersion": "8.3.0",
+  "id": "f85dc420-ba99-11ec-8403-51529e77089a",
+  "migrationVersion": {
+    "map": "8.1.0"
+  },
+  "references": [
+      {
+          "id": "561253e0-f731-11e8-8487-11b9dd924f96",
+          "name": "layer_0_source_index_pattern",
+          "type": "index-pattern"
+      },
+      {
+          "id": "e20b2a30-f735-11e8-8ce0-9723965e01e3",
+          "name": "layer_0_join_0_index_pattern",
+          "type": "index-pattern"
+      }
+  ],
+  "type": "map",
+  "version": "Wzk0LDFd"
+}
+
+{
+  "attributes": {
     "fields": "[{\"name\":\"hour_of_day\",\"type\":\"number\",\"count\":0,\"scripted\":true,\"script\":\"doc['@timestamp'].value.getHour()\",\"lang\":\"painless\",\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false}]",
     "timeFieldName": "@timestamp",
     "title": "logstash-*"

@@ -29,9 +29,8 @@ export type OnSourceChangeArgs = {
 };
 
 export type SourceEditorArgs = {
-  clearJoins: () => void;
   currentLayerType: string;
-  hasJoins: boolean;
+  numberOfJoins: number;
   onChange: (...args: OnSourceChangeArgs[]) => Promise<void>;
 };
 

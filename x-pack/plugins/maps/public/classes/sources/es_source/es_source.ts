@@ -214,6 +214,9 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     const indexPattern = await this.getIndexPattern();
     const globalFilters: Filter[] = searchFilters.applyGlobalQuery ? searchFilters.filters : [];
     const allFilters: Filter[] = [...globalFilters];
+    if (searchFilters.joinKeyFilter) {
+      allFilters.push(searchFilters.joinKeyFilter);
+    }
     if (this.isFilterByMapBounds() && 'buffer' in searchFilters && searchFilters.buffer) {
       // buffer can be empty
       const geoField = await this._getGeoField();
