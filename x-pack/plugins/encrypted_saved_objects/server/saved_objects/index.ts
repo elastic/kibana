@@ -149,27 +149,34 @@ export function setupSavedObjects({
                   return savedObject;
                 }
 
+                const descriptor = {
+                  type: savedObject.type,
+                  id: savedObject.id,
+                  namespace: getDescriptorNamespace(
+                    typeRegistry,
+                    savedObject.type,
+                    findOptions.namespaces
+                  ),
+                };
+
                 try {
                   return {
                     ...savedObject,
                     attributes: (await service.decryptAttributes(
-                      {
-                        type: savedObject.type,
-                        id: savedObject.id,
-                        namespace: getDescriptorNamespace(
-                          typeRegistry,
-                          savedObject.type,
-                          findOptions.namespaces
-                        ),
-                      },
+                      descriptor,
                       savedObject.attributes as Record<string, unknown>
                     )) as T,
                   };
                 } catch (error) {
-                  // catch error and enrich SO with it. Then consumer of API can decide either proceed
+                  // catch error and enrich SO with it, return stripped attributes. Then consumer of API can decide either proceed
                   // with only unsecured properties or stop when error happens
+                  const { attributes: strippedAttrs } = await service.stripOrDecryptAttributes(
+                    descriptor,
+                    savedObject.attributes as Record<string, unknown>
+                  );
                   return {
                     ...savedObject,
+                    attributes: strippedAttrs as T,
                     error: { ...error, message: `Decryption error: "${error.message}"` },
                   };
                 }
