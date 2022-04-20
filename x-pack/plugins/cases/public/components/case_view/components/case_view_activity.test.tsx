@@ -18,7 +18,10 @@ import { CaseViewActivity } from './case_view_activity';
 import { ConnectorTypes } from '../../../../common/api/connectors';
 import { Case } from '../../../../common';
 import { CaseViewProps } from '../types';
-import { useGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
+import {
+  UseGetCaseUserActions,
+  useGetCaseUserActions,
+} from '../../../containers/use_get_case_user_actions';
 import { useConnectors } from '../../../containers/configure/use_connectors';
 import { usePostPushToService } from '../../../containers/use_post_push_to_service';
 import { useGetActionLicense } from '../../../containers/use_get_action_license';
@@ -32,11 +35,11 @@ jest.mock('../../../common/navigation/hooks');
 jest.mock('../../../containers/use_get_action_license');
 jest.mock('../../../containers/use_get_tags');
 
+(useGetTags as jest.Mock).mockReturnValue({ tags: ['coke', 'pepsi'], fetchTags: jest.fn() });
 (useGetActionLicense as jest.Mock).mockReturnValue({
   actionLicense: null,
   isLoading: false,
 });
-(useGetTags as jest.Mock).mockReturnValue({ tags: ['coke', 'pepsi'], fetchTags: jest.fn() });
 
 const caseData: Case = {
   ...basicCase,
@@ -90,6 +93,15 @@ export const caseProps = {
   caseData,
   updateCase: jest.fn(),
   fetchCaseMetrics: jest.fn(),
+  getCaseUserActions: {
+    caseServices: {},
+    caseUserActions: [],
+    hasDataToPush: false,
+    isError: false,
+    isLoading: true,
+    participants: [],
+    fetchCaseUserActions: jest.fn(),
+  } as UseGetCaseUserActions,
 };
 
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
@@ -98,7 +110,6 @@ const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 
 describe('Case View Page activity tab', () => {
   beforeAll(() => {
-    // useUpdateCaseMock.mockReturnValue(defaultUpdateCaseState);
     useGetCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
     useConnectorsMock.mockReturnValue({ connectors: connectorsMock, loading: false });
     usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });

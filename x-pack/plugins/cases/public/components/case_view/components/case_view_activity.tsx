@@ -10,7 +10,6 @@ import React, { useCallback, useMemo } from 'react';
 import { useConnectors } from '../../../containers/configure/use_connectors';
 import { useCaseViewNavigation } from '../../../common/navigation';
 import { UpdateKey, UseFetchAlertData } from '../../../../common/ui/types';
-import { useGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
 import { Case, CaseStatuses } from '../../../../common';
 import { EditConnector } from '../../edit_connector';
 import { CasesNavigation } from '../../links';
@@ -23,6 +22,7 @@ import { useCasesContext } from '../../cases_context/use_cases_context';
 import * as i18n from '../translations';
 import { getNoneConnector, normalizeActionConnector } from '../../configure_cases/utils';
 import { getConnectorById } from '../../utils';
+import { UseGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
 
 export const CaseViewActivity = ({
   initLoadingData,
@@ -34,6 +34,7 @@ export const CaseViewActivity = ({
   updateCase,
   fetchCaseMetrics,
   useFetchAlertData,
+  getCaseUserActions,
 }: {
   initLoadingData: boolean;
   ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
@@ -44,6 +45,7 @@ export const CaseViewActivity = ({
   updateCase: (newCase: Case) => void;
   fetchCaseMetrics: (silent?: boolean) => Promise<void>;
   useFetchAlertData: UseFetchAlertData;
+  getCaseUserActions: UseGetCaseUserActions;
 }) => {
   const { userCanCrud } = useCasesContext();
   const { getCaseViewUrl } = useCaseViewNavigation();
@@ -55,7 +57,7 @@ export const CaseViewActivity = ({
     hasDataToPush,
     isLoading: isLoadingUserActions,
     participants,
-  } = useGetCaseUserActions(caseId, caseData.connector.id);
+  } = getCaseUserActions;
 
   const refetchCaseUserActions = useCallback(() => {
     fetchCaseUserActions(caseId, caseData.connector.id);

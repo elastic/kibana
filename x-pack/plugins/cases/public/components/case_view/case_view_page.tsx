@@ -45,11 +45,13 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     const init = useRef(true);
     const timelineUi = useTimelineContext()?.ui;
 
+    const getCaseUserActions = useGetCaseUserActions(caseId, caseData.connector.id);
+
     const {
       fetchCaseUserActions,
       caseServices,
       isLoading: isLoadingUserActions,
-    } = useGetCaseUserActions(caseId, caseData.connector.id);
+    } = getCaseUserActions;
 
     const refetchCaseUserActions = useCallback(() => {
       fetchCaseUserActions(caseId, caseData.connector.id);
@@ -186,6 +188,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             <EuiSpacer size="m" />
             <EuiFlexGroup>
               <CaseViewActivity
+                getCaseUserActions={getCaseUserActions}
                 initLoadingData={initLoadingData}
                 ruleDetailsNavigation={ruleDetailsNavigation}
                 caseId={caseId}
