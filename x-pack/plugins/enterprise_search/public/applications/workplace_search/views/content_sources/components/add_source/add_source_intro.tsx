@@ -9,7 +9,6 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { KibanaLogic } from '../../../../../shared/kibana';
 import { AppLogic } from '../../../../app_logic';
 import {
   WorkplaceSearchPageTemplate,
@@ -35,22 +34,6 @@ export const AddSourceIntro: React.FC<AddSourceIntroProps> = (props) => {
   const { name, categories, serviceType } = props.sourceData;
   const { isOrganization } = useValues(AppLogic);
 
-  const goToChoice = () =>
-    KibanaLogic.values.navigateToUrl(
-      `${getSourcesPath(
-        `${getSourcesPath(getAddPath(serviceType), isOrganization)}/`,
-        isOrganization
-      )}/`
-    );
-
-  const goToInternal = () =>
-    KibanaLogic.values.navigateToUrl(
-      `${getSourcesPath(
-        `${getSourcesPath(getAddPath(serviceType), isOrganization)}/`,
-        isOrganization
-      )}/`
-    );
-
   const header = (
     <AddSourceHeader name={name} serviceType={serviceType} categories={categories || []} />
   );
@@ -60,8 +43,10 @@ export const AddSourceIntro: React.FC<AddSourceIntroProps> = (props) => {
     <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name || '...']}>
       <ConfigurationIntro
         name={name}
-        advanceStep={
-          hasMultipleConnectorOptions(props.sourceData.serviceType) ? goToChoice : goToInternal
+        advanceStepTo={
+          hasMultipleConnectorOptions(props.sourceData.serviceType)
+            ? `${getSourcesPath(getAddPath(serviceType), isOrganization)}/choice`
+            : `${getSourcesPath(getAddPath(serviceType), isOrganization)}/`
         }
         header={header}
       />

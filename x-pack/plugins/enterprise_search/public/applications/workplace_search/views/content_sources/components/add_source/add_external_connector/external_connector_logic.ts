@@ -23,6 +23,8 @@ import { getAddPath, getSourcesPath } from '../../../../../routes';
 import { SourceConfigData } from '../add_source_logic';
 
 export interface ExternalConnectorActions {
+  fetchExternalSource: () => true;
+  fetchExternalSourceSuccess(sourceConfigData: SourceConfigData): SourceConfigData;
   saveExternalConnectorConfigError: () => true;
   saveExternalConnectorConfigSuccess(externalConnectorId: string): string;
   setExternalConnectorApiKey(externalConnectorApiKey: string): string;
@@ -42,6 +44,7 @@ export interface ExternalConnectorConfig {
 export interface ExternalConnectorValues {
   formDisabled: boolean;
   buttonLoading: boolean;
+  dataLoading: boolean;
   externalConnectorApiKey: string;
   externalConnectorUrl: string;
   urlValid: boolean;
@@ -55,6 +58,8 @@ export const ExternalConnectorLogic = kea<
 >({
   path: ['enterprise_search', 'workplace_search', 'external_connector_logic'],
   actions: {
+    fetchExternalSource: true,
+    fetchExternalSourceSuccess: (sourceConfigData) => sourceConfigData,
     saveExternalConnectorConfigError: true,
     saveExternalConnectorConfigSuccess: (externalConnectorId) => externalConnectorId,
     saveExternalConnectorConfig: (config) => config,
@@ -65,6 +70,12 @@ export const ExternalConnectorLogic = kea<
     validateUrl: true,
   },
   reducers: {
+    dataLoading: [
+      true,
+      {
+        fetchExternalSourceSuccess: () => false,
+      },
+    ],
     buttonLoading: [
       false,
       {
@@ -110,6 +121,23 @@ export const ExternalConnectorLogic = kea<
     ],
   },
   listeners: ({ actions, values }) => ({
+    fetchExternalSource: async () => {
+      const route = '/internal/workplace_search/org/settings/connectors/external';
+
+      try {
+        const response = await HttpLogic.values.http.get<SourceConfigData>(route);
+        actions.fetchExternalSourceSuccess(response);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
+    fetchExternalSourceSuccess: ({ configuredFields: { externalConnectorUrl } }) => {
+      if (externalConnectorUrl && !externalConnectorUrl.startsWith('https://')) {
+        actions.setShowInsecureUrlCallout(true);
+      } else {
+        actions.setShowInsecureUrlCallout(false);
+      }
+    },
     saveExternalConnectorConfig: async ({ url, apiKey }) => {
       if (!isValidExternalUrl(url)) {
         actions.setUrlValidation(false);
@@ -153,7 +181,10 @@ export const ExternalConnectorLogic = kea<
     },
   }),
   selectors: ({ selectors }) => ({
-    formDisabled: [() => [selectors.buttonLoading], (buttonLoading: boolean) => buttonLoading],
+    formDisabled: [
+      () => [selectors.buttonLoading, selectors.dataLoading],
+      (buttonLoading: boolean, dataLoading: boolean) => buttonLoading || dataLoading,
+    ],
     insecureUrl: [
       () => [selectors.externalConnectorUrl],
       (url: string) => !url.startsWith('https://'),

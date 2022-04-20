@@ -80,6 +80,42 @@ export const staticSourceData: SourceDataItem[] = [
     accountContextOnly: false,
   },
   {
+    name: SOURCE_NAMES.CONFLUENCE_CONNECTOR_PACKAGE,
+    iconName: SOURCE_NAMES.CONFLUENCE,
+    serviceType: 'external',
+    baseServiceType: 'confluence_cloud',
+    configuration: {
+      isPublicKey: false,
+      hasOauthRedirect: true,
+      needsBaseUrl: true,
+      documentationUrl: docLinks.workplaceSearchExternalSharePointOnline, // TODO Update this when we have a doclink
+      applicationPortalUrl: 'https://developer.atlassian.com/console/myapps/',
+    },
+    objTypes: [
+      // TODO confirm these
+      SOURCE_OBJ_TYPES.PAGES,
+      SOURCE_OBJ_TYPES.ATTACHMENTS,
+      SOURCE_OBJ_TYPES.BLOG_POSTS,
+      SOURCE_OBJ_TYPES.SPACES,
+    ],
+    features: {
+      basicOrgContext: [
+        FeatureIds.SyncFrequency,
+        FeatureIds.SyncedItems,
+        FeatureIds.GlobalAccessPermissions,
+      ],
+      basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
+      platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
+      platinumPrivateContext: [
+        FeatureIds.Private,
+        FeatureIds.SyncFrequency,
+        FeatureIds.SyncedItems,
+      ],
+    },
+    accountContextOnly: false,
+    isBeta: true,
+  },
+  {
     name: SOURCE_NAMES.CONFLUENCE_SERVER,
     iconName: SOURCE_NAMES.CONFLUENCE_SERVER,
     serviceType: 'confluence_server',
@@ -527,7 +563,7 @@ export const staticSourceData: SourceDataItem[] = [
     accountContextOnly: false,
   },
   {
-    name: SOURCE_NAMES.SHAREPOINT,
+    name: SOURCE_NAMES.SHAREPOINT_CONNECTOR_PACKAGE,
     iconName: SOURCE_NAMES.SHAREPOINT,
     serviceType: 'external',
     baseServiceType: 'share_point',
@@ -670,6 +706,21 @@ export const staticCustomSourceData: SourceDataItem = {
   iconName: SOURCE_NAMES.CUSTOM,
   categories: ['API', 'Custom'],
   serviceType: 'custom',
+  configuration: {
+    isPublicKey: false,
+    hasOauthRedirect: false,
+    needsBaseUrl: false,
+    documentationUrl: docLinks.workplaceSearchCustomSources,
+    applicationPortalUrl: '',
+  },
+  accountContextOnly: false,
+};
+
+export const staticGenericExternalSourceData: SourceDataItem = {
+  name: SOURCE_NAMES.CUSTOM,
+  iconName: SOURCE_NAMES.CUSTOM,
+  categories: ['API', 'Custom'],
+  serviceType: 'external',
   configuration: {
     isPublicKey: false,
     hasOauthRedirect: false,

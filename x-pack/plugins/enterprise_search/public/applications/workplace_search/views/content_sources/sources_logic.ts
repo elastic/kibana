@@ -330,7 +330,10 @@ export const mergeServerAndStaticData = (
       ...staticItem,
       ...serverItem,
       connected: !!connectedSource,
+      // this should search by baseServiceType when the BE support baseServiceTypes for external sources
+      name: staticItem.name,
     };
   });
+
   return sortByName(unsortedData);
 };

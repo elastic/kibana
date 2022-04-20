@@ -610,7 +610,7 @@ const getFirstStep = (
   if (reAuthenticate) return AddSourceSteps.ReauthenticateStep;
   if (
     (serviceType === 'external' && configuredFields?.clientId && configuredFields?.clientSecret) ||
-    configured
+    (serviceType !== 'external' && configured)
   )
     return AddSourceSteps.ConnectInstanceStep;
   return AddSourceSteps.SaveConfigStep;

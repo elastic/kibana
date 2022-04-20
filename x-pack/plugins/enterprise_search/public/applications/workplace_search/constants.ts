@@ -145,6 +145,10 @@ export const SOURCE_NAMES = {
     'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.confluence',
     { defaultMessage: 'Confluence' }
   ),
+  CONFLUENCE_CONNECTOR_PACKAGE: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.confluenceConnectorPackage',
+    { defaultMessage: 'Confluence Connector Package' }
+  ),
   CONFLUENCE_SERVER: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.confluenceServer',
     { defaultMessage: 'Confluence (Server)' }
@@ -200,6 +204,10 @@ export const SOURCE_NAMES = {
   SHAREPOINT: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.sharePoint',
     { defaultMessage: 'SharePoint Online' }
+  ),
+  SHAREPOINT_CONNECTOR_PACKAGE: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.sharePointConnectorPackage',
+    { defaultMessage: 'SharePoint Online Connector Package' }
   ),
   SHAREPOINT_SERVER: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.sharePointServer',

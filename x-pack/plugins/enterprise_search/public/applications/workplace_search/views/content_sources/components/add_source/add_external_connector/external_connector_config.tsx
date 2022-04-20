@@ -48,7 +48,6 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({
   goBack,
   onDeleteConfig,
 }) => {
-  const serviceType = 'external';
   const { saveExternalConnectorConfig } = useActions(ExternalConnectorLogic);
 
   const { formDisabled, buttonLoading, externalConnectorUrl, externalConnectorApiKey, urlValid } =
@@ -62,6 +61,8 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({
   const {
     name,
     categories,
+    serviceType,
+    baseServiceType,
     configuration: { applicationLinkTitle, applicationPortalUrl, documentationUrl },
   } = sourceData;
   const { isOrganization } = useValues(AppLogic);
@@ -122,7 +123,11 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({
   ];
 
   const header = (
-    <AddSourceHeader name={name} serviceType={serviceType} categories={categories || []} />
+    <AddSourceHeader
+      name={name}
+      serviceType={baseServiceType || serviceType}
+      categories={categories || []}
+    />
   );
   const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
 

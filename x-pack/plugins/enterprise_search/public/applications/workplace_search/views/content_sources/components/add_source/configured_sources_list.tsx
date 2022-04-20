@@ -73,7 +73,8 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
   const visibleSources = (
     <EuiFlexGrid columns={3} gutterSize="m" className="source-grid-configured">
       {sources.map((sourceData, i) => {
-        const { connected, accountContextOnly, name, serviceType, isBeta } = sourceData;
+        const { connected, accountContextOnly, name, serviceType, isBeta, baseServiceType } =
+          sourceData;
         return (
           <React.Fragment key={i}>
             <EuiFlexItem
@@ -108,7 +109,11 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
                       responsive={false}
                     >
                       <EuiFlexItem>
-                        <SourceIcon serviceType={serviceType} name={name} size="xxl" />
+                        <SourceIcon
+                          serviceType={baseServiceType || serviceType}
+                          name={name}
+                          size="xxl"
+                        />
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiText size="s">
