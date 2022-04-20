@@ -10,7 +10,7 @@ export * from './mappings';
 export * from './templates';
 export * from './data_streams';
 export {
-  SettingsToRetrieve,
+  type SettingsToRetrieve,
   retrieveSettings,
   retrieveAutoCompleteInfo,
   clearSubscriptions,
