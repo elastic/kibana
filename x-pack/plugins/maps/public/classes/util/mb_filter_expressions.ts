@@ -6,11 +6,7 @@
  */
 
 import type { FilterSpecification } from '@kbn/mapbox-gl';
-import {
-  GEO_JSON_TYPE,
-  FEATURE_VISIBLE_PROPERTY_NAME,
-  KBN_IS_CENTROID_FEATURE,
-} from '../../../common/constants';
+import { GEO_JSON_TYPE, KBN_IS_CENTROID_FEATURE } from '../../../common/constants';
 
 import { Timeslice } from '../../../common/descriptor_types';
 
@@ -27,13 +23,13 @@ export const EXCLUDE_CENTROID_FEATURES = [
 
 function getFilterExpression(
   filters: FilterSpecification[],
-  hasJoins: boolean,
+  joinFilter?: FilterSpecification,
   timesliceMaskConfig?: TimesliceMaskConfig
 ): FilterSpecification {
   const allFilters: FilterSpecification[] = [...filters];
 
-  if (hasJoins) {
-    allFilters.push(['==', ['get', FEATURE_VISIBLE_PROPERTY_NAME], true]);
+  if (joinFilter) {
+    allFilters.push(joinFilter);
   }
 
   if (timesliceMaskConfig) {
@@ -54,7 +50,7 @@ function getFilterExpression(
 }
 
 export function getFillFilterExpression(
-  hasJoins: boolean,
+  joinFilter?: FilterSpecification,
   timesliceMaskConfig?: TimesliceMaskConfig
 ): FilterSpecification {
   return getFilterExpression(
@@ -66,13 +62,13 @@ export function getFillFilterExpression(
         ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POLYGON],
       ],
     ],
-    hasJoins,
+    joinFilter,
     timesliceMaskConfig
   );
 }
 
 export function getLineFilterExpression(
-  hasJoins: boolean,
+  joinFilter?: FilterSpecification,
   timesliceMaskConfig?: TimesliceMaskConfig
 ): FilterSpecification {
   return getFilterExpression(
@@ -86,7 +82,7 @@ export function getLineFilterExpression(
         ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_LINE_STRING],
       ],
     ],
-    hasJoins,
+    joinFilter,
     timesliceMaskConfig
   );
 }
@@ -98,19 +94,19 @@ const IS_POINT_FEATURE = [
 ];
 
 export function getPointFilterExpression(
-  hasJoins: boolean,
+  joinFilter?: FilterSpecification,
   timesliceMaskConfig?: TimesliceMaskConfig
 ): FilterSpecification {
   return getFilterExpression(
     [EXCLUDE_CENTROID_FEATURES, IS_POINT_FEATURE],
-    hasJoins,
+    joinFilter,
     timesliceMaskConfig
   );
 }
 
 export function getLabelFilterExpression(
-  hasJoins: boolean,
   isSourceGeoJson: boolean,
+  joinFilter?: FilterSpecification,
   timesliceMaskConfig?: TimesliceMaskConfig
 ): FilterSpecification {
   const filters: FilterSpecification[] = [];
@@ -122,5 +118,5 @@ export function getLabelFilterExpression(
     filters.push(IS_POINT_FEATURE);
   }
 
-  return getFilterExpression(filters, hasJoins, timesliceMaskConfig);
+  return getFilterExpression(filters, joinFilter, timesliceMaskConfig);
 }
