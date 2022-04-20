@@ -7,18 +7,11 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { isEmpty } from 'lodash';
-import { loadRules, Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { loadRules } from '@kbn/triggers-actions-ui-plugin/public';
 import { RULES_LOAD_ERROR } from '../pages/rules/translations';
-import { FetchRulesProps } from '../pages/rules/types';
+import { FetchRulesProps, RuleState } from '../pages/rules/types';
 import { OBSERVABILITY_RULE_TYPES } from '../pages/rules/config';
 import { useKibana } from '../utils/kibana_react';
-
-interface RuleState {
-  isLoading: boolean;
-  data: Rule[];
-  error: string | null;
-  totalItemCount: number;
-}
 
 export function useFetchRules({
   searchText,

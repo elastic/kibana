@@ -8,6 +8,6 @@
 
 module.exports = {
   preset: '@kbn/test/jest_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/elastic-analytics'],
+  rootDir: '../../../../',
+  roots: ['<rootDir>/packages/analytics/shippers/fullstory'],
 };

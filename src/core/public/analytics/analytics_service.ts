@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { AnalyticsClient } from '@elastic/analytics';
-import { createAnalytics } from '@elastic/analytics';
+import type { AnalyticsClient } from '@kbn/analytics-client';
+import { createAnalytics } from '@kbn/analytics-client';
 import { CoreContext } from '../core_system';
 import { createLogger } from './logger';
 
