@@ -46,6 +46,8 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     const isCloudEnabled = getIsCloudEnabled(this.config.id);
     registerCloudUsageCollector(usageCollection, { isCloudEnabled });
 
+    this.logger.fatal(`TEST isCloudEnabled: ${isCloudEnabled}`);
+
     if (this.config.full_story.enabled) {
       registerFullstoryRoute({
         httpResources: core.http.resources,
