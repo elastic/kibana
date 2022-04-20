@@ -26,6 +26,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
       if (request.factoryQueryType == null) {
         throw new Error('factoryQueryType is required');
       }
+
       const queryFactory: OsqueryFactory<T> = osqueryFactory[request.factoryQueryType];
       const dsl = queryFactory.buildDsl(request);
 

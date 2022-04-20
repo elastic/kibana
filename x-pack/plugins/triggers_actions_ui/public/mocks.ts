@@ -21,15 +21,19 @@ import {
   ConnectorAddFlyoutProps,
   ConnectorEditFlyoutProps,
   AlertsTableProps,
+  AlertsTableConfigurationRegistry,
 } from './types';
 import { getAlertsTableLazy } from './common/get_alerts_table';
+import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
   const ruleTypeRegistry = new TypeRegistry<RuleTypeModel>();
+  const alertsTableConfigurationRegistry = new TypeRegistry<AlertsTableConfigurationRegistry>();
   return {
     actionTypeRegistry,
     ruleTypeRegistry,
+    alertsTableConfigurationRegistry,
     getAddConnectorFlyout: (props: Omit<ConnectorAddFlyoutProps, 'actionTypeRegistry'>) => {
       return getAddConnectorFlyoutLazy({ ...props, actionTypeRegistry });
     },
@@ -55,6 +59,9 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     },
     getAlertsTable: (props: AlertsTableProps) => {
       return getAlertsTableLazy(props);
+    },
+    getRuleStatusDropdown: (props) => {
+      return getRuleStatusDropdownLazy(props);
     },
   };
 }

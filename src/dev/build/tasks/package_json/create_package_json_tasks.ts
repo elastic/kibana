@@ -6,10 +6,37 @@
  * Side Public License, v 1.
  */
 
-// @ts-ignore
-import { transformDependencies } from '@kbn/pm';
 import { findUsedDependencies } from './find_used_dependencies';
 import { read, write, Task } from '../../lib';
+
+/**
+ * Replaces `link:` dependencies with `file:` dependencies. When installing
+ * dependencies, these `file:` dependencies will be copied into `node_modules`
+ * instead of being symlinked.
+ *
+ * This will allow us to copy packages into the build and run `yarn`, which
+ * will then _copy_ the `file:` dependencies into `node_modules` instead of
+ * symlinking like we do in development.
+ *
+ * Additionally it also taken care of replacing `link:bazel-bin/` with
+ * `file:` so we can also support the copy of the Bazel packages dist already into
+ * build/packages to be copied into the node_modules
+ */
+export function transformDependencies(dependencies: Record<string, string>) {
+  return Object.fromEntries(
+    Object.entries(dependencies).map(([name, version]) => {
+      if (!version.startsWith('link:')) {
+        return [name, version];
+      }
+
+      if (version.startsWith('link:bazel-bin/')) {
+        return [name, version.replace('link:bazel-bin/', 'file:')];
+      }
+
+      return [name, version.replace('link:', 'file:')];
+    })
+  );
+}
 
 export const CreatePackageJson: Task = {
   description: 'Creating build-ready version of package.json',
