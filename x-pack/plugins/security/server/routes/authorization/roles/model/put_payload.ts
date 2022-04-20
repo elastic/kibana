@@ -133,7 +133,7 @@ export function getPutPayloadSchema(
              */
             spaces: spacesSchema,
 
-            packages: spacesSchema,
+            packages: schema.maybe(schema.arrayOf(schema.string())),
 
             /**
              * An optional list of Kibana base privileges. If this entry applies to special "global"

@@ -21,11 +21,13 @@ export interface RoleIndexPrivilege {
   query?: string;
 }
 
+// extend with package resources
 export interface RoleKibanaPrivilege {
   spaces: string[];
   base: string[];
   feature: FeaturesPrivileges;
   _reserved?: string[];
+  packages?: string[];
 }
 
 export interface Role {

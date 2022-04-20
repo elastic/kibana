@@ -49,6 +49,7 @@ export class RolesAPIClient {
         kibanaPrivilege.feature = {};
       }
       if (kibanaPrivilege.feature!.integrations) kibanaPrivilege.packages = ['endpoint'];
+      else kibanaPrivilege.packages = [];
 
       // console.log(JSON.stringify(kibanaPrivilege, null, 2));
     });
