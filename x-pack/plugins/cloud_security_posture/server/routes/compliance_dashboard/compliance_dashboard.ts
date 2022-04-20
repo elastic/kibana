@@ -62,6 +62,12 @@ export const defineGetComplianceDashboardRoute = (
           getTrends(esClient),
         ]);
 
+        // Try closing the PIT, if it fails we can safely ignore the error since it closes itself after the keep alive
+        //   ends. Not waiting on the promise returned from the `closePointInTime` call to avoid delaying the request
+        esClient.closePointInTime({ id: pitId }).catch((err) => {
+          cspContext.logger.warn(`Could not close PIT for stats endpoint: ${err}`);
+        });
+
         const clusters = getClustersTrends(clustersWithoutTrends, trends);
         const trend = getSummaryTrend(trends);
 
