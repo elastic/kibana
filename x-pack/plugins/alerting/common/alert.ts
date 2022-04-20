@@ -49,7 +49,7 @@ export enum AlertExecutionStatusWarningReasons {
 export interface AlertExecutionStatus {
   status: AlertExecutionStatuses;
   numberOfTriggeredActions?: number;
-  numberOfScheduledActions?: number;
+  numberOfGeneratedActions?: number;
   metrics?: RuleExecutionMetrics;
   lastExecutionDate: Date;
   lastDuration?: number;

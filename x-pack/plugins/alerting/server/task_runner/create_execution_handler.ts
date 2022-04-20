@@ -112,7 +112,7 @@ export function createExecutionHandler<
         }),
       }));
 
-    alertExecutionStore.numberOfScheduledActions += actions.length;
+    alertExecutionStore.numberOfGeneratedActions += actions.length;
 
     const ruleLabel = `${ruleType.id}:${ruleId}: '${ruleName}'`;
 
@@ -120,7 +120,7 @@ export function createExecutionHandler<
     let ephemeralActionsToSchedule = maxEphemeralActionsPerRule;
 
     for (const action of actions) {
-      if (alertExecutionStore.numberOfTriggeredActions >= ruleType.config!.execution.actions.max) {
+      if (alertExecutionStore.numberOfTriggeredActions >= ruleType.config!.run.actions.max) {
         alertExecutionStore.triggeredActionsStatus = ActionsCompletion.PARTIAL;
         break;
       }

@@ -23,7 +23,7 @@ export const staticExternalSourceData: SourceDataItem = {
     documentationUrl: docLinks.workplaceSearchExternalSharePointOnline,
     applicationPortalUrl: 'https://portal.azure.com/',
   },
-  objTypes: [SOURCE_OBJ_TYPES.FOLDERS, SOURCE_OBJ_TYPES.SITES, SOURCE_OBJ_TYPES.ALL_FILES],
+  objTypes: [SOURCE_OBJ_TYPES.ALL_STORED_FILES],
   features: {
     basicOrgContext: [
       FeatureIds.SyncFrequency,

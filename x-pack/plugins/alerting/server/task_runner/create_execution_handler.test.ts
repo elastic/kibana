@@ -54,7 +54,7 @@ const ruleType: NormalizedRuleType<
   executor: jest.fn(),
   producer: 'alerts',
   config: {
-    execution: {
+    run: {
       actions: { max: 1000 },
     },
   },
@@ -127,7 +127,7 @@ describe('Create Execution Handler', () => {
     );
     alertExecutionStore = {
       numberOfTriggeredActions: 0,
-      numberOfScheduledActions: 0,
+      numberOfGeneratedActions: 0,
       triggeredActionsStatus: ActionsCompletion.COMPLETE,
     };
   });
@@ -481,7 +481,7 @@ describe('Create Execution Handler', () => {
       ruleType: {
         ...ruleType,
         config: {
-          execution: {
+          run: {
             actions: { max: 2 },
           },
         },
@@ -513,7 +513,7 @@ describe('Create Execution Handler', () => {
 
     alertExecutionStore = {
       numberOfTriggeredActions: 0,
-      numberOfScheduledActions: 0,
+      numberOfGeneratedActions: 0,
       triggeredActionsStatus: ActionsCompletion.COMPLETE,
     };
 
@@ -526,7 +526,7 @@ describe('Create Execution Handler', () => {
     });
 
     expect(alertExecutionStore.numberOfTriggeredActions).toBe(2);
-    expect(alertExecutionStore.numberOfScheduledActions).toBe(3);
+    expect(alertExecutionStore.numberOfGeneratedActions).toBe(3);
     expect(alertExecutionStore.triggeredActionsStatus).toBe(ActionsCompletion.PARTIAL);
     expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(2);
   });

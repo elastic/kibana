@@ -33,7 +33,7 @@ export class CopyToSpaceSavedObjectsManagementAction extends SavedObjectsManagem
 
   public euiAction = {
     name: i18n.translate('savedObjectsManagement.copyToSpace.actionTitle', {
-      defaultMessage: 'Copy to space',
+      defaultMessage: 'Copy to spaces',
     }),
     description: i18n.translate('savedObjectsManagement.copyToSpace.actionDescription', {
       defaultMessage: 'Make a copy of this saved object in one or more spaces',

@@ -46,7 +46,7 @@ export const MonitorManagementPage: React.FC = () => {
           page: 1, // saved objects page index is base 1
           perPage: 10,
           sortOrder: 'asc',
-          sortField: ConfigKey.NAME,
+          sortField: `${ConfigKey.NAME}.keyword`,
         })
       );
     }
