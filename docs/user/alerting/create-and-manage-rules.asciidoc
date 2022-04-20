@@ -152,17 +152,9 @@ When you snooze a rule, the rule checks continue to run on a schedule but the al
 [role="screenshot"]
 image:images/snooze-panel.png[The snooze panel allows you to set the length of a rule's snooze period]
 
-When a rule is in a `snoozed` state, you can cancel or change the duration of this state.
-
-[role="screenshot"]
-image:images/cancel-snooze.png[The snooze panel allows you to modify or cancel an existing snooze]
-
-You can perform these operations in bulk by multi-selecting rules, and then clicking the *Manage rules* button. 
+When a rule is in a `snoozed` state, you can cancel or change the duration of this state. You can perform these operations in bulk by multi-selecting rules, and then clicking the *Manage rules* button. 
 
 TIP: In this context, "Mute" refers to an indefinite snooze. preview:[]
-
-[role="screenshot"]
-image:images/bulk-mute-disable.png[The Manage rules button lets you mute/unmute, enable/disable, and delete in bulk,width=75%]
 
 [float]
 === Rule status
