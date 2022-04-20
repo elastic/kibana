@@ -12,9 +12,10 @@ import type {
   Plugin,
   Logger,
 } from '@kbn/core/server';
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
-import { CIS_KUBERNETES_PACKAGE_NAME } from '../common/constants';
+import { DeepReadonly } from 'utility-types';
+import { DeletePackagePoliciesResponse, PackagePolicy } from '@kbn/fleet-plugin/common';
+import { initializeCspTransforms } from './create_transforms/create_transforms';
 import { CspAppService } from './lib/csp_app_services';
 import type {
   CspServerPluginSetup,
@@ -26,9 +27,12 @@ import type {
 import { defineRoutes } from './routes';
 import { cspRuleTemplateAssetType } from './saved_objects/csp_rule_template';
 import { cspRuleAssetType } from './saved_objects/csp_rule_type';
-import { initializeCspRules } from './saved_objects/initialize_rules';
 import { initializeCspTransformsIndices } from './create_indices/create_transforms_indices';
-import { initializeCspTransforms } from './create_transforms/create_transforms';
+import {
+  onPackagePolicyPostCreateCallback,
+  onPackagePolicyDeleteCallback,
+} from './fleet_integration/fleet_integration';
+import { CIS_KUBERNETES_PACKAGE_NAME } from '../common/constants';
 
 export interface CspAppContext {
   logger: Logger;
@@ -95,10 +99,30 @@ export class CspPlugin
           request: KibanaRequest
         ): Promise<PackagePolicy> => {
           if (packagePolicy.package?.name === CIS_KUBERNETES_PACKAGE_NAME) {
-            this.initialize(core);
+            await this.initialize(core);
+            await onPackagePolicyPostCreateCallback(
+              this.logger,
+              packagePolicy,
+              context.core.savedObjects.client
+            );
           }
 
           return packagePolicy;
+        }
+      );
+
+      plugins.fleet.registerExternalCallback(
+        'postPackagePolicyDelete',
+        async (deletedPackagePolicies: DeepReadonly<DeletePackagePoliciesResponse>) => {
+          for (const deletedPackagePolicy of deletedPackagePolicies) {
+            if (deletedPackagePolicy.package?.name === CIS_KUBERNETES_PACKAGE_NAME) {
+              await onPackagePolicyDeleteCallback(
+                this.logger,
+                deletedPackagePolicy,
+                core.savedObjects.createInternalRepository()
+              );
+            }
+          }
         }
       );
     });
@@ -108,11 +132,11 @@ export class CspPlugin
 
   public stop() {}
 
-  private initialize(core: CoreStart) {
+  initialize(core: CoreStart): Promise<unknown> {
     this.logger.debug('initialize');
-    initializeCspRules(core.savedObjects.createInternalRepository());
-    initializeCspTransformsIndices(core.elasticsearch.client.asInternalUser, this.logger).then(
-      (_) => initializeCspTransforms(core.elasticsearch.client.asInternalUser, this.logger)
-    );
+    return initializeCspTransformsIndices(
+      core.elasticsearch.client.asInternalUser,
+      this.logger
+    ).then((_) => initializeCspTransforms(core.elasticsearch.client.asInternalUser, this.logger));
   }
 }
