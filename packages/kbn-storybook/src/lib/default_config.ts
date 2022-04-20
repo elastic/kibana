@@ -7,7 +7,7 @@
  */
 
 import * as path from 'path';
-import type { StorybookConfig } from '@storybook/core-common';
+import { StorybookConfig } from '@storybook/core-common';
 import { Configuration } from 'webpack';
 import webpackMerge from 'webpack-merge';
 import { REPO_ROOT } from './constants';
@@ -70,7 +70,7 @@ export const defaultConfig: StorybookConfig = {
 // an issue with storybook typescript setup see this issue for more details
 // https://github.com/storybookjs/storybook/issues/9610
 
-export const defaultConfigWebFinal = {
+export const defaultConfigWebFinal: StorybookConfig = {
   ...defaultConfig,
   webpackFinal: (config: Configuration) => {
     return WebpackConfig({ config });
