@@ -49,6 +49,8 @@ RUNTIME_DEPS = [
   "@npm//@elastic/eui",
   "@npm//react-use",
   "@npm//react",
+  "@npm//@emotion/react",
+  "@npm//@emotion/css",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -71,6 +73,8 @@ TYPES_DEPS = [
   "@npm//@types/react",
   "@npm//@elastic/eui",
   "@npm//react-use",
+  "@npm//@emotion/react",
+  "@npm//@emotion/css",
 ]
 
 jsts_transpiler(

@@ -264,12 +264,12 @@ Object {
       },
       countTotal: 4,
       countTotalFailures: 4,
-      scheduledActionsPercentiles: {
+      generatedActionsPercentiles: {
         p50: 4,
         p90: 26,
         p99: 26,
       },
-      scheduledActionsPercentilesByType: {
+      generatedActionsPercentilesByType: {
         p50: {
           '__index-threshold': 4,
           logs__alert__document__count: 10,

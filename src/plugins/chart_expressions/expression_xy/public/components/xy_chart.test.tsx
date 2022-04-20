@@ -531,6 +531,7 @@ describe('XYChart component', () => {
         fit: false,
         min: 123,
         max: 456,
+        includeDataFromIds: [],
       });
     });
 
@@ -554,6 +555,7 @@ describe('XYChart component', () => {
         fit: true,
         min: NaN,
         max: NaN,
+        includeDataFromIds: [],
       });
     });
 
@@ -583,6 +585,7 @@ describe('XYChart component', () => {
         fit: false,
         min: NaN,
         max: NaN,
+        includeDataFromIds: [],
       });
     });
 
@@ -614,6 +617,7 @@ describe('XYChart component', () => {
         fit: false,
         min: NaN,
         max: NaN,
+        includeDataFromIds: [],
       });
     });
 
@@ -623,44 +627,9 @@ describe('XYChart component', () => {
       const component = shallow(<XYChart {...defaultProps} data={data} args={args} />);
       expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
         fit: false,
-        min: 0,
-        max: 150,
-      });
-    });
-
-    test('it should ignore referenceLine values when set to custom extents', () => {
-      const { data, args } = sampleArgsWithReferenceLine();
-
-      const component = shallow(
-        <XYChart
-          {...defaultProps}
-          data={data}
-          args={{
-            ...args,
-            yLeftExtent: {
-              type: 'axisExtentConfig',
-              mode: 'custom',
-              lowerBound: 123,
-              upperBound: 456,
-            },
-          }}
-        />
-      );
-      expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
-        fit: false,
-        min: 123,
-        max: 456,
-      });
-    });
-
-    test('it should work for negative values in referenceLines', () => {
-      const { data, args } = sampleArgsWithReferenceLine(-150);
-
-      const component = shallow(<XYChart {...defaultProps} data={data} args={args} />);
-      expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
-        fit: false,
-        min: -150,
-        max: 5,
+        min: NaN,
+        max: NaN,
+        includeDataFromIds: ['referenceLine-referenceLine-a-rect'],
       });
     });
   });

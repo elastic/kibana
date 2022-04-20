@@ -58,7 +58,6 @@ import {
   getAxesConfiguration,
   GroupsConfiguration,
   validateExtent,
-  computeOverallDataDomain,
   getColorAssignments,
   getLinesCausedPaddings,
 } from '../helpers';
@@ -341,42 +340,21 @@ export function XYChart({
         min = extent.lowerBound ?? NaN;
         max = extent.upperBound ?? NaN;
       }
-    } else {
-      const axisHasReferenceLine = referenceLineLayers.some(({ yConfig }) =>
-        yConfig?.some(({ axisMode }) => axisMode === axis.groupId)
-      );
-      if (!fit && axisHasReferenceLine) {
-        // Remove this once the chart will support automatic annotation fit for other type of charts
-        const { min: computedMin, max: computedMax } = computeOverallDataDomain(
-          filteredLayers,
-          axis.series.map(({ accessor }) => accessor),
-          data.tables
-        );
-
-        if (computedMin != null && computedMax != null) {
-          max = Math.max(computedMax, max || 0);
-          min = Math.min(computedMin, min || 0);
-        }
-        for (const { layerId, yConfig } of referenceLineLayers) {
-          const table = data.tables[layerId];
-          for (const { axisMode, forAccessor } of yConfig || []) {
-            if (axis.groupId === axisMode) {
-              for (const row of table.rows) {
-                const value = row[forAccessor];
-                // keep the 0 in view
-                max = Math.max(value, max || 0, 0);
-                min = Math.min(value, min || 0, 0);
-              }
-            }
-          }
-        }
-      }
     }
 
     return {
       fit,
       min,
       max,
+      includeDataFromIds: referenceLineLayers
+        .flatMap((l) =>
+          l.yConfig ? l.yConfig.map((yConfig) => ({ layerId: l.layerId, yConfig })) : []
+        )
+        .filter(({ yConfig }) => yConfig.axisMode === axis.groupId)
+        .map(
+          ({ layerId, yConfig }) =>
+            `${layerId}-${yConfig.forAccessor}-${yConfig.fill !== 'none' ? 'rect' : 'line'}`
+        ),
     };
   };
 
