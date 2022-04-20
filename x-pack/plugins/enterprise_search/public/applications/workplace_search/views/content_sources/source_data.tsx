@@ -17,33 +17,6 @@ import {
 } from '../../constants';
 import { FeatureIds, SourceDataItem } from '../../types';
 
-export const staticExternalSourceData: SourceDataItem = {
-  name: SOURCE_NAMES.SHAREPOINT,
-  iconName: SOURCE_NAMES.SHAREPOINT,
-  serviceType: 'external',
-  baseServiceType: 'share_point',
-  configuration: {
-    isPublicKey: false,
-    hasOauthRedirect: true,
-    needsBaseUrl: false,
-    documentationUrl: docLinks.workplaceSearchExternalSharePointOnline,
-    applicationPortalUrl: 'https://portal.azure.com/',
-  },
-  objTypes: [SOURCE_OBJ_TYPES.ALL_STORED_FILES],
-  features: {
-    basicOrgContext: [
-      FeatureIds.SyncFrequency,
-      FeatureIds.SyncedItems,
-      FeatureIds.GlobalAccessPermissions,
-    ],
-    basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
-    platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
-    platinumPrivateContext: [FeatureIds.Private, FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
-  },
-  accountContextOnly: false,
-  isBeta: true,
-};
-
 export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.BOX,
@@ -553,7 +526,36 @@ export const staticSourceData: SourceDataItem[] = [
     },
     accountContextOnly: false,
   },
-  staticExternalSourceData,
+  {
+    name: SOURCE_NAMES.SHAREPOINT,
+    iconName: SOURCE_NAMES.SHAREPOINT,
+    serviceType: 'external',
+    baseServiceType: 'share_point',
+    configuration: {
+      isPublicKey: false,
+      hasOauthRedirect: true,
+      needsBaseUrl: false,
+      documentationUrl: docLinks.workplaceSearchExternalSharePointOnline,
+      applicationPortalUrl: 'https://portal.azure.com/',
+    },
+    objTypes: [SOURCE_OBJ_TYPES.ALL_STORED_FILES],
+    features: {
+      basicOrgContext: [
+        FeatureIds.SyncFrequency,
+        FeatureIds.SyncedItems,
+        FeatureIds.GlobalAccessPermissions,
+      ],
+      basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
+      platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
+      platinumPrivateContext: [
+        FeatureIds.Private,
+        FeatureIds.SyncFrequency,
+        FeatureIds.SyncedItems,
+      ],
+    },
+    accountContextOnly: false,
+    isBeta: true,
+  },
   {
     name: SOURCE_NAMES.SHAREPOINT_SERVER,
     iconName: SOURCE_NAMES.SHAREPOINT_SERVER,

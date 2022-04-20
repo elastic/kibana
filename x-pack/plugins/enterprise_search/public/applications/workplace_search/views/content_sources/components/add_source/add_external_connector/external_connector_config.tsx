@@ -29,8 +29,6 @@ import {
 import { NAV, REMOVE_BUTTON } from '../../../../../constants';
 import { SourceDataItem } from '../../../../../types';
 
-import { staticExternalSourceData } from '../../../source_data';
-
 import { AddSourceHeader } from '../add_source_header';
 import { ConfigDocsLinks } from '../config_docs_links';
 import { OAUTH_SAVE_CONFIG_BUTTON, OAUTH_BACK_BUTTON } from '../constants';
@@ -64,13 +62,9 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({
   const {
     name,
     categories,
-    configuration: { applicationLinkTitle, applicationPortalUrl },
+    configuration: { applicationLinkTitle, applicationPortalUrl, documentationUrl },
   } = sourceData;
   const { isOrganization } = useValues(AppLogic);
-
-  const {
-    configuration: { documentationUrl },
-  } = staticExternalSourceData;
 
   const saveButton = (
     <EuiButton color="primary" fill isLoading={buttonLoading} disabled={formDisabled} type="submit">
