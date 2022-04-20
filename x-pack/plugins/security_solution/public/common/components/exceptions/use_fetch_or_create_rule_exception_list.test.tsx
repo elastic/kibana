@@ -175,13 +175,13 @@ describe('useFetchOrCreateRuleExceptionList', () => {
         expect(patchRule).toHaveBeenCalledTimes(1);
       });
     });
-    it('invokes onSuccess indicating that the rule changed', async () => {
+    it('invokes onSuccess', async () => {
       await act(async () => {
         const { waitForNextUpdate } = render();
         await waitForNextUpdate();
         await waitForNextUpdate();
         await waitForNextUpdate();
-        expect(onSuccess).toHaveBeenCalledWith(true);
+        expect(onSuccess).toHaveBeenCalledWith(false);
       });
     });
   });
@@ -223,7 +223,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
         expect(result.current[1]).toEqual(detectionExceptionList);
       });
     });
-    it('invokes onSuccess indicating that the rule did not change', async () => {
+    it('invokes onSuccess indicating', async () => {
       await act(async () => {
         const { waitForNextUpdate } = render();
         await waitForNextUpdate();

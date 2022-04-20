@@ -7,7 +7,12 @@
 
 import { CustomRule, ThreatIndicatorRule } from '../../objects/rule';
 
-export const createCustomRule = (rule: CustomRule, ruleId = 'rule_testing', interval = '100m') =>
+export const createCustomRule = (
+  rule: CustomRule,
+  ruleId = 'rule_testing',
+  interval = '100m',
+  enabled = false
+) =>
   cy.request({
     method: 'POST',
     url: 'api/detection_engine/rules',
@@ -23,7 +28,7 @@ export const createCustomRule = (rule: CustomRule, ruleId = 'rule_testing', inte
       index: rule.index,
       query: rule.customQuery,
       language: 'kuery',
-      enabled: false,
+      enabled,
       exceptions_list: rule.exceptionLists ?? [],
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },

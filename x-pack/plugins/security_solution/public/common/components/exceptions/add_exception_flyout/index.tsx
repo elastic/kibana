@@ -167,35 +167,6 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   }, [jobs, ruleIndices]);
 
   const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(memoRuleIndices);
-  const onError = useCallback(
-    (error: Error): void => {
-      addError(error, { title: i18n.ADD_EXCEPTION_ERROR });
-      onCancel();
-    },
-    [addError, onCancel]
-  );
-
-  const onSuccess = useCallback(
-    (updated: number, conflicts: number): void => {
-      addSuccess(i18n.ADD_EXCEPTION_SUCCESS);
-      onConfirm(shouldCloseAlert, shouldBulkCloseAlert);
-      if (conflicts > 0) {
-        addWarning({
-          title: i18nCommon.UPDATE_ALERT_STATUS_FAILED(conflicts),
-          text: i18nCommon.UPDATE_ALERT_STATUS_FAILED_DETAILED(updated, conflicts),
-        });
-      }
-    },
-    [addSuccess, addWarning, onConfirm, shouldBulkCloseAlert, shouldCloseAlert]
-  );
-
-  const [{ isLoading: addExceptionIsLoading }, addOrUpdateExceptionItems] = useAddOrUpdateException(
-    {
-      http,
-      onSuccess,
-      onError,
-    }
-  );
 
   const handleBuilderOnChange = useCallback(
     ({
@@ -235,6 +206,37 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       onCancel();
     },
     [addError, onCancel]
+  );
+
+  const onError = useCallback(
+    (error: Error): void => {
+      addError(error, { title: i18n.ADD_EXCEPTION_ERROR });
+      onCancel();
+    },
+    [addError, onCancel]
+  );
+
+  const onSuccess = useCallback(
+    (updated: number, conflicts: number): void => {
+      handleRuleChange(true);
+      addSuccess(i18n.ADD_EXCEPTION_SUCCESS);
+      onConfirm(shouldCloseAlert, shouldBulkCloseAlert);
+      if (conflicts > 0) {
+        addWarning({
+          title: i18nCommon.UPDATE_ALERT_STATUS_FAILED(conflicts),
+          text: i18nCommon.UPDATE_ALERT_STATUS_FAILED_DETAILED(updated, conflicts),
+        });
+      }
+    },
+    [addSuccess, addWarning, onConfirm, shouldBulkCloseAlert, shouldCloseAlert, handleRuleChange]
+  );
+
+  const [{ isLoading: addExceptionIsLoading }, addOrUpdateExceptionItems] = useAddOrUpdateException(
+    {
+      http,
+      onSuccess,
+      onError,
+    }
   );
 
   const handleFetchOrCreateExceptionListError = useCallback(
