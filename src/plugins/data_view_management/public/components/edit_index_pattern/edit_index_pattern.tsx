@@ -8,6 +8,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { withRouter, RouteComponentProps, useLocation } from 'react-router-dom';
+import styled from 'styled-components';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,6 +17,7 @@ import {
   EuiBadge,
   EuiCallOut,
   EuiCode,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -26,6 +28,10 @@ import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
 import { getTags } from '../utils';
 import { removeDataView, RemoveDataViewProps } from './remove_data_view';
+
+const Code = styled(EuiCode)`
+  margin-left: 8px;
+`;
 
 export interface EditIndexPatternProps extends RouteComponentProps {
   indexPattern: DataView;
@@ -170,16 +176,16 @@ export const EditIndexPattern = withRouter(
             {Boolean(indexPattern.title) && (
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="none" alignItems="center">
-                  {indexPatternHeading}
-                  <EuiCode>{indexPattern.title}</EuiCode>
+                  <EuiText size="s">{indexPatternHeading}</EuiText>
+                  <Code>{indexPattern.title}</Code>
                 </EuiFlexGroup>
               </EuiFlexItem>
             )}
             {Boolean(indexPattern.timeFieldName) && (
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="none" alignItems="center">
-                  {timeFilterHeading}
-                  <EuiCode>{indexPattern.timeFieldName}</EuiCode>
+                  <EuiText size="s">{timeFilterHeading}</EuiText>
+                  <Code>{indexPattern.timeFieldName}</Code>
                 </EuiFlexGroup>
               </EuiFlexItem>
             )}
@@ -190,7 +196,13 @@ export const EditIndexPattern = withRouter(
             )}
             {tags.map((tag: any) => (
               <EuiFlexItem grow={false} key={tag.key}>
-                <EuiBadge color={tag.key === 'default' ? 'default' : 'hollow'}>{tag.name}</EuiBadge>
+                {tag.key === 'default' ? (
+                  <EuiBadge iconType="starFilled" color="default">
+                    {tag.name}
+                  </EuiBadge>
+                ) : (
+                  <EuiBadge color="hollow">{tag.name}</EuiBadge>
+                )}
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>

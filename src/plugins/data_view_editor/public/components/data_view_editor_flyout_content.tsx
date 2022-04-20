@@ -123,7 +123,11 @@ const IndexPatternEditorFlyoutContentComponent = ({
         };
       }
 
-      if (editData && !editDataViewChangedModal) {
+      if (
+        editData &&
+        editData.title !== form.getFields().title.value &&
+        !editDataViewChangedModal
+      ) {
         setEditDataViewChangedModal(true);
       } else {
         await onSave(indexPatternStub);
