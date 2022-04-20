@@ -2,8 +2,8 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "elastic-analytics"
-PKG_REQUIRE_NAME = "@elastic/analytics"
+PKG_DIRNAME = "fullstory"
+PKG_REQUIRE_NAME = "@kbn/analytics-shippers-fullstory"
 
 SOURCE_FILES = glob(
   [
@@ -37,7 +37,6 @@ NPM_MODULE_EXTRA_FILES = [
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
   "@npm//moment",
-  "@npm//rxjs",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -53,8 +52,7 @@ TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
   "@npm//moment",
-  "@npm//rxjs",
-  "//packages/kbn-logging:npm_module_types",
+  "//packages/analytics/client:npm_module_types",
   "//packages/kbn-logging-mocks:npm_module_types",
 ]
 
