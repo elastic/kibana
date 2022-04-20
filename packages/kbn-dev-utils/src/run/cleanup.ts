@@ -9,8 +9,8 @@
 import { inspect } from 'util';
 
 import exitHook from 'exit-hook';
+import { ToolingLog } from '@kbn/tooling-log';
 
-import { ToolingLog } from '../tooling_log';
 import { isFailError } from './fail';
 
 /**

@@ -220,12 +220,14 @@
 /packages/kbn-ambient-ui-types/ @elastic/kibana-operations
 /packages/kbn-ambient-storybook-types/ @elastic/kibana-operations
 /packages/kbn-bazel-packages/ @elastic/kibana-operations
+/packages/kbn-bazel-runner/ @elastic/kibana-operations
 /packages/kbn-cli-dev-mode/ @elastic/kibana-operations
 /packages/kbn-dev-utils*/ @elastic/kibana-operations
 /packages/kbn-es-archiver/ @elastic/kibana-operations
 /packages/kbn-es/ @elastic/kibana-operations
 /packages/kbn-eslint-plugin-imports/ @elastic/kibana-operations
 /packages/kbn-generate/ @elastic/kibana-operations
+/packages/kbn-import-resolver/ @elastic/kibana-operations
 /packages/kbn-optimizer/ @elastic/kibana-operations
 /packages/kbn-plugin-discovery/ @elastic/kibana-operations
 /packages/kbn-pm/ @elastic/kibana-operations
@@ -522,9 +524,8 @@
 /x-pack/plugins/security_solution/server/lib/sourcerer @elastic/security-solution-platform
 /packages/kbn-securitysolution* @elastic/security-solution-platform
 
-
-## Security Solution sub teams - Security Threat Intelligence
-/x-pack/plugins/security_solution/public/common/components/threat_match @elastic/security-threat-intelligence
+## Security Threat Intelligence - Under Security Platform
+/x-pack/plugins/security_solution/public/common/components/threat_match @elastic/security-solution-platform
 
 ## Security Solution cross teams ownership
 /x-pack/plugins/security_solution/cypress/downloads @elastic/security-detections-response @elastic/security-threat-hunting
