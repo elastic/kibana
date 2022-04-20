@@ -96,6 +96,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       crawlRules: `${APP_SEARCH_DOCS}crawl-web-content.html#crawl-web-content-manage-crawl-rules`,
       curations: `${APP_SEARCH_DOCS}curations-guide.html`,
       duplicateDocuments: `${APP_SEARCH_DOCS}web-crawler-reference.html#web-crawler-reference-content-deduplication`,
+      elasticsearchIndexedEngines: `${APP_SEARCH_DOCS}elasticsearch-engines.html`,
       entryPoints: `${APP_SEARCH_DOCS}crawl-web-content.html#crawl-web-content-manage-entry-points`,
       guide: `${APP_SEARCH_DOCS}index.html`,
       indexingDocuments: `${APP_SEARCH_DOCS}indexing-documents-guide.html`,
@@ -601,6 +602,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       learnMoreBlog: `${ELASTIC_WEBSITE_URL}blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
       apiKeysLearnMore: `${KIBANA_DOCS}api-keys.html`,
       onPremRegistry: `${FLEET_DOCS}air-gapped.html`,
+      secureLogstash: `${FLEET_DOCS}secure-logstash-connections.html`,
     },
     ecs: {
       guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
