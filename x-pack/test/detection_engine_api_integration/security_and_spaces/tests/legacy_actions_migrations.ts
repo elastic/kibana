@@ -15,6 +15,9 @@ import {
   getRuleSOById,
 } from '../../utils';
 
+/**
+ * @deprecated Once the legacy notification system is removed, remove this test too.
+ */
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

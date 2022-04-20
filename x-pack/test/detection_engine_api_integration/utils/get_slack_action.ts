@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-export const getWebHookAction = () => ({
-  actionTypeId: '.webhook',
-  config: {
-    method: 'post',
-    url: 'http://localhost',
-  },
-  secrets: {
-    user: 'example',
-    password: 'example',
-  },
+export const getSlackAction = () => ({
+  actionTypeId: '.slack',
+  isMissingSecrets: false,
+  config: {},
+  secrets: 'WTpvAWxAnR1yHdFqQ',
   name: 'Some connector',
 });

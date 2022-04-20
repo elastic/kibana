@@ -14,7 +14,7 @@ import {
   deleteAllAlerts,
   deleteSignalsIndex,
   removeServerGeneratedProperties,
-  getWebHookAction,
+  getSlackAction,
   getRuleWithWebHookAction,
   getSimpleRuleOutputWithWebHookAction,
   waitForRuleSuccessOrStatus,
@@ -51,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body: hookAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'true')
-          .send(getWebHookAction())
+          .send(getSlackAction())
           .expect(200);
 
         const rule = await createRule(supertest, log, getRuleWithWebHookAction(hookAction.id));
@@ -66,7 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body: hookAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'true')
-          .send(getWebHookAction())
+          .send(getSlackAction())
           .expect(200);
 
         const rule = await createRule(
@@ -82,7 +82,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body: hookAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'true')
-          .send(getWebHookAction())
+          .send(getSlackAction())
           .expect(200);
 
         // create a rule with the action attached and a meta field
