@@ -7,29 +7,33 @@
 Synchronizes {kib} saved objects for {ml} jobs and trained models.
 
 [[machine-learning-api-sync-request]]
-==== Request
+==== {api-request-title}
 
 `GET <kibana host>:<port>/api/ml/saved_objects/sync`
 
 `GET <kibana host>:<port>/s/<space_id>/api/ml/saved_objects/sync`
 
+[[machine-learning-api-sync-desc]]
+==== {api-description-title}
+
+This API runs automatically when you start {kib} and periodically thereafter.
 
 [[machine-learning-api-sync-path-params]]
-==== Path parameters
+==== {api-path-parms-title}
 
 `space_id`::
 (Optional, string) An identifier for the space. If `space_id` is not provided in
 the URL the default space is used.
 
 [[machine-learning-api-sync-query-params]]
-==== Query parameters
+==== {api-query-parms-title}
 
 `simulate`::
 (Optional, boolean) When `true`, simulates the synchronization by only returning
 the list actions that _would_ be performed.
 
 [[machine-learning-api-sync-response-body]]
-==== Response body
+==== {api-response-body-title}
 
 `datafeedsAdded`::
 (array) If a saved object for an {anomaly-job} is missing a {dfeed} identifier,
@@ -52,13 +56,13 @@ exist, they are deleted. This list contains the job and model identifiers and
 indicates whether the synchronization was successful.
 
 [[machine-learning-api-sync-codes]]
-==== Response code
+==== {api-response-codes-title}
 
 `200`::
   Indicates a successful call.
 
 [[machine-learning-api-sync-example]]
-==== Example
+==== {api-examples-title}
 
 Retrieve the list of {ml} saved objects that require synchronization:
 
@@ -68,8 +72,8 @@ $ curl -X GET api/ml/saved_objects/sync?simulate=true
 --------------------------------------------------
 // KIBANA
 
-If there are two jobs that need to be synchronized, for example,
-the API returns the following:
+If there are two jobs that need to be synchronized, for example, the API returns
+the following response:
 
 [source,sh]
 --------------------------------------------------
