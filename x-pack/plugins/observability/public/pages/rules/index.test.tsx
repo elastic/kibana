@@ -94,7 +94,7 @@ describe('empty RulesPage', () => {
       await nextTick();
       wrapper.update();
     });
-    expect(wrapper.find(RulesTable)).toHaveLength(0);
+    expect(wrapper.find(RulesTable).exists()).toBe(false);
     expect(wrapper.find('[data-test-subj="createFirstRuleEmptyPrompt"]').exists()).toBeTruthy();
   });
   it('renders Create rule button', async () => {
@@ -348,7 +348,7 @@ describe('RulesPage with items', () => {
 
   it('renders table of rules', async () => {
     await setup();
-    expect(wrapper.find(RulesTable)).toHaveLength(1);
+    expect(wrapper.find(RulesTable).exists()).toBe(true);
   });
 });
 
