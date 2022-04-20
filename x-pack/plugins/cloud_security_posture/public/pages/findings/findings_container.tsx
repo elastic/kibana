@@ -46,7 +46,7 @@ const getGroupByOptions = (): Array<EuiComboBoxOptionOption<FindingsBaseURLQuery
   {
     value: 'resource',
     label: i18n.translate('xpack.csp.findings.groupBySelector.groupByResourceIdLabel', {
-      defaultMessage: 'Resource ID',
+      defaultMessage: 'Resource',
     }),
   },
 ];
