@@ -13,6 +13,12 @@ Synchronizes {kib} saved objects for {ml} jobs and trained models.
 
 `GET <kibana host>:<port>/s/<space_id>/api/ml/saved_objects/sync`
 
+[[machine-learning-api-sync-prereq]]
+==== {api-prereq-title}
+
+You must have `all` privileges for the *Machine Learning* feature in the *Analytics* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>.
+
 [[machine-learning-api-sync-desc]]
 ==== {api-description-title}
 
