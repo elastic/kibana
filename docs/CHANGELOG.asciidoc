@@ -214,7 +214,7 @@ Observability::
 * Update position of legend and it's controls {kibana-pull}115854[#115854]
 
 Platform::
-Allow customizing ES client maxSockets {kibana-pull}126937[#126937]
+Allow customizing {es} client maxSockets {kibana-pull}126937[#126937]
 
 [float]
 [[fixes-v8.2.0]]
