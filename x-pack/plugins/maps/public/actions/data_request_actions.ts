@@ -124,7 +124,7 @@ function getDataRequestContext(
   isForceRefresh: boolean
 ): DataRequestContext {
   return {
-    dataFilters: getDataFilters(getState(), layerId),
+    dataFilters: getDataFilters(getState()),
     startLoading: (dataId: string, requestToken: symbol, meta: DataRequestMeta) =>
       dispatch(startDataLoad(layerId, dataId, requestToken, meta)),
     stopLoading: (dataId: string, requestToken: symbol, data: object, meta: DataRequestMeta) =>
