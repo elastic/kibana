@@ -12,6 +12,9 @@ import type {
   Plugin,
   Logger,
 } from '@kbn/core/server';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
+import { CIS_KUBERNETES_PACKAGE_NAME } from '../common/constants';
 import { CspAppService } from './lib/csp_app_services';
 import type {
   CspServerPluginSetup,
@@ -42,9 +45,11 @@ export class CspPlugin
     >
 {
   private readonly logger: Logger;
+
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
+
   private readonly CspAppService = new CspAppService();
 
   public setup(
@@ -72,12 +77,42 @@ export class CspPlugin
       ...plugins.fleet,
     });
 
+    plugins.fleet.fleetSetupCompleted().then(async () => {
+      const packageInfo = await plugins.fleet.packageService.asInternalUser.getInstallation(
+        CIS_KUBERNETES_PACKAGE_NAME
+      );
+
+      // If package is installed we want to make sure all needed assets are installed
+      if (packageInfo) {
+        this.initialize(core);
+      }
+
+      plugins.fleet.registerExternalCallback(
+        'packagePolicyPostCreate',
+        async (
+          packagePolicy: PackagePolicy,
+          context: RequestHandlerContext,
+          request: KibanaRequest
+        ): Promise<PackagePolicy> => {
+          if (packagePolicy.package?.name === CIS_KUBERNETES_PACKAGE_NAME) {
+            this.initialize(core);
+          }
+
+          return packagePolicy;
+        }
+      );
+    });
+
+    return {};
+  }
+
+  public stop() {}
+
+  private initialize(core: CoreStart) {
+    this.logger.debug('initialize');
     initializeCspRules(core.savedObjects.createInternalRepository());
     initializeCspTransformsIndices(core.elasticsearch.client.asInternalUser, this.logger).then(
       (_) => initializeCspTransforms(core.elasticsearch.client.asInternalUser, this.logger)
     );
-
-    return {};
   }
-  public stop() {}
 }
