@@ -27,7 +27,7 @@ export const ElasticAgentCard = (props: ElasticAgentCardProps) => {
     if (category) {
       return addBasePath(`${prefix}/${category}`);
     }
-    return prefix;
+    return addBasePath(prefix);
   };
 
   return (

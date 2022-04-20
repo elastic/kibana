@@ -8,9 +8,17 @@ exports[`ElasticAgentCard renders 1`] = `
       "navigateToUrl": [Function],
     }
   }
+  data={
+    Object {
+      "hasDataView": [Function],
+      "hasESData": [Function],
+      "hasUserDataView": [Function],
+    }
+  }
   docLinks={
     Object {
       "dataViewsDocLink": "dummy link",
+      "kibanaGuideDocLink": "Kibana guide",
     }
   }
   editors={
@@ -20,7 +28,19 @@ exports[`ElasticAgentCard renders 1`] = `
   }
   http={
     Object {
-      "addBasePath": [MockFunction],
+      "addBasePath": [MockFunction] {
+        "calls": Array [
+          Array [
+            "/app/integrations/browse",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": "/app/integrations/browse",
+          },
+        ],
+      },
     }
   }
   intl={

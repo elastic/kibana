@@ -9,7 +9,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDocLinks, SharedUxServicesProvider } from '@kbn/shared-ux-services';
 import { EmptyStatePage } from '@kbn/shared-ux-components';
-import { servicesFactory } from '../../services';
 import { getSharedUXServices } from '../../plugin';
 
 interface Props {

@@ -33,7 +33,7 @@ export class SharedUXPlugin implements Plugin<SharedUXPluginSetup, SharedUXPlugi
     services = servicesFactory({ coreStart, startPlugins });
 
     return {
-      getContextServices: () => services,
+      getContextServices: () => servicesFactory({ coreStart, startPlugins }),
     };
   }
 

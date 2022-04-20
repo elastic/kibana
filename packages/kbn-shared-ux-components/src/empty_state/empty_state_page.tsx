@@ -25,7 +25,8 @@ export const EmptyStatePage = ({ onDataViewCreated, noDataConfig }: Props) => {
       setDataExists(await hasESData());
       setHasUserDataViews(await hasUserDataView());
     };
-    checkData();
+    // TODO: add error handling
+    checkData().catch(() => {});
   }, [hasESData, hasUserDataView]);
 
   if (!dataExists) {

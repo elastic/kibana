@@ -21,5 +21,5 @@ export type DocLinksServiceFactory = KibanaPluginServiceFactory<
  */
 export const docLinksServiceFactory: DocLinksServiceFactory = ({ coreStart, startPlugins }) => ({
   dataViewsDocLink: coreStart.docLinks.links.indexPatterns?.introduction,
-  kibanaGuideDocLink: startPlugins.docLinks.links.kibana.guide,
+  kibanaGuideDocLink: coreStart.docLinks.links.kibana.guide,
 });
