@@ -6,7 +6,11 @@
  */
 import { schema } from '@kbn/config-schema';
 import { v4 as uuidv4 } from 'uuid';
-import { SyntheticsMonitor, SyntheticsMonitorWithSecrets } from '../../../common/runtime_types';
+import {
+  ConfigKey,
+  SyntheticsMonitor,
+  SyntheticsMonitorWithSecrets,
+} from '../../../common/runtime_types';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 import {
@@ -23,7 +27,7 @@ export const testNowMonitorRoute: UMRestApiRouteFactory = () => ({
       monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
     }),
   },
-  handler: async ({ request, savedObjectsClient, response, server }): Promise<any> => {
+  handler: async ({ request, savedObjectsClient, server }): Promise<any> => {
     const { monitorId } = request.params;
     const monitor = await savedObjectsClient.get<SyntheticsMonitor>(
       syntheticsMonitorType,
@@ -38,6 +42,8 @@ export const testNowMonitorRoute: UMRestApiRouteFactory = () => ({
         monitorId
       );
 
+    const { [ConfigKey.SCHEDULE]: schedule, [ConfigKey.LOCATIONS]: locations } = monitor.attributes;
+
     const { syntheticsService } = server;
 
     const testRunId = uuidv4();
@@ -45,7 +51,6 @@ export const testNowMonitorRoute: UMRestApiRouteFactory = () => ({
     const errors = await syntheticsService.triggerConfigs(request, [
       {
         ...normalizeSecrets(monitorWithSecrets).attributes,
-        ...monitor.attributes,
         id: monitorId,
         fields_under_root: true,
         fields: { config_id: monitorId, test_run_id: testRunId },
@@ -53,9 +58,9 @@ export const testNowMonitorRoute: UMRestApiRouteFactory = () => ({
     ]);
 
     if (errors && errors?.length > 0) {
-      return { errors, testRunId, monitorId };
+      return { errors, testRunId, monitorId, schedule, locations };
     }
 
-    return { testRunId, monitorId };
+    return { testRunId, monitorId, schedule, locations };
   },
 });
