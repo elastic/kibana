@@ -7,10 +7,11 @@
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import * as TEST_SUBJECTS from './test_subjects';
-import { FindingsByResourceTable, getResourceId } from './findings_by_resource_table';
+import { FindingsByResourceTable, formatNumber, getResourceId } from './findings_by_resource_table';
 import * as TEXT from './translations';
 import type { PropsOf } from '@elastic/eui';
 import Chance from 'chance';
+import numeral from '@elastic/numeral';
 
 const chance = new Chance();
 
@@ -58,6 +59,10 @@ describe('<FindingsByResourceTable />', () => {
       expect(within(row).getByText(item.resource_id)).toBeInTheDocument();
       expect(within(row).getByText(item.cluster_id)).toBeInTheDocument();
       expect(within(row).getByText(item.cis_section)).toBeInTheDocument();
+      expect(within(row).getByText(formatNumber(item.failed_findings.total))).toBeInTheDocument();
+      expect(
+        within(row).getByText(new RegExp(numeral(item.failed_findings.normalized).format('0%')))
+      ).toBeInTheDocument();
     });
   });
 });

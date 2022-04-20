@@ -21,7 +21,8 @@ import * as TEST_SUBJECTS from './test_subjects';
 import * as TEXT from './translations';
 import type { CspFindingsByResourceResult } from './use_findings_by_resource';
 
-const formatNumber = (value: number) => (value < 1000 ? value : numeral(value).format('0.0a'));
+export const formatNumber = (value: number) =>
+  value < 1000 ? value : numeral(value).format('0.0a');
 
 type FindingsGroupByResourceProps = CspFindingsByResourceResult;
 type CspFindingsByResource = NonNullable<CspFindingsByResourceResult['data']>['page'][number];
