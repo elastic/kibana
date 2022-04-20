@@ -85,10 +85,12 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
         await saveFleetServerHost();
         await generateServiceToken();
 
-        const existingPolicy = await sendGetOneAgentPolicy(fleetServerPolicyId!);
+        const existingPolicy = await sendGetOneAgentPolicy(
+          QUICK_START_FLEET_SERVER_POLICY_FIELDS.id!
+        );
 
         // Don't attempt to create the policy if it's already been created in a previous quick start flow
-        if (existingPolicy) {
+        if (existingPolicy.data?.item) {
           setFleetServerPolicyId(existingPolicy.data?.item.id);
         } else {
           const createPolicyResponse = await sendCreateAgentPolicy(
@@ -118,7 +120,6 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
     validateFleetServerHost,
     saveFleetServerHost,
     generateServiceToken,
-    fleetServerPolicyId,
     setFleetServerHost,
     fleetServerHost,
     setFleetServerPolicyId,
