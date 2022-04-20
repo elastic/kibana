@@ -12,7 +12,7 @@ import Path from 'path';
 import { promisify } from 'util';
 import { pipeline } from 'stream';
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import Axios from 'axios';
 import del from 'del';
 

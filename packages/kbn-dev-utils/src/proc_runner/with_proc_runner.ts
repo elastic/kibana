@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { ToolingLog } from '@kbn/tooling-log';
+
 import { ProcRunner } from './proc_runner';
-import { ToolingLog } from '../tooling_log';
 
 /**
  *  Create a ProcRunner and pass it to an async function. When

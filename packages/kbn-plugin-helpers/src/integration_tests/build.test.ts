@@ -11,7 +11,7 @@ import Fs from 'fs';
 
 import execa from 'execa';
 import { REPO_ROOT } from '@kbn/utils';
-import { createStripAnsiSerializer, createReplaceSerializer } from '@kbn/dev-utils';
+import { createStripAnsiSerializer, createReplaceSerializer } from '@kbn/jest-serializers';
 import extract from 'extract-zip';
 import del from 'del';
 import globby from 'globby';

@@ -8,11 +8,13 @@
 import { initialUserPrivilegesState, UserPrivilegesState } from '../user_privileges_context';
 import { getEndpointPrivilegesInitialStateMock } from '../endpoint/mocks';
 
-export const useUserPrivileges = jest.fn(() => {
+export const getUserPrivilegesMockDefaultValue = () => {
   const mockedPrivileges: UserPrivilegesState = {
     ...initialUserPrivilegesState(),
     endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
   };
 
   return mockedPrivileges;
-});
+};
+
+export const useUserPrivileges = jest.fn(getUserPrivilegesMockDefaultValue);
