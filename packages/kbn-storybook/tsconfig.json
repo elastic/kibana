@@ -10,7 +10,6 @@
     "target": "es2015",
     "types": [
       "node",
-      "@storybook/core-common",
       "@kbn/ambient-storybook-types"
     ]
   },
