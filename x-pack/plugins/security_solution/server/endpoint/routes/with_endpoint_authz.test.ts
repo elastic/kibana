@@ -14,7 +14,7 @@ import { EndpointAuthorizationError } from '../errors';
 
 describe('When using `withEndpointAuthz()`', () => {
   let mockRequestHandler: jest.Mocked<RequestHandler>;
-  let mockContext: jest.Mocked<ReturnType<typeof requestContextMock.create>>;
+  let mockContext: ReturnType<typeof requestContextMock.create>;
   let mockRequest: ReturnType<typeof httpServerMock.createKibanaRequest>;
   let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
