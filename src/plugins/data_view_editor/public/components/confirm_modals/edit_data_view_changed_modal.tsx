@@ -19,14 +19,14 @@ const geti18nTexts = (dataViewName?: string) => ({
   confirmButtonText: i18n.translate(
     'indexPatternEditor.editDataView.editConfirmationModal.saveButtonLabel',
     {
-      defaultMessage: 'Edit',
+      defaultMessage: 'Save',
     }
   ),
   warningEditingDataView: i18n.translate(
     'indexPatternEditor.editDataView.editConfirmationModal.warningEditingDataView',
     {
       defaultMessage:
-        'Are you sure you want to edit this data view? Changing it might have unwanted outcomes.',
+        'Are you sure you want to edit this data view? Anything that depends upon this might not work as expected.',
     }
   ),
   typeConfirm: i18n.translate('indexPatternEditor.editDataView.editConfirmationModal.typeConfirm', {

@@ -8,7 +8,7 @@
 
 import React, { ChangeEvent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiFieldText, EuiText } from '@elastic/eui';
+import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { DataView, UseField } from '../../shared_imports';
 import { IndexPatternConfig } from '../../types';
 
@@ -30,17 +30,7 @@ export const NameField = ({ editData }: NameFieldProps) => {
     >
       {(field) => {
         return (
-          <EuiFormRow
-            label={field.label}
-            labelAppend={
-              <EuiText size="xs" color="subdued">
-                {i18n.translate('indexPatternEditor.form.optional', {
-                  defaultMessage: 'Optional',
-                })}
-              </EuiText>
-            }
-            fullWidth
-          >
+          <EuiFormRow label={field.label} fullWidth>
             <EuiFieldText
               value={field.value}
               onChange={(e: ChangeEvent<HTMLInputElement>) => {

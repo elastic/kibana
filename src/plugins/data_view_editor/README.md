@@ -14,7 +14,7 @@ Convenience method that uses the `core.application.capabilities` api to determin
 
 ### `openEditor(options: DataViewEditorProps): CloseEditor`
 
-Use this method to display the data view editor to create an index pattern.
+Use this method to display the data view editor to create a data view.
 
 #### `options`
 
