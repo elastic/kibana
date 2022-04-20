@@ -65,7 +65,9 @@ Alerting::
 * Keep the number_of_scheduled_actions in event log {kibana-pull}128438[#128438]
 * Remove defaultRuleTaskTimeout and set ruleType specific timeout from kibana.yml {kibana-pull}128294[#128294]
 * Limit the executable actions per rule execution {kibana-pull}128079[#128079] and {kibana-pull}126902[#126902]
-* Adds Cases to the Stack Management page {kibana-pull}125224[#125224]
+
+Cases::
+* Adds Cases to the Stack Management page as a technical preview feature{kibana-pull}125224[#125224]
 
 Dashboard::
 * Adds time slider control {kibana-pull}128305[#128305]
@@ -74,7 +76,8 @@ Dashboard::
 * Adds options list API and validation system {kibana-pull}123889[#123889]
 
 Discover::
-Adds `Copy to clipboard` ability for column name of Document Explorer {kibana-pull}123892[#123892]
+* Enables document explorer by default {kibana-pull}125485[#125485]
+* Adds `Copy to clipboard` ability for column name of Document Explorer {kibana-pull}123892[#123892]
 
 Elastic Security::
 For the Elastic Security 8.2.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
@@ -124,8 +127,7 @@ Dashboard::
 * Adds range slider Control {kibana-pull}125584[#125584]
 
 Discover::
-* Adds ability to edit histogram as vis {kibana-pull}125705[#125705]
-* Enables document explorer as default {kibana-pull}125485[#125485]
+Adds ability to edit histogram as vis {kibana-pull}125705[#125705]
 
 Elastic Security::
 For the Elastic Security 8.2.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
@@ -162,14 +164,13 @@ Lens & Visualizations::
 * Adds the ability to detach from global time range in *Lens* {kibana-pull}125563[#125563]
 * Adds last value, min and max on dates, allow last value on ip_range, number_range, and date_range in *Lens* {kibana-pull}125389[#125389]
 * Adds version-aware sorting to data table in *Lens* {kibana-pull}125361[#125361]
-* Adds embeddable enhancement {kibana-pull}125299[#125299]
 * Cancel discarded searches in *Timelion* {kibana-pull}125255[#125255]
 * Cancel discarded searches in *TSVB* {kibana-pull}125197[#125197]
 * Adds the ability to allow users to disable auto-apply in *Lens* {kibana-pull}125158[#125158]
 * Adds Filter custom label for kibanaAddFilter in *Vega* {kibana-pull}124498[#124498]
 * Adds metric Viz config options, title position, and sizing in *Lens* {kibana-pull}124124[#124124]
 * Adds the ability to make graph edges easier to click {kibana-pull}124053[#124053]
-* Adds new autoExtendBounds setting to histogram agg config {kibana-pull}118855[#118855]
+* Adds "Show empty rows" options to intervals function in *Lens* {kibana-pull}118855[#118855]
 
 Machine Learning::
 * Combines annotations into one block if multiple annotations overlap {kibana-pull}128782[#128782]
@@ -301,9 +302,9 @@ Observability::
 * Service maps popover detail metrics are aggregates over all transaction types {kibana-pull}125580[#125580]
 
 Platform::
-* Duplicated datatable available as inspector data for Heatmap chart {kibana-pull}126786[#126786]
-* We fixed an issue that would cause Kibana to become unresponsive while generating a PDF report {kibana-pull}124787[#124787]
-* We fixed a bug that resulted in an unfriendly notification title being displayed after a report has run {kibana-pull}123607[#123607]
+* Fixes an issue where duplicate data appears in the inspector datatable in *Lens* for heatmap visualizations, and stale data persists in the inspector datatable when you remove layers {kibana-pull}126786[#126786]
+* Fixes an issue that caused {kib} to become unresponsive while generating a PDF report {kibana-pull}124787[#124787]
+* Fixes an issue where an unfriendly notification title displays after you create a report {kibana-pull}123607[#123607]
 
 Security::
 * Fixes styles for "You do not have permission" screen {kibana-pull}129715[#129715]
