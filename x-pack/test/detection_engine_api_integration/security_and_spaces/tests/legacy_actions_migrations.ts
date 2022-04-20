@@ -129,7 +129,7 @@ export default ({ getService }: FtrProviderContext) => {
       ]);
     });
 
-    it('migrates legacy actions for rule with action run hourly', async () => {
+    it.only('migrates legacy actions for rule with action run hourly', async () => {
       const soId = '064e3160-b076-11ec-bb3f-1f063f8e06cf';
       const ruleId = '4c056b05-75ac-4209-be32-82100f771eb4';
       const legacySidecarId = '07aa8d10-b076-11ec-bb3f-1f063f8e06cf';
@@ -166,14 +166,22 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(ruleSO?.alert.actions).to.eql([
         {
-          actionRef: 'action_0',
           actionTypeId: '.email',
+          params: {
+            subject: 'Rule email',
+            to: ['test@test.com'],
+            message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+          },
+          actionRef: 'action_0',
           group: 'default',
+        },
+        {
+          actionTypeId: '.slack',
           params: {
             message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
-            subject: 'Test Actions',
-            to: ['test@test.com'],
           },
+          actionRef: 'action_1',
+          group: 'default',
         },
       ]);
       expect(ruleSO?.alert.throttle).to.eql('1h');
@@ -182,6 +190,11 @@ export default ({ getService }: FtrProviderContext) => {
         {
           id: 'c95cb100-b075-11ec-bb3f-1f063f8e06cf',
           name: 'action_0',
+          type: 'action',
+        },
+        {
+          id: '207fa0e0-c04e-11ec-8a52-4fb92379525a',
+          name: 'action_1',
           type: 'action',
         },
       ]);

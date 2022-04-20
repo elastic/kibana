@@ -36,6 +36,33 @@
   "type": "doc",
   "value": {
     "index" : ".kibana",
+    "id" : "action:207fa0e0-c04e-11ec-8a52-4fb92379525a",
+    "source" : {
+      "action" : {
+        "actionTypeId" : ".slack",
+        "name" : "Slack connector",
+        "isMissingSecrets" : false,
+        "config" : { },
+        "secrets" : "WTpvAWxAnR1yHdFqQrmGGeOmqGzeIDQnjGexz7F3JdFVEH0CJkPbiyEk9SiiBr1OPZ3s0LWqphjNREjyxSTCTuYTKaEIQ1+mJFQzjIulekMZklQdon7kNh4hOVHW832IX1Lpx9f5cgAPQst2bqJCehz+3BeZOh17Hgrvb/0zzKRCR4cvlhYbOUNUCNR/d6YoEniwUK8pO9xcel9hle7XY6MNfBGiMX8T41O87lvgp9xDjch3LpwqzDjUIFs="
+      },
+      "type" : "action",
+      "references" : [ ],
+      "namespaces" : [
+        "default"
+      ],
+      "migrationVersion" : {
+        "action" : "8.0.0"
+      },
+      "coreMigrationVersion" : "8.1.2",
+      "updated_at" : "2022-03-30T22:07:27.777Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index" : ".kibana",
     "id" : "alert:9095ee90-b075-11ec-bb3f-1f063f8e06cf",
     "source" : {
       "alert" : {
@@ -629,10 +656,18 @@
             "to" : [
               "test@test.com"
             ],
-            "subject" : "Test Actions"
+            "subject" : "Rule email"
           },
           "actionTypeId" : ".email",
           "actionRef" : "action_0"
+        },
+        {
+          "group" : "default",
+          "params" : {
+            "message" : "Rule {{context.rule.name}} generated {{state.signals_count}} alerts"
+          },
+          "actionTypeId" : ".slack",
+          "actionRef" : "action_1"
         }
       ],
       "throttle" : null,
@@ -660,6 +695,11 @@
       {
         "id" : "c95cb100-b075-11ec-bb3f-1f063f8e06cf",
         "name" : "action_0",
+        "type" : "action"
+      },
+      {
+        "id" : "207fa0e0-c04e-11ec-8a52-4fb92379525a",
+        "name" : "action_1",
         "type" : "action"
       },
       {
@@ -879,9 +919,17 @@
               "to" : [
                 "test@test.com"
               ],
-              "subject" : "Test Actions"
+              "subject" : "Rule email"
             },
             "action_type_id" : ".email"
+          },
+          {
+            "actionRef" : "action_1",
+            "group" : "default",
+            "params" : {
+              "message" : "Rule {{context.rule.name}} generated {{state.signals_count}} alerts"
+            },
+            "action_type_id" : ".slack"
           }
         ],
         "ruleThrottle" : "1h",
@@ -898,6 +946,11 @@
           "id" : "c95cb100-b075-11ec-bb3f-1f063f8e06cf",
           "type" : "action",
           "name" : "action_0"
+        },
+        {
+          "id" : "207fa0e0-c04e-11ec-8a52-4fb92379525a",
+          "type" : "action",
+          "name" : "action_1"
         }
       ],
       "namespaces" : [

@@ -219,7 +219,10 @@ describe.each([
       readRulesMock.mockImplementationOnce(() =>
         Promise.resolve({ ...mockRule, params: { ...mockRule.params, type: 'machine_learning' } })
       );
-
+      (legacyMigrate as jest.Mock).mockResolvedValue({
+        ...mockRule,
+        params: { ...mockRule.params, type: 'machine_learning' },
+      });
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -270,7 +273,10 @@ describe.each([
       readRulesMock.mockImplementationOnce(() =>
         Promise.resolve({ ...mockRule, params: { ...mockRule.params, index: ['index-*'] } })
       );
-
+      (legacyMigrate as jest.Mock).mockResolvedValue({
+        ...mockRule,
+        params: { ...mockRule.params, index: ['index-*'] },
+      });
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_BULK_ACTION,

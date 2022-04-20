@@ -323,9 +323,15 @@ export const getUpdatedActionsParams = ({
 }): Omit<SanitizedRule<RuleParams>, 'id'> => {
   const { id, ...restOfRule } = rule;
 
-  const actionReference = references.find((reference) => reference.name === 'action_0');
+  const actionReference = references.reduce<Record<string, SavedObjectReference>>(
+    (acc, reference) => {
+      acc[reference.name] = reference;
+      return acc;
+    },
+    {}
+  );
 
-  if (actionReference == null) {
+  if (isEmpty(actionReference)) {
     throw new Error(
       `An error occurred migrating legacy action for rule with id:${id}. Connector reference id not found.`
     );
@@ -335,11 +341,20 @@ export const getUpdatedActionsParams = ({
   // into the rule itself
   return {
     ...restOfRule,
-    actions: actions.map(({ actionRef, action_type_id: actionTypeId, ...resOfAction }) => ({
-      ...resOfAction,
-      id: actionReference.id,
-      actionTypeId,
-    })),
+    actions: actions.reduce<RuleAction[]>((acc, action) => {
+      const { actionRef, action_type_id: actionTypeId, ...resOfAction } = action;
+      if (!actionReference[actionRef]) {
+        return acc;
+      }
+      return [
+        ...acc,
+        {
+          ...resOfAction,
+          id: actionReference[actionRef].id,
+          actionTypeId,
+        },
+      ];
+    }, []),
     throttle: transformToAlertThrottle(ruleThrottle),
     notifyWhen: transformToNotifyWhen(ruleThrottle),
   };
@@ -383,10 +398,6 @@ export const legacyMigrate = async ({
       },
     }),
   ]);
-  console.log({
-    siemNotification: JSON.stringify(siemNotification),
-    legacyRuleActionsSO: JSON.stringify(legacyRuleActionsSO),
-  });
 
   const siemNotificationsExist = siemNotification != null && siemNotification.data.length > 0;
   const legacyRuleNotificationSOsExist =
@@ -420,7 +431,6 @@ export const legacyMigrate = async ({
       legacyRuleActionsSO.saved_objects[0].attributes.ruleThrottle === 'no_actions' ||
       legacyRuleActionsSO.saved_objects[0].attributes.ruleThrottle === 'rule'
     ) {
-      console.log('NO ACTIONS');
       return rule;
     }
 

@@ -103,7 +103,7 @@ describe('legacyReadNotifications', () => {
         id: undefined,
         ruleAlertId: 'rule-1',
       });
-      expect(rule).toEqual(legacyGetNotificationResult());
+      expect(rule).toEqual(legacyGetNotificationResult('123'));
     });
 
     test('should return null if the output from rulesClient with ruleAlertId set is empty', async () => {
@@ -127,7 +127,7 @@ describe('legacyReadNotifications', () => {
         id: null,
         ruleAlertId: 'rule-1',
       });
-      expect(rule).toEqual(legacyGetNotificationResult());
+      expect(rule).toEqual(legacyGetNotificationResult('123'));
     });
 
     test('should return null if id and ruleAlertId are null', async () => {

@@ -921,15 +921,20 @@ describe('utils', () => {
   });
 
   describe('#getUpdatedActionsParams', () => {
-    it('throws if no connector id can be found', () => {
+    it('updates one action', () => {
+      const { id, ...rule } = {
+        ...getRuleLegacyActions(),
+        id: '123',
+        actions: [],
+        throttle: null,
+        notifyWhen: 'onActiveAlert',
+      } as SanitizedRule<RuleParams>;
+
       expect(
         getUpdatedActionsParams({
           rule: {
-            ...getRuleLegacyActions(),
-            id: '123',
-            actions: [],
-            throttle: null,
-            notifyWhen: 'onActiveAlert',
+            ...rule,
+            id,
           },
           ruleThrottle: '1h',
           actions: [
@@ -950,9 +955,111 @@ describe('utils', () => {
               type: 'alert',
               name: 'alert_0',
             },
+            {
+              id: '1234',
+              type: 'action',
+              name: 'action_0',
+            },
           ],
         })
-      ).toThrowError();
+      ).toEqual({
+        ...rule,
+        actions: [
+          {
+            actionTypeId: '.email',
+            group: 'default',
+            id: '1234',
+            params: {
+              message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+              subject: 'Test Actions',
+              to: ['a@a.com'],
+            },
+          },
+        ],
+        throttle: '1h',
+        notifyWhen: 'onThrottleInterval',
+      });
+    });
+
+    it('updates multiple actions', () => {
+      const { id, ...rule } = {
+        ...getRuleLegacyActions(),
+        id: '123',
+        actions: [],
+        throttle: null,
+        notifyWhen: 'onActiveAlert',
+      } as SanitizedRule<RuleParams>;
+
+      expect(
+        getUpdatedActionsParams({
+          rule: {
+            ...rule,
+            id,
+          },
+          ruleThrottle: '1h',
+          actions: [
+            {
+              actionRef: 'action_0',
+              group: 'default',
+              params: {
+                message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+                to: ['test@test.com'],
+                subject: 'Rule email',
+              },
+              action_type_id: '.email',
+            },
+            {
+              actionRef: 'action_1',
+              group: 'default',
+              params: {
+                message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+              },
+              action_type_id: '.slack',
+            },
+          ],
+          references: [
+            {
+              id: '064e3160-b076-11ec-bb3f-1f063f8e06cf',
+              type: 'alert',
+              name: 'alert_0',
+            },
+            {
+              id: 'c95cb100-b075-11ec-bb3f-1f063f8e06cf',
+              type: 'action',
+              name: 'action_0',
+            },
+            {
+              id: '207fa0e0-c04e-11ec-8a52-4fb92379525a',
+              type: 'action',
+              name: 'action_1',
+            },
+          ],
+        })
+      ).toEqual({
+        ...rule,
+        actions: [
+          {
+            actionTypeId: '.email',
+            group: 'default',
+            id: 'c95cb100-b075-11ec-bb3f-1f063f8e06cf',
+            params: {
+              message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+              subject: 'Rule email',
+              to: ['test@test.com'],
+            },
+          },
+          {
+            actionTypeId: '.slack',
+            group: 'default',
+            id: '207fa0e0-c04e-11ec-8a52-4fb92379525a',
+            params: {
+              message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+            },
+          },
+        ],
+        throttle: '1h',
+        notifyWhen: 'onThrottleInterval',
+      });
     });
   });
 });
