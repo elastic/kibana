@@ -201,6 +201,9 @@ export class ContextContainer implements IContextContainer {
     provider: IContextProvider<Context, ContextName>
   ): this => {
     const contextName = name as string;
+    if (contextName === 'resolve') {
+      throw new Error(`Cannot register a provider for ${contextName}, it is a reserved keyword.`);
+    }
     if (this.contextProviders.has(contextName)) {
       throw new Error(`Context provider for ${contextName} has already been registered.`);
     }
@@ -235,7 +238,17 @@ export class ContextContainer implements IContextContainer {
     ...contextArgs: HandlerParameters<RequestHandler>
   ): HandlerContextType<RequestHandler> {
     const contextsToBuild = new Set(this.getContextNamesForSource(source));
-    const builtContextParts: Partial<HandlerContextType<RequestHandler>> = {};
+    const builtContextPromises: Record<string, Promise<unknown>> = {};
+
+    const builtContext = {} as HandlerContextType<RequestHandler>;
+    (builtContext as unknown as RequestHandlerContext).resolve = async (keys) => {
+      const resolved = await Promise.all(
+        keys.map(async (key) => {
+          return [key, await builtContext[key]];
+        })
+      );
+      return Object.fromEntries(resolved);
+    };
 
     return [...this.contextProviders]
       .sort(sortByCoreFirst(this.coreId))
@@ -249,15 +262,15 @@ export class ContextContainer implements IContextContainer {
         Object.defineProperty(contextAccessors, contextName, {
           get: async () => {
             const contextKey = contextName as keyof HandlerContextType<RequestHandler>;
-            if (!builtContextParts[contextKey]) {
-              builtContextParts[contextKey] = await provider(exposedContext, ...contextArgs);
+            if (!builtContextPromises[contextKey]) {
+              builtContextPromises[contextKey] = provider(exposedContext, ...contextArgs);
             }
-            return builtContextParts[contextKey]!;
+            return await builtContextPromises[contextKey];
           },
         });
 
         return contextAccessors;
-      }, {} as HandlerContextType<RequestHandler>);
+      }, builtContext);
   }
 
   private getContextNamesForSource(source: symbol): ReadonlySet<string> {
@@ -314,6 +327,8 @@ const createExposedContext = ({
   contextAccessors: Partial<HandlerContextType<RequestHandler>>;
 }) => {
   const exposedContext: Partial<HandlerContextType<RequestHandler>> = {};
+  exposedContext.resolve = contextAccessors.resolve;
+
   for (const contextName of exposedContextNames) {
     if (contextName === currentContextName) {
       continue;

@@ -7,7 +7,7 @@
  */
 
 import { ContextContainer } from './context';
-import { PluginOpaqueId } from '../..';
+import type { PluginOpaqueId, RequestHandlerContextBase } from '../..';
 import { httpServerMock } from '../../http/http_server.mocks';
 
 const pluginA = Symbol('pluginA');
@@ -22,7 +22,7 @@ const plugins: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]> = new Map([
 ]);
 const coreId = Symbol();
 
-interface MyContext {
+interface MyContext extends RequestHandlerContextBase {
   core: any;
   core1: string;
   core2: number;
@@ -32,31 +32,47 @@ interface MyContext {
   ctxFromD: object;
 }
 
-describe('ContextContainer', () => {
-  it('does not allow the same context to be registered twice', () => {
-    const contextContainer = new ContextContainer(plugins, coreId);
-    contextContainer.registerContext<{ ctxFromA: string; core: any }, 'ctxFromA'>(
-      coreId,
-      'ctxFromA',
-      () => 'aString'
-    );
+type TestContext<T> = T & RequestHandlerContextBase;
 
-    expect(() =>
-      contextContainer.registerContext<{ ctxFromA: string; core: any }, 'ctxFromA'>(
+describe('ContextContainer', () => {
+  describe('registerContext', () => {
+    it('throws an error if the same context is registered twice', () => {
+      const contextContainer = new ContextContainer(plugins, coreId);
+      contextContainer.registerContext<TestContext<{ ctxFromA: string; core: any }>, 'ctxFromA'>(
         coreId,
         'ctxFromA',
         () => 'aString'
-      )
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"Context provider for ctxFromA has already been registered."`
-    );
-  });
+      );
 
-  describe('registerContext', () => {
+      expect(() =>
+        contextContainer.registerContext<TestContext<{ ctxFromA: string; core: any }>, 'ctxFromA'>(
+          coreId,
+          'ctxFromA',
+          () => 'aString'
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Context provider for ctxFromA has already been registered."`
+      );
+    });
+
+    it('throws an error if a `resolve` context is registered', () => {
+      const contextContainer = new ContextContainer(plugins, coreId);
+      expect(() =>
+        contextContainer.registerContext<TestContext<{ ctxFromA: string; core: any }>, 'ctxFromA'>(
+          coreId,
+          // @ts-expect-error protected with typing too
+          'resolve',
+          () => 'aString'
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Cannot register a provider for resolve, it is a reserved keyword."`
+      );
+    });
+
     it('throws error if called with an unknown symbol', async () => {
       const contextContainer = new ContextContainer(plugins, coreId);
       await expect(() =>
-        contextContainer.registerContext<{ ctxFromA: string; core: any }, 'ctxFromA'>(
+        contextContainer.registerContext<TestContext<{ ctxFromA: string; core: any }>, 'ctxFromA'>(
           Symbol('unknown'),
           'ctxFromA',
           jest.fn()
@@ -69,7 +85,7 @@ describe('ContextContainer', () => {
     it('reports a TS error if returned contract does not satisfy the Context interface', async () => {
       const contextContainer = new ContextContainer(plugins, coreId);
       await expect(() =>
-        contextContainer.registerContext<{ ctxFromA: string; core: any }, 'ctxFromA'>(
+        contextContainer.registerContext<TestContext<{ ctxFromA: string; core: any }>, 'ctxFromA'>(
           pluginA,
           'ctxFromA',
           // @ts-expect-error expected string, returned number
@@ -82,7 +98,7 @@ describe('ContextContainer', () => {
       const contextContainer = new ContextContainer(plugins, coreId);
       await expect(() =>
         // @ts-expect-error expects ctxFromB, but given ctxFromC
-        contextContainer.registerContext<{ ctxFromB: string; core: any }, 'ctxFromC'>(
+        contextContainer.registerContext<TestContext<{ ctxFromB: string; core: any }>, 'ctxFromC'>(
           pluginB,
           'ctxFromC',
           async () => 1
@@ -95,6 +111,9 @@ describe('ContextContainer', () => {
     const resolveAllContexts = async (ctx: Record<string, any>): Promise<unknown> => {
       const resolved = {} as Record<string, any>;
       for (const key of Object.getOwnPropertyNames(ctx)) {
+        if (key === 'resolve') {
+          continue;
+        }
         resolved[key] = await ctx[key];
       }
       return resolved;
@@ -106,13 +125,13 @@ describe('ContextContainer', () => {
       const core1provider = jest.fn().mockReturnValue('core1');
       const ctxFromAProvider = jest.fn().mockReturnValue('ctxFromA');
 
-      contextContainer.registerContext<{ core1: string; core: any }, 'core1'>(
+      contextContainer.registerContext<TestContext<{ core1: string; core: any }>, 'core1'>(
         coreId,
         'core1',
         core1provider
       );
 
-      contextContainer.registerContext<{ ctxFromA: string; core: any }, 'ctxFromA'>(
+      contextContainer.registerContext<TestContext<{ ctxFromA: string; core: any }>, 'ctxFromA'>(
         pluginA,
         'ctxFromA',
         ctxFromAProvider
@@ -149,13 +168,13 @@ describe('ContextContainer', () => {
       const core1provider = jest.fn().mockReturnValue('core1');
       const ctxFromAProvider = jest.fn().mockReturnValue('ctxFromA');
 
-      contextContainer.registerContext<{ core1: string; core: any }, 'core1'>(
+      contextContainer.registerContext<TestContext<{ core1: string; core: any }>, 'core1'>(
         coreId,
         'core1',
         core1provider
       );
 
-      contextContainer.registerContext<{ ctxFromA: string; core: any }, 'ctxFromA'>(
+      contextContainer.registerContext<TestContext<{ ctxFromA: string; core: any }>, 'ctxFromA'>(
         pluginA,
         'ctxFromA',
         ctxFromAProvider
@@ -190,13 +209,13 @@ describe('ContextContainer', () => {
         return `${core1}-ctxFromA`;
       });
 
-      contextContainer.registerContext<{ core1: string; core: any }, 'core1'>(
+      contextContainer.registerContext<TestContext<{ core1: string; core: any }>, 'core1'>(
         coreId,
         'core1',
         core1provider
       );
 
-      contextContainer.registerContext<{ ctxFromA: string; core: any }, 'ctxFromA'>(
+      contextContainer.registerContext<TestContext<{ ctxFromA: string; core: any }>, 'ctxFromA'>(
         pluginA,
         'ctxFromA',
         ctxFromAProvider
@@ -232,13 +251,13 @@ describe('ContextContainer', () => {
         return `${core1}-ctxFromA`;
       });
 
-      contextContainer.registerContext<{ core1: string; core: any }, 'core1'>(
+      contextContainer.registerContext<TestContext<{ core1: string; core: any }>, 'core1'>(
         coreId,
         'core1',
         core1provider
       );
 
-      contextContainer.registerContext<{ ctxFromA: string; core: any }, 'ctxFromA'>(
+      contextContainer.registerContext<TestContext<{ ctxFromA: string; core: any }>, 'ctxFromA'>(
         pluginA,
         'ctxFromA',
         ctxFromAProvider
@@ -269,7 +288,7 @@ describe('ContextContainer', () => {
     it('resolves dependencies', async () => {
       const contextContainer = new ContextContainer(plugins, coreId);
       expect.assertions(10);
-      contextContainer.registerContext<{ core1: string; core: any }, 'core1'>(
+      contextContainer.registerContext<TestContext<{ core1: string; core: any }>, 'core1'>(
         coreId,
         'core1',
         async (context) => {
@@ -278,7 +297,7 @@ describe('ContextContainer', () => {
         }
       );
 
-      contextContainer.registerContext<{ ctxFromA: string; core: any }, 'ctxFromA'>(
+      contextContainer.registerContext<TestContext<{ ctxFromA: string; core: any }>, 'ctxFromA'>(
         pluginA,
         'ctxFromA',
         async (context) => {
@@ -286,7 +305,7 @@ describe('ContextContainer', () => {
           return 'aString';
         }
       );
-      contextContainer.registerContext<{ ctxFromB: number; core: any }, 'ctxFromB'>(
+      contextContainer.registerContext<TestContext<{ ctxFromB: number; core: any }>, 'ctxFromB'>(
         pluginB,
         'ctxFromB',
         async (context) => {
@@ -294,7 +313,7 @@ describe('ContextContainer', () => {
           return 299;
         }
       );
-      contextContainer.registerContext<{ ctxFromC: boolean; core: any }, 'ctxFromC'>(
+      contextContainer.registerContext<TestContext<{ ctxFromC: boolean; core: any }>, 'ctxFromC'>(
         pluginC,
         'ctxFromC',
         async (context) => {
@@ -306,7 +325,7 @@ describe('ContextContainer', () => {
           return false;
         }
       );
-      contextContainer.registerContext<{ ctxFromD: {}; core: any }, 'ctxFromD'>(
+      contextContainer.registerContext<TestContext<{ ctxFromD: {}; core: any }>, 'ctxFromD'>(
         pluginD,
         'ctxFromD',
         async (context) => {
@@ -476,6 +495,90 @@ describe('ContextContainer', () => {
 
       expect(rawHandler1).toHaveBeenCalledWith(expect.any(Object), request, response);
     });
+
+    describe('#resolve', () => {
+      it('resolves dependencies', async () => {
+        const contextContainer = new ContextContainer(plugins, coreId);
+        expect.assertions(10);
+        contextContainer.registerContext<MyContext, 'core1'>(coreId, 'core1', async (context) => {
+          expect(await context.resolve([])).toEqual({});
+          return 'core';
+        });
+
+        contextContainer.registerContext<MyContext, 'ctxFromA'>(
+          pluginA,
+          'ctxFromA',
+          async (context) => {
+            expect(await context.resolve(['core1'])).toEqual({ core1: 'core' });
+            return 'aString';
+          }
+        );
+        contextContainer.registerContext<MyContext, 'ctxFromB'>(
+          pluginB,
+          'ctxFromB',
+          async (context) => {
+            expect(await context.resolve(['core1', 'ctxFromA'])).toEqual({
+              core1: 'core',
+              ctxFromA: 'aString',
+            });
+            return 299;
+          }
+        );
+        contextContainer.registerContext<MyContext, 'ctxFromC'>(
+          pluginC,
+          'ctxFromC',
+          async (context) => {
+            expect(await context.resolve(['core1', 'ctxFromA', 'ctxFromB'])).toEqual({
+              core1: 'core',
+              ctxFromA: 'aString',
+              ctxFromB: 299,
+            });
+            return false;
+          }
+        );
+        contextContainer.registerContext<MyContext, 'ctxFromD'>(
+          pluginD,
+          'ctxFromD',
+          async (context) => {
+            expect(await context.resolve(['core1'])).toEqual({ core1: 'core' });
+            return {};
+          }
+        );
+
+        const rawHandler1 = jest.fn(async (context) => {
+          expect(await context.resolve(['core1', 'ctxFromA', 'ctxFromB', 'ctxFromC'])).toEqual({
+            core1: 'core',
+            ctxFromA: 'aString',
+            ctxFromB: 299,
+            ctxFromC: false,
+          });
+          return 'handler1' as any;
+        });
+        const handler1 = contextContainer.createHandler(pluginC, rawHandler1);
+
+        const rawHandler2 = jest.fn(async (context) => {
+          expect(await context.resolve(['core1', 'ctxFromD'])).toEqual({
+            core1: 'core',
+            ctxFromD: {},
+          });
+          return 'handler2' as any;
+        });
+
+        const handler2 = contextContainer.createHandler(pluginD, rawHandler2);
+
+        const request = httpServerMock.createKibanaRequest();
+        const response = httpServerMock.createResponseFactory();
+
+        await handler1(request, response);
+        await handler2(request, response);
+
+        // Should have context from pluginC, its deps, and core
+        expect(rawHandler1).toHaveBeenCalledWith(expect.any(Object), request, response);
+
+        // Should have context from pluginD, and core
+        expect(rawHandler2).toHaveBeenCalledWith(expect.any(Object), request, response);
+      });
+    });
   });
 
   describe('createHandler', () => {
@@ -507,7 +610,11 @@ describe('ContextContainer', () => {
       const request = httpServerMock.createKibanaRequest();
       const response = httpServerMock.createResponseFactory();
       await handler1(request, response);
-      expect(rawHandler1).toHaveBeenCalledWith({}, request, response);
+      expect(rawHandler1).toHaveBeenCalledWith(
+        { resolve: expect.any(Function) },
+        request,
+        response
+      );
     });
   });
 });

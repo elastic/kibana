@@ -28,6 +28,7 @@
  * @packageDocumentation
  */
 
+import { AwaitedProperties } from '@kbn/utility-types';
 import { Type } from '@kbn/config-schema';
 import {
   ElasticsearchServiceSetup,
@@ -465,8 +466,39 @@ export type {
 } from './analytics';
 export { TelemetryCounterType } from './analytics';
 
+/** @public **/
+export interface RequestHandlerContextBase {
+  /**
+   * Await all the specified context parts and return them.
+   *
+   * @example
+   * ```ts
+   * const resolved = await context.resolve(['core', 'pluginA']);
+   * const esClient = resolved.core.elasticsearch.client;
+   * const pluginAService = resolved.pluginA.someService;
+   * ```
+   */
+  resolve: <T extends keyof Omit<this, 'resolve'>>(
+    parts: T[]
+  ) => Promise<AwaitedProperties<Pick<this, T>>>;
+}
+
 /**
- * Plugin specific context passed to a route handler.
+ * Base context passed to a route handler.
+ *
+ * @public
+ */
+export interface RequestHandlerContext extends RequestHandlerContextBase {
+  core: Promise<CoreRequestHandlerContext>;
+}
+
+/** @public */
+export type CustomRequestHandlerContext<T> = RequestHandlerContext & {
+  [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>;
+};
+
+/**
+ * The `core` context provided to route handler.
  *
  * Provides the following clients and services:
  *    - {@link SavedObjectsClient | savedObjects.client} - Saved Objects client
@@ -477,14 +509,8 @@ export { TelemetryCounterType } from './analytics';
  *      data client which uses the credentials of the incoming request
  *    - {@link IUiSettingsClient | uiSettings.client} - uiSettings client
  *      which uses the credentials of the incoming request
- *
  * @public
  */
-export interface RequestHandlerContext {
-  core: Promise<CoreRequestHandlerContext>;
-}
-
-/** @public */
 export interface CoreRequestHandlerContext {
   savedObjects: {
     client: SavedObjectsClientContract;
@@ -503,11 +529,6 @@ export interface CoreRequestHandlerContext {
     client: DeprecationsClient;
   };
 }
-
-/** @public */
-export type CustomRequestHandlerContext<T> = RequestHandlerContext & {
-  [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>;
-};
 
 /**
  * Context passed to the `setup` method of `preboot` plugins.
