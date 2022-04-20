@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { IUiSettingsClient } from 'kibana/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { partition } from 'lodash';
 import {
   AggFunctionsMapping,
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
-} from '../../../../../src/plugins/data/public';
-import { queryToAst } from '../../../../../src/plugins/data/common';
+} from '@kbn/data-plugin/public';
+import { queryToAst } from '@kbn/data-plugin/common';
 import {
   buildExpression,
   buildExpressionFunction,
   ExpressionAstExpression,
   ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
-} from '../../../../../src/plugins/expressions/public';
+} from '@kbn/expressions-plugin/public';
 import { GenericIndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
 import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';

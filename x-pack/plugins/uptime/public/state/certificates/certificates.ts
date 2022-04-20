@@ -6,7 +6,7 @@
  */
 
 import { Action, createAction, handleActions } from 'redux-actions';
-import { AppState } from '../index';
+import { AppState } from '..';
 
 export const setCertificatesTotalAction = createAction<CertificatesState>('SET_CERTIFICATES_TOTAL');
 

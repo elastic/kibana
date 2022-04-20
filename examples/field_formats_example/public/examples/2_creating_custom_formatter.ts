@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SerializedFieldFormat } from '../../../../src/plugins/field_formats/common';
-import { FieldFormatsSetup, FieldFormatsStart } from '../../../../src/plugins/field_formats/public';
+import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 import { ExampleCurrencyFormat } from '../../common';
 

@@ -12,7 +12,8 @@ import type {
   RouteMethod,
   SavedObjectsClientContract,
   IRouter,
-} from '../../../../../src/core/server';
+} from '@kbn/core/server';
+
 import type { FleetAuthz } from '../../common/authz';
 import type { AgentClient } from '../services';
 

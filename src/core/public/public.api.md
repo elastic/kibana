@@ -45,7 +45,6 @@ import { PackageInfo } from '@kbn/config';
 import { Path } from 'history';
 import { PeerCertificate } from 'tls';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { PublicUiSettingsParams as PublicUiSettingsParams_2 } from 'src/core/server/types';
 import { default as React_2 } from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { Request as Request_2 } from '@hapi/hapi';
@@ -61,7 +60,6 @@ import { TypeOf } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { UnregisterCallback } from 'history';
 import { URL as URL_2 } from 'url';
-import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
 // @internal (undocumented)
 export function __kbnBootstrap__(): Promise<void>;
@@ -782,7 +780,7 @@ export type IToasts = Pick<ToastsApi, 'get$' | 'add' | 'remove' | 'addSuccess' |
 export interface IUiSettingsClient {
     get$: <T = any>(key: string, defaultOverride?: T) => Observable<T>;
     get: <T = any>(key: string, defaultOverride?: T) => T;
-    getAll: () => Readonly<Record<string, PublicUiSettingsParams_2 & UserProvidedValues_2>>;
+    getAll: () => Readonly<Record<string, PublicUiSettingsParams & UserProvidedValues>>;
     getUpdate$: <T = any>() => Observable<{
         key: string;
         newValue: T;
@@ -1091,8 +1089,10 @@ export interface SavedObjectReferenceWithContext {
         name: string;
     }>;
     isMissing?: boolean;
+    originId?: string;
     spaces: string[];
     spacesWithMatchingAliases?: string[];
+    spacesWithMatchingOrigins?: string[];
     type: string;
 }
 
@@ -1568,7 +1568,7 @@ export interface UiSettingsParams<T = unknown> {
 // @public (undocumented)
 export interface UiSettingsState {
     // (undocumented)
-    [key: string]: PublicUiSettingsParams_2 & UserProvidedValues_2;
+    [key: string]: PublicUiSettingsParams & UserProvidedValues;
 }
 
 // @public

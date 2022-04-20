@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import moment from 'moment';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../common/constants';
@@ -13,7 +13,7 @@ import { AlertCluster, AlertCpuUsageNodeStats } from '../../../common/types/aler
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 import { Globals } from '../../static_globals';
-import { getConfigCcs } from '../../../common/ccs_utils';
+import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 
 interface NodeBucketESResponse {
   key: string;
@@ -43,7 +43,7 @@ export async function fetchCpuUsageNodeStats(
     config: Globals.app.config,
     moduleType: 'elasticsearch',
     dataset: 'node_stats',
-    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+    ccs: CCS_REMOTE_PATTERN,
   });
   const params = {
     index: indexPatterns,

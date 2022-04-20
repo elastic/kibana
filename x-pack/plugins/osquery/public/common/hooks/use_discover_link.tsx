@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-import { FilterStateStore } from '../../../../../../src/plugins/data/common';
+import { FilterStateStore } from '@kbn/data-plugin/common';
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../lib/kibana';
 
 interface UseDiscoverLink {
@@ -43,6 +43,7 @@ export const useDiscoverLink = ({ filters }: UseDiscoverLink) => {
       });
       setDiscoverUrl(newUrl);
     };
+
     getDiscoverUrl();
   }, [filters, locator]);
 

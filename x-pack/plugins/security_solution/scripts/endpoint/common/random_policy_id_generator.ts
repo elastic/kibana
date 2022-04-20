@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClient } from '@kbn/test';
 import { AxiosResponse } from 'axios';
-import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import {
   PACKAGE_POLICY_API_ROUTES,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-} from '../../../../fleet/common/constants';
+} from '@kbn/fleet-plugin/common/constants';
+import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { setupFleetForEndpoint } from '../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
 import { GetPolicyListResponse } from '../../../public/management/pages/policy/types';
 

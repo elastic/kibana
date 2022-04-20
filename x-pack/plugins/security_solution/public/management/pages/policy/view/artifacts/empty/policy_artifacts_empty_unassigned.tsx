@@ -13,7 +13,7 @@ import { useUserPrivileges } from '../../../../../../common/components/user_priv
 import { POLICY_ARTIFACT_EMPTY_UNASSIGNED_LABELS } from './translations';
 import { EventFiltersPageLocation } from '../../../../event_filters/types';
 import { TrustedAppsListPageLocation } from '../../../../trusted_apps/state';
-import { HostIsolationExceptionsPageLocation } from '../../../../host_isolation_exceptions/types';
+import { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
 interface CommonProps {
   policyId: string;
   policyName: string;
@@ -24,7 +24,7 @@ interface CommonProps {
     location?:
       | Partial<EventFiltersPageLocation>
       | Partial<TrustedAppsListPageLocation>
-      | Partial<HostIsolationExceptionsPageLocation>
+      | Partial<ArtifactListPageUrlParams>
   ) => string;
 }
 

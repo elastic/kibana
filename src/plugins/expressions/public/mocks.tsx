@@ -7,9 +7,8 @@
  */
 
 import React from 'react';
+import { coreMock } from '@kbn/core/public/mocks';
 import { ExpressionsSetup, ExpressionsStart, plugin as pluginInitializer } from '.';
-
-import { coreMock } from '../../../core/public/mocks';
 
 export type Setup = jest.Mocked<ExpressionsSetup>;
 export type Start = jest.Mocked<ExpressionsStart>;

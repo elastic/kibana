@@ -18,7 +18,7 @@ import {
   DEFAULT_MIN_STOP,
 } from '@kbn/coloring';
 
-import type { Datatable, DatatableColumn } from 'src/plugins/expressions/public';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 
 import { defaultPaletteParams } from '../constants';
 

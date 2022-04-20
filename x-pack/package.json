@@ -13,7 +13,6 @@
   },
   "kibana": {
     "build": {
-      "intermediateBuildDirectory": "build/plugin/kibana/x-pack",
       "oss": false
     },
     "clean": {

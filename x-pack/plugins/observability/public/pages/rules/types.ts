@@ -6,8 +6,8 @@
  */
 import { Dispatch, SetStateAction } from 'react';
 import { EuiTableSortingType, EuiBasicTableColumn } from '@elastic/eui';
-import { RuleExecutionStatus } from '../../../../alerting/common';
-import { RuleTableItem, Rule } from '../../../../triggers_actions_ui/public';
+import { RuleExecutionStatus } from '@kbn/alerting-plugin/common';
+import { RuleTableItem, Rule } from '@kbn/triggers-actions-ui-plugin/public';
 export interface StatusProps {
   type: RuleStatus;
   disabled: boolean;

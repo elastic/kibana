@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CustomIntegrationsSetup } from '../../../../../src/plugins/custom_integrations/public';
+import type { CustomIntegrationsSetup } from '@kbn/custom-integrations-plugin/public';
 
 let customIntegrations: CustomIntegrationsSetup;
 

@@ -7,8 +7,8 @@
 
 import { isRight } from 'fp-ts/lib/Either';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
-import { HttpFetchQuery, HttpSetup } from 'src/core/public';
-import { FETCH_STATUS, AddInspectorRequest } from '../../../../observability/public';
+import { HttpFetchQuery, HttpSetup } from '@kbn/core/public';
+import { FETCH_STATUS, AddInspectorRequest } from '@kbn/observability-plugin/public';
 
 class ApiService {
   private static instance: ApiService;

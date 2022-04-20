@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SpacesApi } from '../../../../../x-pack/plugins/spaces/public';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import { ShareToSpaceSavedObjectsManagementColumn } from './columns';
 import { SavedObjectsManagementColumn } from './types';
 

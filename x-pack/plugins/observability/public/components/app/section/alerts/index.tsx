@@ -24,11 +24,11 @@ import moment from 'moment';
 import React, { useState, useMemo } from 'react';
 import { EuiSelect } from '@elastic/eui';
 import { uniqBy } from 'lodash';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { getObservabilityAlerts } from '../../../../services/get_observability_alerts';
 import { paths } from '../../../../config';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityAppServices } from '../../../../application/types';
 
 const ALL_TYPES = 'ALL_TYPES';

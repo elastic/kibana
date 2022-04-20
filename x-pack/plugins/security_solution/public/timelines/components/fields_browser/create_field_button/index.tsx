@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { EuiButton } from '@elastic/eui';
 import styled from 'styled-components';
 
-import type { CreateFieldComponent } from '../../../../../../timelines/common/types';
+import type { CreateFieldComponent } from '@kbn/timelines-plugin/common/types';
 import type { OpenFieldEditor } from '..';
 import * as i18n from './translations';
 

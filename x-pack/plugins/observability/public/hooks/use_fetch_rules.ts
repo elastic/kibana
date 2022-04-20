@@ -7,7 +7,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { isEmpty } from 'lodash';
-import { loadRules } from '../../../triggers_actions_ui/public';
+import { loadRules } from '@kbn/triggers-actions-ui-plugin/public';
 import { RULES_LOAD_ERROR } from '../pages/rules/translations';
 import { FetchRulesProps, RuleState } from '../pages/rules/types';
 import { OBSERVABILITY_RULE_TYPES } from '../pages/rules/config';
