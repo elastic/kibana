@@ -9,8 +9,6 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
 import { SharedUxServices } from '@kbn/shared-ux-services';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DocLinksStart } from '@kbn/core/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 
 /** @internal */
@@ -64,6 +62,4 @@ export interface SharedUXPluginSetupDeps {}
 /** @internal */
 export interface SharedUXPluginStartDeps {
   dataViewEditor: DataViewEditorStart;
-  dataViews: DataViewsPublicPluginStart;
-  docLinks: DocLinksStart;
 }

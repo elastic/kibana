@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { SharedUxServices } from '@kbn/shared-ux-services';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import {
   SharedUXPluginSetup,
@@ -17,7 +16,6 @@ import {
 
 import { servicesFactory } from './services';
 
-let services: SharedUxServices;
 /**
  * The Kibana plugin for Shared User Experience (Shared UX).
  */
@@ -30,14 +28,12 @@ export class SharedUXPlugin implements Plugin<SharedUXPluginSetup, SharedUXPlugi
   }
 
   public start(coreStart: CoreStart, startPlugins: SharedUXPluginStartDeps): SharedUXPluginStart {
-    services = servicesFactory({ coreStart, startPlugins });
+    const services = servicesFactory({ coreStart, startPlugins });
 
     return {
-      getContextServices: () => servicesFactory({ coreStart, startPlugins }),
+      getContextServices: () => services,
     };
   }
 
   public stop() {}
 }
-
-export const getSharedUXServices = () => services;

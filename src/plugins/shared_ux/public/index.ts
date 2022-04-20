@@ -16,5 +16,3 @@ export function plugin() {
 }
 
 export type { SharedUXPluginSetup, SharedUXPluginStart } from './types';
-
-export { EmptyStateAnalyticsPage } from './components';

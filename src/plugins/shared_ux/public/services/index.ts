@@ -17,7 +17,6 @@ import { editorsServiceFactory } from './editors';
 import { docLinksServiceFactory } from './doc_links';
 import { httpServiceFactory } from './http';
 import { applicationServiceFactory } from './application';
-import { dataServiceFactory } from './data';
 
 /**
  * A factory function for creating a Kibana-based implementation of `SharedUXServices`.
@@ -32,5 +31,4 @@ export const servicesFactory: KibanaPluginServiceFactory<
   docLinks: docLinksServiceFactory(params),
   http: httpServiceFactory(params),
   application: applicationServiceFactory(params),
-  data: dataServiceFactory(params),
 });

@@ -172,7 +172,6 @@ export interface DiscoverStartPlugins {
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   spaces?: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  sharedUX: SharedUXPluginStart;
 }
 
 /**
