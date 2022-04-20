@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover filter editor', function describeIndexTests() {
     before(async function () {
-      await security.testUser.setRoles(['kibana_admin', 'version_test']);
+      await security.testUser.setRoles(['kibana_admin', 'version_test', 'test_logstash_reader']);
       log.debug('load kibana index with default index pattern');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
