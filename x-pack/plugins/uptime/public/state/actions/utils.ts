@@ -7,11 +7,11 @@
 
 import { createAction } from 'redux-actions';
 import { IHttpFetchError } from '@kbn/core/public';
-import { AsyncAction, AsyncAction1 } from './types';
+import { AsyncAction, AsyncActionOptionalPayload } from './types';
 
 export function createAsyncAction<Payload, SuccessPayload>(
   actionStr: string
-): AsyncAction1<Payload, SuccessPayload>;
+): AsyncActionOptionalPayload<Payload, SuccessPayload>;
 export function createAsyncAction<Payload, SuccessPayload>(
   actionStr: string
 ): AsyncAction<Payload, SuccessPayload> {
