@@ -93,7 +93,7 @@ interface SetupFullStoryDeps {
 interface SetupTelemetryContextDeps extends CloudSetupDependencies {
   analytics: AnalyticsServiceSetup;
   executionContextPromise: Promise<ExecutionContextStart>;
-  esOrgId?: string;
+  cloudId?: string;
 }
 
 interface SetupChatDeps extends Pick<CloudSetupDependencies, 'security'> {
@@ -120,7 +120,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       analytics: core.analytics,
       security,
       executionContextPromise,
-      esOrgId: this.config.id,
+      cloudId: this.config.id,
     }).catch((e) => {
       // eslint-disable-next-line no-console
       console.debug(`Error setting up TelemetryContext: ${e.toString()}`);
@@ -278,7 +278,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     analytics,
     security,
     executionContextPromise,
-    esOrgId,
+    cloudId,
   }: SetupTelemetryContextDeps) {
     // Some context providers can be moved to other places for better domain isolation.
     // Let's use https://github.com/elastic/kibana/issues/125690 for that purpose.
@@ -290,11 +290,11 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
     analytics.registerContextProvider({
       name: 'cloud_org_id',
-      context$: of({ esOrgId }),
+      context$: of({ cloudId }),
       schema: {
-        esOrgId: {
+        cloudId: {
           type: 'keyword',
-          _meta: { description: 'The Cloud Organization ID', optional: true },
+          _meta: { description: 'The Cloud ID', optional: true },
         },
       },
     });
@@ -310,7 +310,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
             const { sha256 } = await import('js-sha256');
             // Join the cloud org id and the user to create a truly unique user id.
             // The hashing here is to keep it at clear as possible in our source code that we do not send literal user IDs
-            return { userId: sha256(esOrgId ? `${esOrgId}:${userId}` : `${userId}`) };
+            return { userId: sha256(cloudId ? `${cloudId}:${userId}` : `${userId}`) };
           })
         ),
         schema: {
