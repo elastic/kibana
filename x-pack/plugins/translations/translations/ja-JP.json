@@ -6411,7 +6411,6 @@
     "visualizations.listing.table.typeColumnName": "型",
     "visualizations.listingPageTitle": "Visualizeライブラリ",
     "visualizations.newChart.conditionalMessage.advancedSettingsLink": "高度な設定",
-    "visualizations.newChart.conditionalMessage.newLibrary": "{link}で古いライブラリに切り替える",
     "visualizations.newHeatmapChart.notificationMessage": "新しいヒートマップグラフライブラリはまだ分割グラフアグリゲーションをサポートしていません。{conditionalMessage}",
     "visualizations.newVisWizard.aggBasedGroupDescription": "クラシック Visualize ライブラリを使用して、アグリゲーションに基づいてグラフを作成します。",
     "visualizations.newVisWizard.aggBasedGroupTitle": "アグリゲーションに基づく",
