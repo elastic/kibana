@@ -31,7 +31,7 @@ NPM_MODULE_EXTRA_FILES = [
 #
 #  To reference other packages use:
 #    "//repo/relative/path/to/package"
-#    eg. "//src/ops/kbn-utils"
+#    eg. "//packages/kbn-std"
 #
 #  To reference a NPM package use:
 #    "@npm//name-of-package"
