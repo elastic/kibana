@@ -30,7 +30,7 @@ export interface RuleTagFilterProps {
   onChange: (tags: string[]) => void;
 }
 
-const getOptionDataTestSubj = (tag: string) => `RuleTagFilterOption-${tag}`;
+const getOptionDataTestSubj = (tag: string) => `ruleTagFilterOption-${tag}`;
 
 export const RuleTagFilter = (props: RuleTagFilterProps) => {
   const { 
@@ -42,8 +42,8 @@ export const RuleTagFilter = (props: RuleTagFilterProps) => {
     emptyMessage,
     errorMessage,
     optionDataTestSubj = getOptionDataTestSubj,
-    buttonDataTestSubj = 'RuleTagFilterButton',
-    dataTestSubj = 'RuleTagFilterSelectable', 
+    buttonDataTestSubj = 'ruleTagFilterButton',
+    dataTestSubj = 'ruleTagFilterSelectable', 
     onChange = () => {},
   } = props;
 

@@ -48,11 +48,11 @@ describe('rule_tag_filter', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="RuleTagFilterSelectable"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="ruleTagFilterSelectable"]').exists()).toBeFalsy();
 
     wrapper.find(EuiFilterButton).simulate('click');
 
-    expect(wrapper.find('[data-test-subj="RuleTagFilterSelectable"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="ruleTagFilterSelectable"]').exists()).toBeTruthy();
     expect(wrapper.find('li').length).toEqual(tags.length);
   });
 
@@ -67,17 +67,17 @@ describe('rule_tag_filter', () => {
 
     wrapper.find(EuiFilterButton).simulate('click');
 
-    wrapper.find('[data-test-subj="RuleTagFilterOption-a"]').at(0).simulate('click');
+    wrapper.find('[data-test-subj="ruleTagFilterOption-a"]').at(0).simulate('click');
     expect(onChangeMock).toHaveBeenCalledWith(['a']);
     
     wrapper.setProps({
       selectedTags: ['a'],
     });
 
-    wrapper.find('[data-test-subj="RuleTagFilterOption-a"]').at(0).simulate('click');
+    wrapper.find('[data-test-subj="ruleTagFilterOption-a"]').at(0).simulate('click');
     expect(onChangeMock).toHaveBeenCalledWith([]);
 
-    wrapper.find('[data-test-subj="RuleTagFilterOption-b"]').at(0).simulate('click');
+    wrapper.find('[data-test-subj="ruleTagFilterOption-b"]').at(0).simulate('click');
     expect(onChangeMock).toHaveBeenCalledWith(['a', 'b']);
   });
 });
