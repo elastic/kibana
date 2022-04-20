@@ -62,13 +62,13 @@ describe('FullStoryShipper', () => {
         });
       });
 
-      test('calls `setUserVars` when esOrgId is provided', () => {
-        fullstoryShipper.extendContext({ esOrgId: 'test-es-org-id' });
+      test('calls `setUserVars` when cloudId is provided', () => {
+        fullstoryShipper.extendContext({ cloudId: 'test-es-org-id' });
         expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({ org_id_str: 'test-es-org-id' });
       });
 
-      test('merges both: version and esOrgId if both are provided', () => {
-        fullstoryShipper.extendContext({ version: '1.2.3', esOrgId: 'test-es-org-id' });
+      test('merges both: version and cloudId if both are provided', () => {
+        fullstoryShipper.extendContext({ version: '1.2.3', cloudId: 'test-es-org-id' });
         expect(fullStoryApiMock.setUserVars).toHaveBeenCalledWith({
           org_id_str: 'test-es-org-id',
           version_str: '1.2.3',
@@ -84,7 +84,7 @@ describe('FullStoryShipper', () => {
         const context = {
           userId: 'test-user-id',
           version: '1.2.3',
-          esOrgId: 'test-es-org-id',
+          cloudId: 'test-es-org-id',
           foo: 'bar',
         };
         fullstoryShipper.extendContext(context);

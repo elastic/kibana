@@ -33,7 +33,7 @@ export class FullStoryShipper implements IShipper {
     this.initContext.logger.debug(`Received context ${JSON.stringify(newContext)}`);
 
     // FullStory requires different APIs for different type of contexts.
-    const { userId, version, esOrgId, ...nonUserContext } = newContext;
+    const { userId, version, cloudId, ...nonUserContext } = newContext;
 
     // Call it only when the userId changes
     if (userId && userId !== this.lastUserId) {
@@ -44,13 +44,13 @@ export class FullStoryShipper implements IShipper {
     }
 
     // User-level context
-    if (version || esOrgId) {
+    if (version || cloudId) {
       this.initContext.logger.debug(
-        `Calling FS.setUserVars with version ${version} and esOrgId ${esOrgId}`
+        `Calling FS.setUserVars with version ${version} and cloudId ${cloudId}`
       );
       this.fullStoryApi.setUserVars({
         ...(version ? getParsedVersion(version) : {}),
-        ...(esOrgId ? { org_id_str: esOrgId } : {}),
+        ...(cloudId ? { org_id_str: cloudId } : {}),
       });
     }
 

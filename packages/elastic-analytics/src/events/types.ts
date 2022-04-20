@@ -17,9 +17,9 @@ export interface EventContext {
    */
   userId?: string;
   /**
-   * The user's organization ID.
+   * The Cloud ID.
    */
-  esOrgId?: string;
+  cloudId?: string;
   /**
    * The product's version.
    */
