@@ -6,22 +6,19 @@
  * Side Public License, v 1.
  */
 
-import {
-  PluginServiceProviders,
-  PluginServiceProvider,
-  PluginServiceRegistry,
-} from '@kbn/presentation-util-plugin/public';
-
 import { CustomIntegrationsServices } from '..';
 import { findServiceFactory } from './find';
 import { platformServiceFactory } from './platform';
+import { KibanaPluginServiceFactory } from '../types';
+import { CustomIntegrationsStartDependencies } from '../../types';
 
 export { findServiceFactory } from './find';
 export { platformServiceFactory } from './platform';
 
-export const providers: PluginServiceProviders<CustomIntegrationsServices> = {
-  find: new PluginServiceProvider(findServiceFactory),
-  platform: new PluginServiceProvider(platformServiceFactory),
-};
-
-export const registry = new PluginServiceRegistry<CustomIntegrationsServices>(providers);
+export const servicesFactory: KibanaPluginServiceFactory<
+  CustomIntegrationsServices,
+  CustomIntegrationsStartDependencies
+> = (params) => ({
+  find: findServiceFactory(params),
+  platform: platformServiceFactory(params),
+});

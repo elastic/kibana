@@ -9,7 +9,7 @@
 import Path from 'path';
 
 import execa from 'execa';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 export class RepoInfo {
   constructor(

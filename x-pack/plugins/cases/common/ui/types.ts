@@ -17,6 +17,7 @@ import {
   CaseUserActionResponse,
   CaseMetricsResponse,
   CommentResponse,
+  CommentResponseAlertsType,
 } from '../api';
 import { SnakeToCamelCase } from '../types';
 
@@ -57,6 +58,7 @@ export type CaseViewRefreshPropInterface = null | {
 };
 
 export type Comment = SnakeToCamelCase<CommentResponse>;
+export type AlertComment = SnakeToCamelCase<CommentResponseAlertsType>;
 export type CaseUserActions = SnakeToCamelCase<CaseUserActionResponse>;
 export type CaseExternalService = SnakeToCamelCase<CaseExternalServiceBasic>;
 
