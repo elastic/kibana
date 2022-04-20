@@ -8,7 +8,7 @@
 import moment from 'moment';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Actions, EventLogger } from '.';
-import { ElementPosition } from '../get_element_position_data';
+import { ElementsPositionAndAttribute } from '../get_element_position_data';
 
 describe('Event Logger', () => {
   let eventLogger: EventLogger;
@@ -154,14 +154,23 @@ describe('Event Logger', () => {
 
   it('logs number of pixels', () => {
     const logs = [];
-    const elementPosition = {
+    const elementPositionAndAttribute = {
+      position: {
+        boundingClientRect: { width: 1350, height: 2000 },
+        scroll: {},
+      },
       zoom: 2,
-      boundingClientRect: { width: 1350, height: 2000 },
-      scroll: {},
-    } as ElementPosition;
-    logs.push(eventLogger.getScreenshotStart({ current: 1, total: 1, elementPosition }));
+    } as ElementsPositionAndAttribute;
     logs.push(
-      eventLogger.getScreenshotEnd({ byteLength: 4444, current: 1, total: 1, elementPosition })
+      eventLogger.getScreenshotStart({ current: 1, total: 1, elementPositionAndAttribute })
+    );
+    logs.push(
+      eventLogger.getScreenshotEnd({
+        byteLength: 4444,
+        current: 1,
+        total: 1,
+        elementPositionAndAttribute,
+      })
     );
 
     const logData = logs.map((log) => ({

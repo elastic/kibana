@@ -42,7 +42,7 @@ export const getScreenshots = async (
     eventLogger.getScreenshotStart({
       current: size,
       total: i + 1,
-      elementPosition: item.position,
+      elementPositionAndAttribute: item,
     });
 
     const data = await browser.screenshot(item.position);
@@ -60,7 +60,7 @@ export const getScreenshots = async (
     eventLogger.getScreenshotEnd({
       current: size,
       total: i + 1,
-      elementPosition: item.position,
+      elementPositionAndAttribute: item,
       byteLength: data.byteLength,
     });
   }

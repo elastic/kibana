@@ -102,9 +102,9 @@ const getDefaultElementPosition = (
       position: {
         boundingClientRect: { top: 0, left: 0, height, width },
         scroll: { x: 0, y: 0 },
-        zoom: config.capture.zoom,
       },
       attributes: {},
+      zoom: config.capture.zoom,
     },
   ];
 };
