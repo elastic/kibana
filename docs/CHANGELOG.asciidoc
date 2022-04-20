@@ -83,7 +83,7 @@ Review the following information about the 7.17.3 release.
 [[security-update-v7.17.3]]
 === Security update
 
-The 7.17.3 release contains a fix to a potential security vulnerability. For more information, check link:https://ela.st/esa-2022-051[Security Announcements].
+The 7.17.3 release contains a fix to a potential security vulnerability. For more information, check link:https://discuss.elastic.co/t/kibana-7-17-3-and-8-1-3-security-update/302826[Security Announcements].
 
 [float]
 [[breaking-changes-v7.17.3]]
