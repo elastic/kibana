@@ -14,8 +14,8 @@ import { MANAGEMENT_DEFAULT_PAGE_SIZE, MANAGEMENT_PAGE_SIZE_OPTIONS } from '../c
  * @param value
  * @param defaultValue
  */
-export const isDefaultOrMissing = <T>(value: T | undefined, defaultValue: T) => {
-  return value === undefined || value === defaultValue;
+export const isDefaultOrMissing = <T>(value: T | undefined | 0, defaultValue: T) => {
+  return value === undefined || value === defaultValue || value === 0;
 };
 
 /**
