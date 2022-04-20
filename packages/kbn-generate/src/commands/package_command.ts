@@ -15,7 +15,8 @@ import globby from 'globby';
 import micromatch from 'micromatch';
 import { REPO_ROOT } from '@kbn/utils';
 import { discoverBazelPackages, BAZEL_PACKAGE_DIRS } from '@kbn/bazel-packages';
-import { createFailError, createFlagError, isFailError, sortPackageJson } from '@kbn/dev-utils';
+import { createFailError, createFlagError, isFailError } from '@kbn/dev-utils';
+import { sortPackageJson } from '@kbn/sort-package-json';
 
 import { TEMPLATE_DIR, ROOT_PKG_DIR, PKG_TEMPLATE_DIR } from '../paths';
 import type { GenerateCommand } from '../generate_command';

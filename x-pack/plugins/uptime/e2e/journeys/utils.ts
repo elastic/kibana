@@ -30,6 +30,8 @@ export async function loginToKibana({
   await page.click('[data-test-subj=loginSubmit]');
 
   await waitForLoadingToFinish({ page });
+  // Close Monitor Management tour added in 8.2.0
+  await page.click('[data-test-subj=syntheticsManagementTourDismiss]');
 }
 
 export const byTestId = (testId: string) => {
