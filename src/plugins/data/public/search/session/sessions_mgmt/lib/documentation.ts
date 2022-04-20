@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DocLinksStart } from 'kibana/public';
+import { DocLinksStart } from '@kbn/core/public';
 
 export class AsyncSearchIntroDocumentation {
   private docUrl: string = '';

@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { mapboxgl, Map as MapboxMap } from '@kbn/mapbox-gl';
 import { i18n } from '@kbn/i18n';
-import { ResizeChecker } from '.././../../../../../../../../src/plugins/kibana_utils/public';
+import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
 import {
   CUSTOM_ICON_PIXEL_RATIO,
   createSdfIcon,

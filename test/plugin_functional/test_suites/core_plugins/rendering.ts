@@ -9,7 +9,7 @@
 import _ from 'lodash';
 import expect from '@kbn/expect';
 
-import '../../plugins/core_provider_plugin/types';
+import '@kbn/core-provider-plugin/types';
 import { PluginFunctionalProviderContext } from '../../services';
 
 declare global {

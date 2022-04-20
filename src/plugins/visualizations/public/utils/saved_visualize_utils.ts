@@ -13,18 +13,18 @@ import type {
   SavedObjectsClientContract,
   SavedObjectAttributes,
   SavedObjectReference,
-} from 'kibana/public';
-import type { OverlayStart } from '../../../../core/public';
-import { SavedObjectNotFound } from '../../../kibana_utils/public';
+} from '@kbn/core/public';
+import type { OverlayStart } from '@kbn/core/public';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import {
   extractSearchSourceReferences,
   injectSearchSourceReferences,
   parseSearchSourceJSON,
   DataPublicPluginStart,
-} from '../../../../plugins/data/public';
+} from '@kbn/data-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { saveWithConfirmation, checkForDuplicateTitle } from './saved_objects_utils';
-import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
-import type { SpacesPluginStart } from '../../../../../x-pack/plugins/spaces/public';
 import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
 import type {
   VisSavedObject,

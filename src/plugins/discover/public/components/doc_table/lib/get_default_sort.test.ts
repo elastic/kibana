@@ -10,7 +10,7 @@ import { getDefaultSort } from './get_default_sort';
 import {
   stubDataView,
   stubDataViewWithoutTimeField,
-} from '../../../../../data_views/common/data_view.stub';
+} from '@kbn/data-views-plugin/common/data_view.stub';
 
 describe('getDefaultSort function', function () {
   test('should be a function', function () {

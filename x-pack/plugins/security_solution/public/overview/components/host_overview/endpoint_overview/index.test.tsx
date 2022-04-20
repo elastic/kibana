@@ -12,7 +12,7 @@ import '../../../../common/mock/match_media';
 import '../../../../common/mock/react_beautiful_dnd';
 import { TestProviders } from '../../../../common/mock';
 
-import { EndpointOverview } from './index';
+import { EndpointOverview } from '.';
 import {
   EndpointFields,
   HostPolicyResponseActionStatus,

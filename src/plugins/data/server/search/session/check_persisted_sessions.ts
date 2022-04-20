@@ -13,7 +13,7 @@ import {
   SEARCH_SESSION_TYPE,
   SearchSessionStatus,
   KueryNode,
-} from '../../../../../../src/plugins/data/common';
+} from '@kbn/data-plugin/common';
 import { checkSearchSessionsByPage, getSearchSessionsPage$ } from './get_search_session_page';
 import { CheckSearchSessionsDeps, SearchSessionsResponse } from './types';
 import { bulkUpdateSessions, getAllSessionsStatusUpdates } from './update_session_status';

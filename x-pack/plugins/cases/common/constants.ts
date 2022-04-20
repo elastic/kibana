@@ -59,6 +59,7 @@ export const CASE_CONFIGURE_CONNECTORS_URL = `${CASE_CONFIGURE_URL}/connectors` 
 
 export const CASE_COMMENTS_URL = `${CASE_DETAILS_URL}/comments` as const;
 export const CASE_COMMENT_DETAILS_URL = `${CASE_DETAILS_URL}/comments/{comment_id}` as const;
+export const CASE_COMMENT_DELETE_URL = `${CASE_DETAILS_URL}/comments/{comment_id}` as const;
 export const CASE_PUSH_URL = `${CASE_DETAILS_URL}/connector/{connector_id}/_push` as const;
 export const CASE_REPORTERS_URL = `${CASES_URL}/reporters` as const;
 export const CASE_STATUS_URL = `${CASES_URL}/status` as const;
@@ -97,8 +98,11 @@ export const SUPPORTED_CONNECTORS = [
 /**
  * Alerts
  */
-export const MAX_ALERTS_PER_CASE = 5000 as const;
+export const MAX_ALERTS_PER_CASE = 1000 as const;
 
+/**
+ * Owner
+ */
 export const SECURITY_SOLUTION_OWNER = 'securitySolution' as const;
 export const OBSERVABILITY_OWNER = 'observability' as const;
 
@@ -113,6 +117,9 @@ export const OWNER_INFO = {
   },
 } as const;
 
+/**
+ * Searching
+ */
 export const MAX_DOCS_PER_PAGE = 10000 as const;
 export const MAX_CONCURRENT_SEARCHES = 10 as const;
 

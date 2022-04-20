@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { SecuritySolutionFactory } from '../../types';
 import {
   CtiDataSourceStrategyResponse,
   CtiQueries,
   CtiDataSourceRequestOptions,
 } from '../../../../../../common/search_strategy/security_solution/cti';
-import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { buildTiDataSourceQuery } from './query.threat_intel_source.dsl';
 

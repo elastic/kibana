@@ -9,7 +9,7 @@
 import { FieldValueOptionType, SearchFilterConfig } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { TableText } from '../';
+import { TableText } from '..';
 import { UISession } from '../../types';
 import { getStatusText } from '../status';
 

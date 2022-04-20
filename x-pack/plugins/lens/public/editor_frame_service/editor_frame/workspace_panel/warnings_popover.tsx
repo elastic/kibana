@@ -31,16 +31,21 @@ export const WarningsPopover = ({
       panelPaddingSize="none"
       button={
         <EuiButtonEmpty
+          color="warning"
           onClick={onButtonClick}
           iconType="alert"
           className="lnsWorkspaceWarning__button"
         >
-          {i18n.translate('xpack.lens.chartWarnings.number', {
-            defaultMessage: `{warningsCount} {warningsCount, plural, one {warning} other {warnings}}`,
-            values: {
-              warningsCount,
-            },
-          })}
+          {warningsCount}
+          <span className="lnsWorkspaceWarning__buttonText">
+            {' '}
+            {i18n.translate('xpack.lens.chartWarnings.number', {
+              defaultMessage: `{warningsCount, plural, one {warning} other {warnings}}`,
+              values: {
+                warningsCount,
+              },
+            })}
+          </span>
         </EuiButtonEmpty>
       }
       isOpen={isPopoverOpen}

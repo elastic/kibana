@@ -7,7 +7,7 @@
 
 import { Observable, combineLatest, defer, of } from 'rxjs';
 import { concatMap } from 'rxjs/operators';
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { Case } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 

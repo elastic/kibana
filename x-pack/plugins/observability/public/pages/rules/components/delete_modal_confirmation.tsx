@@ -7,7 +7,7 @@
 
 import { EuiConfirmModal } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '../../../utils/kibana_react';
 import {
   confirmModalText,

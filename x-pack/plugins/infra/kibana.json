@@ -26,7 +26,6 @@
     "licenseManagement",
     "kibanaUtils",
     "kibanaReact",
-    "home",
     "ml",
     "embeddable"
   ],

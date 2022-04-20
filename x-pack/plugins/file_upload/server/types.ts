@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SecurityPluginStart } from '../..//security/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 export interface StartDeps {
   security?: SecurityPluginStart;

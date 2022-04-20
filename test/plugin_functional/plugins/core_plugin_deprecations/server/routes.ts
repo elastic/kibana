@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { HttpServiceSetup } from 'kibana/server';
+import type { HttpServiceSetup } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 
 export function registerRoutes(http: HttpServiceSetup) {

@@ -7,10 +7,10 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import type { KibanaFeature } from '@kbn/features-plugin/common';
 
-import type { KibanaFeature } from '../../../../../features/common';
+import type { RouteDefinitionParams } from '../..';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
-import type { RouteDefinitionParams } from '../../index';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
 import {
   getPutPayloadSchema,

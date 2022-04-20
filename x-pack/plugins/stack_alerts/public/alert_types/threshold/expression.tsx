@@ -9,8 +9,8 @@ import React, { useState, Fragment, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiCallOut, EuiEmptyPrompt, EuiText, EuiTitle } from '@elastic/eui';
-import { HttpSetup } from 'kibana/public';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { HttpSetup } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   getFields,
   COMPARATORS,
@@ -22,7 +22,7 @@ import {
   WhenExpression,
   builtInAggregationTypes,
   RuleTypeParamsExpressionProps,
-} from '../../../../triggers_actions_ui/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { ThresholdVisualization } from './visualization';
 import { IndexThresholdAlertParams } from './types';
 import './expression.scss';

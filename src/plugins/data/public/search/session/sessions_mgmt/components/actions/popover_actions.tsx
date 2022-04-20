@@ -18,7 +18,7 @@ import {
   EuiContextMenuPanelItemSeparator,
 } from '@elastic/eui/src/components/context_menu/context_menu';
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import React, { useState } from 'react';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { UISession } from '../../types';

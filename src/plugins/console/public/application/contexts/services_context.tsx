@@ -8,7 +8,7 @@
 
 import React, { createContext, useContext, useEffect } from 'react';
 import { Observable } from 'rxjs';
-import type { NotificationsSetup, CoreTheme, DocLinksStart, HttpSetup } from 'kibana/public';
+import type { NotificationsSetup, CoreTheme, DocLinksStart, HttpSetup } from '@kbn/core/public';
 
 import { History, Settings, Storage } from '../../services';
 import { ObjectStorageClient } from '../../../common/types';

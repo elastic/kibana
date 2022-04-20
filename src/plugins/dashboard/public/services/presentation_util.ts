@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export type { PresentationUtilPluginStart } from '../../../presentation_util/public';
-export { LazyDashboardPicker, withSuspense, useLabs } from '../../../presentation_util/public';
+export type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+export { LazyDashboardPicker, withSuspense, useLabs } from '@kbn/presentation-util-plugin/public';

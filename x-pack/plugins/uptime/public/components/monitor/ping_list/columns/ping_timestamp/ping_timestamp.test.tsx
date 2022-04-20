@@ -10,13 +10,13 @@ import { fireEvent, waitFor } from '@testing-library/react';
 import { PingTimestamp } from './ping_timestamp';
 import { mockReduxHooks } from '../../../../../lib/helper/test_helpers';
 import { render } from '../../../../../lib/helper/rtl_helpers';
-import * as observabilityPublic from '../../../../../../../observability/public';
+import * as observabilityPublic from '@kbn/observability-plugin/public';
 import { getShortTimeStamp } from '../../../../overview/monitor_list/columns/monitor_status_column';
 import moment from 'moment';
 import '../../../../../lib/__mocks__/use_composite_image.mock';
 import { mockRef } from '../../../../../lib/__mocks__/screenshot_ref.mock';
 
-jest.mock('../../../../../../../observability/public');
+jest.mock('@kbn/observability-plugin/public');
 
 mockReduxHooks();
 
