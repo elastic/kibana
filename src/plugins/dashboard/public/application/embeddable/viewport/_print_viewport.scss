@@ -13,11 +13,6 @@ is being formed. This can result in parts of the vis being cut out.
   padding-left: $visPadding;
   padding-right: $visPadding;
 
-  // First vis on a page
-  &:nth-child(#{$visualisationsPerPage}n - #{$visualisationsPerPage - 1}) {
-    padding-top: calc(#{$visPadding} * 2); // Create a bit more vertical space between the page title and the vis
-  }
-
   // Last vis on the page
   &:nth-child(#{$visualisationsPerPage}n) {
     page-break-after: always;

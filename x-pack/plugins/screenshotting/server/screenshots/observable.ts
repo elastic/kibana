@@ -26,6 +26,7 @@ import { injectCustomCss } from './inject_css';
 import { openUrl } from './open_url';
 import { waitForRenderComplete } from './wait_for_render';
 import { waitForVisualizations } from './wait_for_visualizations';
+import type { PdfScreenshotOptions } from '../formats';
 
 type CaptureTimeouts = ConfigType['capture']['timeouts'];
 export interface PhaseTimeouts extends CaptureTimeouts {
@@ -230,7 +231,11 @@ export class ScreenshotObservableHandler {
           try {
             screenshots =
               this.layout.id === LayoutTypes.PRINT
-                ? await getPdf(this.driver, this.logger)
+                ? await getPdf(
+                    this.driver,
+                    this.logger,
+                    (this.options as PdfScreenshotOptions).title ?? ''
+                  )
                 : await getScreenshots(this.driver, this.logger, elements);
           } catch (e) {
             throw new errors.FailedToCaptureScreenshot(e.message);

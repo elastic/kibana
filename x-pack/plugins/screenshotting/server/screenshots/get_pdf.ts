@@ -11,13 +11,14 @@ import type { Screenshot } from './types';
 
 export async function getPdf(
   browser: HeadlessChromiumDriver,
-  logger: Logger
+  logger: Logger,
+  title: string
 ): Promise<Screenshot[]> {
   logger.info('printing PDF');
 
   return [
     {
-      data: await browser.printA4Pdf(),
+      data: await browser.printA4Pdf({ title }),
       title: null,
       description: null,
     },

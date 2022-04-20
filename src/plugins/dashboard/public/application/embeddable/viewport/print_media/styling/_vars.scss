@@ -3,8 +3,8 @@ $a4PageHeight: 297mm;
 $a4PageWidth: 210mm;
 $a4PageMargin: 0;
 $a4PagePadding: 0;
-$a4PageFooterHeight: 10mm; // space for the logo at the bottom
-$a4PageMarginBottom: 9mm; // space for the user-agent page numbers at the bottom
+$a4PageHeaderHeight: 15mm;
+$a4PageFooterHeight: 20mm;
 
-$a4PageContentHeight: $a4PageHeight - $a4PageFooterHeight - $a4PageMarginBottom;
+$a4PageContentHeight: $a4PageHeight - $a4PageHeaderHeight - $a4PageFooterHeight;
 $a4PageContentWidth: $a4PageWidth;
