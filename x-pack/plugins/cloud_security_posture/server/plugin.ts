@@ -6,13 +6,14 @@
  */
 
 import type {
+  KibanaRequest,
+  RequestHandlerContext,
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
   Logger,
 } from '@kbn/core/server';
-import { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 import { DeepReadonly } from 'utility-types';
 import { DeletePackagePoliciesResponse, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { initializeCspTransforms } from './create_transforms/create_transforms';
@@ -96,7 +97,7 @@ export class CspPlugin
         async (
           packagePolicy: PackagePolicy,
           context: RequestHandlerContext,
-          request: KibanaRequest
+          _: KibanaRequest
         ): Promise<PackagePolicy> => {
           if (packagePolicy.package?.name === CIS_KUBERNETES_PACKAGE_NAME) {
             await this.initialize(core);
