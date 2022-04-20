@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { httpServerMock, loggingSystemMock, savedObjectsClientMock } from 'src/core/server/mocks';
+import {
+  httpServerMock,
+  loggingSystemMock,
+  savedObjectsClientMock,
+} from '../../../../../src/core/server/mocks';
 import {
   RequestHandlerContext,
   SavedObjectsClientContract,

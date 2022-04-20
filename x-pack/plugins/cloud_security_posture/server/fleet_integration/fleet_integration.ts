@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
 import type {
   SavedObjectsBulkCreateObject,
@@ -90,7 +89,7 @@ export const getPackagePolicyDeleteCallback = (
           const { saved_objects: cspRules }: SavedObjectsFindResponse<CspRuleSchema> =
             await soClient.find({
               type: cspRuleAssetSavedObjectType,
-              filter: `csp_rule.attributes.package_policy_id: ${deletedPackagePolicy.id} AND csp_rule.attributes.policy_id: ${deletedPackagePolicy.policy_id}`,
+              filter: `${cspRuleAssetSavedObjectType}.attributes.package_policy_id: ${deletedPackagePolicy.id} AND ${cspRuleAssetSavedObjectType}.attributes.policy_id: ${deletedPackagePolicy.policy_id}`,
             });
           await Promise.all(
             cspRules.map((rule) => soClient.delete(cspRuleAssetSavedObjectType, rule.id))
