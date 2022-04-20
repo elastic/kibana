@@ -7,4 +7,4 @@
  */
 
 export type { ElasticV3ShipperOptions } from '@kbn/analytics-shippers-elastic-v3-common';
-export { ElasticV3UIShipper } from './ui_shipper';
+export { ElasticV3BrowserShipper } from './browser_shipper';

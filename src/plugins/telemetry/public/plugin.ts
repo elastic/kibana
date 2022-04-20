@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ElasticV3UIShipper } from '@kbn/analytics-shippers-elastic-v3-ui';
+import { ElasticV3BrowserShipper } from '@kbn/analytics-shippers-elastic-v3-browser';
 
 import type {
   Plugin,
@@ -155,7 +155,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       telemetryConstants = getTelemetryConstants(docLinks);
     });
 
-    analytics.registerShipper(ElasticV3UIShipper, {
+    analytics.registerShipper(ElasticV3BrowserShipper, {
       channelName: 'kibana', // TODO: Do we want to send a different channel name for UI and Server?
       version: currentKibanaVersion,
     });

@@ -10,9 +10,9 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { AnalyticsClientInitContext, Event } from '@kbn/analytics-client';
 import { fakeSchedulers } from 'rxjs-marbles/jest';
 import { firstValueFrom } from 'rxjs';
-import { ElasticV3UIShipper } from './ui_shipper';
+import { ElasticV3BrowserShipper } from './browser_shipper';
 
-describe('ElasticV3UIShipper', () => {
+describe('ElasticV3BrowserShipper', () => {
   const events: Event[] = [
     {
       timestamp: '2020-01-01T00:00:00.000Z',
@@ -28,7 +28,7 @@ describe('ElasticV3UIShipper', () => {
     logger: loggerMock.create(),
   };
 
-  let shipper: ElasticV3UIShipper;
+  let shipper: ElasticV3BrowserShipper;
 
   let fetchMock: jest.Mock;
 
@@ -46,7 +46,7 @@ describe('ElasticV3UIShipper', () => {
       writable: true,
     });
 
-    shipper = new ElasticV3UIShipper(
+    shipper = new ElasticV3BrowserShipper(
       { version: '1.2.3', channelName: 'test-channel', debug: true },
       initContext
     );
@@ -134,7 +134,7 @@ describe('ElasticV3UIShipper', () => {
           "code": "200",
           "count": 1,
           "event_type": "test-event-type",
-          "source": "elastic_v3_ui",
+          "source": "elastic_v3_browser",
           "type": "succeeded",
         }
       `);
@@ -175,7 +175,7 @@ describe('ElasticV3UIShipper', () => {
         "code": "200",
         "count": 1,
         "event_type": "test-event-type",
-        "source": "elastic_v3_ui",
+        "source": "elastic_v3_browser",
         "type": "succeeded",
       }
     `);
@@ -184,7 +184,7 @@ describe('ElasticV3UIShipper', () => {
   test(
     'does not add the query.debug: true property to the request if the shipper is not set with the debug flag',
     fakeSchedulers((advance) => {
-      shipper = new ElasticV3UIShipper(
+      shipper = new ElasticV3BrowserShipper(
         { version: '1.2.3', channelName: 'test-channel' },
         initContext
       );
@@ -234,7 +234,7 @@ describe('ElasticV3UIShipper', () => {
           "code": "Failed to fetch",
           "count": 1,
           "event_type": "test-event-type",
-          "source": "elastic_v3_ui",
+          "source": "elastic_v3_browser",
           "type": "failed",
         }
       `);
@@ -272,7 +272,7 @@ describe('ElasticV3UIShipper', () => {
           "code": "400",
           "count": 1,
           "event_type": "test-event-type",
-          "source": "elastic_v3_ui",
+          "source": "elastic_v3_browser",
           "type": "failed",
         }
       `);

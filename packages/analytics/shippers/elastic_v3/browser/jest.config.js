@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../../../',
-  roots: ['<rootDir>/packages/analytics/shippers/elastic_v3/ui'],
+  roots: ['<rootDir>/packages/analytics/shippers/elastic_v3/browser'],
 };

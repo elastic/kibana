@@ -29,13 +29,13 @@ import {
   eventsToNDJSON,
 } from '@kbn/analytics-shippers-elastic-v3-common';
 
-export class ElasticV3UIShipper implements IShipper {
-  public static shipperName = 'elastic_v3_ui';
+export class ElasticV3BrowserShipper implements IShipper {
+  public static shipperName = 'elastic_v3_browser';
   public readonly telemetryCounter$ = new Subject<TelemetryCounter>();
 
   private readonly reportTelemetryCounters = createTelemetryCounterHelper(
     this.telemetryCounter$,
-    ElasticV3UIShipper.shipperName
+    ElasticV3BrowserShipper.shipperName
   );
 
   private readonly internalQueue$ = new Subject<Event>();
@@ -118,7 +118,7 @@ export class ElasticV3UIShipper implements IShipper {
 
     if (this.options.debug) {
       this.initContext.logger.debug(
-        `[${ElasticV3UIShipper.shipperName}]: ${status} - ${await text()}`
+        `[${ElasticV3BrowserShipper.shipperName}]: ${status} - ${await text()}`
       );
     }
 

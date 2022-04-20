@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/analytics-shippers-elastic-v3-ui",
+  "name": "@kbn/analytics-shippers-elastic-v3-browser",
   "private": true,
   "version": "1.0.0",
   "main": "./target_node/index.js",

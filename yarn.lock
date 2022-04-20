@@ -2940,7 +2940,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/analytics-shippers-elastic-v3-ui@link:bazel-bin/packages/analytics/shippers/elastic_v3/ui":
+"@kbn/analytics-shippers-elastic-v3-browser@link:bazel-bin/packages/analytics/shippers/elastic_v3/browser":
   version "0.0.0"
   uid ""
 
@@ -6044,7 +6044,7 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__analytics-shippers-elastic-v3-ui@link:bazel-bin/packages/analytics/shippers/elastic_v3/ui/npm_module_types":
+"@types/kbn__analytics-shippers-elastic-v3-browser@link:bazel-bin/packages/analytics/shippers/elastic_v3/browser/npm_module_types":
   version "0.0.0"
   uid ""
 

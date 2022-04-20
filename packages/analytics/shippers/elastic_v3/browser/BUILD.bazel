@@ -2,8 +2,8 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "ui"
-PKG_REQUIRE_NAME = "@kbn/analytics-shippers-elastic-v3-ui"
+PKG_DIRNAME = "browser"
+PKG_REQUIRE_NAME = "@kbn/analytics-shippers-elastic-v3-browser"
 
 SOURCE_FILES = glob(
   [
