@@ -12,8 +12,8 @@ import type {
   ExpressionFunctionDefinition,
   Datatable,
   Render,
-} from '../../../../expressions/common';
-import { prepareLogTable, Dimension } from '../../../../visualizations/public';
+} from '@kbn/expressions-plugin/common';
+import { prepareLogTable, Dimension } from '@kbn/visualizations-plugin/public';
 import type { ChartType } from '../../common';
 import type { VisParams, XYVisConfig } from '../types';
 
@@ -69,6 +69,12 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
       types: ['number'],
       help: i18n.translate('visTypeXy.function.args.args.maxLegendLines.help', {
         defaultMessage: 'Defines the maximum lines per legend item',
+      }),
+    },
+    legendSize: {
+      types: ['number'],
+      help: i18n.translate('visTypeXy.function.args.args.legendSize.help', {
+        defaultMessage: 'Specifies the legend size in pixels.',
       }),
     },
     addLegend: {
@@ -254,6 +260,7 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
       addTimeMarker: args.addTimeMarker,
       maxLegendLines: args.maxLegendLines,
       truncateLegend: args.truncateLegend,
+      legendSize: args.legendSize,
       categoryAxes: args.categoryAxes.map((categoryAxis) => ({
         ...categoryAxis,
         type: categoryAxis.axisType,

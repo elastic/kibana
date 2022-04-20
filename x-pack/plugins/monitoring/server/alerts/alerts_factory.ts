@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { RulesClient } from '@kbn/alerting-plugin/server';
+import { Rule } from '@kbn/alerting-plugin/common';
 import {
   LargeShardSizeRule,
   CCRReadExceptionsRule,
@@ -21,7 +23,7 @@ import {
   KibanaVersionMismatchRule,
   ElasticsearchVersionMismatchRule,
   BaseRule,
-} from './';
+} from '.';
 import {
   RULE_CLUSTER_HEALTH,
   RULE_LICENSE_EXPIRATION,
@@ -38,8 +40,6 @@ import {
   RULE_CCR_READ_EXCEPTIONS,
   RULE_LARGE_SHARD_SIZE,
 } from '../../common/constants';
-import { RulesClient } from '../../../alerting/server';
-import { Alert } from '../../../alerting/common';
 import { CommonAlertParams } from '../../common/types/alerts';
 
 const BY_TYPE = {
@@ -77,7 +77,7 @@ export class AlertsFactory {
     if (!alertClientAlerts.total || !alertClientAlerts.data?.length) {
       return [];
     }
-    return alertClientAlerts.data.map((alert) => new alertCls(alert as Alert) as BaseRule);
+    return alertClientAlerts.data.map((alert) => new alertCls(alert as Rule) as BaseRule);
   }
 
   public static getAll() {

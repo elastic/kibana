@@ -8,7 +8,7 @@
 import type { FC, PropsWithChildren, PropsWithRef } from 'react';
 import React from 'react';
 
-import type { CoreStart } from 'src/core/public';
+import type { CoreStart } from '@kbn/core/public';
 
 /**
  * We're importing specific files here instead of passing them

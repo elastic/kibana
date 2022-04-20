@@ -9,11 +9,11 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiFieldNumber, EuiRange, EuiButtonEmpty, EuiLink, EuiText } from '@elastic/eui';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { IndexPatternLayer, IndexPattern } from '../../../types';
-import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
-import { rangeOperation } from '../index';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { rangeOperation } from '..';
 import { RangeIndexPatternColumn } from './ranges';
 import {
   MODES,
@@ -189,6 +189,9 @@ describe('ranges', () => {
       expect(esAggsFn).toMatchInlineSnapshot(`
         Object {
           "arguments": Object {
+            "autoExtendBounds": Array [
+              false,
+            ],
             "enabled": Array [
               true,
             ],
@@ -249,6 +252,30 @@ describe('ranges', () => {
           function: 'aggHistogram',
           arguments: expect.objectContaining({
             maxBars: [10],
+          }),
+        })
+      );
+    });
+
+    it('should reflect show empty rows correctly', () => {
+      (layer.columns.col1 as RangeIndexPatternColumn).params.maxBars = 10;
+      (layer.columns.col1 as RangeIndexPatternColumn).params.includeEmptyRows = true;
+
+      const esAggsFn = rangeOperation.toEsAggsFn(
+        layer.columns.col1 as RangeIndexPatternColumn,
+        'col1',
+        {} as IndexPattern,
+        layer,
+        uiSettingsMock,
+        []
+      );
+
+      expect(esAggsFn).toEqual(
+        expect.objectContaining({
+          function: 'aggHistogram',
+          arguments: expect.objectContaining({
+            autoExtendBounds: [true],
+            min_doc_count: [true],
           }),
         })
       );

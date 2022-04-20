@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { MakeSchemaFrom, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { MakeSchemaFrom, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { get } from 'lodash';
-import { TaskManagerStartContract } from '../../../task_manager/server';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { AlertingUsage } from './types';
 
 const byTypeSchema: MakeSchemaFrom<AlertingUsage>['count_by_type'] = {
@@ -56,6 +56,8 @@ const byTypeSchema: MakeSchemaFrom<AlertingUsage>['count_by_type'] = {
   xpack__ml__anomaly_detection_jobs_health: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
 };
 
+export const NUM_ALERTING_RULE_TYPES = Object.keys(byTypeSchema).length;
+
 const byReasonSchema: MakeSchemaFrom<AlertingUsage>['count_rules_executions_failured_by_reason_per_day'] =
   {
     // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
@@ -64,6 +66,20 @@ const byReasonSchema: MakeSchemaFrom<AlertingUsage>['count_rules_executions_fail
     decrypt: { type: 'long' },
     license: { type: 'long' },
     unknown: { type: 'long' },
+  };
+
+const byPercentileSchema: MakeSchemaFrom<AlertingUsage>['percentile_num_generated_actions_per_day'] =
+  {
+    p50: { type: 'long' },
+    p90: { type: 'long' },
+    p99: { type: 'long' },
+  };
+
+const byPercentileSchemaByType: MakeSchemaFrom<AlertingUsage>['percentile_num_generated_actions_by_type_per_day'] =
+  {
+    p50: byTypeSchema,
+    p90: byTypeSchema,
+    p99: byTypeSchema,
   };
 
 const byReasonSchemaByType: MakeSchemaFrom<AlertingUsage>['count_rules_executions_failured_by_reason_by_type_per_day'] =
@@ -156,6 +172,20 @@ export function createAlertingUsageCollector(
           count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day: {},
           avg_execution_time_per_day: 0,
           avg_execution_time_by_type_per_day: {},
+          avg_es_search_duration_per_day: 0,
+          avg_es_search_duration_by_type_per_day: {},
+          avg_total_search_duration_per_day: 0,
+          avg_total_search_duration_by_type_per_day: {},
+          percentile_num_generated_actions_per_day: {
+            p50: 0,
+            p90: 0,
+            p99: 0,
+          },
+          percentile_num_generated_actions_by_type_per_day: {
+            p50: {},
+            p90: {},
+            p99: {},
+          },
         };
       }
     },
@@ -203,6 +233,12 @@ export function createAlertingUsageCollector(
       count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day: byTaskStatusSchemaByType,
       avg_execution_time_per_day: { type: 'long' },
       avg_execution_time_by_type_per_day: byTypeSchema,
+      avg_es_search_duration_per_day: { type: 'long' },
+      avg_es_search_duration_by_type_per_day: byTypeSchema,
+      avg_total_search_duration_per_day: { type: 'long' },
+      avg_total_search_duration_by_type_per_day: byTypeSchema,
+      percentile_num_generated_actions_per_day: byPercentileSchema,
+      percentile_num_generated_actions_by_type_per_day: byPercentileSchemaByType,
     },
   });
 }

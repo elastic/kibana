@@ -9,7 +9,7 @@ import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { render } from '../../../lib/helper/rtl_helpers';
-import { FETCH_STATUS } from '../../../../../observability/public';
+import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 import {
   DataStream,
   HTTPFields,
@@ -52,10 +52,14 @@ describe('<ActionBar /> Service Errors', () => {
   it('Handles service errors', async () => {
     jest.spyOn(kibana.kibanaService.toasts, 'addWarning').mockImplementation(toast);
     useFetcher.mockReturnValue({
-      data: [
-        { locationId: 'us_central', error: { reason: 'Invalid config', status: 400 } },
-        { locationId: 'us_central', error: { reason: 'Cannot schedule', status: 500 } },
-      ],
+      data: {
+        attributes: {
+          errors: [
+            { locationId: 'us_central', error: { reason: 'Invalid config', status: 400 } },
+            { locationId: 'us_central', error: { reason: 'Cannot schedule', status: 500 } },
+          ],
+        },
+      },
       status: FETCH_STATUS.SUCCESS,
       refetch: () => {},
     });

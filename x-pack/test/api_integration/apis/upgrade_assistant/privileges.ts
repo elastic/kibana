@@ -7,15 +7,17 @@
 
 import expect from '@kbn/expect';
 
+import { DEPRECATION_LOGS_INDEX } from '@kbn/upgrade-assistant-plugin/common/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { DEPRECATION_LOGS_INDEX } from '../../../../plugins/upgrade_assistant/common/constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const security = getService('security');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('Privileges', () => {
+  describe('Privileges', function () {
+    this.onlyEsVersion('<=7');
+
     describe('GET /api/upgrade_assistant/privileges', () => {
       it('User with with index privileges', async () => {
         const { body } = await supertest

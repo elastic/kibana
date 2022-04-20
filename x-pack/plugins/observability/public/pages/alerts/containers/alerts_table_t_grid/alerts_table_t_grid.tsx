@@ -38,23 +38,24 @@ import styled from 'styled-components';
 import React, { Suspense, useMemo, useState, useCallback, useEffect } from 'react';
 
 import { pick } from 'lodash';
-import { getAlertsPermissions } from '../../../../hooks/use_alert_permission';
 import type {
-  TimelinesUIStart,
   TGridType,
   TGridState,
   TGridModel,
   SortDirection,
-} from '../../../../../../timelines/public';
-
-import type { TopAlert } from '../alerts_page/alerts_page';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+} from '@kbn/timelines-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   ActionProps,
   ColumnHeaderOptions,
   ControlColumnProps,
   RowRenderer,
-} from '../../../../../../timelines/common';
+} from '@kbn/timelines-plugin/common';
+import { CaseAttachments } from '@kbn/cases-plugin/public';
+import { CommentType } from '@kbn/cases-plugin/common';
+import { getAlertsPermissions } from '../../../../hooks/use_alert_permission';
+
+import type { TopAlert } from '../alerts_page/alerts_page';
 
 import { getRenderCellValue } from '../../components/render_cell_value';
 import { observabilityAppId, observabilityFeatureId } from '../../../../../common';
@@ -62,12 +63,10 @@ import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { LazyAlertsFlyout } from '../../../..';
 import { parseAlert } from '../../components/parse_alert';
-import { CoreStart } from '../../../../../../../../src/core/public';
 import { translations, paths } from '../../../../config';
 import { addDisplayNames } from './add_display_names';
-import { CaseAttachments, CasesUiStart } from '../../../../../../cases/public';
-import { CommentType } from '../../../../../../cases/common';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from './translations';
+import { ObservabilityAppServices } from '../../../../application/types';
 
 const ALERT_TABLE_STATE_STORAGE_KEY = 'xpack.observability.alert.tableState';
 
@@ -145,13 +144,10 @@ function ObservabilityActions({
   ecsData,
   setFlyoutAlert,
 }: ObservabilityActionsProps) {
-  const { core, observabilityRuleTypeRegistry } = usePluginContext();
+  const { observabilityRuleTypeRegistry } = usePluginContext();
   const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
   const [openActionsPopoverId, setActionsPopover] = useState(null);
-  const {
-    cases,
-    application: {},
-  } = useKibana<CoreStart & { cases: CasesUiStart }>().services;
+  const { cases, http } = useKibana<ObservabilityAppServices>().services;
 
   const parseObservabilityAlert = useMemo(
     () => parseAlert(observabilityRuleTypeRegistry),
@@ -159,7 +155,6 @@ function ObservabilityActions({
   );
 
   const alert = parseObservabilityAlert(dataFieldEs);
-  const { prepend } = core.http.basePath;
 
   const closeActionsPopover = useCallback(() => {
     setActionsPopover(null);
@@ -171,7 +166,7 @@ function ObservabilityActions({
 
   const casePermissions = useGetUserCasesPermissions();
   const ruleId = alert.fields['kibana.alert.rule.uuid'] ?? null;
-  const linkToRule = ruleId ? prepend(paths.management.ruleDetails(ruleId)) : null;
+  const linkToRule = ruleId ? http.basePath.prepend(paths.management.ruleDetails(ruleId)) : null;
 
   const caseAttachments: CaseAttachments = useMemo(() => {
     return ecsData?._id
@@ -264,7 +259,7 @@ function ObservabilityActions({
           <EuiToolTip content={translations.alertsTable.viewInAppTextLabel}>
             <EuiButtonIcon
               size="s"
-              href={prepend(alert.link ?? '')}
+              href={http.basePath.prepend(alert.link ?? '')}
               iconType="eye"
               color="text"
               aria-label={translations.alertsTable.viewInAppTextLabel}
@@ -312,7 +307,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
   const {
     timelines,
     application: { capabilities },
-  } = useKibana<CoreStart & { timelines: TimelinesUIStart }>().services;
+  } = useKibana<ObservabilityAppServices>().services;
 
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
   const [tGridState, setTGridState] = useState<Partial<TGridModel> | null>(

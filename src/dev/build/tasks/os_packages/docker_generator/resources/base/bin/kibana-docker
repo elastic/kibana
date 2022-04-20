@@ -170,6 +170,7 @@ kibana_vars=(
     status.v6ApiFormat
     telemetry.allowChangingOptInStatus
     telemetry.enabled
+    telemetry.hidePrivacyStatement
     telemetry.optIn
     telemetry.sendUsageTo
     telemetry.sendUsageFrom
@@ -199,7 +200,12 @@ kibana_vars=(
     xpack.alerting.invalidateApiKeysTask.interval
     xpack.alerting.invalidateApiKeysTask.removalDelay
     xpack.alerting.defaultRuleTaskTimeout
+    xpack.alerting.rules.run.timeout
+    xpack.alerting.rules.run.ruleTypeOverrides
     xpack.alerting.cancelAlertsOnRuleTimeout
+    xpack.alerting.rules.minimumScheduleInterval.value
+    xpack.alerting.rules.minimumScheduleInterval.enforce
+    xpack.alerting.rules.run.actions.max
     xpack.alerts.healthCheck.interval
     xpack.alerts.invalidateApiKeysTask.interval
     xpack.alerts.invalidateApiKeysTask.removalDelay
@@ -376,6 +382,8 @@ kibana_vars=(
     xpack.task_manager.poll_interval
     xpack.task_manager.request_capacity
     xpack.task_manager.version_conflict_threshold
+    xpack.task_manager.event_loop_delay.monitor
+    xpack.task_manager.event_loop_delay.warn_threshold
     xpack.uptime.index
 )
 

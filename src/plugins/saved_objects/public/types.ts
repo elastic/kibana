@@ -12,16 +12,19 @@ import {
   SavedObjectsClientContract,
   SavedObjectAttributes,
   SavedObjectReference,
-} from 'kibana/public';
+} from '@kbn/core/public';
 import {
   IndexPattern,
   ISearchSource,
   ISearchStart,
   SerializedSearchSourceFields,
-} from '../../data/public';
-import { DataViewsContract } from '../../data_views/public';
+} from '@kbn/data-plugin/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
 
-/** @deprecated */
+/**
+ * @deprecated
+ * @removeBy 8.8.0
+ */
 export interface SavedObject {
   _serialize: () => { attributes: SavedObjectAttributes; references: SavedObjectReference[] };
   _source: Record<string, unknown>;

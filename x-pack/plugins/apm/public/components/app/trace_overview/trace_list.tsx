@@ -9,8 +9,8 @@ import { EuiIcon, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ApmRoutes } from '../../routing/apm_route_config';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import {
   asMillisecondDuration,
   asTransactionRate,
@@ -86,7 +86,7 @@ export function getTraceListColumns({
           content={
             <ServiceLink
               agentName={agentName}
-              query={{ ...query, transactionType }}
+              query={{ ...query, transactionType, serviceGroup: '' }}
               serviceName={serviceName}
             />
           }
@@ -121,7 +121,7 @@ export function getTraceListColumns({
             'xpack.apm.tracesTable.impactColumnDescription',
             {
               defaultMessage:
-                'The most used and slowest endpoints in your service. It is the result of multiplying latency and throughput',
+                'The most used and slowest endpoints in your service. Calculated by multiplying latency by throughput.',
             }
           )}
         >

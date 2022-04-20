@@ -7,15 +7,12 @@
  */
 
 import { cloneDeep, get, omit, has, flow, forOwn, mapValues } from 'lodash';
-import type { SavedObjectMigrationFn, SavedObjectMigrationMap } from 'kibana/server';
-import { mergeSavedObjectMigrationMaps } from '../../../../core/server';
-import { MigrateFunctionsObject, MigrateFunction } from '../../../kibana_utils/common';
+import type { SavedObjectMigrationFn, SavedObjectMigrationMap } from '@kbn/core/server';
+import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
+import { MigrateFunctionsObject, MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 
-import {
-  DEFAULT_QUERY_LANGUAGE,
-  INDEX_PATTERN_SAVED_OBJECT_TYPE,
-  SerializedSearchSourceFields,
-} from '../../../data/common';
+import { DEFAULT_QUERY_LANGUAGE, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import {
   commonAddSupportOfDualIndexSelectionModeInTSVB,
   commonHideTSVBLastValueIndicator,
@@ -47,7 +44,7 @@ const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
     searchSource.indexRefName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
     doc.references.push({
       name: searchSource.indexRefName,
-      type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
+      type: DATA_VIEW_SAVED_OBJECT_TYPE,
       id: searchSource.index,
     });
     delete searchSource.index;
@@ -60,7 +57,7 @@ const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
       filterRow.meta.indexRefName = `kibanaSavedObjectMeta.searchSourceJSON.filter[${i}].meta.index`;
       doc.references.push({
         name: filterRow.meta.indexRefName,
-        type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
+        type: DATA_VIEW_SAVED_OBJECT_TYPE,
         id: filterRow.meta.index,
       });
       delete filterRow.meta.index;
@@ -658,7 +655,7 @@ const migrateControls: SavedObjectMigrationFn<any, any> = (doc) => {
         control.indexPatternRefName = `control_${i}_index_pattern`;
         doc.references.push({
           name: control.indexPatternRefName,
-          type: INDEX_PATTERN_SAVED_OBJECT_TYPE,
+          type: DATA_VIEW_SAVED_OBJECT_TYPE,
           id: control.indexPattern,
         });
         delete control.indexPattern;
@@ -1103,7 +1100,7 @@ export const replaceIndexPatternReference: SavedObjectMigrationFn<any, any> = (d
   references: Array.isArray(doc.references)
     ? doc.references.map((reference) => {
         if (reference.type === 'index_pattern') {
-          reference.type = INDEX_PATTERN_SAVED_OBJECT_TYPE;
+          reference.type = DATA_VIEW_SAVED_OBJECT_TYPE;
         }
         return reference;
       })

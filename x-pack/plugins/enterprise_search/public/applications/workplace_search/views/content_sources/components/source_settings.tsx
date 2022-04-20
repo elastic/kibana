@@ -43,7 +43,7 @@ import {
 } from '../../../constants';
 import { getEditPath } from '../../../routes';
 import { handlePrivateKeyUpload } from '../../../utils';
-import { AddSourceLogic } from '../components/add_source/add_source_logic';
+
 import {
   SOURCE_SETTINGS_HEADING,
   SOURCE_SETTINGS_TITLE,
@@ -58,6 +58,8 @@ import {
   SYNC_DIAGNOSTICS_BUTTON,
 } from '../constants';
 import { SourceLogic } from '../source_logic';
+
+import { AddSourceLogic } from './add_source/add_source_logic';
 
 import { DownloadDiagnosticsButton } from './download_diagnostics_button';
 
@@ -105,7 +107,15 @@ export const SourceSettings: React.FC = () => {
   const showOauthConfig = !isGithubApp && isOrganization && !isEmpty(configuredFields);
   const showGithubAppConfig = isGithubApp;
 
-  const { clientId, clientSecret, publicKey, consumerKey, baseUrl } = configuredFields || {};
+  const {
+    clientId,
+    clientSecret,
+    publicKey,
+    consumerKey,
+    baseUrl,
+    externalConnectorUrl,
+    externalConnectorApiKey,
+  } = configuredFields || {};
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value);
 
@@ -190,6 +200,8 @@ export const SourceSettings: React.FC = () => {
             publicKey={publicKey}
             consumerKey={consumerKey}
             baseUrl={baseUrl}
+            externalConnectorUrl={externalConnectorUrl}
+            externalConnectorApiKey={externalConnectorApiKey}
           />
           <EuiFormRow>
             <EuiButtonEmptyTo to={editPath as string} flush="left">

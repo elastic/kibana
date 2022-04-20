@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 // @ts-expect-error
 import { fieldCalculator } from './field_calculator';
-import { DataView, DataViewField } from '../../../../../../../data/common';
 import { ElasticSearchHit } from '../../../../../types';
 
 export function getDetails(

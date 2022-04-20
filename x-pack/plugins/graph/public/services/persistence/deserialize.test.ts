@@ -7,9 +7,9 @@
 
 import { GraphWorkspaceSavedObject, IndexPatternSavedObject, Workspace } from '../../types';
 import { migrateLegacyIndexPatternRef, savedWorkspaceToAppState, mapFields } from './deserialize';
-import { createWorkspace } from '../../services/workspace/graph_client_workspace';
+import { createWorkspace } from '../workspace/graph_client_workspace';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
-import { IndexPattern } from '../../../../../../src/plugins/data/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 describe('deserialize', () => {
   let savedWorkspace: GraphWorkspaceSavedObject;
@@ -124,7 +124,7 @@ describe('deserialize', () => {
           { name: 'field2', type: 'string', aggregatable: true, isMapped: true },
           { name: 'field3', type: 'string', aggregatable: true, isMapped: true },
         ],
-      } as IndexPattern,
+      } as DataView,
       workspace
     );
   }
@@ -247,7 +247,7 @@ describe('deserialize', () => {
           { name: 'runtimeField', type: 'string', aggregatable: true, isMapped: false },
           { name: 'field3', type: 'string', aggregatable: true, isMapped: true },
         ],
-      } as IndexPattern;
+      } as DataView;
       expect(mapFields(indexPattern).map(({ name }) => name)).toEqual([
         'field1',
         'field2',

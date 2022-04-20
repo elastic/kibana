@@ -8,9 +8,9 @@
 jest.mock('./lib/generate_pdf');
 
 import * as Rx from 'rxjs';
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Writable } from 'stream';
-import { ReportingCore } from '../../';
+import { ReportingCore } from '../..';
 import { CancellationToken } from '../../../common/cancellation_token';
 import { LocatorParams } from '../../../common/types';
 import { cryptoFactory } from '../../lib';
@@ -82,10 +82,7 @@ test(`passes browserTimezone to generatePdf`, async () => {
     expect.anything(),
     expect.anything(),
     expect.anything(),
-    expect.anything(),
-    expect.anything(),
-    expect.objectContaining({ browserTimezone: 'UTC' }),
-    undefined
+    expect.objectContaining({ browserTimezone: 'UTC' })
   );
 });
 

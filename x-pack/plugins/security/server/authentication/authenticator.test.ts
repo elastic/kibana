@@ -12,13 +12,13 @@ jest.mock('./providers/http');
 
 import { errors } from '@elastic/elasticsearch';
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
   loggingSystemMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { SecurityLicenseFeatures } from '../../common';
 import {

@@ -8,13 +8,13 @@
 import { schema } from '@kbn/config-schema';
 import fs from 'fs';
 import path from 'path';
-import { CoreSetup, CoreStart, IRouter, Logger } from 'kibana/server';
+import { CoreSetup, CoreStart, IRouter, Logger } from '@kbn/core/server';
+import { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { INDEX_SETTINGS_API_PATH, FONTS_API_PATH } from '../common/constants';
 import { getIndexPatternSettings } from './lib/get_index_pattern_settings';
 import { initMVTRoutes } from './mvt/mvt_routes';
 import { initIndexingRoutes } from './data_indexing/indexing_routes';
 import { StartDeps } from './types';
-import { DataRequestHandlerContext } from '../../../../src/plugins/data/server';
 
 export async function initRoutes(coreSetup: CoreSetup, logger: Logger): Promise<void> {
   const router: IRouter<DataRequestHandlerContext> = coreSetup.http.createRouter();

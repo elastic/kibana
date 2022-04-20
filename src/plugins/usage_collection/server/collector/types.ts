@@ -6,46 +6,17 @@
  * Side Public License, v 1.
  */
 
-import type {
-  ElasticsearchClient,
-  KibanaRequest,
-  SavedObjectsClientContract,
-  Logger,
-} from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
 
-/** Types matching number values **/
-export type AllowedSchemaNumberTypes =
-  | 'long'
-  | 'integer'
-  | 'short'
-  | 'byte'
-  | 'double'
-  | 'float'
-  | 'date';
-/** Types matching string values **/
-export type AllowedSchemaStringTypes = 'keyword' | 'text' | 'date';
-/** Types matching boolean values **/
-export type AllowedSchemaBooleanTypes = 'boolean';
+import type { PossibleSchemaTypes } from '@elastic/analytics';
 
-/**
- * Possible type values in the schema
- */
-export type AllowedSchemaTypes =
-  | AllowedSchemaNumberTypes
-  | AllowedSchemaStringTypes
-  | AllowedSchemaBooleanTypes;
-
-/**
- * Helper to ensure the declared types match the schema types
- */
-export type PossibleSchemaTypes<U> = U extends string
-  ? AllowedSchemaStringTypes
-  : U extends number
-  ? AllowedSchemaNumberTypes
-  : U extends boolean
-  ? AllowedSchemaBooleanTypes
-  : // allow any schema type from the union if typescript is unable to resolve the exact U type
-    AllowedSchemaTypes;
+export type {
+  AllowedSchemaTypes,
+  AllowedSchemaStringTypes,
+  AllowedSchemaBooleanTypes,
+  AllowedSchemaNumberTypes,
+  PossibleSchemaTypes,
+} from '@elastic/analytics';
 
 /**
  * Helper to find out whether to keep recursively looking or if we are on an end value
@@ -73,7 +44,7 @@ export type MakeSchemaFrom<Base> = {
  *
  * @remark Bear in mind when testing your collector that your user has the same privileges as the Kibana Internal user to ensure the expected data is sent to the remote cluster.
  */
-export type CollectorFetchContext<WithKibanaRequest extends boolean | undefined = false> = {
+export interface CollectorFetchContext {
   /**
    * Request-scoped Elasticsearch client
    * @remark Bear in mind when testing your collector that your user has the same privileges as the Kibana Internal user to ensure the expected data is sent to the remote cluster (more info: {@link CollectorFetchContext})
@@ -84,58 +55,22 @@ export type CollectorFetchContext<WithKibanaRequest extends boolean | undefined 
    * @remark Bear in mind when testing your collector that your user has the same privileges as the Kibana Internal user to ensure the expected data is sent to the remote cluster (more info: {@link CollectorFetchContext})
    */
   soClient: SavedObjectsClientContract;
-} & (WithKibanaRequest extends true
-  ? {
-      /**
-       * The KibanaRequest that can be used to scope the requests:
-       * It is provided only when your custom clients need to be scoped. If not available, you should use the Internal Client.
-       * More information about when scoping is needed: {@link CollectorFetchContext}
-       * @remark You should only use this if you implement your collector to deal with both scenarios: when provided and, especially, when not provided. When telemetry payload is sent to the remote service the `kibanaRequest` will not be provided.
-       */
-      kibanaRequest?: KibanaRequest;
-    }
-  : {});
+}
 
 /**
  * The fetch method has the context of the Collector itself
  * (this has access to all the properties of the collector like the logger)
  * and the the first parameter is {@link CollectorFetchContext}.
  */
-export type CollectorFetchMethod<
-  WithKibanaRequest extends boolean | undefined,
-  TReturn,
-  ExtraOptions extends object = {}
-> = (
+export type CollectorFetchMethod<TReturn, ExtraOptions extends object = {}> = (
   this: ICollector<TReturn> & ExtraOptions, // Specify the context of `this` for this.log and others to become available
-  context: CollectorFetchContext<WithKibanaRequest>
+  context: CollectorFetchContext
 ) => Promise<TReturn> | TReturn;
-
-export interface ICollectorOptionsFetchExtendedContext<WithKibanaRequest extends boolean> {
-  /**
-   * Set to `true` if your `fetch` method requires the `KibanaRequest` object to be added in its context {@link CollectorFetchContextWithRequest}.
-   * @remark You should fully acknowledge that by using the `KibanaRequest` in your collector, you need to ensure it should specially work without it because it won't be provided when building the telemetry payload actually sent to the remote telemetry service.
-   */
-  kibanaRequest?: WithKibanaRequest;
-}
-
-/**
- * The options to extend the context provided to the `fetch` method.
- * @remark Only to be used in very rare scenarios when this is really needed.
- */
-export type CollectorOptionsFetchExtendedContext<WithKibanaRequest extends boolean> =
-  ICollectorOptionsFetchExtendedContext<WithKibanaRequest> &
-    (WithKibanaRequest extends true // If enforced to true via Types, the config must be expected
-      ? Required<Pick<ICollectorOptionsFetchExtendedContext<WithKibanaRequest>, 'kibanaRequest'>>
-      : {});
 
 /**
  * Options to instantiate a collector
  */
-export type CollectorOptions<
-  TFetchReturn = unknown,
-  WithKibanaRequest extends boolean = boolean,
-  ExtraOptions extends object = {}
-> = {
+export type CollectorOptions<TFetchReturn = unknown, ExtraOptions extends object = {}> = {
   /**
    * Unique string identifier for the collector
    */
@@ -152,17 +87,8 @@ export type CollectorOptions<
    * The method that will collect and return the data in the final format.
    * @param collectorFetchContext {@link CollectorFetchContext}
    */
-  fetch: CollectorFetchMethod<WithKibanaRequest, TFetchReturn, ExtraOptions>;
-} & ExtraOptions &
-  (WithKibanaRequest extends true // If enforced to true via Types, the config must be enforced
-    ? {
-        /** {@link CollectorOptionsFetchExtendedContext} **/
-        extendFetchContext: CollectorOptionsFetchExtendedContext<WithKibanaRequest>;
-      }
-    : {
-        /** {@link CollectorOptionsFetchExtendedContext} **/
-        extendFetchContext?: CollectorOptionsFetchExtendedContext<WithKibanaRequest>;
-      });
+  fetch: CollectorFetchMethod<TFetchReturn, ExtraOptions>;
+} & ExtraOptions;
 
 /**
  * Common interface for Usage and Stats Collectors
@@ -170,13 +96,8 @@ export type CollectorOptions<
 export interface ICollector<TFetchReturn, ExtraOptions extends object = {}> {
   /** Logger **/
   readonly log: Logger;
-  /**
-   * The options to extend the context provided to the `fetch` method: {@link CollectorOptionsFetchExtendedContext}.
-   * @remark Only to be used in very rare scenarios when this is really needed.
-   */
-  readonly extendFetchContext: CollectorOptionsFetchExtendedContext<boolean>;
   /** The registered type (aka name) of the collector **/
-  readonly type: CollectorOptions<TFetchReturn, boolean>['type'];
+  readonly type: CollectorOptions<TFetchReturn>['type'];
   /**
    * The actual logic that reports the Usage collection.
    * It will be called on every collection request.
@@ -188,9 +109,9 @@ export interface ICollector<TFetchReturn, ExtraOptions extends object = {}> {
    *   [type]: await fetch(context)
    * }
    */
-  readonly fetch: CollectorFetchMethod<boolean, TFetchReturn, ExtraOptions>;
+  readonly fetch: CollectorFetchMethod<TFetchReturn, ExtraOptions>;
   /**
    * Should return `true` when it's safe to call the `fetch` method.
    */
-  readonly isReady: CollectorOptions<TFetchReturn, boolean>['isReady'];
+  readonly isReady: CollectorOptions<TFetchReturn>['isReady'];
 }

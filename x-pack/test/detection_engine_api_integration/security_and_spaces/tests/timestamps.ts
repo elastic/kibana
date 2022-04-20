@@ -7,12 +7,12 @@
 
 import expect from '@kbn/expect';
 import { orderBy } from 'lodash';
-import { RuleExecutionStatus } from '../../../../plugins/security_solution/common/detection_engine/schemas/common';
+import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/schemas/common';
 import {
   EqlCreateSchema,
   QueryCreateSchema,
-} from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
-import { ALERT_ORIGINAL_TIME } from '../../../../plugins/security_solution/common/field_maps/field_names';
+} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -26,10 +26,6 @@ import {
   getSignalsByIds,
   getEqlRuleForSignalTesting,
 } from '../../utils';
-
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -70,7 +66,6 @@ export default ({ getService }: FtrProviderContext) => {
           const rule = getRuleForSignalTesting(['timestamp_in_seconds']);
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccessOrStatus(supertest, log, id);
-          await sleep(5000);
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
           const signalsOpen = await getSignalsByIds(supertest, log, [id]);
           const hits = signalsOpen.hits.hits
@@ -86,7 +81,6 @@ export default ({ getService }: FtrProviderContext) => {
           };
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccessOrStatus(supertest, log, id);
-          await sleep(5000);
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
           const signalsOpen = await getSignalsByIds(supertest, log, [id]);
           const hits = signalsOpen.hits.hits
@@ -101,7 +95,6 @@ export default ({ getService }: FtrProviderContext) => {
           const rule = getEqlRuleForSignalTesting(['timestamp_in_seconds']);
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccessOrStatus(supertest, log, id);
-          await sleep(5000);
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
           const signalsOpen = await getSignalsByIds(supertest, log, [id]);
           const hits = signalsOpen.hits.hits
@@ -117,7 +110,6 @@ export default ({ getService }: FtrProviderContext) => {
           };
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccessOrStatus(supertest, log, id);
-          await sleep(5000);
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
           const signalsOpen = await getSignalsByIds(supertest, log, [id]);
           const hits = signalsOpen.hits.hits
@@ -184,7 +176,6 @@ export default ({ getService }: FtrProviderContext) => {
             id,
             RuleExecutionStatus['partial failure']
           );
-          await sleep(5000);
           await waitForSignalsToBePresent(supertest, log, 3, [id]);
           const signalsResponse = await getSignalsByIds(supertest, log, [id], 3);
           const signals = signalsResponse.hits.hits.map((hit) => hit._source);
@@ -204,7 +195,6 @@ export default ({ getService }: FtrProviderContext) => {
             id,
             RuleExecutionStatus['partial failure']
           );
-          await sleep(5000);
           await waitForSignalsToBePresent(supertest, log, 2, [id]);
           const signalsResponse = await getSignalsByIds(supertest, log, [id]);
           const signals = signalsResponse.hits.hits.map((hit) => hit._source);
@@ -226,7 +216,6 @@ export default ({ getService }: FtrProviderContext) => {
             id,
             RuleExecutionStatus['partial failure']
           );
-          await sleep(5000);
           await waitForSignalsToBePresent(supertest, log, 2, [id]);
           const signalsResponse = await getSignalsByIds(supertest, log, [id, id]);
           const signals = signalsResponse.hits.hits.map((hit) => hit._source);
@@ -249,7 +238,6 @@ export default ({ getService }: FtrProviderContext) => {
           const { id } = await createRule(supertest, log, rule);
 
           await waitForRuleSuccessOrStatus(supertest, log, id);
-          await sleep(5000);
           await waitForSignalsToBePresent(supertest, log, 1, [id]);
           const signalsResponse = await getSignalsByIds(supertest, log, [id, id]);
           const hits = signalsResponse.hits.hits
@@ -271,9 +259,29 @@ export default ({ getService }: FtrProviderContext) => {
             id,
             RuleExecutionStatus['partial failure']
           );
-          await sleep(5000);
           await waitForSignalsToBePresent(supertest, log, 2, [id]);
           const signalsResponse = await getSignalsByIds(supertest, log, [id]);
+          const signals = signalsResponse.hits.hits.map((hit) => hit._source);
+          const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
+
+          expect(signalsOrderedByEventId.length).equal(2);
+        });
+
+        it('should generate 2 signals when timestamp override does not exist', async () => {
+          const rule: EqlCreateSchema = {
+            ...getEqlRuleForSignalTesting(['myfa*']),
+            timestamp_override: 'event.fakeingestfield',
+          };
+          const { id } = await createRule(supertest, log, rule);
+
+          await waitForRuleSuccessOrStatus(
+            supertest,
+            log,
+            id,
+            RuleExecutionStatus['partial failure']
+          );
+          await waitForSignalsToBePresent(supertest, log, 2, [id]);
+          const signalsResponse = await getSignalsByIds(supertest, log, [id, id]);
           const signals = signalsResponse.hits.hits.map((hit) => hit._source);
           const signalsOrderedByEventId = orderBy(signals, 'signal.parent.id', 'asc');
 
@@ -326,7 +334,6 @@ export default ({ getService }: FtrProviderContext) => {
             id,
             RuleExecutionStatus['partial failure']
           );
-          await sleep(5000);
           await waitForSignalsToBePresent(supertest, log, 200, [id]);
           const signalsResponse = await getSignalsByIds(supertest, log, [id], 200);
           const signals = signalsResponse.hits.hits.map((hit) => hit._source);

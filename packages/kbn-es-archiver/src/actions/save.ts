@@ -10,7 +10,7 @@ import { resolve, relative } from 'path';
 import { createWriteStream, mkdirSync } from 'fs';
 import { Readable, Writable } from 'stream';
 import type { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { createListStream, createPromiseFromStreams, REPO_ROOT } from '@kbn/utils';
 
 import {

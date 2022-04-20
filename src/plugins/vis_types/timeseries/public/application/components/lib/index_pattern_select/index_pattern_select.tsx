@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiFormRow, EuiText, EuiLink, htmlIdGenerator } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { getCoreStart } from '../../../../services';
 import { PanelModelContext } from '../../../contexts/panel_model_context';
 
@@ -19,7 +20,6 @@ import { ComboBoxSelect } from './combo_box_select';
 
 import type { IndexPatternValue, FetchedIndexPattern } from '../../../../../common/types';
 import { USE_KIBANA_INDEXES_KEY } from '../../../../../common/constants';
-import { IndexPattern } from '../../../../../../../data/common';
 
 export interface IndexPatternSelectProps {
   indexPatternName: string;
@@ -28,7 +28,7 @@ export interface IndexPatternSelectProps {
   allowIndexSwitchingMode?: boolean;
   fetchedIndex:
     | (FetchedIndexPattern & {
-        defaultIndex?: IndexPattern | null;
+        defaultIndex?: DataView | null;
       })
     | null;
 }

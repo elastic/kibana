@@ -7,10 +7,10 @@
 
 import { BehaviorSubject } from 'rxjs';
 
+import { coreMock } from '@kbn/core/public/mocks';
+import type { ILicense } from '@kbn/licensing-plugin/public';
 import { nextTick } from '@kbn/test-jest-helpers';
-import { coreMock } from 'src/core/public/mocks';
 
-import type { ILicense } from '../../../licensing/public';
 import { SecurityLicenseService } from '../../common/licensing';
 import * as UseCurrentUserImports from '../components/use_current_user';
 import { SecurityNavControlService } from './nav_control_service';
@@ -72,6 +72,7 @@ describe('SecurityNavControlService', () => {
               aria-label="Account menu"
               class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
               data-test-subj="userMenuButton"
+              style="line-height: normal;"
               type="button"
             >
               <span

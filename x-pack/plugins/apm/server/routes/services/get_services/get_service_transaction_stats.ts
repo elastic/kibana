@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kqlQuery, rangeQuery } from '../../../../../observability/server';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
@@ -23,12 +23,14 @@ import {
   getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
-import { calculateThroughput } from '../../../lib/helpers/calculate_throughput';
+import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
 import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
 } from '../../../lib/helpers/transaction_error_rate';
 import { ServicesItemsSetup } from './get_services_items';
+import { serviceGroupQuery } from '../../../../common/utils/service_group_query';
+import { ServiceGroup } from '../../../../common/service_groups';
 
 interface AggregationParams {
   environment: string;
@@ -38,6 +40,7 @@ interface AggregationParams {
   maxNumServices: number;
   start: number;
   end: number;
+  serviceGroup: ServiceGroup | null;
 }
 
 export async function getServiceTransactionStats({
@@ -48,6 +51,7 @@ export async function getServiceTransactionStats({
   maxNumServices,
   start,
   end,
+  serviceGroup,
 }: AggregationParams) {
   const { apmEventClient } = setup;
 
@@ -81,6 +85,7 @@ export async function getServiceTransactionStats({
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
+              ...serviceGroupQuery(serviceGroup),
             ],
           },
         },
@@ -140,7 +145,7 @@ export async function getServiceTransactionStats({
         transactionErrorRate: calculateFailedTransactionRate(
           topTransactionTypeBucket.outcomes
         ),
-        throughput: calculateThroughput({
+        throughput: calculateThroughputWithRange({
           start,
           end,
           value: topTransactionTypeBucket.doc_count,

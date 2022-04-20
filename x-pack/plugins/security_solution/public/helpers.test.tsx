@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { shallow } from 'enzyme';
-import { Capabilities } from '../../../../src/core/public';
+import { Capabilities } from '@kbn/core/public';
 import { CASES_FEATURE_ID, SERVER_APP_ID } from '../common/constants';
 import { mockEcsDataWithAlert } from './common/mock';
 import { ALERT_RULE_UUID, ALERT_RULE_NAME, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
@@ -193,7 +193,7 @@ describe('RedirectRoute', () => {
     } as unknown as Capabilities;
     expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
       <Redirect
-        to="/overview"
+        to="/get_started"
       />
     `);
   });
@@ -205,7 +205,7 @@ describe('RedirectRoute', () => {
     } as unknown as Capabilities;
     expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
       <Redirect
-        to="/overview"
+        to="/get_started"
       />
     `);
   });
@@ -217,7 +217,7 @@ describe('RedirectRoute', () => {
     } as unknown as Capabilities;
     expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
       <Redirect
-        to="/overview"
+        to="/get_started"
       />
     `);
   });
@@ -229,7 +229,7 @@ describe('RedirectRoute', () => {
     } as unknown as Capabilities;
     expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
       <Redirect
-        to="/overview"
+        to="/get_started"
       />
     `);
   });
@@ -241,7 +241,7 @@ describe('RedirectRoute', () => {
     } as unknown as Capabilities;
     expect(shallow(<RedirectRoute capabilities={mockCapabilitities} />)).toMatchInlineSnapshot(`
       <Redirect
-        to="/overview"
+        to="/get_started"
       />
     `);
   });

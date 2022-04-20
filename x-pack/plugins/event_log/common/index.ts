@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const BASE_EVENT_LOG_API_PATH = '/api/event_log';
+export const BASE_EVENT_LOG_API_PATH = '/internal/event_log';

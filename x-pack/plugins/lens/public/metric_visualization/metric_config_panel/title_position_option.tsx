@@ -8,16 +8,26 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
-import { MetricState } from '../../../common/expressions';
+import type { MetricState } from '../../../common/types';
 
 export interface TitlePositionProps {
   state: MetricState;
   setState: (newState: MetricState) => void;
 }
 
+export const DEFAULT_TITLE_POSITION = 'top';
+
 const titlePositions = [
-  { id: 'top', label: 'Top' },
-  { id: 'bottom', label: 'Bottom' },
+  {
+    id: 'top',
+    label: i18n.translate('xpack.lens.metricChart.titlePositions.top', { defaultMessage: 'Top' }),
+  },
+  {
+    id: 'bottom',
+    label: i18n.translate('xpack.lens.metricChart.titlePositions.bottom', {
+      defaultMessage: 'Bottom',
+    }),
+  },
 ];
 
 export const TitlePositionOptions: React.FC<TitlePositionProps> = ({ state, setState }) => {
@@ -38,7 +48,7 @@ export const TitlePositionOptions: React.FC<TitlePositionProps> = ({ state, setS
         data-test-subj="lnsMissingValuesSelect"
         legend="This is a basic group"
         options={titlePositions}
-        idSelected={state.titlePosition ?? 'bottom'}
+        idSelected={state.titlePosition ?? DEFAULT_TITLE_POSITION}
         onChange={(value) => {
           setState({ ...state, titlePosition: value as MetricState['titlePosition'] });
         }}

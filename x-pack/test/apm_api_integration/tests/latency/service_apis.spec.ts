@@ -7,8 +7,8 @@
 import { apm, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { meanBy, sumBy } from 'lodash';
-import { LatencyAggregationType } from '../../../../plugins/apm/common/latency_aggregation_types';
-import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
+import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
+import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -130,25 +130,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .instance('instance-b');
 
         await synthtraceEsClient.index([
-          ...timerange(start, end)
+          timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_RATE)
-            .flatMap((timestamp) =>
+            .generator((timestamp) =>
               serviceGoProdInstance
                 .transaction('GET /api/product/list')
                 .duration(GO_PROD_DURATION)
                 .timestamp(timestamp)
-                .serialize()
             ),
-          ...timerange(start, end)
+          timerange(start, end)
             .interval('1m')
             .rate(GO_DEV_RATE)
-            .flatMap((timestamp) =>
+            .generator((timestamp) =>
               serviceGoDevInstance
                 .transaction('GET /api/product/:id')
                 .duration(GO_DEV_DURATION)
                 .timestamp(timestamp)
-                .serialize()
             ),
         ]);
       });

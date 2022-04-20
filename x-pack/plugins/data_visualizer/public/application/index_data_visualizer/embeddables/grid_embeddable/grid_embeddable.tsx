@@ -6,7 +6,7 @@
  */
 
 import { Observable, Subject } from 'rxjs';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import ReactDOM from 'react-dom';
 import React, { Suspense, useCallback, useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -19,20 +19,14 @@ import {
   EmbeddableInput,
   EmbeddableOutput,
   IContainer,
-} from '../../../../../../../../src/plugins/embeddable/public';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-} from '../../../../../../../../src/plugins/kibana_react/public';
+} from '@kbn/embeddable-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { Query } from '@kbn/data-plugin/common';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { SavedSearch } from '@kbn/discover-plugin/public';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from './constants';
 import { EmbeddableLoading } from './embeddable_loading_fallback';
 import { DataVisualizerStartDependencies } from '../../../../plugin';
-import {
-  IndexPattern,
-  IndexPatternField,
-  Query,
-} from '../../../../../../../../src/plugins/data/common';
-import { SavedSearch } from '../../../../../../../../src/plugins/discover/public';
 import {
   DataVisualizerTable,
   ItemIdToExpandedRowMap,
@@ -46,7 +40,7 @@ import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_
 
 export type DataVisualizerGridEmbeddableServices = [CoreStart, DataVisualizerStartDependencies];
 export interface DataVisualizerGridInput {
-  indexPattern: IndexPattern;
+  dataView: DataView;
   savedSearch?: SavedSearch | SavedSearchSavedObject | null;
   query?: Query;
   visibleFieldNames?: string[];
@@ -57,7 +51,7 @@ export interface DataVisualizerGridInput {
   /**
    * Callback to add a filter to filter bar
    */
-  onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   sessionId?: string;
   fieldsToFetch?: string[];
 }
@@ -87,6 +81,7 @@ export const EmbeddableWrapper = ({
     },
     [dataVisualizerListState, onOutputChange]
   );
+
   const { configs, searchQueryLanguage, searchString, extendedColumns, progress, setLastRefresh } =
     useDataVisualizerGridData(input, dataVisualizerListState);
 
@@ -102,7 +97,7 @@ export const EmbeddableWrapper = ({
           m[fieldName] = (
             <IndexBasedDataVisualizerExpandedRow
               item={item}
-              indexPattern={input.indexPattern}
+              dataView={input.dataView}
               combinedQuery={{ searchQueryLanguage, searchString }}
               onAddFilter={input.onAddFilter}
             />
@@ -159,7 +154,7 @@ export const IndexDataVisualizerViewWrapper = (props: {
   const { embeddableInput, onOutputChange } = props;
 
   const input = useObservable(embeddableInput);
-  if (input && input.indexPattern) {
+  if (input && input.dataView) {
     return <EmbeddableWrapper input={input} onOutputChange={onOutputChange} />;
   } else {
     return (
@@ -191,7 +186,7 @@ export class DataVisualizerGridEmbeddable extends Embeddable<
   DataVisualizerGridEmbeddableOutput
 > {
   private node?: HTMLElement;
-  private reload$ = new Subject();
+  private reload$ = new Subject<void>();
   public readonly type: string = DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE;
 
   constructor(

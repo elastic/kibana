@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsMigrationVersion } from 'kibana/public';
+import type { SavedObjectsMigrationVersion, SavedObjectsResolveResponse } from '@kbn/core/public';
 import {
   IAggConfigs,
   SerializedSearchSourceFields,
   TimefilterContract,
   AggConfigSerialized,
-} from '../../../plugins/data/public';
-import type { ISearchSource } from '../../data/common';
-import { ExpressionAstExpression } from '../../expressions/public';
+} from '@kbn/data-plugin/public';
+import type { ISearchSource } from '@kbn/data-plugin/common';
+import { ExpressionAstExpression } from '@kbn/expressions-plugin/public';
 
 import type { Vis } from './vis';
 import type { PersistedState } from './persisted_state';
@@ -38,8 +38,9 @@ export interface ISavedVis {
   savedSearchRefName?: string;
   savedSearchId?: string;
   sharingSavedObjectProps?: {
-    outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
-    aliasTargetId?: string;
+    outcome?: SavedObjectsResolveResponse['outcome'];
+    aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+    aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
     errorJSON?: string;
   };
 }

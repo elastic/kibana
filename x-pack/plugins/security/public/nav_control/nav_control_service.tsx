@@ -13,13 +13,10 @@ import type { Observable, Subscription } from 'rxjs';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 
+import type { CoreStart, CoreTheme } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { CoreStart, CoreTheme } from 'src/core/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-} from '../../../../../src/plugins/kibana_react/public';
 import type { SecurityLicense } from '../../common/licensing';
 import type { UserMenuLink } from './nav_control_component';
 import { SecurityNavControl } from './nav_control_component';
@@ -53,7 +50,7 @@ export class SecurityNavControlService {
 
   private securityFeaturesSubscription?: Subscription;
 
-  private readonly stop$ = new ReplaySubject(1);
+  private readonly stop$ = new ReplaySubject<void>(1);
   private userMenuLinks$ = new BehaviorSubject<UserMenuLink[]>([]);
 
   public setup({ securityLicense, logoutUrl }: SetupDeps) {

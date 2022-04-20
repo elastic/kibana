@@ -8,49 +8,39 @@
 
 import { partition } from 'lodash';
 import { getScenario } from './get_scenario';
-import { uploadEvents } from './upload_events';
 import { RunOptions } from './parse_run_cli_flags';
-import { getCommonServices } from './get_common_services';
-import { ElasticsearchOutput } from '../../lib/utils/to_elasticsearch_output';
+import { ApmFields } from '../../lib/apm/apm_fields';
+import { ApmSynthtraceEsClient } from '../../lib/apm';
+import { Logger } from '../../lib/utils/create_logger';
+import { EntityArrayIterable } from '../../lib/entity_iterable';
+import { StreamProcessor } from '../../lib/stream_processor';
 
-export async function startLiveDataUpload({
-  file,
-  start,
-  bucketSizeInMs,
-  intervalInMs,
-  clientWorkers,
-  batchSize,
-  target,
-  logLevel,
-  workers,
-  writeTarget,
-  scenarioOpts,
-}: RunOptions & { start: number }) {
-  let queuedEvents: ElasticsearchOutput[] = [];
-  let requestedUntil: number = start;
-
-  const { logger, client } = getCommonServices({ target, logLevel });
+export async function startLiveDataUpload(
+  esClient: ApmSynthtraceEsClient,
+  logger: Logger,
+  runOptions: RunOptions,
+  start: Date,
+  version: string
+) {
+  const file = runOptions.file;
 
   const scenario = await getScenario({ file, logger });
-  const { generate } = await scenario({
-    batchSize,
-    bucketSizeInMs,
-    clientWorkers,
-    file,
-    intervalInMs,
-    logLevel,
-    target,
-    workers,
-    writeTarget,
-    scenarioOpts,
-  });
+  const { generate, mapToIndex } = await scenario(runOptions);
 
-  function uploadNextBatch() {
-    const end = new Date().getTime();
+  let queuedEvents: ApmFields[] = [];
+  let requestedUntil: Date = start;
+  const bucketSizeInMs = 1000 * 60;
+
+  async function uploadNextBatch() {
+    const end = new Date();
     if (end > requestedUntil) {
       const bucketFrom = requestedUntil;
-      const bucketTo = requestedUntil + bucketSizeInMs;
-      const nextEvents = generate({ from: bucketFrom, to: bucketTo });
+      const bucketTo = new Date(requestedUntil.getTime() + bucketSizeInMs);
+      // TODO this materializes into an array, assumption is that the live buffer will fit in memory
+      const nextEvents = logger.perf('execute_scenario', () =>
+        generate({ from: bucketFrom, to: bucketTo }).toArray()
+      );
+
       logger.debug(
         `Requesting ${new Date(bucketFrom).toISOString()} to ${new Date(
           bucketTo
@@ -62,23 +52,38 @@ export async function startLiveDataUpload({
 
     const [eventsToUpload, eventsToRemainInQueue] = partition(
       queuedEvents,
-      (event) => event.timestamp <= end
+      (event) => event['@timestamp'] !== undefined && event['@timestamp'] <= end.getTime()
     );
 
     logger.info(`Uploading until ${new Date(end).toISOString()}, events: ${eventsToUpload.length}`);
 
     queuedEvents = eventsToRemainInQueue;
-
-    uploadEvents({
-      events: eventsToUpload,
-      clientWorkers,
-      batchSize,
+    const streamProcessor = new StreamProcessor({
+      version,
       logger,
-      client,
+      processors: StreamProcessor.apmProcessors,
+      maxSourceEvents: runOptions.maxDocs,
+      name: `Live index`,
     });
+    await logger.perf('index_live_scenario', () =>
+      esClient.index(
+        new EntityArrayIterable(eventsToUpload),
+        {
+          concurrency: runOptions.workers,
+          maxDocs: runOptions.maxDocs,
+          mapToIndex,
+          dryRun: false,
+        },
+        streamProcessor
+      )
+    );
   }
 
-  setInterval(uploadNextBatch, intervalInMs);
-
-  uploadNextBatch();
+  do {
+    await uploadNextBatch();
+    await delay(bucketSizeInMs);
+  } while (true);
+}
+async function delay(ms: number) {
+  return await new Promise((resolve) => setTimeout(resolve, ms));
 }

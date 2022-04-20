@@ -26,7 +26,7 @@ import {
   HorizontalAlignment,
 } from '@elastic/charts';
 
-import { renderEndzoneTooltip } from '../../../../charts/public';
+import { renderEndzoneTooltip } from '@kbn/charts-plugin/public';
 
 import { getThemeService } from '../services';
 import { VisConfig } from '../types';
@@ -62,6 +62,7 @@ type XYSettingsProps = Pick<
   legendPosition: Position;
   truncateLegend: boolean;
   maxLegendLines: number;
+  legendSize?: number;
   ariaLabel?: string;
 };
 
@@ -97,6 +98,7 @@ export const XYSettings: FC<XYSettingsProps> = ({
   legendPosition,
   maxLegendLines,
   truncateLegend,
+  legendSize,
   ariaLabel,
 }) => {
   const themeService = getThemeService();
@@ -167,6 +169,7 @@ export const XYSettings: FC<XYSettingsProps> = ({
       baseTheme={baseTheme}
       showLegend={showLegend}
       legendPosition={legendPosition}
+      legendSize={legendSize}
       allowBrushingLastHistogramBin={isTimeChart}
       roundHistogramBrushValues={enableHistogramMode && !isTimeChart}
       legendColorPicker={legendColorPicker}

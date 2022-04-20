@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '../../../visualizations/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
+import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '@kbn/visualizations-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import type {
   GaugeExpressionFunctionDefinition,
   GaugeShape,
-} from '../../../chart_expressions/expression_gauge/common';
+} from '@kbn/expression-gauge-plugin/common';
 import { GaugeType, GaugeVisParams } from './types';
 import { getStopsWithColorsFromRanges } from './utils';
 import { getEsaggsFn } from './to_ast_esaggs';
@@ -67,10 +67,13 @@ export const toExpressionAst: VisToExpressionAst<GaugeVisParams> = (vis, params)
     shape: gaugeTypeToShape(gaugeType),
     metric: schemas.metric.map(prepareDimension),
     ticksPosition: scale.show ? 'auto' : 'hidden',
-    labelMajorMode: 'auto',
+    labelMajorMode: 'none',
     colorMode: 'palette',
     centralMajorMode,
     ...(centralMajorMode === 'custom' ? { labelMinor: style.subText } : {}),
+    percentageMode,
+    respectRanges: true,
+    commonLabel: schemas.metric?.[0]?.label,
   });
 
   if (colorsRange && colorsRange.length) {
@@ -80,8 +83,8 @@ export const toExpressionAst: VisToExpressionAst<GaugeVisParams> = (vis, params)
       range: percentageMode ? 'percent' : 'number',
       continuity: 'none',
       gradient: true,
-      rangeMax: percentageMode ? 100 : Infinity,
-      rangeMin: 0,
+      rangeMax: percentageMode ? 100 : stopsWithColors.stop[stopsWithColors.stop.length - 1],
+      rangeMin: stopsWithColors.stop[0],
     });
 
     gauge.addArgument('palette', buildExpression([palette]));

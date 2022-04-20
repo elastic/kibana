@@ -6,8 +6,6 @@
  */
 
 import Hapi from '@hapi/hapi';
-import * as Rx from 'rxjs';
-import { filter, first, map, switchMap, take } from 'rxjs/operators';
 import type {
   BasePath,
   IClusterClient,
@@ -18,26 +16,35 @@ import type {
   SavedObjectsServiceStart,
   StatusServiceSetup,
   UiSettingsServiceStart,
-} from 'src/core/server';
-import type { PluginStart as DataPluginStart } from 'src/plugins/data/server';
-import type { FieldFormatsStart } from 'src/plugins/field_formats/server';
-import { KibanaRequest, ServiceStatusLevels } from '../../../../src/core/server';
-import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import type { LicensingPluginStart } from '../../licensing/server';
-import type { ScreenshotResult, ScreenshottingStart } from '../../screenshotting/server';
-import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
-import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
-import type { SpacesPluginSetup } from '../../spaces/server';
-import type { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
+} from '@kbn/core/server';
+import { KibanaRequest, ServiceStatusLevels } from '@kbn/core/server';
+import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import {
+  PdfScreenshotResult,
+  PngScreenshotResult,
+  ScreenshotOptions,
+  ScreenshottingStart,
+} from '@kbn/screenshotting-plugin/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import * as Rx from 'rxjs';
+import { filter, first, map, switchMap, take } from 'rxjs/operators';
+import type { ReportingConfig, ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
-import { durationToNumber } from '../common/schema_utils';
-import type { ReportingConfig, ReportingSetup } from './';
 import { ReportingConfigType } from './config';
 import { checkLicense, getExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
-import type { ReportingPluginRouter, ScreenshotOptions } from './types';
+import type { PdfScreenshotOptions, PngScreenshotOptions, ReportingPluginRouter } from './types';
 
 export interface ReportingInternalSetup {
   basePath: Pick<BasePath, 'set'>;
@@ -81,6 +88,8 @@ export class ReportingCore {
   private executing: Set<string>;
 
   public getContract: () => ReportingSetup;
+
+  private kibanaShuttingDown$ = new Rx.ReplaySubject<void>(1);
 
   constructor(private logger: Logger, context: PluginInitializerContext<ReportingConfigType>) {
     this.packageInfo = context.env.packageInfo;
@@ -129,6 +138,14 @@ export class ReportingCore {
     await Promise.all([executeTask.init(taskManager), monitorTask.init(taskManager)]);
   }
 
+  public pluginStop() {
+    this.kibanaShuttingDown$.next();
+  }
+
+  public getKibanaShutdown$(): Rx.Observable<void> {
+    return this.kibanaShuttingDown$.pipe(take(1));
+  }
+
   private async assertKibanaIsAvailable(): Promise<void> {
     const { status } = this.getPluginSetupDeps();
 
@@ -148,7 +165,7 @@ export class ReportingCore {
     if (this.pluginSetupDeps && this.config) {
       return true;
     }
-    return await this.pluginSetup$.pipe(take(2)).toPromise(); // once for pluginSetupDeps (sync) and twice for config (async)
+    return await Rx.firstValueFrom(this.pluginSetup$.pipe(take(2))); // once for pluginSetupDeps (sync) and twice for config (async)
   }
 
   /*
@@ -235,7 +252,7 @@ export class ReportingCore {
       return this.pluginStartDeps;
     }
 
-    return await this.pluginStart$.pipe(first()).toPromise();
+    return await Rx.firstValueFrom(this.pluginStart$);
   }
 
   public getExportTypesRegistry() {
@@ -254,12 +271,9 @@ export class ReportingCore {
     const { license$ } = (await this.getPluginStartDeps()).licensing;
     const registry = this.getExportTypesRegistry();
 
-    return await license$
-      .pipe(
-        map((license) => checkLicense(registry, license)),
-        first()
-      )
-      .toPromise();
+    return await Rx.firstValueFrom(
+      license$.pipe(map((license) => checkLicense(registry, license)))
+    );
   }
 
   /*
@@ -347,31 +361,21 @@ export class ReportingCore {
     return startDeps.esClient;
   }
 
-  public getScreenshots(options: ScreenshotOptions): Rx.Observable<ScreenshotResult> {
+  public getScreenshots(options: PdfScreenshotOptions): Rx.Observable<PdfScreenshotResult>;
+  public getScreenshots(options: PngScreenshotOptions): Rx.Observable<PngScreenshotResult>;
+  public getScreenshots(
+    options: PngScreenshotOptions | PdfScreenshotOptions
+  ): Rx.Observable<PngScreenshotResult | PdfScreenshotResult> {
     return Rx.defer(() => this.getPluginStartDeps()).pipe(
       switchMap(({ screenshotting }) => {
-        const config = this.getConfig();
         return screenshotting.getScreenshots({
           ...options,
-
-          timeouts: {
-            loadDelay: durationToNumber(config.get('capture', 'loadDelay')),
-            openUrl: durationToNumber(config.get('capture', 'timeouts', 'openUrl')),
-            waitForElements: durationToNumber(config.get('capture', 'timeouts', 'waitForElements')),
-            renderComplete: durationToNumber(config.get('capture', 'timeouts', 'renderComplete')),
-          },
-
-          layout: {
-            zoom: config.get('capture', 'zoom'),
-            ...options.layout,
-          },
-
           urls: options.urls.map((url) =>
             typeof url === 'string'
               ? url
               : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
           ),
-        });
+        } as ScreenshotOptions);
       })
     );
   }

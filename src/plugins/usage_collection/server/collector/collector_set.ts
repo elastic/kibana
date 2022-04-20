@@ -11,10 +11,9 @@ import type {
   Logger,
   ElasticsearchClient,
   SavedObjectsClientContract,
-  KibanaRequest,
   KibanaExecutionContext,
   ExecutionContextSetup,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import { Collector } from './collector';
 import type { ICollector, CollectorOptions } from './types';
 import { UsageCollector, UsageCollectorOptions } from './usage_collector';
@@ -64,12 +63,8 @@ export class CollectorSet {
    * Instantiates a stats collector with the definition provided in the options
    * @param options Definition of the collector {@link CollectorOptions}
    */
-  public makeStatsCollector = <
-    TFetchReturn,
-    WithKibanaRequest extends boolean,
-    ExtraOptions extends object = {}
-  >(
-    options: CollectorOptions<TFetchReturn, WithKibanaRequest, ExtraOptions>
+  public makeStatsCollector = <TFetchReturn, ExtraOptions extends object = {}>(
+    options: CollectorOptions<TFetchReturn, ExtraOptions>
   ) => {
     return new Collector<TFetchReturn, ExtraOptions>(this.logger, options);
   };
@@ -78,15 +73,8 @@ export class CollectorSet {
    * Instantiates an usage collector with the definition provided in the options
    * @param options Definition of the collector {@link CollectorOptions}
    */
-  public makeUsageCollector = <
-    TFetchReturn,
-    // TODO: Right now, users will need to explicitly claim `true` for TS to allow `kibanaRequest` usage.
-    //  If we improve `telemetry-check-tools` so plugins do not need to specify TFetchReturn,
-    //  we'll be able to remove the type defaults and TS will successfully infer the config value as provided in JS.
-    WithKibanaRequest extends boolean = false,
-    ExtraOptions extends object = {}
-  >(
-    options: UsageCollectorOptions<TFetchReturn, WithKibanaRequest, ExtraOptions>
+  public makeUsageCollector = <TFetchReturn, ExtraOptions extends object = {}>(
+    options: UsageCollectorOptions<TFetchReturn, ExtraOptions>
   ) => {
     return new UsageCollector<TFetchReturn, ExtraOptions>(this.logger, options);
   };
@@ -191,7 +179,6 @@ export class CollectorSet {
   public bulkFetch = async (
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
-    kibanaRequest: KibanaRequest | undefined, // intentionally `| undefined` to enforce providing the parameter
     collectors: Map<string, AnyCollector> = this.collectors
   ) => {
     this.logger.debug(`Getting ready collectors`);
@@ -209,11 +196,7 @@ export class CollectorSet {
       readyCollectors.map(async (collector) => {
         this.logger.debug(`Fetching data from ${collector.type} collector`);
         try {
-          const context = {
-            esClient,
-            soClient,
-            ...(collector.extendFetchContext.kibanaRequest && { kibanaRequest }),
-          };
+          const context = { esClient, soClient };
           const executionContext: KibanaExecutionContext = {
             type: 'usage_collection',
             name: 'collector.fetch',
@@ -254,16 +237,10 @@ export class CollectorSet {
 
   public bulkFetchUsage = async (
     esClient: ElasticsearchClient,
-    savedObjectsClient: SavedObjectsClientContract,
-    kibanaRequest: KibanaRequest | undefined // intentionally `| undefined` to enforce providing the parameter
+    savedObjectsClient: SavedObjectsClientContract
   ) => {
     const usageCollectors = this.getFilteredCollectorSet((c) => c instanceof UsageCollector);
-    return await this.bulkFetch(
-      esClient,
-      savedObjectsClient,
-      kibanaRequest,
-      usageCollectors.collectors
-    );
+    return await this.bulkFetch(esClient, savedObjectsClient, usageCollectors.collectors);
   };
 
   /**

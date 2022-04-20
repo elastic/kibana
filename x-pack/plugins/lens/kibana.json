@@ -21,14 +21,17 @@
     "presentationUtil",
     "dataViewFieldEditor",
     "expressionGauge",
-    "expressionHeatmap"
+    "expressionHeatmap",
+    "eventAnnotation"
   ],
   "optionalPlugins": [
+    "expressionXY",
     "usageCollection",
     "taskManager",
     "globalSearch",
     "savedObjectsTagging",
-    "spaces"
+    "spaces",
+    "discover"
   ],
   "configPath": [
     "xpack",
@@ -38,6 +41,7 @@
     "common/constants"
   ],
   "requiredBundles": [
+    "unifiedSearch",
     "savedObjects",
     "kibanaUtils",
     "kibanaReact",

@@ -12,8 +12,8 @@ import {
   PluginInitializerContext,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
-} from '../../../../src/core/public';
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
+} from '@kbn/core/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   OsqueryPluginSetup,
   OsqueryPluginStart,
@@ -26,7 +26,7 @@ import {
   LazyOsqueryManagedPolicyEditExtension,
   LazyOsqueryManagedCustomButtonExtension,
 } from './fleet_integration';
-import { getLazyOsqueryAction } from './shared_components';
+import { getLazyOsqueryAction, useIsOsqueryAvailableSimple } from './shared_components';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private kibanaVersion: string;
@@ -50,6 +50,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         const [coreStart, depsStart] = await core.getStartServices();
         // Load application bundle
         const { renderApp } = await import('./application');
+
         // Render the application
         return renderApp(
           coreStart,
@@ -95,6 +96,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         storage: this.storage,
         kibanaVersion: this.kibanaVersion,
       }),
+      isOsqueryAvailable: useIsOsqueryAvailableSimple,
     };
   }
 

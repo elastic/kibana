@@ -8,9 +8,9 @@
 import type { FunctionComponent } from 'react';
 import React from 'react';
 
-import type { CoreStart } from 'src/core/public';
+import type { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { getUserDisplayName } from '../../common/model';
 import { Breadcrumb } from '../components/breadcrumb';
 import { useCurrentUser, useUserProfile } from '../components/use_current_user';

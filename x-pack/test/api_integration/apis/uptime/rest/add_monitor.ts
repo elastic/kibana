@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { omit } from 'lodash';
 import expect from '@kbn/expect';
-import { HTTPFields } from '../../../../../plugins/uptime/common/runtime_types';
+import { secretKeys } from '@kbn/uptime-plugin/common/constants/monitor_management';
+import { HTTPFields } from '@kbn/uptime-plugin/common/runtime_types';
+import { API_URLS } from '@kbn/uptime-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -33,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .send(newMonitor);
 
-      expect(apiResponse.body.attributes).eql(newMonitor);
+      expect(apiResponse.body.attributes).eql(omit(newMonitor, secretKeys));
     });
 
     it('returns bad request if payload is invalid for HTTP monitor', async () => {

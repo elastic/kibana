@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import { popupVersionsMap } from '@kbn/security-solution-plugin/public/management/pages/policy/view/policy_forms/protections/popup_options_to_versions';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
-import { IndexedHostsAndAlertsResponse } from '../../../../plugins/security_solution/common/endpoint/index_data';
-import { popupVersionsMap } from '../../../../plugins/security_solution/public/management/pages/policy/view/policy_forms/protections/popup_options_to_versions';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
@@ -190,6 +190,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           policyInfo.agentPolicy.id
         );
 
+        expect(agentFullPolicy.inputs[0].id).to.eql(policyInfo.packagePolicy.id);
         expect(agentFullPolicy.inputs[0].policy.linux.advanced.agent.connection_delay).to.eql(
           'true'
         );
@@ -322,11 +323,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should show trusted apps card and link should go back to policy', async () => {
-        await testSubjects.existOrFail('fleetTrustedAppsCard');
-        await (await testSubjects.find('linkToTrustedApps')).click();
+        await testSubjects.existOrFail('trustedApps-fleet-integration-card');
+        await (await testSubjects.find('trustedApps-link-to-exceptions')).click();
         await testSubjects.existOrFail('policyDetailsPage');
         await (await testSubjects.find('policyDetailsBackLink')).click();
         await testSubjects.existOrFail('endpointIntegrationPolicyForm');
+      });
+      it('should show event filters card and link should go back to policy', async () => {
+        await testSubjects.existOrFail('eventFilters-fleet-integration-card');
+        await (await testSubjects.find('eventFilters-link-to-exceptions')).click();
+        await testSubjects.existOrFail('policyDetailsPage');
+        await (await testSubjects.find('policyDetailsBackLink')).click();
+        await testSubjects.existOrFail('endpointIntegrationPolicyForm');
+      });
+      it('should show blocklists card and link should go back to policy', async () => {
+        await testSubjects.existOrFail('blocklists-fleet-integration-card');
+        const blocklistsCard = await testSubjects.find('blocklists-fleet-integration-card');
+        await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(blocklistsCard);
+        await (await testSubjects.find('blocklists-link-to-exceptions')).click();
+        await testSubjects.existOrFail('policyDetailsPage');
+        await (await testSubjects.find('policyDetailsBackLink')).click();
+        await testSubjects.existOrFail('endpointIntegrationPolicyForm');
+      });
+      it('should not show host isolation exceptions card because no entries', async () => {
+        await testSubjects.missingOrFail('hostIsolationExceptions-fleet-integration-card');
       });
     });
   });

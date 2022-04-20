@@ -25,7 +25,7 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
-import { KBN_FIELD_TYPES } from '../../../../../../data/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { STACKED_OPTIONS } from '../../visualizations/constants';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 

@@ -22,6 +22,17 @@ export interface ExceptionList {
   type: 'detection' | 'endpoint';
 }
 
+export interface ExceptionListItem {
+  description: string;
+  list_id: string;
+  item_id: string;
+  name: string;
+  namespace_type: 'single' | 'agnostic';
+  tags: string[];
+  type: 'simple';
+  entries: Array<{ field: string; operator: string; type: string; value: string[] }>;
+}
+
 export const getExceptionList = (): ExceptionList => ({
   description: 'Test exception list description',
   list_id: 'test_exception_list',

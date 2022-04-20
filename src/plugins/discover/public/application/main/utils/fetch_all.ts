@@ -5,6 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { ISearchSource } from '@kbn/data-plugin/public';
+import { Adapters } from '@kbn/inspector-plugin';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
+import { DataViewType } from '@kbn/data-views-plugin/public';
 import {
   sendCompleteMsg,
   sendErrorMsg,
@@ -18,11 +23,8 @@ import type { SavedSearch, SortOrder } from '../../../services/saved_searches';
 import { fetchDocuments } from './fetch_documents';
 import { fetchTotalHits } from './fetch_total_hits';
 import { fetchChart } from './fetch_chart';
-import { ISearchSource } from '../../../../../data/common';
-import { Adapters } from '../../../../../inspector';
 import { AppState } from '../services/discover_state';
 import { FetchStatus } from '../../types';
-import { DataPublicPluginStart } from '../../../../../data/public';
 import {
   DataCharts$,
   DataDocuments$,
@@ -31,8 +33,6 @@ import {
   SavedSearchData,
 } from './use_saved_search';
 import { DiscoverServices } from '../../../build_services';
-import { ReduxLikeStateContainer } from '../../../../../kibana_utils/common';
-import { DataViewType } from '../../../../../data_views/common';
 
 export interface FetchDeps {
   abortController: AbortController;

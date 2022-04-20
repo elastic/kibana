@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { Subject, Observable } from 'rxjs';
-import { takeUntil, first } from 'rxjs/operators';
+import { Subject, Observable, firstValueFrom } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { get } from 'lodash';
 import { hasConfigPathIntersection, ChangedDeprecatedPaths } from '@kbn/config';
 
-import { CoreService } from 'src/core/types';
-import { Logger, SavedObjectsServiceStart, SavedObjectTypeRegistry } from 'src/core/server';
 import type {
   AggregationsMultiBucketAggregateBase,
   AggregationsSingleBucketAggregateBase,
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { CoreService } from '../../types';
+import { Logger, SavedObjectsServiceStart, SavedObjectTypeRegistry } from '..';
 import { CoreContext } from '../core_context';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
 import { HttpConfigType, InternalHttpServiceSetup } from '../http';
@@ -100,7 +100,7 @@ export class CoreUsageDataService
   constructor(core: CoreContext) {
     this.logger = core.logger.get('core-usage-stats-service');
     this.configService = core.configService;
-    this.stop$ = new Subject();
+    this.stop$ = new Subject<void>();
   }
 
   private async getSavedObjectUsageData(
@@ -383,7 +383,7 @@ export class CoreUsageDataService
   private async getNonDefaultKibanaConfigs(
     exposedConfigsToUsage: ExposedConfigsToUsage
   ): Promise<ConfigUsageData> {
-    const config = await this.configService.getConfig$().pipe(first()).toPromise();
+    const config = await firstValueFrom(this.configService.getConfig$());
     const nonDefaultConfigs = config.toRaw();
     const usedPaths = await this.configService.getUsedPaths();
     const exposedConfigsKeys = [...exposedConfigsToUsage.keys()];

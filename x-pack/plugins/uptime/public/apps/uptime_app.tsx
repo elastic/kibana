@@ -9,13 +9,16 @@ import { Provider as ReduxProvider } from 'react-redux';
 import { Router } from 'react-router-dom';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { I18nStart, ChromeBreadcrumb, CoreStart, AppMountParameters } from 'kibana/public';
-import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
+import { I18nStart, ChromeBreadcrumb, CoreStart, AppMountParameters } from '@kbn/core/public';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import {
   KibanaContextProvider,
   KibanaThemeProvider,
   RedirectAppLinks,
-} from '../../../../../src/plugins/kibana_react/public';
+} from '@kbn/kibana-react-plugin/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { InspectorContextProvider } from '@kbn/observability-plugin/public';
 import { ClientPluginsSetup, ClientPluginsStart } from './plugin';
 import { UMUpdateBadge } from '../lib/lib';
 import {
@@ -31,11 +34,7 @@ import { UptimeAlertsFlyoutWrapper } from '../components/overview/alerts';
 import { store } from '../state';
 import { kibanaService } from '../state/kibana_service';
 import { ActionMenu } from '../components/common/header/action_menu';
-import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { UptimeIndexPatternContextProvider } from '../contexts/uptime_index_pattern_context';
-import { InspectorContextProvider } from '../../../observability/public';
-import { UptimeUiConfig } from '../../common/config';
 
 export interface UptimeAppColors {
   danger: string;
@@ -64,7 +63,7 @@ export interface UptimeAppProps {
   commonlyUsedRanges: CommonlyUsedRange[];
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   appMountParameters: AppMountParameters;
-  config: UptimeUiConfig;
+  isDev: boolean;
 }
 
 const Application = (props: UptimeAppProps) => {
@@ -79,7 +78,6 @@ const Application = (props: UptimeAppProps) => {
     setBadge,
     startPlugins,
     appMountParameters,
-    config,
   } = props;
 
   useEffect(() => {
@@ -137,11 +135,8 @@ const Application = (props: UptimeAppProps) => {
                               >
                                 <InspectorContextProvider>
                                   <UptimeAlertsFlyoutWrapper />
-                                  <PageRouter config={config} />
-                                  <ActionMenu
-                                    appMountParameters={appMountParameters}
-                                    config={config}
-                                  />
+                                  <PageRouter />
+                                  <ActionMenu appMountParameters={appMountParameters} />
                                 </InspectorContextProvider>
                               </RedirectAppLinks>
                             </div>

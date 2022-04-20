@@ -7,13 +7,17 @@
 
 import React from 'react';
 import { EuiButtonGroup, EuiComboBox, EuiFieldText } from '@elastic/eui';
-import { FramePublicAPI, Operation, VisualizationDimensionEditorProps } from '../../types';
+import type { PaletteRegistry } from '@kbn/coloring';
+import {
+  FramePublicAPI,
+  OperationDescriptor,
+  VisualizationDimensionEditorProps,
+} from '../../types';
 import { DatatableVisualizationState } from '../visualization';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { TableDimensionEditor } from './dimension_editor';
-import { chartPluginMock } from 'src/plugins/charts/public/mocks';
-import { PaletteRegistry } from 'src/plugins/charts/public';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { act } from 'react-dom/test-utils';
 import { PalettePanelContainer } from '../../shared_components';
 import { layerTypes } from '../../../common';
@@ -218,7 +222,7 @@ describe('data table dimension editor', () => {
   it('should not show the dynamic coloring option for a bucketed operation', () => {
     frame.activeData!.first.columns[0].meta.type = 'number';
     frame.datasourceLayers.first.getOperationForColumnId = jest.fn(
-      () => ({ isBucketed: true } as Operation)
+      () => ({ isBucketed: true } as OperationDescriptor)
     );
     state.columns[0].colorMode = 'cell';
     const instance = mountWithIntl(<TableDimensionEditor {...props} />);

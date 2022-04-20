@@ -7,8 +7,8 @@
 
 import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
-import { copyAllowlistedFields, exceptionListEventFields } from './filters';
+import { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
+import { copyAllowlistedFields, exceptionListAllowlistFields } from './filterlists';
 import { PolicyData } from '../../../common/endpoint/types';
 import type {
   ExceptionListItem,
@@ -183,7 +183,7 @@ export const templateExceptionList = (
 
     // cast exception list type to a TelemetryEvent for allowlist filtering
     const filteredListItem = copyAllowlistedFields(
-      exceptionListEventFields,
+      exceptionListAllowlistFields,
       item as unknown as TelemetryEvent
     );
 

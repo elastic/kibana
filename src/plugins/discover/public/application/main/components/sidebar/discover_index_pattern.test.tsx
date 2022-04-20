@@ -11,10 +11,11 @@ import { act } from 'react-dom/test-utils';
 import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { ShallowWrapper } from 'enzyme';
 import { ChangeIndexPattern } from './change_indexpattern';
-import { SavedObject } from 'kibana/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SavedObject } from '@kbn/core/server';
 import { DiscoverIndexPattern, DiscoverIndexPatternProps } from './discover_index_pattern';
 import { EuiSelectable } from '@elastic/eui';
-import { DataView, DataViewAttributes } from 'src/plugins/data/common';
+import type { DataView, DataViewAttributes } from '@kbn/data-views-plugin/public';
 import { indexPatternsMock } from '../../../../__mocks__/index_patterns';
 
 const indexPattern = {

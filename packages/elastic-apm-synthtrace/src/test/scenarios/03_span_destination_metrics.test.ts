@@ -8,7 +8,9 @@
 
 import { apm } from '../../lib/apm';
 import { timerange } from '../../lib/timerange';
-import { getSpanDestinationMetrics } from '../../lib/apm/utils/get_span_destination_metrics';
+import { getSpanDestinationMetrics } from '../../lib/apm/processors/get_span_destination_metrics';
+import { StreamProcessor } from '../../lib/stream_processor';
+import { ApmFields } from '../../lib/apm/apm_fields';
 
 describe('span destination metrics', () => {
   let events: Array<Record<string, any>>;
@@ -18,57 +20,55 @@ describe('span destination metrics', () => {
     const javaInstance = javaService.instance('instance-1');
 
     const range = timerange(
-      new Date('2021-01-01T00:00:00.000Z').getTime(),
-      new Date('2021-01-01T00:15:00.000Z').getTime()
+      new Date('2021-01-01T00:00:00.000Z'),
+      new Date('2021-01-01T00:15:00.000Z')
     );
-
-    events = getSpanDestinationMetrics(
-      range
-        .interval('1m')
-        .rate(25)
-        .flatMap((timestamp) =>
-          javaInstance
-            .transaction('GET /api/product/list')
-            .duration(1000)
-            .success()
-            .timestamp(timestamp)
-            .children(
-              javaInstance
-                .span('GET apm-*/_search', 'db', 'elasticsearch')
-                .timestamp(timestamp)
-                .duration(1000)
-                .destination('elasticsearch')
-                .success()
-            )
-            .serialize()
-        )
-        .concat(
-          range
-            .interval('1m')
-            .rate(50)
-            .flatMap((timestamp) =>
-              javaInstance
-                .transaction('GET /api/product/list')
-                .duration(1000)
-                .failure()
-                .timestamp(timestamp)
-                .children(
-                  javaInstance
-                    .span('GET apm-*/_search', 'db', 'elasticsearch')
-                    .timestamp(timestamp)
-                    .duration(1000)
-                    .destination('elasticsearch')
-                    .failure(),
-                  javaInstance
-                    .span('custom_operation', 'app')
-                    .timestamp(timestamp)
-                    .duration(500)
-                    .success()
-                )
-                .serialize()
-            )
-        )
-    );
+    const processor = new StreamProcessor<ApmFields>({ processors: [getSpanDestinationMetrics] });
+    events = processor
+      .streamToArray(
+        range
+          .interval('1m')
+          .rate(25)
+          .generator((timestamp) =>
+            javaInstance
+              .transaction('GET /api/product/list')
+              .duration(1000)
+              .success()
+              .timestamp(timestamp)
+              .children(
+                javaInstance
+                  .span('GET apm-*/_search', 'db', 'elasticsearch')
+                  .timestamp(timestamp)
+                  .duration(1000)
+                  .destination('elasticsearch')
+                  .success()
+              )
+          ),
+        range
+          .interval('1m')
+          .rate(50)
+          .generator((timestamp) =>
+            javaInstance
+              .transaction('GET /api/product/list')
+              .duration(1000)
+              .failure()
+              .timestamp(timestamp)
+              .children(
+                javaInstance
+                  .span('GET apm-*/_search', 'db', 'elasticsearch')
+                  .timestamp(timestamp)
+                  .duration(1000)
+                  .destination('elasticsearch')
+                  .failure(),
+                javaInstance
+                  .span('custom_operation', 'app')
+                  .timestamp(timestamp)
+                  .duration(500)
+                  .success()
+              )
+          )
+      )
+      .filter((fields) => fields['metricset.name'] === 'span_destination');
   });
 
   it('generates the right amount of span metrics', () => {

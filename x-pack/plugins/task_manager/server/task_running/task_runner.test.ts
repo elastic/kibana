@@ -9,7 +9,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import { secondsFromNow } from '../lib/intervals';
 import { asOk, asErr } from '../lib/result_type';
-import { TaskManagerRunner, TaskRunningStage, TaskRunResult } from '../task_running';
+import { TaskManagerRunner, TaskRunningStage, TaskRunResult } from '.';
 import {
   TaskEvent,
   asTaskRunEvent,
@@ -18,15 +18,15 @@ import {
   TaskPersistence,
 } from '../task_events';
 import { ConcreteTaskInstance, TaskStatus } from '../task';
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import moment from 'moment';
 import { TaskDefinitionRegistry, TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
 import { throwUnrecoverableError } from './errors';
 import { taskStoreMock } from '../task_store.mock';
 import apm from 'elastic-apm-node';
-import { executionContextServiceMock } from '../../../../../src/core/server/mocks';
-import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
+import { executionContextServiceMock } from '@kbn/core/server/mocks';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import {
   TASK_MANAGER_RUN_TRANSACTION_TYPE,
   TASK_MANAGER_TRANSACTION_TYPE,
@@ -1528,7 +1528,11 @@ describe('TaskManagerRunner', () => {
   function withAnyTiming(taskRun: TaskRun) {
     return {
       ...taskRun,
-      timing: { start: expect.any(Number), stop: expect.any(Number) },
+      timing: {
+        start: expect.any(Number),
+        stop: expect.any(Number),
+        eventLoopBlockMs: expect.any(Number),
+      },
     };
   }
 
@@ -1590,6 +1594,10 @@ describe('TaskManagerRunner', () => {
       onTaskEvent: opts.onTaskEvent,
       executionContext,
       usageCounter,
+      eventLoopDelayConfig: {
+        monitor: true,
+        warn_threshold: 5000,
+      },
     });
 
     if (stage === TaskRunningStage.READY_TO_RUN) {

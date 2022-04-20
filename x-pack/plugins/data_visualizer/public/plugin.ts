@@ -5,28 +5,29 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart } from 'kibana/public';
-import { ChartsPluginStart } from 'src/plugins/charts/public';
-import type { CloudStart } from '../../cloud/public';
-import type { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import type { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
-import type { DiscoverSetup, DiscoverStart } from '../../../../src/plugins/discover/public';
-import { Plugin } from '../../../../src/core/public';
+import { CoreSetup, CoreStart } from '@kbn/core/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
+import { Plugin } from '@kbn/core/public';
 
-import { setStartServices } from './kibana_services';
-import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import type { FileUploadPluginStart } from '../../file_upload/public';
-import type { MapsStartApi } from '../../maps/public';
-import type { SecurityPluginSetup } from '../../security/public';
-import type { LensPublicStart } from '../../lens/public';
-import type { IndexPatternFieldEditorStart } from '../../../../src/plugins/data_view_field_editor/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { MapsStartApi } from '@kbn/maps-plugin/public';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { getFileDataVisualizerComponent, getIndexDataVisualizerComponent } from './api';
 import { getMaxBytesFormatted } from './application/common/util/get_max_bytes';
 import { registerHomeAddData, registerHomeFeatureCatalogue } from './register_home';
 import { registerEmbeddables } from './application/index_data_visualizer/embeddables';
-import { FieldFormatsStart } from '../../../../src/plugins/field_formats/public';
-import type { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import { setStartServices } from './kibana_services';
 import { IndexDataVisualizerLocatorDefinition } from './application/index_data_visualizer/locator';
 
 export interface DataVisualizerSetupDependencies {
@@ -37,6 +38,7 @@ export interface DataVisualizerSetupDependencies {
 }
 export interface DataVisualizerStartDependencies {
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   fileUpload: FileUploadPluginStart;
   maps: MapsStartApi;
   embeddable: EmbeddableStart;

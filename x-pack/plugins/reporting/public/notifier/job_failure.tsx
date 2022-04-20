@@ -8,9 +8,9 @@
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Fragment } from 'react';
-import { ThemeServiceStart, ToastInput } from 'src/core/public';
-import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
+import React from 'react';
+import { ThemeServiceStart, ToastInput } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import type { JobSummary, ManagementLinkFn } from '../../common/types';
 
 export const getFailureToast = (
@@ -29,7 +29,7 @@ export const getFailureToast = (
       { theme$: theme.theme$ }
     ),
     text: toMountPoint(
-      <Fragment>
+      <>
         <EuiCallOut
           size="m"
           title={i18n.translate('xpack.reporting.publicNotifier.error.calloutTitle', {
@@ -60,7 +60,7 @@ export const getFailureToast = (
             }}
           />
         </p>
-      </Fragment>,
+      </>,
       { theme$: theme.theme$ }
     ),
     iconType: undefined,

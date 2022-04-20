@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { run, ToolingLog } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/utils';
 import chalk from 'chalk';
 import cheerio from 'cheerio';
 import fs from 'fs';
 import fetch from 'node-fetch';
 import path from 'path';
-import { PackageJson } from 'type-fest';
 
 type PuppeteerRelease = string;
 type ChromiumRevision = string;
@@ -27,7 +27,7 @@ const forkCompatibilityMap: Record<string, PuppeteerRelease> = {
 
 async function getPuppeteerRelease(log: ToolingLog): Promise<PuppeteerRelease> {
   // open node_modules/puppeteer/package.json
-  const puppeteerPackageJson: PackageJson = JSON.parse(
+  const puppeteerPackageJson = JSON.parse(
     fs.readFileSync(path.resolve(REPO_ROOT, 'node_modules', 'puppeteer', 'package.json'), 'utf8')
   );
   const { version } = puppeteerPackageJson;

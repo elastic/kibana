@@ -52,13 +52,7 @@ import { HttpSetup, HttpStart } from './http';
 import { I18nStart } from './i18n';
 import { NotificationsSetup, NotificationsStart } from './notifications';
 import { OverlayStart } from './overlays';
-import {
-  Plugin,
-  AsyncPlugin,
-  PluginInitializer,
-  PluginInitializerContext,
-  PluginOpaqueId,
-} from './plugins';
+import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
 import { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
@@ -66,6 +60,7 @@ import { SavedObjectsStart } from './saved_objects';
 import { DeprecationsServiceStart } from './deprecations';
 import type { ThemeServiceSetup, ThemeServiceStart } from './theme';
 import { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
+import type { AnalyticsServiceSetup, AnalyticsServiceStart } from './analytics';
 
 export type {
   PackageInfo,
@@ -76,6 +71,22 @@ export type {
 export type { CoreContext, CoreSystem } from './core_system';
 export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
 export type { AppCategory, UiSettingsParams, UserProvidedValues, UiSettingsType } from '../types';
+
+export type {
+  AnalyticsServiceSetup,
+  AnalyticsServiceStart,
+  AnalyticsClient,
+  Event,
+  EventContext,
+  EventType,
+  EventTypeOpts,
+  IShipper,
+  ShipperClassConstructor,
+  OptInConfig,
+  ContextProviderOpts,
+  TelemetryCounter,
+} from './analytics';
+export { TelemetryCounterType } from './analytics';
 
 export { AppNavLinkStatus, AppStatus, ScopedHistory } from './application';
 export type {
@@ -97,6 +108,7 @@ export type {
   PublicAppInfo,
   PublicAppDeepLinkInfo,
   NavigateToAppOptions,
+  NavigateToUrlOptions,
 } from './application';
 
 export { SimpleSavedObject } from './saved_objects';
@@ -216,6 +228,8 @@ export type {
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
+  /** {@link AnalyticsServiceSetup} */
+  analytics: AnalyticsServiceSetup;
   /** {@link ApplicationSetup} */
   application: ApplicationSetup;
   /** {@link FatalErrorsSetup} */
@@ -233,6 +247,7 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
    * use *only* to retrieve config values. There is no way to set injected values
    * in the new platform.
    * @deprecated
+   * @removeBy 8.8.0
    * */
   injectedMetadata: {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
@@ -265,6 +280,8 @@ export type StartServicesAccessor<
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreStart {
+  /** {@link AnalyticsServiceStart} */
+  analytics: AnalyticsServiceStart;
   /** {@link ApplicationStart} */
   application: ApplicationStart;
   /** {@link ChromeStart} */
@@ -296,6 +313,7 @@ export interface CoreStart {
    * use *only* to retrieve config values. There is no way to set injected values
    * in the new platform.
    * @deprecated
+   * @removeBy 8.8.0
    * */
   injectedMetadata: {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
@@ -332,7 +350,6 @@ export type {
   NotificationsSetup,
   NotificationsStart,
   Plugin,
-  AsyncPlugin,
   PluginInitializer,
   PluginInitializerContext,
   SavedObjectsStart,

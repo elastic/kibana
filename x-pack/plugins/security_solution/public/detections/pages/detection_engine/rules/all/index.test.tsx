@@ -12,13 +12,12 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { TestProviders } from '../../../../../common/mock';
 import '../../../../../common/mock/formatted_relative';
 import '../../../../../common/mock/match_media';
-import { AllRules } from './index';
-import { RulesFeatureTourContextProvider } from './rules_feature_tour_context';
+import { AllRules } from '.';
 
 jest.mock('../../../../../common/components/link_to');
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../containers/detection_engine/rules');
-jest.mock('../../../../pages/detection_engine/rules/all/rules_table/rules_table_context');
+jest.mock('./rules_table/rules_table_context');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
@@ -68,8 +67,7 @@ describe('AllRules', () => {
             rulesNotInstalled={0}
             rulesNotUpdated={0}
           />
-        </TestProviders>,
-        { wrappingComponent: RulesFeatureTourContextProvider }
+        </TestProviders>
       );
 
       await waitFor(() => {
@@ -92,8 +90,7 @@ describe('AllRules', () => {
           rulesNotInstalled={0}
           rulesNotUpdated={0}
         />
-      </TestProviders>,
-      { wrappingComponent: RulesFeatureTourContextProvider }
+      </TestProviders>
     );
 
     await waitFor(() => {

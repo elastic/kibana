@@ -13,7 +13,7 @@
  */
 
 import { getEsHosts } from './get_es_hosts';
-import { CloudSetup } from '../../../../cloud/server';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
 
 describe('getEsHostsTest', () => {
   const cloudSetup = {

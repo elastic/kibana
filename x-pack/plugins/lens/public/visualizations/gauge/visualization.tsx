@@ -10,12 +10,10 @@ import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter';
-import { DatatableRow } from 'src/plugins/expressions';
-import type { GaugeArguments } from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
-import {
-  GaugeShapes,
-  EXPRESSION_GAUGE_NAME,
-} from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
+import { DatatableRow } from '@kbn/expressions-plugin';
+import { PaletteRegistry, CustomPaletteParams, CUSTOM_PALETTE } from '@kbn/coloring';
+import type { GaugeArguments } from '@kbn/expression-gauge-plugin/common';
+import { GaugeShapes, EXPRESSION_GAUGE_NAME } from '@kbn/expression-gauge-plugin/common';
 import {
   getGoalValue,
   getMaxValue,
@@ -23,9 +21,8 @@ import {
   getValueFromAccessor,
   VerticalBulletIcon,
   HorizontalBulletIcon,
-} from '../../../../../../src/plugins/chart_expressions/expression_gauge/public';
-import { PaletteRegistry } from '../../../../../../src/plugins/charts/public';
-import type { DatasourcePublicAPI, OperationMetadata, Visualization } from '../../types';
+} from '@kbn/expression-gauge-plugin/public';
+import type { DatasourceLayers, OperationMetadata, Visualization } from '../../types';
 import { getSuggestions } from './suggestions';
 import {
   GROUP_ID,
@@ -34,9 +31,9 @@ import {
   GaugeExpressionState,
 } from './constants';
 import { GaugeToolbar } from './toolbar_component';
-import { applyPaletteParams, CUSTOM_PALETTE } from '../../shared_components';
+import { applyPaletteParams } from '../../shared_components';
 import { GaugeDimensionEditor } from './dimension_editor';
-import { CustomPaletteParams, layerTypes } from '../../../common';
+import { layerTypes } from '../../../common';
 import { generateId } from '../../id_generator';
 import { getAccessorsFromState } from './utils';
 
@@ -115,7 +112,7 @@ const checkInvalidConfiguration = (row?: DatatableRow, state?: GaugeVisualizatio
 const toExpression = (
   paletteService: PaletteRegistry,
   state: GaugeVisualizationState,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   attributes?: Partial<Omit<GaugeArguments, keyof GaugeExpressionState | 'ariaLabel'>>
 ): Ast | null => {
   const datasource = datasourceLayers[state.layerId];
@@ -399,22 +396,16 @@ export const getGaugeVisualization = ({
               {
                 groupId: 'min',
                 columnId: generateId(),
-                dataType: 'number',
-                label: 'minAccessor',
                 staticValue: minValue,
               },
               {
                 groupId: 'max',
                 columnId: generateId(),
-                dataType: 'number',
-                label: 'maxAccessor',
                 staticValue: maxValue,
               },
               {
                 groupId: 'goal',
                 columnId: generateId(),
-                dataType: 'number',
-                label: 'goalAccessor',
                 staticValue: goalValue,
               },
             ]

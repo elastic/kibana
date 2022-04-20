@@ -9,8 +9,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 
 import { fromKueryExpression } from '@kbn/es-query';
 
-import type { FieldSpec } from '../../../../../../../src/plugins/data/common';
-import { QueryStringInput } from '../../../../../../../src/plugins/data/public';
+import type { FieldSpec } from '@kbn/data-plugin/common';
+import { QueryStringInput } from '@kbn/unified-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+
 import { useStartServices } from '../hooks';
 import { INDEX_NAME, AGENTS_PREFIX } from '../constants';
 
@@ -22,6 +24,7 @@ interface Props {
   onChange: (newValue: string, submit?: boolean) => void;
   placeholder?: string;
   indexPattern?: string;
+  dataTestSubj?: string;
 }
 
 export const SearchBar: React.FunctionComponent<Props> = ({
@@ -30,6 +33,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
   onChange,
   placeholder,
   indexPattern = INDEX_NAME,
+  dataTestSubj,
 }) => {
   const { data } = useStartServices();
   const [indexPatternFields, setIndexPatternFields] = useState<FieldSpec[]>();
@@ -77,12 +81,12 @@ export const SearchBar: React.FunctionComponent<Props> = ({
       disableLanguageSwitcher={true}
       indexPatterns={
         indexPatternFields
-          ? [
+          ? ([
               {
                 title: indexPattern,
                 fields: indexPatternFields,
               },
-            ]
+            ] as DataView[])
           : []
       }
       query={{
@@ -101,6 +105,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
       submitOnBlur
       isClearable
       autoSubmit
+      {...(dataTestSubj && { dataTestSubj })}
     />
   );
 };

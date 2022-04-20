@@ -31,6 +31,7 @@ import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import {
   hasEqlSequenceQuery,
   isEqlRule,
@@ -39,7 +40,6 @@ import {
 import { useFetchIndex } from '../../../containers/source';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
-import { getExceptionBuilderComponentLazy } from '../../../../../../lists/public';
 
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
@@ -410,27 +410,35 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
             </FlyoutCheckboxesSection>
           </>
         )}
-      {updateError != null && (
-        <EuiFlyoutFooter>
-          <ErrorCallout
-            http={http}
-            errorInfo={updateError}
-            rule={maybeRule}
-            onCancel={onCancel}
-            onSuccess={handleDissasociationSuccess}
-            onError={handleDissasociationError}
-          />
-        </EuiFlyoutFooter>
-      )}
-      {hasVersionConflict && (
-        <EuiFlyoutFooter>
-          <EuiCallOut title={i18n.VERSION_CONFLICT_ERROR_TITLE} color="danger" iconType="alert">
-            <p>{i18n.VERSION_CONFLICT_ERROR_DESCRIPTION}</p>
-          </EuiCallOut>
-        </EuiFlyoutFooter>
-      )}
-      {updateError == null && (
-        <EuiFlyoutFooter>
+
+      <EuiFlyoutFooter>
+        {hasVersionConflict && (
+          <>
+            <EuiCallOut
+              title={i18n.VERSION_CONFLICT_ERROR_TITLE}
+              color="danger"
+              iconType="alert"
+              data-test-subj="exceptionsFlyoutVersionConflict"
+            >
+              <p>{i18n.VERSION_CONFLICT_ERROR_DESCRIPTION}</p>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {updateError != null && (
+          <>
+            <ErrorCallout
+              http={http}
+              errorInfo={updateError}
+              rule={maybeRule}
+              onCancel={onCancel}
+              onSuccess={handleDissasociationSuccess}
+              onError={handleDissasociationError}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {updateError === null && (
           <FlyoutFooterGroup justifyContent="spaceBetween">
             <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={onCancel}>
               {i18n.CANCEL}
@@ -446,8 +454,8 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
               {i18n.EDIT_EXCEPTION_SAVE_BUTTON}
             </EuiButton>
           </FlyoutFooterGroup>
-        </EuiFlyoutFooter>
-      )}
+        )}
+      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 });

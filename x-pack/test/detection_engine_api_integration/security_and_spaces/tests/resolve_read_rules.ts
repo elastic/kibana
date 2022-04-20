@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createSignalsIndex, deleteAllAlerts, deleteSignalsIndex } from '../../utils';
 
@@ -42,6 +42,7 @@ export default ({ getService }: FtrProviderContext) => {
         const URL = `/s/${spaceId}${DETECTION_ENGINE_RULES_URL}?id=90e3ca0e-71f7-513a-b60a-ac678efd8887`;
         const readRulesAliasMatchRes = await supertest.get(URL).set('kbn-xsrf', 'true').send();
         expect(readRulesAliasMatchRes.body.outcome).to.eql('aliasMatch');
+        expect(readRulesAliasMatchRes.body.alias_purpose).to.eql('savedObjectConversion');
 
         // now that we have the migrated alias_target_id, let's attempt an 'exactMatch' query
         // the result of which should have the outcome as undefined when querying the read rules api.

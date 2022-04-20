@@ -8,9 +8,9 @@
 import { from } from 'rxjs';
 import { map, zipObject } from 'lodash';
 
-import { ISearchStrategy } from 'src/plugins/data/server';
+import { ISearchStrategy } from '@kbn/data-plugin/server';
 
-import { getKbnServerError } from '../../../../../src/plugins/kibana_utils/server';
+import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { EssqlSearchStrategyRequest, EssqlSearchStrategyResponse } from '../../types';
 
 import { buildBoolArray } from '../../common/lib/request/build_bool_array';

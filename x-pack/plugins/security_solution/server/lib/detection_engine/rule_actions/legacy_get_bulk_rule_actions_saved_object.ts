@@ -6,10 +6,9 @@
  */
 
 import { chunk } from 'lodash';
-import { SavedObjectsFindOptionsReference } from 'kibana/server';
-import { Logger } from 'src/core/server';
+import { SavedObjectsFindOptionsReference, Logger } from '@kbn/core/server';
 
-import { AlertServices } from '../../../../../alerting/server';
+import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings';
 // eslint-disable-next-line no-restricted-imports
@@ -25,7 +24,7 @@ import { initPromisePool } from '../../../utils/promise_pool';
  */
 interface LegacyGetBulkRuleActionsSavedObject {
   alertIds: string[];
-  savedObjectsClient: AlertServices['savedObjectsClient'];
+  savedObjectsClient: RuleExecutorServices['savedObjectsClient'];
   logger: Logger;
 }
 

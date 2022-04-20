@@ -16,8 +16,8 @@
     "dataViewFieldEditor",
     "dataViewEditor"
   ],
-  "optionalPlugins": ["home", "share", "usageCollection", "spaces"],
-  "requiredBundles": ["kibanaUtils", "home", "kibanaReact", "dataViews"],
+  "optionalPlugins": ["home", "share", "usageCollection", "spaces", "triggersActionsUi"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "dataViews"],
   "extraPublicDirs": ["common"],
   "owner": {
     "name": "Data Discovery",

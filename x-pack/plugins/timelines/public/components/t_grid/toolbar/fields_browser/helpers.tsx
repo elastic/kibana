@@ -6,13 +6,13 @@
  */
 
 import { EuiBadge, EuiLoadingSpinner } from '@elastic/eui';
-import { filter, get, pickBy } from 'lodash/fp';
+import { pickBy } from 'lodash/fp';
 import styled from 'styled-components';
 
-import { TimelineId } from '../../../../../public/types';
+import { TimelineId } from '../../../../types';
 import type { BrowserField, BrowserFields } from '../../../../../common/search_strategy';
 import { defaultHeaders } from '../../../../store/t_grid/defaults';
-import { DEFAULT_CATEGORY_NAME } from '../../body/column_headers/default_headers';
+import { ColumnHeaderOptions } from '../../../../../common';
 
 export const LoadingSpinner = styled(EuiLoadingSpinner)`
   cursor: pointer;
@@ -37,27 +37,86 @@ export const getFieldCount = (category: Partial<BrowserField> | undefined): numb
  * Filters the specified `BrowserFields` to return a new collection where every
  * category contains at least one field name that matches the specified substring.
  */
-export const filterBrowserFieldsByFieldName = ({
+export function filterBrowserFieldsByFieldName({
   browserFields,
   substring,
 }: {
   browserFields: BrowserFields;
   substring: string;
-}): BrowserFields => {
+}): BrowserFields {
   const trimmedSubstring = substring.trim();
+  // an empty search param will match everything, so return the original browserFields
+  if (trimmedSubstring === '') {
+    return browserFields;
+  }
+  const result: Record<string, Partial<BrowserField>> = {};
+  for (const [categoryName, categoryDescriptor] of Object.entries(browserFields)) {
+    if (!categoryDescriptor.fields) {
+      // ignore any category that is missing fields. This is not expected to happen.
+      // eslint-disable-next-line no-continue
+      continue;
+    }
 
-  // filter each category such that it only contains fields with field names
-  // that contain the specified substring:
+    // keep track of whether this category had a matching field, if so, we should emit it into the result
+    let hadAMatch = false;
+
+    // The fields that matched, for this `categoryName`
+    const filteredFields: Record<string, Partial<BrowserField>> = {};
+
+    for (const [fieldName, fieldDescriptor] of Object.entries(categoryDescriptor.fields)) {
+      // For historical reasons, we consider the name as it appears on the field descriptor, not the `fieldName` (attribute name) itself.
+      // It is unclear if there is any point in continuing to do this.
+      const fieldNameFromDescriptor = fieldDescriptor.name;
+
+      if (!fieldNameFromDescriptor) {
+        // Ignore any field that is missing a name in its descriptor. This is not expected to happen.
+        // eslint-disable-next-line no-continue
+        continue;
+      }
+
+      // Check if this field matches (via substring comparison) the passed substring
+      if (fieldNameFromDescriptor !== null && fieldNameFromDescriptor.includes(trimmedSubstring)) {
+        // this field is a match, so we should emit this category into the result object.
+        hadAMatch = true;
+
+        // emit this field
+        filteredFields[fieldName] = fieldDescriptor;
+      }
+    }
+
+    if (hadAMatch) {
+      // if at least one field matches, emit the category, but replace the `fields` attribute with the filtered fields
+      result[categoryName] = {
+        ...browserFields[categoryName],
+        fields: filteredFields,
+      };
+    }
+  }
+  return result;
+}
+
+/**
+ * Filters the selected `BrowserFields` to return a new collection where every
+ * category contains at least one field that is present in the `columnHeaders`.
+ */
+export const filterSelectedBrowserFields = ({
+  browserFields,
+  columnHeaders,
+}: {
+  browserFields: BrowserFields;
+  columnHeaders: ColumnHeaderOptions[];
+}): BrowserFields => {
+  const selectedFieldIds = new Set(columnHeaders.map(({ id }) => id));
+
   const filteredBrowserFields: BrowserFields = Object.keys(browserFields).reduce(
     (filteredCategories, categoryId) => ({
       ...filteredCategories,
       [categoryId]: {
         ...browserFields[categoryId],
-        fields: filter(
-          (f) => f.name != null && f.name.includes(trimmedSubstring),
+        fields: pickBy(
+          ({ name }) => name != null && selectedFieldIds.has(name),
           browserFields[categoryId].fields
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        ).reduce((filtered, field) => ({ ...filtered, [field.name!]: field }), {}),
+        ),
       },
     }),
     {}
@@ -71,48 +130,6 @@ export const filterBrowserFieldsByFieldName = ({
 
   return nonEmptyCategories;
 };
-
-/**
- * Returns a "virtual" category (e.g. default ECS) from the specified fieldIds
- */
-export const createVirtualCategory = ({
-  browserFields,
-  fieldIds,
-}: {
-  browserFields: BrowserFields;
-  fieldIds: string[];
-}): Partial<BrowserField> => ({
-  fields: fieldIds.reduce<Readonly<BrowserFields>>((fields, fieldId) => {
-    const splitId = fieldId.split('.'); // source.geo.city_name -> [source, geo, city_name]
-    const browserField = get(
-      [splitId.length > 1 ? splitId[0] : 'base', 'fields', fieldId],
-      browserFields
-    );
-
-    return {
-      ...fields,
-      ...(browserField
-        ? {
-            [fieldId]: {
-              ...browserField,
-              name: fieldId,
-            },
-          }
-        : {}),
-    };
-  }, {}),
-});
-
-/** Merges the specified browser fields with the default category (i.e. `default ECS`) */
-export const mergeBrowserFieldsWithDefaultCategory = (
-  browserFields: BrowserFields
-): BrowserFields => ({
-  ...browserFields,
-  [DEFAULT_CATEGORY_NAME]: createVirtualCategory({
-    browserFields,
-    fieldIds: defaultHeaders.map((header) => header.id),
-  }),
-});
 
 export const getAlertColumnHeader = (timelineId: string, fieldId: string) =>
   timelineId === TimelineId.detectionsPage || timelineId === TimelineId.detectionsRulesDetailsPage

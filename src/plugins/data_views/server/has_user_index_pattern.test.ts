@@ -7,7 +7,7 @@
  */
 
 import { hasUserIndexPattern } from './has_user_index_pattern';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '../../../core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 describe('hasUserIndexPattern', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
@@ -121,6 +121,21 @@ describe('hasUserIndexPattern', () => {
             name: 'logs-elastic_agent',
             timestamp_field: '@timestamp',
             backing_indices: ['.ds-logs-elastic_agent'],
+          },
+        ],
+        aliases: [],
+      });
+      expect(await hasUserIndexPattern({ esClient, soClient })).toEqual(false);
+    });
+
+    it('returns false if only logs-enterprise_search.api-default data stream exists', async () => {
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [],
+        data_streams: [
+          {
+            name: 'logs-enterprise_search.api-default',
+            timestamp_field: '@timestamp',
+            backing_indices: ['.ds-logs-enterprise_search.api-default-2022.03.07-000001'],
           },
         ],
         aliases: [],

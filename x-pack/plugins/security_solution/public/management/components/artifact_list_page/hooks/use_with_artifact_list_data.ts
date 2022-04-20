@@ -5,27 +5,21 @@
  * 2.0.
  */
 
-import type { QueryObserverResult } from 'react-query';
-import type { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useEffect, useMemo, useState } from 'react';
 import { Pagination } from '@elastic/eui';
 import { useQuery } from 'react-query';
 import type { ServerApiError } from '../../../../common/types';
 import { useIsMounted } from '../../hooks/use_is_mounted';
-import {
-  MANAGEMENT_DEFAULT_PAGE_SIZE,
-  MANAGEMENT_PAGE_SIZE_OPTIONS,
-} from '../../../common/constants';
-import { useUrlParams } from './use_url_params';
+import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
+import { useUrlParams } from '../../hooks/use_url_params';
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import { ArtifactListPageUrlParams } from '../types';
 import { MaybeImmutable } from '../../../../../common/endpoint/types';
 import { useKueryFromExceptionsSearchFilter } from './use_kuery_from_exceptions_search_filter';
+import { useListArtifact } from '../../../hooks/artifacts';
+import { useUrlPagination } from '../../hooks/use_url_pagination';
 
-type WithArtifactListDataInterface = QueryObserverResult<
-  FoundExceptionListItemSchema,
-  ServerApiError
-> & {
+type WithArtifactListDataInterface = ReturnType<typeof useListArtifact> & {
   /**
    * Set to true during initialization of the page until it can be determined if either data exists.
    * This should drive the showing of the overall page loading state if set to `true`
@@ -50,16 +44,14 @@ export const useWithArtifactListData = (
   const isMounted = useIsMounted();
 
   const {
-    urlParams: {
-      page = 1,
-      pageSize = MANAGEMENT_DEFAULT_PAGE_SIZE,
-      sortOrder,
-      sortField,
-      filter,
-      includedPolicies,
-    },
+    urlParams: { filter, includedPolicies },
   } = useUrlParams<ArtifactListPageUrlParams>();
 
+  const {
+    pagination: { page, pageSize },
+  } = useUrlPagination();
+
+  // Used to determine if the `does data exist` check should be done.
   const kuery = useKueryFromExceptionsSearchFilter(filter, searchableFields, includedPolicies);
 
   const {
@@ -85,14 +77,15 @@ export const useWithArtifactListData = (
 
   const [isPageInitializing, setIsPageInitializing] = useState(true);
 
-  const listDataRequest = useQuery<FoundExceptionListItemSchema, ServerApiError>(
-    ['list', apiClient, page, pageSize, sortField, sortField, kuery],
-    async () => apiClient.find({ page, perPage: pageSize, filter: kuery, sortField, sortOrder }),
+  const listDataRequest = useListArtifact(
+    apiClient,
     {
-      enabled: true,
-      keepPreviousData: true,
-      refetchOnWindowFocus: false,
-    }
+      page,
+      perPage: pageSize,
+      filter,
+      policies: includedPolicies ? includedPolicies.split(',') : [],
+    },
+    searchableFields
   );
 
   const {
@@ -106,7 +99,7 @@ export const useWithArtifactListData = (
   // This should only ever happen at most once;
   useEffect(() => {
     if (isMounted) {
-      if (isPageInitializing === true && !isLoadingDataExists) {
+      if (isPageInitializing && !isLoadingDataExists) {
         setIsPageInitializing(false);
       }
     }
@@ -128,21 +121,30 @@ export const useWithArtifactListData = (
 
   // Keep the `doesDataExist` updated if we detect that list data result total is zero.
   // Anytime:
-  //    1. the list data total is 0
-  //    2. and page is 1
-  //    3. and filter is empty
-  //    4. and doesDataExists is currently set to true
-  // check if data exists again
+  //      1. the list data total is 0
+  //      2. and page is 1
+  //      3. and filter is empty
+  //      4. and doesDataExists is `true`
+  //  >> check if data exists again
+  // OR, Anytime:
+  //      1. `doesDataExists` is `false`,
+  //      2. and page is 1
+  //      3. and filter is empty
+  //      4. the list data total is > 0
+  //  >> Check if data exists again (which should return true
   useEffect(() => {
     if (
       isMounted &&
       !isLoadingListData &&
+      !isLoadingDataExists &&
       !listDataError &&
-      listData &&
-      listData.total === 0 &&
       String(page) === '1' &&
       !kuery &&
-      doesDataExist
+      // flow when there the last item on the list gets deleted,
+      // and list goes back to being empty
+      ((listData && listData.total === 0 && doesDataExist) ||
+        // Flow when the list starts off empty and the first item is added
+        (listData && listData.total > 0 && !doesDataExist))
     ) {
       checkIfDataExists();
     }
@@ -151,6 +153,7 @@ export const useWithArtifactListData = (
     doesDataExist,
     filter,
     includedPolicies,
+    isLoadingDataExists,
     isLoadingListData,
     isMounted,
     kuery,

@@ -5,16 +5,14 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import type { ElasticsearchClient } from 'kibana/server';
-import { IRouter } from '../../../../../src/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { IRouter } from '@kbn/core/server';
 import {
   PROCESS_EVENTS_ROUTE,
   PROCESS_EVENTS_PER_PAGE,
   PROCESS_EVENTS_INDEX,
-  ALERTS_INDEX,
   ENTRY_SESSION_ENTITY_ID_PROPERTY,
 } from '../../common/constants';
-import { expandDottedObject } from '../../common/utils/expand_dotted_object';
 
 export const registerProcessEventsRoute = (router: IRouter) => {
   router.get(
@@ -45,20 +43,11 @@ export const doSearch = async (
   forward = true
 ) => {
   const search = await client.search({
-    // TODO: move alerts into it's own route with it's own pagination.
-    index: [PROCESS_EVENTS_INDEX, ALERTS_INDEX],
-    ignore_unavailable: true,
+    index: [PROCESS_EVENTS_INDEX],
     body: {
       query: {
         match: {
           [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId,
-        },
-      },
-      // This runtime_mappings is a temporary fix, so we are able to Query these ECS fields while they are not available
-      // TODO: Remove the runtime_mappings once process.entry_leader.entity_id is implemented to ECS
-      runtime_mappings: {
-        [ENTRY_SESSION_ENTITY_ID_PROPERTY]: {
-          type: 'keyword',
         },
       },
       size: PROCESS_EVENTS_PER_PAGE,
@@ -67,19 +56,17 @@ export const doSearch = async (
     },
   });
 
-  const events = search.hits.hits.map((hit: any) => {
-    // TODO: re-eval if this is needed after moving alerts to it's own route.
-    // the .siem-signals-default index flattens many properties. this util unflattens them.
-    hit._source = expandDottedObject(hit._source);
-
-    return hit;
-  });
+  const events = search.hits.hits;
 
   if (!forward) {
     events.reverse();
   }
 
+  const total =
+    typeof search.hits.total === 'number' ? search.hits.total : search.hits.total?.value;
+
   return {
+    total,
     events,
   };
 };

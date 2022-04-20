@@ -11,6 +11,7 @@ import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elas
 import { noop } from 'lodash/fp';
 import styled from 'styled-components';
 
+import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { eventHasNotes, getEventType, getPinOnClick } from '../helpers';
 import { AlertContextMenu } from '../../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
@@ -19,11 +20,11 @@ import { AddEventNoteAction } from './add_note_icon_item';
 import { PinEventAction } from './pin_event_action';
 import { EventsTdContent } from '../../styles';
 import * as i18n from '../translations';
-import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../../../../timelines/public';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import {
   setActiveTabTimeline,
   updateTimelineGraphEventId,
+  updateTimelineSessionViewConfig,
 } from '../../../../store/timeline/actions';
 import {
   useGlobalFullScreen,
@@ -128,6 +129,46 @@ const ActionsComponent: React.FC<ActionProps> = ({
     }
   }, [dispatch, ecsData._id, timelineId, setGlobalFullScreen, setTimelineFullScreen]);
 
+  const sessionViewConfig = useMemo(() => {
+    const { process, _id, timestamp } = ecsData;
+    const sessionEntityId = process?.entry_leader?.entity_id?.[0];
+
+    if (sessionEntityId === undefined) {
+      return null;
+    }
+
+    const jumpToEntityId = process?.entity_id?.[0];
+    const investigatedAlertId = eventType === 'signal' || eventType === 'eql' ? _id : undefined;
+    const jumpToCursor =
+      (investigatedAlertId && ecsData.kibana?.alert.original_time?.[0]) || timestamp;
+
+    return {
+      sessionEntityId,
+      jumpToEntityId,
+      jumpToCursor,
+      investigatedAlertId,
+    };
+  }, [ecsData, eventType]);
+
+  const openSessionView = useCallback(() => {
+    const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
+    if (timelineId === TimelineId.active) {
+      if (dataGridIsFullScreen) {
+        setTimelineFullScreen(true);
+      }
+      if (sessionViewConfig !== null) {
+        dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.session }));
+      }
+    } else {
+      if (dataGridIsFullScreen) {
+        setGlobalFullScreen(true);
+      }
+    }
+    if (sessionViewConfig !== null) {
+      dispatch(updateTimelineSessionViewConfig({ id: timelineId, sessionViewConfig }));
+    }
+  }, [dispatch, timelineId, sessionViewConfig, setGlobalFullScreen, setTimelineFullScreen]);
+
   return (
     <ActionsContainer>
       {showCheckboxes && !tGridEnabled && (
@@ -214,6 +255,21 @@ const ActionsComponent: React.FC<ActionProps> = ({
                   data-test-subj="view-in-analyzer"
                   iconType="analyzeEvent"
                   onClick={handleClick}
+                  size="s"
+                />
+              </EuiToolTip>
+            </EventsTdContent>
+          </div>
+        ) : null}
+        {sessionViewConfig !== null ? (
+          <div>
+            <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
+              <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.OPEN_SESSION_VIEW}>
+                <EuiButtonIcon
+                  aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
+                  data-test-subj="session-view-button"
+                  iconType="sessionViewer"
+                  onClick={openSessionView}
                   size="s"
                 />
               </EuiToolTip>

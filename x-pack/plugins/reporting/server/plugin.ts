@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import { PLUGIN_ID } from '../common/constants';
-import { ReportingCore } from './';
+import { ReportingCore } from '.';
 import { buildConfig, registerUiSettings, ReportingConfigType } from './config';
 import { registerDeprecations } from './deprecations';
 import { ReportingStore } from './lib';
@@ -112,5 +118,9 @@ export class ReportingPlugin
     });
 
     return reportingCore.getContract();
+  }
+
+  stop() {
+    this.reportingCore?.pluginStop();
   }
 }

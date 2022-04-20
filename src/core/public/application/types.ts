@@ -107,7 +107,9 @@ export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
  */
 export interface App<HistoryLocationState = unknown> extends AppNavOptions {
   /**
-   * The unique identifier of the application
+   * The unique identifier of the application.
+   *
+   * Can only be composed of alphanumeric characters, `-`, `:` and `_`
    */
   id: string;
 
@@ -411,6 +413,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * This string should not include the base path from HTTP.
    *
    * @deprecated Use {@link AppMountParameters.history} instead.
+   * @removeBy 8.8.0
    *
    * @example
    *
@@ -488,6 +491,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * ```
    *
    * @deprecated {@link ScopedHistory.block} should be used instead.
+   * @removeBy 8.8.0
    */
   onAppLeave: (handler: AppLeaveHandler) => void;
 
@@ -557,6 +561,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
  *
  * @public
  * @deprecated {@link AppMountParameters.onAppLeave} has been deprecated in favor of {@link ScopedHistory.block}
+ * @removeBy 8.8.0
  */
 export type AppLeaveHandler = (
   factory: AppLeaveActionFactory,
@@ -737,6 +742,26 @@ export interface NavigateToAppOptions {
    * if true, will open the app in new tab, will share session information via window.open if base
    */
   openInNewTab?: boolean;
+
+  /**
+   * if true, will bypass the default onAppLeave behavior
+   */
+  skipAppLeave?: boolean;
+}
+
+/**
+ * Options for the {@link ApplicationStart.navigateToUrl | navigateToUrl API}
+ * @public
+ */
+export interface NavigateToUrlOptions {
+  /**
+   * if true, will bypass the default onAppLeave behavior
+   */
+  skipAppLeave?: boolean;
+  /**
+   * if true will force a full page reload/refresh/assign, overriding the outcome of other url checks against current the location (effectively using `window.location.assign` instead of `push`)
+   */
+  forceRedirect?: boolean;
 }
 
 /** @public */
@@ -778,7 +803,7 @@ export interface ApplicationStart {
    * - The pathname segment after the basePath matches any known application route (eg. /app/<id>/ or any application's `appRoute` configuration)
    *
    * Then a SPA navigation will be performed using `navigateToApp` using the corresponding application and path.
-   * Otherwise, fallback to a full page reload to navigate to the url using `window.location.assign`
+   * Otherwise, fallback to a full page reload to navigate to the url using `window.location.assign`.
    *
    * @example
    * ```ts
@@ -798,8 +823,9 @@ export interface ApplicationStart {
    * ```
    *
    * @param url - an absolute URL, an absolute path or a relative path, to navigate to.
+   * @param options - navigation options
    */
-  navigateToUrl(url: string): Promise<void>;
+  navigateToUrl(url: string, options?: NavigateToUrlOptions): Promise<void>;
 
   /**
    * Returns the absolute path (or URL) to a given app, including the global base path.

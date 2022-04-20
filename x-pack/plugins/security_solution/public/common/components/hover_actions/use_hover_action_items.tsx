@@ -11,6 +11,7 @@ import { DraggableId } from 'react-beautiful-dnd';
 
 import { isEmpty } from 'lodash';
 
+import { FilterManager } from '@kbn/data-plugin/public';
 import { useKibana } from '../../lib/kibana';
 import { getAllFieldsByName } from '../../containers/source';
 import { allowTopN } from '../drag_and_drop/helpers';
@@ -20,7 +21,6 @@ import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { ShowTopNButton } from './actions/show_top_n';
-import { FilterManager } from '../../../../../../../src/plugins/data/public';
 
 export interface UseHoverActionItemsProps {
   dataProvider?: DataProvider | DataProvider[];
@@ -30,6 +30,7 @@ export interface UseHoverActionItemsProps {
   enableOverflowButton?: boolean;
   field: string;
   handleHoverActionClicked: () => void;
+  hideAddToTimeline: boolean;
   hideTopN: boolean;
   isCaseView: boolean;
   isObjectArray: boolean;
@@ -60,6 +61,7 @@ export const useHoverActionItems = ({
   field,
   handleHoverActionClicked,
   hideTopN,
+  hideAddToTimeline,
   isCaseView,
   isObjectArray,
   isOverflowPopoverOpen,
@@ -204,7 +206,7 @@ export const useHoverActionItems = ({
             })}
           </div>
         ) : null,
-        values != null && (draggableId != null || !isEmpty(dataProvider)) ? (
+        values != null && (draggableId != null || !isEmpty(dataProvider)) && !hideAddToTimeline ? (
           <div data-test-subj="hover-actions-add-timeline" key="hover-actions-add-timeline">
             {getAddToTimelineButton({
               Component: enableOverflowButton ? EuiContextMenuItem : undefined,
@@ -258,6 +260,7 @@ export const useHoverActionItems = ({
       getFilterForValueButton,
       getFilterOutValueButton,
       handleHoverActionClicked,
+      hideAddToTimeline,
       hideTopN,
       isObjectArray,
       onFilterAdded,

@@ -5,53 +5,62 @@
  * 2.0.
  */
 import React from 'react';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { css } from '@emotion/react';
+import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { DataView } from '@kbn/data-plugin/common';
 import * as TEST_SUBJECTS from './test_subjects';
-import type { CspFindingsRequest, CspFindingsResponse } from './use_findings';
+import type { CspFindingsRequest, CspFindingsResult } from './use_findings';
 import type { CspClientPluginStartDeps } from '../../types';
 import { PLUGIN_NAME } from '../../../common';
-import type { DataView } from '../../../../../../src/plugins/data/common';
+import { FINDINGS_SEARCH_PLACEHOLDER } from './translations';
 
-type SearchBarQueryProps = Pick<CspFindingsRequest, 'query' | 'filters' | 'dateRange'>;
+type SearchBarQueryProps = Pick<CspFindingsRequest, 'query' | 'filters'>;
 
-interface BaseFindingsSearchBarProps extends SearchBarQueryProps {
+interface FindingsSearchBarProps extends SearchBarQueryProps {
   setQuery(v: Partial<SearchBarQueryProps>): void;
+  loading: CspFindingsResult['loading'];
 }
-
-type FindingsSearchBarProps = CspFindingsResponse & BaseFindingsSearchBarProps;
 
 export const FindingsSearchBar = ({
   dataView,
-  dateRange,
   query,
   filters,
-  status,
+  loading,
   setQuery,
 }: FindingsSearchBarProps & { dataView: DataView }) => {
+  const { euiTheme } = useEuiTheme();
   const {
-    data: {
+    unifiedSearch: {
       ui: { SearchBar },
     },
   } = useKibana<CspClientPluginStartDeps>().services;
 
   return (
-    <SearchBar
-      appName={PLUGIN_NAME}
-      dataTestSubj={TEST_SUBJECTS.FINDINGS_SEARCH_BAR}
-      showFilterBar={true}
-      showDatePicker={true}
-      showQueryBar={true}
-      showQueryInput={true}
-      showSaveQuery={false}
-      isLoading={status === 'loading'}
-      indexPatterns={[dataView]}
-      dateRangeFrom={dateRange.from}
-      dateRangeTo={dateRange.to}
-      query={query}
-      filters={filters}
-      onQuerySubmit={setQuery}
-      // @ts-expect-error onFiltersUpdated is a valid prop on SearchBar
-      onFiltersUpdated={(value: Filter[]) => setQuery({ filters: value })}
-    />
+    <div css={getContainerStyle(euiTheme)}>
+      <SearchBar
+        appName={PLUGIN_NAME}
+        dataTestSubj={TEST_SUBJECTS.FINDINGS_SEARCH_BAR}
+        showFilterBar={true}
+        showQueryBar={true}
+        showQueryInput={true}
+        showDatePicker={false}
+        showSaveQuery={false}
+        isLoading={loading}
+        indexPatterns={[dataView]}
+        query={query}
+        filters={filters}
+        onQuerySubmit={setQuery}
+        // @ts-expect-error onFiltersUpdated is a valid prop on SearchBar
+        onFiltersUpdated={(value: Filter[]) => setQuery({ filters: value })}
+        placeholder={FINDINGS_SEARCH_PLACEHOLDER}
+      />
+    </div>
   );
 };
+
+const getContainerStyle = (theme: EuiThemeComputed) => css`
+  border-bottom: ${theme.border.thin};
+  background-color: ${theme.colors.body};
+  padding: ${theme.size.base};
+`;

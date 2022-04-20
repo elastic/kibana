@@ -28,6 +28,7 @@ const detectionAlertsTimelines = [TimelineId.detectionsPage, TimelineId.detectio
 const otherTimelines = [
   TimelineId.hostsPageEvents,
   TimelineId.hostsPageExternalAlerts,
+  TimelineId.hostsPageSessions,
   TimelineId.networkPageExternalAlerts,
   TimelineId.active,
   TimelineId.casePage,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IngestDeletePipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import expect from '@kbn/expect';
 import path from 'path';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -25,11 +26,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const es = getService('es');
   const security = getService('security');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/118593
-  describe.skip('Ingest Pipelines', function () {
+  describe('Ingest Pipelines', function () {
     this.tags('smoke');
     before(async () => {
       await security.testUser.setRoles(['ingest_pipelines_user']);
+      // Delete all existing pipelines
+      await es.ingest.deletePipeline({ id: '*' } as IngestDeletePipelineRequest);
       await pageObjects.common.navigateToApp('ingestPipelines');
     });
 

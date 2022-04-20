@@ -23,14 +23,24 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { orderBy, get } from 'lodash';
 
-import { RuleExecutionStatus } from '../../../../plugins/security_solution/common/detection_engine/schemas/common';
+import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/schemas/common';
 import {
   EqlCreateSchema,
   QueryCreateSchema,
   SavedQueryCreateSchema,
   ThresholdCreateSchema,
-} from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/types';
+import {
+  ALERT_ANCESTORS,
+  ALERT_DEPTH,
+  ALERT_ORIGINAL_TIME,
+  ALERT_ORIGINAL_EVENT,
+  ALERT_ORIGINAL_EVENT_CATEGORY,
+  ALERT_GROUP_ID,
+  ALERT_THRESHOLD_RESULT,
+} from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
   createRule,
   createSignalsIndex,
@@ -46,17 +56,7 @@ import {
   waitForRuleSuccessOrStatus,
   waitForSignalsToBePresent,
 } from '../../utils';
-import { Ancestor } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
-import {
-  ALERT_ANCESTORS,
-  ALERT_DEPTH,
-  ALERT_ORIGINAL_TIME,
-  ALERT_ORIGINAL_EVENT,
-  ALERT_ORIGINAL_EVENT_CATEGORY,
-  ALERT_GROUP_ID,
-  ALERT_THRESHOLD_RESULT,
-} from '../../../../plugins/security_solution/common/field_maps/field_names';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 /**
  * Specific _id to use for some of the tests. If the archiver changes and you see errors
@@ -71,8 +71,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
-  describe.skip('Generating signals from source indexes', () => {
+  describe('Generating signals from source indexes', () => {
     beforeEach(async () => {
       await deleteSignalsIndex(supertest, log);
       await createSignalsIndex(supertest, log);
@@ -675,23 +674,36 @@ export default ({ getService }: FtrProviderContext) => {
           const rule: EqlCreateSchema = {
             ...getEqlRuleForSignalTesting(['auditbeat-*']),
             query: 'sequence by host.name [any where true] [any where true]',
+            max_signals: 200,
           };
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccessOrStatus(supertest, log, id);
           // For EQL rules, max_signals is the maximum number of detected sequences: each sequence has a building block
-          // alert for each event in the sequence, so max_signals=100 results in 200 building blocks in addition to
-          // 100 regular alerts
-          await waitForSignalsToBePresent(supertest, log, 300, [id]);
+          // alert for each event in the sequence, so max_signals=200 results in 400 building blocks in addition to
+          // 200 regular alerts
+          await waitForSignalsToBePresent(supertest, log, 600, [id]);
           const signalsOpen = await getSignalsByIds(supertest, log, [id], 1000);
-          expect(signalsOpen.hits.hits.length).eql(300);
+          expect(signalsOpen.hits.hits.length).eql(600);
           const shellSignals = signalsOpen.hits.hits.filter(
             (signal) => signal._source?.[ALERT_DEPTH] === 2
           );
           const buildingBlocks = signalsOpen.hits.hits.filter(
             (signal) => signal._source?.[ALERT_DEPTH] === 1
           );
-          expect(shellSignals.length).eql(100);
-          expect(buildingBlocks.length).eql(200);
+          expect(shellSignals.length).eql(200);
+          expect(buildingBlocks.length).eql(400);
+        });
+
+        it('generates signals when an index name contains special characters to encode', async () => {
+          const rule: EqlCreateSchema = {
+            ...getEqlRuleForSignalTesting(['auditbeat-*', '<my-index-{now/d}*>']),
+            query: 'configuration where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
+          };
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signals = await getSignalsByIds(supertest, log, [id]);
+          expect(signals.hits.hits.length).eql(1);
         });
       });
 
@@ -1160,7 +1172,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe.skip('Signal deduplication', async () => {
+    describe('Signal deduplication', async () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       });

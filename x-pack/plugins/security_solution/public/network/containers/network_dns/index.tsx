@@ -10,6 +10,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { inputsModel } from '../../../common/store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -26,13 +27,12 @@ import {
   NetworkDnsEdges,
   PageInfoPaginated,
 } from '../../../../common/search_strategy';
-import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
-const ID = 'networkDnsQuery';
+export const ID = 'networkDnsQuery';
 
 export interface NetworkDnsArgs {
   id: string;
@@ -206,6 +206,14 @@ export const useNetworkDns = ({
       abortCtrl.current.abort();
     };
   }, [networkDnsRequest, networkDnsSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   return [loading, networkDnsResponse];
 };

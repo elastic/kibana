@@ -23,9 +23,9 @@ import {
 } from '@elastic/eui';
 import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 
+import type { SavedObjectReferenceWithContext, ToastsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SavedObjectReferenceWithContext, ToastsStart } from 'src/core/public';
 
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
 import { DEFAULT_OBJECT_NOUN } from '../../constants';
@@ -42,6 +42,14 @@ import { AliasTable } from './alias_table';
 import { RelativesFooter } from './relatives_footer';
 import { ShareToSpaceForm } from './share_to_space_form';
 import type { InternalLegacyUrlAliasTarget } from './types';
+
+interface SpacesState {
+  isLoading: boolean;
+  spaces: SpacesDataEntry[];
+  referenceGraph: SavedObjectReferenceWithContext[];
+  aliasTargets: InternalLegacyUrlAliasTarget[];
+  prohibitedSpaces: Set<string>; // Any spaces that we cannot share this object to because another object with a matching origin exists there
+}
 
 // No need to wrap LazyCopyToSpaceFlyout in an error boundary, because the ShareToSpaceFlyoutInternal component itself is only ever used in
 // a lazy-loaded fashion with an error boundary.
@@ -143,7 +151,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
   const {
     flyoutIcon,
     flyoutTitle = i18n.translate('xpack.spaces.shareToSpace.flyoutTitle', {
-      defaultMessage: 'Assign {objectNoun} to spaces',
+      defaultMessage: 'Share {objectNoun} to spaces',
       values: { objectNoun: savedObjectTarget.noun },
     }),
     enableCreateCopyCallout = false,
@@ -166,12 +174,14 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
   const [canShareToAllSpaces, setCanShareToAllSpaces] = useState<boolean>(false);
   const [showMakeCopy, setShowMakeCopy] = useState<boolean>(false);
 
-  const [{ isLoading, spaces, referenceGraph, aliasTargets }, setSpacesState] = useState<{
-    isLoading: boolean;
-    spaces: SpacesDataEntry[];
-    referenceGraph: SavedObjectReferenceWithContext[];
-    aliasTargets: InternalLegacyUrlAliasTarget[];
-  }>({ isLoading: true, spaces: [], referenceGraph: [], aliasTargets: [] });
+  const [{ isLoading, spaces, referenceGraph, aliasTargets, prohibitedSpaces }, setSpacesState] =
+    useState<SpacesState>({
+      isLoading: true,
+      spaces: [],
+      referenceGraph: [],
+      aliasTargets: [],
+      prohibitedSpaces: new Set(),
+    });
   useEffect(() => {
     const { type, id } = savedObjectTarget;
     const getShareableReferences = spacesManager.getShareableReferences([{ type, id }]);
@@ -194,7 +204,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
           aliasTargets: shareableReferences.objects.reduce<InternalLegacyUrlAliasTarget[]>(
             (acc, x) => {
               for (const space of x.spacesWithMatchingAliases ?? []) {
-                if (space !== '?') {
+                if (space !== UNKNOWN_SPACE) {
                   const spaceExists = spacesData.spacesMap.has(space);
                   // If the user does not have privileges to view all spaces, they will be redacted; we cannot attempt to disable aliases for redacted spaces.
                   acc.push({ targetSpace: space, targetType: x.type, sourceId: x.id, spaceExists });
@@ -204,6 +214,20 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
             },
             []
           ),
+          prohibitedSpaces: shareableReferences.objects.reduce((acc, x) => {
+            // Whenever we detect that a space contains an object with a matching origin, *and* the list of currently selected spaces does
+            // not include it, then it is prohibited. That means the user cannot share the object to those spaces.
+            for (const space of x.spacesWithMatchingOrigins ?? []) {
+              if (
+                space !== UNKNOWN_SPACE &&
+                !selectedSpaceIds.includes(space) &&
+                space !== activeSpaceId
+              ) {
+                acc.add(space);
+              }
+            }
+            return acc;
+          }, new Set<string>()),
         });
       })
       .catch((e) => {
@@ -329,6 +353,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
           makeCopy={() => setShowMakeCopy(true)}
           enableCreateNewSpaceLink={enableCreateNewSpaceLink}
           enableSpaceAgnosticBehavior={enableSpaceAgnosticBehavior}
+          prohibitedSpaces={prohibitedSpaces}
         />
       );
     }
@@ -346,7 +371,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
           referenceGraph={referenceGraph}
           isDisabled={isStartShareButtonDisabled}
         />
-        <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               onClick={() => onClose()}
@@ -407,10 +432,10 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
   return (
     <EuiFlyout onClose={onClose} maxWidth={500} data-test-subj="share-to-space-flyout">
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup alignItems="center" gutterSize="m">
+        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
           {flyoutIcon && (
             <EuiFlexItem grow={false}>
-              <EuiIcon size="m" type={flyoutIcon} />
+              <EuiIcon size="l" type={flyoutIcon} />
             </EuiFlexItem>
           )}
           <EuiFlexItem>
@@ -424,10 +449,11 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
       <EuiFlexGroup
         direction="column"
         gutterSize="none"
-        className="spcShareToSpace__flyoutBodyWrapper"
+        className="spcShareToSpace__flyoutBodyWrapper eui-yScroll"
+        responsive={false}
       >
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="m">
+          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
             {savedObjectTarget.icon && (
               <EuiFlexItem grow={false}>
                 <EuiIcon type={savedObjectTarget.icon} />

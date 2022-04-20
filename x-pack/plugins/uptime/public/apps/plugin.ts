@@ -11,44 +11,40 @@ import {
   Plugin,
   PluginInitializerContext,
   AppMountParameters,
-} from 'kibana/public';
+} from '@kbn/core/public';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import { SharePluginSetup, SharePluginStart } from '../../../../../src/plugins/share/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../../src/core/public';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import { DiscoverStart } from '@kbn/discover-plugin/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../../src/plugins/home/public';
-import { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
-} from '../../../triggers_actions_ui/public';
-import {
-  DataPublicPluginSetup,
-  DataPublicPluginStart,
-} from '../../../../../src/plugins/data/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 
-import { alertTypeInitializers, legacyAlertTypeInitializers } from '../lib/alert_types';
-import { FleetStart } from '../../../fleet/public';
+import { FleetStart } from '@kbn/fleet-plugin/public';
 import {
   FetchDataParams,
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
-} from '../../../observability/public';
+} from '@kbn/observability-plugin/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
+import { CasesUiStart } from '@kbn/cases-plugin/public';
+import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { PLUGIN } from '../../common/constants/plugin';
-import { IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
 import {
   LazySyntheticsPolicyCreateExtension,
   LazySyntheticsPolicyEditExtension,
 } from '../components/fleet_package';
 import { LazySyntheticsCustomAssetsExtension } from '../components/fleet_package/lazy_synthetics_custom_assets_extension';
-import { Start as InspectorPluginStart } from '../../../../../src/plugins/inspector/public';
-import { UptimeUiConfig } from '../../common/config';
-import { CasesUiStart } from '../../../cases/public';
+import { uptimeOverviewNavigatorParams } from './locators/overview';
+import { alertTypeInitializers, legacyAlertTypeInitializers } from '../lib/alert_types';
 
 export interface ClientPluginsSetup {
   home?: HomePublicPluginSetup;
@@ -56,11 +52,13 @@ export interface ClientPluginsSetup {
   observability: ObservabilityPublicSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface ClientPluginsStart {
   fleet?: FleetStart;
   data: DataPublicPluginStart;
+  discover: DiscoverStart;
   inspector: InspectorPluginStart;
   embeddable: EmbeddableStart;
   observability: ObservabilityPublicStart;
@@ -85,7 +83,6 @@ export class UptimePlugin
   constructor(private readonly initContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup<ClientPluginsStart, unknown>, plugins: ClientPluginsSetup): void {
-    const config = this.initContext.config.get<UptimeUiConfig>();
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
         id: PLUGIN.ID,
@@ -94,7 +91,7 @@ export class UptimePlugin
         icon: 'uptimeApp',
         path: '/app/uptime',
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.DATA,
+        category: 'data',
       });
     }
     const getUptimeDataHelper = async () => {
@@ -103,6 +100,8 @@ export class UptimePlugin
 
       return UptimeDataHelper(coreStart);
     };
+
+    plugins.share.url.locators.create(uptimeOverviewNavigatorParams);
 
     plugins.observability.dashboard.register({
       appName: 'synthetics',
@@ -213,7 +212,7 @@ export class UptimePlugin
         const [coreStart, corePlugins] = await core.getStartServices();
 
         const { renderApp } = await import('./render_app');
-        return renderApp(coreStart, plugins, corePlugins, params, config);
+        return renderApp(coreStart, plugins, corePlugins, params, this.initContext.env.mode.dev);
       },
     });
   }

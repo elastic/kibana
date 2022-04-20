@@ -8,10 +8,10 @@
 
 import ReactDOM from 'react-dom/server';
 import { formatRow, formatTopLevelObject } from './row_formatter';
-import { DataView } from '../../../../../data/common';
-import { fieldFormatsMock } from '../../../../../field_formats/common/mocks';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { DiscoverServices } from '../../../build_services';
-import { stubbedSavedObjectIndexPattern } from '../../../../../data/common/stubs';
+import { stubbedSavedObjectIndexPattern } from '@kbn/data-plugin/common/stubs';
 
 describe('Row formatter', () => {
   const hit = {

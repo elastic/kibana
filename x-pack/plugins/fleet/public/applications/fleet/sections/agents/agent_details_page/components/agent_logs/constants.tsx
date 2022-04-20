@@ -11,6 +11,10 @@ export const AGENT_LOG_INDEX_PATTERN = 'logs-elastic_agent-*,logs-elastic_agent.
 export const AGENT_DATASET = 'elastic_agent';
 export const AGENT_DATASET_FILEBEAT = 'elastic_agent.filebeat';
 export const AGENT_DATASET_METRICBEAT = 'elastic_agent.metricbeat';
+export const AGENT_DATASET_OSQUERYBEAT = 'elastic_agent.osquerybeat';
+export const AGENT_DATASET_HEARTBEAT = 'elastic_agent.heartbeat';
+export const AGENT_DATASET_APM_SERVER = 'elastic_agent.apm_server';
+export const AGENT_DATASET_ENDPOINT_SECURITY = 'elastic_agent.endpoint_security';
 export const AGENT_DATASET_PATTERN = 'elastic_agent.*';
 export const AGENT_ID_FIELD = {
   name: 'elastic_agent.id',

@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { act, renderHook } from '@testing-library/react-hooks';
-import { createFilterManagerMock } from '../../../../../data/public/query/filter_manager/filter_manager.mock';
+import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../common';
 import { DiscoverServices } from '../../../build_services';
 import { FailureReason, LoadingStatus } from '../services/context_query_state';
@@ -20,9 +20,9 @@ import {
 } from '../__mocks__/use_context_app_fetch';
 import { indexPatternWithTimefieldMock } from '../../../__mocks__/index_pattern_with_timefield';
 import { createContextSearchSourceStub } from '../services/_stubs';
-import { DataView } from '../../../../../data_views/common';
-import { themeServiceMock } from '../../../../../../core/public/mocks';
-import { KibanaContextProvider } from '../../../../../kibana_react/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { themeServiceMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 const mockFilterManager = createFilterManagerMock();
 

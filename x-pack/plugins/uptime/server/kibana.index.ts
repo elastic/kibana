@@ -6,8 +6,8 @@
  */
 
 import { Request, Server } from '@hapi/hapi';
-import { Logger } from 'kibana/server';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { PLUGIN } from '../common/constants/plugin';
 import { compose } from './lib/compose/kibana';
 import { initUptimeServer } from './uptime_server';

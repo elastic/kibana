@@ -9,7 +9,7 @@ import { waitFor, waitForElementToBeRemoved } from '@testing-library/react';
 import React from 'react';
 import { sessionViewProcessEventsMock } from '../../../common/mocks/responses/session_view_process_events.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { SessionView } from './index';
+import { SessionView } from '.';
 import userEvent from '@testing-library/user-event';
 
 describe('SessionView component', () => {
@@ -35,6 +35,24 @@ describe('SessionView component', () => {
         });
       });
 
+      it('should show loading state while retrieving empty data and hide it when settled', async () => {
+        let releaseApiResponse: (value?: unknown) => void;
+
+        // make the request wait
+        mockedApi.mockReturnValue(new Promise((resolve) => (releaseApiResponse = resolve)));
+        render();
+        await waitForApiCall();
+
+        // see if loader is present
+        expect(renderResult.getByTestId('sectionLoading')).toBeTruthy();
+
+        // release the request
+        releaseApiResponse!(mockedApi);
+
+        //  check the loader is gone
+        await waitForElementToBeRemoved(renderResult.getByTestId('sectionLoading'));
+      });
+
       it('should show the Empty message', async () => {
         render();
         await waitForApiCall();
@@ -55,7 +73,7 @@ describe('SessionView component', () => {
         mockedApi.mockResolvedValue(sessionViewProcessEventsMock);
       });
 
-      it('should show loading indicator while retrieving data and hide it when it gets it', async () => {
+      it('should show loading state while retrieving data and hide it when settled', async () => {
         let releaseApiResponse: (value?: unknown) => void;
 
         // make the request wait
@@ -64,13 +82,13 @@ describe('SessionView component', () => {
         await waitForApiCall();
 
         // see if loader is present
-        expect(renderResult.getByText('Loading session…')).toBeTruthy();
+        expect(renderResult.getByTestId('sectionLoading')).toBeTruthy();
 
         // release the request
         releaseApiResponse!(mockedApi);
 
         //  check the loader is gone
-        await waitForElementToBeRemoved(renderResult.getByText('Loading session…'));
+        await waitForElementToBeRemoved(renderResult.getByTestId('sectionLoading'));
       });
 
       it('should display the search bar', async () => {
@@ -84,20 +102,25 @@ describe('SessionView component', () => {
         await waitForApiCall();
 
         expect(renderResult.getAllByTestId('sessionView:processTreeNode')).toBeTruthy();
-
-        const selectionArea = renderResult.queryByTestId('sessionView:processTreeSelectionArea');
-
-        expect(selectionArea?.parentElement?.getAttribute('data-id')).toEqual('test-entity-id');
       });
 
       it('should toggle detail panel visibilty when detail button clicked', async () => {
         render();
         await waitForApiCall();
 
-        userEvent.click(renderResult.getByTestId('sessionViewDetailPanelToggle'));
+        userEvent.click(renderResult.getByTestId('sessionView:sessionViewDetailPanelToggle'));
         expect(renderResult.getByText('Process')).toBeTruthy();
         expect(renderResult.getByText('Host')).toBeTruthy();
         expect(renderResult.getByText('Alerts')).toBeTruthy();
+      });
+
+      it('should render session view options button and its options when clicked', async () => {
+        render();
+        await waitForApiCall();
+        userEvent.click(renderResult.getByTestId('sessionView:sessionViewOptionButton'));
+        expect(renderResult.getByText('Display options')).toBeTruthy();
+        expect(renderResult.getByText('Timestamp')).toBeTruthy();
+        expect(renderResult.getByText('Verbose mode')).toBeTruthy();
       });
     });
   });

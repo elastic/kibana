@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/public';
+import { SavedObjectsClientContract } from '@kbn/core/public';
+import type { SavedObjectsResolveResponse } from '@kbn/core/public';
 import { useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
+import { SpacesApi } from '@kbn/spaces-plugin/public';
 import { GraphStore } from '../state_management';
 import { GraphWorkspaceSavedObject, IndexPatternSavedObject, Workspace } from '../types';
 import { getEmptyWorkspace, getSavedWorkspace } from './saved_workspace_utils';
 import { getEditUrl } from '../services/url';
-import { SpacesApi } from '../../../spaces/public';
 export interface UseWorkspaceLoaderProps {
   store: GraphStore;
   workspaceRef: React.MutableRefObject<Workspace | undefined>;
@@ -27,8 +28,9 @@ interface WorkspaceUrlParams {
   id?: string;
 }
 export interface SharingSavedObjectProps {
-  outcome?: 'aliasMatch' | 'exactMatch' | 'conflict';
-  aliasTargetId?: string;
+  outcome?: SavedObjectsResolveResponse['outcome'];
+  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
 }
 
 interface WorkspaceLoadedState {
@@ -138,14 +140,15 @@ export const useWorkspaceLoader = ({
 
       if (spaces && fetchedSharingSavedObjectProps?.outcome === 'aliasMatch') {
         // We found this object by a legacy URL alias from its old ID; redirect the user to the page with its new ID, preserving any URL hash
-        const newObjectId = fetchedSharingSavedObjectProps?.aliasTargetId!; // This is always defined if outcome === 'aliasMatch'
+        const newObjectId = fetchedSharingSavedObjectProps.aliasTargetId!; // This is always defined if outcome === 'aliasMatch'
         const newPath = getEditUrl(coreStart.http.basePath.prepend, { id: newObjectId }) + search;
-        spaces.ui.redirectLegacyUrl(
-          newPath,
-          i18n.translate('xpack.graph.legacyUrlConflict.objectNoun', {
+        spaces.ui.redirectLegacyUrl({
+          path: newPath,
+          aliasPurpose: fetchedSharingSavedObjectProps.aliasPurpose,
+          objectNoun: i18n.translate('xpack.graph.legacyUrlConflict.objectNoun', {
             defaultMessage: 'Graph',
-          })
-        );
+          }),
+        });
         return null;
       }
 

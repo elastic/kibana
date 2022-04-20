@@ -5,16 +5,23 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
-import { SyntheticsMonitor } from '../../../common/runtime_types';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import {
+  EncryptedSyntheticsMonitor,
+  SyntheticsMonitorWithSecrets,
+} from '../../../common/runtime_types';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
-import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monitor';
+import {
+  syntheticsMonitorType,
+  syntheticsMonitor,
+} from '../../lib/saved_objects/synthetics_monitor';
 import { getMonitorNotFoundResponse } from './service_errors';
 import {
   sendTelemetryEvents,
   formatTelemetryDeleteEvent,
 } from './telemetry/monitor_upgrade_sender';
+import { normalizeSecrets } from '../../lib/synthetics_service/utils/secrets';
 
 export const deleteSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
   method: 'DELETE',
@@ -24,30 +31,48 @@ export const deleteSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
     }),
   },
-  handler: async ({ request, response, savedObjectsClient, server }): Promise<any> => {
+  handler: async ({
+    request,
+    response,
+    savedObjectsClient,
+    server: { encryptedSavedObjects, syntheticsService, logger, telemetry, kibanaVersion },
+  }): Promise<any> => {
+    const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
+
     const { monitorId } = request.params;
 
-    const { syntheticsService } = server;
-
     try {
-      const monitor = await savedObjectsClient.get<SyntheticsMonitor>(
+      const encryptedMonitor = await savedObjectsClient.get<EncryptedSyntheticsMonitor>(
         syntheticsMonitorType,
         monitorId
       );
 
+      const monitor =
+        await encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
+          syntheticsMonitor.name,
+          monitorId,
+          {
+            namespace: encryptedMonitor.namespaces?.[0],
+          }
+        );
+
+      const normalizedMonitor = normalizeSecrets(monitor);
+
       await savedObjectsClient.delete(syntheticsMonitorType, monitorId);
-      const errors = await syntheticsService.deleteConfigs(request, [
-        { ...monitor.attributes, id: monitorId },
+      const errors = await syntheticsService.deleteConfigs([
+        { ...normalizedMonitor.attributes, id: monitorId },
       ]);
 
       sendTelemetryEvents(
-        server.logger,
-        server.telemetry,
-        formatTelemetryDeleteEvent(monitor, server.kibanaVersion, new Date().toISOString(), errors)
+        logger,
+        telemetry,
+        formatTelemetryDeleteEvent(monitor, kibanaVersion, new Date().toISOString(), errors)
       );
 
-      if (errors) {
-        return errors;
+      if (errors && errors.length > 0) {
+        return response.ok({
+          body: { message: 'error pushing monitor to the service', attributes: { errors } },
+        });
       }
 
       return monitorId;

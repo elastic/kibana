@@ -24,6 +24,8 @@ import { inputsActions } from '../../common/store/inputs';
 
 import { Network } from './network';
 import { NetworkRoutes } from './navigation';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { LandingPageComponent } from '../../common/components/landing_page';
 
 jest.mock('../../common/containers/sourcerer');
 
@@ -34,6 +36,9 @@ jest.mock('../../common/components/search_bar', () => ({
 }));
 jest.mock('../../common/components/query_bar', () => ({
   QueryBar: () => null,
+}));
+jest.mock('../../common/components/visualization_actions', () => ({
+  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
 }));
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
@@ -72,6 +77,7 @@ const mockProps = {
 };
 
 const mockMapVisibility = jest.fn();
+const mockNavigateToApp = jest.fn();
 jest.mock('../../common/lib/kibana', () => {
   const original = jest.requireActual('../../common/lib/kibana');
 
@@ -86,9 +92,13 @@ jest.mock('../../common/lib/kibana', () => {
             siem: { crud_alerts: true, read_alerts: true },
             maps: mockMapVisibility(),
           },
+          navigateToApp: mockNavigateToApp,
         },
         storage: {
           get: () => true,
+        },
+        cases: {
+          ...mockCasesContract(),
         },
       },
     }),
@@ -105,7 +115,10 @@ describe('Network page - rendering', () => {
   beforeAll(() => {
     mockMapVisibility.mockReturnValue({ show: true });
   });
-  test('it renders the Setup Instructions text when no index is available', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+  test('it renders getting started page when no index is available', () => {
     mockUseSourcererDataView.mockReturnValue({
       selectedPatterns: [],
       indicesExist: false,
@@ -118,16 +131,17 @@ describe('Network page - rendering', () => {
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(true);
+
+    expect(wrapper.find(LandingPageComponent).exists()).toBe(true);
   });
 
-  test('it DOES NOT render the Setup Instructions text when an index is available', async () => {
+  test('it DOES NOT render getting started page when an index is available', async () => {
     mockUseSourcererDataView.mockReturnValue({
       selectedPatterns: [],
       indicesExist: true,
       indexPattern: {},
     });
-    const wrapper = mount(
+    mount(
       <TestProviders>
         <Router history={mockHistory}>
           <Network {...mockProps} />
@@ -135,7 +149,7 @@ describe('Network page - rendering', () => {
       </TestProviders>
     );
     await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(false);
+      expect(mockNavigateToApp).not.toHaveBeenCalled();
     });
   });
 

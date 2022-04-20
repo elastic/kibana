@@ -6,8 +6,8 @@
  */
 
 import { snakeCase } from 'lodash';
-import { AlertTypeParams, MappedParams, MappedParamsProperties } from '../../types';
-import { SavedObjectAttribute } from '../../../../../../src/core/server';
+import { SavedObjectAttribute } from '@kbn/core/server';
+import { RuleTypeParams, MappedParams, MappedParamsProperties } from '../../types';
 import {
   iterateFilterKureyNode,
   IterateFilterKureyNodeParams,
@@ -32,7 +32,7 @@ const SEVERITY_MAP: Record<string, string> = {
  * The function will match params present in MAPPED_PARAMS_PROPERTIES and
  * return an empty object if nothing is matched.
  */
-export const getMappedParams = (params: AlertTypeParams) => {
+export const getMappedParams = (params: RuleTypeParams) => {
   return Object.entries(params).reduce<MappedParams>((result, [key, value]) => {
     const snakeCaseKey = snakeCase(key);
 
@@ -145,7 +145,16 @@ export const modifyFilterKueryNode = ({
       const firstAttribute = getFieldNameAttribute(fieldName, ['alert', 'attributes']);
       // Replace the ast.value for params to mapped_params
       if (firstAttribute === 'params') {
-        ast.value = getModifiedFilter(ast.value);
+        const attributeAfterParams = getFieldNameAttribute(fieldName, [
+          'alert',
+          'attributes',
+          'params',
+        ]);
+        if (
+          MAPPED_PARAMS_PROPERTIES.includes(attributeAfterParams as keyof MappedParamsProperties)
+        ) {
+          ast.value = getModifiedFilter(ast.value);
+        }
       }
     }
 
@@ -155,8 +164,16 @@ export const modifyFilterKueryNode = ({
 
       // Replace the ast.value for params value to the modified mapped_params value
       if (firstAttribute === 'params' && ast.value) {
-        const attribute = getFieldNameAttribute(localFieldName, ['alert', 'attributes', 'params']);
-        ast.value = getModifiedValue(attribute, ast.value);
+        const attributeAfterParams = getFieldNameAttribute(localFieldName, [
+          'alert',
+          'attributes',
+          'params',
+        ]);
+        if (
+          MAPPED_PARAMS_PROPERTIES.includes(attributeAfterParams as keyof MappedParamsProperties)
+        ) {
+          ast.value = getModifiedValue(attributeAfterParams, ast.value);
+        }
       }
     }
   };

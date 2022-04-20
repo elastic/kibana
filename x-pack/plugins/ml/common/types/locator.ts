@@ -6,8 +6,9 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { LocatorPublic } from 'src/plugins/share/public';
-import type { RefreshInterval, TimeRange } from '../../../../../src/plugins/data/common/query';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { LocatorPublic } from '@kbn/share-plugin/public';
+import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common/query';
 import type { JobId } from './anomaly_detection_jobs/job';
 import type { DataFrameAnalysisConfigType } from './data_frame_analytics';
 import type { SearchQueryLanguage } from '../constants/search';
@@ -72,6 +73,11 @@ export type AnomalyDetectionUrlState = MLPageState<
   typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
   AnomalyDetectionQueryState | undefined
 >;
+
+export type AnomalyExplorerSwimLaneUrlState = ExplorerAppState['mlExplorerSwimlane'];
+
+export type AnomalyExplorerFilterUrlState = ExplorerAppState['mlExplorerFilter'];
+
 export interface ExplorerAppState {
   mlExplorerSwimlane: {
     selectedType?: 'overall' | 'viewBy';

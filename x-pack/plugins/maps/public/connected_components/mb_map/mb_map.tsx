@@ -7,12 +7,13 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { Adapters } from 'src/plugins/inspector/public';
+import { Adapters } from '@kbn/inspector-plugin/public';
 import { Filter } from '@kbn/es-query';
-import { Action, ActionExecutionContext } from 'src/plugins/ui_actions/public';
+import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 
 import { mapboxgl } from '@kbn/mapbox-gl';
 import type { Map as MapboxMap, MapboxOptions, MapMouseEvent } from '@kbn/mapbox-gl';
+import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
 import { DrawFilterControl } from './draw_control/draw_filter_control';
 import { ScaleControl } from './scale_control';
 import { TooltipControl } from './tooltip_control';
@@ -23,28 +24,35 @@ import { ILayer } from '../../classes/layers/layer';
 import { IVectorSource } from '../../classes/sources/vector_source';
 import { MapSettings } from '../../reducers/map';
 import {
+  CustomIcon,
   Goto,
   MapCenterAndZoom,
   TileMetaFeature,
   Timeslice,
 } from '../../../common/descriptor_types';
-import { DECIMAL_DEGREES_PRECISION, RawValue, ZOOM_PRECISION } from '../../../common/constants';
+import {
+  CUSTOM_ICON_SIZE,
+  DECIMAL_DEGREES_PRECISION,
+  MAKI_ICON_SIZE,
+  RawValue,
+  ZOOM_PRECISION,
+} from '../../../common/constants';
 import { getGlyphUrl } from '../../util';
 import { syncLayerOrder } from './sort_layers';
 
 import { getTileMetaFeatures, removeOrphanedSourcesAndLayers } from './utils';
-import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { TileStatusTracker } from './tile_status_tracker';
 import { DrawFeatureControl } from './draw_control/draw_feature_control';
 import type { MapExtentState } from '../../reducers/map/types';
 // @ts-expect-error
-import { createSdfIcon } from '../../classes/styles/vector/symbol_utils';
+import { CUSTOM_ICON_PIXEL_RATIO, createSdfIcon } from '../../classes/styles/vector/symbol_utils';
 import { MAKI_ICONS } from '../../classes/styles/vector/maki_icons';
 
 export interface Props {
   isMapReady: boolean;
   settings: MapSettings;
+  customIcons: CustomIcon[];
   layerList: ILayer[];
   spatialFiltersLayer: ILayer;
   goto?: Goto | null;
@@ -68,6 +76,8 @@ export interface Props {
   updateMetaFromTiles: (layerId: string, features: TileMetaFeature[]) => void;
   featureModeActive: boolean;
   filterModeActive: boolean;
+  setTileLoadError(layerId: string, errorMessage: string): void;
+  clearTileLoadError(layerId: string): void;
 }
 
 interface State {
@@ -78,6 +88,7 @@ export class MbMap extends Component<Props, State> {
   private _checker?: ResizeChecker;
   private _isMounted: boolean = false;
   private _containerRef: HTMLDivElement | null = null;
+  private _prevCustomIcons?: CustomIcon[];
   private _prevDisableInteractive?: boolean;
   private _prevLayerList?: ILayer[];
   private _prevTimeslice?: Timeslice;
@@ -196,8 +207,15 @@ export class MbMap extends Component<Props, State> {
       this._tileStatusTracker = new TileStatusTracker({
         mbMap,
         getCurrentLayerList: () => this.props.layerList,
-        updateTileStatus: (layer: ILayer, areTilesLoaded: boolean) => {
+        updateTileStatus: (layer: ILayer, areTilesLoaded: boolean, errorMessage?: string) => {
           this.props.setAreTilesLoaded(layer.getId(), areTilesLoaded);
+
+          if (errorMessage) {
+            this.props.setTileLoadError(layer.getId(), errorMessage);
+          } else {
+            this.props.clearTileLoadError(layer.getId());
+          }
+
           this._queryForMeta(layer);
         },
       });
@@ -254,7 +272,9 @@ export class MbMap extends Component<Props, State> {
     mbMap.on(
       'moveend',
       _.debounce(() => {
-        this.props.extentChanged(this._getMapExtentState());
+        if (this._isMounted) {
+          this.props.extentChanged(this._getMapExtentState());
+        }
       }, 100)
     );
 
@@ -288,7 +308,7 @@ export class MbMap extends Component<Props, State> {
       const pixelRatio = Math.floor(window.devicePixelRatio);
       for (const [symbolId, { svg }] of Object.entries(MAKI_ICONS)) {
         if (!mbMap.hasImage(symbolId)) {
-          const imageData = await createSdfIcon(svg, 0.25, 0.25);
+          const imageData = await createSdfIcon({ renderSize: MAKI_ICON_SIZE, svg });
           mbMap.addImage(symbolId, imageData, {
             pixelRatio,
             sdf: true,
@@ -389,6 +409,27 @@ export class MbMap extends Component<Props, State> {
       }
     }
 
+    if (
+      this._prevCustomIcons === undefined ||
+      !_.isEqual(this._prevCustomIcons, this.props.customIcons)
+    ) {
+      this._prevCustomIcons = this.props.customIcons;
+      const mbMap = this.state.mbMap;
+      for (const { symbolId, svg, cutoff, radius } of this.props.customIcons) {
+        createSdfIcon({ svg, renderSize: CUSTOM_ICON_SIZE, cutoff, radius }).then(
+          (imageData: ImageData) => {
+            // @ts-expect-error MapboxMap type is missing updateImage method
+            if (mbMap.hasImage(symbolId)) mbMap.updateImage(symbolId, imageData);
+            else
+              mbMap.addImage(symbolId, imageData, {
+                sdf: true,
+                pixelRatio: CUSTOM_ICON_PIXEL_RATIO,
+              });
+          }
+        );
+      }
+    }
+
     let zoomRangeChanged = false;
     if (this.props.settings.minZoom !== this.state.mbMap.getMinZoom()) {
       this.state.mbMap.setMinZoom(this.props.settings.minZoom);
@@ -404,7 +445,9 @@ export class MbMap extends Component<Props, State> {
     // hack to update extent after zoom update finishes moving map.
     if (zoomRangeChanged) {
       setTimeout(() => {
-        this.props.extentChanged(this._getMapExtentState());
+        if (this._isMounted) {
+          this.props.extentChanged(this._getMapExtentState());
+        }
       }, 300);
     }
   }

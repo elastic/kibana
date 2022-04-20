@@ -90,6 +90,28 @@ export async function createTestUserService(ctx: FtrProviderContext, role: Role,
       await role.create(name, definition);
     }
 
+    // when configured to setup remote roles, load the remote es service and set them up directly via es
+    const remoteEsRoles: undefined | Record<string, any> = config.get('security.remoteEsRoles');
+    if (remoteEsRoles) {
+      let remoteEs;
+      try {
+        remoteEs = ctx.getService('remoteEs' as 'es');
+      } catch (error) {
+        throw new Error(
+          'unable to load `remoteEs` cluster, which should provide an ES client configured to talk to the remote cluster. Include that service from another FTR config or fix the error it is throwing on creation: ' +
+            error.message
+        );
+      }
+
+      for (const [name, body] of Object.entries(remoteEsRoles)) {
+        log.info(`creating ${name} role on remote cluster`);
+        await remoteEs.security.putRole({
+          name,
+          ...body,
+        });
+      }
+    }
+
     // delete the test_user if present (will it error if the user doesn't exist?)
     try {
       await user.delete(TEST_USER_NAME);

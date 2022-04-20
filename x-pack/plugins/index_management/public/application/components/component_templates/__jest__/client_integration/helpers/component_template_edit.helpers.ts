@@ -6,6 +6,7 @@
  */
 
 import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
+import { HttpSetup } from '@kbn/core/public';
 import { BASE_PATH } from '../../../../../../../common';
 import { ComponentTemplateEdit } from '../../../component_template_wizard';
 
@@ -27,9 +28,11 @@ const testBedConfig: AsyncTestBedConfig = {
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed(WithAppDependencies(ComponentTemplateEdit), testBedConfig);
-
-export const setup = async (): Promise<ComponentTemplateEditTestBed> => {
+export const setup = async (httpSetup: HttpSetup): Promise<ComponentTemplateEditTestBed> => {
+  const initTestBed = registerTestBed(
+    WithAppDependencies(ComponentTemplateEdit, httpSetup),
+    testBedConfig
+  );
   const testBed = await initTestBed();
 
   return {

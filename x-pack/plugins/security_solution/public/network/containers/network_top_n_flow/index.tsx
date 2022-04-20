@@ -10,6 +10,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { inputsModel } from '../../../common/store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -25,14 +26,12 @@ import {
   NetworkTopNFlowStrategyResponse,
   PageInfoPaginated,
 } from '../../../../common/search_strategy';
-import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
-import { useTransforms } from '../../../transforms/containers/use_transforms';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
-const ID = 'networkTopNFlowQuery';
+export const ID = 'networkTopNFlowQuery';
 
 export interface NetworkTopNFlowArgs {
   id: string;
@@ -75,7 +74,6 @@ export const useNetworkTopNFlow = ({
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const { getTransformChangesIfTheyExist } = useTransforms();
 
   const [networkTopNFlowRequest, setTopNFlowRequest] =
     useState<NetworkTopNFlowRequestOptions | null>(null);
@@ -168,25 +166,19 @@ export const useNetworkTopNFlow = ({
 
   useEffect(() => {
     setTopNFlowRequest((prevRequest) => {
-      const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
+      const myRequest = {
+        ...(prevRequest ?? {}),
+        defaultIndex: indexNames,
         factoryQueryType: NetworkQueries.topNFlow,
-        indices: indexNames,
-        filterQuery,
+        filterQuery: createFilter(filterQuery),
+        flowTarget,
+        ip,
+        pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
-      });
-      const myRequest = {
-        ...(prevRequest ?? {}),
-        defaultIndex: indices,
-        factoryQueryType,
-        filterQuery: createFilter(filterQuery),
-        flowTarget,
-        ip,
-        pagination: generateTablePaginationOptions(activePage, limit),
-        timerange,
         sort,
       };
       if (!deepEqual(prevRequest, myRequest)) {
@@ -194,18 +186,7 @@ export const useNetworkTopNFlow = ({
       }
       return prevRequest;
     });
-  }, [
-    activePage,
-    endDate,
-    filterQuery,
-    indexNames,
-    ip,
-    limit,
-    startDate,
-    sort,
-    flowTarget,
-    getTransformChangesIfTheyExist,
-  ]);
+  }, [activePage, endDate, filterQuery, indexNames, ip, limit, startDate, sort, flowTarget]);
 
   useEffect(() => {
     networkTopNFlowSearch(networkTopNFlowRequest);
@@ -214,6 +195,14 @@ export const useNetworkTopNFlow = ({
       abortCtrl.current.abort();
     };
   }, [networkTopNFlowRequest, networkTopNFlowSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   return [loading, networkTopNFlowResponse];
 };

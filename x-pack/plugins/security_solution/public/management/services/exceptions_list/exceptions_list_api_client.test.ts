@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CoreStart, HttpSetup } from 'kibana/public';
+import { CoreStart, HttpSetup } from '@kbn/core/public';
 import { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { ExceptionsListItemGenerator } from '../../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import { ExceptionsListApiClient } from './exceptions_list_api_client';
 
@@ -271,6 +271,25 @@ describe('Exceptions List Api Client', () => {
       const exceptionsListApiClientInstance = getInstance();
 
       await expect(exceptionsListApiClientInstance.hasData()).resolves.toBe(false);
+    });
+
+    it('return new instance when HttpCore changes', async () => {
+      const initialInstance = ExceptionsListApiClient.getInstance(
+        fakeHttpServices,
+        getFakeListId(),
+        getFakeListDefinition()
+      );
+
+      fakeCoreStart = coreMock.createStart({ basePath: '/mock' });
+      fakeHttpServices = fakeCoreStart.http as jest.Mocked<HttpSetup>;
+
+      const newInstance = ExceptionsListApiClient.getInstance(
+        fakeHttpServices,
+        getFakeListId(),
+        getFakeListDefinition()
+      );
+
+      expect(initialInstance).not.toStrictEqual(newInstance);
     });
   });
 });

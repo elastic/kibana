@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { screen } from '@testing-library/dom';
-import { render, mockAppIndexPattern } from './rtl_helpers';
+import { render, mockAppDataView } from './rtl_helpers';
 import { ExploratoryView } from './exploratory_view';
 import * as obsvDataViews from '../../../utils/observability_data_views/observability_data_views';
 import * as pluginHook from '../../../hooks/use_plugin_context';
-import { createStubIndexPattern } from '../../../../../../../src/plugins/data/common/stubs';
+import { createStubIndexPattern } from '@kbn/data-plugin/common/stubs';
 
 jest.spyOn(pluginHook, 'usePluginContext').mockReturnValue({
   appMountParameters: {
@@ -19,7 +19,7 @@ jest.spyOn(pluginHook, 'usePluginContext').mockReturnValue({
   },
 } as any);
 describe('ExploratoryView', () => {
-  mockAppIndexPattern();
+  mockAppDataView();
 
   beforeEach(() => {
     const indexPattern = createStubIndexPattern({

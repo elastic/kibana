@@ -9,23 +9,24 @@ import React from 'react';
 import { waitFor } from '@testing-library/react';
 import ReactDOM from 'react-dom';
 import { createMockedDragDropContext } from './mocks';
-import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { InnerIndexPatternDataPanel, IndexPatternDataPanel, MemoizedDataPanel } from './datapanel';
 import { FieldList } from './field_list';
 import { FieldItem } from './field_item';
 import { NoFieldsCallout } from './no_fields_callout';
 import { act } from 'react-dom/test-utils';
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { IndexPatternPrivateState } from './types';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { EuiProgress, EuiLoadingSpinner } from '@elastic/eui';
 import { documentField } from './document_field';
-import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
-import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
-import { indexPatternFieldEditorPluginMock } from '../../../../../src/plugins/data_view_field_editor/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
 import { getFieldByNameFactory } from './pure_helpers';
-import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { TermsIndexPatternColumn } from './operations';
 import { DOCUMENT_FIELD_NAME } from '../../common';
 
@@ -259,6 +260,7 @@ describe('IndexPattern Data Panel', () => {
       indexPatternRefs: [],
       existingFields: {},
       data: dataPluginMock.createStartContract(),
+      dataViews: dataViewPluginMocks.createStartContract(),
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
       indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
       onUpdateIndexPattern: jest.fn(),
@@ -857,7 +859,7 @@ describe('IndexPattern Data Panel', () => {
       });
       it('should call field editor plugin on clicking add button', async () => {
         const mockIndexPattern = {};
-        (props.data.indexPatterns.get as jest.Mock).mockImplementation(() =>
+        (props.dataViews.get as jest.Mock).mockImplementation(() =>
           Promise.resolve(mockIndexPattern)
         );
         const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);
@@ -895,7 +897,7 @@ describe('IndexPattern Data Panel', () => {
           ],
           metaFields: [],
         };
-        (props.data.indexPatterns.get as jest.Mock).mockImplementation(() =>
+        (props.dataViews.get as jest.Mock).mockImplementation(() =>
           Promise.resolve(mockIndexPattern)
         );
         const wrapper = mountWithIntl(<InnerIndexPatternDataPanel {...props} />);

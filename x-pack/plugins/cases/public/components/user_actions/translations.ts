@@ -36,17 +36,10 @@ export const ALERT_COMMENT_LABEL_TITLE = i18n.translate(
   }
 );
 
-export const GENERATED_ALERT_COMMENT_LABEL_TITLE = i18n.translate(
-  'xpack.cases.caseView.generatedAlertCommentLabelTitle',
-  {
-    defaultMessage: 'were added from',
-  }
-);
-
-export const GENERATED_ALERT_COUNT_COMMENT_LABEL_TITLE = (totalCount: number) =>
-  i18n.translate('xpack.cases.caseView.generatedAlertCountCommentLabelTitle', {
-    values: { totalCount },
-    defaultMessage: `{totalCount} {totalCount, plural, =1 {alert} other {alerts}}`,
+export const MULTIPLE_ALERTS_COMMENT_LABEL_TITLE = (totalAlerts: number) =>
+  i18n.translate('xpack.cases.caseView.generatedAlertCommentLabelTitle', {
+    values: { totalAlerts },
+    defaultMessage: 'added {totalAlerts} alerts from',
   });
 
 export const SHOW_ALERT_TOOLTIP = i18n.translate('xpack.cases.caseView.showAlertTooltip', {
@@ -70,3 +63,11 @@ export const OTHER_ENDPOINTS = (endpoints: number): string =>
     values: { endpoints },
     defaultMessage: ` and {endpoints} {endpoints, plural, =1 {other} other {others}}`,
   });
+
+export const CANCEL_BUTTON = i18n.translate('xpack.cases.caseView.delete.cancel', {
+  defaultMessage: 'Cancel',
+});
+
+export const CONFIRM_BUTTON = i18n.translate('xpack.cases.caseView.delete.confirm', {
+  defaultMessage: 'Delete',
+});

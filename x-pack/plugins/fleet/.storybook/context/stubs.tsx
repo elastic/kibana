@@ -11,7 +11,6 @@ type Stubs =
   | 'licensing'
   | 'storage'
   | 'data'
-  | 'fieldFormats'
   | 'deprecations'
   | 'fatalErrors'
   | 'navigation'
@@ -24,7 +23,6 @@ export const stubbedStartServices: StubbedStartServices = {
   licensing: {} as FleetStartServices['licensing'],
   storage: {} as FleetStartServices['storage'],
   data: {} as FleetStartServices['data'],
-  fieldFormats: {} as FleetStartServices['fieldFormats'],
   deprecations: {} as FleetStartServices['deprecations'],
   fatalErrors: {} as FleetStartServices['fatalErrors'],
   navigation: {} as FleetStartServices['navigation'],

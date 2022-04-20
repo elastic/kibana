@@ -7,13 +7,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { HttpServiceSetup, StartServicesAccessor } from 'kibana/server';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { HttpServiceSetup, StartServicesAccessor } from '@kbn/core/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { IndexPatternsFetcher } from './fetcher';
 import { routes } from './rest_api_routes';
 import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from './types';
 
-import { registerFieldForWildcard } from './fields_for';
+import { registerFieldForWildcard } from './routes/fields_for';
+import { registerHasDataViewsRoute } from './routes/has_data_views';
 
 export function registerRoutes(
   http: HttpServiceSetup,
@@ -38,6 +39,7 @@ export function registerRoutes(
   routes.forEach((route) => route(router, getStartServices, dataViewRestCounter));
 
   registerFieldForWildcard(router, getStartServices);
+  registerHasDataViewsRoute(router);
 
   router.get(
     {

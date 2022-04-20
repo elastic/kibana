@@ -16,8 +16,10 @@ import {
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CLIENT_ALERT_TYPES } from '../../../../common/constants/alerts';
+import { ClientPluginsStart } from '../../../apps/plugin';
+
 import { ToggleFlyoutTranslations } from './translations';
 import { ToggleAlertFlyoutButtonProps } from './alerts_containers';
 
@@ -43,7 +45,10 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const kibana = useKibana();
-
+  const {
+    services: { observability },
+  } = useKibana<ClientPluginsStart>();
+  const manageRulesUrl = observability.useRulesLink();
   const hasUptimeWrite = kibana.services.application?.capabilities.uptime?.save ?? false;
 
   const monitorStatusAlertContextMenuItem: EuiContextMenuPanelItemDescriptor = {
@@ -70,12 +75,7 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
     'aria-label': ToggleFlyoutTranslations.navigateToAlertingUIAriaLabel,
     'data-test-subj': 'xpack.uptime.navigateToAlertingUi',
     name: (
-      <EuiLink
-        color="text"
-        href={kibana.services?.application?.getUrlForApp(
-          'management/insightsAndAlerting/triggersActions/alerts'
-        )}
-      >
+      <EuiLink color="text" href={manageRulesUrl.href}>
         <FormattedMessage
           id="xpack.uptime.navigateToAlertingButton.content"
           defaultMessage="Manage rules"

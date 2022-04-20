@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
+import { IBasePath, Logger } from '@kbn/core/server';
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { UMServerLibs } from '../../lib';
 import { UptimeCorePluginsSetup, UptimeServerSetup } from '../../adapters';
 import type { UptimeRouter } from '../../../types';
-import type { IRuleDataClient } from '../../../../../rule_registry/server';
-import { ruleRegistryMocks } from '../../../../../rule_registry/server/mocks';
 import { getUptimeESMockClient } from '../../requests/helper';
-import { alertsMock } from '../../../../../alerting/server/mocks';
 import { DynamicSettings } from '../../../../common/runtime_types';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 
@@ -25,9 +25,16 @@ import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
  */
 export const bootstrapDependencies = (customRequests?: any, customPlugins: any = {}) => {
   const router = {} as UptimeRouter;
+  const basePath = {
+    prepend: (url: string) => {
+      return `/hfe${url}`;
+    },
+    publicBaseUrl: 'http://localhost:5601/hfe',
+    serverBasePath: '/hfe',
+  } as IBasePath;
   // these server/libs parameters don't have any functionality, which is fine
   // because we aren't testing them here
-  const server = { router, config: {} } as UptimeServerSetup;
+  const server = { router, config: {}, basePath } as UptimeServerSetup;
   const plugins: UptimeCorePluginsSetup = customPlugins as any;
   const libs: UMServerLibs = { requests: {} } as UMServerLibs;
   libs.requests = { ...libs.requests, ...customRequests };
@@ -54,8 +61,9 @@ export const createRuleTypeMocks = (
 
   const services = {
     ...getUptimeESMockClient(),
-    ...alertsMock.createAlertServices(),
+    ...alertsMock.createRuleExecutorServices(),
     alertWithLifecycle: jest.fn().mockReturnValue({ scheduleActions, replaceState }),
+    getAlertStartedDate: jest.fn().mockReturnValue('2022-03-17T13:13:33.755Z'),
     logger: loggerMock,
   };
 

@@ -7,7 +7,7 @@
 
 import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { Query } from 'src/plugins/data/public';
+import { Query } from '@kbn/data-plugin/public';
 import { MapStoreState } from '../reducers/store';
 import {
   createLayerInstance,
@@ -17,6 +17,7 @@ import {
   getLayerListRaw,
   getMapColors,
   getMapReady,
+  getMapSettings,
   getSelectedLayerId,
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
@@ -35,12 +36,18 @@ import {
   SET_SELECTED_LAYER,
   SET_WAITING_FOR_READY_HIDDEN_LAYERS,
   TRACK_CURRENT_LAYER_STATE,
+  UPDATE_LAYER,
   UPDATE_LAYER_ORDER,
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE,
   UPDATE_SOURCE_PROP,
 } from './map_action_constants';
-import { clearDataRequests, syncDataForLayerId, updateStyleMeta } from './data_request_actions';
+import {
+  autoFitToBounds,
+  clearDataRequests,
+  syncDataForLayerId,
+  updateStyleMeta,
+} from './data_request_actions';
 import { updateTooltipStateForLayer } from './tooltip_actions';
 import {
   Attribution,
@@ -117,6 +124,22 @@ export function replaceLayerList(newLayerList: LayerDescriptor[]) {
   };
 }
 
+export function updateLayerById(layerDescriptor: LayerDescriptor) {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    dispatch({
+      type: UPDATE_LAYER,
+      layer: layerDescriptor,
+    });
+    await dispatch(syncDataForLayerId(layerDescriptor.id, false));
+    if (getMapSettings(getState()).autoFitToDataBounds) {
+      dispatch(autoFitToBounds());
+    }
+  };
+}
+
 export function cloneLayer(layerId: string) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
@@ -151,8 +174,7 @@ export function addLayer(layerDescriptor: LayerDescriptor) {
       layer: layerDescriptor,
     });
     dispatch(syncDataForLayerId(layerDescriptor.id, false));
-
-    const layer = createLayerInstance(layerDescriptor);
+    const layer = createLayerInstance(layerDescriptor, []); // custom icons not needed, layer instance only used to get licensed features
     const features = await layer.getLicensedFeatures();
     features.forEach(notifyLicensedFeatureUsage);
   };

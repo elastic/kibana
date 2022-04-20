@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { EntityIterable } from '@elastic/apm-synthtrace';
 
 export const synthtrace = {
-  index: (events: any[]) =>
+  index: (events: EntityIterable) =>
     new Promise((resolve) => {
-      cy.task('synthtrace:index', events).then(resolve);
+      cy.task('synthtrace:index', events.toArray()).then(resolve);
     }),
   clean: () =>
     new Promise((resolve) => {

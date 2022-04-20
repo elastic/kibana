@@ -11,19 +11,18 @@ import { waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { Sidebar } from './sidebar';
 import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kibana';
-import { casesPluginMock } from '../../../../../cases/public/mocks';
-import { CasesUiStart } from '../../../../../cases/public';
+import { casesPluginMock, CaseUiClientMock } from '@kbn/cases-plugin/public/mocks';
 
 jest.mock('../../../common/lib/kibana');
 
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 
 describe('Sidebar', () => {
-  let casesMock: jest.Mocked<CasesUiStart>;
+  let casesMock: CaseUiClientMock;
 
   beforeEach(() => {
     casesMock = casesPluginMock.createStartContract();
-    casesMock.getRecentCases.mockImplementation(() => <>{'test'}</>);
+    casesMock.ui.getRecentCases.mockImplementation(() => <>{'test'}</>);
     useKibanaMock.mockReturnValue({
       services: {
         cases: casesMock,
@@ -50,7 +49,7 @@ describe('Sidebar', () => {
       )
     );
 
-    expect(casesMock.getRecentCases).not.toHaveBeenCalled();
+    expect(casesMock.ui.getRecentCases).not.toHaveBeenCalled();
   });
 
   it('does render the recently created cases section when the user has read permissions', async () => {
@@ -67,6 +66,6 @@ describe('Sidebar', () => {
       )
     );
 
-    expect(casesMock.getRecentCases).toHaveBeenCalled();
+    expect(casesMock.ui.getRecentCases).toHaveBeenCalled();
   });
 });

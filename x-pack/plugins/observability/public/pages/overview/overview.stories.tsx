@@ -7,15 +7,15 @@
 
 import { makeDecorator } from '@storybook/addons';
 import { storiesOf } from '@storybook/react';
-import { AppMountParameters, CoreStart } from 'kibana/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { createKibanaReactContext, KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
 import { HasDataContextProvider } from '../../context/has_data_context';
 import { PluginContext } from '../../context/plugin_context';
 import { registerDataHandler, unregisterDataHandler } from '../../data_handler';
-import { ObservabilityPublicPluginsStart } from '../../plugin';
-import { OverviewPage } from './';
+import { OverviewPage } from '.';
 import { alertsFetchData } from './mock/alerts.mock';
 import { emptyResponse as emptyAPMResponse, fetchApmData } from './mock/apm.mock';
 import { emptyResponse as emptyLogsResponse, fetchLogsData } from './mock/logs.mock';
@@ -23,10 +23,6 @@ import { emptyResponse as emptyMetricsResponse, fetchMetricsData } from './mock/
 import { newsFeedFetchData } from './mock/news_feed.mock';
 import { emptyResponse as emptyUptimeResponse, fetchUptimeData } from './mock/uptime.mock';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
-import {
-  createKibanaReactContext,
-  KibanaPageTemplate,
-} from '../../../../../../src/plugins/kibana_react/public';
 import { ApmIndicesConfig } from '../../../common/typings';
 
 function unregisterAll() {
@@ -49,6 +45,16 @@ const withCore = makeDecorator({
         capabilities: { navLinks: { integrations: true } },
         currentAppId$: {
           subscribe: () => {},
+        },
+      },
+      data: {
+        query: {
+          timefilter: {
+            timefilter: {
+              setTime: () => {},
+              getTime: () => ({}),
+            },
+          },
         },
       },
       http: {
@@ -80,23 +86,12 @@ const withCore = makeDecorator({
                   alertingExperience: { enabled: true },
                   cases: { enabled: true },
                   overviewNext: { enabled: false },
+                  rules: { enabled: true },
                 },
               },
-              core: options as CoreStart,
-              plugins: {
-                data: {
-                  query: {
-                    timefilter: {
-                      timefilter: {
-                        setTime: () => {},
-                        getTime: () => ({}),
-                      },
-                    },
-                  },
-                },
-              } as unknown as ObservabilityPublicPluginsStart,
               observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
               ObservabilityPageTemplate: KibanaPageTemplate,
+              kibanaFeatures: [],
             }}
           >
             <HasDataContextProvider>{storyFn(context)}</HasDataContextProvider>
@@ -228,7 +223,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: fetchLogsData,
-      hasData: async () => false,
+      hasData: async () => ({ hasData: false, indices: 'test-index' }),
     });
     registerDataHandler({
       appName: 'infra_metrics',
@@ -247,7 +242,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: fetchLogsData,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'test-index' }),
     });
 
     return (
@@ -262,7 +257,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: fetchLogsData,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'test-index' }),
     });
     registerDataHandler({
       appName: 'infra_metrics',
@@ -284,7 +279,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'infra_logs',
         fetchData: fetchLogsData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'test-index' }),
       });
       registerDataHandler({
         appName: 'infra_metrics',
@@ -308,7 +303,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'infra_logs',
         fetchData: fetchLogsData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'test-index' }),
       });
       registerDataHandler({
         appName: 'infra_metrics',
@@ -340,7 +335,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: fetchLogsData,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'test-index' }),
     });
     registerDataHandler({
       appName: 'infra_metrics',
@@ -372,7 +367,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'infra_logs',
         fetchData: fetchLogsData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'test-index' }),
       });
       registerDataHandler({
         appName: 'infra_metrics',
@@ -406,7 +401,7 @@ storiesOf('app/Overview', module)
       registerDataHandler({
         appName: 'infra_logs',
         fetchData: fetchLogsData,
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'test-index' }),
       });
       registerDataHandler({
         appName: 'infra_metrics',
@@ -437,7 +432,7 @@ storiesOf('app/Overview', module)
     registerDataHandler({
       appName: 'infra_logs',
       fetchData: async () => emptyLogsResponse,
-      hasData: async () => true,
+      hasData: async () => ({ hasData: true, indices: 'test-index' }),
     });
     registerDataHandler({
       appName: 'infra_metrics',
@@ -473,7 +468,7 @@ storiesOf('app/Overview', module)
         fetchData: async () => {
           throw new Error('Error fetching Logs data');
         },
-        hasData: async () => true,
+        hasData: async () => ({ hasData: true, indices: 'test-index' }),
       });
       registerDataHandler({
         appName: 'infra_metrics',

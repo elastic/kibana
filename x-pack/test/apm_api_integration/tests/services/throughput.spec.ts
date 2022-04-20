@@ -9,12 +9,12 @@ import { apm, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { first, last, meanBy } from 'lodash';
 import moment from 'moment';
-import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
+import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
 import {
   APIClientRequestParamsOf,
   APIReturnType,
-} from '../../../../plugins/apm/public/services/rest/create_call_apm_api';
-import { RecursivePartial } from '../../../../plugins/apm/typings/common';
+} from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { roundNumber } from '../../utils';
 
@@ -85,35 +85,32 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             .instance('instance-c');
 
           await synthtraceEsClient.index([
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(GO_PROD_RATE)
-              .flatMap((timestamp) =>
+              .generator((timestamp) =>
                 serviceGoProdInstance
                   .transaction('GET /api/product/list')
                   .duration(1000)
                   .timestamp(timestamp)
-                  .serialize()
               ),
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(GO_DEV_RATE)
-              .flatMap((timestamp) =>
+              .generator((timestamp) =>
                 serviceGoDevInstance
                   .transaction('GET /api/product/:id')
                   .duration(1000)
                   .timestamp(timestamp)
-                  .serialize()
               ),
-            ...timerange(start, end)
+            timerange(start, end)
               .interval('1m')
               .rate(JAVA_PROD_RATE)
-              .flatMap((timestamp) =>
+              .generator((timestamp) =>
                 serviceJavaInstance
                   .transaction('POST /api/product/buy')
                   .duration(1000)
                   .timestamp(timestamp)
-                  .serialize()
               ),
           ]);
         });
@@ -216,8 +213,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               query: {
                 start: moment(end).subtract(7, 'minutes').toISOString(),
                 end: new Date(end).toISOString(),
-                comparisonStart: new Date(start).toISOString(),
-                comparisonEnd: moment(start).add(7, 'minutes').toISOString(),
+                offset: '7m',
               },
             });
             throughputResponse = response.body;

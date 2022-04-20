@@ -9,16 +9,18 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
-import { ConfigSchema } from '..';
-import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '../../../../../src/core/public';
-import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
+import { KibanaFeature } from '@kbn/features-plugin/common';
+import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import {
   KibanaContextProvider,
   KibanaThemeProvider,
   RedirectAppLinks,
-} from '../../../../../src/plugins/kibana_react/public';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+} from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { ConfigSchema } from '..';
 import type { LazyObservabilityPageTemplateProps } from '../components/shared/page_template/lazy_page_template';
+import { DatePickerContextProvider } from '../context/date_picker_context';
 import { HasDataContextProvider } from '../context/has_data_context';
 import { PluginContext } from '../context/plugin_context';
 import { useRouteParams } from '../hooks/use_route_params';
@@ -51,6 +53,7 @@ export const renderApp = ({
   appMountParameters,
   observabilityRuleTypeRegistry,
   ObservabilityPageTemplate,
+  kibanaFeatures,
 }: {
   config: ConfigSchema;
   core: CoreStart;
@@ -58,6 +61,7 @@ export const renderApp = ({
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   appMountParameters: AppMountParameters;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
+  kibanaFeatures: KibanaFeature[];
 }) => {
   const { element, history, theme$ } = appMountParameters;
   const i18nCore = core.i18n;
@@ -80,19 +84,20 @@ export const renderApp = ({
           value={{
             appMountParameters,
             config,
-            core,
-            plugins,
             observabilityRuleTypeRegistry,
             ObservabilityPageTemplate,
+            kibanaFeatures,
           }}
         >
           <Router history={history}>
             <EuiThemeProvider darkMode={isDarkMode}>
               <i18nCore.Context>
                 <RedirectAppLinks application={core.application} className={APP_WRAPPER_CLASS}>
-                  <HasDataContextProvider>
-                    <App />
-                  </HasDataContextProvider>
+                  <DatePickerContextProvider>
+                    <HasDataContextProvider>
+                      <App />
+                    </HasDataContextProvider>
+                  </DatePickerContextProvider>
                 </RedirectAppLinks>
               </i18nCore.Context>
             </EuiThemeProvider>

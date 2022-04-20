@@ -6,16 +6,14 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
-
 import * as ts from 'typescript';
 import { SourceNode, SourceMapConsumer, BasicSourceMapConsumer } from 'source-map';
-import normalizePath from 'normalize-path';
 
 import { Logger } from './log';
 import { tryReadFile } from './helpers/fs';
 import { parseJson } from './helpers/json';
 import { isNodeModule } from './is_node_module';
+import * as Path from './path';
 
 type SourceMapConsumerEntry = [ts.SourceFile, BasicSourceMapConsumer | undefined];
 
@@ -38,9 +36,9 @@ export class SourceMapper {
           return [sourceFile, undefined];
         }
 
-        const relSourceFile = Path.relative(process.cwd(), sourceFile.fileName);
-        const sourceMapPath = Path.resolve(Path.dirname(sourceFile.fileName), match[1]);
-        const relSourceMapPath = Path.relative(process.cwd(), sourceMapPath);
+        const relSourceFile = Path.cwdRelative(sourceFile.fileName);
+        const sourceMapPath = Path.join(Path.dirname(sourceFile.fileName), match[1]);
+        const relSourceMapPath = Path.cwdRelative(sourceMapPath);
         const sourceJson = await tryReadFile(sourceMapPath, 'utf8');
         if (!sourceJson) {
           throw new Error(
@@ -81,7 +79,7 @@ export class SourceMapper {
    * us the path to the source, relative to the `repoRelativePackageDir`.
    */
   fixSourcePath(source: string) {
-    return normalizePath(Path.relative(this.sourceFixDir, Path.join('/', source)));
+    return Path.relative(this.sourceFixDir, Path.join('/', source));
   }
 
   getSourceNode(generatedNode: ts.Node, code: string) {

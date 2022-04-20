@@ -6,9 +6,11 @@
  */
 
 import { journey, step, before } from '@elastic/synthetics';
-import { assertText, byTestId, loginToKibana, waitForLoadingToFinish } from '../utils';
+import { assertText, byTestId, waitForLoadingToFinish } from '../utils';
+import { loginPageProvider } from '../../page_objects/login';
 
 journey('TlsFlyoutInAlertingApp', async ({ page, params }) => {
+  const login = loginPageProvider({ page });
   before(async () => {
     await waitForLoadingToFinish({ page });
   });
@@ -19,7 +21,7 @@ journey('TlsFlyoutInAlertingApp', async ({ page, params }) => {
     await page.goto(`${baseUrl}`, {
       waitUntil: 'networkidle',
     });
-    await loginToKibana({ page });
+    await login.loginToKibana();
   });
 
   step('Open tls alert flyout', async () => {

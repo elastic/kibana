@@ -11,18 +11,33 @@ import { EuiFlexGroup, EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { ToolbarPopover } from '../../shared_components';
 import type { VisualizationToolbarProps } from '../../types';
 import type { DatatableVisualizationState } from '../visualization';
+import { RowHeightSettings } from './row_height_settings';
 import { DEFAULT_PAGE_SIZE } from './table_basic';
 
 export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisualizationState>) {
   const { state, setState } = props;
+  const onChangeHeight = useCallback(
+    (newHeightMode, heightProperty, heightLinesProperty) => {
+      const rowHeightLines =
+        newHeightMode === 'single' ? 1 : newHeightMode !== 'auto' ? 2 : undefined;
+      setState({
+        ...state,
+        [heightProperty]: newHeightMode,
+        [heightLinesProperty]: rowHeightLines,
+      });
+    },
+    [setState, state]
+  );
 
-  const onToggleFitRow = useCallback(() => {
-    const current = state.fitRowToContent ?? false;
-    setState({
-      ...state,
-      fitRowToContent: !current,
-    });
-  }, [setState, state]);
+  const onChangeHeightLines = useCallback(
+    (newRowHeightLines, heightLinesProperty) => {
+      setState({
+        ...state,
+        [heightLinesProperty]: newRowHeightLines,
+      });
+    },
+    [setState, state]
+  );
 
   const onTogglePagination = useCallback(() => {
     const current = state.paging ?? { size: DEFAULT_PAGE_SIZE, enabled: false };
@@ -34,7 +49,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
   }, [setState, state]);
 
   return (
-    <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" responsive={false}>
+    <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
       <ToolbarPopover
         title={i18n.translate('xpack.lens.table.valuesVisualOptions', {
           defaultMessage: 'Visual options',
@@ -43,21 +58,33 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
         groupPosition="none"
         buttonDataTestSubj="lnsVisualOptionsButton"
       >
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.table.visualOptionsFitRowToContentLabel', {
-            defaultMessage: 'Fit row to content',
+        <RowHeightSettings
+          rowHeight={state.headerRowHeight}
+          rowHeightLines={state.headerRowHeightLines}
+          label={i18n.translate('xpack.lens.table.visualOptionsHeaderRowHeightLabel', {
+            defaultMessage: 'Header row height',
           })}
-          display="columnCompressedSwitch"
-        >
-          <EuiSwitch
-            compressed
-            data-test-subj="lens-legend-auto-height-switch"
-            label=""
-            showLabel={false}
-            checked={Boolean(state.fitRowToContent)}
-            onChange={onToggleFitRow}
-          />
-        </EuiFormRow>
+          onChangeRowHeight={(mode) =>
+            onChangeHeight(mode, 'headerRowHeight', 'headerRowHeightLines')
+          }
+          onChangeRowHeightLines={(lines) => {
+            onChangeHeightLines(lines, 'headerRowHeightLines');
+          }}
+          data-test-subj="lnsHeaderHeightSettings"
+          maxRowHeight={5}
+        />
+        <RowHeightSettings
+          rowHeight={state.rowHeight}
+          rowHeightLines={state.rowHeightLines}
+          label={i18n.translate('xpack.lens.table.visualOptionsFitRowToContentLabel', {
+            defaultMessage: 'Cell row height',
+          })}
+          onChangeRowHeight={(mode) => onChangeHeight(mode, 'rowHeight', 'rowHeightLines')}
+          onChangeRowHeightLines={(lines) => {
+            onChangeHeightLines(lines, 'rowHeightLines');
+          }}
+          data-test-subj="lnsRowHeightSettings"
+        />
         <EuiFormRow
           label={i18n.translate('xpack.lens.table.visualOptionsPaginateTable', {
             defaultMessage: 'Paginate table',

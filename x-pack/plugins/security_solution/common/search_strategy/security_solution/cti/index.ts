@@ -6,7 +6,8 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IEsSearchResponse, IEsSearchRequest } from 'src/plugins/data/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { IEsSearchResponse, IEsSearchRequest } from '@kbn/data-plugin/public';
 import { FactoryQueryTypes } from '../..';
 import { EVENT_ENRICHMENT_INDICATOR_FIELD_MAP } from '../../../cti/constants';
 import { Inspect, Maybe, TimerangeInput } from '../../common';

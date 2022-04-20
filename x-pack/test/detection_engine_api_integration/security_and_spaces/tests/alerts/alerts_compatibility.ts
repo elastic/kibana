@@ -11,7 +11,15 @@ import expect from '@kbn/expect';
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
-} from '../../../../../plugins/security_solution/common/constants';
+} from '@kbn/security-solution-plugin/common/constants';
+import { ThreatEcs } from '@kbn/security-solution-plugin/common/ecs/threat';
+import {
+  EqlCreateSchema,
+  QueryCreateSchema,
+  SavedQueryCreateSchema,
+  ThreatMatchCreateSchema,
+  ThresholdCreateSchema,
+} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 import {
   createRule,
   createSignalsIndex,
@@ -30,14 +38,6 @@ import {
   waitForSignalsToBePresent,
 } from '../../../utils';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { ThreatEcs } from '../../../../../plugins/security_solution/common/ecs/threat';
-import {
-  EqlCreateSchema,
-  QueryCreateSchema,
-  SavedQueryCreateSchema,
-  ThreatMatchCreateSchema,
-  ThresholdCreateSchema,
-} from '../../../../../plugins/security_solution/common/detection_engine/schemas/request';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -46,21 +46,6 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
 
   describe('Alerts Compatibility', function () {
-    beforeEach(async () => {
-      await esArchiver.load(
-        'x-pack/test/functional/es_archives/security_solution/legacy_cti_signals'
-      );
-      await createSignalsIndex(supertest, log);
-    });
-
-    afterEach(async () => {
-      await esArchiver.unload(
-        'x-pack/test/functional/es_archives/security_solution/legacy_cti_signals'
-      );
-      await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
-    });
-
     describe('CTI', () => {
       const expectedDomain = 'elastic.local';
       const expectedProvider = 'provider1';
@@ -71,6 +56,21 @@ export default ({ getService }: FtrProviderContext) => {
         index: 'filebeat-7.14.0-2021.08.04-000001',
         type: 'indicator_match_rule',
       };
+
+      beforeEach(async () => {
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/legacy_cti_signals'
+        );
+        await createSignalsIndex(supertest, log);
+      });
+
+      afterEach(async () => {
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/legacy_cti_signals'
+        );
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
+      });
 
       it('allows querying of legacy enriched signals by threat.indicator', async () => {
         const {
@@ -208,6 +208,19 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('Query', () => {
+      beforeEach(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/7.16.0');
+        await createSignalsIndex(supertest, log);
+      });
+
+      afterEach(async () => {
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/alerts/7.16.0'
+        );
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
+      });
+
       it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
         const rule: QueryCreateSchema = getRuleForSignalTesting([`.siem-signals-*`]);
         const { id } = await createRule(supertest, log, rule);
@@ -236,121 +249,87 @@ export default ({ getService }: FtrProviderContext) => {
           'kibana.space_ids': ['default'],
           'kibana.alert.rule.tags': [],
           agent: {
-            ephemeral_id: '07c24b1e-3663-4372-b982-f2d831e033eb',
-            hostname: 'elastic.local',
-            id: 'ce7741d9-3f0a-466d-8ae6-d7d8f883fcec',
-            name: 'elastic.local',
-            type: 'auditbeat',
-            version: '7.14.0',
+            name: 'security-linux-1.example.dev',
+            id: 'd8f66724-3cf2-437c-b124-6ac9fb0e2311',
+            type: 'filebeat',
+            version: '7.16.0',
           },
-          ecs: { version: '1.10.0' },
-          host: {
-            architecture: 'x86_64',
-            hostname: 'elastic.local',
-            id: '1633D595-A115-5BF5-870B-A471B49446C3',
-            ip: ['192.168.1.1'],
-            mac: ['aa:bb:cc:dd:ee:ff'],
-            name: 'elastic.local',
-            os: {
-              build: '20G80',
-              family: 'darwin',
-              kernel: '20.6.0',
-              name: 'Mac OS X',
-              platform: 'darwin',
-              type: 'macos',
-              version: '10.16',
+          log: {
+            file: {
+              path: '/opt/Elastic/Agent/data/elastic-agent-a13c93/logs/default/filebeat-20220301-3.ndjson',
+            },
+            offset: 148938,
+          },
+          cloud: {
+            availability_zone: 'us-central1-c',
+            instance: {
+              name: 'security-linux-1',
+              id: '8995531128842994872',
+            },
+            provider: 'gcp',
+            service: {
+              name: 'GCE',
+            },
+            machine: {
+              type: 'g1-small',
+            },
+            project: {
+              id: 'elastic-siem',
+            },
+            account: {
+              id: 'elastic-siem',
             },
           },
-          message: 'Process mdworker_shared (PID: 32306) by user elastic STARTED',
-          process: {
-            args: [
-              '/System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared',
-              '-s',
-              'mdworker',
-              '-c',
-              'MDSImporterWorker',
-              '-m',
-              'com.apple.mdworker.shared',
-            ],
-            entity_id: 'wfc7zUuEinqxUbZ6',
-            executable:
-              '/System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared',
-            hash: { sha1: '5f3233fd75c14b315731684d59b632df36a731a6' },
-            name: 'mdworker_shared',
-            pid: 32306,
-            ppid: 1,
-            start: '2021-08-04T04:14:48.830Z',
-            working_directory: '/',
+          ecs: {
+            version: '7.16.0',
           },
-          service: { type: 'system' },
-          threat: {
-            indicator: [
-              {
-                domain: 'elastic.local',
-                event: {
-                  category: 'threat',
-                  created: '2021-08-04T03:53:30.761Z',
-                  dataset: 'ti_abusech.malware',
-                  ingested: '2021-08-04T03:53:37.514040Z',
-                  kind: 'enrichment',
-                  module: 'threatintel',
-                  reference: 'https://urlhaus.abuse.ch/url/12345/',
-                  type: 'indicator',
-                },
-                first_seen: '2021-08-03T20:35:17.000Z',
-                matched: {
-                  atomic: 'elastic.local',
-                  field: 'host.name',
-                  id: '_tdUD3sBcVT20cvWAkpd',
-                  index: 'filebeat-7.14.0-2021.08.04-000001',
-                  type: 'indicator_match_rule',
-                },
-                provider: 'provider1',
-                type: 'url',
-                url: {
-                  domain: 'elastic.local',
-                  extension: 'php',
-                  full: 'http://elastic.local/thing',
-                  original: 'http://elastic.local/thing',
-                  path: '/thing',
-                  scheme: 'http',
-                },
-              },
-            ],
+          host: {
+            hostname: 'security-linux-1',
+            os: {
+              kernel: '4.19.0-18-cloud-amd64',
+              codename: 'buster',
+              name: 'Debian GNU/Linux',
+              type: 'linux',
+              family: 'debian',
+              version: '10 (buster)',
+              platform: 'debian',
+            },
+            containerized: false,
+            ip: '11.200.0.194',
+            name: 'security-linux-1',
+            architecture: 'x86_64',
           },
-          user: {
-            effective: { group: { id: '20' }, id: '501' },
-            group: { id: '20', name: 'staff' },
-            id: '501',
-            name: 'elastic',
-            saved: { group: { id: '20' }, id: '501' },
+          'service.name': 'filebeat',
+          message: 'Status message.',
+          data_stream: {
+            namespace: 'default',
+            type: 'logs',
+            dataset: 'elastic_agent.filebeat',
           },
-          'event.action': 'process_started',
-          'event.category': ['process'],
-          'event.dataset': 'process',
+          'event.agent_id_status': 'verified',
+          'event.ingested': '2022-03-23T16:50:28.994Z',
+          'event.dataset': 'elastic_agent.filebeat',
           'event.kind': 'signal',
-          'event.module': 'system',
-          'event.type': ['start'],
           'kibana.alert.ancestors': [
             {
-              depth: 0,
-              id: 'yNdfD3sBcVT20cvWFEs2',
-              index: 'auditbeat-7.14.0-2021.08.04-000001',
+              id: 'Nmyvt38BIyEvspK02HTJ',
               type: 'event',
+              index: 'events-index-000001',
+              depth: 0,
             },
             {
-              id: '0527411874b23bcea85daf5bf7dcacd144536ba6d92d3230a4a0acfb7de7f512',
+              id: '5cddda6852c5f8b6c32d4bfa5e876aa51884e0c7a2d4faaababf91ec9cb68de7',
               type: 'signal',
-              index: '.siem-signals-default-000001',
+              index: '.siem-signals-default-000001-7.16.0',
               depth: 1,
-              rule: '832f86f0-f4da-11eb-989d-b758d09dbc85',
+              rule: '5b7cd9a0-aac9-11ec-bb53-fd375b7a173a',
             },
           ],
           'kibana.alert.status': 'active',
           'kibana.alert.workflow_status': 'open',
           'kibana.alert.depth': 2,
           'kibana.alert.reason':
-            'process event with process mdworker_shared, by elastic on elastic.local created high alert Signal Testing Query.',
+            'event on security-linux-1 created high alert Signal Testing Query.',
           'kibana.alert.severity': 'high',
           'kibana.alert.risk_score': 1,
           'kibana.alert.rule.parameters': {
@@ -397,13 +376,11 @@ export default ({ getService }: FtrProviderContext) => {
           'kibana.alert.rule.version': 1,
           'kibana.alert.rule.exceptions_list': [],
           'kibana.alert.rule.immutable': false,
-          'kibana.alert.original_time': '2021-08-04T04:14:58.973Z',
-          'kibana.alert.original_event.action': 'process_started',
-          'kibana.alert.original_event.category': ['process'],
-          'kibana.alert.original_event.dataset': 'process',
+          'kibana.alert.original_time': '2022-03-23T16:50:40.440Z',
+          'kibana.alert.original_event.agent_id_status': 'verified',
+          'kibana.alert.original_event.ingested': '2022-03-23T16:50:28.994Z',
+          'kibana.alert.original_event.dataset': 'elastic_agent.filebeat',
           'kibana.alert.original_event.kind': 'signal',
-          'kibana.alert.original_event.module': 'system',
-          'kibana.alert.original_event.type': ['start'],
         });
       });
 
@@ -437,121 +414,87 @@ export default ({ getService }: FtrProviderContext) => {
           'kibana.space_ids': ['default'],
           'kibana.alert.rule.tags': [],
           agent: {
-            ephemeral_id: '07c24b1e-3663-4372-b982-f2d831e033eb',
-            hostname: 'elastic.local',
-            id: 'ce7741d9-3f0a-466d-8ae6-d7d8f883fcec',
-            name: 'elastic.local',
-            type: 'auditbeat',
-            version: '7.14.0',
+            name: 'security-linux-1.example.dev',
+            id: 'd8f66724-3cf2-437c-b124-6ac9fb0e2311',
+            type: 'filebeat',
+            version: '7.16.0',
           },
-          ecs: { version: '1.10.0' },
-          host: {
-            architecture: 'x86_64',
-            hostname: 'elastic.local',
-            id: '1633D595-A115-5BF5-870B-A471B49446C3',
-            ip: ['192.168.1.1'],
-            mac: ['aa:bb:cc:dd:ee:ff'],
-            name: 'elastic.local',
-            os: {
-              build: '20G80',
-              family: 'darwin',
-              kernel: '20.6.0',
-              name: 'Mac OS X',
-              platform: 'darwin',
-              type: 'macos',
-              version: '10.16',
+          log: {
+            file: {
+              path: '/opt/Elastic/Agent/data/elastic-agent-a13c93/logs/default/filebeat-20220301-3.ndjson',
+            },
+            offset: 148938,
+          },
+          cloud: {
+            availability_zone: 'us-central1-c',
+            instance: {
+              name: 'security-linux-1',
+              id: '8995531128842994872',
+            },
+            provider: 'gcp',
+            service: {
+              name: 'GCE',
+            },
+            machine: {
+              type: 'g1-small',
+            },
+            project: {
+              id: 'elastic-siem',
+            },
+            account: {
+              id: 'elastic-siem',
             },
           },
-          message: 'Process mdworker_shared (PID: 32306) by user elastic STARTED',
-          process: {
-            args: [
-              '/System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared',
-              '-s',
-              'mdworker',
-              '-c',
-              'MDSImporterWorker',
-              '-m',
-              'com.apple.mdworker.shared',
-            ],
-            entity_id: 'wfc7zUuEinqxUbZ6',
-            executable:
-              '/System/Library/Frameworks/CoreServices.framework/Frameworks/Metadata.framework/Versions/A/Support/mdworker_shared',
-            hash: { sha1: '5f3233fd75c14b315731684d59b632df36a731a6' },
-            name: 'mdworker_shared',
-            pid: 32306,
-            ppid: 1,
-            start: '2021-08-04T04:14:48.830Z',
-            working_directory: '/',
+          ecs: {
+            version: '7.16.0',
           },
-          service: { type: 'system' },
-          threat: {
-            indicator: [
-              {
-                domain: 'elastic.local',
-                event: {
-                  category: 'threat',
-                  created: '2021-08-04T03:53:30.761Z',
-                  dataset: 'ti_abusech.malware',
-                  ingested: '2021-08-04T03:53:37.514040Z',
-                  kind: 'enrichment',
-                  module: 'threatintel',
-                  reference: 'https://urlhaus.abuse.ch/url/12345/',
-                  type: 'indicator',
-                },
-                first_seen: '2021-08-03T20:35:17.000Z',
-                matched: {
-                  atomic: 'elastic.local',
-                  field: 'host.name',
-                  id: '_tdUD3sBcVT20cvWAkpd',
-                  index: 'filebeat-7.14.0-2021.08.04-000001',
-                  type: 'indicator_match_rule',
-                },
-                provider: 'provider1',
-                type: 'url',
-                url: {
-                  domain: 'elastic.local',
-                  extension: 'php',
-                  full: 'http://elastic.local/thing',
-                  original: 'http://elastic.local/thing',
-                  path: '/thing',
-                  scheme: 'http',
-                },
-              },
-            ],
+          host: {
+            hostname: 'security-linux-1',
+            os: {
+              kernel: '4.19.0-18-cloud-amd64',
+              codename: 'buster',
+              name: 'Debian GNU/Linux',
+              type: 'linux',
+              family: 'debian',
+              version: '10 (buster)',
+              platform: 'debian',
+            },
+            containerized: false,
+            ip: '11.200.0.194',
+            name: 'security-linux-1',
+            architecture: 'x86_64',
           },
-          user: {
-            effective: { group: { id: '20' }, id: '501' },
-            group: { id: '20', name: 'staff' },
-            id: '501',
-            name: 'elastic',
-            saved: { group: { id: '20' }, id: '501' },
+          'service.name': 'filebeat',
+          message: 'Status message.',
+          data_stream: {
+            namespace: 'default',
+            type: 'logs',
+            dataset: 'elastic_agent.filebeat',
           },
-          'event.action': 'process_started',
-          'event.category': ['process'],
-          'event.dataset': 'process',
+          'event.agent_id_status': 'verified',
+          'event.ingested': '2022-03-23T16:50:28.994Z',
+          'event.dataset': 'elastic_agent.filebeat',
           'event.kind': 'signal',
-          'event.module': 'system',
-          'event.type': ['start'],
           'kibana.alert.ancestors': [
             {
-              depth: 0,
-              id: 'yNdfD3sBcVT20cvWFEs2',
-              index: 'auditbeat-7.14.0-2021.08.04-000001',
+              id: 'Nmyvt38BIyEvspK02HTJ',
               type: 'event',
+              index: 'events-index-000001',
+              depth: 0,
             },
             {
-              id: '0527411874b23bcea85daf5bf7dcacd144536ba6d92d3230a4a0acfb7de7f512',
+              id: '5cddda6852c5f8b6c32d4bfa5e876aa51884e0c7a2d4faaababf91ec9cb68de7',
               type: 'signal',
-              index: '.siem-signals-default-000001',
+              index: '.siem-signals-default-000001-7.16.0',
               depth: 1,
-              rule: '832f86f0-f4da-11eb-989d-b758d09dbc85',
+              rule: '5b7cd9a0-aac9-11ec-bb53-fd375b7a173a',
             },
           ],
           'kibana.alert.status': 'active',
           'kibana.alert.workflow_status': 'open',
           'kibana.alert.depth': 2,
           'kibana.alert.reason':
-            'process event with process mdworker_shared, by elastic on elastic.local created high alert Signal Testing Query.',
+            'event on security-linux-1 created high alert Signal Testing Query.',
           'kibana.alert.severity': 'high',
           'kibana.alert.risk_score': 1,
           'kibana.alert.rule.parameters': {
@@ -598,18 +541,29 @@ export default ({ getService }: FtrProviderContext) => {
           'kibana.alert.rule.version': 1,
           'kibana.alert.rule.exceptions_list': [],
           'kibana.alert.rule.immutable': false,
-          'kibana.alert.original_time': '2021-08-04T04:14:58.973Z',
-          'kibana.alert.original_event.action': 'process_started',
-          'kibana.alert.original_event.category': ['process'],
-          'kibana.alert.original_event.dataset': 'process',
+          'kibana.alert.original_time': '2022-03-23T16:50:40.440Z',
+          'kibana.alert.original_event.agent_id_status': 'verified',
+          'kibana.alert.original_event.ingested': '2022-03-23T16:50:28.994Z',
+          'kibana.alert.original_event.dataset': 'elastic_agent.filebeat',
           'kibana.alert.original_event.kind': 'signal',
-          'kibana.alert.original_event.module': 'system',
-          'kibana.alert.original_event.type': ['start'],
         });
       });
     });
 
     describe('Saved Query', () => {
+      beforeEach(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/7.16.0');
+        await createSignalsIndex(supertest, log);
+      });
+
+      afterEach(async () => {
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/alerts/7.16.0'
+        );
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
+      });
+
       it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
         const rule: SavedQueryCreateSchema = getSavedQueryRuleForSignalTesting([`.siem-signals-*`]);
         const { id } = await createRule(supertest, log, rule);
@@ -636,6 +590,19 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('EQL', () => {
+      beforeEach(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/7.16.0');
+        await createSignalsIndex(supertest, log);
+      });
+
+      afterEach(async () => {
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/alerts/7.16.0'
+        );
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
+      });
+
       it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
         const rule: EqlCreateSchema = getEqlRuleForSignalTesting(['.siem-signals-*']);
         const { id } = await createRule(supertest, log, rule);
@@ -662,6 +629,19 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('Threshold', () => {
+      beforeEach(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/7.16.0');
+        await createSignalsIndex(supertest, log);
+      });
+
+      afterEach(async () => {
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/alerts/7.16.0'
+        );
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
+      });
+
       it('should generate a signal-on-legacy-signal with legacy index pattern', async () => {
         const baseRule: ThresholdCreateSchema = getThresholdRuleForSignalTesting([
           '.siem-signals-*',
@@ -670,6 +650,7 @@ export default ({ getService }: FtrProviderContext) => {
           ...baseRule,
           threshold: {
             ...baseRule.threshold,
+            field: 'host.name',
             value: 1,
           },
         };
@@ -690,6 +671,7 @@ export default ({ getService }: FtrProviderContext) => {
           ...baseRule,
           threshold: {
             ...baseRule.threshold,
+            field: 'host.name',
             value: 1,
           },
         };

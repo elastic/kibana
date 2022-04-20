@@ -6,14 +6,14 @@
  */
 
 import { mean } from 'lodash';
-import { SanitizedAlert, AlertSummary, AlertStatus } from '../types';
-import { IEvent } from '../../../event_log/server';
+import { IEvent } from '@kbn/event-log-plugin/server';
+import { SanitizedRule, AlertSummary, AlertStatus } from '../types';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER, LEGACY_EVENT_LOG_ACTIONS } from '../plugin';
 
 const Millis2Nanos = 1000 * 1000;
 
 export interface AlertSummaryFromEventLogParams {
-  rule: SanitizedAlert<{ bar: boolean }>;
+  rule: SanitizedRule<{ bar: boolean }>;
   events: IEvent[];
   executionEvents: IEvent[];
   dateStart: string;

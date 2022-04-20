@@ -42,7 +42,6 @@ import {
   RULE_IMPORT_MODAL_BUTTON,
   RULE_IMPORT_MODAL,
   INPUT_FILE,
-  TOASTER,
   RULE_IMPORT_OVERWRITE_CHECKBOX,
   RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX,
   RULES_TAGS_POPOVER_BTN,
@@ -155,7 +154,7 @@ export const goToRuleDetails = () => {
 };
 
 export const goToTheRuleDetailsOf = (ruleName: string) => {
-  cy.get(RULE_NAME).contains(ruleName).click();
+  cy.get(RULE_NAME).should('contain', ruleName).contains(ruleName).click();
 };
 
 export const loadPrebuiltDetectionRules = () => {
@@ -251,24 +250,6 @@ export const importRules = (rulesFile: string) => {
   cy.get(INPUT_FILE).trigger('click', { force: true }).attachFile(rulesFile).trigger('change');
   cy.get(RULE_IMPORT_MODAL_BUTTON).last().click({ force: true });
   cy.get(INPUT_FILE).should('not.exist');
-};
-
-export const getRulesImportExportToast = (headers: string[]) => {
-  cy.get(TOASTER)
-    .should('exist')
-    .then(($els) => {
-      const arrayOfText = Cypress.$.makeArray($els).map((el) => el.innerText);
-
-      return headers.reduce((areAllIncluded, header) => {
-        const isContained = arrayOfText.includes(header);
-        if (!areAllIncluded) {
-          return false;
-        } else {
-          return isContained;
-        }
-      }, true);
-    })
-    .should('be.true');
 };
 
 export const selectOverwriteRulesImport = () => {

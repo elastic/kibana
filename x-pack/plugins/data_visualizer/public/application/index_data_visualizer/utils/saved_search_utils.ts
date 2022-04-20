@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import {
   fromKueryExpression,
   toElasticsearchQuery,
@@ -16,12 +16,13 @@ import {
   Filter,
 } from '@kbn/es-query';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { isSavedSearchSavedObject, SavedSearchSavedObject } from '../../../../common/types';
-import { IndexPattern, SearchSource } from '../../../../../../../src/plugins/data/common';
+import { SearchSource } from '@kbn/data-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { SavedSearch } from '@kbn/discover-plugin/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { FilterManager } from '@kbn/data-plugin/public';
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '../types/combined_query';
-import { SavedSearch } from '../../../../../../../src/plugins/discover/public';
-import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
-import { FilterManager } from '../../../../../../../src/plugins/data/public';
+import { isSavedSearchSavedObject, SavedSearchSavedObject } from '../../../../common/types';
 
 const DEFAULT_QUERY = {
   bool: {
@@ -74,7 +75,7 @@ export function getQueryFromSavedSearchObject(savedSearch: SavedSearchSavedObjec
 export function createMergedEsQuery(
   query?: Query,
   filters?: Filter[],
-  indexPattern?: IndexPattern,
+  dataView?: DataView,
   uiSettings?: IUiSettingsClient
 ) {
   let combinedQuery: QueryDslQueryContainer = getDefaultQuery();
@@ -82,10 +83,10 @@ export function createMergedEsQuery(
   if (query && query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
     const ast = fromKueryExpression(query.query);
     if (query.query !== '') {
-      combinedQuery = toElasticsearchQuery(ast, indexPattern);
+      combinedQuery = toElasticsearchQuery(ast, dataView);
     }
     if (combinedQuery.bool !== undefined) {
-      const filterQuery = buildQueryFromFilters(filters, indexPattern);
+      const filterQuery = buildQueryFromFilters(filters, dataView);
 
       if (!Array.isArray(combinedQuery.bool.filter)) {
         combinedQuery.bool.filter =
@@ -102,7 +103,7 @@ export function createMergedEsQuery(
     }
   } else {
     combinedQuery = buildEsQuery(
-      indexPattern,
+      dataView,
       query ? [query] : [],
       filters ? filters : [],
       uiSettings ? getEsQueryConfig(uiSettings) : undefined
@@ -116,21 +117,21 @@ export function createMergedEsQuery(
  * with overrides from the provided query data and/or filters
  */
 export function getEsQueryFromSavedSearch({
-  indexPattern,
+  dataView,
   uiSettings,
   savedSearch,
   query,
   filters,
   filterManager,
 }: {
-  indexPattern: IndexPattern;
+  dataView: DataView;
   uiSettings: IUiSettingsClient;
   savedSearch: SavedSearchSavedObject | SavedSearch | null | undefined;
   query?: Query;
   filters?: Filter[];
   filterManager?: FilterManager;
 }) {
-  if (!indexPattern || !savedSearch) return;
+  if (!dataView || !savedSearch) return;
 
   const userQuery = query;
   const userFilters = filters;
@@ -176,7 +177,7 @@ export function getEsQueryFromSavedSearch({
     const combinedQuery = createMergedEsQuery(
       userQuery,
       Array.isArray(userFilters) ? userFilters : [],
-      indexPattern,
+      dataView,
       uiSettings
     );
 
@@ -198,7 +199,7 @@ export function getEsQueryFromSavedSearch({
     const combinedQuery = createMergedEsQuery(
       currentQuery,
       Array.isArray(currentFilters) ? currentFilters : [],
-      indexPattern,
+      dataView,
       uiSettings
     );
 

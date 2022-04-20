@@ -12,7 +12,14 @@ import { inspect } from 'util';
 
 import webpack from 'webpack';
 
-import { Bundle, WorkerConfig, ascending, parseFilePath } from '../common';
+import {
+  Bundle,
+  WorkerConfig,
+  ascending,
+  parseFilePath,
+  Hashes,
+  ParsedDllManifest,
+} from '../common';
 import { BundleRefModule } from './bundle_ref_module';
 import {
   isExternalModule,
@@ -47,7 +54,11 @@ function isBazelPackage(pkgJsonPath: string) {
 }
 
 export class PopulateBundleCachePlugin {
-  constructor(private readonly workerConfig: WorkerConfig, private readonly bundle: Bundle) {}
+  constructor(
+    private readonly workerConfig: WorkerConfig,
+    private readonly bundle: Bundle,
+    private readonly dllManifest: ParsedDllManifest
+  ) {}
 
   public apply(compiler: webpack.Compiler) {
     const { bundle, workerConfig } = this;
@@ -59,12 +70,31 @@ export class PopulateBundleCachePlugin {
       },
       (compilation) => {
         const bundleRefExportIds: string[] = [];
-        const referencedFiles = new Set<string>();
         let moduleCount = 0;
         let workUnits = compilation.fileDependencies.size;
 
+        const paths = new Set<string>();
+        const rawHashes = new Map<string, string | null>();
+        const addReferenced = (path: string) => {
+          if (paths.has(path)) {
+            return;
+          }
+
+          paths.add(path);
+          let content: Buffer;
+          try {
+            content = compiler.inputFileSystem.readFileSync(path);
+          } catch {
+            return rawHashes.set(path, null);
+          }
+
+          return rawHashes.set(path, Hashes.hash(content));
+        };
+
+        const dllRefKeys = new Set<string>();
+
         if (bundle.manifestPath) {
-          referencedFiles.add(bundle.manifestPath);
+          addReferenced(bundle.manifestPath);
         }
 
         for (const module of compilation.modules) {
@@ -84,13 +114,13 @@ export class PopulateBundleCachePlugin {
             }
 
             if (!parsedPath.dirs.includes('node_modules')) {
-              referencedFiles.add(path);
+              addReferenced(path);
 
               if (path.endsWith('.scss')) {
                 workUnits += EXTRA_SCSS_WORK_UNITS;
 
                 for (const depPath of module.buildInfo.fileDependencies) {
-                  referencedFiles.add(depPath);
+                  addReferenced(depPath);
                 }
               }
 
@@ -105,7 +135,7 @@ export class PopulateBundleCachePlugin {
               'package.json'
             );
 
-            referencedFiles.add(isBazelPackage(pkgJsonPath) ? path : pkgJsonPath);
+            addReferenced(isBazelPackage(pkgJsonPath) ? path : pkgJsonPath);
             continue;
           }
 
@@ -119,35 +149,35 @@ export class PopulateBundleCachePlugin {
             continue;
           }
 
-          if (isExternalModule(module) || isIgnoredModule(module) || isDelegatedModule(module)) {
+          if (isDelegatedModule(module)) {
+            // delegated modules are the references to the ui-shared-deps-npm dll
+            dllRefKeys.add(module.userRequest);
+            continue;
+          }
+
+          if (isExternalModule(module) || isIgnoredModule(module)) {
             continue;
           }
 
           throw new Error(`Unexpected module type: ${inspect(module)}`);
         }
 
-        const files = Array.from(referencedFiles).sort(ascending((p) => p));
-        const mtimes = new Map(
-          files.map((path): [string, number | undefined] => {
-            try {
-              return [path, compiler.inputFileSystem.statSync(path)?.mtimeMs];
-            } catch (error) {
-              if (error?.code === 'ENOENT') {
-                return [path, undefined];
-              }
-
-              throw error;
-            }
-          })
-        );
+        const referencedPaths = Array.from(paths).sort(ascending((p) => p));
+        const sortedDllRefKeys = Array.from(dllRefKeys).sort(ascending((p) => p));
 
         bundle.cache.set({
           bundleRefExportIds: bundleRefExportIds.sort(ascending((p) => p)),
           optimizerCacheKey: workerConfig.optimizerCacheKey,
-          cacheKey: bundle.createCacheKey(files, mtimes),
+          cacheKey: bundle.createCacheKey(
+            referencedPaths,
+            new Hashes(rawHashes),
+            this.dllManifest,
+            sortedDllRefKeys
+          ),
           moduleCount,
           workUnits,
-          files,
+          referencedPaths,
+          dllRefKeys: sortedDllRefKeys,
         });
 
         // write the cache to the compilation so that it isn't cleaned by clean-webpack-plugin
