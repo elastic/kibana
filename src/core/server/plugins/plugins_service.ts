@@ -231,9 +231,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
             pluginId,
             this.configService
               .atPath(plugin.configPath)
-              .pipe(
-                map((config: any) => createBrowserConfig(config, configDescriptor.exposeToBrowser!))
-              ),
+              .pipe(map((config: any) => createBrowserConfig(config, configDescriptor))),
           ];
         })
     );

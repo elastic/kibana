@@ -173,7 +173,7 @@ it(`Calls on Reporting whether to include Generate PDF as a sub-feature`, () => 
                       "reporting",
                     ],
                   },
-                  "minimumLicense": "platinum",
+                  "minimumLicense": "gold",
                   "name": "Generate PDF reports",
                   "savedObject": Object {
                     "all": Array [],

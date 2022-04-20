@@ -106,7 +106,9 @@ export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
  */
 export interface App<HistoryLocationState = unknown> extends AppNavOptions {
   /**
-   * The unique identifier of the application
+   * The unique identifier of the application.
+   *
+   * Can only be composed of alphanumeric characters, `-`, `:` and `_`
    */
   id: string;
 

@@ -121,7 +121,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           '--xpack.eventLog.logEntries=true',
-          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
+          ...disabledPlugins
+            .filter((k) => k !== 'security')
+            .map((key) => `--xpack.${key}.enabled=false`),
           // Actions simulators plugin. Needed for testing push to external services.
           ...alertingPlugins.map(
             (pluginDir) =>
