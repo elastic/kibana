@@ -126,7 +126,5 @@ export const mockState: AppState = {
     cacheSize: 0,
     hitCount: [],
   },
-  testNowRuns: {
-    testNowRuns: [],
-  },
+  testNowRuns: {},
 };

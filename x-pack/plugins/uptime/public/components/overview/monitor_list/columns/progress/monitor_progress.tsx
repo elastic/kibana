@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { SimpleMonitorProgress } from './simple_monitor_progress';
 import { BrowserMonitorProgress } from './browser_monitor_progress';
-import { DataStream } from '../../../../../../common/runtime_types';
+import { DataStream, SyntheticsMonitorSchedule } from '../../../../../../common/runtime_types';
 import { useUpdatedMonitor } from './use_updated_monitor';
 import { refreshedMonitorSelector } from '../../../../../state/reducers/monitor_list';
 
@@ -19,6 +19,8 @@ export const MonitorProgress = ({
   testRunId,
   duration,
   monitorType,
+  schedule,
+  expectPings,
   stopProgressTrack,
 }: {
   monitorId: string;
@@ -26,6 +28,8 @@ export const MonitorProgress = ({
   testRunId: string;
   duration: number;
   monitorType: DataStream;
+  schedule: SyntheticsMonitorSchedule;
+  expectPings: number;
   stopProgressTrack: () => void;
 }) => {
   const { updateMonitorStatus, isUpdating } = useUpdatedMonitor({
@@ -46,16 +50,22 @@ export const MonitorProgress = ({
       configId={configId}
       testRunId={testRunId}
       duration={duration}
+      schedule={schedule}
+      expectPings={expectPings}
       isUpdating={isUpdating}
       updateMonitorStatus={updateMonitorStatus}
+      stopProgressTrack={stopProgressTrack}
     />
   ) : (
     <SimpleMonitorProgress
       monitorId={monitorId}
       testRunId={testRunId}
       duration={duration}
+      schedule={schedule}
+      expectPings={expectPings}
       isUpdating={isUpdating}
       updateMonitorStatus={updateMonitorStatus}
+      stopProgressTrack={stopProgressTrack}
     />
   );
 };

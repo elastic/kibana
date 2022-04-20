@@ -21,14 +21,20 @@ import { JourneyStep, Ping } from '../../../../common/runtime_types';
 import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 
 interface Props {
-  doc?: JourneyStep;
+  checkGroupId?: string;
   summaryDocs?: Ping[] | JourneyStep[] | null;
   journeyStarted?: boolean;
   title?: string;
   isCompleted: boolean;
 }
 
-export function TestResultHeader({ doc, title, summaryDocs, journeyStarted, isCompleted }: Props) {
+export function TestResultHeader({
+  checkGroupId,
+  title,
+  summaryDocs,
+  journeyStarted,
+  isCompleted,
+}: Props) {
   const { basePath } = useUptimeSettingsContext();
   let duration = 0;
   if (summaryDocs && summaryDocs.length > 0) {
@@ -76,12 +82,9 @@ export function TestResultHeader({ doc, title, summaryDocs, journeyStarted, isCo
           </EuiFlexGroup>
         )}
       </EuiFlexItem>
-      {doc && (
+      {checkGroupId && (
         <EuiFlexItem grow={false}>
-          <EuiLink
-            href={`${basePath}/app/uptime/journey/${doc.monitor.check_group}/steps`}
-            target="_blank"
-          >
+          <EuiLink href={`${basePath}/app/uptime/journey/${checkGroupId}/steps`} target="_blank">
             {VIEW_DETAILS}
           </EuiLink>
         </EuiFlexItem>

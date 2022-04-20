@@ -19,10 +19,12 @@ import {
 } from './monitor_configs';
 import { MetadataCodec } from './monitor_meta_data';
 
-const Schedule = t.interface({
+const ScheduleCodec = t.interface({
   number: t.string,
   unit: ScheduleUnitCodec,
 });
+
+export type SyntheticsMonitorSchedule = t.TypeOf<typeof ScheduleCodec>;
 
 // TLSFields
 export const TLSFieldsCodec = t.partial({
@@ -65,7 +67,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.NAMESPACE]: t.string,
     [ConfigKey.MONITOR_TYPE]: DataStreamCodec,
     [ConfigKey.ENABLED]: t.boolean,
-    [ConfigKey.SCHEDULE]: Schedule,
+    [ConfigKey.SCHEDULE]: ScheduleCodec,
     [ConfigKey.APM_SERVICE_NAME]: t.string,
     [ConfigKey.TAGS]: t.array(t.string),
     [ConfigKey.LOCATIONS]: MonitorServiceLocationsCodec,

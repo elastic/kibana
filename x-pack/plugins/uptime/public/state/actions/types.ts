@@ -15,10 +15,9 @@ export interface AsyncAction<Payload, SuccessPayload> {
   success: (payload: SuccessPayload) => Action<SuccessPayload>;
   fail: (payload: IHttpFetchError) => Action<IHttpFetchError>;
 }
-export interface AsyncAction1<Payload, SuccessPayload> {
+export interface AsyncActionOptionalPayload<Payload, SuccessPayload>
+  extends AsyncAction<Payload, SuccessPayload> {
   get: (payload?: Payload) => Action<Payload>;
-  success: (payload: SuccessPayload) => Action<SuccessPayload>;
-  fail: (payload: IHttpFetchError) => Action<IHttpFetchError>;
 }
 
 export interface MonitorIdParam {

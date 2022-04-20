@@ -12,23 +12,42 @@ import { TestResultHeader } from '../test_result_header';
 
 interface Props {
   monitorId: string;
+  expectPings: number;
   onDone: () => void;
 }
-export function SimpleTestResults({ monitorId, onDone }: Props) {
-  const [summaryDocs, setSummaryDocs] = useState<Ping[]>([]);
-  const { summaryDoc, loading } = useSimpleRunOnceMonitors({ configId: monitorId });
+export function SimpleTestResults({ monitorId, expectPings, onDone }: Props) {
+  const [summaryDocsCache, setSummaryDocsCache] = useState<Ping[]>([]);
+  const { summaryDocs, loading } = useSimpleRunOnceMonitors({
+    configId: monitorId,
+    expectSummaryDocs: expectPings,
+  });
 
   useEffect(() => {
-    if (summaryDoc) {
-      setSummaryDocs((prevState) => [summaryDoc, ...prevState]);
-      onDone();
+    if (summaryDocs) {
+      setSummaryDocsCache((prevState: Ping[]) => {
+        const prevById: Record<string, Ping> = prevState.reduce(
+          (acc, cur) => ({ ...acc, [cur.docId]: cur }),
+          {}
+        );
+        return summaryDocs.map((updatedDoc) => ({
+          ...updatedDoc,
+          ...(prevById[updatedDoc.docId] ?? {}),
+        }));
+      });
+
+      if (summaryDocs.length >= expectPings) {
+        onDone();
+      }
     }
-  }, [summaryDoc, onDone]);
+  }, [expectPings, summaryDocs, onDone]);
 
   return (
     <>
-      <TestResultHeader summaryDocs={summaryDocs} isCompleted={Boolean(summaryDoc)} />
-      {summaryDoc && <PingListTable pings={summaryDocs} loading={loading} />}
+      <TestResultHeader
+        summaryDocs={summaryDocsCache}
+        isCompleted={Boolean(summaryDocs && summaryDocs.length >= expectPings)}
+      />
+      {summaryDocs && <PingListTable pings={summaryDocsCache} loading={loading} />}
     </>
   );
 }

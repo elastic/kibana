@@ -7,6 +7,7 @@
 import { sha256 } from 'js-sha256';
 import type { Logger } from '@kbn/core/server';
 import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
+import { scheduleToMilli } from '../../../../common/lib/schedule_to_time';
 import {
   MonitorFields,
   EncryptedSyntheticsMonitor,
@@ -68,7 +69,7 @@ export function formatTelemetryEvent({
     ), // mark self-managed locations as other
     locationsCount: attributes[ConfigKey.LOCATIONS].length,
     monitorNameLength: attributes[ConfigKey.NAME].length,
-    monitorInterval: parseInt(attributes[ConfigKey.SCHEDULE].number, 10) * 60 * 1000,
+    monitorInterval: scheduleToMilli(attributes[ConfigKey.SCHEDULE]),
     stackVersion: kibanaVersion,
     scriptType: getScriptType(attributes as Partial<MonitorFields>),
     errors:

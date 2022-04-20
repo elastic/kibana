@@ -23,7 +23,14 @@ describe('BrowserTestRunResult', function () {
   });
 
   it('should render properly', async function () {
-    render(<BrowserTestRunResult monitorId={testId} isMonitorSaved={true} onDone={onDone} />);
+    render(
+      <BrowserTestRunResult
+        monitorId={testId}
+        isMonitorSaved={true}
+        expectPings={1}
+        onDone={onDone}
+      />
+    );
     expect(await screen.findByText('Test result')).toBeInTheDocument();
     expect(await screen.findByText('0 steps completed')).toBeInTheDocument();
     const dataApi = (kibanaService.core as any).data.search;
@@ -55,18 +62,34 @@ describe('BrowserTestRunResult', function () {
     );
   });
 
-  it('should displays results', async function () {
+  it('should display results', async function () {
     jest.spyOn(runOnceHooks, 'useBrowserRunOnceMonitors').mockReturnValue({
       data,
-      stepListData: { steps: [stepEndDoc._source] } as any,
-      loading: false,
-      stepsLoading: false,
-      journeyStarted: true,
-      summaryDoc: summaryDoc._source,
-      stepEnds: [stepEndDoc._source],
+      summariesLoading: false,
+      stepLoadingInProgress: false,
+      expectedSummariesLoaded: true,
+      lastUpdated: Date.now(),
+      checkGroupResults: [
+        {
+          checkGroupId: 'c01406bf-7467-11ec-9858-aa31996e0afe',
+          stepsLoading: false,
+          journeyStarted: true,
+          summaryDoc: summaryDoc._source,
+          journeyDoc: summaryDoc._source,
+          steps: [stepEndDoc._source],
+          completedSteps: 1,
+        },
+      ],
     });
 
-    render(<BrowserTestRunResult monitorId={testId} isMonitorSaved={true} onDone={onDone} />);
+    render(
+      <BrowserTestRunResult
+        monitorId={testId}
+        isMonitorSaved={true}
+        expectPings={1}
+        onDone={onDone}
+      />
+    );
 
     expect(await screen.findByText('Test result')).toBeInTheDocument();
 

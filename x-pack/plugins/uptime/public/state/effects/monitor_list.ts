@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { takeEvery, takeLatest } from 'redux-saga/effects';
+import { takeLatest } from 'redux-saga/effects';
 import {
   getMonitorList,
   getMonitorListSuccess,
   getMonitorListFailure,
   getUpdatedMonitor,
-  testNowMonitorAction,
 } from '../actions';
-import { fetchMonitorList, testNowMonitor } from '../api';
+import { fetchMonitorList } from '../api';
 import { fetchEffectFactory } from './fetch_effect';
 
 export function* fetchMonitorListEffect() {
@@ -27,12 +26,5 @@ export function* fetchUpdatedMonitorEffect() {
   yield takeLatest(
     getUpdatedMonitor.get,
     fetchEffectFactory(fetchMonitorList, getUpdatedMonitor.success, getUpdatedMonitor.fail)
-  );
-}
-
-export function* fetchRunNowMonitorEffect() {
-  yield takeEvery(
-    testNowMonitorAction.get,
-    fetchEffectFactory(testNowMonitor, testNowMonitorAction.success, testNowMonitorAction.fail)
   );
 }

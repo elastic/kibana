@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import moment, { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -20,6 +20,8 @@ import {
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { kibanaService } from '../../../../state/kibana_service';
+import { useRunOnceErrors } from '../../../monitor_management/hooks/use_run_once_errors';
 import { parseTimestamp } from '../parse_timestamp';
 import { DataStream, Ping, PingError } from '../../../../../common/runtime_types';
 import {
@@ -189,6 +191,25 @@ export const MonitorListStatusColumn = ({
 
   const testNowRun = useSelector(testNowRunSelector(configId));
 
+  const { expectPings, errorMessages, hasBlockingError } = useRunOnceErrors({
+    testRunId: testNowRun?.monitorId ?? '',
+    serviceError: (testNowRun?.fetchError as Error) ?? null,
+    locations: testNowRun?.locations ?? [],
+    errors: testNowRun?.errors ?? [],
+  });
+
+  useEffect(() => {
+    errorMessages.forEach(
+      ({ name, message, title }: { name: string; message: string; title: string }) => {
+        kibanaService.toasts.addError({ name, message }, { title });
+      }
+    );
+
+    if (hasBlockingError) {
+      stopProgressTrack();
+    }
+  }, [errorMessages, hasBlockingError, stopProgressTrack]);
+
   return (
     <div>
       <StatusColumnFlexG alignItems="center" gutterSize="xs" wrap={false} responsive={false}>
@@ -200,6 +221,8 @@ export const MonitorListStatusColumn = ({
               testRunId={testNowRun?.testRunId}
               monitorType={monitorType as DataStream}
               duration={duration ?? 0}
+              schedule={testNowRun.schedule}
+              expectPings={expectPings}
               stopProgressTrack={stopProgressTrack}
             />
           ) : (

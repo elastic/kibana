@@ -26,18 +26,34 @@ describe('useBrowserRunOnceMonitors', function () {
       },
     });
 
-    const { result } = renderHook(() => useBrowserRunOnceMonitors({ configId: 'test-id' }), {
-      wrapper: WrappedHelper,
-    });
+    const { result } = renderHook(
+      () =>
+        useBrowserRunOnceMonitors({
+          configId: 'test-id',
+          testRunId: 'test-run-id',
+          expectSummaryDocs: 1,
+        }),
+      {
+        wrapper: WrappedHelper,
+      }
+    );
 
     expect(result.current).toEqual({
       data: undefined,
-      journeyStarted: false,
-      loading: true,
-      stepsLoading: true,
-      stepEnds: [],
-      stepListData: undefined,
-      summaryDoc: undefined,
+      expectedSummariesLoaded: false,
+      lastUpdated: expect.any(Number),
+      stepLoadingInProgress: true,
+      summariesLoading: true,
+      checkGroupResults: [
+        {
+          checkGroupId: 'placeholder-check-group-0',
+          completedSteps: 0,
+          steps: [],
+          summaryDoc: undefined,
+          journeyStarted: false,
+          stepsLoading: true,
+        },
+      ],
     });
   });
 });

@@ -16,8 +16,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { useFetcher } from '@kbn/observability-plugin/public';
+import { useRunOnceErrors } from '../hooks/use_run_once_errors';
 import { TestRunResult } from './test_run_results';
-import { MonitorFields } from '../../../../common/runtime_types';
+import { Locations, MonitorFields, ServiceLocationErrors } from '../../../../common/runtime_types';
 import { runOnceMonitor } from '../../../state/api';
 import { kibanaService } from '../../../state/kibana_service';
 
@@ -43,31 +44,37 @@ export function TestNowMode({
         monitor: testRun.monitor,
         id: testRun.id,
       })
-        .then(() => setServiceError(null))
+        .then((d) => {
+          setServiceError(null);
+          return d;
+        })
         .catch((error) => setServiceError(error));
     }
     return new Promise((resolve) => resolve(null));
   }, [testRun]);
 
-  useEffect(() => {
-    const errors = (data as { errors: Array<{ error: Error }> })?.errors;
+  const errors = (data as { errors?: ServiceLocationErrors })?.errors;
 
-    if (errors?.length > 0) {
-      errors.forEach(({ error }) => {
-        kibanaService.toasts.addError(error, { title: PushErrorLabel });
-      });
-    }
-  }, [data]);
-
-  const errors = (data as { errors?: Array<{ error: Error }> })?.errors;
-
-  const hasErrors = serviceError || (errors && errors?.length > 0);
+  const { hasBlockingError, blockingErrorMessage, expectPings, errorMessages } = useRunOnceErrors({
+    testRunId: testRun?.id ?? '',
+    serviceError,
+    errors: errors ?? [],
+    locations: (testRun?.monitor.locations ?? []) as Locations,
+  });
 
   useEffect(() => {
-    if (!isPushing && (!testRun || hasErrors)) {
+    errorMessages.forEach(
+      ({ name, message, title }: { name: string; message: string; title: string }) => {
+        kibanaService.toasts.addError({ name, message }, { title });
+      }
+    );
+  }, [errorMessages]);
+
+  useEffect(() => {
+    if (!isPushing && (!testRun || hasBlockingError)) {
       onDone();
     }
-  }, [testRun, hasErrors, isPushing, onDone]);
+  }, [testRun, hasBlockingError, isPushing, onDone]);
 
   if (!testRun) {
     return null;
@@ -81,15 +88,19 @@ export function TestNowMode({
         </EuiCallOut>
       )}
 
-      {hasErrors && !isPushing && <EuiCallOut title={PushError} color="danger" iconType="alert" />}
+      {(hasBlockingError && !isPushing && (
+        <EuiCallOut title={blockingErrorMessage} color="danger" iconType="alert" />
+      )) ||
+        null}
 
-      {testRun && !hasErrors && !isPushing && (
+      {testRun && !hasBlockingError && !isPushing && (
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem key={testRun.id}>
             <TestRunResult
               monitorId={testRun.id}
               monitor={testRun.monitor}
               isMonitorSaved={isMonitorSaved}
+              expectPings={expectPings}
               onDone={onDone}
             />
           </EuiFlexItem>
@@ -102,12 +113,4 @@ export function TestNowMode({
 
 const PushingLabel = i18n.translate('xpack.uptime.testRun.pushing.description', {
   defaultMessage: 'Pushing the monitor to service...',
-});
-
-const PushError = i18n.translate('xpack.uptime.testRun.pushError', {
-  defaultMessage: 'Failed to push the monitor to service.',
-});
-
-const PushErrorLabel = i18n.translate('xpack.uptime.testRun.pushErrorLabel', {
-  defaultMessage: 'Push error',
 });
