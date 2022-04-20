@@ -220,6 +220,7 @@
 /packages/kbn-ambient-ui-types/ @elastic/kibana-operations
 /packages/kbn-ambient-storybook-types/ @elastic/kibana-operations
 /packages/kbn-bazel-packages/ @elastic/kibana-operations
+/packages/kbn-bazel-runner/ @elastic/kibana-operations
 /packages/kbn-cli-dev-mode/ @elastic/kibana-operations
 /packages/kbn-dev-utils*/ @elastic/kibana-operations
 /packages/kbn-es-archiver/ @elastic/kibana-operations
@@ -523,9 +524,8 @@
 /x-pack/plugins/security_solution/server/lib/sourcerer @elastic/security-solution-platform
 /packages/kbn-securitysolution* @elastic/security-solution-platform
 
-
-## Security Solution sub teams - Security Threat Intelligence
-/x-pack/plugins/security_solution/public/common/components/threat_match @elastic/security-threat-intelligence
+## Security Threat Intelligence - Under Security Platform
+/x-pack/plugins/security_solution/public/common/components/threat_match @elastic/security-solution-platform
 
 ## Security Solution cross teams ownership
 /x-pack/plugins/security_solution/cypress/downloads @elastic/security-detections-response @elastic/security-threat-hunting
@@ -582,7 +582,7 @@ x-pack/plugins/security_solution/public/common/components/sessions_viewer @elast
 /x-pack/plugins/osquery @elastic/security-asset-management
 
 # Cloud Security Posture
-/x-pack/plugins/cloud_security_posture/ @elastic/cloud-security-posture-control-plane
+/x-pack/plugins/cloud_security_posture/ @elastic/kibana-cloud-security-posture
 
 # Design (at the bottom for specificity of SASS files)
 **/*.scss  @elastic/kibana-design

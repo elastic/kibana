@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/shared-ux'],
-};
+export * from './bazel_runner';
