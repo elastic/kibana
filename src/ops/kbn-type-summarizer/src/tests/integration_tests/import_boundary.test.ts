@@ -53,7 +53,7 @@ it('output links to named import from node modules', async () => {
     }
   `);
   expect(output.logs).toMatchInlineSnapshot(`
-    "debug loaded sourcemaps for [ 'packages/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts' ]
+    "debug loaded sourcemaps for [ 'src/ops/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts' ]
     "
   `);
 });
@@ -86,7 +86,7 @@ it('output links to type exports from node modules', async () => {
     }
   `);
   expect(output.logs).toMatchInlineSnapshot(`
-    "debug loaded sourcemaps for [ 'packages/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts' ]
+    "debug loaded sourcemaps for [ 'src/ops/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts' ]
     "
   `);
 });
@@ -119,7 +119,7 @@ it('output links to default import from node modules', async () => {
     }
   `);
   expect(output.logs).toMatchInlineSnapshot(`
-    "debug loaded sourcemaps for [ 'packages/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts' ]
+    "debug loaded sourcemaps for [ 'src/ops/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts' ]
     "
   `);
 });
@@ -177,7 +177,7 @@ it('handles symbols with multiple sources in node_modules', async () => {
     }
   `);
   expect(output.logs).toMatchInlineSnapshot(`
-    "debug loaded sourcemaps for [ 'packages/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts' ]
+    "debug loaded sourcemaps for [ 'src/ops/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts' ]
     "
   `);
 });
@@ -235,10 +235,10 @@ it('deduplicates multiple imports to the same type', async () => {
   `);
   expect(output.logs).toMatchInlineSnapshot(`
     "debug loaded sourcemaps for [
-      'packages/kbn-type-summarizer/__tmp__/dist_dts/foo1.d.ts',
-      'packages/kbn-type-summarizer/__tmp__/dist_dts/foo2.d.ts',
-      'packages/kbn-type-summarizer/__tmp__/dist_dts/foo3.d.ts',
-      'packages/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts'
+      'src/ops/kbn-type-summarizer/__tmp__/dist_dts/foo1.d.ts',
+      'src/ops/kbn-type-summarizer/__tmp__/dist_dts/foo2.d.ts',
+      'src/ops/kbn-type-summarizer/__tmp__/dist_dts/foo3.d.ts',
+      'src/ops/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts'
     ]
     "
   `);

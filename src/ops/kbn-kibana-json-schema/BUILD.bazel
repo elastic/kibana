@@ -30,7 +30,7 @@ NPM_MODULE_EXTRA_FILES = [
 #
 #  To reference other packages use:
 #    "//repo/relative/path/to/package"
-#    eg. "//packages/kbn-utils"
+#    eg. "//src/ops/kbn-utils"
 #
 #  To reference a NPM package use:
 #    "@npm//name-of-package"
@@ -45,7 +45,7 @@ RUNTIME_DEPS = [
 #
 #  To reference the types for another package use:
 #    "//repo/relative/path/to/package:npm_module_types"
-#    eg. "//packages/kbn-utils:npm_module_types"
+#    eg. "//src/ops/kbn-utils:npm_module_types"
 #
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [

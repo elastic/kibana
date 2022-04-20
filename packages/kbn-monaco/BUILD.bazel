@@ -30,7 +30,7 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "//packages/kbn-babel-preset",
+  "//src/ops/kbn-babel-preset",
   "//packages/kbn-i18n",
   "@npm//antlr4ts",
   "@npm//babel-loader",

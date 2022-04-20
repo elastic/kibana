@@ -271,7 +271,7 @@ The first and only argument to all providers is a Provider API Object. This obje
 Within config files the API has the following properties
 
 [horizontal]
-`log`::: An instance of the {blob}packages/kbn-dev-utils/src/tooling_log/tooling_log.js[`ToolingLog`] that is ready for use
+`log`::: An instance of the {blob}src/ops/kbn-dev-utils/src/tooling_log/tooling_log.js[`ToolingLog`] that is ready for use
 `readConfigFile(path)`::: Returns a promise that will resolve to a Config instance that provides the values from the config file at `path`
 
 Within service and PageObject Providers the API is:
@@ -299,7 +299,7 @@ The `FunctionalTestRunner` comes with three built-in services:
 * Use `config.get(path)` to read any value from the config file
 
 **log:**:::
-* Source: {blob}packages/kbn-dev-utils/src/tooling_log/tooling_log.js[packages/kbn-dev-utils/src/tooling_log/tooling_log.js]
+* Source: {blob}src/ops/kbn-dev-utils/src/tooling_log/tooling_log.js[src/ops/kbn-dev-utils/src/tooling_log/tooling_log.js]
 * `ToolingLog` instances are readable streams. The instance provided by this service is automatically piped to stdout by the `FunctionalTestRunner` CLI
 * `log.verbose()`, `log.debug()`, `log.info()`, `log.warning()` all work just like console.log but produce more organized output
 

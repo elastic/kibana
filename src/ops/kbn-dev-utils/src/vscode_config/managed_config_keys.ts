@@ -30,14 +30,14 @@ export const MANAGED_CONFIG_KEYS: ManagedConfigKey[] = [
       ['**/api_docs']: true,
       ['**/bazel-*']: true,
       ['**/node_modules']: true,
-      ['**/packages/kbn-pm/dist/index.js']: true,
+      ['**/src/ops/kbn-pm/dist/index.js']: true,
       ['**/target']: true,
     },
   },
   {
     key: 'search.exclude',
     value: {
-      ['**/packages/kbn-pm/dist/index.js']: true,
+      ['**/src/ops/kbn-pm/dist/index.js']: true,
       ['**/api_docs']: true,
       ['**/tsconfig.tsbuildinfo']: true,
       ['**/*.map']: true,

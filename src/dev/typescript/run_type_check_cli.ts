@@ -109,7 +109,7 @@ export async function runTypeCheckCli() {
           node scripts/type_check
 
           # check types in a single project
-          node scripts/type_check --project packages/kbn-pm/tsconfig.json
+          node scripts/type_check --project src/ops/kbn-pm/tsconfig.json
       `,
       flags: {
         string: ['project'],

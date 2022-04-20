@@ -23,7 +23,7 @@ unlink node_modules/@kbn
 unlink node_modules/css-loader
 unlink node_modules/style-loader
 
-# packages/kbn-optimizer/src/integration_tests/basic_optimization.test.ts will fail if this is a symlink
+# src/ops/kbn-optimizer/src/integration_tests/basic_optimization.test.ts will fail if this is a symlink
 unlink node_modules/val-loader
 
 cp -R ${WORKSPACE}/kibana/node_modules/@kbn node_modules/

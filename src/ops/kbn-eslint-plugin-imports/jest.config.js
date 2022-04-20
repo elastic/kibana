@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-eslint-plugin-imports'],
+  roots: ['<rootDir>/src/ops/kbn-eslint-plugin-imports'],
 };

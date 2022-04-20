@@ -31,13 +31,13 @@ NPM_MODULE_EXTRA_FILES = [
 #
 #  To reference other packages use:
 #    "//repo/relative/path/to/package"
-#    eg. "//packages/kbn-utils"
+#    eg. "//src/ops/kbn-utils"
 #
 #  To reference a NPM package use:
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
-  "//packages/kbn-utils",
+  "//src/ops/kbn-utils",
   "//packages/kbn-std",
   "//packages/kbn-synthetic-package-map",
   "@npm//globby",
@@ -50,12 +50,12 @@ RUNTIME_DEPS = [
 #
 #  To reference the types for another package use:
 #    "//repo/relative/path/to/package:npm_module_types"
-#    eg. "//packages/kbn-utils:npm_module_types"
+#    eg. "//src/ops/kbn-utils:npm_module_types"
 #
 #  References to NPM packages work the same as RUNTIME_DEPS:
 #    eg. "@npm//@types/babel__core"
 TYPES_DEPS = [
-  "//packages/kbn-utils:npm_module_types",
+  "//src/ops/kbn-utils:npm_module_types",
   "//packages/kbn-std:npm_module_types",
   "//packages/kbn-synthetic-package-map:npm_module_types",
   "@npm//@types/normalize-path",

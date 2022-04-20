@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-dev-utils'],
+  roots: ['<rootDir>/src/ops/kbn-dev-utils'],
 };

@@ -10,7 +10,7 @@ import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
 /**
  * Computes the themeTag that will be used on the client-side as `__kbnThemeTag__`
- * @see `packages/kbn-ui-shared-deps-src/theme.ts`
+ * @see `src/ops/kbn-ui-shared-deps-src/theme.ts`
  */
 export const getThemeTag = ({
   themeVersion,

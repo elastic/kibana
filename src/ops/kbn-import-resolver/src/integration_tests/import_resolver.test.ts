@@ -25,7 +25,7 @@ describe('#resolve()', () => {
   it('resolves imports to synth packages', () => {
     expect(resolver.resolve('@synth/bar', FIXTURES_DIR)).toMatchInlineSnapshot(`
       Object {
-        "absolute": <absolute path>/packages/kbn-import-resolver/src/__fixtures__/src/bar/index.js,
+        "absolute": <absolute path>/src/ops/kbn-import-resolver/src/__fixtures__/src/bar/index.js,
         "type": "file",
       }
     `);
@@ -34,7 +34,7 @@ describe('#resolve()', () => {
   it('resolves imports to bazel packages that are also found in node_modules', () => {
     expect(resolver.resolve('@pkg/box', FIXTURES_DIR)).toMatchInlineSnapshot(`
       Object {
-        "absolute": <absolute path>/packages/kbn-import-resolver/src/__fixtures__/node_modules/@pkg/box/index.js,
+        "absolute": <absolute path>/src/ops/kbn-import-resolver/src/__fixtures__/node_modules/@pkg/box/index.js,
         "nodeModule": "@pkg/box",
         "type": "file",
       }
@@ -44,7 +44,7 @@ describe('#resolve()', () => {
   it('resolves node_module imports', () => {
     expect(resolver.resolve('foo', FIXTURES_DIR)).toMatchInlineSnapshot(`
       Object {
-        "absolute": <absolute path>/packages/kbn-import-resolver/src/__fixtures__/node_modules/foo/index.js,
+        "absolute": <absolute path>/src/ops/kbn-import-resolver/src/__fixtures__/node_modules/foo/index.js,
         "nodeModule": "foo",
         "type": "file",
       }
@@ -63,7 +63,7 @@ describe('#resolve()', () => {
   it('resolves relative paths', () => {
     expect(resolver.resolve('./bar', Path.resolve(FIXTURES_DIR, 'src/bar'))).toMatchInlineSnapshot(`
       Object {
-        "absolute": <absolute path>/packages/kbn-import-resolver/src/__fixtures__/src/bar/bar.js,
+        "absolute": <absolute path>/src/ops/kbn-import-resolver/src/__fixtures__/src/bar/bar.js,
         "type": "file",
       }
     `);
@@ -145,12 +145,12 @@ describe('#getPackageIdForPath()', () => {
 describe('#getAbsolutePackageDir()', () => {
   it('returns path for bazel package', () => {
     expect(resolver.getAbsolutePackageDir('@pkg/box')).toMatchInlineSnapshot(
-      `<absolute path>/packages/kbn-import-resolver/src/__fixtures__/packages/box`
+      `<absolute path>/src/ops/kbn-import-resolver/src/__fixtures__/packages/box`
     );
   });
   it('returns path for synth package', () => {
     expect(resolver.getAbsolutePackageDir('@synth/bar')).toMatchInlineSnapshot(
-      `<absolute path>/packages/kbn-import-resolver/src/__fixtures__/src/bar`
+      `<absolute path>/src/ops/kbn-import-resolver/src/__fixtures__/src/bar`
     );
   });
   it('returns null for node_modules', () => {

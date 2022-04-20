@@ -226,7 +226,7 @@ it('rewrites mocha reports with minimal changes', async () => {
      ‹/body›
      ‹/html›
 
-         at Function.getSnapshot (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/packages/kbn-es/src/artifact.js:95:13)
+         at Function.getSnapshot (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/src/ops/kbn-es/src/artifact.js:95:13)
     -    at process._tickCallback (internal/process/next_tick.js:68:7)]]›
     -      ‹/failure›
     +    at process._tickCallback (internal/process/next_tick.js:68:7)

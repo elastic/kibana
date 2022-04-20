@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-jest-serializers'],
+  roots: ['<rootDir>/src/ops/kbn-jest-serializers'],
 };

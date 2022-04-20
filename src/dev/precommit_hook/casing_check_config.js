@@ -38,8 +38,8 @@ export const IGNORE_FILE_GLOBS = [
   'Dockerfile*',
   'vars/*',
   '.ci/pipeline-library/**/*',
-  'packages/kbn-test/jest-preset.js',
-  'packages/kbn-test/*/jest-preset.js',
+  'src/ops/kbn-test/jest-preset.js',
+  'src/ops/kbn-test/*/jest-preset.js',
   'test/package/Vagrantfile',
   '**/test/**/fixtures/**/*',
 
@@ -69,7 +69,7 @@ export const IGNORE_FILE_GLOBS = [
   '.buildkite/**/*',
 
   // generator templates use weird filenames based on the requirements for the files they're generating
-  'packages/kbn-generate/templates/**/*',
+  'src/ops/kbn-generate/templates/**/*',
 ];
 
 /**
@@ -98,9 +98,9 @@ export const IGNORE_DIRECTORY_GLOBS = [
   ...KEBAB_CASE_DIRECTORY_GLOBS,
   'src/babel-*',
   'packages/*',
-  'packages/kbn-pm/src/utils/__fixtures__/*',
+  'src/ops/kbn-pm/src/utils/__fixtures__/*',
   'x-pack/dev-tools',
-  'packages/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',
+  'src/ops/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',
   'typings/*',
 ];
 
@@ -110,7 +110,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
  *
  * @type {Array}
  */
-export const REMOVE_EXTENSION = ['packages/kbn-plugin-generator/template/**/*.ejs'];
+export const REMOVE_EXTENSION = ['src/ops/kbn-plugin-generator/template/**/*.ejs'];
 
 /**
  * DO NOT ADD FILES TO THIS LIST!!

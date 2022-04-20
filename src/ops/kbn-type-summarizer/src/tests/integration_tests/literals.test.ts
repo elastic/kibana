@@ -34,7 +34,7 @@ it('prints literal number types', async () => {
     }
   `);
   expect(output.logs).toMatchInlineSnapshot(`
-    "debug loaded sourcemaps for [ 'packages/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts' ]
+    "debug loaded sourcemaps for [ 'src/ops/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts' ]
     debug Ignoring 5 global declarations for \\"Promise\\"
     "
   `);

@@ -55,7 +55,7 @@ export function validateLimitsForAllBundles(
   if (issues.length) {
     throw createFailError(
       dedent`
-        The limits defined in packages/kbn-optimizer/limits.yml are outdated. Please update
+        The limits defined in src/ops/kbn-optimizer/limits.yml are outdated. Please update
         this file with a limit (in bytes) for every production bundle.
 
           ${issues.join('\n          ')}

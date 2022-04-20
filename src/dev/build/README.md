@@ -48,4 +48,4 @@ The majority of this logic is extracted from the legacy grunt build, and is desi
 [lib/runner.js]: ./lib/runner.js
 [lib/build.js]: ./lib/build.js
 [build_distributables.js]: ./build_distributables.js
-[@kbn/tooling-log]: ../../../packages/kbn-tooling-log
+[@kbn/tooling-log]: ../../../src/ops/kbn-tooling-log

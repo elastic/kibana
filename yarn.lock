@@ -1518,7 +1518,7 @@
     semver "^7.3.2"
     topojson-client "^3.1.0"
 
-"@elastic/eslint-config-kibana@link:bazel-bin/packages/elastic-eslint-config-kibana":
+"@elastic/eslint-config-kibana@link:bazel-bin/src/ops/elastic-eslint-config-kibana":
   version "0.0.0"
   uid ""
 
@@ -2920,11 +2920,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ambient-storybook-types@link:bazel-bin/packages/kbn-ambient-storybook-types":
+"@kbn/ambient-storybook-types@link:bazel-bin/src/ops/kbn-ambient-storybook-types":
   version "0.0.0"
   uid ""
 
-"@kbn/ambient-ui-types@link:bazel-bin/packages/kbn-ambient-ui-types":
+"@kbn/ambient-ui-types@link:bazel-bin/src/ops/kbn-ambient-ui-types":
   version "0.0.0"
   uid ""
 
@@ -2952,35 +2952,35 @@
   version "0.0.0"
   uid ""
 
-"@kbn/babel-plugin-synthetic-packages@link:bazel-bin/packages/kbn-babel-plugin-synthetic-packages":
+"@kbn/babel-plugin-synthetic-packages@link:bazel-bin/src/ops/kbn-babel-plugin-synthetic-packages":
   version "0.0.0"
   uid ""
 
-"@kbn/babel-preset@link:bazel-bin/packages/kbn-babel-preset":
+"@kbn/babel-preset@link:bazel-bin/src/ops/kbn-babel-preset":
   version "0.0.0"
   uid ""
 
-"@kbn/bazel-packages@link:bazel-bin/packages/kbn-bazel-packages":
+"@kbn/bazel-packages@link:bazel-bin/src/ops/kbn-bazel-packages":
   version "0.0.0"
   uid ""
 
-"@kbn/bazel-runner@link:bazel-bin/packages/kbn-bazel-runner":
+"@kbn/bazel-runner@link:bazel-bin/src/ops/kbn-bazel-runner":
   version "0.0.0"
   uid ""
 
-"@kbn/ci-stats-client@link:bazel-bin/packages/kbn-ci-stats-client":
+"@kbn/ci-stats-client@link:bazel-bin/src/ops/kbn-ci-stats-client":
   version "0.0.0"
   uid ""
 
-"@kbn/ci-stats-core@link:bazel-bin/packages/kbn-ci-stats-core":
+"@kbn/ci-stats-core@link:bazel-bin/src/ops/kbn-ci-stats-core":
   version "0.0.0"
   uid ""
 
-"@kbn/ci-stats-reporter@link:bazel-bin/packages/kbn-ci-stats-reporter":
+"@kbn/ci-stats-reporter@link:bazel-bin/src/ops/kbn-ci-stats-reporter":
   version "0.0.0"
   uid ""
 
-"@kbn/cli-dev-mode@link:bazel-bin/packages/kbn-cli-dev-mode":
+"@kbn/cli-dev-mode@link:bazel-bin/src/ops/kbn-cli-dev-mode":
   version "0.0.0"
   uid ""
 
@@ -3004,7 +3004,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dev-utils@link:bazel-bin/packages/kbn-dev-utils":
+"@kbn/dev-utils@link:bazel-bin/src/ops/kbn-dev-utils":
   version "0.0.0"
   uid ""
 
@@ -3012,11 +3012,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/docs-utils@link:bazel-bin/packages/kbn-docs-utils":
+"@kbn/docs-utils@link:bazel-bin/src/ops/kbn-docs-utils":
   version "0.0.0"
   uid ""
 
-"@kbn/es-archiver@link:bazel-bin/packages/kbn-es-archiver":
+"@kbn/es-archiver@link:bazel-bin/src/ops/kbn-es-archiver":
   version "0.0.0"
   uid ""
 
@@ -3024,15 +3024,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/es@link:bazel-bin/packages/kbn-es":
+"@kbn/es@link:bazel-bin/src/ops/kbn-es":
   version "0.0.0"
   uid ""
 
-"@kbn/eslint-plugin-eslint@link:bazel-bin/packages/kbn-eslint-plugin-eslint":
+"@kbn/eslint-plugin-eslint@link:bazel-bin/src/ops/kbn-eslint-plugin-eslint":
   version "0.0.0"
   uid ""
 
-"@kbn/eslint-plugin-imports@link:bazel-bin/packages/kbn-eslint-plugin-imports":
+"@kbn/eslint-plugin-imports@link:bazel-bin/src/ops/kbn-eslint-plugin-imports":
   version "0.0.0"
   uid ""
 
@@ -3044,7 +3044,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/find-used-node-modules@link:bazel-bin/packages/kbn-find-used-node-modules":
+"@kbn/find-used-node-modules@link:bazel-bin/src/ops/kbn-find-used-node-modules":
   version "0.0.0"
   uid ""
 
@@ -3052,7 +3052,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/generate@link:bazel-bin/packages/kbn-generate":
+"@kbn/generate@link:bazel-bin/src/ops/kbn-generate":
   version "0.0.0"
   uid ""
 
@@ -3064,7 +3064,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/import-resolver@link:bazel-bin/packages/kbn-import-resolver":
+"@kbn/import-resolver@link:bazel-bin/src/ops/kbn-import-resolver":
   version "0.0.0"
   uid ""
 
@@ -3076,11 +3076,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/jest-serializers@link:bazel-bin/packages/kbn-jest-serializers":
+"@kbn/jest-serializers@link:bazel-bin/src/ops/kbn-jest-serializers":
   version "0.0.0"
   uid ""
 
-"@kbn/kibana-json-schema@link:bazel-bin/packages/kbn-kibana-json-schema":
+"@kbn/kibana-json-schema@link:bazel-bin/src/ops/kbn-kibana-json-schema":
   version "0.0.0"
   uid ""
 
@@ -3100,23 +3100,23 @@
   version "0.0.0"
   uid ""
 
-"@kbn/optimizer@link:bazel-bin/packages/kbn-optimizer":
+"@kbn/optimizer@link:bazel-bin/src/ops/kbn-optimizer":
   version "0.0.0"
   uid ""
 
-"@kbn/plugin-discovery@link:bazel-bin/packages/kbn-plugin-discovery":
+"@kbn/plugin-discovery@link:bazel-bin/src/ops/kbn-plugin-discovery":
   version "0.0.0"
   uid ""
 
-"@kbn/plugin-generator@link:bazel-bin/packages/kbn-plugin-generator":
+"@kbn/plugin-generator@link:bazel-bin/src/ops/kbn-plugin-generator":
   version "0.0.0"
   uid ""
 
-"@kbn/plugin-helpers@link:bazel-bin/packages/kbn-plugin-helpers":
+"@kbn/plugin-helpers@link:bazel-bin/src/ops/kbn-plugin-helpers":
   version "0.0.0"
   uid ""
 
-"@kbn/pm@link:packages/kbn-pm":
+"@kbn/pm@link:src/ops/kbn-pm":
   version "0.0.0"
   uid ""
 
@@ -3212,7 +3212,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/sort-package-json@link:bazel-bin/packages/kbn-sort-package-json":
+"@kbn/sort-package-json@link:bazel-bin/src/ops/kbn-sort-package-json":
   version "0.0.0"
   uid ""
 
@@ -3224,7 +3224,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/stdio-dev-helpers@link:bazel-bin/packages/kbn-stdio-dev-helpers":
+"@kbn/stdio-dev-helpers@link:bazel-bin/src/ops/kbn-stdio-dev-helpers":
   version "0.0.0"
   uid ""
 
@@ -3248,7 +3248,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test@link:bazel-bin/packages/kbn-test":
+"@kbn/test@link:bazel-bin/src/ops/kbn-test":
   version "0.0.0"
   uid ""
 
@@ -3260,11 +3260,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/tooling-log@link:bazel-bin/packages/kbn-tooling-log":
+"@kbn/tooling-log@link:bazel-bin/src/ops/kbn-tooling-log":
   version "0.0.0"
   uid ""
 
-"@kbn/type-summarizer@link:bazel-bin/packages/kbn-type-summarizer":
+"@kbn/type-summarizer@link:bazel-bin/src/ops/kbn-type-summarizer":
   version "0.0.0"
   uid ""
 
@@ -3276,15 +3276,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ui-shared-deps-npm@link:bazel-bin/packages/kbn-ui-shared-deps-npm":
+"@kbn/ui-shared-deps-npm@link:bazel-bin/src/ops/kbn-ui-shared-deps-npm":
   version "0.0.0"
   uid ""
 
-"@kbn/ui-shared-deps-src@link:bazel-bin/packages/kbn-ui-shared-deps-src":
+"@kbn/ui-shared-deps-src@link:bazel-bin/src/ops/kbn-ui-shared-deps-src":
   version "0.0.0"
   uid ""
 
-"@kbn/ui-theme@link:bazel-bin/packages/kbn-ui-theme":
+"@kbn/ui-theme@link:bazel-bin/src/ops/kbn-ui-theme":
   version "0.0.0"
   uid ""
 
@@ -3292,7 +3292,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/utils@link:bazel-bin/packages/kbn-utils":
+"@kbn/utils@link:bazel-bin/src/ops/kbn-utils":
   version "0.0.0"
   uid ""
 
@@ -6048,27 +6048,27 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__bazel-packages@link:bazel-bin/packages/kbn-bazel-packages/npm_module_types":
+"@types/kbn__bazel-packages@link:bazel-bin/src/ops/kbn-bazel-packages/npm_module_types":
   version "0.0.0"
   uid ""
 
-"@types/kbn__bazel-runner@link:bazel-bin/packages/kbn-bazel-runner/npm_module_types":
+"@types/kbn__bazel-runner@link:bazel-bin/src/ops/kbn-bazel-runner/npm_module_types":
   version "0.0.0"
   uid ""
 
-"@types/kbn__ci-stats-client@link:bazel-bin/packages/kbn-ci-stats-client/npm_module_types":
+"@types/kbn__ci-stats-client@link:bazel-bin/src/ops/kbn-ci-stats-client/npm_module_types":
   version "0.0.0"
   uid ""
 
-"@types/kbn__ci-stats-core@link:bazel-bin/packages/kbn-ci-stats-core/npm_module_types":
+"@types/kbn__ci-stats-core@link:bazel-bin/src/ops/kbn-ci-stats-core/npm_module_types":
   version "0.0.0"
   uid ""
 
-"@types/kbn__ci-stats-reporter@link:bazel-bin/packages/kbn-ci-stats-reporter/npm_module_types":
+"@types/kbn__ci-stats-reporter@link:bazel-bin/src/ops/kbn-ci-stats-reporter/npm_module_types":
   version "0.0.0"
   uid ""
 
-"@types/kbn__cli-dev-mode@link:bazel-bin/packages/kbn-cli-dev-mode/npm_module_types":
+"@types/kbn__cli-dev-mode@link:bazel-bin/src/ops/kbn-cli-dev-mode/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6092,7 +6092,7 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__dev-utils@link:bazel-bin/packages/kbn-dev-utils/npm_module_types":
+"@types/kbn__dev-utils@link:bazel-bin/src/ops/kbn-dev-utils/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6100,11 +6100,11 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__docs-utils@link:bazel-bin/packages/kbn-docs-utils/npm_module_types":
+"@types/kbn__docs-utils@link:bazel-bin/src/ops/kbn-docs-utils/npm_module_types":
   version "0.0.0"
   uid ""
 
-"@types/kbn__es-archiver@link:bazel-bin/packages/kbn-es-archiver/npm_module_types":
+"@types/kbn__es-archiver@link:bazel-bin/src/ops/kbn-es-archiver/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6112,7 +6112,7 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__eslint-plugin-imports@link:bazel-bin/packages/kbn-eslint-plugin-imports/npm_module_types":
+"@types/kbn__eslint-plugin-imports@link:bazel-bin/src/ops/kbn-eslint-plugin-imports/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6120,11 +6120,11 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__find-used-node-modules@link:bazel-bin/packages/kbn-find-used-node-modules/npm_module_types":
+"@types/kbn__find-used-node-modules@link:bazel-bin/src/ops/kbn-find-used-node-modules/npm_module_types":
   version "0.0.0"
   uid ""
 
-"@types/kbn__generate@link:bazel-bin/packages/kbn-generate/npm_module_types":
+"@types/kbn__generate@link:bazel-bin/src/ops/kbn-generate/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6136,7 +6136,7 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__import-resolver@link:bazel-bin/packages/kbn-import-resolver/npm_module_types":
+"@types/kbn__import-resolver@link:bazel-bin/src/ops/kbn-import-resolver/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6148,11 +6148,11 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__jest-serializers@link:bazel-bin/packages/kbn-jest-serializers/npm_module_types":
+"@types/kbn__jest-serializers@link:bazel-bin/src/ops/kbn-jest-serializers/npm_module_types":
   version "0.0.0"
   uid ""
 
-"@types/kbn__kibana-json-schema@link:bazel-bin/packages/kbn-kibana-json-schema/npm_module_types":
+"@types/kbn__kibana-json-schema@link:bazel-bin/src/ops/kbn-kibana-json-schema/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6172,19 +6172,19 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__optimizer@link:bazel-bin/packages/kbn-optimizer/npm_module_types":
+"@types/kbn__optimizer@link:bazel-bin/src/ops/kbn-optimizer/npm_module_types":
   version "0.0.0"
   uid ""
 
-"@types/kbn__plugin-discovery@link:bazel-bin/packages/kbn-plugin-discovery/npm_module_types":
+"@types/kbn__plugin-discovery@link:bazel-bin/src/ops/kbn-plugin-discovery/npm_module_types":
   version "0.0.0"
   uid ""
 
-"@types/kbn__plugin-generator@link:bazel-bin/packages/kbn-plugin-generator/npm_module_types":
+"@types/kbn__plugin-generator@link:bazel-bin/src/ops/kbn-plugin-generator/npm_module_types":
   version "0.0.0"
   uid ""
 
-"@types/kbn__plugin-helpers@link:bazel-bin/packages/kbn-plugin-helpers/npm_module_types":
+"@types/kbn__plugin-helpers@link:bazel-bin/src/ops/kbn-plugin-helpers/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6280,7 +6280,7 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__sort-package-json@link:bazel-bin/packages/kbn-sort-package-json/npm_module_types":
+"@types/kbn__sort-package-json@link:bazel-bin/src/ops/kbn-sort-package-json/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6288,7 +6288,7 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__stdio-dev-helpers@link:bazel-bin/packages/kbn-stdio-dev-helpers/npm_module_types":
+"@types/kbn__stdio-dev-helpers@link:bazel-bin/src/ops/kbn-stdio-dev-helpers/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6304,11 +6304,11 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__test@link:bazel-bin/packages/kbn-test/npm_module_types":
+"@types/kbn__test@link:bazel-bin/src/ops/kbn-test/npm_module_types":
   version "0.0.0"
   uid ""
 
-"@types/kbn__tooling-log@link:bazel-bin/packages/kbn-tooling-log/npm_module_types":
+"@types/kbn__tooling-log@link:bazel-bin/src/ops/kbn-tooling-log/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6316,15 +6316,15 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__ui-shared-deps-npm@link:bazel-bin/packages/kbn-ui-shared-deps-npm/npm_module_types":
+"@types/kbn__ui-shared-deps-npm@link:bazel-bin/src/ops/kbn-ui-shared-deps-npm/npm_module_types":
   version "0.0.0"
   uid ""
 
-"@types/kbn__ui-shared-deps-src@link:bazel-bin/packages/kbn-ui-shared-deps-src/npm_module_types":
+"@types/kbn__ui-shared-deps-src@link:bazel-bin/src/ops/kbn-ui-shared-deps-src/npm_module_types":
   version "0.0.0"
   uid ""
 
-"@types/kbn__ui-theme@link:bazel-bin/packages/kbn-ui-theme/npm_module_types":
+"@types/kbn__ui-theme@link:bazel-bin/src/ops/kbn-ui-theme/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6332,7 +6332,7 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__utils@link:bazel-bin/packages/kbn-utils/npm_module_types":
+"@types/kbn__utils@link:bazel-bin/src/ops/kbn-utils/npm_module_types":
   version "0.0.0"
   uid ""
 

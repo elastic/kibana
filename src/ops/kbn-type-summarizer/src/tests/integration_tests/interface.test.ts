@@ -55,7 +55,7 @@ it('prints the whole interface, including comments', async () => {
     }
   `);
   expect(result.logs).toMatchInlineSnapshot(`
-    "debug loaded sourcemaps for [ 'packages/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts' ]
+    "debug loaded sourcemaps for [ 'src/ops/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts' ]
     debug Ignoring 5 global declarations for \\"Promise\\"
     "
   `);
@@ -97,8 +97,8 @@ it(`handles export-type'd interfaces`, async () => {
   `);
   expect(result.logs).toMatchInlineSnapshot(`
     "debug loaded sourcemaps for [
-      'packages/kbn-type-summarizer/__tmp__/dist_dts/foo.d.ts',
-      'packages/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts'
+      'src/ops/kbn-type-summarizer/__tmp__/dist_dts/foo.d.ts',
+      'src/ops/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts'
     ]
     "
   `);

@@ -10,9 +10,9 @@ import { configSchema, createConfig } from './config';
 
 const MOCKED_PATHS = [
   '/proc/self/cgroup',
-  'packages/kbn-dev-utils/certs/ca.crt',
-  'packages/kbn-dev-utils/certs/elasticsearch.crt',
-  'packages/kbn-dev-utils/certs/elasticsearch.key',
+  'src/ops/kbn-dev-utils/certs/ca.crt',
+  'src/ops/kbn-dev-utils/certs/elasticsearch.crt',
+  'src/ops/kbn-dev-utils/certs/elasticsearch.key',
 ];
 
 beforeEach(() => {
@@ -130,9 +130,9 @@ describe('createConfig()', () => {
 
   it('should attempt to read PEM files', async () => {
     const ssl = {
-      certificate: 'packages/kbn-dev-utils/certs/elasticsearch.crt',
-      key: 'packages/kbn-dev-utils/certs/elasticsearch.key',
-      certificateAuthorities: 'packages/kbn-dev-utils/certs/ca.crt',
+      certificate: 'src/ops/kbn-dev-utils/certs/elasticsearch.crt',
+      key: 'src/ops/kbn-dev-utils/certs/elasticsearch.key',
+      certificateAuthorities: 'src/ops/kbn-dev-utils/certs/ca.crt',
     };
     const config = createConfig(
       configSchema.validate({
@@ -144,9 +144,9 @@ describe('createConfig()', () => {
       })
     );
     const expected = expect.objectContaining({
-      certificate: 'contents-of-packages/kbn-dev-utils/certs/elasticsearch.crt',
-      key: 'contents-of-packages/kbn-dev-utils/certs/elasticsearch.key',
-      certificateAuthorities: ['contents-of-packages/kbn-dev-utils/certs/ca.crt'],
+      certificate: 'contents-of-src/ops/kbn-dev-utils/certs/elasticsearch.crt',
+      key: 'contents-of-src/ops/kbn-dev-utils/certs/elasticsearch.key',
+      certificateAuthorities: ['contents-of-src/ops/kbn-dev-utils/certs/ca.crt'],
     });
     expect(config.ui.elasticsearch.ssl).toEqual(expected);
   });

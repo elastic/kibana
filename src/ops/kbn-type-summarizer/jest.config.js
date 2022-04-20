@@ -11,5 +11,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-type-summarizer'],
+  roots: ['<rootDir>/src/ops/kbn-type-summarizer'],
 };

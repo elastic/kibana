@@ -75,8 +75,8 @@ it('prints the function declaration, including comments', async () => {
   `);
   expect(result.logs).toMatchInlineSnapshot(`
     "debug loaded sourcemaps for [
-      'packages/kbn-type-summarizer/__tmp__/dist_dts/bar.d.ts',
-      'packages/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts'
+      'src/ops/kbn-type-summarizer/__tmp__/dist_dts/bar.d.ts',
+      'src/ops/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts'
     ]
     "
   `);
@@ -116,8 +116,8 @@ it('uses the export name when it is different', async () => {
   `);
   expect(output.logs).toMatchInlineSnapshot(`
     "debug loaded sourcemaps for [
-      'packages/kbn-type-summarizer/__tmp__/dist_dts/foo.d.ts',
-      'packages/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts'
+      'src/ops/kbn-type-summarizer/__tmp__/dist_dts/foo.d.ts',
+      'src/ops/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts'
     ]
     "
   `);

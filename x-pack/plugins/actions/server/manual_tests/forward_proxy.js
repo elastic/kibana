@@ -9,8 +9,8 @@
 This module implements two forward http proxies, http on 8080 and https on 8443,
 which can be used with the config xpack.actions.proxyUrl to emulate customers
 using forward proxies with Kibana actions.  You can use either the http or https
-versions, both can forward proxy http and https traffic: 
-  
+versions, both can forward proxy http and https traffic:
+
     xpack.actions.proxyUrl: http://localhost:8080
       OR
     xpack.actions.proxyUrl: https://localhost:8443
@@ -39,8 +39,8 @@ const https = require('https');
 const httpProxy = require('http-proxy');
 
 const httpsOptions = {
-  key: fs.readFileSync('packages/kbn-dev-utils/certs/kibana.key', 'utf8'),
-  cert: fs.readFileSync('packages/kbn-dev-utils/certs/kibana.crt', 'utf8'),
+  key: fs.readFileSync('src/ops/kbn-dev-utils/certs/kibana.key', 'utf8'),
+  cert: fs.readFileSync('src/ops/kbn-dev-utils/certs/kibana.crt', 'utf8'),
 };
 
 const proxy = httpProxy.createServer();

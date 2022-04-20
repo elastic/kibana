@@ -28,12 +28,12 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "//packages/kbn-dev-utils:build",
+  "//src/ops/kbn-dev-utils:build",
   "@npm//node-forge",
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-dev-utils:npm_module_types",
+  "//src/ops/kbn-dev-utils:npm_module_types",
   "@npm//@types/flot",
   "@npm//@types/jest",
   "@npm//@types/node",

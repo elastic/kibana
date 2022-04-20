@@ -17,7 +17,7 @@ For each config file specified in configPaths, starts Elasticsearch and Kibana o
 
 `configPaths`: array of strings, each an absolute path to a config file that looks like [this](../../test/functional/config.js), following the config schema specified [here](../../src/functional_test_runner/lib/config/schema.js).
 
-Internally the method that starts Elasticsearch comes from [kbn-es](../../packages/kbn-es).
+Internally the method that starts Elasticsearch comes from [kbn-es](../../src/ops/kbn-es).
 
 #### startServers(configPath: string)
 Starts Elasticsearch and Kibana servers given a specified config.
@@ -36,4 +36,4 @@ We think it makes sense to specify the tests to run along with the particular se
 
 We also think it makes sense to have a test runner intelligently (but simply) start servers, run tests, tear down servers, and repeat for each config, uninterrupted. There's nothing special about each kind of config that specifies running some set of functional tests against some kind of Elasticsearch/Kibana servers. There doesn't need to be a separate job to run each kind of setup/test/teardown. These can all be orchestrated sequentially via the current `runTests` implementation. This is how we envision tests to run on CI.
 
-This inherently means that grouping test files in configs matters, such that a group of test files that depends on a particular server config appears together in that config's `testFiles` list. Given how quickly and easily we can start servers using [@kbn/es](../../packages/kbn-es), it should not impact performance to logically group tests by domain even if multiple groups of tests share the same server config. We can think about how to group test files together across domains when that time comes.
+This inherently means that grouping test files in configs matters, such that a group of test files that depends on a particular server config appears together in that config's `testFiles` list. Given how quickly and easily we can start servers using [@kbn/es](../../src/ops/kbn-es), it should not impact performance to logically group tests by domain even if multiple groups of tests share the same server config. We can think about how to group test files together across domains when that time comes.

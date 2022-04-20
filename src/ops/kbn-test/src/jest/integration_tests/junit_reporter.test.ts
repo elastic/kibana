@@ -35,7 +35,7 @@ it(
         '--preserve-symlinks',
         './node_modules/.bin/jest',
         '--config',
-        'packages/kbn-test/src/jest/integration_tests/__fixtures__/jest.config.js',
+        'src/ops/kbn-test/src/jest/integration_tests/__fixtures__/jest.config.js',
       ],
       {
         cwd: REPO_ROOT,

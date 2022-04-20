@@ -304,7 +304,7 @@ module.exports = {
      */
     {
       files: [
-        'packages/elastic-eslint-config-kibana/**/*.{js,mjs,ts,tsx}',
+        'src/ops/elastic-eslint-config-kibana/**/*.{js,mjs,ts,tsx}',
         'packages/kbn-datemath/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
@@ -666,7 +666,7 @@ module.exports = {
     {
       files: [
         '.eslintrc.js',
-        'packages/kbn-eslint-plugin-eslint/**/*',
+        'src/ops/kbn-eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',
         'x-pack/scripts/*.js',
         '**/jest.config.js',
@@ -1601,7 +1601,7 @@ module.exports = {
     },
 
     {
-      files: ['packages/kbn-type-summarizer/**/*.ts'],
+      files: ['src/ops/kbn-type-summarizer/**/*.ts'],
       rules: {
         'no-bitwise': 'off',
       },

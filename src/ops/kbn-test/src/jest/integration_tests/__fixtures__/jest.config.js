@@ -18,7 +18,7 @@ module.exports = {
         reportName: 'JUnit Reporter Integration Test',
         rootDirectory: resolve(
           REPO_ROOT,
-          'packages/kbn-test/src/jest/integration_tests/__fixtures__'
+          'src/ops/kbn-test/src/jest/integration_tests/__fixtures__'
         ),
       },
     ],

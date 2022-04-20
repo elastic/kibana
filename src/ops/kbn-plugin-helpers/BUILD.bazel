@@ -28,9 +28,9 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "//packages/kbn-dev-utils",
-  "//packages/kbn-optimizer",
-  "//packages/kbn-utils",
+  "//src/ops/kbn-dev-utils",
+  "//src/ops/kbn-optimizer",
+  "//src/ops/kbn-utils",
   "@npm//del",
   "@npm//execa",
   "@npm//extract-zip",
@@ -42,9 +42,9 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-dev-utils:npm_module_types",
-  "//packages/kbn-optimizer:npm_module_types",
-  "//packages/kbn-utils:npm_module_types",
+  "//src/ops/kbn-dev-utils:npm_module_types",
+  "//src/ops/kbn-optimizer:npm_module_types",
+  "//src/ops/kbn-utils:npm_module_types",
   "@npm//del",
   "@npm//execa",
   "@npm//globby",

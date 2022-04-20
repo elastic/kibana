@@ -16,7 +16,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { resolveCustomHosts, getCanonicalCustomHostUrl } from './custom_host_settings';
 
-const CA_DIR = '../../../../../../packages/kbn-dev-utils/certs';
+const CA_DIR = '../../../../../../src/ops/kbn-dev-utils/certs';
 const CA_FILE1 = pathResolve(__filename, pathJoin(CA_DIR, 'ca.crt'));
 const CA_CONTENTS1 = fsReadFileSync(CA_FILE1, 'utf8');
 const CA_FILE2 = pathResolve(__filename, pathJoin(CA_DIR, 'kibana.crt'));

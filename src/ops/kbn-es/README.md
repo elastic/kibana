@@ -105,7 +105,7 @@ To use these steps you'll need to setup the google-cloud-sdk, which can be insta
     gsutil -m rsync . gs://kibana-ci-tmp-artifacts/
     ```
 
- 8. Once the artifacts are uploaded, modify `packages/kbn-es/src/custom_snapshots.js` in a PR to use a URL formatted like:
+ 8. Once the artifacts are uploaded, modify `src/ops/kbn-es/src/custom_snapshots.js` in a PR to use a URL formatted like:
 
     ```
     // force use of manually created snapshots until ReindexPutMappings fix

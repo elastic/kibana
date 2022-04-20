@@ -28,17 +28,17 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "//packages/kbn-plugin-discovery",
-  "//packages/kbn-dev-utils",
-  "//packages/kbn-utils",
+  "//src/ops/kbn-plugin-discovery",
+  "//src/ops/kbn-dev-utils",
+  "//src/ops/kbn-utils",
   "@npm//dedent",
   "@npm//ts-morph",
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-plugin-discovery:npm_module_types",
-  "//packages/kbn-dev-utils:npm_module_types",
-  "//packages/kbn-utils:npm_module_types",
+  "//src/ops/kbn-plugin-discovery:npm_module_types",
+  "//src/ops/kbn-dev-utils:npm_module_types",
+  "//src/ops/kbn-utils:npm_module_types",
   "@npm//ts-morph",
   "@npm//@types/dedent",
   "@npm//@types/jest",

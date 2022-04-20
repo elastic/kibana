@@ -8,7 +8,7 @@
   },
   "include": [
     "./apm_api_integration/**/*",
-    "../../packages/kbn-test/types/**/*",
+    "../../src/ops/kbn-test/types/**/*",
     "../../typings/**/*"
   ],
   "exclude": [

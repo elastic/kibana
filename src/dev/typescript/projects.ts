@@ -82,7 +82,7 @@ export const PROJECTS = [
   ...findProjects('test/plugin_functional/plugins/*/tsconfig.json'),
   ...findProjects('test/interpreter_functional/plugins/*/tsconfig.json'),
   ...findProjects('test/server_integration/__fixtures__/plugins/*/tsconfig.json'),
-  ...findProjects('packages/kbn-type-summarizer/tests/tsconfig.json'),
+  ...findProjects('src/ops/kbn-type-summarizer/tests/tsconfig.json'),
 
   ...BAZEL_PACKAGE_DIRS.flatMap((dir) => findProjects(`${dir}/*/tsconfig.json`)),
 ];

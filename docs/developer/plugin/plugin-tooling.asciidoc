@@ -5,7 +5,7 @@
 [[automatic-plugin-generator]]
 === Automatic plugin generator
 
-We recommend that you kick-start your plugin by generating it with the {kib-repo}tree/{branch}/packages/kbn-plugin-generator[{kib} Plugin Generator]. Run the following in the {kib} repo, and you will be asked a couple of questions, see some progress bars, and have a freshly generated plugin ready for you to play with in {kib}'s `plugins` folder.
+We recommend that you kick-start your plugin by generating it with the {kib-repo}tree/{branch}/src/ops/kbn-plugin-generator[{kib} Plugin Generator]. Run the following in the {kib} repo, and you will be asked a couple of questions, see some progress bars, and have a freshly generated plugin ready for you to play with in {kib}'s `plugins` folder.
 
 ["source","shell"]
 -----------
@@ -29,7 +29,7 @@ The {kib} directory must be named `kibana`, and your plugin directory should be 
 === Build plugin distributable
 WARNING: {kib} distributable is not shipped with `@kbn/optimizer` anymore. You need to pre-build your plugin for use in production.
 
-You can leverage {kib-repo}blob/{branch}/packages/kbn-plugin-helpers[@kbn/plugin-helpers] to build a distributable archive for your plugin.
+You can leverage {kib-repo}blob/{branch}/src/ops/kbn-plugin-helpers[@kbn/plugin-helpers] to build a distributable archive for your plugin.
 The package transpiles the plugin code, adds polyfills, and links necessary js modules in the runtime.
 You don't need to install the `plugin-helpers`: the `package.json` is already pre-configured if you created your plugin with `node scripts/generate_plugin` script.
 To build your plugin run within your plugin folder:

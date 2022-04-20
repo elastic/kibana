@@ -112,7 +112,7 @@ export function reportFailuresToFile(
     const failureHTML = readFileSync(
       resolve(
         REPO_ROOT,
-        'packages/kbn-test/src/failed_tests_reporter/report_failures_to_file_html_template.html'
+        'src/ops/kbn-test/src/failed_tests_reporter/report_failures_to_file_html_template.html'
       )
     )
       .toString()

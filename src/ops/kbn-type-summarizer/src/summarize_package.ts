@@ -43,7 +43,7 @@ export interface SummarizePacakgeOptions {
    */
   outputDir: string;
   /**
-   * Repo-relative path to the package source, for example `packages/kbn-type-summarizer` for
+   * Repo-relative path to the package source, for example `src/ops/kbn-type-summarizer` for
    * this package. This is used to provide the correct `sourceRoot` path in the resulting source
    * map files.
    */

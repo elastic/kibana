@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-ci-stats-reporter'],
+  roots: ['<rootDir>/src/ops/kbn-ci-stats-reporter'],
 };

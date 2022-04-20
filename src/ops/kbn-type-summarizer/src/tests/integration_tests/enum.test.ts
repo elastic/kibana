@@ -60,7 +60,7 @@ it('prints the whole enum, including comments', async () => {
     }
   `);
   expect(result.logs).toMatchInlineSnapshot(`
-    "debug loaded sourcemaps for [ 'packages/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts' ]
+    "debug loaded sourcemaps for [ 'src/ops/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts' ]
     "
   `);
 });
@@ -103,8 +103,8 @@ it(`handles export-type'd enums`, async () => {
   `);
   expect(result.logs).toMatchInlineSnapshot(`
     "debug loaded sourcemaps for [
-      'packages/kbn-type-summarizer/__tmp__/dist_dts/foo.d.ts',
-      'packages/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts'
+      'src/ops/kbn-type-summarizer/__tmp__/dist_dts/foo.d.ts',
+      'src/ops/kbn-type-summarizer/__tmp__/dist_dts/index.d.ts'
     ]
     "
   `);

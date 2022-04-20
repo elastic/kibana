@@ -102,7 +102,7 @@ module.exports = {
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
   testPathIgnorePatterns: [
     '<rootDir>/packages/kbn-ui-framework/dist/',
-    '<rootDir>/packages/kbn-pm/dist/',
+    '<rootDir>/src/ops/kbn-pm/dist/',
     `integration_tests/`,
   ],
 
@@ -121,7 +121,7 @@ module.exports = {
     // ignore all node_modules except monaco-editor and react-monaco-editor which requires babel transforms to handle dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
     '[/\\\\]node_modules(?![\\/\\\\](monaco-editor|react-monaco-editor|d3-interpolate|d3-color))[/\\\\].+\\.js$',
-    'packages/kbn-pm/dist/index.js',
+    'src/ops/kbn-pm/dist/index.js',
   ],
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files to include/exclude for code coverage

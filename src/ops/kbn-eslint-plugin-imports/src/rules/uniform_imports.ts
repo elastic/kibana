@@ -21,13 +21,13 @@ import { getImportResolver } from '../get_import_resolver';
 const SETUP_NODE_ENV_DIR = Path.resolve(REPO_ROOT, 'src/setup_node_env');
 const PKGJSON_PATH = Path.resolve(REPO_ROOT, 'package.json');
 const XPACK_PKGJSON_PATH = Path.resolve(REPO_ROOT, 'x-pack/package.json');
-const KBN_PM_SCRIPT = Path.resolve(REPO_ROOT, 'packages/kbn-pm/dist/index.js');
+const KBN_PM_SCRIPT = Path.resolve(REPO_ROOT, 'src/ops/kbn-pm/dist/index.js');
 
 export const UniformImportsRule: Eslint.Rule.RuleModule = {
   meta: {
     fixable: 'code',
     docs: {
-      url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-imports/README.md#kbnimportsuniform_imports',
+      url: 'https://github.com/elastic/kibana/blob/main/src/ops/kbn-eslint-plugin-imports/README.md#kbnimportsuniform_imports',
     },
   },
 

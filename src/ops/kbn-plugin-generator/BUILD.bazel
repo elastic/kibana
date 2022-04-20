@@ -37,8 +37,8 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "//packages/kbn-utils",
-  "//packages/kbn-dev-utils",
+  "//src/ops/kbn-utils",
+  "//src/ops/kbn-dev-utils",
   "@npm//del",
   "@npm//ejs",
   "@npm//execa",
@@ -50,8 +50,8 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-utils:npm_module_types",
-  "//packages/kbn-dev-utils:npm_module_types",
+  "//src/ops/kbn-utils:npm_module_types",
+  "//src/ops/kbn-dev-utils:npm_module_types",
   "@npm//del",
   "@npm//execa",
   "@npm//globby",

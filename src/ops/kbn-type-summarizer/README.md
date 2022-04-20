@@ -14,4 +14,4 @@ The plan is to expand to other packages in the Kibana repo, adding support for l
 
 ## Something isn't working and I'm blocked!
 
-If there's a problem with the implmentation blocking another team at any point we can move the package back to using api-extractor by removing the package from the `TYPE_SUMMARIZER_PACKAGES` list at the top of [packages/kbn-type-summarizer/src/lib/bazel_cli_config.ts](./src/lib/bazel_cli_config.ts).
+If there's a problem with the implmentation blocking another team at any point we can move the package back to using api-extractor by removing the package from the `TYPE_SUMMARIZER_PACKAGES` list at the top of [src/ops/kbn-type-summarizer/src/lib/bazel_cli_config.ts](./src/lib/bazel_cli_config.ts).

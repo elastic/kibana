@@ -30,15 +30,15 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "//packages/elastic-safer-lodash-set",
   "//packages/kbn-analytics",
-  "//packages/kbn-babel-preset",
+  "//src/ops/kbn-babel-preset",
   "//packages/kbn-datemath",
   "//packages/kbn-flot-charts",
   "//packages/kbn-i18n",
   "//packages/kbn-i18n-react",
   "//packages/kbn-monaco",
   "//packages/kbn-std",
-  "//packages/kbn-ui-shared-deps-npm",
-  "//packages/kbn-ui-theme",
+  "//src/ops/kbn-ui-shared-deps-npm",
+  "//src/ops/kbn-ui-theme",
 ]
 
 TYPES_DEPS = [
@@ -49,8 +49,8 @@ TYPES_DEPS = [
   "//packages/kbn-i18n-react:npm_module_types",
   "//packages/kbn-monaco:npm_module_types",
   "//packages/kbn-std:npm_module_types",
-  "//packages/kbn-ui-shared-deps-npm:npm_module_types",
-  "//packages/kbn-ui-theme:npm_module_types",
+  "//src/ops/kbn-ui-shared-deps-npm:npm_module_types",
+  "//src/ops/kbn-ui-theme:npm_module_types",
   "@npm//webpack",
 ]
 

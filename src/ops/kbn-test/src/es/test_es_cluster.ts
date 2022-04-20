@@ -142,7 +142,7 @@ export interface CreateTestEsClusterOptions {
   ssl?: boolean;
   /**
    * Explicit transport port for a single node to run on, or a string port range to use eg. '9300-9400'
-   * defaults to the transport port from `packages/kbn-test/src/es/es_test_config.ts`
+   * defaults to the transport port from `src/ops/kbn-test/src/es/es_test_config.ts`
    */
   transportPort?: number | string;
 }
