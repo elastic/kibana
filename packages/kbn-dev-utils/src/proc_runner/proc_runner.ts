@@ -10,7 +10,7 @@ import * as Rx from 'rxjs';
 import { filter, first, catchError, map } from 'rxjs/operators';
 import exitHook from 'exit-hook';
 
-import { ToolingLog } from '../tooling_log';
+import { ToolingLog } from '@kbn/tooling-log';
 import { createFailError } from '../run';
 import { Proc, ProcOptions, startProc } from './proc';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ToolingLog } from '@kbn/dev-utils';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 // Similar to ReactJs's waitFor from here: https://testing-library.com/docs/dom-testing-library/api-async#waitfor
 export const waitFor = async (
