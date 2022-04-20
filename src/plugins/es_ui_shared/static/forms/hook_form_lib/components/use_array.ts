@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
 import { useEffect, useRef, useCallback, useMemo } from 'react';
 
 import { FormHook, FieldConfig } from '../types';
@@ -37,6 +36,25 @@ export interface FormArrayField {
   form: FormHook;
 }
 
+let uniqueId = 0;
+
+export const createArrayItem = (path: string, index: number, isNew = true): ArrayItem => ({
+  id: uniqueId++,
+  path: `${path}[${index}]`,
+  isNew,
+});
+
+/**
+ * We create an internal field to represent the Array items. This field is not returned
+ * as part as the form data but is used internally to run validation on the array items.
+ * It is this internal field value (ArrayItem[]) that we then map to actual form fields
+ * (in the children func <UseArray>{({ items }) => (...)}</UseArray>)
+ *
+ * @param path The array path in the form data
+ * @returns The internal array field path
+ */
+export const getInternalArrayFieldPath = (path: string): string => `${path}__array__`;
+
 /**
  * Use UseArray to dynamically add fields to your form.
  *
@@ -60,19 +78,9 @@ export const UseArray = ({
   children,
 }: Props) => {
   const isMounted = useRef(false);
-  const uniqueId = useRef(0);
 
   const form = useFormContext();
   const { getFieldDefaultValue } = form;
-
-  const getNewItemAtIndex = useCallback(
-    (index: number): ArrayItem => ({
-      id: uniqueId.current++,
-      path: `${path}[${index}]`,
-      isNew: true,
-    }),
-    [path]
-  );
 
   const fieldDefaultValue = useMemo<ArrayItem[]>(() => {
     const defaultValues = readDefaultValueOnForm
@@ -80,21 +88,16 @@ export const UseArray = ({
       : undefined;
 
     if (defaultValues) {
-      return defaultValues.map((_, index) => ({
-        id: uniqueId.current++,
-        path: `${path}[${index}]`,
-        isNew: false,
-      }));
+      return defaultValues.map((_, index) => createArrayItem(path, index, false));
     }
 
-    return new Array(initialNumberOfItems).fill('').map((_, i) => getNewItemAtIndex(i));
-  }, [path, initialNumberOfItems, readDefaultValueOnForm, getFieldDefaultValue, getNewItemAtIndex]);
+    return new Array(initialNumberOfItems).fill('').map((_, i) => createArrayItem(path, i));
+  }, [path, initialNumberOfItems, readDefaultValueOnForm, getFieldDefaultValue]);
 
   // Create an internal hook field which behaves like any other form field except that it is not
   // outputed in the form data (when calling form.submit() or form.getFormData())
   // This allow us to run custom validations (passed to the props) on the Array items
-
-  const internalFieldPath = useMemo(() => `${path}__${uuid.v4()}`, [path]);
+  const internalFieldPath = useMemo(() => getInternalArrayFieldPath(path), [path]);
 
   const fieldConfigBase: FieldConfig<ArrayItem[]> & InternalFieldConfig<ArrayItem[]> = {
     defaultValue: fieldDefaultValue,
@@ -132,9 +135,9 @@ export const UseArray = ({
   const addItem = useCallback(() => {
     setValue((previousItems) => {
       const itemIndex = previousItems.length;
-      return [...previousItems, getNewItemAtIndex(itemIndex)];
+      return [...previousItems, createArrayItem(path, itemIndex)];
     });
-  }, [setValue, getNewItemAtIndex]);
+  }, [setValue, path]);
 
   const removeItem = useCallback(
     (id: number) => {
