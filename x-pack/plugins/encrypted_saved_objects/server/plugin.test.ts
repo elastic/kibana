@@ -61,7 +61,7 @@ describe('EncryptedSavedObjects Plugin', () => {
 
       expect(startContract.getClient()).toMatchInlineSnapshot(`
         Object {
-          "createPointInTimeFinderAsInternalUser": [Function],
+          "createPointInTimeFinderDecryptedAsInternalUser": [Function],
           "getDecryptedAsInternalUser": [Function],
         }
       `);

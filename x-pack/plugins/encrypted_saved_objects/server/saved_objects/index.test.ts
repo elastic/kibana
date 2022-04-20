@@ -186,7 +186,7 @@ describe('#setupSavedObjects', () => {
     });
   });
 
-  describe('#createPointInTimeFinderAsInternalUser', () => {
+  describe('#createPointInTimeFinderDecryptedAsInternalUser', () => {
     it('includes `namespace` for single-namespace saved objects', async () => {
       const mockSavedObject: SavedObject = {
         id: 'some-id',
@@ -203,7 +203,7 @@ describe('#setupSavedObjects', () => {
 
       mockSavedObjectTypeRegistry.isSingleNamespace.mockReturnValue(true);
 
-      const finder = await setupContract().createPointInTimeFinderAsInternalUser({
+      const finder = await setupContract().createPointInTimeFinderDecryptedAsInternalUser({
         type: 'known-type',
         namespaces: ['some-ns'],
       });
@@ -248,7 +248,7 @@ describe('#setupSavedObjects', () => {
 
       mockSavedObjectTypeRegistry.isSingleNamespace.mockReturnValue(false);
 
-      const finder = await setupContract().createPointInTimeFinderAsInternalUser({
+      const finder = await setupContract().createPointInTimeFinderDecryptedAsInternalUser({
         type: 'known-type',
         namespaces: ['some-ns'],
       });
@@ -291,7 +291,7 @@ describe('#setupSavedObjects', () => {
         },
       });
 
-      const finder = await setupContract().createPointInTimeFinderAsInternalUser({
+      const finder = await setupContract().createPointInTimeFinderDecryptedAsInternalUser({
         type: 'not-known-type',
         namespaces: ['some-ns'],
       });
@@ -323,7 +323,7 @@ describe('#setupSavedObjects', () => {
         throw new Error('Test failure');
       });
 
-      const finder = await setupContract().createPointInTimeFinderAsInternalUser({
+      const finder = await setupContract().createPointInTimeFinderDecryptedAsInternalUser({
         type: 'known-type',
         namespaces: ['some-ns'],
       });

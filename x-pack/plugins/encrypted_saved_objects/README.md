@@ -99,11 +99,11 @@ const savedObjectWithDecryptedContent =  await esoClient.getDecryptedAsInternalU
 one would pass to `SavedObjectsClient.get`. These argument allows to specify `namespace` property that, for example, is
 required if Saved Object was created within a non-default space.
 
-Alternative option is using `createPointInTimeFinderAsInternalUser` API method, that can be used to help page through large sets of saved objects.
+Alternative option is using `createPointInTimeFinderDecryptedAsInternalUser` API method, that can be used to help page through large sets of saved objects.
 Its interface matches interface of the corresponding Saved Objects API `createPointInTimeFinder` method:
 
 ```typescript
-const finder = await this.encryptedSavedObjectsClient.createPointInTimeFinderAsInternalUser({
+const finder = await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser({
   filter,
   type: 'my-saved-object-type',
   perPage: 1000,

@@ -55,7 +55,7 @@ export interface EncryptedSavedObjectsClient {
    *
    * @example
    * ```ts
-   * const finder = await this.encryptedSavedObjectsClient.createPointInTimeFinderAsInternalUser({
+   * const finder = await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser({
    *   filter,
    *   type: 'my-saved-object-type',
    *   perPage: 1000,
@@ -69,7 +69,7 @@ export interface EncryptedSavedObjectsClient {
    * @param dependencies matches interface of corresponding argument of Saved Objects API `createPointInTimeFinder` {@link SavedObjectsCreatePointInTimeFinderDependencies}
    *
    */
-  createPointInTimeFinderAsInternalUser<T = unknown, A = unknown>(
+  createPointInTimeFinderDecryptedAsInternalUser<T = unknown, A = unknown>(
     findOptions: SavedObjectsCreatePointInTimeFinderOptions,
     dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
   ): Promise<ISavedObjectsPointInTimeFinder<T, A>>;
@@ -132,7 +132,7 @@ export function setupSavedObjects({
         };
       },
 
-      createPointInTimeFinderAsInternalUser: async <T = unknown, A = unknown>(
+      createPointInTimeFinderDecryptedAsInternalUser: async <T = unknown, A = unknown>(
         findOptions: SavedObjectsCreatePointInTimeFinderOptions,
         dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
       ): Promise<ISavedObjectsPointInTimeFinder<T, A>> => {

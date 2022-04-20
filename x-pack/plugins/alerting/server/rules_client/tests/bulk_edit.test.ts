@@ -92,12 +92,14 @@ describe('bulkEdit()', () => {
   const mockCreatePointInTimeFinderAsInternalUser = (
     response = { saved_objects: [existingDecryptedRule] }
   ) => {
-    encryptedSavedObjects.createPointInTimeFinderAsInternalUser = jest.fn().mockResolvedValue({
-      close: jest.fn(),
-      find: function* asyncGenerator() {
-        yield response;
-      },
-    });
+    encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+      .fn()
+      .mockResolvedValue({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield response;
+        },
+      });
   };
 
   beforeEach(async () => {
@@ -521,7 +523,7 @@ describe('bulkEdit()', () => {
   });
 
   describe('apiKeys', () => {
-    test('should call createPointInTimeFinderAsInternalUser that returns api Keys', async () => {
+    test('should call createPointInTimeFinderDecryptedAsInternalUser that returns api Keys', async () => {
       await rulesClient.bulkEdit({
         filter: 'alert.attributes.tags: "APM"',
         operations: [
@@ -533,7 +535,9 @@ describe('bulkEdit()', () => {
         ],
       });
 
-      expect(encryptedSavedObjects.createPointInTimeFinderAsInternalUser).toHaveBeenCalledWith({
+      expect(
+        encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser
+      ).toHaveBeenCalledWith({
         filter: {
           arguments: [
             {

@@ -1493,12 +1493,14 @@ export class RulesClient {
     errors: BulkEditError[];
   }> {
     const rulesFinder =
-      await this.encryptedSavedObjectsClient.createPointInTimeFinderAsInternalUser<RawRule>({
-        filter,
-        type: 'alert',
-        perPage: 100,
-        ...(this.namespace ? { namespaces: [this.namespace] } : undefined),
-      });
+      await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
+        {
+          filter,
+          type: 'alert',
+          perPage: 100,
+          ...(this.namespace ? { namespaces: [this.namespace] } : undefined),
+        }
+      );
 
     const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
     const errors: BulkEditError[] = [];
