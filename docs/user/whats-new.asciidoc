@@ -182,7 +182,7 @@ For more information, refer to
 [float]
 ==== New xMatters connector
 
-With the new <<xmatters-action-type,xMatters connector>>, you can
+With the new {kibana-ref}/xmatters-action-type.html[xMatters connector], you can
 configure the severity of a rule and assign it tags, so the right
 resources are notified to take action on the corresponding incidents. With the xMatters action,
 you can leverage schedules and escalations to engage with the right resources.
