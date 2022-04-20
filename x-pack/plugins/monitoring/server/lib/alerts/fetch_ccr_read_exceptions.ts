@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
+import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 import { CCRReadExceptionsStats } from '../../../common/types/alerts';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
-import { getConfigCcs } from '../../../common/ccs_utils';
 
 export async function fetchCCRReadExceptions(
   esClient: ElasticsearchClient,
@@ -24,7 +24,7 @@ export async function fetchCCRReadExceptions(
     config: Globals.app.config,
     moduleType: 'elasticsearch',
     dataset: 'ccr',
-    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+    ccs: CCS_REMOTE_PATTERN,
   });
   const params = {
     index: indexPatterns,

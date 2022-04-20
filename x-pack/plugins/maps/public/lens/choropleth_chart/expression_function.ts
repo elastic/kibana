@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { LensMultiTable } from '../../../../lens/common';
+import type { LensMultiTable } from '@kbn/lens-plugin/common';
+import { prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
 import type { ChoroplethChartConfig, ChoroplethChartProps } from './types';
 import { RENDERER_ID } from './expression_renderer';
-import { prepareLogTable } from '../../../../../../src/plugins/visualizations/common/utils';
 
 interface ChoroplethChartRender {
   type: 'render';

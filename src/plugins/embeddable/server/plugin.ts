@@ -7,8 +7,13 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { CoreSetup, CoreStart, Plugin } from 'kibana/server';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import { identity } from 'lodash';
+import {
+  PersistableStateService,
+  PersistableStateMigrateFn,
+  MigrateFunctionsObject,
+} from '@kbn/kibana-utils-plugin/common';
 import {
   EmbeddableFactoryRegistry,
   EnhancementsRegistry,
@@ -22,11 +27,6 @@ import {
   getMigrateFunction,
   getTelemetryFunction,
 } from '../common/lib';
-import {
-  PersistableStateService,
-  PersistableStateMigrateFn,
-  MigrateFunctionsObject,
-} from '../../kibana_utils/common';
 import { EmbeddableStateWithType, CommonEmbeddableStartContract } from '../common/types';
 import { getAllMigrations } from '../common/lib/get_all_migrations';
 
@@ -94,7 +94,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     }
     this.enhancements.set(enhancement.id, {
       id: enhancement.id,
-      telemetry: enhancement.telemetry || (() => ({})),
+      telemetry: enhancement.telemetry || ((state, stats) => stats),
       inject: enhancement.inject || identity,
       extract:
         enhancement.extract ||
@@ -127,7 +127,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     }
     this.embeddableFactories.set(factory.id, {
       id: factory.id,
-      telemetry: factory.telemetry || (() => ({})),
+      telemetry: factory.telemetry || ((state, stats) => stats),
       inject: factory.inject || identity,
       extract: factory.extract || ((state: EmbeddableStateWithType) => ({ state, references: [] })),
       migrations: factory.migrations || {},

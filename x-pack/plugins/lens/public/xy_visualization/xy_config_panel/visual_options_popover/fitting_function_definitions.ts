@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FittingFunction } from '../../../../../../../src/plugins/chart_expressions/expression_xy/common';
+import type { FittingFunction } from '@kbn/expression-xy-plugin/common';
 
 export const fittingFunctionDefinitions: Array<{ id: FittingFunction } & Record<string, string>> = [
   {

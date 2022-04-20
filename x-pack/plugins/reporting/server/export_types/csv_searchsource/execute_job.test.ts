@@ -17,9 +17,9 @@ jest.mock('./generate_csv/generate_csv', () => ({
 }));
 
 import nodeCrypto from '@elastic/node-crypto';
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Writable } from 'stream';
-import { ReportingCore } from '../../';
+import { ReportingCore } from '../..';
 import { CancellationToken } from '../../../common/cancellation_token';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import { runTaskFnFactory } from './execute_job';

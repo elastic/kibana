@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { ToolingLog } from '@kbn/dev-utils';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
-import type { FullResponseSchema } from '../../../plugins/security_solution/common/detection_engine/schemas/request';
+import type { FullResponseSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 
 import {
   DETECTION_ENGINE_RULES_URL,
   INTERNAL_IMMUTABLE_KEY,
   INTERNAL_RULE_ID_KEY,
-} from '../../../plugins/security_solution/common/constants';
+} from '@kbn/security-solution-plugin/common/constants';
 
 /**
  * Helper to cut down on the noise in some of the tests. This

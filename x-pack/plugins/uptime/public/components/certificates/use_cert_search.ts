@@ -7,7 +7,7 @@
 
 import { useSelector } from 'react-redux';
 import { useContext } from 'react';
-import { createEsParams, useEsSearch } from '../../../../observability/public';
+import { createEsParams, useEsSearch } from '@kbn/observability-plugin/public';
 
 import { CertResult, GetCertsParams, Ping } from '../../../common/runtime_types';
 

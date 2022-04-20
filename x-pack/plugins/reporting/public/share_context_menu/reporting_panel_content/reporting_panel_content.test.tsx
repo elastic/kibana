@@ -12,7 +12,7 @@ import {
   notificationServiceMock,
   themeServiceMock,
   uiSettingsServiceMock,
-} from 'src/core/public/mocks';
+} from '@kbn/core/public/mocks';
 import { ReportingAPIClient } from '../../lib/reporting_api_client';
 import { ReportingPanelContent, ReportingPanelProps as Props } from '.';
 import { ErrorUnsavedWorkPanel } from './components';

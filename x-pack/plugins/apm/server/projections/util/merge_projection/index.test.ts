@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mergeProjection } from './index';
+import { mergeProjection } from '.';
 
 describe('mergeProjection', () => {
   it('overrides arrays', () => {

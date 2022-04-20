@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { createAsyncAction } from './utils';
 import { MonitorIdParam } from './types';
-import { Rule } from '../../../../triggers_actions_ui/public';
 
 export const getExistingAlertAction = createAsyncAction<MonitorIdParam, Rule>(
   'GET EXISTING ALERTS'

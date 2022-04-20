@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { Client } from '@elastic/elasticsearch';
-import { SerializedConcreteTaskInstance } from '../../../../plugins/task_manager/server/task';
+import { SerializedConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 
 export interface TaskManagerDoc {
   type: string;

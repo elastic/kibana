@@ -8,8 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '..';
 
 export const aggMultiTermsFnName = 'aggMultiTerms';
 
@@ -85,6 +85,12 @@ export const aggMultiTerms = (): FunctionDefinition => ({
       types: ['number'],
       help: i18n.translate('data.search.aggs.buckets.multiTerms.size.help', {
         defaultMessage: 'Max number of buckets to retrieve',
+      }),
+    },
+    shardSize: {
+      types: ['number'],
+      help: i18n.translate('data.search.aggs.buckets.terms.shardSize.help', {
+        defaultMessage: 'Number of terms to evaluate during the aggregation.',
       }),
     },
     otherBucket: {

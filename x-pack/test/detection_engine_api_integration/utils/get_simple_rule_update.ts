@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UpdateRulesSchema } from '../../../plugins/security_solution/common/detection_engine/schemas/request';
+import type { UpdateRulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 
 /**
  * This is a typical simple rule for testing that is easy for most basic testing

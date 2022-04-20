@@ -25,8 +25,8 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
-import { RuleExecutionStatusErrorReasons, parseDuration } from '../../../../../../alerting/common';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { getAlertingSectionBreadcrumb, getRuleDetailsBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
@@ -285,11 +285,10 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                       await snoozeRule(rule, snoozeEndTime)
                     }
                     unsnoozeRule={async () => await unsnoozeRule(rule)}
-                    item={rule as RuleTableItem}
+                    rule={rule as RuleTableItem}
                     onRuleChanged={requestRefresh}
                     direction="row"
                     isEditable={hasEditButton}
-                    previousSnoozeInterval={null}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

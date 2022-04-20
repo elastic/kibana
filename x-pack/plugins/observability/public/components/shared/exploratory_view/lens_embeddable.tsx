@@ -8,11 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import React, { Dispatch, SetStateAction, useCallback, useState } from 'react';
 import styled from 'styled-components';
-import { LensEmbeddableInput, TypedLensByValueInput } from '../../../../../lens/public';
+import { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useUiTracker } from '../../../hooks/use_track_metric';
 import { useSeriesStorage } from './hooks/use_series_storage';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useExpViewTimeRange } from './hooks/use_time_range';
 import { parseRelativeDate } from './components/date_range_picker';
 import { trackTelemetryOnLoad } from './utils/telemetry';

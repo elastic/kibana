@@ -8,13 +8,10 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { Render } from '../../../../presentation_util/public/__stories__';
+import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
+import { getElasticLogo, getElasticOutline } from '@kbn/presentation-util-plugin/common/lib';
+import { waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getRepeatImageRenderer } from '../repeat_image_renderer';
-import {
-  getElasticLogo,
-  getElasticOutline,
-} from '../../../../../../src/plugins/presentation_util/common/lib';
-import { waitFor } from '../../../../../../src/plugins/presentation_util/public/__stories__';
 
 const Renderer = ({
   elasticLogo,
