@@ -104,18 +104,15 @@ export const DonutChart = ({
         >
           <EuiFlexItem>{title}</EuiFlexItem>
           <EuiFlexItem className="eui-textTruncate">
-            {!data && (
+            {data ? (
+              <EuiText className="eui-textTruncate" size="s">
+                {label}
+              </EuiText>
+            ) : (
               <EuiText className="eui-textTruncate" size="s" style={emptyLabelStyle}>
                 {label}
               </EuiText>
             )}
-            {data && !link && (
-              <EuiText className="eui-textTruncate" size="s">
-                {label}
-              </EuiText>
-            )}
-
-            {data && link && <EuiLink className="eui-textTruncate">{label}</EuiLink>}
           </EuiFlexItem>
         </DonutTextWrapper>
         {data == null || totalCount == null || totalCount === 0 ? (
