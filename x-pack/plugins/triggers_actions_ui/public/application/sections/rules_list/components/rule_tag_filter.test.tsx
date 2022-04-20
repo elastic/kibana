@@ -1,0 +1,83 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { EuiFilterButton } from '@elastic/eui';
+import { RuleTagFilter } from './rule_tag_filter';
+
+const onChangeMock = jest.fn();
+
+const tags = [
+  'a',
+  'b',
+  'c',
+  'd',
+  'e',
+  'f',
+];
+
+describe('rule_tag_filter', () => {
+  beforeEach(() => {
+    onChangeMock.mockReset();
+  });
+
+  it('renders correctly', () => {
+    const wrapper = mountWithIntl(
+      <RuleTagFilter
+        tags={tags}
+        selectedTags={[]}
+        onChange={onChangeMock}
+      />
+    );
+
+    expect(wrapper.find(EuiFilterButton).exists()).toBeTruthy();
+    expect(wrapper.find('.euiNotificationBadge').text()).toEqual('0');
+  });
+
+  it('can open the popover correctly', () => {
+    const wrapper = mountWithIntl(
+      <RuleTagFilter
+        tags={tags}
+        selectedTags={[]}
+        onChange={onChangeMock}
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="RuleTagFilterSelectable"]').exists()).toBeFalsy();
+
+    wrapper.find(EuiFilterButton).simulate('click');
+
+    expect(wrapper.find('[data-test-subj="RuleTagFilterSelectable"]').exists()).toBeTruthy();
+    expect(wrapper.find('li').length).toEqual(tags.length);
+  });
+
+  it('can select tags', () => {
+    const wrapper = mountWithIntl(
+      <RuleTagFilter
+        tags={tags}
+        selectedTags={[]}
+        onChange={onChangeMock}
+      />
+    );
+
+    wrapper.find(EuiFilterButton).simulate('click');
+
+    wrapper.find('[data-test-subj="RuleTagFilterOption-a"]').at(0).simulate('click');
+    expect(onChangeMock).toHaveBeenCalledWith(['a']);
+    
+    wrapper.setProps({
+      selectedTags: ['a'],
+    });
+
+    wrapper.find('[data-test-subj="RuleTagFilterOption-a"]').at(0).simulate('click');
+    expect(onChangeMock).toHaveBeenCalledWith([]);
+
+    wrapper.find('[data-test-subj="RuleTagFilterOption-b"]').at(0).simulate('click');
+    expect(onChangeMock).toHaveBeenCalledWith(['a', 'b']);
+  });
+});
