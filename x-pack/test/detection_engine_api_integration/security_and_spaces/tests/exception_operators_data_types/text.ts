@@ -62,7 +62,7 @@ export default ({ getService }: FtrProviderContext) => {
         runner.test(
           'should find all the text from the data set when no exceptions are set on the rule',
           async () => {
-            const rule = getRuleForSignalTesting(['text']);
+            const rule = getRuleForSignalTesting(['text'], '');
             const { id } = await createRule(supertest, log, rule);
             await waitForRuleSuccessOrStatus(supertest, log, id);
             await waitForSignalsToBePresent(supertest, log, 4, [id]);
@@ -73,7 +73,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
 
         runner.test('should filter 1 single text if it is set as an exception', async () => {
-          const rule = getRuleForSignalTesting(['text']);
+          const rule = getRuleForSignalTesting(['text'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -92,7 +92,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         runner.test('should filter 2 text if both are set as exceptions', async () => {
-          const rule = getRuleForSignalTesting(['text']);
+          const rule = getRuleForSignalTesting(['text'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -119,7 +119,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         runner.test('should filter 3 text if all 3 are set as exceptions', async () => {
-          const rule = getRuleForSignalTesting(['text']);
+          const rule = getRuleForSignalTesting(['text'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -154,7 +154,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         runner.test('should filter 4 text if all are set as exceptions', async () => {
-          const rule = getRuleForSignalTesting(['text']);
+          const rule = getRuleForSignalTesting(['text'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -196,7 +196,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         runner.test('should filter 1 single text using a single word', async () => {
-          const rule = getRuleForSignalTesting(['text']);
+          const rule = getRuleForSignalTesting(['text'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -215,7 +215,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         runner.test('should filter all words using a common piece of text', async () => {
-          const rule = getRuleForSignalTesting(['text']);
+          const rule = getRuleForSignalTesting(['text'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -233,7 +233,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         runner.test('should filter 1 single text with punctuation added', async () => {
-          const rule = getRuleForSignalTesting(['text']);
+          const rule = getRuleForSignalTesting(['text'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -258,7 +258,7 @@ export default ({ getService }: FtrProviderContext) => {
         const runner = createParallelTestRunner();
 
         runner.test('will return 0 results if it cannot find what it is excluding', async () => {
-          const rule = getRuleForSignalTesting(['text']);
+          const rule = getRuleForSignalTesting(['text'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -276,7 +276,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         runner.test('will return just 1 result we excluded', async () => {
-          const rule = getRuleForSignalTesting(['text']);
+          const rule = getRuleForSignalTesting(['text'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -295,7 +295,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         runner.test('will return 0 results if we exclude two text', async () => {
-          const rule = getRuleForSignalTesting(['text']);
+          const rule = getRuleForSignalTesting(['text'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -321,7 +321,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         runner.test('should filter 1 single text using a single word', async () => {
-          const rule = getRuleForSignalTesting(['text']);
+          const rule = getRuleForSignalTesting(['text'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -340,7 +340,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         runner.test('should filter all words using a common piece of text', async () => {
-          const rule = getRuleForSignalTesting(['text']);
+          const rule = getRuleForSignalTesting(['text'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -359,7 +359,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         runner.test('should filter 1 single text with punctuation added', async () => {
-          const rule = getRuleForSignalTesting(['text']);
+          const rule = getRuleForSignalTesting(['text'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -384,7 +384,7 @@ export default ({ getService }: FtrProviderContext) => {
         const runner = createParallelTestRunner();
 
         runner.test('should filter 1 single text if it is set as an exception', async () => {
-          const rule = getRuleForSignalTesting(['text']);
+          const rule = getRuleForSignalTesting(['text'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -403,7 +403,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         runner.test('should filter 2 text if both are set as exceptions', async () => {
-          const rule = getRuleForSignalTesting(['text']);
+          const rule = getRuleForSignalTesting(['text'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -422,7 +422,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         runner.test('should filter 3 text if all 3 are set as exceptions', async () => {
-          const rule = getRuleForSignalTesting(['text']);
+          const rule = getRuleForSignalTesting(['text'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -441,7 +441,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         runner.test('should filter 4 text if all are set as exceptions', async () => {
-          const rule = getRuleForSignalTesting(['text']);
+          const rule = getRuleForSignalTesting(['text'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -465,7 +465,7 @@ export default ({ getService }: FtrProviderContext) => {
         const runner = createParallelTestRunner();
 
         runner.test('will return 0 results if it cannot find what it is excluding', async () => {
-          const rule = getRuleForSignalTesting(['text']);
+          const rule = getRuleForSignalTesting(['text'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -483,7 +483,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         runner.test('will return just the result we excluded', async () => {
-          const rule = getRuleForSignalTesting(['text']);
+          const rule = getRuleForSignalTesting(['text'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -508,7 +508,7 @@ export default ({ getService }: FtrProviderContext) => {
         const runner = createParallelTestRunner();
 
         runner.test('will return 0 results if matching against text', async () => {
-          const rule = getRuleForSignalTesting(['text']);
+          const rule = getRuleForSignalTesting(['text'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -531,7 +531,7 @@ export default ({ getService }: FtrProviderContext) => {
         const runner = createParallelTestRunner();
 
         runner.test('will return 4 results if matching against text', async () => {
-          const rule = getRuleForSignalTesting(['text']);
+          const rule = getRuleForSignalTesting(['text'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -637,7 +637,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         runner.test('will return 3 results if we have a list that includes 1 text', async () => {
           const filename = await importTextFile(supertest, log, 'text', ['word one']);
-          const rule = getRuleForSignalTesting(['text']);
+          const rule = getRuleForSignalTesting(['text'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -664,7 +664,7 @@ export default ({ getService }: FtrProviderContext) => {
             const filename = await importTextFile(supertest, log, 'text', [
               'word one additional wording',
             ]);
-            const rule = getRuleForSignalTesting(['text']);
+            const rule = getRuleForSignalTesting(['text'], '');
             const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
               [
                 {
@@ -688,7 +688,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         runner.test('will return 2 results if we have a list that includes 2 text', async () => {
           const filename = await importFile(supertest, log, 'text', ['word one', 'word three']);
-          const rule = getRuleForSignalTesting(['text']);
+          const rule = getRuleForSignalTesting(['text'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -716,7 +716,7 @@ export default ({ getService }: FtrProviderContext) => {
             'word three',
             'word four',
           ]);
-          const rule = getRuleForSignalTesting(['text']);
+          const rule = getRuleForSignalTesting(['text'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -826,7 +826,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         runner.test('will return 1 result if we have a list that excludes 1 text', async () => {
           const filename = await importTextFile(supertest, log, 'text', ['word one']);
-          const rule = getRuleForSignalTesting(['text']);
+          const rule = getRuleForSignalTesting(['text'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -853,7 +853,7 @@ export default ({ getService }: FtrProviderContext) => {
             const filename = await importTextFile(supertest, log, 'text', [
               'word one additional wording',
             ]);
-            const rule = getRuleForSignalTesting(['text']);
+            const rule = getRuleForSignalTesting(['text'], '');
             const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
               [
                 {
@@ -877,7 +877,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         runner.test('will return 2 results if we have a list that excludes 2 text', async () => {
           const filename = await importTextFile(supertest, log, 'text', ['word one', 'word three']);
-          const rule = getRuleForSignalTesting(['text']);
+          const rule = getRuleForSignalTesting(['text'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {
@@ -905,7 +905,7 @@ export default ({ getService }: FtrProviderContext) => {
             'word three',
             'word four',
           ]);
-          const rule = getRuleForSignalTesting(['text']);
+          const rule = getRuleForSignalTesting(['text'], '');
           const { id } = await createRuleWithExceptionEntries(supertest, log, rule, [
             [
               {

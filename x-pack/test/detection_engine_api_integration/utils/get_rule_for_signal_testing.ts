@@ -18,7 +18,7 @@ let id = 0;
 
 export const getRuleForSignalTesting = (
   index: string[],
-  ruleId = '',
+  ruleId = 'rule-1',
   enabled = true
 ): QueryCreateSchema => {
   return {
