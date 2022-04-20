@@ -11,7 +11,7 @@ import type {
   KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectsOpenPointInTimeOptions,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import type {
   CreateCommentsArray,
   Description,

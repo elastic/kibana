@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { QuerySuggestion } from '../../../data/public';
+import { QuerySuggestion } from '@kbn/data-plugin/public';
 
 export type SuggestionOnClick = (suggestion: QuerySuggestion, index: number) => void;
 

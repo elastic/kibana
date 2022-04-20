@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { FOLLOWER_INDEX_ADVANCED_SETTINGS } from '../../../../../plugins/cross_cluster_replication/common/constants';
+import { FOLLOWER_INDEX_ADVANCED_SETTINGS } from '@kbn/cross-cluster-replication-plugin/common/constants';
 import { getFollowerIndexPayload } from './fixtures';
 import { registerHelpers as registerElasticSearchHelpers } from './lib';
 import { registerHelpers as registerRemoteClustersHelpers } from './remote_clusters.helpers';

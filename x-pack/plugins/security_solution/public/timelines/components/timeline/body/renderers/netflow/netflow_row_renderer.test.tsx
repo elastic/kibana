@@ -9,8 +9,6 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import '../../../../../../common/mock/match_media';
-import { BrowserFields } from '../../../../../../common/containers/source';
-import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
 import { Ecs } from '../../../../../../../common/ecs';
 import { getMockNetflowData, TestProviders } from '../../../../../../common/mock';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
@@ -34,9 +32,7 @@ describe('netflowRowRenderer', () => {
   const mount = useMountAppended();
 
   test('renders correctly against snapshot', () => {
-    const browserFields: BrowserFields = {};
     const children = netflowRowRenderer.renderRow({
-      browserFields,
       data: getMockNetflowData(),
       isDraggable: true,
       timelineId: 'test',
@@ -106,7 +102,6 @@ describe('netflowRowRenderer', () => {
 
   test('should render netflow data', () => {
     const children = netflowRowRenderer.renderRow({
-      browserFields: mockBrowserFields,
       data: getMockNetflowData(),
       isDraggable: true,
       timelineId: 'test',

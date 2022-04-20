@@ -11,8 +11,8 @@ import type {
   IScopedClusterClient,
   KibanaRequest,
   SavedObjectsClientContract,
-} from 'kibana/server';
-import type { DataViewsService } from '../../../../../src/plugins/data_views/common';
+} from '@kbn/core/server';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { DatafeedOverride, JobOverride } from '../../common/types/modules';
 import { wrapError } from '../client/error_wrapper';
 import { dataRecognizerFactory } from '../models/data_recognizer';

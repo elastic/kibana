@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ISearchSource, EsQuerySortValue, SortDirection } from '../../../../../data/public';
+import { ISearchSource, EsQuerySortValue, SortDirection } from '@kbn/data-plugin/public';
 import { convertTimeValueToIso } from './date_conversion';
 import { IntervalValue } from './generate_intervals';
 import { EsQuerySearchAfter } from './get_es_query_search_after';

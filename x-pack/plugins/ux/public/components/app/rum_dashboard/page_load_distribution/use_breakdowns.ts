@@ -7,7 +7,7 @@
 
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { PercentileRange } from './index';
+import { PercentileRange } from '.';
 
 interface Props {
   percentileRange?: PercentileRange;

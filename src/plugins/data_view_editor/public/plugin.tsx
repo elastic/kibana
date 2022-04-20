@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 
 import { PluginSetup, PluginStart, SetupPlugins, StartPlugins, DataViewEditorProps } from './types';
 import { getEditorOpener } from './open_editor';

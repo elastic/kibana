@@ -9,6 +9,7 @@
 import glob from 'glob';
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/utils';
+import { BAZEL_PACKAGE_DIRS } from '@kbn/bazel-packages';
 import { Project, ProjectOptions } from './project';
 
 /**
@@ -67,12 +68,11 @@ export const PROJECTS = [
     name: 'fleet/cypress',
   }),
 
-  createProject('x-pack/plugins/uptime/e2e/tsconfig.json', {
+  createProject('x-pack/plugins/synthetics/e2e/tsconfig.json', {
     name: 'uptime/synthetics-e2e-tests',
     disableTypeCheck: true,
   }),
 
-  ...findProjects('packages/*/tsconfig.json'),
   ...findProjects('src/plugins/*/tsconfig.json'),
   ...findProjects('src/plugins/chart_expressions/*/tsconfig.json'),
   ...findProjects('src/plugins/vis_types/*/tsconfig.json'),
@@ -83,4 +83,6 @@ export const PROJECTS = [
   ...findProjects('test/interpreter_functional/plugins/*/tsconfig.json'),
   ...findProjects('test/server_integration/__fixtures__/plugins/*/tsconfig.json'),
   ...findProjects('packages/kbn-type-summarizer/tests/tsconfig.json'),
+
+  ...BAZEL_PACKAGE_DIRS.flatMap((dir) => findProjects(`${dir}/*/tsconfig.json`)),
 ];

@@ -12,7 +12,7 @@ import {
   FoundExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { HttpStart } from 'kibana/public';
+import { HttpStart } from '@kbn/core/public';
 import {
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,

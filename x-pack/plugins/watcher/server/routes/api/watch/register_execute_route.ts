@@ -6,16 +6,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { get } from 'lodash';
 
 import { RouteDependencies } from '../../../types';
 // @ts-ignore
-import { ExecuteDetails } from '../../../models/execute_details/index';
+import { ExecuteDetails } from '../../../models/execute_details';
 // @ts-ignore
-import { Watch } from '../../../models/watch/index';
+import { Watch } from '../../../models/watch';
 // @ts-ignore
-import { WatchHistoryItem } from '../../../models/watch_history_item/index';
+import { WatchHistoryItem } from '../../../models/watch_history_item';
 
 const bodySchema = schema.object({
   executeDetails: schema.object({}, { unknowns: 'allow' }),

@@ -12,7 +12,7 @@ import { ControlState } from './state_action_machine';
 import { AliasAction } from './actions';
 import { IndexMapping } from '../mappings';
 import { SavedObjectsRawDoc } from '..';
-import { TransformErrorObjects } from '../migrations/core';
+import { TransformErrorObjects } from './core';
 import { SavedObjectTypeExcludeFromUpgradeFilterHook } from '../types';
 import { MigrationLog, Progress } from './types';
 

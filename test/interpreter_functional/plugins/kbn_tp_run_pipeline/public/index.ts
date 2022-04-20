@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializer, PluginInitializerContext } from 'src/core/public';
+import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { Plugin, StartDeps } from './plugin';
 export type { StartDeps };
 

@@ -14,8 +14,8 @@ import type {
   OpsMetrics,
   ServiceStatus,
   ServiceStatusLevel,
-} from 'src/core/server';
-import { ServiceStatusLevels } from '../../../../../src/core/server';
+} from '@kbn/core/server';
+import { ServiceStatusLevels } from '@kbn/core/server';
 import { KIBANA_STATS_TYPE_MONITORING, KIBANA_SETTINGS_TYPE } from '../../common/constants';
 
 import { sendBulkPayload } from './lib';

@@ -11,10 +11,10 @@ import type {
   SavedObjectsExportTransformContext,
   SavedObjectsServiceSetup,
   SavedObjectsTypeMappingDefinition,
-} from 'kibana/server';
+} from '@kbn/core/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import mappings from './mappings.json';
 import { getMigrations } from './migrations';
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import { transformRulesForExport } from './transform_rule_for_export';
 import { RawRule } from '../types';
 import { getImportWarnings } from './get_import_warnings';

@@ -7,8 +7,9 @@
 
 import { Subject } from 'rxjs';
 
+import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
-import { coreMock, elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
 // Note: this import must be before other relative imports for the mocks to work as intended.
 // eslint-disable-next-line import/order
@@ -21,7 +22,6 @@ import {
   mockRegisterPrivilegesWithCluster,
 } from './service.test.mocks';
 
-import { featuresPluginMock } from '../../../features/server/mocks';
 import { licenseMock } from '../../common/licensing/index.mock';
 import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 import { AuthorizationService } from './authorization_service';
