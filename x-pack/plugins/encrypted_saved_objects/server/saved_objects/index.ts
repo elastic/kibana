@@ -114,6 +114,11 @@ export function setupSavedObjects({
       ): Promise<SavedObject<T>> => {
         const [internalRepository, typeRegistry] = await internalRepositoryAndTypeRegistryPromise;
         const savedObject = await internalRepository.get(type, id, options);
+
+        if (service.isRegistered(savedObject.type) === false) {
+          return savedObject as SavedObject<T>;
+        }
+
         return {
           ...savedObject,
           attributes: (await service.decryptAttributes(
@@ -139,21 +144,36 @@ export function setupSavedObjects({
           for await (const res of finderAsyncGenerator) {
             const encryptedSavedObjects = await pMap(
               res.saved_objects,
-              async (savedObject) => ({
-                ...savedObject,
-                attributes: (await service.decryptAttributes(
-                  {
-                    type: savedObject.type,
-                    id: savedObject.id,
-                    namespace: getDescriptorNamespace(
-                      typeRegistry,
-                      savedObject.type,
-                      findOptions.namespaces
-                    ),
-                  },
-                  savedObject.attributes as Record<string, unknown>
-                )) as T,
-              }),
+              async (savedObject) => {
+                if (service.isRegistered(savedObject.type) === false) {
+                  return savedObject;
+                }
+
+                try {
+                  return {
+                    ...savedObject,
+                    attributes: (await service.decryptAttributes(
+                      {
+                        type: savedObject.type,
+                        id: savedObject.id,
+                        namespace: getDescriptorNamespace(
+                          typeRegistry,
+                          savedObject.type,
+                          findOptions.namespaces
+                        ),
+                      },
+                      savedObject.attributes as Record<string, unknown>
+                    )) as T,
+                  };
+                } catch (error) {
+                  // catch error and enrich SO with it. Then consumer of API can decide either proceed
+                  // with only unsecured properties or stop when error happens
+                  return {
+                    ...savedObject,
+                    error: { ...error, message: `Decryption error: "${error.message}"` },
+                  };
+                }
+              },
               { concurrency: 50 }
             );
 
