@@ -22,9 +22,6 @@ import {
 import type { ChangeEvent, FunctionComponent, HTMLProps } from 'react';
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   Capabilities,
   DocLinksStart,
@@ -33,13 +30,16 @@ import type {
   IHttpFetchError,
   NotificationsStart,
   ScopedHistory,
-} from 'src/core/public';
-import type { DataViewsContract } from 'src/plugins/data_views/public';
+} from '@kbn/core/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { KibanaFeature } from '@kbn/features-plugin/common';
+import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
-import type { KibanaFeature } from '../../../../../features/common';
-import type { FeaturesPluginStart } from '../../../../../features/public';
-import type { Space, SpacesApiUi } from '../../../../../spaces/public';
 import type { SecurityLicense } from '../../../../common/licensing';
 import type {
   BuiltinESPrivileges,

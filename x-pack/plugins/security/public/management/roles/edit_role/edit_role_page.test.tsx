@@ -9,13 +9,13 @@ import { act } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
+import type { Capabilities } from '@kbn/core/public';
+import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { KibanaFeature } from '@kbn/features-plugin/public';
+import type { Space } from '@kbn/spaces-plugin/public';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import type { Capabilities } from 'src/core/public';
-import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
-import { dataViewPluginMocks } from 'src/plugins/data_views/public/mocks';
 
-import { KibanaFeature } from '../../../../../features/public';
-import type { Space } from '../../../../../spaces/public';
 import { licenseMock } from '../../../../common/licensing/index.mock';
 import type { Role } from '../../../../common/model';
 import { userAPIClientMock } from '../../users/index.mock';
