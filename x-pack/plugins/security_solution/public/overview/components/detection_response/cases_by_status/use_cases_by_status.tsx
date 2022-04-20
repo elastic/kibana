@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { useState, useEffect } from 'react';
-import { CaseStatuses } from '../../../../../../cases/common';
+import { CaseStatuses } from '@kbn/cases-plugin/common';
 import { APP_ID } from '../../../../../common/constants';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../common/lib/kibana';
