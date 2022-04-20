@@ -387,7 +387,7 @@ function updateSourcePropWithoutSync(
 
     if (propName === 'scalingType') {
       // get joins from layer descriptor instead of layer.getJoins()
-      // 1) IVectorLayer implemenations my return empty array when descriptor has joins
+      // 1) IVectorLayer implementations may return empty array when descriptor has joins
       // 2) getJoins returns instances and descriptors are needed.
       const layerDescriptor = getLayerDescriptor(getState(), layerId) as VectorLayerDescriptor;
       const joins = layerDescriptor.joins ? layerDescriptor.joins : [];
