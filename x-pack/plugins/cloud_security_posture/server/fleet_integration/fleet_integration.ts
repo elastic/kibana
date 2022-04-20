@@ -4,20 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
+import { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 import type {
   SavedObjectsBulkCreateObject,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
   ISavedObjectsRepository,
   Logger,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import {
   PostPackagePolicyPostCreateCallback,
   PostPackagePolicyDeleteCallback,
-} from '../../../fleet/server';
+} from '@kbn/fleet-plugin/server';
 
-import { PackagePolicy } from '../../../fleet/common';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   cloudSecurityPostureRuleTemplateSavedObjectType,
   CloudSecurityPostureRuleTemplateSchema,

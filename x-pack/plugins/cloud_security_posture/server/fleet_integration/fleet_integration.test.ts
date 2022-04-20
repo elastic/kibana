@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import {
-  httpServerMock,
-  loggingSystemMock,
-  savedObjectsClientMock,
-} from '../../../../../src/core/server/mocks';
+import { httpServerMock, loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import {
   RequestHandlerContext,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
-} from 'src/core/server';
-import { createPackagePolicyMock } from '../../../fleet/common/mocks';
+} from '@kbn/core/server';
+import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { CIS_KUBERNETES_PACKAGE_NAME } from '../../common/constants';
 import { getPackagePolicyCreateCallback } from './fleet_integration';
 
