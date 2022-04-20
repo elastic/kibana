@@ -16,6 +16,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -60,40 +61,48 @@ export const DocumentExplorerUpdateCallout = () => {
     <EuiCallOut
       className="dscDocumentExplorerCallout"
       title={<CalloutTitle onCloseCallout={onCloseCallout} />}
-      iconType="search"
+      iconType="tableDensityNormal"
+      heading="h3"
+      size="s"
     >
       <p>
         <FormattedMessage
           id="discover.docExplorerUpdateCallout.bodyMessage"
-          defaultMessage="Experience the new {documentExplorer}. Understand the shape of your data with {fieldStatistics}."
+          defaultMessage="Perform multi-column sorting, resize columns, set row height, and view data in fullscreen with the {documentExplorer}.
+          Learn more about the structure of your data with {fieldStatistics}."
           values={{
             fieldStatistics: (
-              <span css={semiBoldStyle}>
-                <FormattedMessage
-                  id="discover.docExplorerUpdateCallout.fieldStatistics"
-                  defaultMessage="Field Statistics"
-                />
-              </span>
+              <EuiLink href={docLinks.links.discover.fieldStatistics} external>
+                <span css={semiBoldStyle}>
+                  <FormattedMessage
+                    id="discover.docExplorerUpdateCallout.fieldStatistics"
+                    defaultMessage="field statistics"
+                  />
+                </span>
+              </EuiLink>
             ),
             documentExplorer: (
-              <span css={semiBoldStyle}>
-                <FormattedMessage
-                  id="discover.docExplorerUpdateCallout.documentExplorer"
-                  defaultMessage="Document Explorer"
-                />
-              </span>
+              <EuiLink href={docLinks.links.discover.documentExplorer} external>
+                <span css={semiBoldStyle}>
+                  <FormattedMessage
+                    id="discover.docExplorerUpdateCallout.documentExplorer"
+                    defaultMessage="new document table"
+                  />
+                </span>
+              </EuiLink>
             ),
           }}
         />
       </p>
       <EuiButton
-        iconType="tableDensityNormal"
+        data-test-subj="document-explorer-update-callout-dismiss-button"
+        iconType="check"
         size="s"
-        href={docLinks.links.discover.documentExplorer}
+        onClick={onCloseCallout}
       >
         <FormattedMessage
-          id="discover.docExplorerUpdateCallout.learnMore"
-          defaultMessage="Learn more"
+          id="discover.docExplorerUpdateCallout.dismissButtonLabel"
+          defaultMessage="Got it"
         />
       </EuiButton>
     </EuiCallOut>
@@ -106,7 +115,7 @@ function CalloutTitle({ onCloseCallout }: { onCloseCallout: () => void }) {
       <EuiFlexItem grow={false}>
         <FormattedMessage
           id="discover.docExplorerUpdateCallout.headerMessage"
-          defaultMessage="A better way to explore"
+          defaultMessage="Exploring your data just got better"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

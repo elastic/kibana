@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.common.navigateToApp('discover');
       await retry.try(async function tryingForTime() {
-        const rowData = await PageObjects.discover.getDocTableIndex(1);
+        const rowData = await PageObjects.discover.getDocTableIndex(1, true);
         expect(rowData).to.contain(expectedText);
       });
     });
