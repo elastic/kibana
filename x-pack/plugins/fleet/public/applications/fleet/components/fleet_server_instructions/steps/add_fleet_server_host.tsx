@@ -25,6 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useStartServices, useLink } from '../../../hooks';
 import type { FleetServerHostForm } from '../hooks';
+import { FleetServerHostComboBox } from '../components';
 
 export const getAddFleetServerHostStep = ({
   fleetServerHostForm,
@@ -51,6 +52,7 @@ export const AddFleetServerHostStepContent = ({
 }) => {
   const {
     fleetServerHost,
+    fleetServerHostSettings,
     setFleetServerHost,
     validateFleetServerHost,
     saveFleetServerHost,
@@ -83,8 +85,8 @@ export const AddFleetServerHostStepContent = ({
   }, [validateFleetServerHost, saveFleetServerHost, fleetServerHost, notifications.toasts]);
 
   const onChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFleetServerHost(e.target.value);
+    (host: string) => {
+      setFleetServerHost(host);
 
       if (error) {
         validateFleetServerHost();
@@ -105,22 +107,12 @@ export const AddFleetServerHostStepContent = ({
       <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFieldText
-            fullWidth
-            placeholder={'https://fleet-server-host.com:8220'}
-            value={fleetServerHost}
+          <FleetServerHostComboBox
+            fleetServerHost={fleetServerHost}
+            fleetServerHostSettings={fleetServerHostSettings}
+            isDisabled={isLoading}
             isInvalid={!!error}
-            onChange={onChange}
-            disabled={isLoading}
-            prepend={
-              <EuiText>
-                <FormattedMessage
-                  id="xpack.fleet.fleetServerSetup.addFleetServerHostInputLabel"
-                  defaultMessage="Fleet Server host"
-                />
-              </EuiText>
-            }
-            data-test-subj="fleetServerHostInput"
+            onFleetServerHostChange={onChange}
           />
           {error && <EuiFormErrorText>{error}</EuiFormErrorText>}
         </EuiFlexItem>

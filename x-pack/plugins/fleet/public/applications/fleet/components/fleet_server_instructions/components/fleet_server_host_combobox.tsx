@@ -46,6 +46,7 @@ export const FleetServerHostComboBox: React.FunctionComponent<Props> = ({
   return (
     <EuiComboBox<string>
       fullWidth
+      isClearable={false}
       singleSelection={{ asPlainText: true }}
       placeholder="https://fleet-server-host.com:8220"
       options={options}
