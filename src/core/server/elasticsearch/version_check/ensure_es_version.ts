@@ -11,8 +11,8 @@
  * that defined in Kibana's package.json.
  */
 
-import { timer, from, Observable } from 'rxjs';
-import { map, distinctUntilChanged, exhaustMap } from 'rxjs/operators';
+import { timer, from, Observable, of } from 'rxjs';
+import { map, distinctUntilChanged, exhaustMap, catchError } from 'rxjs/operators';
 import {
   esVersionCompatibleWithKibana,
   esVersionEqualsKibana,
@@ -143,12 +143,18 @@ function compareNodes(prev: NodesVersionCompatibility, curr: NodesVersionCompati
 }
 
 function obtainNodesInfo(client: ElasticsearchClient): Observable<NodesInfo> {
-  const infoPromise: Promise<NodesInfo> =
-    client.nodes.info({
-      filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
-    }) || Promise.reject('Elasticsearch client returned no information for the nodes');
+  const infoPromise: Promise<NodesInfo> = client.nodes.info({
+    filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
+  });
 
-  return from(infoPromise.catch((nodesInfoRequestError) => ({ nodes: {}, nodesInfoRequestError })));
+  return infoPromise
+    ? from(infoPromise).pipe(
+        catchError((nodesInfoRequestError) => of({ nodes: {}, nodesInfoRequestError }))
+      )
+    : of({
+        nodes: {},
+        nodesInfoRequestError: 'Elasticsearch client returned no information for the nodes',
+      });
 }
 
 /** @public */
