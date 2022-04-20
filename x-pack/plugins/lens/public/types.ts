@@ -928,15 +928,6 @@ export interface Visualization<T = unknown> {
    * functions and datasource expressions will not be appended to the expression automatically.
    */
   shouldBuildDatasourceExpressionManually?: () => boolean;
-
-  /**
-   * Converts `activeData`, came from expressions in the form of hashmap as `{ [index]: table, ...}`, to the hashmap of
-   * layer ids and tables as `{ [layerId]: table }`.
-   */
-  convertActiveData?: (
-    activeData?: FramePublicAPI['activeData'],
-    state?: T
-  ) => FramePublicAPI['activeData'];
 }
 
 export interface LensFilterEvent {

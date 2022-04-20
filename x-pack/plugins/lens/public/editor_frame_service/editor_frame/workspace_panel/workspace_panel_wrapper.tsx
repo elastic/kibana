@@ -127,7 +127,7 @@ export function WorkspacePanelWrapper({
                 {activeVisualization && activeVisualization.renderToolbar && (
                   <EuiFlexItem grow={false}>
                     <NativeRenderer
-                      render={activeVisualization.renderToolbar.bind(activeVisualization)}
+                      render={activeVisualization.renderToolbar}
                       nativeProps={{
                         frame: framePublicAPI,
                         state: visualizationState,

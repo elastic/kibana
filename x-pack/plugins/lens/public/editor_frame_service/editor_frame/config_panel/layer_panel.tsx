@@ -357,7 +357,7 @@ export function LayerPanel(
               <>
                 <EuiSpacer size="s" />
                 <NativeRenderer
-                  render={layerDatasource.renderLayerPanel.bind(layerDatasource)}
+                  render={layerDatasource.renderLayerPanel}
                   nativeProps={{
                     layerId,
                     state: layerDatasourceState,
@@ -529,9 +529,7 @@ export function LayerPanel(
                               >
                                 {layerDatasource ? (
                                   <NativeRenderer
-                                    render={layerDatasource.renderDimensionTrigger.bind(
-                                      layerDatasource
-                                    )}
+                                    render={layerDatasource.renderDimensionTrigger}
                                     nativeProps={{
                                       ...layerDatasourceConfigProps,
                                       columnId: accessorConfig.columnId,
@@ -623,7 +621,7 @@ export function LayerPanel(
           <div>
             {activeGroup && activeId && layerDatasource && (
               <NativeRenderer
-                render={layerDatasource.renderDimensionEditor.bind(layerDatasource)}
+                render={layerDatasource.renderDimensionEditor}
                 nativeProps={{
                   ...layerDatasourceConfigProps,
                   core: props.core,
@@ -650,7 +648,7 @@ export function LayerPanel(
               activeGroup?.enableDimensionEditor && (
                 <div className="lnsLayerPanel__styleEditor">
                   <NativeRenderer
-                    render={activeVisualization.renderDimensionEditor.bind(activeVisualization)}
+                    render={activeVisualization.renderDimensionEditor}
                     nativeProps={{
                       ...layerVisualizationConfigProps,
                       groupId: activeGroup.groupId,

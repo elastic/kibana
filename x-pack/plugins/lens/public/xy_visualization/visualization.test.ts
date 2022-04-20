@@ -1493,7 +1493,7 @@ describe('xy_visualization', () => {
 
       it('differ vertical axis if the formatters are not compatibles between each other', () => {
         const tables: Record<string, Datatable> = {
-          0: {
+          first: {
             type: 'datatable',
             rows: [],
             columns: [
@@ -2186,7 +2186,7 @@ describe('xy_visualization', () => {
       };
 
       frame.activeData = {
-        0: {
+        first: {
           type: 'datatable',
           columns: [
             { id: 'a', name: 'A', meta: { type: 'number' } },

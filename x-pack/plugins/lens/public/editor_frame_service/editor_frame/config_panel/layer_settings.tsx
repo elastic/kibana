@@ -26,9 +26,6 @@ export function LayerSettings({
   }
 
   return (
-    <NativeRenderer
-      render={activeVisualization.renderLayerHeader.bind(activeVisualization)}
-      nativeProps={layerConfigProps}
-    />
+    <NativeRenderer render={activeVisualization.renderLayerHeader} nativeProps={layerConfigProps} />
   );
 }
