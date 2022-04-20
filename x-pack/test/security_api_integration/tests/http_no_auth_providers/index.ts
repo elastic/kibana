@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('security APIs - HTTP no authentication providers are enabled', function () {
-    this.tags('ciGroup5');
+    this.tags('ciGroup6');
     loadTestFile(require.resolve('./authentication'));
   });
 }

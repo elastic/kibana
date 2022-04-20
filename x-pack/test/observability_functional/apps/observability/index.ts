@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('ObservabilityApp', function () {
-    this.tags('ciGroup5');
+    this.tags('ciGroup6');
 
     loadTestFile(require.resolve('./alerts'));
     loadTestFile(require.resolve('./alerts/add_to_case'));

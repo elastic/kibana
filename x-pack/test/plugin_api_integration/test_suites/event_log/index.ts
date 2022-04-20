@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('event_log', function taskManagerSuite() {
-    this.tags('ciGroup5');
+    this.tags('ciGroup6');
     loadTestFile(require.resolve('./public_api_integration'));
     loadTestFile(require.resolve('./service_api_integration'));
   });

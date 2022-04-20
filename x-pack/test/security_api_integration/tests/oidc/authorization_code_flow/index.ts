@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('security APIs - OIDC (Authorization Code Flow)', function () {
-    this.tags('ciGroup5');
+    this.tags('ciGroup6');
     loadTestFile(require.resolve('./oidc_auth'));
   });
 }
