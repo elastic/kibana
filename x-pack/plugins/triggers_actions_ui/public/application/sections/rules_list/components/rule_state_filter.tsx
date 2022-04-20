@@ -10,11 +10,7 @@ import { EuiFilterButton, EuiPopover, EuiFilterGroup, EuiFilterSelectItem } from
 
 type State = 'enabled' | 'muted' | 'disabled';
 
-const states: State[] = [
-  'enabled',
-  'disabled',
-  'muted',
-];
+const states: State[] = ['enabled', 'disabled', 'muted'];
 
 const optionStyles = {
   textTransform: 'capitalize' as const,
@@ -23,9 +19,9 @@ const optionStyles = {
 const getOptionDataTestSubj = (state: State) => `ruleStateFilterOption-${state}`;
 
 export interface RuleStateFilterProps {
-  selectedStates: State[],
-  dataTestSubj?: string,
-  buttonDataTestSubj?: string,
+  selectedStates: State[];
+  dataTestSubj?: string;
+  buttonDataTestSubj?: string;
   optionDataTestSubj?: (state: State) => string;
   onChange: (selectedStates: State[]) => void;
 }

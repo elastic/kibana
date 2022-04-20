@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { RuleStateFilterProps } from '../../../../public/types';
+import { RuleStateFilterProps } from '../../../types';
 import { getRuleStateFilterLazy } from '../../../common/get_rule_state_filter';
 
 export const RuleStateFilterSandbox = () => {
@@ -18,9 +18,7 @@ export const RuleStateFilterSandbox = () => {
         selectedStates,
         onChange: setSelectedStates,
       })}
-      <div>
-        Selected states: {JSON.stringify(selectedStates)}
-      </div>
+      <div>Selected states: {JSON.stringify(selectedStates)}</div>
     </div>
   );
 };

@@ -18,12 +18,7 @@ describe('rule_state_filter', () => {
   });
 
   it('renders correctly', () => {
-    const wrapper = mountWithIntl(
-      <RuleStateFilter
-        selectedStates={[]}
-        onChange={onChangeMock}
-      />
-    );
+    const wrapper = mountWithIntl(<RuleStateFilter selectedStates={[]} onChange={onChangeMock} />);
 
     expect(wrapper.find(EuiFilterSelectItem).exists()).toBeFalsy();
     expect(wrapper.find(EuiFilterButton).exists()).toBeTruthy();
@@ -32,12 +27,7 @@ describe('rule_state_filter', () => {
   });
 
   it('can open the popover correctly', () => {
-    const wrapper = mountWithIntl(
-      <RuleStateFilter
-        selectedStates={[]}
-        onChange={onChangeMock}
-      />
-    );
+    const wrapper = mountWithIntl(<RuleStateFilter selectedStates={[]} onChange={onChangeMock} />);
 
     expect(wrapper.find('[data-test-subj="ruleStateFilterSelect"]').exists()).toBeFalsy();
 
@@ -48,12 +38,7 @@ describe('rule_state_filter', () => {
   });
 
   it('can select states', () => {
-    const wrapper = mountWithIntl(
-      <RuleStateFilter
-        selectedStates={[]}
-        onChange={onChangeMock}
-      />
-    );
+    const wrapper = mountWithIntl(<RuleStateFilter selectedStates={[]} onChange={onChangeMock} />);
 
     wrapper.find(EuiFilterButton).simulate('click');
 
