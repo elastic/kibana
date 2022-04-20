@@ -6,10 +6,12 @@
  */
 
 import { journey, step, expect, before } from '@elastic/synthetics';
-import { byTestId, loginToKibana, waitForLoadingToFinish } from './utils';
 import { callKibana } from '../../../apm/scripts/create_apm_users_and_roles/helpers/call_kibana';
+import { byTestId, waitForLoadingToFinish } from './utils';
+import { loginPageProvider } from '../page_objects/login';
 
 journey('DataViewPermissions', async ({ page, params }) => {
+  const login = loginPageProvider({ page });
   before(async () => {
     await waitForLoadingToFinish({ page });
     try {
@@ -36,7 +38,7 @@ journey('DataViewPermissions', async ({ page, params }) => {
     await page.goto(`${baseUrl}?${queryParams}`, {
       waitUntil: 'networkidle',
     });
-    await loginToKibana({ page, user: { username: 'obs_read_user', password: 'changeme' } });
+    await login.loginToKibana('obs_read_user', 'changeme');
   });
 
   step('Click explore data button', async () => {
