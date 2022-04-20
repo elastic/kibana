@@ -74,7 +74,7 @@ export const removeLegacyTemplates = async (params: {
 
   const allComponentTemplates = await _getAllComponentTemplates(esClient);
 
-  const legacyComponentTemplateNames = await _getLegacyComponentTemplatesForPackage(
+  const legacyComponentTemplateNames = _getLegacyComponentTemplatesForPackage(
     allComponentTemplates,
     packageInfo
   );
