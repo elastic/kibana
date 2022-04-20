@@ -24,6 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
 import moment from 'moment';
 import { useSelector } from 'react-redux';
+import { createExploratoryViewUrl } from '@kbn/observability-plugin/public';
 import { getChartDateLabel } from '../../../lib/helper';
 import { ChartWrapper } from './chart_wrapper';
 import { UptimeThemeContext } from '../../../contexts';
@@ -32,7 +33,6 @@ import { useMonitorId, useUrlParams } from '../../../hooks';
 import { ChartEmptyState } from './chart_empty_state';
 import { getDateRangeFromChartElement } from './utils';
 import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../translations';
-import { createExploratoryViewUrl } from '../../../../../observability/public';
 import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 import { monitorStatusSelector } from '../../../state/selectors';
 

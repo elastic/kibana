@@ -11,8 +11,8 @@ import {
   SavedObjectsClientContract,
   SavedObjectReference,
   ResolvedSimpleSavedObject,
-} from 'kibana/public';
-import { Query } from '../../../../../src/plugins/data/public';
+} from '@kbn/core/public';
+import { Query } from '@kbn/data-plugin/public';
 import { DOC_TYPE } from '../../common';
 import { LensSavedObjectAttributes } from '../async_services';
 

@@ -12,7 +12,7 @@ import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
   Logger,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
 import type {
   EsAssetReference,

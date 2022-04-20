@@ -10,9 +10,9 @@ import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
   UiSettingsServiceStart,
-} from 'src/core/server';
-import type { FieldFormatsStart } from 'src/plugins/field_formats/server';
-import type { IndexPatternsServiceStart } from 'src/plugins/data_views/server';
+} from '@kbn/core/server';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type { IndexPatternsServiceStart } from '@kbn/data-views-plugin/server';
 import { DatatableUtilitiesService as DatatableUtilitiesServiceCommon } from '../../common';
 import type { AggsStart } from '../search';
 

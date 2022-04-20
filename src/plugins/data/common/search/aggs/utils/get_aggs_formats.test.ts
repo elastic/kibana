@@ -8,11 +8,7 @@
 
 import { identity } from 'lodash';
 
-import {
-  FieldFormat,
-  IFieldFormat,
-  SerializedFieldFormat,
-} from '../../../../../field_formats/common';
+import { FieldFormat, IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { MultiFieldKey } from '../buckets/multi_field_key';
 import { getAggsFormats } from './get_aggs_formats';
 
@@ -49,6 +45,13 @@ describe('getAggsFormats', () => {
     expect(getFormat).toHaveBeenCalledTimes(3);
   });
 
+  test('date_range does not crash on empty value', () => {
+    const mapping = { id: 'date_range', params: {} };
+    const format = getAggFormat(mapping, getFormat);
+
+    expect(format.convert(undefined)).toBe('');
+  });
+
   test('creates custom format for ip_range', () => {
     const mapping = { id: 'ip_range', params: {} };
     const format = getAggFormat(mapping, getFormat);
@@ -62,12 +65,26 @@ describe('getAggsFormats', () => {
     expect(getFormat).toHaveBeenCalledTimes(4);
   });
 
+  test('ip_range does not crash on empty value', () => {
+    const mapping = { id: 'ip_range', params: {} };
+    const format = getAggFormat(mapping, getFormat);
+
+    expect(format.convert(undefined)).toBe('');
+  });
+
   test('creates custom format for range', () => {
     const mapping = { id: 'range', params: {} };
     const format = getAggFormat(mapping, getFormat);
 
     expect(format.convert({ gte: 1, lt: 20 })).toBe('≥ 1 and < 20');
     expect(getFormat).toHaveBeenCalledTimes(1);
+  });
+
+  test('range does not crash on empty value', () => {
+    const mapping = { id: 'range', params: {} };
+    const format = getAggFormat(mapping, getFormat);
+
+    expect(format.convert(undefined)).toBe('');
   });
 
   test('creates alternative format for range using the template parameter', () => {

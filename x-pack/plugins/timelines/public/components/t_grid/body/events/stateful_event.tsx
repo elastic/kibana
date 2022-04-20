@@ -161,7 +161,6 @@ const StatefulEventComponent: React.FC<Props> = ({
       <EventsTrSupplement>
         <StatefulRowRenderer
           ariaRowindex={ariaRowindex}
-          browserFields={browserFields}
           containerRef={containerRef}
           event={event}
           lastFocusedAriaColindex={lastFocusedAriaColindex}
@@ -170,15 +169,7 @@ const StatefulEventComponent: React.FC<Props> = ({
         />
       </EventsTrSupplement>
     ),
-    [
-      ariaRowindex,
-      browserFields,
-      containerRef,
-      event,
-      lastFocusedAriaColindex,
-      rowRenderers,
-      timelineId,
-    ]
+    [ariaRowindex, containerRef, event, lastFocusedAriaColindex, rowRenderers, timelineId]
   );
 
   return (

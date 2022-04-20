@@ -9,7 +9,6 @@ import { EuiSpacer } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import { BrowserFields } from '../../../../../../common/containers/source';
 import { Ecs } from '../../../../../../../common/ecs';
 import { NetflowRenderer } from '../netflow';
 
@@ -17,7 +16,6 @@ import { EndgameSecurityEventDetailsLine } from './endgame_security_event_detail
 import { Details } from '../helpers';
 
 interface Props {
-  browserFields: BrowserFields;
   contextId: string;
   data: Ecs;
   isDraggable?: boolean;

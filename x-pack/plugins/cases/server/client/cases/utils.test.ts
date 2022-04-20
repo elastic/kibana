@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { actionsClientMock } from '../../../../actions/server/actions_client.mock';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client.mock';
 import { mockCases } from '../../routes/api/__fixtures__';
 
 import { BasicParams, ExternalServiceParams, Incident } from './types';

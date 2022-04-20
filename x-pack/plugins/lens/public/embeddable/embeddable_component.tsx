@@ -6,9 +6,9 @@
  */
 
 import React, { FC, useEffect } from 'react';
-import type { CoreStart, ThemeServiceStart } from 'kibana/public';
-import type { Action, UiActionsStart } from 'src/plugins/ui_actions/public';
-import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+import type { CoreStart, ThemeServiceStart } from '@kbn/core/public';
+import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import { EuiLoadingChart } from '@elastic/eui';
 import {
   EmbeddableFactory,
@@ -19,7 +19,7 @@ import {
   EmbeddableStart,
   IEmbeddable,
   useEmbeddableFactory,
-} from '../../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
 import type { LensByReferenceInput, LensByValueInput } from './embeddable';
 import type { Document } from '../persistence';
 import type { IndexPatternPersistedState } from '../indexpattern_datasource/types';

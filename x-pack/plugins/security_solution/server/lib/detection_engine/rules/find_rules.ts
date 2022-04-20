@@ -7,7 +7,7 @@
 
 import { SIGNALS_ID, ruleTypeMappings } from '@kbn/securitysolution-rules';
 
-import { FindResult } from '../../../../../alerting/server';
+import { FindResult } from '@kbn/alerting-plugin/server';
 import { RuleParams } from '../schemas/rule_schemas';
 import { FindRuleOptions } from './types';
 

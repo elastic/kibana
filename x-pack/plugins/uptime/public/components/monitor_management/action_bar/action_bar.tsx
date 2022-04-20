@@ -18,14 +18,14 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { useSelector } from 'react-redux';
-import { FETCH_STATUS, useFetcher } from '../../../../../observability/public';
+import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
 
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { MONITOR_MANAGEMENT_ROUTE } from '../../../../common/constants';
 import { UptimeSettingsContext } from '../../../contexts';
 import { setMonitor } from '../../../state/api';
 
 import { SyntheticsMonitor } from '../../../../common/runtime_types';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { TestRun } from '../test_now_mode/test_now_mode';
 
 import { monitorManagementListSelector } from '../../../state/selectors';
@@ -121,7 +121,7 @@ export const ActionBar = ({
             <EuiButtonEmpty
               color="ghost"
               size="s"
-              href={`${basePath}/app/uptime/${MONITOR_MANAGEMENT_ROUTE}`}
+              href={`${basePath}/app/uptime/${MONITOR_MANAGEMENT_ROUTE}/all`}
             >
               {DISCARD_LABEL}
             </EuiButtonEmpty>

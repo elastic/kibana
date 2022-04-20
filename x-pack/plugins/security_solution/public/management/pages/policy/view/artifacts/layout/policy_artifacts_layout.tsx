@@ -32,8 +32,8 @@ import { PolicyArtifactsFlyout } from '../flyout';
 import { PolicyArtifactsPageLabels, policyArtifactsPageLabels } from '../translations';
 import { PolicyArtifactsDeleteModal } from '../delete_modal';
 import { EventFiltersPageLocation } from '../../../../event_filters/types';
-import { HostIsolationExceptionsPageLocation } from '../../../../host_isolation_exceptions/types';
 import { TrustedAppsListPageLocation } from '../../../../trusted_apps/state';
+import { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
 
 interface PolicyArtifactsLayoutProps {
   policyItem?: ImmutableObject<PolicyData> | undefined;
@@ -45,7 +45,7 @@ interface PolicyArtifactsLayoutProps {
     location?:
       | Partial<EventFiltersPageLocation>
       | Partial<TrustedAppsListPageLocation>
-      | Partial<HostIsolationExceptionsPageLocation>
+      | Partial<ArtifactListPageUrlParams>
   ) => string;
   getPolicyArtifactsPath: (policyId: string) => string;
   /** A boolean to check extra privileges for restricted actions, true when it's allowed, false when not */

@@ -6,7 +6,7 @@
  */
 
 import { get, getOr } from 'lodash/fp';
-import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import {
   NetworkUsersBucketsItem,
   NetworkUsersEdges,

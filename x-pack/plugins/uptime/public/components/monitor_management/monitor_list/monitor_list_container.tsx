@@ -8,7 +8,7 @@
 import React, { useEffect, useReducer, useCallback, Reducer } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { useTrackPageview } from '../../../../../observability/public';
+import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { ConfigKey } from '../../../../common/runtime_types';
 import { getMonitors } from '../../../state/actions';
 import { monitorManagementListSelector } from '../../../state/selectors';
@@ -27,7 +27,7 @@ export const MonitorListContainer: React.FC = () => {
       pageIndex: 1, // saved objects page index is base 1
       pageSize: 10,
       sortOrder: 'asc',
-      sortField: ConfigKey.NAME,
+      sortField: `${ConfigKey.NAME}.keyword`,
     }
   );
 

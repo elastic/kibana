@@ -6,7 +6,7 @@
  */
 
 import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { HttpStart } from 'kibana/public';
+import { HttpStart } from '@kbn/core/public';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 import { HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION } from './constants';
 
