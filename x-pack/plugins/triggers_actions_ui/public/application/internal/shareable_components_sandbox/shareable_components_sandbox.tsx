@@ -7,11 +7,13 @@
 
 import React from 'react';
 import { RuleStatusDropdownSandbox } from './rule_status_dropdown_sandbox';
+import { RuleStateFilterSandbox } from './rule_state_filter_sandbox';
 
 export const InternalShareableComponentsSandbox: React.FC<{}> = () => {
   return (
     <>
       <RuleStatusDropdownSandbox />
+      <RuleStateFilterSandbox />
     </>
   );
 };
