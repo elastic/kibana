@@ -8,7 +8,6 @@
 
 import { IFieldType, indexPatterns as indexPatternsUtils } from '@kbn/data-plugin/public';
 import { flatten } from 'lodash';
-import { escapeKuery } from '@kbn/es-query';
 import { sortPrefixFirst } from './sort_prefix_first';
 import { QuerySuggestionField, QuerySuggestionTypes } from '../query_suggestion_provider';
 import { KqlQuerySuggestionProvider } from './types';
@@ -27,7 +26,7 @@ const keywordComparator = (first: IFieldType, second: IFieldType) => {
 export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<QuerySuggestionField> = (
   core
 ) => {
-  return ({ indexPatterns }, { start, end, prefix, suffix, nestedPath = '' }) => {
+  return async ({ indexPatterns }, { start, end, prefix, suffix, nestedPath = '' }) => {
     const allFields = flatten(
       indexPatterns.map((indexPattern) => {
         return indexPattern.fields.filter(indexPatternsUtils.isFilterable);
@@ -42,7 +41,7 @@ export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<QuerySuggestio
       );
     });
     const sortedFields = sortPrefixFirst(matchingFields.sort(keywordComparator), search, 'name');
-
+    const { escapeKuery } = await import('@kbn/es-query');
     const suggestions: QuerySuggestionField[] = sortedFields.map((field) => {
       const remainingPath =
         field.subType && field.subType.nested
