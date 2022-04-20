@@ -10,8 +10,8 @@ import { isRight } from 'fp-ts/lib/Either';
 import {
   MonitorSummariesResult,
   MonitorSummariesResultType,
-} from '@kbn/uptime-plugin/common/runtime_types';
-import { API_URLS } from '@kbn/uptime-plugin/common/constants';
+} from '@kbn/synthetics-plugin/common/runtime_types';
+import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 interface ExpectedMonitorStatesPage {

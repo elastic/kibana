@@ -68,7 +68,7 @@ export const PROJECTS = [
     name: 'fleet/cypress',
   }),
 
-  createProject('x-pack/plugins/uptime/e2e/tsconfig.json', {
+  createProject('x-pack/plugins/synthetics/e2e/tsconfig.json', {
     name: 'uptime/synthetics-e2e-tests',
     disableTypeCheck: true,
   }),

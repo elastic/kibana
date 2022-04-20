@@ -1,6 +1,6 @@
 {
   "configPath": ["xpack", "uptime"],
-  "id": "uptime",
+  "id": "synthetics",
   "kibanaVersion": "kibana",
   "optionalPlugins": ["cloud", "data", "fleet", "home", "ml", "telemetry"],
   "requiredPlugins": [

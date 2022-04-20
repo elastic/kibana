@@ -8,11 +8,11 @@
 import expect from '@kbn/expect';
 import moment from 'moment';
 import { isRight } from 'fp-ts/lib/Either';
-import { CertType } from '@kbn/uptime-plugin/common/runtime_types';
+import { CertType } from '@kbn/synthetics-plugin/common/runtime_types';
 import {
   processCertsResult,
   getCertsRequestBody,
-} from '@kbn/uptime-plugin/common/requests/get_certs_request_body';
+} from '@kbn/synthetics-plugin/common/requests/get_certs_request_body';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { makeChecksWithStatus } from './helper/make_checks';
 

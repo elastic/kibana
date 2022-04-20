@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { API_URLS } from '@kbn/uptime-plugin/common/constants';
-import { serviceApiKeyPrivileges } from '@kbn/uptime-plugin/server/lib/synthetics_service/get_api_key';
+import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { serviceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/lib/synthetics_service/get_api_key';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
