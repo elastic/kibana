@@ -99,7 +99,6 @@ you can now increase or decrease the visibility of your legend by changing the s
 In *Maps*, you can now display your clusters as hexagons
 instead of rectangles. This feature adds another beautiful, and more precise way, to
 visualize your geo_point fields. 
-a standard subscription on Cloud and a platinum license on prem.
 
 [role="screenshot"]
 image::images/highlights-maps-hexagon.png[region map created in Lens]
