@@ -6,7 +6,7 @@
  */
 
 import type { HeadlessChromiumDriver } from '../browsers';
-import { EventLogger } from './event_logger';
+import { Actions, EventLogger } from './event_logger';
 import type { ElementsPositionAndAttribute } from './get_element_position_data';
 
 export interface Screenshot {
@@ -36,28 +36,36 @@ export const getScreenshots = async (
 
   const screenshots: Screenshot[] = [];
 
-  for (let i = 0; i < elementsPositionAndAttributes.length; i++) {
-    const item = elementsPositionAndAttributes[i];
-    const spanEnd = eventLogger.screenshot({
-      elementPosition: item.position,
-    });
+  try {
+    for (let i = 0; i < elementsPositionAndAttributes.length; i++) {
+      const item = elementsPositionAndAttributes[i];
+      const endScreenshot = eventLogger.startScreenshot({
+        elementPosition: item.position,
+      });
 
-    const data = await browser.screenshot(item.position);
+      const data = await browser.screenshot(item.position);
 
-    if (!data?.byteLength) {
-      throw new Error(`Failure in getScreenshots! Screenshot data is void`);
+      if (!data?.byteLength) {
+        throw new Error(`Failure in getScreenshots! Screenshot data is void`);
+      }
+
+      screenshots.push({
+        data,
+        title: item.attributes.title,
+        description: item.attributes.description,
+      });
+
+      endScreenshot({
+        elementPosition: item.position,
+        byteLength: data.byteLength,
+      });
     }
-
-    screenshots.push({
-      data,
-      title: item.attributes.title,
-      description: item.attributes.description,
-    });
-
-    spanEnd({
-      elementPosition: item.position,
-      byteLength: data.byteLength,
-    });
+  } catch (error) {
+    kbnLogger.error(error);
+    eventLogger.error(
+      `An error occurred when trying to capture screenshots: ${error.message}`,
+      Actions.GET_NUMBER_OF_ITEMS
+    );
   }
 
   kbnLogger.info(`screenshots taken: ${screenshots.length}`);
