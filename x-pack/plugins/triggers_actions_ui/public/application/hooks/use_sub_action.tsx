@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useReducer, useRef } from 'react';
 import { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
 import { executeAction } from '../lib/action_connector_api';
@@ -16,25 +16,88 @@ interface UseSubActionParams {
   subActionParams: Record<string, unknown>;
 }
 
-export const useSubAction = <T,>({
-  connectorId,
-  subAction,
-  subActionParams,
-}: UseSubActionParams) => {
+interface SubActionsState<T> {
+  isLoading: boolean;
+  isError: boolean;
+  response: unknown | undefined;
+  error: Error | null;
+}
+
+enum SubActionsActionsList {
+  INIT,
+  LOADING,
+  SUCCESS,
+  ERROR,
+}
+
+type Action<T> =
+  | { type: SubActionsActionsList.INIT }
+  | { type: SubActionsActionsList.LOADING }
+  | { type: SubActionsActionsList.SUCCESS; payload: T | undefined }
+  | { type: SubActionsActionsList.ERROR; payload: Error | null };
+
+const dataFetchReducer = <T,>(state: SubActionsState<T>, action: Action<T>): SubActionsState<T> => {
+  switch (action.type) {
+    case SubActionsActionsList.INIT:
+      return {
+        ...state,
+        isLoading: false,
+        isError: false,
+      };
+
+    case SubActionsActionsList.LOADING:
+      return {
+        ...state,
+        isLoading: true,
+        isError: false,
+      };
+
+    case SubActionsActionsList.SUCCESS:
+      return {
+        ...state,
+        response: action.payload,
+        isLoading: false,
+        isError: false,
+      };
+
+    case SubActionsActionsList.ERROR:
+      return {
+        ...state,
+        error: action.payload,
+        isLoading: false,
+        isError: true,
+      };
+
+    default:
+      return state;
+  }
+};
+
+export const useSubAction = <T,>(params: UseSubActionParams | null) => {
   const { http } = useKibana().services;
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-  const [response, setResponse] = useState<T | undefined>(undefined);
+  const [state, dispatch] = useReducer(dataFetchReducer, {
+    isError: false,
+    isLoading: false,
+    response: undefined,
+    error: null,
+  });
+
   const abortCtrl = useRef(new AbortController());
   const isMounted = useRef(false);
 
   async function executeSubAction() {
-    abortCtrl.current = new AbortController();
+    if (params == null) {
+      return;
+    }
+
+    const { connectorId, subAction, subActionParams } = params;
+    dispatch({ type: SubActionsActionsList.INIT });
 
     try {
-      setIsLoading(true);
-      setIsError(false);
+      abortCtrl.current.abort();
+      abortCtrl.current = new AbortController();
+      dispatch({ type: SubActionsActionsList.LOADING });
+
       const res = (await executeAction({
         id: connectorId,
         http,
@@ -45,20 +108,23 @@ export const useSubAction = <T,>({
       })) as ActionTypeExecutorResult<T>;
 
       if (isMounted.current) {
-        setIsLoading(false);
-        setResponse(res.data);
         if (res.status && res.status === 'error') {
-          setIsError(true);
-          setError(new Error(`${res.message}: ${res.serviceMessage}`));
+          dispatch({
+            type: SubActionsActionsList.ERROR,
+            payload: new Error(`${res.message}: ${res.serviceMessage}`),
+          });
         }
+
+        dispatch({ type: SubActionsActionsList.SUCCESS, payload: res.data });
       }
 
       return res.data;
     } catch (e) {
       if (isMounted.current) {
-        setIsLoading(false);
-        setIsError(true);
-        setError(e);
+        dispatch({
+          type: SubActionsActionsList.ERROR,
+          payload: e,
+        });
       }
     }
   }
@@ -74,9 +140,6 @@ export const useSubAction = <T,>({
   }, []);
 
   return {
-    isLoading,
-    response,
-    isError,
-    error,
+    ...state,
   };
 };
