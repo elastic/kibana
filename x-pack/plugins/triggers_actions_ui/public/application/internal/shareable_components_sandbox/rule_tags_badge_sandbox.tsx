@@ -8,12 +8,7 @@
 import React, { useState } from 'react';
 import { getRuleTagsBadgeLazy } from '../../../common/get_rule_tags_badge';
 
-const tags = [
-  'tag1',
-  'tag2',
-  'tag3',
-  'tag4',
-];
+const tags = ['tag1', 'tag2', 'tag3', 'tag4'];
 
 export const RuleTagsBadgeSandbox = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);

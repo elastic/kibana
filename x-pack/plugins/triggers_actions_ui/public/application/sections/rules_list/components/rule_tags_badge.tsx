@@ -7,28 +7,24 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiPopover,
-  EuiBadge,
-  EuiPopoverTitle,
-} from '@elastic/eui';
+import { EuiPopover, EuiBadge, EuiPopoverTitle } from '@elastic/eui';
 
 const tagTitle = i18n.translate(
   'xpack.triggersActionsUI.sections.rules_list.rules_list_tags.tagTitle',
   {
     defaultMessage: 'Tag',
-  },
+  }
 );
 
 export interface RuleTagsBadgeProps {
-  isOpen: boolean,
-  tags: string[],
+  isOpen: boolean;
+  tags: string[];
   onClick: React.MouseEventHandler<HTMLButtonElement>;
-  onClose: () => void,
-  badgeDataTestSubj?: string,
-  titleDataTestSubj?: string,
-  popoverTagDataTestSubj?: string,
-};
+  onClose: () => void;
+  badgeDataTestSubj?: string;
+  titleDataTestSubj?: string;
+  popoverTagDataTestSubj?: string;
+}
 
 const containerStyle = {
   width: '300px',
@@ -42,7 +38,7 @@ export const RuleTagsBadge = (props: RuleTagsBadgeProps) => {
     onClose,
     badgeDataTestSubj = 'ruleTagsBadge',
     titleDataTestSubj = 'ruleTagsPopoverTitle',
-    popoverTagDataTestSubj = 'ruleTagsPopoverTag'
+    popoverTagDataTestSubj = 'ruleTagsPopoverTag',
   } = props;
 
   const badge = useMemo(() => {
@@ -63,37 +59,29 @@ export const RuleTagsBadge = (props: RuleTagsBadgeProps) => {
     );
   }, [tags, badgeDataTestSubj]);
 
-  const tagBadges = useMemo(() => (
-    tags.map((tag, index) => (
-      <EuiBadge
-        data-test-subj={popoverTagDataTestSubj}
-        key={index}
-        color="hollow"
-        iconType="tag"
-        iconSide="left"
-      >
-        {tag}
-      </EuiBadge>
-    ))
-  ), [tags, popoverTagDataTestSubj]);
+  const tagBadges = useMemo(
+    () =>
+      tags.map((tag, index) => (
+        <EuiBadge
+          data-test-subj={popoverTagDataTestSubj}
+          key={index}
+          color="hollow"
+          iconType="tag"
+          iconSide="left"
+        >
+          {tag}
+        </EuiBadge>
+      )),
+    [tags, popoverTagDataTestSubj]
+  );
 
   return (
-    <EuiPopover
-      button={badge}
-      anchorPosition="upCenter"
-      isOpen={isOpen}
-      closePopover={onClose}
-    >
-      <EuiPopoverTitle data-test-subj={titleDataTestSubj}>
-        {tagTitle}
-      </EuiPopoverTitle>
-      <div style={containerStyle}>
-        {tagBadges}
-      </div>
+    <EuiPopover button={badge} anchorPosition="upCenter" isOpen={isOpen} closePopover={onClose}>
+      <EuiPopoverTitle data-test-subj={titleDataTestSubj}>{tagTitle}</EuiPopoverTitle>
+      <div style={containerStyle}>{tagBadges}</div>
     </EuiPopover>
   );
 };
-  
+
 // eslint-disable-next-line import/no-default-export
 export { RuleTagsBadge as default };
-  
