@@ -8,9 +8,9 @@
 import { act } from '@testing-library/react';
 import { noop } from 'lodash';
 
-import type { AppUnmount } from 'src/core/public';
-import { AppNavLinkStatus } from 'src/core/public';
-import { coreMock, scopedHistoryMock, themeServiceMock } from 'src/core/public/mocks';
+import type { AppUnmount } from '@kbn/core/public';
+import { AppNavLinkStatus } from '@kbn/core/public';
+import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 
 import { securityMock } from '../mocks';
 import { accountManagementApp } from './account_management_app';

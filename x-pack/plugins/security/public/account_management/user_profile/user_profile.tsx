@@ -30,11 +30,11 @@ import type { FunctionComponent } from 'react';
 import React, { useRef, useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CoreStart } from 'src/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import type { AuthenticatedUser, UserAvatar as IUserAvatar } from '../../../common';
 import {
   canUserChangeDetails,

@@ -13,7 +13,7 @@ import { act } from 'react-dom/test-utils';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 
-import { coreMock, themeServiceMock } from 'src/core/public/mocks';
+import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { userProfileMock } from '../../common/model/user_profile.mock';

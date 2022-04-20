@@ -9,9 +9,9 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 
-import { coreMock, scopedHistoryMock, themeServiceMock } from 'src/core/public/mocks';
+import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 
-import type { UserData } from '../../../common/';
+import type { UserData } from '../../../common';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
 import { Providers } from '../account_management_app';

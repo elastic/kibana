@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 import { UserProfileAPIClient } from './user_profile_api_client';
 
