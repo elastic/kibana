@@ -30,6 +30,7 @@ import { getAddAlertFlyoutLazy } from './common/get_add_alert_flyout';
 import { getEditAlertFlyoutLazy } from './common/get_edit_alert_flyout';
 import { getAlertsTableLazy } from './common/get_alerts_table';
 import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
+import { getRuleTagsBadgeLazy } from './common/get_rule_tags_badge';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
 import {
   ExperimentalFeatures,
@@ -45,6 +46,7 @@ import type {
   ConnectorEditFlyoutProps,
   AlertsTableProps,
   RuleStatusDropdownProps,
+  RuleTagsBadgeProps,
   AlertsTableConfigurationRegistry,
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
@@ -75,6 +77,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
   ) => ReactElement<RuleEditProps>;
   getAlertsTable: (props: AlertsTableProps) => ReactElement<AlertsTableProps>;
   getRuleStatusDropdown: (props: RuleStatusDropdownProps) => ReactElement<RuleStatusDropdownProps>;
+  getRuleTagsBadge: (props: RuleTagsBadgeProps) => ReactElement<RuleTagsBadgeProps>;
 }
 
 interface PluginsSetup {
@@ -243,6 +246,9 @@ export class Plugin
       },
       getRuleStatusDropdown: (props: RuleStatusDropdownProps) => {
         return getRuleStatusDropdownLazy(props);
+      },
+      getRuleTagsBadge: (props: RuleTagsBadgeProps) => {
+        return getRuleTagsBadgeLazy(props);
       },
     };
   }
