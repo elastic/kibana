@@ -880,10 +880,8 @@ describe('utils', () => {
       it.each([[CaseStatuses.open], [CaseStatuses['in-progress']]])(
         'returns the correct duration when the case %s',
         (status) => {
-          expect(
-            getDurationForUpdate({ status: CaseStatuses.closed, closedAt, createdAt })
-          ).toEqual({
-            duration: 120,
+          expect(getDurationForUpdate({ status, closedAt, createdAt })).toEqual({
+            duration: null,
           });
         }
       );
@@ -907,7 +905,7 @@ describe('utils', () => {
       );
 
       it.each([['invalid'], [null]])(
-        'returns undefined if the createdAt date is %s',
+        'returns undefined if the closedAt date is %s',
         (closedAtInvalid) => {
           expect(
             getDurationForUpdate({
@@ -920,7 +918,7 @@ describe('utils', () => {
         }
       );
 
-      it('returns undefined if if created_at > closed_at', async () => {
+      it('returns undefined if created_at > closed_at', async () => {
         expect(
           getDurationForUpdate({
             status: CaseStatuses.closed,

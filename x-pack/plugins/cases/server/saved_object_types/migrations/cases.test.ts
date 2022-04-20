@@ -393,72 +393,35 @@ describe('case migrations', () => {
       });
     });
 
-    it('returns null if the created_at date is invalid', () => {
-      const doc = {
-        id: '123',
-        attributes: {
-          created_at: 'invalid',
-          closed_at: '2021-11-23T19:02:00Z',
-        },
-        type: 'abc',
-        references: [],
-      } as unknown as SavedObjectSanitizedDoc<CaseAttributes>;
+    it.each([['invalid'], [null]])(
+      'returns null if the createdAt date is %s',
+      (createdAtInvalid) => {
+        const doc = {
+          id: '123',
+          attributes: {
+            created_at: createdAtInvalid,
+            closed_at: '2021-11-23T19:02:00Z',
+          },
+          type: 'abc',
+          references: [],
+        } as unknown as SavedObjectSanitizedDoc<CaseAttributes>;
 
-      expect(addDuration(doc)).toEqual({
-        ...doc,
-        attributes: {
-          ...doc.attributes,
-          duration: null,
-        },
-      });
-    });
+        expect(addDuration(doc)).toEqual({
+          ...doc,
+          attributes: {
+            ...doc.attributes,
+            duration: null,
+          },
+        });
+      }
+    );
 
-    it('returns null if the closed_at date is invalid', () => {
-      const doc = {
-        id: '123',
-        attributes: {
-          created_at: '2021-11-23T19:02:00Z',
-          closed_at: 'invalid',
-        },
-        type: 'abc',
-        references: [],
-      } as unknown as SavedObjectSanitizedDoc<CaseAttributes>;
-
-      expect(addDuration(doc)).toEqual({
-        ...doc,
-        attributes: {
-          ...doc.attributes,
-          duration: null,
-        },
-      });
-    });
-
-    it('returns null if the created_at is null', () => {
-      const doc = {
-        id: '123',
-        attributes: {
-          created_at: null,
-          closed_at: '2021-11-23T19:02:00Z',
-        },
-        type: 'abc',
-        references: [],
-      } as unknown as SavedObjectSanitizedDoc<CaseAttributes>;
-
-      expect(addDuration(doc)).toEqual({
-        ...doc,
-        attributes: {
-          ...doc.attributes,
-          duration: null,
-        },
-      });
-    });
-
-    it('returns null if the closed_at is null', () => {
+    it.each([['invalid'], [null]])('returns null if the closedAt date is %s', (closedAtInvalid) => {
       const doc = {
         id: '123',
         attributes: {
           created_at: '2021-11-23T19:02:00Z',
-          closed_at: null,
+          closed_at: closedAtInvalid,
         },
         type: 'abc',
         references: [],
