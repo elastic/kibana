@@ -10,9 +10,9 @@ filegroup(
   name = "build_pkg_code",
   srcs = [
     "//packages/analytics/client:build",
+    "//packages/analytics/shippers/elastic_v3/browser:build",
     "//packages/analytics/shippers/elastic_v3/common:build",
     "//packages/analytics/shippers/elastic_v3/server:build",
-    "//packages/analytics/shippers/elastic_v3/browser:build",
     "//packages/analytics/shippers/fullstory:build",
     "//packages/elastic-apm-synthtrace:build",
     "//packages/elastic-eslint-config-kibana:build",
@@ -117,9 +117,9 @@ filegroup(
   name = "build_pkg_types",
   srcs = [
     "//packages/analytics/client:build_types",
+    "//packages/analytics/shippers/elastic_v3/browser:build_types",
     "//packages/analytics/shippers/elastic_v3/common:build_types",
     "//packages/analytics/shippers/elastic_v3/server:build_types",
-    "//packages/analytics/shippers/elastic_v3/browser:build_types",
     "//packages/analytics/shippers/fullstory:build_types",
     "//packages/elastic-apm-synthtrace:build_types",
     "//packages/elastic-safer-lodash-set:build_types",
