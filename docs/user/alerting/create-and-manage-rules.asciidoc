@@ -142,22 +142,24 @@ Actions are not required on rules. You can run a rule without actions to underst
 [[controlling-rules]]
 === Snooze and disable rules
 
-The rule listing allows you to quickly snooze/unsnooze and disable/enable, and delete individual rules using the colored dropdown.
+The rule listing enables you to quickly snooze, disable or enable, and delete individual rules using the colored dropdown.
 
 [role="screenshot"]
-image:images/individual-snooze-disable.png[The rule status dropdown allows an individual rule to be snoozed or disabled]
+image:images/individual-snooze-disable.png[The rule status dropdown enables you to snooze or disable an individual rule]
 
-Snoozing means that the rule checks continue to run on a schedule, but that alert will not trigger any action. You can set this snooze to expire after a certain period of time, or to snooze indefinitely if you want to snooze the rule's actions until you manually unsnooze them.
+When you snooze a rule, the rule checks continue to run on a schedule but the alert will not trigger any actions. You can snooze for a specified period of time or indefinitely.
 
 [role="screenshot"]
 image:images/snooze-panel.png[The snooze panel allows you to set the length of a rule's snooze period]
 
-If a rule is already snoozed, you can use the snooze UI to change the amount of time it will continue to snooze for, or to cancel the snooze.
+When a rule is in a `snoozed` state, you can cancel or change the duration of this state.
 
 [role="screenshot"]
 image:images/cancel-snooze.png[The snooze panel allows you to modify or cancel an existing snooze]
 
-You can perform these operations in bulk by multi-selecting rules, and then clicking the *Manage rules* button. **(Note that "Mute" refers to an indefinite snooze. This term may be changed in a future version of Kibana.)**
+You can perform these operations in bulk by multi-selecting rules, and then clicking the *Manage rules* button. 
+
+TIP: In this context, "Mute" refers to an indefinite snooze. preview:[]
 
 [role="screenshot"]
 image:images/bulk-mute-disable.png[The Manage rules button lets you mute/unmute, enable/disable, and delete in bulk,width=75%]
