@@ -56,8 +56,7 @@ export function useSavedSearch() {
           qry.bool.filter = qry.bool.filter === undefined ? [] : [qry.bool.filter];
         }
         if (Array.isArray(qry.bool.must_not) === false) {
-          qry.bool.must_not =
-            qry.bool.must_not === undefined ? [] : [qry.bool.must_not];
+          qry.bool.must_not = qry.bool.must_not === undefined ? [] : [qry.bool.must_not];
         }
         qry.bool.filter = [...qry.bool.filter, ...filterQuery.filter];
         qry.bool.must_not = [...qry.bool.must_not, ...filterQuery.must_not];
