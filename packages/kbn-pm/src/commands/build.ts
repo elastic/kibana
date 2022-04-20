@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { runBazel } from '../utils/bazel';
+import { runBazel } from '@kbn/bazel-runner';
 import { ICommand } from '.';
+import { log } from '../utils/log';
 
 export const BuildCommand: ICommand = {
   description: 'Runs a build in the Bazel built packages',
@@ -19,9 +20,11 @@ export const BuildCommand: ICommand = {
   },
 
   async run(projects, projectGraph, { options }) {
-    const runOffline = options?.offline === true;
-
     // Call bazel with the target to build all available packages
-    await runBazel(['build', '//packages:build', '--show_result=1'], runOffline);
+    await runBazel({
+      bazelArgs: ['build', '//packages:build', '--show_result=1'],
+      log,
+      offline: options?.offline === true,
+    });
   },
 };

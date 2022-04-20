@@ -7,7 +7,8 @@
  */
 
 import { Client, HttpConnection } from '@elastic/elasticsearch';
-import { createFailError, ToolingLog } from '@kbn/dev-utils';
+import { createFailError } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { TestFailure } from './get_failures';
 
