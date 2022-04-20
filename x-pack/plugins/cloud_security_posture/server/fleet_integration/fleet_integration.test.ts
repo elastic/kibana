@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { httpServerMock, loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import {
-  RequestHandlerContext,
-  SavedObjectsClientContract,
-  SavedObjectsFindResponse,
-} from '@kbn/core/server';
+import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { CIS_KUBERNETES_PACKAGE_NAME } from '../../common/constants';
-import { getPackagePolicyCreateCallback } from './fleet_integration';
+import { onPackagePolicyPostCreateCallback } from './fleet_integration';
 
 describe('create CSP rules with post package create callback', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -37,6 +33,7 @@ describe('create CSP rules with post package create callback', () => {
     enabled: true,
     rego_rule_id: 'cis_1_2_2',
   };
+
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     mockSoClient = savedObjectsClientMock.create();
@@ -55,12 +52,7 @@ describe('create CSP rules with post package create callback', () => {
       pit_id: undefined,
     } as unknown as SavedObjectsFindResponse);
 
-    const handler = getPackagePolicyCreateCallback(logger);
-    const mockContext = {
-      core: { savedObjects: { client: mockSoClient } },
-    } as unknown as RequestHandlerContext;
-    const mockKibanaRequest = httpServerMock.createKibanaRequest();
-    await handler(mockPackagePolicy, mockContext, mockKibanaRequest);
+    await onPackagePolicyPostCreateCallback(logger, mockPackagePolicy, mockSoClient);
 
     expect(mockSoClient.bulkCreate.mock.calls[0][0]).toMatchObject([
       {
@@ -77,12 +69,9 @@ describe('create CSP rules with post package create callback', () => {
   it('should not create rules when the package policy is not csp package', async () => {
     const mockPackagePolicy = createPackagePolicyMock();
     mockPackagePolicy.package!.name = 'not_csp_package';
-    const handler = getPackagePolicyCreateCallback(logger);
-    const mockContext = {
-      core: { savedObjects: { client: mockSoClient } },
-    } as unknown as RequestHandlerContext;
-    const mockKibanaRequest = httpServerMock.createKibanaRequest();
-    const res = await handler(mockPackagePolicy, mockContext, mockKibanaRequest);
-    expect(res).toEqual(mockPackagePolicy);
+
+    await onPackagePolicyPostCreateCallback(logger, mockPackagePolicy, mockSoClient);
+    expect(mockSoClient.find).toHaveBeenCalledTimes(0);
+    expect(mockSoClient.bulkCreate).toHaveBeenCalledTimes(0);
   });
 });

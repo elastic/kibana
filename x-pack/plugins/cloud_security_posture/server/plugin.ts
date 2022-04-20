@@ -12,6 +12,9 @@ import type {
   Plugin,
   Logger,
 } from '@kbn/core/server';
+import { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
+import { DeepReadonly } from 'utility-types';
+import { DeletePackagePoliciesResponse, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { CspAppService } from './lib/csp_app_services';
 import type {
   CspServerPluginSetup,
@@ -25,9 +28,10 @@ import { cspRuleTemplateAssetType } from './saved_objects/csp_rule_template';
 import { cspRuleAssetType } from './saved_objects/csp_rule_type';
 import { initializeCspTransformsIndices } from './create_indices/create_transforms_indices';
 import {
-  getPackagePolicyCreateCallback,
-  getPackagePolicyDeleteCallback,
+  onPackagePolicyPostCreateCallback,
+  onPackagePolicyDeleteCallback,
 } from './fleet_integration/fleet_integration';
+import { CIS_KUBERNETES_PACKAGE_NAME } from '../common/constants';
 
 export interface CspAppContext {
   logger: Logger;
@@ -78,12 +82,36 @@ export class CspPlugin
     plugins.fleet.fleetSetupCompleted().then(() => {
       plugins.fleet.registerExternalCallback(
         'packagePolicyPostCreate',
-        getPackagePolicyCreateCallback(this.logger)
+        async (
+          packagePolicy: PackagePolicy,
+          context: RequestHandlerContext,
+          request: KibanaRequest
+        ): Promise<PackagePolicy> => {
+          if (packagePolicy.package?.name === CIS_KUBERNETES_PACKAGE_NAME) {
+            await onPackagePolicyPostCreateCallback(
+              this.logger,
+              packagePolicy,
+              context.core.savedObjects.client
+            );
+          }
+
+          return packagePolicy;
+        }
       );
 
       plugins.fleet.registerExternalCallback(
         'postPackagePolicyDelete',
-        getPackagePolicyDeleteCallback(core.savedObjects.createInternalRepository(), this.logger)
+        async (deletedPackagePolicies: DeepReadonly<DeletePackagePoliciesResponse>) => {
+          for (const deletedPackagePolicy of deletedPackagePolicies) {
+            if (deletedPackagePolicy.package?.name === CIS_KUBERNETES_PACKAGE_NAME) {
+              await onPackagePolicyDeleteCallback(
+                this.logger,
+                deletedPackagePolicy,
+                core.savedObjects.createInternalRepository()
+              );
+            }
+          }
+        }
       );
     });
 
