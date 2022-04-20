@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { flattenObject } from './utils';
+import { flattenObject, stripOutUndefinedValues } from './utils';
 
 describe('Form lib utils', () => {
   describe('flattenObject', () => {
@@ -37,6 +37,30 @@ describe('Form lib utils', () => {
         'b.baz[3][0]': 1,
         'b.baz[3][1]': 2,
         'b.baz[3][2].3': false,
+      });
+    });
+  });
+
+  describe('stripOutUndefinedValues', () => {
+    test('should remove all undefined values', () => {
+      const obj = {
+        foo: undefined,
+        bar: {
+          a: true,
+          b: undefined,
+          c: ['foo', undefined, 'bar'],
+          d: {
+            d: undefined,
+          },
+        },
+      };
+
+      expect(stripOutUndefinedValues(obj)).toEqual({
+        bar: {
+          a: true,
+          c: ['foo', undefined, 'bar'],
+          d: {},
+        },
       });
     });
   });
