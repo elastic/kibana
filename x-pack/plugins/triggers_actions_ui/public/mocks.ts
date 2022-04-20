@@ -24,6 +24,7 @@ import {
   AlertsTableConfigurationRegistry,
 } from './types';
 import { getAlertsTableLazy } from './common/get_alerts_table';
+import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -58,6 +59,9 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     },
     getAlertsTable: (props: AlertsTableProps) => {
       return getAlertsTableLazy(props);
+    },
+    getRuleStatusDropdown: (props) => {
+      return getRuleStatusDropdownLazy(props);
     },
   };
 }

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import path from 'path';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import {
   ApiDeclaration,
   ScopeApi,
