@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Field formats example', function () {
     before(async () => {
-      this.tags('ciGroup2');
+      this.tags('ciGroup11');
       await PageObjects.common.navigateToApp('fieldFormatsExample');
     });
 
