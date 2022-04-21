@@ -102,6 +102,15 @@ describe('CollapsibleNav', () => {
     component.find('button[data-test-subj="collapsible-nav-lock"]').simulate('click');
     expect(onLock.callCount).toEqual(1);
   });
+  // the docking button should not be present under 1440 wdith
+  resizeWindow(1439, 900);
+  it('does not render dock button', () => {
+    const onLock = sinon.spy();
+    const component = mount(<CollapsibleNav {...mockProps()} onIsLockedUpdate={onLock} />);
+
+    // limit the find to buttons because jest also renders data-test-subj on a JSX wrapper element
+    expect(component.find('button[data-test-subj="collapsible-nav-lock"]')).toBeNull();
+  });
 
   it('renders links grouped by category', () => {
     // just a test of category functionality, categories are not accurate

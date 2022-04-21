@@ -646,10 +646,54 @@ exports[`Header renders 1`] = `
     BehaviorSubject {
       "_value": true,
       "closed": false,
-      "currentObservers": Array [],
+      "currentObservers": Array [
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
+              "closed": false,
+              "initialTeardown": [Function],
+            },
+          ],
+          "_parentage": null,
+          "closed": false,
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
+              "next": [Function],
+            },
+          },
+          "initialTeardown": undefined,
+          "isStopped": false,
+        },
+      ],
       "hasError": false,
       "isStopped": false,
-      "observers": Array [],
+      "observers": Array [
+        SafeSubscriber {
+          "_finalizers": Array [
+            Subscription {
+              "_finalizers": null,
+              "_parentage": [Circular],
+              "closed": false,
+              "initialTeardown": [Function],
+            },
+          ],
+          "_parentage": null,
+          "closed": false,
+          "destination": ConsumerObserver {
+            "partialObserver": Object {
+              "complete": undefined,
+              "error": undefined,
+              "next": [Function],
+            },
+          },
+          "initialTeardown": undefined,
+          "isStopped": false,
+        },
+      ],
       "thrownError": null,
     }
   }
@@ -2311,6 +2355,7 @@ exports[`Header renders 1`] = `
                     }
                     homeHref="/"
                     id="generated-id"
+                    isLocked={true}
                     isNavOpen={false}
                     navLinks$={
                       BehaviorSubject {
@@ -2435,7 +2480,9 @@ exports[`Header renders 1`] = `
                         </EuiHeaderSectionItemButton>
                       }
                       data-test-subj="collapsibleNav"
+                      dockedBreakpoint={1440}
                       id="generated-id"
+                      isDocked={true}
                       isOpen={false}
                       onClose={[Function]}
                       ownFocus={false}
