@@ -21,6 +21,7 @@ const MAX_NUMBER_OF_SERVICES = 50;
 export async function getServicesItems({
   environment,
   kuery,
+  probability,
   setup,
   searchAggregatedTransactions,
   logger,
@@ -30,6 +31,7 @@ export async function getServicesItems({
 }: {
   environment: string;
   kuery: string;
+  probability: number;
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
   logger: Logger;
@@ -41,6 +43,7 @@ export async function getServicesItems({
     const params = {
       environment,
       kuery,
+      probability,
       setup,
       searchAggregatedTransactions,
       maxNumServices: MAX_NUMBER_OF_SERVICES,
