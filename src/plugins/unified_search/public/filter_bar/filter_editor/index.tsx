@@ -86,7 +86,6 @@ class FilterEditorUI extends Component<Props, State> {
   }
 
   public render() {
-    // TODO: Hook up "Add vs Edit" panel titles
     const panelTitleAdd = i18n.translate('unifiedSearch.filter.filterEditor.addFilterPopupTitle', {
       defaultMessage: 'Add filter',
     });
@@ -97,7 +96,6 @@ class FilterEditorUI extends Component<Props, State> {
       }
     );
 
-    // TODO: Hook up "Add vs Update" button labels
     const addButtonLabel = i18n.translate('unifiedSearch.filter.filterEditor.addButtonLabel', {
       defaultMessage: 'Add filter',
     });

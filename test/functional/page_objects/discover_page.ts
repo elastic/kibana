@@ -7,7 +7,6 @@
  */
 
 import expect from '@kbn/expect';
-import _saved_queries from '../apps/discover/_saved_queries';
 import { FtrService } from '../ftr_provider_context';
 
 export class DiscoverPageObject extends FtrService {
@@ -247,7 +246,7 @@ export class DiscoverPageObject extends FtrService {
     return (await this.kibanaServer.uiSettings.get('doc_table:legacy')) === true;
   }
 
-  public async getDocTableIndex(index: number) {
+  public async getDocTableIndex(index: number, visibleText = false) {
     const isLegacyDefault = await this.useLegacyTable();
     if (isLegacyDefault) {
       const row = await this.find.byCssSelector(`tr.kbnDocTable__row:nth-child(${index})`);
@@ -255,7 +254,16 @@ export class DiscoverPageObject extends FtrService {
     }
 
     const row = await this.dataGrid.getRow({ rowIndex: index - 1 });
-    const result = await Promise.all(row.map(async (cell) => await cell.getVisibleText()));
+    const result = await Promise.all(
+      row.map(async (cell) => {
+        if (visibleText) {
+          return await cell.getVisibleText();
+        } else {
+          const textContent = await cell.getAttribute('textContent');
+          return textContent.trim();
+        }
+      })
+    );
     // Remove control columns
     return result.slice(2).join(' ');
   }
