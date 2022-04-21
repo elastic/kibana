@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginServices } from '../../../presentation_util/public';
+import { PluginServices } from '@kbn/presentation-util-plugin/public';
 import { ControlsDataViewsService } from './data_views';
 import { ControlsOverlaysService } from './overlays';
 import { registry as stubRegistry } from './stub';
@@ -15,6 +15,7 @@ import { ControlsDataService } from './data';
 import { ControlsService } from './controls';
 import { ControlsHTTPService } from './http';
 import { ControlsOptionsListService } from './options_list';
+import { ControlsSettingsService } from './settings';
 
 export interface ControlsServices {
   // dependency services
@@ -22,6 +23,7 @@ export interface ControlsServices {
   overlays: ControlsOverlaysService;
   data: ControlsDataService;
   http: ControlsHTTPService;
+  settings: ControlsSettingsService;
 
   // controls plugin's own services
   controls: ControlsService;

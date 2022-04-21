@@ -6,11 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { SimpleSavedObject } from 'kibana/public';
-import { MonitorFields } from '../../../../../plugins/uptime/common/runtime_types';
+import { SimpleSavedObject } from '@kbn/core/public';
+import { MonitorFields } from '@kbn/synthetics-plugin/common/runtime_types';
+import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { formatSecrets } from '@kbn/synthetics-plugin/server/lib/synthetics_service/utils/secrets';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { API_URLS } from '../../../../../plugins/uptime/common/constants';
-import { formatSecrets } from '../../../../../plugins/uptime/server/lib/synthetics_service/utils/secrets';
 import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -30,7 +30,9 @@ export default function ({ getService }: FtrProviderContext) {
       return res.body as SimpleSavedObject<MonitorFields>;
     };
 
-    before(() => {
+    before(async () => {
+      await supertest.post(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true').expect(200);
+
       _monitors = [
         getFixtureJson('icmp_monitor'),
         getFixtureJson('tcp_monitor'),

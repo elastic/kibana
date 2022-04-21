@@ -9,7 +9,11 @@ import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
 
-export const useStyles = () => {
+interface StylesDeps {
+  hasSearchResults: boolean;
+}
+
+export const useStyles = ({ hasSearchResults }: StylesDeps) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
@@ -17,12 +21,34 @@ export const useStyles = () => {
       position: 'absolute',
       top: euiTheme.size.s,
       right: euiTheme.size.xxl,
+      'button[data-test-subj="pagination-button-last"]': {
+        display: 'none',
+      },
+      'button[data-test-subj="pagination-button-first"]': {
+        display: 'none',
+      },
+    };
+
+    const noResults: CSSObject = {
+      position: 'absolute',
+      color: euiTheme.colors.subdued,
+      top: euiTheme.size.m,
+      right: euiTheme.size.xxl,
+    };
+
+    const searchBarWithResult: CSSObject = {
+      position: 'relative',
+      'input.euiFieldSearch.euiFieldSearch-isClearable': {
+        paddingRight: hasSearchResults ? '200px' : euiTheme.size.xxl,
+      },
     };
 
     return {
       pagination,
+      searchBarWithResult,
+      noResults,
     };
-  }, [euiTheme]);
+  }, [euiTheme, hasSearchResults]);
 
   return cached;
 };

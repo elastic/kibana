@@ -6,10 +6,15 @@
  */
 
 import { isNil } from 'lodash';
-import { Alert, AlertTypeParams, RecoveredActionGroup } from '../../common';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import {
+  Rule,
+  RuleExecutionStatusWarningReasons,
+  RuleTypeParams,
+  RecoveredActionGroup,
+} from '../../common';
 import { getDefaultRuleMonitoring } from './task_runner';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import { TaskStatus } from '../../../task_manager/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 
 interface GeneratorParams {
@@ -104,7 +109,7 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   executor: jest.fn(),
   producer: 'alerts',
   config: {
-    execution: {
+    run: {
       actions: { max: 1000 },
     },
   },
@@ -116,7 +121,7 @@ export const mockRunNowResponse = {
 
 export const mockDate = new Date('2019-02-12T21:01:22.479Z');
 
-export const mockedRuleTypeSavedObject: Alert<AlertTypeParams> = {
+export const mockedRuleTypeSavedObject: Rule<RuleTypeParams> = {
   id: '1',
   consumer: 'bar',
   createdAt: mockDate,
@@ -211,7 +216,7 @@ export const generateEventLog = ({
   actionId,
   status,
   numberOfTriggeredActions,
-  numberOfScheduledActions,
+  numberOfGeneratedActions,
   savedObjects = [generateAlertSO('1')],
 }: GeneratorParams = {}) => ({
   ...(status === 'error' && {
@@ -235,10 +240,10 @@ export const generateEventLog = ({
         ...(consumer && { consumer }),
         execution: {
           uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-          ...((!isNil(numberOfTriggeredActions) || !isNil(numberOfScheduledActions)) && {
+          ...((!isNil(numberOfTriggeredActions) || !isNil(numberOfGeneratedActions)) && {
             metrics: {
               number_of_triggered_actions: numberOfTriggeredActions,
-              number_of_scheduled_actions: numberOfScheduledActions,
+              number_of_generated_actions: numberOfGeneratedActions,
               number_of_searches: 3,
               es_search_duration_ms: 33,
               total_search_duration_ms: 23423,
@@ -327,6 +332,12 @@ const generateMessage = ({
     }
     if (actionGroupId === 'recovered') {
       return `rule-name' instanceId: '${instanceId}' scheduled actionGroup: '${actionGroupId}' action: action:${actionId}`;
+    }
+    if (
+      status === 'warning' &&
+      reason === RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS
+    ) {
+      return `The maximum number of actions for this rule type was reached; excess actions were not triggered.`;
     }
     return `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`;
   }

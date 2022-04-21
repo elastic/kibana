@@ -12,7 +12,7 @@ import { FrameworkRequest } from '../../../../framework';
 import { SavedTimeline } from '../../../../../../common/types';
 import { mockTemplate, mockTimeline } from '../../../__mocks__/create_timelines';
 import { buildFrameworkRequest } from '../../../utils/common';
-import { SecurityPluginSetup } from '../../../../../../../security/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { requestContextMock } from '../../../../detection_engine/routes/__mocks__';
 import {
   getCreateTimelinesRequest,

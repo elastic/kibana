@@ -6,12 +6,13 @@
  */
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { Logger } from '@kbn/core/server';
 import { updateRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/update_rules_type_dependents';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { updateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/update_rules_bulk_schema';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwAuthzError } from '../../../machine_learning/validation';
@@ -21,15 +22,20 @@ import { transformBulkError, buildSiemResponse, createBulkErrorObject } from '..
 import { updateRules } from '../../rules/update_rules';
 import { legacyMigrate } from '../../rules/utils';
 import { readRules } from '../../rules/read_rules';
+import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from './utils/deprecation';
 
+/**
+ * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
+ */
 export const updateRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  isRuleRegistryEnabled: boolean
+  isRuleRegistryEnabled: boolean,
+  logger: Logger
 ) => {
   router.put(
     {
-      path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+      path: DETECTION_ENGINE_RULES_BULK_UPDATE,
       validate: {
         body: buildRouteValidation(updateRulesBulkSchema),
       },
@@ -38,6 +44,8 @@ export const updateRulesBulkRoute = (
       },
     },
     async (context, request, response) => {
+      logDeprecatedBulkEndpoint(logger, DETECTION_ENGINE_RULES_BULK_UPDATE);
+
       const siemResponse = buildSiemResponse(response);
 
       const rulesClient = context.alerting.getRulesClient();
@@ -105,9 +113,16 @@ export const updateRulesBulkRoute = (
 
       const [validated, errors] = validate(rules, rulesBulkSchema);
       if (errors != null) {
-        return siemResponse.error({ statusCode: 500, body: errors });
+        return siemResponse.error({
+          statusCode: 500,
+          body: errors,
+          headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_UPDATE),
+        });
       } else {
-        return response.ok({ body: validated ?? {} });
+        return response.ok({
+          body: validated ?? {},
+          headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_UPDATE),
+        });
       }
     }
   );

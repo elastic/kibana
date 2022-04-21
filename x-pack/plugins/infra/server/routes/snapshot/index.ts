@@ -16,6 +16,7 @@ import { SnapshotRequestRT, SnapshotNodeResponseRT } from '../../../common/http_
 import { throwErrors } from '../../../common/runtime_types';
 import { createSearchClient } from '../../lib/create_search_client';
 import { getNodes } from './lib/get_nodes';
+import { LogQueryFields } from '../../lib/metrics/types';
 
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
@@ -41,13 +42,14 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
         snapshotRequest.sourceId
       );
       const compositeSize = libs.configuration.inventory.compositeSize;
-      const logQueryFields = await libs
-        .getLogQueryFields(
-          snapshotRequest.sourceId,
-          requestContext.core.savedObjects.client,
-          requestContext.core.elasticsearch.client.asCurrentUser
-        )
-        .catch(() => undefined);
+      const [, , { logViews }] = await libs.getStartServices();
+      const logQueryFields: LogQueryFields | undefined = await logViews
+        .getScopedClient(request)
+        .getResolvedLogView(snapshotRequest.sourceId)
+        .then(
+          ({ indices }) => ({ indexPattern: indices }),
+          () => undefined
+        );
 
       UsageCollector.countNode(snapshotRequest.nodeType);
       const client = createSearchClient(requestContext, framework);

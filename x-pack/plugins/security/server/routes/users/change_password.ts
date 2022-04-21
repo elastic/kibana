@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import type { RouteDefinitionParams } from '../';
+import type { RouteDefinitionParams } from '..';
 import { canUserChangePassword } from '../../../common/model';
 import {
   BasicHTTPAuthorizationHeaderCredentials,

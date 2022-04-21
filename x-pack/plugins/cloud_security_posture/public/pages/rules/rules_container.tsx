@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { extractErrorMessage, isNonNullable } from '../../../common/utils/helpers';
 import { RulesTable } from './rules_table';
 import { RulesBottomBar } from './rules_bottom_bar';
@@ -28,7 +29,6 @@ import {
 } from './use_csp_rules';
 import * as TEST_SUBJECTS from './test_subjects';
 import { RuleFlyout } from './rules_flyout';
-import { pagePathGetters } from '../../../../fleet/public';
 import { useKibana } from '../../common/hooks/use_kibana';
 
 interface RulesPageData {
@@ -214,8 +214,9 @@ export const RulesContainer = () => {
       )}
       {selectedRuleId && (
         <RuleFlyout
-          rule={rulesPageData.rules_map.get(selectedRuleId)!}
+          rule={changedRules.get(selectedRuleId) || rulesPageData.rules_map.get(selectedRuleId)!}
           onClose={() => setSelectedRuleId(null)}
+          toggleRule={toggleRule}
         />
       )}
     </div>

@@ -8,11 +8,11 @@
 import { TaskRunnerFactory } from './task_runner';
 import { RuleTypeRegistry, ConstructorOptions } from './rule_type_registry';
 import { ActionGroup, RuleType } from './types';
-import { taskManagerMock } from '../../task_manager/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ILicenseState } from './lib/license_state';
 import { licenseStateMock } from './lib/license_state.mock';
-import { licensingMock } from '../../licensing/server/mocks';
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
 
 const logger = loggingSystemMock.create().get();
@@ -60,7 +60,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -86,7 +86,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -124,7 +124,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -153,7 +153,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -185,7 +185,7 @@ describe('Create Lifecycle', () => {
         producer: 'alerts',
         defaultScheduleInterval: 'foobar',
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -278,7 +278,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -312,7 +312,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -350,7 +350,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -392,7 +392,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -423,7 +423,7 @@ describe('Create Lifecycle', () => {
         producer: 'alerts',
         ruleTaskTimeout: '20m',
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -460,7 +460,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -488,7 +488,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -509,7 +509,7 @@ describe('Create Lifecycle', () => {
           executor: jest.fn(),
           producer: 'alerts',
           config: {
-            execution: {
+            run: {
               actions: { max: 1000 },
             },
           },
@@ -536,7 +536,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -560,7 +560,7 @@ describe('Create Lifecycle', () => {
           "state": Array [],
         },
         "config": Object {
-          "execution": Object {
+          "run": Object {
             "actions": Object {
               "max": 1000,
             },
@@ -615,7 +615,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -714,7 +714,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -752,7 +752,7 @@ function ruleTypeWithVariables<ActionGroupIds extends string>(
     async executor() {},
     producer: 'alerts',
     config: {
-      execution: {
+      run: {
         actions: { max: 1000 },
       },
     },

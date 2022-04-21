@@ -13,7 +13,8 @@
     "public/**/*.json",
     "server/**/*",
     "storybook/**/*",
-    "../../../typings/**/*"
+    "../../../typings/**/*",
+    "./jest_setup.ts"
   ],
   "references": [
     { "path": "../../core/tsconfig.json" },

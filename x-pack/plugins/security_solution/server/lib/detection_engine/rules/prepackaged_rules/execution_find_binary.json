@@ -1,0 +1,55 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies Linux binary find abuse to break out from restricted environments by spawning an interactive system shell. The find command in Unix is a command line utility for walking a file hirerarchy and the activity of spawning shell is not a standard use of this binary for a user or system administrator.It indicates a potentially malicious actor attempting to improve the capabilities or stability of their access.",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Linux Restricted Shell Breakout via the find command",
+  "query": "process where event.type == \"start\" and process.name in (\"bash\", \"sh\") and\n  process.parent.name == \"find\" and process.parent.args == \"-exec\" and\n  process.parent.args == \";\" and process.parent.args in (\"/bin/bash\", \"/bin/sh\", \"bash\", \"sh\")\n",
+  "references": [
+    "https://gtfobins.github.io/gtfobins/find/"
+  ],
+  "risk_score": 47,
+  "rule_id": "6f683345-bb10-47a7-86a7-71e9c24fb358",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Execution",
+    "GTFOBins"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/",
+          "subtechnique": [
+            {
+              "id": "T1059.004",
+              "name": "Unix Shell",
+              "reference": "https://attack.mitre.org/techniques/T1059/004/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

@@ -8,14 +8,14 @@
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { PolicyTestResourceInfo } from '../../../security_solution_endpoint/services/endpoint_policy';
-import { ArtifactTestData } from '../../../security_solution_endpoint/services//endpoint_artifacts';
 import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
   GLOBAL_ARTIFACT_TAG,
-} from '../../../../plugins/security_solution/common/endpoint/service/artifacts';
-import { ExceptionsListItemGenerator } from '../../../../plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator';
+} from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
+import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { PolicyTestResourceInfo } from '../../../security_solution_endpoint/services/endpoint_policy';
+import { ArtifactTestData } from '../../../security_solution_endpoint/services/endpoint_artifacts';
 import {
   createUserAndRole,
   deleteUserAndRole,
@@ -122,35 +122,6 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(400)
               .expect(anEndpointArtifactError)
               .expect(anErrorMessageWith(/types that failed validation:/));
-          });
-
-          it(`should error on [${blocklistApiCall.method}] if the same hash type is present twice`, async () => {
-            const body = blocklistApiCall.getBody();
-
-            body.entries = [
-              {
-                field: 'file.hash.sha256',
-                value: ['a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3'],
-                type: 'match_any',
-                operator: 'included',
-              },
-              {
-                field: 'file.hash.sha256',
-                value: [
-                  '2C26B46B68FFC68FF99B453C1D30413413422D706483BFA0F98A5E886266E7AE',
-                  'FCDE2B2EDBA56BF408601FB721FE9B5C338D10EE429EA04FAE5511B68FBF8FB9',
-                ],
-                type: 'match_any',
-                operator: 'included',
-              },
-            ];
-
-            await supertest[blocklistApiCall.method](blocklistApiCall.path)
-              .set('kbn-xsrf', 'true')
-              .send(body)
-              .expect(400)
-              .expect(anEndpointArtifactError)
-              .expect(anErrorMessageWith(/duplicated/));
           });
 
           it(`should error on [${blocklistApiCall.method}] if an invalid hash is used`, async () => {

@@ -7,9 +7,12 @@
 
 import expect from '@kbn/expect';
 import {
-  HostAuthenticationsStrategyResponse,
-  HostsQueries,
-} from '../../../../plugins/security_solution/common/search_strategy';
+  AuthStackByField,
+  Direction,
+  UserAuthenticationsRequestOptions,
+  UserAuthenticationsStrategyResponse,
+  UsersQueries,
+} from '@kbn/security-solution-plugin/common/search_strategy';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -35,25 +38,29 @@ export default function ({ getService }: FtrProviderContext) {
     );
 
     it('Make sure that we get Authentication data', async () => {
-      const authentications = await bsearch.send<HostAuthenticationsStrategyResponse>({
-        supertest,
-        options: {
-          factoryQueryType: HostsQueries.authentications,
-          timerange: {
-            interval: '12h',
-            to: TO,
-            from: FROM,
-          },
-          pagination: {
-            activePage: 0,
-            cursorStart: 0,
-            fakePossibleCount: 3,
-            querySize: 1,
-          },
-          defaultIndex: ['auditbeat-*'],
-          docValueFields: [],
-          inspect: false,
+      const requestOptions: UserAuthenticationsRequestOptions = {
+        factoryQueryType: UsersQueries.authentications,
+        timerange: {
+          interval: '12h',
+          to: TO,
+          from: FROM,
         },
+        pagination: {
+          activePage: 0,
+          cursorStart: 0,
+          fakePossibleCount: 3,
+          querySize: 1,
+        },
+        defaultIndex: ['auditbeat-*'],
+        docValueFields: [],
+        stackByField: AuthStackByField.userName,
+        sort: { field: 'timestamp', direction: Direction.asc },
+        filterQuery: '',
+      };
+
+      const authentications = await bsearch.send<UserAuthenticationsStrategyResponse>({
+        supertest,
+        options: requestOptions,
         strategy: 'securitySolutionSearchStrategy',
       });
 
@@ -63,25 +70,29 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('Make sure that pagination is working in Authentications query', async () => {
-      const authentications = await bsearch.send<HostAuthenticationsStrategyResponse>({
-        supertest,
-        options: {
-          factoryQueryType: HostsQueries.authentications,
-          timerange: {
-            interval: '12h',
-            to: TO,
-            from: FROM,
-          },
-          pagination: {
-            activePage: 2,
-            cursorStart: 1,
-            fakePossibleCount: 5,
-            querySize: 2,
-          },
-          defaultIndex: ['auditbeat-*'],
-          docValueFields: [],
-          inspect: false,
+      const requestOptions: UserAuthenticationsRequestOptions = {
+        factoryQueryType: UsersQueries.authentications,
+        timerange: {
+          interval: '12h',
+          to: TO,
+          from: FROM,
         },
+        pagination: {
+          activePage: 2,
+          cursorStart: 1,
+          fakePossibleCount: 5,
+          querySize: 2,
+        },
+        defaultIndex: ['auditbeat-*'],
+        docValueFields: [],
+        stackByField: AuthStackByField.userName,
+        sort: { field: 'timestamp', direction: Direction.asc },
+        filterQuery: '',
+      };
+
+      const authentications = await bsearch.send<UserAuthenticationsStrategyResponse>({
+        supertest,
+        options: requestOptions,
         strategy: 'securitySolutionSearchStrategy',
       });
 

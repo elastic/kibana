@@ -17,7 +17,7 @@ import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { HeaderActions } from '../body/actions/header_actions';
 import { CellValueElementProps } from '../cell_rendering';
 import { Direction } from '../../../../../common/search_strategy';
-import { useTimelineEvents } from '../../../containers/index';
+import { useTimelineEvents } from '../../../containers';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
@@ -125,7 +125,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
-  const ACTION_BUTTON_COUNT = 5;
+  const ACTION_BUTTON_COUNT = 6;
 
   const filterQuery = useMemo(() => {
     if (isEmpty(pinnedEventIds)) {

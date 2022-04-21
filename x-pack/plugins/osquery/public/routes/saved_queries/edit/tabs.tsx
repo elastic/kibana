@@ -17,6 +17,7 @@ interface ResultTabsProps {
   agentIds?: string[];
   startDate?: string;
   endDate?: string;
+  hideFullscreen?: true;
 }
 
 const ResultTabsComponent: React.FC<ResultTabsProps> = ({
@@ -24,6 +25,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   agentIds,
   endDate,
   startDate,
+  hideFullscreen,
 }) => {
   const tabs = useMemo(
     () => [
@@ -38,6 +40,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
               agentIds={agentIds}
               startDate={startDate}
               endDate={endDate}
+              hideFullscreen={hideFullscreen}
             />
           </>
         ),
@@ -57,7 +60,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
         ),
       },
     ],
-    [actionId, agentIds, endDate, startDate]
+    [actionId, agentIds, endDate, startDate, hideFullscreen]
   );
 
   return (

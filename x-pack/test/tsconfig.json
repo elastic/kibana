@@ -77,7 +77,6 @@
     { "path": "../plugins/licensing/tsconfig.json" },
     { "path": "../plugins/lists/tsconfig.json" },
     { "path": "../plugins/logstash/tsconfig.json" },
-    { "path": "../plugins/metrics_entities/tsconfig.json" },
     { "path": "../plugins/ml/tsconfig.json" },
     { "path": "../plugins/monitoring/tsconfig.json" },
     { "path": "../plugins/observability/tsconfig.json" },
@@ -102,6 +101,6 @@
     { "path": "../plugins/remote_clusters/tsconfig.json" },
     { "path": "../plugins/cross_cluster_replication/tsconfig.json" },
     { "path": "../plugins/index_lifecycle_management/tsconfig.json"},
-    { "path": "../plugins/uptime/tsconfig.json" }
+    { "path": "../plugins/synthetics/tsconfig.json"}
   ]
 }

@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { pluginServices } from './services';
 import {
   ControlsPluginSetup,
@@ -29,9 +30,13 @@ import {
   CONTROL_GROUP_TYPE,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
+  TIME_SLIDER_CONTROL,
 } from '.';
+import {
+  TimesliderEmbeddableFactory,
+  TimeSliderControlEmbeddableInput,
+} from './control_types/time_slider';
 import { controlsService } from './services/kibana/controls';
-import { EmbeddableFactory } from '../../embeddable/public';
 
 export class ControlsPlugin
   implements
@@ -97,6 +102,19 @@ export class ControlsPlugin
         rangeSliderFactory
       );
       registerControlType(rangeSliderFactory);
+
+      // Time Slider Control Factory Setup
+      const timeSliderFactoryDef = new TimesliderEmbeddableFactory();
+      const timeSliderFactory = embeddable.registerEmbeddableFactory(
+        TIME_SLIDER_CONTROL,
+        timeSliderFactoryDef
+      )();
+      this.transferEditorFunctions<TimeSliderControlEmbeddableInput>(
+        timeSliderFactoryDef,
+        timeSliderFactory
+      );
+
+      registerControlType(timeSliderFactory);
     });
 
     return {

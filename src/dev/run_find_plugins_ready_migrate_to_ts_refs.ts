@@ -10,7 +10,8 @@ import Path from 'path';
 import Fs from 'fs';
 import JSON5 from 'json5';
 import { get } from 'lodash';
-import { run, KibanaPlatformPlugin } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-utils';
+import { KibanaPlatformPlugin } from '@kbn/plugin-discovery';
 import { getPluginDeps, findPlugins } from './plugin_discovery';
 
 interface AllOptions {

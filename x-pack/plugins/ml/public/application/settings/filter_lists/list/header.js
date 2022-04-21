@@ -23,7 +23,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
-import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { MlPageHeader } from '../../../components/page_header';
 
 function FilterListsHeaderUI({ totalCount, refreshFilterLists, kibana }) {

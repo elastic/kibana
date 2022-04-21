@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
+import { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { AgentsRequestOptions } from '../../../../../../common/search_strategy';
 // import { createQueryFilterClauses } from '../../../../../../common/utils/build_query';
 

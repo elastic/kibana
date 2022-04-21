@@ -6,12 +6,12 @@
  */
 
 import { buildQueryFilter, Filter } from '@kbn/es-query';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import { maxBy, minBy } from 'lodash';
+import { TimeRange } from '@kbn/data-plugin/common';
 import { ExpressionValueFilter } from '../../types';
 // @ts-expect-error untyped local
 import { buildBoolArray } from './build_bool_array';
-import { TimeRange } from '../../../../../src/plugins/data/common';
 
 export interface EmbeddableFilterInput {
   filters: Filter[];

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
-
 import { ByteSizeValue } from '@kbn/config-schema';
+import { IScopedClusterClient } from '@kbn/core/server';
 
 import { ElasticsearchIndex } from '../../common/types';
 
@@ -23,7 +22,6 @@ export const fetchIndices = async (client: IScopedClusterClient): Promise<Elasti
     // node.js string length limit: https://github.com/nodejs/node/issues/33960
     filter_path: ['*.aliases'],
     // for better performance only compute aliases and settings of indices but not mappings
-    // @ts-expect-error new param https://github.com/elastic/elasticsearch-specification/issues/1382
     features: ['aliases', 'settings'],
   });
 

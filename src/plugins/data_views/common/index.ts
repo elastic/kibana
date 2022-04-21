@@ -11,7 +11,6 @@ export {
   DEFAULT_ASSETS_TO_IGNORE,
   META_FIELDS,
   DATA_VIEW_SAVED_OBJECT_TYPE,
-  INDEX_PATTERN_SAVED_OBJECT_TYPE,
 } from './constants';
 export type { IFieldType, IIndexPatternFieldList } from './fields';
 export {
