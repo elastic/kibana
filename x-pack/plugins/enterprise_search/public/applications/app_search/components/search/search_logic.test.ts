@@ -12,7 +12,7 @@ import {
   mockFlashMessageHelpers,
 } from '../../../__mocks__/kea_logic';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { SearchLogic } from './search_logic';
 

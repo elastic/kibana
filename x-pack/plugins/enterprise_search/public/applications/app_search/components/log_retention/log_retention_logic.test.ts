@@ -11,11 +11,11 @@ import {
   mockFlashMessageHelpers,
 } from '../../../__mocks__/kea_logic';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { LogRetentionOptions } from './types';
 
-import { LogRetentionLogic } from './';
+import { LogRetentionLogic } from '.';
 
 describe('LogRetentionLogic', () => {
   const { mount } = new LogicMounter(LogRetentionLogic);
@@ -29,6 +29,11 @@ describe('LogRetentionLogic', () => {
       retention_policy: { is_default: true, min_age_days: 180 },
     },
     api: {
+      disabled_at: null,
+      enabled: true,
+      retention_policy: { is_default: true, min_age_days: 180 },
+    },
+    audit: {
       disabled_at: null,
       enabled: true,
       retention_policy: { is_default: true, min_age_days: 180 },
@@ -47,6 +52,11 @@ describe('LogRetentionLogic', () => {
       retentionPolicy: { isDefault: true, minAgeDays: 180 },
     },
     api: {
+      disabledAt: null,
+      enabled: true,
+      retentionPolicy: { isDefault: true, minAgeDays: 180 },
+    },
+    audit: {
       disabledAt: null,
       enabled: true,
       retentionPolicy: { isDefault: true, minAgeDays: 180 },
@@ -156,6 +166,11 @@ describe('LogRetentionLogic', () => {
               enabled: true,
               retentionPolicy: null,
             },
+            audit: {
+              disabledAt: null,
+              enabled: true,
+              retentionPolicy: null,
+            },
             crawler: {
               disabledAt: null,
               enabled: true,
@@ -172,6 +187,11 @@ describe('LogRetentionLogic', () => {
                 retentionPolicy: null,
               },
               analytics: {
+                disabledAt: null,
+                enabled: true,
+                retentionPolicy: null,
+              },
+              audit: {
                 disabledAt: null,
                 enabled: true,
                 retentionPolicy: null,

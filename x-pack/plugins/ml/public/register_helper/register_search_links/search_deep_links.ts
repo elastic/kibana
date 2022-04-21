@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { AppDeepLink } from 'src/core/public';
+import type { AppDeepLink } from '@kbn/core/public';
 import { ML_PAGES } from '../../../common/constants/locator';
 
 const OVERVIEW_LINK_DEEP_LINK: AppDeepLink = {
@@ -51,7 +51,7 @@ const MODEL_MANAGEMENT_DEEP_LINK: AppDeepLink = {
     {
       id: 'mlNodesOverviewDeepLink',
       title: i18n.translate('xpack.ml.deepLink.nodesOverview', {
-        defaultMessage: 'Nodes Overview',
+        defaultMessage: 'Nodes',
       }),
       path: `/${ML_PAGES.TRAINED_MODELS_NODES}`,
     },

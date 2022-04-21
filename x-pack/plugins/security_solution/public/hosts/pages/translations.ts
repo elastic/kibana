@@ -60,7 +60,14 @@ export const NAVIGATION_ALERTS_TITLE = i18n.translate(
 export const NAVIGATION_HOST_RISK_TITLE = i18n.translate(
   'xpack.securitySolution.hosts.navigation.hostRisk',
   {
-    defaultMessage: 'Host risk',
+    defaultMessage: 'Hosts by risk',
+  }
+);
+
+export const NAVIGATION_SESSIONS_TITLE = i18n.translate(
+  'xpack.securitySolution.hosts.navigation.sessionsTitle',
+  {
+    defaultMessage: 'Sessions',
   }
 );
 

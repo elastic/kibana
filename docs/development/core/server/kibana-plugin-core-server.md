@@ -70,6 +70,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [DeprecationSettings](./kibana-plugin-core-server.deprecationsettings.md) | UiSettings deprecation field options. |
 |  [DeprecationsServiceSetup](./kibana-plugin-core-server.deprecationsservicesetup.md) | The deprecations service provides a way for the Kibana platform to communicate deprecated features and configs with its users. These deprecations are only communicated if the deployment is using these features. Allowing for a user tailored experience for upgrading the stack version.<!-- -->The Deprecation service is consumed by the upgrade assistant to assist with the upgrade experience.<!-- -->If a deprecated feature can be resolved without manual user intervention. Using correctiveActions.api allows the Upgrade Assistant to use this api to correct the deprecation upon a user trigger. |
 |  [DiscoveredPlugin](./kibana-plugin-core-server.discoveredplugin.md) | Small container object used to expose information about discovered plugins that may or may not have been started. |
+|  [DocLinksServiceSetup](./kibana-plugin-core-server.doclinksservicesetup.md) |  |
 |  [ElasticsearchConfigPreboot](./kibana-plugin-core-server.elasticsearchconfigpreboot.md) | A limited set of Elasticsearch configuration entries exposed to the <code>preboot</code> plugins at <code>setup</code>. |
 |  [ElasticsearchErrorDetails](./kibana-plugin-core-server.elasticsearcherrordetails.md) |  |
 |  [ElasticsearchServicePreboot](./kibana-plugin-core-server.elasticsearchservicepreboot.md) |  |
@@ -243,6 +244,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  --- | --- |
 |  [APP\_WRAPPER\_CLASS](./kibana-plugin-core-server.app_wrapper_class.md) | The class name for top level \*and\* nested application wrappers to ensure proper layout |
 |  [kibanaResponseFactory](./kibana-plugin-core-server.kibanaresponsefactory.md) | Set of helpers used to create <code>KibanaResponse</code> to form HTTP response on an incoming request. Should be returned as a result of [RequestHandler](./kibana-plugin-core-server.requesthandler.md) execution. |
+|  [mergeSavedObjectMigrationMaps](./kibana-plugin-core-server.mergesavedobjectmigrationmaps.md) | Merges two saved object migration maps.<!-- -->If there is a migration for a given version on only one of the maps, that migration function will be used:<!-- -->mergeSavedObjectMigrationMaps(<!-- -->{ '1.2.3': f }<!-- -->, { '4.5.6': g }<!-- -->) -<!-- -->&gt; { '1.2.3': f, '4.5.6': g }<!-- -->If there is a migration for a given version on both maps, the migrations will be composed:<!-- -->mergeSavedObjectMigrationMaps(<!-- -->{ '1.2.3': f }<!-- -->, { '1.2.3': g }<!-- -->) -<!-- -->&gt; { '1.2.3': (doc, context) =<!-- -->&gt; f(g(doc, context), context) } |
 |  [pollEsNodesVersion](./kibana-plugin-core-server.pollesnodesversion.md) |  |
 |  [ServiceStatusLevels](./kibana-plugin-core-server.servicestatuslevels.md) | The current "level" of availability of a service. |
 |  [validBodyOutput](./kibana-plugin-core-server.validbodyoutput.md) | The set of valid body.output |
@@ -251,6 +253,9 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Type Alias | Description |
 |  --- | --- |
+|  [AnalyticsServicePreboot](./kibana-plugin-core-server.analyticsservicepreboot.md) | Exposes the public APIs of the AnalyticsClient during the preboot phase  |
+|  [AnalyticsServiceSetup](./kibana-plugin-core-server.analyticsservicesetup.md) | Exposes the public APIs of the AnalyticsClient during the setup phase.  |
+|  [AnalyticsServiceStart](./kibana-plugin-core-server.analyticsservicestart.md) | Exposes the public APIs of the AnalyticsClient during the start phase  |
 |  [AppenderConfigType](./kibana-plugin-core-server.appenderconfigtype.md) |  |
 |  [AuthenticationHandler](./kibana-plugin-core-server.authenticationhandler.md) | See [AuthToolkit](./kibana-plugin-core-server.authtoolkit.md)<!-- -->. |
 |  [AuthHeaders](./kibana-plugin-core-server.authheaders.md) | Auth Headers map |
@@ -259,9 +264,11 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [CapabilitiesSwitcher](./kibana-plugin-core-server.capabilitiesswitcher.md) | See [CapabilitiesSetup](./kibana-plugin-core-server.capabilitiessetup.md) |
 |  [DeprecationsDetails](./kibana-plugin-core-server.deprecationsdetails.md) |  |
 |  [DestructiveRouteMethod](./kibana-plugin-core-server.destructiveroutemethod.md) | Set of HTTP methods changing the state of the server. |
+|  [DocLinksServiceStart](./kibana-plugin-core-server.doclinksservicestart.md) |  |
 |  [ElasticsearchClient](./kibana-plugin-core-server.elasticsearchclient.md) | Client used to query the elasticsearch cluster. |
 |  [ElasticsearchClientConfig](./kibana-plugin-core-server.elasticsearchclientconfig.md) | Configuration options to be used to create a [cluster client](./kibana-plugin-core-server.iclusterclient.md) using the [createClient API](./kibana-plugin-core-server.elasticsearchservicestart.createclient.md) |
 |  [ExecutionContextStart](./kibana-plugin-core-server.executioncontextstart.md) |  |
+|  [ExposedToBrowserDescriptor](./kibana-plugin-core-server.exposedtobrowserdescriptor.md) | Type defining the list of configuration properties that will be exposed on the client-side Object properties can either be fully exposed |
 |  [GetAuthHeaders](./kibana-plugin-core-server.getauthheaders.md) | Get headers to authenticate a user against Elasticsearch. |
 |  [GetAuthState](./kibana-plugin-core-server.getauthstate.md) | Gets authentication state for a request. Returned by <code>auth</code> interceptor. |
 |  [HandlerContextType](./kibana-plugin-core-server.handlercontexttype.md) | Extracts the type of the first argument of a [HandlerFunction](./kibana-plugin-core-server.handlerfunction.md) to represent the type of the context. |

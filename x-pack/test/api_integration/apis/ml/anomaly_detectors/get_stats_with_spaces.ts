@@ -27,7 +27,7 @@ export default ({ getService }: FtrProviderContext) => {
     expectedStatusCode: number,
     space?: string
   ) {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .get(
         `${space ? `/s/${space}` : ''}/api/ml/anomaly_detectors${
           jobOrGroup ? `/${jobOrGroup}` : ''
@@ -37,8 +37,8 @@ export default ({ getService }: FtrProviderContext) => {
         USER.ML_VIEWER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_VIEWER_ALL_SPACES)
       )
-      .set(COMMON_REQUEST_HEADERS)
-      .expect(expectedStatusCode);
+      .set(COMMON_REQUEST_HEADERS);
+    ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
   }

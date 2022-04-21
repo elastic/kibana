@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import _ from 'lodash';
-import { CoreStart, Logger } from 'src/core/server';
-import type { DataRequestHandlerContext } from 'src/plugins/data/server';
+import { CoreStart, Logger } from '@kbn/core/server';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import { IncomingHttpHeaders } from 'http';
 import { Stream } from 'stream';
 import { isAbortError } from './util';
 import { makeExecutionContext } from '../../common/execution_context';
+import { Field, mergeFields } from './merge_fields';
 
 export async function getEsTile({
   url,
@@ -36,23 +37,31 @@ export async function getEsTile({
   logger: Logger;
   requestBody: any;
   abortController: AbortController;
-}): Promise<Stream | null> {
+}): Promise<{ stream: Stream | null; headers: IncomingHttpHeaders; statusCode: number }> {
   try {
     const path = `/${encodeURIComponent(index)}/_mvt/${geometryFieldName}/${z}/${x}/${y}`;
-    let fields = _.uniq(requestBody.docvalue_fields.concat(requestBody.stored_fields));
-    fields = fields.filter((f) => f !== geometryFieldName);
+
     const body = {
       grid_precision: 0, // no aggs
       exact_bounds: true,
       extent: 4096, // full resolution,
       query: requestBody.query,
-      fields,
+      fields: mergeFields(
+        [
+          requestBody.docvalue_fields as Field[] | undefined,
+          requestBody.stored_fields as Field[] | undefined,
+        ],
+        [geometryFieldName]
+      ),
       runtime_mappings: requestBody.runtime_mappings,
       track_total_hits: requestBody.size + 1,
     };
 
     const tile = await core.executionContext.withContext(
-      makeExecutionContext('mvt:get_tile', url),
+      makeExecutionContext({
+        description: 'mvt:get_tile',
+        url,
+      }),
       async () => {
         return await context.core.elasticsearch.client.asCurrentUser.transport.request(
           {
@@ -66,18 +75,21 @@ export async function getEsTile({
               'Accept-Encoding': 'gzip',
             },
             asStream: true,
+            meta: true,
           }
         );
       }
     );
 
-    return tile.body as Stream;
+    return { stream: tile.body as Stream, headers: tile.headers, statusCode: tile.statusCode };
   } catch (e) {
-    if (!isAbortError(e)) {
-      // These are often circuit breaking exceptions
-      // Should return a tile with some error message
-      logger.warn(`Cannot generate ES-grid-tile for ${z}/${x}/${y}: ${e.message}`);
+    if (isAbortError(e)) {
+      return { stream: null, headers: {}, statusCode: 200 };
     }
-    return null;
+
+    // These are often circuit breaking exceptions
+    // Should return a tile with some error message
+    logger.warn(`Cannot generate ES-grid-tile for ${z}/${x}/${y}: ${e.message}`);
+    return { stream: null, headers: {}, statusCode: 500 };
   }
 }

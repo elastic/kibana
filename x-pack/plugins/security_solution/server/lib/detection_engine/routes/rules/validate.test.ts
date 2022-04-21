@@ -119,8 +119,7 @@ describe.each([
       expect(validatedOrError).toEqual(expected);
     });
 
-    // TODO: https://github.com/elastic/kibana/pull/121644 clean up
-    test('it should do a validation correctly of a rule id with ruleStatus passed in', () => {
+    test('it should do a validation correctly of a rule id with rule execution summary passed in', () => {
       const rule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       const ruleExecutionSumary = getRuleExecutionSummarySucceeded();
       const validatedOrError = transformValidateBulkError(
@@ -136,7 +135,6 @@ describe.each([
       expect(validatedOrError).toEqual(expected);
     });
 
-    // TODO: https://github.com/elastic/kibana/pull/121644 clean up
     test('it should return error object if "alert" is not expected alert type', () => {
       const ruleAlert = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       // @ts-expect-error

@@ -8,13 +8,14 @@
 import { from } from 'rxjs';
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
-import { ElasticsearchClient, StartServicesAccessor } from 'kibana/server';
+import { ElasticsearchClient, StartServicesAccessor } from '@kbn/core/server';
 import {
   IndexPatternsFetcher,
   ISearchStrategy,
   SearchStrategyDependencies,
-} from '../../../../../../src/plugins/data/server';
+} from '@kbn/data-plugin/server';
 
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { DELETED_SECURITY_SOLUTION_DATA_VIEW } from '../../../common/constants';
 import {
   IndexFieldsStrategyResponse,
@@ -23,7 +24,6 @@ import {
   BeatFields,
 } from '../../../common/search_strategy';
 import { StartPlugins } from '../../types';
-import type { FieldSpec } from '../../../../../../src/plugins/data_views/common';
 
 const apmIndexPattern = 'apm-*-transaction*';
 const apmDataStreamsPattern = 'traces-apm*';
@@ -57,7 +57,7 @@ export const findExistingIndices = async (
             index,
             body: { query: { match_all: {} }, size: 0 },
           });
-          return get(searchResponse, 'body.hits.total.value', 0) > 0;
+          return get(searchResponse, 'hits.total.value', 0) > 0;
         }
         const searchResponse = await esClient.fieldCaps({
           index,
@@ -65,7 +65,7 @@ export const findExistingIndices = async (
           ignore_unavailable: true,
           allow_no_indices: false,
         });
-        return searchResponse.body.indices.length > 0;
+        return searchResponse.indices.length > 0;
       })
       .map((p) => p.catch((e) => false))
   );

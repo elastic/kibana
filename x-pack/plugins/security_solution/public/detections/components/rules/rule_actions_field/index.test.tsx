@@ -8,11 +8,11 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { getSupportedActions, RuleActionsField } from './index';
+import { getSupportedActions, RuleActionsField } from '.';
 import { useForm, Form } from '../../../../shared_imports';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useFormFieldMock } from '../../../../common/mock';
-import { ActionType } from '../../../../../../actions/common';
+import { ActionType } from '@kbn/actions-plugin/common';
 jest.mock('../../../../common/lib/kibana');
 
 describe('RuleActionsField', () => {
@@ -89,48 +89,6 @@ describe('RuleActionsField', () => {
             "id": ".jira",
             "minimumLicenseRequired": "gold",
             "name": "My Jira",
-          },
-        ]
-      `);
-    });
-
-    // sub-cases-enabled: remove this once the sub cases and connector feature is completed
-    // https://github.com/elastic/kibana/issues/94115
-    it('should not contain the case connector as a supported action', () => {
-      expect(getSupportedActions(actions, false)).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "enabled": true,
-            "enabledInConfig": false,
-            "enabledInLicense": true,
-            "id": ".jira",
-            "minimumLicenseRequired": "gold",
-            "name": "My Jira",
-          },
-        ]
-      `);
-    });
-
-    // sub-cases-enabled: unskip after sub cases and the case connector is supported
-    // https://github.com/elastic/kibana/issues/94115
-    it.skip('if we do NOT have an error on case action creation, we are supporting case connector', () => {
-      expect(getSupportedActions(actions, false)).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "enabled": true,
-            "enabledInConfig": false,
-            "enabledInLicense": true,
-            "id": ".jira",
-            "minimumLicenseRequired": "gold",
-            "name": "My Jira",
-          },
-          Object {
-            "enabled": true,
-            "enabledInConfig": false,
-            "enabledInLicense": true,
-            "id": ".case",
-            "minimumLicenseRequired": "basic",
-            "name": "Cases",
           },
         ]
       `);

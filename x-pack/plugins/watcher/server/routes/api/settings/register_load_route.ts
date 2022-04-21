@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 // @ts-ignore
-import { Settings } from '../../../models/settings/index';
+import { Settings } from '../../../models/settings';
 import { RouteDependencies } from '../../../types';
 
 function fetchClusterSettings(client: IScopedClusterClient) {
-  return client.asCurrentUser.cluster
-    .getSettings({
-      include_defaults: true,
-      filter_path: '**.xpack.notification',
-    })
-    .then(({ body }) => body);
+  return client.asCurrentUser.cluster.getSettings({
+    include_defaults: true,
+    filter_path: '**.xpack.notification',
+  });
 }
 
 export function registerLoadRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {

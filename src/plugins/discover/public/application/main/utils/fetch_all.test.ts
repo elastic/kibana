@@ -6,16 +6,17 @@
  * Side Public License, v 1.
  */
 import { FetchStatus } from '../../types';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
 import { reduce } from 'rxjs/operators';
-import { SearchSource } from '../../../../../data/common';
-import { RequestAdapter } from '../../../../../inspector';
+import { SearchSource } from '@kbn/data-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-plugin';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
-import { ReduxLikeStateContainer } from '../../../../../kibana_utils/common';
+import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { AppState } from '../services/discover_state';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { fetchAll } from './fetch_all';
 import {
+  DataAvailableFieldsMsg,
   DataChartsMessage,
   DataDocumentsMsg,
   DataMainMsg,
@@ -44,9 +45,9 @@ const mockFetchTotalHits = fetchTotalHits as unknown as jest.MockedFunction<type
 const mockFetchChart = fetchChart as unknown as jest.MockedFunction<typeof fetchChart>;
 
 function subjectCollector<T>(subject: Subject<T>): () => Promise<T[]> {
-  const promise = subject
-    .pipe(reduce((history, value) => history.concat([value]), [] as T[]))
-    .toPromise();
+  const promise = firstValueFrom(
+    subject.pipe(reduce((history, value) => history.concat([value]), [] as T[]))
+  );
 
   return () => {
     subject.complete();
@@ -64,6 +65,9 @@ describe('test fetchAll', () => {
       documents$: new BehaviorSubject<DataDocumentsMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
       totalHits$: new BehaviorSubject<DataTotalHitsMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
       charts$: new BehaviorSubject<DataChartsMessage>({ fetchStatus: FetchStatus.UNINITIALIZED }),
+      availableFields$: new BehaviorSubject<DataAvailableFieldsMsg>({
+        fetchStatus: FetchStatus.UNINITIALIZED,
+      }),
     };
     deps = {
       appStateContainer: {

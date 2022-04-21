@@ -7,6 +7,12 @@
 
 import expect from '@kbn/expect';
 
+import {
+  EqlCreateSchema,
+  QueryCreateSchema,
+  ThresholdCreateSchema,
+} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { ALERT_THRESHOLD_RESULT } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   createRule,
@@ -20,12 +26,6 @@ import {
   waitForRuleSuccessOrStatus,
   waitForSignalsToBePresent,
 } from '../../../utils';
-import {
-  EqlCreateSchema,
-  QueryCreateSchema,
-  ThresholdCreateSchema,
-} from '../../../../../plugins/security_solution/common/detection_engine/schemas/request';
-import { ALERT_THRESHOLD_RESULT } from '../../../../../plugins/security_solution/common/field_maps/field_names';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -111,7 +111,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(hits).to.eql([
           {
             count: 4,
-            from: '1900-01-01T00:00:00.000Z',
+            from: '2020-10-28T05:00:53.000Z',
             terms: [
               {
                 field: 'event.dataset',

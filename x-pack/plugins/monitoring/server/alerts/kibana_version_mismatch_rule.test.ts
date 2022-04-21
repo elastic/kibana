@@ -9,7 +9,7 @@ import { KibanaVersionMismatchRule } from './kibana_version_mismatch_rule';
 import { RULE_KIBANA_VERSION_MISMATCH } from '../../common/constants';
 import { fetchKibanaVersions } from '../lib/alerts/fetch_kibana_versions';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 const RealDate = Date;
 
@@ -88,13 +88,15 @@ describe('KibanaVersionMismatchRule', () => {
     const executorOptions = {
       services: {
         scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-        alertInstanceFactory: jest.fn().mockImplementation(() => {
-          return {
-            replaceState,
-            scheduleActions,
-            getState,
-          };
-        }),
+        alertFactory: {
+          create: jest.fn().mockImplementation(() => {
+            return {
+              replaceState,
+              scheduleActions,
+              getState,
+            };
+          }),
+        },
       },
       state: {},
     };

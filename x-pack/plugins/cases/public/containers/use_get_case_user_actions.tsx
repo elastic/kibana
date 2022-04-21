@@ -11,7 +11,7 @@ import deepEqual from 'fast-deep-equal';
 
 import { ElasticUser, CaseUserActions, CaseExternalService } from '../../common/ui/types';
 import { ActionTypes, CaseConnector, NONE_CONNECTOR_ID } from '../../common/api';
-import { getCaseUserActions, getSubCaseUserActions } from './api';
+import { getCaseUserActions } from './api';
 import * as i18n from './translations';
 import { useToasts } from '../common/lib/kibana';
 import {
@@ -50,11 +50,7 @@ export const initialData: CaseUserActionsState = {
 };
 
 export interface UseGetCaseUserActions extends CaseUserActionsState {
-  fetchCaseUserActions: (
-    caseId: string,
-    caseConnectorId: string,
-    subCaseId?: string
-  ) => Promise<void>;
+  fetchCaseUserActions: (caseId: string, caseConnectorId: string) => Promise<void>;
 }
 
 const groupConnectorFields = (
@@ -234,8 +230,7 @@ export const getPushedInfo = (
 
 export const useGetCaseUserActions = (
   caseId: string,
-  caseConnectorId: string,
-  subCaseId?: string
+  caseConnectorId: string
 ): UseGetCaseUserActions => {
   const [caseUserActionsState, setCaseUserActionsState] =
     useState<CaseUserActionsState>(initialData);
@@ -244,7 +239,7 @@ export const useGetCaseUserActions = (
   const toasts = useToasts();
 
   const fetchCaseUserActions = useCallback(
-    async (thisCaseId: string, thisCaseConnectorId: string, thisSubCaseId?: string) => {
+    async (thisCaseId: string, thisCaseConnectorId: string) => {
       try {
         isCancelledRef.current = false;
         abortCtrlRef.current.abort();
@@ -254,14 +249,9 @@ export const useGetCaseUserActions = (
           isLoading: true,
         });
 
-        const response = await (thisSubCaseId
-          ? getSubCaseUserActions(thisCaseId, thisSubCaseId, abortCtrlRef.current.signal)
-          : getCaseUserActions(thisCaseId, abortCtrlRef.current.signal));
+        const response = await getCaseUserActions(thisCaseId, abortCtrlRef.current.signal);
 
         if (!isCancelledRef.current) {
-          // Attention Future developer
-          // We are removing the first item because it will always be the creation of the case
-          // and we do not want it to simplify our life
           const participants = !isEmpty(response)
             ? uniqBy('createdBy.username', response).map((cau) => cau.createdBy)
             : [];
@@ -302,7 +292,7 @@ export const useGetCaseUserActions = (
 
   useEffect(() => {
     if (!isEmpty(caseId)) {
-      fetchCaseUserActions(caseId, caseConnectorId, subCaseId);
+      fetchCaseUserActions(caseId, caseConnectorId);
     }
 
     return () => {
@@ -310,6 +300,6 @@ export const useGetCaseUserActions = (
       abortCtrlRef.current.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [caseId, subCaseId]);
+  }, [caseId]);
   return { ...caseUserActionsState, fetchCaseUserActions };
 };

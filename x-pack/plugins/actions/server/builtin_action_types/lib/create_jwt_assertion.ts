@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// eslint-disable-next-line import/no-extraneous-dependencies
+
 import jwt, { Algorithm } from 'jsonwebtoken';
-import { Logger } from '../../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 
 export interface JWTClaims {
   audience: string;

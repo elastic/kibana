@@ -104,7 +104,7 @@ const LinkPanelComponent = ({
 
   const pagination = useMemo(
     () => ({
-      hidePerPageOptions: true,
+      showPerPageOptions: false,
       pageIndex,
       pageSize: PAGE_SIZE,
       totalItemCount: listItems.length,

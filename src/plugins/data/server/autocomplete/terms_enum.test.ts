@@ -7,11 +7,10 @@
  */
 
 import { termsEnumSuggestions } from './terms_enum';
-import { coreMock } from '../../../../core/server/mocks';
-import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+import { coreMock } from '@kbn/core/server/mocks';
+import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { ConfigSchema } from '../../config';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import type { TransportResult } from '@elastic/elasticsearch';
 import { TermsEnumResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 let savedObjectsClientMock: jest.Mocked<SavedObjectsClientContract>;
@@ -19,9 +18,7 @@ let esClientMock: DeeplyMockedKeys<ElasticsearchClient>;
 const configMock = {
   autocomplete: { valueSuggestions: { tiers: ['data_hot', 'data_warm', 'data_content'] } },
 } as ConfigSchema;
-const mockResponse = {
-  body: { terms: ['whoa', 'amazing'] },
-};
+const mockResponse = { terms: ['whoa', 'amazing'] };
 
 jest.mock('../data_views');
 
@@ -30,9 +27,7 @@ describe('_terms_enum suggestions', () => {
     const requestHandlerContext = coreMock.createRequestHandlerContext();
     savedObjectsClientMock = requestHandlerContext.savedObjects.client;
     esClientMock = requestHandlerContext.elasticsearch.client.asCurrentUser;
-    esClientMock.termsEnum.mockResolvedValue(
-      mockResponse as unknown as TransportResult<TermsEnumResponse>
-    );
+    esClientMock.termsEnum.mockResolvedValue(mockResponse as unknown as TermsEnumResponse);
   });
 
   it('calls the _terms_enum API with the field, query, filters, and config tiers', async () => {
@@ -44,7 +39,7 @@ describe('_terms_enum suggestions', () => {
       'fieldName',
       'query',
       [],
-      { name: 'field_name', type: 'string' }
+      { name: 'field_name', type: 'string', searchable: true, aggregatable: true }
     );
 
     const [[args]] = esClientMock.termsEnum.mock.calls;
@@ -73,7 +68,7 @@ describe('_terms_enum suggestions', () => {
         "index": "index",
       }
     `);
-    expect(result).toEqual(mockResponse.body.terms);
+    expect(result).toEqual(mockResponse.terms);
   });
 
   it('calls the _terms_enum API and fallback to fieldName when field is null', async () => {
@@ -113,6 +108,6 @@ describe('_terms_enum suggestions', () => {
         "index": "index",
       }
     `);
-    expect(result).toEqual(mockResponse.body.terms);
+    expect(result).toEqual(mockResponse.terms);
   });
 });

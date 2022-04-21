@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { TransportResult } from '@elastic/elasticsearch';
-import { SavedObjectsErrorHelpers } from 'src/core/server';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ScopedClusterClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { ScopedClusterClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
 import moment from 'moment';
 
 import {
@@ -256,21 +255,14 @@ describe('ReindexActions', () => {
   });
 
   describe('getFlatSettings', () => {
-    const asApiResponse = <T>(body: T): TransportResult<T> =>
-      ({
-        body,
-      } as TransportResult<T>);
-
     it('returns flat settings', async () => {
-      clusterClient.asCurrentUser.indices.get.mockResolvedValueOnce(
-        // @ts-expect-error not full interface
-        asApiResponse({
-          myIndex: {
-            settings: { 'index.mySetting': '1' },
-            mappings: {},
-          },
-        })
-      );
+      clusterClient.asCurrentUser.indices.get.mockResponse({
+        myIndex: {
+          // @ts-expect-error not full interface
+          settings: { 'index.mySetting': '1' },
+          mappings: {},
+        },
+      });
       await expect(actions.getFlatSettings('myIndex')).resolves.toEqual({
         settings: { 'index.mySetting': '1' },
         mappings: {},
@@ -278,7 +270,7 @@ describe('ReindexActions', () => {
     });
 
     it('returns null if index does not exist', async () => {
-      clusterClient.asCurrentUser.indices.get.mockResolvedValueOnce(asApiResponse({}));
+      clusterClient.asCurrentUser.indices.get.mockResponse({});
       await expect(actions.getFlatSettings('myIndex')).resolves.toBeNull();
     });
   });

@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 
 jest.mock('../../../../../shared_imports');
-jest.mock('../../../../../app/app_dependencies');
+jest.mock('../../../../app_dependencies');
 
 import { useActions } from './use_actions';
 
@@ -33,6 +33,7 @@ describe('Transform: Transform List Actions', () => {
       'transformActionEdit',
       'transformActionClone',
       'transformActionDelete',
+      'transformActionReset',
     ]);
   });
 });

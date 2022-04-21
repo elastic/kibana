@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
@@ -38,7 +38,7 @@ export const getAlertRoute = (
       const rulesClient = context.alerting.getRulesClient();
       const { id } = req.params;
       return res.ok({
-        body: await rulesClient.get({ id }),
+        body: await rulesClient.get({ id, excludeFromPublicApi: true }),
       });
     })
   );

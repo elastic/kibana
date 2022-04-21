@@ -18,14 +18,13 @@ import moment from 'moment';
 import { Moment } from 'moment-timezone';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import {
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../../src/core/types/elasticsearch';
+} from '@kbn/core/types/elasticsearch';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { APMConfig } from '../../server';
-import { UxUIFilters } from '../../typings/ui_filters';
 import { MockApmPluginContextWrapper } from '../context/apm_plugin/mock_apm_plugin_context';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 
@@ -119,7 +118,6 @@ interface MockSetup {
   apmEventClient: any;
   internalClient: any;
   config: APMConfig;
-  uiFilters: UxUIFilters;
   indices: {
     sourcemap: string;
     error: string;

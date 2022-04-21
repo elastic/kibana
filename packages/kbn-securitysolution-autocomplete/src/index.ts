@@ -11,6 +11,7 @@ export * from './field_value_exists';
 export * from './field_value_lists';
 export * from './field_value_match';
 export * from './field_value_match_any';
+export * from './field_value_wildcard';
 export * from './filter_field_to_list';
 export * from './get_generic_combo_box_props';
 export * from './get_operators';

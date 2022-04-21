@@ -9,7 +9,7 @@ import { MemoryUsageRule } from './memory_usage_rule';
 import { RULE_MEMORY_USAGE } from '../../common/constants';
 import { fetchMemoryUsageNodeStats } from '../lib/alerts/fetch_memory_usage_node_stats';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 const RealDate = Date;
 
@@ -83,13 +83,15 @@ describe('MemoryUsageRule', () => {
     const executorOptions = {
       services: {
         scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-        alertInstanceFactory: jest.fn().mockImplementation(() => {
-          return {
-            replaceState,
-            scheduleActions,
-            getState,
-          };
-        }),
+        alertFactory: {
+          create: jest.fn().mockImplementation(() => {
+            return {
+              replaceState,
+              scheduleActions,
+              getState,
+            };
+          }),
+        },
       },
       state: {},
     };

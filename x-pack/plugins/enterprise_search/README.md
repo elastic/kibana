@@ -6,13 +6,13 @@ This plugin provides Kibana user interfaces for managing the Enterprise Search s
 
 ### App Search
 
-<img src="./public/applications/enterprise_search/assets/app_search.png" width="400" height="255">
+<img src="./public/applications/enterprise_search_overview/assets/app_search.png" width="400" height="255">
 
 Add rich, relevant search to your apps and websites. https://www.elastic.co/app-search/
 
 ### Workplace Search
 
-<img src="./public/applications/enterprise_search/assets/workplace_search.png" width="400" height="255">
+<img src="./public/applications/enterprise_search_overview/assets/workplace_search.png" width="400" height="255">
 
 Unify all your team's content into a personalized search experience. https://www.elastic.co/workplace-search/
 

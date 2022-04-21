@@ -6,7 +6,7 @@
  */
 
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { ElasticsearchAssetType } from '../../../../types';
 import type { EsAssetReference, RegistryDataStream, InstallablePackage } from '../../../../types';
@@ -262,7 +262,7 @@ export async function ensureFleetFinalPipelineIsInstalled(
   };
   const res = await esClient.ingest.getPipeline(
     { id: FLEET_FINAL_PIPELINE_ID },
-    esClientRequestOptions
+    { ...esClientRequestOptions, meta: true }
   );
 
   const installedVersion = res?.body[FLEET_FINAL_PIPELINE_ID]?.version;

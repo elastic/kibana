@@ -16,7 +16,7 @@ import {
   transformSavedObjectToExternalModel,
   transformUpdateResponseToExternalModel,
 } from './transform';
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { ConnectorTypes } from '../../../common/api';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
@@ -267,7 +267,6 @@ describe('case transforms', () => {
 
     it('creates an empty references array to delete the connector_id when connector_id is null and the original references is undefined', () => {
       const transformedAttributes = transformAttributesToESModel({
-        // TODO: It was null. Check if it is correct
         external_service: createExternalService({ connector_id: 'none' }),
       });
 
@@ -390,7 +389,6 @@ describe('case transforms', () => {
     it('sets external_service.connector_id to none when a reference cannot be found', () => {
       const transformedSO = transformSavedObjectToExternalModel(
         createCaseSavedObjectResponse({
-          // TODO: It was null. Check if it is correct
           externalService: createExternalService({ connector_id: 'none' }),
         })
       );

@@ -6,7 +6,7 @@
  */
 
 import { createMockedIndexPattern } from '../../../mocks';
-import { formulaOperation, GenericOperationDefinition, GenericIndexPatternColumn } from '../index';
+import { formulaOperation, GenericOperationDefinition, GenericIndexPatternColumn } from '..';
 import { FormulaIndexPatternColumn } from './formula';
 import { insertOrReplaceFormulaColumn } from './parse';
 import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../../types';
@@ -265,7 +265,7 @@ describe('formula', () => {
           previousColumn: {
             ...layer.columns.col1,
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
             filter: {
               language: 'lucene',
               query: `*`,
@@ -343,6 +343,7 @@ describe('formula', () => {
           formula: 'moving_average(average(bytes), window=3)',
         },
         references: [],
+        timeScale: 'd',
       });
     });
 
@@ -840,7 +841,7 @@ describe('formula', () => {
             ...columnParams,
           } as FormulaIndexPatternColumn,
         },
-        columnOrder: [],
+        columnOrder: ['col1'],
         indexPatternId: '',
       };
     }
@@ -1386,6 +1387,45 @@ invalid: "
           )
         ).toEqual([`The first argument for ${fn} should be a operation name. Found no operation`]);
       }
+    });
+
+    it('returns an error if the formula is fully static and there is at least one bucket dimension', () => {
+      const formulaLayer = getNewLayerWithFormula('5 + 3 * 7');
+      expect(
+        formulaOperation.getErrorMessage!(
+          {
+            ...formulaLayer,
+            columns: {
+              ...formulaLayer.columns,
+              col0: {
+                dataType: 'date',
+                isBucketed: true,
+                label: '',
+                operationType: 'date_histogram',
+                references: [],
+                sourceField: 'ts',
+              },
+            },
+            columnOrder: ['col0', 'col1'],
+          },
+          'col1',
+          indexPattern,
+          operationDefinitionMap
+        )
+      ).toEqual([
+        'A layer with only static values will not show results, use at least one dynamic metric',
+      ]);
+    });
+
+    it('returns no error if the formula is fully static and there is no bucket dimension', () => {
+      expect(
+        formulaOperation.getErrorMessage!(
+          getNewLayerWithFormula('5 + 3 * 7'),
+          'col1',
+          indexPattern,
+          operationDefinitionMap
+        )
+      ).toEqual(undefined);
     });
 
     it('returns no error if a math operation is passed to fullReference operations', () => {

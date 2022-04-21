@@ -6,22 +6,18 @@
  */
 
 import {
-  DEFAULT_INDEX_KEY,
-  DEFAULT_INDEX_PATTERN,
-  DEFAULT_INDEX_PATTERN_EXPERIMENTAL,
-} from '../../../../common/constants';
-import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
-} from '../../../../../alerting/server';
+  RuleExecutorServices,
+} from '@kbn/alerting-plugin/server';
+import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { withSecuritySpan } from '../../../utils/with_security_span';
 
 export interface GetInputIndex {
   experimentalFeatures: ExperimentalFeatures;
   index: string[] | null | undefined;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
 }
 
@@ -42,9 +38,7 @@ export const getInputIndex = async ({
     if (configuration.attributes != null && configuration.attributes[DEFAULT_INDEX_KEY] != null) {
       return configuration.attributes[DEFAULT_INDEX_KEY];
     } else {
-      return experimentalFeatures.uebaEnabled
-        ? [...DEFAULT_INDEX_PATTERN, ...DEFAULT_INDEX_PATTERN_EXPERIMENTAL]
-        : DEFAULT_INDEX_PATTERN;
+      return DEFAULT_INDEX_PATTERN;
     }
   }
 };

@@ -9,6 +9,7 @@ import {
   createCommentsMigrations,
   mergeMigrationFunctionMaps,
   migrateByValueLensVisualizations,
+  removeAssociationType,
   removeRuleInformation,
   stringifyCommentWithoutTrailingNewline,
 } from './comments';
@@ -18,23 +19,21 @@ import {
 } from '../../../common/utils/markdown_plugins/utils';
 import { CommentType } from '../../../common/api';
 
-import { savedObjectsServiceMock } from '../../../../../../src/core/server/mocks';
-import { makeLensEmbeddableFactory } from '../../../../lens/server/embeddable/make_lens_embeddable_factory';
-import { LensDocShape715 } from '../../../../lens/server';
+import { savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
+import { LensDocShape715 } from '@kbn/lens-plugin/server';
 import {
   SavedObjectReference,
   SavedObjectsMigrationLogger,
   SavedObjectUnsanitizedDoc,
-} from 'kibana/server';
-import {
-  MigrateFunction,
-  MigrateFunctionsObject,
-} from '../../../../../../src/plugins/kibana_utils/common';
+} from '@kbn/core/server';
+import { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
+import { GENERATED_ALERT, SUB_CASE_SAVED_OBJECT } from './constants';
 
 describe('comments migrations', () => {
   const migrations = createCommentsMigrations({
-    lensEmbeddableFactory: makeLensEmbeddableFactory({}),
+    lensEmbeddableFactory: makeLensEmbeddableFactory(() => ({}), {}),
   });
 
   const contextMock = savedObjectsServiceMock.createMigrationContext();
@@ -438,7 +437,7 @@ describe('comments migrations', () => {
         id: '123',
         type: 'abc',
         attributes: {
-          type: CommentType.generatedAlert,
+          type: GENERATED_ALERT,
           rule: {
             id: '123',
             name: 'hello',
@@ -470,6 +469,64 @@ describe('comments migrations', () => {
       expect(removeRuleInformation(doc)).toEqual({
         ...doc,
         attributes: { ...doc.attributes, rule: { id: null, name: null } },
+      });
+    });
+  });
+
+  describe('removeAssociationType', () => {
+    it('removes the associationType field from the document', () => {
+      const doc = {
+        id: '123',
+        attributes: {
+          type: 'user',
+          associationType: 'case',
+        },
+        type: 'abc',
+        references: [],
+      };
+
+      expect(removeAssociationType(doc)).toEqual({
+        ...doc,
+        attributes: {
+          type: doc.attributes.type,
+        },
+      });
+    });
+
+    it('removes the sub case reference', () => {
+      const doc = {
+        id: '123',
+        attributes: {
+          type: 'user',
+          associationType: 'case',
+        },
+        type: 'abc',
+        references: [
+          {
+            type: SUB_CASE_SAVED_OBJECT,
+            id: 'test-id',
+            name: 'associated-sub-case',
+          },
+          {
+            type: 'action',
+            id: 'action-id',
+            name: 'action-name',
+          },
+        ],
+      };
+
+      expect(removeAssociationType(doc)).toEqual({
+        ...doc,
+        attributes: {
+          type: doc.attributes.type,
+        },
+        references: [
+          {
+            type: 'action',
+            id: 'action-id',
+            name: 'action-name',
+          },
+        ],
       });
     });
   });

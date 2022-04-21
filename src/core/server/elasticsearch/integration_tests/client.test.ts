@@ -39,16 +39,19 @@ describe('elasticsearch clients', () => {
   it('does not return deprecation warning when x-elastic-product-origin header is set', async () => {
     // Header should be automatically set by Core
     const resp1 =
-      await kibanaServer.coreStart.elasticsearch.client.asInternalUser.indices.getSettings({
-        index: '.kibana',
-      });
+      await kibanaServer.coreStart.elasticsearch.client.asInternalUser.indices.getSettings(
+        {
+          index: '.kibana',
+        },
+        { meta: true }
+      );
     expect(resp1.headers).not.toHaveProperty('warning');
 
     // Also test setting it explicitly
     const resp2 =
       await kibanaServer.coreStart.elasticsearch.client.asInternalUser.indices.getSettings(
         { index: '.kibana' },
-        { headers: { 'x-elastic-product-origin': 'kibana' } }
+        { headers: { 'x-elastic-product-origin': 'kibana' }, meta: true }
       );
     expect(resp2.headers).not.toHaveProperty('warning');
   });
@@ -65,7 +68,8 @@ function createFakeElasticsearchServer() {
   return server;
 }
 
-describe('fake elasticsearch', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/129754
+describe.skip('fake elasticsearch', () => {
   let esServer: http.Server;
   let kibanaServer: Root;
   let kibanaHttpServer: http.Server;

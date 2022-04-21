@@ -6,13 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { CASES_URL, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
+import { CommentResponseAlertsType } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import {
-  CASES_URL,
-  SECURITY_SOLUTION_OWNER,
-} from '../../../../../../plugins/cases/common/constants';
 import { deleteAllCaseItems, getComment } from '../../../../common/lib/utils';
-import { CommentResponseAlertsType } from '../../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
@@ -97,6 +94,41 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         })) as CommentResponseAlertsType;
 
         expect(comment).to.not.have.property('rule');
+      });
+    });
+
+    describe('8.1.0', () => {
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.13.2/alerts.json'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.13.2/alerts.json'
+        );
+        await deleteAllCaseItems(es);
+      });
+
+      it('removes the associationType field from an alert comment', async () => {
+        const comment = (await getComment({
+          supertest,
+          caseId: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
+          commentId: 'ee59cdd0-cf9d-11eb-a603-13e7747d215c',
+        })) as CommentResponseAlertsType;
+
+        expect(comment).not.to.have.property('associationType');
+      });
+
+      it('removes the associationType field from a user comment', async () => {
+        const comment = (await getComment({
+          supertest,
+          caseId: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
+          commentId: 'ae59cdd0-cf9d-11eb-a603-13e7747d215c',
+        })) as CommentResponseAlertsType;
+
+        expect(comment).not.to.have.property('associationType');
       });
     });
   });

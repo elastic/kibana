@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { KbnError } from '../../../../kibana_utils/common';
+import { KbnError } from '@kbn/kibana-utils-plugin/common';
 
 export class NoSearchIdInSessionError extends KbnError {
   constructor() {

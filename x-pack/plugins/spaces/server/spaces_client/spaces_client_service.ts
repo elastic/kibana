@@ -12,7 +12,7 @@ import type {
   ISavedObjectsRepository,
   KibanaRequest,
   SavedObjectsServiceStart,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
 import type { ConfigType } from '../config';
 import type { ISpacesClient } from './spaces_client';
@@ -96,20 +96,28 @@ export class SpacesClientService {
   }
 
   public start(coreStart: CoreStart): SpacesClientServiceStart {
+    const nonGlobalTypes = coreStart.savedObjects
+      .getTypeRegistry()
+      .getAllTypes()
+      .filter((x) => x.namespaceType !== 'agnostic');
+    const nonGlobalTypeNames = nonGlobalTypes.map((x) => x.name);
+
     if (!this.repositoryFactory) {
+      const hiddenTypeNames = nonGlobalTypes.filter((x) => x.hidden).map((x) => x.name);
       this.repositoryFactory = (request, savedObjectsStart) =>
-        savedObjectsStart.createScopedRepository(request, ['space']);
+        savedObjectsStart.createScopedRepository(request, [...hiddenTypeNames, 'space']);
     }
+
     return {
       createSpacesClient: (request: KibanaRequest) => {
         if (!this.config) {
           throw new Error('Initialization error: spaces config is not available');
         }
-
         const baseClient = new SpacesClient(
           this.debugLogger,
           this.config,
-          this.repositoryFactory!(request, coreStart.savedObjects)
+          this.repositoryFactory!(request, coreStart.savedObjects),
+          nonGlobalTypeNames
         );
         if (this.clientWrapper) {
           return this.clientWrapper(request, baseClient);

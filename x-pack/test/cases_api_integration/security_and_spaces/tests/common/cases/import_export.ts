@@ -7,8 +7,27 @@
 
 import expect from '@kbn/expect';
 import { join } from 'path';
-import { SavedObject } from 'kibana/server';
+import { SavedObject } from '@kbn/core/server';
 import supertest from 'supertest';
+import {
+  CASES_URL,
+  CASE_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+} from '@kbn/cases-plugin/common/constants';
+import {
+  AttributesTypeUser,
+  CommentsResponse,
+  CaseAttributes,
+  CaseUserActionAttributes,
+  CasePostRequest,
+  CaseUserActionResponse,
+  PushedUserAction,
+  ConnectorUserAction,
+  CommentUserAction,
+  CreateCaseUserAction,
+  CaseStatuses,
+} from '@kbn/cases-plugin/common/api';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
   deleteAllCaseItems,
@@ -19,26 +38,6 @@ import {
 } from '../../../../common/lib/utils';
 import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import {
-  CASES_URL,
-  CASE_SAVED_OBJECT,
-  CASE_USER_ACTION_SAVED_OBJECT,
-  CASE_COMMENT_SAVED_OBJECT,
-} from '../../../../../../plugins/cases/common/constants';
-import {
-  AttributesTypeUser,
-  CommentsResponse,
-  CaseType,
-  CaseAttributes,
-  CaseUserActionAttributes,
-  CasePostRequest,
-  CaseUserActionResponse,
-  PushedUserAction,
-  ConnectorUserAction,
-  CommentUserAction,
-  CreateCaseUserAction,
-  CaseStatuses,
-} from '../../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -239,7 +238,6 @@ const expectCaseCreateUserAction = (
 
   expect(restParsedCreateCase).to.eql({
     ...restCreateCase,
-    type: CaseType.individual,
     status: CaseStatuses.open,
   });
   expect(restParsedConnector).to.eql(restConnector);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectAttributes } from 'src/core/public';
+import type { SavedObjectAttributes } from '@kbn/core/public';
 
 export interface BaseSettings {
   has_seen_add_data_notice?: boolean;

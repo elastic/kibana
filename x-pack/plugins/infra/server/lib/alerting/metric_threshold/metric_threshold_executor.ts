@@ -8,17 +8,14 @@
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { first, isEqual, last } from 'lodash';
-import moment from 'moment';
 import {
   ActionGroupIdsOf,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
   RecoveredActionGroup,
-} from '../../../../../alerting/common';
-import {
-  AlertInstance as Alert,
-  AlertTypeState as RuleTypeState,
-} from '../../../../../alerting/server';
+} from '@kbn/alerting-plugin/common';
+import { Alert, RuleTypeState } from '@kbn/alerting-plugin/server';
+import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
 import { InfraBackendLibs } from '../../infra_types';
@@ -30,7 +27,9 @@ import {
   // buildRecoveredAlertReason,
   stateToAlertMessage,
 } from '../common/messages';
-import { UNGROUPED_FACTORY_KEY } from '../common/utils';
+import { UNGROUPED_FACTORY_KEY, getViewInAppUrl } from '../common/utils';
+import { LINK_TO_METRICS_EXPLORER } from '../../../../common/alerting/metrics';
+
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
 
 export type MetricThresholdRuleParams = Record<string, any>;
@@ -67,7 +66,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     MetricThresholdAlertContext,
     MetricThresholdAllowedActionGroups
   >(async function (options) {
-    const { services, params, state } = options;
+    const { services, params, state, startedAt } = options;
     const { criteria } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
     const { alertWithLifecycle, savedObjectsClient } = services;
@@ -94,7 +93,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         const { fromKueryExpression } = await import('@kbn/es-query');
         fromKueryExpression(params.filterQueryText);
       } catch (e) {
-        const timestamp = moment().toISOString();
+        const timestamp = startedAt.toISOString();
         const actionGroupId = FIRED_ACTIONS.id; // Change this to an Error action group when able
         const reason = buildInvalidQueryAlertReason(params.filterQueryText);
         const alert = alertFactory(UNGROUPED_FACTORY_KEY, reason);
@@ -102,6 +101,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           group: UNGROUPED_FACTORY_KEY,
           alertState: stateToAlertMessage[AlertStates.ERROR],
           reason,
+          viewInAppUrl: getViewInAppUrl(libs.basePath, LINK_TO_METRICS_EXPLORER),
           timestamp,
           value: null,
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
@@ -137,7 +137,8 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       params as EvaluatedRuleParams,
       config,
       prevGroups,
-      compositeSize
+      compositeSize,
+      { end: startedAt.valueOf() }
     );
 
     // Because each alert result has the same group definitions, just grab the groups from the first one.
@@ -147,7 +148,6 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     const groups = [...new Set([...prevGroups, ...resultGroups])];
 
     const hasGroups = !isEqual(groups, [UNGROUPED_FACTORY_KEY]);
-
     for (const group of groups) {
       // AND logic; all criteria must be across the threshold
       const shouldAlertFire = alertResults.every((result) =>
@@ -225,7 +225,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
 
       if (reason) {
         const firstResult = first(alertResults);
-        const timestamp = (firstResult && firstResult[group].timestamp) ?? moment().toISOString();
+        const timestamp = (firstResult && firstResult[group].timestamp) ?? startedAt.toISOString();
         const actionGroupId =
           nextState === AlertStates.OK
             ? RecoveredActionGroup.id
@@ -237,6 +237,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           group,
           alertState: stateToAlertMessage[nextState],
           reason,
+          viewInAppUrl: getViewInAppUrl(libs.basePath, LINK_TO_METRICS_EXPLORER),
           timestamp,
           value: mapToConditionsLookup(
             alertResults,
@@ -286,6 +287,8 @@ const formatAlertResult = <AlertResult>(
     comparator: Comparator;
     warningThreshold?: number[];
     warningComparator?: Comparator;
+    timeSize: number;
+    timeUnit: TimeUnitChar;
   } & AlertResult,
   useWarningThreshold?: boolean
 ) => {
@@ -305,6 +308,7 @@ const formatAlertResult = <AlertResult>(
   const formatter = createFormatter('percent');
   const thresholdToFormat = useWarningThreshold ? warningThreshold! : threshold;
   const comparatorToFormat = useWarningThreshold ? warningComparator! : comparator;
+
   return {
     ...alertResult,
     currentValue:

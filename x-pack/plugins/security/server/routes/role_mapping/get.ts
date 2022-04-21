@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import type { RouteDefinitionParams } from '../';
+import type { RouteDefinitionParams } from '..';
 import type { RoleMapping } from '../../../common/model';
 import { wrapError } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
@@ -33,7 +33,7 @@ export function defineRoleMappingGetRoutes(params: RouteDefinitionParams) {
             name: request.params.name,
           });
 
-        const mappings = Object.entries(roleMappingsResponse.body).map(([name, mapping]) => {
+        const mappings = Object.entries(roleMappingsResponse).map(([name, mapping]) => {
           return {
             name,
             ...mapping,

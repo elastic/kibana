@@ -8,7 +8,7 @@
 
 import { Dictionary, countBy, defaults, uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { DataView, DataViewField } from '../../../../../../plugins/data_views/public';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS, TAB_SOURCE_FILTERS } from '../constants';
 import { areScriptedFieldsEnabled } from '../../utils';
 
@@ -105,36 +105,11 @@ export function getPath(field: DataViewField, indexPattern: DataView) {
   return `/dataView/${indexPattern?.id}/field/${encodeURIComponent(field.name)}`;
 }
 
-const allTypesDropDown = i18n.translate(
-  'indexPatternManagement.editIndexPattern.fields.allTypesDropDown',
-  {
-    defaultMessage: 'All field types',
-  }
-);
-
-const allLangsDropDown = i18n.translate(
-  'indexPatternManagement.editIndexPattern.fields.allLangsDropDown',
-  {
-    defaultMessage: 'All languages',
-  }
-);
-
-export function convertToEuiSelectOption(options: string[], type: string) {
-  const euiOptions =
-    options.length > 0
-      ? [
-          {
-            value: '',
-            text: type === 'scriptedFieldLanguages' ? allLangsDropDown : allTypesDropDown,
-          },
-        ]
-      : [];
-  return euiOptions.concat(
-    uniq(options).map((option) => {
-      return {
-        value: option,
-        text: option,
-      };
-    })
-  );
+export function convertToEuiFilterOptions(options: string[]) {
+  return uniq(options).map((option) => {
+    return {
+      value: option,
+      name: option,
+    };
+  });
 }

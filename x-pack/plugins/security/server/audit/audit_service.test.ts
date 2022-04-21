@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Observable, of } from 'rxjs';
+import { lastValueFrom, Observable, of } from 'rxjs';
 
 import {
   coreMock,
   httpServerMock,
   httpServiceMock,
   loggingSystemMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 
 import { licenseMock } from '../../common/licensing/index.mock';
 import type { ConfigType } from '../config';
@@ -68,6 +68,7 @@ describe('#setup', () => {
       Object {
         "asScoped": [Function],
         "withoutRequest": Object {
+          "enabled": true,
           "log": [Function],
         },
       }
@@ -381,8 +382,8 @@ describe('#createLoggingConfig', () => {
       allowAuditLogging: true,
     });
 
-    const loggingConfig = await features$
-      .pipe(
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
         createLoggingConfig({
           enabled: false,
           appender: {
@@ -393,7 +394,7 @@ describe('#createLoggingConfig', () => {
           },
         })
       )
-      .toPromise();
+    );
 
     expect(loggingConfig.loggers![0].level).toEqual('off');
   });
@@ -403,8 +404,8 @@ describe('#createLoggingConfig', () => {
       allowAuditLogging: false,
     });
 
-    const loggingConfig = await features$
-      .pipe(
+    const loggingConfig = await lastValueFrom(
+      features$.pipe(
         createLoggingConfig({
           enabled: true,
           appender: {
@@ -415,7 +416,7 @@ describe('#createLoggingConfig', () => {
           },
         })
       )
-      .toPromise();
+    );
 
     expect(loggingConfig.loggers![0].level).toEqual('off');
   });

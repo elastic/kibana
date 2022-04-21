@@ -6,18 +6,19 @@
  */
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
 
 import {
   SYNC_FREQUENCY_PATH,
   BLOCKED_TIME_WINDOWS_PATH,
-  OBJECTS_AND_ASSETS_PATH,
+  ASSETS_AND_OBJECTS_PATH,
   SOURCE_SYNCHRONIZATION_PATH,
   getSourcesPath,
+  OLD_OBJECTS_AND_ASSETS_PATH,
 } from '../../../../routes';
 
+import { AssetsAndObjects } from './assets_and_objects';
 import { Frequency } from './frequency';
-import { ObjectsAndAssets } from './objects_and_assets';
 import { Synchronization } from './synchronization';
 
 export const SynchronizationRouter: React.FC = () => (
@@ -31,8 +32,12 @@ export const SynchronizationRouter: React.FC = () => (
     <Route exact path={getSourcesPath(BLOCKED_TIME_WINDOWS_PATH, true)}>
       <Frequency tabId={1} />
     </Route>
-    <Route exact path={getSourcesPath(OBJECTS_AND_ASSETS_PATH, true)}>
-      <ObjectsAndAssets />
+    <Route exact path={getSourcesPath(ASSETS_AND_OBJECTS_PATH, true)}>
+      <AssetsAndObjects />
     </Route>
+    <Redirect
+      from={getSourcesPath(OLD_OBJECTS_AND_ASSETS_PATH, true)}
+      to={getSourcesPath(ASSETS_AND_OBJECTS_PATH, true)}
+    />
   </Switch>
 );

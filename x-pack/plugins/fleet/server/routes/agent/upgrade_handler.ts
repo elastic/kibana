@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RequestHandler } from 'src/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import semverCoerce from 'semver/functions/coerce';
 
@@ -133,7 +133,7 @@ export const checkVersionIsSame = (version: string, kibanaVersion: string) => {
 const checkSourceUriAllowed = (sourceUri?: string) => {
   if (sourceUri && !appContextService.getConfig()?.developer?.allowAgentUpgradeSourceUri) {
     throw new Error(
-      `source_uri is not allowed or recommended in production. Set xpack.fleet.developer.allowAgentUpgradeSourceUri in kibana.yml to enable.`
+      `source_uri is not allowed or recommended in production. Set xpack.fleet.developer.allowAgentUpgradeSourceUri in kibana.yml to true.`
     );
   }
 };

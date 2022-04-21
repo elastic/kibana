@@ -22,7 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Home page', function () {
     describe('Loads the app with limited privileges', () => {
       before(async () => {
-        await security.testUser.setRoles(['alerts_and_actions_role'], true);
+        await security.testUser.setRoles(['alerts_and_actions_role']);
       });
       after(async () => {
         await security.testUser.restoreDefaults();
@@ -79,7 +79,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(url).to.contain(`/rules`);
 
           // Verify content
-          await testSubjects.existOrFail('alertsList');
+          await testSubjects.existOrFail('rulesList');
         });
 
         it('navigates to an alert details page', async () => {
@@ -103,7 +103,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.header.waitUntilLoadingHasFinished();
 
           // Verify content
-          await testSubjects.existOrFail('alertsList');
+          await testSubjects.existOrFail('rulesList');
 
           // click on first alert
           await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(createdAlert.name);

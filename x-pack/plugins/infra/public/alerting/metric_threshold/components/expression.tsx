@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Unit } from '@elastic/datemath';
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiAccordion,
   EuiButtonEmpty,
@@ -22,13 +21,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ForLastExpression,
   IErrorObject,
   RuleTypeParams,
   RuleTypeParamsExpressionProps,
-} from '../../../../../triggers_actions_ui/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
+import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import { Aggregators, Comparator, QUERY_INVALID } from '../../../../common/alerting/metrics';
 import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
@@ -39,12 +38,11 @@ import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { AlertContextMeta, AlertParams, MetricExpression } from '../types';
 import { ExpressionChart } from './expression_chart';
 import { ExpressionRow } from './expression_row';
-
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 type Props = Omit<
   RuleTypeParamsExpressionProps<RuleTypeParams & AlertParams, AlertContextMeta>,
-  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data'
+  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch'
 >;
 
 const defaultExpression = {
@@ -66,7 +64,7 @@ export const Expressions: React.FC<Props> = (props) => {
   });
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
-  const [timeUnit, setTimeUnit] = useState<Unit | undefined>('m');
+  const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
   const derivedIndexPattern = useMemo(
     () => createDerivedIndexPattern(),
     [createDerivedIndexPattern]
@@ -168,7 +166,7 @@ export const Expressions: React.FC<Props> = (props) => {
           ...c,
           timeUnit: tu,
         })) || [];
-      setTimeUnit(tu as Unit);
+      setTimeUnit(tu as TimeUnitChar);
       setRuleParams('criteria', criteria as AlertParams['criteria']);
     },
     [ruleParams.criteria, setRuleParams]

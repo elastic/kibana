@@ -12,44 +12,41 @@ import type {
   CoreStart,
   Plugin,
   PluginInitializerContext,
-} from 'kibana/public';
+} from '@kbn/core/public';
 import { BehaviorSubject } from 'rxjs';
 import { take } from 'rxjs/operators';
 
-import type { ManagementSetup } from 'src/plugins/management/public';
-import type { SharePluginSetup, SharePluginStart } from 'src/plugins/share/public';
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
-import type { HomePublicPluginSetup } from 'src/plugins/home/public';
-import type { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
-import type { SpacesPluginStart } from '../../spaces/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
-import { AppStatus, AppUpdater, DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-import type { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import { AppStatus, AppUpdater, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
-import type { LicenseManagementUIPluginSetup } from '../../license_management/public';
-import type { LicensingPluginSetup } from '../../licensing/public';
-import type { SecurityPluginSetup } from '../../security/public';
+import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
 
-import { PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
-import { isFullLicense, isMlEnabled } from '../common/license';
-
-import { setDependencyCache } from './application/util/dependency_cache';
-import { registerFeature } from './register_feature';
-import { MlLocatorDefinition, MlLocator } from './locator';
-import type { MapsStartApi, MapsSetupApi } from '../../maps/public';
+import type { MapsStartApi, MapsSetupApi } from '@kbn/maps-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
-} from '../../triggers_actions_ui/public';
-import type { DataVisualizerPluginStart } from '../../data_visualizer/public';
-import type { PluginSetupContract as AlertingSetup } from '../../alerting/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
+import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
+import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { DashboardSetup, DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { registerManagementSection } from './application/management';
-import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import type {
-  FieldFormatsSetup,
-  FieldFormatsStart,
-} from '../../../../src/plugins/field_formats/public';
-import type { DashboardSetup, DashboardStart } from '../../../../src/plugins/dashboard/public';
+import { MlLocatorDefinition, MlLocator } from './locator';
+import { setDependencyCache } from './application/util/dependency_cache';
+import { registerFeature } from './register_feature';
+import { isFullLicense, isMlEnabled } from '../common/license';
+import { PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -62,6 +59,7 @@ export interface MlStartDependencies {
   dataVisualizer: DataVisualizerPluginStart;
   fieldFormats: FieldFormatsStart;
   dashboard: DashboardStart;
+  charts: ChartsPluginStart;
 }
 
 export interface MlSetupDependencies {
@@ -109,7 +107,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         return renderApp(
           coreStart,
           {
+            charts: pluginsStart.charts,
             data: pluginsStart.data,
+            dashboard: pluginsStart.dashboard,
             share: pluginsStart.share,
             security: pluginsSetup.security,
             licensing: pluginsSetup.licensing,
@@ -124,7 +124,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             dataVisualizer: pluginsStart.dataVisualizer,
             usageCollection: pluginsSetup.usageCollection,
             fieldFormats: pluginsStart.fieldFormats,
-            dashboard: pluginsStart.dashboard,
           },
           params
         );
@@ -173,8 +172,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
       if (pluginsSetup.maps) {
         // Pass capabilites.ml.canGetJobs as minimum permission to show anomalies card in maps layers
-        const canGetJobs = capabilities.ml?.canGetJobs === true || false;
-        await registerMapExtension(pluginsSetup.maps, core, canGetJobs);
+        const canGetJobs = capabilities.ml?.canGetJobs === true;
+        const canCreateJobs = capabilities.ml?.canCreateJob === true;
+        await registerMapExtension(pluginsSetup.maps, core, { canGetJobs, canCreateJobs });
       }
 
       if (mlEnabled) {

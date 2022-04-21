@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { coreMock } from '../../../../src/core/server/mocks';
-import { globalSearchPluginMock } from '../../global_search/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { globalSearchPluginMock } from '@kbn/global-search-plugin/server/mocks';
 import { GlobalSearchProvidersPlugin } from './plugin';
 
 describe('GlobalSearchProvidersPlugin', () => {

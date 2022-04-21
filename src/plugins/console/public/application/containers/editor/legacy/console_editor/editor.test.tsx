@@ -16,7 +16,7 @@ import * as sinon from 'sinon';
 
 import { serviceContextMock } from '../../../../contexts/services_context.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 import {
   ServicesContextProvider,
   EditorContextProvider,
@@ -41,7 +41,7 @@ describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
         <ServicesContextProvider value={mockedAppContextValue}>
           <RequestContextProvider>
             <EditorContextProvider settings={{} as unknown as DevToolsSettings}>
-              <Editor initialTextValue="" />
+              <Editor initialTextValue="" setEditorInstance={() => {}} />
             </EditorContextProvider>
           </RequestContextProvider>
         </ServicesContextProvider>

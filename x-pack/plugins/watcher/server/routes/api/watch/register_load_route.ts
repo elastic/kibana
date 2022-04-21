@@ -6,10 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { get } from 'lodash';
 // @ts-ignore
-import { Watch } from '../../../models/watch/index';
+import { Watch } from '../../../models/watch';
 import { RouteDependencies } from '../../../types';
 
 const paramsSchema = schema.object({
@@ -17,11 +17,9 @@ const paramsSchema = schema.object({
 });
 
 function fetchWatch(dataClient: IScopedClusterClient, watchId: string) {
-  return dataClient.asCurrentUser.watcher
-    .getWatch({
-      id: watchId,
-    })
-    .then(({ body }) => body);
+  return dataClient.asCurrentUser.watcher.getWatch({
+    id: watchId,
+  });
 }
 
 export function registerLoadRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {

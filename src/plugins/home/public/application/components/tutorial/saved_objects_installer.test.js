@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { SavedObjectsInstaller } from './saved_objects_installer';
 

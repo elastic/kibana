@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import {
   ImportExceptionsListSchema,
   ImportExceptionListItemSchema,
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
+import { RulesClient } from '@kbn/alerting-plugin/server';
+import { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { legacyMigrate } from '../../../rules/utils';
 import { PartialFilter } from '../../../types';
 import { createBulkErrorObject, ImportRuleResponse } from '../../utils';
@@ -21,9 +23,7 @@ import { readRules } from '../../../rules/read_rules';
 import { patchRules } from '../../../rules/patch_rules';
 import { ImportRulesSchemaDecoded } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { MlAuthz } from '../../../../machine_learning/authz';
-import { throwHttpError } from '../../../../machine_learning/validation';
-import { RulesClient } from '../../../../../../../../plugins/alerting/server';
-import { ExceptionListClient } from '../../../../../../../../plugins/lists/server';
+import { throwAuthzError } from '../../../../machine_learning/validation';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
 
 export type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
@@ -165,7 +165,7 @@ export const importRules = async ({
                 const language =
                   !isMlRule(type) && languageOrUndefined == null ? 'kuery' : languageOrUndefined; // TODO: Fix these either with an is conversion or by better typing them within io-ts
                 const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
-                throwHttpError(await mlAuthz.validateRuleType(type));
+                throwAuthzError(await mlAuthz.validateRuleType(type));
                 const rule = await readRules({
                   isRuleRegistryEnabled,
                   rulesClient,

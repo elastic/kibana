@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { TemplateDeserialized } from '../../../../common';
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 import { templateSchema } from './validate_schemas';
 import { saveTemplate, doesTemplateExist } from './lib';
 
@@ -28,7 +28,7 @@ export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDep
         } = template;
 
         // Check that template with the same name doesn't already exist
-        const { body: templateExists } = await doesTemplateExist({
+        const templateExists = await doesTemplateExist({
           name: template.name,
           client,
           isLegacy,
@@ -48,7 +48,7 @@ export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDep
         }
 
         // Otherwise create new index template
-        const { body: responseBody } = await saveTemplate({ template, client, isLegacy });
+        const responseBody = await saveTemplate({ template, client, isLegacy });
 
         return response.ok({ body: responseBody });
       } catch (error) {

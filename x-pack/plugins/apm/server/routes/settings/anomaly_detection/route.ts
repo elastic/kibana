@@ -7,7 +7,8 @@
 
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
-import { maxSuggestions } from '../../../../../observability/common';
+import { maxSuggestions } from '@kbn/observability-plugin/common';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { ML_ERRORS } from '../../../../common/anomaly_detection';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
@@ -49,7 +50,7 @@ const anomalyDetectionJobsRoute = createApmServerRoute({
 
     return {
       jobs,
-      hasLegacyJobs: jobs.some((job) => job.version === 1),
+      hasLegacyJobs: jobs.some((job): boolean => job.version === 1),
     };
   },
 });
@@ -128,7 +129,10 @@ const anomalyDetectionUpdateToV3Route = createApmServerRoute({
       setupRequest(resources),
       resources.core
         .start()
-        .then((start) => start.elasticsearch.client.asInternalUser),
+        .then(
+          (start): ElasticsearchClient =>
+            start.elasticsearch.client.asInternalUser
+        ),
     ]);
 
     const { logger } = resources;

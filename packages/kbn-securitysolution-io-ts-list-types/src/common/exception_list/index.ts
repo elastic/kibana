@@ -14,6 +14,7 @@ export const exceptionListType = t.keyof({
   endpoint_trusted_apps: null,
   endpoint_events: null,
   endpoint_host_isolation_exceptions: null,
+  endpoint_blocklists: null,
 });
 export const exceptionListTypeOrUndefined = t.union([exceptionListType, t.undefined]);
 export type ExceptionListType = t.TypeOf<typeof exceptionListType>;
@@ -24,4 +25,5 @@ export enum ExceptionListTypeEnum {
   ENDPOINT_TRUSTED_APPS = 'endpoint',
   ENDPOINT_EVENTS = 'endpoint_events',
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS = 'endpoint_host_isolation_exceptions',
+  ENDPOINT_BLOCKLISTS = 'endpoint_blocklists',
 }

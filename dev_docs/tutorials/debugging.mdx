@@ -21,7 +21,9 @@ Next we will go over how to exactly enable the inspector for different aspects o
 
 You will need to run Jest directly from the Node script:
 
-`node --inspect-brk scripts/jest [TestPathPattern]`
+`node --inspect-brk node_modules/.bin/jest --runInBand --config [JestConfig] [TestPathPattern]`
+
+Additional information can be found in the [Jest troubleshooting documentation](https://jestjs.io/docs/troubleshooting).
 
 ### Functional Test Runner
 
@@ -59,3 +61,49 @@ logging:
     - name: elasticsearch.query
       level: debug
 ```
+
+## Debugging Kibana with APM
+
+Kibana is integrated with APM's node and RUM agents. 
+To learn more about how APM works and what it reports, refer to the [documentation](https://www.elastic.co/guide/en/apm/guide/current/index.html).
+
+We currently track the following types of transactions from Kibana: 
+
+Frontend (APM RUM): 
+ * `http-request`- tracks all outgoing API requests
+ * `page-load` - tracks the inidial loading time of kibana
+ * `app-change` - tracks application changes
+
+Backend (APM Node): 
+ * `request` - tracks all incoming API requests
+ * `kibana-platform` - tracks server initiation phases (preboot, setup and start)
+ * `task-manager` - tracks the operation of the task manager, including claiming pending tasks and marking them as running
+ * `task-run` - tracks the execution of individual tasks
+
+### Enabling APM on a local environment
+
+In some cases, it is beneficial to enable APM on a local development environment to get an initial undesrtanding of a feature's performance during manual or automatic tests.
+
+ 1. Create a secondary monitoring deployment to collect APM data. The easiest option is to use [Elastic Cloud](https://cloud.elastic.co/deployments) to create a new deployment.
+ 2. Open Kibana, go to `Integrations` and enable the Elastic APM integration.
+ 3. Scroll down and copy the server URL and secret token. You may also find them in your cloud console under APM & Fleet.
+ 4. Create or open `config\kibana.dev.yml` on your local development environment.
+ 5. Add the following settings: 
+    ```
+    elastic.apm.active: true
+    elastic.apm.serverUrl: <serverUrl>
+    elastic.apm.secretToken: <secretToken>
+    ```
+ 6. Once you run kibana and start using it, two new services (kibana, kibana-frontend) should appear under the APM UI on the APM deployment.
+  ![APM UI](./apm_ui.png)
+
+### Enabling APM via environment variables
+
+It is possible to enable APM via environment variables as well.
+They take precedence over any values defined in `kibana.yml` or `kibana.dev.yml`
+
+Set the following environment variables to enable APM: 
+
+ * ELASTIC_APM_ACTIVE
+ * ELASTIC_APM_SERVER_URL
+ * ELASTIC_APM_SECRET_TOKEN

@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CoreSetup } from 'kibana/server';
+import { CoreSetup } from '@kbn/core/server';
 import { SavedQueryRouteHandlerContext } from './route_handler_context';
 
 const SAVED_QUERY_PATH = '/api/saved_query';
@@ -115,6 +115,22 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     async (context, request, response) => {
       try {
         const body = await context.savedQuery.find(request.body);
+        return response.ok({ body });
+      } catch (e) {
+        // TODO: Handle properly
+        return response.customError(e);
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: `${SAVED_QUERY_PATH}/_all`,
+      validate: {},
+    },
+    async (context, request, response) => {
+      try {
+        const body = await context.savedQuery.getAll();
         return response.ok({ body });
       } catch (e) {
         // TODO: Handle properly

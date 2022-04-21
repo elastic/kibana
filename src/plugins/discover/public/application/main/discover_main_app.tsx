@@ -7,12 +7,13 @@
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import type { DataViewAttributes } from '@kbn/data-views-plugin/public';
+import type { SavedObject } from '@kbn/data-plugin/public';
 import { DiscoverLayout } from './components/layout';
 import { setBreadcrumbsTitle } from '../../utils/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
 import { useDiscoverState } from './utils/use_discover_state';
 import { useUrl } from './utils/use_url';
-import { IndexPatternAttributes, SavedObject } from '../../../../data/common';
 import { SavedSearch } from '../../services/saved_searches';
 import { ElasticSearchHit } from '../../types';
 import { useDiscoverServices } from '../../utils/use_discover_services';
@@ -23,7 +24,7 @@ export interface DiscoverMainProps {
   /**
    * List of available index patterns
    */
-  indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+  indexPatternList: Array<SavedObject<DataViewAttributes>>;
   /**
    * Current instance of SavedSearch
    */

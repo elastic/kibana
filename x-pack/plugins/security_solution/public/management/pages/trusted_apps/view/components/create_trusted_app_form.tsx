@@ -18,20 +18,23 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiFormProps } from '@elastic/eui/src/components/form/form';
 import {
-  ConditionEntry,
+  hasSimpleExecutableName,
+  isPathValid,
   ConditionEntryField,
+  OperatingSystem,
+} from '@kbn/securitysolution-utils';
+import { EuiFormProps } from '@elastic/eui/src/components/form/form';
+
+import {
+  TrustedAppConditionEntry,
   EffectScope,
   MacosLinuxConditionEntry,
   MaybeImmutable,
   NewTrustedApp,
-  OperatingSystem,
 } from '../../../../../../common/endpoint/types';
 import {
   isValidHash,
-  isPathValid,
-  hasSimpleExecutableName,
   getDuplicateFields,
 } from '../../../../../../common/endpoint/service/trusted_apps/validations';
 
@@ -137,7 +140,7 @@ const validateFormValues = (values: MaybeImmutable<NewTrustedApp>): ValidationRe
       })
     );
   } else {
-    const duplicated = getDuplicateFields(values.entries as ConditionEntry[]);
+    const duplicated = getDuplicateFields(values.entries as TrustedAppConditionEntry[]);
     if (duplicated.length) {
       isValid = false;
       duplicated.forEach((field) => {

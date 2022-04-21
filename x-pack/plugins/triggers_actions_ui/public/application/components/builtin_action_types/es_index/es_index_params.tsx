@@ -24,7 +24,7 @@ import {
   AlertHistoryDefaultIndexName,
   ALERT_HISTORY_PREFIX,
 } from '../../../../types';
-import { IndexActionParams } from '.././types';
+import { IndexActionParams } from '../types';
 import { JsonEditorWithMessageVariables } from '../../json_editor_with_message_variables';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -108,7 +108,7 @@ export const IndexParamsFields = ({
         >
           <EuiIcon type="refresh" />
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertsList.resetDefaultIndexLabel"
+            id="xpack.triggersActionsUI.sections.rulesList.resetDefaultIndexLabel"
             defaultMessage="Reset default index"
           />
         </EuiLink>

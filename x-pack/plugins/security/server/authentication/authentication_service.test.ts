@@ -12,7 +12,6 @@ import { mockCanRedirectRequest } from './authentication_service.test.mocks';
 
 import { errors } from '@elastic/elasticsearch';
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   AuthenticationHandler,
   AuthToolkit,
@@ -26,20 +25,21 @@ import type {
   UnauthorizedError,
   UnauthorizedErrorHandler,
   UnauthorizedErrorHandlerToolkit,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import {
   coreMock,
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
   loggingSystemMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import type { AuditServiceSetup } from '../audit';
-import { auditServiceMock } from '../audit/index.mock';
+import { auditServiceMock } from '../audit/mocks';
 import type { ConfigType } from '../config';
 import { ConfigSchema, createConfig } from '../config';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';

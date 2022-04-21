@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import type { RouteDefinitionParams } from '../';
+import type { RouteDefinitionParams } from '..';
 import { wrapError } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
@@ -49,7 +49,7 @@ export function defineRoleMappingPostRoutes({ router }: RouteDefinitionParams) {
             name: request.params.name,
             body: request.body,
           });
-        return response.ok({ body: saveResponse.body });
+        return response.ok({ body: saveResponse });
       } catch (error) {
         const wrappedError = wrapError(error);
         return response.customError({

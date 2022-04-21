@@ -69,6 +69,7 @@ import {
   CoreServicesUsageData,
 } from './core_usage_data';
 import { PrebootServicePreboot } from './preboot';
+import { DocLinksServiceStart, DocLinksServiceSetup } from './doc_links';
 
 export type { PrebootServicePreboot } from './preboot';
 
@@ -82,6 +83,11 @@ export type {
 };
 
 import type { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
+import type {
+  AnalyticsServicePreboot,
+  AnalyticsServiceSetup,
+  AnalyticsServiceStart,
+} from './analytics';
 
 export type { IExecutionContextContainer, KibanaExecutionContext } from './execution_context';
 
@@ -267,6 +273,7 @@ export type {
   PluginName,
   SharedGlobalConfig,
   MakeUsageFromSchema,
+  ExposedToBrowserDescriptor,
 } from './plugins';
 
 export {
@@ -275,6 +282,7 @@ export {
   SavedObjectsSerializer,
   SavedObjectTypeRegistry,
   SavedObjectsUtils,
+  mergeSavedObjectMigrationMaps,
 } from './saved_objects';
 
 export type {
@@ -438,6 +446,25 @@ export type {
   CoreIncrementCounterParams,
 } from './core_usage_data';
 
+export type { DocLinksServiceSetup, DocLinksServiceStart } from './doc_links';
+
+export type {
+  AnalyticsServiceSetup,
+  AnalyticsServicePreboot,
+  AnalyticsServiceStart,
+  AnalyticsClient,
+  Event,
+  EventContext,
+  EventType,
+  EventTypeOpts,
+  IShipper,
+  ContextProviderOpts,
+  OptInConfig,
+  ShipperClassConstructor,
+  TelemetryCounter,
+} from './analytics';
+export { TelemetryCounterType } from './analytics';
+
 /**
  * Plugin specific context passed to a route handler.
  *
@@ -479,6 +506,8 @@ export interface RequestHandlerContext {
  * @public
  */
 export interface CorePreboot {
+  /** {@link AnalyticsServicePreboot} */
+  analytics: AnalyticsServicePreboot;
   /** {@link ElasticsearchServicePreboot} */
   elasticsearch: ElasticsearchServicePreboot;
   /** {@link HttpServicePreboot} */
@@ -497,10 +526,14 @@ export interface CorePreboot {
  * @public
  */
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
+  /** {@link AnalyticsServiceSetup} */
+  analytics: AnalyticsServiceSetup;
   /** {@link CapabilitiesSetup} */
   capabilities: CapabilitiesSetup;
   /** {@link ContextSetup} */
   context: ContextSetup;
+  /** {@link DocLinksServiceSetup} */
+  docLinks: DocLinksServiceSetup;
   /** {@link ElasticsearchServiceSetup} */
   elasticsearch: ElasticsearchServiceSetup;
   /** {@link ExecutionContextSetup} */
@@ -549,8 +582,12 @@ export type StartServicesAccessor<
  * @public
  */
 export interface CoreStart {
+  /** {@link AnalyticsServiceStart} */
+  analytics: AnalyticsServiceStart;
   /** {@link CapabilitiesStart} */
   capabilities: CapabilitiesStart;
+  /** {@link DocLinksServiceStart} */
+  docLinks: DocLinksServiceStart;
   /** {@link ElasticsearchServiceStart} */
   elasticsearch: ElasticsearchServiceStart;
   /** {@link ExecutionContextStart} */

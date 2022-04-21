@@ -7,10 +7,10 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import type { KibanaFeature } from '@kbn/features-plugin/common';
 
-import type { KibanaFeature } from '../../../../../features/common';
+import type { RouteDefinitionParams } from '../..';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
-import type { RouteDefinitionParams } from '../../index';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
 import {
   getPutPayloadSchema,
@@ -66,7 +66,7 @@ export function definePutRolesRoutes({
       const { name } = request.params;
 
       try {
-        const [features, { body: rawRoles }] = await Promise.all([
+        const [features, rawRoles] = await Promise.all([
           getFeatures(),
           context.core.elasticsearch.client.asCurrentUser.security.getRole(
             { name: request.params.name },

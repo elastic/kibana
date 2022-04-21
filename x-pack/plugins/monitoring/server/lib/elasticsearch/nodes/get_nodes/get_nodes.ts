@@ -46,13 +46,13 @@ export async function getNodes(
   const max = end;
   const duration = moment.duration(max - orgStart, 'ms');
 
-  const config = req.server.config();
+  const config = req.server.config;
   const clusterUuid = req.params.clusterUuid;
   const metricFields = ElasticsearchMetric.getMetricFields();
   const min = start;
 
   const bucketSize = Math.max(
-    parseInt(config.get('monitoring.ui.min_interval_seconds') as string, 10),
+    config.ui.min_interval_seconds,
     calculateAuto(100, duration).asSeconds()
   );
 
@@ -74,9 +74,11 @@ export async function getNodes(
     dataset,
   });
 
+  const maxBucketSize = config.ui.max_bucket_size;
+
   const params = {
     index: indexPatterns,
-    size: config.get('monitoring.ui.max_bucket_size'),
+    size: maxBucketSize,
     ignore_unavailable: true,
     body: {
       query: createQuery({
@@ -97,7 +99,7 @@ export async function getNodes(
           terms: {
             field: `source_node.uuid`,
             include: uuidsToInclude,
-            size: config.get('monitoring.ui.max_bucket_size'),
+            size: maxBucketSize,
           },
           aggs: {
             by_date: {

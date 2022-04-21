@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { RouteDependencies } from '../../../types';
 
 const paramsSchema = schema.object({
@@ -14,11 +14,9 @@ const paramsSchema = schema.object({
 });
 
 function deleteWatch(dataClient: IScopedClusterClient, watchId: string) {
-  return dataClient.asCurrentUser.watcher
-    .deleteWatch({
-      id: watchId,
-    })
-    .then(({ body }) => body);
+  return dataClient.asCurrentUser.watcher.deleteWatch({
+    id: watchId,
+  });
 }
 
 export function registerDeleteRoute({

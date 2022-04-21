@@ -31,6 +31,7 @@ import { EnvironmentService, config as pidConfig } from './environment';
 // do not try to shorten the import to `./status`, it will break server test mocking
 import { StatusService } from './status/status_service';
 import { ExecutionContextService } from './execution_context';
+import { DocLinksService } from './doc_links';
 
 import { config as cspConfig } from './csp';
 import { config as elasticsearchConfig } from './elasticsearch';
@@ -56,12 +57,14 @@ import { config as executionContextConfig } from './execution_context';
 import { PrebootCoreRouteHandlerContext } from './preboot_core_route_handler_context';
 import { PrebootService } from './preboot';
 import { DiscoveredPlugins } from './plugins';
+import { AnalyticsService } from './analytics';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
 
 export class Server {
   public readonly configService: ConfigService;
+  private readonly analytics: AnalyticsService;
   private readonly capabilities: CapabilitiesService;
   private readonly context: ContextService;
   private readonly elasticsearch: ElasticsearchService;
@@ -82,6 +85,7 @@ export class Server {
   private readonly deprecations: DeprecationsService;
   private readonly executionContext: ExecutionContextService;
   private readonly prebootService: PrebootService;
+  private readonly docLinks: DocLinksService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -101,6 +105,7 @@ export class Server {
     this.configService = new ConfigService(rawConfigProvider, env, this.logger);
 
     const core = { coreId, configService: this.configService, env, logger: this.logger };
+    this.analytics = new AnalyticsService(core);
     this.context = new ContextService(core);
     this.http = new HttpService(core);
     this.rendering = new RenderingService(core);
@@ -120,6 +125,7 @@ export class Server {
     this.deprecations = new DeprecationsService(core);
     this.executionContext = new ExecutionContextService(core);
     this.prebootService = new PrebootService(core);
+    this.docLinks = new DocLinksService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
@@ -129,6 +135,8 @@ export class Server {
   public async preboot() {
     this.log.debug('prebooting server');
     const prebootTransaction = apm.startTransaction('server-preboot', 'kibana-platform');
+
+    const analyticsPreboot = this.analytics.preboot();
 
     const environmentPreboot = await this.environment.preboot();
 
@@ -161,6 +169,7 @@ export class Server {
     const loggingPreboot = this.logging.preboot({ loggingSystem: this.loggingSystem });
 
     const corePreboot: InternalCorePreboot = {
+      analytics: analyticsPreboot,
       context: contextServicePreboot,
       elasticsearch: elasticsearchServicePreboot,
       http: httpPreboot,
@@ -186,6 +195,8 @@ export class Server {
     this.log.debug('setting up server');
     const setupTransaction = apm.startTransaction('server-setup', 'kibana-platform');
 
+    const analyticsSetup = this.analytics.setup();
+
     const environmentSetup = this.environment.setup();
 
     // Configuration could have changed after preboot.
@@ -196,6 +207,7 @@ export class Server {
       pluginDependencies: new Map([...pluginTree.asOpaqueIds]),
     });
     const executionContextSetup = this.executionContext.setup();
+    const docLinksSetup = this.docLinks.setup();
 
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
@@ -261,8 +273,10 @@ export class Server {
     const loggingSetup = this.logging.setup();
 
     const coreSetup: InternalCoreSetup = {
+      analytics: analyticsSetup,
       capabilities: capabilitiesSetup,
       context: contextServiceSetup,
+      docLinks: docLinksSetup,
       elasticsearch: elasticsearchServiceSetup,
       environment: environmentSetup,
       executionContext: executionContextSetup,
@@ -293,7 +307,9 @@ export class Server {
     this.log.debug('starting server');
     const startTransaction = apm.startTransaction('server-start', 'kibana-platform');
 
+    const analyticsStart = this.analytics.start();
     const executionContextStart = this.executionContext.start();
+    const docLinkStart = this.docLinks.start();
     const elasticsearchStart = await this.elasticsearch.start();
     const deprecationsStart = this.deprecations.start();
     const soStartSpan = startTransaction?.startSpan('saved_objects.migration', 'migration');
@@ -317,7 +333,9 @@ export class Server {
     this.status.start();
 
     this.coreStart = {
+      analytics: analyticsStart,
       capabilities: capabilitiesStart,
+      docLinks: docLinkStart,
       elasticsearch: elasticsearchStart,
       executionContext: executionContextStart,
       http: httpStart,

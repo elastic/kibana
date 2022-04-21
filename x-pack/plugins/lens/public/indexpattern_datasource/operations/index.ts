@@ -40,4 +40,6 @@ export type {
   OverallAverageIndexPatternColumn,
   FormulaIndexPatternColumn,
   MathIndexPatternColumn,
+  StaticValueIndexPatternColumn,
+  TimeScaleIndexPatternColumn,
 } from './definitions';

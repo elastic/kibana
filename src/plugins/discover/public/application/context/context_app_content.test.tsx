@@ -7,11 +7,11 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { ActionBar } from './components/action_bar/action_bar';
-import { AppState, GetStateReturn } from './services/context_state';
-import { SortDirection } from 'src/plugins/data/common';
+import { GetStateReturn } from './services/context_state';
+import { SortDirection } from '@kbn/data-plugin/public';
 import { ContextAppContent, ContextAppContentProps } from './context_app_content';
 import { LoadingStatus } from './services/context_query_state';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
@@ -19,7 +19,7 @@ import { DiscoverGrid } from '../../components/discover_grid/discover_grid';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { DocTableWrapper } from '../../components/doc_table/doc_table_wrapper';
 import { EsHitRecordList } from '../types';
-import { KibanaContextProvider } from '../../../../kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 describe('ContextAppContent test', () => {
   const mountComponent = ({
@@ -52,7 +52,6 @@ describe('ContextAppContent test', () => {
     const props = {
       columns: ['order_date', '_source'],
       indexPattern: indexPatternMock,
-      appState: {} as unknown as AppState,
       stateContainer: {} as unknown as GetStateReturn,
       anchorStatus: anchorStatus || LoadingStatus.LOADED,
       predecessorsStatus: LoadingStatus.LOADED,

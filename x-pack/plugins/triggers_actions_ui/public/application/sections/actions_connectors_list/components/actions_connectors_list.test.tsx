@@ -8,10 +8,10 @@
 import * as React from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { ThemeProvider } from 'styled-components';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
 import ActionsConnectorsList from './actions_connectors_list';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';

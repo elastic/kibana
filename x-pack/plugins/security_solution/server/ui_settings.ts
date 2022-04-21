@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import { CoreSetup, UiSettingsParams } from '../../../../src/core/server';
+import { CoreSetup, UiSettingsParams } from '@kbn/core/server';
 import {
   APP_ID,
   DEFAULT_ANOMALY_SCORE,
@@ -17,7 +17,6 @@ import {
   DEFAULT_FROM,
   DEFAULT_INDEX_KEY,
   DEFAULT_INDEX_PATTERN,
-  DEFAULT_INDEX_PATTERN_EXPERIMENTAL,
   DEFAULT_INTERVAL_PAUSE,
   DEFAULT_INTERVAL_VALUE,
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
@@ -26,17 +25,13 @@ import {
   DEFAULT_THREAT_INDEX_KEY,
   DEFAULT_THREAT_INDEX_VALUE,
   DEFAULT_TO,
-  DEFAULT_TRANSFORMS,
-  DEFAULT_TRANSFORMS_SETTING,
   ENABLE_NEWS_FEED_SETTING,
   IP_REPUTATION_LINKS_SETTING,
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
-  RULES_TABLE_ADVANCED_FILTERING_THRESHOLD,
-  DEFAULT_RULES_TABLE_IN_MEMORY_THRESHOLD,
+  ENABLE_CCS_READ_WARNING_SETTING,
 } from '../common/constants';
-import { transformConfigSchema } from '../common/transforms/types';
 import { ExperimentalFeatures } from '../common/experimental_features';
 
 type SettingsConfig = Record<string, UiSettingsParams<unknown>>;
@@ -106,9 +101,7 @@ export const initUiSettings = (
       }),
       sensitive: true,
 
-      value: experimentalFeatures.uebaEnabled
-        ? [...DEFAULT_INDEX_PATTERN, ...DEFAULT_INDEX_PATTERN_EXPERIMENTAL]
-        : DEFAULT_INDEX_PATTERN,
+      value: DEFAULT_INDEX_PATTERN,
       description: i18n.translate('xpack.securitySolution.uiSettings.defaultIndexDescription', {
         defaultMessage:
           '<p>Comma-delimited list of Elasticsearch indices from which the Security app collects events.</p>',
@@ -187,22 +180,6 @@ export const initUiSettings = (
         on: schema.boolean(),
       }),
     },
-    [RULES_TABLE_ADVANCED_FILTERING_THRESHOLD]: {
-      name: i18n.translate('xpack.securitySolution.uiSettings.advancedFilteringMaxRules', {
-        defaultMessage: 'Experimental sorting and filtering capabilities threshold',
-      }),
-      description: i18n.translate(
-        'xpack.securitySolution.uiSettings.advancedFilteringMaxRulesDescription',
-        {
-          defaultMessage: `<p>Experimental sorting and filtering is enabled on the Rules and Rule Monitoring tables when the total number of rules in the current Kibana space doesn't exceed this threshold</p>`,
-        }
-      ),
-      type: 'number',
-      value: DEFAULT_RULES_TABLE_IN_MEMORY_THRESHOLD,
-      category: [APP_ID],
-      requiresPageReload: true,
-      schema: schema.number({ min: 0, max: 10000 }),
-    },
     [NEWS_FEED_URL_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.newsFeedUrl', {
         defaultMessage: 'News feed URL',
@@ -239,26 +216,19 @@ export const initUiSettings = (
         })
       ),
     },
-    // TODO: Remove this check once the experimental flag is removed
-    ...(experimentalFeatures.metricsEntitiesEnabled
-      ? {
-          [DEFAULT_TRANSFORMS]: {
-            name: i18n.translate('xpack.securitySolution.uiSettings.transforms', {
-              defaultMessage: 'Default transforms to use',
-            }),
-            value: DEFAULT_TRANSFORMS_SETTING,
-            type: 'json',
-            description: i18n.translate('xpack.securitySolution.uiSettings.transformDescription', {
-              // TODO: Add a hyperlink to documentation about this feature
-              defaultMessage: 'Experimental: Enable an application cache through transforms',
-            }),
-            sensitive: true,
-            category: [APP_ID],
-            requiresPageReload: false,
-            schema: transformConfigSchema,
-          },
-        }
-      : {}),
+    [ENABLE_CCS_READ_WARNING_SETTING]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.enableCcsReadWarningLabel', {
+        defaultMessage: 'CCS Rule Privileges Warning',
+      }),
+      value: true,
+      description: i18n.translate('xpack.securitySolution.uiSettings.enableCcsWarningDescription', {
+        defaultMessage: '<p>Enables privilege check warnings in rules for CCS indices</p>',
+      }),
+      type: 'boolean',
+      category: [APP_ID],
+      requiresPageReload: false,
+      schema: schema.boolean(),
+    },
   };
 
   uiSettings.register(orderSettings(securityUiSettings));

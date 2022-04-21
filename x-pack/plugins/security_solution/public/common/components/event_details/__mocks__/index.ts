@@ -36,6 +36,12 @@ export const mockAlertDetailsData = [
   },
   { category: 'agent', field: 'agent.version', values: ['7.10.0'], originalValue: '7.10.0' },
   {
+    category: 'agent',
+    field: 'agent.status',
+    values: ['inactive'],
+    originalValue: ['inactive'],
+  },
+  {
     category: 'winlog',
     field: 'winlog.computer_name',
     values: ['windows-native'],
@@ -179,6 +185,18 @@ export const mockAlertDetailsData = [
     originalValue: 'Microsoft-Windows-Security-Auditing',
   },
   { category: 'log', field: 'log.level', values: ['information'], originalValue: 'information' },
+  {
+    category: 'destination',
+    field: 'destination.address',
+    values: ['google.com'],
+    originalValue: 'google.com',
+  },
+  {
+    category: 'source',
+    field: 'source.address',
+    values: ['185.156.74.3'],
+    originalValue: '185.156.74.3',
+  },
   { category: 'source', field: 'source.port', values: [0], originalValue: 0 },
   { category: 'source', field: 'source.domain', values: ['-'], originalValue: '-' },
   {
@@ -461,6 +479,12 @@ export const mockAlertDetailsData = [
   },
   {
     category: 'kibana',
+    field: 'kibana.alert.original_event.id',
+    values: ['f7bc2422-cb1e-4427-ba33-6f496ee8360c'],
+    originalValue: 'f7bc2422-cb1e-4427-ba33-6f496ee8360c',
+  },
+  {
+    category: 'kibana',
     field: 'kibana.alert.original_event.code',
     values: [4625],
     originalValue: 4625,
@@ -616,5 +640,11 @@ export const mockAlertDetailsData = [
     field: 'threat.enrichments.matched.field',
     values: ['host.name'],
     originalValue: ['host.name'],
+  },
+  {
+    category: 'Target',
+    field: 'Target.process.executable',
+    values: ['dummy.exe'],
+    originalValue: ['dummy.exe'],
   },
 ];

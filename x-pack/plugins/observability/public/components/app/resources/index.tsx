@@ -42,7 +42,7 @@ const resources = [
 
 export function Resources() {
   return (
-    <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="xs">
+    <EuiFlexGroup direction="column" alignItems="flexStart">
       <EuiFlexItem grow={false}>
         <EuiTitle size="xs">
           <h4>

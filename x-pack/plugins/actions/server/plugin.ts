@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { UsageCollectionSetup, UsageCounter } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import {
   PluginInitializerContext,
   Plugin,
@@ -18,18 +18,23 @@ import {
   ElasticsearchServiceStart,
   SavedObjectsClientContract,
   SavedObjectsBulkGetObject,
-} from '../../../../src/core/server';
+} from '@kbn/core/server';
 
 import {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
-} from '../../encrypted_saved_objects/server';
-import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
-import { SpacesPluginStart, SpacesPluginSetup } from '../../spaces/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { SecurityPluginSetup } from '../../security/server';
+} from '@kbn/encrypted-saved-objects-plugin/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { IEventLogger, IEventLogService } from '@kbn/event-log-plugin/server';
+import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import {
   ensureCleanupFailedExecutionsTaskScheduled,
   registerCleanupFailedExecutionsTaskDefinition,
@@ -65,7 +70,6 @@ import {
 import { getActionsConfigurationUtilities } from './actions_config';
 
 import { defineRoutes } from './routes';
-import { IEventLogger, IEventLogService } from '../../event_log/server';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import {
   ACTION_SAVED_OBJECT_TYPE,
@@ -88,6 +92,7 @@ import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/aler
 import { ACTIONS_FEATURE_ID, AlertHistoryEsIndexConnectorId } from '../common';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
 import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
+import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
 
 export interface PluginSetupContract {
   registerType<
@@ -134,6 +139,7 @@ export interface ActionsPluginsSetup {
   security?: SecurityPluginSetup;
   features: FeaturesPluginSetup;
   spaces?: SpacesPluginSetup;
+  monitoringCollection?: MonitoringCollectionSetup;
 }
 
 export interface ActionsPluginsStart {
@@ -164,6 +170,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private usageCounter?: UsageCounter;
   private readonly telemetryLogger: Logger;
   private readonly preconfiguredActions: PreConfiguredAction[];
+  private inMemoryMetrics: InMemoryMetrics;
   private kibanaIndex?: string;
 
   constructor(initContext: PluginInitializerContext) {
@@ -174,6 +181,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     );
     this.telemetryLogger = initContext.logger.get('usage');
     this.preconfiguredActions = [];
+    this.inMemoryMetrics = new InMemoryMetrics(initContext.logger.get('in_memory_metrics'));
   }
 
   public setup(
@@ -204,7 +212,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     });
 
     // get executions count
-    const taskRunnerFactory = new TaskRunnerFactory(actionExecutor);
+    const taskRunnerFactory = new TaskRunnerFactory(actionExecutor, this.inMemoryMetrics);
     const actionsConfigUtils = getActionsConfigurationUtilities(this.actionsConfig);
 
     if (this.actionsConfig.preconfiguredAlertHistoryEsIndex) {
@@ -282,6 +290,17 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
     // Usage counter for telemetry
     this.usageCounter = plugins.usageCollection?.createUsageCounter(ACTIONS_FEATURE_ID);
+
+    if (plugins.monitoringCollection) {
+      registerNodeCollector({
+        monitoringCollection: plugins.monitoringCollection,
+        inMemoryMetrics: this.inMemoryMetrics,
+      });
+      registerClusterCollector({
+        monitoringCollection: plugins.monitoringCollection,
+        core,
+      });
+    }
 
     // Routes
     defineRoutes(

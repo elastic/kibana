@@ -7,8 +7,7 @@
 
 import { History } from 'history';
 import { parse, stringify } from 'query-string';
-import { url } from '../../../../../../../src/plugins/kibana_utils/public';
-import { UxLocalUIFilterName } from '../../../../common/ux_ui_filter';
+import { url } from '@kbn/kibana-utils-plugin/public';
 
 export function toQuery(search?: string): APMQueryParamsRaw {
   return search ? parse(search.slice(1), { sort: false }) : {};
@@ -64,7 +63,7 @@ export function createHref(
   return history.createHref(location);
 }
 
-export type APMQueryParams = {
+export interface APMQueryParams {
   sampleRangeFrom?: number;
   sampleRangeTo?: number;
   transactionId?: string;
@@ -89,14 +88,15 @@ export type APMQueryParams = {
   percentile?: 50 | 75 | 90 | 95 | 99;
   latencyAggregationType?: string;
   comparisonEnabled?: boolean;
-  comparisonType?: string;
+  offset?: string;
   transactionResult?: string;
   host?: string;
   containerId?: string;
   podName?: string;
   agentName?: string;
   serviceVersion?: string;
-} & { [key in UxLocalUIFilterName]?: string };
+  serviceGroup?: string;
+}
 
 // forces every value of T[K] to be type: string
 type StringifyAll<T> = { [K in keyof T]: string };

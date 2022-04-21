@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory } from 'src/core/server';
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import { routeDefinitionParamsMock } from '../index.mock';
 import { defineRoleMappingPostRoutes } from './post';
@@ -18,8 +18,8 @@ describe('POST role mappings', () => {
       core: coreMock.createRequestHandlerContext(),
       licensing: { license: { check: jest.fn().mockReturnValue({ state: 'valid' }) } } as any,
     };
-    mockContext.core.elasticsearch.client.asCurrentUser.security.putRoleMapping.mockResolvedValue({
-      body: { created: true },
+    mockContext.core.elasticsearch.client.asCurrentUser.security.putRoleMapping.mockResponse({
+      created: true,
     } as any);
 
     defineRoleMappingPostRoutes(mockRouteDefinitionParams);

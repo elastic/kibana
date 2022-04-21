@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { duration } from 'moment';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { initCardinalityFieldsCache } from './fields_aggs_cache';
@@ -16,6 +16,7 @@ import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { Datafeed, IndicesOptions } from '../../../common/types/anomaly_detection_jobs';
 import { RuntimeMappings } from '../../../common/types/fields';
 import { isPopulatedObject } from '../../../common/util/object_utils';
+
 /**
  * Service for carrying out queries to obtain data
  * specific to fields in Elasticsearch indices.
@@ -44,7 +45,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     fieldNames: string[],
     datafeedConfig?: Datafeed
   ): Promise<string[]> {
-    const { body } = await asCurrentUser.fieldCaps({
+    const body = await asCurrentUser.fieldCaps({
       index,
       fields: fieldNames,
     });
@@ -179,9 +180,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       ...runtimeMappings,
     };
 
-    const {
-      body: { aggregations },
-    } = await asCurrentUser.search({
+    const { aggregations } = await asCurrentUser.search({
       index,
       body,
       ...(datafeedConfig?.indices_options ?? {}),
@@ -223,9 +222,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
   }> {
     const obj = { success: true, start: { epoch: 0, string: '' }, end: { epoch: 0, string: '' } };
 
-    const {
-      body: { aggregations },
-    } = await asCurrentUser.search({
+    const { aggregations } = await asCurrentUser.search({
       index,
       size: 0,
       body: {
@@ -400,9 +397,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       },
     };
 
-    const {
-      body: { aggregations },
-    } = await asCurrentUser.search({
+    const { aggregations } = await asCurrentUser.search({
       index,
       body,
       ...(datafeedConfig?.indices_options ?? {}),

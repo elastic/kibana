@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Unit } from '@elastic/datemath';
 import * as rt from 'io-ts';
+import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import { SnapshotCustomMetricInput } from '../../http_api';
 import { ANOMALY_THRESHOLD } from '../../infra_ml';
 import { InventoryItemType, SnapshotMetricType } from '../../inventory_models/types';
@@ -69,7 +69,7 @@ export interface MetricAnomalyParams {
 export interface InventoryMetricConditions {
   metric: SnapshotMetricType;
   timeSize: number;
-  timeUnit: Unit;
+  timeUnit: TimeUnitChar;
   sourceId?: string;
   threshold: number[];
   comparator: Comparator;
@@ -89,7 +89,7 @@ export interface InventoryMetricThresholdParams {
 
 interface BaseMetricExpressionParams {
   timeSize: number;
-  timeUnit: Unit;
+  timeUnit: TimeUnitChar;
   sourceId?: string;
   threshold: number[];
   comparator: Comparator;
@@ -112,3 +112,8 @@ export type MetricExpressionParams = NonCountMetricExpressionParams | CountMetri
 export const QUERY_INVALID: unique symbol = Symbol('QUERY_INVALID');
 
 export type FilterQuery = string | typeof QUERY_INVALID;
+
+export interface AlertExecutionDetails {
+  alertId: string;
+  executionId: string;
+}

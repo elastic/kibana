@@ -33,13 +33,18 @@ This flag will enable automatic warn and error logging if task manager self dete
 The amount of seconds we allow a task to delay before printing a warning server log.  Defaults to 60.
 
 `xpack.task_manager.ephemeral_tasks.enabled`::
-Enables an experimental feature that executes a limited (and configurable) number of actions in the same task as the alert which triggered them.
+Enables a technical preview feature that executes a limited (and configurable) number of actions in the same task as the alert which triggered them.
 These action tasks will reduce the latency of the time it takes an action to run after it's triggered, but are not persisted as SavedObjects.
 These non-persisted action tasks have a risk that they won't be run at all if the Kibana instance running them exits unexpectedly. Defaults to false.
 
 `xpack.task_manager.ephemeral_tasks.request_capacity`::
 Sets the size of the ephemeral queue defined above. Defaults to 10.
 
+`xpack.task_manager.event_loop_delay.monitor`::
+Enables event loop delay monitoring, which will log a warning when a task causes an event loop delay which exceeds the `warn_threshold` setting.  Defaults to true.
+
+`xpack.task_manager.event_loop_delay.warn_threshold`::
+Sets the amount of event loop delay during a task execution which will cause a warning to be logged. Defaults to 5000 milliseconds (5 seconds).
 
 [float]
 [[task-manager-health-settings]]

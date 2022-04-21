@@ -12,8 +12,9 @@ import {
   UiSettingsServiceStart,
   SavedObjectsClientContract,
   ElasticsearchClient,
-} from 'src/core/server';
-import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
+} from '@kbn/core/server';
+import { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import {
   AggsCommonService,
   AggConfigs,
@@ -22,7 +23,6 @@ import {
   calculateBounds,
   TimeRange,
 } from '../../../common';
-import { FieldFormatsStart } from '../../../../field_formats/server';
 import { IndexPatternsServiceStart } from '../../data_views';
 import { AggsSetup, AggsStart } from './types';
 
@@ -72,17 +72,13 @@ export class AggsService {
         };
         const isDefaultTimezone = () => getConfig('dateFormat:tz') === 'Browser';
 
-        const { calculateAutoTimeExpression, datatableUtilities, types } =
-          this.aggsCommonService.start({
-            getConfig,
-            getIndexPattern: (
-              await indexPatterns.indexPatternsServiceFactory(
-                savedObjectsClient,
-                elasticsearchClient
-              )
-            ).get,
-            isDefaultTimezone,
-          });
+        const { calculateAutoTimeExpression, types } = this.aggsCommonService.start({
+          getConfig,
+          getIndexPattern: (
+            await indexPatterns.indexPatternsServiceFactory(savedObjectsClient, elasticsearchClient)
+          ).get,
+          isDefaultTimezone,
+        });
 
         const aggTypesDependencies: AggTypesDependencies = {
           calculateBounds: this.calculateBounds,
@@ -118,7 +114,6 @@ export class AggsService {
 
         return {
           calculateAutoTimeExpression,
-          datatableUtilities,
           createAggConfigs: (indexPattern, configStates = []) => {
             return new AggConfigs(indexPattern, configStates, { typesRegistry });
           },

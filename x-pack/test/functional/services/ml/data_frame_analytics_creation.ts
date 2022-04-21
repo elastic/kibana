@@ -6,16 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
+import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
 
+import {
+  isRegressionAnalysis,
+  isClassificationAnalysis,
+} from '@kbn/ml-plugin/common/util/analytics_utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import type { CanvasElementColorStats } from '../canvas_element';
 import type { MlCommonUI } from './common_ui';
 import { MlApi } from './api';
-import {
-  isRegressionAnalysis,
-  isClassificationAnalysis,
-} from '../../../../plugins/ml/common/util/analytics_utils';
 
 export function MachineLearningDataFrameAnalyticsCreationProvider(
   { getPageObject, getService }: FtrProviderContext,
@@ -152,7 +152,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     ) {
       // For each chart, get the content of each header cell and assert
       // the legend text and column id and if the chart should be present or not.
-      await retry.tryForTime(5000, async () => {
+      await retry.tryForTime(10000, async () => {
         for (const expected of expectedHistogramCharts.values()) {
           const id = expected.id;
           await testSubjects.existOrFail(`mlDataGridChart-${id}`);
@@ -185,16 +185,6 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
         await testSubjects.existOrFail('mlAnalyticsCreateJobWizardIncludesSelect');
       });
     },
-
-    // async assertIncludedFieldsSelection(expectedSelection: string[]) {
-    //   const includesTable = await testSubjects.find('mlAnalyticsCreateJobWizardIncludesSelect');
-    //   const actualSelection = await includesTable.findByClassName('euiTableRow-isSelected');
-
-    //   expect(actualSelection).to.eql(
-    //     expectedSelection,
-    //     `Included fields should be '${expectedSelection}' (got '${actualSelection}')`
-    //   );
-    // },
 
     async assertDestIndexInputExists() {
       await retry.tryForTime(4000, async () => {

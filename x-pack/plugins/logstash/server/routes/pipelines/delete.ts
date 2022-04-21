@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ElasticsearchClient } from 'src/core/server';
-import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { wrapRouteWithLicenseCheck } from '@kbn/licensing-plugin/server';
 
 import { checkLicense } from '../../lib/check_license';
 import type { LogstashPluginRouter } from '../../types';
@@ -18,7 +18,7 @@ async function deletePipelines(client: ElasticsearchClient, pipelineIds: string[
       .deletePipeline({
         id: pipelineId,
       })
-      .then((response) => ({ success: response.body }))
+      .then((response) => ({ success: response }))
       .catch((error) => ({ error }));
   });
 

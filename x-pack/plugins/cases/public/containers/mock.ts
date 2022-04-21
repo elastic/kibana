@@ -7,18 +7,21 @@
 
 import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } from './types';
 
-import type { ResolvedCase, CaseMetrics, CaseMetricsFeature } from '../../common/ui/types';
+import type {
+  ResolvedCase,
+  CaseMetrics,
+  CaseMetricsFeature,
+  AlertComment,
+} from '../../common/ui/types';
 import {
   Actions,
   ActionTypes,
-  AssociationType,
   CaseConnector,
   CaseResponse,
   CasesFindResponse,
   CasesResponse,
   CasesStatusResponse,
   CaseStatuses,
-  CaseType,
   CaseUserActionResponse,
   CaseUserActionsResponse,
   CommentResponse,
@@ -33,12 +36,12 @@ import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 import { SnakeToCamelCase } from '../../common/types';
 import { covertToSnakeCase } from './utils';
-export { connectorsMock } from './configure/mock';
 
+export { connectorsMock } from '../common/mock/connectors';
 export const basicCaseId = 'basic-case-id';
 export const caseWithAlertsId = 'case-with-alerts-id';
 export const caseWithAlertsSyncOffId = 'case-with-alerts-syncoff-id';
-export const basicSubCaseId = 'basic-sub-case-id';
+
 const basicCommentId = 'basic-comment-id';
 const basicCreatedAt = '2020-02-19T23:06:33.798Z';
 const basicUpdatedAt = '2020-02-20T15:02:57.995Z';
@@ -54,7 +57,6 @@ export const elasticUser = {
 export const tags: string[] = ['coke', 'pepsi'];
 
 export const basicComment: Comment = {
-  associationType: AssociationType.case,
   comment: 'Solve this fast!',
   type: CommentType.user,
   id: basicCommentId,
@@ -68,9 +70,8 @@ export const basicComment: Comment = {
   version: 'WzQ3LDFc',
 };
 
-export const alertComment: Comment = {
+export const alertComment: AlertComment = {
   alertId: 'alert-id-1',
-  associationType: AssociationType.case,
   index: 'alert-index-1',
   type: CommentType.alert,
   id: 'alert-comment-id',
@@ -102,7 +103,6 @@ export const hostIsolationComment: () => Comment = () => {
       ],
       type: 'isolate',
     },
-    associationType: AssociationType.case,
     createdAt: basicCreatedAt,
     createdBy: elasticUser,
     owner: SECURITY_SOLUTION_OWNER,
@@ -128,7 +128,6 @@ export const hostReleaseComment: () => Comment = () => {
       ],
       type: 'unisolate',
     },
-    associationType: AssociationType.case,
     createdAt: basicCreatedAt,
     createdBy: elasticUser,
     owner: SECURITY_SOLUTION_OWNER,
@@ -141,7 +140,6 @@ export const hostReleaseComment: () => Comment = () => {
 };
 
 export const basicCase: Case = {
-  type: CaseType.individual,
   owner: SECURITY_SOLUTION_OWNER,
   closedAt: null,
   closedBy: null,
@@ -168,7 +166,6 @@ export const basicCase: Case = {
   settings: {
     syncAlerts: true,
   },
-  subCaseIds: [],
 };
 
 export const caseWithAlerts = {
@@ -234,12 +231,11 @@ export const basicCaseMetrics: CaseMetrics = {
   },
 };
 
-export const collectionCase: Case = {
-  type: CaseType.collection,
+export const mockCase: Case = {
   owner: SECURITY_SOLUTION_OWNER,
   closedAt: null,
   closedBy: null,
-  id: 'collection-id',
+  id: 'mock-id',
   comments: [basicComment],
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
@@ -253,7 +249,7 @@ export const collectionCase: Case = {
   externalService: null,
   status: CaseStatuses.open,
   tags,
-  title: 'Another horrible breach in a collection!!',
+  title: 'Another horrible breach!!',
   totalComment: 1,
   totalAlerts: 0,
   updatedAt: basicUpdatedAt,
@@ -262,8 +258,6 @@ export const collectionCase: Case = {
   settings: {
     syncAlerts: true,
   },
-  subCases: [],
-  subCaseIds: [],
 };
 
 export const basicCasePost: Case = {
@@ -367,7 +361,6 @@ export const elasticUserSnake = {
 };
 
 export const basicCommentSnake: CommentResponse = {
-  associationType: AssociationType.case,
   comment: 'Solve this fast!',
   type: CommentType.user,
   id: basicCommentId,

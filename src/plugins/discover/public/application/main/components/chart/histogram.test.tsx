@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../../types';
 import { DataCharts$ } from '../../utils/use_saved_search';
@@ -14,7 +14,7 @@ import { Chart } from './point_series';
 import { DiscoverHistogram } from './histogram';
 import React from 'react';
 import * as hooks from '../../utils/use_data_state';
-import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 const chartData = {
   xAxisOrderedValues: [

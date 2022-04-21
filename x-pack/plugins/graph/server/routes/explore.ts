@@ -6,7 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 import { LicenseState, verifyApiAccess } from '../lib/license_state';
@@ -49,13 +49,11 @@ export function registerExploreRoute({
         try {
           return response.ok({
             body: {
-              resp: (
-                await esClient.asCurrentUser.transport.request({
-                  path: '/' + encodeURIComponent(request.body.index) + '/_graph/explore',
-                  body: request.body.query,
-                  method: 'POST',
-                })
-              ).body,
+              resp: await esClient.asCurrentUser.transport.request({
+                path: '/' + encodeURIComponent(request.body.index) + '/_graph/explore',
+                body: request.body.query,
+                method: 'POST',
+              }),
             },
           });
         } catch (error) {

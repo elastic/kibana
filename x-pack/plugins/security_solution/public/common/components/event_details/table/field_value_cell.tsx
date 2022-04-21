@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { CSSObject } from 'styled-components';
 import { BrowserField } from '../../../containers/source';
 import { OverflowField } from '../../tables/helpers';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
@@ -21,6 +22,7 @@ export interface FieldValueCellProps {
   getLinkValue?: (field: string) => string | null;
   isDraggable?: boolean;
   linkValue?: string | null | undefined;
+  style?: CSSObject | undefined;
   values: string[] | null | undefined;
 }
 
@@ -33,6 +35,7 @@ export const FieldValueCell = React.memo(
     getLinkValue,
     isDraggable = false,
     linkValue,
+    style,
     values,
   }: FieldValueCellProps) => {
     return (
@@ -41,6 +44,7 @@ export const FieldValueCell = React.memo(
         data-test-subj={`event-field-${data.field}`}
         direction="column"
         gutterSize="none"
+        style={style}
       >
         {values != null &&
           values.map((value, i) => {

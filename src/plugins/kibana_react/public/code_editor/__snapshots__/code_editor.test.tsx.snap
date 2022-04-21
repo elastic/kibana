@@ -126,6 +126,7 @@ exports[`<CodeEditor /> is rendered 1`] = `
 >
   <div
     className="kibanaCodeEditor"
+    onKeyDown={[Function]}
   >
     <EuiToolTip
       content={
@@ -181,47 +182,50 @@ exports[`<CodeEditor /> is rendered 1`] = `
         />
       </span>
     </EuiToolTip>
-    <mockMonacoEditor
-      editorDidMount={[Function]}
-      editorWillMount={[Function]}
-      height={250}
-      language="loglang"
-      onChange={[Function]}
-      options={
-        Object {
-          "fontFamily": "Roboto Mono",
-          "fontSize": 12,
-          "lineHeight": 21,
-          "matchBrackets": "never",
-          "minimap": Object {
-            "enabled": false,
-          },
-          "renderLineHighlight": "none",
-          "scrollBeyondLastLine": false,
-          "scrollbar": Object {
-            "alwaysConsumeMouseWheel": false,
-            "useShadows": false,
-          },
-          "wordBasedSuggestions": false,
-          "wordWrap": "on",
-          "wrappingIndent": "indent",
+    <Component>
+      <mockMonacoEditor
+        editorDidMount={[Function]}
+        editorWillMount={[Function]}
+        height={250}
+        language="loglang"
+        onChange={[Function]}
+        options={
+          Object {
+            "fontFamily": "Roboto Mono",
+            "fontSize": 12,
+            "lineHeight": 21,
+            "matchBrackets": "never",
+            "minimap": Object {
+              "enabled": false,
+            },
+            "padding": Object {},
+            "renderLineHighlight": "none",
+            "scrollBeyondLastLine": false,
+            "scrollbar": Object {
+              "alwaysConsumeMouseWheel": false,
+              "useShadows": false,
+            },
+            "wordBasedSuggestions": false,
+            "wordWrap": "on",
+            "wrappingIndent": "indent",
+          }
         }
-      }
-      theme="euiColors"
-      value="
+        theme="euiColors"
+        value="
 [Sun Mar 7 20:54:27 2004] [notice] [client xx.xx.xx.xx] This is a notice!
 [Sun Mar 7 20:58:27 2004] [info] [client xx.xx.xx.xx] (104)Connection reset by peer: client stopped connection before send body completed
 [Sun Mar 7 21:16:17 2004] [error] [client xx.xx.xx.xx] File does not exist: /home/httpd/twiki/view/Main/WebHome
 "
-    >
-      <div>
-        <div />
-        <textarea
-          data-test-subj="monacoEditorTextarea"
-          onKeyDown={[Function]}
-        />
-      </div>
-    </mockMonacoEditor>
+      >
+        <div>
+          <div />
+          <textarea
+            data-test-subj="monacoEditorTextarea"
+            onKeyDown={[Function]}
+          />
+        </div>
+      </mockMonacoEditor>
+    </Component>
     <ResizeDetector
       handleHeight={true}
       handleWidth={true}

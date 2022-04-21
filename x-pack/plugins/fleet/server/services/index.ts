@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { agentPolicyService } from './agent_policy';
 import * as settingsService from './settings';
@@ -31,7 +31,6 @@ export interface ESIndexPatternService {
 export interface AgentPolicyServiceInterface {
   get: typeof agentPolicyService['get'];
   list: typeof agentPolicyService['list'];
-  getDefaultAgentPolicyId: typeof agentPolicyService['getDefaultAgentPolicyId'];
   getFullAgentPolicy: typeof agentPolicyService['getFullAgentPolicy'];
   getByIds: typeof agentPolicyService['getByIDs'];
 }

@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
-import { KibanaRequest, RouteRegistrar } from 'src/core/server';
+import { KibanaRequest, RouteRegistrar } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import agent from 'elastic-apm-node';
 import { ServerRouteRepository } from '@kbn/server-route-repository';
@@ -18,10 +18,10 @@ import {
   routeValidationObject,
 } from '@kbn/server-route-repository';
 import { jsonRt, mergeRt } from '@kbn/io-ts-utils';
+import { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import { pickKeys } from '../../../common/utils/pick_keys';
 import { APMRouteHandlerResources, TelemetryUsageCounter } from '../typings';
 import type { ApmPluginRequestHandlerContext } from '../typings';
-import { InspectResponse } from '../../../../observability/typings/common';
 
 const inspectRt = t.exact(
   t.partial({

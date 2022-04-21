@@ -8,10 +8,10 @@
 import { parse } from '@kbn/tinymath';
 import { monaco } from '@kbn/monaco';
 import { createMockedIndexPattern } from '../../../../mocks';
-import { GenericOperationDefinition } from '../../index';
+import { GenericOperationDefinition } from '../..';
 import type { IndexPatternField } from '../../../../types';
 import type { OperationMetadata } from '../../../../../types';
-import { dataPluginMock } from '../../../../../../../../../src/plugins/data/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { tinymathFunctions } from '../util';
 import {
   getSignatureHelp,
@@ -58,7 +58,7 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
     input: 'field',
     buildColumn: buildGenericColumn('count'),
     getPossibleOperationForField: (field: IndexPatternField) =>
-      field.name === 'Records' ? numericOperation() : null,
+      field.name === '___records___' ? numericOperation() : null,
   } as unknown as GenericOperationDefinition,
   last_value: {
     type: 'last_value',

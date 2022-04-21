@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { FullAgentPolicy } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { FullAgentPolicy } from '../../../../plugins/fleet/common';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
@@ -131,6 +131,7 @@ export default function (providerContext: FtrProviderContext) {
     type: `synthetics/${monitorType}`,
     use_output: 'default',
   });
+
   describe('When on the Synthetics Integration Policy Create Page', function () {
     skipIfNoDockerRegistry(providerContext);
     const basicConfig = {
@@ -554,8 +555,8 @@ export default function (providerContext: FtrProviderContext) {
             monitorType: 'browser',
             config: {
               screenshots: 'on',
-              schedule: '@every 3m',
-              timeout: '16s',
+              schedule: '@every 10m',
+              timeout: null,
               tags: [config.tags],
               throttling: '5d/3u/20l',
               'service.name': config.apmServiceName,
@@ -604,8 +605,8 @@ export default function (providerContext: FtrProviderContext) {
             monitorType: 'browser',
             config: {
               screenshots: 'on',
-              schedule: '@every 3m',
-              timeout: '16s',
+              schedule: '@every 10m',
+              timeout: null,
               tags: [config.tags],
               throttling: '5d/3u/20l',
               'service.name': config.apmServiceName,
@@ -663,8 +664,8 @@ export default function (providerContext: FtrProviderContext) {
             monitorType: 'browser',
             config: {
               screenshots: advancedConfig.screenshots,
-              schedule: '@every 3m',
-              timeout: '16s',
+              schedule: '@every 10m',
+              timeout: null,
               tags: [config.tags],
               throttling: '1337d/1338u/1339l',
               'service.name': config.apmServiceName,
@@ -727,8 +728,8 @@ export default function (providerContext: FtrProviderContext) {
             monitorType: 'browser',
             config: {
               screenshots: advancedConfig.screenshots,
-              schedule: '@every 3m',
-              timeout: '16s',
+              schedule: '@every 10m',
+              timeout: null,
               tags: [config.tags],
               'service.name': config.apmServiceName,
               'source.zip_url.url': config.zipUrl,

@@ -12,16 +12,19 @@ import {
   SavedObjectsClientContract,
   SavedObjectAttributes,
   SavedObjectReference,
-} from 'kibana/public';
+} from '@kbn/core/public';
 import {
-  DataPublicPluginStart,
   IndexPattern,
-  IndexPatternsContract,
   ISearchSource,
+  ISearchStart,
   SerializedSearchSourceFields,
-} from '../../data/public';
+} from '@kbn/data-plugin/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
 
-/** @deprecated */
+/**
+ * @deprecated
+ * @removeBy 8.8.0
+ */
 export interface SavedObject {
   _serialize: () => { attributes: SavedObjectAttributes; references: SavedObjectReference[] };
   _source: Record<string, unknown>;
@@ -63,8 +66,8 @@ export interface SavedObjectCreationOpts {
 
 export interface SavedObjectKibanaServices {
   savedObjectsClient: SavedObjectsClientContract;
-  indexPatterns: IndexPatternsContract;
-  search: DataPublicPluginStart['search'];
+  dataViews: DataViewsContract;
+  search: ISearchStart;
   chrome: ChromeStart;
   overlays: OverlayStart;
 }

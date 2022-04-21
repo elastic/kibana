@@ -23,7 +23,7 @@ interface Props {
 export function DataSections({ bucketSize }: Props) {
   return (
     <EuiFlexItem grow={false}>
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem grow={false}>
           <LogsSection bucketSize={bucketSize} />
         </EuiFlexItem>

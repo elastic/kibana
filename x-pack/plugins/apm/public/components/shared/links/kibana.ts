@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import { IBasePath } from '../../../../../../../src/core/public';
+import { IBasePath } from '@kbn/core/public';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 export function getUpgradeAssistantHref(basePath: IBasePath) {
   return basePath.prepend('/app/management/stack/upgrade_assistant');
-}
-
-export function useUpgradeAssistantHref() {
-  const { core } = useApmPluginContext();
-
-  return getUpgradeAssistantHref(core.http.basePath);
 }
 
 export function useFleetCloudAgentPolicyHref() {

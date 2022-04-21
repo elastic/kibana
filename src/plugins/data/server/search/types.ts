@@ -14,7 +14,7 @@ import type {
   SavedObjectsClientContract,
   KibanaRequest,
   RequestHandlerContext,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import {
   ISearchOptions,
   ISearchStartSearchSource,
@@ -23,6 +23,7 @@ import {
   ISearchClient,
   IEsSearchResponse,
   IEsSearchRequest,
+  SearchSourceService,
 } from '../../common/search';
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors';
@@ -63,6 +64,8 @@ export interface ISearchSetup {
    * @internal
    */
   __enhance: (enhancements: SearchEnhancements) => void;
+
+  searchSource: ReturnType<SearchSourceService['setup']>;
 }
 
 /**

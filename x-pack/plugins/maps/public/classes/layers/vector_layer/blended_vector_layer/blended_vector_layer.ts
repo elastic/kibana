@@ -15,6 +15,7 @@ import { IStyleProperty } from '../../../styles/vector/properties/style_property
 import {
   COUNT_PROP_LABEL,
   COUNT_PROP_NAME,
+  GRID_RESOLUTION,
   LAYER_TYPE,
   AGG_TYPE,
   RENDER_AS,
@@ -30,6 +31,7 @@ import { ISource } from '../../../sources/source';
 import { DataRequestContext } from '../../../../actions';
 import { DataRequestAbortError } from '../../../util/data_request';
 import {
+  CustomIcon,
   VectorStyleDescriptor,
   SizeDynamicOptions,
   DynamicStylePropertyOptions,
@@ -57,6 +59,7 @@ function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle
     indexPatternId: documentSource.getIndexPatternId(),
     geoField: documentSource.getGeoFieldName(),
     requestType: RENDER_AS.POINT,
+    resolution: GRID_RESOLUTION.COARSE,
   });
   clusterSourceDescriptor.applyGlobalQuery = documentSource.getApplyGlobalQuery();
   clusterSourceDescriptor.applyGlobalTime = documentSource.getApplyGlobalTime();
@@ -169,6 +172,7 @@ export interface BlendedVectorLayerArguments {
   chartsPaletteServiceGetColor?: (value: string) => string | null;
   source: IVectorSource;
   layerDescriptor: VectorLayerDescriptor;
+  customIcons: CustomIcon[];
 }
 
 export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLayer {
@@ -205,6 +209,7 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
       clusterStyleDescriptor,
       this._clusterSource,
       this,
+      options.customIcons,
       options.chartsPaletteServiceGetColor
     );
 

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
-import { useUiSetting } from '../../../../../../../src/plugins/kibana_react/public';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 
 const invalidDateText = i18n.translate(
   'xpack.securitySolution.enpdoint.resolver.panelutils.invaliddate',

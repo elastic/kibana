@@ -118,3 +118,9 @@ export const uxLocalUIFilters = uxLocalUIFilterNames.reduce((acc, key) => {
     },
   };
 }, {} as UxLocalUIFilterMap);
+
+export type UxUIFilters = {
+  environment?: string;
+} & {
+  [key in UxLocalUIFilterName]?: string[];
+};

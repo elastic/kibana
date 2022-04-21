@@ -9,9 +9,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 
-import { AggGroupNames } from '../../../../data/public';
-import { ColorSchemas } from '../../../../charts/public';
-import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '../../../../visualizations/public';
+import { AggGroupNames } from '@kbn/data-plugin/public';
+import { ColorSchemas } from '@kbn/charts-plugin/public';
+import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import { HeatmapTypeProps, HeatmapVisParams, AxisType, ScaleType } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { getHeatmapOptions } from '../editor/components';
@@ -26,7 +26,7 @@ export const getHeatmapVisTypeDefinition = ({
   title: i18n.translate('visTypeHeatmap.heatmap.heatmapTitle', { defaultMessage: 'Heat map' }),
   icon: 'heatmap',
   description: i18n.translate('visTypeHeatmap.heatmap.heatmapDescription', {
-    defaultMessage: 'Shade data in cells in a matrix.',
+    defaultMessage: 'Display values as colors in a matrix.',
   }),
   toExpressionAst,
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter],

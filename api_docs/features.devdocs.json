@@ -316,6 +316,7 @@
             ],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": true,
+            "removeBy": "8.8.0",
             "references": [
               {
                 "plugin": "security",
@@ -332,6 +333,10 @@
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/public/management/roles/model/primary_feature_privilege.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/plugin.ts"
               },
               {
                 "plugin": "security",
@@ -1459,6 +1464,7 @@
             ],
             "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
             "deprecated": true,
+            "removeBy": "8.8.0\n\nThis is relied on by the reporting feature, and should be removed once reporting\nmigrates to using the Kibana Privilege model: https://github.com/elastic/kibana/issues/19914",
             "references": [
               {
                 "plugin": "security",
@@ -1544,6 +1550,7 @@
             ],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": true,
+            "removeBy": "8.8.0",
             "references": [
               {
                 "plugin": "security",
@@ -1560,6 +1567,10 @@
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/public/management/roles/model/primary_feature_privilege.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/plugin.ts"
               },
               {
                 "plugin": "security",
@@ -2072,9 +2083,13 @@
             "parentPluginId": "features",
             "id": "def-server.PluginSetupContract.getKibanaFeatures",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "getKibanaFeatures",
-            "description": [],
+            "description": [
+              "\nCalling this function during setup will crash Kibana.\nUse start contract instead."
+            ],
             "signature": [
               "() => ",
               {
@@ -2087,7 +2102,122 @@
               "[]"
             ],
             "path": "x-pack/plugins/features/server/plugin.ts",
-            "deprecated": false,
+            "deprecated": true,
+            "removeBy": "8.8.0",
+            "references": [
+              {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/lib/request_interceptors/on_post_auth_interceptor.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/usage_collection/spaces_usage_collector.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/app_authorization.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/authorization_service.tsx"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/plugin.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/app_authorization.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/privileges/privileges.test.ts"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/lib/request_interceptors/on_post_auth_interceptor.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/management/roles/__fixtures__/kibana_privileges.ts"
+              }
+            ],
             "children": [],
             "returnComment": []
           },
@@ -2095,9 +2225,13 @@
             "parentPluginId": "features",
             "id": "def-server.PluginSetupContract.getElasticsearchFeatures",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "getElasticsearchFeatures",
-            "description": [],
+            "description": [
+              "\nCalling this function during setup will crash Kibana.\nUse start contract instead."
+            ],
             "signature": [
               "() => ",
               {
@@ -2110,7 +2244,14 @@
               "[]"
             ],
             "path": "x-pack/plugins/features/server/plugin.ts",
-            "deprecated": false,
+            "deprecated": true,
+            "removeBy": "8.8.0",
+            "references": [
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/authorization/authorization_service.tsx"
+              }
+            ],
             "children": [],
             "returnComment": []
           },
@@ -2136,7 +2277,9 @@
             "type": "Function",
             "tags": [],
             "label": "enableReportingUiCapabilities",
-            "description": [],
+            "description": [
+              "\nIn the future, OSS features should register their own subfeature\nprivileges. This can be done when parts of Reporting are moved to\nsrc/plugins. For now, this method exists for `reporting` to tell\n`features` to include Reporting when registering OSS features."
+            ],
             "signature": [
               "() => void"
             ],
@@ -3021,6 +3164,7 @@
             ],
             "path": "x-pack/plugins/features/common/feature_elasticsearch_privileges.ts",
             "deprecated": true,
+            "removeBy": "8.8.0\n\nThis is relied on by the reporting feature, and should be removed once reporting\nmigrates to using the Kibana Privilege model: https://github.com/elastic/kibana/issues/19914",
             "references": [
               {
                 "plugin": "security",
@@ -3106,6 +3250,7 @@
             ],
             "path": "x-pack/plugins/features/common/feature_kibana_privileges.ts",
             "deprecated": true,
+            "removeBy": "8.8.0",
             "references": [
               {
                 "plugin": "security",
@@ -3122,6 +3267,10 @@
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/public/management/roles/model/primary_feature_privilege.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/plugin.ts"
               },
               {
                 "plugin": "security",

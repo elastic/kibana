@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import apm from 'elastic-apm-node';
-import type { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { HeadlessChromiumDriver } from '../browsers';
 import { Layout } from '../layouts';
 import { CONTEXT_ELEMENTATTRIBUTES } from './constants';
@@ -83,9 +82,7 @@ export const getElementPositionAndAttributes = async (
 
     if (!elementsPositionAndAttributes?.length) {
       throw new Error(
-        i18n.translate('xpack.screenshotting.screencapture.noElements', {
-          defaultMessage: `An error occurred while reading the page for visualization panels: no panels were found.`,
-        })
+        `An error occurred while reading the page for visualization panels: no panels were found.`
       );
     }
   } catch (err) {

@@ -9,7 +9,9 @@
 import { resolve } from 'path';
 import { inspect } from 'util';
 
-import { run, createFlagError, Flags, ToolingLog, getTimeReporter } from '@kbn/dev-utils';
+import { run, createFlagError, Flags } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import exitHook from 'exit-hook';
 
 import { FunctionalTestRunner } from './functional_test_runner';
@@ -46,6 +48,7 @@ export function runFtrCli() {
         {
           mochaOpts: {
             bail: flags.bail,
+            dryRun: flags['dry-run'],
             grep: flags.grep || undefined,
             invert: flags.invert,
           },
@@ -148,6 +151,7 @@ export function runFtrCli() {
           'u',
           'throttle',
           'headless',
+          'dry-run',
         ],
         default: {
           config: 'test/functional/config.js',
@@ -174,6 +178,7 @@ export function runFtrCli() {
           --kibana-install-dir  directory where the Kibana install being tested resides
           --throttle         enable network throttling in Chrome browser
           --headless         run browser in headless mode
+          --dry-run          report tests without executing them
         `,
       },
     }

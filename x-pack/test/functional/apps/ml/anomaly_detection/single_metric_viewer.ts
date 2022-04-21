@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 
 // @ts-expect-error not full interface
 const JOB_CONFIG: Job = {
@@ -64,7 +64,6 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToJobManagement();
 
         await ml.testExecution.logTestStep('open job in single metric viewer');
-        await ml.jobTable.waitForJobsToLoad();
         await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id, 1);
 
         await ml.jobTable.clickOpenJobInSingleMetricViewerButton(JOB_CONFIG.job_id);
@@ -152,7 +151,6 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToJobManagement();
 
         await ml.testExecution.logTestStep('open job in single metric viewer');
-        await ml.jobTable.waitForJobsToLoad();
         await ml.jobTable.filterWithSearchString(jobConfig.job_id, 1);
 
         await ml.jobTable.clickOpenJobInSingleMetricViewerButton(jobConfig.job_id);

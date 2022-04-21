@@ -61,13 +61,13 @@ jest.mock('./utils', () => ({
       })
   ),
 }));
-jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => ({
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
   withKibana: (comp) => {
     return comp;
   },
 }));
 
-import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { NewCalendar } from './new_calendar';
 

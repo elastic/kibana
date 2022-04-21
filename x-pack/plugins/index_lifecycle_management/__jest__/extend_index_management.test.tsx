@@ -9,8 +9,8 @@ import moment from 'moment-timezone';
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
-import { mountWithIntl } from '@kbn/test/jest';
-import { usageCollectionPluginMock } from '../../../../src/plugins/usage_collection/public/mocks';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import { Index } from '../common/types';
 import {
   retryLifecycleActionExtension,
@@ -31,8 +31,8 @@ import { init as initUiMetric } from '../public/application/services/ui_metric';
 initHttp(axios.create({ adapter: axiosXhrAdapter }));
 initUiMetric(usageCollectionPluginMock.createSetupContract());
 
-jest.mock('../../../plugins/index_management/public', async () => {
-  const { indexManagementMock } = await import('../../../plugins/index_management/public/mocks');
+jest.mock('@kbn/index-management-plugin/public', async () => {
+  const { indexManagementMock } = await import('@kbn/index-management-plugin/public/mocks');
   return indexManagementMock.createSetup();
 });
 
@@ -44,7 +44,7 @@ const indexWithoutLifecyclePolicy: Index = {
   primary: 1,
   replica: 1,
   documents: 1,
-  documents_deleted: '0',
+  documents_deleted: 0,
   size: '3.4kb',
   primary_size: '3.4kb',
   aliases: 'none',
@@ -64,7 +64,7 @@ const indexWithLifecyclePolicy: Index = {
   primary: 1,
   replica: 1,
   documents: 2,
-  documents_deleted: '0',
+  documents_deleted: 0,
   size: '6.5kb',
   primary_size: '6.5kb',
   aliases: 'none',
@@ -92,7 +92,7 @@ const indexWithLifecycleError = {
   primary: 1,
   replica: 1,
   documents: 2,
-  documents_deleted: '0',
+  documents_deleted: 0,
   size: '6.5kb',
   primary_size: '6.5kb',
   aliases: 'none',
@@ -113,7 +113,6 @@ const indexWithLifecycleError = {
     step_info: {
       type: 'illegal_argument_exception',
       reason: 'setting [index.lifecycle.rollover_alias] for index [testy3] is empty or not defined',
-      stack_trace: 'fakestacktrace',
     },
     phase_execution: {
       policy: 'testy',

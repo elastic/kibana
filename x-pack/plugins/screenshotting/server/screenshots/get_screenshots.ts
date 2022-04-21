@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import apm from 'elastic-apm-node';
-import type { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { HeadlessChromiumDriver } from '../browsers';
 import type { ElementsPositionAndAttribute } from './get_element_position_data';
 
@@ -33,11 +32,7 @@ export const getScreenshots = async (
   logger: Logger,
   elementsPositionAndAttributes: ElementsPositionAndAttribute[]
 ): Promise<Screenshot[]> => {
-  logger.info(
-    i18n.translate('xpack.screenshotting.screencapture.takingScreenshots', {
-      defaultMessage: `taking screenshots`,
-    })
-  );
+  logger.info(`taking screenshots`);
 
   const screenshots: Screenshot[] = [];
 
@@ -60,14 +55,7 @@ export const getScreenshots = async (
     span?.end();
   }
 
-  logger.info(
-    i18n.translate('xpack.screenshotting.screencapture.screenshotsTaken', {
-      defaultMessage: `screenshots taken: {numScreenhots}`,
-      values: {
-        numScreenhots: screenshots.length,
-      },
-    })
-  );
+  logger.info(`screenshots taken: ${screenshots.length}`);
 
   return screenshots;
 };

@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { flow } from 'lodash';
+import { ActionsClient } from '@kbn/actions-plugin/server';
 import { isPushedUserAction } from '../../../common/utils/user_actions';
 import {
   ActionConnector,
@@ -23,8 +24,7 @@ import {
   CommentRequestActionsType,
   ActionTypes,
 } from '../../../common/api';
-import { ActionsClient } from '../../../../actions/server';
-import { CasesClientGetAlertsResponse } from '../../client/alerts/types';
+import { CasesClientGetAlertsResponse } from '../alerts/types';
 import {
   BasicParams,
   EntityInformation,
@@ -78,7 +78,7 @@ export const getLatestPushInfo = (
 const getCommentContent = (comment: CommentResponse): string => {
   if (comment.type === CommentType.user) {
     return comment.comment;
-  } else if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
+  } else if (comment.type === CommentType.alert) {
     const ids = getAlertIds(comment);
     return `Alert with ids ${ids.join(', ')} added to case`;
   } else if (
@@ -110,7 +110,7 @@ const getAlertsInfo = (
 
   const res =
     comments?.reduce<CountAlertsInfo>(({ totalComments, pushed, totalAlerts }, comment) => {
-      if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
+      if (comment.type === CommentType.alert) {
         return {
           totalComments: totalComments + 1,
           pushed: comment.pushed_at != null ? pushed + 1 : pushed,
@@ -379,7 +379,6 @@ export const getCommentContextFromAttributes = (
         comment: attributes.comment,
         owner,
       };
-    case CommentType.generatedAlert:
     case CommentType.alert:
       return {
         type: attributes.type,

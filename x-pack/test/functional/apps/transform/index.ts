@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   TransformLatestConfig,
   TransformPivotConfig,
-} from '../../../../plugins/transform/common/types/transform';
+} from '@kbn/transform-plugin/common/types/transform';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -44,6 +44,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./editing'));
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./deleting'));
+    loadTestFile(require.resolve('./resetting'));
     loadTestFile(require.resolve('./starting'));
   });
 }
@@ -64,6 +65,7 @@ export interface BaseTransformTestData {
   transformDescription: string;
   expected: any;
   destinationIndex: string;
+  destinationDataViewTimeField?: string;
   discoverAdjustSuperDatePicker: boolean;
 }
 

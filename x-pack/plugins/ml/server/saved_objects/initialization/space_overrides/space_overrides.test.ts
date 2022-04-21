@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { createJobSpaceOverrides } from './space_overrides';
 
 const jobs = [
@@ -51,11 +51,7 @@ const result = {
 
 const callAs = {
   ml: {
-    getJobs: jest.fn(() =>
-      Promise.resolve({
-        body: { jobs },
-      })
-    ),
+    getJobs: jest.fn(() => Promise.resolve({ jobs })),
   },
 };
 

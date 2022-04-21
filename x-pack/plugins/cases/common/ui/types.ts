@@ -5,37 +5,32 @@
  * 2.0.
  */
 
+import type { SavedObjectsResolveResponse } from '@kbn/core/public';
 import {
-  AssociationType,
   CaseAttributes,
   CaseConnector,
   CasePatchRequest,
   CaseStatuses,
-  CaseType,
   User,
   ActionConnector,
   CaseExternalServiceBasic,
   CaseUserActionResponse,
   CaseMetricsResponse,
   CommentResponse,
+  CommentResponseAlertsType,
 } from '../api';
 import { SnakeToCamelCase } from '../types';
 
+type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
+
 export interface CasesContextFeatures {
-  alerts: { sync: boolean };
+  alerts: { sync?: boolean; enabled?: boolean };
   metrics: CaseMetricsFeature[];
 }
 
-export type CasesFeatures = Partial<CasesContextFeatures>;
+export type CasesFeaturesAllRequired = DeepRequired<CasesContextFeatures>;
 
-export interface CasesContextValue {
-  owner: string[];
-  appId: string;
-  appTitle: string;
-  userCanCrud: boolean;
-  basePath: string;
-  features: CasesContextFeatures;
-}
+export type CasesFeatures = Partial<CasesContextFeatures>;
 
 export interface CasesUiConfigType {
   markdownPlugins: {
@@ -63,6 +58,7 @@ export type CaseViewRefreshPropInterface = null | {
 };
 
 export type Comment = SnakeToCamelCase<CommentResponse>;
+export type AlertComment = SnakeToCamelCase<CommentResponseAlertsType>;
 export type CaseUserActions = SnakeToCamelCase<CaseUserActionResponse>;
 export type CaseExternalService = SnakeToCamelCase<CaseExternalServiceBasic>;
 
@@ -83,26 +79,19 @@ interface BasicCase {
   version: string;
 }
 
-export interface SubCase extends BasicCase {
-  associationType: AssociationType;
-  caseParentId: string;
-}
-
 export interface Case extends BasicCase {
   connector: CaseConnector;
   description: string;
   externalService: CaseExternalService | null;
-  subCases?: SubCase[] | null;
-  subCaseIds: string[];
   settings: CaseAttributes['settings'];
   tags: string[];
-  type: CaseType;
 }
 
 export interface ResolvedCase {
   case: Case;
-  outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
-  aliasTargetId?: string;
+  outcome: SavedObjectsResolveResponse['outcome'];
+  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
 }
 
 export interface QueryParams {
@@ -118,7 +107,6 @@ export interface FilterOptions {
   tags: string[];
   reporters: User[];
   owner: string[];
-  onlyCollectionType?: boolean;
 }
 
 export interface CasesStatus {
@@ -178,7 +166,6 @@ export interface ActionLicense {
 
 export interface DeleteCase {
   id: string;
-  type: CaseType | null;
   title: string;
 }
 
@@ -195,7 +182,7 @@ export type UpdateKey = keyof Pick<
 export interface UpdateByKey {
   updateKey: UpdateKey;
   updateValue: CasePatchRequest[UpdateKey];
-  fetchCaseUserActions?: (caseId: string, caseConnectorId: string, subCaseId?: string) => void;
+  fetchCaseUserActions?: (caseId: string, caseConnectorId: string) => void;
   updateCase?: (newCase: Case) => void;
   caseData: Case;
   onSuccess?: () => void;
@@ -206,7 +193,7 @@ export interface RuleEcs {
   id?: string[];
   rule_id?: string[];
   name?: string[];
-  false_positives: string[];
+  false_positives?: string[];
   saved_id?: string[];
   timeline_id?: string[];
   timeline_title?: string[];
@@ -265,3 +252,5 @@ export interface Ecs {
 }
 
 export type CaseActionConnector = ActionConnector;
+
+export type UseFetchAlertData = (alertIds: string[]) => [boolean, Record<string, unknown>];

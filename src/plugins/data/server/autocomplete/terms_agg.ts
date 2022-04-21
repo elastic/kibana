@@ -7,7 +7,7 @@
  */
 
 import { get, map } from 'lodash';
-import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ConfigSchema } from '../../config';
 import { IFieldType, getFieldSubtypeNested } from '../../common';
@@ -45,8 +45,8 @@ export async function termsAggSuggestions(
   );
 
   const buckets =
-    get(result.body, 'aggregations.suggestions.buckets') ||
-    get(result.body, 'aggregations.nestedSuggestions.suggestions.buckets');
+    get(result, 'aggregations.suggestions.buckets') ||
+    get(result, 'aggregations.nestedSuggestions.suggestions.buckets');
 
   return map(buckets ?? [], 'key');
 }

@@ -14,24 +14,20 @@ import {
   BASE_NEXT_ATTEMPT_DELAY,
 } from './check_metadata_transforms_task';
 import { createMockEndpointAppContext } from '../../mocks';
-import { coreMock } from '../../../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../../../../task_manager/server/mocks';
-import { TaskManagerSetupContract, TaskStatus } from '../../../../../task_manager/server';
-import { CoreSetup } from '../../../../../../../src/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { TaskManagerSetupContract, TaskStatus } from '@kbn/task-manager-plugin/server';
+import { CoreSetup } from '@kbn/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ElasticsearchClientMock } from '../../../../../../../src/core/server/elasticsearch/client/mocks';
+import { ElasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
 import { TRANSFORM_STATES } from '../../../../common/constants';
 import { METADATA_TRANSFORMS_PATTERN } from '../../../../common/endpoint/constants';
-import { RunResult } from '../../../../../task_manager/server/task';
-import {
-  ElasticsearchAssetType,
-  EsAssetReference,
-  Installation,
-} from '../../../../../fleet/common';
+import { RunResult } from '@kbn/task-manager-plugin/server/task';
+import { ElasticsearchAssetType, EsAssetReference, Installation } from '@kbn/fleet-plugin/common';
 
 import type { EndpointAppContext } from '../../types';
-import type { PackagePolicy } from '../../../../../fleet/common/types/models/package_policy';
-import type { PackageClient } from '../../../../../fleet/server';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
+import type { PackageClient } from '@kbn/fleet-plugin/server';
 
 const MOCK_TASK_INSTANCE = {
   id: `${TYPE}:${VERSION}`,
@@ -132,22 +128,28 @@ describe('check metadata transforms task', () => {
       it('should stop task if transform stats response fails', async () => {
         esClient.transform.getTransformStats.mockRejectedValue({});
         await runTask();
-        expect(esClient.transform.getTransformStats).toHaveBeenCalledWith({
-          transform_id: METADATA_TRANSFORMS_PATTERN,
-        });
+        expect(esClient.transform.getTransformStats).toHaveBeenCalledWith(
+          {
+            transform_id: METADATA_TRANSFORMS_PATTERN,
+          },
+          { meta: true }
+        );
         expect(esClient.transform.stopTransform).not.toHaveBeenCalled();
         expect(esClient.transform.startTransform).not.toHaveBeenCalled();
       });
 
       it('should attempt transform restart if failing state', async () => {
         const transformStatsResponseMock = buildFailedStatsResponse();
-        esClient.transform.getTransformStats.mockResolvedValue(transformStatsResponseMock);
+        esClient.transform.getTransformStats.mockResponse(transformStatsResponseMock.body);
 
         const taskResponse = (await runTask()) as RunResult;
 
-        expect(esClient.transform.getTransformStats).toHaveBeenCalledWith({
-          transform_id: METADATA_TRANSFORMS_PATTERN,
-        });
+        expect(esClient.transform.getTransformStats).toHaveBeenCalledWith(
+          {
+            transform_id: METADATA_TRANSFORMS_PATTERN,
+          },
+          { meta: true }
+        );
         expect(esClient.transform.stopTransform).toHaveBeenCalledWith({
           transform_id: failedTransformId,
           allow_no_match: true,
@@ -165,7 +167,7 @@ describe('check metadata transforms task', () => {
 
       it('should correctly track transform restart attempts', async () => {
         const transformStatsResponseMock = buildFailedStatsResponse();
-        esClient.transform.getTransformStats.mockResolvedValue(transformStatsResponseMock);
+        esClient.transform.getTransformStats.mockResponse(transformStatsResponseMock.body);
 
         esClient.transform.stopTransform.mockRejectedValueOnce({});
         let taskResponse = (await runTask()) as RunResult;
@@ -196,7 +198,7 @@ describe('check metadata transforms task', () => {
 
       it('should correctly back off subsequent restart attempts', async () => {
         let transformStatsResponseMock = buildFailedStatsResponse();
-        esClient.transform.getTransformStats.mockResolvedValue(transformStatsResponseMock);
+        esClient.transform.getTransformStats.mockResponse(transformStatsResponseMock.body);
 
         esClient.transform.stopTransform.mockRejectedValueOnce({});
         let taskStartedAt = new Date();
@@ -263,7 +265,7 @@ describe('check metadata transforms task', () => {
             ],
           },
         } as unknown as TransportResult<TransformGetTransformStatsResponse>;
-        esClient.transform.getTransformStats.mockResolvedValue(transformStatsResponseMock);
+        esClient.transform.getTransformStats.mockResponse(transformStatsResponseMock.body);
         taskResponse = (await runTask({
           ...MOCK_TASK_INSTANCE,
           state: taskResponse.state,
@@ -302,7 +304,7 @@ describe('check metadata transforms task', () => {
             count: 1,
           },
         } as unknown as TransportResult<TransformGetTransformStatsResponse>;
-        esClient.transform.getTransformStats.mockResolvedValue(transformStatsResponseMock);
+        esClient.transform.getTransformStats.mockResponse(transformStatsResponseMock.body);
       });
 
       it('should reinstall if missing transforms', async () => {
@@ -417,7 +419,7 @@ describe('check metadata transforms task', () => {
             count: 2,
           },
         } as unknown as TransportResult<TransformGetTransformStatsResponse>;
-        esClient.transform.getTransformStats.mockResolvedValue(goodTransformStatsResponseMock);
+        esClient.transform.getTransformStats.mockResponse(goodTransformStatsResponseMock.body);
         taskResponse = (await runTask({
           ...MOCK_TASK_INSTANCE,
           state: taskResponse.state,

@@ -9,6 +9,8 @@ import { setupTestUsers } from './test_users';
 
 export default function ({ loadTestFile, getService }) {
   describe('Fleet Endpoints', function () {
+    this.tags('ciGroup29');
+
     before(async () => {
       await setupTestUsers(getService('security'));
     });
@@ -39,16 +41,16 @@ export default function ({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./package_policy/upgrade'));
 
     // Agent policies
-    loadTestFile(require.resolve('./agent_policy/index'));
+    loadTestFile(require.resolve('./agent_policy'));
 
     // Data Streams
-    loadTestFile(require.resolve('./data_streams/index'));
+    loadTestFile(require.resolve('./data_streams'));
 
     // Settings
-    loadTestFile(require.resolve('./settings/index'));
+    loadTestFile(require.resolve('./settings'));
 
     // Preconfiguration
-    loadTestFile(require.resolve('./preconfiguration/index'));
+    loadTestFile(require.resolve('./preconfiguration'));
 
     // Service tokens
     loadTestFile(require.resolve('./service_tokens'));
@@ -58,5 +60,8 @@ export default function ({ loadTestFile, getService }) {
 
     // Telemetry
     loadTestFile(require.resolve('./fleet_telemetry'));
+
+    // Integrations
+    loadTestFile(require.resolve('./integrations'));
   });
 }

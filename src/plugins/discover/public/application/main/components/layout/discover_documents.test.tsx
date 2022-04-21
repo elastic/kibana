@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
@@ -18,8 +18,8 @@ import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocuments } from './discover_documents';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
-import { ElasticSearchHit } from 'src/plugins/discover/public/types';
-import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+import { ElasticSearchHit } from '../../../../types';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 setHeaderActionMenuMounter(jest.fn());
 
@@ -43,7 +43,7 @@ function mountComponent(fetchStatus: FetchStatus, hits: ElasticSearchHit[]) {
     searchSource: documents$,
     setExpandedDoc: jest.fn(),
     state: { columns: [] },
-    stateContainer: {} as GetStateReturn,
+    stateContainer: { setAppState: () => {} } as unknown as GetStateReturn,
     navigateTo: jest.fn(),
   };
 

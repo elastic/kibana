@@ -7,9 +7,8 @@
 
 import expect from '@kbn/expect';
 import { keyBy } from 'lodash';
+import type { UserFormValues } from '@kbn/security-plugin/public/management/users/edit_user/user_form';
 import { FtrProviderContext } from '../../ftr_provider_context';
-
-import type { UserFormValues } from '../../../../plugins/security/public/management/users/edit_user/user_form';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['security', 'settings']);
@@ -44,7 +43,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // In Cloud default users are defined in file realm, such users aren't exposed through the Users API.
       if (isCloudEnvironment()) {
-        expect(Object.keys(users)).to.eql(['test_user']);
+        expect(users).to.not.have.property('elastic');
+        expect(users).to.not.have.property('kibana_system');
+        expect(users).to.not.have.property('kibana');
       } else {
         expect(users.elastic.roles).to.eql(['superuser']);
         expect(users.elastic.reserved).to.be(true);

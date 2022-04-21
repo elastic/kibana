@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import { mapValues, trimEnd, mergeWith } from 'lodash';
+import { mapValues, trimEnd, mergeWith, cloneDeep, unset } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
-import {
-  MigrateFunction,
-  MigrateFunctionsObject,
-} from '../../../../../../src/plugins/kibana_utils/common';
+import { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,
   SavedObjectMigrationContext,
-} from '../../../../../../src/core/server';
-import { LensServerPluginSetup } from '../../../../lens/server';
-import { CommentType, AssociationType } from '../../../common/api';
+} from '@kbn/core/server';
+import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import { CommentType } from '../../../common/api';
 import {
   isLensMarkdownNode,
   LensMarkdownNode,
@@ -29,6 +26,7 @@ import {
 } from '../../../common/utils/markdown_plugins/utils';
 import { addOwnerToSO, SanitizedCaseOwner } from '.';
 import { logError } from './utils';
+import { GENERATED_ALERT, SUB_CASE_SAVED_OBJECT } from './constants';
 
 interface UnsanitizedComment {
   comment: string;
@@ -40,7 +38,11 @@ interface SanitizedComment {
   type: CommentType;
 }
 
-interface SanitizedCommentForSubCases {
+enum AssociationType {
+  case = 'case',
+}
+
+interface SanitizedCommentWithAssociation {
   associationType: AssociationType;
   rule?: { id: string | null; name: string | null };
 }
@@ -75,8 +77,8 @@ export const createCommentsMigrations = (
     },
     '7.12.0': (
       doc: SavedObjectUnsanitizedDoc<UnsanitizedComment>
-    ): SavedObjectSanitizedDoc<SanitizedCommentForSubCases> => {
-      let attributes: SanitizedCommentForSubCases & UnsanitizedComment = {
+    ): SavedObjectSanitizedDoc<unknown> => {
+      let attributes: SanitizedCommentWithAssociation & UnsanitizedComment = {
         ...doc.attributes,
         associationType: AssociationType.case,
       };
@@ -107,6 +109,7 @@ export const createCommentsMigrations = (
      * The downside is it incurs extra query overhead.
      **/
     '8.0.0': removeRuleInformation,
+    '8.1.0': removeAssociationType,
   };
 
   return mergeMigrationFunctionMaps(commentsMigrations, embeddableMigrations);
@@ -188,10 +191,7 @@ export const mergeMigrationFunctionMaps = (
 export const removeRuleInformation = (
   doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
 ): SavedObjectSanitizedDoc<unknown> => {
-  if (
-    doc.attributes.type === CommentType.alert ||
-    doc.attributes.type === CommentType.generatedAlert
-  ) {
+  if (doc.attributes.type === CommentType.alert || doc.attributes.type === GENERATED_ALERT) {
     return {
       ...doc,
       attributes: {
@@ -208,5 +208,18 @@ export const removeRuleInformation = (
   return {
     ...doc,
     references: doc.references ?? [],
+  };
+};
+
+export const removeAssociationType = (
+  doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
+): SavedObjectSanitizedDoc<Record<string, unknown>> => {
+  const docCopy = cloneDeep(doc);
+  unset(docCopy, 'attributes.associationType');
+
+  return {
+    ...docCopy,
+    references:
+      docCopy.references?.filter((reference) => reference.type !== SUB_CASE_SAVED_OBJECT) ?? [],
   };
 };

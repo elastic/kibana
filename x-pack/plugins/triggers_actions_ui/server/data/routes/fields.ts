@@ -13,8 +13,8 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
   ElasticsearchClient,
-} from 'kibana/server';
-import { Logger } from '../../../../../../src/core/server';
+} from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 
 const bodySchema = schema.object({
   indexPatterns: schema.arrayOf(schema.string()),
@@ -101,7 +101,7 @@ async function getRawFields(esClient: ElasticsearchClient, indexes: string[]): P
     allow_no_indices: true,
   };
   const result = await esClient.fieldCaps(params);
-  return result.body as RawFields;
+  return result as RawFields;
 }
 
 function getFieldsFromRawFields(rawFields: RawFields): Field[] {

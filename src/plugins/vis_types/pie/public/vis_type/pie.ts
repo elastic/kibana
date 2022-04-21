@@ -8,16 +8,17 @@
 
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
-import { AggGroupNames } from '../../../../data/public';
-import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '../../../../visualizations/public';
-import { DEFAULT_PERCENT_DECIMALS } from '../../common';
-import { PieTypeProps } from '../types';
+import { AggGroupNames } from '@kbn/data-plugin/public';
+import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import {
-  PieVisParams,
+  PartitionVisParams,
   LabelPositions,
   ValueFormats,
   EmptySizeRatios,
-} from '../../../../chart_expressions/expression_pie/common';
+  LegendDisplay,
+} from '@kbn/expression-partition-vis-plugin/common';
+import { DEFAULT_PERCENT_DECIMALS } from '../../common';
+import { PieTypeProps } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { getPieOptions } from '../editor/components';
 
@@ -25,7 +26,7 @@ export const getPieVisTypeDefinition = ({
   showElasticChartsOptions = false,
   palettes,
   trackUiMetric,
-}: PieTypeProps): VisTypeDefinition<PieVisParams> => ({
+}: PieTypeProps): VisTypeDefinition<PartitionVisParams> => ({
   name: 'pie',
   title: i18n.translate('visTypePie.pie.pieTitle', { defaultMessage: 'Pie' }),
   icon: 'visPie',
@@ -38,7 +39,7 @@ export const getPieVisTypeDefinition = ({
     defaults: {
       type: 'pie',
       addTooltip: true,
-      addLegend: !showElasticChartsOptions,
+      legendDisplay: !showElasticChartsOptions ? LegendDisplay.SHOW : LegendDisplay.HIDE,
       legendPosition: Position.Right,
       nestedLegend: false,
       truncateLegend: true,

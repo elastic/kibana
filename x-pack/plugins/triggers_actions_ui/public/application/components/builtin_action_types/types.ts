@@ -132,6 +132,45 @@ export interface WebhookSecrets {
 
 export type WebhookActionConnector = UserConfiguredActionConnector<WebhookConfig, WebhookSecrets>;
 
+export enum XmattersSeverityOptions {
+  CRITICAL = 'critical',
+  HIGH = 'high',
+  MEDIUM = 'medium',
+  LOW = 'low',
+  MINIMAL = 'minimal',
+}
+
+export interface XmattersActionParams {
+  alertActionGroupName: string;
+  signalId: string;
+  ruleName: string;
+  date: string;
+  severity: XmattersSeverityOptions;
+  spaceId: string;
+  tags: string;
+}
+
+export interface XmattersConfig {
+  configUrl?: string;
+  usesBasic: boolean;
+}
+
+export interface XmattersSecrets {
+  user: string;
+  password: string;
+  secretsUrl?: string;
+}
+
+export type XmattersActionConnector = UserConfiguredActionConnector<
+  XmattersConfig,
+  XmattersSecrets
+>;
+
+export enum XmattersAuthenticationType {
+  Basic = 'Basic Authentication',
+  URL = 'URL Authentication',
+}
+
 export interface TeamsSecrets {
   webhookUrl: string;
 }

@@ -7,12 +7,13 @@
 
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
-import rison from 'rison-node';
 import { i18n } from '@kbn/i18n';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
-import { Filter } from '@kbn/es-query';
-import type { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { type Filter, buildPhraseFilter } from '@kbn/es-query';
+import type { DataViewField, DataView } from '@kbn/data-plugin/common';
+import { lastValueFrom } from 'rxjs';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { SortDirection, SortDirectionNumeric, TimeRange } from '@kbn/data-plugin/common';
 import { AbstractESSource } from '../es_source';
 import {
   getHttp,
@@ -28,6 +29,7 @@ import {
   PreIndexedShape,
   TotalHits,
 } from '../../../../common/elasticsearch_util';
+import { encodeMvtResponseBody } from '../../../../common/mvt_request_body';
 // @ts-expect-error
 import { UpdateSourceEditor } from './update_source_editor';
 import {
@@ -52,12 +54,6 @@ import {
   Timeslice,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
-import {
-  SortDirection,
-  SortDirectionNumeric,
-  TimeRange,
-} from '../../../../../../../src/plugins/data/common';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { IField } from '../../fields/field';
 import { GeoJsonWithMeta, IMvtVectorSource, SourceStatus } from '../vector_source';
@@ -185,8 +181,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
         sortOrder={this._descriptor.sortOrder}
         scalingType={this._descriptor.scalingType}
         filterByMapBounds={this.isFilterByMapBounds()}
-        hasJoins={sourceEditorArgs.hasJoins}
-        clearJoins={sourceEditorArgs.clearJoins}
+        numberOfJoins={sourceEditorArgs.numberOfJoins}
       />
     );
   }
@@ -194,7 +189,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   async getFields(): Promise<IField[]> {
     try {
       const indexPattern = await this.getIndexPattern();
-      const fields: IndexPatternField[] = indexPattern.fields.filter((field) => {
+      const fields: DataViewField[] = indexPattern.fields.filter((field) => {
         // Ensure fielddata is enabled for field.
         // Search does not request _source
         return field.aggregatable;
@@ -280,7 +275,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       throw new Error('Cannot _getTopHits without topHitsSplitField');
     }
 
-    const indexPattern: IndexPattern = await this.getIndexPattern();
+    const indexPattern: DataView = await this.getIndexPattern();
 
     const fieldNames = searchFilters.fieldNames.filter(
       (fieldName) => fieldName !== this._descriptor.geoField
@@ -316,7 +311,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       };
     }
 
-    const topHitsSplitField: IndexPatternField = getField(indexPattern, topHitsSplitFieldName);
+    const topHitsSplitField: DataViewField = getField(indexPattern, topHitsSplitFieldName);
     const cardinalityAgg = { precision_threshold: 1 };
     const termsAgg = {
       size: DEFAULT_MAX_BUCKETS_LIMIT,
@@ -339,11 +334,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       },
     });
     if (topHitsSplitField.type === 'string') {
-      const entityIsNotEmptyFilter = esFilters.buildPhraseFilter(
-        topHitsSplitField,
-        '',
-        indexPattern
-      );
+      const entityIsNotEmptyFilter = buildPhraseFilter(topHitsSplitField, '', indexPattern);
       entityIsNotEmptyFilter.meta.negate = true;
       searchSource.setField('filter', [
         ...(searchSource.getField('filter') as Filter[]),
@@ -575,7 +566,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     return this._tooltipFields.length > 0;
   }
 
-  async _loadTooltipProperties(docId: string | number, index: string, indexPattern: IndexPattern) {
+  async _loadTooltipProperties(docId: string | number, index: string, indexPattern: DataView) {
     if (this._tooltipFields.length === 0) {
       return {};
     }
@@ -602,10 +593,12 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     searchSource.setField('query', query);
     searchSource.setField('fieldsFromSource', this._getTooltipPropertyNames());
 
-    const resp = await searchSource.fetch({
-      legacyHitsTotal: false,
-      executionContext: makePublicExecutionContext('es_search_source:load_tooltip_properties'),
-    });
+    const { rawResponse: resp } = await lastValueFrom(
+      searchSource.fetch$({
+        legacyHitsTotal: false,
+        executionContext: makePublicExecutionContext('es_search_source:load_tooltip_properties'),
+      })
+    );
 
     const hit = _.get(resp, 'hits.hits[0]');
     if (!hit) {
@@ -765,10 +758,6 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       reason = i18n.translate('xpack.maps.source.esSearch.joinsDisabledReason', {
         defaultMessage: 'Joins are not supported when scaling by clusters',
       });
-    } else if (this._descriptor.scalingType === SCALING_TYPES.MVT) {
-      reason = i18n.translate('xpack.maps.source.esSearch.joinsDisabledReasonMvt', {
-        defaultMessage: 'Joins are not supported when scaling by vector tiles',
-      });
     } else {
       reason = null;
     }
@@ -841,9 +830,6 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       searchSource.setField('sort', this._buildEsSort());
     }
 
-    const dsl = searchSource.getSearchRequestBody();
-    const risonDsl = rison.encode(dsl);
-
     const mvtUrlServicePath = getHttp().basePath.prepend(
       `/${GIS_API_PATH}/${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`
     );
@@ -851,7 +837,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     return `${mvtUrlServicePath}\
 ?geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
-&requestBody=${risonDsl}\
+&requestBody=${encodeMvtResponseBody(searchSource.getSearchRequestBody())}\
 &token=${refreshToken}`;
   }
 
@@ -907,12 +893,14 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     const maxResultWindow = await this.getMaxResultWindow();
     const searchSource = await this.makeSearchSource(searchFilters, 0);
     searchSource.setField('trackTotalHits', maxResultWindow + 1);
-    const resp = await searchSource.fetch({
-      abortSignal: abortController.signal,
-      sessionId: searchFilters.searchSessionId,
-      legacyHitsTotal: false,
-      executionContext: makePublicExecutionContext('es_search_source:all_doc_counts'),
-    });
+    const { rawResponse: resp } = await lastValueFrom(
+      searchSource.fetch$({
+        abortSignal: abortController.signal,
+        sessionId: searchFilters.searchSessionId,
+        legacyHitsTotal: false,
+        executionContext: makePublicExecutionContext('es_search_source:all_doc_counts'),
+      })
+    );
     return !isTotalHitsGreaterThan(resp.hits.total as unknown as TotalHits, maxResultWindow);
   }
 }

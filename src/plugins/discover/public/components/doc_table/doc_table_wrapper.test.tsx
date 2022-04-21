@@ -7,12 +7,12 @@
  */
 
 import React from 'react';
-import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
+import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { DocTableWrapper } from './doc_table_wrapper';
 import { DocTableRow } from './components/table_row';
 import { discoverServiceMock } from '../../__mocks__/services';
-import { KibanaContextProvider } from '../../../../kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 describe('Doc table component', () => {
   const mountComponent = (rows?: DocTableRow[]) => {

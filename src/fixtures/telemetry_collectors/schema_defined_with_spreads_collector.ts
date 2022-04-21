@@ -6,13 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { CollectorSet, MakeSchemaFrom } from '../../plugins/usage_collection/server/collector';
-import { loggerMock } from '../../core/server/logging/logger.mock';
+import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
 
-const { makeUsageCollector } = new CollectorSet({
-  logger: loggerMock.create(),
-  maximumWaitTimeForAllCollectorsInS: 0,
-});
+const { makeUsageCollector } = createUsageCollectionSetupMock();
 
 interface MyObject {
   total: number;

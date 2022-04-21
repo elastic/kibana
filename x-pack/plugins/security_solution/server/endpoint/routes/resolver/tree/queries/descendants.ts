@@ -6,11 +6,10 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { TransportResult } from '@elastic/elasticsearch';
-import { IScopedClusterClient } from 'src/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { JsonObject, JsonValue } from '@kbn/utility-types';
 import { FieldsObject, ResolverSchema } from '../../../../../../common/endpoint/types';
-import { NodeID, TimeRange, docValueFields, validIDs } from '../utils/index';
+import { NodeID, TimeRange, docValueFields, validIDs } from '../utils';
 
 interface DescendantsParams {
   schema: ResolverSchema;
@@ -26,6 +25,7 @@ export class DescendantsQuery {
   private readonly indexPatterns: string | string[];
   private readonly timeRange: TimeRange;
   private readonly docValueFields: JsonValue[];
+
   constructor({ schema, indexPatterns, timeRange }: DescendantsParams) {
     this.docValueFields = docValueFields(schema);
     this.schema = schema;
@@ -198,7 +198,7 @@ export class DescendantsQuery {
       return [];
     }
 
-    let response: TransportResult<estypes.SearchResponse<unknown>>;
+    let response: estypes.SearchResponse<unknown>;
     if (this.schema.ancestry) {
       response = await client.asCurrentUser.search({
         body: this.queryWithAncestryArray(validNodes, this.schema.ancestry, limit),
@@ -220,6 +220,6 @@ export class DescendantsQuery {
      * So the schema fields are flattened ('process.parent.entity_id')
      */
     // @ts-expect-error @elastic/elasticsearch _source is optional
-    return response.body.hits.hits.map((hit) => hit.fields);
+    return response.hits.hits.map((hit) => hit.fields);
   }
 }

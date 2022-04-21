@@ -6,7 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
 import {
   queryRulesSchema,
@@ -50,7 +50,7 @@ export const readRulesRoute = (
 
       try {
         const rulesClient = context.alerting.getRulesClient();
-        const ruleExecutionLogClient = context.securitySolution.getExecutionLogClient();
+        const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
         const savedObjectsClient = context.core.savedObjects.client;
 
         const rule = await readRules({
@@ -66,7 +66,7 @@ export const readRulesRoute = (
             logger,
           });
 
-          const ruleExecutionSummary = await ruleExecutionLogClient.getExecutionSummary(rule.id);
+          const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
 
           const transformed = transform(
             rule,

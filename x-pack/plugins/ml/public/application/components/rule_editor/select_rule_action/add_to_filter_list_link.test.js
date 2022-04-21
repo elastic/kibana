@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 
 import { AddToFilterListLink } from './add_to_filter_list_link';

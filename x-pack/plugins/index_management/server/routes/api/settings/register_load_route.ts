@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 const paramsSchema = schema.object({
   indexName: schema.string(),
@@ -36,7 +36,7 @@ export function registerLoadRoute({ router, lib: { handleEsError } }: RouteDepen
       };
 
       try {
-        const { body: hit } = await client.asCurrentUser.indices.getSettings(params);
+        const hit = await client.asCurrentUser.indices.getSettings(params);
         return response.ok({ body: formatHit(hit) });
       } catch (error) {
         return handleEsError({ error, response });

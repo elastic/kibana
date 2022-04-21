@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { ILicenseState, AlertTypeDisabledError } from '../lib';
+import { ILicenseState, RuleTypeDisabledError } from '../lib';
 import { MuteOptions } from '../rules_client';
 import { RewriteRequestCase, verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types';
@@ -44,7 +44,7 @@ export const muteAlertRoute = (
           await rulesClient.muteInstance(params);
           return res.noContent();
         } catch (e) {
-          if (e instanceof AlertTypeDisabledError) {
+          if (e instanceof RuleTypeDisabledError) {
             return e.sendResponse(res);
           }
           throw e;

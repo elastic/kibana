@@ -8,7 +8,7 @@
 import { of } from 'rxjs';
 import { action } from '@storybook/addon-actions';
 
-import type { ApplicationStart } from 'kibana/public';
+import type { ApplicationStart } from '@kbn/core/public';
 
 const applications = new Map();
 
@@ -27,7 +27,12 @@ export const getApplication = () => {
       management: {},
       navLinks: {},
       fleet: {
-        write: true,
+        read: true,
+        all: true,
+      },
+      fleetv2: {
+        read: true,
+        all: true,
       },
     },
     applications$: of(applications),

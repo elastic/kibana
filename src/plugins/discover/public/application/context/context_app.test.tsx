@@ -8,8 +8,8 @@
 
 import React from 'react';
 import { waitFor } from '@testing-library/react';
-import { mountWithIntl } from '@kbn/test/jest';
-import { createFilterManagerMock } from '../../../../data/public/query/filter_manager/filter_manager.mock';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { mockTopNavMenu } from './__mocks__/top_nav_menu';
 import { ContextAppContent } from './context_app_content';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
@@ -18,8 +18,9 @@ import { DiscoverServices } from '../../build_services';
 import { indexPatternsMock } from '../../__mocks__/index_patterns';
 import { act } from 'react-dom/test-utils';
 import { uiSettingsMock } from '../../__mocks__/ui_settings';
-import { themeServiceMock } from '../../../../../core/public/mocks';
-import { KibanaContextProvider } from '../../../../kibana_react/public';
+import { themeServiceMock } from '@kbn/core/public/mocks';
+import { LocalStorageMock } from '../../__mocks__/local_storage_mock';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 const mockFilterManager = createFilterManagerMock();
 const mockNavigationPlugin = { ui: { TopNavMenu: mockTopNavMenu } };
@@ -45,6 +46,9 @@ describe('ContextApp test', () => {
     toastNotifications: { addDanger: () => {} },
     navigation: mockNavigationPlugin,
     core: {
+      executionContext: {
+        set: jest.fn(),
+      },
       notifications: { toasts: [] },
       theme: { theme$: themeServiceMock.createStartContract().theme$ },
     },
@@ -55,6 +59,7 @@ describe('ContextApp test', () => {
     },
     filterManager: mockFilterManager,
     uiSettings: uiSettingsMock,
+    storage: new LocalStorageMock({}),
   } as unknown as DiscoverServices;
 
   const defaultProps = {

@@ -6,17 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { stackMonitoring, timerange } from '../../index';
-import { eventsToElasticsearchOutput } from '../../lib/utils/to_elasticsearch_output';
+import { stackMonitoring, timerange } from '../..';
 import { Scenario } from '../scenario';
-import { getCommonServices } from '../utils/get_common_services';
+import { getLogger } from '../utils/get_common_services';
+import { RunOptions } from '../utils/parse_run_cli_flags';
+import { ApmFields } from '../../lib/apm/apm_fields';
 
-const scenario: Scenario = async ({ target, writeTarget, logLevel }) => {
-  const { logger } = getCommonServices({ target, logLevel });
+const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
+  const logger = getLogger(runOptions);
 
-  if (!writeTarget) {
-    throw new Error('Write target is not defined');
-  }
+  // TODO reintroduce overwrite
+  // if (!runOptions.writeTarget) {
+  //  throw new Error('Write target is not defined');
+  // }
 
   return {
     generate: ({ from, to }) => {
@@ -26,20 +28,11 @@ const scenario: Scenario = async ({ target, writeTarget, logLevel }) => {
       return range
         .interval('30s')
         .rate(1)
-        .flatMap((timestamp) => {
+        .generator((timestamp) => {
           const events = logger.perf('generating_sm_events', () => {
-            return kibanaStats.timestamp(timestamp).requests(10, 20).serialize();
+            return kibanaStats.timestamp(timestamp).requests(10, 20);
           });
-
-          return logger.perf('sm_events_to_es_output', () => {
-            const smEvents = eventsToElasticsearchOutput({ events, writeTarget });
-            smEvents.forEach((event: any) => {
-              const ts = event._source['@timestamp'];
-              delete event._source['@timestamp'];
-              event._source.timestamp = ts;
-            });
-            return smEvents;
-          });
+          return events;
         });
     },
   };

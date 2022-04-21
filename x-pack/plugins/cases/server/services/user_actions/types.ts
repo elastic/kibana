@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from 'kibana/server';
+import { SavedObjectReference } from '@kbn/core/server';
 import {
   CasePostRequest,
   CaseSettings,
@@ -75,7 +75,6 @@ export interface CommonArguments {
   user: User;
   caseId: string;
   owner: string;
-  subCaseId?: string;
   attachmentId?: string;
   connectorId?: string;
   action?: UserAction;

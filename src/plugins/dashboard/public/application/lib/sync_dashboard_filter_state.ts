@@ -81,6 +81,7 @@ export const syncDashboardFilterState = ({
       set: ({ filters, query }) => {
         intermediateFilterState.filters = cleanFiltersForSerialize(filters ?? []) || [];
         intermediateFilterState.query = query || queryString.getDefaultQuery();
+        applyFilters(intermediateFilterState.query, intermediateFilterState.filters);
         dispatchDashboardStateChange(setFiltersAndQuery(intermediateFilterState));
       },
       state$: $onDashboardStateChange.pipe(
@@ -102,13 +103,14 @@ export const syncDashboardFilterState = ({
     .subscribe(() => applyFilters(queryString.getQuery(), filterManager.getFilters()));
 
   const timeRefreshSubscription = merge(
-    ...[timefilterService.getRefreshIntervalUpdate$(), timefilterService.getTimeUpdate$()]
+    timefilterService.getRefreshIntervalUpdate$(),
+    timefilterService.getTimeUpdate$()
   ).subscribe(() => {
-    $triggerDashboardRefresh.next();
+    $triggerDashboardRefresh.next({});
 
     // manually check for unsaved changes here because the time range is not stored on the dashboardState,
     // but it could trigger the unsaved changes badge.
-    $checkForUnsavedChanges.next();
+    $checkForUnsavedChanges.next(undefined);
   });
 
   const forceRefreshSubscription = timefilterService

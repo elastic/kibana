@@ -15,16 +15,15 @@ import type { TransportResult } from '@elastic/elasticsearch';
 import type { Client } from '@elastic/elasticsearch';
 
 import type SuperTest from 'supertest';
-import { ObjectRemover as ActionsRemover } from '../../../alerting_api_integration/common/lib';
 import {
+  CASES_INTERNAL_URL,
   CASES_URL,
   CASE_CONFIGURE_CONNECTORS_URL,
   CASE_CONFIGURE_URL,
   CASE_REPORTERS_URL,
   CASE_STATUS_URL,
   CASE_TAGS_URL,
-  SUB_CASES_PATCH_DEL_URL,
-} from '../../../../plugins/cases/common/constants';
+} from '@kbn/cases-plugin/common/constants';
 import {
   CasesConfigureRequest,
   CasesConfigureResponse,
@@ -32,14 +31,11 @@ import {
   ConnectorTypes,
   CasePostRequest,
   CaseResponse,
-  SubCasesFindResponse,
   CaseStatuses,
-  SubCasesResponse,
   CasesResponse,
   CasesFindResponse,
   CommentRequest,
   CaseUserActionResponse,
-  SubCaseResponse,
   CommentResponse,
   CasesPatchRequest,
   AllCommentsResponse,
@@ -53,16 +49,18 @@ import {
   CasesByAlertId,
   CaseResolveResponse,
   CaseMetricsResponse,
-} from '../../../../plugins/cases/common/api';
-import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
-import { getCaseUserActionUrl, getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
-import { ContextTypeGeneratedAlertType } from '../../../../plugins/cases/server/connectors';
-import { SignalHit } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
-import { ActionResult, FindActionResult } from '../../../../plugins/actions/server/types';
+  BulkCreateCommentRequest,
+  CommentType,
+} from '@kbn/cases-plugin/common/api';
+import { getCaseUserActionUrl } from '@kbn/cases-plugin/common/api/helpers';
+import { SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/types';
+import { ActionResult, FindActionResult } from '@kbn/actions-plugin/server/types';
+import { ESCasesConfigureAttributes } from '@kbn/cases-plugin/server/services/configure/types';
+import { ESCaseAttributes } from '@kbn/cases-plugin/server/services/cases/types';
 import { User } from './authentication/types';
 import { superUser } from './authentication/users';
-import { ESCasesConfigureAttributes } from '../../../../plugins/cases/server/services/configure/types';
-import { ESCaseAttributes } from '../../../../plugins/cases/server/services/cases/types';
+import { getPostCaseRequest, postCaseReq } from './mock';
+import { ObjectRemover as ActionsRemover } from '../../../alerting_api_integration/common/lib';
 import { getServiceNowServer } from '../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 
 function toArray<T>(input: T | T[]): T[] {
@@ -125,58 +123,21 @@ interface SetStatusCasesParams {
 }
 
 /**
- * Sets the status of some cases or sub cases. The cases field must be all of one type.
+ * Sets the status of some cases.
  */
 export const setStatus = async ({
   supertest,
   cases,
-  type,
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   cases: SetStatusCasesParams[];
-  type: 'case' | 'sub_case';
-}): Promise<CasesResponse | SubCasesResponse> => {
-  const url = type === 'case' ? CASES_URL : SUB_CASES_PATCH_DEL_URL;
-  const patchFields = type === 'case' ? { cases } : { subCases: cases };
-  const { body }: { body: CasesResponse | SubCasesResponse } = await supertest
-    .patch(url)
+}): Promise<CasesResponse> => {
+  const { body }: { body: CasesResponse } = await supertest
+    .patch(CASES_URL)
     .set('kbn-xsrf', 'true')
-    .send(patchFields)
+    .send({ cases })
     .expect(200);
   return body;
-};
-
-/**
- * Variable to easily access the default comment for the createSubCase function.
- */
-export const defaultCreateSubComment = postCommentGenAlertReq;
-
-/**
- * Variable to easily access the default comment for the createSubCase function.
- */
-export const defaultCreateSubPost = postCollectionReq;
-
-/**
- * Response structure for the createSubCase and createSubCaseComment functions.
- */
-export interface CreateSubCaseResp {
-  newSubCaseInfo: CaseResponse;
-  modifiedSubCases?: SubCasesResponse;
-}
-
-/**
- * Creates a sub case using the actions API. If a caseID isn't passed in then it will create
- * the collection as well. To create a sub case a comment must be created so it uses a default
- * generated alert style comment which can be overridden.
- */
-export const createSubCase = async (args: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
-  comment?: ContextTypeGeneratedAlertType;
-  caseID?: string;
-  caseInfo?: CasePostRequest;
-  actionID?: string;
-}): Promise<CreateSubCaseResp> => {
-  return createSubCaseComment({ ...args, forceNewSubCase: true });
 };
 
 /**
@@ -203,89 +164,6 @@ export const deleteCaseAction = async (
   id: string
 ) => {
   await supertest.delete(`/api/actions/connector/${id}`).set('kbn-xsrf', 'foo');
-};
-
-/**
- * Creates a sub case using the actions APIs. This will handle forcing a creation of a new sub case even if one exists
- * if the forceNewSubCase parameter is set to true.
- */
-export const createSubCaseComment = async ({
-  supertest,
-  caseID,
-  comment = defaultCreateSubComment,
-  caseInfo = defaultCreateSubPost,
-  // if true it will close any open sub cases and force a new sub case to be opened
-  forceNewSubCase = false,
-  actionID,
-}: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
-  comment?: ContextTypeGeneratedAlertType;
-  caseID?: string;
-  caseInfo?: CasePostRequest;
-  forceNewSubCase?: boolean;
-  actionID?: string;
-}): Promise<CreateSubCaseResp> => {
-  let actionIDToUse: string;
-
-  if (actionID === undefined) {
-    actionIDToUse = await createCaseAction(supertest);
-  } else {
-    actionIDToUse = actionID;
-  }
-
-  let collectionID: string;
-
-  if (!caseID) {
-    collectionID = (
-      await supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(caseInfo).expect(200)
-    ).body.id;
-  } else {
-    collectionID = caseID;
-  }
-
-  let closedSubCases: SubCasesResponse | undefined;
-  if (forceNewSubCase) {
-    const { body: subCasesResp }: { body: SubCasesFindResponse } = await supertest
-      .get(`${getSubCasesUrl(collectionID)}/_find`)
-      .expect(200);
-
-    const nonClosed = subCasesResp.subCases.filter(
-      (subCase) => subCase.status !== CaseStatuses.closed
-    );
-    if (nonClosed.length > 0) {
-      // mark the sub case as closed so a new sub case will be created on the next comment
-      closedSubCases = (
-        await supertest
-          .patch(SUB_CASES_PATCH_DEL_URL)
-          .set('kbn-xsrf', 'true')
-          .send({
-            subCases: nonClosed.map((subCase) => ({
-              id: subCase.id,
-              version: subCase.version,
-              status: CaseStatuses.closed,
-            })),
-          })
-          .expect(200)
-      ).body;
-    }
-  }
-
-  const caseConnector = await supertest
-    .post(`/api/actions/connector/${actionIDToUse}/_execute`)
-    .set('kbn-xsrf', 'foo')
-    .send({
-      params: {
-        subAction: 'addComment',
-        subActionParams: {
-          caseId: collectionID,
-          comment,
-        },
-      },
-    })
-    .expect(200);
-
-  expect(caseConnector.body.status).to.eql('ok');
-  return { newSubCaseInfo: caseConnector.body.data, modifiedSubCases: closedSubCases };
 };
 
 type ConfigRequestParams = Partial<CaseConnector> & {
@@ -449,19 +327,6 @@ export const removeServerGeneratedPropertiesFromUserAction = (
   >(attributes, keysToRemove);
 };
 
-export const removeServerGeneratedPropertiesFromSubCase = (
-  subCase: SubCaseResponse | undefined
-) => {
-  if (!subCase) {
-    return;
-  }
-
-  return removeServerGeneratedPropertiesFromSavedObject<SubCaseResponse>(subCase, [
-    'closed_at',
-    'comments',
-  ]);
-};
-
 export const removeServerGeneratedPropertiesFromCase = (
   theCase: CaseResponse
 ): Partial<CaseResponse> => {
@@ -479,7 +344,6 @@ export const removeServerGeneratedPropertiesFromComments = (
 export const deleteAllCaseItems = async (es: Client) => {
   await Promise.all([
     deleteCasesByESQuery(es),
-    deleteSubCases(es),
     deleteCasesUserActions(es),
     deleteComments(es),
     deleteConfiguration(es),
@@ -502,21 +366,6 @@ export const deleteCasesByESQuery = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
     q: 'type:cases',
-    wait_for_completion: true,
-    refresh: true,
-    body: {},
-    conflicts: 'proceed',
-  });
-};
-
-/**
- * Deletes all sub cases in the .kibana index. This uses ES to perform the delete and does
- * not go through the case API.
- */
-export const deleteSubCases = async (es: Client): Promise<void> => {
-  await es.deleteByQuery({
-    index: '.kibana',
-    q: 'type:cases-sub-case',
     wait_for_completion: true,
     refresh: true,
     body: {},
@@ -802,6 +651,31 @@ export const createComment = async ({
 }): Promise<CaseResponse> => {
   const { body: theCase } = await supertest
     .post(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/comments`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .send(params)
+    .expect(expectedHttpCode);
+
+  return theCase;
+};
+
+export const bulkCreateAttachments = async ({
+  supertest,
+  caseId,
+  params,
+  auth = { user: superUser, space: null },
+  expectedHttpCode = 200,
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  caseId: string;
+  params: BulkCreateCommentRequest;
+  auth?: { user: User; space: string | null };
+  expectedHttpCode?: number;
+}): Promise<CaseResponse> => {
+  const { body: theCase } = await supertest
+    .post(
+      `${getSpaceUrlPrefix(auth.space)}${CASES_INTERNAL_URL}/${caseId}/attachments/_bulk_create`
+    )
     .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
     .send(params)
@@ -1284,4 +1158,61 @@ export const getServiceNowSimulationServer = async (): Promise<{
   const url = `http://localhost:${port}`;
 
   return { server, url };
+};
+
+/**
+ * Extracts the warning value a warning header that is formatted according to RFC 7234.
+ * For example for the string 299 Kibana-8.1.0 "Deprecation endpoint", the return value is Deprecation endpoint.
+ *
+ */
+export const extractWarningValueFromWarningHeader = (warningHeader: string) => {
+  const firstQuote = warningHeader.indexOf('"');
+  const lastQuote = warningHeader.length - 1;
+  const warningValue = warningHeader.substring(firstQuote + 1, lastQuote);
+  return warningValue;
+};
+
+export const getAttachments = (numberOfAttachments: number): BulkCreateCommentRequest => {
+  return [...Array(numberOfAttachments)].map((index) => {
+    if (index % 0) {
+      return {
+        type: CommentType.user,
+        comment: `Test ${index + 1}`,
+        owner: 'securitySolutionFixture',
+      };
+    }
+
+    return {
+      type: CommentType.alert,
+      alertId: `test-id-${index + 1}`,
+      index: `test-index-${index + 1}`,
+      rule: {
+        id: `rule-test-id-${index + 1}`,
+        name: `Test ${index + 1}`,
+      },
+      owner: 'securitySolutionFixture',
+    };
+  });
+};
+
+export const createCaseAndBulkCreateAttachments = async ({
+  supertest,
+  numberOfAttachments = 3,
+  auth = { user: superUser, space: null },
+  expectedHttpCode = 200,
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  numberOfAttachments?: number;
+  auth?: { user: User; space: string | null };
+  expectedHttpCode?: number;
+}): Promise<{ theCase: CaseResponse; attachments: BulkCreateCommentRequest }> => {
+  const postedCase = await createCase(supertest, postCaseReq);
+  const attachments = getAttachments(numberOfAttachments);
+  const patchedCase = await bulkCreateAttachments({
+    supertest,
+    caseId: postedCase.id,
+    params: attachments,
+  });
+
+  return { theCase: patchedCase, attachments };
 };

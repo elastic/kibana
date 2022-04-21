@@ -31,7 +31,10 @@ To make the [VSCode debugger](https://vscode.readthedocs.io/en/latest/editor/deb
   "type": "node",
   "name": "vscode-jest-tests",
   "request": "launch",
-  "args": ["--runInBand"],
+  "args": [
+    "--runInBand",
+    "--config=${workspaceFolder}/jest.config.js"
+    ],
   "cwd": "${workspaceFolder}",
   "console": "integratedTerminal",
   "internalConsoleOptions": "neverOpen",

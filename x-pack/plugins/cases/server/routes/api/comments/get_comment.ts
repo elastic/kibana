@@ -7,37 +7,34 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDeps } from '../types';
-import { wrapError } from '../utils';
 import { CASE_COMMENT_DETAILS_URL } from '../../../../common/constants';
+import { createCaseError } from '../../../common/error';
+import { createCasesRoute } from '../create_cases_route';
 
-export function initGetCommentApi({ router, logger }: RouteDeps) {
-  router.get(
-    {
-      path: CASE_COMMENT_DETAILS_URL,
-      validate: {
-        params: schema.object({
-          case_id: schema.string(),
-          comment_id: schema.string(),
+export const getCommentRoute = createCasesRoute({
+  method: 'get',
+  path: CASE_COMMENT_DETAILS_URL,
+  params: {
+    params: schema.object({
+      case_id: schema.string(),
+      comment_id: schema.string(),
+    }),
+  },
+  handler: async ({ context, request, response }) => {
+    try {
+      const client = await context.cases.getCasesClient();
+
+      return response.ok({
+        body: await client.attachments.get({
+          attachmentID: request.params.comment_id,
+          caseID: request.params.case_id,
         }),
-      },
-    },
-    async (context, request, response) => {
-      try {
-        const client = await context.cases.getCasesClient();
-
-        return response.ok({
-          body: await client.attachments.get({
-            attachmentID: request.params.comment_id,
-            caseID: request.params.case_id,
-          }),
-        });
-      } catch (error) {
-        logger.error(
-          `Failed to get comment in route case id: ${request.params.case_id} comment id: ${request.params.comment_id}: ${error}`
-        );
-        return response.customError(wrapError(error));
-      }
+      });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to get comment in route case id: ${request.params.case_id} comment id: ${request.params.comment_id}: ${error}`,
+        error,
+      });
     }
-  );
-}
+  },
+});

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { Logger } from 'kibana/server';
+import { Logger } from '@kbn/core/server';
 import { isoToEpochRt } from '@kbn/io-ts-utils';
 import { setupRequest, Setup } from '../../lib/helpers/setup_request';
 import { getClientMetrics } from './get_client_metrics';
@@ -21,8 +21,8 @@ import { getWebCoreVitals } from './get_web_core_vitals';
 import { hasRumData } from './has_rum_data';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { rangeRt } from '../default_api_types';
-import { UxUIFilters } from '../../../typings/ui_filters';
 import { APMRouteHandlerResources } from '../typings';
+import { UxUIFilters } from '../../../common/ux_ui_filter';
 
 export type SetupUX = Setup & {
   uiFilters: UxUIFilters;
@@ -407,6 +407,7 @@ function decodeUiFilters(
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 async function setupUXRequest<TParams extends SetupUXRequestParams>(
   resources: APMRouteHandlerResources & { params: TParams }
 ) {

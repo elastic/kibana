@@ -9,23 +9,18 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EuiProgress, EuiBasicTable, EuiTableSelectionType } from '@elastic/eui';
 import { difference, head, isEmpty } from 'lodash/fp';
 import styled, { css } from 'styled-components';
-import classnames from 'classnames';
 
 import {
   Case,
   CaseStatusWithAllStatus,
   FilterOptions,
   SortFieldCase,
-  SubCase,
 } from '../../../common/ui/types';
-import { CaseStatuses, CaseType, CommentRequestAlertType, caseStatuses } from '../../../common/api';
-import { SELECTABLE_MESSAGE_COLLECTIONS } from '../../common/translations';
+import { CaseStatuses, caseStatuses } from '../../../common/api';
 import { useGetCases } from '../../containers/use_get_cases';
-import { usePostComment } from '../../containers/use_post_comment';
 
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesColumns } from './columns';
-import { getExpandedRowMap } from './expanded_row';
 import { CasesTableFilters } from './table_filters';
 import { EuiBasicTableOnChange } from './types';
 
@@ -50,23 +45,14 @@ const getSortField = (field: string): SortFieldCase =>
   field === SortFieldCase.closedAt ? SortFieldCase.closedAt : SortFieldCase.createdAt;
 
 export interface AllCasesListProps {
-  alertData?: Omit<CommentRequestAlertType, 'type'>;
   hiddenStatuses?: CaseStatusWithAllStatus[];
   isSelectorView?: boolean;
-  onRowClick?: (theCase?: Case | SubCase) => void;
-  updateCase?: (newCase: Case) => void;
+  onRowClick?: (theCase?: Case) => void;
   doRefresh?: () => void;
 }
 
 export const AllCasesList = React.memo<AllCasesListProps>(
-  ({
-    alertData,
-    hiddenStatuses = [],
-    isSelectorView = false,
-    onRowClick,
-    updateCase,
-    doRefresh,
-  }) => {
+  ({ hiddenStatuses = [], isSelectorView = false, onRowClick, doRefresh }) => {
     const { owner, userCanCrud } = useCasesContext();
     const hasOwner = !!owner.length;
     const availableSolutions = useAvailableCasesOwners();
@@ -90,9 +76,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       setSelectedCases,
     } = useGetCases({ initialFilterOptions });
 
-    // Post Comment to Case
-    const { postComment, isLoading: isCommentUpdating } = usePostComment();
-    const { connectors } = useConnectors({ toastPermissionsErrors: false });
+    const { connectors } = useConnectors();
 
     const sorting = useMemo(
       () => ({
@@ -102,7 +86,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     );
 
     const filterRefetch = useRef<() => void>();
-    const tableRef = useRef<EuiBasicTable>();
+    const tableRef = useRef<EuiBasicTable | null>(null);
     const [isLoading, handleIsLoading] = useState<boolean>(false);
 
     const setFilterRefetch = useCallback(
@@ -184,21 +168,8 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       userCanCrud,
       connectors,
       onRowClick,
-      alertData,
-      postComment,
-      updateCase,
       showSolutionColumn: !hasOwner && availableSolutions.length > 1,
     });
-
-    const itemIdToExpandedRowMap = useMemo(
-      () =>
-        getExpandedRowMap({
-          columns,
-          data: data.cases,
-          onSubCaseClick: onRowClick,
-        }),
-      [data.cases, columns, onRowClick]
-    );
 
     const pagination = useMemo(
       () => ({
@@ -213,7 +184,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const euiBasicTableSelectionProps = useMemo<EuiTableSelectionType<Case>>(
       () => ({
         onSelectionChange: setSelectedCases,
-        selectableMessage: (selectable) => (!selectable ? SELECTABLE_MESSAGE_COLLECTIONS : ''),
         initialSelected: selectedCases,
       }),
       [selectedCases, setSelectedCases]
@@ -224,7 +194,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const tableRowProps = useCallback(
       (theCase: Case) => ({
         'data-test-subj': `cases-table-row-${theCase.id}`,
-        className: classnames({ isDisabled: theCase.type === CaseType.collection }),
       }),
       []
     );
@@ -235,7 +204,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           size="xs"
           color="accent"
           className="essentialAnimation"
-          $isShow={(isCasesLoading || isLoading || isCommentUpdating) && !isDataEmpty}
+          $isShow={(isCasesLoading || isLoading) && !isDataEmpty}
         />
         <CasesTableFilters
           countClosedCases={data.countClosedCases}
@@ -252,6 +221,8 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           }}
           setFilterRefetch={setFilterRefetch}
           hiddenStatuses={hiddenStatuses}
+          displayCreateCaseButton={isSelectorView}
+          onCreateCasePressed={onRowClick}
         />
         <CasesTable
           columns={columns}
@@ -260,10 +231,9 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           goToCreateCase={onRowClick}
           handleIsLoading={handleIsLoading}
           isCasesLoading={isCasesLoading}
-          isCommentUpdating={isCommentUpdating}
+          isCommentUpdating={isCasesLoading}
           isDataEmpty={isDataEmpty}
           isSelectorView={isSelectorView}
-          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           onChange={tableOnChangeCallback}
           pagination={pagination}
           refreshCases={refreshCases}

@@ -25,16 +25,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EVENT_FILTERS_OPERATORS } from '@kbn/securitysolution-list-utils';
+import { OperatingSystem } from '@kbn/securitysolution-utils';
 
-import { OperatingSystem, PolicyData } from '../../../../../../../common/endpoint/types';
+import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
+import type { OnChangeProps } from '@kbn/lists-plugin/public';
+import { PolicyData } from '../../../../../../../common/endpoint/types';
 import { AddExceptionComments } from '../../../../../../common/components/exceptions/add_exception_comments';
 import { filterIndexPatterns } from '../../../../../../common/components/exceptions/helpers';
 import { Loader } from '../../../../../../common/components/loader';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useFetchIndex } from '../../../../../../common/containers/source';
 import { AppAction } from '../../../../../../common/store/actions';
-import { getExceptionBuilderComponentLazy } from '../../../../../../../../lists/public';
-import type { OnChangeProps } from '../../../../../../../../lists/public';
 import { useEventFiltersSelector } from '../../hooks';
 import { getFormEntryStateMutable, getHasNameError, getNewComment } from '../../../store/selector';
 import {
@@ -68,6 +69,18 @@ const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.LINUX,
 ];
 
+const getAddedFieldsCounts = (formFields: string[]): { [k: string]: number } =>
+  formFields.reduce<{ [k: string]: number }>((allFields, field) => {
+    if (field in allFields) {
+      allFields[field]++;
+    } else {
+      allFields[field] = 1;
+    }
+    return allFields;
+  }, {});
+
+const computeHasDuplicateFields = (formFieldsList: Record<string, number>): boolean =>
+  Object.values(formFieldsList).some((e) => e > 1);
 interface EventFiltersFormProps {
   allowSelectOs?: boolean;
   policies: PolicyData[];
@@ -84,6 +97,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
     const [hasBeenInputNameVisited, setHasBeenInputNameVisited] = useState(false);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const [hasFormChanged, setHasFormChanged] = useState(false);
+    const [hasDuplicateFields, setHasDuplicateFields] = useState<boolean>(false);
 
     // This value has to be memoized to avoid infinite useEffect loop on useFetchIndex
     const indexNames = useMemo(() => ['logs-endpoint.events.*'], []);
@@ -130,6 +144,8 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
           (!hasFormChanged && arg.exceptionItems[0] === undefined) ||
           isEqual(arg.exceptionItems[0]?.entries, exception?.entries)
         ) {
+          const addedFields = arg.exceptionItems[0]?.entries.map((e) => e.field) || [''];
+          setHasDuplicateFields(computeHasDuplicateFields(getAddedFieldsCounts(addedFields)));
           setHasFormChanged(true);
           return;
         }
@@ -225,6 +241,7 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
           onChange: handleOnBuilderChange,
           listTypeSpecificIndexPatternFilter: filterIndexPatterns,
           operatorsList: EVENT_FILTERS_OPERATORS,
+          osTypes: exception?.os_types,
         }),
       [data, handleOnBuilderChange, http, indexPatterns, exception]
     );
@@ -444,6 +461,17 @@ export const EventFiltersForm: React.FC<EventFiltersFormProps> = memo(
         {detailsSection}
         <EuiHorizontalRule />
         {criteriaSection}
+        {hasDuplicateFields && (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiText color="subdued" size="xs" data-test-subj="duplicate-fields-warning-message">
+              <FormattedMessage
+                id="xpack.securitySolution.eventFilters.warningMessage.duplicateFields"
+                defaultMessage="Using multiples of the same filed values can degrade Endpoint performance and/or create ineffective rules"
+              />
+            </EuiText>
+          </>
+        )}
         {showAssignmentSection && (
           <>
             <EuiHorizontalRule /> {policiesSection}

@@ -8,15 +8,14 @@
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlCommonUI } from './common_ui';
-import { MlCustomUrls } from './custom_urls';
-
 import {
   TimeRangeType,
   TIME_RANGE_TYPE,
   URL_TYPE,
-} from '../../../../plugins/ml/public/application/jobs/components/custom_url_editor/constants';
+} from '@kbn/ml-plugin/public/application/jobs/components/custom_url_editor/constants';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { MlCommonUI } from './common_ui';
+import { MlCustomUrls } from './custom_urls';
 
 export type MlADJobTable = ProvidedType<typeof MachineLearningJobTableProvider>;
 
@@ -244,8 +243,13 @@ export function MachineLearningJobTableProvider(
       await testSubjects.existOrFail('mlJobListTable loaded', { timeout: 30 * 1000 });
     }
 
-    public async filterWithSearchString(filter: string, expectedRowCount: number = 1) {
+    public async filterWithSearchString(
+      filter: string,
+      expectedRowCount: number = 1,
+      tableEnvironment: 'mlAnomalyDetection' | 'stackMgmtJobList' = 'mlAnomalyDetection'
+    ) {
       await this.waitForJobsToLoad();
+      await this.refreshJobList(tableEnvironment);
       const searchBar = await testSubjects.find('mlJobListSearchBar');
       const searchBarInput = await searchBar.findByTagName('input');
       await searchBarInput.clearValueWithKeyboard();

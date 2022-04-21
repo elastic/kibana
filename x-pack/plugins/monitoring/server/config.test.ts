@@ -6,7 +6,6 @@
  */
 
 import fs from 'fs';
-import { when } from 'jest-when';
 import { configSchema, createConfig } from './config';
 
 const MOCKED_PATHS = [
@@ -17,10 +16,13 @@ const MOCKED_PATHS = [
 ];
 
 beforeEach(() => {
-  const spy = jest.spyOn(fs, 'readFileSync').mockImplementation();
-  MOCKED_PATHS.forEach((file) =>
-    when(spy).calledWith(file, 'utf8').mockReturnValue(`contents-of-${file}`)
-  );
+  jest.spyOn(fs, 'readFileSync').mockImplementation((path, enc) => {
+    if (typeof path === 'string' && MOCKED_PATHS.includes(path) && enc === 'utf8') {
+      return `contents-of-${path}`;
+    }
+
+    throw new Error(`unpexpected arguments to fs.readFileSync: ${path}, ${enc}`);
+  });
 });
 
 describe('config schema', () => {
@@ -70,6 +72,7 @@ describe('config schema', () => {
           "debug_mode": false,
           "elasticsearch": Object {
             "apiVersion": "master",
+            "compression": false,
             "customHeaders": Object {},
             "healthCheck": Object {
               "delay": "PT2.5S",
@@ -77,6 +80,7 @@ describe('config schema', () => {
             "ignoreVersionMismatch": false,
             "logFetchCount": 10,
             "logQueries": false,
+            "maxSockets": Infinity,
             "pingTimeout": "PT30S",
             "requestHeadersWhitelist": Array [
               "authorization",
@@ -99,6 +103,9 @@ describe('config schema', () => {
             "index": "filebeat-*",
           },
           "max_bucket_size": 10000,
+          "metricbeat": Object {
+            "index": "metricbeat-*",
+          },
           "min_interval_seconds": 10,
           "show_license_expiration": true,
         },

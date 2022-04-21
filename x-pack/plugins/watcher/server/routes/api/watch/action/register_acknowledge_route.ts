@@ -7,9 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 // @ts-ignore
-import { WatchStatus } from '../../../../models/watch_status/index';
+import { WatchStatus } from '../../../../models/watch_status';
 import { RouteDependencies } from '../../../../types';
 
 const paramsSchema = schema.object({
@@ -18,12 +18,10 @@ const paramsSchema = schema.object({
 });
 
 function acknowledgeAction(dataClient: IScopedClusterClient, watchId: string, actionId: string) {
-  return dataClient.asCurrentUser.watcher
-    .ackWatch({
-      watch_id: watchId,
-      action_id: actionId,
-    })
-    .then(({ body }) => body);
+  return dataClient.asCurrentUser.watcher.ackWatch({
+    watch_id: watchId,
+    action_id: actionId,
+  });
 }
 
 export function registerAcknowledgeRoute({

@@ -9,15 +9,12 @@ import React, { FC } from 'react';
 import './_index.scss';
 import ReactDOM from 'react-dom';
 
-import { AppMountParameters, CoreStart, HttpStart } from 'kibana/public';
+import { AppMountParameters, CoreStart, HttpStart } from '@kbn/core/public';
 
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-} from '../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { setDependencyCache, clearCache } from './util/dependency_cache';
 import { setLicenseCache } from './license';
 import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
@@ -88,6 +85,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     usageCollection: deps.usageCollection,
     fieldFormats: deps.fieldFormats,
     dashboard: deps.dashboard,
+    charts: deps.charts,
     ...coreStart,
   };
 
@@ -134,7 +132,7 @@ export const renderApp = (
     application: coreStart.application,
     http: coreStart.http,
     security: deps.security,
-    urlGenerators: deps.share.urlGenerators,
+    dashboard: deps.dashboard,
     maps: deps.maps,
     dataVisualizer: deps.dataVisualizer,
     dataViews: deps.data.dataViews,

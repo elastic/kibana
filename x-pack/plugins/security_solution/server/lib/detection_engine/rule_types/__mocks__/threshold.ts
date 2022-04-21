@@ -24,7 +24,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
-import { TypeOfFieldMap } from '../../../../../../rule_registry/common/field_map';
+import { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { ANCHOR_DATE } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
@@ -77,7 +77,6 @@ export const mockThresholdResults = {
   },
 };
 
-// TODO: https://github.com/elastic/kibana/pull/121644 clean up
 export const sampleThresholdAlert = {
   _id: 'b3ad77a4-65bd-4c4e-89cf-13c46f54bc4d',
   _index: 'some-index',

@@ -18,7 +18,7 @@ export { DashboardSessionStorage } from './dashboard_session_storage';
 export { loadSavedDashboardState } from './load_saved_dashboard_state';
 export { attemptLoadDashboardByTitle } from './load_dashboard_by_title';
 export { syncDashboardFilterState } from './sync_dashboard_filter_state';
-export { syncDashboardIndexPatterns } from './sync_dashboard_index_patterns';
+export { syncDashboardDataViews } from './sync_dashboard_data_views';
 export { syncDashboardContainerInput } from './sync_dashboard_container_input';
 export { loadDashboardHistoryLocationState } from './load_dashboard_history_location_state';
 export { buildDashboardContainer, tryDestroyDashboardContainer } from './build_dashboard_container';

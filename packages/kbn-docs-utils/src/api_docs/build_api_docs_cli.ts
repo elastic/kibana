@@ -9,7 +9,8 @@
 import Fs from 'fs';
 import Path from 'path';
 
-import { run, CiStatsReporter, createFlagError } from '@kbn/dev-utils';
+import { run, createFlagError } from '@kbn/dev-utils';
+import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/utils';
 import { Project } from 'ts-morph';
 
@@ -23,6 +24,7 @@ import { writeDeprecationDocByPlugin } from './mdx/write_deprecations_doc_by_plu
 import { writePluginDirectoryDoc } from './mdx/write_plugin_directory_doc';
 import { collectApiStatsForPlugin } from './stats';
 import { countEslintDisableLine, EslintDisableCounts } from './count_eslint_disable';
+import { writeDeprecationDueByTeam } from './mdx/write_deprecations_due_by_team';
 
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
@@ -248,6 +250,7 @@ export function runBuildApiDocsCli() {
           log.info(`Plugin ${pluginApi.id} has no public API.`);
         }
         writeDeprecationDocByPlugin(outputFolder, referencedDeprecations, log);
+        writeDeprecationDueByTeam(outputFolder, referencedDeprecations, plugins, log);
         writeDeprecationDocByApi(
           outputFolder,
           referencedDeprecations,
@@ -281,10 +284,12 @@ function getTsProject(repoPath: string) {
   const xpackTsConfig = `${repoPath}/tsconfig.json`;
   const project = new Project({
     tsConfigFilePath: xpackTsConfig,
+    // We'll use the files added below instead.
+    skipAddingFilesFromTsConfig: true,
   });
-  project.addSourceFilesAtPaths(`${repoPath}/x-pack/plugins/**/*{.d.ts,.ts}`);
-  project.addSourceFilesAtPaths(`${repoPath}/src/plugins/**/*{.d.ts,.ts}`);
-  project.addSourceFilesAtPaths(`${repoPath}/packages/**/*{.d.ts,.ts}`);
+  project.addSourceFilesAtPaths([`${repoPath}/x-pack/plugins/**/*.ts`, '!**/*.d.ts']);
+  project.addSourceFilesAtPaths([`${repoPath}/src/plugins/**/*.ts`, '!**/*.d.ts']);
+  project.addSourceFilesAtPaths([`${repoPath}/packages/**/*.ts`, '!**/*.d.ts']);
   project.resolveSourceFileDependencies();
   return project;
 }

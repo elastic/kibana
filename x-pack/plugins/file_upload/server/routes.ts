@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
-import { CoreSetup, Logger } from 'src/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
+import { CoreSetup, Logger } from '@kbn/core/server';
 import { MAX_FILE_SIZE_BYTES } from '../common/constants';
 import type { IngestPipelineWrapper, InputData, Mappings, Settings } from '../common/types';
 import { wrapError } from './error_wrapper';
@@ -50,7 +50,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       validate: {
         query: schema.object({
           indexName: schema.maybe(schema.string()),
-          checkCreateIndexPattern: schema.boolean(),
+          checkCreateDataView: schema.boolean(),
           checkHasManagePipeline: schema.boolean(),
         }),
       },
@@ -58,13 +58,13 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     async (context, request, response) => {
       try {
         const [, pluginsStart] = await coreSetup.getStartServices();
-        const { indexName, checkCreateIndexPattern, checkHasManagePipeline } = request.query;
+        const { indexName, checkCreateDataView, checkHasManagePipeline } = request.query;
 
         const { hasImportPermission } = await checkFileUploadPrivileges({
           authorization: pluginsStart.security?.authz,
           request,
           indexName,
-          checkCreateIndexPattern,
+          checkCreateDataView,
           checkHasManagePipeline,
         });
 
@@ -182,8 +182,9 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     },
     async (context, request, response) => {
       try {
-        const { body: indexExists } =
-          await context.core.elasticsearch.client.asCurrentUser.indices.exists(request.body);
+        const indexExists = await context.core.elasticsearch.client.asCurrentUser.indices.exists(
+          request.body
+        );
         return response.ok({ body: { exists: indexExists } });
       } catch (e) {
         return response.customError(wrapError(e));

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
@@ -13,13 +13,11 @@ import { Router } from 'react-router-dom';
 import { getContext, resetContext } from 'kea';
 import { Store } from 'redux';
 
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-} from '../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+
 import { InitialAppData } from '../../common/types';
 import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
 
@@ -42,6 +40,9 @@ export const renderApp = (
 ) => {
   const { publicUrl, errorConnectingMessage, ...initialData } = data;
   externalUrl.enterpriseSearchUrl = publicUrl || config.host || '';
+
+  const EmptyContext: FC = ({ children }) => <>{children}</>;
+  const CloudContext = plugins.cloud?.CloudContextProvider || EmptyContext;
 
   resetContext({ createStore: true });
   const store = getContext().store;
@@ -74,12 +75,14 @@ export const renderApp = (
     <I18nProvider>
       <KibanaThemeProvider theme$={params.theme$}>
         <KibanaContextProvider services={{ ...core, ...plugins }}>
-          <Provider store={store}>
-            <Router history={params.history}>
-              <App {...initialData} />
-              <Toasts />
-            </Router>
-          </Provider>
+          <CloudContext>
+            <Provider store={store}>
+              <Router history={params.history}>
+                <App {...initialData} />
+                <Toasts />
+              </Router>
+            </Provider>
+          </CloudContext>
         </KibanaContextProvider>
       </KibanaThemeProvider>
     </I18nProvider>,

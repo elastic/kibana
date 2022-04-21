@@ -26,7 +26,7 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
     });
 
     after(async () => {
-      await kibanaServer.importExport.unload(archive);
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('loads workpad list', async () => {

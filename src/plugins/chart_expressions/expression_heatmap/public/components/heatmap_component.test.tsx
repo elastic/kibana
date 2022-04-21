@@ -8,11 +8,11 @@
 
 import React from 'react';
 import { Settings, TooltipType, Heatmap } from '@elastic/charts';
-import { chartPluginMock } from '../../../../charts/public/mocks';
-import { EmptyPlaceholder } from '../../../../charts/public';
-import { fieldFormatsServiceMock } from '../../../../field_formats/public/mocks';
-import type { Datatable } from '../../../../expressions/public';
-import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
 import { HeatmapRenderProps, HeatmapArguments } from '../../common';
@@ -26,6 +26,17 @@ jest.mock('@elastic/charts', () => {
     getSpecId: jest.fn(() => {}),
   };
 });
+
+const actWithTimeout = (action: Function, timer: number = 1) =>
+  act(
+    () =>
+      new Promise((resolve) =>
+        setTimeout(async () => {
+          await action();
+          resolve();
+        }, timer)
+      )
+  );
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
 const palettesRegistry = chartPluginMock.createPaletteRegistry();
@@ -41,6 +52,8 @@ const args: HeatmapArguments = {
     isCellLabelVisible: true,
     isYAxisLabelVisible: true,
     isXAxisLabelVisible: true,
+    isYAxisTitleVisible: true,
+    isXAxisTitleVisible: true,
     type: 'heatmap_grid',
   },
   palette: {
@@ -59,16 +72,18 @@ const args: HeatmapArguments = {
   highlightInHover: false,
   xAccessor: 'col-1-2',
   valueAccessor: 'col-0-1',
+  yAccessor: 'col-2-3',
 };
 const data: Datatable = {
   type: 'datatable',
   rows: [
-    { 'col-0-1': 0, 'col-1-2': 'a' },
-    { 'col-0-1': 148, 'col-1-2': 'b' },
+    { 'col-0-1': 0, 'col-1-2': 'a', 'col-2-3': 'd' },
+    { 'col-0-1': 148, 'col-1-2': 'b', 'col-2-3': 'c' },
   ],
   columns: [
     { id: 'col-0-1', name: 'Count', meta: { type: 'number' } },
     { id: 'col-1-2', name: 'Dest', meta: { type: 'string' } },
+    { id: 'col-2-3', name: 'Test', meta: { type: 'string' } },
   ],
 };
 
@@ -95,6 +110,7 @@ describe('HeatmapComponent', function () {
       onSelectRange: jest.fn(),
       paletteService: palettesRegistry,
       formatFactory: formatService.deserialize,
+      interactive: true,
     };
   });
 
@@ -105,6 +121,9 @@ describe('HeatmapComponent', function () {
 
   it('renders the legend toggle component if uiState is set', async () => {
     const component = mountWithIntl(<HeatmapComponent {...wrapperProps} />);
+    await actWithTimeout(async () => {
+      await component.update();
+    });
     await act(async () => {
       expect(findTestSubject(component, 'vislibToggleLegend').length).toBe(1);
     });
@@ -113,6 +132,9 @@ describe('HeatmapComponent', function () {
   it('not renders the legend toggle component if uiState is undefined', async () => {
     const newProps = { ...wrapperProps, uiState: undefined } as unknown as HeatmapRenderProps;
     const component = mountWithIntl(<HeatmapComponent {...newProps} />);
+    await actWithTimeout(async () => {
+      await component.update();
+    });
     await act(async () => {
       expect(findTestSubject(component, 'vislibToggleLegend').length).toBe(0);
     });
@@ -120,6 +142,9 @@ describe('HeatmapComponent', function () {
 
   it('renders the legendColorPicker if uiState is set', async () => {
     const component = mountWithIntl(<HeatmapComponent {...wrapperProps} />);
+    await actWithTimeout(async () => {
+      await component.update();
+    });
     await act(async () => {
       expect(component.find(Settings).prop('legendColorPicker')).toBeDefined();
     });
@@ -128,6 +153,9 @@ describe('HeatmapComponent', function () {
   it('not renders the legendColorPicker if uiState is undefined', async () => {
     const newProps = { ...wrapperProps, uiState: undefined } as unknown as HeatmapRenderProps;
     const component = mountWithIntl(<HeatmapComponent {...newProps} />);
+    await actWithTimeout(async () => {
+      await component.update();
+    });
     await act(async () => {
       expect(component.find(Settings).prop('legendColorPicker')).toBeUndefined();
     });
@@ -161,6 +189,48 @@ describe('HeatmapComponent', function () {
         type: 'bands',
       });
     });
+  });
+
+  it('computes the bands correctly if only value accessor is provided', async () => {
+    const newData: Datatable = {
+      type: 'datatable',
+      rows: [{ 'col-0-1': 571.806 }],
+      columns: [{ id: 'col-0-1', name: 'Count', meta: { type: 'number' } }],
+    };
+    const newProps = {
+      ...wrapperProps,
+      data: newData,
+      args: { ...wrapperProps.args, lastRangeIsRightOpen: false },
+    } as unknown as HeatmapRenderProps;
+    const component = mountWithIntl(<HeatmapComponent {...newProps} />);
+    await act(async () => {
+      expect(component.find(Heatmap).prop('colorScale')).toEqual({
+        bands: [
+          { color: 'rgb(0, 0, 0)', end: 0, start: 0 },
+          { color: 'rgb(112, 38, 231)', end: Infinity, start: 571.806 },
+        ],
+        type: 'bands',
+      });
+    });
+  });
+
+  it('renders the axis titles', () => {
+    const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} />);
+    expect(component.find(Heatmap).prop('xAxisTitle')).toEqual('Dest');
+    expect(component.find(Heatmap).prop('yAxisTitle')).toEqual('Test');
+  });
+
+  it('renders custom axis titles if given', () => {
+    const newProps = {
+      ...wrapperProps,
+      args: {
+        ...wrapperProps.args,
+        gridConfig: { ...wrapperProps.args.gridConfig, xTitle: 'test1', yTitle: 'test2' },
+      },
+    } as unknown as HeatmapRenderProps;
+    const component = shallowWithIntl(<HeatmapComponent {...newProps} />);
+    expect(component.find(Heatmap).prop('xAxisTitle')).toEqual('test1');
+    expect(component.find(Heatmap).prop('yAxisTitle')).toEqual('test2');
   });
 
   it('hides the legend if the legend isVisible args is false', async () => {
@@ -242,5 +312,11 @@ describe('HeatmapComponent', function () {
       ],
     ]);
     expect(wrapperProps.onClickValue).toHaveBeenCalled();
+  });
+
+  it('does not add callbacks when not interactive', () => {
+    const component = shallowWithIntl(<HeatmapComponent {...wrapperProps} interactive={false} />);
+    expect(component.find(Settings).first().prop('onElementClick')).toBeUndefined();
+    expect(component.find(Settings).first().prop('onBrushEnd')).toBeUndefined();
   });
 });

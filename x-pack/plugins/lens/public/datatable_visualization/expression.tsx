@@ -9,12 +9,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
-
-import type { IAggType } from 'src/plugins/data/public';
-import { PaletteRegistry } from 'src/plugins/charts/public';
-import { IUiSettingsClient, ThemeServiceStart } from 'kibana/public';
-import { ExpressionRenderDefinition } from 'src/plugins/expressions';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
+import type { PaletteRegistry } from '@kbn/coloring';
+import type { IAggType } from '@kbn/data-plugin/public';
+import { IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DatatableComponent } from './components/table_basic';
 
 import type { ILensInterpreterRenderHandlers } from '../types';
@@ -41,7 +40,7 @@ export const getDatatableRenderer = (dependencies: {
     handlers: ILensInterpreterRenderHandlers
   ) => {
     const resolvedGetType = await dependencies.getType;
-    const { hasCompatibleActions } = handlers;
+    const { hasCompatibleActions, isInteractive } = handlers;
 
     // An entry for each table row, whether it has any actions attached to
     // ROW_CLICK_TRIGGER trigger.
@@ -81,6 +80,7 @@ export const getDatatableRenderer = (dependencies: {
             paletteService={dependencies.paletteService}
             getType={resolvedGetType}
             rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
+            interactive={isInteractive()}
             uiSettings={dependencies.uiSettings}
           />
         </I18nProvider>

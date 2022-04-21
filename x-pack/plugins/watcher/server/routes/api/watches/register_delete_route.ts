@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { RouteDependencies } from '../../../types';
 
 const bodySchema = schema.object({
@@ -25,7 +25,7 @@ function deleteWatches(dataClient: IScopedClusterClient, watchIds: string[]) {
       .deleteWatch({
         id: watchId,
       })
-      .then(({ body: success }) => ({ success }))
+      .then((success) => ({ success }))
       .catch((error) => ({ error }));
   });
 

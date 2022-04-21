@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Observable, Subject } from 'rxjs';
-import { first, map, shareReplay, takeUntil } from 'rxjs/operators';
-import { merge } from '@kbn/std';
+import { firstValueFrom, Observable, Subject } from 'rxjs';
+import { map, shareReplay, takeUntil } from 'rxjs/operators';
 
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
@@ -29,6 +28,7 @@ import { calculateStatus$ } from './status';
 import { isValidConnection } from './is_valid_connection';
 import { isInlineScriptingEnabled } from './is_scripting_enabled';
 import type { UnauthorizedErrorHandler } from './client/retry_unauthorized';
+import { mergeConfig } from './merge_config';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -41,7 +41,7 @@ export class ElasticsearchService
 {
   private readonly log: Logger;
   private readonly config$: Observable<ElasticsearchConfig>;
-  private stop$ = new Subject();
+  private stop$ = new Subject<void>();
   private kibanaVersion: string;
   private authHeaders?: IAuthHeadersStorage;
   private executionContextClient?: IExecutionContext;
@@ -60,7 +60,7 @@ export class ElasticsearchService
   public async preboot(): Promise<InternalElasticsearchServicePreboot> {
     this.log.debug('Prebooting elasticsearch service');
 
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = await firstValueFrom(this.config$);
     return {
       config: {
         hosts: config.hosts,
@@ -76,7 +76,7 @@ export class ElasticsearchService
   public async setup(deps: SetupDeps): Promise<InternalElasticsearchServiceSetup> {
     this.log.debug('Setting up elasticsearch service');
 
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = await firstValueFrom(this.config$);
 
     this.authHeaders = deps.http.authRequestHeaders;
     this.executionContextClient = deps.executionContext;
@@ -112,7 +112,7 @@ export class ElasticsearchService
       throw new Error('ElasticsearchService needs to be setup before calling start');
     }
 
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = await firstValueFrom(this.config$);
 
     // Log every error we may encounter in the connection to Elasticsearch
     this.esNodesCompatibility$.subscribe(({ isCompatible, message }) => {
@@ -141,9 +141,6 @@ export class ElasticsearchService
     return {
       client: this.client!,
       createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),
-      legacy: {
-        config$: this.config$,
-      },
     };
   }
 
@@ -157,10 +154,10 @@ export class ElasticsearchService
 
   private createClusterClient(
     type: string,
-    baseConfig: ElasticsearchConfig,
-    clientConfig?: Partial<ElasticsearchClientConfig>
+    baseConfig: ElasticsearchClientConfig,
+    clientConfig: Partial<ElasticsearchClientConfig> = {}
   ) {
-    const config = clientConfig ? merge({}, baseConfig, clientConfig) : baseConfig;
+    const config = mergeConfig(baseConfig, clientConfig);
     return new ClusterClient({
       config,
       logger: this.coreContext.logger.get('elasticsearch'),

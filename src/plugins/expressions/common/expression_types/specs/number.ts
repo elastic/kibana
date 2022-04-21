@@ -17,8 +17,8 @@ export const number: ExpressionTypeDefinition<typeof name, number> = {
   name,
   from: {
     null: () => 0,
-    boolean: (b) => Number(b),
-    string: (n) => {
+    boolean: (b: boolean) => Number(b),
+    string: (n: number) => {
       const value = Number(n);
       if (Number.isNaN(value)) {
         throw new Error(
@@ -42,7 +42,7 @@ export const number: ExpressionTypeDefinition<typeof name, number> = {
         value: { text },
       };
     },
-    datatable: (value): Datatable => ({
+    datatable: (value: number): Datatable => ({
       type: 'datatable',
       columns: [{ id: 'value', name: 'value', meta: { type: 'number' } }],
       rows: [{ value }],

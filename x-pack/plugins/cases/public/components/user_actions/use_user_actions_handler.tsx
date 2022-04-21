@@ -14,6 +14,7 @@ import { AddCommentRefObject } from '../add_comment';
 import { UserActionMarkdownRefObject } from './markdown_form';
 import { UserActionBuilderArgs, UserActionTreeProps } from './types';
 import { NEW_COMMENT_ID } from './constants';
+import { useDeleteComment } from '../../containers/use_delete_comment';
 
 export type UseUserActionsHandlerArgs = Pick<
   UserActionTreeProps,
@@ -30,6 +31,7 @@ export type UseUserActionsHandler = Pick<
   | 'handleOutlineComment'
   | 'handleSaveComment'
   | 'handleManageQuote'
+  | 'handleDeleteComment'
 > & { handleUpdate: (updatedCase: Case) => void };
 
 const isAddCommentRef = (
@@ -43,11 +45,12 @@ export const useUserActionsHandler = ({
   fetchUserActions,
   updateCase,
 }: UseUserActionsHandlerArgs): UseUserActionsHandler => {
-  const { detailName: caseId, subCaseId } = useCaseViewParams();
+  const { detailName: caseId } = useCaseViewParams();
   const { clearDraftComment, draftComment, hasIncomingLensState, openLensModal } =
     useLensDraftComment();
   const handlerTimeoutId = useRef(0);
   const { isLoadingIds, patchComment } = useUpdateComment();
+  const { deleteComment } = useDeleteComment();
   const [selectedOutlineCommentId, setSelectedOutlineCommentId] = useState('');
   const [manageMarkdownEditIds, setManageMarkdownEditIds] = useState<string[]>([]);
   const commentRefs = useRef<
@@ -75,10 +78,16 @@ export const useUserActionsHandler = ({
         fetchUserActions,
         version,
         updateCase,
-        subCaseId,
       });
     },
-    [caseId, fetchUserActions, patchComment, subCaseId, updateCase]
+    [caseId, fetchUserActions, patchComment, updateCase]
+  );
+
+  const handleDeleteComment = useCallback(
+    (id: string) => {
+      deleteComment({ caseId, commentId: id, fetchUserActions, updateCase });
+    },
+    [caseId, deleteComment, fetchUserActions, updateCase]
   );
 
   const handleOutlineComment = useCallback(
@@ -161,6 +170,7 @@ export const useUserActionsHandler = ({
     handleManageMarkdownEditId,
     handleOutlineComment,
     handleSaveComment,
+    handleDeleteComment,
     handleManageQuote,
     handleUpdate,
   };

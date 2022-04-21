@@ -7,29 +7,27 @@
 
 import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { INDEX_NAMES } from '../../../common/constants';
 import { RouteDependencies } from '../../types';
 // @ts-ignore
-import { WatchHistoryItem } from '../../models/watch_history_item/index';
+import { WatchHistoryItem } from '../../models/watch_history_item';
 
 const paramsSchema = schema.object({
   id: schema.string(),
 });
 
 function fetchHistoryItem(dataClient: IScopedClusterClient, watchHistoryItemId: string) {
-  return dataClient.asCurrentUser
-    .search({
-      index: INDEX_NAMES.WATCHER_HISTORY,
-      body: {
-        query: {
-          bool: {
-            must: [{ term: { _id: watchHistoryItemId } }],
-          },
+  return dataClient.asCurrentUser.search({
+    index: INDEX_NAMES.WATCHER_HISTORY,
+    body: {
+      query: {
+        bool: {
+          must: [{ term: { _id: watchHistoryItemId } }],
         },
       },
-    })
-    .then(({ body }) => body);
+    },
+  });
 }
 
 export function registerLoadHistoryRoute({

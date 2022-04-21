@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FieldValuePair } from '../../../../../common/correlations/types';
 import {
@@ -72,7 +72,7 @@ export const fetchBooleanFieldStats = async (
     field.fieldName,
     termFilters
   );
-  const { body } = await esClient.search<unknown, FieldStatsAggs>(request);
+  const body = await esClient.search<unknown, FieldStatsAggs>(request);
   const aggregations = body.aggregations;
   const stats: BooleanFieldStats = {
     fieldName: field.fieldName,

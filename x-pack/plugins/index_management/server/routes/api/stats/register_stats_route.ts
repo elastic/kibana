@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 const paramsSchema = schema.object({
   indexName: schema.string(),
@@ -41,7 +41,7 @@ export function registerStatsRoute({ router, lib: { handleEsError } }: RouteDepe
       };
 
       try {
-        const { body: hit } = await client.asCurrentUser.indices.stats(params);
+        const hit = await client.asCurrentUser.indices.stats(params);
 
         return response.ok({ body: formatHit(hit, indexName) });
       } catch (error) {

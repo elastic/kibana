@@ -5,18 +5,18 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from 'src/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 export type ESLicense = estypes.LicenseGetLicenseInformation;
 
 let cachedLicense: ESLicense | undefined;
 
 async function fetchLicense(esClient: ElasticsearchClient, local: boolean) {
-  const { body } = await esClient.license.get({
+  return await esClient.license.get({
     local,
   });
-  return body;
 }
+
 /**
  * Get the cluster's license from the connected node.
  *

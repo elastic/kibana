@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObject } from 'kibana/server';
+import { SavedObject } from '@kbn/core/server';
 import { CaseStatuses, CaseUserActionResponse } from '../../../common/api';
 import { getStatusInfo } from './lifespan';
 
@@ -193,7 +193,6 @@ function createStatusChangeSavedObject(
       action_id: '',
       case_id: '',
       comment_id: null,
-      sub_case_id: '',
     },
   };
 }

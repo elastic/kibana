@@ -6,16 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest } from 'kibana/server';
+import { KibanaRequest } from '@kbn/core/server';
 import { first } from 'lodash';
 import moment from 'moment';
 import {
   ActionGroup,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
-} from '../../../../../alerting/common';
-import { AlertExecutorOptions as RuleExecutorOptions } from '../../../../../alerting/server';
-import { MlPluginSetup } from '../../../../../ml/server';
+} from '@kbn/alerting-plugin/common';
+import { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { AlertStates, MetricAnomalyParams } from '../../../../common/alerting/metrics';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { MappedAnomalyHit } from '../../infra_ml';
@@ -83,7 +83,7 @@ export const createMetricAnomalyExecutor =
         typical,
         influencers,
       } = first(data as MappedAnomalyHit[])!;
-      const alert = services.alertInstanceFactory(`${nodeType}-${metric}`);
+      const alert = services.alertFactory.create(`${nodeType}-${metric}`);
 
       alert.scheduleActions(FIRED_ACTIONS_ID, {
         alertState: stateToAlertMessage[AlertStates.ALERT],

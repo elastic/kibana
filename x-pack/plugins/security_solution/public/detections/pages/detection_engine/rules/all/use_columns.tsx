@@ -27,13 +27,12 @@ import { LinkAnchor } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { getRuleDetailsUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { PopoverItems } from '../../../../../common/components/popover_items';
-import { useStateToaster } from '../../../../../common/components/toasters';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { canEditRuleWithActions, getToolTipContent } from '../../../../../common/utils/privileges';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
 import { SeverityBadge } from '../../../../components/rules/severity_badge';
 import { Rule } from '../../../../containers/detection_engine/rules';
-import { useRulesTableContext } from '../../../../containers/detection_engine/rules/rules_table/rules_table_context';
+import { useRulesTableContext } from './rules_table/rules_table_context';
 import * as i18n from '../translations';
 import { PopoverTooltip } from './popover_tooltip';
 import { TableHeaderTooltipCell } from './table_header_tooltip_cell';
@@ -45,6 +44,7 @@ import {
   DurationMetric,
   RuleExecutionSummary,
 } from '../../../../../../common/detection_engine/schemas/common';
+import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
@@ -91,36 +91,40 @@ const useEnabledColumn = ({ hasPermissions }: ColumnsProps): TableColumn => {
   );
 };
 
-const useRuleNameColumn = (): TableColumn => {
+export const RuleLink = ({ name, id }: Pick<Rule, 'id' | 'name'>) => {
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const { navigateToApp } = useKibana().services.application;
 
+  return (
+    <EuiToolTip content={name} anchorClassName="eui-textTruncate">
+      <LinkAnchor
+        data-test-subj="ruleName"
+        onClick={(ev: { preventDefault: () => void }) => {
+          ev.preventDefault();
+          navigateToApp(APP_UI_ID, {
+            deepLinkId: SecurityPageName.rules,
+            path: getRuleDetailsUrl(id),
+          });
+        }}
+        href={formatUrl(getRuleDetailsUrl(id))}
+      >
+        {name}
+      </LinkAnchor>
+    </EuiToolTip>
+  );
+};
+
+const useRuleNameColumn = (): TableColumn => {
   return useMemo(
     () => ({
       field: 'name',
       name: i18n.COLUMN_RULE,
-      render: (value: Rule['name'], item: Rule) => (
-        <EuiToolTip content={value} anchorClassName="eui-textTruncate">
-          <LinkAnchor
-            data-test-subj="ruleName"
-            onClick={(ev: { preventDefault: () => void }) => {
-              ev.preventDefault();
-              navigateToApp(APP_UI_ID, {
-                deepLinkId: SecurityPageName.rules,
-                path: getRuleDetailsUrl(item.id),
-              });
-            }}
-            href={formatUrl(getRuleDetailsUrl(item.id))}
-          >
-            {value}
-          </LinkAnchor>
-        </EuiToolTip>
-      ),
+      render: (value: Rule['name'], item: Rule) => <RuleLink id={item.id} name={value} />,
       sortable: true,
       truncateText: true,
       width: '38%',
     }),
-    [formatUrl, navigateToApp]
+    []
   );
 };
 
@@ -156,13 +160,13 @@ const TAGS_COLUMN: TableColumn = {
 const useActionsColumn = (): EuiTableActionsColumnType<Rule> => {
   const { navigateToApp } = useKibana().services.application;
   const hasActionsPrivileges = useHasActionsPrivileges();
-  const [, dispatchToaster] = useStateToaster();
+  const toasts = useAppToasts();
   const { reFetchRules, setLoadingRules } = useRulesTableContext().actions;
 
   return useMemo(
     () => ({
       actions: getRulesTableActions(
-        dispatchToaster,
+        toasts,
         navigateToApp,
         reFetchRules,
         hasActionsPrivileges,
@@ -170,7 +174,7 @@ const useActionsColumn = (): EuiTableActionsColumnType<Rule> => {
       ),
       width: '40px',
     }),
-    [dispatchToaster, hasActionsPrivileges, navigateToApp, reFetchRules, setLoadingRules]
+    [hasActionsPrivileges, navigateToApp, reFetchRules, setLoadingRules, toasts]
   );
 };
 
@@ -192,7 +196,7 @@ export const useRulesColumns = ({ hasPermissions }: ColumnsProps): TableColumn[]
             {value}
           </EuiText>
         ),
-        sortable: !!isInMemorySorting,
+        sortable: true,
         truncateText: true,
         width: '85px',
       },
@@ -200,7 +204,7 @@ export const useRulesColumns = ({ hasPermissions }: ColumnsProps): TableColumn[]
         field: 'severity',
         name: i18n.COLUMN_SEVERITY,
         render: (value: Rule['severity']) => <SeverityBadge value={value} />,
-        sortable: !!isInMemorySorting,
+        sortable: true,
         truncateText: true,
         width: '12%',
       },
@@ -342,7 +346,7 @@ export const useMonitoringColumns = ({ hasPermissions }: ColumnsProps): TableCol
                               href={`${docLinks.links.siem.troubleshootGaps}`}
                               target="_blank"
                             >
-                              {'see documentation'}
+                              {i18n.COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION}
                             </EuiLink>
                           ),
                         }}

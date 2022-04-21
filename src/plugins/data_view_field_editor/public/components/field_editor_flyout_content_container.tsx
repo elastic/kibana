@@ -7,10 +7,11 @@
  */
 
 import React, { useCallback, useState, useMemo } from 'react';
-import { DocLinksStart, NotificationsStart, CoreStart } from 'src/core/public';
+import { DocLinksStart, NotificationsStart, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import {
   DataViewField,
   DataView,
@@ -51,7 +52,7 @@ export interface Props {
   apiService: ApiService;
   /** Field format */
   fieldFormatEditors: PluginStart['fieldFormatEditors'];
-  fieldFormats: DataPublicPluginStart['fieldFormats'];
+  fieldFormats: FieldFormatsStart;
   uiSettings: CoreStart['uiSettings'];
 }
 

@@ -24,13 +24,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate, FormattedTime, FormattedRelative } from '@kbn/i18n-react';
 import moment from 'moment-timezone';
 
-import {
+import type {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
   PieVisualizationState,
   TermsIndexPatternColumn,
-} from '../../../lens/public';
-import { FilterStateStore, DataView } from '../../../../../src/plugins/data/common';
+} from '@kbn/lens-plugin/public';
+import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/lens-plugin/common/constants';
+import { FilterStateStore, DataView } from '@kbn/data-plugin/common';
 import { useKibana } from '../common/lib/kibana';
 import { OsqueryManagerPackagePolicyInputStream } from '../../common/types';
 import { ScheduledQueryErrorsTable } from './scheduled_query_errors_table';
@@ -91,7 +92,7 @@ function getLensAttributes(
         },
       } as TermsIndexPatternColumn,
       'ed999e9d-204c-465b-897f-fe1a125b39ed': {
-        sourceField: 'Records',
+        sourceField: RECORDS_FIELD,
         isBucketed: false,
         dataType: 'number',
         scale: 'ratio',
@@ -206,6 +207,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
   mode,
 }) => {
   const lensService = useKibana().services.lens;
+  const isLensAvailable = lensService?.canUseEditor();
 
   const handleClick = useCallback(
     (event) => {
@@ -229,14 +231,13 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
     [actionId, agentIds, endDate, lensService, mode, startDate]
   );
 
+  if (!isLensAvailable) {
+    return null;
+  }
+
   if (buttonType === ViewResultsActionButtonType.button) {
     return (
-      <EuiButtonEmpty
-        size="xs"
-        iconType="lensApp"
-        onClick={handleClick}
-        disabled={!lensService?.canUseEditor()}
-      >
+      <EuiButtonEmpty size="xs" iconType="lensApp" onClick={handleClick} disabled={false}>
         {VIEW_IN_LENS}
       </EuiButtonEmpty>
     );
@@ -246,7 +247,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
     <EuiToolTip content={VIEW_IN_LENS}>
       <EuiButtonIcon
         iconType="lensApp"
-        disabled={!lensService?.canUseEditor()}
+        disabled={false}
         onClick={handleClick}
         aria-label={VIEW_IN_LENS}
       />
@@ -263,12 +264,15 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   endDate,
   startDate,
 }) => {
-  const urlGenerator = useKibana().services.discover?.urlGenerator;
+  const { discover, application } = useKibana().services;
+  const locator = discover?.locator;
+  const discoverPermissions = application.capabilities.discover;
+
   const [discoverUrl, setDiscoverUrl] = useState<string>('');
 
   useEffect(() => {
     const getDiscoverUrl = async () => {
-      if (!urlGenerator?.createUrl) return;
+      if (!locator) return;
 
       const agentIdsQuery = agentIds?.length
         ? {
@@ -279,7 +283,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
           }
         : null;
 
-      const newUrl = await urlGenerator.createUrl({
+      const newUrl = await locator.getUrl({
         indexPatternId: 'logs-*',
         filters: [
           {
@@ -332,8 +336,13 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
       });
       setDiscoverUrl(newUrl);
     };
+
     getDiscoverUrl();
-  }, [actionId, agentIds, endDate, startDate, urlGenerator]);
+  }, [actionId, agentIds, endDate, startDate, locator]);
+
+  if (!discoverPermissions.show) {
+    return null;
+  }
 
   if (buttonType === ViewResultsActionButtonType.button) {
     return (
@@ -612,6 +621,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
       setLogsDataView(dataView[0]);
     };
+
     fetchLogsDataView();
   }, [dataViews]);
 
@@ -638,6 +648,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           />
         );
       }
+
       setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
     },
     [agentIds, itemIdToExpandedRowMap, packName]

@@ -7,44 +7,44 @@
 import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { UsageCollectionStart } from 'src/plugins/usage_collection/public';
-import type { ConfigSchema } from '.';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import {
   AppMountParameters,
-  AppNavLinkStatus,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
-} from '../../../../src/core/public';
+} from '@kbn/core/public';
 import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
-} from '../../../../src/plugins/data/public';
-import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import { Start as InspectorPluginStart } from '../../../../src/plugins/inspector/public';
+} from '@kbn/data-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type {
   PluginSetupContract as AlertingPluginPublicSetup,
   PluginStartContract as AlertingPluginPublicStart,
-} from '../../alerting/public';
-import type { FeaturesPluginSetup } from '../../features/public';
-import type { FleetStart } from '../../fleet/public';
-import type { LicensingPluginSetup } from '../../licensing/public';
-import type { MapsStartApi } from '../../maps/public';
-import type { MlPluginSetup, MlPluginStart } from '../../ml/public';
+} from '@kbn/alerting-plugin/public';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/public';
+import type { FleetStart } from '@kbn/fleet-plugin/public';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { MapsStartApi } from '@kbn/maps-plugin/public';
+import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import {
   FetchDataParams,
-  HasDataParams,
   METRIC_TYPE,
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
-} from '../../observability/public';
+} from '@kbn/observability-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
-} from '../../triggers_actions_ui/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { enableServiceGroups } from '@kbn/observability-plugin/public';
 import { registerApmAlerts } from './components/alerting/register_apm_alerts';
 import {
   getApmEnrollmentFlyoutData,
@@ -54,7 +54,7 @@ import { getLazyApmAgentsTabExtension } from './components/fleet_integration/laz
 import { getLazyAPMPolicyCreateExtension } from './components/fleet_integration/lazy_apm_policy_create_extension';
 import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/lazy_apm_policy_edit_extension';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
-import type { SecurityPluginStart } from '../../security/public';
+import type { ConfigSchema } from '.';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 
@@ -84,6 +84,7 @@ export interface ApmPluginStartDeps {
   observability: ObservabilityPublicStart;
   fleet?: FleetStart;
   security?: SecurityPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
@@ -118,6 +119,11 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
     }
 
+    const serviceGroupsEnabled = core.uiSettings.get<boolean>(
+      enableServiceGroups,
+      false
+    );
+
     // register observability nav if user has access to plugin
     plugins.observability.navigation.registerSections(
       from(core.getStartServices()).pipe(
@@ -129,7 +135,26 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                 label: 'APM',
                 sortKey: 400,
                 entries: [
-                  { label: servicesTitle, app: 'apm', path: '/services' },
+                  serviceGroupsEnabled
+                    ? {
+                        label: servicesTitle,
+                        app: 'apm',
+                        path: '/service-groups',
+                        matchPath(currentPath: string) {
+                          return [
+                            '/service-groups',
+                            '/services',
+                            '/service-map',
+                          ].some((testPath) =>
+                            currentPath.startsWith(testPath)
+                          );
+                        },
+                      }
+                    : {
+                        label: servicesTitle,
+                        app: 'apm',
+                        path: '/services',
+                      },
                   { label: tracesTitle, app: 'apm', path: '/traces' },
                   {
                     label: dependenciesTitle,
@@ -149,24 +174,15 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                       }
                     },
                   },
-                  { label: serviceMapTitle, app: 'apm', path: '/service-map' },
-                ],
-              },
-
-              // UX navigation
-              {
-                label: 'User Experience',
-                sortKey: 600,
-                entries: [
-                  {
-                    label: i18n.translate('xpack.apm.ux.overview.heading', {
-                      defaultMessage: 'Dashboard',
-                    }),
-                    app: 'ux',
-                    path: '/',
-                    matchFullPath: true,
-                    ignoreTrailingSlash: true,
-                  },
+                  ...(serviceGroupsEnabled
+                    ? []
+                    : [
+                        {
+                          label: serviceMapTitle,
+                          app: 'apm',
+                          path: '/service-map',
+                        },
+                      ]),
                 ],
               },
             ];
@@ -236,32 +252,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       },
     });
 
-    const getUxDataHelper = async () => {
-      const { fetchUxOverviewDate, hasRumData } = await import(
-        './components/app/rum_dashboard/ux_overview_fetchers'
-      );
-      const { createCallApmApi } = await import(
-        './services/rest/create_call_apm_api'
-      );
-      // have to do this here as well in case app isn't mounted yet
-      createCallApmApi(core);
-
-      return { fetchUxOverviewDate, hasRumData };
-    };
-
     const { observabilityRuleTypeRegistry } = plugins.observability;
-
-    plugins.observability.dashboard.register({
-      appName: 'ux',
-      hasData: async (params?: HasDataParams) => {
-        const dataHelper = await getUxDataHelper();
-        return await dataHelper.hasRumData(params!);
-      },
-      fetchData: async (params: FetchDataParams) => {
-        const dataHelper = await getUxDataHelper();
-        return await dataHelper.fetchUxOverviewDate(params);
-      },
-    });
 
     core.application.register({
       id: 'apm',
@@ -272,6 +263,15 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
       deepLinks: [
+        ...(serviceGroupsEnabled
+          ? [
+              {
+                id: 'service-groups-list',
+                title: 'Service groups',
+                path: '/service-groups',
+              },
+            ]
+          : []),
         { id: 'services', title: servicesTitle, path: '/services' },
         { id: 'traces', title: tracesTitle, path: '/traces' },
         { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
@@ -297,49 +297,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     });
 
     registerApmAlerts(observabilityRuleTypeRegistry);
-
-    core.application.register({
-      id: 'ux',
-      title: 'User Experience',
-      order: 8500,
-      euiIconType: 'logoObservability',
-      category: DEFAULT_APP_CATEGORIES.observability,
-      navLinkStatus: config.ui.enabled
-        ? AppNavLinkStatus.default
-        : AppNavLinkStatus.hidden,
-      keywords: [
-        'RUM',
-        'Real User Monitoring',
-        'DEM',
-        'Digital Experience Monitoring',
-        'EUM',
-        'End User Monitoring',
-        'UX',
-        'Javascript',
-        'APM',
-        'Mobile',
-        'digital',
-        'performance',
-        'web performance',
-        'web perf',
-      ],
-      async mount(appMountParameters: AppMountParameters<unknown>) {
-        // Load application bundle and Get start service
-        const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
-          import('./application/ux_app'),
-          core.getStartServices(),
-        ]);
-
-        return renderApp({
-          core: coreStart,
-          deps: pluginSetupDeps,
-          appMountParameters,
-          config,
-          corePlugins: corePlugins as ApmPluginStartDeps,
-          observabilityRuleTypeRegistry,
-        });
-      },
-    });
 
     return {};
   }

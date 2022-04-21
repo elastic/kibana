@@ -19,11 +19,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ApplicationStart } from 'kibana/public';
-import { IKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
-import { VisualizationListItem } from 'src/plugins/visualizations/public';
-import type { SavedObjectsTaggingApi } from 'src/plugins/saved_objects_tagging_oss/public';
-import { RedirectAppLinks } from '../../../../kibana_react/public';
+import { ApplicationStart } from '@kbn/core/public';
+import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { VisualizationListItem } from '../..';
 import { getVisualizeListItemLink } from './get_visualize_list_item_link';
 import { getUsageCollector } from '../../services';
 import { VISUALIZE_APP_NAME } from '../../../common/constants';
@@ -59,11 +59,11 @@ const getBadge = (item: VisualizationListItem) => {
         className="visListingTable__experimentalIcon"
         label="E"
         title={i18n.translate('visualizations.listing.experimentalTitle', {
-          defaultMessage: 'Experimental',
+          defaultMessage: 'Technical preview',
         })}
         tooltipContent={i18n.translate('visualizations.listing.experimentalTooltip', {
           defaultMessage:
-            'This visualization might be changed or removed in a future release and is not subject to the support SLA.',
+            'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
         })}
       />
     );

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { coreMock } from '@kbn/core/server/mocks';
 import { ExpressionsServerSetup, ExpressionsServerStart } from '.';
 import { plugin as pluginInitializer } from '.';
-import { coreMock } from '../../../core/server/mocks';
 
 export type Setup = jest.Mocked<ExpressionsServerSetup>;
 export type Start = jest.Mocked<ExpressionsServerStart>;
@@ -21,6 +21,7 @@ const createSetupContract = (): Setup => ({
   registerFunction: jest.fn(),
   registerRenderer: jest.fn(),
   registerType: jest.fn(),
+  getAllMigrations: jest.fn(),
 });
 
 const createStartContract = (): Start =>
@@ -30,6 +31,10 @@ const createStartContract = (): Start =>
     getRenderer: jest.fn(),
     getType: jest.fn(),
     run: jest.fn(),
+    telemetry: jest.fn(),
+    extract: jest.fn(),
+    inject: jest.fn(),
+    getAllMigrations: jest.fn(),
   } as unknown as Start);
 
 const createPlugin = async () => {

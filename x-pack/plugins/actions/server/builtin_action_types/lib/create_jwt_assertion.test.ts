@@ -8,10 +8,10 @@
 jest.mock('jsonwebtoken', () => ({
   sign: jest.fn(),
 }));
-// eslint-disable-next-line import/no-extraneous-dependencies
+
 import jwt from 'jsonwebtoken';
-import { Logger } from '../../../../../../src/core/server';
-import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createJWTAssertion } from './create_jwt_assertion';
 
 const jwtSign = jwt.sign as jest.Mock;

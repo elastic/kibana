@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { createDatatableUtilitiesMock } from '../common/mocks';
 import { DataPlugin, DataViewsContract } from '.';
-import { fieldFormatsServiceMock } from '../../field_formats/public/mocks';
 import { searchServiceMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
 import { AutocompleteStart, AutocompleteSetup } from './autocomplete';
@@ -58,13 +59,10 @@ const createStartContract = (): Start => {
       createFiltersFromRangeSelectAction: jest.fn(),
     },
     autocomplete: autocompleteStartMock,
+    datatableUtilities: createDatatableUtilitiesMock(),
     search: searchServiceMock.createStartContract(),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     query: queryStartMock,
-    ui: {
-      IndexPatternSelect: jest.fn(),
-      SearchBar: jest.fn().mockReturnValue(null),
-    },
     dataViews,
     /**
      * @deprecated Use dataViews service instead. All index pattern interfaces were renamed.

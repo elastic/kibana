@@ -72,7 +72,9 @@ export const JobFilterBar: FC<JobFilterBarProps> = ({ queryText, setFilters }) =
   };
 
   useEffect(() => {
-    setFilters(queryInstance);
+    if (queryText !== undefined) {
+      setFilters(queryInstance);
+    }
   }, [queryText]);
 
   const filters: SearchFilterConfig[] = useMemo(

@@ -5,9 +5,9 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Logger } from 'kibana/server';
-import { CollectorFetchContext } from '../../../../../src/plugins/usage_collection/server';
-import { SEARCH_SESSION_TYPE } from '../../../../../src/plugins/data/common';
+import { Logger } from '@kbn/core/server';
+import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
+import { SEARCH_SESSION_TYPE } from '@kbn/data-plugin/common';
 import { ReportedUsage } from './register';
 
 interface SessionPersistedTermsBucket {
@@ -18,7 +18,7 @@ interface SessionPersistedTermsBucket {
 export function fetchProvider(kibanaIndex: string, logger: Logger) {
   return async ({ esClient }: CollectorFetchContext): Promise<ReportedUsage> => {
     try {
-      const { body: esResponse } = await esClient.search<unknown>({
+      const esResponse = await esClient.search<unknown>({
         index: kibanaIndex,
         body: {
           size: 0,

@@ -20,41 +20,20 @@ import { isFunction, defaults, cloneDeep } from 'lodash';
 import { Assign } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 
+import { IAggConfigs, ISearchSource, AggConfigSerialized } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { getSavedSearch, throwErrorOnSavedSearchUrlConflict } from '@kbn/discover-plugin/public';
 import { PersistedState } from './persisted_state';
 import { getTypes, getAggs, getSearch, getSavedObjects, getSpaces } from './services';
-import {
-  IAggConfigs,
-  IndexPattern,
-  ISearchSource,
-  AggConfigSerialized,
-  SerializedSearchSourceFields,
-} from '../../data/public';
 import { BaseVisType } from './vis_types';
-import { VisParams } from '../common/types';
+import { SerializedVis, SerializedVisData, VisParams } from '../common/types';
 
-import { getSavedSearch, throwErrorOnSavedSearchUrlConflict } from '../../discover/public';
-
-export interface SerializedVisData {
-  expression?: string;
-  aggs: AggConfigSerialized[];
-  searchSource: SerializedSearchSourceFields;
-  savedSearchId?: string;
-}
-
-export interface SerializedVis<T = VisParams> {
-  id?: string;
-  title: string;
-  description?: string;
-  type: string;
-  params: T;
-  uiState?: any;
-  data: SerializedVisData;
-}
+export type { SerializedVis, SerializedVisData };
 
 export interface VisData {
   ast?: string;
   aggs?: IAggConfigs;
-  indexPattern?: IndexPattern;
+  indexPattern?: DataView;
   searchSource?: ISearchSource;
   savedSearchId?: string;
 }
@@ -189,7 +168,7 @@ export class Vis<TVisParams = VisParams> {
   }
 
   serialize(): SerializedVis {
-    const aggs = this.data.aggs ? this.data.aggs.aggs.map((agg) => agg.toJSON()) : [];
+    const aggs = this.data.aggs ? this.data.aggs.aggs.map((agg) => agg.serialize()) : [];
     return {
       id: this.id,
       title: this.title,

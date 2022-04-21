@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableExamplesStart } from 'examples/embeddable_examples/public/plugin';
-import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '../../../src/core/public';
-import { UiActionsService } from '../../../src/plugins/ui_actions/public';
-import { EmbeddableStart } from '../../../src/plugins/embeddable/public';
-import { Start as InspectorStart } from '../../../src/plugins/inspector/public';
-import { DeveloperExamplesSetup } from '../../developer_examples/public';
+import { EmbeddableExamplesStart } from '@kbn/embeddable-examples-plugin/public/plugin';
+import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '@kbn/core/public';
+import { UiActionsService } from '@kbn/ui-actions-plugin/public';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import img from './embeddables.png';
 
 interface StartDeps {
@@ -34,7 +34,12 @@ export class EmbeddableExplorerPlugin implements Plugin<void, void, {}, StartDep
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app');
-        await depsStart.embeddableExamples.createSampleData();
+        try {
+          await depsStart.embeddableExamples.createSampleData();
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error('Failed to create sample data', error);
+        }
         return renderApp(
           {
             notifications: coreStart.notifications,
@@ -63,7 +68,7 @@ export class EmbeddableExplorerPlugin implements Plugin<void, void, {}, StartDep
       links: [
         {
           label: 'README',
-          href: 'https://github.com/elastic/kibana/tree/main/src/plugins/embeddable/README.md',
+          href: 'https://github.com/elastic/kibana/tree/main/src/plugins/embeddable/README.asciidoc',
           iconType: 'logoGithub',
           target: '_blank',
           size: 's',

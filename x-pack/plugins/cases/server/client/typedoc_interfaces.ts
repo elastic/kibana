@@ -27,9 +27,6 @@ import {
   CasesResponse,
   CaseUserActionsResponse,
   CommentsResponse,
-  SubCaseResponse,
-  SubCasesFindResponse,
-  SubCasesResponse,
 } from '../../common/api';
 
 /**
@@ -51,9 +48,5 @@ export interface ICasesConfigurePatch extends CasesConfigurePatch {}
 
 export interface ICommentsResponse extends CommentsResponse {}
 export interface IAllCommentsResponse extends AllCommentsResponse {}
-
-export interface ISubCasesFindResponse extends SubCasesFindResponse {}
-export interface ISubCaseResponse extends SubCaseResponse {}
-export interface ISubCasesResponse extends SubCasesResponse {}
 
 export interface ICaseUserActionsResponse extends CaseUserActionsResponse {}

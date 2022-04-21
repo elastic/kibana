@@ -19,21 +19,30 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import dfaImage from './data_frame_analytics_kibana.png';
+import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 import { useMlKibana } from '../../../../../contexts/kibana';
+import { useNavigateToPath } from '../../../../../contexts/kibana';
+import { ML_PAGES } from '../../../../../../../common/constants/locator';
+import { checkPermission } from '../../../../../capabilities/check_capabilities';
 
-interface Props {
-  disabled: boolean;
-  onCreateFirstJobClick: () => void;
-}
-
-export const AnalyticsEmptyPrompt: FC<Props> = ({ disabled, onCreateFirstJobClick }) => {
+export const AnalyticsEmptyPrompt: FC = () => {
   const {
     services: {
       docLinks,
       http: { basePath },
     },
   } = useMlKibana();
+  const disabled =
+    !mlNodesAvailable() ||
+    !checkPermission('canCreateDataFrameAnalytics') ||
+    !checkPermission('canStartStopDataFrameAnalytics');
+
   const transformsLink = `${basePath.get()}/app/management/data/transform`;
+  const navigateToPath = useNavigateToPath();
+
+  const navigateToSourceSelection = async () => {
+    await navigateToPath(ML_PAGES.DATA_FRAME_ANALYTICS_SOURCE_SELECTION);
+  };
 
   return (
     <EuiEmptyPrompt
@@ -63,7 +72,7 @@ export const AnalyticsEmptyPrompt: FC<Props> = ({ disabled, onCreateFirstJobClic
           <p>
             <FormattedMessage
               id="xpack.ml.overview.analyticsList.emptyPromptText"
-              defaultMessage="Data frame analytics enables you to perform outlier detection, regression, or classification analysis and put the annotated data in a new index. The classification and regression trained models can also be used for inference in pipelines and aggregations."
+              defaultMessage="Train outlier detection, regression, or classification machine learning models using data frame analytics."
             />
           </p>
           <EuiCallOut
@@ -71,13 +80,26 @@ export const AnalyticsEmptyPrompt: FC<Props> = ({ disabled, onCreateFirstJobClic
             title={
               <FormattedMessage
                 id="xpack.ml.overview.analyticsList.emptyPromptHelperText"
-                defaultMessage="Data frame analytics requires specifically structured source data. Use {transforms} to create data frames before you create the jobs."
+                defaultMessage="Before building a data frame analytics job, use {transforms} to construct an {sourcedata}."
                 values={{
                   transforms: (
                     <EuiLink href={transformsLink} target="blank" color={'accent'}>
                       <FormattedMessage
                         id="xpack.ml.overview.gettingStartedSectionTransforms"
-                        defaultMessage="Elasticsearch's transforms"
+                        defaultMessage="transforms"
+                      />
+                    </EuiLink>
+                  ),
+                  sourcedata: (
+                    <EuiLink
+                      href={docLinks.links.ml.dFAPrepareData}
+                      target="blank"
+                      color={'accent'}
+                      external
+                    >
+                      <FormattedMessage
+                        id="xpack.ml.overview.gettingStartedSectionSourceData"
+                        defaultMessage="entity-centric source data set"
                       />
                     </EuiLink>
                   ),
@@ -90,7 +112,7 @@ export const AnalyticsEmptyPrompt: FC<Props> = ({ disabled, onCreateFirstJobClic
       }
       actions={[
         <EuiButton
-          onClick={onCreateFirstJobClick}
+          onClick={navigateToSourceSelection}
           isDisabled={disabled}
           color="primary"
           iconType="plusInCircle"

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import React, { useState } from 'react';
 import { CreatePreBuiltRules } from '../../../../containers/detection_engine/rules';
-import * as i18n from '../translations';
+import { RulesFeatureTour } from './feature_tour/rules_feature_tour';
 import { RulesTables } from './rules_tables';
+import { AllRulesTabs, RulesTableToolbar } from './rules_table_toolbar';
 
 interface AllRulesProps {
   createPrePackagedRules: CreatePreBuiltRules | null;
@@ -20,27 +21,8 @@ interface AllRulesProps {
   rulesInstalled: number | null;
   rulesNotInstalled: number | null;
   rulesNotUpdated: number | null;
-  setRefreshRulesData: (refreshRule: () => Promise<void>) => void;
 }
 
-export enum AllRulesTabs {
-  rules = 'rules',
-  monitoring = 'monitoring',
-  exceptions = 'exceptions',
-}
-
-const allRulesTabs = [
-  {
-    id: AllRulesTabs.rules,
-    name: i18n.RULES_TAB,
-    disabled: false,
-  },
-  {
-    id: AllRulesTabs.monitoring,
-    name: i18n.MONITORING_TAB,
-    disabled: false,
-  },
-];
 /**
  * Table Component for displaying all Rules for a given cluster. Provides the ability to filter
  * by name, sort by enabled, and perform the following actions:
@@ -59,32 +41,13 @@ export const AllRules = React.memo<AllRulesProps>(
     rulesInstalled,
     rulesNotInstalled,
     rulesNotUpdated,
-    setRefreshRulesData,
   }) => {
-    const [allRulesTab, setAllRulesTab] = useState(AllRulesTabs.rules);
-
-    const tabs = useMemo(
-      () => (
-        <EuiTabs>
-          {allRulesTabs.map((tab) => (
-            <EuiTab
-              data-test-subj={`allRulesTableTab-${tab.id}`}
-              onClick={() => setAllRulesTab(tab.id)}
-              isSelected={tab.id === allRulesTab}
-              disabled={tab.disabled}
-              key={tab.id}
-            >
-              {tab.name}
-            </EuiTab>
-          ))}
-        </EuiTabs>
-      ),
-      [allRulesTab]
-    );
+    const [activeTab, setActiveTab] = useState(AllRulesTabs.rules);
 
     return (
       <>
-        {tabs}
+        <RulesFeatureTour />
+        <RulesTableToolbar activeTab={activeTab} onTabChange={setActiveTab} />
         <EuiSpacer />
         <RulesTables
           createPrePackagedRules={createPrePackagedRules}
@@ -95,8 +58,7 @@ export const AllRules = React.memo<AllRulesProps>(
           rulesInstalled={rulesInstalled}
           rulesNotInstalled={rulesNotInstalled}
           rulesNotUpdated={rulesNotUpdated}
-          selectedTab={allRulesTab}
-          setRefreshRulesData={setRefreshRulesData}
+          selectedTab={activeTab}
         />
       </>
     );

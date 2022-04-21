@@ -10,6 +10,11 @@ import rison from 'rison-node';
 import { Duration } from 'moment/moment';
 import { memoize } from 'lodash';
 import type { MlDatafeed } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  FIELD_FORMAT_IDS,
+  IFieldFormat,
+  SerializedFieldFormat,
+} from '@kbn/field-formats-plugin/common';
 import { MlClient } from '../ml_client';
 import {
   MlAnomalyDetectionAlertParams,
@@ -26,18 +31,12 @@ import {
   TopHitsResultsKeys,
 } from '../../../common/types/alerts';
 import { AnomalyDetectionAlertContext } from './register_anomaly_detection_alert_type';
-import { MlJobsResponse } from '../../../common/types/job_service';
 import { resolveMaxTimeInterval } from '../../../common/util/job_utils';
 import { isDefined } from '../../../common/types/guards';
 import { getTopNBuckets, resolveLookbackInterval } from '../../../common/util/alerts';
 import type { DatafeedsService } from '../../models/job_service/datafeeds';
 import { getEntityFieldName, getEntityFieldValue } from '../../../common/util/anomaly_utils';
 import { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
-import {
-  FIELD_FORMAT_IDS,
-  IFieldFormat,
-  SerializedFieldFormat,
-} from '../../../../../../src/plugins/field_formats/common';
 import type { AwaitReturnType } from '../../../common/types/common';
 import { getTypicalAndActualValues } from '../../models/results_service/results_service';
 import type { GetDataViewsService } from '../data_views_utils';
@@ -375,9 +374,7 @@ export function alertingServiceProvider(
     ];
 
     // Extract jobs from group ids and make sure provided jobs assigned to a current space
-    const jobsResponse = (
-      await mlClient.getJobs<MlJobsResponse>({ job_id: jobAndGroupIds.join(',') })
-    ).body.jobs;
+    const jobsResponse = (await mlClient.getJobs({ job_id: jobAndGroupIds.join(',') })).jobs;
 
     if (jobsResponse.length === 0) {
       // Probably assigned groups don't contain any jobs anymore.
@@ -454,7 +451,7 @@ export function alertingServiceProvider(
         : getResultTypeAggRequest(params.resultType, params.severity),
     };
 
-    const response = await mlClient.anomalySearch(
+    const body = await mlClient.anomalySearch(
       {
         // @ts-expect-error
         body: requestBody,
@@ -462,7 +459,7 @@ export function alertingServiceProvider(
       jobIds
     );
 
-    const result = response.body.aggregations;
+    const result = body.aggregations;
 
     const resultsLabel = getAggResultsLabel(params.resultType);
 
@@ -512,9 +509,7 @@ export function alertingServiceProvider(
     ];
 
     // Extract jobs from group ids and make sure provided jobs assigned to a current space
-    const jobsResponse = (
-      await mlClient.getJobs<MlJobsResponse>({ job_id: jobAndGroupIds.join(',') })
-    ).body.jobs;
+    const jobsResponse = (await mlClient.getJobs({ job_id: jobAndGroupIds.join(',') })).jobs;
 
     if (jobsResponse.length === 0) {
       // Probably assigned groups don't contain any jobs anymore.
@@ -595,7 +590,7 @@ export function alertingServiceProvider(
       },
     };
 
-    const response = await mlClient.anomalySearch(
+    const body = await mlClient.anomalySearch(
       {
         // @ts-expect-error
         body: requestBody,
@@ -603,7 +598,7 @@ export function alertingServiceProvider(
       jobIds
     );
 
-    const result = response.body.aggregations as {
+    const result = body.aggregations as {
       alerts_over_time: {
         buckets: Array<
           {

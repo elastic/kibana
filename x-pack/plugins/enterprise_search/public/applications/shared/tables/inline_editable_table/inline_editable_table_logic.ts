@@ -48,6 +48,7 @@ interface InlineEditableTableValues<Item extends ItemWithAnID> {
 export interface InlineEditableTableProps<Item extends ItemWithAnID> {
   columns: Array<InlineEditableTableColumn<Item>>;
   instanceId: string;
+  defaultItem: Item;
   // TODO Because these callbacks are params, they are only set on the logic once (i.e., they are cached)
   // which makes using "useState" to back this really hard.
   onAdd(item: Item, onSuccess: () => void): void;
@@ -79,12 +80,15 @@ export const InlineEditableTableLogic = kea<InlineEditableTableLogicType<ItemWit
     setFieldErrors: (fieldErrors) => ({ fieldErrors }),
     setRowErrors: (rowErrors) => ({ rowErrors }),
   }),
-  reducers: ({ props: { columns } }) => ({
+  reducers: ({ props: { columns, defaultItem } }) => ({
     editingItemValue: [
       null,
       {
         doneEditing: () => null,
-        editNewItem: () => generateEmptyItem(columns),
+        editNewItem: () =>
+          defaultItem
+            ? { ...generateEmptyItem(columns), ...defaultItem }
+            : generateEmptyItem(columns),
         editExistingItem: (_, { item }) => item,
         setEditingItemValue: (_, { item }) => item,
       },

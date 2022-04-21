@@ -100,6 +100,11 @@ export function useDiscoverState({
   });
 
   /**
+   * Reset to display loading spinner when savedSearch is changing
+   */
+  useEffect(() => reset(), [savedSearch.id, reset]);
+
+  /**
    * Sync URL state with local app state on saved search load
    * or dataView / savedSearch switch
    */
@@ -136,7 +141,7 @@ export function useDiscoverState({
       }
 
       if (chartDisplayChanged || chartIntervalChanged || docTableSortChanged) {
-        refetch$.next();
+        refetch$.next(undefined);
       }
       setState(nextState);
     });
@@ -206,7 +211,7 @@ export function useDiscoverState({
     (_payload, isUpdate?: boolean) => {
       if (isUpdate === false) {
         searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
-        refetch$.next();
+        refetch$.next(undefined);
       }
     },
     [refetch$, searchSessionManager]
@@ -217,7 +222,7 @@ export function useDiscoverState({
    */
   useEffect(() => {
     if (indexPattern) {
-      refetch$.next();
+      refetch$.next(undefined);
     }
   }, [initialFetchStatus, refetch$, indexPattern, savedSearch.id]);
 

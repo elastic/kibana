@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { omit, merge } from 'lodash';
 import { CommentResponseAlertsType } from '../../../../common/api';
 import { SnakeToCamelCase } from '../../../../common/types';
-import { getRuleId, getRuleName } from './alert';
+import { getRuleId, getRuleInfo, getRuleName } from './alert';
 import { Ecs } from '../../../containers/types';
 
 describe('rule getters', () => {
@@ -133,6 +134,73 @@ describe('rule getters', () => {
       } as unknown as Ecs;
 
       expect(funcToExec(comment, alert)).toEqual(expectedResult);
+    });
+  });
+
+  describe('getRuleInfo', () => {
+    const defaultComment = {
+      alertId: ['alert-id-1', 'alert-id-2'],
+      alertIndex: ['alert-index-1', 'alert-index-2'],
+      rule: {
+        id: '1',
+        name: 'Rule name1',
+      },
+    } as unknown as SnakeToCamelCase<CommentResponseAlertsType>;
+
+    const signal = { rule: { id: '1', name: 'Rule name1' } };
+    const kibana = { alert: { rule: { uuid: 'rule id1', name: 'other rule name1' } } };
+
+    const defaultAlert = {
+      'alert-id-1': {
+        signal,
+        kibana,
+      },
+    };
+
+    const nullRule = {
+      id: null,
+      name: null,
+    };
+
+    const tests = [
+      // Alert id is missing from the comment
+      [{ ruleId: null, ruleName: null }, omit(defaultComment, 'alertId'), {}],
+      // All information is in the comment. The alert data are empty
+      [{ ruleId: '1', ruleName: 'Rule name1' }, defaultComment, {}],
+      // The comment does not contain the rule info but the alert data does
+      [{ ruleId: '1', ruleName: 'Rule name1' }, omit(defaultComment, 'rule'), defaultAlert],
+      // The comment has the rule info as null but the alert data has the info
+      [
+        { ruleId: '1', ruleName: 'Rule name1' },
+        merge({}, defaultComment, { rule: nullRule }),
+        defaultAlert,
+      ],
+      // The comment has the rule info and the alert data has the info
+      [{ ruleId: '1', ruleName: 'Rule name1' }, defaultComment, defaultAlert],
+      // The comment does not contain the rule info neither the alert data does
+      [{ ruleId: null, ruleName: null }, omit(defaultComment, 'rule'), {}],
+      // The comment does not contain the rule info and the alert data contains only the signal attribute
+      [
+        { ruleId: '1', ruleName: 'Rule name1' },
+        omit(defaultComment, 'rule'),
+        { 'alert-id-1': { signal } },
+      ],
+      // The comment does not contain the rule info and the alert data contains only the kibana attribute
+      [
+        { ruleId: 'rule id1', ruleName: 'other rule name1' },
+        omit(defaultComment, 'rule'),
+        { 'alert-id-1': { kibana } },
+      ],
+    ] as Array<
+      [
+        Record<string, unknown>,
+        SnakeToCamelCase<CommentResponseAlertsType>,
+        Record<string, unknown>
+      ]
+    >;
+
+    it.each(tests)('returns the correct rule info: %s', (expectedResult, comment, alert) => {
+      expect(getRuleInfo(comment, alert)).toEqual(expectedResult);
     });
   });
 });

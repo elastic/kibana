@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSourcererDataViewRoute } from './';
+import { createSourcererDataViewRoute } from '.';
 import {
   requestMock,
   serverMock,
@@ -13,7 +13,7 @@ import {
 } from '../../detection_engine/routes/__mocks__';
 
 import { SOURCERER_API_URL } from '../../../../common/constants';
-import { StartServicesAccessor } from 'kibana/server';
+import { StartServicesAccessor } from '@kbn/core/server';
 import { StartPlugins } from '../../../plugin';
 
 jest.mock('./helpers', () => {
@@ -166,6 +166,35 @@ describe('sourcerer route', () => {
         const response = await server.inject(getSourcererRequest(mockPatternList), context);
         expect(response.status).toEqual(200);
         expect(response.body).toEqual(mockDataViewsTransformed);
+      });
+
+      test('passes override=true on create and save', async () => {
+        const getMock = jest.fn();
+        getMock.mockResolvedValueOnce(null);
+        getMock.mockResolvedValueOnce(mockPattern);
+        const mockCreateAndSave = jest.fn();
+        const getStartServicesSpecial = jest.fn().mockResolvedValue([
+          null,
+          {
+            data: {
+              indexPatterns: {
+                dataViewsServiceFactory: () => ({
+                  getIdsWithTitle: () =>
+                    new Promise((rs) => rs(mockDataViews.filter((v) => v.id !== mockPattern.id))),
+                  get: getMock,
+                  createAndSave: mockCreateAndSave.mockImplementation(
+                    () => new Promise((rs) => rs(mockPattern))
+                  ),
+                  updateSavedObject: () => new Promise((rs, rj) => rj(new Error('error'))),
+                }),
+              },
+            },
+          },
+        ] as unknown) as StartServicesAccessor<StartPlugins>;
+        createSourcererDataViewRoute(server.router, getStartServicesSpecial);
+        await server.inject(getSourcererRequest(mockPatternList), context);
+        expect(mockCreateAndSave).toHaveBeenCalled();
+        expect(mockCreateAndSave.mock.calls[0][1]).toEqual(true);
       });
 
       test('returns sourcerer formatted Data Views when SIEM Data View exists', async () => {

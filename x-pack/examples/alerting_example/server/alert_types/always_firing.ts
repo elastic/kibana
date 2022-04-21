@@ -7,7 +7,7 @@
 
 import uuid from 'uuid';
 import { range } from 'lodash';
-import { RuleType } from '../../../../plugins/alerting/server';
+import { RuleType } from '@kbn/alerting-plugin/server';
 import {
   DEFAULT_INSTANCES_TO_GENERATE,
   ALERTING_EXAMPLE_APP_ID,
@@ -65,8 +65,8 @@ export const alertType: RuleType<
     range(instances)
       .map(() => uuid.v4())
       .forEach((id: string) => {
-        services
-          .alertInstanceFactory(id)
+        services.alertFactory
+          .create(id)
           .replaceState({ triggerdOnCycle: count })
           .scheduleActions(getTShirtSizeByIdAndThreshold(id, thresholds));
       });

@@ -7,7 +7,7 @@
 
 import type { ElasticsearchResponse } from '../../../common/types/es';
 
-const getMemPath = (cgroup?: string) =>
+const getMemPath = (cgroup?: boolean) =>
   cgroup
     ? 'beats_stats.metrics.beat.cgroup.memory.mem.usage.bytes'
     : 'beats_stats.metrics.beat.memstats.rss';
@@ -30,7 +30,7 @@ export const apmAggFilterPath = [
   'aggregations.max_mem_total.value',
   'aggregations.versions.buckets',
 ];
-export const apmUuidsAgg = (maxBucketSize?: string, cgroup?: string) => ({
+export const apmUuidsAgg = (maxBucketSize?: number, cgroup?: boolean) => ({
   total: {
     cardinality: {
       field: 'beats_stats.beat.uuid',

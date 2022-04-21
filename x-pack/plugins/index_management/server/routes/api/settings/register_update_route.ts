@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 const bodySchema = schema.any();
 
@@ -34,7 +34,7 @@ export function registerUpdateRoute({ router, lib: { handleEsError } }: RouteDep
       };
 
       try {
-        const { body: responseBody } = await client.asCurrentUser.indices.putSettings(params);
+        const responseBody = await client.asCurrentUser.indices.putSettings(params);
         return response.ok({ body: responseBody });
       } catch (error) {
         return handleEsError({ error, response });

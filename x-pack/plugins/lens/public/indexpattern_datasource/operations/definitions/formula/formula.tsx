@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { BaseIndexPatternColumn, OperationDefinition } from '../index';
+import type { BaseIndexPatternColumn, OperationDefinition } from '..';
 import type { ReferenceBasedIndexPatternColumn } from '../column_types';
 import type { IndexPattern } from '../../../types';
 import { runASTValidation, tryToParse } from './validation';
@@ -86,6 +86,25 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
           return [];
         })
         .filter((marker) => marker);
+      const hasBuckets = layer.columnOrder.some((colId) => layer.columns[colId].isBucketed);
+      const hasOtherMetrics = layer.columnOrder.some((colId) => {
+        const col = layer.columns[colId];
+        return (
+          !col.isBucketed &&
+          !col.isStaticValue &&
+          col.operationType !== 'math' &&
+          col.operationType !== 'formula'
+        );
+      });
+
+      if (hasBuckets && !hasOtherMetrics) {
+        innerErrors.push({
+          message: i18n.translate('xpack.lens.indexPattern.noRealMetricError', {
+            defaultMessage:
+              'A layer with only static values will not show results, use at least one dynamic metric',
+          }),
+        });
+      }
 
       return innerErrors.length ? innerErrors.map(({ message }) => message) : undefined;
     },
@@ -149,6 +168,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         // otherwise the filter has been already migrated into the formula text
         filter:
           previousColumn?.operationType === 'formula' ? getFilter(previousColumn, {}) : undefined,
+        timeScale: previousColumn?.timeScale,
       };
     },
     isTransferable: () => {
@@ -162,6 +182,6 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         operations: operationDefinitionMap,
       }).layer;
     },
-
+    timeScalingMode: 'optional',
     paramEditor: WrappedFormulaEditor,
   };

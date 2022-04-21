@@ -11,10 +11,10 @@ import classNames from 'classnames';
 import React from 'react';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
+import { CoreStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { buildContextMenuForActions, UiActionsService, Action } from '../ui_actions';
-import { CoreStart, OverlayStart, ThemeServiceStart } from '../../../../../core/public';
-import { toMountPoint } from '../../../../kibana_react/public';
-import { UsageCollectionStart } from '../../../../usage_collection/public';
 
 import { Start as InspectorStartContract } from '../inspector';
 import {
@@ -67,6 +67,13 @@ export interface EmbeddableContainerContext {
 
 interface Props {
   embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
+
+  /**
+   * Ordinal number of the embeddable in the container, used as a
+   * "title" when the panel has no title, i.e. "Panel {index}".
+   */
+  index?: number;
+
   getActions: UiActionsService['getTriggerCompatibleActions'];
   getEmbeddableFactory?: EmbeddableStart['getEmbeddableFactory'];
   getAllEmbeddableFactories?: EmbeddableStart['getEmbeddableFactories'];
@@ -286,6 +293,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
             }
             closeContextMenu={this.state.closeContextMenu}
             title={title}
+            index={this.props.index}
             badges={this.state.badges}
             notifications={this.state.notifications}
             embeddable={this.props.embeddable}

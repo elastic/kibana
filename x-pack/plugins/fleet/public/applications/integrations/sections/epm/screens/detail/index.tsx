@@ -8,11 +8,9 @@ import type { ReactEventHandler } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Redirect, Route, Switch, useLocation, useParams, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import type { EuiToolTipProps } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBetaBadge,
-  EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
   EuiDescriptionList,
@@ -22,7 +20,6 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -35,6 +32,7 @@ import {
   useUIExtension,
   useBreadcrumbs,
   useStartServices,
+  useAuthz,
   usePermissionCheck,
 } from '../../../../hooks';
 import {
@@ -43,12 +41,7 @@ import {
   INTEGRATIONS_ROUTING_PATHS,
   pagePathGetters,
 } from '../../../../constants';
-import {
-  useCapabilities,
-  useGetPackageInfoByKey,
-  useLink,
-  useAgentPolicyContext,
-} from '../../../../hooks';
+import { useGetPackageInfoByKey, useLink, useAgentPolicyContext } from '../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 import type {
   CreatePackagePolicyRouteState,
@@ -56,7 +49,7 @@ import type {
   PackageInfo,
 } from '../../../../types';
 import { InstallStatus } from '../../../../types';
-import { Error, Loading } from '../../../../components';
+import { Error, EuiButtonWithTooltip, Loading } from '../../../../components';
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
 import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from '../../components/release_badge';
@@ -102,11 +95,13 @@ export function Detail() {
   const { getId: getAgentPolicyId } = useAgentPolicyContext();
   const { pkgkey, panel } = useParams<DetailParams>();
   const { getHref } = useLink();
-  const hasWriteCapabilities = useCapabilities().write;
+  const canInstallPackages = useAuthz().integrations.installPackages;
+  const canReadPackageSettings = useAuthz().integrations.readPackageSettings;
+  const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
   const permissionCheck = usePermissionCheck();
   const missingSecurityConfiguration =
     !permissionCheck.data?.success && permissionCheck.data?.error === 'MISSING_SECURITY';
-  const userCanInstallIntegrations = hasWriteCapabilities && permissionCheck.data?.success;
+  const userCanInstallPackages = canInstallPackages && permissionCheck.data?.success;
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
@@ -140,9 +135,24 @@ export function Detail() {
     data: packageInfoData,
     error: packageInfoError,
     isLoading: packageInfoLoading,
+    isInitialRequest: packageIsInitialRequest,
+    resendRequest: refreshPackageInfo,
   } = useGetPackageInfoByKey(pkgName, pkgVersion);
 
-  const isLoading = packageInfoLoading || permissionCheck.isLoading;
+  // Refresh package info when status change
+  const [oldPackageInstallStatus, setOldPackageStatus] = useState(packageInstallStatus);
+
+  useEffect(() => {
+    if (packageInstallStatus === 'not_installed') {
+      setOldPackageStatus(packageInstallStatus);
+    }
+    if (oldPackageInstallStatus === 'not_installed' && packageInstallStatus === 'installed') {
+      setOldPackageStatus(packageInstallStatus);
+      refreshPackageInfo();
+    }
+  }, [packageInstallStatus, oldPackageInstallStatus, refreshPackageInfo]);
+
+  const isLoading = (packageInfoLoading && !packageIsInitialRequest) || permissionCheck.isLoading;
 
   const showCustomTab =
     useUIExtension(packageInfoData?.item.name ?? '', 'package-detail-custom') !== undefined;
@@ -367,7 +377,7 @@ export function Detail() {
                 content: (
                   <EuiButtonWithTooltip
                     fill
-                    isDisabled={!userCanInstallIntegrations}
+                    isDisabled={!userCanInstallPackages}
                     iconType="plusInCircle"
                     href={getHref('add_integration_to_policy', {
                       pkgkey,
@@ -379,17 +389,17 @@ export function Detail() {
                     onClick={handleAddIntegrationPolicyClick}
                     data-test-subj="addIntegrationPolicyButton"
                     tooltip={
-                      !userCanInstallIntegrations
+                      !userCanInstallPackages
                         ? {
                             content: missingSecurityConfiguration ? (
                               <FormattedMessage
                                 id="xpack.fleet.epm.addPackagePolicyButtonSecurityRequiredTooltip"
-                                defaultMessage="To add Elastic Agent Integrations, you must have security enabled and have the superuser role. Contact your administrator."
+                                defaultMessage="To add Elastic Agent Integrations, you must have security enabled and have the All privilege for Fleet. Contact your administrator."
                               />
                             ) : (
                               <FormattedMessage
                                 id="xpack.fleet.epm.addPackagePolicyButtonPrivilegesRequiredTooltip"
-                                defaultMessage="To add Elastic Agent integrations, you must have the superuser role. Contact your adminstrator."
+                                defaultMessage="Elastic Agent Integrations require the All privilege for Fleet and All privilege for Integrations. Contact your administrator."
                               />
                             ),
                           }
@@ -427,7 +437,7 @@ export function Detail() {
       packageInfo,
       updateAvailable,
       packageInstallStatus,
-      userCanInstallIntegrations,
+      userCanInstallPackages,
       getHref,
       pkgkey,
       integration,
@@ -462,7 +472,7 @@ export function Detail() {
       },
     ];
 
-    if (userCanInstallIntegrations && packageInstallStatus === InstallStatus.installed) {
+    if (canReadIntegrationPolicies && packageInstallStatus === InstallStatus.installed) {
       tabs.push({
         id: 'policies',
         name: (
@@ -498,7 +508,7 @@ export function Detail() {
       });
     }
 
-    if (userCanInstallIntegrations) {
+    if (canReadPackageSettings) {
       tabs.push({
         id: 'settings',
         name: (
@@ -516,7 +526,7 @@ export function Detail() {
       });
     }
 
-    if (showCustomTab) {
+    if (canReadPackageSettings && showCustomTab) {
       tabs.push({
         id: 'custom',
         name: (
@@ -540,7 +550,8 @@ export function Detail() {
     panel,
     getHref,
     integration,
-    userCanInstallIntegrations,
+    canReadIntegrationPolicies,
+    canReadPackageSettings,
     packageInstallStatus,
     CustomAssets,
     showCustomTab,
@@ -625,17 +636,3 @@ export function Detail() {
     </WithHeaderLayout>
   );
 }
-
-type EuiButtonPropsFull = Parameters<typeof EuiButton>[0];
-
-const EuiButtonWithTooltip: React.FC<
-  EuiButtonPropsFull & { tooltip?: Partial<EuiToolTipProps> }
-> = ({ tooltip: tooltipProps, ...buttonProps }) => {
-  return tooltipProps ? (
-    <EuiToolTip {...tooltipProps}>
-      <EuiButton {...buttonProps} />
-    </EuiToolTip>
-  ) : (
-    <EuiButton {...buttonProps} />
-  );
-};

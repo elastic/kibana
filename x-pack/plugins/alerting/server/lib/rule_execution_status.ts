@@ -5,21 +5,49 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
-import { RuleTaskState, AlertExecutionStatus, RawRuleExecutionStatus } from '../types';
+import { Logger } from '@kbn/core/server';
+import {
+  RuleExecutionStatus,
+  RuleExecutionStatusValues,
+  RuleExecutionStatusWarningReasons,
+  RawRuleExecutionStatus,
+  RuleExecutionState,
+} from '../types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
-import { AlertExecutionStatuses } from '../../common';
+import { RuleExecutionStatuses } from '../../common';
+import { translations } from '../constants/translations';
+import { ActionsCompletion } from '../task_runner/types';
 
-export function executionStatusFromState(state: RuleTaskState): AlertExecutionStatus {
+export function executionStatusFromState(state: RuleExecutionState): RuleExecutionStatus {
   const alertIds = Object.keys(state.alertInstances ?? {});
+
+  const hasIncompleteAlertExecution =
+    state.alertExecutionStore.triggeredActionsStatus === ActionsCompletion.PARTIAL;
+
+  let status: RuleExecutionStatuses =
+    alertIds.length === 0 ? RuleExecutionStatusValues[0] : RuleExecutionStatusValues[1];
+
+  if (hasIncompleteAlertExecution) {
+    status = RuleExecutionStatusValues[5];
+  }
+
   return {
+    metrics: state.metrics,
+    numberOfTriggeredActions: state.alertExecutionStore.numberOfTriggeredActions,
+    numberOfGeneratedActions: state.alertExecutionStore.numberOfGeneratedActions,
     lastExecutionDate: new Date(),
-    status: alertIds.length === 0 ? 'ok' : 'active',
+    status,
+    ...(hasIncompleteAlertExecution && {
+      warning: {
+        reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+        message: translations.taskRunner.warning.maxExecutableActions,
+      },
+    }),
   };
 }
 
-export function executionStatusFromError(error: Error): AlertExecutionStatus {
+export function executionStatusFromError(error: Error): RuleExecutionStatus {
   return {
     lastExecutionDate: new Date(),
     status: 'error',
@@ -35,13 +63,15 @@ export function ruleExecutionStatusToRaw({
   lastDuration,
   status,
   error,
-}: AlertExecutionStatus): RawRuleExecutionStatus {
+  warning,
+}: RuleExecutionStatus): RawRuleExecutionStatus {
   return {
     lastExecutionDate: lastExecutionDate.toISOString(),
     lastDuration: lastDuration ?? 0,
     status,
     // explicitly setting to null (in case undefined) due to partial update concerns
     error: error ?? null,
+    warning: warning ?? null,
   };
 }
 
@@ -49,10 +79,16 @@ export function ruleExecutionStatusFromRaw(
   logger: Logger,
   ruleId: string,
   rawRuleExecutionStatus?: Partial<RawRuleExecutionStatus> | null | undefined
-): AlertExecutionStatus | undefined {
+): RuleExecutionStatus | undefined {
   if (!rawRuleExecutionStatus) return undefined;
 
-  const { lastExecutionDate, lastDuration, status = 'unknown', error } = rawRuleExecutionStatus;
+  const {
+    lastExecutionDate,
+    lastDuration,
+    status = 'unknown',
+    error,
+    warning,
+  } = rawRuleExecutionStatus;
 
   let parsedDateMillis = lastExecutionDate ? Date.parse(lastExecutionDate) : Date.now();
   if (isNaN(parsedDateMillis)) {
@@ -62,7 +98,7 @@ export function ruleExecutionStatusFromRaw(
     parsedDateMillis = Date.now();
   }
 
-  const executionStatus: AlertExecutionStatus = {
+  const executionStatus: RuleExecutionStatus = {
     status,
     lastExecutionDate: new Date(parsedDateMillis),
   };
@@ -75,11 +111,16 @@ export function ruleExecutionStatusFromRaw(
     executionStatus.error = error;
   }
 
+  if (warning) {
+    executionStatus.warning = warning;
+  }
+
   return executionStatus;
 }
 
 export const getRuleExecutionStatusPending = (lastExecutionDate: string) => ({
-  status: 'pending' as AlertExecutionStatuses,
+  status: 'pending' as RuleExecutionStatuses,
   lastExecutionDate,
   error: null,
+  warning: null,
 });

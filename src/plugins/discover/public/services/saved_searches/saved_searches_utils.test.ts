@@ -14,7 +14,7 @@ import {
   throwErrorOnSavedSearchUrlConflict,
 } from './saved_searches_utils';
 
-import { createSearchSourceMock } from '../../../../data/public/mocks';
+import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 
 import type { SavedSearchAttributes, SavedSearch } from './types';
 
@@ -57,6 +57,7 @@ describe('saved_searches_utils', () => {
           "hideAggregatedPreview": undefined,
           "hideChart": true,
           "id": "id",
+          "rowHeight": undefined,
           "searchSource": SearchSource {
             "dependencies": Object {
               "getConfig": [MockFunction],
@@ -130,6 +131,7 @@ describe('saved_searches_utils', () => {
           "kibanaSavedObjectMeta": Object {
             "searchSourceJSON": "{}",
           },
+          "rowHeight": undefined,
           "sort": Array [
             Array [
               "a",

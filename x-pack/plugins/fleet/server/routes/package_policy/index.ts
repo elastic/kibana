@@ -106,7 +106,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: PACKAGE_POLICY_API_ROUTES.DRYRUN_PATTERN,
       validate: DryRunPackagePoliciesRequestSchema,
       fleetAuthz: {
-        integrations: { writeIntegrationPolicies: true },
+        integrations: { readIntegrationPolicies: true },
       },
     },
     dryRunUpgradePackagePolicyHandler

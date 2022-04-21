@@ -1,0 +1,20 @@
+title: Full agent policy input stream
+allOf:
+  - type: object
+    additionalProperties: true
+    properties:
+      id:
+        type: string
+      data_stream:
+        type: object
+        properties:
+          dataset:
+            type: string
+          type:
+            type: string
+        required:
+          - dataset
+          - type
+    required:
+      - id
+      - data_stream

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import { TIME_RANGE_TYPE } from '@kbn/ml-plugin/public/application/jobs/components/custom_url_editor/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
-import { TIME_RANGE_TYPE } from '../../../../../plugins/ml/public/application/jobs/components/custom_url_editor/constants';
 
-import { ECOMMERCE_INDEX_PATTERN } from '../index';
+import { ECOMMERCE_INDEX_PATTERN } from '..';
 
 export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
@@ -86,7 +86,6 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.navigation.navigateToJobManagement();
 
       await ml.testExecution.logTestStep('open job in anomaly explorer');
-      await ml.jobTable.waitForJobsToLoad();
       await ml.jobTable.filterWithSearchString(ecommerceJobConfig.job_id, 1);
       await ml.jobTable.clickOpenJobInAnomalyExplorerButton(ecommerceJobConfig.job_id);
       await ml.commonUI.waitForMlLoadingIndicatorToDisappear();

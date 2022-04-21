@@ -22,7 +22,7 @@ import { AddAnomalyChartsToDashboardControl } from './dashboard_controls/add_ano
 
 interface AnomalyContextMenuProps {
   selectedJobs: ExplorerJob[];
-  selectedCells?: AppStateSelectedCells;
+  selectedCells?: AppStateSelectedCells | null;
   bounds?: TimeRangeBounds;
   interval?: number;
   chartsCount: number;
@@ -39,6 +39,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
       application: { capabilities },
     },
   } = useMlKibana();
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAddDashboardsActive, setIsAddDashboardActive] = useState(false);
 

@@ -11,10 +11,14 @@ import {
   AggregationsRateAggregate,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { PackagePolicyServiceInterface } from '../../../fleet/server';
+import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  ListResult,
+  PackagePolicy,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '@kbn/fleet-plugin/common';
 import { getRouteMetric } from '../routes/usage';
-import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../../src/core/server';
-import { ListResult, PackagePolicy, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../fleet/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import { METRICS_INDICES } from './constants';
 import { AgentInfo, BeatMetricsUsage, LiveQueryUsage } from './types';
@@ -32,6 +36,7 @@ export async function getPolicyLevelUsage(
   if (!packagePolicyService) {
     return {};
   }
+
   const packagePolicies = await packagePolicyService.list(soClient, {
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
     perPage: 10_000,
@@ -68,12 +73,13 @@ export async function getPolicyLevelUsage(
     index: '.fleet-agents',
     ignore_unavailable: true,
   });
-  const policied = agentResponse.body.aggregations?.policied;
+  const policied = agentResponse.aggregations?.policied;
   if (policied && typeof policied.doc_count === 'number') {
     result.agent_info = {
       enrolled: policied.doc_count,
     };
   }
+
   return result;
 }
 
@@ -82,6 +88,7 @@ export function getPackageVersions(packagePolicies: ListResult<PackagePolicy>) {
     if (item.package) {
       acc[item.package.version] = (acc[item.package.version] ?? 0) + 1;
     }
+
     return acc;
   }, {} as { [version: string]: number });
 }
@@ -101,6 +108,7 @@ export function getScheduledQueryUsage(packagePolicies: ListResult<PackagePolicy
       if (policyAgents === 0) {
         ++acc.queryGroups.empty;
       }
+
       return acc;
     },
     {
@@ -116,7 +124,7 @@ export async function getLiveQueryUsage(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ) {
-  const { body: metricResponse } = await esClient.search<
+  const metricResponse = await esClient.search<
     unknown,
     {
       queries: AggregationsSingleBucketAggregateBase;
@@ -202,11 +210,12 @@ export function extractBeatUsageMetrics(
       }
     }
   }
+
   return result;
 }
 
 export async function getBeatUsage(esClient: ElasticsearchClient) {
-  const { body: metricResponse } = await esClient.search<unknown, BeatUsageAggs>({
+  const metricResponse = await esClient.search<unknown, BeatUsageAggs>({
     body: {
       size: 0,
       aggs: {

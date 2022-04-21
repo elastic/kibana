@@ -10,22 +10,7 @@ import { SavedObjectFindOptionsRt } from '../saved_object';
 
 import { UserRT } from '../user';
 
-/**
- * this is used to differentiate between an alert attached to a top-level case and a group of alerts that should only
- * be attached to a sub case. The reason we need this is because an alert group comment will have references to both a case and
- * sub case when it is created. For us to be able to filter out alert groups in a top-level case we need a field to
- * use as a filter.
- */
-export enum AssociationType {
-  case = 'case',
-  subCase = 'sub_case',
-}
-
 export const CommentAttributesBasicRt = rt.type({
-  associationType: rt.union([
-    rt.literal(AssociationType.case),
-    rt.literal(AssociationType.subCase),
-  ]),
   created_at: rt.string,
   created_by: UserRT,
   owner: rt.string,
@@ -38,7 +23,6 @@ export const CommentAttributesBasicRt = rt.type({
 export enum CommentType {
   user = 'user',
   alert = 'alert',
-  generatedAlert = 'generated_alert',
   actions = 'actions',
 }
 
@@ -59,7 +43,7 @@ export const ContextTypeUserRt = rt.type({
  * it matches this structure. User attached alerts do not need to be transformed.
  */
 export const AlertCommentRequestRt = rt.type({
-  type: rt.union([rt.literal(CommentType.generatedAlert), rt.literal(CommentType.alert)]),
+  type: rt.literal(CommentType.alert),
   alertId: rt.union([rt.array(rt.string), rt.string]),
   index: rt.union([rt.array(rt.string), rt.string]),
   rule: rt.type({
@@ -167,11 +151,9 @@ export const AllCommentsResponseRt = rt.array(CommentResponseRt);
 
 export const FindQueryParamsRt = rt.partial({
   ...SavedObjectFindOptionsRt.props,
-  /**
-   * If specified the attachments found will be associated to a sub case instead of a case object
-   */
-  subCaseId: rt.string,
 });
+
+export const BulkCreateCommentRequestRt = rt.array(CommentRequestRt);
 
 export type FindQueryParams = rt.TypeOf<typeof FindQueryParamsRt>;
 export type AttributesTypeActions = rt.TypeOf<typeof AttributesTypeActionsRt>;
@@ -179,6 +161,7 @@ export type AttributesTypeAlerts = rt.TypeOf<typeof AttributesTypeAlertsRt>;
 export type AttributesTypeUser = rt.TypeOf<typeof AttributesTypeUserRt>;
 export type CommentAttributes = rt.TypeOf<typeof CommentAttributesRt>;
 export type CommentRequest = rt.TypeOf<typeof CommentRequestRt>;
+export type BulkCreateCommentRequest = rt.TypeOf<typeof BulkCreateCommentRequestRt>;
 export type CommentResponse = rt.TypeOf<typeof CommentResponseRt>;
 export type CommentResponseUserType = rt.TypeOf<typeof CommentResponseTypeUserRt>;
 export type CommentResponseAlertsType = rt.TypeOf<typeof CommentResponseTypeAlertsRt>;

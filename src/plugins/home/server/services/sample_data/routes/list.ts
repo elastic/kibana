@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { IRouter, Logger, RequestHandlerContext } from 'src/core/server';
+import type { IRouter, Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { AppLinkData, SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';
 import type { FindSampleObjectsResponseObject } from '../lib/find_sample_objects';
@@ -68,6 +68,7 @@ export const createListRoute = (
 };
 
 type ExistingSampleObjects = Map<string, FindSampleObjectsResponseObject[]>;
+
 async function findExistingSampleObjects(
   context: RequestHandlerContext,
   logger: Logger,
@@ -104,15 +105,14 @@ async function getSampleDatasetStatus(
     const dataIndexConfig = sampleDataset.dataIndices[i];
     const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
     try {
-      const { body: indexExists } =
-        await context.core.elasticsearch.client.asCurrentUser.indices.exists({
-          index,
-        });
+      const indexExists = await context.core.elasticsearch.client.asCurrentUser.indices.exists({
+        index,
+      });
       if (!indexExists) {
         return { status: NOT_INSTALLED };
       }
 
-      const { body: count } = await context.core.elasticsearch.client.asCurrentUser.count({
+      const count = await context.core.elasticsearch.client.asCurrentUser.count({
         index,
       });
       if (count.count === 0) {

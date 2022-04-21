@@ -44,7 +44,7 @@ describe.each([
     clients.rulesClient.update.mockResolvedValue(
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     ); // successful update
-    clients.ruleExecutionLogClient.getExecutionSummary.mockResolvedValue(
+    clients.ruleExecutionLog.getExecutionSummary.mockResolvedValue(
       getRuleExecutionSummarySucceeded()
     );
     clients.appClient.getSignalsIndex.mockReturnValue('.siem-signals-test-index');

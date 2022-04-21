@@ -11,10 +11,9 @@ import {
   IRouter,
   RequestHandlerContext,
   SavedObjectsClientContract,
-} from 'kibana/server';
-
-import type { SecurityPluginStart } from '../../security/server';
-import type { SpacesPluginStart } from '../../spaces/server';
+} from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 import { ListClient } from './services/lists/list_client';
 import { ExceptionListClient } from './services/exception_lists/exception_list_client';
@@ -39,7 +38,8 @@ export type GetListClientType = (
 export type GetExceptionListClientType = (
   savedObjectsClient: SavedObjectsClientContract,
   user: string,
-  disableServerExtensionPoints?: boolean
+  /** Default is `true` - processing of server extension points are always on by default */
+  enableServerExtensionPoints?: boolean
 ) => ExceptionListClient;
 
 export interface ListPluginSetup {

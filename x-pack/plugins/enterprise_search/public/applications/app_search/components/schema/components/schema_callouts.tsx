@@ -14,12 +14,16 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 import { SchemaErrorsCallout } from '../../../../shared/schema';
+import { AppLogic } from '../../../app_logic';
 import { ENGINE_RELEVANCE_TUNING_PATH, ENGINE_REINDEX_JOB_PATH } from '../../../routes';
 import { generateEnginePath } from '../../engine';
 
 import { SchemaLogic } from '../schema_logic';
 
 export const SchemaCallouts: React.FC = () => {
+  const {
+    myRole: { canManageEngines },
+  } = useValues(AppLogic);
   const {
     hasUnconfirmedFields,
     hasNewUnsearchedFields,
@@ -38,7 +42,7 @@ export const SchemaCallouts: React.FC = () => {
           <EuiSpacer />
         </>
       )}
-      {hasUnconfirmedFields && (
+      {hasUnconfirmedFields && canManageEngines && (
         <>
           {hasNewUnsearchedFields ? <UnsearchedFieldsCallout /> : <UnconfirmedFieldsCallout />}
           <EuiSpacer />

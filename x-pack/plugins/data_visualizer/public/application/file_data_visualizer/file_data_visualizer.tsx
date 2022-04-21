@@ -6,14 +6,11 @@
  */
 import '../_index.scss';
 import React, { FC } from 'react';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-} from '../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 
 // @ts-ignore
-import { FileDataVisualizerView } from './components/file_data_visualizer_view/index';
+import { FileDataVisualizerView } from './components/file_data_visualizer_view';
 import { ResultLink } from '../common/components/results_links';
 
 interface Props {
@@ -23,28 +20,35 @@ interface Props {
 export type FileDataVisualizerSpec = typeof FileDataVisualizer;
 export const FileDataVisualizer: FC<Props> = ({ additionalLinks }) => {
   const coreStart = getCoreStart();
-  const { data, maps, embeddable, share, security, fileUpload } = getPluginsStart();
+  const { data, maps, embeddable, discover, share, security, fileUpload, cloud } =
+    getPluginsStart();
   const services = {
     data,
     maps,
     embeddable,
+    discover,
     share,
     security,
     fileUpload,
     ...coreStart,
   };
 
+  const EmptyContext: FC = ({ children }) => <>{children}</>;
+  const CloudContext = cloud?.CloudContextProvider || EmptyContext;
+
   return (
     <KibanaThemeProvider theme$={coreStart.theme.theme$}>
       <KibanaContextProvider services={{ ...services }}>
-        <FileDataVisualizerView
-          indexPatterns={data.indexPatterns}
-          savedObjectsClient={coreStart.savedObjects.client}
-          http={coreStart.http}
-          fileUpload={fileUpload}
-          resultsLinks={additionalLinks}
-          capabilities={coreStart.application.capabilities}
-        />
+        <CloudContext>
+          <FileDataVisualizerView
+            dataViewsContract={data.dataViews}
+            savedObjectsClient={coreStart.savedObjects.client}
+            http={coreStart.http}
+            fileUpload={fileUpload}
+            resultsLinks={additionalLinks}
+            capabilities={coreStart.application.capabilities}
+          />
+        </CloudContext>
       </KibanaContextProvider>
     </KibanaThemeProvider>
   );

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import apm from 'elastic-apm-node';
-import type { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { HeadlessChromiumDriver } from '../browsers';
 import { Layout } from '../layouts';
 import { CONTEXT_WAITFORRENDER } from './constants';
@@ -20,11 +19,7 @@ export const waitForRenderComplete = async (
 ) => {
   const span = apm.startSpan('wait_for_render', 'wait');
 
-  logger.debug(
-    i18n.translate('xpack.screenshotting.screencapture.waitingForRenderComplete', {
-      defaultMessage: 'waiting for rendering to complete',
-    })
-  );
+  logger.debug('waiting for rendering to complete');
 
   return await browser
     .evaluate(
@@ -74,11 +69,7 @@ export const waitForRenderComplete = async (
       logger
     )
     .then(() => {
-      logger.debug(
-        i18n.translate('xpack.screenshotting.screencapture.renderIsComplete', {
-          defaultMessage: 'rendering is complete',
-        })
-      );
+      logger.debug('rendering is complete');
 
       span?.end();
     });

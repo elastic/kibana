@@ -10,6 +10,18 @@ import reduceReducers from 'reduce-reducers';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { pluck } from 'rxjs/operators';
 import { AnyAction, Reducer } from 'redux';
+import {
+  AppMountParameters,
+  AppUpdater,
+  CoreSetup,
+  CoreStart,
+  PluginInitializerContext,
+  Plugin as IPlugin,
+  DEFAULT_APP_CATEGORIES,
+  AppNavLinkStatus,
+} from '@kbn/core/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { TimelineState } from '@kbn/timelines-plugin/public';
 import type {
   PluginSetup,
   PluginStart,
@@ -20,17 +32,6 @@ import type {
   SubPlugins,
   StartedSubPlugins,
 } from './types';
-import {
-  AppMountParameters,
-  AppUpdater,
-  CoreSetup,
-  CoreStart,
-  PluginInitializerContext,
-  Plugin as IPlugin,
-  DEFAULT_APP_CATEGORIES,
-  AppNavLinkStatus,
-} from '../../../../src/core/public';
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { initTelemetry } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
 import { SOLUTION_NAME } from './common/translations';
@@ -60,7 +61,6 @@ import {
   ExperimentalFeatures,
   parseExperimentalConfigValue,
 } from '../common/experimental_features';
-import type { TimelineState } from '../../timelines/public';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
 import { initDataView, SourcererModel, KibanaDataView } from './common/store/sourcerer/model';
 import { SecurityDataView } from './common/containers/sourcerer/api';
@@ -295,8 +295,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         exceptions: new subPluginClasses.Exceptions(),
         cases: new subPluginClasses.Cases(),
         hosts: new subPluginClasses.Hosts(),
+        users: new subPluginClasses.Users(),
         network: new subPluginClasses.Network(),
-        ueba: new subPluginClasses.Ueba(),
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
@@ -321,8 +321,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       rules: subPlugins.rules.start(storage),
       exceptions: subPlugins.exceptions.start(storage),
       hosts: subPlugins.hosts.start(storage),
+      users: subPlugins.users.start(storage),
       network: subPlugins.network.start(storage),
-      ueba: subPlugins.ueba.start(storage),
       timelines: subPlugins.timelines.start(),
       management: subPlugins.management.start(core, plugins),
     };
@@ -388,8 +388,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ...subPlugins.hosts.storageTimelines!.timelineById,
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             ...subPlugins.network.storageTimelines!.timelineById,
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            ...subPlugins.ueba.storageTimelines!.timelineById,
           },
         },
       };
@@ -405,8 +403,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         createInitialState(
           {
             ...subPlugins.hosts.store.initialState,
+            ...subPlugins.users.store.initialState,
             ...subPlugins.network.store.initialState,
-            ...subPlugins.ueba.store.initialState,
             ...timelineInitialState,
             ...subPlugins.management.store.initialState,
           },
@@ -419,8 +417,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ),
         {
           ...subPlugins.hosts.store.reducer,
+          ...subPlugins.users.store.reducer,
           ...subPlugins.network.store.reducer,
-          ...subPlugins.ueba.store.reducer,
           timeline: timelineReducer,
           ...subPlugins.management.store.reducer,
           ...tGridReducer,

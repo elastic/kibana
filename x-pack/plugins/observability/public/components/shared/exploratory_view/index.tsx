@@ -8,20 +8,24 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
-import { ExploratoryView } from './exploratory_view';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { ObservabilityPublicPluginsStart } from '../../../plugin';
-import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
-import { IndexPatternContextProvider } from './hooks/use_app_index_pattern';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
   createSessionStorageStateStorage,
-} from '../../../../../../../src/plugins/kibana_utils/public/';
+} from '@kbn/kibana-utils-plugin/public';
+import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { ExploratoryView } from './exploratory_view';
+import { ObservabilityPublicPluginsStart } from '../../../plugin';
+import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
+import { DataViewContextProvider } from './hooks/use_app_data_view';
 import { UrlStorageContextProvider } from './hooks/use_series_storage';
 import { useTrackPageview } from '../../..';
-import { TypedLensByValueInput } from '../../../../../lens/public';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
+
+const PAGE_TITLE = i18n.translate('xpack.observability.expView.heading.label', {
+  defaultMessage: 'Explore data',
+});
 
 export interface ExploratoryViewPageProps {
   useSessionStorage?: boolean;
@@ -52,6 +56,7 @@ export function ExploratoryViewPage({
     app
   );
 
+  const { ObservabilityPageTemplate } = usePluginContext();
   const {
     services: { uiSettings, notifications },
   } = useKibana<ObservabilityPublicPluginsStart>();
@@ -67,19 +72,15 @@ export function ExploratoryViewPage({
       });
 
   return (
-    <Wrapper>
-      <IndexPatternContextProvider>
+    <ObservabilityPageTemplate pageHeader={{ pageTitle: PAGE_TITLE }}>
+      <DataViewContextProvider>
         <UrlStorageContextProvider storage={kbnUrlStateStorage}>
           <ExploratoryView saveAttributes={saveAttributes} />
         </UrlStorageContextProvider>
-      </IndexPatternContextProvider>
-    </Wrapper>
+      </DataViewContextProvider>
+    </ObservabilityPageTemplate>
   );
 }
-
-const Wrapper = euiStyled.div`
-  padding: ${(props) => props.theme.eui.paddingSizes.l};
-`;
 
 // eslint-disable-next-line import/no-default-export
 export default ExploratoryViewPage;

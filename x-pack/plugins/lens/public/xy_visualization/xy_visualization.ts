@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export * from './expression';
 export * from './types';
 export * from './visualization';

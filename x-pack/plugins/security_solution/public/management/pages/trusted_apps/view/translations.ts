@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ConditionEntryField } from '@kbn/securitysolution-utils';
 import {
   MacosLinuxConditionEntry,
   WindowsConditionEntry,
-  ConditionEntryField,
   OperatorFieldIds,
 } from '../../../../../common/endpoint/types';
 

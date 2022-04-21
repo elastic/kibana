@@ -23,6 +23,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded(
         'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
       );
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
+      );
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'without-timefield',
         'timepicker:timeDefaults': '{  "from": "2019-01-18T19:37:13.000Z",  "to": "now"}',
@@ -37,6 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.unload(
         'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
       );
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
     });
 
     it('should not display a timepicker', async () => {

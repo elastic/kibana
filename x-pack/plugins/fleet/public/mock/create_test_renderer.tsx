@@ -13,10 +13,11 @@ import { render as reactRender, act } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import type { RenderHookResult } from '@testing-library/react-hooks';
 
-import { themeServiceMock } from 'src/core/public/mocks';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { ScopedHistory } from '../../../../../src/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { ScopedHistory } from '@kbn/core/public';
+
 import { FleetAppContext } from '../applications/fleet/app';
 import { IntegrationsAppContext } from '../applications/integrations/app';
 import type { FleetConfigType } from '../plugin';
@@ -77,7 +78,6 @@ export const createFleetTestRendererMock = (): TestRenderer => {
     AppWrapper: memo(({ children }) => {
       return (
         <FleetAppContext
-          basepath={basePath}
           startServices={testRendererMocks.startServices}
           config={testRendererMocks.config}
           history={testRendererMocks.mountHistory}

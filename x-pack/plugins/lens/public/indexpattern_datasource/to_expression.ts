@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { IUiSettingsClient } from 'kibana/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { partition } from 'lodash';
 import {
   AggFunctionsMapping,
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
-} from '../../../../../src/plugins/data/public';
-import { queryToAst } from '../../../../../src/plugins/data/common';
+} from '@kbn/data-plugin/public';
+import { queryToAst } from '@kbn/data-plugin/common';
 import {
   buildExpression,
   buildExpressionFunction,
   ExpressionAstExpression,
   ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
-} from '../../../../../src/plugins/expressions/public';
+} from '@kbn/expressions-plugin/public';
 import { GenericIndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
 import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
@@ -28,6 +28,15 @@ import { FormattedIndexPatternColumn } from './operations/definitions/column_typ
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
 
 type OriginalColumn = { id: string } & GenericIndexPatternColumn;
+
+declare global {
+  interface Window {
+    /**
+     * Debug setting to make requests complete slower than normal. data.search.aggs.shardDelay.enabled has to be set via settings for this to work
+     */
+    ELASTIC_LENS_DELAY_SECONDS?: number;
+  }
+}
 
 function getExpressionForLayer(
   layer: IndexPatternLayer,
@@ -139,8 +148,27 @@ function getExpressionForLayer(
       }
     });
 
+    if (window.ELASTIC_LENS_DELAY_SECONDS) {
+      aggs.push(
+        buildExpression({
+          type: 'expression',
+          chain: [
+            buildExpressionFunction('aggShardDelay', {
+              id: 'the-delay',
+              enabled: true,
+              schema: 'metric',
+              delay: `${window.ELASTIC_LENS_DELAY_SECONDS}s`,
+            }).toAst(),
+          ],
+        })
+      );
+    }
+
     const idMap = esAggEntries.reduce((currentIdMap, [colId, column], index) => {
-      const esAggsId = `col-${index}-${index}`;
+      const esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
+        ? `col-${index + (column.isBucketed ? 0 : 1)}-${index}`
+        : `col-${index}-${index}`;
+
       return {
         ...currentIdMap,
         [esAggsId]: {
@@ -166,6 +194,10 @@ function getExpressionForLayer(
           format: format ? [format.id] : [''],
           columnId: [id],
           decimals: typeof format?.params?.decimals === 'number' ? [format.params.decimals] : [],
+          suffix:
+            format?.params && 'suffix' in format.params && format.params.suffix
+              ? [format.params.suffix]
+              : [],
           parentFormat: parentFormat ? [JSON.stringify(parentFormat)] : [],
         },
       };
@@ -235,7 +267,8 @@ function getExpressionForLayer(
 
     const allDateHistogramFields = Object.values(columns)
       .map((column) =>
-        isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column)
+        isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column) &&
+        !column.params.ignoreTimeRange
           ? column.sourceField
           : null
       )

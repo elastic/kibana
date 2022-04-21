@@ -5,14 +5,22 @@
  * 2.0.
  */
 
-import { of, throwError, NEVER } from 'rxjs';
-import type { Logger } from 'src/core/server';
-import { createMockBrowserDriver, createMockBrowserDriverFactory } from '../browsers/mock';
+import type { Logger, PackageInfo } from '@kbn/core/server';
+import { httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { lastValueFrom, of, throwError } from 'rxjs';
+import { ScreenshotOptions, Screenshots } from '.';
+import {
+  SCREENSHOTTING_APP_ID,
+  SCREENSHOTTING_EXPRESSION,
+  SCREENSHOTTING_EXPRESSION_INPUT,
+} from '../../common';
 import type { HeadlessChromiumDriverFactory } from '../browsers';
+import { createMockBrowserDriver, createMockBrowserDriverFactory } from '../browsers/mock';
+import type { ConfigType } from '../config';
+import type { PngScreenshotOptions } from '../formats';
 import * as Layouts from '../layouts/create_layout';
 import { createMockLayout } from '../layouts/mock';
 import { CONTEXT_ELEMENTATTRIBUTES } from './constants';
-import { getScreenshots, ScreenshotOptions } from '.';
 
 /*
  * Tests
@@ -20,31 +28,50 @@ import { getScreenshots, ScreenshotOptions } from '.';
 describe('Screenshot Observable Pipeline', () => {
   let driver: ReturnType<typeof createMockBrowserDriver>;
   let driverFactory: jest.Mocked<HeadlessChromiumDriverFactory>;
+  let http: ReturnType<typeof httpServiceMock.createSetupContract>;
   let layout: ReturnType<typeof createMockLayout>;
   let logger: jest.Mocked<Logger>;
+  let packageInfo: Readonly<PackageInfo>;
   let options: ScreenshotOptions;
+  let screenshots: Screenshots;
+  let config: ConfigType;
 
   beforeEach(async () => {
     driver = createMockBrowserDriver();
     driverFactory = createMockBrowserDriverFactory(driver);
+    http = httpServiceMock.createSetupContract();
     layout = createMockLayout();
-    logger = {
-      debug: jest.fn(),
-      error: jest.fn(),
-      info: jest.fn(),
-    } as unknown as jest.Mocked<Logger>;
+    logger = loggingSystemMock.createLogger();
+
+    packageInfo = {
+      branch: 'screenshot-test',
+      buildNum: 567891011,
+      buildSha: 'screenshot-dfdfed0a',
+      dist: false,
+      version: '5000.0.0',
+    };
     options = {
       browserTimezone: 'UTC',
-      conditionalHeaders: {},
+      headers: {},
       layout: {},
-      timeouts: {
-        loadDelay: 2000,
-        openUrl: 120000,
-        waitForElements: 20000,
-        renderComplete: 10000,
-      },
       urls: ['/welcome/home/start/index.htm'],
-    } as unknown as typeof options;
+    };
+    config = {
+      poolSize: 1,
+      capture: {
+        timeouts: {
+          openUrl: 30000,
+          waitForElements: 30000,
+          renderComplete: 30000,
+        },
+        loadDelay: 5000000000,
+        zoom: 2,
+      },
+      networkPolicy: { enabled: false, rules: [] },
+      browser: {} as ConfigType['browser'],
+    };
+
+    screenshots = new Screenshots(driverFactory, logger, packageInfo, http, config);
 
     jest.spyOn(Layouts, 'createLayout').mockReturnValue(layout);
 
@@ -56,174 +83,23 @@ describe('Screenshot Observable Pipeline', () => {
   });
 
   it('pipelines a single url into screenshot and timeRange', async () => {
-    const result = await getScreenshots(driverFactory, logger, options).toPromise();
+    const result = await lastValueFrom(screenshots.getScreenshots(options as PngScreenshotOptions));
 
     expect(result).toHaveProperty('results');
-    expect(result.results).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "elementsPositionAndAttributes": Array [
-            Object {
-              "attributes": Object {
-                "description": "Default ",
-                "title": "Default Mock Title",
-              },
-              "position": Object {
-                "boundingClientRect": Object {
-                  "height": 600,
-                  "left": 0,
-                  "top": 0,
-                  "width": 800,
-                },
-                "scroll": Object {
-                  "x": 0,
-                  "y": 0,
-                },
-              },
-            },
-          ],
-          "error": undefined,
-          "screenshots": Array [
-            Object {
-              "data": Object {
-                "data": Array [
-                  115,
-                  99,
-                  114,
-                  101,
-                  101,
-                  110,
-                  115,
-                  104,
-                  111,
-                  116,
-                ],
-                "type": "Buffer",
-              },
-              "description": "Default ",
-              "title": "Default Mock Title",
-            },
-          ],
-          "timeRange": "Default GetTimeRange Result",
-        },
-      ]
-    `);
+    expect(result.results).toMatchSnapshot();
   });
 
   it('pipelines multiple urls into', async () => {
     driver.screenshot.mockResolvedValue(Buffer.from('some screenshots'));
-    const result = await getScreenshots(driverFactory, logger, {
-      ...options,
-      urls: ['/welcome/home/start/index2.htm', '/welcome/home/start/index.php3?page=./home.php'],
-    }).toPromise();
+    const result = await lastValueFrom(
+      screenshots.getScreenshots({
+        ...options,
+        urls: ['/welcome/home/start/index2.htm', '/welcome/home/start/index.php3?page=./home.php'],
+      } as PngScreenshotOptions)
+    );
 
     expect(result).toHaveProperty('results');
-    expect(result.results).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "elementsPositionAndAttributes": Array [
-            Object {
-              "attributes": Object {
-                "description": "Default ",
-                "title": "Default Mock Title",
-              },
-              "position": Object {
-                "boundingClientRect": Object {
-                  "height": 600,
-                  "left": 0,
-                  "top": 0,
-                  "width": 800,
-                },
-                "scroll": Object {
-                  "x": 0,
-                  "y": 0,
-                },
-              },
-            },
-          ],
-          "error": undefined,
-          "screenshots": Array [
-            Object {
-              "data": Object {
-                "data": Array [
-                  115,
-                  111,
-                  109,
-                  101,
-                  32,
-                  115,
-                  99,
-                  114,
-                  101,
-                  101,
-                  110,
-                  115,
-                  104,
-                  111,
-                  116,
-                  115,
-                ],
-                "type": "Buffer",
-              },
-              "description": "Default ",
-              "title": "Default Mock Title",
-            },
-          ],
-          "timeRange": "Default GetTimeRange Result",
-        },
-        Object {
-          "elementsPositionAndAttributes": Array [
-            Object {
-              "attributes": Object {
-                "description": "Default ",
-                "title": "Default Mock Title",
-              },
-              "position": Object {
-                "boundingClientRect": Object {
-                  "height": 600,
-                  "left": 0,
-                  "top": 0,
-                  "width": 800,
-                },
-                "scroll": Object {
-                  "x": 0,
-                  "y": 0,
-                },
-              },
-            },
-          ],
-          "error": undefined,
-          "screenshots": Array [
-            Object {
-              "data": Object {
-                "data": Array [
-                  115,
-                  111,
-                  109,
-                  101,
-                  32,
-                  115,
-                  99,
-                  114,
-                  101,
-                  101,
-                  110,
-                  115,
-                  104,
-                  111,
-                  116,
-                  115,
-                ],
-                "type": "Buffer",
-              },
-              "description": "Default ",
-              "title": "Default Mock Title",
-            },
-          ],
-          "timeRange": "Default GetTimeRange Result",
-        },
-      ]
-  `);
+    expect(result.results).toMatchSnapshot();
 
     expect(driver.open).toHaveBeenCalledTimes(2);
     expect(driver.open).nthCalledWith(
@@ -240,105 +116,45 @@ describe('Screenshot Observable Pipeline', () => {
     );
   });
 
+  it('captures screenshot of an expression', async () => {
+    await screenshots
+      .getScreenshots({
+        ...options,
+        expression: 'kibana',
+        input: 'something',
+      } as PngScreenshotOptions)
+      .toPromise();
+
+    expect(driver.open).toHaveBeenCalledTimes(1);
+    expect(driver.open).toHaveBeenCalledWith(
+      expect.stringContaining(SCREENSHOTTING_APP_ID),
+      expect.objectContaining({
+        context: expect.objectContaining({
+          [SCREENSHOTTING_EXPRESSION]: 'kibana',
+          [SCREENSHOTTING_EXPRESSION_INPUT]: 'something',
+        }),
+      }),
+      expect.anything()
+    );
+  });
+
   describe('error handling', () => {
     it('recovers if waitForSelector fails', async () => {
       driver.waitForSelector.mockImplementation((selectorArg: string) => {
         throw new Error('Mock error!');
       });
-      const result = await getScreenshots(driverFactory, logger, {
-        ...options,
-        urls: ['/welcome/home/start/index2.htm', '/welcome/home/start/index.php3?page=./home.php3'],
-      }).toPromise();
+      const result = await lastValueFrom(
+        screenshots.getScreenshots({
+          ...options,
+          urls: [
+            '/welcome/home/start/index2.htm',
+            '/welcome/home/start/index.php3?page=./home.php3',
+          ],
+        } as PngScreenshotOptions)
+      );
 
       expect(result).toHaveProperty('results');
-      expect(result.results).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "elementsPositionAndAttributes": Array [
-              Object {
-                "attributes": Object {},
-                "position": Object {
-                  "boundingClientRect": Object {
-                    "height": 100,
-                    "left": 0,
-                    "top": 0,
-                    "width": 100,
-                  },
-                  "scroll": Object {
-                    "x": 0,
-                    "y": 0,
-                  },
-                },
-              },
-            ],
-            "error": [Error: The "wait for elements" phase encountered an error: Error: An error occurred when trying to read the page for visualization panel info: Error: Mock error!],
-            "screenshots": Array [
-              Object {
-                "data": Object {
-                  "data": Array [
-                    115,
-                    99,
-                    114,
-                    101,
-                    101,
-                    110,
-                    115,
-                    104,
-                    111,
-                    116,
-                  ],
-                  "type": "Buffer",
-                },
-                "description": undefined,
-                "title": undefined,
-              },
-            ],
-            "timeRange": null,
-          },
-          Object {
-            "elementsPositionAndAttributes": Array [
-              Object {
-                "attributes": Object {},
-                "position": Object {
-                  "boundingClientRect": Object {
-                    "height": 100,
-                    "left": 0,
-                    "top": 0,
-                    "width": 100,
-                  },
-                  "scroll": Object {
-                    "x": 0,
-                    "y": 0,
-                  },
-                },
-              },
-            ],
-            "error": [Error: The "wait for elements" phase encountered an error: Error: An error occurred when trying to read the page for visualization panel info: Error: Mock error!],
-            "screenshots": Array [
-              Object {
-                "data": Object {
-                  "data": Array [
-                    115,
-                    99,
-                    114,
-                    101,
-                    101,
-                    110,
-                    115,
-                    104,
-                    111,
-                    116,
-                  ],
-                  "type": "Buffer",
-                },
-                "description": undefined,
-                "title": undefined,
-              },
-            ],
-            "timeRange": null,
-          },
-        ]
-      `);
+      expect(result.results).toMatchSnapshot();
     });
 
     it('observes page exit', async () => {
@@ -346,14 +162,13 @@ describe('Screenshot Observable Pipeline', () => {
         of({
           driver,
           unexpectedExit$: throwError('Instant timeout has fired!'),
-          metrics$: NEVER,
-          close: () => of(undefined),
+          close: () => of({}),
         })
       );
 
-      await expect(
-        getScreenshots(driverFactory, logger, options).toPromise()
-      ).rejects.toMatchInlineSnapshot(`"Instant timeout has fired!"`);
+      await expect(screenshots.getScreenshots(options).toPromise()).rejects.toMatchInlineSnapshot(
+        `"Instant timeout has fired!"`
+      );
     });
 
     it(`uses defaults for element positions and size when Kibana page is not ready`, async () => {
@@ -362,55 +177,12 @@ describe('Screenshot Observable Pipeline', () => {
       );
 
       layout.getViewport = () => null;
-      const result = await getScreenshots(driverFactory, logger, options).toPromise();
+      const result = await lastValueFrom(
+        screenshots.getScreenshots(options as PngScreenshotOptions)
+      );
 
       expect(result).toHaveProperty('results');
-      expect(result.results).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "elementsPositionAndAttributes": Array [
-              Object {
-                "attributes": Object {},
-                "position": Object {
-                  "boundingClientRect": Object {
-                    "height": 1200,
-                    "left": 0,
-                    "top": 0,
-                    "width": 1800,
-                  },
-                  "scroll": Object {
-                    "x": 0,
-                    "y": 0,
-                  },
-                },
-              },
-            ],
-            "error": undefined,
-            "screenshots": Array [
-              Object {
-                "data": Object {
-                  "data": Array [
-                    115,
-                    99,
-                    114,
-                    101,
-                    101,
-                    110,
-                    115,
-                    104,
-                    111,
-                    116,
-                  ],
-                  "type": "Buffer",
-                },
-                "description": undefined,
-                "title": undefined,
-              },
-            ],
-            "timeRange": undefined,
-          },
-        ]
-      `);
+      expect(result.results).toMatchSnapshot();
     });
   });
 });

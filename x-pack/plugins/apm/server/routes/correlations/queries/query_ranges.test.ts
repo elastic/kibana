@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { ElasticsearchClient } from 'src/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
 import {
@@ -110,20 +110,14 @@ describe('query_ranges', () => {
       ];
 
       const esClientSearchMock = jest.fn(
-        (
-          req: estypes.SearchRequest
-        ): {
-          body: estypes.SearchResponse;
-        } => {
+        (req: estypes.SearchRequest): estypes.SearchResponse => {
           return {
-            body: {
-              aggregations: {
-                logspace_ranges: {
-                  buckets: logspaceRangesBuckets,
-                },
+            aggregations: {
+              logspace_ranges: {
+                buckets: logspaceRangesBuckets,
               },
-            } as unknown as estypes.SearchResponse,
-          };
+            },
+          } as unknown as estypes.SearchResponse;
         }
       );
 

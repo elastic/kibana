@@ -24,35 +24,21 @@ export type AttachmentServiceMock = jest.Mocked<AttachmentService>;
 
 export const createCaseServiceMock = (): CaseServiceMock => {
   const service: PublicMethodsOf<CasesService> = {
-    createSubCase: jest.fn(),
     deleteCase: jest.fn(),
-    deleteSubCase: jest.fn(),
     findCases: jest.fn(),
-    findSubCases: jest.fn(),
-    findSubCasesByCaseId: jest.fn(),
     getAllCaseComments: jest.fn(),
-    getAllSubCaseComments: jest.fn(),
     getCase: jest.fn(),
     getCases: jest.fn(),
     getCaseIdsByAlertId: jest.fn(),
-    getMostRecentSubCase: jest.fn(),
     getResolveCase: jest.fn(),
-    getSubCase: jest.fn(),
-    getSubCases: jest.fn(),
     getTags: jest.fn(),
     getReporters: jest.fn(),
     getUser: jest.fn(),
     postNewCase: jest.fn(),
     patchCase: jest.fn(),
     patchCases: jest.fn(),
-    patchSubCase: jest.fn(),
-    patchSubCases: jest.fn(),
-    findSubCaseStatusStats: jest.fn(),
-    getCommentsByAssociation: jest.fn(),
-    getCaseCommentStats: jest.fn(),
-    findSubCasesGroupByCase: jest.fn(),
-    findCaseStatusStats: jest.fn(),
     findCasesGroupedByID: jest.fn(),
+    getCaseStatusStats: jest.fn(),
   };
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
@@ -88,6 +74,7 @@ export const createUserActionServiceMock = (): CaseUserActionServiceMock => {
     bulkCreateCaseDeletion: jest.fn(),
     bulkCreateUpdateCase: jest.fn(),
     bulkCreateAttachmentDeletion: jest.fn(),
+    bulkCreateAttachmentCreation: jest.fn(),
     createUserAction: jest.fn(),
     create: jest.fn(),
     getAll: jest.fn(),
@@ -116,11 +103,15 @@ export const createAttachmentServiceMock = (): AttachmentServiceMock => {
     get: jest.fn(),
     delete: jest.fn(),
     create: jest.fn(),
+    bulkCreate: jest.fn(),
     update: jest.fn(),
     bulkUpdate: jest.fn(),
     getAllAlertsAttachToCase: jest.fn(),
     countAlertsAttachedToCase: jest.fn(),
     executeCaseActionsAggregations: jest.fn(),
+    getCaseCommentStats: jest.fn(),
+    valueCountAlertsAttachedToCase: jest.fn(),
+    executeCaseAggregations: jest.fn(),
   };
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error

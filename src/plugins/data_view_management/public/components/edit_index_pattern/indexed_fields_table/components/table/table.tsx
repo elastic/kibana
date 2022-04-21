@@ -7,7 +7,7 @@
  */
 
 import React, { PureComponent } from 'react';
-import { OverlayModalStart, ThemeServiceStart } from 'src/core/public';
+import { OverlayModalStart, ThemeServiceStart } from '@kbn/core/public';
 
 import {
   EuiIcon,
@@ -28,10 +28,13 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toMountPoint } from '../../../../../../../kibana_react/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
-import { DataView } from '../../../../../../../data_views/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { IndexedFieldItem } from '../../types';
+
+export const showDelete = (field: IndexedFieldItem) =>
+  !field.isMapped && field.isUserEditable && field.runtimeField?.type !== 'composite';
 
 // localized labels
 const additionalInfoAriaLabel = i18n.translate(
@@ -454,7 +457,7 @@ export class Table extends PureComponent<IndexedFieldProps> {
             onClick: (field) => deleteField(field.name),
             type: 'icon',
             'data-test-subj': 'deleteField',
-            available: (field) => !field.isMapped && field.isUserEditable,
+            available: showDelete,
           },
         ],
         width: '40px',

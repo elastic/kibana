@@ -7,12 +7,12 @@
  */
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
+import { ISearchSource } from '@kbn/data-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/public';
+import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
-import { ISearchSource } from '../../../../../data/common';
 import { GetStateReturn } from '../services/discover_state';
-import { RequestAdapter } from '../../../../../inspector/public';
-import type { AutoRefreshDoneFn } from '../../../../../data/public';
 import { validateTimeRange } from './validate_time_range';
 import { Chart } from '../components/chart/point_series';
 import { useSingleton } from './use_singleton';
@@ -30,6 +30,7 @@ export interface SavedSearchData {
   documents$: DataDocuments$;
   totalHits$: DataTotalHits$;
   charts$: DataCharts$;
+  availableFields$: AvailableFields$;
 }
 
 export interface TimechartBucketInterval {
@@ -42,6 +43,7 @@ export type DataMain$ = BehaviorSubject<DataMainMsg>;
 export type DataDocuments$ = BehaviorSubject<DataDocumentsMsg>;
 export type DataTotalHits$ = BehaviorSubject<DataTotalHitsMsg>;
 export type DataCharts$ = BehaviorSubject<DataChartsMessage>;
+export type AvailableFields$ = BehaviorSubject<DataAvailableFieldsMsg>;
 
 export type DataRefetch$ = Subject<DataRefetchMsg>;
 
@@ -76,6 +78,10 @@ export interface DataTotalHitsMsg extends DataMsg {
 export interface DataChartsMessage extends DataMsg {
   bucketInterval?: TimechartBucketInterval;
   chartData?: Chart;
+}
+
+export interface DataAvailableFieldsMsg extends DataMsg {
+  fields?: string[];
 }
 
 /**
@@ -116,14 +122,19 @@ export const useSavedSearch = ({
 
   const charts$: DataCharts$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
 
+  const availableFields$: AvailableFields$ = useBehaviorSubject({
+    fetchStatus: initialFetchStatus,
+  });
+
   const dataSubjects = useMemo(() => {
     return {
       main$,
       documents$,
       totalHits$,
       charts$,
+      availableFields$,
     };
-  }, [main$, charts$, documents$, totalHits$]);
+  }, [main$, charts$, documents$, totalHits$, availableFields$]);
 
   /**
    * The observable to trigger data fetching in UI
@@ -136,7 +147,6 @@ export const useSavedSearch = ({
    * Values that shouldn't trigger re-rendering when changed
    */
   const refs = useRef<{
-    abortController?: AbortController;
     autoRefreshDone?: AutoRefreshDoneFn;
   }>({});
 
@@ -161,6 +171,7 @@ export const useSavedSearch = ({
       searchSource,
       initialFetchStatus,
     });
+    let abortController: AbortController;
 
     const subscription = fetch$.subscribe(async (val) => {
       if (!validateTimeRange(timefilter.getTime(), services.toastNotifications)) {
@@ -168,12 +179,12 @@ export const useSavedSearch = ({
       }
       inspectorAdapters.requests.reset();
 
-      refs.current.abortController?.abort();
-      refs.current.abortController = new AbortController();
+      abortController?.abort();
+      abortController = new AbortController();
       const autoRefreshDone = refs.current.autoRefreshDone;
 
       await fetchAll(dataSubjects, searchSource, val === 'reset', {
-        abortController: refs.current.abortController,
+        abortController,
         appStateContainer: stateContainer.appStateContainer,
         data,
         initialFetchStatus,
@@ -194,7 +205,10 @@ export const useSavedSearch = ({
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      abortController?.abort();
+      subscription.unsubscribe();
+    };
   }, [
     data,
     data.query.queryString,

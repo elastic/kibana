@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { requestContextMock, requestMock, serverMock } from '../__mocks__';
@@ -36,7 +36,7 @@ describe.each([
       getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
     );
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
-    clients.ruleExecutionLogClient.getExecutionSummariesBulk.mockResolvedValue(
+    clients.ruleExecutionLog.getExecutionSummariesBulk.mockResolvedValue(
       getRuleExecutionSummaries()
     );
 

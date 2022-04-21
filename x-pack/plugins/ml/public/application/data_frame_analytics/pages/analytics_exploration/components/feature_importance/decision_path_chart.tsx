@@ -132,7 +132,11 @@ export const DecisionPathChart = ({
       <Chart
         size={{ height: DECISION_PATH_MARGIN + decisionPathData.length * DECISION_PATH_ROW_HEIGHT }}
       >
-        <Settings theme={theme} rotation={90} />
+        <Settings
+          // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
+          theme={theme}
+          rotation={90}
+        />
         {regressionBaselineData && (
           <LineAnnotation
             id="xpack.ml.dataframe.analytics.explorationResults.decisionPathBaseline"

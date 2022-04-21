@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { DataView } from '@kbn/data-views-plugin/public';
+import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { updateSearchSource } from './update_search_source';
-import { DataView } from '../../../../../data/common';
 import { SavedSearch } from '../../../services/saved_searches';
 import { AppState } from '../services/discover_state';
 import type { SortOrder } from '../../../services/saved_searches';
-import { SavedObjectSaveOpts } from '../../../../../saved_objects/public';
 import { DiscoverServices } from '../../../build_services';
 import { saveSavedSearch } from '../../../services/saved_searches';
 
@@ -50,6 +50,9 @@ export async function persistSavedSearch(
   }
   if (typeof state.hideChart !== 'undefined') {
     savedSearch.hideChart = state.hideChart;
+  }
+  if (typeof state.rowHeight !== 'undefined') {
+    savedSearch.rowHeight = state.rowHeight;
   }
 
   if (state.viewMode) {

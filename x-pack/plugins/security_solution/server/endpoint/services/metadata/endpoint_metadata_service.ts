@@ -10,10 +10,16 @@ import {
   Logger,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
-import { TransportResult } from '@elastic/elasticsearch';
 import { SearchTotalHits, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { Agent, AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
+import {
+  AgentNotFoundError,
+  AgentPolicyServiceInterface,
+  PackagePolicyServiceInterface,
+} from '@kbn/fleet-plugin/server';
+import { getAgentStatus } from '@kbn/fleet-plugin/common/services/agent_status';
 import {
   HostInfo,
   HostMetadata,
@@ -22,12 +28,6 @@ import {
   PolicyData,
   UnitedAgentMetadata,
 } from '../../../../common/endpoint/types';
-import { Agent, AgentPolicy, PackagePolicy } from '../../../../../fleet/common';
-import {
-  AgentNotFoundError,
-  AgentPolicyServiceInterface,
-  PackagePolicyServiceInterface,
-} from '../../../../../fleet/server';
 import {
   EndpointHostNotFoundError,
   EndpointHostUnEnrolledError,
@@ -53,7 +53,6 @@ import {
 import { createInternalReadonlySoClient } from '../../utils/create_internal_readonly_so_client';
 import { METADATA_UNITED_INDEX } from '../../../../common/endpoint/constants';
 import { getAllEndpointPackagePolicies } from '../../routes/metadata/support/endpoint_package_policies';
-import { getAgentStatus } from '../../../../../fleet/common/services/agent_status';
 import { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import { EndpointFleetServicesInterface } from '../fleet/endpoint_fleet_services_factory';
@@ -122,7 +121,7 @@ export class EndpointMetadataService {
   async getHostMetadata(esClient: ElasticsearchClient, endpointId: string): Promise<HostMetadata> {
     const query = getESQueryHostMetadataByID(endpointId);
     const queryResult = await esClient.search<HostMetadata>(query).catch(catchAndWrapError);
-    const endpointMetadata = queryResponseToHostResult(queryResult.body).result;
+    const endpointMetadata = queryResponseToHostResult(queryResult).result;
 
     if (endpointMetadata) {
       return endpointMetadata;
@@ -148,7 +147,7 @@ export class EndpointMetadataService {
       .search<HostMetadata>(query, { ignore: [404] })
       .catch(catchAndWrapError);
 
-    return queryResponseToHostListResult(searchResult.body).resultList;
+    return queryResponseToHostListResult(searchResult).resultList;
   }
 
   /**
@@ -413,7 +412,7 @@ export class EndpointMetadataService {
     const endpointPolicyIds = endpointPolicies.map((policy) => policy.policy_id);
     const unitedIndexQuery = await buildUnitedIndexQuery(queryOptions, endpointPolicyIds);
 
-    let unitedMetadataQueryResponse: TransportResult<SearchResponse<UnitedAgentMetadata>, unknown>;
+    let unitedMetadataQueryResponse: SearchResponse<UnitedAgentMetadata>;
 
     try {
       unitedMetadataQueryResponse = await esClient.search<UnitedAgentMetadata>(unitedIndexQuery);
@@ -423,7 +422,7 @@ export class EndpointMetadataService {
       throw err;
     }
 
-    const { hits: docs, total: docsCount } = unitedMetadataQueryResponse?.body?.hits || {};
+    const { hits: docs, total: docsCount } = unitedMetadataQueryResponse?.hits || {};
     const agentPolicyIds: string[] = docs.map((doc) => doc._source?.united?.agent?.policy_id ?? '');
 
     const agentPolicies =

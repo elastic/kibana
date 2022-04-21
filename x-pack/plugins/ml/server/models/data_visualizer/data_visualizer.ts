@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { get, each, last, find } from 'lodash';
-import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/server';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/server';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 import { getSafeAggregationName } from '../../../common/util/job_utils';
 import { stringHash } from '../../../common/util/string_utils';
@@ -204,7 +204,7 @@ const getAggIntervals = async (
     return aggs;
   }, {} as Record<string, object>);
 
-  const { body } = await asCurrentUser.search({
+  const body = await asCurrentUser.search({
     index: indexPattern,
     size: 0,
     body: {
@@ -290,7 +290,7 @@ export const getHistogramsForFields = async (
     return [];
   }
 
-  const { body } = await asCurrentUser.search({
+  const body = await asCurrentUser.search({
     index: indexPattern,
     size: 0,
     body: {
@@ -666,7 +666,7 @@ export class DataVisualizer {
         : {}),
     };
 
-    const { body } = await this._asCurrentUser.search({
+    const body = await this._asCurrentUser.search({
       index,
       track_total_hits: true,
       size,
@@ -757,7 +757,7 @@ export class DataVisualizer {
     };
     filterCriteria.push({ exists: { field } });
 
-    const { body } = await this._asCurrentUser.search({
+    const body = await this._asCurrentUser.search({
       index,
       size,
       body: searchBody,
@@ -802,7 +802,7 @@ export class DataVisualizer {
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
-    const { body } = await this._asCurrentUser.search({
+    const body = await this._asCurrentUser.search({
       index,
       size,
       body: searchBody,
@@ -907,7 +907,7 @@ export class DataVisualizer {
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
-    const { body } = await this._asCurrentUser.search({
+    const body = await this._asCurrentUser.search({
       index,
       size,
       body: searchBody,
@@ -1030,7 +1030,7 @@ export class DataVisualizer {
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
-    const { body } = await this._asCurrentUser.search({
+    const body = await this._asCurrentUser.search({
       index,
       size,
       body: searchBody,
@@ -1106,7 +1106,7 @@ export class DataVisualizer {
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
-    const { body } = await this._asCurrentUser.search({
+    const body = await this._asCurrentUser.search({
       index,
       size,
       body: searchBody,
@@ -1175,7 +1175,7 @@ export class DataVisualizer {
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
-    const { body } = await this._asCurrentUser.search({
+    const body = await this._asCurrentUser.search({
       index,
       size,
       body: searchBody,
@@ -1240,7 +1240,7 @@ export class DataVisualizer {
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     };
 
-    const { body } = await this._asCurrentUser.search({
+    const body = await this._asCurrentUser.search({
       index,
       size,
       body: searchBody,

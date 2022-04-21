@@ -8,16 +8,16 @@
 import { capitalize, uniqBy } from 'lodash';
 import { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { ESFilter } from '../../../../../src/core/types/elasticsearch';
+import { ESFilter } from '@kbn/core/types/elasticsearch';
+import { IInspectorInfo } from '@kbn/data-plugin/common';
 import { createEsParams, useEsSearch } from './use_es_search';
-import { IInspectorInfo } from '../../../../../src/plugins/data/common';
 import { TRANSACTION_URL } from '../components/shared/exploratory_view/configurations/constants/elasticsearch_fieldnames';
 
 export interface Props {
   sourceField: string;
   label: string;
   query?: string;
-  indexPatternTitle?: string;
+  dataViewTitle?: string;
   filters?: ESFilter[];
   time?: { from: string; to: string };
   keepHistory?: boolean;
@@ -59,7 +59,7 @@ const getIncludeClause = (sourceField: string, query?: string) => {
 
 export const useValuesList = ({
   sourceField,
-  indexPatternTitle,
+  dataViewTitle,
   query = '',
   filters,
   time,
@@ -91,7 +91,7 @@ export const useValuesList = ({
 
   const { data, loading } = useEsSearch(
     createEsParams({
-      index: indexPatternTitle!,
+      index: dataViewTitle!,
       body: {
         query: {
           bool: {
@@ -135,7 +135,7 @@ export const useValuesList = ({
         },
       },
     }),
-    [debouncedQuery, from, to, JSON.stringify(filters), indexPatternTitle, sourceField],
+    [debouncedQuery, from, to, JSON.stringify(filters), dataViewTitle, sourceField],
     { name: `get${label.replace(/\s/g, '')}ValuesList` }
   );
 

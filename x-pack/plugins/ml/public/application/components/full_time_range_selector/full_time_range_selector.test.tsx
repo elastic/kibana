@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
-import { FullTimeRangeSelector } from './index';
-import type { Query } from 'src/plugins/data/public';
-import type { DataView } from '../../../../../../../src/plugins/data_views/public';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import { FullTimeRangeSelector } from '.';
+import type { Query } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 // Create a mock for the setFullTimeRange function in the service.
 // The mock is hoisted to the top, so need to prefix the mock function

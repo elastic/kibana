@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Unit } from '@elastic/datemath';
 import { schema, Type } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { PluginSetupContract } from '../../../../../alerting/server';
+import { PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import {
   Comparator,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
@@ -31,6 +31,7 @@ import {
   thresholdActionVariableDescription,
   timestampActionVariableDescription,
   valueActionVariableDescription,
+  viewInAppUrlActionVariableDescription,
 } from '../common/messages';
 import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
 import {
@@ -43,7 +44,7 @@ import {
 const condition = schema.object({
   threshold: schema.arrayOf(schema.number()),
   comparator: oneOfLiterals(Object.values(Comparator)) as Type<Comparator>,
-  timeUnit: schema.string() as Type<Unit>,
+  timeUnit: schema.string() as Type<TimeUnitChar>,
   timeSize: schema.number(),
   metric: oneOfLiterals(Object.keys(SnapshotMetricTypeKeys)) as Type<SnapshotMetricType>,
   warningThreshold: schema.maybe(schema.arrayOf(schema.number())),
@@ -99,6 +100,7 @@ export async function registerMetricInventoryThresholdRuleType(
         { name: 'value', description: valueActionVariableDescription },
         { name: 'metric', description: metricActionVariableDescription },
         { name: 'threshold', description: thresholdActionVariableDescription },
+        { name: 'viewInAppUrl', description: viewInAppUrlActionVariableDescription },
       ],
     },
   });

@@ -13,7 +13,9 @@ import {
   Logger,
   RequestHandler,
   SavedObjectsClientContract,
-} from '../../../../../../../src/core/server';
+} from '@kbn/core/server';
+import { PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
+import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import {
   HostInfo,
   HostMetadata,
@@ -24,10 +26,8 @@ import {
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
 import { kibanaRequestToMetadataListESQuery } from './query_builders';
-import { PackagePolicy } from '../../../../../fleet/common/types/models';
-import { AgentNotFoundError } from '../../../../../fleet/server';
 import { EndpointAppContext, HostListQueryResult } from '../../types';
-import { GetMetadataRequestSchema } from './index';
+import { GetMetadataRequestSchema } from '.';
 import { findAllUnenrolledAgentIds } from './support/unenroll';
 import { findAgentIdsByStatus } from './support/agent_status';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
@@ -192,7 +192,7 @@ export function getMetadataTransformStatsHandler(
         allow_no_match: true,
       });
       return response.ok({
-        body: transformStats.body,
+        body: transformStats,
       });
     } catch (error) {
       return errorHandler(logger, response, error);
@@ -366,6 +366,6 @@ async function legacyListMetadataQuery(
   });
 
   const result = await esClient.search<HostMetadata>(queryParams);
-  const hostListQueryResult = queryResponseToHostListResult(result.body);
+  const hostListQueryResult = queryResponseToHostListResult(result);
   return mapToHostResultList(queryParams, hostListQueryResult, metadataRequestContext);
 }

@@ -70,7 +70,7 @@ export function getShardStats(
     dataset,
   });
 
-  const config = req.server.config();
+  const config = req.server.config;
   const metric = ElasticsearchMetric.getMetricFields();
   const filters = [];
   if (cluster.cluster_state?.state_uuid) {

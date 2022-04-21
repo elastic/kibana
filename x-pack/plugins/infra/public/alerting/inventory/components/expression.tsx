@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Unit } from '@elastic/datemath';
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -23,14 +22,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce, omit } from 'lodash';
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   ForLastExpression,
   IErrorObject,
   RuleTypeParamsExpressionProps,
   ThresholdExpression,
-} from '../../../../../triggers_actions_ui/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
+import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import {
   Comparator,
   FilterQuery,
@@ -87,7 +86,7 @@ type Props = Omit<
     },
     AlertContextMeta
   >,
-  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data'
+  'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data' | 'unifiedSearch'
 >;
 
 export const defaultExpression = {
@@ -113,7 +112,7 @@ export const Expressions: React.FC<Props> = (props) => {
     toastWarning: notifications.toasts.addWarning,
   });
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
-  const [timeUnit, setTimeUnit] = useState<Unit>('m');
+  const [timeUnit, setTimeUnit] = useState<TimeUnitChar>('m');
 
   const derivedIndexPattern = useMemo(
     () => createDerivedIndexPattern(),
@@ -196,7 +195,7 @@ export const Expressions: React.FC<Props> = (props) => {
         ...c,
         timeUnit: tu,
       }));
-      setTimeUnit(tu as Unit);
+      setTimeUnit(tu as TimeUnitChar);
       setRuleParams('criteria', criteria as Criteria);
     },
     [ruleParams.criteria, setRuleParams]

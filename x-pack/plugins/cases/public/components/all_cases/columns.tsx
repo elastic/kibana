@@ -22,31 +22,24 @@ import {
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 
-import { Case, DeleteCase, SubCase } from '../../../common/ui/types';
-import {
-  CaseStatuses,
-  CaseType,
-  CommentType,
-  CommentRequestAlertType,
-  ActionConnector,
-} from '../../../common/api';
+import { Case, DeleteCase } from '../../../common/ui/types';
+import { CaseStatuses, ActionConnector } from '../../../common/api';
 import { OWNER_INFO } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { CaseDetailsLink } from '../links';
 import * as i18n from './translations';
-import { getSubCasesStatusCountsBadges, isSubCase } from './helpers';
 import { ALERTS } from '../../common/translations';
 import { getActions } from './actions';
 import { UpdateCase } from '../../containers/use_get_cases';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
-import { useKibana } from '../../common/lib/kibana';
+import { useApplicationCapabilities, useKibana } from '../../common/lib/kibana';
 import { StatusContextMenu } from '../case_action_bar/status_context_menu';
 import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
-import { PostComment } from '../../containers/use_post_comment';
-import type { CasesOwners } from '../../methods/can_use_cases';
+import type { CasesOwners } from '../../client/helpers/can_use_cases';
+import { useCasesFeatures } from '../cases_context/use_cases_features';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -78,9 +71,7 @@ export interface GetCasesColumn {
   userCanCrud: boolean;
   connectors?: ActionConnector[];
   onRowClick?: (theCase: Case) => void;
-  alertData?: Omit<CommentRequestAlertType, 'type'>;
-  postComment?: (args: PostComment) => Promise<void>;
-  updateCase?: (newCase: Case) => void;
+
   showSolutionColumn?: boolean;
 }
 export const useCasesColumns = ({
@@ -93,9 +84,6 @@ export const useCasesColumns = ({
   userCanCrud,
   connectors = [],
   onRowClick,
-  alertData,
-  postComment,
-  updateCase,
   showSolutionColumn,
 }: GetCasesColumn): CasesColumns[] => {
   // Delete case
@@ -108,16 +96,17 @@ export const useCasesColumns = ({
     isLoading: isDeleting,
   } = useDeleteCases();
 
+  const { isAlertsEnabled } = useCasesFeatures();
+
   const [deleteThisCase, setDeleteThisCase] = useState<DeleteCase>({
     id: '',
     title: '',
-    type: null,
   });
 
   const toggleDeleteModal = useCallback(
     (deleteCase: Case) => {
       handleToggleModal();
-      setDeleteThisCase({ id: deleteCase.id, title: deleteCase.title, type: deleteCase.type });
+      setDeleteThisCase({ id: deleteCase.id, title: deleteCase.title });
     },
     [handleToggleModal]
   );
@@ -144,21 +133,11 @@ export const useCasesColumns = ({
 
   const assignCaseAction = useCallback(
     async (theCase: Case) => {
-      if (alertData != null) {
-        await postComment?.({
-          caseId: theCase.id,
-          data: {
-            type: CommentType.alert,
-            ...alertData,
-          },
-          updateCase,
-        });
-      }
       if (onRowClick) {
         onRowClick(theCase);
       }
     },
-    [alertData, onRowClick, postComment, updateCase]
+    [onRowClick]
   );
 
   useEffect(() => {
@@ -175,16 +154,12 @@ export const useCasesColumns = ({
   return [
     {
       name: i18n.NAME,
-      render: (theCase: Case | SubCase) => {
+      render: (theCase: Case) => {
         if (theCase.id != null && theCase.title != null) {
           const caseDetailsLinkComponent = isSelectorView ? (
             <TruncatedText text={theCase.title} />
           ) : (
-            <CaseDetailsLink
-              detailName={isSubCase(theCase) ? theCase.caseParentId : theCase.id}
-              subCaseId={isSubCase(theCase) ? theCase.id : undefined}
-              title={theCase.title}
-            >
+            <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
               <TruncatedText text={theCase.title} />
             </CaseDetailsLink>
           );
@@ -234,7 +209,7 @@ export const useCasesColumns = ({
                 <EuiBadge
                   color="hollow"
                   key={`${tag}-${i}`}
-                  data-test-subj={`case-table-column-tags-${i}`}
+                  data-test-subj={`case-table-column-tags-${tag}`}
                 >
                   {tag}
                 </EuiBadge>
@@ -246,15 +221,19 @@ export const useCasesColumns = ({
       },
       truncateText: true,
     },
-    {
-      align: RIGHT_ALIGNMENT,
-      field: 'totalAlerts',
-      name: ALERTS,
-      render: (totalAlerts: Case['totalAlerts']) =>
-        totalAlerts != null
-          ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
-          : getEmptyTagValue(),
-    },
+    ...(isAlertsEnabled
+      ? [
+          {
+            align: RIGHT_ALIGNMENT,
+            field: 'totalAlerts',
+            name: ALERTS,
+            render: (totalAlerts: Case['totalAlerts']) =>
+              totalAlerts != null
+                ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
+                : getEmptyTagValue(),
+          },
+        ]
+      : []),
     ...(showSolutionColumn
       ? [
           {
@@ -350,32 +329,24 @@ export const useCasesColumns = ({
           {
             name: i18n.STATUS,
             render: (theCase: Case) => {
-              if (theCase?.subCases == null || theCase.subCases.length === 0) {
-                if (theCase.status == null || theCase.type === CaseType.collection) {
-                  return getEmptyTagValue();
-                }
-                return (
-                  <StatusContextMenu
-                    currentStatus={theCase.status}
-                    disabled={!userCanCrud || isLoadingCases.length > 0}
-                    onStatusChanged={(status) =>
-                      handleDispatchUpdate({
-                        updateKey: 'status',
-                        updateValue: status,
-                        caseId: theCase.id,
-                        version: theCase.version,
-                      })
-                    }
-                  />
-                );
+              if (theCase.status === null || theCase.status === undefined) {
+                return getEmptyTagValue();
               }
 
-              const badges = getSubCasesStatusCountsBadges(theCase.subCases);
-              return badges.map(({ color, count }, index) => (
-                <EuiBadge key={index} color={color}>
-                  {count}
-                </EuiBadge>
-              ));
+              return (
+                <StatusContextMenu
+                  currentStatus={theCase.status}
+                  disabled={!userCanCrud || isLoadingCases.length > 0}
+                  onStatusChanged={(status) =>
+                    handleDispatchUpdate({
+                      updateKey: 'status',
+                      updateValue: status,
+                      caseId: theCase.id,
+                      version: theCase.version,
+                    })
+                  }
+                />
+              );
             },
           },
         ]
@@ -417,6 +388,7 @@ const IconWrapper = styled.span`
 
 export const ExternalServiceColumn: React.FC<Props> = ({ theCase, connectors }) => {
   const { triggersActionsUi } = useKibana().services;
+  const { actions } = useApplicationCapabilities();
 
   if (theCase.externalService == null) {
     return renderStringField(i18n.NOT_PUSHED, `case-table-column-external-notPushed`);
@@ -434,13 +406,16 @@ export const ExternalServiceColumn: React.FC<Props> = ({ theCase, connectors }) 
 
   return (
     <p>
-      <IconWrapper>
-        <EuiIcon
-          size="original"
-          title={theCase.externalService?.connectorName}
-          type={getConnectorIcon(triggersActionsUi, lastPushedConnector?.actionTypeId)}
-        />
-      </IconWrapper>
+      {actions.read && (
+        <IconWrapper>
+          <EuiIcon
+            size="original"
+            title={theCase.externalService?.connectorName}
+            type={getConnectorIcon(triggersActionsUi, lastPushedConnector?.actionTypeId)}
+            data-test-subj="cases-table-connector-icon"
+          />
+        </IconWrapper>
+      )}
       <EuiLink
         data-test-subj={`case-table-column-external`}
         title={theCase.externalService?.connectorName}

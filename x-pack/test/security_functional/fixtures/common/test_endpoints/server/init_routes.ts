@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
-import { CoreSetup, PluginInitializerContext } from '../../../../../../../src/core/server';
+import { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
 
 export function initRoutes(initializerContext: PluginInitializerContext, core: CoreSetup) {
   const logger = initializerContext.logger.get();
@@ -80,7 +80,7 @@ export function initRoutes(initializerContext: PluginInitializerContext, core: C
 
       // 3. Make authentication request once again and return result.
       try {
-        const { body } = await scopedClient.asCurrentUser.security.authenticate();
+        const body = await scopedClient.asCurrentUser.security.authenticate();
         slowLog.info(
           `Successfully performed final authentication request: ${JSON.stringify(body)}`
         );

@@ -47,6 +47,10 @@ describe('ServiceNowITSM Fields', () => {
 
   it('all params fields are rendered - isEdit: true', () => {
     const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
+    act(() => {
+      onChoicesSuccess(mockChoices);
+    });
+    wrapper.update();
     expect(wrapper.find('[data-test-subj="severitySelect"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="urgencySelect"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="impactSelect"]').exists()).toBeTruthy();
@@ -73,7 +77,7 @@ describe('ServiceNowITSM Fields', () => {
     );
   });
 
-  test('it transforms the categories to options correctly', async () => {
+  it('transforms the categories to options correctly', async () => {
     const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
     act(() => {
       onChoicesSuccess(mockChoices);
@@ -91,10 +95,14 @@ describe('ServiceNowITSM Fields', () => {
         value: 'software',
         text: 'Software',
       },
+      {
+        text: 'Failed Login',
+        value: 'failed_login',
+      },
     ]);
   });
 
-  test('it transforms the subcategories to options correctly', async () => {
+  it('transforms the subcategories to options correctly', async () => {
     const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
     act(() => {
       onChoicesSuccess(mockChoices);
@@ -109,7 +117,7 @@ describe('ServiceNowITSM Fields', () => {
     ]);
   });
 
-  it('it transforms the options correctly', async () => {
+  it('transforms the options correctly', async () => {
     const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
     act(() => {
       onChoicesSuccess(mockChoices);
@@ -127,25 +135,43 @@ describe('ServiceNowITSM Fields', () => {
     );
   });
 
-  test('it shows the deprecated callout when the connector uses the table API', async () => {
+  it('shows the deprecated callout when the connector uses the table API', async () => {
     const tableApiConnector = { ...connector, config: { usesTableApi: true } };
     render(<Fields fields={fields} onChange={onChange} connector={tableApiConnector} />);
     expect(screen.getByTestId('deprecated-connector-warning-callout')).toBeInTheDocument();
   });
 
-  test('it does not show the deprecated callout when the connector does not uses the table API', async () => {
+  it('does not show the deprecated callout when the connector does not uses the table API', async () => {
     render(<Fields fields={fields} onChange={onChange} connector={connector} />);
     expect(screen.queryByTestId('deprecated-connector-warning-callout')).not.toBeInTheDocument();
   });
 
+  it('should hide subcategory if selecting a category without subcategories', async () => {
+    // Failed Login doesn't have defined subcategories
+    const customFields = {
+      ...fields,
+      category: 'Failed Login',
+      subcategory: '',
+    };
+    const wrapper = mount(
+      <Fields fields={customFields} onChange={onChange} connector={connector} />
+    );
+
+    expect(wrapper.find('[data-test-subj="subcategorySelect"]').exists()).toBeFalsy();
+  });
+
   describe('onChange calls', () => {
     const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
+    act(() => {
+      onChoicesSuccess(mockChoices);
+    });
+    wrapper.update();
 
     expect(onChange).toHaveBeenCalledWith(fields);
 
     const testers = ['severity', 'urgency', 'impact', 'subcategory'];
     testers.forEach((subj) =>
-      test(`${subj.toUpperCase()}`, async () => {
+      it(`${subj.toUpperCase()}`, async () => {
         await waitFor(() => {
           const select = wrapper.find(EuiSelect).filter(`[data-test-subj="${subj}Select"]`)!;
           select.prop('onChange')!({
@@ -162,7 +188,7 @@ describe('ServiceNowITSM Fields', () => {
       })
     );
 
-    test('it should set subcategory to null when changing category', async () => {
+    it('should set subcategory to null when changing category', async () => {
       await waitFor(() => {
         const select = wrapper.find(EuiSelect).filter(`[data-test-subj="categorySelect"]`)!;
         select.prop('onChange')!({

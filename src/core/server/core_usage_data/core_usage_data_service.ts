@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { Subject, Observable } from 'rxjs';
-import { takeUntil, first } from 'rxjs/operators';
+import { Subject, Observable, firstValueFrom } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { get } from 'lodash';
 import { hasConfigPathIntersection, ChangedDeprecatedPaths } from '@kbn/config';
 
-import { CoreService } from 'src/core/types';
-import { Logger, SavedObjectsServiceStart, SavedObjectTypeRegistry } from 'src/core/server';
 import type {
   AggregationsMultiBucketAggregateBase,
   AggregationsSingleBucketAggregateBase,
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { CoreService } from '../../types';
+import { Logger, SavedObjectsServiceStart, SavedObjectTypeRegistry } from '..';
 import { CoreContext } from '../core_context';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
 import { HttpConfigType, InternalHttpServiceSetup } from '../http';
@@ -100,7 +100,7 @@ export class CoreUsageDataService
   constructor(core: CoreContext) {
     this.logger = core.logger.get('core-usage-stats-service');
     this.configService = core.configService;
-    this.stop$ = new Subject();
+    this.stop$ = new Subject<void>();
   }
 
   private async getSavedObjectUsageData(
@@ -131,18 +131,19 @@ export class CoreUsageDataService
             return acc.add(index);
           }, new Set<string>())
           .values()
-      ).map((index) => {
+      ).map(async (index) => {
         // The _cat/indices API returns the _index_ and doesn't return a way
         // to map back from the index to the alias. So we have to make an API
-        // call for every alias
-        return elasticsearch.client.asInternalUser.cat
-          .indices<any[]>({
+        // call for every alias. The document count is the lucene document count.
+        const catIndicesResults = await elasticsearch.client.asInternalUser.cat
+          .indices({
             index,
             format: 'JSON',
             bytes: 'b',
           })
-          .then(({ body }) => {
+          .then((body) => {
             const stats = body[0];
+
             return {
               alias: kibanaOrTaskManagerIndex(index, kibanaIndex),
               docsCount: stats['docs.count'] ? parseInt(stats['docs.count'], 10) : 0,
@@ -153,6 +154,27 @@ export class CoreUsageDataService
                 : 0,
             };
           });
+        // We use the GET <index>/_count API to get the number of saved objects
+        // to monitor if the cluster will hit the scalling limit of saved object migrations
+        const savedObjectsCounts = await elasticsearch.client.asInternalUser
+          .count({
+            index,
+          })
+          .then((body) => {
+            return {
+              savedObjectsDocsCount: body.count ? body.count : 0,
+            };
+          });
+        this.logger.debug(
+          `Lucene documents count ${catIndicesResults.docsCount} from index ${catIndicesResults.alias}`
+        );
+        this.logger.debug(
+          `Saved objects documents count ${savedObjectsCounts.savedObjectsDocsCount} from index ${catIndicesResults.alias}`
+        );
+        return {
+          ...catIndicesResults,
+          ...savedObjectsCounts,
+        };
       })
     );
   }
@@ -160,7 +182,7 @@ export class CoreUsageDataService
   private async getSavedObjectAliasUsageData(elasticsearch: ElasticsearchServiceStart) {
     // Note: this agg can be changed to use `savedObjectsRepository.find` in the future after `filters` is supported.
     // See src/core/server/saved_objects/service/lib/aggregations/aggs_types/bucket_aggs.ts for supported aggregations.
-    const { body: resp } = await elasticsearch.client.asInternalUser.search<
+    const resp = await elasticsearch.client.asInternalUser.search<
       unknown,
       { aliases: UsageDataAggs }
     >({
@@ -361,7 +383,7 @@ export class CoreUsageDataService
   private async getNonDefaultKibanaConfigs(
     exposedConfigsToUsage: ExposedConfigsToUsage
   ): Promise<ConfigUsageData> {
-    const config = await this.configService.getConfig$().pipe(first()).toPromise();
+    const config = await firstValueFrom(this.configService.getConfig$());
     const nonDefaultConfigs = config.toRaw();
     const usedPaths = await this.configService.getUsedPaths();
     const exposedConfigsKeys = [...exposedConfigsToUsage.keys()];

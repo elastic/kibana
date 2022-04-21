@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FieldValuePair } from '../../../../../common/correlations/types';
 import {
@@ -55,7 +55,7 @@ export const fetchFieldValueFieldStats = async (
 ): Promise<FieldValueFieldStats> => {
   const request = getFieldValueFieldStatsRequest(params, field);
 
-  const { body } = await esClient.search(request);
+  const body = await esClient.search(request);
   const aggregations = body.aggregations as {
     filtered_count: estypes.AggregationsSingleBucketAggregateBase;
   };
