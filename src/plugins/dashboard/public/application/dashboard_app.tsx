@@ -119,13 +119,12 @@ export function DashboardApp({
     <>
       {isCompleteDashboardAppState(dashboardAppState) && (
         <>
-          {!printMode && (
-            <DashboardTopNav
-              redirectTo={redirectTo}
-              embedSettings={embedSettings}
-              dashboardAppState={dashboardAppState}
-            />
-          )}
+          <DashboardTopNav
+            printMode={printMode}
+            redirectTo={redirectTo}
+            embedSettings={embedSettings}
+            dashboardAppState={dashboardAppState}
+          />
 
           {dashboardAppState.savedDashboard.outcome === 'conflict' &&
           dashboardAppState.savedDashboard.id &&

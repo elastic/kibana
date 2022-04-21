@@ -219,6 +219,19 @@ export class ScreenshotObservableHandler {
     );
   }
 
+  /**
+   * Given a title and time range value look like:
+   *
+   * "[Logs] Web Traffic - Apr 14, 2022 @ 120742.318 to Apr 21, 2022 @ 120742.318"
+   *
+   * Otherwise closest thing to that or a blank string.
+   */
+  private getTitle(timeRange: null | string): string {
+    return `${(this.options as PdfScreenshotOptions).title ?? ''} ${
+      timeRange ? `- ${timeRange}` : ''
+    }`.trim();
+  }
+
   public getScreenshots() {
     return (withRenderComplete: Observable<PageSetupResults>) =>
       withRenderComplete.pipe(
@@ -231,11 +244,7 @@ export class ScreenshotObservableHandler {
           try {
             screenshots =
               this.layout.id === LayoutTypes.PRINT
-                ? await getPdf(
-                    this.driver,
-                    this.logger,
-                    (this.options as PdfScreenshotOptions).title ?? ''
-                  )
+                ? await getPdf(this.driver, this.logger, this.getTitle(data.timeRange))
                 : await getScreenshots(this.driver, this.logger, elements);
           } catch (e) {
             throw new errors.FailedToCaptureScreenshot(e.message);

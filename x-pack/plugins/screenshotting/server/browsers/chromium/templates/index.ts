@@ -9,7 +9,7 @@ import fs from 'fs';
 import { resolve } from 'path';
 
 export const getHeaderTemplate = (title: string) =>
-  `<span style="font-size: 10px; color: #8d8e8e; font-family: system-ui; text-align: center; width: 100%;">${title}</span>`;
+  `<span style="font-size: 8px; color: #8d8e8e; font-family: system-ui; text-align: center; width: 100%;">${title}</span>`;
 
 export const getFooterTemplate = () =>
   fs.readFileSync(resolve(__dirname, './footer.html')).toString();

@@ -101,11 +101,11 @@ export async function toPdf(
   { logo, title }: PdfScreenshotOptions,
   { metrics, results }: CaptureResult
 ): Promise<PdfScreenshotResult> {
-  const timeRange = getTimeRange(results);
   let buffer: Buffer;
   let pages: number;
   const shouldConvertPngsToPdf = layout.id !== LayoutTypes.PRINT;
   if (shouldConvertPngsToPdf) {
+    const timeRange = getTimeRange(results);
     try {
       ({ buffer, pages } = await pngsToPdf({
         title: title ? `${title}${timeRange ? ` - ${timeRange}` : ''}` : undefined,
