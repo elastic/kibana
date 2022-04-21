@@ -40,6 +40,10 @@ interface ActionResponseFields {
   completed_at: string;
   started_at: string;
 }
+
+/**
+ * An endpoint Action created in the Endpoint's `.logs-endpoint.actions-default` index.
+ */
 export interface LogsEndpointAction {
   '@timestamp': string;
   agent: {
@@ -72,6 +76,9 @@ export interface FleetActionResponseData {
   };
 }
 
+/**
+ * And endpoint action created in Fleet's `.fleet-actions`
+ */
 export interface EndpointAction {
   action_id: string;
   '@timestamp': string;
@@ -176,9 +183,12 @@ export interface ActionDetails {
    * The Endpoint ID (and fleet agent ID - they are the same) for which the action was created for.
    * This is an Array because the action could have been sent to multiple endpoints.
    */
-  endpointIds: string[];
-  /** The type of action (ex. `isolate`) */
-  actionType: string;
+  agents: string[];
+  /**
+   * The Endpoint type of action (ex. `isolate`, `release`) that is being requested to be
+   * performed on the endpoint
+   */
+  command: string;
   isExpired: boolean;
   isCompleted: boolean;
   /** The date when the initial action request was submitted */
@@ -188,7 +198,7 @@ export interface ActionDetails {
   /**
    * The list of items (actions and responses) received thus far for the action.
    */
-  items: ActivityLogEntry[];
+  logEntries: ActivityLogEntry[];
 }
 
 export interface ActionDetailsApiResponse {

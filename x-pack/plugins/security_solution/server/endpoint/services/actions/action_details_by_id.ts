@@ -6,12 +6,15 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+import { mapToNormalizedActionRequest } from './utils';
 import {
   ActionDetails,
   ActivityLogAction,
+  ActivityLogActionResponse,
   EndpointAction,
   EndpointActionResponse,
   EndpointActivityLogAction,
+  EndpointActivityLogActionResponse,
   LogsEndpointAction,
   LogsEndpointActionResponse,
 } from '../../../../common/endpoint/types';
@@ -30,8 +33,10 @@ export const getActionDetailsById = async (
   esClient: ElasticsearchClient,
   actionId: string
 ): Promise<ActionDetails> => {
-  let actionRequests: Array<ActivityLogAction | EndpointActivityLogAction>;
-  let actionResponses;
+  let actionRequestsLogEntries: Array<ActivityLogAction | EndpointActivityLogAction>;
+
+  let normalizedActionRequest: ReturnType<typeof mapToNormalizedActionRequest> | undefined;
+  let actionResponses: Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>;
 
   try {
     const actionRequestEsSearchResults = await esClient
@@ -52,11 +57,19 @@ export const getActionDetailsById = async (
       )
       .catch(catchAndWrapError);
 
-    actionRequests = getUniqueLogData(
+    actionRequestsLogEntries = getUniqueLogData(
       categorizeActionResults({
         results: actionRequestEsSearchResults?.hits?.hits ?? [],
       })
     ) as Array<ActivityLogAction | EndpointActivityLogAction>;
+
+    // Multiple Action records could have been returned, but we only really
+    // need one since they both hold similar data
+    const actionDoc = actionRequestsLogEntries[0]?.item.data;
+
+    if (actionDoc) {
+      normalizedActionRequest = mapToNormalizedActionRequest(actionDoc);
+    }
 
     const actionResponsesEsSearchResults = await esClient
       .search<EndpointActionResponse | LogsEndpointActionResponse>(
@@ -80,13 +93,13 @@ export const getActionDetailsById = async (
       categorizeResponseResults({
         results: actionResponsesEsSearchResults?.hits?.hits ?? [],
       })
-    );
+    ) as Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>;
   } catch (error) {
     throw new EndpointError(error.message, error);
   }
 
   // If action id was not found, error out
-  if (actionRequests.length === 0) {
+  if (!normalizedActionRequest) {
     throw new NotFoundError(`Action with id '${actionId}' not found.`);
   }
 
@@ -95,13 +108,13 @@ export const getActionDetailsById = async (
 
   const actionDetails: ActionDetails = {
     id: actionId,
-    endpointIds: [...(actionRequests[0].item.data.agents ?? [])],
-    actionType: actionRequests[0].item.data.data.command,
-    startedAt: actionRequests[0].item.data['@timestamp'],
-    items: [...actionRequests, ...actionResponses],
+    agents: normalizedActionRequest.agents,
+    command: normalizedActionRequest.command,
+    startedAt: normalizedActionRequest.createdAt,
+    logEntries: [...actionRequestsLogEntries, ...actionResponses],
     isCompleted,
     completedAt,
-    isExpired: !isCompleted && actionRequests[0].item.data.expiration < new Date().toISOString(),
+    isExpired: !isCompleted && normalizedActionRequest.expiration < new Date().toISOString(),
   };
 
   return actionDetails;
