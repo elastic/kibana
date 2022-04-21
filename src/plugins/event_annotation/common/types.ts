@@ -33,7 +33,6 @@ export interface RangeStyleProps {
   label: string;
   color?: string;
   outside?: boolean;
-  textVisibility?: boolean;
   isHidden?: boolean;
 }
 

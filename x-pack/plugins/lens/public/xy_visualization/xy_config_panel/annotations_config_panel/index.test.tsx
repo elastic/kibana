@@ -155,7 +155,7 @@ describe('AnnotationsPanel', () => {
       expect(component.find('[data-test-subj="lns-xyAnnotation-fillStyle"]').exists()).toBeTruthy();
     });
 
-    test('calculates correct endTimstamp when switching for range annotation', () => {
+    test('calculates correct endTimstamp and transparent color when switching for range annotation and back', () => {
       const state = testState();
       const setState = jest.fn();
       const component = mount(
@@ -179,18 +179,37 @@ describe('AnnotationsPanel', () => {
           {
             annotations: [
               {
-                color: 'red',
-                icon: 'triangle',
+                color: '#FF00001A',
                 id: 'ann1',
                 isHidden: undefined,
+                label: 'Event range',
                 key: {
                   endTimestamp: '2022-03-21T10:49:00.000Z',
                   timestamp: '2022-03-18T08:25:00.000Z',
                   type: 'range',
                 },
-                label: 'Event range',
-                lineStyle: 'dashed',
-                lineWidth: 3,
+              },
+            ],
+            layerId: 'annotation',
+            layerType: 'annotations',
+          },
+        ],
+      });
+      component.find('button[data-test-subj="lns-xyAnnotation-rangeSwitch"]').simulate('click');
+      expect(setState).toBeCalledWith({
+        ...state,
+        layers: [
+          {
+            annotations: [
+              {
+                color: '#FF0000',
+                id: 'ann1',
+                isHidden: undefined,
+                key: {
+                  timestamp: '2022-03-18T08:25:00.000Z',
+                  type: 'point_in_time',
+                },
+                label: 'Event',
               },
             ],
             layerId: 'annotation',

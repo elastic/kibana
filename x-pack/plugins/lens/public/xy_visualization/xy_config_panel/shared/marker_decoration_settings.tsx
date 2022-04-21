@@ -132,10 +132,12 @@ export const IconSelectSetting = ({
   currentConfig,
   setConfig,
   customIconSet,
+  defaultIcon = 'empty',
 }: {
   currentConfig?: MarkerDecorationConfig;
   setConfig: (config: MarkerDecorationConfig) => void;
   customIconSet?: IconSet;
+  defaultIcon: string;
 }) => {
   return (
     <EuiFormRow
@@ -146,6 +148,7 @@ export const IconSelectSetting = ({
       })}
     >
       <IconSelect
+        defaultIcon={defaultIcon}
         customIconSet={customIconSet}
         value={currentConfig?.icon}
         onChange={(newIcon) => {

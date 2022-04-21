@@ -25,7 +25,10 @@ import type {
   ManualRangeEventAnnotationOutput,
 } from '@kbn/event-annotation-plugin/common';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { defaultAnnotationColor } from '@kbn/event-annotation-plugin/public';
+import {
+  defaultAnnotationColor,
+  defaultAnnotationRangeColor,
+} from '@kbn/event-annotation-plugin/public';
 import type { AnnotationLayerArgs, AnnotationLayerConfigResult } from '../../common/types';
 import { AnnotationIcon, hasIcon, Marker, MarkerBody } from '../helpers';
 import { mapVerticalToHorizontalPlacement, LINES_MARKER_SIZE } from '../helpers';
@@ -281,7 +284,7 @@ export const Annotations = ({
                 details: label,
               },
             ]}
-            style={{ fill: color || defaultAnnotationColor }}
+            style={{ fill: color || defaultAnnotationRangeColor, opacity: 1 }}
             outside={Boolean(outside)}
             outsideDimension={
               hide ? OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION : OUTSIDE_RECT_ANNOTATION_WIDTH

@@ -88,14 +88,16 @@ export const IconSelect = ({
   value,
   onChange,
   customIconSet = euiIconsSet,
+  defaultIcon = 'empty',
 }: {
   value?: string;
   onChange: (newIcon: string) => void;
   customIconSet?: IconSet;
+  defaultIcon?: string;
 }) => {
   const selectedIcon =
     customIconSet.find((option) => value === option.value) ||
-    customIconSet.find((option) => option.value === 'empty')!;
+    customIconSet.find((option) => option.value === defaultIcon)!;
 
   return (
     <EuiComboBox

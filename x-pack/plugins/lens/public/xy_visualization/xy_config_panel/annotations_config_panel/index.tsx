@@ -18,7 +18,9 @@ import {
   EuiFormLabel,
   EuiFormControlLayout,
   EuiText,
+  transparentize,
 } from '@elastic/eui';
+import { pick } from 'lodash';
 import moment from 'moment';
 import {
   EventAnnotationConfig,
@@ -26,6 +28,12 @@ import {
   RangeEventAnnotationConfig,
 } from '@kbn/event-annotation-plugin/common/types';
 import { search } from '@kbn/data-plugin/public';
+import {
+  defaultAnnotationColor,
+  defaultAnnotationRangeColor,
+  isRangeAnnotation,
+} from '@kbn/event-annotation-plugin/public';
+import Color from 'color';
 import type { FramePublicAPI, VisualizationDimensionEditorProps } from '../../../types';
 import { State, XYState, XYAnnotationLayerConfig, XYDataLayerConfig } from '../../types';
 import { FormatFactory } from '../../../../common';
@@ -38,6 +46,14 @@ import { LineStyleSettings } from '../shared/line_style_settings';
 import { updateLayer } from '..';
 import { annotationsIconSet } from './icon_set';
 import { getDataLayers } from '../../visualization_helpers';
+
+export const toRangeAnnotationColor = (color = defaultAnnotationColor) => {
+  return new Color(transparentize(color, 0.1)).hexa();
+};
+
+export const toLineAnnotationColor = (color = defaultAnnotationRangeColor) => {
+  return new Color(transparentize(color, 1)).hex();
+};
 
 export const getEndTimestamp = (
   startTime: string,
@@ -72,6 +88,33 @@ export const getEndTimestamp = (
   return moment(startTimeNumber + 3 * intervalDuration.as('milliseconds')).toISOString();
 };
 
+const sanitizeProperties = (annotation: EventAnnotationConfig) => {
+  if (isRangeAnnotation(annotation)) {
+    const rangeAnnotation: RangeEventAnnotationConfig = pick(annotation, [
+      'label',
+      'key',
+      'id',
+      'isHidden',
+      'color',
+      'outside',
+    ]);
+    return rangeAnnotation;
+  } else {
+    const lineAnnotation: PointInTimeEventAnnotationConfig = pick(annotation, [
+      'id',
+      'label',
+      'key',
+      'isHidden',
+      'lineStyle',
+      'lineWidth',
+      'color',
+      'icon',
+      'textVisibility',
+    ]);
+    return lineAnnotation;
+  }
+};
+
 export const AnnotationsPanel = (
   props: VisualizationDimensionEditorProps<State> & {
     formatFactory: FormatFactory;
@@ -96,16 +139,21 @@ export const AnnotationsPanel = (
   const isRange = isRangeAnnotation(currentAnnotation);
 
   const setAnnotations = useCallback(
-    (annotations) => {
-      if (annotations == null) {
+    (annotation) => {
+      if (annotation == null) {
         return;
       }
       const newConfigs = [...(localLayer.annotations || [])];
       const existingIndex = newConfigs.findIndex((c) => c.id === accessor);
       if (existingIndex !== -1) {
-        newConfigs[existingIndex] = { ...newConfigs[existingIndex], ...annotations };
+        newConfigs[existingIndex] = sanitizeProperties({
+          ...newConfigs[existingIndex],
+          ...annotation,
+        });
       } else {
-        return; // that should never happen because annotations are created before annotations panel is opened
+        throw new Error(
+          'should never happen because annotation is created before config panel is opened'
+        );
       }
       setLocalState(updateLayer(localState, { ...localLayer, annotations: newConfigs }, index));
     },
@@ -227,6 +275,7 @@ export const AnnotationsPanel = (
         {!isRange && (
           <IconSelectSetting
             setConfig={setAnnotations}
+            defaultIcon="triangle"
             currentConfig={{
               axisMode: 'bottom',
               ...currentAnnotation,
@@ -297,6 +346,8 @@ export const AnnotationsPanel = (
 
         <ColorPicker
           {...props}
+          defaultColor={isRange ? defaultAnnotationRangeColor : defaultAnnotationColor}
+          showAlpha={isRange}
           setConfig={setAnnotations}
           disableHelpTooltip
           label={i18n.translate('xpack.lens.xyChart.lineColor.label', {
@@ -310,12 +361,6 @@ export const AnnotationsPanel = (
       </DimensionEditorSection>
     </>
   );
-};
-
-const isRangeAnnotation = (
-  annotation?: EventAnnotationConfig
-): annotation is RangeEventAnnotationConfig => {
-  return Boolean(annotation && annotation?.key.type === 'range');
 };
 
 const ConfigPanelApplyAsRangeSwitch = ({
@@ -354,7 +399,7 @@ const ConfigPanelApplyAsRangeSwitch = ({
                 annotation.label === defaultRangeAnnotationLabel
                   ? defaultAnnotationLabel
                   : annotation.label,
-              color: annotation.color,
+              color: toLineAnnotationColor(annotation.color),
               isHidden: annotation.isHidden,
             };
             onChange(newPointAnnotation);
@@ -372,7 +417,7 @@ const ConfigPanelApplyAsRangeSwitch = ({
                 annotation.label === defaultAnnotationLabel
                   ? defaultRangeAnnotationLabel
                   : annotation.label,
-              color: annotation.color,
+              color: toRangeAnnotationColor(annotation.color),
               isHidden: annotation.isHidden,
             };
             onChange(newRangeAnnotation);

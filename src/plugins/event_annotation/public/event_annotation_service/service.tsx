@@ -7,7 +7,11 @@
  */
 
 import { EventAnnotationServiceType } from './types';
-import { defaultAnnotationColor, defaultAnnotationLabel } from './helpers';
+import {
+  defaultAnnotationColor,
+  defaultAnnotationRangeColor,
+  defaultAnnotationLabel,
+} from './helpers';
 import { EventAnnotationConfig } from '../../common';
 import { RangeEventAnnotationConfig } from '../../common/types';
 
@@ -37,7 +41,7 @@ export function getEventAnnotationService(): EventAnnotationServiceType {
                 time: [time],
                 endTime: [endTime],
                 label: [label || defaultAnnotationLabel],
-                color: [color || defaultAnnotationColor],
+                color: [color || defaultAnnotationRangeColor],
                 outside: [Boolean(outside)],
                 isHidden: [Boolean(isHidden)],
               },

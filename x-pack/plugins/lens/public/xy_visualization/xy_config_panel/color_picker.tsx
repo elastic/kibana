@@ -5,23 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiColorPicker, EuiColorPickerProps, EuiToolTip, EuiIcon } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { defaultAnnotationColor } from '@kbn/event-annotation-plugin/public';
 import type { VisualizationDimensionEditorProps } from '../../types';
-import { State, XYDataLayerConfig } from '../types';
+import { State } from '../types';
 import { FormatFactory } from '../../../common';
 import { getSeriesColor } from '../state_helpers';
-import {
-  defaultReferenceLineColor,
-  getAccessorColorConfig,
-  getColorAssignments,
-} from '../color_assignment';
+import { getAccessorColorConfig, getColorAssignments } from '../color_assignment';
 import { getSortedAccessors } from '../to_expression';
 import { TooltipWrapper } from '../../shared_components';
-import { isReferenceLayer, isAnnotationsLayer, getDataLayers } from '../visualization_helpers';
+import { getDataLayers, isDataLayer } from '../visualization_helpers';
 
 const tooltipContent = {
   auto: i18n.translate('xpack.lens.configPanel.color.tooltip.auto', {
@@ -47,6 +42,8 @@ export const ColorPicker = ({
   disableHelpTooltip,
   disabled,
   setConfig,
+  showAlpha,
+  defaultColor,
 }: VisualizationDimensionEditorProps<State> & {
   formatFactory: FormatFactory;
   paletteService: PaletteRegistry;
@@ -54,6 +51,8 @@ export const ColorPicker = ({
   disableHelpTooltip?: boolean;
   disabled?: boolean;
   setConfig: (config: { color?: string }) => void;
+  showAlpha?: boolean;
+  defaultColor?: string;
 }) => {
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
@@ -61,35 +60,46 @@ export const ColorPicker = ({
   const overwriteColor = getSeriesColor(layer, accessor);
   const currentColor = useMemo(() => {
     if (overwriteColor || !frame.activeData) return overwriteColor;
-    if (isReferenceLayer(layer)) {
-      return defaultReferenceLineColor;
-    } else if (isAnnotationsLayer(layer)) {
-      return defaultAnnotationColor;
+    if (defaultColor) {
+      return defaultColor;
     }
+    if (isDataLayer(layer)) {
+      const sortedAccessors: string[] = getSortedAccessors(
+        frame.datasourceLayers[layer.layerId] ?? layer.accessors,
+        layer
+      );
 
-    const dataLayer: XYDataLayerConfig = layer;
-    const sortedAccessors: string[] = getSortedAccessors(
-      frame.datasourceLayers[layer.layerId] ?? layer.accessors,
-      layer
-    );
+      const colorAssignments = getColorAssignments(
+        getDataLayers(state.layers),
+        { tables: frame.activeData },
+        formatFactory
+      );
+      const mappedAccessors = getAccessorColorConfig(
+        colorAssignments,
+        frame,
+        {
+          ...layer,
+          accessors: sortedAccessors.filter((sorted) => layer.accessors.includes(sorted)),
+        },
+        paletteService
+      );
 
-    const colorAssignments = getColorAssignments(
-      getDataLayers(state.layers),
-      { tables: frame.activeData },
-      formatFactory
-    );
-    const mappedAccessors = getAccessorColorConfig(
-      colorAssignments,
-      frame,
-      {
-        ...dataLayer,
-        accessors: sortedAccessors.filter((sorted) => dataLayer.accessors.includes(sorted)),
-      },
-      paletteService
-    );
+      return mappedAccessors.find((a) => a.columnId === accessor)?.color || null;
+    }
+  }, [
+    overwriteColor,
+    frame,
+    paletteService,
+    state.layers,
+    accessor,
+    formatFactory,
+    layer,
+    defaultColor,
+  ]);
 
-    return mappedAccessors.find((a) => a.columnId === accessor)?.color || null;
-  }, [overwriteColor, frame, paletteService, state.layers, accessor, formatFactory, layer]);
+  useEffect(() => {
+    setColor(currentColor);
+  }, [currentColor]);
 
   const [color, setColor] = useState(currentColor);
 
@@ -120,6 +130,7 @@ export const ColorPicker = ({
         defaultMessage: 'Auto',
       })}
       aria-label={inputLabel}
+      showAlpha={showAlpha}
     />
   );
 
