@@ -35,8 +35,11 @@ export { removeWriteBlock } from './remove_write_block';
 export type { CloneIndexResponse, CloneIndexParams } from './clone_index';
 export { cloneIndex } from './clone_index';
 
-export type { WaitForIndexStatusYellowParams } from './wait_for_index_status_yellow';
-import { waitForIndexStatusYellow } from './wait_for_index_status_yellow';
+export type {
+  WaitForIndexStatusYellowParams,
+  IndexNotYellowTimeout,
+} from './wait_for_index_status_yellow';
+import { IndexNotYellowTimeout, waitForIndexStatusYellow } from './wait_for_index_status_yellow';
 
 export type { WaitForTaskResponse, WaitForTaskCompletionTimeout } from './wait_for_task';
 import { waitForTask, WaitForTaskCompletionTimeout } from './wait_for_task';
@@ -149,6 +152,7 @@ export interface ActionErrorTypeMap {
   request_entity_too_large_exception: RequestEntityTooLargeException;
   unknown_docs_found: UnknownDocsFound;
   unsupported_cluster_routing_allocation: UnsupportedClusterRoutingAllocation;
+  index_not_yellow_timeout: IndexNotYellowTimeout;
 }
 
 /**

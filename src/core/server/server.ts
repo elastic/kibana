@@ -316,6 +316,7 @@ export class Server {
     const savedObjectsStart = await this.savedObjects.start({
       elasticsearch: elasticsearchStart,
       pluginsInitialized: this.#pluginsInitialized,
+      docLinks: docLinkStart,
     });
     await this.resolveSavedObjectsStartPromise!(savedObjectsStart);
 

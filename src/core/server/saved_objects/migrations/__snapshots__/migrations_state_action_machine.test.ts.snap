@@ -32,6 +32,9 @@ Object {
                 },
               ],
               "maxBatchSizeBytes": 100000000,
+              "migrationDocLinks": Object {
+                "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
+              },
               "outdatedDocuments": Array [],
               "outdatedDocumentsQuery": Object {
                 "bool": Object {
@@ -193,6 +196,9 @@ Object {
                 },
               ],
               "maxBatchSizeBytes": 100000000,
+              "migrationDocLinks": Object {
+                "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
+              },
               "outdatedDocuments": Array [],
               "outdatedDocumentsQuery": Object {
                 "bool": Object {
@@ -358,6 +364,9 @@ Object {
                 },
               ],
               "maxBatchSizeBytes": 100000000,
+              "migrationDocLinks": Object {
+                "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
+              },
               "outdatedDocuments": Array [],
               "outdatedDocumentsQuery": Object {
                 "bool": Object {
@@ -527,6 +536,9 @@ Object {
                 },
               ],
               "maxBatchSizeBytes": 100000000,
+              "migrationDocLinks": Object {
+                "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
+              },
               "outdatedDocuments": Array [],
               "outdatedDocumentsQuery": Object {
                 "bool": Object {
@@ -722,6 +734,9 @@ Object {
                 },
               ],
               "maxBatchSizeBytes": 100000000,
+              "migrationDocLinks": Object {
+                "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
+              },
               "outdatedDocuments": Array [
                 Object {
                   "_id": "1234",
@@ -894,6 +909,9 @@ Object {
                 },
               ],
               "maxBatchSizeBytes": 100000000,
+              "migrationDocLinks": Object {
+                "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
+              },
               "outdatedDocuments": Array [
                 Object {
                   "_id": "1234",
