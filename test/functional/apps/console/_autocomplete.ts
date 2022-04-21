@@ -27,7 +27,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should provide basic auto-complete functionality', async () => {
       await PageObjects.console.enterRequest();
-      await PageObjects.console.pressEnter();
       await PageObjects.console.enterText(`{\n\t"query": {`);
       await PageObjects.console.pressEnter();
       await PageObjects.console.promptAutocomplete();
@@ -40,7 +39,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       beforeEach(async () => {
         await PageObjects.console.clearTextArea();
         await PageObjects.console.enterRequest();
-        await PageObjects.console.pressEnter();
       });
       it('should add a comma after previous non empty line', async () => {
         await PageObjects.console.enterText(`{\n\t"query": {\n\t\t"match": {}`);

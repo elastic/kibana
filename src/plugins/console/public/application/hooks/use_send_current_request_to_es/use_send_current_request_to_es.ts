@@ -16,10 +16,10 @@ import { retrieveAutoCompleteInfo } from '../../../lib/mappings/mappings';
 import { instance as registry } from '../../contexts/editor_context/editor_registry';
 import { useRequestActionContext, useServicesContext } from '../../contexts';
 import { StorageQuotaError } from '../../components/storage_quota_error';
-import { sendRequest } from './send_request';
+import { sendRequestToES } from './send_request_to_es';
 import { track } from './track';
 
-export const useSendCurrentRequest = () => {
+export const useSendCurrentRequestToES = () => {
   const {
     services: { history, settings, notifications, trackUiMetric, http },
     theme$,
@@ -46,7 +46,7 @@ export const useSendCurrentRequest = () => {
       // Fire and forget
       setTimeout(() => track(requests, editor, trackUiMetric), 0);
 
-      const results = await sendRequest({ http, requests });
+      const results = await sendRequestToES({ http, requests });
 
       let saveToHistoryError: undefined | Error;
       const { isHistoryDisabled } = settings.toJSON();

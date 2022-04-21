@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-jest.mock('./send_request', () => ({ sendRequest: jest.fn() }));
+jest.mock('./send_request_to_es', () => ({ sendRequestToES: jest.fn() }));
 jest.mock('../../contexts/editor_context/editor_registry', () => ({
   instance: { getInputEditor: jest.fn() },
 }));
@@ -21,10 +21,10 @@ import { serviceContextMock } from '../../contexts/services_context.mock';
 import { useRequestActionContext } from '../../contexts/request_context';
 import { instance as editorRegistry } from '../../contexts/editor_context/editor_registry';
 
-import { sendRequest } from './send_request';
-import { useSendCurrentRequest } from './use_send_current_request';
+import { sendRequestToES } from './send_request_to_es';
+import { useSendCurrentRequestToES } from './use_send_current_request_to_es';
 
-describe('useSendCurrentRequest', () => {
+describe('useSendCurrentRequestToES', () => {
   let mockContextValue: ContextValue;
   let dispatch: (...args: unknown[]) => void;
   const contexts = ({ children }: { children: JSX.Element }) => (
@@ -41,18 +41,18 @@ describe('useSendCurrentRequest', () => {
     jest.resetAllMocks();
   });
 
-  it('calls send request', async () => {
+  it('calls send request to ES', async () => {
     // Set up mocks
     (mockContextValue.services.settings.toJSON as jest.Mock).mockReturnValue({});
     // This request should succeed
-    (sendRequest as jest.Mock).mockResolvedValue([]);
+    (sendRequestToES as jest.Mock).mockResolvedValue([]);
     (editorRegistry.getInputEditor as jest.Mock).mockImplementation(() => ({
       getRequestsInRange: () => ['test'],
     }));
 
-    const { result } = renderHook(() => useSendCurrentRequest(), { wrapper: contexts });
+    const { result } = renderHook(() => useSendCurrentRequestToES(), { wrapper: contexts });
     await act(() => result.current());
-    expect(sendRequest).toHaveBeenCalledWith({
+    expect(sendRequestToES).toHaveBeenCalledWith({
       http: mockContextValue.services.http,
       requests: ['test'],
     });
@@ -64,12 +64,12 @@ describe('useSendCurrentRequest', () => {
 
   it('handles known errors', async () => {
     // Set up mocks
-    (sendRequest as jest.Mock).mockRejectedValue({ response: 'nada' });
+    (sendRequestToES as jest.Mock).mockRejectedValue({ response: 'nada' });
     (editorRegistry.getInputEditor as jest.Mock).mockImplementation(() => ({
       getRequestsInRange: () => ['test'],
     }));
 
-    const { result } = renderHook(() => useSendCurrentRequest(), { wrapper: contexts });
+    const { result } = renderHook(() => useSendCurrentRequestToES(), { wrapper: contexts });
     await act(() => result.current());
     // Second call should be the request failure
     const [, [requestFailedCall]] = (dispatch as jest.Mock).mock.calls;
@@ -80,12 +80,12 @@ describe('useSendCurrentRequest', () => {
 
   it('handles unknown errors', async () => {
     // Set up mocks
-    (sendRequest as jest.Mock).mockRejectedValue(NaN /* unexpected error value */);
+    (sendRequestToES as jest.Mock).mockRejectedValue(NaN /* unexpected error value */);
     (editorRegistry.getInputEditor as jest.Mock).mockImplementation(() => ({
       getRequestsInRange: () => ['test'],
     }));
 
-    const { result } = renderHook(() => useSendCurrentRequest(), { wrapper: contexts });
+    const { result } = renderHook(() => useSendCurrentRequestToES(), { wrapper: contexts });
     await act(() => result.current());
     // Second call should be the request failure
     const [, [requestFailedCall]] = (dispatch as jest.Mock).mock.calls;
@@ -100,7 +100,7 @@ describe('useSendCurrentRequest', () => {
 
   it('notifies the user about save to history errors once only', async () => {
     // Set up mocks
-    (sendRequest as jest.Mock).mockReturnValue(
+    (sendRequestToES as jest.Mock).mockReturnValue(
       [{ request: {} }, { request: {} }] /* two responses to save history */
     );
     (mockContextValue.services.settings.toJSON as jest.Mock).mockReturnValue({});
@@ -112,7 +112,7 @@ describe('useSendCurrentRequest', () => {
       getRequestsInRange: () => ['test', 'test'],
     }));
 
-    const { result } = renderHook(() => useSendCurrentRequest(), { wrapper: contexts });
+    const { result } = renderHook(() => useSendCurrentRequestToES(), { wrapper: contexts });
     await act(() => result.current());
 
     expect(dispatch).toHaveBeenCalledTimes(2);

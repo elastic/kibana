@@ -11,7 +11,7 @@ import { SenseEditor } from '../../../../models/sense_editor';
 
 interface Actions {
   senseEditor: SenseEditor;
-  sendCurrentRequest: () => void;
+  sendCurrentRequestToES: () => void;
   openDocumentation: () => void;
 }
 
@@ -24,7 +24,11 @@ const COMMANDS = {
   GO_TO_LINE: 'gotoline',
 };
 
-export function registerCommands({ senseEditor, sendCurrentRequest, openDocumentation }: Actions) {
+export function registerCommands({
+  senseEditor,
+  sendCurrentRequestToES,
+  openDocumentation,
+}: Actions) {
   const throttledAutoIndent = throttle(() => senseEditor.autoIndent(), 500, {
     leading: true,
     trailing: true,
@@ -35,7 +39,7 @@ export function registerCommands({ senseEditor, sendCurrentRequest, openDocument
     keys: { win: 'Ctrl-Enter', mac: 'Command-Enter' },
     name: COMMANDS.SEND_TO_ELASTICSEARCH,
     fn: () => {
-      sendCurrentRequest();
+      sendCurrentRequestToES();
     },
   });
 

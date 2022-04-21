@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { useSendCurrentRequest } from './use_send_current_request';
+export { useSendCurrentRequestToES } from './use_send_current_request_to_es';
