@@ -61,21 +61,15 @@ export const commonDataLayerArgs: CommonDataLayerFn['args'] = {
   },
   lineWidth: {
     types: ['number'],
-    help: i18n.translate('expressionXY.dataLayer.lineWidth.help', {
-      defaultMessage: 'Line width',
-    }),
+    help: strings.getLineWidthHelp(),
   },
   showPoints: {
     types: ['boolean'],
-    help: i18n.translate('expressionXY.dataLayer.showPoints.help', {
-      defaultMessage: 'Show points',
-    }),
+    help: strings.getShowPointsHelp(),
   },
   pointsRadius: {
     types: ['number'],
-    help: i18n.translate('expressionXY.dataLayer.pointsRadius.help', {
-      defaultMessage: 'Points radius',
-    }),
+    help: strings.getPointsRadiusHelp(),
   },
   yConfig: {
     types: [Y_CONFIG],
