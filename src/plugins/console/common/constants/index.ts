@@ -7,4 +7,4 @@
  */
 
 export { MAJOR_VERSION } from './plugin';
-export { API_BASE_PATH, KIBANA_API_KEYWORD } from './api';
+export { API_BASE_PATH, KIBANA_API_PREFIX } from './api';

@@ -8,7 +8,7 @@
 
 import type { HttpResponse, HttpSetup } from '@kbn/core/public';
 import { trimStart } from 'lodash';
-import { API_BASE_PATH, KIBANA_API_KEYWORD } from '../../../common/constants';
+import { API_BASE_PATH, KIBANA_API_PREFIX } from '../../../common/constants';
 
 const esVersion: string[] = [];
 
@@ -68,12 +68,12 @@ export async function send({
 }
 
 function getKibanaRequestUrl(path: string) {
-  const isKibanaApiRequest = path.startsWith(KIBANA_API_KEYWORD);
+  const isKibanaApiRequest = path.startsWith(KIBANA_API_PREFIX);
   const kibanaBasePath = window.location.origin;
 
   if (isKibanaApiRequest) {
     // window.location.origin is used as a Kibana public base path for sending requests in cURL commands. E.g. "Copy as cURL".
-    return `${kibanaBasePath}/${trimStart(path.replace(KIBANA_API_KEYWORD, ''), '/')}`;
+    return `${kibanaBasePath}/${trimStart(path.replace(KIBANA_API_PREFIX, ''), '/')}`;
   }
 }
 
