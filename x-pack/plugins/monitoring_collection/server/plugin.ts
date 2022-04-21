@@ -16,11 +16,7 @@ import {
   IClusterClient,
 } from '@kbn/core/server';
 import { METRICSET_ALLOWLIST } from './constants';
-import {
-  createConfig,
-  MonitoringCollectionConfig,
-  MonitoringCollectionConfigSchema,
-} from './config';
+import { MonitoringCollectionConfig } from './config';
 
 export interface MonitoringCollectionSetup {
   registerMetricSet: (metric: MetricSet) => void;
@@ -32,6 +28,7 @@ export interface MonitoringCollectionSetup {
 export interface MonitoringCollectionStart {
   reportGauge: (name: string, dimensions: Record<string, string>, value: number) => void;
   reportCounter: (name: string, dimensions: Record<string, string>, amount?: number) => void;
+  registerCustomElasticsearchClient: (customClient: ICustomClusterClient) => void;
 }
 export type ValidMetricResult = number;
 
@@ -55,16 +52,13 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
   private metricSets: Record<string, MetricSet> = {};
   private results: Record<string, Record<string, ValidMetricResult>> = {};
   private client?: IClusterClient | ICustomClusterClient;
-  private kibanaDimensions?: KibanaIdentifier;
   private kibanaVersion?: string;
   private kibanaUuid?: string;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
     this.logger = initializerContext.logger.get();
-    this.config = createConfig(
-      this.initializerContext.config.get<MonitoringCollectionConfigSchema>()
-    );
+    this.config = initializerContext.config.get();
   }
 
   setup(core: CoreSetup) {
@@ -99,7 +93,7 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
         aggs: Record<string, estypes.AggregationsAggregationContainer>
       ) => {
         const request: estypes.SearchRequest = {
-          index: 'metrics-apm*',
+          index: this.config.metricsIndex,
           size: 0,
           body: {
             query,
@@ -118,12 +112,7 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
   }
 
   start(core: CoreStart) {
-    const config = this.config!;
-    this.client =
-      config.elasticsearch.hosts.length && config.elasticsearch.hosts[0].length
-        ? core.elasticsearch.createClient('monitoring_collection', config.elasticsearch)
-        : core.elasticsearch.client;
-
+    this.client = core.elasticsearch.client;
     const kibanaDimensions: KibanaIdentifier = {
       version: this.kibanaVersion!,
       uuid: this.kibanaUuid!,
@@ -145,21 +134,25 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
           this.results[id][key] = results[idIndex][key];
         }
       });
-    }, 10000);
+    }, this.config.interval);
 
     return {
       reportCounter: (name: string, dimensions: Record<string, string>, amount: number = 1) => {
         // @ts-ignore-line
         const counter = apm.registerMetricCounter(name, {
           ...dimensions,
-          ...this.kibanaDimensions,
+          ...kibanaDimensions,
         });
         if (counter) {
           counter.inc(amount);
         }
       },
       reportGauge: (name: string, dimensions: Record<string, string>, value: number) => {
-        apm.registerMetric(name, { ...dimensions, ...this.kibanaDimensions }, () => value);
+        // console.log(`reportGauge()`, { name, dimensions, value })
+        apm.registerMetric(name, { ...dimensions, ...kibanaDimensions }, () => value);
+      },
+      registerCustomElasticsearchClient: (customClient: ICustomClusterClient) => {
+        this.client = customClient;
       },
     };
   }

@@ -247,6 +247,8 @@ export class ActionExecutor {
           status: 'ok',
         };
 
+        result.actionTypeId = actionTypeId;
+
         event.event = event.event || {};
 
         if (result.status === 'ok') {
@@ -345,6 +347,7 @@ export class ActionExecutor {
     });
 
     eventLogger.logEvent(event);
+    return this.actionInfo;
   }
 }
 

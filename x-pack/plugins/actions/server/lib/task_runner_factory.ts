@@ -34,7 +34,7 @@ import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects
 import { asSavedObjectExecutionSource } from './action_execution_source';
 import { RelatedSavedObjects, validatedRelatedSavedObjects } from './related_saved_objects';
 import { injectSavedObjectReferences } from './action_task_params_utils';
-import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
+import { NodeLevelMetrics } from '../monitoring';
 
 export interface TaskRunnerContext {
   logger: Logger;
@@ -43,17 +43,16 @@ export interface TaskRunnerContext {
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   basePathService: IBasePath;
   getUnsecuredSavedObjectsClient: (request: KibanaRequest) => SavedObjectsClientContract;
+  nodeLevelMetrics?: NodeLevelMetrics;
 }
 
 export class TaskRunnerFactory {
   private isInitialized = false;
   private taskRunnerContext?: TaskRunnerContext;
   private readonly actionExecutor: ActionExecutorContract;
-  private readonly inMemoryMetrics: InMemoryMetrics;
 
-  constructor(actionExecutor: ActionExecutorContract, inMemoryMetrics: InMemoryMetrics) {
+  constructor(actionExecutor: ActionExecutorContract) {
     this.actionExecutor = actionExecutor;
-    this.inMemoryMetrics = inMemoryMetrics;
   }
 
   public initialize(taskRunnerContext: TaskRunnerContext) {
@@ -69,13 +68,14 @@ export class TaskRunnerFactory {
       throw new Error('TaskRunnerFactory not initialized');
     }
 
-    const { actionExecutor, inMemoryMetrics } = this;
+    const { actionExecutor } = this;
     const {
       logger,
       encryptedSavedObjectsClient,
       spaceIdToNamespace,
       basePathService,
       getUnsecuredSavedObjectsClient,
+      nodeLevelMetrics,
     } = this.taskRunnerContext!;
 
     const taskInfo = {
@@ -134,14 +134,14 @@ export class TaskRunnerFactory {
           }
         }
 
-        inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
+        nodeLevelMetrics?.execution(actionId, executorResult?.actionTypeId);
         if (
           executorResult &&
           executorResult?.status === 'error' &&
           executorResult?.retry !== undefined &&
           isRetryableBasedOnAttempts
         ) {
-          inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_FAILURES);
+          nodeLevelMetrics?.failure(actionId);
           logger.error(
             `Action '${actionId}' failed ${
               !!executorResult.retry ? willRetryMessage : willNotRetryMessage
@@ -155,7 +155,7 @@ export class TaskRunnerFactory {
             executorResult.retry as boolean | Date
           );
         } else if (executorResult && executorResult?.status === 'error') {
-          inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_FAILURES);
+          nodeLevelMetrics?.failure(actionId, executorResult?.actionTypeId);
           logger.error(
             `Action '${actionId}' failed ${willNotRetryMessage}: ${executorResult.message}`
           );
@@ -198,7 +198,7 @@ export class TaskRunnerFactory {
         const path = addSpaceIdToPath('/', spaceId);
         basePathService.set(request, path);
 
-        await actionExecutor.logCancellation({
+        const actionInfo = await actionExecutor.logCancellation({
           actionId,
           request,
           consumer,
@@ -207,7 +207,7 @@ export class TaskRunnerFactory {
           ...getSourceFromReferences(references),
         });
 
-        inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_TIMEOUTS);
+        nodeLevelMetrics?.timeout(actionId, actionInfo?.actionTypeId);
 
         logger.debug(
           `Cancelling action task for action with id ${actionId} - execution error due to timeout.`

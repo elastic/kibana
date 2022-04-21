@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-function createInMemoryMetricsMock() {
+function createNodeLevelMetricsMock() {
   return jest.fn().mockImplementation(() => {
     return {
-      increment: jest.fn(),
-      getInMemoryMetric: jest.fn(),
-      getAllInMemoryMetrics: jest.fn(),
+      execution: jest.fn(),
+      failure: jest.fn(),
+      timeout: jest.fn(),
     };
   });
 }
 
-export const inMemoryMetricsMock = {
-  create: createInMemoryMetricsMock(),
+export const nodeLevelMetricsMock = {
+  create: createNodeLevelMetricsMock(),
 };

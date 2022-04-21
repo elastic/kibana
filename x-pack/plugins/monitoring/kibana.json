@@ -16,7 +16,8 @@
     "triggersActionsUi",
     "alerting",
     "actions",
-    "encryptedSavedObjects"
+    "encryptedSavedObjects",
+    "monitoringCollection"
   ],
   "server": true,
   "ui": true,

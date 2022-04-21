@@ -36,7 +36,6 @@ import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { Logger } from '@kbn/core/server';
 import { connectorTokenClientMock } from './builtin_action_types/lib/connector_token_client.mock';
-import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
 
 jest.mock('@kbn/core/server/saved_objects/service/lib/utils', () => ({
   SavedObjectsUtils: {
@@ -83,7 +82,6 @@ const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
 };
 
 const connectorTokenClient = connectorTokenClientMock.create();
-const inMemoryMetrics = inMemoryMetricsMock.create();
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -91,10 +89,7 @@ beforeEach(() => {
   actionTypeRegistryParams = {
     licensing: licensingMock.createSetup(),
     taskManager: mockTaskManager,
-    taskRunnerFactory: new TaskRunnerFactory(
-      new ActionExecutor({ isESOCanEncrypt: true }),
-      inMemoryMetrics
-    ),
+    taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor({ isESOCanEncrypt: true })),
     actionsConfigUtils: actionsConfigMock.create(),
     licenseState: mockedLicenseState,
     preconfiguredActions: [],
@@ -501,10 +496,7 @@ describe('create()', () => {
     const localActionTypeRegistryParams = {
       licensing: licensingMock.createSetup(),
       taskManager: mockTaskManager,
-      taskRunnerFactory: new TaskRunnerFactory(
-        new ActionExecutor({ isESOCanEncrypt: true }),
-        inMemoryMetrics
-      ),
+      taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor({ isESOCanEncrypt: true })),
       actionsConfigUtils: localConfigUtils,
       licenseState: licenseStateMock.create(),
       preconfiguredActions: [],

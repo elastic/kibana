@@ -6,15 +6,25 @@
  */
 
 import { MonitoringCollectionSetup } from '.';
+import { MonitoringCollectionStart } from './plugin';
 
 const createSetupMock = (): jest.Mocked<MonitoringCollectionSetup> => {
   const mock = {
-    registerMetric: jest.fn(),
-    getMetrics: jest.fn(),
+    registerMetricSet: jest.fn(),
+    aggregateMonitoringData: jest.fn(),
+  };
+  return mock;
+};
+
+const createStartMock = (): jest.Mocked<MonitoringCollectionStart> => {
+  const mock = {
+    reportGauge: jest.fn(),
+    reportCounter: jest.fn(),
   };
   return mock;
 };
 
 export const monitoringCollectionMock = {
   createSetup: createSetupMock,
+  createStart: createStartMock,
 };

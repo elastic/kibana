@@ -34,6 +34,7 @@ import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '@kbn/features-plugin/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
+import { MonitoringCollectionStart } from '@kbn/monitoring-collection-plugin/server';
 import { ElasticsearchModifiedSource } from '../common/types/es';
 import { RulesByType } from '../common/types/alerts';
 import { configSchema, MonitoringConfig } from './config';
@@ -68,6 +69,11 @@ export interface PluginsStart {
   alerting: AlertingPluginStartContract;
   actions: ActionsPluginsStartContact;
   licensing: LicensingPluginStart;
+  monitoringCollection: MonitoringCollectionStart;
+}
+
+export interface MonitoringPluginStart {
+  getMonitoringCluster: () => ICustomClusterClient;
 }
 
 export interface RouteDependencies {

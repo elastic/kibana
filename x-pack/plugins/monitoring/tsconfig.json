@@ -30,5 +30,6 @@
     { "path": "../observability/tsconfig.json" },
     { "path": "../telemetry_collection_xpack/tsconfig.json" },
     { "path": "../triggers_actions_ui/tsconfig.json" },
+    { "path": "../monitoring_collection/tsconfig.json" },
   ]
 }

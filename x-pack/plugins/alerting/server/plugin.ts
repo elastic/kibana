@@ -79,7 +79,7 @@ import { getHealth } from './health/get_health';
 import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { AlertingAuthorization } from './authorization';
 import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
-import { registerClusterCollector, NodeLevelMetrics } from './monitoring';
+import { registerClusterLevelMetrics, NodeLevelMetrics } from './monitoring';
 
 import { getExecutionConfigForRuleType } from './lib/get_rules_config';
 import { getRuleTaskTimeout } from './lib/get_rule_task_timeout';
@@ -162,7 +162,6 @@ export interface AlertingPluginsStart {
 export class AlertingPlugin {
   private readonly config: AlertingConfig;
   private readonly logger: Logger;
-  private readonly metricCollectionLogger: Logger;
   private ruleTypeRegistry?: RuleTypeRegistry;
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private licenseState: ILicenseState | null = null;
@@ -181,7 +180,6 @@ export class AlertingPlugin {
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
     this.logger = initializerContext.logger.get();
-    this.metricCollectionLogger = initializerContext.logger.get('node_level_metrics');
     this.taskRunnerFactory = new TaskRunnerFactory();
     this.rulesClientFactory = new RulesClientFactory();
     this.alertingAuthorizationClientFactory = new AlertingAuthorizationClientFactory();
@@ -268,7 +266,7 @@ export class AlertingPlugin {
     );
 
     if (plugins.monitoringCollection) {
-      registerClusterCollector({
+      registerClusterLevelMetrics({
         monitoringCollection: plugins.monitoringCollection,
         core,
       });
@@ -370,10 +368,7 @@ export class AlertingPlugin {
     });
 
     if (plugins.monitoringCollection) {
-      this.nodeLevelMetrics = new NodeLevelMetrics(
-        this.metricCollectionLogger,
-        plugins.monitoringCollection
-      );
+      this.nodeLevelMetrics = new NodeLevelMetrics(plugins.monitoringCollection);
     }
 
     const spaceIdToNamespace = (spaceId?: string) => {

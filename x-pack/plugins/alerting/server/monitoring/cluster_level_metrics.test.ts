@@ -7,17 +7,16 @@
 import { coreMock } from '@kbn/core/public/mocks';
 import { CoreSetup } from '@kbn/core/server';
 import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
-import { Metric } from '@kbn/monitoring-collection-plugin/server';
-import { registerClusterCollector } from './register_cluster_collector';
-import { ActionsPluginsStart } from '../plugin';
-import { ClusterActionsMetric } from './types';
+import { MetricSet, ValidMetricResult } from '@kbn/monitoring-collection-plugin/server';
+import { registerClusterLevelMetrics } from './cluster_level_metrics';
+import { AlertingPluginsStart } from '../plugin';
 
 jest.useFakeTimers('modern');
 jest.setSystemTime(new Date('2020-03-09').getTime());
 
-describe('registerClusterCollector()', () => {
+describe('registerClusterLevelMetrics()', () => {
   const monitoringCollection = monitoringCollectionMock.createSetup();
-  const coreSetup = coreMock.createSetup() as unknown as CoreSetup<ActionsPluginsStart, unknown>;
+  const coreSetup = coreMock.createSetup() as unknown as CoreSetup<AlertingPluginsStart, unknown>;
   const taskManagerFetch = jest.fn();
 
   beforeEach(() => {
@@ -33,16 +32,16 @@ describe('registerClusterCollector()', () => {
     });
   });
 
-  it('should get overdue actions', async () => {
-    const metrics: Record<string, Metric<unknown>> = {};
-    monitoringCollection.registerMetric.mockImplementation((metric) => {
-      metrics[metric.type] = metric;
+  it('should get overdue rules', async () => {
+    const metrics: Record<string, MetricSet> = {};
+    monitoringCollection.registerMetricSet.mockImplementation((set) => {
+      metrics[set.id] = set;
     });
-    registerClusterCollector({ monitoringCollection, core: coreSetup });
+    registerClusterLevelMetrics({ monitoringCollection, core: coreSetup });
 
     const metricTypes = Object.keys(metrics);
     expect(metricTypes.length).toBe(1);
-    expect(metricTypes[0]).toBe('cluster_actions');
+    expect(metricTypes[0]).toBe('kibana_alerting_cluster_rules');
 
     const nowInMs = +new Date();
     const docs = [
@@ -55,10 +54,13 @@ describe('registerClusterCollector()', () => {
     ];
     taskManagerFetch.mockImplementation(async () => ({ docs }));
 
-    const result = (await metrics.cluster_actions.fetch()) as ClusterActionsMetric;
-    expect(result.overdue.count).toBe(docs.length);
-    expect(result.overdue.delay.p50).toBe(1000);
-    expect(result.overdue.delay.p99).toBe(1000);
+    const result = (await metrics.kibana_alerting_cluster_rules.fetch()) as Record<
+      string,
+      ValidMetricResult
+    >;
+    expect(result.overdue_count).toBe(docs.length);
+    expect(result.overdue_delay_p50).toBe(1000);
+    expect(result.overdue_delay_p99).toBe(1000);
     expect(taskManagerFetch).toHaveBeenCalledWith({
       query: {
         bool: {
@@ -66,7 +68,7 @@ describe('registerClusterCollector()', () => {
             {
               term: {
                 'task.scope': {
-                  value: 'actions',
+                  value: 'alerting',
                 },
               },
             },
@@ -130,15 +132,15 @@ describe('registerClusterCollector()', () => {
   });
 
   it('should calculate accurate p50 and p99', async () => {
-    const metrics: Record<string, Metric<unknown>> = {};
-    monitoringCollection.registerMetric.mockImplementation((metric) => {
-      metrics[metric.type] = metric;
+    const metrics: Record<string, MetricSet> = {};
+    monitoringCollection.registerMetricSet.mockImplementation((set) => {
+      metrics[set.id] = set;
     });
-    registerClusterCollector({ monitoringCollection, core: coreSetup });
+    registerClusterLevelMetrics({ monitoringCollection, core: coreSetup });
 
     const metricTypes = Object.keys(metrics);
     expect(metricTypes.length).toBe(1);
-    expect(metricTypes[0]).toBe('cluster_actions');
+    expect(metricTypes[0]).toBe('kibana_alerting_cluster_rules');
 
     const nowInMs = +new Date();
     const docs = [
@@ -150,9 +152,12 @@ describe('registerClusterCollector()', () => {
     ];
     taskManagerFetch.mockImplementation(async () => ({ docs }));
 
-    const result = (await metrics.cluster_actions.fetch()) as ClusterActionsMetric;
-    expect(result.overdue.count).toBe(docs.length);
-    expect(result.overdue.delay.p50).toBe(3000);
-    expect(result.overdue.delay.p99).toBe(40000);
+    const result = (await metrics.kibana_alerting_cluster_rules.fetch()) as Record<
+      string,
+      ValidMetricResult
+    >;
+    expect(result.overdue_count).toBe(docs.length);
+    expect(result.overdue_delay_p50).toBe(3000);
+    expect(result.overdue_delay_p99).toBe(40000);
   });
 });

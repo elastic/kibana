@@ -17,15 +17,14 @@ import { savedObjectsClientMock, loggingSystemMock, httpServiceMock } from '@kbn
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { ActionTypeDisabledError } from './errors';
 import { actionsClientMock } from '../mocks';
-import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
-import { IN_MEMORY_METRICS } from '../monitoring';
+import { nodeLevelMetricsMock } from '../monitoring/node_level_metrics.mock';
 
 const spaceIdToNamespace = jest.fn();
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const mockedEncryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 const mockedActionExecutor = actionExecutorMock.create();
 const eventLogger = eventLoggerMock.create();
-const inMemoryMetrics = inMemoryMetricsMock.create();
+const mockedNodeLevelMetrics = nodeLevelMetricsMock.create();
 
 let fakeTimer: sinon.SinonFakeTimers;
 let taskRunnerFactory: TaskRunnerFactory;
@@ -49,7 +48,7 @@ beforeAll(() => {
     },
     taskType: 'actions:1',
   };
-  taskRunnerFactory = new TaskRunnerFactory(mockedActionExecutor, inMemoryMetrics);
+  taskRunnerFactory = new TaskRunnerFactory(mockedActionExecutor);
   mockedActionExecutor.initialize(actionExecutorInitializerParams);
   taskRunnerFactory.initialize(taskRunnerFactoryInitializerParams);
 });
@@ -76,6 +75,7 @@ const taskRunnerFactoryInitializerParams = {
   encryptedSavedObjectsClient: mockedEncryptedSavedObjectsClient,
   basePathService: httpServiceMock.createBasePath(),
   getUnsecuredSavedObjectsClient: jest.fn().mockReturnValue(services.savedObjectsClient),
+  nodeLevelMetrics: mockedNodeLevelMetrics,
 };
 
 beforeEach(() => {
@@ -87,20 +87,14 @@ beforeEach(() => {
 });
 
 test(`throws an error if factory isn't initialized`, () => {
-  const factory = new TaskRunnerFactory(
-    new ActionExecutor({ isESOCanEncrypt: true }),
-    inMemoryMetrics
-  );
+  const factory = new TaskRunnerFactory(new ActionExecutor({ isESOCanEncrypt: true }));
   expect(() =>
     factory.create({ taskInstance: mockedTaskInstance })
   ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory not initialized"`);
 });
 
 test(`throws an error if factory is already initialized`, () => {
-  const factory = new TaskRunnerFactory(
-    new ActionExecutor({ isESOCanEncrypt: true }),
-    inMemoryMetrics
-  );
+  const factory = new TaskRunnerFactory(new ActionExecutor({ isESOCanEncrypt: true }));
   factory.initialize(taskRunnerFactoryInitializerParams);
   expect(() =>
     factory.initialize(taskRunnerFactoryInitializerParams)
@@ -627,7 +621,7 @@ test('sanitizes invalid relatedSavedObjects when provided', async () => {
 });
 
 test(`doesn't use API key when not provided`, async () => {
-  const factory = new TaskRunnerFactory(mockedActionExecutor, inMemoryMetrics);
+  const factory = new TaskRunnerFactory(mockedActionExecutor);
   factory.initialize(taskRunnerFactoryInitializerParams);
   const taskRunner = factory.create({ taskInstance: mockedTaskInstance });
 
@@ -872,8 +866,7 @@ test('increments monitoring metrics after execution', async () => {
 
   await taskRunner.run();
 
-  expect(inMemoryMetrics.increment).toHaveBeenCalledTimes(1);
-  expect(inMemoryMetrics.increment.mock.calls[0][0]).toBe(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
+  expect(taskRunnerFactoryInitializerParams.nodeLevelMetrics.execution).toHaveBeenCalledTimes(1);
 });
 
 test('increments monitoring metrics after a failed execution', async () => {
@@ -910,9 +903,8 @@ test('increments monitoring metrics after a failed execution', async () => {
   }
 
   expect(err).toBeDefined();
-  expect(inMemoryMetrics.increment).toHaveBeenCalledTimes(2);
-  expect(inMemoryMetrics.increment.mock.calls[0][0]).toBe(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
-  expect(inMemoryMetrics.increment.mock.calls[1][0]).toBe(IN_MEMORY_METRICS.ACTION_FAILURES);
+  expect(taskRunnerFactoryInitializerParams.nodeLevelMetrics.execution).toHaveBeenCalledTimes(1);
+  expect(taskRunnerFactoryInitializerParams.nodeLevelMetrics.failure).toHaveBeenCalledTimes(1);
 });
 
 test('increments monitoring metrics after a timeout', async () => {
@@ -936,6 +928,5 @@ test('increments monitoring metrics after a timeout', async () => {
 
   await taskRunner.cancel();
 
-  expect(inMemoryMetrics.increment).toHaveBeenCalledTimes(1);
-  expect(inMemoryMetrics.increment.mock.calls[0][0]).toBe(IN_MEMORY_METRICS.ACTION_TIMEOUTS);
+  expect(taskRunnerFactoryInitializerParams.nodeLevelMetrics.timeout).toHaveBeenCalledTimes(1);
 });

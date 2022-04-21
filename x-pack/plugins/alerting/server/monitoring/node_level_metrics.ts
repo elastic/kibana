@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
 import { MonitoringCollectionStart } from '@kbn/monitoring-collection-plugin/server';
 import { RuleExecutionStatusErrorReasons } from '../types';
 
 const PREFIX = `kibana_alerting_node_`;
 
 export class NodeLevelMetrics {
-  private logger: Logger;
   private monitoringCollection: MonitoringCollectionStart;
 
-  constructor(logger: Logger, monitoringCollection: MonitoringCollectionStart) {
-    this.logger = logger;
+  constructor(monitoringCollection: MonitoringCollectionStart) {
     this.monitoringCollection = monitoringCollection;
   }
 

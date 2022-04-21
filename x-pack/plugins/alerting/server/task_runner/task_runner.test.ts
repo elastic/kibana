@@ -2822,24 +2822,8 @@ describe('Task Runner', () => {
     await taskRunner.run();
     await taskRunner.cancel();
 
-    // expect(taskRunnerFactoryInitializerParams.nodeLevelMetrics?.execution).toHaveBeenCalledTimes(6);
-    // expect(
-    //   (taskRunnerFactoryInitializerParams.nodeLevelMetrics?.execution as jest.Mock).mock.calls[0][0]
-    // ).toBe(IN_MEMORY_METRICS.RULE_EXECUTIONS);
-    // expect(taskRunnerFactoryInitializerParams.nodeLevelMetrics?.execution.mock.calls[1][0]).toBe(
-    //   IN_MEMORY_METRICS.RULE_EXECUTIONS
-    // );
-    // expect(taskRunnerFactoryInitializerParams.nodeLevelMetrics?.execution.mock.calls[2][0]).toBe(
-    //   IN_MEMORY_METRICS.RULE_EXECUTIONS
-    // );
-    // expect(taskRunnerFactoryInitializerParams.nodeLevelMetrics?.execution.mock.calls[3][0]).toBe(
-    //   IN_MEMORY_METRICS.RULE_EXECUTIONS
-    // );
-    // expect(taskRunnerFactoryInitializerParams.nodeLevelMetrics?.execution.mock.calls[4][0]).toBe(
-    //   IN_MEMORY_METRICS.RULE_FAILURES
-    // );
-    // expect(taskRunnerFactoryInitializerParams.nodeLevelMetrics?.execution.mock.calls[5][0]).toBe(
-    //   IN_MEMORY_METRICS.RULE_TIMEOUTS
-    // );
+    expect(taskRunnerFactoryInitializerParams.nodeLevelMetrics?.execution).toHaveBeenCalledTimes(4);
+    expect(taskRunnerFactoryInitializerParams.nodeLevelMetrics?.failure).toHaveBeenCalledTimes(1);
+    expect(taskRunnerFactoryInitializerParams.nodeLevelMetrics?.timeout).toHaveBeenCalledTimes(1);
   });
 });

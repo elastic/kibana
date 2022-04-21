@@ -13,7 +13,7 @@ import {
 import { CoreSetup } from '@kbn/core/server';
 import { AlertingPluginsStart } from '../plugin';
 
-export function registerClusterCollector({
+export function registerClusterLevelMetrics({
   monitoringCollection,
   core,
 }: {
