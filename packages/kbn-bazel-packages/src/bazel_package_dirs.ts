@@ -25,6 +25,7 @@ export const BAZEL_PACKAGE_DIRS = [
   'packages/analytics',
   'packages/analytics/shippers',
   'src/plugins',
+  'x-pack/plugins',
 ];
 
 /**
