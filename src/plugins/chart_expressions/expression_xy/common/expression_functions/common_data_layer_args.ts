@@ -12,7 +12,7 @@ import { DataLayerFn, ExtendedDataLayerFn } from '../types';
 
 type CommonDataLayerFn = DataLayerFn | ExtendedDataLayerFn;
 
-export const commonDataLayerArgs: Omit<CommonDataLayerFn['args'], 'table'> = {
+export const commonDataLayerArgs: CommonDataLayerFn['args'] = {
   hide: {
     types: ['boolean'],
     default: false,
