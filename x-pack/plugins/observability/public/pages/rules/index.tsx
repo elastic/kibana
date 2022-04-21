@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { capitalize, sortBy } from 'lodash';
 import {
   EuiButton,
@@ -15,10 +15,8 @@ import {
   EuiButtonEmpty,
   EuiText,
   EuiHorizontalRule,
-  EuiAutoRefreshButton,
   EuiTableSortingType,
   EuiFieldSearch,
-  OnRefreshChangeProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -93,8 +91,6 @@ export function RulesPage() {
   });
   const [inputText, setInputText] = useState<string | undefined>();
   const [searchText, setSearchText] = useState<string | undefined>();
-  const [refreshInterval, setRefreshInterval] = useState(60000);
-  const [isPaused, setIsPaused] = useState(false);
   const [ruleLastResponseFilter, setRuleLastResponseFilter] = useState<string[]>([]);
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
@@ -106,14 +102,6 @@ export function RulesPage() {
 
   const onRuleEdit = (ruleItem: RuleTableItem) => {
     setCurrentRuleToEdit(ruleItem);
-  };
-
-  const onRefreshChange = ({
-    isPaused: isPausedChanged,
-    refreshInterval: refreshIntervalChanged,
-  }: OnRefreshChangeProps) => {
-    setIsPaused(isPausedChanged);
-    setRefreshInterval(refreshIntervalChanged);
   };
 
   const { rulesState, setRulesState, reload, noData, initialLoad } = useFetchRules({
@@ -159,15 +147,6 @@ export function RulesPage() {
   const authorizedToCreateAnyRules = authorizedRuleTypes.some(
     (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
   );
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (!isPaused) {
-        reload();
-      }
-    }, refreshInterval);
-    return () => clearInterval(interval);
-  }, [refreshInterval, reload, isPaused]);
 
   useBreadcrumbs([
     {
@@ -367,14 +346,6 @@ export function RulesPage() {
                 }}
               />
             </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiAutoRefreshButton
-              isPaused={isPaused}
-              refreshInterval={refreshInterval}
-              onRefreshChange={onRefreshChange}
-              shortHand
-            />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule margin="xs" />
