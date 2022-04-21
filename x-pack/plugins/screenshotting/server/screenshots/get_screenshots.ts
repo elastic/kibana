@@ -55,10 +55,7 @@ export const getScreenshots = async (
         description: item.attributes.description,
       });
 
-      endScreenshot({
-        elementPosition: item.position,
-        byteLength: data.byteLength,
-      });
+      endScreenshot({ byte_length: data.byteLength });
     }
   } catch (error) {
     kbnLogger.error(error);

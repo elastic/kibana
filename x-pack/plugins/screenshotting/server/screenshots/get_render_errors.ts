@@ -15,6 +15,8 @@ export const getRenderErrors = async (
   eventLogger: EventLogger,
   layout: Layout
 ): Promise<undefined | string[]> => {
+  const { kbnLogger } = eventLogger;
+
   const spanEnd = eventLogger.log(
     'look for render errors',
     Actions.GET_RENDER_ERRORS,
@@ -22,34 +24,44 @@ export const getRenderErrors = async (
     'read'
   );
 
-  const { kbnLogger } = eventLogger;
-  const errorsFound: undefined | string[] = await browser.evaluate(
-    {
-      fn: (errorSelector, errorAttribute) => {
-        const visualizations: Element[] = Array.from(document.querySelectorAll(errorSelector));
-        const errors: string[] = [];
+  let errorsFound: undefined | string[];
+  try {
+    errorsFound = await browser.evaluate(
+      {
+        fn: (errorSelector, errorAttribute) => {
+          const visualizations: Element[] = Array.from(document.querySelectorAll(errorSelector));
+          const errors: string[] = [];
 
-        visualizations.forEach((visualization) => {
-          const errorMessage = visualization.getAttribute(errorAttribute);
-          if (errorMessage) {
-            errors.push(errorMessage);
-          }
-        });
+          visualizations.forEach((visualization) => {
+            const errorMessage = visualization.getAttribute(errorAttribute);
+            if (errorMessage) {
+              errors.push(errorMessage);
+            }
+          });
 
-        return errors.length ? errors : undefined;
+          return errors.length ? errors : undefined;
+        },
+        args: [layout.selectors.renderError, layout.selectors.renderErrorAttribute],
       },
-      args: [layout.selectors.renderError, layout.selectors.renderErrorAttribute],
-    },
-    { context: CONTEXT_GETRENDERERRORS },
-    kbnLogger
-  );
+      { context: CONTEXT_GETRENDERERRORS },
+      kbnLogger
+    );
 
-  const renderErrors = errorsFound?.length;
-  if (renderErrors) {
-    kbnLogger.warn(`Found ${renderErrors} error messages. See report object for more information.`);
+    const renderErrors = errorsFound?.length;
+    if (renderErrors) {
+      kbnLogger.warn(
+        `Found ${renderErrors} error messages. See report object for more information.`
+      );
+    }
+
+    spanEnd({ render_errors: renderErrors });
+  } catch (error) {
+    kbnLogger.error(error);
+    eventLogger.error(
+      `An error occurred when checking the page for rendering errors`,
+      Actions.GET_RENDER_ERRORS
+    );
   }
-
-  spanEnd({ render_errors: renderErrors });
 
   return errorsFound;
 };
