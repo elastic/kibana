@@ -12,6 +12,7 @@
  * 2.0.
  */
 
+import { RuleExecutionStatus } from '../../../../../../common/detection_engine/schemas/common';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
 
 import {
@@ -20,6 +21,8 @@ import {
   formatSortForTermsSort,
   getExecutionEventAggregation,
   getProviderAndActionFilter,
+  mapPlatformStatusToRuleExecutionStatus,
+  mapRuleExecutionStatusToPlatformStatus,
 } from '.';
 
 describe('getExecutionEventAggregation', () => {
@@ -1317,5 +1320,55 @@ describe('formatExecutionEventResponse', () => {
         },
       ],
     });
+  });
+});
+
+describe('mapRuleStatusToPlatformStatus', () => {
+  test('should correctly translate empty array to empty array', () => {
+    expect(mapRuleExecutionStatusToPlatformStatus([])).toEqual([]);
+  });
+
+  test('should correctly translate RuleExecutionStatus.failed to `failure` platform status', () => {
+    expect(mapRuleExecutionStatusToPlatformStatus([RuleExecutionStatus.failed])).toEqual([
+      'failure',
+    ]);
+  });
+
+  test('should correctly translate RuleExecutionStatus.succeeded to `success` platform status', () => {
+    expect(mapRuleExecutionStatusToPlatformStatus([RuleExecutionStatus.succeeded])).toEqual([
+      'success',
+    ]);
+  });
+
+  test('should correctly translate RuleExecutionStatus.["going to run"] to empty array platform status', () => {
+    expect(mapRuleExecutionStatusToPlatformStatus([RuleExecutionStatus['going to run']])).toEqual(
+      []
+    );
+  });
+
+  test("should correctly translate multiple RuleExecutionStatus's to platform statuses", () => {
+    expect(
+      mapRuleExecutionStatusToPlatformStatus([
+        RuleExecutionStatus.succeeded,
+        RuleExecutionStatus.failed,
+        RuleExecutionStatus['going to run'],
+      ]).sort()
+    ).toEqual(['failure', 'success']);
+  });
+});
+
+describe('mapPlatformStatusToRuleExecutionStatus', () => {
+  test('should correctly translate `invalid` platform status to `undefined`', () => {
+    expect(mapPlatformStatusToRuleExecutionStatus('')).toEqual(undefined);
+  });
+
+  test('should correctly translate `failure` platform status to `RuleExecutionStatus.failed`', () => {
+    expect(mapPlatformStatusToRuleExecutionStatus('failure')).toEqual(RuleExecutionStatus.failed);
+  });
+
+  test('should correctly translate `success` platform status to `RuleExecutionStatus.succeeded`', () => {
+    expect(mapPlatformStatusToRuleExecutionStatus('success')).toEqual(
+      RuleExecutionStatus.succeeded
+    );
   });
 });

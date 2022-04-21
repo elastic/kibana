@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+/**
+ * Rule executed without issue
+ */
 export const successfulExecution = [
   {
     '@timestamp': '2022-03-17T22:59:31.360Z',
@@ -226,6 +229,9 @@ export const successfulExecution = [
   },
 ];
 
+/**
+ * Rule execution identified gap since last execution
+ */
 export const failedGapExecution = [
   {
     '@timestamp': '2022-03-17T12:36:16.413Z',
@@ -447,6 +453,9 @@ export const failedGapExecution = [
   },
 ];
 
+/**
+ * Rule execution resulted in partial warning, e.g. missing index pattern
+ */
 export const partialWarningExecution = [
   {
     '@timestamp': '2022-03-16T23:28:36.012Z',
@@ -623,6 +632,115 @@ export const partialWarningExecution = [
       ruleset: 'siem',
     },
     message: 'rule execution start: "f78f3550-a186-11ec-89a1-0bce95157aba"',
+    ecs: {
+      version: '1.8.0',
+    },
+  },
+];
+
+/**
+ * Rule execution failed because rule is disabled (configure 1s interval/lookback then rule
+ * is disabled while running)
+ */
+export const failedRanAfterDisabled = [
+  {
+    '@timestamp': '2022-04-21T02:00:55.400Z',
+    event: {
+      provider: 'alerting',
+      action: 'execute',
+      kind: 'alert',
+      category: ['siem'],
+      start: '2022-04-21T02:00:55.397Z',
+      end: '2022-04-21T02:00:55.400Z',
+      duration: 3000000,
+      reason: 'disabled',
+      outcome: 'failure',
+    },
+    kibana: {
+      alert: {
+        rule: {
+          rule_type_id: 'siem.queryRule',
+          consumer: 'siem',
+          execution: {
+            uuid: '50eb8b2e-8334-4387-b77f-d47fdb7fbe2d',
+          },
+        },
+      },
+      saved_objects: [
+        {
+          rel: 'primary',
+          type: 'alert',
+          id: 'a890e240-b9fb-11ec-8598-338317271cf4',
+          type_id: 'siem.queryRule',
+        },
+      ],
+      space_ids: ['default'],
+      task: {
+        scheduled: '2022-04-21T02:00:53.325Z',
+        schedule_delay: 2072000000,
+      },
+      alerting: {
+        status: 'error',
+      },
+      server_uuid: '5b2de169-2785-441b-ae8c-186a1936b17d',
+      version: '8.3.0',
+    },
+    rule: {
+      id: 'a890e240-b9fb-11ec-8598-338317271cf4',
+      license: 'basic',
+      category: 'siem.queryRule',
+      ruleset: 'siem',
+    },
+    error: {
+      message: 'Rule failed to execute because rule ran after it was disabled.',
+    },
+    message: 'siem.queryRule:a890e240-b9fb-11ec-8598-338317271cf4: execution failed',
+    ecs: {
+      version: '1.8.0',
+    },
+  },
+  {
+    '@timestamp': '2022-04-21T02:00:55.397Z',
+    event: {
+      provider: 'alerting',
+      action: 'execute-start',
+      kind: 'alert',
+      category: ['siem'],
+      start: '2022-04-21T02:00:55.397Z',
+    },
+    kibana: {
+      alert: {
+        rule: {
+          rule_type_id: 'siem.queryRule',
+          consumer: 'siem',
+          execution: {
+            uuid: '50eb8b2e-8334-4387-b77f-d47fdb7fbe2d',
+          },
+        },
+      },
+      saved_objects: [
+        {
+          rel: 'primary',
+          type: 'alert',
+          id: 'a890e240-b9fb-11ec-8598-338317271cf4',
+          type_id: 'siem.queryRule',
+        },
+      ],
+      space_ids: ['default'],
+      task: {
+        scheduled: '2022-04-21T02:00:53.325Z',
+        schedule_delay: 2072000000,
+      },
+      server_uuid: '5b2de169-2785-441b-ae8c-186a1936b17d',
+      version: '8.3.0',
+    },
+    rule: {
+      id: 'a890e240-b9fb-11ec-8598-338317271cf4',
+      license: 'basic',
+      category: 'siem.queryRule',
+      ruleset: 'siem',
+    },
+    message: 'rule execution start: "a890e240-b9fb-11ec-8598-338317271cf4"',
     ecs: {
       version: '1.8.0',
     },
