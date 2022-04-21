@@ -36,10 +36,8 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
   const { uiSettings, data, usageCollection, appName } = kibana.services;
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
   const [dataViews, setDataviews] = useState<DataView[]>([]);
+  const [newFilter, setNewFilter] = useState<Filter | undefined>(undefined);
   const isPinned = uiSettings!.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT);
-  const [dataView] = dataViews;
-  const index = dataView && dataView.id;
-  const newFilter = buildEmptyFilter(isPinned, index);
 
   useEffect(() => {
     const fetchDataViews = async () => {
@@ -55,11 +53,15 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
         stringPatterns
       )) as DataView[];
       setDataviews([...objectPatterns, ...objectPatternsFromStrings]);
+      const [dataView] = [...objectPatterns, ...objectPatternsFromStrings];
+      const index = dataView && dataView.id;
+      const emptyFilter = buildEmptyFilter(isPinned, index);
+      setNewFilter(emptyFilter);
     };
     if (indexPatterns) {
       fetchDataViews();
     }
-  }, [data.dataViews, indexPatterns]);
+  }, [data.dataViews, indexPatterns, isPinned]);
 
   function onAdd(filter: Filter) {
     reportUiCounter?.(METRIC_TYPE.CLICK, `filter:added`);
@@ -70,15 +72,17 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
 
   return (
     <div style={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }}>
-      <FilterEditor
-        filter={newFilter}
-        indexPatterns={dataViews}
-        onSubmit={onAdd}
-        onCancel={() => closePopover?.()}
-        key={JSON.stringify(newFilter)}
-        timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-        mode="add"
-      />
+      {newFilter && (
+        <FilterEditor
+          filter={newFilter}
+          indexPatterns={dataViews}
+          onSubmit={onAdd}
+          onCancel={() => closePopover?.()}
+          key={JSON.stringify(newFilter)}
+          timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          mode="add"
+        />
+      )}
     </div>
   );
 });
