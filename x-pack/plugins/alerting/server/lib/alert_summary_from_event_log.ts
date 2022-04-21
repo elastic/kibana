@@ -10,7 +10,7 @@ import { IEvent } from '@kbn/event-log-plugin/server';
 import { SanitizedRule, AlertSummary, AlertStatus } from '../types';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER, LEGACY_EVENT_LOG_ACTIONS } from '../plugin';
 
-const Millis2Nanos = 1000 * 1000;
+const Millis2Nanos = BigInt(1000 * 1000);
 
 export interface AlertSummaryFromEventLogParams {
   rule: SanitizedRule<{ bar: boolean }>;
@@ -111,7 +111,7 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
     }
 
     if (event?.event?.duration) {
-      const eventDirationMillis = event.event.duration / Millis2Nanos;
+      const eventDirationMillis = Number(BigInt(event.event.duration) / Millis2Nanos);
       eventDurations.push(eventDirationMillis);
       eventDurationsWithTimestamp[event['@timestamp']!] = eventDirationMillis;
     }

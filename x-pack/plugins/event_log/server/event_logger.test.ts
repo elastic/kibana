@@ -137,9 +137,9 @@ describe('EventLogger', () => {
 
     expect(timeStopValue).toBeGreaterThanOrEqual(timeStartValue);
 
-    const duration = event.event!.duration!;
+    const duration = BigInt(event.event!.duration!);
     expect(duration).toBeGreaterThan(0.95 * delayMS * 1000 * 1000);
-    expect(duration / (1000 * 1000)).toBeCloseTo(timeStopValue - timeStartValue);
+    expect(duration / BigInt(1000 * 1000)).toBeCloseTo(timeStopValue - timeStartValue);
   });
 
   test('timing method endTiming() method works when startTiming() is not called', async () => {

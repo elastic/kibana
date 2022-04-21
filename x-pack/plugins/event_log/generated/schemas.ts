@@ -52,7 +52,7 @@ export const EventSchema = schema.maybe(
         code: ecsString(),
         created: ecsDate(),
         dataset: ecsString(),
-        duration: ecsNumber(),
+        duration: ecsString(),
         end: ecsDate(),
         hash: ecsString(),
         id: ecsString(),

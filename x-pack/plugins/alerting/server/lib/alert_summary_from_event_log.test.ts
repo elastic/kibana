@@ -643,7 +643,7 @@ export class EventsFactory {
       event: {
         provider: EVENT_LOG_PROVIDER,
         action: EVENT_LOG_ACTIONS.execute,
-        duration: random(2000, 180000) * 1000 * 1000,
+        duration: `${random(2000, 180000)}000000`,
       },
     };
 
@@ -710,7 +710,7 @@ export class EventsFactory {
     return this.events
       .filter((ev) => ev?.event?.action === 'execute' && ev?.event?.duration !== undefined)
       .reduce((res: Record<string, number>, ev) => {
-        res[ev?.['@timestamp']!] = ev?.event?.duration! / (1000 * 1000);
+        res[ev?.['@timestamp']!] = Number(BigInt(ev?.event?.duration!) / BigInt(1000 * 1000));
         return res;
       }, {});
   }
