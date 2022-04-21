@@ -153,6 +153,10 @@ export const strings = {
     i18n.translate('expressionXY.dataLayer.accessors.help', {
       defaultMessage: 'The columns to display on the y axis.',
     }),
+  getMarkSizeAccessorHelp: () =>
+    i18n.translate('expressionXY.dataLayer.markSizeAccessor.help', {
+      defaultMessage: 'Mark size accessor',
+    }),
   getYConfigHelp: () =>
     i18n.translate('expressionXY.dataLayer.yConfig.help', {
       defaultMessage: 'Additional configuration for y axes',
