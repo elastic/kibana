@@ -25,6 +25,9 @@ import {
   EuiHealth,
   EuiPopover,
   EuiContextMenu,
+  EuiFlexGrid,
+  EuiHorizontalRule,
+  EuiStat,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 // import { hasExecuteActionsCapability } from './config';
@@ -42,20 +45,21 @@ function PageTitle(rule: Rule) {
   return (
     <>
       {rule.name} <ExperimentalBadge />
-      <EuiPanel hasShadow={false} hasBorder={false}>
-        <EuiFlexGroup alignItems="baseline">
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem component="span" grow={false}>
           <EuiText color="subdued" size="s">
             <b>Last updated</b> by {rule.updatedBy} on {rule.updatedAt} &emsp;
-            <b>Created</b> by {rule.createdBy} on {rule.createdAt} &emsp;
+            <b>Created</b> by {rule.createdBy} on {rule.createdAt}
           </EuiText>
-
-          <EuiPanel grow={false} hasShadow={false} hasBorder={true} paddingSize={'none'}>
+        </EuiFlexItem>
+        <EuiFlexItem style={{ alignSelf: 'flexStart' }} component="span" grow={false}>
+          <EuiPanel hasShadow={false} hasBorder={true} paddingSize={'none'}>
             <EuiButtonEmpty iconType="tag" color="text">
               {rule.tags.length}
             </EuiButtonEmpty>
           </EuiPanel>
-        </EuiFlexGroup>
-      </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 }
@@ -82,7 +86,11 @@ interface ItemValueRuleSummaryProps {
 }
 
 function ItemValueRuleSummary({ itemValue, extraSpace = true }: ItemValueRuleSummaryProps) {
-  return <EuiFlexItem grow={extraSpace ? 3 : 1}>{itemValue}</EuiFlexItem>;
+  return (
+    <EuiFlexItem grow={extraSpace ? 3 : 1}>
+      <EuiText size="m">{itemValue}</EuiText>
+    </EuiFlexItem>
+  );
 }
 interface RuleDetailsPathParams {
   ruleId: string;
@@ -220,13 +228,11 @@ export function RuleDetailsPage() {
               <EuiFlexItem>
                 <EuiTitle size="m">
                   <EuiHealth textSize="inherit" color={getColorStatusBased(status)}>
-                    {status}
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
                   </EuiHealth>
                 </EuiTitle>
               </EuiFlexItem>
-
               <EuiSpacer size="l" />
-
               <EuiFlexGroup>
                 <ItemTitleRuleSummary
                   translationKey="xpack.observability.ruleDetails.lastRun"
@@ -237,8 +243,10 @@ export function RuleDetailsPage() {
                   itemValue={moment(lastExecutionDate).fromNow()}
                 />
               </EuiFlexGroup>
+              <EuiSpacer size="xl" />
 
-              <EuiSpacer size="l" />
+              <EuiHorizontalRule margin="none" />
+              <EuiSpacer size="s" />
 
               <EuiFlexGroup>
                 <ItemTitleRuleSummary
@@ -247,17 +255,7 @@ export function RuleDetailsPage() {
                 />
                 <ItemValueRuleSummary extraSpace={false} itemValue={'TODO'} />
               </EuiFlexGroup>
-
               <EuiSpacer size="l" />
-
-              <EuiFlexGroup>
-                <ItemTitleRuleSummary
-                  translationKey="xpack.observability.ruleDetails.last25hExecution"
-                  defaultMessage="Executions (last 24 h)"
-                />
-
-                <ItemValueRuleSummary extraSpace={false} itemValue={'TODO'} />
-              </EuiFlexGroup>
               <EuiSpacer size="l" />
             </EuiFlexGroup>
           </EuiPanel>
