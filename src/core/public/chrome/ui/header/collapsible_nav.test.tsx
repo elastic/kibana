@@ -85,7 +85,7 @@ function clickGroup(component: ReactWrapper, group: string) {
 
 describe('CollapsibleNav', () => {
   // this test is mostly an "EUI works as expected" sanity check
-  // the docking button should be present at 1440 wdith and up
+  // the docking button should be visible at 1440 wdith and up
   resizeWindow(1440, 900);
   it('renders the default nav', () => {
     const onLock = sinon.spy();
@@ -101,15 +101,6 @@ describe('CollapsibleNav', () => {
     // limit the find to buttons because jest also renders data-test-subj on a JSX wrapper element
     component.find('button[data-test-subj="collapsible-nav-lock"]').simulate('click');
     expect(onLock.callCount).toEqual(1);
-  });
-  // the docking button should not be present under 1440 wdith
-  resizeWindow(1439, 900);
-  it('does not render dock button', () => {
-    const onLock = sinon.spy();
-    const component = mount(<CollapsibleNav {...mockProps()} onIsLockedUpdate={onLock} />);
-
-    // limit the find to buttons because jest also renders data-test-subj on a JSX wrapper element
-    expect(component.find('button[data-test-subj="collapsible-nav-lock"]')).toBeNull();
   });
 
   it('renders links grouped by category', () => {
