@@ -115,14 +115,23 @@ export function buildProjectGraph(projects: ProjectMap) {
   const projectGraph: ProjectGraph = new Map();
 
   for (const project of projects.values()) {
-    const projectDeps = [];
+    const projectDeps: Project[] = [];
     const dependencies = project.allDependencies;
+
+    if (!project.isSinglePackageJsonProject && Object.keys(dependencies).length > 0) {
+      throw new CliError(
+        `${project.name} is not allowed to hold local dependencies. Please declare them at the root package.json`
+      );
+    }
+
+    if (!project.isSinglePackageJsonProject) {
+      projectGraph.set(project.name, projectDeps);
+      continue;
+    }
 
     for (const depName of Object.keys(dependencies)) {
       if (projects.has(depName)) {
         const dep = projects.get(depName)!;
-        project.ensureValidProjectDependency(dep);
-
         projectDeps.push(dep);
       }
     }

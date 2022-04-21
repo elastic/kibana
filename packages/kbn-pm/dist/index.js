@@ -61512,32 +61512,6 @@ class Project {
     return this.json.name;
   }
 
-  ensureValidProjectDependency(project) {
-    const relativePathToProject = normalizePath(path__WEBPACK_IMPORTED_MODULE_1___default.a.relative(this.path, project.path));
-    const relativePathToProjectIfBazelPkg = normalizePath(path__WEBPACK_IMPORTED_MODULE_1___default.a.relative(this.path, `${__dirname}/../../../bazel-bin/packages/${path__WEBPACK_IMPORTED_MODULE_1___default.a.basename(project.path)}`));
-    const versionInPackageJson = this.allDependencies[project.name];
-    const expectedVersionInPackageJson = `link:${relativePathToProject}`;
-    const expectedVersionInPackageJsonIfBazelPkg = `link:${relativePathToProjectIfBazelPkg}`; // TODO: after introduce bazel to build all the packages and completely remove the support for kbn packages
-    //  do not allow child projects to hold dependencies, unless they are meant to be published externally
-
-    if (versionInPackageJson === expectedVersionInPackageJson || versionInPackageJson === expectedVersionInPackageJsonIfBazelPkg) {
-      return;
-    }
-
-    const updateMsg = 'Update its package.json to the expected value below.';
-    const meta = {
-      actual: `"${project.name}": "${versionInPackageJson}"`,
-      expected: `"${project.name}": "${expectedVersionInPackageJson}" or "${project.name}": "${expectedVersionInPackageJsonIfBazelPkg}"`,
-      package: `${this.name} (${this.packageJsonLocation})`
-    };
-
-    if (Object(_package_json__WEBPACK_IMPORTED_MODULE_5__[/* isLinkDependency */ "a"])(versionInPackageJson)) {
-      throw new _errors__WEBPACK_IMPORTED_MODULE_3__[/* CliError */ "a"](`[${this.name}] depends on [${project.name}] using 'link:', but the path is wrong. ${updateMsg}`, meta);
-    }
-
-    throw new _errors__WEBPACK_IMPORTED_MODULE_3__[/* CliError */ "a"](`[${this.name}] depends on [${project.name}] but it's not using the local package. ${updateMsg}`, meta);
-  }
-
   getBuildConfig() {
     return this.json.kibana && this.json.kibana.build || {};
   }
@@ -61609,10 +61583,6 @@ class Project {
     return Object.values(this.allDependencies).every(dep => Object(_package_json__WEBPACK_IMPORTED_MODULE_5__[/* isLinkDependency */ "a"])(dep));
   }
 
-} // We normalize all path separators to `/` in generated files
-
-function normalizePath(path) {
-  return path.replace(/[\\\/]+/g, '/');
 }
 
 /***/ }),
@@ -61739,10 +61709,18 @@ function buildProjectGraph(projects) {
     const projectDeps = [];
     const dependencies = project.allDependencies;
 
+    if (!project.isSinglePackageJsonProject && Object.keys(dependencies).length > 0) {
+      throw new _errors__WEBPACK_IMPORTED_MODULE_3__[/* CliError */ "a"](`${project.name} is not allowed to hold local dependencies. Please declare them at the root package.json`);
+    }
+
+    if (!project.isSinglePackageJsonProject) {
+      projectGraph.set(project.name, projectDeps);
+      continue;
+    }
+
     for (const depName of Object.keys(dependencies)) {
       if (projects.has(depName)) {
         const dep = projects.get(depName);
-        project.ensureValidProjectDependency(dep);
         projectDeps.push(dep);
       }
     }
