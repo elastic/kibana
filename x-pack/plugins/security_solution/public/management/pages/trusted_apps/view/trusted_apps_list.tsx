@@ -15,6 +15,7 @@ import { useHttp } from '../../../../common/lib/kibana';
 import { ArtifactListPage, ArtifactListPageProps } from '../../../components/artifact_list_page';
 import { TrustedAppsApiClient } from '../service';
 import { TrustedAppsForm } from './components/form';
+import { SEARCHABLE_FIELDS } from '../constants';
 
 const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   pageTitle: i18n.translate('xpack.securitySolution.trustedApps.pageTitle', {
@@ -115,6 +116,7 @@ export const TrustedAppsList = memo(() => {
       labels={TRUSTED_APPS_PAGE_LABELS}
       data-test-subj="trustedAppsListPage"
       flyoutSize="m"
+      searchableFields={SEARCHABLE_FIELDS}
     />
   );
 });
