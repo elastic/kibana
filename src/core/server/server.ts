@@ -367,6 +367,11 @@ export class Server {
     await this.metrics.stop();
     await this.status.stop();
     await this.logging.stop();
+    await this.prebootService.stop();
+    await this.executionContext.stop();
+    await this.deprecations.stop();
+    await this.coreUsageData.stop();
+    await this.httpResources.stop();
     this.deprecations.stop();
   }
 
