@@ -15,7 +15,13 @@ import { DashboardContainer } from '..';
 import { DashboardState } from '../../types';
 import { DashboardContainerInput, DashboardSavedObject } from '../..';
 import { ControlGroupContainer, ControlGroupInput } from '../../../../controls/public';
-import { controlGroupInputToRawControlGroupAttributes, getDefaultControlGroupInput, persistableControlGroupInputIsEqual, RawControlGroupAttributes, rawControlGroupAttributesToControlGroupInput } from '../../../../controls/common';
+import {
+  controlGroupInputToRawControlGroupAttributes,
+  getDefaultControlGroupInput,
+  persistableControlGroupInputIsEqual,
+  RawControlGroupAttributes,
+  rawControlGroupAttributesToControlGroupInput,
+} from '../../../../controls/common';
 interface DiffChecks {
   [key: string]: (a?: unknown, b?: unknown) => boolean;
 }
@@ -130,8 +136,11 @@ export const syncDashboardControlGroup = async ({
     controlGroup
       .getOutput$()
       .pipe(
-        distinctUntilChanged(({ filters: filtersA }: { filters: Filter[] }, { filters: filtersB }: { filters: Filter[] }) =>
-          compareAllFilters(filtersA, filtersB)
+        distinctUntilChanged(
+          (
+            { filters: filtersA }: { filters: Filter[] },
+            { filters: filtersB }: { filters: Filter[] }
+          ) => compareAllFilters(filtersA, filtersB)
         )
       )
       .subscribe(() => {
@@ -172,7 +181,9 @@ export const deserializeControlGroupFromDashboardSavedObject = (
   dashboardSavedObject: DashboardSavedObject
 ): Omit<ControlGroupInput, 'id'> | undefined => {
   if (!dashboardSavedObject.controlGroupInput) return;
-  return rawControlGroupAttributesToControlGroupInput(dashboardSavedObject.controlGroupInput as RawControlGroupAttributes);
+  return rawControlGroupAttributesToControlGroupInput(
+    dashboardSavedObject.controlGroupInput as RawControlGroupAttributes
+  );
 };
 
 export const combineDashboardFiltersWithControlGroupFilters = (

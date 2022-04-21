@@ -12,10 +12,7 @@ import {
   EmbeddableStateWithType,
 } from '../../../embeddable/common';
 import { SavedObjectReference } from '../../../../core/types';
-import {
-  DashboardContainerStateWithType,
-  DashboardPanelState,
-} from '../types';
+import { DashboardContainerStateWithType, DashboardPanelState } from '../types';
 import { CONTROL_GROUP_TYPE, PersistableControlGroupInput } from '../../../controls/common';
 
 const getPanelStatePrefix = (state: DashboardPanelState) => `${state.explicitInput.id}:`;

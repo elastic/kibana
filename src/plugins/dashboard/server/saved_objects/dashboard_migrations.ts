@@ -32,7 +32,11 @@ import {
   MigrateFunctionsObject,
 } from '../../../kibana_utils/common';
 import { replaceIndexPatternReference } from './replace_index_pattern_reference';
-import { CONTROL_GROUP_TYPE, rawControlGroupAttributesToSerializable, serializableToRawControlGroupAttributes } from '../../../controls/common';
+import {
+  CONTROL_GROUP_TYPE,
+  rawControlGroupAttributesToSerializable,
+  serializableToRawControlGroupAttributes,
+} from '../../../controls/common';
 
 function migrateIndexPattern(doc: DashboardDoc700To720) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');

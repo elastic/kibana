@@ -7,10 +7,7 @@
  */
 import semverGt from 'semver/functions/gt';
 import { SavedObjectAttributes, SavedObjectReference } from '../../../core/types';
-import {
-  DashboardContainerStateWithType,
-  DashboardPanelState,
-} from './types';
+import { DashboardContainerStateWithType, DashboardPanelState } from './types';
 import { EmbeddablePersistableStateService } from '../../embeddable/common/types';
 import {
   convertPanelStateToSavedDashboardPanel,
