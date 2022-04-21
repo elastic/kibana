@@ -7,36 +7,26 @@
 
 import { EuiContextMenu } from '@elastic/eui';
 import { shallow } from 'enzyme';
-import type { FunctionComponent, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 
-import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
-
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { userProfileMock } from '../../common/model/user_profile.mock';
 import * as UseCurrentUserImports from '../components/use_current_user';
 import { SecurityNavControl } from './nav_control_component';
-import { Providers } from './nav_control_service';
 
 jest.mock('../components/use_current_user');
 jest.mock('react-use/lib/useObservable');
 
 const useObservableMock = useObservable as jest.Mock;
 const useUserProfileMock = jest.spyOn(UseCurrentUserImports, 'useUserProfile');
+const useCurrentUserMock = jest.spyOn(UseCurrentUserImports, 'useCurrentUser');
 
 const userProfile = userProfileMock.create();
-const coreStart = coreMock.createStart();
-const theme$ = themeServiceMock.createTheme$();
 const userMenuLinks$ = new BehaviorSubject([]);
-
-const wrappingComponent: FunctionComponent = ({ children }) => (
-  <Providers services={coreStart} theme$={theme$}>
-    {children}
-  </Providers>
-);
 
 describe('SecurityNavControl', () => {
   beforeEach(() => {
@@ -44,6 +34,12 @@ describe('SecurityNavControl', () => {
     useUserProfileMock.mockReturnValue({
       loading: false,
       value: userProfile,
+    });
+
+    useCurrentUserMock.mockReset();
+    useCurrentUserMock.mockReturnValue({
+      loading: false,
+      value: mockAuthenticatedUser(),
     });
 
     useObservableMock.mockReset();
@@ -54,13 +50,11 @@ describe('SecurityNavControl', () => {
 
   it('should render an avatar when user profile has loaded', async () => {
     const wrapper = shallow(
-      <SecurityNavControl editProfileUrl="" logoutUrl="" userMenuLinks$={userMenuLinks$} />,
-      {
-        wrappingComponent,
-      }
+      <SecurityNavControl editProfileUrl="" logoutUrl="" userMenuLinks$={userMenuLinks$} />
     );
 
     expect(useUserProfileMock).toHaveBeenCalledTimes(1);
+    expect(useCurrentUserMock).toHaveBeenCalledTimes(1);
     expect(wrapper.prop<ReactElement>('button')).toMatchInlineSnapshot(`
       <EuiHeaderSectionItemButton
         aria-controls="headerUserMenu"
@@ -80,7 +74,6 @@ describe('SecurityNavControl', () => {
           size="s"
           user={
             Object {
-              "active": true,
               "authentication_provider": Object {
                 "name": "basic1",
                 "type": "basic",
@@ -100,8 +93,10 @@ describe('SecurityNavControl', () => {
               "metadata": Object {
                 "_reserved": false,
               },
-              "roles": Array [],
-              "username": "some-username",
+              "roles": Array [
+                "user-role",
+              ],
+              "username": "user",
             }
           }
         />
@@ -113,15 +108,16 @@ describe('SecurityNavControl', () => {
     useUserProfileMock.mockReturnValue({
       loading: true,
     });
+    useCurrentUserMock.mockReturnValue({
+      loading: true,
+    });
 
     const wrapper = shallow(
-      <SecurityNavControl editProfileUrl="" logoutUrl="" userMenuLinks$={userMenuLinks$} />,
-      {
-        wrappingComponent,
-      }
+      <SecurityNavControl editProfileUrl="" logoutUrl="" userMenuLinks$={userMenuLinks$} />
     );
 
     expect(useUserProfileMock).toHaveBeenCalledTimes(1);
+    expect(useCurrentUserMock).toHaveBeenCalledTimes(1);
     expect(wrapper.prop<ReactElement>('button')).toMatchInlineSnapshot(`
       <EuiHeaderSectionItemButton
         aria-controls="headerUserMenu"
@@ -145,10 +141,7 @@ describe('SecurityNavControl', () => {
 
   it('should open popover when avatar is clicked', async () => {
     const wrapper = shallow(
-      <SecurityNavControl editProfileUrl="" logoutUrl="" userMenuLinks$={userMenuLinks$} />,
-      {
-        wrappingComponent,
-      }
+      <SecurityNavControl editProfileUrl="" logoutUrl="" userMenuLinks$={userMenuLinks$} />
     );
 
     act(() => {
@@ -163,12 +156,12 @@ describe('SecurityNavControl', () => {
     useUserProfileMock.mockReturnValue({
       loading: true,
     });
+    useCurrentUserMock.mockReturnValue({
+      loading: true,
+    });
 
     const wrapper = shallow(
-      <SecurityNavControl editProfileUrl="" logoutUrl="" userMenuLinks$={userMenuLinks$} />,
-      {
-        wrappingComponent,
-      }
+      <SecurityNavControl editProfileUrl="" logoutUrl="" userMenuLinks$={userMenuLinks$} />
     );
 
     act(() => {
@@ -191,10 +184,7 @@ describe('SecurityNavControl', () => {
             { label: 'link3', href: 'path-to-link-3', iconType: 'empty', order: 3 },
           ])
         }
-      />,
-      {
-        wrappingComponent,
-      }
+      />
     );
 
     expect(wrapper.find(EuiContextMenu).prop('panels')).toMatchInlineSnapshot(`
@@ -284,10 +274,7 @@ describe('SecurityNavControl', () => {
             },
           ])
         }
-      />,
-      {
-        wrappingComponent,
-      }
+      />
     );
 
     expect(wrapper.find(EuiContextMenu).prop('panels')).toMatchInlineSnapshot(`
@@ -362,21 +349,19 @@ describe('SecurityNavControl', () => {
   it('should render anonymous user', async () => {
     useUserProfileMock.mockReturnValue({
       loading: false,
-      value: userProfileMock.create({
-        user: {
-          ...mockAuthenticatedUser({
-            authentication_provider: { type: 'anonymous', name: 'does no matter' },
-          }),
-          active: true,
-        },
+      value: undefined,
+      error: new Error('404'),
+    });
+
+    useCurrentUserMock.mockReturnValue({
+      loading: false,
+      value: mockAuthenticatedUser({
+        authentication_provider: { type: 'anonymous', name: 'does no matter' },
       }),
     });
 
     const wrapper = shallow(
-      <SecurityNavControl editProfileUrl="" logoutUrl="" userMenuLinks$={userMenuLinks$} />,
-      {
-        wrappingComponent,
-      }
+      <SecurityNavControl editProfileUrl="" logoutUrl="" userMenuLinks$={userMenuLinks$} />
     );
 
     expect(wrapper.find(EuiContextMenu).prop('panels')).toMatchInlineSnapshot(`

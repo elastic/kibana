@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IClusterClient, Logger } from 'src/core/server';
+import type { IClusterClient, Logger } from '@kbn/core/server';
 
 import type { AuthenticationProvider, UserData, UserInfo, UserProfile } from '../../common';
 import { getDetailedErrorMessage } from '../errors';

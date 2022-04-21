@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Capabilities } from 'src/core/types';
+import type { Capabilities } from '@kbn/core/types';
 
 import type { AuthenticationProvider } from './authentication_provider';
 import type { User } from './user';

@@ -12,12 +12,18 @@ import type { ILicense } from '@kbn/licensing-plugin/public';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { SecurityLicenseService } from '../../common/licensing';
+import { authenticationMock } from '../authentication/index.mock';
 import * as UseCurrentUserImports from '../components/use_current_user';
 import { SecurityNavControlService } from './nav_control_service';
-const useUserProfileMock = jest.spyOn(UseCurrentUserImports, 'useUserProfile');
 
-useUserProfileMock.mockReset();
+const useUserProfileMock = jest.spyOn(UseCurrentUserImports, 'useUserProfile');
+const useCurrentUserMock = jest.spyOn(UseCurrentUserImports, 'useCurrentUser');
+
 useUserProfileMock.mockReturnValue({
+  loading: true,
+});
+
+useCurrentUserMock.mockReturnValue({
   loading: true,
 });
 
@@ -34,6 +40,8 @@ const validLicense = {
   hasAtLeast: (...candidates) => true,
 } as ILicense;
 
+const authc = authenticationMock.createStart();
+
 describe('SecurityNavControlService', () => {
   it('can render and cleanup the control via the mount() function', async () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
@@ -47,7 +55,7 @@ describe('SecurityNavControlService', () => {
     const coreStart = coreMock.createStart();
     coreStart.chrome.navControls.registerRight = jest.fn();
 
-    navControlService.start({ core: coreStart });
+    navControlService.start({ core: coreStart, authc });
     expect(coreStart.chrome.navControls.registerRight).toHaveBeenCalledTimes(1);
     const [{ mount }] = coreStart.chrome.navControls.registerRight.mock.calls[0];
 
@@ -111,7 +119,7 @@ describe('SecurityNavControlService', () => {
     });
 
     const coreStart = coreMock.createStart();
-    navControlService.start({ core: coreStart });
+    navControlService.start({ core: coreStart, authc });
 
     expect(coreStart.chrome.navControls.registerRight).not.toHaveBeenCalled();
 
@@ -131,7 +139,7 @@ describe('SecurityNavControlService', () => {
 
     const coreStart = coreMock.createStart();
     coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
-    navControlService.start({ core: coreStart });
+    navControlService.start({ core: coreStart, authc });
 
     expect(coreStart.chrome.navControls.registerRight).not.toHaveBeenCalled();
   });
@@ -146,7 +154,7 @@ describe('SecurityNavControlService', () => {
     });
 
     const coreStart = coreMock.createStart();
-    navControlService.start({ core: coreStart });
+    navControlService.start({ core: coreStart, authc });
 
     expect(coreStart.chrome.navControls.registerRight).toHaveBeenCalledTimes(1);
 
@@ -167,13 +175,13 @@ describe('SecurityNavControlService', () => {
     });
 
     const coreStart = coreMock.createStart();
-    navControlService.start({ core: coreStart });
+    navControlService.start({ core: coreStart, authc });
 
     expect(coreStart.chrome.navControls.registerRight).toHaveBeenCalledTimes(1);
 
     navControlService.stop();
 
-    navControlService.start({ core: coreStart });
+    navControlService.start({ core: coreStart, authc });
     expect(coreStart.chrome.navControls.registerRight).toHaveBeenCalledTimes(2);
   });
 
@@ -191,14 +199,17 @@ describe('SecurityNavControlService', () => {
 
     it('should return functions to register and retrieve user menu links', () => {
       const coreStart = coreMock.createStart();
-      const navControlServiceStart = navControlService.start({ core: coreStart });
+      const navControlServiceStart = navControlService.start({ core: coreStart, authc });
       expect(navControlServiceStart).toHaveProperty('getUserMenuLinks$');
       expect(navControlServiceStart).toHaveProperty('addUserMenuLinks');
     });
 
     it('should register custom user menu links to be displayed in the nav controls', (done) => {
       const coreStart = coreMock.createStart();
-      const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({ core: coreStart });
+      const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({
+        core: coreStart,
+        authc,
+      });
       const userMenuLinks$ = getUserMenuLinks$();
 
       addUserMenuLinks([
@@ -225,7 +236,10 @@ describe('SecurityNavControlService', () => {
 
     it('should retrieve user menu links sorted by order', (done) => {
       const coreStart = coreMock.createStart();
-      const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({ core: coreStart });
+      const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({
+        core: coreStart,
+        authc,
+      });
       const userMenuLinks$ = getUserMenuLinks$();
 
       addUserMenuLinks([
@@ -292,7 +306,10 @@ describe('SecurityNavControlService', () => {
 
     it('should allow adding a custom profile link', () => {
       const coreStart = coreMock.createStart();
-      const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({ core: coreStart });
+      const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({
+        core: coreStart,
+        authc,
+      });
       const userMenuLinks$ = getUserMenuLinks$();
 
       addUserMenuLinks([
@@ -312,7 +329,10 @@ describe('SecurityNavControlService', () => {
 
     it('should not allow adding more than one custom profile link', () => {
       const coreStart = coreMock.createStart();
-      const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({ core: coreStart });
+      const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({
+        core: coreStart,
+        authc,
+      });
       const userMenuLinks$ = getUserMenuLinks$();
 
       expect(() => {

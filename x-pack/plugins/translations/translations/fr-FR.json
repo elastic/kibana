@@ -19032,7 +19032,6 @@
     "xpack.security.account.changePasswordTitle": "Mot de passe",
     "xpack.security.account.currentPasswordRequired": "Le mot de passe actuel est requis.",
     "xpack.security.account.noEmailMessage": "aucune adresse e-mail",
-    "xpack.security.account.pageTitle": "Paramètres de {strongUsername}",
     "xpack.security.account.passwordLengthDescription": "Le mot de passe est trop court.",
     "xpack.security.account.passwordsDoNotMatch": "Les mots de passe ne correspondent pas.",
     "xpack.security.account.usernameGroupDescription": "Vous ne pouvez pas modifier ces informations.",

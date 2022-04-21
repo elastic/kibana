@@ -104,6 +104,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
           defaultMessage="Username can't be changed once created."
         />
       ),
+      testSubj: 'username',
     },
   ];
 
@@ -123,6 +124,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
             defaultMessage="Contact an administrator to change your full name."
           />
         ),
+        testSubj: 'full_name',
       });
     }
 
@@ -141,6 +143,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
             defaultMessage="Contact an administrator to change your email address."
           />
         ),
+        testSubj: 'email',
       });
     }
   }
@@ -185,7 +188,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                           </EuiFlexGroup>
                         </EuiText>
                       ),
-                      description: item.description,
+                      description: <span data-test-subj={item.testSubj}>{item.description}</span>,
                     },
                   ]}
                   compressed

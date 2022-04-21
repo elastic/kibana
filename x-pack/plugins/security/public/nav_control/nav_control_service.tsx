@@ -18,6 +18,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 import type { SecurityLicense } from '../../common/licensing';
+import type { AuthenticationServiceSetup } from '../authentication';
+import { AuthenticationProvider } from '../components/use_current_user';
 import type { UserMenuLink } from './nav_control_component';
 import { SecurityNavControl } from './nav_control_component';
 
@@ -28,6 +30,7 @@ interface SetupDeps {
 
 interface StartDeps {
   core: CoreStart;
+  authc: AuthenticationServiceSetup;
 }
 
 export interface SecurityNavControlServiceStart {
@@ -58,7 +61,7 @@ export class SecurityNavControlService {
     this.logoutUrl = logoutUrl;
   }
 
-  public start({ core }: StartDeps): SecurityNavControlServiceStart {
+  public start({ core, authc }: StartDeps): SecurityNavControlServiceStart {
     this.securityFeaturesSubscription = this.securityLicense.features$.subscribe(
       ({ showLinks }) => {
         const isAnonymousPath = core.http.anonymousPaths.isAnonymous(window.location.pathname);
@@ -66,7 +69,7 @@ export class SecurityNavControlService {
         const shouldRegisterNavControl =
           !isAnonymousPath && showLinks && !this.navControlRegistered;
         if (shouldRegisterNavControl) {
-          this.registerSecurityNavControl(core);
+          this.registerSecurityNavControl(core, authc);
         }
       }
     );
@@ -108,13 +111,13 @@ export class SecurityNavControlService {
     this.stop$.next();
   }
 
-  private registerSecurityNavControl(core: CoreStart) {
+  private registerSecurityNavControl(core: CoreStart, authc: AuthenticationServiceSetup) {
     const { theme$ } = core.theme;
     core.chrome.navControls.registerRight({
       order: 2000,
       mount: (element: HTMLElement) => {
         ReactDOM.render(
-          <Providers services={core} theme$={theme$}>
+          <Providers services={core} authc={authc} theme$={theme$}>
             <SecurityNavControl
               editProfileUrl={core.http.basePath.prepend('/security/account')}
               logoutUrl={this.logoutUrl}
@@ -137,14 +140,22 @@ export class SecurityNavControlService {
 }
 
 export interface ProvidersProps {
+  authc: AuthenticationServiceSetup;
   services: CoreStart;
   theme$: Observable<CoreTheme>;
 }
 
-export const Providers: FunctionComponent<ProvidersProps> = ({ services, theme$, children }) => (
+export const Providers: FunctionComponent<ProvidersProps> = ({
+  authc,
+  services,
+  theme$,
+  children,
+}) => (
   <KibanaContextProvider services={services}>
-    <I18nProvider>
-      <KibanaThemeProvider theme$={theme$}>{children}</KibanaThemeProvider>
-    </I18nProvider>
+    <AuthenticationProvider authc={authc}>
+      <I18nProvider>
+        <KibanaThemeProvider theme$={theme$}>{children}</KibanaThemeProvider>
+      </I18nProvider>
+    </AuthenticationProvider>
   </KibanaContextProvider>
 );

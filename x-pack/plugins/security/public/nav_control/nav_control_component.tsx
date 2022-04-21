@@ -24,7 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { UserAvatar as IUserAvatar } from '../../common';
 import { getUserDisplayName, isUserAnonymous } from '../../common/model';
 import { UserAvatar } from '../account_management';
-import { useUserProfile } from '../components/use_current_user';
+import { useCurrentUser, useUserProfile } from '../components/use_current_user';
 
 export interface UserMenuLink {
   label: string;
@@ -49,8 +49,9 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   const [isOpen, setIsOpen] = useState(false);
 
   const userProfile = useUserProfile<{ avatar: IUserAvatar }>('avatar');
+  const currentUser = useCurrentUser(); // User profiles do not exist for anonymous users so need to fetch current user as well
 
-  const displayName = userProfile.value ? getUserDisplayName(userProfile.value.user) : '';
+  const displayName = currentUser.value ? getUserDisplayName(currentUser.value) : '';
 
   const button = (
     <EuiHeaderSectionItemButton
@@ -60,24 +61,26 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
       aria-label={i18n.translate('xpack.security.navControlComponent.accountMenuAriaLabel', {
         defaultMessage: 'Account menu',
       })}
-      onClick={() => setIsOpen((value) => (userProfile.value ? !value : false))}
+      onClick={() => setIsOpen((value) => (currentUser.value ? !value : false))}
       data-test-subj="userMenuButton"
       style={{ lineHeight: 'normal' }}
     >
-      {userProfile.value ? (
+      {currentUser.value && userProfile.value ? (
         <UserAvatar
-          user={userProfile.value.user}
+          user={currentUser.value}
           avatar={userProfile.value.data.avatar}
           size="s"
           data-test-subj="userMenuAvatar"
         />
+      ) : currentUser.value && userProfile.error ? (
+        <UserAvatar user={currentUser.value} size="s" data-test-subj="userMenuAvatar" />
       ) : (
         <EuiLoadingSpinner size="m" />
       )}
     </EuiHeaderSectionItemButton>
   );
 
-  const isAnonymous = userProfile.value ? isUserAnonymous(userProfile.value.user) : false;
+  const isAnonymous = currentUser.value ? isUserAnonymous(currentUser.value) : false;
   const items: EuiContextMenuPanelItemDescriptor[] = [];
   if (userMenuLinks.length) {
     const userMenuLinkMenuItems = userMenuLinks
