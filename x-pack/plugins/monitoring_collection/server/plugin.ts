@@ -138,18 +138,25 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
 
     return {
       reportCounter: (name: string, dimensions: Record<string, string>, amount: number = 1) => {
-        // @ts-ignore-line
-        const counter = apm.registerMetricCounter(name, {
-          ...dimensions,
-          ...kibanaDimensions,
-        });
-        if (counter) {
-          counter.inc(amount);
+        try {
+          // @ts-ignore-line
+          const counter = apm.registerMetricCounter(name, {
+            ...dimensions,
+            ...kibanaDimensions,
+          });
+          if (counter) {
+            counter.inc(amount);
+          }
+        } catch (err) {
+          this.logger.warn(`Unable to report counter for ${name} due to ${err.message}`);
         }
       },
       reportGauge: (name: string, dimensions: Record<string, string>, value: number) => {
-        // console.log(`reportGauge()`, { name, dimensions, value })
-        apm.registerMetric(name, { ...dimensions, ...kibanaDimensions }, () => value);
+        try {
+          apm.registerMetric(name, { ...dimensions, ...kibanaDimensions }, () => value);
+        } catch (err) {
+          this.logger.warn(`Unable to report gauge for ${name} due to ${err.message}`);
+        }
       },
       registerCustomElasticsearchClient: (customClient: ICustomClusterClient) => {
         this.client = customClient;
