@@ -18,7 +18,7 @@ export const ACTIONS_THROTTLE_INPUT =
 
 export const EMAIL_ACTION_BTN = '[data-test-subj=".email-ActionTypeSelectOption"]';
 
-export const CREATE_ACTION_CONNECTOR_BTN = '[data-test-subj="addNewActionConnectorButton-.email"]';
+export const CREATE_ACTION_CONNECTOR_BTN = '[data-test-subj="createActionConnectorButton-0"]';
 
 export const SAVE_ACTION_CONNECTOR_BTN = '[data-test-subj="saveActionButtonModal"]';
 
