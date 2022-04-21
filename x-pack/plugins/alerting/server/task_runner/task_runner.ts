@@ -764,8 +764,8 @@ export class TaskRunner<
       IExecutionStatusAndMetrics
     >(
       stateWithMetrics,
-      (ruleRunStateWithMetrics) => executionStatusFromState(ruleRunStateWithMetrics),
-      (err: ElasticsearchError) => executionStatusFromError(err)
+      (ruleRunStateWithMetrics) => executionStatusFromState(ruleRunStateWithMetrics, runDate),
+      (err: ElasticsearchError) => executionStatusFromError(err, runDate)
     );
     // set the executionStatus date to same as event, if it's set
     if (event.event?.start) {

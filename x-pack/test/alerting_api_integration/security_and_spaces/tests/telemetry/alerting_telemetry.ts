@@ -382,8 +382,8 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
 
       // percentile calculations for number of scheduled actions
       expect(telemetry.percentile_num_generated_actions_per_day.p50 >= 0).to.be(true);
-      expect(telemetry.percentile_num_generated_actions_per_day.p90 > 0).to.be(true);
-      expect(telemetry.percentile_num_generated_actions_per_day.p99 > 0).to.be(true);
+      expect(telemetry.percentile_num_generated_actions_per_day.p90).to.be.greaterThan(0);
+      expect(telemetry.percentile_num_generated_actions_per_day.p99).to.be.greaterThan(0);
 
       // percentile calculations by rule type. most of these rule types don't schedule actions so they should all be 0
       expect(
@@ -432,22 +432,19 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
 
       // this rule type does schedule actions so should be least 1 action scheduled
       expect(
-        telemetry.percentile_num_generated_actions_by_type_per_day.p50['test__cumulative-firing'] >=
-          1
-      ).to.be(true);
+        telemetry.percentile_num_generated_actions_by_type_per_day.p50['test__cumulative-firing']
+      ).to.be.greaterThan(0);
       expect(
-        telemetry.percentile_num_generated_actions_by_type_per_day.p90['test__cumulative-firing'] >=
-          1
-      ).to.be(true);
+        telemetry.percentile_num_generated_actions_by_type_per_day.p90['test__cumulative-firing']
+      ).to.be.greaterThan(0);
       expect(
-        telemetry.percentile_num_generated_actions_by_type_per_day.p99['test__cumulative-firing'] >=
-          1
-      ).to.be(true);
+        telemetry.percentile_num_generated_actions_by_type_per_day.p99['test__cumulative-firing']
+      ).to.be.greaterThan(0);
 
       // percentile calculations for number of alerts
       expect(telemetry.percentile_num_alerts_per_day.p50 >= 0).to.be(true);
-      expect(telemetry.percentile_num_alerts_per_day.p90 > 0).to.be(true);
-      expect(telemetry.percentile_num_alerts_per_day.p99 > 0).to.be(true);
+      expect(telemetry.percentile_num_alerts_per_day.p90).to.be.greaterThan(0);
+      expect(telemetry.percentile_num_alerts_per_day.p99).to.be.greaterThan(0);
 
       // percentile calculations by rule type. most of these rule types don't generate alerts so they should all be 0
       expect(
@@ -490,14 +487,14 @@ export default function createAlertingTelemetryTests({ getService }: FtrProvider
 
       // this rule type does generate alerts so should be least 1 alert
       expect(
-        telemetry.percentile_num_alerts_by_type_per_day.p50['test__cumulative-firing'] >= 1
-      ).to.be(true);
+        telemetry.percentile_num_alerts_by_type_per_day.p50['test__cumulative-firing']
+      ).to.be.greaterThan(0);
       expect(
-        telemetry.percentile_num_alerts_by_type_per_day.p90['test__cumulative-firing'] >= 1
-      ).to.be(true);
+        telemetry.percentile_num_alerts_by_type_per_day.p90['test__cumulative-firing']
+      ).to.be.greaterThan(0);
       expect(
-        telemetry.percentile_num_alerts_by_type_per_day.p99['test__cumulative-firing'] >= 1
-      ).to.be(true);
+        telemetry.percentile_num_alerts_by_type_per_day.p99['test__cumulative-firing']
+      ).to.be.greaterThan(0);
     });
   });
 }

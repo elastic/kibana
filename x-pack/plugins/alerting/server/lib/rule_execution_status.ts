@@ -24,7 +24,8 @@ export interface IExecutionStatusAndMetrics {
 }
 
 export function executionStatusFromState(
-  stateWithMetrics: RuleTaskStateAndMetrics
+  stateWithMetrics: RuleTaskStateAndMetrics,
+  lastExecutionDate?: Date
 ): IExecutionStatusAndMetrics {
   const alertIds = Object.keys(stateWithMetrics.alertInstances ?? {});
 
@@ -40,7 +41,7 @@ export function executionStatusFromState(
 
   return {
     status: {
-      lastExecutionDate: new Date(),
+      lastExecutionDate: lastExecutionDate ?? new Date(),
       status,
       ...(hasIncompleteAlertExecution && {
         warning: {
@@ -53,10 +54,13 @@ export function executionStatusFromState(
   };
 }
 
-export function executionStatusFromError(error: Error): IExecutionStatusAndMetrics {
+export function executionStatusFromError(
+  error: Error,
+  lastExecutionDate?: Date
+): IExecutionStatusAndMetrics {
   return {
     status: {
-      lastExecutionDate: new Date(),
+      lastExecutionDate: lastExecutionDate ?? new Date(),
       status: 'error',
       error: {
         reason: getReasonFromError(error),
