@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import {
   AXIS_EXTENT_CONFIG,
   AXIS_TITLES_VISIBILITY_CONFIG,
@@ -118,9 +117,7 @@ export const commonXYArgs: CommonXYFn['args'] = {
   },
   markSizeRatio: {
     types: ['number'],
-    help: i18n.translate('expressionXY.xyVis.markSizeRatio.help', {
-      defaultMessage: 'Specifies the ratio of the dots at the line and area charts',
-    }),
+    help: strings.getMarkSizeRatioHelp(),
     default: 1,
   },
 };

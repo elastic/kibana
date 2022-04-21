@@ -35,6 +35,7 @@ import { ServiceGroup } from '../../../../common/service_groups';
 interface AggregationParams {
   environment: string;
   kuery: string;
+  probability: number;
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
   maxNumServices: number;
@@ -46,6 +47,7 @@ interface AggregationParams {
 export async function getServiceTransactionStats({
   environment,
   kuery,
+  probability,
   setup,
   searchAggregatedTransactions,
   maxNumServices,
@@ -90,28 +92,35 @@ export async function getServiceTransactionStats({
           },
         },
         aggs: {
-          services: {
-            terms: {
-              field: SERVICE_NAME,
-              size: maxNumServices,
+          sample: {
+            random_sampler: {
+              probability,
             },
             aggs: {
-              transactionType: {
+              services: {
                 terms: {
-                  field: TRANSACTION_TYPE,
+                  field: SERVICE_NAME,
+                  size: maxNumServices,
                 },
                 aggs: {
-                  ...metrics,
-                  environments: {
+                  transactionType: {
                     terms: {
-                      field: SERVICE_ENVIRONMENT,
+                      field: TRANSACTION_TYPE,
                     },
-                  },
-                  sample: {
-                    top_metrics: {
-                      metrics: [{ field: AGENT_NAME } as const],
-                      sort: {
-                        '@timestamp': 'desc' as const,
+                    aggs: {
+                      ...metrics,
+                      environments: {
+                        terms: {
+                          field: SERVICE_ENVIRONMENT,
+                        },
+                      },
+                      sample: {
+                        top_metrics: {
+                          metrics: [{ field: AGENT_NAME } as const],
+                          sort: {
+                            '@timestamp': 'desc' as const,
+                          },
+                        },
                       },
                     },
                   },
@@ -125,7 +134,7 @@ export async function getServiceTransactionStats({
   );
 
   return (
-    response.aggregations?.services.buckets.map((bucket) => {
+    response.aggregations?.sample.services.buckets.map((bucket) => {
       const topTransactionTypeBucket =
         bucket.transactionType.buckets.find(
           ({ key }) =>
