@@ -6,19 +6,16 @@ print-ready HTML.
 
 Observations:
 1. We currently do not control the user-agent's header and footer content
-   (including the style of fonts)
+   (including the style of fonts) for client-side printing.
 
-2. I could not see a good way to get page numbering other than using the
-   browser-provided footers :'(
-
-3. Page box model is quite different from what we have in browsers - page
+2. Page box model is quite different from what we have in browsers - page
    margins define where the "no-mans-land" exists for actual content. Moving
    content into this space by, for example setting negative margins resulted
    in slightly unpredictable behaviour because the browser wants to either
    move this content to another page or it may get split across two
-   pages
+   pages.
 
-4. page-break-* is your friend!
+3. page-break-* is your friend!
 */
 
 // Currently we cannot control or style the content the browser places in
