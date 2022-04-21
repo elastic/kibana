@@ -57,6 +57,28 @@ export const barchartConfigs = {
       padding: 16,
       fontSize: 16,
     },
+    left: {
+      style: {
+        tickLine: {
+          size: 0,
+        },
+        tickLabel: {
+          padding: 16,
+          fontSize: 14,
+        },
+      },
+    },
+    bottom: {
+      style: {
+        tickLine: {
+          size: 0,
+        },
+        tickLabel: {
+          padding: 16,
+          fontSize: 10.5,
+        },
+      },
+    },
   },
   settings: {
     rotation: 90 as Rotation,

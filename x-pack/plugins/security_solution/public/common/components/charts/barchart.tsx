@@ -115,30 +115,28 @@ export const BarChartBaseComponent = ({
         id={xAxisId}
         position={Position.Bottom}
         showOverlappingTicks={false}
-        style={{
-          tickLine: {
-            size: 0,
+        style={deepmerge(
+          {
+            tickLine: {
+              size: tickSize,
+            },
           },
-          tickLabel: {
-            padding: 16,
-            fontSize: 10.5,
-          },
-        }}
+          get('configs.axis.bottom.style', chartConfigs)
+        )}
         tickFormat={xTickFormatter}
       />
 
       <Axis
         id={yAxisId}
         position={Position.Left}
-        style={{
-          tickLine: {
-            size: 0,
+        style={deepmerge(
+          {
+            tickLine: {
+              size: tickSize,
+            },
           },
-          tickLabel: {
-            padding: 16,
-            fontSize: 14,
-          },
-        }}
+          get('configs.axis.left.style', chartConfigs)
+        )}
         tickFormat={yTickFormatter}
         title={yAxisTitle}
       />
