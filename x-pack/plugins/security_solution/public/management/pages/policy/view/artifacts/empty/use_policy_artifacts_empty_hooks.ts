@@ -11,7 +11,6 @@ import { useNavigateToAppEventHandler } from '../../../../../../common/hooks/end
 import { useAppUrl } from '../../../../../../common/lib/kibana/hooks';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import { EventFiltersPageLocation } from '../../../../event_filters/types';
-import { TrustedAppsListPageLocation } from '../../../../trusted_apps/state';
 import { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
 
 export const useGetLinkTo = (
@@ -19,10 +18,7 @@ export const useGetLinkTo = (
   policyName: string,
   getPolicyArtifactsPath: (policyId: string) => string,
   getArtifactPath: (
-    location?:
-      | Partial<EventFiltersPageLocation>
-      | Partial<TrustedAppsListPageLocation>
-      | Partial<ArtifactListPageUrlParams>
+    location?: Partial<EventFiltersPageLocation> | Partial<ArtifactListPageUrlParams>
   ) => string,
   location?: Partial<{ show: 'create' }>
 ) => {

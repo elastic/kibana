@@ -36,7 +36,7 @@ import { FleetIntegrationArtifactsCard } from './endpoint_package_custom_extensi
 import { BlocklistsApiClient } from '../../../blocklist/services';
 import { HostIsolationExceptionsApiClient } from '../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { EventFiltersApiClient } from '../../../event_filters/service/event_filters_api_client';
-import { TrustedAppsApiClient } from '../../../trusted_apps/service/trusted_apps_api_client';
+import { TrustedAppsApiClient } from '../../../trusted_apps/service/api_client';
 import { SEARCHABLE_FIELDS as BLOCKLIST_SEARCHABLE_FIELDS } from '../../../blocklist/constants';
 import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../host_isolation_exceptions/constants';
 import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../event_filters/constants';

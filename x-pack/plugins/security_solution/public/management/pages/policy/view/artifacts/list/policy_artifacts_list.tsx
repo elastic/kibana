@@ -29,7 +29,6 @@ import { ExceptionsListApiClient } from '../../../../../services/exceptions_list
 import { useListArtifact } from '../../../../../hooks/artifacts';
 import { POLICY_ARTIFACT_LIST_LABELS } from './translations';
 import { EventFiltersPageLocation } from '../../../../event_filters/types';
-import { TrustedAppsListPageLocation } from '../../../../trusted_apps/state';
 import { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
 
 interface PolicyArtifactsListProps {
@@ -37,10 +36,7 @@ interface PolicyArtifactsListProps {
   apiClient: ExceptionsListApiClient;
   searchableFields: string[];
   getArtifactPath: (
-    location?:
-      | Partial<EventFiltersPageLocation>
-      | Partial<TrustedAppsListPageLocation>
-      | Partial<ArtifactListPageUrlParams>
+    location?: Partial<EventFiltersPageLocation> | Partial<ArtifactListPageUrlParams>
   ) => string;
   getPolicyArtifactsPath: (policyId: string) => string;
   labels: typeof POLICY_ARTIFACT_LIST_LABELS;
