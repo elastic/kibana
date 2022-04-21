@@ -17,11 +17,11 @@ export const LEGEND_CONFIG = 'legendConfig';
 export const XY_VIS_RENDERER = 'xyVis';
 export const GRID_LINES_CONFIG = 'gridlinesConfig';
 export const ANNOTATION_LAYER = 'annotationLayer';
+export const EXTENDED_ANNOTATION_LAYER = 'extendedAnnotationLayer';
 export const TICK_LABELS_CONFIG = 'tickLabelsConfig';
 export const AXIS_EXTENT_CONFIG = 'axisExtentConfig';
 export const REFERENCE_LINE_LAYER = 'referenceLineLayer';
 export const EXTENDED_REFERENCE_LINE_LAYER = 'extendedReferenceLineLayer';
-export const EXTENDED_ANNOTATION_LAYER = 'extendedAnnotationLayer';
 export const LABELS_ORIENTATION_CONFIG = 'labelsOrientationConfig';
 export const AXIS_TITLES_VISIBILITY_CONFIG = 'axisTitlesVisibilityConfig';
 

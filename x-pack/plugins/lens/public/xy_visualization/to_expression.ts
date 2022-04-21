@@ -381,11 +381,7 @@ export const buildExpression = (
               )
             ),
             ...validAnnotationsLayers.map((layer) =>
-              annotationLayerToExpression(
-                layer,
-                eventAnnotationService,
-                datasourceExpressionsByLayers[layer.layerId]
-              )
+              annotationLayerToExpression(layer, eventAnnotationService)
             ),
           ],
         },
@@ -411,6 +407,7 @@ const referenceLineLayerToExpression = (
         type: 'function',
         function: 'extendedReferenceLineLayer',
         arguments: {
+          layerId: [layer.layerId],
           yConfig: layer.yConfig
             ? layer.yConfig.map((yConfig) =>
                 extendedYConfigToExpression(yConfig, defaultReferenceLineColor)
@@ -427,8 +424,7 @@ const referenceLineLayerToExpression = (
 
 const annotationLayerToExpression = (
   layer: XYAnnotationLayerConfig,
-  eventAnnotationService: EventAnnotationServiceType,
-  datasourceExpression: Ast
+  eventAnnotationService: EventAnnotationServiceType
 ): Ast => {
   return {
     type: 'expression',
@@ -438,7 +434,7 @@ const annotationLayerToExpression = (
         function: 'extendedAnnotationLayer',
         arguments: {
           hide: [Boolean(layer.hide)],
-          ...(datasourceExpression ? { table: [buildTableExpression(datasourceExpression)] } : {}),
+          layerId: [layer.layerId],
           annotations: layer.annotations
             ? layer.annotations.map(
                 (ann): Ast =>
@@ -485,6 +481,7 @@ const dataLayerToExpression = (
         type: 'function',
         function: 'extendedDataLayer',
         arguments: {
+          layerId: [layer.layerId],
           hide: [Boolean(layer.hide)],
           xAccessor: layer.xAccessor ? [layer.xAccessor] : [],
           yScaleType: [

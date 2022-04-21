@@ -12,7 +12,6 @@ export * from './state';
 export * from './visualization';
 export * from './fitting_functions';
 export * from './axes_configuration';
-export * from './reference_lines';
 export * from './icon';
 export * from './color_assignment';
 export * from './annotations';

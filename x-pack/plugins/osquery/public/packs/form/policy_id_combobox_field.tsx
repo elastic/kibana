@@ -106,6 +106,7 @@ const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
       value,
       (acc, policyId) => {
         const agentPolicy = agentPoliciesById && agentPoliciesById[policyId];
+
         return acc + (agentPolicy?.agents ?? 0);
       },
       0
