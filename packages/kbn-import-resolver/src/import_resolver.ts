@@ -38,8 +38,8 @@ export class ImportResolver {
   }
 
   private safeStat = memoize(safeStat);
-
   private baseResolveOpts: Resolve.SyncOpts;
+  private fallbackToTypes: boolean;
 
   constructor(
     /**
@@ -62,15 +62,15 @@ export class ImportResolver {
      */
     options?: ImportResolverOptions
   ) {
+    this.fallbackToTypes = options?.disableTypesFallback !== true;
     this.baseResolveOpts = {
       extensions: ['.js', '.json', '.ts', '.tsx', '.d.ts'],
       preserveSymlinks: true,
       isFile: (path) => !!this.safeStat(path)?.isFile(),
       isDirectory: (path) => !!this.safeStat(path)?.isDirectory(),
       readFileSync: memoize(readFileSync),
-      packageFilter: options?.disableTypesFallback
-        ? undefined
-        : (pkg) => {
+      packageFilter: this.fallbackToTypes
+        ? (pkg) => {
             if (pkg.main && pkg.types) {
               // for the purpose of resolving files, a "types" file is adequate
               return {
@@ -80,7 +80,8 @@ export class ImportResolver {
             }
 
             return pkg;
-          },
+          }
+        : undefined,
     };
   }
 
@@ -121,7 +122,7 @@ export class ImportResolver {
     return this.synthPkgMap.has(pkgId);
   }
 
-  private shouldIgnore(req: string): boolean {
+  private isIgnorable(req: string): boolean {
     // this library is only installed on CI and never resolvable
     if (req === 'kibana-buildkite-library') {
       return true;
@@ -285,10 +286,10 @@ export class ImportResolver {
 
     req = this.adaptReq(req, dirname) ?? req;
 
-    if (this.shouldIgnore(req)) {
-      return { type: 'ignore' };
-    }
-
-    return this.tryNodeResolve(req, dirname) ?? this.tryTypesResolve(req, dirname);
+    return (
+      this.tryNodeResolve(req, dirname) ??
+      (this.fallbackToTypes ? this.tryTypesResolve(req, dirname) : null) ??
+      (this.isIgnorable(req) ? { type: 'ignore' } : null)
+    );
   }
 }
