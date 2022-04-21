@@ -79,6 +79,7 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                           const { id: queryId, ...query } = stream.compiled_stream;
                           queries[queryId] = query;
                         }
+
                         return queries;
                       },
                       {} as Record<string, unknown>
