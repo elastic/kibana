@@ -40,7 +40,8 @@ describe('From alert', () => {
     deleteAlertsAndRules();
     createCustomRuleEnabled(
       { ...getNewRule(), customQuery: 'agent.name:*', index: ['exceptions*'] },
-      'rule_testing'
+      'rule_testing',
+      '1s'
     );
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
