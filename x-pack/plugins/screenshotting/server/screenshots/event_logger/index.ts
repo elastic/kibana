@@ -318,6 +318,6 @@ export class EventLogger {
       },
     };
 
-    this.logger.debug(message, errorData);
+    this.logger.get('events').debug(message, errorData);
   }
 }
