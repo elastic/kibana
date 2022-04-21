@@ -18,10 +18,10 @@ import {
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { DELETED_SECURITY_SOLUTION_DATA_VIEW } from '../../../common/constants';
 import {
-  IndexFieldsStrategyResponse,
+  BeatFields,
   IndexField,
   IndexFieldsStrategyRequest,
-  BeatFields,
+  IndexFieldsStrategyResponse,
 } from '../../../common/search_strategy';
 import { StartPlugins } from '../../types';
 
@@ -215,6 +215,7 @@ const missingFields: FieldSpec[] = [
  * in size at a time calling this function repeatedly. This function should be as optimized as possible
  * and should avoid any and all creation of new arrays, iterating over the arrays or performing
  * any n^2 operations.
+ * @param beatFields: BeatFields,
  * @param indexesAlias The index alias
  * @param index The index its self
  * @param indexesAliasIdx The index within the alias
@@ -223,9 +224,10 @@ export const createFieldItem = (
   beatFields: BeatFields,
   indexesAlias: string[],
   index: FieldSpec,
-  indexesAliasIdx: number
+  indexesAliasIdx: number | null
 ): IndexField => {
-  const alias = indexesAlias[indexesAliasIdx];
+  const alias = indexesAliasIdx != null ? [indexesAlias[indexesAliasIdx]] : indexesAlias;
+
   const splitIndexName = index.name.split('.');
   const indexName =
     splitIndexName[splitIndexName.length - 1] === 'text'
@@ -241,7 +243,7 @@ export const createFieldItem = (
     // the format type on FieldSpec is SerializedFieldFormat
     // and is a string on beatIndex
     format: index.format?.id ?? beatIndex.format,
-    indexes: [alias],
+    indexes: alias,
   };
 };
 
@@ -267,58 +269,30 @@ export const formatFirstFields = async (
     setTimeout(() => {
       resolve(
         responsesFieldSpec.reduce(
-          (accumulator: IndexField[], fieldSpec: FieldSpec[], indexesAliasIdx: number) => {
-            missingFields.forEach((index) => {
+          (accumulator: IndexField[], fieldSpec: FieldSpec[], indexesAliasId: number) => {
+            const indexFieldNameHash: Record<string, number> = {};
+            const indexesAliasIdx = responsesFieldSpec.length > 1 ? indexesAliasId : null;
+            [...missingFields, ...fieldSpec].forEach((index) => {
               const item = createFieldItem(beatFields, indexesAlias, index, indexesAliasIdx);
+              const alreadyExistingIndexField = indexFieldNameHash[item.name];
+              if (alreadyExistingIndexField != null) {
+                const existingIndexField = accumulator[alreadyExistingIndexField];
+                if (isEmpty(accumulator[alreadyExistingIndexField].description)) {
+                  accumulator[alreadyExistingIndexField].description = item.description;
+                }
+                accumulator[alreadyExistingIndexField].indexes = Array.from(
+                  new Set([...existingIndexField.indexes, ...item.indexes])
+                );
+                return;
+              }
               accumulator.push(item);
-            });
-            fieldSpec.forEach((index) => {
-              const item = createFieldItem(beatFields, indexesAlias, index, indexesAliasIdx);
-              accumulator.push(item);
+              indexFieldNameHash[item.name] = accumulator.length - 1;
             });
             return accumulator;
           },
           []
         )
       );
-    });
-  });
-};
-
-/**
- * This is a mutatious HOT CODE PATH function that will have array sizes up to 4.7 megs
- * in size at a time when being called. This function should be as optimized as possible
- * and should avoid any and all creation of new arrays, iterating over the arrays or performing
- * any n^2 operations. The `.push`, and `forEach` operations are expected within this function
- * to speed up performance. The "indexFieldNameHash" side effect hash avoids additional expensive n^2
- * look ups.
- *
- * This intentionally waits for the next tick on the event loop to process as the large 4.7 megs
- * has already consumed a lot of the event loop processing up to this function and we want to give
- * I/O opportunity to occur by scheduling this on the next loop.
- * @param fields The index fields to create the secondary fields for
- */
-export const formatSecondFields = async (fields: IndexField[]): Promise<IndexField[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const indexFieldNameHash: Record<string, number> = {};
-      const reduced = fields.reduce((accumulator: IndexField[], indexfield: IndexField) => {
-        const alreadyExistingIndexField = indexFieldNameHash[indexfield.name];
-        if (alreadyExistingIndexField != null) {
-          const existingIndexField = accumulator[alreadyExistingIndexField];
-          if (isEmpty(accumulator[alreadyExistingIndexField].description)) {
-            accumulator[alreadyExistingIndexField].description = indexfield.description;
-          }
-          accumulator[alreadyExistingIndexField].indexes = Array.from(
-            new Set([...existingIndexField.indexes, ...indexfield.indexes])
-          );
-          return accumulator;
-        }
-        accumulator.push(indexfield);
-        indexFieldNameHash[indexfield.name] = accumulator.length - 1;
-        return accumulator;
-      }, []);
-      resolve(reduced);
     });
   });
 };
@@ -337,7 +311,5 @@ export const formatIndexFields = async (
   responsesFieldSpec: FieldSpec[][],
   indexesAlias: string[]
 ): Promise<IndexField[]> => {
-  const fields = await formatFirstFields(beatFields, responsesFieldSpec, indexesAlias);
-  const secondFields = await formatSecondFields(fields);
-  return secondFields;
+  return formatFirstFields(beatFields, responsesFieldSpec, indexesAlias);
 };
