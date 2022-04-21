@@ -30,3 +30,21 @@ export const ALLOWED_HOSTS_ERROR = (message: string) =>
       message,
     },
   });
+
+export const VALIDATE_OAUTH_MISSING_FIELD_ERROR = (field: string, isOAuth: boolean) =>
+  i18n.translate('xpack.actions.builtin.configuration.apiValidateConnectorError', {
+    defaultMessage: '{field} must be provided when isOAuth = {isOAuth}',
+    values: {
+      field,
+      isOAuth: isOAuth ? 'true' : 'false',
+    },
+  });
+
+export const VALIDATE_OAUTH_POPULATED_FIELD_ERROR = (field: string, isOAuth: boolean) =>
+  i18n.translate('xpack.actions.builtin.configuration.apiAllowedHostsError', {
+    defaultMessage: '{field} should not be provided with isOAuth = {isOAuth}',
+    values: {
+      field,
+      isOAuth: isOAuth ? 'true' : 'false',
+    },
+  });

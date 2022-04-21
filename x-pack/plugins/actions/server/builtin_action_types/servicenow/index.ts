@@ -97,6 +97,7 @@ export function getServiceNowITSMActionType(
       secrets: schema.object(ExternalIncidentServiceSecretConfiguration, {
         validate: curry(validate.secrets)(configurationUtilities),
       }),
+      connector: validate.connector,
       params: ExecutorParamsSchemaITSM,
     },
     executor: curry(executor)({
@@ -124,6 +125,7 @@ export function getServiceNowSIRActionType(
       secrets: schema.object(ExternalIncidentServiceSecretConfiguration, {
         validate: curry(validate.secrets)(configurationUtilities),
       }),
+      connector: validate.connector,
       params: ExecutorParamsSchemaSIR,
     },
     executor: curry(executor)({
@@ -151,6 +153,7 @@ export function getServiceNowITOMActionType(
       secrets: schema.object(ExternalIncidentServiceSecretConfiguration, {
         validate: curry(validate.secrets)(configurationUtilities),
       }),
+      connector: validate.connector,
       params: ExecutorParamsSchemaITOM,
     },
     executor: curry(executorITOM)({

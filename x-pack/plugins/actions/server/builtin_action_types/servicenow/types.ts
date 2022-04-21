@@ -75,6 +75,7 @@ export interface ExternalServiceCredentials {
 export interface ExternalServiceValidation {
   config: (configurationUtilities: ActionsConfigurationUtilities, configObject: any) => void;
   secrets: (configurationUtilities: ActionsConfigurationUtilities, secrets: any) => void;
+  connector: (config: any, secrets: any) => string | null;
 }
 
 export interface ExternalServiceIncidentResponse {
