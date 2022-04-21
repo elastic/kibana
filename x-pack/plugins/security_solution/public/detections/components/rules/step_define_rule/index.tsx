@@ -252,7 +252,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     // we reset the custom query to the default used for "threat_match" rules ('*:*').
     if (isThreatMatchRule(ruleType) && !isThreatMatchRule(previousRuleType)) {
       if (isEqual(queryBar.value, defaultCustomQuery.forNormalRules)) {
-        console.log(`StepDefineRuleComponent :: switchedToThreatMatchType`);
         queryBar.reset({
           defaultValue: defaultCustomQuery.forThreatMatchRules,
         });
@@ -265,7 +264,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     // we reset the custom query to another default value ('').
     if (!isThreatMatchRule(ruleType) && isThreatMatchRule(previousRuleType)) {
       if (isEqual(queryBar.value, defaultCustomQuery.forThreatMatchRules)) {
-        console.log(`StepDefineRuleComponent :: switchedFromThreatMatchType`);
         queryBar.reset({
           defaultValue: defaultCustomQuery.forNormalRules,
         });
