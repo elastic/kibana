@@ -71,6 +71,7 @@ export const useRuleExecutionEvents = ({
       });
     },
     {
+      keepPreviousData: true,
       onError: (e) => {
         addError(e, { title: i18n.RULE_EXECUTION_EVENTS_FETCH_FAILURE });
       },

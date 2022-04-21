@@ -209,7 +209,7 @@ describe('getExecutionEventAggregation', () => {
                 top_hits: {
                   size: 1,
                   _source: {
-                    includes: ['event.outcome', 'message'],
+                    includes: ['error.message', 'event.outcome', 'message'],
                   },
                 },
               },
