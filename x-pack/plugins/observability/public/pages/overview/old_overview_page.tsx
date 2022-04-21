@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { observabilityFeatureId } from '../../../common';
 import { useTrackPageview, useUiTracker } from '../..';
 import { EmptySections } from '../../components/app/empty_sections';
@@ -198,6 +199,7 @@ export function OverviewPage({ routeParams }: Props) {
                     rangeTo={relativeEnd}
                     indexNames={indexNames}
                     stateStorageKey={ALERT_TABLE_STATE_STORAGE_KEY}
+                    storage={new Storage(window.localStorage)}
                   />
                 </CasesContext>
               </SectionContainer>

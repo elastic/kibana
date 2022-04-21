@@ -18,6 +18,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AlertStatusFilterButton } from '../../../../../common/typings';
 import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { observabilityFeatureId } from '../../../../../common';
@@ -333,6 +334,7 @@ function AlertsPage() {
               kuery={kuery}
               setRefetch={setRefetch}
               stateStorageKey={ALERT_TABLE_STATE_STORAGE_KEY}
+              storage={new Storage(window.localStorage)}
             />
           </CasesContext>
         </EuiFlexItem>
