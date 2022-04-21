@@ -27,7 +27,7 @@ import {
   toSentenceCase,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { compact, debounce, isEqual, isFunction } from 'lodash';
+import { compact, debounce, isEmpty, isEqual, isFunction } from 'lodash';
 import { Toast } from '@kbn/core/public';
 import {
   IDataPluginServices,
@@ -714,6 +714,9 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
     const inputClassName = classNames('kbnQueryBar__textarea', {
       'kbnQueryBar__textarea--withIcon': this.props.iconType,
       'kbnQueryBar__textarea--isClearable': this.props.isClearable,
+      'kbnQueryBar__textarea--withPrepend': this.props.prepend,
+      'kbnQueryBar__textarea--isSuggestionsVisible':
+        isSuggestionsVisible && !isEmpty(this.state.suggestions),
     });
     const inputWrapClassName = classNames('kbnQueryBar__textareaWrap');
 

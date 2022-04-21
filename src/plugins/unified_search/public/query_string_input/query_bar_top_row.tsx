@@ -297,6 +297,10 @@ export const QueryBarTopRow = React.memo(
       return Boolean(showDatePicker || showAutoRefreshOnly);
     }
 
+    function renderFilterMenuOnly(): boolean {
+      return !Boolean(props.showAddFilter) && Boolean(props.prepend);
+    }
+
     function shouldRenderUpdatebutton(): boolean {
       return (
         Boolean(showSubmitButton) &&
@@ -413,6 +417,7 @@ export const QueryBarTopRow = React.memo(
             <EuiFlexGroup
               className={classNames('kbnQueryBar__buttonGroup', {
                 'kbnQueryBar__buttonGroup--small': shouldShowDatePickerAsBadge(),
+                'kbnQueryBar__buttonGroup--attached': renderFilterMenuOnly(),
               })}
               gutterSize="none"
               responsive={false}
@@ -428,7 +433,7 @@ export const QueryBarTopRow = React.memo(
     function renderQueryInput() {
       return (
         <EuiFlexGroup gutterSize="s" responsive={false}>
-          {renderFilterButtonGroup()}
+          {!renderFilterMenuOnly() && renderFilterButtonGroup()}
           {shouldRenderQueryInput() && (
             <EuiFlexItem data-test-subj="unifiedQueryInput">
               <QueryStringInput
@@ -447,6 +452,7 @@ export const QueryBarTopRow = React.memo(
                 nonKqlMode={props.nonKqlMode}
                 timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
                 disableLanguageSwitcher={true}
+                prepend={renderFilterMenuOnly() && renderFilterButtonGroup()}
               />
             </EuiFlexItem>
           )}
