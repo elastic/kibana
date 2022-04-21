@@ -83,6 +83,16 @@ export class HomePageObject extends FtrService {
     await this.find.clickByLinkText('Dashboard');
   }
 
+  async launchSampleCanvas(id: string) {
+    await this.launchSampleDataSet(id);
+    await this.find.clickByLinkText('Canvas');
+  }
+
+  async launchSampleMap(id: string) {
+    await this.launchSampleDataSet(id);
+    await this.find.clickByLinkText('Map');
+  }
+
   async launchSampleDataSet(id: string) {
     await this.addSampleDataSet(id);
     await this.common.closeToastIfExists();

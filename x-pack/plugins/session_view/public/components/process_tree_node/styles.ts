@@ -23,6 +23,7 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
     const { colors, border, size, font } = euiTheme;
 
     const TREE_INDENT = `calc(${size.l} + ${size.xxs})`;
+    const PROCESS_TREE_LEFT_PADDING = size.s;
 
     const darkText: CSSObject = {
       color: colors.text,
@@ -52,12 +53,13 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
         borderColor = colors.danger;
       }
 
-      if (hasInvestigatedAlert) {
-        bgColor = transparentize(colors.danger, 0.04);
-      }
-
       if (isSelected) {
         searchResColor = colors.warning;
+        bgColor = `${transparentize(colors.primary, 0.1)}!important`;
+      }
+
+      if (hasInvestigatedAlert) {
+        bgColor = `${transparentize(colors.danger, 0.04)}!important`;
       }
 
       return { bgColor, borderColor, hoverColor, searchResColor };
@@ -79,10 +81,10 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
         height: '100%',
         pointerEvents: 'none',
         content: `''`,
-        marginLeft: `calc(-${depth} * ${TREE_INDENT})`,
+        marginLeft: `calc(-${depth} * ${TREE_INDENT} - ${PROCESS_TREE_LEFT_PADDING})`,
         borderLeft: `${size.xs} solid ${borderColor}`,
         backgroundColor: bgColor,
-        width: `calc(100% + ${depth} * ${TREE_INDENT})`,
+        width: `calc(100% + ${depth} * ${TREE_INDENT} + ${PROCESS_TREE_LEFT_PADDING})`,
         transform: `translateY(-${size.xs})`,
       },
     };
@@ -99,8 +101,8 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
       verticalAlign: 'middle',
       color: colors.mediumShade,
       wordBreak: 'break-all',
-      minHeight: size.l,
-      lineHeight: size.l,
+      minHeight: `calc(${size.l} - ${size.xxs})`,
+      lineHeight: `calc(${size.l} - ${size.xxs})`,
     };
 
     const workingDir: CSSObject = {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import type { TMSService } from '@elastic/ems-client';
-import type { MapConfig, TileMapConfig } from '../../../../../../maps_ems/public';
+import type { MapConfig, TileMapConfig } from '@kbn/maps-ems-plugin/public';
 
 export const ORIGIN_LEGACY = {
   EMS: 'elastic_maps_service',

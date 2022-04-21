@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import {
   ImportExceptionsListSchema,
   ImportExceptionListItemSchema,
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
+import { RulesClient } from '@kbn/alerting-plugin/server';
+import { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { legacyMigrate } from '../../../rules/utils';
 import { PartialFilter } from '../../../types';
 import { createBulkErrorObject, ImportRuleResponse } from '../../utils';
@@ -22,8 +24,6 @@ import { patchRules } from '../../../rules/patch_rules';
 import { ImportRulesSchemaDecoded } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { MlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
-import { RulesClient } from '../../../../../../../../plugins/alerting/server';
-import { ExceptionListClient } from '../../../../../../../../plugins/lists/server';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
 
 export type PromiseFromStreams = ImportRulesSchemaDecoded | Error;

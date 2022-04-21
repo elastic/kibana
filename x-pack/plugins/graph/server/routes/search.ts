@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { UI_SETTINGS } from '@kbn/data-plugin/server';
 import { LicenseState, verifyApiAccess } from '../lib/license_state';
-import { UI_SETTINGS } from '../../../../../src/plugins/data/server';
 
 export function registerSearchRoute({
   router,

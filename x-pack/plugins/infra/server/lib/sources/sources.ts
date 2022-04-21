@@ -10,7 +10,7 @@ import { constant, identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { failure } from 'io-ts/lib/PathReporter';
 import { inRange } from 'lodash';
-import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   InfraSavedSourceConfiguration,
   InfraSource,
@@ -20,7 +20,7 @@ import {
   sourceConfigurationConfigFilePropertiesRT,
   SourceConfigurationSavedObjectRuntimeType,
 } from '../../../common/source_configuration/source_configuration';
-import { InfraConfig } from '../../../server';
+import { InfraConfig } from '../..';
 import { defaultSourceConfiguration } from './defaults';
 import { AnomalyThresholdRangeError, NotFoundError } from './errors';
 import {
@@ -236,7 +236,7 @@ export class InfraSources {
   }
 }
 
-const mergeSourceConfiguration = (
+export const mergeSourceConfiguration = (
   first: InfraSourceConfiguration,
   ...others: InfraStaticSourceConfiguration[]
 ) =>

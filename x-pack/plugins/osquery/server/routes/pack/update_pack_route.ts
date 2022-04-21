@@ -13,8 +13,8 @@ import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PackagePolicy,
-} from '../../../../fleet/common';
-import { IRouter } from '../../../../../../src/core/server';
+} from '@kbn/fleet-plugin/common';
+import { IRouter } from '@kbn/core/server';
 
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
@@ -192,6 +192,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     if (!has(draft, 'inputs[0].streams')) {
                       set(draft, 'inputs[0].streams', []);
                     }
+
                     set(
                       draft,
                       `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
@@ -199,6 +200,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                         queries: updatedPackSO.attributes.queries,
                       }
                     );
+
                     return draft;
                   })
                 );
@@ -221,6 +223,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     draft,
                     `inputs[0].config.osquery.value.packs.${currentPackSO.attributes.name}`
                   );
+
                   return draft;
                 })
               );
@@ -248,6 +251,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     draft,
                     `inputs[0].config.osquery.value.packs.${currentPackSO.attributes.name}`
                   );
+
                   return draft;
                 })
               );
@@ -280,6 +284,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       queries: updatedPackSO.attributes.queries,
                     }
                   );
+
                   return draft;
                 })
               );
@@ -301,6 +306,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                   if (!(draft.inputs.length && draft.inputs[0].streams.length)) {
                     set(draft, 'inputs[0].streams', []);
                   }
+
                   set(
                     draft,
                     `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
@@ -308,6 +314,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       queries: updatedPackSO.attributes.queries,
                     }
                   );
+
                   return draft;
                 })
               );

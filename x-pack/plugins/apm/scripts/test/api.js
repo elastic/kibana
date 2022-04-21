@@ -6,7 +6,7 @@
  */
 
 /* eslint-disable no-console */
-
+const { times } = require('lodash');
 const yargs = require('yargs');
 const path = require('path');
 const childProcess = require('child_process');
@@ -44,6 +44,10 @@ const { argv } = yargs(process.argv.slice(2))
     type: 'boolean',
     description: 'Add --inspect-brk flag to the ftr for debugging',
   })
+  .option('times', {
+    type: 'number',
+    description: 'Repeat the test n number of times',
+  })
   .check((argv) => {
     const { inspect, runner } = argv;
     if (inspect && !runner) {
@@ -57,6 +61,7 @@ const { argv } = yargs(process.argv.slice(2))
 const { trial, server, runner, grep, inspect } = argv;
 
 const license = trial ? 'trial' : 'basic';
+
 console.log(`License: ${license}`);
 
 let ftrScript = 'functional_tests';
@@ -72,4 +77,27 @@ const cmd = `node ${inspectArg} ../../../../scripts/${ftrScript} ${grepArg} --co
 
 console.log(`Running ${cmd}`);
 
-childProcess.execSync(cmd, { cwd: path.join(__dirname), stdio: 'inherit' });
+function runTests() {
+  childProcess.execSync(cmd, { cwd: path.join(__dirname), stdio: 'inherit' });
+}
+
+if (argv.times) {
+  const runCounter = { succeeded: 0, failed: 0, remaining: argv.times };
+  let exitStatus = 0;
+  times(argv.times, () => {
+    try {
+      runTests();
+      runCounter.succeeded++;
+    } catch (e) {
+      exitStatus = 1;
+      runCounter.failed++;
+    }
+    runCounter.remaining--;
+    if (argv.times > 1) {
+      console.log(runCounter);
+    }
+  });
+  process.exit(exitStatus);
+} else {
+  runTests();
+}

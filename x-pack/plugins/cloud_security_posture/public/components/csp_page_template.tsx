@@ -9,15 +9,15 @@ import type { UseQueryResult } from 'react-query';
 import { NavLink } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiErrorBoundary, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  KibanaPageTemplate,
-  type KibanaPageTemplateProps,
-} from '../../../../../src/plugins/kibana_react/public';
+import { KibanaPageTemplate, type KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
 import { allNavigationItems } from '../common/navigation/constants';
 import type { CspNavigationItem } from '../common/navigation/types';
-import { CLOUD_SECURITY_POSTURE } from '../common/translations';
 import { CspLoadingState } from './csp_loading_state';
-import { DEFAULT_NO_DATA_TEXT, LOADING, PACKAGE_NOT_INSTALLED_TEXT } from './translations';
+import {
+  CLOUD_SECURITY_POSTURE,
+  DEFAULT_NO_DATA_TEXT,
+  PACKAGE_NOT_INSTALLED_TEXT,
+} from './translations';
 import { useCisKubernetesIntegration } from '../common/api/use_cis_kubernetes_integration';
 import { useCISIntegrationLink } from '../common/navigation/use_navigate_to_cis_integration';
 
@@ -77,6 +77,9 @@ export const DEFAULT_NO_DATA_CONFIG: KibanaPageTemplateProps['noDataConfig'] = {
   actions: {},
 };
 
+export const LOADING_STATE_TEST_SUBJECT = 'csp_page_template_loading';
+export const ERROR_STATE_TEST_SUBJECT = 'csp_page_template_error';
+
 const getPackageNotInstalledNoDataConfig = (
   cisIntegrationLink: string
 ): KibanaPageTemplateProps['noDataConfig'] => ({
@@ -94,12 +97,20 @@ const getPackageNotInstalledNoDataConfig = (
   },
 });
 
-const DefaultLoading = () => <CspLoadingState>{LOADING}</CspLoadingState>;
+const DefaultLoading = () => (
+  <CspLoadingState data-test-subj={LOADING_STATE_TEST_SUBJECT}>
+    <FormattedMessage
+      id="xpack.csp.cspPageTemplate.loadingDescription"
+      defaultMessage="Loading..."
+    />
+  </CspLoadingState>
+);
 
 const DefaultError = (error: unknown) => (
   <EuiEmptyPrompt
     color="danger"
     iconType="alert"
+    data-test-subj={ERROR_STATE_TEST_SUBJECT}
     title={
       <>
         <EuiTitle>

@@ -8,9 +8,9 @@
 
 import deepEqual from 'fast-deep-equal';
 
-import { TIME_SLIDER_CONTROL } from '../../';
+import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
+import { TIME_SLIDER_CONTROL } from '../..';
 import { ControlEmbeddable, IEditableControlFactory } from '../../types';
-import { EmbeddableFactoryDefinition, IContainer } from '../../../../embeddable/public';
 import {
   createOptionsListExtract,
   createOptionsListInject,
@@ -53,6 +53,7 @@ export class TimesliderEmbeddableFactory
   public isEditable = () => Promise.resolve(false);
 
   public getDisplayName = () => TimeSliderStrings.getDisplayName();
+  public getIconType = () => 'clock';
   public getDescription = () => TimeSliderStrings.getDescription();
 
   public inject = createOptionsListInject();

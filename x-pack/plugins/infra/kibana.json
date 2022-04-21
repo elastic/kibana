@@ -10,6 +10,7 @@
     "embeddable",
     "data",
     "dataEnhanced",
+    "dataViews",
     "visTypeTimeseries",
     "alerting",
     "triggersActionsUi",
@@ -21,11 +22,11 @@
   "ui": true,
   "configPath": ["xpack", "infra"],
   "requiredBundles": [
+    "unifiedSearch",
     "observability",
     "licenseManagement",
     "kibanaUtils",
     "kibanaReact",
-    "home",
     "ml",
     "embeddable"
   ],

@@ -25,7 +25,6 @@ import styled from 'styled-components';
 
 import { Direction } from '../../../../common/search_strategy';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
-import { AuthTableColumns } from '../../../hosts/components/authentications_table';
 import { HostsTableColumns } from '../../../hosts/components/hosts_table';
 import { NetworkDnsColumns } from '../../../network/components/network_dns_table/columns';
 import { NetworkHttpColumns } from '../../../network/components/network_http_table/columns';
@@ -51,6 +50,7 @@ import { Panel } from '../panel';
 import { InspectButtonContainer } from '../inspect';
 import { useQueryToggle } from '../../containers/query_toggle';
 import { UsersTableColumns } from '../../../users/components/all_users';
+import { AuthTableColumns } from '../authentication/types';
 
 const DEFAULT_DATA_TEST_SUBJ = 'paginated-table';
 

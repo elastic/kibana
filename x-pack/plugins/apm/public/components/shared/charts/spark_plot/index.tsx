@@ -21,7 +21,7 @@ import {
   EuiLoadingChart,
 } from '@elastic/eui';
 import React from 'react';
-import { useChartTheme } from '../../../../../../observability/public';
+import { useChartTheme } from '@kbn/observability-plugin/public';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { useTheme } from '../../../../hooks/use_theme';
 import { unit } from '../../../../utils/style';

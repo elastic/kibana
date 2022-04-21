@@ -16,12 +16,14 @@ export interface WithHeaderLayoutProps extends HeaderProps {
   restrictHeaderWidth?: number;
   'data-test-subj'?: string;
   children?: React.ReactNode;
+  headerChildren?: React.ReactNode;
 }
 
 export const WithHeaderLayout: React.FC<WithHeaderLayoutProps> = ({
   restrictWidth,
   restrictHeaderWidth,
   children,
+  headerChildren,
   'data-test-subj': dataTestSubj,
   ...rest
 }) => (
@@ -30,7 +32,9 @@ export const WithHeaderLayout: React.FC<WithHeaderLayoutProps> = ({
       maxWidth={restrictHeaderWidth}
       data-test-subj={dataTestSubj ? `${dataTestSubj}_header` : undefined}
       {...rest}
-    />
+    >
+      {headerChildren}
+    </Header>
     <Page
       restrictWidth={restrictWidth || 1200}
       data-test-subj={dataTestSubj ? `${dataTestSubj}_page` : undefined}

@@ -6,19 +6,21 @@
  */
 
 import Boom from '@hapi/boom';
-import { createValidationFunction } from '../../../../common/runtime_types';
-import { InfraBackendLibs } from '../../../lib/infra_types';
-import { getLogEntryExamples } from '../../../lib/log_analysis';
-import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 import {
   getLogEntryExamplesRequestPayloadRT,
   getLogEntryExamplesSuccessReponsePayloadRT,
   LOG_ANALYSIS_GET_LOG_ENTRY_RATE_EXAMPLES_PATH,
 } from '../../../../common/http_api/log_analysis';
+import { createValidationFunction } from '../../../../common/runtime_types';
+import { InfraBackendLibs } from '../../../lib/infra_types';
+import { getLogEntryExamples } from '../../../lib/log_analysis';
 import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
-import { resolveLogSourceConfiguration } from '../../../../common/log_sources';
+import { assertHasInfraMlPlugins } from '../../../utils/request_context';
 
-export const initGetLogEntryExamplesRoute = ({ framework, sources }: InfraBackendLibs) => {
+export const initGetLogEntryExamplesRoute = ({
+  framework,
+  getStartServices,
+}: Pick<InfraBackendLibs, 'framework' | 'getStartServices'>) => {
   framework.registerRoute(
     {
       method: 'post',
@@ -38,14 +40,8 @@ export const initGetLogEntryExamplesRoute = ({ framework, sources }: InfraBacken
         },
       } = request.body;
 
-      const sourceConfiguration = await sources.getSourceConfiguration(
-        requestContext.core.savedObjects.client,
-        sourceId
-      );
-      const resolvedSourceConfiguration = await resolveLogSourceConfiguration(
-        sourceConfiguration.configuration,
-        await framework.getIndexPatternsServiceWithRequestContext(requestContext)
-      );
+      const [, , { logViews }] = await getStartServices();
+      const resolvedLogView = await logViews.getScopedClient(request).getResolvedLogView(sourceId);
 
       try {
         assertHasInfraMlPlugins(requestContext);
@@ -57,7 +53,7 @@ export const initGetLogEntryExamplesRoute = ({ framework, sources }: InfraBacken
           endTime,
           dataset,
           exampleCount,
-          resolvedSourceConfiguration,
+          resolvedLogView,
           framework.callWithRequest,
           categoryId
         );

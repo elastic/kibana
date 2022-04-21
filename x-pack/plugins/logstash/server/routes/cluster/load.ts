@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
+import { wrapRouteWithLicenseCheck } from '@kbn/licensing-plugin/server';
 import { Cluster } from '../../models/cluster';
 import { checkLicense } from '../../lib/check_license';
 import type { LogstashPluginRouter } from '../../types';
