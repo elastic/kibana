@@ -230,6 +230,9 @@ Object {
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
+  "cluster_name": "cluster-name",
+  "cluster_uuid": "cluster-uuid",
+  "cluster_version": "8.0.0",
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
@@ -285,6 +288,9 @@ Object {
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
+  "cluster_name": "cluster-name",
+  "cluster_uuid": "cluster-uuid",
+  "cluster_version": "8.0.0",
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
@@ -344,6 +350,9 @@ Object {
   "basePath": "",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
+  "cluster_name": "cluster-name",
+  "cluster_uuid": "cluster-uuid",
+  "cluster_version": "8.0.0",
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
@@ -399,6 +408,9 @@ Object {
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
+  "cluster_name": "cluster-name",
+  "cluster_uuid": "cluster-uuid",
+  "cluster_version": "8.0.0",
   "csp": Object {
     "warnLegacyBrowsers": true,
   },

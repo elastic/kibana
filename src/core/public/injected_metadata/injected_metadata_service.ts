@@ -36,6 +36,9 @@ export interface InjectedMetadataParams {
     basePath: string;
     serverBasePath: string;
     publicBaseUrl: string;
+    cluster_uuid?: string;
+    cluster_name?: string;
+    cluster_version?: string;
     category?: AppCategory;
     csp: {
       warnLegacyBrowsers: boolean;
@@ -143,6 +146,14 @@ export class InjectedMetadataService {
       getTheme: () => {
         return this.state.theme;
       },
+
+      getElasticsearchInfo: () => {
+        return {
+          cluster_uuid: this.state.cluster_uuid,
+          cluster_name: this.state.cluster_name,
+          cluster_version: this.state.cluster_version,
+        };
+      },
     };
   }
 }
@@ -168,6 +179,11 @@ export interface InjectedMetadataSetup {
   getTheme: () => {
     darkMode: boolean;
     version: ThemeVersion;
+  };
+  getElasticsearchInfo: () => {
+    cluster_uuid?: string;
+    cluster_name?: string;
+    cluster_version?: string;
   };
   /**
    * An array of frontend plugins in topological order.

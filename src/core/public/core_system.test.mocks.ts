@@ -21,6 +21,15 @@ import { renderingServiceMock } from './rendering/rendering_service.mock';
 import { integrationsServiceMock } from './integrations/integrations_service.mock';
 import { coreAppMock } from './core_app/core_app.mock';
 import { themeServiceMock } from './theme/theme_service.mock';
+import { analyticsServiceMock } from './analytics/analytics_service.mock';
+
+export const analyticsServiceStartMock = analyticsServiceMock.createAnalyticsServiceStart();
+export const MockAnalyticsService = analyticsServiceMock.create();
+MockAnalyticsService.start.mockReturnValue(analyticsServiceStartMock);
+export const AnalyticsServiceConstructor = jest.fn().mockReturnValue(MockAnalyticsService);
+jest.doMock('./analytics', () => ({
+  AnalyticsService: AnalyticsServiceConstructor,
+}));
 
 export const MockInjectedMetadataService = injectedMetadataServiceMock.create();
 export const InjectedMetadataServiceConstructor = jest

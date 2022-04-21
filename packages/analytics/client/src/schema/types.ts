@@ -66,6 +66,8 @@ export type SchemaValue<Value> =
       : // Otherwise, try to infer the type and enforce the schema
       NonNullable<Value> extends Array<infer U>
       ? SchemaArray<U, Value>
+      : NonNullable<Value> extends ReadonlyArray<infer U>
+      ? SchemaArray<U, Value>
       : NonNullable<Value> extends object
       ? SchemaObject<Value>
       : SchemaChildValue<Value>);

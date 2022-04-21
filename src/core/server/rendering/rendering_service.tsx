@@ -8,10 +8,11 @@
 
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { take } from 'rxjs/operators';
+import { catchError, take, timeout } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
+import { firstValueFrom, of } from 'rxjs';
 import type { UiPlugins } from '../plugins';
 import { CoreContext } from '../core_context';
 import { Template } from './views';
@@ -29,7 +30,9 @@ import { KibanaRequest } from '../http';
 import { IUiSettingsClient } from '../ui_settings';
 import { filterUiPlugins } from './filter_ui_plugins';
 
-type RenderOptions = (RenderingPrebootDeps & { status?: never }) | RenderingSetupDeps;
+type RenderOptions =
+  | (RenderingPrebootDeps & { status?: never; elasticsearch?: never })
+  | RenderingSetupDeps;
 
 /** @internal */
 export class RenderingService {
@@ -57,6 +60,7 @@ export class RenderingService {
   }
 
   public async setup({
+    elasticsearch,
     http,
     status,
     uiPlugins,
@@ -72,12 +76,12 @@ export class RenderingService {
     });
 
     return {
-      render: this.render.bind(this, { http, uiPlugins, status }),
+      render: this.render.bind(this, { elasticsearch, http, uiPlugins, status }),
     };
   }
 
   private async render(
-    { http, uiPlugins, status }: RenderOptions,
+    { elasticsearch, http, uiPlugins, status }: RenderOptions,
     request: KibanaRequest,
     uiSettings: IUiSettingsClient,
     { isAnonymousPage = false, vars, includeExposedConfigKeys }: IRenderOptions = {}
@@ -93,6 +97,14 @@ export class RenderingService {
       defaults: uiSettings.getRegistered() ?? {},
       user: isAnonymousPage ? {} : await uiSettings.getUserProvided(),
     };
+
+    const elasticearchInfo = await (elasticsearch &&
+      firstValueFrom(
+        elasticsearch.clusterInfo$.pipe(
+          timeout(50), // If not available, just return undefined
+          catchError(() => of({}))
+        )
+      ));
 
     const darkMode = getSettingValue('theme:darkMode', settings, Boolean);
     const themeVersion: ThemeVersion = 'v8';
@@ -123,6 +135,7 @@ export class RenderingService {
         serverBasePath,
         publicBaseUrl,
         env,
+        ...elasticearchInfo,
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
           translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,

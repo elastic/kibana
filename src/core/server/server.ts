@@ -60,6 +60,7 @@ import { AnalyticsService } from './analytics';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
+const KIBANA_STARTED_EVENT = 'kibana_started';
 
 export class Server {
   public readonly configService: ConfigService;
@@ -137,7 +138,7 @@ export class Server {
 
     const analyticsPreboot = this.analytics.preboot();
 
-    const environmentPreboot = await this.environment.preboot();
+    const environmentPreboot = await this.environment.preboot({ analytics: analyticsPreboot });
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
     this.discoveredPlugins = await this.plugins.discover({ environment: environmentPreboot });
@@ -196,6 +197,8 @@ export class Server {
 
     const analyticsSetup = this.analytics.setup();
 
+    analyticsSetup.registerEventType({ eventType: KIBANA_STARTED_EVENT, schema: {} });
+
     const environmentSetup = this.environment.setup();
 
     // Configuration could have changed after preboot.
@@ -223,6 +226,7 @@ export class Server {
     const capabilitiesSetup = this.capabilities.setup({ http: httpSetup });
 
     const elasticsearchServiceSetup = await this.elasticsearch.setup({
+      analytics: analyticsSetup,
       http: httpSetup,
       executionContext: executionContextSetup,
     });
@@ -249,6 +253,7 @@ export class Server {
     });
 
     const statusSetup = await this.status.setup({
+      analytics: analyticsSetup,
       elasticsearch: elasticsearchServiceSetup,
       pluginDependencies: pluginTree.asNames,
       savedObjects: savedObjectsSetup,
@@ -259,6 +264,7 @@ export class Server {
     });
 
     const renderingSetup = await this.rendering.setup({
+      elasticsearch: elasticsearchServiceSetup,
       http: httpSetup,
       status: statusSetup,
       uiPlugins,
@@ -351,6 +357,8 @@ export class Server {
     await this.http.start();
 
     startTransaction?.end();
+
+    analyticsStart.reportEvent(KIBANA_STARTED_EVENT, {});
 
     return this.coreStart;
   }
