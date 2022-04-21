@@ -20,10 +20,7 @@ import {
 } from './saved_objects_types';
 import { applicationUsageSchema } from './schema';
 import { rollTotals, serializeKey } from './rollups';
-import {
-  ROLL_TOTAL_INDICES_INTERVAL,
-  ROLL_INDICES_START,
-} from './constants';
+import { ROLL_TOTAL_INDICES_INTERVAL, ROLL_INDICES_START } from './constants';
 import { ApplicationUsageTelemetryReport, ApplicationUsageViews } from './types';
 
 export const transformByApplicationViews = (
