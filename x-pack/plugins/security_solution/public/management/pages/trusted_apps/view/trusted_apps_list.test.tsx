@@ -15,11 +15,8 @@ import { exceptionsListAllHttpMocks } from '../../mocks/exceptions_list_http_moc
 import { SEARCHABLE_FIELDS } from '../constants';
 import { parseQueryFilterToKQL } from '../../../common/utils';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
-import { getUserPrivilegesMockDefaultValue } from '../../../../common/components/user_privileges/__mocks__';
-import { getFirstCard } from '../../../components/artifact_list_page/mocks';
 
 jest.mock('../../../../common/components/user_privileges');
-const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
 describe('When on the trusted applications page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -40,14 +37,9 @@ describe('When on the trusted applications page', () => {
     });
   });
 
-  afterEach(() => {
-    useUserPrivilegesMock.mockImplementation(getUserPrivilegesMockDefaultValue);
-  });
-
   it('should search using expected exception item fields', async () => {
     const expectedFilterString = parseQueryFilterToKQL('fooFooFoo', SEARCHABLE_FIELDS);
     const { findAllByTestId } = render();
-    console.log('expectedFilterString ', expectedFilterString);
     await waitFor(async () => {
       await expect(findAllByTestId('trustedAppsListPage-card')).resolves.toHaveLength(10);
     });
