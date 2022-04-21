@@ -18,7 +18,6 @@ exports[`empty state page renders NoDataConfigPage 1`] = `
   docLinks={
     Object {
       "dataViewsDocLink": "dummy link",
-      "kibanaGuideDocLink": "Kibana guide",
     }
   }
   editors={
@@ -759,7 +758,6 @@ exports[`empty state page renders NoDataViews 1`] = `
   docLinks={
     Object {
       "dataViewsDocLink": "dummy link",
-      "kibanaGuideDocLink": "Kibana guide",
     }
   }
   editors={
