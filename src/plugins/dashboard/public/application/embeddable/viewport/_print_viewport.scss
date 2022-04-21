@@ -43,7 +43,6 @@ is being formed. This can result in parts of the vis being cut out.
 }
 
 @media print {
-
   .printViewport {
     &__vis {
       @include visualizationPadding();
