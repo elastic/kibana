@@ -60,6 +60,7 @@ export const SourceRow: React.FC<SourceRowProps> = ({
   source: {
     id,
     serviceType,
+    baseServiceType,
     searchable,
     supportedByLicense,
     status,
@@ -117,7 +118,7 @@ export const SourceRow: React.FC<SourceRowProps> = ({
         >
           <EuiFlexItem grow={false}>
             <SourceIcon
-              serviceType={isIndexing ? 'loadingSmall' : serviceType}
+              serviceType={isIndexing ? 'loadingSmall' : baseServiceType || serviceType}
               name={name}
               iconAsBase64={mainIcon}
             />
