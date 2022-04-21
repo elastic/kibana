@@ -55,12 +55,14 @@ interface LegendSizeSettingsProps {
   legendSize?: number;
   onLegendSizeChange: (size?: number) => void;
   isVerticalLegend: boolean;
+  showAutoOption: boolean;
 }
 
 export const LegendSizeSettings = ({
   legendSize,
   onLegendSizeChange,
   isVerticalLegend,
+  showAutoOption,
 }: LegendSizeSettingsProps) => {
   useEffect(() => {
     if (legendSize && !isVerticalLegend) {
@@ -73,21 +75,20 @@ export const LegendSizeSettings = ({
     [onLegendSizeChange]
   );
 
-  const options =
-    legendSize !== LegendSizes.AUTO
-      ? legendSizeOptions
-      : [
-          {
-            value: LegendSizes.AUTO.toString(),
-            inputDisplay: i18n.translate(
-              'visDefaultEditor.options.legendSizeSetting.legendSizeOptions.auto',
-              {
-                defaultMessage: 'Auto',
-              }
-            ),
-          },
-          ...legendSizeOptions,
-        ];
+  const options = showAutoOption
+    ? [
+        {
+          value: LegendSizes.AUTO.toString(),
+          inputDisplay: i18n.translate(
+            'visDefaultEditor.options.legendSizeSetting.legendSizeOptions.auto',
+            {
+              defaultMessage: 'Auto',
+            }
+          ),
+        },
+        ...legendSizeOptions,
+      ]
+    : legendSizeOptions;
 
   const legendSizeSelect = (
     <EuiSuperSelect
