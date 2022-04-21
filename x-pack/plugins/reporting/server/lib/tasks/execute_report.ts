@@ -259,9 +259,11 @@ export class ExecuteReportTask implements ReportingTask {
     // run the report
     // if workerFn doesn't finish before timeout, call the cancellationToken and throw an error
     const queueTimeout = durationToNumber(this.config.queue.timeout);
-    return Rx.from(runner.jobExecutor(task.id, task.payload, cancellationToken, stream))
-      .pipe(timeout(queueTimeout)) // throw an error if a value is not emitted before timeout
-      .toPromise();
+    return Rx.lastValueFrom(
+      Rx.from(runner.jobExecutor(task.id, task.payload, cancellationToken, stream)).pipe(
+        timeout(queueTimeout)
+      ) // throw an error if a value is not emitted before timeout
+    );
   }
 
   public async _completeJob(

@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { BrowserSimpleFields, ConfigKey, DataStream } from '../types';
+import { BrowserSimpleFields, ConfigKey, DataStream, ScheduleUnit } from '../types';
 import { defaultValues as commonDefaultValues } from '../common/default_values';
 
 interface BrowserSimpleFieldsContext {
@@ -22,6 +22,10 @@ interface BrowserSimpleFieldsContextProvider {
 
 export const initialValues: BrowserSimpleFields = {
   ...commonDefaultValues,
+  [ConfigKey.SCHEDULE]: {
+    unit: ScheduleUnit.MINUTES,
+    number: '10',
+  },
   [ConfigKey.METADATA]: {
     script_source: {
       is_generated_script: false,

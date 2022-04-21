@@ -47,6 +47,7 @@ export interface BasicSettingRow {
   labelAppend?: string;
   labelAppendLink?: string;
   labelAppendLinkText?: string;
+  dataTestSubj?: string;
   settings?: SettingsRow[];
   validation?: SettingValidation;
   required?: boolean;

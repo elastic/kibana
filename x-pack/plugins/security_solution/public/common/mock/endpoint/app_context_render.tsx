@@ -28,7 +28,7 @@ import { KibanaContextProvider, KibanaServices } from '../../lib/kibana';
 import { getDeepLinks } from '../../../app/deep_links';
 import { fleetGetPackageListHttpMock } from '../../../management/pages/mocks';
 
-type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
+export type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
 // hide react-query output in console
 setLogger({
@@ -69,7 +69,7 @@ export interface AppContextTestRender {
   setExperimentalFlag: (flags: Partial<ExperimentalFeatures>) => void;
 }
 
-// Defined a private custom reducer that reacts to an action that enables us to updat the
+// Defined a private custom reducer that reacts to an action that enables us to update the
 // store with new values for technical preview features/flags. Because the `action.type` is a `Symbol`,
 // and its not exported the action can only be `dispatch`'d from this module
 const UpdateExperimentalFeaturesTestActionType = Symbol('updateExperimentalFeaturesTestAction');

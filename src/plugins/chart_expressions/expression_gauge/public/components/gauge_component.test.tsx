@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { ColorStop } from '@kbn/coloring';
 import { chartPluginMock } from '../../../../charts/public/mocks';
 import { fieldFormatsServiceMock } from '../../../../field_formats/public/mocks';
 import type { Datatable } from '../../../../expressions/public';
@@ -15,7 +16,6 @@ import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import {
   GaugeRenderProps,
   GaugeArguments,
-  ColorStop,
   GaugeLabelMajorModes,
   GaugeTicksPositions,
   GaugeColorModes,

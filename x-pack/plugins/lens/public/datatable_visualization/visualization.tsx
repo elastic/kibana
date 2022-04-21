@@ -17,7 +17,7 @@ import type {
   SuggestionRequest,
   Visualization,
   VisualizationSuggestion,
-  DatasourcePublicAPI,
+  DatasourceLayers,
 } from '../types';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
@@ -492,7 +492,7 @@ export const getDatatableVisualization = ({
 
 function getDataSourceAndSortedColumns(
   state: DatatableVisualizationState,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   layerId: string
 ) {
   const datasource = datasourceLayers[state.layerId];

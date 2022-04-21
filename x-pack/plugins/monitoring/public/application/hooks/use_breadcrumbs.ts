@@ -243,9 +243,11 @@ export const useBreadcrumbs = ({ history }: { history: History }) => {
     (bcrumbs?: BreadcrumbItem[]) => {
       if (!chrome) return;
       if (!bcrumbs) {
-        const currentBreadcrumbs: Observable<any> & {
-          value?: BreadcrumbItem[];
-        } = chrome.getBreadcrumbs$()?.source;
+        const currentBreadcrumbs:
+          | (Observable<any> & {
+              value?: BreadcrumbItem[];
+            })
+          | undefined = chrome.getBreadcrumbs$()?.source;
         if (currentBreadcrumbs && currentBreadcrumbs.value) {
           bcrumbs = currentBreadcrumbs.value;
         }

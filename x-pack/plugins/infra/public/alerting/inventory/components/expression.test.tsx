@@ -13,6 +13,7 @@ import { coreMock as mockCoreMock } from 'src/core/public/mocks';
 import { Comparator, InventoryMetricConditions } from '../../../../common/alerting/metrics';
 import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
 import { AlertContextMeta, defaultExpression, ExpressionRow, Expressions } from './expression';
+import { dataViewPluginMocks } from 'src/plugins/data_views/public/mocks';
 
 jest.mock('../../../containers/metrics_source/use_source_via_http', () => ({
   useSourceViaHttp: () => ({
@@ -34,6 +35,8 @@ const exampleCustomMetric = {
   type: 'custom',
 } as SnapshotCustomMetricInput;
 
+const dataViewMock = dataViewPluginMocks.createStartContract();
+
 describe('Expression', () => {
   async function setup(currentOptions: AlertContextMeta) {
     const ruleParams = {
@@ -51,6 +54,7 @@ describe('Expression', () => {
         setRuleParams={(key, value) => Reflect.set(ruleParams, key, value)}
         setRuleProperty={() => {}}
         metadata={currentOptions}
+        dataViews={dataViewMock}
       />
     );
 
@@ -116,6 +120,7 @@ describe('Expression', () => {
         setRuleParams={(key, value) => Reflect.set(ruleParams, key, value)}
         setRuleProperty={() => {}}
         metadata={{}}
+        dataViews={dataViewMock}
       />
     );
 

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { firstValueFrom, Observable } from 'rxjs';
 import { OnPreResponseHandler } from '../../../../src/core/server';
 import { ILicense } from '../common/types';
 
@@ -24,7 +23,7 @@ export function createOnPreResponseHandler(
     if (res.statusCode >= 400 && res.statusCode !== 429) {
       await refresh();
     }
-    const license = await license$.pipe(take(1)).toPromise();
+    const license = await firstValueFrom(license$);
     return t.next({
       headers: {
         'kbn-license-sig': license.signature,

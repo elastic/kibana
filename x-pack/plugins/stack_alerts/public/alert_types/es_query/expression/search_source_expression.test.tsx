@@ -8,6 +8,7 @@
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
+import { dataViewPluginMocks } from 'src/plugins/data_views/public/mocks';
 import { unifiedSearchPluginMock } from 'src/plugins/unified_search/public/mocks';
 import { DataPublicPluginStart, ISearchStart } from 'src/plugins/data/public';
 import { EsQueryAlertParams, SearchType } from '../types';
@@ -21,6 +22,8 @@ const dataMock = dataPluginMock.createStartContract() as DataPublicPluginStart &
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   search: ISearchStart & { searchSource: { create: jest.MockedFunction<any> } };
 };
+
+const dataViewPluginMock = dataViewPluginMocks.createStartContract();
 const chartsStartMock = chartPluginMock.createStartContract();
 const unifiedSearchMock = unifiedSearchPluginMock.createStartContract();
 
@@ -64,6 +67,7 @@ const setup = async (alertParams: EsQueryAlertParams<SearchType.searchSource>) =
       errors={errors}
       unifiedSearch={unifiedSearchMock}
       data={dataMock}
+      dataViews={dataViewPluginMock}
       defaultActionGroupId=""
       actionGroups={[]}
       charts={chartsStartMock}

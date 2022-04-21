@@ -7,18 +7,11 @@
  */
 
 import { PluginInitializerContext } from 'kibana/server';
-import { TypeOf } from '@kbn/config-schema';
-import { configSchema } from '../../config';
 
 export class ConfigManager {
   private esShardTimeout: number = 0;
-  private graphiteUrls: string[] = [];
 
   constructor(config: PluginInitializerContext['config']) {
-    config.create<TypeOf<typeof configSchema>>().subscribe((configUpdate) => {
-      this.graphiteUrls = configUpdate.graphiteUrls || [];
-    });
-
     config.legacy.globalConfig$.subscribe((configUpdate) => {
       this.esShardTimeout = configUpdate.elasticsearch.shardTimeout.asMilliseconds();
     });
@@ -26,9 +19,5 @@ export class ConfigManager {
 
   getEsShardTimeout() {
     return this.esShardTimeout;
-  }
-
-  getGraphiteUrls() {
-    return this.graphiteUrls;
   }
 }

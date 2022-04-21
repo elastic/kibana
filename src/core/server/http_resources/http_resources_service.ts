@@ -98,6 +98,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
           vars: {
             apmConfig,
           },
+          includeExposedConfigKeys: options.includeExposedConfigKeys,
         });
 
         return response.ok({
@@ -112,6 +113,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
           vars: {
             apmConfig,
           },
+          includeExposedConfigKeys: options.includeExposedConfigKeys,
         });
 
         return response.ok({

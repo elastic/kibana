@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { catchError, first } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import type { ExecutionContextSetup } from 'src/core/server';
 import apm from 'elastic-apm-node';
@@ -37,10 +38,8 @@ export function registerBsearchRoute(
         return executionContextService.withContext(executionContext, () => {
           apm.addLabels(executionContextService.getAsLabels());
 
-          return search
-            .search(requestData, restOptions)
-            .pipe(
-              first(),
+          return firstValueFrom(
+            search.search(requestData, restOptions).pipe(
               catchError((err) => {
                 // Re-throw as object, to get attributes passed to the client
                 // eslint-disable-next-line no-throw-literal
@@ -51,7 +50,7 @@ export function registerBsearchRoute(
                 };
               })
             )
-            .toPromise();
+          );
         });
       },
     };

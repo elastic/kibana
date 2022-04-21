@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { PaletteOutput } from '@kbn/coloring';
 import { getVisSchemas, VisToExpressionAst, SchemaConfig } from '../../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
-import { PaletteOutput } from '../../../charts/common';
 import {
   PIE_VIS_EXPRESSION_NAME,
   PARTITION_LABELS_FUNCTION,

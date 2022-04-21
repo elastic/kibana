@@ -35,7 +35,7 @@ import {
   LegendColorPickerWrapperContext,
   LegendColorPickerWrapper,
 } from '../utils/get_color_picker';
-import { DEFAULT_PALETTE_NAME, defaultPaletteParams } from '../constants';
+import { defaultPaletteParams } from '../constants';
 import { HeatmapIcon } from './heatmap_icon';
 import './index.scss';
 
@@ -96,9 +96,11 @@ function computeColorRanges(
 ) {
   const paletteColors =
     paletteParams?.colors ||
-    applyPaletteParams(paletteService, { type: 'palette', name: DEFAULT_PALETTE_NAME }, minMax).map(
-      ({ color }) => color
-    );
+    applyPaletteParams(
+      paletteService,
+      { type: 'palette', name: defaultPaletteParams.name },
+      minMax
+    ).map(({ color }) => color);
   // Repeat the first color at the beginning to cover below and above the defined palette
   const colors = [paletteColors[0], ...paletteColors];
 

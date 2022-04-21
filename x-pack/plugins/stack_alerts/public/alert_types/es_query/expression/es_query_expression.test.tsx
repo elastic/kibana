@@ -11,6 +11,7 @@ import { of } from 'rxjs';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { dataPluginMock } from 'src/plugins/data/public/mocks';
+import { dataViewPluginMocks } from 'src/plugins/data_views/public/mocks';
 import { unifiedSearchPluginMock } from 'src/plugins/unified_search/public/mocks';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import {
@@ -99,6 +100,7 @@ const createDataPluginMock = () => {
 };
 
 const dataMock = createDataPluginMock();
+const dataViewMock = dataViewPluginMocks.createStartContract();
 const unifiedSearchMock = unifiedSearchPluginMock.createStartContract();
 const chartsStartMock = chartPluginMock.createStartContract();
 
@@ -150,6 +152,7 @@ describe('EsQueryAlertTypeExpression', () => {
         setRuleProperty={() => {}}
         errors={errors}
         data={dataMock}
+        dataViews={dataViewMock}
         defaultActionGroupId=""
         actionGroups={[]}
         charts={chartsStartMock}

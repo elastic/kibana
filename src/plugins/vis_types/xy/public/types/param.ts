@@ -7,7 +7,8 @@
  */
 
 import type { Fit, Position } from '@elastic/charts';
-import type { Style, Labels, PaletteOutput } from '../../../../charts/public';
+import type { PaletteOutput } from '@kbn/coloring';
+import type { Style, Labels } from '../../../../charts/public';
 import type {
   SchemaConfig,
   ExpressionValueXYDimension,

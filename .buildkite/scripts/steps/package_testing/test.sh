@@ -15,7 +15,7 @@ elif [[ "$TEST_PACKAGE" == "rpm" ]]; then
   buildkite-agent artifact download 'kibana-*.rpm' . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   KIBANA_IP_ADDRESS="192.168.56.6"
 elif [[ "$TEST_PACKAGE" == "docker" ]]; then
-  buildkite-agent artifact download "kibana-$KIBANA_PKG_VERSION-SNAPSHOT-docker-image.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+  buildkite-agent artifact download "kibana-$KIBANA_PKG_VERSION*-docker-image.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   KIBANA_IP_ADDRESS="192.168.56.7"
 fi
 cd ..

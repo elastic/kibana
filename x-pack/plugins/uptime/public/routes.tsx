@@ -259,7 +259,8 @@ const getRoutes = (): RouteProps[] => {
               <EuiBetaBadge
                 label="Beta"
                 tooltipContent={i18n.translate('xpack.uptime.routes.monitorManagement.betaLabel', {
-                  defaultMessage: 'This module is not GA. Please help us by reporting any bugs.',
+                  defaultMessage:
+                    'This functionality is in beta and is subject to change. The design and code is less mature than official generally available features and is being provided as-is with no warranties. Beta features are not subject to the support service level agreement of official generally available features.',
                 })}
               />
             </EuiFlexItem>

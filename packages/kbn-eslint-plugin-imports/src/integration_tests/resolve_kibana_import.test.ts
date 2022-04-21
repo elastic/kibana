@@ -63,15 +63,6 @@ describe('standard import formats', () => {
   });
 
   it('resolves @elastic/ imports', () => {
-    expect(resolveKibanaImport('@elastic/datemath', pkg('kbn-dev-utils/src')))
-      .toMatchInlineSnapshot(`
-      Object {
-        "absolute": <absolute path>/node_modules/@elastic/datemath/target_node/index.js,
-        "nodeModule": "@elastic/datemath",
-        "type": "file",
-      }
-    `);
-
     expect(resolveKibanaImport('@elastic/eui', pkg('kbn-dev-utils/src'))).toMatchInlineSnapshot(`
       Object {
         "absolute": <absolute path>/node_modules/@elastic/eui/lib/index.js,

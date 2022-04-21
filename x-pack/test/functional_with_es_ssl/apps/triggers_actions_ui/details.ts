@@ -136,7 +136,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return response;
   }
 
-  describe('Rule Details', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/129337
+  // Failing: See https://github.com/elastic/kibana/issues/129337
+  describe.skip('Rule Details', function () {
     describe('Header', function () {
       const testRunUuid = uuid.v4();
       before(async () => {

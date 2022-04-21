@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { firstValueFrom, Observable } from 'rxjs';
 import {
   CoreSetup,
   CoreStart,
@@ -46,7 +45,7 @@ export class DiscoverEnhancedPlugin
         },
         isReady: () => true,
         fetch: async () => {
-          const config = await this.config$.pipe(take(1)).toPromise();
+          const config = await firstValueFrom(this.config$);
           return {
             exploreDataInChartActionEnabled: config.actions.exploreDataInChart.enabled,
           };

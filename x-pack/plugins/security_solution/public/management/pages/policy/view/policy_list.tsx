@@ -89,7 +89,11 @@ export const PolicyList = memo(() => {
   const policyIdToEndpointCount = useMemo(() => {
     const map = new Map<AgentPolicy['package_policies'][number], number>();
     for (const policy of endpointCount?.items) {
-      map.set(policy.package_policies[0], policy.agents ?? 0);
+      for (const packagePolicyId of policy.package_policies) {
+        if (policyIds.includes(packagePolicyId as string)) {
+          map.set(packagePolicyId, policy.agents ?? 0);
+        }
+      }
     }
 
     // error with the endpointCount api call, set default count to 0
@@ -289,11 +293,11 @@ export const PolicyList = memo(() => {
       data-test-subj="policyListPage"
       hideHeader={totalItemCount === 0}
       title={i18n.translate('xpack.securitySolution.policy.list.title', {
-        defaultMessage: 'Policy List',
+        defaultMessage: 'Policies',
       })}
       subtitle={i18n.translate('xpack.securitySolution.policy.list.subtitle', {
         defaultMessage:
-          'Use endpoint policies to customize endpoint security protections and other configurations',
+          'Use policies to customize endpoint and cloud workload protections and other configurations',
       })}
     >
       {totalItemCount > 0 ? (

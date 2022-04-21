@@ -33,10 +33,6 @@ import {
 import { ROLES } from '../../../../plugins/security_solution/common/test';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -311,7 +307,6 @@ export default ({ getService }: FtrProviderContext) => {
           bodyId,
           RuleExecutionStatus['partial failure']
         );
-        await sleep(5000);
 
         const { body: rule } = await supertest
           .get(DETECTION_ENGINE_RULES_URL)
@@ -344,7 +339,6 @@ export default ({ getService }: FtrProviderContext) => {
           bodyId,
           RuleExecutionStatus['partial failure']
         );
-        await sleep(5000);
         await waitForSignalsToBePresent(supertest, log, 2, [bodyId]);
 
         const { body: rule } = await supertest

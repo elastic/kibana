@@ -7,8 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
-import { Observable, of, Subject } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { firstValueFrom, Observable, of, Subject } from 'rxjs';
 import {
   DataPublicPluginStart,
   IKibanaSearchResponse,
@@ -92,7 +91,7 @@ describe('useDataSearch hook', () => {
     expect(dataMock.search.search).not.toHaveBeenCalled();
 
     // execute requests$ observable
-    const firstRequestPromise = result.current.requests$.pipe(take(1)).toPromise();
+    const firstRequestPromise = firstValueFrom(result.current.requests$);
 
     act(() => {
       result.current.search('first', 'second');
@@ -161,7 +160,7 @@ describe('useDataSearch hook', () => {
     expect(dataMock.search.search).not.toHaveBeenCalled();
 
     // execute requests$ observable
-    const firstRequestPromise = result.current.requests$.pipe(take(1)).toPromise();
+    const firstRequestPromise = firstValueFrom(result.current.requests$);
 
     act(() => {
       result.current.search('first', 'second');

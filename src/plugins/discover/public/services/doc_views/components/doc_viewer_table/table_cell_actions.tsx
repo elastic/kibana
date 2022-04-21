@@ -147,7 +147,8 @@ export const TableActions = ({
           toolTipContent: filtersExistsToolTip,
           icon: 'filter',
           disabled: filtersExistsDisabled,
-          onClick: onClickAction(onFilter.bind({}, fieldMapping, flattenedField, '-')),
+          'data-test-subj': `addExistsFilterButton-${field}`,
+          onClick: onClickAction(onFilter.bind({}, '_exists_', field, '+')),
         },
         {
           name: toggleColumnsLabel,

@@ -9,7 +9,7 @@
 import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/utils';
-import { lastValueFrom } from '@kbn/std';
+import { lastValueFrom } from 'rxjs';
 import { CiStatsMetric } from '@kbn/dev-utils';
 import {
   runOptimizer,

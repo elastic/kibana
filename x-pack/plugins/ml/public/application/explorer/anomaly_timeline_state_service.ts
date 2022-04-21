@@ -259,7 +259,9 @@ export class AnomalyTimelineStateService extends StateService {
           number,
           number,
           AppStateSelectedCells,
-          TimeBucketsInterval
+          TimeBucketsInterval,
+          TimeRangeBounds,
+          Refresh
         ]
       >
     )
@@ -342,7 +344,7 @@ export class AnomalyTimelineStateService extends StateService {
                   latest: overallSwimLaneData!.latest,
                 },
                 selectedJobs,
-                viewBySwimlaneFieldName,
+                viewBySwimlaneFieldName!,
                 ANOMALY_SWIM_LANE_HARD_LIMIT,
                 swimLanePagination.viewByPerPage,
                 swimLanePagination.viewByFromPage,

@@ -49,14 +49,18 @@ export const DetailPanelAlertGroupItem = ({
       arrowDisplay="right"
       initialIsOpen={false}
       buttonContent={
-        <EuiText data-test-subj={ALERT_GROUP_ITEM_TITLE_TEST_ID} css={styles.alertTitle} size="s">
-          <p>
+        <EuiText
+          data-test-subj={ALERT_GROUP_ITEM_TITLE_TEST_ID}
+          css={styles.alertTitleContainer}
+          size="s"
+        >
+          <p css={styles.alertTitle}>
             <EuiIcon color="danger" type="alert" css={styles.alertIcon} />
             {dataOrDash(rule?.name)}
           </p>
         </EuiText>
       }
-      css={styles.alertItem}
+      css={styles.alertGroupItem}
       extraAction={
         <EuiNotificationBadge
           data-test-subj={ALERT_GROUP_ITEM_COUNT_TEST_ID}

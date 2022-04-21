@@ -51,7 +51,7 @@ export class SecurityNavControlService {
 
   private securityFeaturesSubscription?: Subscription;
 
-  private readonly stop$ = new ReplaySubject(1);
+  private readonly stop$ = new ReplaySubject<void>(1);
   private userMenuLinks$ = new BehaviorSubject<UserMenuLink[]>([]);
 
   public setup({ securityLicense, authc, logoutUrl }: SetupDeps) {

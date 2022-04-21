@@ -1,0 +1,15 @@
+diff --git a/third_party/github.com/bazelbuild/bazel-skylib/rules/private/copy_file_private.bzl b/third_party/github.com/bazelbuild/bazel-skylib/rules/private/copy_file_private.bzl
+index a719174c..273322d0 100644
+--- a/third_party/github.com/bazelbuild/bazel-skylib/rules/private/copy_file_private.bzl
++++ b/third_party/github.com/bazelbuild/bazel-skylib/rules/private/copy_file_private.bzl
+@@ -30,7 +30,9 @@ _execution_requirements = {
+     # Also, remote-execution does not allow source directory inputs, see
+     # https://github.com/bazelbuild/bazel/commit/c64421bc35214f0414e4f4226cc953e8c55fa0d2
+     # So we must not attempt to execute remotely in that case.
+-    "no-remote-exec": "1",
++    # no-remote | Prevents the action or test from being executed remotely or cached remotely.
++    #           | This is equivalent to using both `no-remote-cache` and `no-remote-exec`.
++    "no-remote": "1",
+ }
+ 
+ def _hash_file(file):

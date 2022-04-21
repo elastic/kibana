@@ -117,7 +117,7 @@ describe.skip('Server logging configuration', function () {
           )
           .toPromise();
 
-        const lastMessage = await message$.pipe(take(1)).toPromise();
+        const lastMessage = await Rx.firstValueFrom(message$);
         expect(containsJsonOnly(lastMessage)).toBe(true);
 
         createConfigManager(configFilePath).modify((oldConfig) => {

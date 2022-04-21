@@ -22,7 +22,11 @@ import { showNewVisModal } from '../../wizard';
 import { getTypes } from '../../services';
 import { SavedObjectsFindOptionsReference } from '../../../../../core/public';
 import { useKibana, TableListView, useExecutionContext } from '../../../../kibana_react/public';
-import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../visualizations/public';
+import {
+  VISUALIZE_ENABLE_LABS_SETTING,
+  SAVED_OBJECTS_LIMIT_SETTING,
+  SAVED_OBJECTS_PER_PAGE_SETTING,
+} from '../../../../visualizations/public';
 import { VisualizeServices } from '../types';
 import { VisualizeConstants } from '../../../common/constants';
 import { getTableColumns, getNoItemsMessage } from '../utils';
@@ -37,7 +41,6 @@ export const VisualizeListing = () => {
       toastNotifications,
       stateTransferService,
       savedObjects,
-      savedObjectsPublic,
       savedObjectsTagging,
       uiSettings,
       visualizeCapabilities,
@@ -48,7 +51,8 @@ export const VisualizeListing = () => {
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
   const closeNewVisModal = useRef(() => {});
-  const listingLimit = savedObjectsPublic.settings.getListingLimit();
+  const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
+  const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
   useExecutionContext(executionContext, {
     type: 'application',
@@ -193,7 +197,7 @@ export const VisualizeListing = () => {
       editItem={visualizeCapabilities.save ? editItem : undefined}
       tableColumns={tableColumns}
       listingLimit={listingLimit}
-      initialPageSize={savedObjectsPublic.settings.getPerPage()}
+      initialPageSize={initialPageSize}
       initialFilter={''}
       rowHeader="title"
       emptyPrompt={noItemsFragment}
@@ -209,6 +213,7 @@ export const VisualizeListing = () => {
       toastNotifications={toastNotifications}
       searchFilters={searchFilters}
       theme={theme}
+      application={application}
     >
       {dashboardCapabilities.createNew && (
         <>

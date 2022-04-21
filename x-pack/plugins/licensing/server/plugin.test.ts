@@ -17,6 +17,7 @@ import {
   loggingSystemMock,
 } from '../../../../src/core/server/mocks';
 import { IClusterClient } from '../../../../src/core/server';
+import { firstValueFrom } from 'rxjs';
 
 function buildRawLicense(
   options: Partial<estypes.XpackInfoMinimalLicenseInformation> = {}
@@ -84,7 +85,7 @@ describe('licensing plugin', () => {
         const coreSetup = createCoreSetupWith(esClient);
         await plugin.setup(coreSetup);
         const { license$ } = await plugin.start();
-        const license = await license$.pipe(take(1)).toPromise();
+        const license = await firstValueFrom(license$);
         expect(license.isAvailable).toBe(true);
       });
 
@@ -97,7 +98,7 @@ describe('licensing plugin', () => {
         const coreSetup = createCoreSetupWith(esClient);
         await plugin.setup(coreSetup);
         const { license$ } = await plugin.start();
-        await license$.pipe(take(1)).toPromise();
+        await firstValueFrom(license$);
 
         expect(esClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1);
       });
@@ -116,7 +117,7 @@ describe('licensing plugin', () => {
         const coreSetup = createCoreSetupWith(esClient);
         await plugin.setup(coreSetup);
         const { license$ } = await plugin.start();
-        const [first, second, third] = await license$.pipe(take(3), toArray()).toPromise();
+        const [first, second, third] = await firstValueFrom(license$.pipe(take(3), toArray()));
 
         expect(first.type).toBe('basic');
         expect(second.type).toBe('gold');
@@ -131,7 +132,7 @@ describe('licensing plugin', () => {
         await plugin.setup(coreSetup);
         const { license$ } = await plugin.start();
 
-        const license = await license$.pipe(take(1)).toPromise();
+        const license = await firstValueFrom(license$);
         expect(license.isAvailable).toBe(false);
         expect(license.error).toBeDefined();
       });
@@ -146,7 +147,7 @@ describe('licensing plugin', () => {
         await plugin.setup(coreSetup);
         const { license$ } = await plugin.start();
 
-        const license = await license$.pipe(take(1)).toPromise();
+        const license = await firstValueFrom(license$);
         expect(license.isAvailable).toBe(false);
         expect(license.error).toBe('X-Pack plugin is not installed on the Elasticsearch cluster.');
       });
@@ -175,7 +176,7 @@ describe('licensing plugin', () => {
         await plugin.setup(coreSetup);
         const { license$ } = await plugin.start();
 
-        const [first, second, third] = await license$.pipe(take(3), toArray()).toPromise();
+        const [first, second, third] = await firstValueFrom(license$.pipe(take(3), toArray()));
 
         expect(first.error).toBe(error1.message);
         expect(second.error).toBe(error2.message);
@@ -235,7 +236,7 @@ describe('licensing plugin', () => {
         await plugin.setup(coreSetup);
         const { license$ } = await plugin.start();
 
-        const [first, second, third] = await license$.pipe(take(3), toArray()).toPromise();
+        const [first, second, third] = await firstValueFrom(license$.pipe(take(3), toArray()));
         expect(first.signature === third.signature).toBe(true);
         expect(first.signature === second.signature).toBe(false);
       });
@@ -308,7 +309,7 @@ describe('licensing plugin', () => {
         );
         expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(0);
 
-        const customLicense = await customLicense$.pipe(take(1)).toPromise();
+        const customLicense = await firstValueFrom(customLicense$);
         expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1);
 
         await flushPromises(customPollingFrequency * 1.5);
@@ -341,7 +342,7 @@ describe('licensing plugin', () => {
         await refresh();
 
         expect(customClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1);
-        const license = await license$.pipe(take(1)).toPromise();
+        const license = await firstValueFrom(license$);
         expect(license.type).toBe('gold');
       });
     });

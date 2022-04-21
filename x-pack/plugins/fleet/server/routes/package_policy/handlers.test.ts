@@ -263,6 +263,38 @@ describe('When calling package policy', () => {
         });
       });
     });
+
+    describe('postCreate callback registration', () => {
+      it('should call to packagePolicyCreate and packagePolicyPostCreate call backs', async () => {
+        const request = getCreateKibanaRequest();
+        await routeHandler(context, request, response);
+
+        expect(response.ok).toHaveBeenCalled();
+        expect(packagePolicyService.runExternalCallbacks).toBeCalledTimes(2);
+
+        const firstCB = packagePolicyServiceMock.runExternalCallbacks.mock.calls[0][0];
+        const secondCB = packagePolicyServiceMock.runExternalCallbacks.mock.calls[1][0];
+
+        expect(firstCB).toEqual('packagePolicyCreate');
+        expect(secondCB).toEqual('packagePolicyPostCreate');
+      });
+
+      it('should not call packagePolicyPostCreate call back in case of packagePolicy create failed', async () => {
+        const request = getCreateKibanaRequest();
+
+        packagePolicyServiceMock.create.mockImplementationOnce(
+          async (soClient, esClient, newData) => {
+            throw new Error('foo');
+          }
+        );
+
+        await routeHandler(context, request, response);
+        const firstCB = packagePolicyServiceMock.runExternalCallbacks.mock.calls[0][0];
+
+        expect(firstCB).toEqual('packagePolicyCreate');
+        expect(packagePolicyService.runExternalCallbacks).toBeCalledTimes(1);
+      });
+    });
   });
 
   describe('update api handler', () => {

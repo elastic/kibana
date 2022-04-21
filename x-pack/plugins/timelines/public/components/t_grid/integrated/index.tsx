@@ -113,7 +113,7 @@ export interface TGridIntegratedProps {
   filterStatus?: AlertStatus;
   globalFullScreen: boolean;
   // If truthy, the graph viewer (Resolver) is showing
-  graphEventId: string | undefined;
+  graphEventId?: string;
   graphOverlay?: React.ReactNode;
   hasAlertsCrud: boolean;
   height?: number;

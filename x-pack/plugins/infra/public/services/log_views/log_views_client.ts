@@ -9,6 +9,7 @@ import * as rt from 'io-ts';
 import { HttpStart } from 'src/core/public';
 import { ISearchGeneric } from 'src/plugins/data/public';
 import { DataViewsContract } from 'src/plugins/data_views/public';
+import { lastValueFrom } from 'rxjs';
 import {
   getLogViewResponsePayloadRT,
   getLogViewUrl,
@@ -57,39 +58,39 @@ export class LogViewsClient implements ILogViewsClient {
   }
 
   public async getResolvedLogViewStatus(resolvedLogView: ResolvedLogView): Promise<LogViewStatus> {
-    const indexStatus = await this.search({
-      params: {
-        ignore_unavailable: true,
-        allow_no_indices: true,
-        index: resolvedLogView.indices,
-        size: 0,
-        terminate_after: 1,
-        track_total_hits: 1,
-      },
-    })
-      .toPromise()
-      .then(
-        ({ rawResponse }) => {
-          if (rawResponse._shards.total <= 0) {
-            return 'missing' as const;
-          }
-
-          const totalHits = decodeTotalHits(rawResponse.hits.total);
-          if (typeof totalHits === 'number' ? totalHits > 0 : totalHits.value > 0) {
-            return 'available' as const;
-          }
-
-          return 'empty' as const;
+    const indexStatus = await lastValueFrom(
+      this.search({
+        params: {
+          ignore_unavailable: true,
+          allow_no_indices: true,
+          index: resolvedLogView.indices,
+          size: 0,
+          terminate_after: 1,
+          track_total_hits: 1,
         },
-        (err) => {
-          if (err.status === 404) {
-            return 'missing' as const;
-          }
-          throw new FetchLogViewStatusError(
-            `Failed to check status of log indices of "${resolvedLogView.indices}": ${err}`
-          );
+      })
+    ).then(
+      ({ rawResponse }) => {
+        if (rawResponse._shards.total <= 0) {
+          return 'missing' as const;
         }
-      );
+
+        const totalHits = decodeTotalHits(rawResponse.hits.total);
+        if (typeof totalHits === 'number' ? totalHits > 0 : totalHits.value > 0) {
+          return 'available' as const;
+        }
+
+        return 'empty' as const;
+      },
+      (err) => {
+        if (err.status === 404) {
+          return 'missing' as const;
+        }
+        throw new FetchLogViewStatusError(
+          `Failed to check status of log indices of "${resolvedLogView.indices}": ${err}`
+        );
+      }
+    );
 
     return {
       index: indexStatus,

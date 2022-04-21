@@ -8,6 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
+import { lastValueFrom } from 'rxjs';
 import { isCompleteResponse, ISearchSource } from '../../../../../data/public';
 import { DataViewType } from '../../../../../data_views/public';
 import { FetchDeps } from './fetch_all';
@@ -53,5 +54,5 @@ export function fetchTotalHits(
       map((res) => res.rawResponse.hits.total as number)
     );
 
-  return fetch$.toPromise();
+  return lastValueFrom(fetch$);
 }

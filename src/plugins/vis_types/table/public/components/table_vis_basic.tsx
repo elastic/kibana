@@ -6,8 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
-import { EuiDataGrid, EuiDataGridProps, EuiDataGridSorting, EuiTitle } from '@elastic/eui';
+import React, { memo, useCallback, useMemo, useRef } from 'react';
+import {
+  EuiDataGrid,
+  EuiDataGridProps,
+  EuiDataGridRefProps,
+  EuiDataGridSorting,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 
@@ -34,6 +40,8 @@ export const TableVisBasic = memo(
     title,
     uiStateProps: { columnsWidth, sort, setColumnsWidth, setSort },
   }: TableVisBasicProps) => {
+    const dataGridRef = useRef<EuiDataGridRefProps>(null);
+
     const { columns, rows, formattedColumns } = table;
 
     // custom sorting is in place until the EuiDataGrid sorting gets rid of flaws -> https://github.com/elastic/eui/issues/4108
@@ -65,7 +73,8 @@ export const TableVisBasic = memo(
       sortedRows,
       formattedColumns,
       columnsWidth,
-      fireEvent
+      fireEvent,
+      dataGridRef.current?.closeCellPopover
     );
 
     // Pagination config
@@ -158,6 +167,7 @@ export const TableVisBasic = memo(
           sorting={{ columns: sortingColumns, onSort }}
           onColumnResize={onColumnResize}
           minSizeForControls={1}
+          ref={dataGridRef}
         />
       </>
     );

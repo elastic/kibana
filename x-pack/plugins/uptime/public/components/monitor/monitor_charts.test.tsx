@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import DateMath from '@elastic/datemath';
+import DateMath from '@kbn/datemath';
 import { MonitorCharts } from './monitor_charts';
 import { shallowWithRouter } from '../../lib';
 

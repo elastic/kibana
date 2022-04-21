@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import DateMath from '@elastic/datemath';
+import DateMath from '@kbn/datemath';
 import { getSupportedUrlParams } from './get_supported_url_params';
 import { CLIENT_DEFAULTS } from '../../../../common/constants';
 

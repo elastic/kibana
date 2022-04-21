@@ -99,9 +99,11 @@ export class Legacy {
         set: (breadcrumbs: BreadcrumbItem[]) => this._shims.breadcrumbs.update(breadcrumbs),
         update: (breadcrumbs?: BreadcrumbItem[]) => {
           if (!breadcrumbs) {
-            const currentBreadcrumbs: Observable<any> & {
-              value?: BreadcrumbItem[];
-            } = core.chrome.getBreadcrumbs$()?.source;
+            const currentBreadcrumbs:
+              | (Observable<any> & {
+                  value?: BreadcrumbItem[];
+                })
+              | undefined = core.chrome.getBreadcrumbs$()?.source;
             breadcrumbs = currentBreadcrumbs?.value;
           }
           const globalStateStr = location.hash.split('?')[1];

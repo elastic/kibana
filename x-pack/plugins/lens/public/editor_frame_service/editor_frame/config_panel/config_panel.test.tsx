@@ -422,6 +422,7 @@ describe('ConfigPanel', () => {
           datasourceLayers: {
             a: expect.anything(),
           },
+          dateRange: expect.anything(),
         },
         groupId: 'a',
         layerId: 'newId',

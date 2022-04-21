@@ -29,6 +29,20 @@ describe('Event Details Overview Cards', () => {
     getByText('Rule');
   });
 
+  it('renders only readOnly cards', () => {
+    const { getByText, queryByText } = render(
+      <TestProviders>
+        <Overview {...propsWithReadOnly} />
+      </TestProviders>
+    );
+
+    getByText('Severity');
+    getByText('Risk Score');
+
+    expect(queryByText('Status')).not.toBeInTheDocument();
+    expect(queryByText('Rule')).not.toBeInTheDocument();
+  });
+
   it('renders all cards it has data for', () => {
     const { getByText, queryByText } = render(
       <TestProviders>
@@ -193,4 +207,9 @@ const propsWithoutSeverity = {
   ...props,
   browserFields: { kibana: { fields: fieldsWithoutSeverity } },
   data: dataWithoutSeverity,
+};
+
+const propsWithReadOnly = {
+  ...props,
+  isReadOnly: true,
 };

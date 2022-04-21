@@ -121,7 +121,7 @@ export const ActionBar = ({
             <EuiButtonEmpty
               color="ghost"
               size="s"
-              href={`${basePath}/app/uptime/${MONITOR_MANAGEMENT_ROUTE}`}
+              href={`${basePath}/app/uptime/${MONITOR_MANAGEMENT_ROUTE}/all`}
             >
               {DISCARD_LABEL}
             </EuiButtonEmpty>

@@ -98,7 +98,7 @@ const zIndexEdgeHighlight = 110;
 const zIndexEdgeHover = 120;
 
 export const getNodeHeight = (theme: EuiTheme): number =>
-  parseInt(theme.eui.avatarSizing.l.size, 10);
+  parseInt(theme.eui.euiSizeXXL, 10);
 
 function isService(el: cytoscape.NodeSingular) {
   return el.data(SERVICE_NAME) !== undefined;
@@ -156,7 +156,7 @@ const getStyle = (theme: EuiTheme): cytoscape.Stylesheet[] => {
         'text-max-width': '200px',
         'text-valign': 'bottom',
         'text-wrap': 'ellipsis',
-        width: theme.eui.avatarSizing.l.size,
+        width: theme.eui.euiSizeXXL,
         'z-index': zIndexNode,
       },
     },

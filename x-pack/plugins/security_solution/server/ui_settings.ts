@@ -25,8 +25,6 @@ import {
   DEFAULT_THREAT_INDEX_KEY,
   DEFAULT_THREAT_INDEX_VALUE,
   DEFAULT_TO,
-  DEFAULT_TRANSFORMS,
-  DEFAULT_TRANSFORMS_SETTING,
   ENABLE_NEWS_FEED_SETTING,
   IP_REPUTATION_LINKS_SETTING,
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
@@ -34,7 +32,6 @@ import {
   NEWS_FEED_URL_SETTING_DEFAULT,
   ENABLE_CCS_READ_WARNING_SETTING,
 } from '../common/constants';
-import { transformConfigSchema } from '../common/transforms/types';
 import { ExperimentalFeatures } from '../common/experimental_features';
 
 type SettingsConfig = Record<string, UiSettingsParams<unknown>>;
@@ -232,26 +229,6 @@ export const initUiSettings = (
       requiresPageReload: false,
       schema: schema.boolean(),
     },
-    // TODO: Remove this check once the experimental flag is removed
-    ...(experimentalFeatures.metricsEntitiesEnabled
-      ? {
-          [DEFAULT_TRANSFORMS]: {
-            name: i18n.translate('xpack.securitySolution.uiSettings.transforms', {
-              defaultMessage: 'Default transforms to use',
-            }),
-            value: DEFAULT_TRANSFORMS_SETTING,
-            type: 'json',
-            description: i18n.translate('xpack.securitySolution.uiSettings.transformDescription', {
-              // TODO: Add a hyperlink to documentation about this feature
-              defaultMessage: 'Experimental: Enable an application cache through transforms',
-            }),
-            sensitive: true,
-            category: [APP_ID],
-            requiresPageReload: false,
-            schema: transformConfigSchema,
-          },
-        }
-      : {}),
   };
 
   uiSettings.register(orderSettings(securityUiSettings));

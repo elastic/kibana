@@ -10,8 +10,7 @@ import React, { lazy } from 'react';
 import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
 import { IUiSettingsClient } from 'src/core/public';
 import { PersistedState } from 'src/plugins/visualizations/public';
-import { PaletteRegistry } from 'src/plugins/charts/public';
-
+import type { PaletteRegistry } from '@kbn/coloring';
 import { TimeseriesVisParams } from '../../../types';
 import type { TimeseriesVisData, PanelData } from '../../../../common/types';
 import type { FieldFormatMap } from '../../../../../../data/common';

@@ -21,7 +21,7 @@ const log = new ToolingLog({
 });
 
 it('getFileName', () => {
-  expect(getFileName('@elastic/datemath')).toBe('elastic_datemath');
+  expect(getFileName('@kbn/datemath')).toBe('kbn_datemath');
 });
 
 it('test getPluginForPath', () => {

@@ -8,7 +8,7 @@
 
 import { uniq } from 'lodash';
 import { Duration, Moment } from 'moment';
-import { Unit } from '@elastic/datemath';
+import { Unit } from '@kbn/datemath';
 import { SerializedFieldFormat } from '../../../../../../field_formats/common';
 
 export interface Column {

@@ -7,9 +7,9 @@
  */
 
 import { Datum, PartitionLayer } from '@elastic/charts';
+import type { PaletteRegistry } from '@kbn/coloring';
 import { FieldFormat } from '../../../../../field_formats/common';
 import type { FieldFormatsStart } from '../../../../../field_formats/public';
-import { PaletteRegistry } from '../../../../../charts/public';
 import type { Datatable, DatatableRow } from '../../../../../expressions/public';
 import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
 import { sortPredicateByType } from './sort_predicate';

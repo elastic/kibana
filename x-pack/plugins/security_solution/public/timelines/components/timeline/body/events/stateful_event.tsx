@@ -19,7 +19,6 @@ import {
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
 import type { SetEventsDeleted, SetEventsLoading } from '../../../../../../../timelines/common';
-import { BrowserFields } from '../../../../../common/containers/source';
 import {
   TimelineItem,
   TimelineNonEcsData,
@@ -45,7 +44,6 @@ import { StatefulEventContext } from '../../../../../../../timelines/public';
 interface Props {
   actionsColumnWidth: number;
   containerRef: React.MutableRefObject<HTMLDivElement | null>;
-  browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
   event: TimelineItem;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
@@ -78,7 +76,6 @@ EventsTrSupplementContainerWrapper.displayName = 'EventsTrSupplementContainerWra
 
 const StatefulEventComponent: React.FC<Props> = ({
   actionsColumnWidth,
-  browserFields,
   containerRef,
   columnHeaders,
   event,
@@ -236,31 +233,6 @@ const StatefulEventComponent: React.FC<Props> = ({
     [dispatch, timelineId]
   );
 
-  const RowRendererContent = useMemo(
-    () => (
-      <EventsTrSupplement>
-        <StatefulRowRenderer
-          ariaRowindex={ariaRowindex}
-          browserFields={browserFields}
-          containerRef={containerRef}
-          event={event}
-          lastFocusedAriaColindex={lastFocusedAriaColindex}
-          rowRenderers={rowRenderers}
-          timelineId={timelineId}
-        />
-      </EventsTrSupplement>
-    ),
-    [
-      ariaRowindex,
-      browserFields,
-      containerRef,
-      event,
-      lastFocusedAriaColindex,
-      rowRenderers,
-      timelineId,
-    ]
-  );
-
   return (
     <StatefulEventContext.Provider value={activeStatefulEventContext}>
       <EventsTrGroup
@@ -319,7 +291,16 @@ const StatefulEventComponent: React.FC<Props> = ({
             />
           </EventsTrSupplement>
 
-          {RowRendererContent}
+          <EventsTrSupplement>
+            <StatefulRowRenderer
+              ariaRowindex={ariaRowindex}
+              containerRef={containerRef}
+              event={event}
+              lastFocusedAriaColindex={lastFocusedAriaColindex}
+              rowRenderers={rowRenderers}
+              timelineId={timelineId}
+            />
+          </EventsTrSupplement>
         </EventsTrSupplementContainerWrapper>
       </EventsTrGroup>
     </StatefulEventContext.Provider>

@@ -18,7 +18,6 @@ import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { useQueryToggle } from '../../containers/query_toggle';
 
 jest.mock('../../containers/query_toggle');
-jest.mock('../../lib/kibana');
 
 jest.mock('./matrix_loader', () => ({
   MatrixLoader: () => <div className="matrixLoader" />,

@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { from, of } from 'rxjs';
+import { firstValueFrom, from, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { DataView, DataViewsContract } from '../../../../../src/plugins/data_views/common';
 import { fieldList, FieldSpec } from '../../../../../src/plugins/data/common';
@@ -68,13 +68,13 @@ export const createIndexPatternsMock = (
       const indexPatterns$ = of(
         indexPatterns.map(({ id = 'unknown_id', title }) => ({ id, title }))
       );
-      return await indexPatterns$.pipe(delay(asyncDelay)).toPromise();
+      return await firstValueFrom(indexPatterns$.pipe(delay(asyncDelay)));
     },
     async get(indexPatternId: string) {
       const indexPatterns$ = from(
         indexPatterns.filter((indexPattern) => indexPattern.id === indexPatternId)
       );
-      return await indexPatterns$.pipe(delay(asyncDelay)).toPromise();
+      return await firstValueFrom(indexPatterns$.pipe(delay(asyncDelay)));
     },
   };
 };

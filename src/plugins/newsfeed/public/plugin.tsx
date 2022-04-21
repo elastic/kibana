@@ -25,7 +25,7 @@ export class NewsfeedPublicPlugin
 {
   private readonly kibanaVersion: string;
   private readonly config: NewsfeedPluginBrowserConfig;
-  private readonly stop$ = new Rx.ReplaySubject(1);
+  private readonly stop$ = new Rx.ReplaySubject<void>(1);
 
   constructor(initializerContext: PluginInitializerContext<NewsfeedPluginBrowserConfig>) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;

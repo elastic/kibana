@@ -17,6 +17,7 @@ import {
 } from '../../../test_helpers';
 import type { ReportingRequestHandlerContext } from '../../../types';
 import { registerDiagnoseScreenshot } from '../screenshot';
+import { defer } from 'rxjs';
 
 jest.mock('../../../export_types/common/generate_png');
 
@@ -30,9 +31,8 @@ describe('POST /diagnose/screenshot', () => {
 
   const setScreenshotResponse = (resp: object | Error) => {
     const generateMock = {
-      pipe: () => ({
-        toPromise: () => (resp instanceof Error ? Promise.reject(resp) : Promise.resolve(resp)),
-      }),
+      pipe: () =>
+        defer(() => (resp instanceof Error ? Promise.reject(resp) : Promise.resolve(resp))),
     };
     (generatePngObservable as jest.Mock).mockReturnValue(generateMock);
   };

@@ -7,6 +7,8 @@
 
 import { SavedObjectsType } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
+import { add820Indices } from './migrations';
+
 export const settingsObjectType = 'uptime-dynamic-settings';
 export const settingsObjectId = 'uptime-dynamic-settings-singleton';
 
@@ -42,5 +44,9 @@ export const umDynamicSettings: SavedObjectsType = {
       i18n.translate('xpack.uptime.uptimeSettings.index', {
         defaultMessage: 'Uptime Settings - Index',
       }),
+  },
+  migrations: {
+    // Takes a pre 8.2.0 doc, and converts it to 8.2.0
+    '8.2.0': add820Indices,
   },
 };

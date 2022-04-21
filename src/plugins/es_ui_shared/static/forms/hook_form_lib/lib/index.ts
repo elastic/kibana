@@ -7,5 +7,7 @@
  */
 
 export type { Subscription } from './subject';
+
 export { Subject } from './subject';
-export * from './utils';
+
+export { flattenObject, unflattenObject, mapFormFields } from './utils';
