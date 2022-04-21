@@ -127,7 +127,7 @@ steps:
     label: 'Jest Tests'
     parallelism: 10
     agents:
-      queue: n2-2-16g-spot
+      queue: n2-4-spot
     timeout_in_minutes: 90
     key: jest
     retry:

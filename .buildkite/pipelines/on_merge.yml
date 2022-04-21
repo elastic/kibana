@@ -159,7 +159,7 @@ steps:
 
   - command: .buildkite/scripts/steps/test/jest.sh
     label: 'Jest Tests'
-    parallelism: 8
+    parallelism: 10
     agents:
       queue: n2-4-spot
     timeout_in_minutes: 90
