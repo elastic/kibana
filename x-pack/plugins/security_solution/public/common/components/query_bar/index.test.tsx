@@ -85,6 +85,7 @@ describe('QueryBar ', () => {
       dataTestSubj: undefined,
       dateRangeFrom: 'now/d',
       dateRangeTo: 'now/d',
+      displayStyle: undefined,
       filters: [],
       indexPatterns: [
         {
@@ -203,6 +204,7 @@ describe('QueryBar ', () => {
       showQueryBar: true,
       showQueryInput: true,
       showSaveQuery: true,
+      showSubmitButton: false,
     });
   });
 
