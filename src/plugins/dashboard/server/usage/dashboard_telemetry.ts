@@ -7,7 +7,11 @@
  */
 import { isEmpty } from 'lodash';
 import { ISavedObjectsRepository, SavedObjectAttributes } from 'src/core/server';
-import { ControlGroupTelemetry, CONTROL_GROUP_TYPE, RawControlGroupAttributes } from '../../../controls/common';
+import {
+  ControlGroupTelemetry,
+  CONTROL_GROUP_TYPE,
+  RawControlGroupAttributes,
+} from '../../../controls/common';
 import { EmbeddablePersistableStateService } from '../../../embeddable/common';
 import { SavedDashboardPanel730ToLatest } from '../../common';
 import { injectReferences } from '../../common/saved_dashboard_references';
@@ -120,4 +124,3 @@ export async function collectDashboardTelemetry(
 function initializeControlGroupTelemetry(arg0: {}): ControlGroupTelemetry {
   throw new Error('Function not implemented.');
 }
-
