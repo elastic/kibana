@@ -40,6 +40,7 @@ const Header = styled.header<HeaderProps>`
       `.header-section-titles {
               margin-top:  ${theme.eui.paddingSizes.m};
         }`}
+  }
 
   ${({ height }) =>
     height &&
