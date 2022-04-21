@@ -378,20 +378,6 @@ export class AbstractLayer implements ILayer {
   }
 
   isLayerLoading(): boolean {
-    // __areTilesLoaded is not set until after intial render
-    // To avoid showing no results icon when page is first rendered,
-    // indicate as loading until elasticsearch vector tile layers have either meta featues or errors.
-    const source = this.getSource();
-    if (
-      source.isESSource() &&
-      'isMvt' in source &&
-      (source as IVectorSource).isMvt() &&
-      this._getMetaFromTiles().length === 0 &&
-      !this.hasErrors()
-    ) {
-      return true;
-    }
-
     const areTilesLoading =
       typeof this._descriptor.__areTilesLoaded !== 'undefined'
         ? !this._descriptor.__areTilesLoaded
