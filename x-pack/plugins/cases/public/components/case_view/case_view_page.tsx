@@ -6,7 +6,15 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingLogo,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+} from '@elastic/eui';
 
 import { Case, UpdateKey } from '../../../common/ui';
 import { EditableTitle } from '../header_page/editable_title';
@@ -23,6 +31,7 @@ import type { CaseViewPageProps } from './types';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { useOnUpdateField } from './use_on_update_field';
 import { CaseViewActivity } from './components/case_view_activity';
+import { ACTIVITY_TAB, ALERTS_TAB } from './translations';
 
 export const CaseViewPage = React.memo<CaseViewPageProps>(
   ({
@@ -146,6 +155,71 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
       }
     }, [onComponentInitialized]);
 
+    const tabs = useMemo(
+      () => [
+        {
+          id: 'activity',
+          name: ACTIVITY_TAB,
+          content: (
+            <CaseViewActivity
+              getCaseUserActions={getCaseUserActions}
+              initLoadingData={initLoadingData}
+              ruleDetailsNavigation={ruleDetailsNavigation}
+              caseId={caseId}
+              caseData={caseData}
+              actionsNavigation={actionsNavigation}
+              showAlertDetails={showAlertDetails}
+              updateCase={updateCase}
+              fetchCaseMetrics={fetchCaseMetrics}
+              useFetchAlertData={useFetchAlertData}
+            />
+          ),
+        },
+        {
+          id: 'alerts',
+          name: ALERTS_TAB,
+          content: (
+            <EuiEmptyPrompt
+              icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
+              title={<h2>{'Alerts table placeholder'}</h2>}
+            />
+          ),
+        },
+      ],
+      [
+        actionsNavigation,
+        caseData,
+        caseId,
+        fetchCaseMetrics,
+        getCaseUserActions,
+        initLoadingData,
+        ruleDetailsNavigation,
+        showAlertDetails,
+        updateCase,
+        useFetchAlertData,
+      ]
+    );
+    const [selectedTabId, setSelectedTabId] = useState(tabs[0].id);
+    const selectedTabContent = useMemo(() => {
+      return tabs.find((obj) => obj.id === selectedTabId)?.content;
+    }, [selectedTabId, tabs]);
+
+    const onSelectedTabChanged = (id: string) => {
+      setSelectedTabId(id);
+    };
+
+    const renderTabs = () => {
+      return tabs.map((tab, index) => (
+        <EuiTab
+          key={index}
+          onClick={() => onSelectedTabChanged(tab.id)}
+          isSelected={tab.id === selectedTabId}
+        >
+          {tab.name}
+        </EuiTab>
+      ));
+    };
+
     return (
       <>
         <HeaderPage
@@ -186,19 +260,10 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />
+            <EuiTabs>{renderTabs()}</EuiTabs>
+            <EuiSpacer size="l" />
             <EuiFlexGroup>
-              <CaseViewActivity
-                getCaseUserActions={getCaseUserActions}
-                initLoadingData={initLoadingData}
-                ruleDetailsNavigation={ruleDetailsNavigation}
-                caseId={caseId}
-                caseData={caseData}
-                actionsNavigation={actionsNavigation}
-                showAlertDetails={showAlertDetails}
-                updateCase={updateCase}
-                fetchCaseMetrics={fetchCaseMetrics}
-                useFetchAlertData={useFetchAlertData}
-              />
+              <EuiFlexItem>{selectedTabContent}</EuiFlexItem>
             </EuiFlexGroup>
           </ContentWrapper>
         </WhitePageWrapper>
