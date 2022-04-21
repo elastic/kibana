@@ -13,13 +13,7 @@
  */
 
 import { journey, step, before } from '@elastic/synthetics';
-import {
-  assertNotText,
-  assertText,
-  byTestId,
-  loginToKibana,
-  waitForLoadingToFinish,
-} from '../utils';
+import { assertNotText, assertText, byTestId, waitForLoadingToFinish } from '../utils';
 import { settingsPageProvider } from '../../page_objects/settings';
 
 journey('DefaultEmailSettings', async ({ page, params }) => {
@@ -40,7 +34,7 @@ journey('DefaultEmailSettings', async ({ page, params }) => {
     await page.goto(`${baseUrl}?${queryParams}`, {
       waitUntil: 'networkidle',
     });
-    await loginToKibana({ page });
+    await settings.loginToKibana();
   });
 
   step('clear existing settings', async () => {

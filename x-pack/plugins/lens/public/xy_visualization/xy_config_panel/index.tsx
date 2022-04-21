@@ -21,7 +21,6 @@ import { getScaleType } from '../to_expression';
 import { TooltipWrapper } from '../../shared_components';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import { getDataLayers } from '../visualization_helpers';
-import { convertActiveDataFromIndexesToLayers } from '../reference_line_helpers';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -119,9 +118,8 @@ export const XyToolbar = memo(function XyToolbar(
 
   const dataLayers = getDataLayers(state?.layers);
   const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
-  const activeData = convertActiveDataFromIndexesToLayers(frame.activeData, state.layers);
-  const axisGroups = getAxesConfiguration(dataLayers, shouldRotate, activeData);
-  const dataBounds = getDataBounds(activeData, axisGroups);
+  const axisGroups = getAxesConfiguration(dataLayers, shouldRotate, frame.activeData);
+  const dataBounds = getDataBounds(frame.activeData, axisGroups);
 
   const tickLabelsVisibilitySettings = {
     x: state?.tickLabelsVisibilitySettings?.x ?? true,

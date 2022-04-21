@@ -288,6 +288,7 @@ exports[`XYChart component it renders area 1`] = `
     domain={
       Object {
         "fit": false,
+        "includeDataFromIds": Array [],
         "max": NaN,
         "min": NaN,
       }
@@ -325,7 +326,7 @@ exports[`XYChart component it renders area 1`] = `
   <DataLayers
     areLayersAlreadyFormatted={
       Object {
-        "0": Object {
+        "first": Object {
           "a": false,
           "b": false,
           "c": false,
@@ -474,6 +475,7 @@ exports[`XYChart component it renders area 1`] = `
           ],
           "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
           "isHistogram": false,
+          "layerId": "first",
           "layerType": "data",
           "palette": Object {
             "name": "mock",
@@ -598,11 +600,11 @@ exports[`XYChart component it renders area 1`] = `
           "series": Array [
             Object {
               "accessor": "a",
-              "layer": 0,
+              "layer": "first",
             },
             Object {
               "accessor": "b",
-              "layer": 0,
+              "layer": "first",
             },
           ],
         },
@@ -687,6 +689,7 @@ exports[`XYChart component it renders bar 1`] = `
     domain={
       Object {
         "fit": false,
+        "includeDataFromIds": Array [],
         "max": NaN,
         "min": NaN,
       }
@@ -724,7 +727,7 @@ exports[`XYChart component it renders bar 1`] = `
   <DataLayers
     areLayersAlreadyFormatted={
       Object {
-        "0": Object {
+        "first": Object {
           "a": false,
           "b": false,
           "c": false,
@@ -873,6 +876,7 @@ exports[`XYChart component it renders bar 1`] = `
           ],
           "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
           "isHistogram": false,
+          "layerId": "first",
           "layerType": "data",
           "palette": Object {
             "name": "mock",
@@ -997,11 +1001,11 @@ exports[`XYChart component it renders bar 1`] = `
           "series": Array [
             Object {
               "accessor": "a",
-              "layer": 0,
+              "layer": "first",
             },
             Object {
               "accessor": "b",
-              "layer": 0,
+              "layer": "first",
             },
           ],
         },
@@ -1086,6 +1090,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
     domain={
       Object {
         "fit": false,
+        "includeDataFromIds": Array [],
         "max": NaN,
         "min": NaN,
       }
@@ -1123,7 +1128,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
   <DataLayers
     areLayersAlreadyFormatted={
       Object {
-        "0": Object {
+        "first": Object {
           "a": false,
           "b": false,
           "c": false,
@@ -1272,6 +1277,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
           ],
           "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
           "isHistogram": false,
+          "layerId": "first",
           "layerType": "data",
           "palette": Object {
             "name": "mock",
@@ -1396,11 +1402,11 @@ exports[`XYChart component it renders horizontal bar 1`] = `
           "series": Array [
             Object {
               "accessor": "a",
-              "layer": 0,
+              "layer": "first",
             },
             Object {
               "accessor": "b",
-              "layer": 0,
+              "layer": "first",
             },
           ],
         },
@@ -1485,6 +1491,7 @@ exports[`XYChart component it renders line 1`] = `
     domain={
       Object {
         "fit": false,
+        "includeDataFromIds": Array [],
         "max": NaN,
         "min": NaN,
       }
@@ -1522,7 +1529,7 @@ exports[`XYChart component it renders line 1`] = `
   <DataLayers
     areLayersAlreadyFormatted={
       Object {
-        "0": Object {
+        "first": Object {
           "a": false,
           "b": false,
           "c": false,
@@ -1671,6 +1678,7 @@ exports[`XYChart component it renders line 1`] = `
           ],
           "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
           "isHistogram": false,
+          "layerId": "first",
           "layerType": "data",
           "palette": Object {
             "name": "mock",
@@ -1795,11 +1803,11 @@ exports[`XYChart component it renders line 1`] = `
           "series": Array [
             Object {
               "accessor": "a",
-              "layer": 0,
+              "layer": "first",
             },
             Object {
               "accessor": "b",
-              "layer": 0,
+              "layer": "first",
             },
           ],
         },
@@ -1884,6 +1892,7 @@ exports[`XYChart component it renders stacked area 1`] = `
     domain={
       Object {
         "fit": false,
+        "includeDataFromIds": Array [],
         "max": NaN,
         "min": NaN,
       }
@@ -1921,7 +1930,7 @@ exports[`XYChart component it renders stacked area 1`] = `
   <DataLayers
     areLayersAlreadyFormatted={
       Object {
-        "0": Object {
+        "first": Object {
           "a": false,
           "b": false,
           "c": false,
@@ -2070,6 +2079,7 @@ exports[`XYChart component it renders stacked area 1`] = `
           ],
           "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
           "isHistogram": false,
+          "layerId": "first",
           "layerType": "data",
           "palette": Object {
             "name": "mock",
@@ -2194,11 +2204,11 @@ exports[`XYChart component it renders stacked area 1`] = `
           "series": Array [
             Object {
               "accessor": "a",
-              "layer": 0,
+              "layer": "first",
             },
             Object {
               "accessor": "b",
-              "layer": 0,
+              "layer": "first",
             },
           ],
         },
@@ -2283,6 +2293,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
     domain={
       Object {
         "fit": false,
+        "includeDataFromIds": Array [],
         "max": NaN,
         "min": NaN,
       }
@@ -2320,7 +2331,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
   <DataLayers
     areLayersAlreadyFormatted={
       Object {
-        "0": Object {
+        "first": Object {
           "a": false,
           "b": false,
           "c": false,
@@ -2469,6 +2480,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
           ],
           "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
           "isHistogram": false,
+          "layerId": "first",
           "layerType": "data",
           "palette": Object {
             "name": "mock",
@@ -2593,11 +2605,11 @@ exports[`XYChart component it renders stacked bar 1`] = `
           "series": Array [
             Object {
               "accessor": "a",
-              "layer": 0,
+              "layer": "first",
             },
             Object {
               "accessor": "b",
-              "layer": 0,
+              "layer": "first",
             },
           ],
         },
@@ -2682,6 +2694,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
     domain={
       Object {
         "fit": false,
+        "includeDataFromIds": Array [],
         "max": NaN,
         "min": NaN,
       }
@@ -2719,7 +2732,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
   <DataLayers
     areLayersAlreadyFormatted={
       Object {
-        "0": Object {
+        "first": Object {
           "a": false,
           "b": false,
           "c": false,
@@ -2868,6 +2881,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
           ],
           "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
           "isHistogram": false,
+          "layerId": "first",
           "layerType": "data",
           "palette": Object {
             "name": "mock",
@@ -2992,11 +3006,11 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
           "series": Array [
             Object {
               "accessor": "a",
-              "layer": 0,
+              "layer": "first",
             },
             Object {
               "accessor": "b",
-              "layer": 0,
+              "layer": "first",
             },
           ],
         },

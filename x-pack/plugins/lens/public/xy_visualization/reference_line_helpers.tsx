@@ -254,45 +254,6 @@ function computeStaticValueForGroup(
   }
 }
 
-/**
- * Converts hashmap of tables, stored by layers' indexes
- * (created at `layeredXyVis` expression function), to hashmap of tables, stored by layers' ids. Before,
- * layers, passed to `xy` expression function contained layerIds. But it is impossible to continue using
- * this approach any more, as far as the idea of multitable is going to be deprecated.
- * @param activeData hashmap of tables, containing requested data.
- * @param layers array of data visualization configuration. Each layer has its own table at the `activeData`.
- * @returns new hashmap of tables, where all the tables are mapped by layerId.
- */
-export const convertActiveDataFromIndexesToLayers = (
-  activeData: Record<string, Datatable> | undefined,
-  layers: XYState['layers'] = []
-): Record<string, Datatable> | undefined => {
-  if (!activeData) {
-    return activeData;
-  }
-
-  const indexesToLayerIds = layers.reduce<Record<number, string>>(
-    (layersWithIndexes, { layerId }, index) =>
-      layerId ? { ...layersWithIndexes, [index]: layerId } : layersWithIndexes,
-    {}
-  );
-
-  const convertedActiveData = Object.entries<Datatable>(activeData).reduce<
-    Record<string | number, Datatable>
-  >((dataByLayerIds, [layerIndex, dataPerLayer]) => {
-    // if layer index doesn't exist at the map of layer index, it means, that is
-    // a layerId and should be mapped without conveting from index to layerId.
-    const index = Number(layerIndex);
-    const layerId = isNaN(index) ? layerIndex : indexesToLayerIds[index] ?? layerIndex;
-    return {
-      ...dataByLayerIds,
-      [layerId]: dataPerLayer,
-    };
-  }, {});
-
-  return Object.keys(convertedActiveData).length ? convertedActiveData : undefined;
-};
-
 export const getReferenceSupportedLayer = (
   state?: XYState,
   frame?: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>
@@ -312,8 +273,6 @@ export const getReferenceSupportedLayer = (
     },
   ];
 
-  const layers = state?.layers || [];
-
   const referenceLineGroups = getGroupsRelatedToData(
     referenceLineGroupIds,
     state,
@@ -321,6 +280,7 @@ export const getReferenceSupportedLayer = (
     frame?.activeData
   );
 
+  const layers = state?.layers || [];
   const dataLayers = getDataLayers(layers);
 
   const filledDataLayers = dataLayers.filter(
@@ -337,7 +297,7 @@ export const getReferenceSupportedLayer = (
         groupId: id,
         columnId: generateId(),
         dataType: 'number',
-        label: getAxisName(label, { isHorizontal: isHorizontalChart(state?.layers || []) }),
+        label: getAxisName(label, { isHorizontal: isHorizontalChart(layers) }),
         staticValue: getStaticValue(
           dataLayers,
           label,

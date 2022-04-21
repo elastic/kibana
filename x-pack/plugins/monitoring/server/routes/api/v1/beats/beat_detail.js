@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { prefixIndexPattern } from '../../../../../common/ccs_utils';
+import { prefixIndexPatternWithCcs } from '../../../../../common/ccs_utils';
 import { getBeatSummary } from '../../../../lib/beats';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors';
@@ -37,7 +37,7 @@ export function beatsDetailRoute(server) {
       const beatUuid = req.params.beatUuid;
       const config = server.config;
       const ccs = req.payload.ccs;
-      const beatsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
+      const beatsIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_BEATS, ccs);
 
       const summaryOptions = {
         clusterUuid,

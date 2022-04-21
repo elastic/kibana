@@ -28,10 +28,10 @@ import {
   referenceLineLayerFunction,
   extendedReferenceLineLayerFunction,
   annotationLayerFunction,
-  extendedAnnotationLayerFunction,
   labelsOrientationConfigFunction,
   axisTitlesVisibilityConfigFunction,
-} from '../common';
+  extendedAnnotationLayerFunction,
+} from '../common/expression_functions';
 import { GetStartDepsFn, getXyChartRenderer } from './expression_renderers';
 
 export interface XYPluginStartDependencies {
