@@ -6,3 +6,4 @@
  */
 
 export * from './actions';
+export { getActionDetailsById } from './action_details_by_id';
