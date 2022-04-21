@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { Datatable } from '@kbn/expressions-plugin';
 import { i18n } from '@kbn/i18n';
-import { SeriesType } from '../types';
+import { validateAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { DataLayerArgs, ExtendedDataLayerArgs, SeriesType } from '../types';
 
 const errors = {
   markSizeAccessorForNonLineOrAreaChartsError: () =>
@@ -101,7 +103,19 @@ export const validateLinesVisibilityForChartType = (
   showLines: boolean | undefined,
   seriesType: SeriesType
 ) => {
-  if (showLines !== undefined && !seriesType.includes('line')) {
+  if (showLines && !(seriesType.includes('line') || seriesType.includes('area'))) {
     throw new Error(errors.linesVisibilityForNonLineChartError());
   }
+};
+
+export const validateDataLayer = (
+  args: DataLayerArgs | ExtendedDataLayerArgs,
+  table: Datatable
+) => {
+  validateMarkSizeForChartType(args.markSizeAccessor, args.seriesType);
+  validateAccessor(args.markSizeAccessor, table.columns);
+  validateLinesVisibilityForChartType(args.showLines, args.seriesType);
+  validateLineWidthForChartType(args.lineWidth, args.seriesType);
+  validateShowPointsForChartType(args.showPoints, args.seriesType);
+  validatePointsRadiusForChartType(args.pointsRadius, args.seriesType);
 };

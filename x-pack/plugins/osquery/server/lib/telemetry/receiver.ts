@@ -111,6 +111,7 @@ export class TelemetryReceiver {
       return (await ret).license;
     } catch (err) {
       this.logger.debug(`failed retrieving license: ${err}`);
+
       return undefined;
     }
   }

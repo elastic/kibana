@@ -9,15 +9,15 @@
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { FormatFactory } from '../types';
 import {
-  CommonXYDataLayerConfigResult,
-  CommonXYReferenceLineLayerConfigResult,
+  CommonXYDataLayerConfig,
+  CommonXYReferenceLineLayerConfig,
   ExtendedYConfig,
   YConfig,
 } from '../../common';
 import { isDataLayer } from './visualization';
 
 export interface Series {
-  layer: number;
+  layer: string;
   accessor: string;
 }
 
@@ -40,7 +40,7 @@ export function isFormatterCompatible(
 }
 
 export function groupAxesByType(
-  layers: Array<CommonXYDataLayerConfigResult | CommonXYReferenceLineLayerConfigResult>
+  layers: Array<CommonXYDataLayerConfig | CommonXYReferenceLineLayerConfig>
 ) {
   const series: {
     auto: FormattedMetric[];
@@ -54,7 +54,7 @@ export function groupAxesByType(
     bottom: [],
   };
 
-  layers.forEach((layer, index) => {
+  layers.forEach((layer) => {
     const { table } = layer;
     layer.accessors.forEach((accessor) => {
       const yConfig: Array<YConfig | ExtendedYConfig> | undefined = layer.yConfig;
@@ -75,7 +75,7 @@ export function groupAxesByType(
         };
       }
       series[mode].push({
-        layer: index,
+        layer: layer.layerId,
         accessor,
         fieldFormat: formatter,
       });
@@ -111,7 +111,7 @@ export function groupAxesByType(
 }
 
 export function getAxesConfiguration(
-  layers: Array<CommonXYDataLayerConfigResult | CommonXYReferenceLineLayerConfigResult>,
+  layers: Array<CommonXYDataLayerConfig | CommonXYReferenceLineLayerConfig>,
   shouldRotate: boolean,
   formatFactory?: FormatFactory
 ): GroupsConfiguration {

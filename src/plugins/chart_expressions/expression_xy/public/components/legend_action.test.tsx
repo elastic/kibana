@@ -11,7 +11,7 @@ import { LegendActionProps, SeriesIdentifier } from '@elastic/charts';
 import { EuiPopover } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ComponentType, ReactWrapper } from 'enzyme';
-import type { DataLayerConfigResult, LensMultiTable } from '../../common';
+import type { DataLayerConfig, LensMultiTable } from '../../common';
 import { LayerTypes } from '../../common/constants';
 import { getLegendAction } from './legend_action';
 import { LegendActionPopover } from './legend_action_popover';
@@ -153,7 +153,8 @@ const tables = {
   },
 } as LensMultiTable['tables'];
 
-const sampleLayer: DataLayerConfigResult = {
+const sampleLayer: DataLayerConfig = {
+  layerId: 'first',
   type: 'dataLayer',
   layerType: LayerTypes.DATA,
   seriesType: 'line',

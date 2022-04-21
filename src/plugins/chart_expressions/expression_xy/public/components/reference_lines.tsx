@@ -13,11 +13,7 @@ import { groupBy } from 'lodash';
 import { RectAnnotation, AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import type {
-  CommonXYReferenceLineLayerConfigResult,
-  IconPosition,
-  YAxisMode,
-} from '../../common/types';
+import type { CommonXYReferenceLineLayerConfig, IconPosition, YAxisMode } from '../../common/types';
 import {
   LINES_MARKER_SIZE,
   mapVerticalToHorizontalPlacement,
@@ -92,7 +88,7 @@ export function getBaseIconPlacement(
 }
 
 export interface ReferenceLineAnnotationsProps {
-  layers: CommonXYReferenceLineLayerConfigResult[];
+  layers: CommonXYReferenceLineLayerConfig[];
   formatters: Record<'left' | 'right' | 'bottom', FieldFormat | undefined>;
   axesMap: Record<'left' | 'right', boolean>;
   isHorizontal: boolean;
@@ -108,7 +104,7 @@ export const ReferenceLineAnnotations = ({
 }: ReferenceLineAnnotationsProps) => {
   return (
     <>
-      {layers.flatMap((layer, index) => {
+      {layers.flatMap((layer) => {
         if (!layer.yConfig) {
           return [];
         }
@@ -194,8 +190,8 @@ export const ReferenceLineAnnotations = ({
           annotations.push(
             <LineAnnotation
               {...props}
-              id={`${index}-${yConfig.forAccessor}-line`}
-              key={`${index}-${yConfig.forAccessor}-line`}
+              id={`${layer.layerId}-${yConfig.forAccessor}-line`}
+              key={`${layer.layerId}-${yConfig.forAccessor}-line`}
               dataValues={table.rows.map(() => ({
                 dataValue: row[yConfig.forAccessor],
                 header: columnToLabelMap[yConfig.forAccessor],
@@ -225,8 +221,8 @@ export const ReferenceLineAnnotations = ({
             annotations.push(
               <RectAnnotation
                 {...props}
-                id={`${index}-${yConfig.forAccessor}-rect`}
-                key={`${index}-${yConfig.forAccessor}-rect`}
+                id={`${layer.layerId}-${yConfig.forAccessor}-rect`}
+                key={`${layer.layerId}-${yConfig.forAccessor}-rect`}
                 dataValues={table.rows.map(() => {
                   const nextValue = shouldCheckNextReferenceLine
                     ? row[groupedByDirection[yConfig.fill!][indexFromSameType + 1].forAccessor]
