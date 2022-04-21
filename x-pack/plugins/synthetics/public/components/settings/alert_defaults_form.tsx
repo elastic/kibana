@@ -125,7 +125,7 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
       <EuiTitle size="s">
         <h3>
           <FormattedMessage
-            id="xpack.synthetics..sourceConfiguration.alertDefaults"
+            id="xpack.synthetics.sourceConfiguration.alertDefaults"
             defaultMessage="Alert defaults"
           />
         </h3>
@@ -135,14 +135,14 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
         title={
           <h4>
             <FormattedMessage
-              id="xpack.synthetics..sourceConfiguration.alertConnectors"
+              id="xpack.synthetics.sourceConfiguration.alertConnectors"
               defaultMessage="Alert Connectors"
             />
           </h4>
         }
         description={
           <FormattedMessage
-            id="xpack.synthetics..sourceConfiguration.defaultConnectors.description"
+            id="xpack.synthetics.sourceConfiguration.defaultConnectors.description"
             defaultMessage="Default connectors to be used to send an alert."
           />
         }
@@ -154,7 +154,7 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
           isInvalid={!!error}
           label={
             <FormattedMessage
-              id="xpack.synthetics..sourceConfiguration.defaultConnectors"
+              id="xpack.synthetics.sourceConfiguration.defaultConnectors"
               defaultMessage="Default connectors"
             />
           }

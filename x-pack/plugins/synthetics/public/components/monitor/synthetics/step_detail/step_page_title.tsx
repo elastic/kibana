@@ -41,7 +41,7 @@ export const StepPageTitleContent = ({
           <EuiFlexItem grow={false}>
             <EuiText size="s">
               <FormattedMessage
-                id="xpack.synthetics..synthetics.stepDetail.totalSteps"
+                id="xpack.synthetics.synthetics.stepDetail.totalSteps"
                 defaultMessage="Step {stepIndex} of {totalSteps}"
                 values={{
                   stepIndex,

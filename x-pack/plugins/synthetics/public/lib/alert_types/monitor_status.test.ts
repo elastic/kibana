@@ -207,7 +207,7 @@ describe('monitor status alert type', () => {
         "documentationUrl": [Function],
         "format": [Function],
         "iconClass": "uptimeApp",
-        "id": "xpack.synthetics..alerts.monitorStatus",
+        "id": "xpack.synthetics.alerts.monitorStatus",
         "requiresAppContext": false,
         "ruleParamsExpression": [Function],
         "validate": [Function],

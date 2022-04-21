@@ -25,27 +25,25 @@ const DEFAULT_TIMERANGE_UNIT = 'm';
 const TimeRangeOptions: TimeRangeOption[] = [
   {
     'aria-label': labels.SECONDS_TIME_RANGE,
-    'data-test-subj':
-      'xpack.synthetics..alerts.monitorStatus.timerangeUnitSelectable.secondsOption',
+    'data-test-subj': 'xpack.synthetics.alerts.monitorStatus.timerangeUnitSelectable.secondsOption',
     key: 's',
     label: labels.SECONDS,
   },
   {
     'aria-label': labels.MINUTES_TIME_RANGE,
-    'data-test-subj':
-      'xpack.synthetics..alerts.monitorStatus.timerangeUnitSelectable.minutesOption',
+    'data-test-subj': 'xpack.synthetics.alerts.monitorStatus.timerangeUnitSelectable.minutesOption',
     key: 'm',
     label: labels.MINUTES,
   },
   {
     'aria-label': labels.HOURS_TIME_RANGE,
-    'data-test-subj': 'xpack.synthetics..alerts.monitorStatus.timerangeUnitSelectable.hoursOption',
+    'data-test-subj': 'xpack.synthetics.alerts.monitorStatus.timerangeUnitSelectable.hoursOption',
     key: 'h',
     label: labels.HOURS,
   },
   {
     'aria-label': labels.DAYS_TIME_RANGE,
-    'data-test-subj': 'xpack.synthetics..alerts.monitorStatus.timerangeUnitSelectable.daysOption',
+    'data-test-subj': 'xpack.synthetics.alerts.monitorStatus.timerangeUnitSelectable.daysOption',
     key: 'd',
     label: labels.DAYS,
   },
@@ -79,13 +77,13 @@ export const TimeExpressionSelect: React.FC<Props> = ({
           content={
             <AlertFieldNumber
               aria-label={labels.ENTER_NUMBER_OF_TIME_UNITS}
-              data-test-subj="xpack.synthetics..alerts.monitorStatus.timerangeValueField"
+              data-test-subj="xpack.synthetics.alerts.monitorStatus.timerangeValueField"
               disabled={false}
               fieldValue={numUnits}
               setFieldValue={setNumUnits}
             />
           }
-          data-test-subj="xpack.synthetics..alerts.monitorStatus.timerangeValueExpression"
+          data-test-subj="xpack.synthetics.alerts.monitorStatus.timerangeValueExpression"
           description={labels.ENTER_NUMBER_OF_TIME_UNITS_DESCRIPTION}
           id="timerange"
           isEnabled={isEnabled}
@@ -98,7 +96,7 @@ export const TimeExpressionSelect: React.FC<Props> = ({
           content={
             <TimeUnitSelectable
               aria-label={timeExpLabels.SELECT_TIME_RANGE_ARIA}
-              data-test-subj="xpack.synthetics..alerts.monitorStatus.timerangeUnitSelectable"
+              data-test-subj="xpack.synthetics.alerts.monitorStatus.timerangeUnitSelectable"
               headlineText={timeExpLabels.SELECT_TIME_RANGE_HEADLINE}
               onChange={(newOptions: Array<Pick<TimeRangeOption, 'checked'>>) => {
                 if (newOptions.reduce((acc, { checked }) => acc || checked === 'on', false)) {
@@ -108,7 +106,7 @@ export const TimeExpressionSelect: React.FC<Props> = ({
               timeRangeOptions={timerangeUnitOptions}
             />
           }
-          data-test-subj="xpack.synthetics..alerts.monitorStatus.timerangeUnitExpression"
+          data-test-subj="xpack.synthetics.alerts.monitorStatus.timerangeUnitExpression"
           description=""
           id="timerange-unit"
           isEnabled={isEnabled}

@@ -8,28 +8,28 @@
 import { i18n } from '@kbn/i18n';
 
 export const LOADING_LABEL = i18n.translate(
-  'xpack.synthetics..monitorManagement.editMonitorLoadingLabel',
+  'xpack.synthetics.monitorManagement.editMonitorLoadingLabel',
   {
     defaultMessage: 'Loading monitor',
   }
 );
 
 export const ERROR_HEADING_LABEL = i18n.translate(
-  'xpack.synthetics..monitorManagement.editMonitorError',
+  'xpack.synthetics.monitorManagement.editMonitorError',
   {
     defaultMessage: 'Error loading Monitor Management',
   }
 );
 
 export const SERVICE_LOCATIONS_ERROR_LABEL = i18n.translate(
-  'xpack.synthetics..monitorManagement.addMonitorError',
+  'xpack.synthetics.monitorManagement.addMonitorError',
   {
     defaultMessage: 'Service locations were not able to be loaded. Please try again later.',
   }
 );
 
 export const MONITOR_LOADING_ERROR_LABEL = i18n.translate(
-  'xpack.synthetics..monitorManagement.editMonitorErrorBody',
+  'xpack.synthetics.monitorManagement.editMonitorErrorBody',
   {
     defaultMessage: 'Monitor configuration was not able to be loaded. Please try again later.',
   }

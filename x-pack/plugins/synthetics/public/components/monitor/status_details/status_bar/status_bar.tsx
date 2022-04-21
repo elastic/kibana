@@ -44,19 +44,19 @@ export const MonListDescription = styled(EuiDescriptionListDescription)`
 export const renderMonitorType = (type: string | undefined) => {
   switch (type) {
     case 'http':
-      return i18n.translate('xpack.synthetics..monitorDetails.statusBar.pingType.http', {
+      return i18n.translate('xpack.synthetics.monitorDetails.statusBar.pingType.http', {
         defaultMessage: 'HTTP',
       });
     case 'tcp':
-      return i18n.translate('xpack.synthetics..monitorDetails.statusBar.pingType.tcp', {
+      return i18n.translate('xpack.synthetics.monitorDetails.statusBar.pingType.tcp', {
         defaultMessage: 'TCP',
       });
     case 'icmp':
-      return i18n.translate('xpack.synthetics..monitorDetails.statusBar.pingType.icmp', {
+      return i18n.translate('xpack.synthetics.monitorDetails.statusBar.pingType.icmp', {
         defaultMessage: 'ICMP',
       });
     case 'browser':
-      return i18n.translate('xpack.synthetics..monitorDetails.statusBar.pingType.browser', {
+      return i18n.translate('xpack.synthetics.monitorDetails.statusBar.pingType.browser', {
         defaultMessage: 'Browser',
       });
     default:
@@ -83,7 +83,7 @@ export const MonitorStatusBar: React.FC = () => {
         <MonListTitle>{OverallAvailability}</MonListTitle>
         <MonListDescription data-test-subj="uptimeOverallAvailability">
           <FormattedMessage
-            id="xpack.synthetics..availabilityLabelText"
+            id="xpack.synthetics.availabilityLabelText"
             defaultMessage="{value} %"
             values={{ value: formatAvailabilityValue(availability) }}
             description="A percentage value, like 23.5 %"

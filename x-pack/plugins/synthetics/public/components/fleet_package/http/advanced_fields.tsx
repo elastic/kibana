@@ -52,7 +52,7 @@ export const HTTPAdvancedFields = memo<Props>(
         id="uptimeFleetHttpAdvancedOptions"
         buttonContent={
           <FormattedMessage
-            id="xpack.synthetics..createPackagePolicy.stepConfigure.httpAdvancedOptions"
+            id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions"
             defaultMessage="Advanced HTTP options"
           />
         }
@@ -64,14 +64,14 @@ export const HTTPAdvancedFields = memo<Props>(
           title={
             <h4>
               <FormattedMessage
-                id="xpack.synthetics..createPackagePolicy.stepConfigure.httpAdvancedOptions.requestConfiguration.title"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.requestConfiguration.title"
                 defaultMessage="Request configuration"
               />
             </h4>
           }
           description={
             <FormattedMessage
-              id="xpack.synthetics..createPackagePolicy.stepConfigure.httpAdvancedOptions.requestConfiguration.description"
+              id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.requestConfiguration.description"
               defaultMessage="Configure an optional request to send to the remote host including method, body, and headers."
             />
           }
@@ -81,14 +81,14 @@ export const HTTPAdvancedFields = memo<Props>(
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.username.label"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.username.label"
                 defaultMessage="Username"
               />
             }
             labelAppend={<OptionalLabel />}
             helpText={
               <FormattedMessage
-                id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.username.helpText"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.username.helpText"
                 defaultMessage="Username for authenticating with the server."
               />
             }
@@ -108,14 +108,14 @@ export const HTTPAdvancedFields = memo<Props>(
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.password.label"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.password.label"
                 defaultMessage="Password"
               />
             }
             labelAppend={<OptionalLabel />}
             helpText={
               <FormattedMessage
-                id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.password.helpText"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.password.helpText"
                 defaultMessage="Password for authenticating with the server."
               />
             }
@@ -135,14 +135,14 @@ export const HTTPAdvancedFields = memo<Props>(
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.proxyURL.http.label"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.proxyURL.http.label"
                 defaultMessage="Proxy URL"
               />
             }
             labelAppend={<OptionalLabel />}
             helpText={
               <FormattedMessage
-                id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.proxyUrl.http.helpText"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.proxyUrl.http.helpText"
                 defaultMessage="HTTP proxy URL."
               />
             }
@@ -162,13 +162,13 @@ export const HTTPAdvancedFields = memo<Props>(
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.synthetics..createPackagePolicy.stepConfigure.httpAdvancedOptions.requestConfiguration.requestMethod.label"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.requestConfiguration.requestMethod.label"
                 defaultMessage="Request method"
               />
             }
             helpText={
               <FormattedMessage
-                id="xpack.synthetics..createPackagePolicy.stepConfigure.httpAdvancedOptions.requestMethod.helpText"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.requestMethod.helpText"
                 defaultMessage="The HTTP method to use."
               />
             }
@@ -190,7 +190,7 @@ export const HTTPAdvancedFields = memo<Props>(
             fullWidth
             label={
               <FormattedMessage
-                id="xpack.synthetics..createPackagePolicy.stepConfigure.httpAdvancedOptions.requestConfiguration.requestHeaders"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.requestConfiguration.requestHeaders"
                 defaultMessage="Request headers"
               />
             }
@@ -198,13 +198,13 @@ export const HTTPAdvancedFields = memo<Props>(
             isInvalid={!!validate[ConfigKey.REQUEST_HEADERS_CHECK]?.(fields)}
             error={
               <FormattedMessage
-                id="xpack.synthetics..createPackagePolicy.stepConfigure.httpAdvancedOptions.requestHeadersField.error"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.requestHeadersField.error"
                 defaultMessage="Header key must be a valid HTTP token."
               />
             }
             helpText={
               <FormattedMessage
-                id="xpack.synthetics..createPackagePolicy.stepConfigure.httpAdvancedOptions.requestHeadersField.helpText"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.requestHeadersField.helpText"
                 defaultMessage="A dictionary of additional HTTP headers to send. By default the client will set the User-Agent header to identify itself."
               />
             }
@@ -231,14 +231,14 @@ export const HTTPAdvancedFields = memo<Props>(
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.synthetics..createPackagePolicy.stepConfigure.httpAdvancedOptions.requestConfiguration.requestBody"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.requestConfiguration.requestBody"
                 defaultMessage="Request body"
               />
             }
             labelAppend={<OptionalLabel />}
             helpText={
               <FormattedMessage
-                id="xpack.synthetics..createPackagePolicy.stepConfigure.httpAdvancedOptions.requestBody.helpText"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.requestBody.helpText"
                 defaultMessage="Request body content."
               />
             }
@@ -265,14 +265,14 @@ export const HTTPAdvancedFields = memo<Props>(
           title={
             <h4>
               <FormattedMessage
-                id="xpack.synthetics..createPackagePolicy.stepConfigure.httpAdvancedOptions.responseConfiguration.title"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseConfiguration.title"
                 defaultMessage="Response configuration"
               />
             </h4>
           }
           description={
             <FormattedMessage
-              id="xpack.synthetics..createPackagePolicy.stepConfigure.httpAdvancedOptions.responseConfiguration.description"
+              id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseConfiguration.description"
               defaultMessage="Control the indexing of the HTTP response contents."
             />
           }
@@ -282,7 +282,7 @@ export const HTTPAdvancedFields = memo<Props>(
             helpText={
               <>
                 <FormattedMessage
-                  id="xpack.synthetics..createPackagePolicy.stepConfigure.httpAdvancedOptions.indexResponseHeaders.helpText"
+                  id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.indexResponseHeaders.helpText"
                   defaultMessage="Controls the indexing of the HTTP response headers to "
                 />
                 <EuiCode>http.response.body.headers</EuiCode>
@@ -295,7 +295,7 @@ export const HTTPAdvancedFields = memo<Props>(
               checked={fields[ConfigKey.RESPONSE_HEADERS_INDEX]}
               label={
                 <FormattedMessage
-                  id="xpack.synthetics..createPackagePolicy.stepConfigure.httpAdvancedOptions.responseConfig.indexResponseHeaders"
+                  id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseConfig.indexResponseHeaders"
                   defaultMessage="Index response headers"
                 />
               }
@@ -312,7 +312,7 @@ export const HTTPAdvancedFields = memo<Props>(
             helpText={
               <>
                 <FormattedMessage
-                  id="xpack.synthetics..createPackagePolicy.stepConfigure.httpAdvancedOptions.indexResponseBody.helpText"
+                  id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.indexResponseBody.helpText"
                   defaultMessage="Controls the indexing of the HTTP response body contents to "
                 />
                 <EuiCode>http.response.body.contents</EuiCode>
@@ -335,14 +335,14 @@ export const HTTPAdvancedFields = memo<Props>(
           title={
             <h4>
               <FormattedMessage
-                id="xpack.synthetics..createPackagePolicy.stepConfigure.httpAdvancedOptions.responseChecks.title"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseChecks.title"
                 defaultMessage="Response checks"
               />
             </h4>
           }
           description={
             <FormattedMessage
-              id="xpack.synthetics..createPackagePolicy.stepConfigure.httpAdvancedOptions.responseChecks.description"
+              id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseChecks.description"
               defaultMessage="Configure the expected HTTP response."
             />
           }
@@ -350,7 +350,7 @@ export const HTTPAdvancedFields = memo<Props>(
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.synthetics..createPackagePolicy.stepConfigure.httpAdvancedOptions.responseChecks.responseStatusCheck.label"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseChecks.responseStatusCheck.label"
                 defaultMessage="Check response status equals"
               />
             }
@@ -358,12 +358,12 @@ export const HTTPAdvancedFields = memo<Props>(
             isInvalid={!!validate[ConfigKey.RESPONSE_STATUS_CHECK]?.(fields)}
             error={
               <FormattedMessage
-                id="xpack.synthetics..createPackagePolicy.stepConfigure.httpAdvancedOptions.responseChecks.responseStatusCheck.error"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseChecks.responseStatusCheck.error"
                 defaultMessage="Status code must contain digits only."
               />
             }
             helpText={i18n.translate(
-              'xpack.synthetics..createPackagePolicy.stepConfigure.httpAdvancedOptions.responseChecks.responseStatusCheck.helpText',
+              'xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseChecks.responseStatusCheck.helpText',
               {
                 defaultMessage:
                   'A list of expected status codes. Press enter to add a new code. 4xx and 5xx codes are considered down by default. Other codes are considered up.',
@@ -386,7 +386,7 @@ export const HTTPAdvancedFields = memo<Props>(
             fullWidth
             label={
               <FormattedMessage
-                id="xpack.synthetics..createPackagePolicy.stepConfigure.httpAdvancedOptions.responseChecks.checkResponseHeadersContain"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseChecks.checkResponseHeadersContain"
                 defaultMessage="Check response headers contain"
               />
             }
@@ -394,13 +394,13 @@ export const HTTPAdvancedFields = memo<Props>(
             isInvalid={!!validate[ConfigKey.RESPONSE_HEADERS_CHECK]?.(fields)}
             error={[
               <FormattedMessage
-                id="xpack.synthetics..createPackagePolicy.stepConfigure.httpAdvancedOptions.responseHeadersField.error"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseHeadersField.error"
                 defaultMessage="Header key must be a valid HTTP token."
               />,
             ]}
             helpText={
               <FormattedMessage
-                id="xpack.synthetics..createPackagePolicy.stepConfigure.httpAdvancedOptions.responseHeadersField.helpText"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseHeadersField.helpText"
                 defaultMessage="A list of expected response headers."
               />
             }
@@ -422,13 +422,13 @@ export const HTTPAdvancedFields = memo<Props>(
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.synthetics..createPackagePolicy.stepConfigure.httpAdvancedOptions.responseCheckPositive.label"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseCheckPositive.label"
                 defaultMessage="Check response body contains"
               />
             }
             labelAppend={<OptionalLabel />}
             helpText={i18n.translate(
-              'xpack.synthetics..createPackagePolicy.stepConfigure.httpAdvancedOptions.responseBodyCheckPositive.helpText',
+              'xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseBodyCheckPositive.helpText',
               {
                 defaultMessage:
                   'A list of regular expressions to match the body output. Press enter to add a new expression. Only a single expression needs to match.',
@@ -452,13 +452,13 @@ export const HTTPAdvancedFields = memo<Props>(
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.synthetics..createPackagePolicy.stepConfigure.httpAdvancedOptions.responseCheckNegative.label"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseCheckNegative.label"
                 defaultMessage="Check response body does not contain"
               />
             }
             labelAppend={<OptionalLabel />}
             helpText={i18n.translate(
-              'xpack.synthetics..createPackagePolicy.stepConfigure.httpAdvancedOptions.responseBodyCheckNegative.helpText',
+              'xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseBodyCheckNegative.helpText',
               {
                 defaultMessage:
                   'A list of regular expressions to match the the body output negatively. Press enter to add a new expression. Return match failed if single expression matches.',

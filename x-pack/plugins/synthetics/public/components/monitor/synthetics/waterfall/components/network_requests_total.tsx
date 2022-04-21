@@ -28,13 +28,13 @@ export const NetworkRequestsTotal = ({
     <NetworkRequestsTotalStyle size="xs" color="subdued">
       <strong>
         <FormattedMessage
-          id="xpack.synthetics..synthetics.waterfall.requestsTotalMessage"
+          id="xpack.synthetics.synthetics.waterfall.requestsTotalMessage"
           defaultMessage="{numNetworkRequests} network requests"
           values={{
             numNetworkRequests:
               totalNetworkRequests > fetchedNetworkRequests ? (
                 <FormattedMessage
-                  id="xpack.synthetics..synthetics.waterfall.requestsTotalMessage.first"
+                  id="xpack.synthetics.synthetics.waterfall.requestsTotalMessage.first"
                   defaultMessage="First {count}"
                   values={{ count: `${fetchedNetworkRequests}/${totalNetworkRequests}` }}
                 />
@@ -45,7 +45,7 @@ export const NetworkRequestsTotal = ({
         />{' '}
         {showHighlightedNetworkRequests && highlightedNetworkRequests >= 0 && (
           <FormattedMessage
-            id="xpack.synthetics..synthetics.waterfall.requestsHighlightedMessage"
+            id="xpack.synthetics.synthetics.waterfall.requestsHighlightedMessage"
             defaultMessage="({numHighlightedRequests} match the filter)"
             values={{
               numHighlightedRequests: highlightedNetworkRequests,
@@ -57,7 +57,7 @@ export const NetworkRequestsTotal = ({
         <EuiIconTip
           type={'iInCircle'}
           content={i18n.translate(
-            'xpack.synthetics..synthetics.waterfall.requestsTotalMessage.info',
+            'xpack.synthetics.synthetics.waterfall.requestsTotalMessage.info',
             {
               defaultMessage: 'Waterfall view only shows up to 1000 requests',
             }

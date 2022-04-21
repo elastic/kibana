@@ -22,7 +22,7 @@ export const MonitorAsyncError = () => {
       <EuiCallOut
         title={
           <FormattedMessage
-            id="xpack.synthetics..monitorManagement.monitorSync.failure.title"
+            id="xpack.synthetics.monitorManagement.monitorSync.failure.title"
             defaultMessage="Monitors failed to sync with the Synthetics service"
           />
         }
@@ -31,7 +31,7 @@ export const MonitorAsyncError = () => {
       >
         <p>
           <FormattedMessage
-            id="xpack.synthetics..monitorManagement.monitorSync.failure.content"
+            id="xpack.synthetics.monitorManagement.monitorSync.failure.content"
             defaultMessage="There was a problem syncing your monitors for one or more locations:"
           />
         </p>
@@ -58,28 +58,28 @@ export const MonitorAsyncError = () => {
 };
 
 const REASON_LABEL = i18n.translate(
-  'xpack.synthetics..monitorManagement.monitorSync.failure.reasonLabel',
+  'xpack.synthetics.monitorManagement.monitorSync.failure.reasonLabel',
   {
     defaultMessage: 'Reason',
   }
 );
 
 const STATUS_LABEL = i18n.translate(
-  'xpack.synthetics..monitorManagement.monitorSync.failure.statusLabel',
+  'xpack.synthetics.monitorManagement.monitorSync.failure.statusLabel',
   {
     defaultMessage: 'Status',
   }
 );
 
 const NOT_AVAILABLE_LABEL = i18n.translate(
-  'xpack.synthetics..monitorManagement.monitorSync.failure.notAvailable',
+  'xpack.synthetics.monitorManagement.monitorSync.failure.notAvailable',
   {
     defaultMessage: 'Not available',
   }
 );
 
 const DISMISS_LABEL = i18n.translate(
-  'xpack.synthetics..monitorManagement.monitorSync.failure.dismissLabel',
+  'xpack.synthetics.monitorManagement.monitorSync.failure.dismissLabel',
   {
     defaultMessage: 'Dismiss',
   }

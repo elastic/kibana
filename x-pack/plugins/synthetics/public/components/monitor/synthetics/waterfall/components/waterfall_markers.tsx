@@ -78,7 +78,7 @@ export function WaterfallChartMarkers() {
               {
                 dataValue: offset,
                 details: label,
-                header: i18n.translate('xpack.synthetics..synthetics.waterfall.offsetUnit', {
+                header: i18n.translate('xpack.synthetics.synthetics.waterfall.offsetUnit', {
                   defaultMessage: '{offset} ms',
                   values: { offset },
                 }),
@@ -149,30 +149,30 @@ const Wrapper = euiStyled.span`
   }
 `;
 
-export const FCP_LABEL = i18n.translate('xpack.synthetics..synthetics.waterfall.fcpLabel', {
+export const FCP_LABEL = i18n.translate('xpack.synthetics.synthetics.waterfall.fcpLabel', {
   defaultMessage: 'First contentful paint',
 });
 
-export const LCP_LABEL = i18n.translate('xpack.synthetics..synthetics.waterfall.lcpLabel', {
+export const LCP_LABEL = i18n.translate('xpack.synthetics.synthetics.waterfall.lcpLabel', {
   defaultMessage: 'Largest contentful paint',
 });
 
 export const LAYOUT_SHIFT_LABEL = i18n.translate(
-  'xpack.synthetics..synthetics.waterfall.layoutShiftLabel',
+  'xpack.synthetics.synthetics.waterfall.layoutShiftLabel',
   {
     defaultMessage: 'Layout shift',
   }
 );
 
 export const LOAD_EVENT_LABEL = i18n.translate(
-  'xpack.synthetics..synthetics.waterfall.loadEventLabel',
+  'xpack.synthetics.synthetics.waterfall.loadEventLabel',
   {
     defaultMessage: 'Load event',
   }
 );
 
 export const DOCUMENT_CONTENT_LOADED_LABEL = i18n.translate(
-  'xpack.synthetics..synthetics.waterfall.domContentLabel',
+  'xpack.synthetics.synthetics.waterfall.domContentLabel',
   {
     defaultMessage: 'DOM Content Loaded',
   }

@@ -33,7 +33,7 @@ describe('SyntheticsCallout', () => {
           <p>
             <FormattedMessage
               defaultMessage="Uptime is now previewing support for scripted multi-step availability checks. This means you can interact with elements of a webpage and check the availability of an entire journey (such as making a purchase or signing into a system) instead of just a simple single page up/down check. Please click below to read more and, if you'd like to be one of the first to use these capabilities, you can download our preview synthetics agent and view your synthetic checks in Uptime."
-              id="xpack.synthetics..overview.pageHeader.syntheticsCallout.content"
+              id="xpack.synthetics.overview.pageHeader.syntheticsCallout.content"
               values={Object {}}
             />
           </p>
@@ -46,7 +46,7 @@ describe('SyntheticsCallout', () => {
               >
                 <FormattedMessage
                   defaultMessage="Read announcement"
-                  id="xpack.synthetics..overview.pageHeader.syntheticsCallout.announcementLink"
+                  id="xpack.synthetics.overview.pageHeader.syntheticsCallout.announcementLink"
                   values={Object {}}
                 />
               </EuiButton>
@@ -60,7 +60,7 @@ describe('SyntheticsCallout', () => {
               >
                 <FormattedMessage
                   defaultMessage="Dismiss"
-                  id="xpack.synthetics..overview.pageHeader.syntheticsCallout.dismissButtonText"
+                  id="xpack.synthetics.overview.pageHeader.syntheticsCallout.dismissButtonText"
                   values={Object {}}
                 />
               </EuiButtonEmpty>
@@ -91,7 +91,7 @@ describe('SyntheticsCallout', () => {
           <p>
             <FormattedMessage
               defaultMessage="Uptime is now previewing support for scripted multi-step availability checks. This means you can interact with elements of a webpage and check the availability of an entire journey (such as making a purchase or signing into a system) instead of just a simple single page up/down check. Please click below to read more and, if you'd like to be one of the first to use these capabilities, you can download our preview synthetics agent and view your synthetic checks in Uptime."
-              id="xpack.synthetics..overview.pageHeader.syntheticsCallout.content"
+              id="xpack.synthetics.overview.pageHeader.syntheticsCallout.content"
               values={Object {}}
             />
           </p>
@@ -104,7 +104,7 @@ describe('SyntheticsCallout', () => {
               >
                 <FormattedMessage
                   defaultMessage="Read announcement"
-                  id="xpack.synthetics..overview.pageHeader.syntheticsCallout.announcementLink"
+                  id="xpack.synthetics.overview.pageHeader.syntheticsCallout.announcementLink"
                   values={Object {}}
                 />
               </EuiButton>
@@ -118,7 +118,7 @@ describe('SyntheticsCallout', () => {
               >
                 <FormattedMessage
                   defaultMessage="Dismiss"
-                  id="xpack.synthetics..overview.pageHeader.syntheticsCallout.dismissButtonText"
+                  id="xpack.synthetics.overview.pageHeader.syntheticsCallout.dismissButtonText"
                   values={Object {}}
                 />
               </EuiButtonEmpty>

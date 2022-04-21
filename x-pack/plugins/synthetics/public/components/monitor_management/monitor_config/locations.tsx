@@ -70,14 +70,14 @@ export const ServiceLocations = ({ selectedLocations, setLocations, isInvalid, o
 };
 
 const VALIDATION_ERROR = i18n.translate(
-  'xpack.synthetics..monitorManagement.serviceLocationsValidationError',
+  'xpack.synthetics.monitorManagement.serviceLocationsValidationError',
   {
     defaultMessage: 'At least one service location must be specified',
   }
 );
 
 export const LOCATIONS_LABEL = i18n.translate(
-  'xpack.synthetics..monitorManagement.monitorLocationsLabel',
+  'xpack.synthetics.monitorManagement.monitorLocationsLabel',
   {
     defaultMessage: 'Monitor locations',
   }

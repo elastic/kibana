@@ -8,28 +8,28 @@
 import { i18n } from '@kbn/i18n';
 
 export const SYNTHETICS_ENABLE_FAILURE = i18n.translate(
-  'xpack.synthetics..monitorManagement.syntheticsEnabledFailure',
+  'xpack.synthetics.monitorManagement.syntheticsEnabledFailure',
   {
     defaultMessage: 'Monitor Management was not able to be enabled. Please contact support.',
   }
 );
 
 export const SYNTHETICS_DISABLE_FAILURE = i18n.translate(
-  'xpack.synthetics..monitorManagement.syntheticsDisabledFailure',
+  'xpack.synthetics.monitorManagement.syntheticsDisabledFailure',
   {
     defaultMessage: 'Monitor Management was not able to be disabled. Please contact support.',
   }
 );
 
 export const SYNTHETICS_ENABLE_SUCCESS = i18n.translate(
-  'xpack.synthetics..monitorManagement.syntheticsEnableSuccess',
+  'xpack.synthetics.monitorManagement.syntheticsEnableSuccess',
   {
     defaultMessage: 'Monitor Management enabled successfully.',
   }
 );
 
 export const SYNTHETICS_DISABLE_SUCCESS = i18n.translate(
-  'xpack.synthetics..monitorManagement.syntheticsDisabledSuccess',
+  'xpack.synthetics.monitorManagement.syntheticsDisabledSuccess',
   {
     defaultMessage: 'Monitor Management disabled successfully.',
   }

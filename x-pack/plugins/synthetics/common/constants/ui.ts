@@ -74,7 +74,7 @@ export enum CERT_STATUS {
   TOO_OLD = 'TOO_OLD',
 }
 
-export const KQL_SYNTAX_LOCAL_STORAGE = 'xpack.synthetics..kql.syntax';
+export const KQL_SYNTAX_LOCAL_STORAGE = 'xpack.synthetics.kql.syntax';
 
 export const FILTER_FIELDS = {
   TAGS: 'tags',

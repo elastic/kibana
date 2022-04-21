@@ -40,26 +40,23 @@ export const ServiceAllowedWrapper: React.FC = ({ children }) => {
   return <>{children}</>;
 };
 
-const REQUEST_ACCESS_LABEL = i18n.translate('xpack.synthetics..monitorManagement.requestAccess', {
+const REQUEST_ACCESS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.requestAccess', {
   defaultMessage: 'Request access',
 });
 
-export const MONITOR_MANAGEMENT_LABEL = i18n.translate(
-  'xpack.synthetics..monitorManagement.label',
-  {
-    defaultMessage: 'Monitor Management',
-  }
-);
+export const MONITOR_MANAGEMENT_LABEL = i18n.translate('xpack.synthetics.monitorManagement.label', {
+  defaultMessage: 'Monitor Management',
+});
 
 const LOADING_MONITOR_MANAGEMENT_LABEL = i18n.translate(
-  'xpack.synthetics..monitorManagement.loading.label',
+  'xpack.synthetics.monitorManagement.loading.label',
   {
     defaultMessage: 'Loading Monitor Management',
   }
 );
 
 export const PUBLIC_BETA_DESCRIPTION = i18n.translate(
-  'xpack.synthetics..monitorManagement.publicBetaDescription',
+  'xpack.synthetics.monitorManagement.publicBetaDescription',
   {
     defaultMessage:
       "We've got a brand new app on the way. In the meantime, we're excited to give you early access to our globally managed testing infrastructure. This will allow you to upload synthetic monitors using our new point and click script recorder and manage your monitors with a new UI.",

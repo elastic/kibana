@@ -46,11 +46,11 @@ export const AlertQueryBar = ({ query = '', onChange }: Props) => {
         }}
         query={{ query: inputVal, language: 'kuery' }}
         aria-label={labels.ALERT_KUERY_BAR_ARIA}
-        dataTestSubj="xpack.synthetics..alerts.monitorStatus.filterBar"
+        dataTestSubj="xpack.synthetics.alerts.monitorStatus.filterBar"
         autoSubmit={true}
         disableLanguageSwitcher={true}
         isInvalid={!!(inputVal && !query)}
-        placeholder={i18n.translate('xpack.synthetics..alerts.searchPlaceholder.kql', {
+        placeholder={i18n.translate('xpack.synthetics.alerts.searchPlaceholder.kql', {
           defaultMessage: 'Filter using kql syntax',
         })}
       />

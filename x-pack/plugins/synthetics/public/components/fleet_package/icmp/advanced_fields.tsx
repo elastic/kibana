@@ -16,7 +16,7 @@ export const ICMPAdvancedFields = ({ children }: { children?: React.ReactNode })
         id="uptimeFleetIcmpAdvancedOptions"
         buttonContent={
           <FormattedMessage
-            id="xpack.synthetics..createPackagePolicy.stepConfigure.icmpAdvancedOptions"
+            id="xpack.synthetics.createPackagePolicy.stepConfigure.icmpAdvancedOptions"
             defaultMessage="Advanced ICMP options"
           />
         }

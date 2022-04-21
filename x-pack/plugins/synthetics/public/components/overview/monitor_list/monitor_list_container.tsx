@@ -22,7 +22,7 @@ export interface MonitorListProps {
 }
 
 const DEFAULT_PAGE_SIZE = 10;
-const LOCAL_STORAGE_KEY = 'xpack.synthetics..monitorList.pageSize';
+const LOCAL_STORAGE_KEY = 'xpack.synthetics.monitorList.pageSize';
 const getPageSizeValue = () => {
   const value = parseInt(localStorage.getItem(LOCAL_STORAGE_KEY) ?? '', 10);
   if (isNaN(value)) {

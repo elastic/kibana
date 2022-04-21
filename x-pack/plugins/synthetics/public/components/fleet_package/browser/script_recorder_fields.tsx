@@ -46,7 +46,7 @@ export function ScriptRecorderFields({ onChange, script, fileName }: Props) {
       <EuiSpacer size="m" />
       <EuiLink href="https://github.com/elastic/synthetics-recorder/releases/" target="_blank">
         <FormattedMessage
-          id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.recorderLink"
+          id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.recorderLink"
           defaultMessage="Download the Elastic Synthetics Recorder"
         />
       </EuiLink>
@@ -71,7 +71,7 @@ export function ScriptRecorderFields({ onChange, script, fileName }: Props) {
                 iconSide="right"
               >
                 <FormattedMessage
-                  id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.showScriptLabel"
+                  id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.showScriptLabel"
                   defaultMessage="Show script"
                 />
               </EuiButton>
@@ -85,7 +85,7 @@ export function ScriptRecorderFields({ onChange, script, fileName }: Props) {
                   color="danger"
                 >
                   <FormattedMessage
-                    id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.removeScriptLabel"
+                    id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.removeScriptLabel"
                     defaultMessage="Remove script"
                   />
                 </EuiButton>
@@ -120,14 +120,14 @@ export function ScriptRecorderFields({ onChange, script, fileName }: Props) {
 }
 
 const PLACEHOLDER_FILE_NAME = i18n.translate(
-  'xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.scriptRecorder.mockFileName',
+  'xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.scriptRecorder.mockFileName',
   {
     defaultMessage: 'test_script.js',
   }
 );
 
 const CLOSE_BUTTON_LABEL = i18n.translate(
-  'xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.scriptRecorder.closeButtonLabel',
+  'xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.scriptRecorder.closeButtonLabel',
   {
     defaultMessage: 'Close script flyout',
   }

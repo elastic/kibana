@@ -72,14 +72,14 @@ export const BrowserSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
         id="syntheticsFleetScheduleField--number syntheticsFleetScheduleField--unit"
         label={
           <FormattedMessage
-            id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval"
+            id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval"
             defaultMessage="Frequency"
           />
         }
         isInvalid={!!validate[ConfigKey.SCHEDULE]?.(fields)}
         error={
           <FormattedMessage
-            id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error"
+            id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error"
             defaultMessage="Monitor frequency is required"
           />
         }
@@ -99,7 +99,7 @@ export const BrowserSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.sourceType.label"
+            id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.sourceType.label"
             defaultMessage="Source Type"
           />
         }

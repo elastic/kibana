@@ -186,57 +186,57 @@ const WarningText = euiStyled(EuiText)`
     padding-left: 8px;
 `;
 
-const DISCARD_LABEL = i18n.translate('xpack.synthetics..monitorManagement.discardLabel', {
+const DISCARD_LABEL = i18n.translate('xpack.synthetics.monitorManagement.discardLabel', {
   defaultMessage: 'Discard',
 });
 
-const SAVE_MONITOR_LABEL = i18n.translate('xpack.synthetics..monitorManagement.saveMonitorLabel', {
+const SAVE_MONITOR_LABEL = i18n.translate('xpack.synthetics.monitorManagement.saveMonitorLabel', {
   defaultMessage: 'Save monitor',
 });
 
 const UPDATE_MONITOR_LABEL = i18n.translate(
-  'xpack.synthetics..monitorManagement.updateMonitorLabel',
+  'xpack.synthetics.monitorManagement.updateMonitorLabel',
   {
     defaultMessage: 'Update monitor',
   }
 );
 
-const RUN_TEST_LABEL = i18n.translate('xpack.synthetics..monitorManagement.runTest', {
+const RUN_TEST_LABEL = i18n.translate('xpack.synthetics.monitorManagement.runTest', {
   defaultMessage: 'Run test',
 });
 
-const RE_RUN_TEST_LABEL = i18n.translate('xpack.synthetics..monitorManagement.reRunTest', {
+const RE_RUN_TEST_LABEL = i18n.translate('xpack.synthetics.monitorManagement.reRunTest', {
   defaultMessage: 'Re-run test',
 });
 
 const VALIDATION_ERROR_LABEL = i18n.translate(
-  'xpack.synthetics..monitorManagement.validationError',
+  'xpack.synthetics.monitorManagement.validationError',
   {
     defaultMessage: 'Your monitor has errors. Please fix them before saving.',
   }
 );
 
 const MONITOR_SUCCESS_LABEL = i18n.translate(
-  'xpack.synthetics..monitorManagement.monitorAddedSuccessMessage',
+  'xpack.synthetics.monitorManagement.monitorAddedSuccessMessage',
   {
     defaultMessage: 'Monitor added successfully.',
   }
 );
 
 const MONITOR_UPDATED_SUCCESS_LABEL = i18n.translate(
-  'xpack.synthetics..monitorManagement.monitorEditedSuccessMessage',
+  'xpack.synthetics.monitorManagement.monitorEditedSuccessMessage',
   {
     defaultMessage: 'Monitor updated successfully.',
   }
 );
 
 const MONITOR_FAILURE_LABEL = i18n.translate(
-  'xpack.synthetics..monitorManagement.monitorFailureMessage',
+  'xpack.synthetics.monitorManagement.monitorFailureMessage',
   {
     defaultMessage: 'Monitor was unable to be saved. Please try again later.',
   }
 );
 
-const TEST_NOW_DESCRIPTION = i18n.translate('xpack.synthetics..testRun.description', {
+const TEST_NOW_DESCRIPTION = i18n.translate('xpack.synthetics.testRun.description', {
   defaultMessage: 'Test your monitor and verify the results before saving',
 });

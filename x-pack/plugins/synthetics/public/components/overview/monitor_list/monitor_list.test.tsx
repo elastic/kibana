@@ -258,7 +258,7 @@ describe('MonitorList component', () => {
         await waitFor(() => {
           expect(
             getByTestId(
-              `xpack.synthetics..monitorList.${list.summaries[0].monitor_id}.expandMonitorDetail`
+              `xpack.synthetics.monitorList.${list.summaries[0].monitor_id}.expandMonitorDetail`
             )
           ).toBeInTheDocument();
           expect(getByText('Downtime history')).toBeInTheDocument();
@@ -287,7 +287,7 @@ describe('MonitorList component', () => {
 
         await waitFor(() => {
           expect(
-            queryByTestId('xpack.synthetics..monitorList.always-down.expandMonitorDetail')
+            queryByTestId('xpack.synthetics.monitorList.always-down.expandMonitorDetail')
           ).not.toBeInTheDocument();
           expect(queryByText('Downtime history')).not.toBeInTheDocument();
         });

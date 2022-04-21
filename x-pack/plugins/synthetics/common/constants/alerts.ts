@@ -8,29 +8,29 @@
 import { ActionGroup } from '@kbn/alerting-plugin/common';
 
 export type MonitorStatusActionGroup =
-  ActionGroup<'xpack.synthetics..alerts.actionGroups.monitorStatus'>;
-export type TLSLegacyActionGroup = ActionGroup<'xpack.synthetics..alerts.actionGroups.tls'>;
-export type TLSActionGroup = ActionGroup<'xpack.synthetics..alerts.actionGroups.tlsCertificate'>;
+  ActionGroup<'xpack.synthetics.alerts.actionGroups.monitorStatus'>;
+export type TLSLegacyActionGroup = ActionGroup<'xpack.synthetics.alerts.actionGroups.tls'>;
+export type TLSActionGroup = ActionGroup<'xpack.synthetics.alerts.actionGroups.tlsCertificate'>;
 export type DurationAnomalyActionGroup =
-  ActionGroup<'xpack.synthetics..alerts.actionGroups.durationAnomaly'>;
+  ActionGroup<'xpack.synthetics.alerts.actionGroups.durationAnomaly'>;
 
 export const MONITOR_STATUS: MonitorStatusActionGroup = {
-  id: 'xpack.synthetics..alerts.actionGroups.monitorStatus',
+  id: 'xpack.synthetics.alerts.actionGroups.monitorStatus',
   name: 'Uptime Down Monitor',
 };
 
 export const TLS_LEGACY: TLSLegacyActionGroup = {
-  id: 'xpack.synthetics..alerts.actionGroups.tls',
+  id: 'xpack.synthetics.alerts.actionGroups.tls',
   name: 'Uptime TLS Alert (Legacy)',
 };
 
 export const TLS: TLSActionGroup = {
-  id: 'xpack.synthetics..alerts.actionGroups.tlsCertificate',
+  id: 'xpack.synthetics.alerts.actionGroups.tlsCertificate',
   name: 'Uptime TLS Alert',
 };
 
 export const DURATION_ANOMALY: DurationAnomalyActionGroup = {
-  id: 'xpack.synthetics..alerts.actionGroups.durationAnomaly',
+  id: 'xpack.synthetics.alerts.actionGroups.durationAnomaly',
   name: 'Uptime Duration Anomaly',
 };
 
@@ -47,8 +47,8 @@ export const ACTION_GROUP_DEFINITIONS: {
 };
 
 export const CLIENT_ALERT_TYPES = {
-  MONITOR_STATUS: 'xpack.synthetics..alerts.monitorStatus',
-  TLS_LEGACY: 'xpack.synthetics..alerts.tls',
-  TLS: 'xpack.synthetics..alerts.tlsCertificate',
-  DURATION_ANOMALY: 'xpack.synthetics..alerts.durationAnomaly',
+  MONITOR_STATUS: 'xpack.synthetics.alerts.monitorStatus',
+  TLS_LEGACY: 'xpack.synthetics.alerts.tls',
+  TLS: 'xpack.synthetics.alerts.tlsCertificate',
+  DURATION_ANOMALY: 'xpack.synthetics.alerts.durationAnomaly',
 };

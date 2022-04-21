@@ -120,7 +120,7 @@ export const KeyValuePairsField = ({
                     <EuiFlexItem>
                       {
                         <FormattedMessage
-                          id="xpack.synthetics..keyValuePairsField.key.label"
+                          id="xpack.synthetics.keyValuePairsField.key.label"
                           defaultMessage="Key"
                         />
                       }
@@ -128,7 +128,7 @@ export const KeyValuePairsField = ({
                     <EuiFlexItem>
                       {
                         <FormattedMessage
-                          id="xpack.synthetics..keyValuePairsField.value.label"
+                          id="xpack.synthetics.keyValuePairsField.value.label"
                           defaultMessage="Value"
                         />
                       }
@@ -151,7 +151,7 @@ export const KeyValuePairsField = ({
                     <EuiButtonIcon
                       iconType="trash"
                       aria-label={i18n.translate(
-                        'xpack.synthetics..keyValuePairsField.deleteItem.label',
+                        'xpack.synthetics.keyValuePairsField.deleteItem.label',
                         {
                           defaultMessage: 'Delete item number {index}, {key}:{value}',
                           values: { index: index + 1, key, value },
@@ -164,7 +164,7 @@ export const KeyValuePairsField = ({
                 startControl={
                   <StyledField
                     aria-label={i18n.translate(
-                      'xpack.synthetics..keyValuePairsField.key.ariaLabel',
+                      'xpack.synthetics.keyValuePairsField.key.ariaLabel',
                       {
                         defaultMessage: 'Key',
                       }
@@ -178,7 +178,7 @@ export const KeyValuePairsField = ({
                 endControl={
                   <StyledField
                     aria-label={i18n.translate(
-                      'xpack.synthetics..keyValuePairsField.value.ariaLabel',
+                      'xpack.synthetics.keyValuePairsField.value.ariaLabel',
                       {
                         defaultMessage: 'Value',
                       }

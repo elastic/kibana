@@ -8,29 +8,29 @@
 import { i18n } from '@kbn/i18n';
 
 export const STATUS_COLUMN_LABEL = i18n.translate(
-  'xpack.synthetics..monitorList.statusColumnLabel',
+  'xpack.synthetics.monitorList.statusColumnLabel',
   {
     defaultMessage: 'Status',
   }
 );
 
-export const NAME_COLUMN_LABEL = i18n.translate('xpack.synthetics..monitorList.nameColumnLabel', {
+export const NAME_COLUMN_LABEL = i18n.translate('xpack.synthetics.monitorList.nameColumnLabel', {
   defaultMessage: 'Name',
 });
 
 export const HISTORY_COLUMN_LABEL = i18n.translate(
-  'xpack.synthetics..monitorList.monitorHistoryColumnLabel',
+  'xpack.synthetics.monitorList.monitorHistoryColumnLabel',
   {
     defaultMessage: 'Downtime history',
   }
 );
 
-export const TLS_COLUMN_LABEL = i18n.translate('xpack.synthetics..monitorList.tlsColumnLabel', {
+export const TLS_COLUMN_LABEL = i18n.translate('xpack.synthetics.monitorList.tlsColumnLabel', {
   defaultMessage: 'TLS Certificate',
 });
 
 export const getExpandDrawerLabel = (id: string) => {
-  return i18n.translate('xpack.synthetics..monitorList.expandDrawerButton.ariaLabel', {
+  return i18n.translate('xpack.synthetics.monitorList.expandDrawerButton.ariaLabel', {
     defaultMessage: 'Expand row for monitor with ID {id}',
     description: 'The user can click a button on this table and expand further details.',
     values: {
@@ -40,7 +40,7 @@ export const getExpandDrawerLabel = (id: string) => {
 };
 
 export const getDescriptionLabel = (itemsLength: number) => {
-  return i18n.translate('xpack.synthetics..monitorList.table.description', {
+  return i18n.translate('xpack.synthetics.monitorList.table.description', {
     defaultMessage:
       'Monitor Status table with columns for Status, Name, URL, IP, Downtime History and Integrations. The table is currently displaying {length} items.',
     values: { length: itemsLength },
@@ -48,7 +48,7 @@ export const getDescriptionLabel = (itemsLength: number) => {
 };
 
 export const NO_MONITOR_ITEM_SELECTED = i18n.translate(
-  'xpack.synthetics..monitorList.noItemForSelectedFiltersMessage',
+  'xpack.synthetics.monitorList.noItemForSelectedFiltersMessage',
   {
     defaultMessage: 'No monitors found for selected filter criteria',
     description:
@@ -56,30 +56,30 @@ export const NO_MONITOR_ITEM_SELECTED = i18n.translate(
   }
 );
 
-export const LOADING = i18n.translate('xpack.synthetics..monitorList.loading', {
+export const LOADING = i18n.translate('xpack.synthetics.monitorList.loading', {
   defaultMessage: 'Loading...',
   description: 'Shown when the monitor list is waiting for a server response',
 });
 
-export const NO_DATA_MESSAGE = i18n.translate('xpack.synthetics..monitorList.noItemMessage', {
+export const NO_DATA_MESSAGE = i18n.translate('xpack.synthetics.monitorList.noItemMessage', {
   defaultMessage: 'No uptime monitors found',
   description: 'This message is shown if the monitors table is rendered but has no items.',
 });
 
 export const RESPONSE_ANOMALY_SCORE = i18n.translate(
-  'xpack.synthetics..monitorList.anomalyColumn.label',
+  'xpack.synthetics.monitorList.anomalyColumn.label',
   {
     defaultMessage: 'Response Anomaly Score',
   }
 );
 
 export const STATUS_ALERT_COLUMN = i18n.translate(
-  'xpack.synthetics..monitorList.statusAlert.label',
+  'xpack.synthetics.monitorList.statusAlert.label',
   {
     defaultMessage: 'Status alert',
   }
 );
 
-export const TEST_NOW_COLUMN = i18n.translate('xpack.synthetics..monitorList.testNow.label', {
+export const TEST_NOW_COLUMN = i18n.translate('xpack.synthetics.monitorList.testNow.label', {
   defaultMessage: 'Test now',
 });

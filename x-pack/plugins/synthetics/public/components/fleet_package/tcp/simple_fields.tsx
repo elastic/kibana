@@ -37,14 +37,14 @@ export const TCPSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.tcp.hosts"
+            id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.tcp.hosts"
             defaultMessage="Host:Port"
           />
         }
         isInvalid={!!validate[ConfigKey.HOSTS]?.(fields)}
         error={
           <FormattedMessage
-            id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.tcp.hosts.error"
+            id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.tcp.hosts.error"
             defaultMessage="Host and port are required"
           />
         }
@@ -66,14 +66,14 @@ export const TCPSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
         id="syntheticsFleetScheduleField--number syntheticsFleetScheduleField--unit"
         label={
           <FormattedMessage
-            id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval"
+            id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval"
             defaultMessage="Frequency"
           />
         }
         isInvalid={!!validate[ConfigKey.SCHEDULE]?.(fields)}
         error={
           <FormattedMessage
-            id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error"
+            id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error"
             defaultMessage="Monitor frequency is required"
           />
         }

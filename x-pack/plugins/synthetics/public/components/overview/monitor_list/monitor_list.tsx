@@ -224,7 +224,7 @@ export const MonitorListComponent: ({
               return (
                 <EuiButtonIcon
                   aria-label={labels.getExpandDrawerLabel(id)}
-                  data-test-subj={`xpack.synthetics..monitorList.${id}.expandMonitorDetail`}
+                  data-test-subj={`xpack.synthetics.monitorList.${id}.expandMonitorDetail`}
                   iconType={expandedDrawerIds.includes(id) ? 'arrowUp' : 'arrowDown'}
                   onClick={() => toggleDrawer(id)}
                 />
@@ -271,14 +271,14 @@ export const MonitorListComponent: ({
           <EuiFlexGroup responsive={false}>
             <EuiFlexItem grow={false}>
               <OverviewPageLink
-                dataTestSubj="xpack.synthetics..monitorList.prevButton"
+                dataTestSubj="xpack.synthetics.monitorList.prevButton"
                 direction="prev"
                 pagination={prevPagePagination}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <OverviewPageLink
-                dataTestSubj="xpack.synthetics..monitorList.nextButton"
+                dataTestSubj="xpack.synthetics.monitorList.nextButton"
                 direction="next"
                 pagination={nextPagePagination}
               />

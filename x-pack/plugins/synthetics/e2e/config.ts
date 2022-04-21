@@ -10,9 +10,9 @@ import { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { readKibanaConfig } from './tasks/read_kibana_config';
 
-const MANIFEST_KEY = 'xpack.synthetics..service.manifestUrl';
-const SERVICE_PASSWORD = 'xpack.synthetics..service.password';
-const SERVICE_USERNAME = 'xpack.synthetics..service.username';
+const MANIFEST_KEY = 'xpack.synthetics.service.manifestUrl';
+const SERVICE_PASSWORD = 'xpack.synthetics.service.password';
+const SERVICE_USERNAME = 'xpack.synthetics.service.username';
 
 async function config({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
@@ -56,13 +56,13 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.username=kibana_system`,
         `--elasticsearch.password=changeme`,
         '--xpack.reporting.enabled=false',
-        `--xpack.synthetics..service.manifestUrl=${manifestUrl}`,
-        `--xpack.synthetics..service.username=${
+        `--xpack.synthetics.service.manifestUrl=${manifestUrl}`,
+        `--xpack.synthetics.service.username=${
           process.env.SYNTHETICS_REMOTE_ENABLED
             ? serviceUsername
             : 'localKibanaIntegrationTestsUser'
         }`,
-        `--xpack.synthetics..service.password=${servicePassword}`,
+        `--xpack.synthetics.service.password=${servicePassword}`,
       ],
     },
   };

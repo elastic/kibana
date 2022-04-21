@@ -21,24 +21,24 @@ export const StatusFilter: React.FC = () => {
   return (
     <EuiFilterGroup>
       <FilterStatusButton
-        content={i18n.translate('xpack.synthetics..filterBar.filterAllLabel', {
+        content={i18n.translate('xpack.synthetics.filterBar.filterAllLabel', {
           defaultMessage: 'All',
         })}
-        dataTestSubj="xpack.synthetics..filterBar.filterStatusAll"
+        dataTestSubj="xpack.synthetics.filterBar.filterStatusAll"
         value={ALL}
         withNext={true}
         isActive={statusFilter === ''}
       />
       <FilterStatusButton
         content={STATUS_UP_LABEL}
-        dataTestSubj="xpack.synthetics..filterBar.filterStatusUp"
+        dataTestSubj="xpack.synthetics.filterBar.filterStatusUp"
         value="up"
         withNext={true}
         isActive={statusFilter === 'up'}
       />
       <FilterStatusButton
         content={STATUS_DOWN_LABEL}
-        dataTestSubj="xpack.synthetics..filterBar.filterStatusDown"
+        dataTestSubj="xpack.synthetics.filterBar.filterStatusDown"
         value="down"
         withNext={false}
         isActive={statusFilter === 'down'}

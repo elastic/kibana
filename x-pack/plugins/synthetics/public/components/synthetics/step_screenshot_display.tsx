@@ -59,13 +59,13 @@ const BaseStepImage = ({
       allowFullScreen={true}
       alt={
         stepName
-          ? i18n.translate('xpack.synthetics..synthetics.screenshotDisplay.altText', {
+          ? i18n.translate('xpack.synthetics.synthetics.screenshotDisplay.altText', {
               defaultMessage: 'Screenshot for step with name "{stepName}"',
               values: {
                 stepName,
               },
             })
-          : i18n.translate('xpack.synthetics..synthetics.screenshotDisplay.altTextWithoutName', {
+          : i18n.translate('xpack.synthetics.synthetics.screenshotDisplay.altTextWithoutName', {
               defaultMessage: 'Screenshot',
             })
       }
@@ -180,7 +180,7 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
             <EuiText>
               <strong>
                 <FormattedMessage
-                  id="xpack.synthetics..synthetics.screenshot.noImageMessage"
+                  id="xpack.synthetics.synthetics.screenshot.noImageMessage"
                   defaultMessage="No image available"
                 />
               </strong>

@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-const SYNTHETICS_CALLOUT_LS_KEY = 'xpack.synthetics..syntheticsCallout.display';
+const SYNTHETICS_CALLOUT_LS_KEY = 'xpack.synthetics.syntheticsCallout.display';
 const shouldShowSyntheticsCallout = () => {
   let value = localStorage.getItem(SYNTHETICS_CALLOUT_LS_KEY);
   if (value === null) {
@@ -29,14 +29,14 @@ export const SyntheticsCallout = () => {
   return (
     <>
       <EuiCallOut
-        title={i18n.translate('xpack.synthetics..overview.pageHeader.syntheticsCallout.title', {
+        title={i18n.translate('xpack.synthetics.overview.pageHeader.syntheticsCallout.title', {
           defaultMessage: 'Elastic Synthetics',
         })}
         iconType="beaker"
       >
         <p>
           <FormattedMessage
-            id="xpack.synthetics..overview.pageHeader.syntheticsCallout.content"
+            id="xpack.synthetics.overview.pageHeader.syntheticsCallout.content"
             defaultMessage="Uptime is now previewing support for scripted multi-step availability checks. This means you can interact with elements of a webpage and check the availability of an entire journey (such as making a purchase or signing into a system) instead of just a simple single page up/down check. Please click below to read more and, if you'd like to be one of the first to use these capabilities, you can download our preview synthetics agent and view your synthetic checks in Uptime."
           />
         </p>
@@ -44,7 +44,7 @@ export const SyntheticsCallout = () => {
           <EuiFlexItem grow={false}>
             <EuiButton href="https://www.elastic.co/what-is/synthetic-monitoring">
               <FormattedMessage
-                id="xpack.synthetics..overview.pageHeader.syntheticsCallout.announcementLink"
+                id="xpack.synthetics.overview.pageHeader.syntheticsCallout.announcementLink"
                 defaultMessage="Read announcement"
               />
             </EuiButton>
@@ -60,7 +60,7 @@ export const SyntheticsCallout = () => {
               }}
             >
               <FormattedMessage
-                id="xpack.synthetics..overview.pageHeader.syntheticsCallout.dismissButtonText"
+                id="xpack.synthetics.overview.pageHeader.syntheticsCallout.dismissButtonText"
                 defaultMessage="Dismiss"
               />
             </EuiButtonEmpty>

@@ -18,13 +18,13 @@ interface PopoverButtonProps {
 const PopoverButton: React.FC<PopoverButtonProps> = ({ setIsOpen, size }) => (
   <EuiButtonEmpty
     color="text"
-    data-test-subj="xpack.synthetics..monitorList.pageSizeSelect.popoverOpen"
+    data-test-subj="xpack.synthetics.monitorList.pageSizeSelect.popoverOpen"
     iconType="arrowDown"
     iconSide="right"
     onClick={() => setIsOpen(true)}
   >
     <FormattedMessage
-      id="xpack.synthetics..monitorList.pageSizePopoverButtonText"
+      id="xpack.synthetics.monitorList.pageSizePopoverButtonText"
       defaultMessage="Rows per page: {size}"
       values={{ size }}
     />
@@ -39,28 +39,28 @@ interface ContextItemProps {
 
 const items: ContextItemProps[] = [
   {
-    'data-test-subj': 'xpack.synthetics..monitorList.pageSizeSelect.sizeSelectItem10',
+    'data-test-subj': 'xpack.synthetics.monitorList.pageSizeSelect.sizeSelectItem10',
     key: '10 rows',
     numRows: 10,
   },
   {
-    'data-test-subj': 'xpack.synthetics..monitorList.pageSizeSelect.sizeSelectItem25',
+    'data-test-subj': 'xpack.synthetics.monitorList.pageSizeSelect.sizeSelectItem25',
     key: '25 rows',
     numRows: 25,
   },
   {
-    'data-test-subj': 'xpack.synthetics..monitorList.pageSizeSelect.sizeSelectItem50',
+    'data-test-subj': 'xpack.synthetics.monitorList.pageSizeSelect.sizeSelectItem50',
     key: '50 rows',
     numRows: 50,
   },
   {
-    'data-test-subj': 'xpack.synthetics..monitorList.pageSizeSelect.sizeSelectItem100',
+    'data-test-subj': 'xpack.synthetics.monitorList.pageSizeSelect.sizeSelectItem100',
     key: '100 rows',
     numRows: 100,
   },
 ];
 
-const LOCAL_STORAGE_KEY = 'xpack.synthetics..monitorList.pageSize';
+const LOCAL_STORAGE_KEY = 'xpack.synthetics.monitorList.pageSize';
 
 interface MonitorListPageSizeSelectProps {
   size: number;
@@ -121,7 +121,7 @@ export const MonitorListPageSizeSelectComponent: React.FC<ComponentProps> = ({
             }}
           >
             <FormattedMessage
-              id="xpack.synthetics..monitorList.pageSizeSelect.numRowsItemMessage"
+              id="xpack.synthetics.monitorList.pageSizeSelect.numRowsItemMessage"
               defaultMessage="{numRows} rows"
               values={{ numRows }}
             />

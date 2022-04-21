@@ -80,20 +80,20 @@ export function useRunOnceErrors({
   };
 }
 
-const PushErrorLabel = i18n.translate('xpack.synthetics..testRun.pushErrorLabel', {
+const PushErrorLabel = i18n.translate('xpack.synthetics.testRun.pushErrorLabel', {
   defaultMessage: 'Push error',
 });
 
-const RunErrorLabel = i18n.translate('xpack.synthetics..testRun.runErrorLabel', {
+const RunErrorLabel = i18n.translate('xpack.synthetics.testRun.runErrorLabel', {
   defaultMessage: 'Error running test',
 });
 
 const getLocationTestErrorLabel = (locationName: string) =>
-  i18n.translate('xpack.synthetics..testRun.runErrorLocation', {
+  i18n.translate('xpack.synthetics.testRun.runErrorLocation', {
     defaultMessage: 'Failed to run monitor on location {locationName}.',
     values: { locationName },
   });
 
-const PushErrorService = i18n.translate('xpack.synthetics..testRun.pushError', {
+const PushErrorService = i18n.translate('xpack.synthetics.testRun.pushError', {
   defaultMessage: 'Failed to push the monitor to service.',
 });

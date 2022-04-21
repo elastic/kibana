@@ -87,7 +87,7 @@ export const RequestBodyField = ({ onChange, onBlur, type, value }: Props) => {
       content: (
         <CodeEditor
           ariaLabel={i18n.translate(
-            'xpack.synthetics..createPackagePolicy.stepConfigure.requestBody.codeEditor.text.ariaLabel',
+            'xpack.synthetics.createPackagePolicy.stepConfigure.requestBody.codeEditor.text.ariaLabel',
             {
               defaultMessage: 'Text code editor',
             }
@@ -109,7 +109,7 @@ export const RequestBodyField = ({ onChange, onBlur, type, value }: Props) => {
       content: (
         <CodeEditor
           ariaLabel={i18n.translate(
-            'xpack.synthetics..createPackagePolicy.stepConfigure.requestBody.codeEditor.json.ariaLabel',
+            'xpack.synthetics.createPackagePolicy.stepConfigure.requestBody.codeEditor.json.ariaLabel',
             {
               defaultMessage: 'JSON code editor',
             }
@@ -131,7 +131,7 @@ export const RequestBodyField = ({ onChange, onBlur, type, value }: Props) => {
       content: (
         <CodeEditor
           ariaLabel={i18n.translate(
-            'xpack.synthetics..createPackagePolicy.stepConfigure.requestBody.codeEditor.xml.ariaLabel',
+            'xpack.synthetics.createPackagePolicy.stepConfigure.requestBody.codeEditor.xml.ariaLabel',
             {
               defaultMessage: 'XML code editor',
             }
@@ -154,7 +154,7 @@ export const RequestBodyField = ({ onChange, onBlur, type, value }: Props) => {
         <KeyValuePairsField
           addPairControlLabel={
             <FormattedMessage
-              id="xpack.synthetics..createPackagePolicy.stepConfigure.requestBody.formField.addFormField.label"
+              id="xpack.synthetics.createPackagePolicy.stepConfigure.requestBody.formField.addFormField.label"
               defaultMessage="Add form field"
             />
           }
@@ -180,25 +180,25 @@ export const RequestBodyField = ({ onChange, onBlur, type, value }: Props) => {
 
 const modeLabels = {
   [Mode.FORM]: i18n.translate(
-    'xpack.synthetics..createPackagePolicy.stepConfigure.requestBodyType.form',
+    'xpack.synthetics.createPackagePolicy.stepConfigure.requestBodyType.form',
     {
       defaultMessage: 'Form',
     }
   ),
   [Mode.PLAINTEXT]: i18n.translate(
-    'xpack.synthetics..createPackagePolicy.stepConfigure.requestBodyType.text',
+    'xpack.synthetics.createPackagePolicy.stepConfigure.requestBodyType.text',
     {
       defaultMessage: 'Text',
     }
   ),
   [Mode.JSON]: i18n.translate(
-    'xpack.synthetics..createPackagePolicy.stepConfigure.requestBodyType.JSON',
+    'xpack.synthetics.createPackagePolicy.stepConfigure.requestBodyType.JSON',
     {
       defaultMessage: 'JSON',
     }
   ),
   [Mode.XML]: i18n.translate(
-    'xpack.synthetics..createPackagePolicy.stepConfigure.requestBodyType.XML',
+    'xpack.synthetics.createPackagePolicy.stepConfigure.requestBodyType.XML',
     {
       defaultMessage: 'XML',
     }

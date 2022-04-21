@@ -147,7 +147,7 @@ export const MiddleTruncatedText = ({
                     size="s"
                     color="success"
                     aria-label={i18n.translate(
-                      'xpack.synthetics..waterfallChart.sidebar.url.https',
+                      'xpack.synthetics.waterfallChart.sidebar.url.https',
                       {
                         defaultMessage: 'https',
                       }
@@ -173,7 +173,7 @@ export const MiddleTruncatedText = ({
           <EuiScreenReaderOnly>
             <span>
               <FormattedMessage
-                id="xpack.synthetics..synthetics.waterfall.resource.externalLink"
+                id="xpack.synthetics.synthetics.waterfall.resource.externalLink"
                 defaultMessage="Open resource in new tab"
               />
             </span>

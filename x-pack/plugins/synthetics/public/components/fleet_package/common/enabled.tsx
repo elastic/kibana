@@ -22,7 +22,7 @@ export function Enabled({ fields, onChange, onBlur }: Props) {
       <EuiFormRow
         helpText={
           <FormattedMessage
-            id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.enabled.helpText"
+            id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.enabled.helpText"
             defaultMessage="Switch this configuration off to disable the monitor."
           />
         }
@@ -30,7 +30,7 @@ export function Enabled({ fields, onChange, onBlur }: Props) {
         <EuiSwitch
           label={
             <FormattedMessage
-              id="xpack.synthetics..createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.enabled.label"
+              id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.enabled.label"
               defaultMessage="Enabled"
             />
           }

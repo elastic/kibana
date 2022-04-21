@@ -32,7 +32,7 @@ export const StepDuration = ({
 }: Props) => {
   const stepDurationText = useMemo(
     () =>
-      i18n.translate('xpack.synthetics..synthetics.step.duration', {
+      i18n.translate('xpack.synthetics.synthetics.step.duration', {
         defaultMessage: '{value} seconds',
         values: {
           value: microToSec(step.synthetics.step?.duration.us!, 1),
@@ -83,6 +83,6 @@ export const StepDuration = ({
   );
 };
 
-const STEP_DURATION_TREND = i18n.translate('xpack.synthetics..synthetics.step.durationTrend', {
+const STEP_DURATION_TREND = i18n.translate('xpack.synthetics.synthetics.step.durationTrend', {
   defaultMessage: 'Step duration trend',
 });

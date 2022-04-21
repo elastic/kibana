@@ -21,11 +21,11 @@ export const SyntheticsCustomAssetsExtension: PackageAssetsComponent = () => {
   const { http } = useKibana<ClientPluginsStart>().services;
   const views: CustomAssetsAccordionProps['views'] = [
     {
-      name: i18n.translate('xpack.synthetics..fleetIntegration.assets.name', {
+      name: i18n.translate('xpack.synthetics.fleetIntegration.assets.name', {
         defaultMessage: 'Monitors',
       }),
       url: http?.basePath.prepend(`/app/${PLUGIN.ID}`) ?? '',
-      description: i18n.translate('xpack.synthetics..fleetIntegration.assets.description', {
+      description: i18n.translate('xpack.synthetics.fleetIntegration.assets.description', {
         defaultMessage: 'View monitors in Uptime',
       }),
     },

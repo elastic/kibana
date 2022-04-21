@@ -55,25 +55,25 @@ export const TestNowColumn = ({
 };
 
 export const TEST_NOW_ARIA_LABEL = i18n.translate(
-  'xpack.synthetics..monitorList.testNow.AriaLabel',
+  'xpack.synthetics.monitorList.testNow.AriaLabel',
   {
     defaultMessage: 'CLick to run test now',
   }
 );
 
 export const TEST_NOW_AVAILABLE_LABEL = i18n.translate(
-  'xpack.synthetics..monitorList.testNow.available',
+  'xpack.synthetics.monitorList.testNow.available',
   {
     defaultMessage: 'Test now is only available for monitors added via Monitor Management.',
   }
 );
 
-export const TEST_NOW_LABEL = i18n.translate('xpack.synthetics..monitorList.testNow.label', {
+export const TEST_NOW_LABEL = i18n.translate('xpack.synthetics.monitorList.testNow.label', {
   defaultMessage: 'Test now',
 });
 
 export const TEST_SCHEDULED_LABEL = i18n.translate(
-  'xpack.synthetics..monitorList.testNow.scheduled',
+  'xpack.synthetics.monitorList.testNow.scheduled',
   {
     defaultMessage: 'Test is already scheduled',
   }

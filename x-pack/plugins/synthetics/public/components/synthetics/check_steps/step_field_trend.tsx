@@ -94,7 +94,7 @@ export function StepFieldTrend({
   );
 }
 
-export const EXPLORE_LABEL = i18n.translate('xpack.synthetics..synthetics.markers.explore', {
+export const EXPLORE_LABEL = i18n.translate('xpack.synthetics.synthetics.markers.explore', {
   defaultMessage: 'Explore',
 });
 

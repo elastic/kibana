@@ -86,7 +86,7 @@ export const alertsReducer = handleActions<AlertState>(
 
 const showAlertDisabledSuccess = () => {
   kibanaService.core.notifications.toasts.addSuccess(
-    i18n.translate('xpack.synthetics..overview.alerts.disabled.success', {
+    i18n.translate('xpack.synthetics.overview.alerts.disabled.success', {
       defaultMessage: 'Rule successfully disabled!',
     })
   );
@@ -94,7 +94,7 @@ const showAlertDisabledSuccess = () => {
 
 const showAlertDisabledFailed = (err: Error) => {
   kibanaService.core.notifications.toasts.addError(err, {
-    title: i18n.translate('xpack.synthetics..overview.alerts.disabled.failed', {
+    title: i18n.translate('xpack.synthetics.overview.alerts.disabled.failed', {
       defaultMessage: 'Rule cannot be disabled!',
     }),
   });
@@ -157,7 +157,7 @@ export function* fetchAlertsEffect() {
       yield put(getMonitorAlertsAction.get());
     } catch (err) {
       kibanaService.core.notifications.toasts.addError(err, {
-        title: i18n.translate('xpack.synthetics..overview.alerts.enabled.failed', {
+        title: i18n.translate('xpack.synthetics.overview.alerts.enabled.failed', {
           defaultMessage: 'Rule cannot be enabled!',
         }),
       });

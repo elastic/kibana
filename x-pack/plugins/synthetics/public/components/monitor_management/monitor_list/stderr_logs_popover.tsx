@@ -44,14 +44,14 @@ const Container = styled.div`
 `;
 
 export const getInlineErrorLabel = (message?: string) => {
-  return i18n.translate('xpack.synthetics..monitorList.statusColumn.error.messageLabel', {
+  return i18n.translate('xpack.synthetics.monitorList.statusColumn.error.messageLabel', {
     defaultMessage: '{message}. Click for more details.',
     values: { message },
   });
 };
 
 export const ERROR_LOGS_LABEL = i18n.translate(
-  'xpack.synthetics..monitorList.statusColumn.error.logs',
+  'xpack.synthetics.monitorList.statusColumn.error.logs',
   {
     defaultMessage: 'Error logs',
   }

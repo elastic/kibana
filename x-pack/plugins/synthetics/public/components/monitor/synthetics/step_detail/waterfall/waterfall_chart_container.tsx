@@ -18,7 +18,7 @@ import { useStepWaterfallMetrics } from '../use_step_waterfall_metrics';
 import { JourneyStep } from '../../../../../../common/runtime_types';
 
 export const NO_DATA_TEXT = i18n.translate(
-  'xpack.synthetics..synthetics.stepDetail.waterfallNoData',
+  'xpack.synthetics.synthetics.stepDetail.waterfallNoData',
   {
     defaultMessage: 'No waterfall data could be found for this step',
   }
@@ -64,7 +64,7 @@ export const WaterfallChartContainer: React.FC<Props> = ({ checkGroup, stepIndex
             <EuiLoadingChart
               size="xl"
               aria-label={i18n.translate(
-                'xpack.synthetics..synthetics.stepDetail.waterfall.loading',
+                'xpack.synthetics.synthetics.stepDetail.waterfall.loading',
                 {
                   defaultMessage: 'Waterfall chart loading',
                 }
@@ -94,7 +94,7 @@ export const WaterfallChartContainer: React.FC<Props> = ({ checkGroup, stepIndex
         <EuiCallOut
           title={
             <FormattedMessage
-              id="xpack.synthetics..synthetics.stepDetail.waterfallUnsupported.title"
+              id="xpack.synthetics.synthetics.stepDetail.waterfallUnsupported.title"
               defaultMessage="Waterfall chart unavailable"
             />
           }
@@ -102,7 +102,7 @@ export const WaterfallChartContainer: React.FC<Props> = ({ checkGroup, stepIndex
           iconType="help"
         >
           <FormattedMessage
-            id="xpack.synthetics..synthetics.stepDetail.waterfallUnsupported.description"
+            id="xpack.synthetics.synthetics.stepDetail.waterfallUnsupported.description"
             defaultMessage="The waterfall chart cannot be shown. You may be using an older version of the Synthetic Agent. Please check the version and consider upgrading."
           />
         </EuiCallOut>
