@@ -13,11 +13,12 @@ import { FlyoutTypes, useSecurityFlyout } from '../../../../detections/component
 import { TakeActionDropdown } from '../../../../detections/components/take_action_dropdown';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
 import { TimelineId } from '../../../../../common/types';
-import { useExceptionFlyout } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_flyout';
-import { AddExceptionFlyoutWrapper } from '../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
+import {
+  AddExceptionModalWrapperData,
+  useExceptionFlyout,
+} from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_flyout';
 import { useEventFilterModal } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_modal';
 import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
-import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { Ecs } from '../../../../../common/ecs';
 import { inputsModel, inputsSelectors, State } from '../../../../common/store';
 
@@ -35,13 +36,6 @@ interface EventDetailsFooterProps {
   onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
   timelineId: string;
   refetchFlyoutData: () => Promise<void>;
-}
-
-interface AddExceptionModalWrapperData {
-  alertStatus: Status;
-  eventId: string;
-  ruleId: string;
-  ruleName: string;
 }
 
 export const EventDetailsFooterComponent = React.memo(
@@ -95,16 +89,11 @@ export const EventDetailsFooterComponent = React.memo(
       }
     }, [timelineId, globalQuery, timelineQuery]);
 
-    const {
-      exceptionFlyoutType,
-      onAddExceptionTypeClick,
-      onAddExceptionCancel,
-      onAddExceptionConfirm,
-      ruleIndices,
-    } = useExceptionFlyout({
+    const { onAddExceptionTypeClick } = useExceptionFlyout({
       ruleIndex,
       refetch: refetchAll,
       timelineId,
+      addExceptionModalWrapperData,
     });
     const { onAddEventFilterClick } = useEventFilterModal({
       ecsData: detailsEcsData,
@@ -151,20 +140,6 @@ export const EventDetailsFooterComponent = React.memo(
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>
-        {/* This is still wrong to do render flyout/modal inside of the flyout
-        We need to completely refactor the EventDetails  component to be correct
-      */}
-        {exceptionFlyoutType != null &&
-          addExceptionModalWrapperData.ruleId != null &&
-          addExceptionModalWrapperData.eventId != null && (
-            <AddExceptionFlyoutWrapper
-              {...addExceptionModalWrapperData}
-              ruleIndices={ruleIndices}
-              exceptionListType={exceptionFlyoutType}
-              onCancel={onAddExceptionCancel}
-              onConfirm={onAddExceptionConfirm}
-            />
-          )}
       </>
     );
   }

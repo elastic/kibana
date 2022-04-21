@@ -5,32 +5,41 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 
+import { FlyoutTypes, useSecurityFlyout } from '../../flyouts';
 import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { inputsModel } from '../../../../common/store';
+import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+
+export interface AddExceptionModalWrapperData {
+  alertStatus?: Status;
+  eventId: string;
+  ruleId?: string;
+  ruleName?: string;
+  onRuleChange?: () => void;
+}
 
 interface UseExceptionFlyoutProps {
   ruleIndex: string[] | null | undefined;
   refetch?: inputsModel.Refetch;
   timelineId: string;
+  addExceptionModalWrapperData: AddExceptionModalWrapperData;
 }
+
 interface UseExceptionFlyout {
-  exceptionFlyoutType: ExceptionListType | null;
   onAddExceptionTypeClick: (type: ExceptionListType) => void;
-  onAddExceptionCancel: () => void;
-  onAddExceptionConfirm: (didCloseAlert: boolean, didBulkCloseAlert: boolean) => void;
-  ruleIndices: string[];
 }
 
 export const useExceptionFlyout = ({
   ruleIndex,
   refetch,
   timelineId,
+  addExceptionModalWrapperData,
 }: UseExceptionFlyoutProps): UseExceptionFlyout => {
-  const [exceptionFlyoutType, setOpenAddExceptionFlyout] = useState<ExceptionListType | null>(null);
+  const { flyoutDispatch } = useSecurityFlyout();
 
   const ruleIndices = useMemo((): string[] => {
     if (ruleIndex != null) {
@@ -40,29 +49,48 @@ export const useExceptionFlyout = ({
     }
   }, [ruleIndex]);
 
-  const onAddExceptionTypeClick = useCallback((exceptionListType: ExceptionListType): void => {
-    setOpenAddExceptionFlyout(exceptionListType);
-  }, []);
-
   const onAddExceptionCancel = useCallback(() => {
-    setOpenAddExceptionFlyout(null);
-  }, []);
+    flyoutDispatch({ type: null });
+  }, [flyoutDispatch]);
 
   const onAddExceptionConfirm = useCallback(
     (didCloseAlert: boolean, didBulkCloseAlert) => {
       if (refetch && (timelineId !== TimelineId.active || didBulkCloseAlert)) {
         refetch();
       }
-      setOpenAddExceptionFlyout(null);
+      flyoutDispatch({ type: null });
     },
-    [refetch, timelineId]
+    [flyoutDispatch, refetch, timelineId]
+  );
+
+  const onAddExceptionTypeClick = useCallback(
+    (exceptionListType: ExceptionListType): void => {
+      if (
+        addExceptionModalWrapperData.ruleId != null &&
+        addExceptionModalWrapperData.eventId != null
+      ) {
+        flyoutDispatch({
+          type: FlyoutTypes.ADD_EXCEPTION,
+          payload: {
+            exceptionFlyoutType: exceptionListType,
+            addExceptionModalWrapperData,
+            onAddExceptionCancel,
+            onAddExceptionConfirm,
+            ruleIndices,
+          },
+        });
+      }
+    },
+    [
+      addExceptionModalWrapperData,
+      flyoutDispatch,
+      onAddExceptionCancel,
+      onAddExceptionConfirm,
+      ruleIndices,
+    ]
   );
 
   return {
-    exceptionFlyoutType,
     onAddExceptionTypeClick,
-    onAddExceptionCancel,
-    onAddExceptionConfirm,
-    ruleIndices,
   };
 };

@@ -25,8 +25,9 @@ export const useEventFilterModal = (props: IProps) => {
       flyoutDispatch({
         type: FlyoutTypes.EVENT_FILTER,
         payload: {
-          closeAddEventFilterModal,
           ...props,
+          closeAddEventFilterModal,
+          ecsData: props.ecsData as Ecs,
         },
       });
     }

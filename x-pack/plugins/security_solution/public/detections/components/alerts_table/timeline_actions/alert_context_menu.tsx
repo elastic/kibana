@@ -13,7 +13,7 @@ import { connect, ConnectedProps } from 'react-redux';
 import { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import { get } from 'lodash/fp';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
-import { useSecurityFlyout } from '../../flyouts';
+import { FlyoutTypes, useSecurityFlyout } from '../../flyouts';
 import { OsqueryActionItem } from '../../osquery/osquery_action_item';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { buildGetAlertByIdQuery } from '../../../../common/components/exceptions/helpers';
@@ -132,16 +132,17 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   const ruleIndex =
     ecsRowData['kibana.alert.rule.parameters']?.index ?? ecsRowData?.signal?.rule?.index;
 
-  const {
-    exceptionFlyoutType,
-    onAddExceptionCancel,
-    onAddExceptionConfirm,
-    onAddExceptionTypeClick,
-    ruleIndices,
-  } = useExceptionFlyout({
+  const { onAddExceptionTypeClick } = useExceptionFlyout({
     ruleIndex,
     refetch: refetchAll,
     timelineId,
+    addExceptionModalWrapperData: {
+      ruleId,
+      ruleName,
+      alertStatus,
+      eventId: ecsRowData?._id,
+      onRuleChange,
+    },
   });
 
   const { onAddEventFilterClick } = useEventFilterModal({ ecsData: ecsRowData });
@@ -183,8 +184,8 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
       OsqueryActionItem({
         handleClick: () => {
           flyoutDispatch({
-            type: 'osquery',
-            payload: { agentId, onClose: () => flyoutDispatch({ type: null }) },
+            type: FlyoutTypes.OSQUERY,
+            payload: { agentId: agentId as string, onClose: () => flyoutDispatch({ type: null }) },
           });
           closePopover();
         },
@@ -233,22 +234,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
           </EventsTdContent>
         </div>
       )}
-      {exceptionFlyoutType != null &&
-        ruleId != null &&
-        ruleName != null &&
-        ecsRowData?._id != null && (
-          <AddExceptionFlyoutWrapper
-            ruleName={ruleName}
-            ruleId={ruleId}
-            ruleIndices={ruleIndices}
-            exceptionListType={exceptionFlyoutType}
-            eventId={ecsRowData?._id}
-            onCancel={onAddExceptionCancel}
-            onConfirm={onAddExceptionConfirm}
-            alertStatus={alertStatus}
-            onRuleChange={onRuleChange}
-          />
-        )}
     </>
   );
 };
