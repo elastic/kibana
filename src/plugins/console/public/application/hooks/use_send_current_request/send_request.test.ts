@@ -98,4 +98,37 @@ describe('sendRequest', () => {
       expect(mockedSendRequest).toHaveBeenCalledTimes(1);
     }
   });
+
+  describe('successful response value', () => {
+    describe('with text', () => {
+      it('should return value with lines separated', async () => {
+        mockedSendRequest.mockResolvedValue('\ntest_index-1    []\ntest_index-2    []\n');
+        const response = await sendRequest({
+          http: mockContextValue.services.http,
+          requests: [{ method: 'GET', url: 'test-1', data: [] }],
+        });
+
+        expect(response).toMatchInlineSnapshot(`
+          "
+          test_index-1    []
+          test_index-2    []
+          "
+        `);
+        expect(mockedSendRequest).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('with parsed json', () => {
+      it('should stringify value', async () => {
+        mockedSendRequest.mockResolvedValue(JSON.stringify({ test: 'some value' }));
+        const response = await sendRequest({
+          http: mockContextValue.services.http,
+          requests: [{ method: 'GET', url: 'test-2', data: [] }],
+        });
+
+        expect(typeof response).toBe('string');
+        expect(mockedSendRequest).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
 });
