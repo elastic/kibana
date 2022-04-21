@@ -34,6 +34,7 @@ export interface Options {
   sigint$?: Rx.Observable<void>;
   sigterm$?: Rx.Observable<void>;
   mapLogLine?: DevServer['mapLogLine'];
+  forceColor?: boolean;
 }
 
 export class DevServer {
@@ -50,6 +51,7 @@ export class DevServer {
   private readonly argv: string[];
   private readonly gracefulTimeout: number;
   private readonly mapLogLine?: (line: string) => string | null;
+  private readonly forceColor: boolean;
 
   constructor(options: Options) {
     this.log = options.log;
@@ -62,6 +64,7 @@ export class DevServer {
     this.sigint$ = options.sigint$ ?? Rx.fromEvent<void>(process, 'SIGINT');
     this.sigterm$ = options.sigterm$ ?? Rx.fromEvent<void>(process, 'SIGTERM');
     this.mapLogLine = options.mapLogLine;
+    this.forceColor = options.forceColor ?? !!process.stdout.isTTY;
   }
 
   isReady$() {
@@ -142,101 +145,108 @@ export class DevServer {
     );
 
     const runServer = () =>
-      usingServerProcess(this.script, this.argv, (proc) => {
-        this.phase$.next('starting');
-        this.ready$.next(false);
+      usingServerProcess(
+        {
+          script: this.script,
+          argv: this.argv,
+          forceColor: this.forceColor,
+        },
+        (proc) => {
+          this.phase$.next('starting');
+          this.ready$.next(false);
 
-        // observable which emits devServer states containing lines
-        // logged to stdout/stderr, completes when stdio streams complete
-        const log$ = Rx.merge(observeLines(proc.stdout!), observeLines(proc.stderr!)).pipe(
-          tap((observedLine) => {
-            const line = this.mapLogLine ? this.mapLogLine(observedLine) : observedLine;
-            if (line !== null) {
-              this.log.write(line);
-            }
-          })
-        );
-
-        // observable which emits exit states and is the switch which
-        // ends all other merged observables
-        const exit$ = Rx.fromEvent<[number]>(proc, 'exit').pipe(
-          tap(([code]) => {
-            this.ready$.next(false);
-
-            if (code != null && code !== 0) {
-              this.phase$.next('fatal exit');
-              if (this.watcher.enabled) {
-                this.log.bad(`server crashed`, 'with status code', code);
-              } else {
-                throw new Error(`server crashed with exit code [${code}]`);
+          // observable which emits devServer states containing lines
+          // logged to stdout/stderr, completes when stdio streams complete
+          const log$ = Rx.merge(observeLines(proc.stdout!), observeLines(proc.stderr!)).pipe(
+            tap((observedLine) => {
+              const line = this.mapLogLine ? this.mapLogLine(observedLine) : observedLine;
+              if (line !== null) {
+                this.log.write(line);
               }
-            }
-          }),
-          take(1),
-          share()
-        );
+            })
+          );
 
-        // throw errors if spawn fails
-        const error$ = Rx.fromEvent<Error>(proc, 'error').pipe(
-          map((error) => {
-            throw error;
-          }),
-          takeUntil(exit$)
-        );
+          // observable which emits exit states and is the switch which
+          // ends all other merged observables
+          const exit$ = Rx.fromEvent<[number]>(proc, 'exit').pipe(
+            tap(([code]) => {
+              this.ready$.next(false);
 
-        // handles messages received from the child process
-        const msg$ = Rx.fromEvent<[any]>(proc, 'message').pipe(
-          tap(([received]) => {
-            if (!Array.isArray(received)) {
-              return;
-            }
+              if (code != null && code !== 0) {
+                this.phase$.next('fatal exit');
+                if (this.watcher.enabled) {
+                  this.log.bad(`server crashed`, 'with status code', code);
+                } else {
+                  throw new Error(`server crashed with exit code [${code}]`);
+                }
+              }
+            }),
+            take(1),
+            share()
+          );
 
-            const msg = received[0];
+          // throw errors if spawn fails
+          const error$ = Rx.fromEvent<Error>(proc, 'error').pipe(
+            map((error) => {
+              throw error;
+            }),
+            takeUntil(exit$)
+          );
 
-            if (msg === 'SERVER_LISTENING') {
-              this.phase$.next('listening');
-              this.ready$.next(true);
-            }
+          // handles messages received from the child process
+          const msg$ = Rx.fromEvent<[any]>(proc, 'message').pipe(
+            tap(([received]) => {
+              if (!Array.isArray(received)) {
+                return;
+              }
 
-            // TODO: remove this once Pier is done migrating log rotation to KP
-            if (msg === 'RELOAD_LOGGING_CONFIG_FROM_SERVER_WORKER') {
-              // When receive that event from server worker
-              // forward a reloadLoggingConfig message to parent
-              // and child proc. This is only used by LogRotator service
-              // when the cluster mode is enabled
-              process.emit('message' as any, { reloadLoggingConfig: true } as any);
-              proc.send({ reloadLoggingConfig: true });
-            }
-          }),
-          takeUntil(exit$)
-        );
+              const msg = received[0];
 
-        // handle graceful shutdown requests
-        const triggerGracefulShutdown$ = gracefulShutdown$.pipe(
-          mergeMap(() => {
-            // signal to the process that it should exit
-            proc.kill('SIGINT');
+              if (msg === 'SERVER_LISTENING') {
+                this.phase$.next('listening');
+                this.ready$.next(true);
+              }
 
-            // if the timer fires before exit$ we will send SIGINT
-            return Rx.timer(this.gracefulTimeout).pipe(
-              tap(() => {
-                this.log.warn(
-                  `server didnt exit`,
-                  `sent [SIGINT] to the server but it didn't exit within ${this.gracefulTimeout}ms, killing with SIGKILL`
-                );
+              // TODO: remove this once Pier is done migrating log rotation to KP
+              if (msg === 'RELOAD_LOGGING_CONFIG_FROM_SERVER_WORKER') {
+                // When receive that event from server worker
+                // forward a reloadLoggingConfig message to parent
+                // and child proc. This is only used by LogRotator service
+                // when the cluster mode is enabled
+                process.emit('message' as any, { reloadLoggingConfig: true } as any);
+                proc.send({ reloadLoggingConfig: true });
+              }
+            }),
+            takeUntil(exit$)
+          );
 
-                proc.kill('SIGKILL');
-              })
-            );
-          }),
+          // handle graceful shutdown requests
+          const triggerGracefulShutdown$ = gracefulShutdown$.pipe(
+            mergeMap(() => {
+              // signal to the process that it should exit
+              proc.kill('SIGINT');
 
-          // if exit$ emits before the gracefulTimeout then this
-          // will unsub and cancel the timer
-          takeUntil(exit$)
-        );
+              // if the timer fires before exit$ we will send SIGINT
+              return Rx.timer(this.gracefulTimeout).pipe(
+                tap(() => {
+                  this.log.warn(
+                    `server didnt exit`,
+                    `sent [SIGINT] to the server but it didn't exit within ${this.gracefulTimeout}ms, killing with SIGKILL`
+                  );
 
-        return Rx.merge(log$, exit$, error$, msg$, triggerGracefulShutdown$);
-      });
+                  proc.kill('SIGKILL');
+                })
+              );
+            }),
+
+            // if exit$ emits before the gracefulTimeout then this
+            // will unsub and cancel the timer
+            takeUntil(exit$)
+          );
+
+          return Rx.merge(log$, exit$, error$, msg$, triggerGracefulShutdown$);
+        }
+      );
 
     subscriber.add(
       Rx.concat([undefined], this.watcher.serverShouldRestart$())
