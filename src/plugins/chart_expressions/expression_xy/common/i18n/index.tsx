@@ -113,6 +113,10 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.ariaLabel.help', {
       defaultMessage: 'Specifies the aria label of the xy chart',
     }),
+  getMarkSizeRatioHelp: () =>
+    i18n.translate('expressionXY.xyVis.markSizeRatio.help', {
+      defaultMessage: 'Specifies the ratio of the dots at the line and area charts',
+    }),
   getDataLayerFnHelp: () =>
     i18n.translate('expressionXY.dataLayer.help', {
       defaultMessage: `Configure a layer in the xy chart`,
