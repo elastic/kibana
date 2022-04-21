@@ -511,6 +511,17 @@ export function XYChart({
         },
       };
 
+  const OUTSIDE_RECT_ANNOTATION_WIDTH = 8;
+  const OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION = 2;
+
+  const outsideDimension =
+    rangeAnnotations.length && annotationsLayers?.[0].hide
+      ? OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION
+      : shouldUseNewTimeAxis
+      ? Number(MULTILAYER_TIME_AXIS_STYLE.tickLine?.padding) +
+        Number(chartTheme.axes?.tickLabel?.fontSize)
+      : Number(chartTheme.axes?.tickLine?.size) || OUTSIDE_RECT_ANNOTATION_WIDTH;
+
   return (
     <Chart ref={chartRef}>
       <Settings
@@ -922,6 +933,7 @@ export function XYChart({
           isBarChart={filteredBarLayers.length > 0}
           minInterval={minInterval}
           hide={annotationsLayers?.[0].hide}
+          outsideDimension={outsideDimension}
         />
       ) : null}
     </Chart>

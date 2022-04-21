@@ -49,6 +49,7 @@ export interface AnnotationsProps {
   hide?: boolean;
   minInterval?: number;
   isBarChart?: boolean;
+  outsideDimension: number;
 }
 
 interface CollectiveConfig extends ManualPointEventAnnotationArgs {
@@ -171,9 +172,6 @@ export const getAnnotationsGroupedByInterval = (
 // todo: remove when closed https://github.com/elastic/elastic-charts/issues/1647
 RectAnnotation.displayName = 'RectAnnotation';
 
-const OUTSIDE_RECT_ANNOTATION_WIDTH = 16;
-const OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION = 2;
-
 export const Annotations = ({
   groupedLineAnnotations,
   rangeAnnotations,
@@ -183,6 +181,7 @@ export const Annotations = ({
   hide,
   minInterval,
   isBarChart,
+  outsideDimension,
 }: AnnotationsProps) => {
   return (
     <>
@@ -286,9 +285,7 @@ export const Annotations = ({
             ]}
             style={{ fill: color || defaultAnnotationRangeColor, opacity: 1 }}
             outside={Boolean(outside)}
-            outsideDimension={
-              hide ? OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION : OUTSIDE_RECT_ANNOTATION_WIDTH
-            }
+            outsideDimension={outsideDimension}
           />
         );
       })}
