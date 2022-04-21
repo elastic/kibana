@@ -91,7 +91,7 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
       const currentAlertSpan: {
         alertId?: string;
         start?: string;
-        durationToDate?: number;
+        durationToDate?: string;
       } = {};
       for (let i = 0; i < instanceEvents.length; ++i) {
         switch (instanceEvents[i]?.event?.action) {
@@ -110,10 +110,11 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
             expect(instanceEvents[i]?.event?.start).to.equal(currentAlertSpan.start);
             expect(instanceEvents[i]?.event?.end).to.be(undefined);
 
-            if (instanceEvents[i]?.event?.duration! !== 0) {
-              expect(instanceEvents[i]?.event?.duration! > currentAlertSpan.durationToDate!).to.be(
-                true
-              );
+            if (instanceEvents[i]?.event?.duration! !== '0') {
+              expect(
+                BigInt(instanceEvents[i]?.event?.duration!) >
+                  BigInt(currentAlertSpan.durationToDate!)
+              ).to.be(true);
             }
             currentAlertSpan.durationToDate = instanceEvents[i]?.event?.duration;
             break;
@@ -125,7 +126,7 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
             expect(
               new Date(instanceEvents[i]?.event?.end!).valueOf() -
                 new Date(instanceEvents[i]?.event?.start!).valueOf()
-            ).to.equal(instanceEvents[i]?.event?.duration! / 1000 / 1000);
+            ).to.equal(Number(BigInt(instanceEvents[i]?.event?.duration!) / BigInt(1000000)));
             break;
         }
       }

@@ -17,7 +17,7 @@ import {
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
-const NANOS_IN_MILLIS = 1000 * 1000;
+const NANOS_IN_MILLIS = BigInt(1000 * 1000);
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -372,13 +372,14 @@ export default function ({ getService }: FtrProviderContext) {
     const executeEventEnd = Date.parse(executeEvent?.event?.end || 'undefined');
     const dateNow = Date.now();
 
-    expect(typeof duration).to.be('number');
+    expect(typeof duration).to.be('string');
     expect(executeEventStart).to.be.ok();
     expect(startExecuteEventStart).to.equal(executeEventStart);
     expect(executeEventEnd).to.be.ok();
 
     const durationDiff = Math.abs(
-      Math.round(duration! / NANOS_IN_MILLIS) - (executeEventEnd - executeEventStart)
+      Math.round(Number(BigInt(duration!) / NANOS_IN_MILLIS)) -
+        (executeEventEnd - executeEventStart)
     );
 
     // account for rounding errors

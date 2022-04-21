@@ -18,7 +18,7 @@ import {
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
-const NANOS_IN_MILLIS = 1000 * 1000;
+const NANOS_IN_MILLIS = BigInt(1000 * 1000);
 
 // eslint-disable-next-line import/no-default-export
 export default function eventLogTests({ getService }: FtrProviderContext) {
@@ -786,14 +786,14 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
   const dateNow = Date.now();
 
   if (duration !== undefined) {
-    expect(typeof duration).to.be('number');
+    expect(typeof duration).to.be('string');
     expect(eventStart).to.be.ok();
 
     if (shouldHaveEventEnd !== false) {
       expect(eventEnd).to.be.ok();
 
       const durationDiff = Math.abs(
-        Math.round(duration! / NANOS_IN_MILLIS) - (eventEnd - eventStart)
+        Math.round(Number(BigInt(duration!) / NANOS_IN_MILLIS)) - (eventEnd - eventStart)
       );
 
       // account for rounding errors
