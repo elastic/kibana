@@ -18,6 +18,7 @@ module.exports = (request, options) => {
   if (result?.type === 'built-in') {
     return request;
   }
+
   if (result?.type === 'file') {
     return result.absolute;
   }

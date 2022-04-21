@@ -37,9 +37,10 @@ export class ImportResolver {
     return new ImportResolver(repoRoot, pkgMap, readPackageMap(), options);
   }
 
-  private safeStat = memoize(safeStat);
-  private baseResolveOpts: Resolve.SyncOpts;
-  private fallbackToTypes: boolean;
+  private readonly safeStat = memoize(safeStat);
+  private readonly baseResolveOpts: Resolve.SyncOpts;
+  private readonly fallbackToTypes: boolean;
+  private readonly resolveCache = new Map<string, ResolveResult | null>();
 
   constructor(
     /**
@@ -247,6 +248,12 @@ export class ImportResolver {
    * Resolve an import request from a file in the given dirname
    */
   resolve(req: string, dirname: string): ResolveResult | null {
+    const key = `${req}:${dirname}`;
+    const cached = this.resolveCache.get(key);
+    if (cached !== undefined) {
+      return cached;
+    }
+
     // transform webpack loader requests and focus on the actual file selected
     const lastExI = req.lastIndexOf('!');
     if (lastExI > -1) {
@@ -286,10 +293,12 @@ export class ImportResolver {
 
     req = this.adaptReq(req, dirname) ?? req;
 
-    return (
+    const result =
       this.tryNodeResolve(req, dirname) ??
       (this.fallbackToTypes ? this.tryTypesResolve(req, dirname) : null) ??
-      (this.isIgnorable(req) ? { type: 'ignore' } : null)
-    );
+      (this.isIgnorable(req) ? { type: 'ignore' } : null);
+
+    this.resolveCache.set(key, result);
+    return result;
   }
 }
