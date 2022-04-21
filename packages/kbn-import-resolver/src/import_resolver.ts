@@ -22,6 +22,8 @@ import { memoize } from './helpers/memoize';
 
 const NODE_MODULE_SEG = Path.sep + 'node_modules' + Path.sep;
 
+const IGNORE_RESULT: ResolveResult = { type: 'ignore' };
+
 interface ImportResolverOptions {
   disableTypesFallback?: boolean;
 }
@@ -254,6 +256,12 @@ export class ImportResolver {
       return cached;
     }
 
+    const result = this.uncachedResolve(req, dirname);
+    this.resolveCache.set(key, result);
+    return result;
+  }
+
+  private uncachedResolve(req: string, dirname: string): ResolveResult | null {
     // transform webpack loader requests and focus on the actual file selected
     const lastExI = req.lastIndexOf('!');
     if (lastExI > -1) {
@@ -293,12 +301,10 @@ export class ImportResolver {
 
     req = this.adaptReq(req, dirname) ?? req;
 
-    const result =
+    return (
       this.tryNodeResolve(req, dirname) ??
       (this.fallbackToTypes ? this.tryTypesResolve(req, dirname) : null) ??
-      (this.isIgnorable(req) ? { type: 'ignore' } : null);
-
-    this.resolveCache.set(key, result);
-    return result;
+      (this.isIgnorable(req) ? IGNORE_RESULT : null)
+    );
   }
 }
