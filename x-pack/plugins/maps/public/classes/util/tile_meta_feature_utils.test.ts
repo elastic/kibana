@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TileMetaFeature } from '../../../common/descriptor_types';
 import { getAggsMeta, getAggRange, getHitsMeta } from './tile_meta_feature_utils';
 
 describe('getAggsMeta', () => {
@@ -64,7 +65,7 @@ describe('getAggsMeta', () => {
           took: 1,
         },
       },
-    ];
+    ] as TileMetaFeature[];
     const { docCount } = getAggsMeta(metaFeatures);
     expect(docCount).toBe(0);
   });
@@ -161,7 +162,7 @@ describe('getAggsMeta', () => {
           took: 12,
         },
       },
-    ];
+    ] as TileMetaFeature[];
     const { docCount } = getAggsMeta(metaFeatures);
     expect(docCount).toBe(1032943);
   });
@@ -197,7 +198,7 @@ test('getAggRange', () => {
       timed_out: false,
       took: 12,
     },
-  };
+  } as TileMetaFeature;
   expect(getAggRange(metaFeature, '_count')).toEqual({
     max: 96,
     min: 1,
@@ -257,7 +258,7 @@ describe('getHitsMeta', () => {
           took: 7,
         },
       },
-    ];
+    ] as TileMetaFeature[];;
     expect(getHitsMeta(metaFeatures, 10000)).toEqual({
       tilesWithFeatures: 0,
       tilesWithTrimmedResults: 0,
@@ -367,7 +368,7 @@ describe('getHitsMeta', () => {
           took: 10,
         },
       },
-    ];
+    ] as TileMetaFeature[];;
     expect(getHitsMeta(metaFeatures, 10000)).toEqual({
       tilesWithFeatures: 3,
       tilesWithTrimmedResults: 2,

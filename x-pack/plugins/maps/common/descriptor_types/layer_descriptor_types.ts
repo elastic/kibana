@@ -45,7 +45,7 @@ export type TileMetaFeature = Feature & {
     // aggregations.<agg_name>.min
     // aggregations.<agg_name>.max
     // aggregations.<agg_name>.sum
-    [key: string]: number | string;
+    [key: string]: number | string | boolean;
   };
 };
 
