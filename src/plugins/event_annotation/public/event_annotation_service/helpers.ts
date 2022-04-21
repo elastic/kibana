@@ -5,15 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { transparentize } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiLightVars } from '@kbn/ui-theme';
-import Color from 'color';
 import { EventAnnotationConfig, RangeEventAnnotationConfig } from '../../common';
 export const defaultAnnotationColor = euiLightVars.euiColorAccent;
-export const defaultAnnotationRangeColor = new Color(
-  transparentize(euiLightVars.euiColorAccent, 0.1)
-).hexa();
+export const defaultAnnotationRangeColor = `#F04E981A`; // defaultAnnotationColor with opacity 0.1
 
 export const defaultAnnotationLabel = i18n.translate(
   'eventAnnotation.manualAnnotation.defaultAnnotationLabel',

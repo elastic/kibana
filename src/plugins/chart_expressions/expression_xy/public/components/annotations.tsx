@@ -261,21 +261,22 @@ export const Annotations = ({
       })}
       {rangeAnnotations.map(({ label, time, color, endTime, outside }) => {
         const id = snakeCase(label);
+
         return (
           <RectAnnotation
             id={id}
             key={id}
-            customTooltipDetails={() => (
-              <>
-                <EuiText size="xs">
+            customTooltip={() => (
+              <div className="echTooltip">
+                <EuiText size="xs" className="echTooltip__header">
                   <h4>
                     {formatter
                       ? `${formatter.convert(time)} — ${formatter?.convert(endTime)}`
                       : `${moment(time).toISOString()} — ${moment(endTime).toISOString()}`}
                   </h4>
                 </EuiText>
-                <EuiText size="xs">{label}</EuiText>
-              </>
+                <div className="xyAnnotationTooltipDetail">{label}</div>
+              </div>
             )}
             dataValues={[
               {
