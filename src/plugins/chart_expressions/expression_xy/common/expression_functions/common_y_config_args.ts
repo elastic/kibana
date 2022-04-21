@@ -12,10 +12,7 @@ import { YConfigFn, ExtendedYConfigFn } from '../types';
 
 type CommonYConfigFn = YConfigFn | ExtendedYConfigFn;
 
-export const commonYConfigArgs: Pick<
-  CommonYConfigFn['args'],
-  'forAccessor' | 'axisMode' | 'color'
-> = {
+export const commonYConfigArgs: CommonYConfigFn['args'] = {
   forAccessor: {
     types: ['string'],
     help: strings.getForAccessorHelp(),
