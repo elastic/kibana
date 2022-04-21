@@ -16,7 +16,7 @@ export default {
   description: '',
 };
 
-const TimeSliderWrapper: FC<Omit<TimeSliderProps, 'onChange' | 'fieldName'>> = (props) => {
+const TimeSliderWrapper: FC<Omit<TimeSliderProps, 'onChange' | 'fieldName' | 'id'>> = (props) => {
   const [value, setValue] = useState(props.value);
   const onChange = useCallback(
     (newValue: [number | null, number | null]) => {
@@ -31,7 +31,13 @@ const TimeSliderWrapper: FC<Omit<TimeSliderProps, 'onChange' | 'fieldName'>> = (
   return (
     <div style={{ width: '600px' }}>
       <EuiFormControlLayout style={{ width: '100%' }}>
-        <TimeSlider {...props} value={value} fieldName={'Field Name'} onChange={onChange} />
+        <TimeSlider
+          id="time_slider_control"
+          {...props}
+          value={value}
+          fieldName={'Field Name'}
+          onChange={onChange}
+        />
       </EuiFormControlLayout>
     </div>
   );
