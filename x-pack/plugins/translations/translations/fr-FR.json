@@ -18504,7 +18504,6 @@
     "xpack.ml.jobsList.alertingRules.tooltipContent": "La tâche a {rulesCount} {rulesCount, plural, one { règle d'alerte associée} other { règles d'alerte associées}}",
     "xpack.ml.jobsList.analyticsSpacesLabel": "Espaces",
     "xpack.ml.jobsList.auditMessageColumn.screenReaderDescription": "Cette colonne affiche des icônes lorsque des erreurs ou des avertissements pour la tâche ont été signalé(e)s au cours des dernières 24 heures",
-    "xpack.ml.jobsList.breadcrumb": "Tâches",
     "xpack.ml.jobsList.cannotSelectRowForJobMessage": "Impossible de sélectionner l'ID de tâche {jobId}",
     "xpack.ml.jobsList.cloneJobErrorMessage": "Impossible de cloner {jobId}. La tâche est introuvable",
     "xpack.ml.jobsList.closeActionStatusText": "fermer",

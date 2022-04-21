@@ -18679,7 +18679,6 @@
     "xpack.ml.jobsList.alertingRules.tooltipContent": "作业具有 {rulesCount} 个关联的告警{rulesCount, plural, other {规则}}",
     "xpack.ml.jobsList.analyticsSpacesLabel": "工作区",
     "xpack.ml.jobsList.auditMessageColumn.screenReaderDescription": "过去 24 小时里该作业有错误或警告时，此列显示图标",
-    "xpack.ml.jobsList.breadcrumb": "作业",
     "xpack.ml.jobsList.cannotSelectRowForJobMessage": "无法选择作业 ID {jobId}",
     "xpack.ml.jobsList.cloneJobErrorMessage": "无法克隆 {jobId}。找不到作业",
     "xpack.ml.jobsList.closeActionStatusText": "关闭",
