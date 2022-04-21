@@ -73,9 +73,7 @@ export const commonDataLayerArgs: CommonDataLayerFn['args'] = {
   },
   showLines: {
     types: ['boolean'],
-    help: i18n.translate('expressionXY.dataLayer.showLines.help', {
-      defaultMessage: 'Show lines between points',
-    }),
+    help: strings.getShowLinesHelp(),
   },
   yConfig: {
     types: [Y_CONFIG],
