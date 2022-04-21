@@ -9,7 +9,8 @@
 import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/utils';
-import { run, createFailError, createFlagError, CiStatsReporter } from '@kbn/dev-utils';
+import { run, createFailError, createFlagError } from '@kbn/dev-utils';
+import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import globby from 'globby';
 import normalize from 'normalize-path';
 
