@@ -25,21 +25,22 @@ export const _getLegacyComponentTemplatesForPackage = (
   componentTemplates: ClusterComponentTemplate[],
   installablePackage: InstallablePackage
 ): string[] => {
-  const namesMap: Map<string, void> = new Map();
+  const legacyNamesLookup: Set<string> = new Set();
 
   // fill a map with all possible @mappings and @settings component
   // template names for fast lookup below.
   installablePackage.data_streams?.forEach((ds) => {
     LEGACY_TEMPLATE_SUFFIXES.forEach((suffix) => {
-      namesMap.set(getComponentTemplateWithSuffix(ds, suffix));
+      legacyNamesLookup.add(getComponentTemplateWithSuffix(ds, suffix));
     });
   });
 
   return componentTemplates.reduce<string[]>((legacyTemplates, componentTemplate) => {
-    if (!namesMap.has(componentTemplate.name)) return legacyTemplates;
+    if (!legacyNamesLookup.has(componentTemplate.name)) return legacyTemplates;
 
-    if (componentTemplate.component_template._meta?.package?.name !== installablePackage.name)
+    if (componentTemplate.component_template._meta?.package?.name !== installablePackage.name) {
       return legacyTemplates;
+    }
 
     return legacyTemplates.concat(componentTemplate.name);
   }, []);
@@ -84,15 +85,16 @@ export const _getIndexTemplatesToUsedByMap = (
   return lookupMap;
 };
 
-const _getAllComponentTemplates = async (esClient: ElasticsearchClient) =>
-  esClient.cluster.getComponentTemplate().then((result) => result.component_templates);
+const _getAllComponentTemplates = async (esClient: ElasticsearchClient) => {
+  const { component_templates: componentTemplates } = await esClient.cluster.getComponentTemplate();
 
-const _getAllIndexTemplatesWithComposedOf = async (esClient: ElasticsearchClient) =>
-  esClient.indices
-    .getIndexTemplate()
-    .then((result) =>
-      result.index_templates.filter((tmpl) => tmpl.index_template.composed_of?.length)
-    );
+  return componentTemplates;
+};
+
+const _getAllIndexTemplatesWithComposedOf = async (esClient: ElasticsearchClient) => {
+  const { index_templates: indexTemplates } = await esClient.indices.getIndexTemplate();
+  return indexTemplates.filter((tmpl) => tmpl.index_template.composed_of?.length);
+};
 
 export const _filterComponentTemplatesInUse = ({
   componentTemplateNames,
