@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { SeriesTypes, XScaleTypes, YScaleTypes, Y_CONFIG } from '../constants';
 import { strings } from '../i18n';
 import { DataLayerFn, ExtendedDataLayerFn } from '../types';
@@ -58,27 +57,19 @@ export const commonDataLayerArgs: CommonDataLayerFn['args'] = {
   },
   markSizeAccessor: {
     types: ['string'],
-    help: i18n.translate('expressionXY.dataLayer.markSizeAccessor.help', {
-      defaultMessage: 'Mark size accessor',
-    }),
+    help: strings.getMarkSizeAccessorHelp(),
   },
   lineWidth: {
     types: ['number'],
-    help: i18n.translate('expressionXY.dataLayer.lineWidth.help', {
-      defaultMessage: 'Line width',
-    }),
+    help: strings.getLineWidthHelp(),
   },
   showPoints: {
     types: ['boolean'],
-    help: i18n.translate('expressionXY.dataLayer.showPoints.help', {
-      defaultMessage: 'Show points',
-    }),
+    help: strings.getShowPointsHelp(),
   },
   pointsRadius: {
     types: ['number'],
-    help: i18n.translate('expressionXY.dataLayer.pointsRadius.help', {
-      defaultMessage: 'Points radius',
-    }),
+    help: strings.getPointsRadiusHelp(),
   },
   showLines: {
     types: ['boolean'],
