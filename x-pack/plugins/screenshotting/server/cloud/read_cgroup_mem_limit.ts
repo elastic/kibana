@@ -15,6 +15,7 @@ function tryReadFile(path: string): undefined | string {
   }
 }
 
+// Max memory limits locations per cgroups v1
 const cgroupMemLimitPaths = [
   '/sys/fs/cgroup/memory/memory.limit_in_bytes',
   '/sys/fs/cgroup/memory.max',
