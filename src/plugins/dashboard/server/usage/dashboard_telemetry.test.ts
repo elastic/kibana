@@ -8,8 +8,9 @@
 
 import { SavedDashboardPanel730ToLatest } from '../../common';
 import { getEmptyDashboardData, collectPanelsByType } from './dashboard_telemetry';
-import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
+import { EmbeddableStateWithType } from '../../../embeddable/common';
+import { createEmbeddablePersistableStateServiceMock } from '../../../embeddable/common/mocks';
+import { SavedObjectReference } from 'kibana/public';
 
 const visualizationType1ByValue = {
   embeddableConfig: {
@@ -96,21 +97,25 @@ const embeddablePersistableStateService = createEmbeddablePersistableStateServic
 
 describe('dashboard telemetry', () => {
   beforeAll(() => {
-    embeddablePersistableStateService.extract.mockImplementationOnce((state) => {
-      const { HARDCODED_ID, ...restOfState } = state as unknown as Record<string, unknown>;
-      return {
-        state: restOfState as EmbeddableStateWithType,
-        references: [{ id: HARDCODED_ID as string, name: 'refName', type: 'type' }],
-      };
-    });
+    embeddablePersistableStateService.extract.mockImplementationOnce(
+      (state: EmbeddableStateWithType) => {
+        const { HARDCODED_ID, ...restOfState } = state as unknown as Record<string, unknown>;
+        return {
+          state: restOfState as EmbeddableStateWithType,
+          references: [{ id: HARDCODED_ID as string, name: 'refName', type: 'type' }],
+        };
+      }
+    );
 
-    embeddablePersistableStateService.inject.mockImplementationOnce((state, references) => {
-      const ref = references.find((r) => r.name === 'refName');
-      return {
-        ...state,
-        HARDCODED_ID: ref!.id,
-      };
-    });
+    embeddablePersistableStateService.inject.mockImplementationOnce(
+      (state: EmbeddableStateWithType, references: SavedObjectReference[]) => {
+        const ref = references.find((r: SavedObjectReference) => r.name === 'refName');
+        return {
+          ...state,
+          HARDCODED_ID: ref!.id,
+        };
+      }
+    );
   });
 
   it('collects information about dashboard panels', () => {
