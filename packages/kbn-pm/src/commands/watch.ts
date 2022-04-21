@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { runIBazel } from '../utils/bazel';
+import { runIBazel } from '@kbn/bazel-runner';
 import { ICommand } from '.';
+import { log } from '../utils/log';
 
 export const WatchCommand: ICommand = {
   description: 'Runs a build in the Bazel built packages and keeps watching them for changes',
@@ -25,9 +26,10 @@ export const WatchCommand: ICommand = {
     //
     // Note: --run_output=false arg will disable the iBazel notifications about gazelle and buildozer when running it
     // Can also be solved by adding a root `.bazel_fix_commands.json` but its not needed at the moment
-    await runIBazel(
-      ['--run_output=false', 'build', '//packages:build', '--show_result=1'],
-      runOffline
-    );
+    await runIBazel({
+      bazelArgs: ['--run_output=false', 'build', '//packages:build', '--show_result=1'],
+      log,
+      offline: runOffline,
+    });
   },
 };
