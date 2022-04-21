@@ -10,7 +10,7 @@
  * Resolution result indicating that the import request resolves to a built-in node library
  */
 export interface BuiltInResult {
-  type: 'built-in';
+  readonly type: 'built-in';
 }
 
 /**
@@ -18,7 +18,7 @@ export interface BuiltInResult {
  * currently installed so assumed to be optional
  */
 export interface OptionalDepResult {
-  type: 'optional-and-missing';
+  readonly type: 'optional-and-missing';
 }
 
 /**
@@ -28,7 +28,7 @@ export interface OptionalDepResult {
  * can be trusted to exist after the build it complete or in their used location.
  */
 export interface IgnoreResult {
-  type: 'ignore';
+  readonly type: 'ignore';
 }
 
 /**
@@ -38,8 +38,8 @@ export interface IgnoreResult {
  * end up in the build or running code.
  */
 export interface TypesResult {
-  type: '@types';
-  module: string;
+  readonly type: '@types';
+  readonly module: string;
 }
 
 /**
@@ -47,11 +47,11 @@ export interface TypesResult {
  * the path of that file and the name of the nodeModule if applicable
  */
 export interface FileResult {
-  type: 'file';
-  absolute: string;
-  nodeModule?: string;
-  prefix?: string;
-  postfix?: string;
+  readonly type: 'file';
+  readonly absolute: string;
+  readonly nodeModule?: string;
+  readonly prefix?: string;
+  readonly postfix?: string;
 }
 
 /**
