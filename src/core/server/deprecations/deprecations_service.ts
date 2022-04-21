@@ -178,6 +178,8 @@ export class DeprecationsService
     };
   }
 
+  public stop() {}
+
   private createScopedDeprecations(): (
     esClient: IScopedClusterClient,
     savedObjectsClient: SavedObjectsClientContract

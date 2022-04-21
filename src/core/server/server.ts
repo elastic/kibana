@@ -362,6 +362,8 @@ export class Server {
     await this.plugins.stop();
     this.savedObjects.stop();
     await this.elasticsearch.stop();
+    this.uiSettings.stop();
+    this.rendering.stop();
     this.metrics.stop();
     this.status.stop();
     this.logging.stop();
@@ -369,6 +371,7 @@ export class Server {
     this.executionContext.stop();
     this.coreUsageData.stop();
     this.httpResources.stop();
+    this.deprecations.stop();
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup) {

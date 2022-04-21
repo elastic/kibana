@@ -69,6 +69,7 @@ export class HttpService implements CoreService<HttpSetup, HttpStart> {
   }
 
   public stop() {
+    this.anonymousPaths.stop();
     this.loadingCount.stop();
   }
 }

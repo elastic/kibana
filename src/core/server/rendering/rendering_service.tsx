@@ -153,6 +153,8 @@ export class RenderingService {
 
     return `<!DOCTYPE html>${renderToStaticMarkup(<Template metadata={metadata} />)}`;
   }
+
+  public stop() {}
 }
 
 const getUiConfig = async (uiPlugins: UiPlugins, pluginId: string) => {
