@@ -68,10 +68,15 @@ export const fatalReasonDocumentExceedsMaxBatchSizeBytes = ({
 
 /**
  * Constructs migration failure message and logs message strings when an unsupported cluster routing allocation is configured.
+ * // note: "[unsupported_cluster_routing_allocation] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue." is the left.message from initialize_action
  */
-export const fatalReasonClusterRoutingAllocationUnsupported = (docSectionLink: string) => {
-  return {
-    fatalReason: `The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {"transient": {"cluster.routing.allocation.enable": null}, "persistent": {"cluster.routing.allocation.enable": null}}. Refer to ${docSectionLink} for more information on how to resolve the issue.`,
-    logsErrorMessage: `The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. Ensure that the persistent and transient Elasticsearch configuration option 'cluster.routing.allocation.enable' is not set or set it to a value of 'all'. Refer to ${docSectionLink} for more information on how to resolve the issue.`,
-  };
-};
+export const fatalReasonClusterRoutingAllocationUnsupported = ({
+  errorMessage,
+  docSectionLink,
+}: {
+  errorMessage: string;
+  docSectionLink: string;
+}) => ({
+  fatalReason: `${errorMessage} To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {"transient": {"cluster.routing.allocation.enable": null}, "persistent": {"cluster.routing.allocation.enable": null}}. Refer to ${docSectionLink} for more information on how to resolve the issue.`,
+  logsErrorMessage: `${errorMessage} Ensure that the persistent and transient Elasticsearch configuration option 'cluster.routing.allocation.enable' is not set or set it to a value of 'all'. Refer to ${docSectionLink} for more information on how to resolve the issue.`,
+});

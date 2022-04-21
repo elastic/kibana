@@ -68,9 +68,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     if (Either.isLeft(res)) {
       const left = res.left;
       if (isLeftTypeof(left, 'unsupported_cluster_routing_allocation')) {
-        const initErrorMessages = fatalReasonClusterRoutingAllocationUnsupported(
-          stateP.migrationDocLinks.routingAllocationDisabled
-        );
+        const initErrorMessages = fatalReasonClusterRoutingAllocationUnsupported({
+          errorMessage: left.message,
+          docSectionLink: stateP.migrationDocLinks.routingAllocationDisabled,
+        });
         return {
           ...stateP,
           controlState: 'FATAL',

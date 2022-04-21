@@ -97,6 +97,7 @@ describe('migrations v2 model', () => {
     migrationDocLinks: {
       resolveMigrationFailures: 'resolveMigrationFailures',
       repeatedTimeoutRequests: 'repeatedTimeoutRequests',
+      routingAllocationDisabled: 'routingAllocationDisabled',
     },
   };
 
@@ -284,12 +285,13 @@ describe('migrations v2 model', () => {
       test('INIT -> FATAL when cluster routing allocation is not enabled', () => {
         const res: ResponseType<'INIT'> = Either.left({
           type: 'unsupported_cluster_routing_allocation',
+          message: '[unsupported_cluster_routing_allocation]',
         });
         const newState = model(initState, res) as FatalState;
 
         expect(newState.controlState).toEqual('FATAL');
         expect(newState.reason).toMatchInlineSnapshot(
-          `"The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {\\"transient\\": {\\"cluster.routing.allocation.enable\\": null}, \\"persistent\\": {\\"cluster.routing.allocation.enable\\": null}}"`
+          `"[unsupported_cluster_routing_allocation] To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {\\"transient\\": {\\"cluster.routing.allocation.enable\\": null}, \\"persistent\\": {\\"cluster.routing.allocation.enable\\": null}}. Refer to routingAllocationDisabled for more information on how to resolve the issue."`
         );
       });
       test("INIT -> FATAL when .kibana points to newer version's index", () => {
