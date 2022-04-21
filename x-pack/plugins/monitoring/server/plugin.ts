@@ -22,6 +22,7 @@ import {
 } from '@kbn/core/server';
 import { get } from 'lodash';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { RouteMethod } from '@kbn/core/server';
 import {
   KIBANA_MONITORING_LOGGING_TAG,
   KIBANA_STATS_TYPE_MONITORING,
@@ -51,6 +52,7 @@ import {
   PluginsSetup,
   PluginsStart,
   RequestHandlerContextMonitoringPlugin,
+  MonitoringRouteConfig,
 } from './types';
 
 // This is used to test the version of kibana
@@ -328,7 +330,9 @@ export class MonitoringPlugin
     return {
       config,
       log: this.log,
-      route: (options: any) => {
+      route: <Params = any, Query = any, Body = any, Method extends RouteMethod = any>(
+        options: MonitoringRouteConfig<Params, Query, Body, Method>
+      ) => {
         const method = options.method;
         const handler = async (
           context: RequestHandlerContextMonitoringPlugin,
@@ -403,18 +407,23 @@ export class MonitoringPlugin
           }
         };
 
-        const validate: any = get(options, 'config.validate', false);
-        if (validate && validate.payload) {
-          validate.body = validate.payload;
-        }
+        const validate: MonitoringRouteConfig<Params, Query, Body, Method>['validate'] =
+          // NOTE / TODO: "config.validate" is a legacy convention and should be converted over during the TS conversion work
+          get(options, 'validate', false) || get(options, 'config.validate', false);
+
         options.validate = validate;
 
-        if (method === 'POST') {
-          router.post(options, handler);
-        } else if (method === 'GET') {
-          router.get(options, handler);
-        } else if (method === 'PUT') {
-          router.put(options, handler);
+        const routeConfig = {
+          path: options.path,
+          validate: options.validate,
+        };
+
+        if (method.toLowerCase() === 'post') {
+          router.post(routeConfig, handler);
+        } else if (method.toLowerCase() === 'get') {
+          router.get(routeConfig, handler);
+        } else if (method.toLowerCase() === 'put') {
+          router.put(routeConfig, handler);
         } else {
           throw new Error('Unsupported API method: ' + method);
         }

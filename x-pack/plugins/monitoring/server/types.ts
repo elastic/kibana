@@ -35,6 +35,7 @@ import { PluginSetupContract as FeaturesPluginSetupContract } from '@kbn/feature
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { MonitoringCollectionStart } from '@kbn/monitoring-collection-plugin/server';
+import { RouteConfig, RouteMethod } from '@kbn/core/server';
 import { ElasticsearchModifiedSource } from '../common/types/es';
 import { RulesByType } from '../common/types/alerts';
 import { configSchema, MonitoringConfig } from './config';
@@ -85,10 +86,18 @@ export interface RouteDependencies {
   logger: Logger;
 }
 
+export type MonitoringRouteConfig<Params, Query, Body, Method extends RouteMethod> = {
+  method: RouteMethod;
+} & RouteConfig<Params, Query, Body, Method> & {
+    handler: (request: LegacyRequest) => any;
+  };
+
 export interface MonitoringCore {
   config: MonitoringConfig;
   log: Logger;
-  route: (options: any) => void;
+  route: <Params = any, Query = any, Body = any, Method extends RouteMethod = any>(
+    options: MonitoringRouteConfig<Params, Query, Body, Method>
+  ) => void;
 }
 
 export interface LegacyShimDependencies {
@@ -150,7 +159,8 @@ export interface LegacyServer {
   };
 }
 
-export type Cluster = ElasticsearchModifiedSource & {
+export type Cluster = Omit<ElasticsearchModifiedSource, 'timestamp'> & {
+  timestamp?: string;
   ml?: { jobs: any };
   logs?: any;
   alerts?: AlertsOnCluster;
