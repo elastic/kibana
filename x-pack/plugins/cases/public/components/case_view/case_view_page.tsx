@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -15,23 +14,25 @@ import {
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
-
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { CASE_VIEW_PAGE_TABS } from '../../../common/constants';
 import { Case, UpdateKey } from '../../../common/ui';
-import { EditableTitle } from '../header_page/editable_title';
-import { ContentWrapper, WhitePageWrapper } from '../wrappers';
-import { CaseActionBar } from '../case_action_bar';
-import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
-import { useTimelineContext } from '../timeline_context/use_timeline_context';
-import { useCasesContext } from '../cases_context/use_cases_context';
-import { HeaderPage } from '../header_page';
-import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
+import { useCaseViewNavigation, useUrlParams } from '../../common/navigation';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
-import { CaseViewMetrics } from './metrics';
-import type { CaseViewPageProps } from './types';
+import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
+import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
-import { useOnUpdateField } from './use_on_update_field';
+import { CaseActionBar } from '../case_action_bar';
+import { HeaderPage } from '../header_page';
+import { EditableTitle } from '../header_page/editable_title';
+import { useTimelineContext } from '../timeline_context/use_timeline_context';
+import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
+import { ContentWrapper, WhitePageWrapper } from '../wrappers';
 import { CaseViewActivity } from './components/case_view_activity';
+import { CaseViewMetrics } from './metrics';
 import { ACTIVITY_TAB, ALERTS_TAB } from './translations';
+import type { CaseViewPageProps } from './types';
+import { useOnUpdateField } from './use_on_update_field';
 
 export const CaseViewPage = React.memo<CaseViewPageProps>(
   ({
@@ -49,6 +50,10 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     const { userCanCrud } = useCasesContext();
     const { metricsFeatures } = useCasesFeatures();
     useCasesTitleBreadcrumbs(caseData.title);
+
+    const { navigateToCaseView } = useCaseViewNavigation();
+    const { urlParams } = useUrlParams();
+    const activeTabId = urlParams.tabId || CASE_VIEW_PAGE_TABS.ACTIVITY;
 
     const [initLoadingData, setInitLoadingData] = useState(true);
     const init = useRef(true);
@@ -158,7 +163,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     const tabs = useMemo(
       () => [
         {
-          id: 'activity',
+          id: CASE_VIEW_PAGE_TABS.ACTIVITY,
           name: ACTIVITY_TAB,
           content: (
             <CaseViewActivity
@@ -176,7 +181,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
           ),
         },
         {
-          id: 'alerts',
+          id: CASE_VIEW_PAGE_TABS.ALERTS,
           name: ALERTS_TAB,
           content: (
             <EuiEmptyPrompt
@@ -199,26 +204,21 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
         useFetchAlertData,
       ]
     );
-    const [selectedTabId, setSelectedTabId] = useState(tabs[0].id);
     const selectedTabContent = useMemo(() => {
-      return tabs.find((obj) => obj.id === selectedTabId)?.content;
-    }, [selectedTabId, tabs]);
+      return tabs.find((obj) => obj.id === activeTabId)?.content;
+    }, [activeTabId, tabs]);
 
-    const onSelectedTabChanged = (id: string) => {
-      setSelectedTabId(id);
-    };
-
-    const renderTabs = () => {
+    const renderTabs = useCallback(() => {
       return tabs.map((tab, index) => (
         <EuiTab
           key={index}
-          onClick={() => onSelectedTabChanged(tab.id)}
-          isSelected={tab.id === selectedTabId}
+          onClick={() => navigateToCaseView({ detailName: caseId, tabId: tab.id })}
+          isSelected={tab.id === activeTabId}
         >
           {tab.name}
         </EuiTab>
       ));
-    };
+    }, [activeTabId, caseId, navigateToCaseView, tabs]);
 
     return (
       <>

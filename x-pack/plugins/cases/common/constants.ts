@@ -149,3 +149,8 @@ export const CASES_TELEMETRY_TASK_NAME = 'cases-telemetry-task';
  */
 export const CASE_TELEMETRY_SAVED_OBJECT = 'cases-telemetry';
 export const CASE_TELEMETRY_SAVED_OBJECT_ID = 'cases-telemetry';
+
+export const enum CASE_VIEW_PAGE_TABS {
+  ALERTS = 'alerts',
+  ACTIVITY = 'activity',
+}
