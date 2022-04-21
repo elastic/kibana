@@ -69,7 +69,7 @@ export function InfraTabs() {
     <>
       <EuiTabbedContent
         tabs={tabs}
-        initialSelectedTab={tabs[0]}
+        initialSelectedTab={tabs[2]}
         autoFocus="selected"
         onTabClick={(tab) => {}}
       />
@@ -107,27 +107,20 @@ function useTabs({
   const hostFilter = useMemo(
     () => ({
       bool: {
-        filter: [
-          {
-            terms: {
-              'host.name': hostNames,
-            },
-          },
+        should: [
+          { terms: { 'host.name': hostNames } },
+          { terms: { 'container.id': containerIds } },
+          { terms: { 'kubernetes.pod.name': podNames } },
         ],
+        minimum_should_match: 1,
       },
     }),
-    [hostNames]
+    [hostNames, containerIds, podNames]
   );
   const podsFilter = useMemo(
     () => ({
       bool: {
-        filter: [
-          {
-            terms: {
-              'kubernetes.pod.name': podNames,
-            },
-          },
-        ],
+        filter: [{ terms: { 'kubernetes.pod.name': podNames } }],
       },
     }),
     [podNames]
@@ -135,13 +128,7 @@ function useTabs({
   const containersFilter = useMemo(
     () => ({
       bool: {
-        filter: [
-          {
-            terms: {
-              'container.id': containerIds,
-            },
-          },
-        ],
+        filter: [{ terms: { 'container.id': containerIds } }],
       },
     }),
     [containerIds]
