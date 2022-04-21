@@ -96,6 +96,7 @@ exports[`EditLayerPanel is rendered 1`] = `
           layer={
             Object {
               "canShowTooltip": [Function],
+              "getDescriptor": [Function],
               "getDisplayName": [Function],
               "getId": [Function],
               "getImmutableSourceProperties": [Function],
@@ -119,6 +120,7 @@ exports[`EditLayerPanel is rendered 1`] = `
             layer={
               Object {
                 "canShowTooltip": [Function],
+                "getDescriptor": [Function],
                 "getDisplayName": [Function],
                 "getId": [Function],
                 "getImmutableSourceProperties": [Function],

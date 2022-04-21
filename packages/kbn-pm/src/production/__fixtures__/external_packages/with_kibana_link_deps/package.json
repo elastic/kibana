@@ -1,7 +1,0 @@
-{
-  "name": "quux",
-  "version": "1.0.0",
-  "dependencies": {
-    "@kbn/foo": "link:../../packages/foo"
-  }
-}
