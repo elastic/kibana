@@ -10,10 +10,10 @@ import React from 'react';
 import { EuiSpacer, EuiPanel, EuiTitle, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { docLinks } from '../../../shared/doc_links';
+import { docLinks } from '../doc_links';
 
 export const ElasticsearchResources: React.FC = () => (
-  <EuiPanel hasShadow={false} color="subdued">
+  <EuiPanel hasShadow grow={false} color="subdued">
     <EuiTitle size="xs">
       <h4>
         {i18n.translate('xpack.enterpriseSearch.overview.elasticsearchResources.title', {
@@ -40,7 +40,7 @@ export const ElasticsearchResources: React.FC = () => (
     <EuiLink href={docLinks.clientsGuide} target="_blank">
       {i18n.translate(
         'xpack.enterpriseSearch.overview.elasticsearchResources.elasticsearchClients',
-        { defaultMessage: 'Elasticsearch clients' }
+        { defaultMessage: 'Setup a language client' }
       )}
     </EuiLink>
     <EuiSpacer size="s" />

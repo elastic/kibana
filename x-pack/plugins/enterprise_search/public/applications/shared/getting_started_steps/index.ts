@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { useEnterpriseSearchOverviewNav } from './nav';
-export { EnterpriseSearchOverviewPageTemplate } from './page_template';
-export { EnterpriseSearchOverviewHeaderActions } from './kibana_header_actions';
+export { GettingStartedSteps } from './getting_started_steps';
