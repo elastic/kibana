@@ -70,7 +70,7 @@
         "task": "7.6.0"
       },
       "task": {
-        "taskType": "alerting:xpack.uptime.alerts.monitorStatus",
+        "taskType": "alerting:xpack.synthetics.alerts.monitorStatus",
         "retryAt": null,
         "runAt": "2222-02-01T15:59:42.908Z",
         "scope": [

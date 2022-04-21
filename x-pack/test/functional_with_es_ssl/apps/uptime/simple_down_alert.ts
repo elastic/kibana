@@ -75,7 +75,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('displays relevant alert in list drawer', async () => {
       await toasts.dismissAllToasts();
 
-      await testSubjects.click(`xpack.uptime.monitorList.${monitorId}.expandMonitorDetail`);
+      await testSubjects.click(`xpack.synthetics.monitorList.${monitorId}.expandMonitorDetail`);
       await pageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('uptimeMonitorListDrawerAlert0');
     });
@@ -104,7 +104,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         },
         {
           actionTypeId: '.slack',
-          group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
+          group: 'xpack.synthetics.alerts.actionGroups.monitorStatus',
           params: {
             message:
               'Monitor {{state.monitorName}} with url {{{state.monitorUrl}}} from {{state.observerLocation}} {{{state.statusMessage}}} The latest error message is {{{state.latestErrorMessage}}}',
@@ -112,7 +112,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           id: 'my-slack1',
         },
       ]);
-      expect(alertTypeId).to.eql('xpack.uptime.alerts.monitorStatus');
+      expect(alertTypeId).to.eql('xpack.synthetics.alerts.monitorStatus');
       expect(consumer).to.eql('uptime');
       expect(tags).to.eql(['UPTIME_AUTO']);
     });
