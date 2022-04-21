@@ -227,7 +227,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         filters: ruleFields.queryBar?.filters,
         language: ruleFields.queryBar?.query?.language,
         query: ruleFields.queryBar?.query?.query as string,
-        saved_id: ruleFields.queryBar?.saved_id,
+        saved_id: ruleFields.queryBar?.saved_id ?? undefined,
         ...(ruleType === 'threshold' && {
           threshold: {
             field: ruleFields.threshold?.field ?? [],
@@ -251,7 +251,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         filters: ruleFields.queryBar?.filters,
         language: ruleFields.queryBar?.query?.language,
         query: ruleFields.queryBar?.query?.query as string,
-        saved_id: ruleFields.queryBar?.saved_id,
+        saved_id: ruleFields.queryBar?.saved_id ?? undefined,
         threat_index: ruleFields.threatIndex,
         threat_query: ruleFields.threatQueryBar?.query?.query as string,
         threat_filters: ruleFields.threatQueryBar?.filters,
@@ -263,7 +263,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         filters: ruleFields.queryBar?.filters,
         language: ruleFields.queryBar?.query?.language,
         query: ruleFields.queryBar?.query?.query as string,
-        saved_id: ruleFields.queryBar?.saved_id,
+        saved_id: ruleFields.queryBar?.saved_id ?? undefined,
         ...(ruleType === 'query' &&
           ruleFields.queryBar?.saved_id && { type: 'saved_query' as Type }),
       };
