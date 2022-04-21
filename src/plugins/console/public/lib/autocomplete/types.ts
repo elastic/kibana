@@ -15,6 +15,14 @@ export interface ResultTerm {
   value?: string;
 }
 
+export interface DataAutoCompleteRulesOneOf {
+  __condition?: {
+    lines_regex: string;
+  };
+  __template: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
 export interface AutoCompleteContext {
   autoCompleteSet?: null | ResultTerm[];
   endpoint?: null | {
@@ -24,6 +32,7 @@ export interface AutoCompleteContext {
     bodyAutocompleteRootComponents: unknown;
     id?: string;
     documentation?: string;
+    data_autocomplete_rules?: Record<string, unknown> | null;
   };
   urlPath?: null | unknown;
   urlParamsTokenPath?: Array<Record<string, string>> | null;
