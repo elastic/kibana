@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { CoreSetup, RequestHandlerContext } from 'src/core/server';
-import type { SearchRequestHandlerContext } from '../../../../src/plugins/data/server';
-import type { MlPluginSetup } from '../../ml/server';
+import type { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
+import type { SearchRequestHandlerContext } from '@kbn/data-plugin/server';
+import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { InfraStaticSourceConfiguration } from '../common/source_configuration/source_configuration';
 import { InfraServerPluginStartDeps } from './lib/adapters/framework';
 import { LogViewsServiceSetup, LogViewsServiceStart } from './services/log_views/types';

@@ -7,9 +7,9 @@
  */
 
 import type { PaletteRegistry } from '@kbn/coloring';
-import type { PersistedState } from '../../../../visualizations/public';
-import type { ChartsPluginSetup } from '../../../../charts/public';
-import type { IFieldFormat, SerializedFieldFormat } from '../../../../field_formats/common';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { GaugeExpressionProps } from './expression_functions';
 
 export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;

@@ -12,6 +12,7 @@ import { useActions } from 'kea';
 import { EuiPanel, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { CurationsLogic } from '..';
 import { AppSearchPageTemplate } from '../../layout';
 import { MultiInputRows } from '../../multi_input_rows';
 
@@ -20,7 +21,6 @@ import {
   QUERY_INPUTS_BUTTON,
   QUERY_INPUTS_PLACEHOLDER,
 } from '../constants';
-import { CurationsLogic } from '../index';
 import { getCurationsBreadcrumbs } from '../utils';
 
 export const CurationCreation: React.FC = () => {

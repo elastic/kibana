@@ -40,6 +40,7 @@ export const useDeletePack = ({ packId, withRedirect }: UseDeletePackProps) => {
       if (withRedirect) {
         navigateToApp(PLUGIN_ID, { path: pagePathGetters.packs() });
       }
+
       toasts.addSuccess(
         i18n.translate('xpack.osquery.deletePack.successToastMessageText', {
           defaultMessage: 'Successfully deleted pack',

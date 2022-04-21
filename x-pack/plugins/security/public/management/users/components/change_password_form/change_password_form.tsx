@@ -18,10 +18,10 @@ import _ from 'lodash';
 import type { ChangeEvent } from 'react';
 import React, { Component } from 'react';
 
+import type { NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { NotificationsStart } from 'src/core/public';
 
 import type { User } from '../../../../../common/model';
 import type { UserAPIClient } from '../../user_api_client';

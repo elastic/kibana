@@ -6,13 +6,13 @@
  */
 
 import { getActionRoute } from './get';
-import { httpServiceMock } from 'src/core/server/mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './legacy/_mock_handler_arguments';
 import { actionsClientMock } from '../actions_client.mock';
 import { verifyAccessAndContext } from './verify_access_and_context';
 
-jest.mock('./verify_access_and_context.ts', () => ({
+jest.mock('./verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
 }));
 

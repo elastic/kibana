@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin } from 'src/core/public';
+import { CoreSetup, Plugin } from '@kbn/core/public';
 export const plugin = () => new FooPlugin();
 
 class FooPlugin implements Plugin {

@@ -8,8 +8,9 @@
 import type { TypeOf } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 
-import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
-import type { RequestHandler } from '../../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core/server';
+
 import { appContextService, packagePolicyService } from '../../services';
 import type {
   GetPackagePoliciesRequestSchema,

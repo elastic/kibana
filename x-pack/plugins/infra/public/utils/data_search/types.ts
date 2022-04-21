@@ -10,7 +10,7 @@ import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
-} from '../../../../../../src/plugins/data/public';
+} from '@kbn/data-plugin/public';
 import { SearchStrategyError } from '../../../common/search_strategies/common/errors';
 
 export interface DataSearchRequestDescriptor<Request extends IKibanaSearchRequest, RawResponse> {

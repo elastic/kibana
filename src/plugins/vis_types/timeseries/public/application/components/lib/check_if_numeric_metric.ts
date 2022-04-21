@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
-import { KBN_FIELD_TYPES } from '../../../../../../data/public';
 
 import type { Metric, IndexPatternValue } from '../../../../common/types';
 import type { VisFields } from '../../lib/fetch_fields';

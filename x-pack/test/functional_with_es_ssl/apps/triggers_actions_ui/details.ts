@@ -10,9 +10,9 @@ import uuid from 'uuid';
 import { omit, mapValues, range, flatten } from 'lodash';
 import moment from 'moment';
 import { asyncForEach } from '@kbn/std';
+import { alwaysFiringAlertType } from '@kbn/alerting-fixture-plugin/server/plugin';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ObjectRemover } from '../../lib/object_remover';
-import { alwaysFiringAlertType } from '../../fixtures/plugins/alerts/server/plugin';
 import { getTestAlertData, getTestActionData } from '../../lib/get_test_data';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -136,7 +136,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return response;
   }
 
-  describe('Rule Details', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/129337
+  // Failing: See https://github.com/elastic/kibana/issues/129337
+  describe.skip('Rule Details', function () {
     describe('Header', function () {
       const testRunUuid = uuid.v4();
       before(async () => {
