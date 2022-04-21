@@ -9,7 +9,6 @@ import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover } fr
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { Resizable, ResizeCallback } from 're-resizable';
-import deepEqual from 'fast-deep-equal';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
@@ -298,14 +297,4 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
   );
 };
 
-export const ColumnHeader = React.memo(
-  ColumnHeaderComponent,
-  (prevProps, nextProps) =>
-    prevProps.draggableIndex === nextProps.draggableIndex &&
-    prevProps.tabType === nextProps.tabType &&
-    prevProps.timelineId === nextProps.timelineId &&
-    prevProps.isDragging === nextProps.isDragging &&
-    prevProps.onFilterChange === nextProps.onFilterChange &&
-    deepEqual(prevProps.sort, nextProps.sort) &&
-    deepEqual(prevProps.header, nextProps.header)
-);
+export const ColumnHeader = React.memo(ColumnHeaderComponent);
