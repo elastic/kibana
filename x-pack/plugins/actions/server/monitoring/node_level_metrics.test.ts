@@ -29,7 +29,7 @@ describe('NodeLevelMetrics', () => {
     it('should report a gauge when provided with an execution time', () => {
       const executionTime = 1000;
       const metrics = new NodeLevelMetrics(monitoringCollection);
-      metrics.execution('actionA', executionTime);
+      metrics.execution('actionA', 'actionType', executionTime);
       expect(monitoringCollection.reportCounter).toHaveBeenCalledTimes(1);
       expect(monitoringCollection.reportCounter).toHaveBeenCalledWith(
         'kibana_alerting_node_action_executions',

@@ -51,8 +51,8 @@ describe('NodeLevelMetrics', () => {
       metrics.failure('ruleA', RuleExecutionStatusErrorReasons.Read);
       expect(monitoringCollection.reportCounter).toHaveBeenCalledTimes(1);
       expect(monitoringCollection.reportCounter).toHaveBeenCalledWith(
-        `kibana_alerting_node_rule_${RuleExecutionStatusErrorReasons.Read}_failures`,
-        { rule_id: 'ruleA' }
+        `kibana_alerting_node_rule_failures`,
+        { rule_id: 'ruleA', failure_reason: RuleExecutionStatusErrorReasons.Read }
       );
     });
   });
