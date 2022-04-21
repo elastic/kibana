@@ -404,5 +404,6 @@ export interface DocLinks {
   readonly kibanaUpgradeSavedObjects: {
     readonly resolveMigrationFailures: string;
     readonly repeatedTimeoutRequests: string;
+    readonly routingAllocationDisabled: string;
   };
 }

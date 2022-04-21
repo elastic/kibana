@@ -21,7 +21,12 @@ import {
   setProgressTotal,
 } from './progress';
 import { delayRetryState, resetRetryState } from './retry_state';
-import { extractTransformFailuresReason, extractUnknownDocFailureReason } from './extract_errors';
+import {
+  extractTransformFailuresReason,
+  extractUnknownDocFailureReason,
+  fatalReasonDocumentExceedsMaxBatchSizeBytes,
+  fatalReasonClusterRoutingAllocationUnsupported,
+} from './extract_errors';
 import type { ExcludeRetryableEsError } from './types';
 import {
   getAliases,
@@ -33,17 +38,7 @@ import {
 } from './helpers';
 import { createBatches } from './create_batches';
 
-const FATAL_REASON_REQUEST_ENTITY_TOO_LARGE = `While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option.`;
-const fatalReasonDocumentExceedsMaxBatchSizeBytes = ({
-  _id,
-  docSizeBytes,
-  maxBatchSizeBytes,
-}: {
-  _id: string;
-  docSizeBytes: number;
-  maxBatchSizeBytes: number;
-}) =>
-  `The document with _id "${_id}" is ${docSizeBytes} bytes which exceeds the configured maximum batch size of ${maxBatchSizeBytes} bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.`;
+export const FATAL_REASON_REQUEST_ENTITY_TOO_LARGE = `While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option.`;
 
 export const model = (currentState: State, resW: ResponseType<AllActionStates>): State => {
   // The action response `resW` is weakly typed, the type includes all action
@@ -73,15 +68,18 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     if (Either.isLeft(res)) {
       const left = res.left;
       if (isLeftTypeof(left, 'unsupported_cluster_routing_allocation')) {
+        const initErrorMessages = fatalReasonClusterRoutingAllocationUnsupported(
+          stateP.migrationDocLinks.routingAllocationDisabled
+        );
         return {
           ...stateP,
           controlState: 'FATAL',
-          reason: `The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {"transient": {"cluster.routing.allocation.enable": null}, "persistent": {"cluster.routing.allocation.enable": null}}`,
+          reason: initErrorMessages.fatalReason,
           logs: [
             ...stateP.logs,
             {
               level: 'error',
-              message: `The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. Ensure that the persistent and transient Elasticsearch configuration option 'cluster.routing.allocation.enable' is not set or set it to a value of 'all'.`,
+              message: initErrorMessages.logsErrorMessage,
             },
           ],
         };
