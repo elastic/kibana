@@ -38,7 +38,7 @@ import { SetupGuideCta } from '../setup_guide';
 
 import { TrialCallout } from '../trial_callout';
 
-interface ProductSelectorProps {
+interface OverviewContentProps {
   access: {
     hasAppSearchAccess?: boolean;
     hasWorkplaceSearchAccess?: boolean;
@@ -46,20 +46,20 @@ interface ProductSelectorProps {
   isWorkplaceSearchAdmin: boolean;
 }
 
-export const OverviewContent: React.FC<ProductSelectorProps> = ({ access }) => {
+export const OverviewContent: React.FC<OverviewContentProps> = ({ access }) => {
   const { hasAppSearchAccess, hasWorkplaceSearchAccess } = access;
   const { config } = useValues(KibanaLogic);
 
-  // If Enterprise Search hasn't been set up yet, show all products. Otherwise, only show products the user has access to
-  const shouldShowAppSearchCard = !config.host || hasAppSearchAccess;
-  const shouldShowWorkplaceSearchCard = !config.host || hasWorkplaceSearchAccess;
-
+  // TODO Refactor this and the tests according to the search indices permissions
   // If Enterprise Search has been set up and the user does not have access to either product, show a message saying they
   // need to contact an administrator to get access to one of the products.
-  const shouldShowEnterpriseSearchCards = shouldShowAppSearchCard || shouldShowWorkplaceSearchCard;
+  const shouldShowEnterpriseSearchOverview =
+    !config.host || hasAppSearchAccess || hasWorkplaceSearchAccess;
 
-  const productCards = (
+  const enterpriseSearchOverview = (
     <>
+      <AddContentEmptyPrompt />
+      <EuiSpacer size="xxl" />
       <EuiFlexGroup>
         <EuiFlexItem>
           <GettingStartedSteps />
@@ -151,9 +151,7 @@ export const OverviewContent: React.FC<ProductSelectorProps> = ({ access }) => {
       <SendTelemetry action="viewed" metric="overview" />
       <TrialCallout />
       <EuiPageBody paddingSize="none">
-        <AddContentEmptyPrompt />
-        <EuiSpacer size="xxl" />
-        {shouldShowEnterpriseSearchCards ? productCards : insufficientAccessMessage}
+        {shouldShowEnterpriseSearchOverview ? enterpriseSearchOverview : insufficientAccessMessage}
         <Chat />
       </EuiPageBody>
     </EnterpriseSearchOverviewPageTemplate>
