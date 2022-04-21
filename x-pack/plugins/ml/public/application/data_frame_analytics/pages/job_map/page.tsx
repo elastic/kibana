@@ -145,10 +145,11 @@ export const Page: FC = () => {
       <SavedObjectsWarning onCloseFlyout={refresh} />
       <UpgradeWarning />
 
-      {mapJobId || mapModelId || analyticsId ? (
+      {jobId || modelId ? (
         <JobMap
-          analyticsId={mapJobId || analyticsId?.job_id}
-          modelId={mapModelId || analyticsId?.model_id}
+          key={`${jobId || modelId}-id`}
+          analyticsId={jobId}
+          modelId={modelId}
           forceRefresh={isLoading}
         />
       ) : (
