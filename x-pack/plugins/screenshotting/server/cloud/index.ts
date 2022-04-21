@@ -7,7 +7,6 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import fs from 'fs';
 import { readMemoryLimit } from './read_cgroup_mem_limit';
 
 const MIN_CLOUD_OS_MEM_GB: number = 2;
@@ -25,13 +24,6 @@ export function systemHasInsufficientMemory(
   logger.fatal(`TEST isCloudEnabled ${Boolean(cloud?.isCloudEnabled)}`);
   logger.fatal(`TEST hasDeploymentId ${Boolean(cloud?.deploymentId)}`);
   logger.fatal(`TEST has cloud ${Boolean(cloud?.isCloudEnabled || cloud?.deploymentId)}`);
-  const rootFiles = fs.readdirSync('/');
-  logger.fatal(`${rootFiles}`);
-  const f = rootFiles.find((file) => file.match(/instance.*data.*\.json$/i));
-  if (f) {
-    logger.fatal(`matched ${f}`);
-    logger.fatal(`${fs.readFileSync(f).toString()}`);
-  }
   if (!Boolean(cloud?.isCloudEnabled || cloud?.deploymentId)) return false;
   const limit = readMemoryLimit();
   logger.fatal(`TEST memory limit from cgroups ${limit}`);
