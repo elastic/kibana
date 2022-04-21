@@ -42,7 +42,7 @@ export const generateCaseViewPath = (params: CaseViewPathParams): string => {
   // Cast for generatePath argument type constraint
   const pathParams = params as unknown as { [paramName: string]: string };
 
-  // paths with comentId have their own specific path.
+  // paths with commentId have their own specific path.
   // Effectively overwrites the tabId
   if (commentId) {
     return normalizePath(generatePath(CASE_VIEW_COMMENT_PATH, pathParams));
