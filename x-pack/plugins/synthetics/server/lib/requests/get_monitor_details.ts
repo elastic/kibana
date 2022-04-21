@@ -6,6 +6,7 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { MonitorDetails, Ping } from '../../../common/runtime_types';
 import { formatFilterString } from '../alerts/status_check';
@@ -31,7 +32,7 @@ export const getMonitorAlerts = async ({
   const options: any = {
     page: 1,
     perPage: 500,
-    filter: 'alert.attributes.alertTypeId:(xpack.synthetics.alerts.monitorStatus)',
+    filter: `alert.attributes.alertTypeId:(${CLIENT_ALERT_TYPES.MONITOR_STATUS})`,
     defaultSearchOperator: 'AND',
     sortField: 'name.keyword',
   };

@@ -16,7 +16,7 @@ import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { AnomaliesTableRecord } from '@kbn/ml-plugin/common/types/anomalies';
 import { getSeverityType } from '@kbn/ml-plugin/common/util/anomaly_utils';
 import { updateState, generateAlertMessage, getViewInAppUrl } from './common';
-import { DURATION_ANOMALY } from '../../../common/constants/alerts';
+import { CLIENT_ALERT_TYPES, DURATION_ANOMALY } from '../../../common/constants/alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
 import { UptimeCorePluginsSetup } from '../adapters/framework';
 import { UptimeAlertTypeFactory } from './types';
@@ -77,7 +77,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
   libs,
   plugins
 ) => ({
-  id: 'xpack.synthetics.alerts.durationAnomaly',
+  id: CLIENT_ALERT_TYPES.DURATION_ANOMALY,
   producer: 'uptime',
   name: durationAnomalyTranslations.alertFactoryName,
   validate: {
