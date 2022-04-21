@@ -60,7 +60,7 @@ const items: ContextItemProps[] = [
   },
 ];
 
-const LOCAL_STORAGE_KEY = 'xpack.synthetics.monitorList.pageSize';
+const LOCAL_STORAGE_KEY = 'xpack.uptime.monitorList.pageSize';
 
 interface MonitorListPageSizeSelectProps {
   size: number;
