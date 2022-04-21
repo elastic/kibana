@@ -28,7 +28,6 @@ import { usePostPushToService } from '../../containers/use_post_push_to_service'
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
 import { ConnectorTypes } from '../../../common/api';
 import { caseViewProps, caseData } from './index.test';
-import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { useCaseViewNavigation, useUrlParams } from '../../common/navigation/hooks';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/constants';
 import userEvent from '@testing-library/user-event';
