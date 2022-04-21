@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, isEqual, isUndefined, keyBy, pick } from 'lodash/fp';
-import memoizeOne from 'memoize-one';
+import { isEmpty, isEqual, keyBy } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 import { Subscription } from 'rxjs';
@@ -15,7 +14,6 @@ import {
   BrowserField,
   BrowserFields,
   DocValueFields,
-  IndexField,
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
 } from '@kbn/timelines-plugin/common';
@@ -40,69 +38,6 @@ export const getAllFieldsByName = (
   browserFields: BrowserFields
 ): { [fieldName: string]: Partial<BrowserField> } =>
   keyBy('name', getAllBrowserFields(browserFields));
-
-export const getIndexFields = memoizeOne(
-  (title: string, fields: IndexField[]): DataViewBase =>
-    fields && fields.length > 0
-      ? {
-          fields: fields.map((field) =>
-            pick(['name', 'searchable', 'type', 'aggregatable', 'esTypes', 'subType'], field)
-          ),
-          title,
-        }
-      : { fields: [], title },
-  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
-);
-
-/**
- * HOT Code path where the fields can be 16087 in length or larger. This is
- * VERY mutatious on purpose to improve the performance of the transform.
- */
-export const getBrowserFields = memoizeOne(
-  (_title: string, fields: IndexField[]): BrowserFields => {
-    // Adds two dangerous casts to allow for mutations within this function
-    type DangerCastForMutation = Record<string, {}>;
-    type DangerCastForBrowserFieldsMutation = Record<
-      string,
-      Omit<BrowserField, 'fields'> & { fields: Record<string, BrowserField> }
-    >;
-
-    // We mutate this instead of using lodash/set to keep this as fast as possible
-    return fields.reduce<DangerCastForBrowserFieldsMutation>((accumulator, field) => {
-      if (accumulator[field.category] == null) {
-        (accumulator as DangerCastForMutation)[field.category] = {};
-      }
-      if (accumulator[field.category].fields == null) {
-        accumulator[field.category].fields = {};
-      }
-      accumulator[field.category].fields[field.name] = field as unknown as BrowserField;
-      return accumulator;
-    }, {});
-  },
-  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
-);
-
-export const getDocValueFields = memoizeOne(
-  (_title: string, fields: IndexField[]): DocValueFields[] =>
-    fields && fields.length > 0
-      ? fields.reduce<DocValueFields[]>((accumulator: DocValueFields[], field: IndexField) => {
-          if (field.readFromDocValues && accumulator.length < 100) {
-            return [
-              ...accumulator,
-              {
-                field: field.name,
-              },
-            ];
-          }
-          return accumulator;
-        }, [])
-      : [],
-  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
-);
-
-export const indicesExistOrDataTemporarilyUnavailable = (
-  indicesExist: boolean | null | undefined
-) => indicesExist || isUndefined(indicesExist);
 
 const DEFAULT_BROWSER_FIELDS = {};
 const DEFAULT_INDEX_PATTERNS = { fields: [], title: '' };
@@ -160,11 +95,14 @@ export const useFetchIndex = (
                 previousIndexesName.current = response.indicesExist;
                 setLoading(false);
                 setState({
-                  browserFields: getBrowserFields(stringifyIndices, response.indexFields),
-                  docValueFields: getDocValueFields(stringifyIndices, response.indexFields),
+                  browserFields: response.formattedFields.browserFields,
+                  docValueFields: response.formattedFields.docValueFields,
                   indexes: response.indicesExist,
                   indexExists: response.indicesExist.length > 0,
-                  indexPatterns: getIndexFields(stringifyIndices, response.indexFields),
+                  indexPatterns: {
+                    fields: response.formattedFields.indexFields,
+                    title: stringifyIndices,
+                  },
                 });
 
                 searchSubscription$.current.unsubscribe();

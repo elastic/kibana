@@ -76,7 +76,7 @@ export const useFieldBrowserOptions: UseFieldBrowserOptions = ({
           onSave: async (savedField: DataViewField) => {
             // Fetch the updated list of fields
             // Using cleanCache since the number of fields might have not changed, but we need to update the state anyway
-            await indexFieldsSearch({ dataViewId: selectedDataViewId, cleanCache: true });
+            await indexFieldsSearch({ dataViewId: selectedDataViewId });
 
             if (fieldName && fieldName !== savedField.name) {
               // Remove old field from event table when renaming a field

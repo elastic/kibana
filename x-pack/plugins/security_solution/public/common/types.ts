@@ -8,8 +8,7 @@
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ResponseErrorAttributes } from '@kbn/core/server';
 import type { DataViewBase } from '@kbn/es-query';
-import { FieldSpec } from '@kbn/data-views-plugin/common';
-
+import { IndexField } from '@kbn/timelines-plugin/common';
 export interface ServerApiError {
   statusCode: number;
   error: string;
@@ -25,5 +24,5 @@ export interface SecuritySolutionUiConfigType {
  * DataViewBase with enhanced index fields used in timelines
  */
 export interface SecuritySolutionDataViewBase extends DataViewBase {
-  fields: FieldSpec[];
+  fields: IndexField[];
 }

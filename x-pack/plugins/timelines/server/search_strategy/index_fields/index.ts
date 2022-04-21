@@ -16,9 +16,12 @@ import {
 } from '@kbn/data-plugin/server';
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import { pick } from 'lodash/fp';
 import { DELETED_SECURITY_SOLUTION_DATA_VIEW } from '../../../common/constants';
 import {
   BeatFields,
+  BrowserField,
+  DataViewFormattedFields,
   IndexField,
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
@@ -27,7 +30,11 @@ import { StartPlugins } from '../../types';
 
 const apmIndexPattern = 'apm-*-transaction*';
 const apmDataStreamsPattern = 'traces-apm*';
-
+const formattedFieldsInit: DataViewFormattedFields = {
+  browserFields: {},
+  docValueFields: [],
+  indexFields: [],
+};
 export const indexFieldsProvider = (
   getStartServices: StartServicesAccessor<StartPlugins>
 ): ISearchStrategy<
@@ -96,7 +103,7 @@ export const requestIndexFieldSearch = async (
   );
 
   let indicesExist: string[] = [];
-  let indexFields: IndexField[] = [];
+  let formattedFields: DataViewFormattedFields = formattedFieldsInit;
   let runtimeMappings = {};
 
   // if dataViewId is provided, get fields and indices from the Kibana Data View
@@ -127,7 +134,7 @@ export const requestIndexFieldSearch = async (
       const dataViewSpec = dataView.toSpec();
       const fieldDescriptor = [Object.values(dataViewSpec.fields ?? {})];
       runtimeMappings = dataViewSpec.runtimeFieldMap ?? {};
-      indexFields = await formatIndexFields(beatFields, fieldDescriptor, patternList);
+      formattedFields = await formatIndexFields(beatFields, fieldDescriptor, patternList);
     }
   } else if ('indices' in request) {
     const patternList = dedupeIndexName(request.indices);
@@ -148,12 +155,12 @@ export const requestIndexFieldSearch = async (
           });
         })
       );
-      indexFields = await formatIndexFields(beatFields, fieldDescriptor, patternList);
+      formattedFields = await formatIndexFields(beatFields, fieldDescriptor, patternList);
     }
   }
 
   return {
-    indexFields,
+    formattedFields,
     runtimeMappings,
     indicesExist,
     rawResponse: {
@@ -264,33 +271,72 @@ export const formatFirstFields = async (
   beatFields: BeatFields,
   responsesFieldSpec: FieldSpec[][],
   indexesAlias: string[]
-): Promise<IndexField[]> => {
+): Promise<DataViewFormattedFields> => {
+  type DangerCastForMutation = Record<string, {}>;
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(
         responsesFieldSpec.reduce(
-          (accumulator: IndexField[], fieldSpec: FieldSpec[], indexesAliasId: number) => {
+          (
+            accumulator: DataViewFormattedFields,
+            fieldSpec: FieldSpec[],
+            indexesAliasId: number
+          ) => {
             const indexFieldNameHash: Record<string, number> = {};
             const indexesAliasIdx = responsesFieldSpec.length > 1 ? indexesAliasId : null;
             [...missingFields, ...fieldSpec].forEach((index) => {
-              const item = createFieldItem(beatFields, indexesAlias, index, indexesAliasIdx);
-              const alreadyExistingIndexField = indexFieldNameHash[item.name];
+              const field = createFieldItem(beatFields, indexesAlias, index, indexesAliasIdx);
+              const alreadyExistingIndexField = indexFieldNameHash[field.name];
               if (alreadyExistingIndexField != null) {
-                const existingIndexField = accumulator[alreadyExistingIndexField];
-                if (isEmpty(accumulator[alreadyExistingIndexField].description)) {
-                  accumulator[alreadyExistingIndexField].description = item.description;
+                const existingIndexField = accumulator.indexFields[alreadyExistingIndexField];
+                if (isEmpty(accumulator.indexFields[alreadyExistingIndexField].description)) {
+                  accumulator.indexFields[alreadyExistingIndexField].description =
+                    field.description;
                 }
-                accumulator[alreadyExistingIndexField].indexes = Array.from(
-                  new Set([...existingIndexField.indexes, ...item.indexes])
+                accumulator.indexFields[alreadyExistingIndexField].indexes = Array.from(
+                  new Set([...existingIndexField.indexes, ...field.indexes])
                 );
                 return;
               }
-              accumulator.push(item);
-              indexFieldNameHash[item.name] = accumulator.length - 1;
+              // mutate browserFields
+              if (accumulator.browserFields[field.category] == null) {
+                (accumulator.browserFields as DangerCastForMutation)[field.category] = {};
+              }
+              if (accumulator.browserFields[field.category].fields == null) {
+                accumulator.browserFields[field.category].fields = {};
+              }
+              accumulator.browserFields[field.category].fields[field.name] =
+                field as unknown as BrowserField;
+
+              // mutate docValueFields
+              if (field.readFromDocValues && accumulator.docValueFields.length < 100) {
+                accumulator.docValueFields.push({
+                  field: field.name,
+                });
+              }
+
+              // mutate indexFields
+              accumulator.indexFields.push(
+                pick(
+                  [
+                    'category',
+                    'indexes',
+                    'name',
+                    'searchable',
+                    'type',
+                    'aggregatable',
+                    'esTypes',
+                    'subType',
+                  ],
+                  field
+                )
+              );
+
+              indexFieldNameHash[field.name] = accumulator.indexFields.length - 1;
             });
             return accumulator;
           },
-          []
+          formattedFieldsInit
         )
       );
     });
@@ -310,6 +356,6 @@ export const formatIndexFields = async (
   beatFields: BeatFields,
   responsesFieldSpec: FieldSpec[][],
   indexesAlias: string[]
-): Promise<IndexField[]> => {
+): Promise<DataViewFormattedFields> => {
   return formatFirstFields(beatFields, responsesFieldSpec, indexesAlias);
 };

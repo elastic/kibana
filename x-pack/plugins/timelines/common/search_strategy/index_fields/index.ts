@@ -38,6 +38,17 @@ export interface IndexField extends Omit<FieldSpec, 'format'> {
   format?: Maybe<string>;
 }
 
+type DangerCastForBrowserFieldsMutation = Record<
+  string,
+  Omit<BrowserField, 'fields'> & { fields: Record<string, BrowserField> }
+>;
+
+export interface DataViewFormattedFields {
+  browserFields: DangerCastForBrowserFieldsMutation;
+  docValueFields: DocValueFields[];
+  indexFields: IndexField[];
+}
+
 export type BeatFields = Record<string, FieldInfo>;
 
 export interface IndexFieldsStrategyRequestByIndices extends IEsSearchRequest {
@@ -54,7 +65,7 @@ export type IndexFieldsStrategyRequest<T extends 'indices' | 'dataView'> = T ext
   : IndexFieldsStrategyRequestByIndices;
 
 export interface IndexFieldsStrategyResponse extends IEsSearchResponse {
-  indexFields: IndexField[];
+  formattedFields: DataViewFormattedFields;
   indicesExist: string[];
   runtimeMappings: MappingRuntimeFields;
 }
