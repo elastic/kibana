@@ -184,13 +184,13 @@ export interface ActionDetails {
   /** The date when the initial action request was submitted */
   startedAt: string;
   /** The date when the action was completed (a response ack was received) */
-  completedAt: string;
+  completedAt: string | undefined;
   /**
    * The list of items (actions and responses) received thus far for the action.
    */
   items: ActivityLogEntry[];
 }
 
-export interface ActionDetailsResponse {
+export interface ActionDetailsApiResponse {
   data: ActionDetails;
 }

@@ -9,6 +9,7 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TransportResult } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import { NotFoundError } from '../errors';
 import { EndpointError } from '../../../common/endpoint/errors';
 import { ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN } from '../../../common/endpoint/constants';
 import { SecuritySolutionRequestHandlerContext } from '../../types';
@@ -21,6 +22,8 @@ import {
   EndpointPendingActions,
   LogsEndpointActionResponse,
   ActionDetails,
+  ActivityLogAction,
+  EndpointActivityLogAction,
 } from '../../../common/endpoint/types';
 import {
   ACTION_REQUEST_INDICES,
@@ -408,45 +411,79 @@ export const getActionDetailsById = async (
   actionId: string
 ): Promise<ActionDetails> => {
   // Get Action request
-  let actionRequest;
+  let actionRequests: Array<ActivityLogAction | EndpointActivityLogAction>;
   let actionResponses;
 
   try {
-    actionRequest = await esClient.search(
-      {
-        index: ACTION_REQUEST_INDICES,
-        body: {
-          query: {
-            bool: {
-              filter: [{ term: { action_id: actionId } }],
+    const actionRequestEsSearchResults = await esClient
+      .search<EndpointAction | LogsEndpointAction>(
+        {
+          index: ACTION_REQUEST_INDICES,
+          body: {
+            query: {
+              bool: {
+                filter: [{ term: { action_id: actionId } }],
+              },
             },
           },
         },
-      },
-      {
-        ignore: [404],
-      }
-    );
+        {
+          ignore: [404],
+        }
+      )
+      .catch(catchAndWrapError);
 
-    actionResponses = await esClient.search(
-      {
-        index: ACTION_RESPONSE_INDICES,
-        size: 1000,
-        body: {
-          query: {
-            bool: {
-              filter: [{ term: { action_id: actionId } }],
+    actionRequests = getUniqueLogData(
+      categorizeActionResults({
+        results: actionRequestEsSearchResults?.hits?.hits ?? [],
+      })
+    ) as Array<ActivityLogAction | EndpointActivityLogAction>;
+
+    const actionResponsesEsSearchResults = await esClient
+      .search<EndpointActionResponse | LogsEndpointActionResponse>(
+        {
+          index: ACTION_RESPONSE_INDICES,
+          size: 1000,
+          body: {
+            query: {
+              bool: {
+                filter: [{ term: { action_id: actionId } }],
+              },
             },
           },
+          // FIXME:PT need to sort this in ascending order
         },
-      },
-      { ignore: [404] }
+        { ignore: [404] }
+      )
+      .catch(catchAndWrapError);
+
+    actionResponses = getUniqueLogData(
+      categorizeResponseResults({
+        results: actionResponsesEsSearchResults?.hits?.hits ?? [],
+      })
     );
   } catch (error) {
     throw new EndpointError(error.message, error);
   }
 
-  return [actionRequest, actionResponses];
+  // If action id was not found, error out
+  if (actionRequests.length === 0) {
+    throw new NotFoundError(`Action with id '${actionId}' not found.`);
+  }
 
-  // get action responses
+  const isCompleted = false; // FIXME:PT calculate
+  const completedAt = undefined; // FIXME:PT calculate
+
+  const actionDetails: ActionDetails = {
+    id: actionId,
+    endpointIds: [...(actionRequests[0].item.data.agents ?? [])],
+    actionType: actionRequests[0].item.data.data.command,
+    startedAt: actionRequests[0].item.data['@timestamp'],
+    items: [...actionRequests, ...actionResponses],
+    isCompleted,
+    completedAt,
+    isExpired: !isCompleted && actionRequests[0].item.data.expiration < new Date().toISOString(),
+  };
+
+  return actionDetails;
 };

@@ -7,6 +7,7 @@
 
 import { RequestHandler } from '@kbn/core/server';
 import { TypeOf } from '@kbn/config-schema';
+import { errorHandler } from '../error_handler';
 import {
   ActionDetailsRequestSchema,
   ActionStatusRequestSchema,
@@ -51,26 +52,32 @@ export function registerActionStatusRoutes(
     withEndpointAuthz(
       { all: ['canAccessEndpointManagement'] },
       endpointContext.logFactory.get('hostIsolationDetails'),
-      getActionDetailsRequestHandler()
+      getActionDetailsRequestHandler(endpointContext)
     )
   );
 }
 
-export const getActionDetailsRequestHandler = (): RequestHandler<
+export const getActionDetailsRequestHandler = (
+  endpointContext: EndpointAppContext
+): RequestHandler<
   TypeOf<typeof ActionDetailsRequestSchema.params>,
   never,
   never,
   SecuritySolutionRequestHandlerContext
 > => {
   return async (context, req, res) => {
-    return res.ok({
-      body: {
-        data: await getActionDetailsById(
-          context.core.elasticsearch.client.asInternalUser,
-          req.params.action_id
-        ),
-      },
-    });
+    try {
+      return res.ok({
+        body: {
+          data: await getActionDetailsById(
+            context.core.elasticsearch.client.asInternalUser,
+            req.params.action_id
+          ),
+        },
+      });
+    } catch (error) {
+      return errorHandler(endpointContext.logFactory.get('EndpointActionDetails'), res, error);
+    }
   };
 };
 
