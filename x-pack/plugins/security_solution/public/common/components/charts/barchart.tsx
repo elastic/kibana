@@ -106,6 +106,7 @@ export const BarChartBaseComponent = ({
             data={series.value ?? []}
             stackAccessors={get('configs.series.stackAccessors', chartConfigs)}
             color={series.color ? series.color : undefined}
+            barSeriesStyle={get('configs.series.barSeriesStyle', chartConfigs)}
           />
         ) : null;
       })}
@@ -116,7 +117,11 @@ export const BarChartBaseComponent = ({
         showOverlappingTicks={false}
         style={{
           tickLine: {
-            size: tickSize,
+            size: 0,
+          },
+          tickLabel: {
+            padding: 16,
+            fontSize: 10.5,
           },
         }}
         tickFormat={xTickFormatter}
@@ -127,7 +132,11 @@ export const BarChartBaseComponent = ({
         position={Position.Left}
         style={{
           tickLine: {
-            size: tickSize,
+            size: 0,
+          },
+          tickLabel: {
+            padding: 16,
+            fontSize: 14,
           },
         }}
         tickFormat={yTickFormatter}

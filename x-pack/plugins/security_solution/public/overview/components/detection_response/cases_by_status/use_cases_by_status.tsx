@@ -7,19 +7,38 @@
 
 import moment from 'moment';
 import { useState, useEffect } from 'react';
-import { CaseStatuses } from '../../../../../../cases/common';
 import { APP_ID } from '../../../../../common/constants';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useKibana } from '../../../../common/lib/kibana';
 
-export const useCasesByStatus = () => {
+export interface CasesCounts {
+  count_open_cases?: number;
+  count_in_progress_cases?: number;
+  count_closed_cases?: number;
+}
+
+export interface UseCasesByStatusProps {
+  skip?: boolean;
+}
+
+export interface UseCasesByStatusResults {
+  closed: number;
+  inProgress: number;
+  isLoading: boolean;
+  open: number;
+  totalCounts: number;
+  updatedAt: number;
+}
+
+export const useCasesByStatus = ({ skip = false }) => {
   const {
     services: { cases },
   } = useKibana();
   const { to, from } = useGlobalTime();
+
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   const [isLoading, setIsLoading] = useState(true);
-  const [casesCount, setCasesCount] = useState(null);
+  const [casesCounts, setCasesCounts] = useState<CasesCounts | null>(null);
 
   // This is a known issue of cases api, it doesn't accept date time format atm
   // Once they fix this problem we can remove this two lines
@@ -27,53 +46,54 @@ export const useCasesByStatus = () => {
   const toDate = moment(to).format('YYYY-MM-DD');
 
   useEffect(() => {
-    const fetchOpen = async () => {
-      const casesResponse = await cases.api.cases.find({
-        status: CaseStatuses.open,
-        from: fromDate,
-        to: toDate,
-        owner: APP_ID,
-      });
-      setCasesCount(casesResponse);
-      setIsLoading(false);
-      setUpdatedAt(Date.now());
+    let isSubscribed = true;
+    const abortCtrl = new AbortController();
+    const fetchCases = async () => {
+      try {
+        const casesResponse = await cases.api.cases.getAllCasesMetrics({
+          from: fromDate,
+          to: toDate,
+          owner: APP_ID,
+        });
+        if (isSubscribed) {
+          setCasesCounts(casesResponse);
+        }
+      } catch (error) {
+        if (isSubscribed) {
+          setCasesCounts({});
+        }
+      }
+      if (isSubscribed) {
+        setIsLoading(false);
+        setUpdatedAt(Date.now());
+      }
     };
-    fetchOpen();
-  }, [cases.api.cases, from, fromDate, to, toDate]);
 
-  // const inProgress = cases.api.cases.find({
-  //   status: CaseStatuses['in-progress'],
-  //   from,
-  //   to,
-  //   owner: APP_ID,
-  // });
+    if (!skip) {
+      fetchCases();
+    }
 
-  // const closed = cases.api.cases.find({
-  //   status: CaseStatuses.closed,
-  //   from,
-  //   to,
-  //   owner: APP_ID,
-  // });
+    if (skip) {
+      setIsLoading(false);
+      isSubscribed = false;
+      abortCtrl.abort();
+    }
 
-  // const totalCounts = cases.api.cases.getAllCasesMetrics({
-  //   from,
-  //   to,
-  //   owner: APP_ID,
-  // });
-
-  // useEffect(() => {
-  //   if (totalCounts != null && open != null && inProgress != null && closed != null) {
-  //     setIsLoading(false);
-  //     setUpdatedAt(Date.now());
-  //   }
-  // }, [closed, inProgress, open, totalCounts]);
+    return () => {
+      isSubscribed = false;
+      abortCtrl.abort();
+    };
+  }, [cases.api.cases, from, fromDate, skip, to, toDate]);
 
   return {
-    closed: casesCount?.count_closed_cases,
-    inProgress: casesCount?.count_in_progress_cases,
+    closed: casesCounts?.count_closed_cases ?? 0,
+    inProgress: casesCounts?.count_in_progress_cases ?? 0,
     isLoading,
-    open: casesCount?.count_open_cases,
-    totalCounts: casesCount?.total,
+    open: casesCounts?.count_open_cases ?? 0,
+    totalCounts:
+      (casesCounts?.count_closed_cases ?? 0) +
+      (casesCounts?.count_in_progress_cases ?? 0) +
+      (casesCounts?.count_open_cases ?? 0),
     updatedAt,
   };
 };

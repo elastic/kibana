@@ -13,7 +13,26 @@ export const UPDATING = i18n.translate('xpack.securitySolution.detectionResponse
 export const UPDATED = i18n.translate('xpack.securitySolution.detectionResponse.updated', {
   defaultMessage: 'Updated',
 });
-
+export const OPEN = i18n.translate('xpack.securitySolution.detectionResponse.casesByStatus.open', {
+  defaultMessage: 'Open',
+});
+export const IN_PROGRESS = i18n.translate(
+  'xpack.securitySolution.detectionResponse.casesByStatus.inProgress',
+  {
+    defaultMessage: 'In progress',
+  }
+);
+export const CLOSED = i18n.translate(
+  'xpack.securitySolution.detectionResponse.casesByStatus.closed',
+  {
+    defaultMessage: 'Closed',
+  }
+);
+export const CASES = (totalCases: number) =>
+  i18n.translate('xpack.securitySolution.detectionResponse.casesByStatus.totalCases', {
+    values: { totalCases },
+    defaultMessage: 'total {totalCases, plural, =1 {case} other {cases}}',
+  });
 export const CASES_BY_STATUS_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.detectionResponse.casesByStatusSectionTitle',
   {
