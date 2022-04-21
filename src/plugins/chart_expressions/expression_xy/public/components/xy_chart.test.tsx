@@ -1262,9 +1262,7 @@ describe('XYChart component', () => {
         {...defaultProps}
         args={{
           ...args,
-          layers: [
-            { ...(args.layers[0] as DataLayerConfig), seriesType: 'bar', isStacked: true },
-          ],
+          layers: [{ ...(args.layers[0] as DataLayerConfig), seriesType: 'bar', isStacked: true }],
         }}
       />
     );
@@ -1283,9 +1281,7 @@ describe('XYChart component', () => {
         {...defaultProps}
         args={{
           ...args,
-          layers: [
-            { ...(args.layers[0] as DataLayerConfig), seriesType: 'area', isStacked: true },
-          ],
+          layers: [{ ...(args.layers[0] as DataLayerConfig), seriesType: 'area', isStacked: true }],
         }}
       />
     );

@@ -13,7 +13,7 @@ import {
   ValueLabelModes,
   XYCurveTypes,
   X_AXIS_CONFIG,
-  Y_AXIS_CONFIG
+  Y_AXIS_CONFIG,
 } from '../constants';
 import { strings } from '../i18n';
 import { LayeredXyVisFn, XyVisFn } from '../types';
