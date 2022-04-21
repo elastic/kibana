@@ -20,6 +20,7 @@ const createStartMock = (): jest.Mocked<MonitoringCollectionStart> => {
   const mock = {
     reportGauge: jest.fn(),
     reportCounter: jest.fn(),
+    registerCustomElasticsearchClient: jest.fn(),
   };
   return mock;
 };
