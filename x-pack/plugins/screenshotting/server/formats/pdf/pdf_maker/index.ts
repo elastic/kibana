@@ -28,37 +28,42 @@ export async function pngsToPdf({
   packageInfo,
   eventLogger,
 }: PngsToPdfArgs): Promise<{ buffer: Buffer; pages: number }> {
+  const { kbnLogger } = eventLogger;
   const transactionEnd = eventLogger.pdfTransaction();
-  const pdfMaker = new PdfMaker(layout, logo, packageInfo, eventLogger.kbnLogger);
-  if (title) {
-    pdfMaker.setTitle(title);
-  }
-  results.forEach((result) => {
-    result.screenshots.forEach((png) => {
-      const spanEnd = eventLogger.log(
-        'add image to PDF file',
-        Actions.ADD_IMAGE,
-        'generatePdf',
-        'output'
-      );
-      pdfMaker.addImage(png.data, {
-        title: png.title ?? undefined,
-        description: png.description ?? undefined,
-      });
-      spanEnd();
-    });
-  });
 
   let buffer: Uint8Array | null = null;
+  let pdfMaker: PdfMaker | null = null;
   try {
+    pdfMaker = new PdfMaker(layout, logo, packageInfo, kbnLogger);
+    if (title) {
+      pdfMaker.setTitle(title);
+    }
+    results.forEach((result) => {
+      result.screenshots.forEach((png) => {
+        const spanEnd = eventLogger.log(
+          'add image to PDF file',
+          Actions.ADD_IMAGE,
+          'generatePdf',
+          'output'
+        );
+        pdfMaker?.addImage(png.data, {
+          title: png.title ?? undefined,
+          description: png.description ?? undefined,
+        });
+        spanEnd();
+      });
+    });
+
     const spanEnd = eventLogger.log('compile PDF file', Actions.COMPILE, 'generatePdf', 'output');
     buffer = await pdfMaker.generate();
     spanEnd();
 
     const byteLength = buffer?.byteLength ?? 0;
     transactionEnd({ byte_length_pdf: byteLength, pdf_pages: pdfMaker.getPageCount() });
-  } catch (err) {
-    throw err;
+  } catch (error) {
+    kbnLogger.error(error);
+    eventLogger.error(error, Actions.COMPILE);
+    throw error;
   }
 
   return { buffer: Buffer.from(buffer.buffer), pages: pdfMaker.getPageCount() };
