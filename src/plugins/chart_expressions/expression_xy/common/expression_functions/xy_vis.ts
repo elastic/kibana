@@ -11,27 +11,6 @@ import { XY_VIS, DATA_LAYER, REFERENCE_LINE_LAYER, ANNOTATION_LAYER } from '../c
 import { strings } from '../i18n';
 import { commonXYArgs } from './common_xy_args';
 
-const validateExtents = (dataLayers: DataLayerConfigResult[], axes?: YAxisConfigResult[]) => {
-  const lineSeries = dataLayers.filter(({ seriesType }) => seriesType === SeriesTypes.LINE);
-  const hasBarOrArea =
-    dataLayers.filter(
-      ({ seriesType }) => seriesType === SeriesTypes.BAR || seriesType === SeriesTypes.AREA
-    ).length > 0;
-  axes?.forEach((axis) => {
-    if (
-      hasBarOrArea &&
-      axis.extent?.mode === AxisExtentModes.CUSTOM &&
-      !areValidBounds(axis.extent)
-    ) {
-      throw new Error(errors.extendBoundsAreInvalidError());
-    }
-
-    if (!lineSeries.length && axis.extent?.mode === AxisExtentModes.DATA_BOUNDS) {
-      throw new Error(errors.dataBoundsForNotLineChartError());
-    }
-  });
-};
-
 export const xyVisFunction: XyVisFn = {
   name: XY_VIS,
   type: 'render',
@@ -52,19 +31,6 @@ export const xyVisFunction: XyVisFn = {
     annotationLayers: {
       types: [ANNOTATION_LAYER],
       help: strings.getAnnotationLayerHelp(),
-      multi: true,
-    },
-    xAxisConfig: {
-      types: [X_AXIS_CONFIG],
-      help: i18n.translate('expressionXY.xyVis.xAxisConfig.help', {
-        defaultMessage: 'Specifies the configs for x-axis',
-      }),
-    },
-    axes: {
-      types: [Y_AXIS_CONFIG],
-      help: i18n.translate('expressionXY.xyVis.axes.help', {
-        defaultMessage: 'Specifies the configs for y-axes',
-      }),
       multi: true,
     },
   },

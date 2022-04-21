@@ -18,12 +18,7 @@ import { strings } from '../i18n';
 import { ExtendedYConfigFn } from '../types';
 import { commonYConfigArgs } from './common_y_config_args';
 
-export const extendedYConfigFunction: ExpressionFunctionDefinition<
-  typeof EXTENDED_Y_CONFIG,
-  null,
-  ExtendedYConfig,
-  ExtendedYConfigResult
-> = {
+export const extendedYConfigFunction: ExtendedYConfigFn = {
   name: EXTENDED_Y_CONFIG,
   aliases: [],
   type: EXTENDED_Y_CONFIG,
@@ -74,12 +69,6 @@ export const extendedYConfigFunction: ExpressionFunctionDefinition<
         defaultMessage: 'Fill',
       }),
       strict: true,
-    },
-    axisId: {
-      types: ['string'],
-      help: i18n.translate('expressionXY.yConfig.axisId.help', {
-        defaultMessage: 'An optional id of axis',
-      }),
     },
   },
   fn(input, args) {

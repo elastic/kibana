@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { Y_CONFIG } from '../constants';
 import { YConfig, YConfigResult } from '../types';
+import { commonYConfigArgs } from './common_y_config_args';
 
 export const yConfigFunction: ExpressionFunctionDefinition<
   typeof Y_CONFIG,
@@ -25,24 +26,7 @@ export const yConfigFunction: ExpressionFunctionDefinition<
   }),
   inputTypes: ['null'],
   args: {
-    forAccessor: {
-      types: ['string'],
-      help: i18n.translate('expressionXY.yConfig.forAccessor.help', {
-        defaultMessage: 'The accessor this configuration is for',
-      }),
-    },
-    color: {
-      types: ['string'],
-      help: i18n.translate('expressionXY.yConfig.color.help', {
-        defaultMessage: 'The color of the series',
-      }),
-    },
-    axisId: {
-      types: ['string'],
-      help: i18n.translate('expressionXY.yConfig.axisId.help', {
-        defaultMessage: 'An optional id of axis',
-      }),
-    },
+    ...commonYConfigArgs,
   },
   fn(input, args) {
     return {

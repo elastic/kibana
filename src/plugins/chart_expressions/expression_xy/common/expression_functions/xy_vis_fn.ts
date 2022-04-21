@@ -8,9 +8,21 @@
 
 import { i18n } from '@kbn/i18n';
 import { Dimension, prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
-import { AxisExtentModes, LayerTypes, ValueLabelModes, XY_VIS_RENDERER } from '../constants';
+import {
+  AxisExtentModes,
+  LayerTypes,
+  ValueLabelModes,
+  XY_VIS_RENDERER,
+  SeriesTypes,
+} from '../constants';
 import { appendLayerIds } from '../helpers';
-import { AxisExtentConfigResult, DataLayerConfigResult, XYLayerConfig, XyVisFn } from '../types';
+import {
+  AxisExtentConfigResult,
+  DataLayerConfigResult,
+  XYLayerConfig,
+  XyVisFn,
+  YAxisConfigResult,
+} from '../types';
 import { getLayerDimensions } from '../utils';
 
 const errors = {
@@ -37,26 +49,34 @@ const errors = {
     }),
 };
 
-const validateExtent = (
-  extent: AxisExtentConfigResult,
-  hasBarOrArea: boolean,
-  dataLayers: DataLayerConfigResult[]
-) => {
+function areValidBounds(extent: AxisExtentConfigResult) {
   const isValidLowerBound =
     extent.lowerBound === undefined || (extent.lowerBound !== undefined && extent.lowerBound <= 0);
   const isValidUpperBound =
     extent.upperBound === undefined || (extent.upperBound !== undefined && extent.upperBound >= 0);
 
-  const areValidBounds = isValidLowerBound && isValidUpperBound;
+  return isValidLowerBound && isValidUpperBound;
+}
 
-  if (hasBarOrArea && extent.mode === AxisExtentModes.CUSTOM && !areValidBounds) {
-    throw new Error(errors.extendBoundsAreInvalidError());
-  }
+const validateExtents = (dataLayers: DataLayerConfigResult[], axes?: YAxisConfigResult[]) => {
+  const lineSeries = dataLayers.filter(({ seriesType }) => seriesType === SeriesTypes.LINE);
+  const hasBarOrArea =
+    dataLayers.filter(
+      ({ seriesType }) => seriesType === SeriesTypes.BAR || seriesType === SeriesTypes.AREA
+    ).length > 0;
+  axes?.forEach((axis) => {
+    if (
+      hasBarOrArea &&
+      axis.extent?.mode === AxisExtentModes.CUSTOM &&
+      !areValidBounds(axis.extent)
+    ) {
+      throw new Error(errors.extendBoundsAreInvalidError());
+    }
 
-  const lineSeries = dataLayers.filter(({ seriesType }) => seriesType.includes('line'));
-  if (!lineSeries.length && extent.mode === AxisExtentModes.DATA_BOUNDS) {
-    throw new Error(errors.dataBoundsForNotLineChartError());
-  }
+    if (!lineSeries.length && axis.extent?.mode === AxisExtentModes.DATA_BOUNDS) {
+      throw new Error(errors.dataBoundsForNotLineChartError());
+    }
+  });
 };
 
 export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
@@ -83,8 +103,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   const hasBar = dataLayers.filter(({ seriesType }) => seriesType.includes('bar')).length > 0;
   const hasArea = dataLayers.filter(({ seriesType }) => seriesType.includes('area')).length > 0;
 
-  validateExtent(args.yLeftExtent, hasBar || hasArea, dataLayers);
-  validateExtent(args.yRightExtent, hasBar || hasArea, dataLayers);
+  validateExtents(dataLayers, args.axes);
 
   if (!hasArea && args.fillOpacity !== undefined) {
     throw new Error(errors.notUsedFillOpacityError());

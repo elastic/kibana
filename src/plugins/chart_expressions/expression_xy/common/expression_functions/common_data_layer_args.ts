@@ -40,6 +40,21 @@ export const commonDataLayerArgs: Omit<CommonDataLayerFn['args'], 'table'> = {
     default: false,
     help: strings.getIsHistogramHelp(),
   },
+  isPercentage: {
+    types: ['boolean'],
+    default: false,
+    help: strings.getIsPercentageHelp(),
+  },
+  isStacked: {
+    types: ['boolean'],
+    default: false,
+    help: strings.getIsStackedHelp(),
+  },
+  isHorizontal: {
+    types: ['boolean'],
+    default: false,
+    help: strings.getIsHorizontalHelp(),
+  },
   yScaleType: {
     options: [...Object.values(YScaleTypes)],
     help: strings.getYScaleTypeHelp(),
@@ -68,5 +83,9 @@ export const commonDataLayerArgs: Omit<CommonDataLayerFn['args'], 'table'> = {
     types: ['palette', 'system_palette'],
     help: strings.getPaletteHelp(),
     default: '{palette}',
+  },
+  xAxisId: {
+    types: ['string'],
+    help: strings.getXAxisIdHelp(),
   },
 };

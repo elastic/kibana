@@ -14,8 +14,6 @@ import {
   EXTENDED_REFERENCE_LINE_LAYER,
   LAYERED_XY_VIS,
   EXTENDED_ANNOTATION_LAYER,
-  X_AXIS_CONFIG,
-  Y_AXIS_CONFIG,
 } from '../constants';
 import { logDatatables } from '../utils';
 import { commonXYArgs } from './common_xy_args';
@@ -35,19 +33,6 @@ export const layeredXyVisFunction: LayeredXyVisFn = {
         defaultMessage: 'Layers of visual series',
       }),
       multi: true,
-    },
-    axes: {
-      types: [Y_AXIS_CONFIG],
-      help: i18n.translate('expressionXY.layeredXyVis.axes.help', {
-        defaultMessage: 'Specifies the configs for axes',
-      }),
-      multi: true,
-    },
-    xAxisConfig: {
-      types: [X_AXIS_CONFIG],
-      help: i18n.translate('expressionXY.xyVis.xAxisConfig.help', {
-        defaultMessage: 'Specifies the configs for x-axis',
-      }),
     },
   },
   fn(data, args, handlers) {

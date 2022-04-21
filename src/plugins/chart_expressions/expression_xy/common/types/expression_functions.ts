@@ -149,6 +149,7 @@ export interface ExtendedDataLayerArgs {
   // palette will always be set on the expression
   yConfig?: YConfigResult[];
   table?: Datatable;
+  xAxisId?: string;
 }
 
 export interface LegendConfig {
@@ -418,4 +419,18 @@ export type LegendConfigFn = ExpressionFunctionDefinition<
   null,
   LegendConfig,
   Promise<LegendConfigResult>
+>;
+
+export type XAxisConfigFn = ExpressionFunctionDefinition<
+  typeof X_AXIS_CONFIG,
+  null,
+  AxisConfig,
+  XAxisConfigResult
+>;
+
+export type YAxisConfigFn = ExpressionFunctionDefinition<
+  typeof Y_AXIS_CONFIG,
+  null,
+  YAxisConfig,
+  YAxisConfigResult
 >;

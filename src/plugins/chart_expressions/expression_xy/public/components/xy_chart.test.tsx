@@ -585,7 +585,7 @@ describe('XYChart component', () => {
         <XYChart
           {...defaultProps}
           args={{
-            ...refArgs,
+            ...args,
             axes: [
               {
                 type: 'yAxisConfig',
@@ -746,7 +746,7 @@ describe('XYChart component', () => {
         args={{
           ...args,
           layers: [
-            { ...(args.layers[0] as DataLayerConfigResult), isHorizontal: true, seriesType: 'bar' },
+            { ...(args.layers[0] as DataLayerConfig), isHorizontal: true, seriesType: 'bar' },
           ],
         }}
       />
@@ -1263,7 +1263,7 @@ describe('XYChart component', () => {
         args={{
           ...args,
           layers: [
-            { ...(args.layers[0] as DataLayerConfigResult), seriesType: 'bar', isStacked: true },
+            { ...(args.layers[0] as DataLayerConfig), seriesType: 'bar', isStacked: true },
           ],
         }}
       />
@@ -1284,7 +1284,7 @@ describe('XYChart component', () => {
         args={{
           ...args,
           layers: [
-            { ...(args.layers[0] as DataLayerConfigResult), seriesType: 'area', isStacked: true },
+            { ...(args.layers[0] as DataLayerConfig), seriesType: 'area', isStacked: true },
           ],
         }}
       />
@@ -1306,7 +1306,7 @@ describe('XYChart component', () => {
           ...args,
           layers: [
             {
-              ...(args.layers[0] as DataLayerConfigResult),
+              ...(args.layers[0] as DataLayerConfig),
               seriesType: 'bar',
               isStacked: true,
               isHorizontal: true,
@@ -1424,7 +1424,7 @@ describe('XYChart component', () => {
           ...args,
           layers: [
             {
-              ...(args.layers[0] as DataLayerConfigResult),
+              ...(args.layers[0] as DataLayerConfig),
               seriesType: 'bar',
               isStacked: true,
               isHistogram: true,

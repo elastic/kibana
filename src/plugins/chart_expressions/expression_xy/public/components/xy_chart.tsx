@@ -106,7 +106,7 @@ function getValueLabelsStyling(isHorizontal: boolean): {
   };
 }
 
-function getIconForSeriesType(layer: CommonXYDataLayerConfigResult): IconType {
+function getIconForSeriesType(layer: CommonXYDataLayerConfig): IconType {
   return (
     visualizationDefinitions.find(
       (c) =>
@@ -324,7 +324,7 @@ export function XYChart({
         .flatMap((l) =>
           l.yConfig ? l.yConfig.map((yConfig) => ({ layerId: l.layerId, yConfig })) : []
         )
-        .filter(({ yConfig }) => yConfig.axisMode === axis.groupId)
+        .filter(({ yConfig }) => axis.series.some((s) => s.accessor === yConfig.forAccessor))
         .map(
           ({ layerId, yConfig }) =>
             `${layerId}-${yConfig.forAccessor}-${yConfig.fill !== 'none' ? 'rect' : 'line'}`

@@ -29,26 +29,6 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.logDatatable.breakDown', {
       defaultMessage: 'Break down by',
     }),
-  getXTitleHelp: () =>
-    i18n.translate('expressionXY.xyVis.xTitle.help', {
-      defaultMessage: 'X axis title',
-    }),
-  getYTitleHelp: () =>
-    i18n.translate('expressionXY.xyVis.yLeftTitle.help', {
-      defaultMessage: 'Y left axis title',
-    }),
-  getYRightTitleHelp: () =>
-    i18n.translate('expressionXY.xyVis.yRightTitle.help', {
-      defaultMessage: 'Y right axis title',
-    }),
-  getYLeftExtentHelp: () =>
-    i18n.translate('expressionXY.xyVis.yLeftExtent.help', {
-      defaultMessage: 'Y left axis extents',
-    }),
-  getYRightExtentHelp: () =>
-    i18n.translate('expressionXY.xyVis.yRightExtent.help', {
-      defaultMessage: 'Y right axis extents',
-    }),
   getLegendHelp: () =>
     i18n.translate('expressionXY.xyVis.legend.help', {
       defaultMessage: 'Configure the chart legend.',
@@ -64,22 +44,6 @@ export const strings = {
   getValueLabelsHelp: () =>
     i18n.translate('expressionXY.xyVis.valueLabels.help', {
       defaultMessage: 'Value labels mode',
-    }),
-  getTickLabelsVisibilitySettingsHelp: () =>
-    i18n.translate('expressionXY.xyVis.tickLabelsVisibilitySettings.help', {
-      defaultMessage: 'Show x and y axes tick labels',
-    }),
-  getLabelsOrientationHelp: () =>
-    i18n.translate('expressionXY.xyVis.labelsOrientation.help', {
-      defaultMessage: 'Defines the rotation of the axis labels',
-    }),
-  getGridlinesVisibilitySettingsHelp: () =>
-    i18n.translate('expressionXY.xyVis.gridlinesVisibilitySettings.help', {
-      defaultMessage: 'Show x and y axes gridlines',
-    }),
-  getAxisTitlesVisibilitySettingsHelp: () =>
-    i18n.translate('expressionXY.xyVis.axisTitlesVisibilitySettings.help', {
-      defaultMessage: 'Show x and y axes titles',
     }),
   getDataLayerHelp: () =>
     i18n.translate('expressionXY.xyVis.dataLayer.help', {
@@ -113,6 +77,14 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.ariaLabel.help', {
       defaultMessage: 'Specifies the aria label of the xy chart',
     }),
+  getXAxisConfigHelp: () =>
+    i18n.translate('expressionXY.xyVis.ariaLabel.help', {
+      defaultMessage: 'Specifies x-axis config',
+    }),
+  getAxesHelp: () =>
+    i18n.translate('expressionXY.xyVis.ariaLabel.help', {
+      defaultMessage: 'Specifies y-axes configs',
+    }),
   getDataLayerFnHelp: () =>
     i18n.translate('expressionXY.dataLayer.help', {
       defaultMessage: `Configure a layer in the xy chart`,
@@ -137,6 +109,18 @@ export const strings = {
     i18n.translate('expressionXY.dataLayer.isHistogram.help', {
       defaultMessage: 'Whether to layout the chart as a histogram',
     }),
+  getIsStackedHelp: () =>
+    i18n.translate('expressionXY.dataLayer.isHistogram.help', {
+      defaultMessage: 'Layout of the chart in stacked mode',
+    }),
+  getIsPercentageHelp: () =>
+    i18n.translate('expressionXY.dataLayer.isHistogram.help', {
+      defaultMessage: 'Whether to layout the chart has percentage mode',
+    }),
+  getIsHorizontalHelp: () =>
+    i18n.translate('expressionXY.dataLayer.isHistogram.help', {
+      defaultMessage: 'Layout of the chart is horizontal',
+    }),
   getYScaleTypeHelp: () =>
     i18n.translate('expressionXY.dataLayer.yScaleType.help', {
       defaultMessage: 'The scale type of the y axes',
@@ -160,6 +144,10 @@ export const strings = {
   getPaletteHelp: () =>
     i18n.translate('expressionXY.dataLayer.palette.help', {
       defaultMessage: 'Palette',
+    }),
+  getXAxisIdHelp: () =>
+    i18n.translate('expressionXY.dataLayer.xAxisId.help', {
+      defaultMessage: 'Id of x-axis',
     }),
   getTableHelp: () =>
     i18n.translate('expressionXY.layers.table.help', {
@@ -189,13 +177,13 @@ export const strings = {
     i18n.translate('expressionXY.yConfig.forAccessor.help', {
       defaultMessage: 'The accessor this configuration is for',
     }),
-  getAxisModeHelp: () =>
-    i18n.translate('expressionXY.yConfig.axisMode.help', {
-      defaultMessage: 'The axis mode of the metric',
-    }),
   getColorHelp: () =>
     i18n.translate('expressionXY.yConfig.color.help', {
       defaultMessage: 'The color of the series',
+    }),
+  getAxisIdHelp: () =>
+    i18n.translate('expressionXY.yConfig.axisId.help', {
+      defaultMessage: 'Id of axis',
     }),
   getAnnotationLayerFnHelp: () =>
     i18n.translate('expressionXY.annotationLayer.help', {
@@ -208,5 +196,73 @@ export const strings = {
   getAnnotationLayerAnnotationsHelp: () =>
     i18n.translate('expressionXY.annotationLayer.annotations.help', {
       defaultMessage: 'Annotations',
+    }),
+  getXAxisConfigFnHelp: () =>
+    i18n.translate('expressionXY.axisConfig.help', {
+      defaultMessage: `Configure the xy chart's x-axis config`,
+    }),
+  getYAxisConfigFnHelp: () =>
+    i18n.translate('expressionXY.axisConfig.help', {
+      defaultMessage: `Configure the xy chart's y-axis config`,
+    }),
+  getAxisModeHelp: () =>
+    i18n.translate('expressionXY.axisConfig.mode.help', {
+      defaultMessage: 'Scale mode. Can be normal, percentage, wiggle or silhouette',
+    }),
+  getAxisBoundsMarginHelp: () =>
+    i18n.translate('expressionXY.axisConfig.boundsMargin.help', {
+      defaultMessage: 'Margin of bounds',
+    }),
+  getAxisExtentHelp: () =>
+    i18n.translate('expressionXY.axisConfig.extent.help', {
+      defaultMessage: 'Axis extents',
+    }),
+  getAxisScaleTypeHelp: () =>
+    i18n.translate('expressionXY.axisConfig.scaleType.help', {
+      defaultMessage: 'The scale type of the axis',
+    }),
+  getAxisTitleHelp: () =>
+    i18n.translate('expressionXY.axisConfig.title.help', {
+      defaultMessage: 'Title of axis',
+    }),
+  getAxisPositionHelp: () =>
+    i18n.translate('expressionXY.axisConfig.position.help', {
+      defaultMessage: 'Position of axis',
+    }),
+  getAxisHideHelp: () =>
+    i18n.translate('expressionXY.axisConfig.hide.help', {
+      defaultMessage: 'Hide the axis',
+    }),
+  getAxisLabelColorHelp: () =>
+    i18n.translate('expressionXY.axisConfig.title.help', {
+      defaultMessage: 'Color of the axis labels',
+    }),
+  getAxisShowOverlappingLabelsHelp: () =>
+    i18n.translate('expressionXY.axisConfig.showOverlappingLabels.help', {
+      defaultMessage: 'Show overlapping labels',
+    }),
+  getAxisShowDuplicatesHelp: () =>
+    i18n.translate('expressionXY.axisConfig.showDuplicates.help', {
+      defaultMessage: 'Show duplicated ticks',
+    }),
+  getAxisShowGridLinesHelp: () =>
+    i18n.translate('expressionXY.axisConfig.showGridLines.help', {
+      defaultMessage: 'Specifies whether or not the gridlines of the axis are visible',
+    }),
+  getAxisLabelsOrientationHelp: () =>
+    i18n.translate('expressionXY.axisConfig.labelsOrientation.help', {
+      defaultMessage: 'Specifies the labels orientation of the axis',
+    }),
+  getAxisShowLabelsHelp: () =>
+    i18n.translate('expressionXY.axisConfig.showLabels.help', {
+      defaultMessage: 'Show labels',
+    }),
+  getAxisShowTitleHelp: () =>
+    i18n.translate('expressionXY.axisConfig.showTitle.help', {
+      defaultMessage: 'Show title of the axis',
+    }),
+  getAxisTruncateHelp: () =>
+    i18n.translate('expressionXY.axisConfig.truncate.help', {
+      defaultMessage: 'The number of symbols before truncating',
     }),
 };
