@@ -506,7 +506,9 @@ export class SavedObjectsService
     };
   }
 
-  public async stop() {}
+  public stop() {
+    this.migrator$.complete();
+  }
 
   private createMigrator(
     soMigrationsConfig: SavedObjectsMigrationConfigType,

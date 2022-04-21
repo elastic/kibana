@@ -162,9 +162,11 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
     }
     this.pluginsStatus.blockNewRegistrations();
 
-    getOverallStatusChanges(this.overall$, this.stop$).subscribe((message) => {
-      this.logger.info(message);
-    });
+    this.subscriptions.push(
+      getOverallStatusChanges(this.overall$, this.stop$).subscribe((message) => {
+        this.logger.info(message);
+      })
+    );
   }
 
   public stop() {

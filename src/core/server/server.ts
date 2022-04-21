@@ -360,19 +360,15 @@ export class Server {
 
     await this.http.stop(); // HTTP server has to stop before savedObjects and ES clients are closed to be able to gracefully attempt to resolve any pending requests
     await this.plugins.stop();
-    await this.savedObjects.stop();
+    this.savedObjects.stop();
     await this.elasticsearch.stop();
-    await this.uiSettings.stop();
-    await this.rendering.stop();
-    await this.metrics.stop();
-    await this.status.stop();
-    await this.logging.stop();
-    await this.prebootService.stop();
-    await this.executionContext.stop();
-    await this.deprecations.stop();
-    await this.coreUsageData.stop();
-    await this.httpResources.stop();
-    this.deprecations.stop();
+    this.metrics.stop();
+    this.status.stop();
+    this.logging.stop();
+    this.prebootService.stop();
+    this.executionContext.stop();
+    this.coreUsageData.stop();
+    this.httpResources.stop();
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup) {

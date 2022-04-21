@@ -34,8 +34,6 @@ export class AnonymousPathsService implements CoreService<IAnonymousPaths, IAnon
   public start(deps: Deps) {
     return this.setup(deps);
   }
-
-  public stop() {}
 }
 
 const normalizePath = (path: string) => {

@@ -90,8 +90,6 @@ export class UiSettingsService
     };
   }
 
-  public async stop() {}
-
   private getScopedClientFactory(): (
     savedObjectsClient: SavedObjectsClientContract
   ) => UiSettingsClient {
