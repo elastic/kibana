@@ -499,10 +499,6 @@ const fixValueLabelsInXY: SavedObjectMigrationFn<
   LensDocShape830<XYVisualizationStatePre830>,
   LensDocShape830<XYVisualizationState830 | unknown>
 > = (doc) => {
-  if (doc.attributes.visualizationType !== 'lnsXY') {
-    return doc;
-  }
-
   const newDoc = cloneDeep(doc);
   return { ...newDoc, attributes: commonFixValueLabelsInXY(newDoc.attributes) };
 };
