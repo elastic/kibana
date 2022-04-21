@@ -78,11 +78,11 @@ export const strings = {
       defaultMessage: 'Specifies the aria label of the xy chart',
     }),
   getXAxisConfigHelp: () =>
-    i18n.translate('expressionXY.xyVis.ariaLabel.help', {
+    i18n.translate('expressionXY.xyVis.xAxisConfig.help', {
       defaultMessage: 'Specifies x-axis config',
     }),
   getAxesHelp: () =>
-    i18n.translate('expressionXY.xyVis.ariaLabel.help', {
+    i18n.translate('expressionXY.xyVis.axes.help', {
       defaultMessage: 'Specifies y-axes configs',
     }),
   getDataLayerFnHelp: () =>
@@ -110,15 +110,15 @@ export const strings = {
       defaultMessage: 'Whether to layout the chart as a histogram',
     }),
   getIsStackedHelp: () =>
-    i18n.translate('expressionXY.dataLayer.isHistogram.help', {
+    i18n.translate('expressionXY.dataLayer.isStacked.help', {
       defaultMessage: 'Layout of the chart in stacked mode',
     }),
   getIsPercentageHelp: () =>
-    i18n.translate('expressionXY.dataLayer.isHistogram.help', {
+    i18n.translate('expressionXY.dataLayer.isPercentage.help', {
       defaultMessage: 'Whether to layout the chart has percentage mode',
     }),
   getIsHorizontalHelp: () =>
-    i18n.translate('expressionXY.dataLayer.isHistogram.help', {
+    i18n.translate('expressionXY.dataLayer.isHorizontal.help', {
       defaultMessage: 'Layout of the chart is horizontal',
     }),
   getYScaleTypeHelp: () =>
@@ -198,11 +198,11 @@ export const strings = {
       defaultMessage: 'Annotations',
     }),
   getXAxisConfigFnHelp: () =>
-    i18n.translate('expressionXY.axisConfig.help', {
+    i18n.translate('expressionXY.xAxisConfigFn.help', {
       defaultMessage: `Configure the xy chart's x-axis config`,
     }),
   getYAxisConfigFnHelp: () =>
-    i18n.translate('expressionXY.axisConfig.help', {
+    i18n.translate('expressionXY.yAxisConfigFn.help', {
       defaultMessage: `Configure the xy chart's y-axis config`,
     }),
   getAxisModeHelp: () =>
@@ -234,7 +234,7 @@ export const strings = {
       defaultMessage: 'Hide the axis',
     }),
   getAxisLabelColorHelp: () =>
-    i18n.translate('expressionXY.axisConfig.title.help', {
+    i18n.translate('expressionXY.axisConfig.labelColor.help', {
       defaultMessage: 'Color of the axis labels',
     }),
   getAxisShowOverlappingLabelsHelp: () =>
