@@ -61,6 +61,8 @@ function calculateBucketSize({ start, end }: { start?: number; end?: number }) {
   }
 }
 
+const ALERT_TABLE_STATE_STORAGE_KEY = 'xpack.observability.overview.alert.tableState';
+
 export function OverviewPage({ routeParams }: Props) {
   const trackMetric = useUiTracker({ app: 'observability-overview' });
   useTrackPageview({ app: 'observability-overview', path: 'overview' });
@@ -195,7 +197,7 @@ export function OverviewPage({ routeParams }: Props) {
                     rangeFrom={relativeStart}
                     rangeTo={relativeEnd}
                     indexNames={indexNames}
-                    stateStorageKey="xpack.observability.overview.alert.tableState"
+                    stateStorageKey={ALERT_TABLE_STATE_STORAGE_KEY}
                   />
                 </CasesContext>
               </SectionContainer>

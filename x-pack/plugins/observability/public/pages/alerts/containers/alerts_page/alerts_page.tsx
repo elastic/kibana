@@ -70,6 +70,8 @@ const ALERT_STATUS_REGEX = new RegExp(
   'gm'
 );
 
+const ALERT_TABLE_STATE_STORAGE_KEY = 'xpack.observability.alert.tableState';
+
 function AlertsPage() {
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const [alertFilterStatus, setAlertFilterStatus] = useState('' as AlertStatusFilterButton);
@@ -330,7 +332,7 @@ function AlertsPage() {
               rangeTo={rangeTo}
               kuery={kuery}
               setRefetch={setRefetch}
-              stateStorageKey="xpack.observability.alert.tableState"
+              stateStorageKey={ALERT_TABLE_STATE_STORAGE_KEY}
             />
           </CasesContext>
         </EuiFlexItem>
