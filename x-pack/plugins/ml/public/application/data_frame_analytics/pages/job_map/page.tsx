@@ -18,16 +18,24 @@ import { HelpMenu } from '../../../components/help_menu';
 import { useMlKibana, useMlApiContext } from '../../../contexts/kibana';
 import { useRefreshAnalyticsList } from '../../common';
 import { MlPageHeader } from '../../../components/page_header';
-import { AnalyticsIdSelector, AnalyticsSelectorIds } from '../components/analytics_selector';
+import {
+  AnalyticsIdSelector,
+  AnalyticsSelectorIds,
+  AnalyticsIdSelectorControls,
+} from '../components/analytics_selector';
 import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_prompt';
 
 export const Page: FC = () => {
   const [globalState, setGlobalState] = useUrlState('_g');
-  const [isLoading, setIsLoading] = useState(false);
-  const [jobsExist, setJobsExist] = useState(true);
-  const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
   const mapJobId = globalState?.ml?.jobId;
   const mapModelId = globalState?.ml?.modelId;
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [isIdSelectorFlyoutVisible, setIsIdSelectorFlyoutVisible] = useState<boolean>(
+    !mapJobId && !mapModelId
+  );
+  const [jobsExist, setJobsExist] = useState(true);
+  const { refresh } = useRefreshAnalyticsList({ isLoading: setIsLoading });
   const [analyticsId, setAnalyticsId] = useState<AnalyticsSelectorIds>();
   const {
     services: { docLinks },
@@ -71,7 +79,6 @@ export const Page: FC = () => {
     }
     return (
       <>
-        <AnalyticsIdSelector setAnalyticsId={setAnalyticsId} />
         <EuiEmptyPrompt
           iconType="alert"
           title={
@@ -93,6 +100,16 @@ export const Page: FC = () => {
 
   return (
     <>
+      <AnalyticsIdSelectorControls
+        setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
+        selectedId={jobId || modelId}
+      />
+      {isIdSelectorFlyoutVisible ? (
+        <AnalyticsIdSelector
+          setAnalyticsId={setAnalyticsId}
+          setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
+        />
+      ) : null}
       {jobId === undefined && modelId === undefined ? (
         <MlPageHeader>
           <FormattedMessage

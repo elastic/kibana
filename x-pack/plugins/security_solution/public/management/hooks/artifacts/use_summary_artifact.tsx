@@ -28,7 +28,7 @@ export function useSummaryArtifact(
   const { filter = '', policies = [] } = options;
 
   return useQuery<ExceptionListSummarySchema, HttpFetchError>(
-    ['summary', exceptionListApiClient, options],
+    ['summary', exceptionListApiClient, filter, policies],
     () => {
       return exceptionListApiClient.summary(
         parsePoliciesAndFilterToKql({
