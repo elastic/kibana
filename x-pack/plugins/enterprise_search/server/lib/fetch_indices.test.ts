@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
-
 import { ByteSizeValue } from '@kbn/config-schema';
+import { IScopedClusterClient } from '@kbn/core/server';
 
 import { fetchIndices } from './fetch_indices';
 
@@ -70,7 +69,6 @@ describe('fetchIndices lib function', () => {
             size_in_bytes: '105.47kb',
           },
         },
-        aliases: 'none',
         name: 'search-regular-index',
       },
     ]);
@@ -120,8 +118,22 @@ describe('fetchIndices lib function', () => {
             size_in_bytes: '105.47kb',
           },
         },
-        aliases: ['search-aliased', 'search-double-aliased'],
-        name: 'index-without-prefix',
+        name: 'search-aliased',
+      },
+      {
+        health: 'green',
+        status: 'open',
+        uuid: '83a81e7e-5955-4255-b008-5d6961203f57',
+        total: {
+          docs: {
+            count: 100,
+            deleted: 0,
+          },
+          store: {
+            size_in_bytes: '105.47kb',
+          },
+        },
+        name: 'search-double-aliased',
       },
     ]);
   });
@@ -139,7 +151,6 @@ describe('fetchIndices lib function', () => {
     // deleted index won't be present in the indices stats call response
     await expect(fetchIndices(mockClient as unknown as IScopedClusterClient)).resolves.toEqual([
       {
-        aliases: 'none',
         name: 'search-regular-index',
         total: {
           docs: {

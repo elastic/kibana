@@ -5,8 +5,13 @@
  * 2.0.
  */
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
-import { savedObjectsClientMock, httpServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import {
+  savedObjectsClientMock,
+  httpServiceMock,
+  loggingSystemMock,
+  httpServerMock,
+} from '@kbn/core/server/mocks';
 import {
   convertRulesConfigToYaml,
   createRulesConfig,
@@ -18,15 +23,16 @@ import {
 
 import { CspAppService } from '../../lib/csp_app_services';
 import { CspAppContext } from '../../plugin';
-import { createPackagePolicyMock } from '../../../../fleet/common/mocks';
-import { createPackagePolicyServiceMock } from '../../../../fleet/server/mocks';
+import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 
 import { cspRuleAssetSavedObjectType, CspRuleSchema } from '../../../common/schemas/csp_rule';
 import {
   ElasticsearchClient,
+  KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import { Chance } from 'chance';
 
 describe('Update rules configuration API', () => {
@@ -52,7 +58,55 @@ describe('Update rules configuration API', () => {
 
     const [config, _] = router.post.mock.calls[0];
 
-    expect(config.path).toEqual('/api/csp/update_rules_config');
+    expect(config.path).toEqual('/internal/cloud_security_posture/update_rules_config');
+  });
+
+  it('should accept to a user with fleet.all privilege', async () => {
+    const router = httpServiceMock.createRouter();
+    const cspAppContextService = new CspAppService();
+
+    const cspContext: CspAppContext = {
+      logger,
+      service: cspAppContextService,
+    };
+    defineUpdateRulesConfigRoute(router, cspContext);
+    const [_, handler] = router.post.mock.calls[0];
+
+    const mockContext = {
+      fleet: { authz: { fleet: { all: true } } },
+    } as unknown as KibanaRequest;
+
+    const mockResponse = httpServerMock.createResponseFactory();
+    const mockRequest = httpServerMock.createKibanaRequest();
+    const [context, req, res] = [mockContext, mockRequest, mockResponse];
+
+    await handler(context, req, res);
+
+    expect(res.forbidden).toHaveBeenCalledTimes(0);
+  });
+
+  it('should reject to a user without fleet.all privilege', async () => {
+    const router = httpServiceMock.createRouter();
+    const cspAppContextService = new CspAppService();
+
+    const cspContext: CspAppContext = {
+      logger,
+      service: cspAppContextService,
+    };
+    defineUpdateRulesConfigRoute(router, cspContext);
+    const [_, handler] = router.post.mock.calls[0];
+
+    const mockContext = {
+      fleet: { authz: { fleet: { all: true } } },
+    } as unknown as KibanaRequest;
+
+    const mockResponse = httpServerMock.createResponseFactory();
+    const mockRequest = httpServerMock.createKibanaRequest();
+    const [context, req, res] = [mockContext, mockRequest, mockResponse];
+
+    await handler(context, req, res);
+
+    expect(res.forbidden).toHaveBeenCalledTimes(0);
   });
 
   it('validate getCspRules input parameters', async () => {

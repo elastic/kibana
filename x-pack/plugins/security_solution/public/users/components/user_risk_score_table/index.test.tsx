@@ -14,7 +14,7 @@ import { UsersType } from '../../store/model';
 
 describe('UserRiskScoreTable', () => {
   const username = 'test_user_name';
-  const defautProps = {
+  const defaultProps = {
     data: [
       {
         '@timestamp': '1641902481',
@@ -32,6 +32,7 @@ describe('UserRiskScoreTable', () => {
     isInspect: false,
     loading: false,
     loadPage: noop,
+    setQuerySkip: jest.fn(),
     severityCount: {
       Unknown: 0,
       Low: 0,
@@ -46,7 +47,7 @@ describe('UserRiskScoreTable', () => {
   it('renders', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <UserRiskScoreTable {...defautProps} />
+        <UserRiskScoreTable {...defaultProps} />
       </TestProviders>
     );
 

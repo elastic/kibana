@@ -13,7 +13,7 @@ import { IconButtonGroup } from './icon_button_group';
 import mdx from './icon_button_group.mdx';
 
 export default {
-  title: 'Toolbar/Icon Button Group',
+  title: 'Toolbar/Buttons/Icon Button Group',
   description: 'A collection of buttons that is a part of a toolbar.',
   parameters: {
     docs: {

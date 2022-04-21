@@ -17,24 +17,16 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { PaletteRegistry } from 'src/plugins/charts/public';
 import {
-  GaugeTicksPositions,
-  GaugeColorModes,
-} from '../../../../../../src/plugins/chart_expressions/expression_gauge/common';
-import {
-  getMaxValue,
-  getMinValue,
-} from '../../../../../../src/plugins/chart_expressions/expression_gauge/public';
-import { isNumericFieldForDatatable } from '../../../common/expressions';
-import {
-  applyPaletteParams,
+  PaletteRegistry,
   CustomizablePalette,
   CUSTOM_PALETTE,
   FIXED_PROGRESSION,
-  PalettePanelContainer,
-  TooltipWrapper,
-} from '../../shared_components/';
+} from '@kbn/coloring';
+import { GaugeTicksPositions, GaugeColorModes } from '@kbn/expression-gauge-plugin/common';
+import { getMaxValue, getMinValue } from '@kbn/expression-gauge-plugin/public';
+import { isNumericFieldForDatatable } from '../../../common/expressions';
+import { applyPaletteParams, PalettePanelContainer, TooltipWrapper } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import './dimension_editor.scss';
 import { GaugeVisualizationState } from './constants';

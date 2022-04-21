@@ -8,7 +8,8 @@
 import { Fit } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { rgba } from 'polished';
-import { EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
+import { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { getSeverity } from '@kbn/ml-plugin/public';
 import { getSeverityColor } from '../../../../../common/anomaly_detection';
 import {
   ANOMALY_SEVERITY,
@@ -16,7 +17,6 @@ import {
 } from '../../../../../common/ml_constants';
 import { ServiceAnomalyTimeseries } from '../../../../../common/anomaly_detection/service_anomaly_timeseries';
 import { APMChartSpec } from '../../../../../typings/timeseries';
-import { getSeverity } from '../../../../../../ml/public';
 
 export function getChartAnomalyTimeseries({
   anomalyTimeseries,

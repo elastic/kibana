@@ -19,7 +19,7 @@ import {
   isReferenced,
   getReferenceRoot,
 } from './layer_helpers';
-import { operationDefinitionMap, OperationType } from '../operations';
+import { operationDefinitionMap, OperationType } from '.';
 import { TermsIndexPatternColumn } from './definitions/terms';
 import { DateHistogramIndexPatternColumn } from './definitions/date_histogram';
 import { AvgIndexPatternColumn } from './definitions/metrics';
@@ -36,10 +36,10 @@ import {
   MovingAverageIndexPatternColumn,
   OperationDefinition,
 } from './definitions';
-import { TinymathAST } from 'packages/kbn-tinymath';
-import { CoreStart } from 'kibana/public';
+import { TinymathAST } from '@kbn/tinymath';
+import { CoreStart } from '@kbn/core/public';
 
-jest.mock('../operations');
+jest.mock('.');
 jest.mock('../../id_generator');
 
 const indexPatternFields = [
@@ -767,7 +767,7 @@ describe('state_helpers', () => {
         }).columns.col2
       ).toEqual(
         expect.objectContaining({
-          label: 'Top values of bytes',
+          label: 'Top 3 values of bytes',
         })
       );
     });
@@ -1079,7 +1079,7 @@ describe('state_helpers', () => {
           }).columns.col1
         ).toEqual(
           expect.objectContaining({
-            label: 'Top values of source',
+            label: 'Top 3 values of source',
           })
         );
       });
@@ -2162,6 +2162,7 @@ describe('state_helpers', () => {
                 id: 'number',
                 params: { decimals: 2 },
               },
+              emptyAsNull: true,
             },
           })
         );
@@ -2250,7 +2251,7 @@ describe('state_helpers', () => {
 
     it('should remove column and any incomplete state', () => {
       const termsColumn: TermsIndexPatternColumn = {
-        label: 'Top values of source',
+        label: 'Top 5 values of source',
         dataType: 'string',
         isBucketed: true,
 

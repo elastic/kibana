@@ -7,11 +7,11 @@
 
 import React, { ChangeEvent } from 'react';
 import { shallow, mount } from 'enzyme';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
-import { percentileOperation } from './index';
+import { percentileOperation } from '.';
 import { IndexPattern, IndexPatternLayer } from '../../types';
 import { PercentileIndexPatternColumn } from './percentile';
 import { EuiRange } from '@elastic/eui';

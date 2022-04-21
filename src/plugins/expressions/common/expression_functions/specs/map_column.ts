@@ -95,7 +95,7 @@ export const mapColumn: ExpressionFunctionDefinition<
         input.rows.map((row) =>
           args
             .expression({
-              type: 'datatable',
+              ...input,
               columns: [...input.columns],
               rows: [row],
             })
@@ -129,9 +129,9 @@ export const mapColumn: ExpressionFunctionDefinition<
         };
 
         return {
+          ...input,
           columns,
           rows,
-          type: 'datatable',
         };
       })
     );

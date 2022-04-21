@@ -45,7 +45,7 @@ describe('CustomLinkToolbar', () => {
       wrapper: Wrapper,
     });
     expect(
-      component.getByLabelText('Custom links settings page')
+      component.getByText('Custom links settings page')
     ).toBeInTheDocument();
     expectTextsInDocument(component, ['Create']);
   });
@@ -56,7 +56,7 @@ describe('CustomLinkToolbar', () => {
       { wrapper: Wrapper }
     );
     expect(
-      component.getByLabelText('Custom links settings page')
+      component.getByText('Custom links settings page')
     ).toBeInTheDocument();
     expectTextsNotInDocument(component, ['Create']);
   });

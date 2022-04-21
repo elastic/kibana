@@ -6,17 +6,15 @@
  */
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import type { SeriesType, YConfig, ValidLayer } from '@kbn/expression-xy-plugin/common';
 import type { FramePublicAPI, DatasourcePublicAPI } from '../types';
-import type {
-  SeriesType,
+import {
+  visualizationTypes,
   XYLayerConfig,
-  YConfig,
-  ValidLayer,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
-} from '../../common/expressions';
-import { visualizationTypes } from './types';
-import { getDataLayers, isDataLayer } from './visualization_helpers';
+} from './types';
+import { getDataLayers, isAnnotationsLayer, isDataLayer } from './visualization_helpers';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
   return (
@@ -53,6 +51,9 @@ export function getIconForSeries(type: SeriesType): EuiIconType {
 }
 
 export const getSeriesColor = (layer: XYLayerConfig, accessor: string) => {
+  if (isAnnotationsLayer(layer)) {
+    return layer?.annotations?.find((ann) => ann.id === accessor)?.color || null;
+  }
   if (isDataLayer(layer) && layer.splitAccessor) {
     return null;
   }

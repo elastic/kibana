@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginFunctionalProviderContext } from 'test/plugin_functional/services';
+import { PluginFunctionalProviderContext } from '../../plugin_functional/services';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({
@@ -18,7 +18,7 @@ export default function ({
   const PageObjects = getPageObjects(['common', 'header']);
 
   describe('embeddable explorer', function () {
-    this.tags('ciGroup2');
+    this.tags('ciGroup11');
     before(async () => {
       await browser.setWindowSize(1300, 900);
       await PageObjects.common.navigateToApp('embeddableExplorer');

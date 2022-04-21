@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertTypeParams, FindResult } from '../../../../../alerting/server';
+import { RuleTypeParams, FindResult } from '@kbn/alerting-plugin/server';
 import { LEGACY_NOTIFICATIONS_ID } from '../../../../common/constants';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyFindNotificationParams } from './legacy_types';
@@ -32,7 +32,7 @@ export const legacyFindNotifications = async ({
   filter,
   sortField,
   sortOrder,
-}: LegacyFindNotificationParams): Promise<FindResult<AlertTypeParams>> =>
+}: LegacyFindNotificationParams): Promise<FindResult<RuleTypeParams>> =>
   rulesClient.find({
     options: {
       fields,

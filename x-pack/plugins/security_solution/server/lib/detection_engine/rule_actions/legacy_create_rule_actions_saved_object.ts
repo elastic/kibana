@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from 'kibana/server';
-import { AlertServices } from '../../../../../alerting/server';
+import { SavedObjectReference } from '@kbn/core/server';
+import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { RuleAction } from '@kbn/alerting-plugin/common';
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from './legacy_saved_object_mappings';
 // eslint-disable-next-line no-restricted-imports
@@ -18,15 +19,14 @@ import {
   legacyGetThrottleOptions,
   legacyTransformActionToReference,
 } from './legacy_utils';
-import { AlertAction } from '../../../../../alerting/common';
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 interface LegacyCreateRuleActionsSavedObject {
   ruleAlertId: string;
-  savedObjectsClient: AlertServices['savedObjectsClient'];
-  actions: AlertAction[] | undefined;
+  savedObjectsClient: RuleExecutorServices['savedObjectsClient'];
+  actions: RuleAction[] | undefined;
   throttle: string | null | undefined;
 }
 

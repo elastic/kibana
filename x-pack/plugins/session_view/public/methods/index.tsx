@@ -15,15 +15,11 @@ const queryClient = new QueryClient();
 
 const SessionViewLazy = lazy(() => import('../components/session_view'));
 
-export const getSessionViewLazy = ({ sessionEntityId, height, jumpToEvent }: SessionViewDeps) => {
+export const getSessionViewLazy = (props: SessionViewDeps) => {
   return (
     <QueryClientProvider client={queryClient}>
       <Suspense fallback={<EuiLoadingSpinner />}>
-        <SessionViewLazy
-          sessionEntityId={sessionEntityId}
-          height={height}
-          jumpToEvent={jumpToEvent}
-        />
+        <SessionViewLazy {...props} />
       </Suspense>
     </QueryClientProvider>
   );

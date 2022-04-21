@@ -7,14 +7,15 @@
 
 import { Ast } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
-import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { getXyVisualization } from './xy_visualization';
 import { OperationDescriptor } from '../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { layerTypes } from '../../common';
-import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import { defaultReferenceLineColor } from './color_assignment';
-import { themeServiceMock } from '../../../../../src/core/public/mocks';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 
 describe('#toExpression', () => {
   const xyVisualization = getXyVisualization({
@@ -22,6 +23,7 @@ describe('#toExpression', () => {
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     kibanaTheme: themeServiceMock.createStartContract(),
     useLegacyTimeAxis: false,
+    eventAnnotationService: eventAnnotationServiceMock,
   });
   let mockDatasource: ReturnType<typeof createMockDatasource>;
   let frame: ReturnType<typeof createMockFramePublicAPI>;
@@ -54,6 +56,8 @@ describe('#toExpression', () => {
           valueLabels: 'hide',
           preferredSeriesType: 'bar',
           fittingFunction: 'Carry',
+          endValue: 'Nearest',
+          emphasizeFitting: true,
           tickLabelsVisibilitySettings: { x: false, yLeft: true, yRight: true },
           labelsOrientation: {
             x: 0,

@@ -1,6 +1,6 @@
 {
   "id": "sessionView",
-  "version": "8.0.0",
+  "version": "1.0.0",
   "kibanaVersion": "kibana",
   "owner": {
     "name": "Security Team",
@@ -8,10 +8,11 @@
   },
   "requiredPlugins": [
     "data",
-    "timelines"
+    "timelines",
+    "ruleRegistry"
   ],
   "requiredBundles": [
-    "kibanaReact", 
+    "kibanaReact",
     "esUiShared"
   ],
   "server": true,

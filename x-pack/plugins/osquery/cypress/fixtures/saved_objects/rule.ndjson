@@ -1,0 +1,99 @@
+{
+  "id": "c8ca6100-802e-11ec-952d-cf6018da8e2b",
+  "type": "alert",
+  "namespaces": [
+    "default"
+  ],
+  "updated_at": "2022-01-28T11:38:23.009Z",
+  "version": "WzE5MjksMV0=",
+  "attributes": {
+    "name": "Test-rule",
+    "tags": [
+      "__internal_rule_id:22308402-5e0e-421b-8d22-a47ddc4b0188",
+      "__internal_immutable:false"
+    ],
+    "alertTypeId": "siem.queryRule",
+    "consumer": "siem",
+    "params": {
+      "author": [],
+      "description": "asd",
+      "ruleId": "22308402-5e0e-421b-8d22-a47ddc4b0188",
+      "falsePositives": [],
+      "from": "now-360s",
+      "immutable": false,
+      "license": "",
+      "outputIndex": ".siem-signals-default",
+      "meta": {
+        "from": "1m",
+        "kibana_siem_app_url": "http://localhost:5601/app/security"
+      },
+      "maxSignals": 100,
+      "riskScore": 21,
+      "riskScoreMapping": [],
+      "severity": "low",
+      "severityMapping": [],
+      "threat": [],
+      "to": "now",
+      "references": [],
+      "version": 1,
+      "exceptionsList": [],
+      "type": "query",
+      "language": "kuery",
+      "index": [
+        "apm-*-transaction*",
+        "traces-apm*",
+        "auditbeat-*",
+        "endgame-*",
+        "filebeat-*",
+        "logs-*",
+        "packetbeat-*",
+        "winlogbeat-*"
+      ],
+      "query": "_id:*",
+      "filters": []
+    },
+    "schedule": {
+      "interval": "5m"
+    },
+    "enabled": true,
+    "actions": [],
+    "throttle": null,
+    "notifyWhen": "onActiveAlert",
+    "apiKeyOwner": "elastic",
+    "legacyId": null,
+    "createdBy": "elastic",
+    "updatedBy": "elastic",
+    "createdAt": "2022-01-28T11:38:17.540Z",
+    "updatedAt": "2022-01-28T11:38:19.894Z",
+    "muteAll": true,
+    "mutedInstanceIds": [],
+    "executionStatus": {
+      "status": "ok",
+      "lastExecutionDate": "2022-01-28T11:38:21.638Z",
+      "error": null,
+      "lastDuration": 1369
+    },
+    "monitoring": {
+      "execution": {
+        "history": [
+          {
+            "success": true,
+            "timestamp": 1643369903007
+          }
+        ],
+        "calculated_metrics": {
+          "success_ratio": 1
+        }
+      }
+    },
+    "meta": {
+      "versionApiKeyLastmodified": "8.1.0"
+    },
+    "scheduledTaskId": "c8ca6100-802e-11ec-952d-cf6018da8e2b"
+  },
+  "references": [],
+  "migrationVersion": {
+    "alert": "8.0.0"
+  },
+  "coreMigrationVersion": "8.1.0"
+}

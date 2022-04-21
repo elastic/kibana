@@ -88,7 +88,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
       <EuiLoadingContent data-test-subj="initialLoadingPanelAllCases" lines={10} />
     </Div>
   ) : (
-    <Div>
+    <Div data-test-subj={isCasesLoading ? 'cases-table-loading' : null}>
       <CasesTableUtilityBar
         data={data}
         enableBulkActions={showActions}

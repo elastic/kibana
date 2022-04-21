@@ -6,10 +6,11 @@
  */
 import { useCallback, useMemo } from 'react';
 
-import { CommentType } from '../../../../../cases/common';
+import { CommentType } from '@kbn/cases-plugin/common';
 
 import { APP_ID } from '../../../../common/constants';
 import { useKibana } from '../../lib/kibana/kibana_react';
+import { ADD_TO_CASE_SUCCESS } from './translations';
 
 import { LensAttributes } from './types';
 
@@ -44,6 +45,7 @@ export const useAddToNewCase = ({
 
   const createCaseFlyout = cases.hooks.getUseCasesAddToNewCaseFlyout({
     attachments,
+    toastContent: ADD_TO_CASE_SUCCESS,
   });
 
   const onAddToNewCaseClicked = useCallback(() => {

@@ -6,11 +6,11 @@
  */
 
 import { transformError, getBootstrapIndexExists } from '@kbn/securitysolution-es-utils';
+import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 
 import { buildSiemResponse } from '../utils';
-import { RuleDataPluginService } from '../../../../../../rule_registry/server';
 import { fieldAliasesOutdated } from './check_template_version';
 import { getIndexVersion } from './get_index_version';
 import { isOutdated } from '../../migrations/helpers';

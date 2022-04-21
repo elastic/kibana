@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Persistence via Microsoft Office AddIns",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "file where event.type != \"deletion\" and\n file.extension : (\"wll\",\"xll\",\"ppa\",\"ppam\",\"xla\",\"xlam\") and\n file.path :\n    (\n    \"C:\\\\Users\\\\*\\\\AppData\\\\Roaming\\\\Microsoft\\\\Word\\\\Startup\\\\*\",\n    \"C:\\\\Users\\\\*\\\\AppData\\\\Roaming\\\\Microsoft\\\\AddIns\\\\*\",\n    \"C:\\\\Users\\\\*\\\\AppData\\\\Roaming\\\\Microsoft\\\\Excel\\\\XLSTART\\\\*\"\n    )\n",
   "references": [
     "https://labs.mwrinfosecurity.com/blog/add-in-opportunities-for-office-persistence/"
@@ -45,5 +46,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }

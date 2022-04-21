@@ -8,11 +8,12 @@
 import { truncate } from 'lodash';
 import moment from 'moment';
 import { BadRequestError, transformError } from '@kbn/securitysolution-es-utils';
-import { KibanaResponseFactory, Logger } from 'src/core/server';
+import { KibanaResponseFactory, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { SanitizedRule } from '@kbn/alerting-plugin/common';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { RuleAlertType } from '../../rules/types';
-
-import type { RulesClient } from '../../../../../../alerting/server';
 
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -36,12 +37,13 @@ import { deleteRules } from '../../rules/delete_rules';
 import { duplicateRule } from '../../rules/duplicate_rule';
 import { findRules } from '../../rules/find_rules';
 import { readRules } from '../../rules/read_rules';
-import { patchRules } from '../../rules/patch_rules';
+import { editRule } from '../../rules/edit_rule';
 import { applyBulkActionEditToRule } from '../../rules/bulk_action_edit';
 import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { buildSiemResponse } from '../utils';
-import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
+import { legacyMigrate } from '../../rules/utils';
+import { RuleParams } from '../../schemas/rule_schemas';
 
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
 const MAX_ERROR_MESSAGE_LENGTH = 1000;
@@ -95,13 +97,19 @@ const buildBulkResponse = (
     total: bulkActionOutcome.results.length + errors.length,
   };
 
+  // Whether rules will be updated, created or deleted depends on the bulk
+  // action type being processed. However, in order to avoid doing a switch-case
+  // by the action type, we can figure it out indirectly.
   const results = {
+    // We had a rule, now there's a rule with the same id - the existing rule was modified
     updated: bulkActionOutcome.results
       .filter(({ item, result }) => item.id === result?.id)
       .map(({ result }) => result && internalRuleToAPIResponse(result)),
+    // We had a rule, now there's a rule with a different id - a new rule was created
     created: bulkActionOutcome.results
       .filter(({ item, result }) => result != null && result.id !== item.id)
       .map(({ result }) => result && internalRuleToAPIResponse(result)),
+    // We had a rule, now it's null - the rule was deleted
     deleted: bulkActionOutcome.results
       .filter(({ result }) => result == null)
       .map(({ item }) => internalRuleToAPIResponse(item)),
@@ -185,6 +193,39 @@ const fetchRulesByQueryOrIds = async ({
   };
 };
 
+/**
+ * Helper method to migrate any legacy actions a rule may have. If no actions or no legacy actions
+ * no migration is performed.
+ * @params rulesClient
+ * @params savedObjectsClient
+ * @params rule - rule to be migrated
+ * @returns The migrated rule
+ */
+export const migrateRuleActions = async ({
+  rulesClient,
+  savedObjectsClient,
+  rule,
+}: {
+  rulesClient: RulesClient;
+  savedObjectsClient: SavedObjectsClientContract;
+  rule: RuleAlertType;
+}): Promise<SanitizedRule<RuleParams>> => {
+  const migratedRule = await legacyMigrate({
+    rulesClient,
+    savedObjectsClient,
+    rule,
+  });
+
+  // This should only be hit if `rule` passed into `legacyMigrate`
+  // is `null` or `rule.id` is null which right now, as typed, should not occur
+  // but catching if does, in which case something upstream would be breaking down
+  if (migratedRule == null) {
+    throw new Error(`An error occurred processing rule with id:${rule.id}`);
+  }
+
+  return migratedRule;
+};
+
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
@@ -258,13 +299,19 @@ export const performBulkActionRoute = (
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
-                if (!rule.enabled) {
-                  throwAuthzError(await mlAuthz.validateRuleType(rule.params.type));
-                  await rulesClient.enable({ id: rule.id });
+                const migratedRule = await migrateRuleActions({
+                  rulesClient,
+                  savedObjectsClient,
+                  rule,
+                });
+
+                if (!migratedRule.enabled) {
+                  throwAuthzError(await mlAuthz.validateRuleType(migratedRule.params.type));
+                  await rulesClient.enable({ id: migratedRule.id });
                 }
 
                 return {
-                  ...rule,
+                  ...migratedRule,
                   enabled: true,
                 };
               },
@@ -276,13 +323,19 @@ export const performBulkActionRoute = (
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
-                if (rule.enabled) {
-                  throwAuthzError(await mlAuthz.validateRuleType(rule.params.type));
-                  await rulesClient.disable({ id: rule.id });
+                const migratedRule = await migrateRuleActions({
+                  rulesClient,
+                  savedObjectsClient,
+                  rule,
+                });
+
+                if (migratedRule.enabled) {
+                  throwAuthzError(await mlAuthz.validateRuleType(migratedRule.params.type));
+                  await rulesClient.disable({ id: migratedRule.id });
                 }
 
                 return {
-                  ...rule,
+                  ...migratedRule,
                   enabled: false,
                 };
               },
@@ -294,8 +347,14 @@ export const performBulkActionRoute = (
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
+                const migratedRule = await migrateRuleActions({
+                  rulesClient,
+                  savedObjectsClient,
+                  rule,
+                });
+
                 await deleteRules({
-                  ruleId: rule.id,
+                  ruleId: migratedRule.id,
                   rulesClient,
                   ruleExecutionLog,
                 });
@@ -310,10 +369,16 @@ export const performBulkActionRoute = (
               concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
               items: rules,
               executor: async (rule) => {
-                throwAuthzError(await mlAuthz.validateRuleType(rule.params.type));
+                const migratedRule = await migrateRuleActions({
+                  rulesClient,
+                  savedObjectsClient,
+                  rule,
+                });
+
+                throwAuthzError(await mlAuthz.validateRuleType(migratedRule.params.type));
 
                 const createdRule = await rulesClient.create({
-                  data: duplicateRule(rule, isRuleRegistryEnabled),
+                  data: duplicateRule(migratedRule, isRuleRegistryEnabled),
                 });
 
                 return createdRule;
@@ -351,24 +416,24 @@ export const performBulkActionRoute = (
 
                 throwAuthzError(await mlAuthz.validateRuleType(rule.params.type));
 
-                const editedRule = body[BulkAction.edit].reduce(
-                  (acc, action) => applyBulkActionEditToRule(acc, action),
-                  rule
-                );
-
-                const { tags, params: { timelineTitle, timelineId } = {} } = editedRule;
-                const index = 'index' in editedRule.params ? editedRule.params.index : undefined;
-
-                await patchRules({
+                const migratedRule = await migrateRuleActions({
                   rulesClient,
+                  savedObjectsClient,
                   rule,
-                  tags,
-                  index,
-                  timelineTitle,
-                  timelineId,
                 });
 
-                return editedRule;
+                const updatedRule = await editRule({
+                  rulesClient,
+                  rule: migratedRule,
+                  edit: (ruleToEdit) => {
+                    return body[BulkAction.edit].reduce(
+                      (acc, action) => applyBulkActionEditToRule(acc, action),
+                      ruleToEdit
+                    );
+                  },
+                });
+
+                return updatedRule;
               },
               abortSignal: abortController.signal,
             });

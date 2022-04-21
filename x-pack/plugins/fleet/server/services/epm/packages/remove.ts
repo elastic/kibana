@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import Boom from '@hapi/boom';
 
-import type { SavedObject } from 'src/core/server';
+import type { SavedObject } from '@kbn/core/server';
 
-import { SavedObjectsClient } from '../../../../../../../src/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
+
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+
+import { SavedObjectsUtils } from '@kbn/core/server';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import { DEFAULT_SPACE_ID } from '../../../../../spaces/common/constants';
 import { ElasticsearchAssetType } from '../../../types';
 import type {
   AssetReference,
@@ -23,7 +26,7 @@ import type {
   KibanaAssetReference,
   Installation,
 } from '../../../types';
-import { deletePipeline } from '../elasticsearch/ingest_pipeline/';
+import { deletePipeline } from '../elasticsearch/ingest_pipeline';
 import { removeUnusedIndexPatterns } from '../kibana/index_pattern/install';
 import { deleteTransforms } from '../elasticsearch/transform/remove';
 import { deleteMlModel } from '../elasticsearch/ml_model';
@@ -31,9 +34,8 @@ import { packagePolicyService, appContextService } from '../..';
 import { deletePackageCache } from '../archive';
 import { deleteIlms } from '../elasticsearch/datastream_ilm/remove';
 import { removeArchiveEntries } from '../archive/storage';
-import { SavedObjectsUtils } from '../../../../../../../src/core/server';
 
-import { getInstallation, kibanaSavedObjectTypes } from './index';
+import { getInstallation, kibanaSavedObjectTypes } from '.';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;

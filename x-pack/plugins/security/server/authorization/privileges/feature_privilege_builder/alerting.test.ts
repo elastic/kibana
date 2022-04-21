@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { FeatureKibanaPrivileges } from '../../../../../features/server';
-import { KibanaFeature } from '../../../../../features/server';
+import type { FeatureKibanaPrivileges } from '@kbn/features-plugin/server';
+import { KibanaFeature } from '@kbn/features-plugin/server';
+
 import { Actions } from '../../actions';
 import { FeaturePrivilegeAlertingBuilder } from './alerting';
 
@@ -226,6 +227,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAlert",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAlert",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/snooze",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unsnooze",
           ]
         `);
       });
@@ -321,6 +323,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAlert",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAlert",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/snooze",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unsnooze",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/get",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/find",
             "alerting:1.0.0-zeta1:alert-type/my-feature/alert/update",
@@ -376,6 +379,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAlert",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAlert",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/snooze",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unsnooze",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/get",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getRuleState",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getAlertSummary",
@@ -478,6 +482,7 @@ describe(`feature_privilege_builder`, () => {
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/muteAlert",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unmuteAlert",
             "alerting:1.0.0-zeta1:alert-type/my-feature/rule/snooze",
+            "alerting:1.0.0-zeta1:alert-type/my-feature/rule/unsnooze",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/get",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getRuleState",
             "alerting:1.0.0-zeta1:readonly-alert-type/my-feature/rule/getAlertSummary",

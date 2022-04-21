@@ -130,12 +130,23 @@ export const EngineCreationLogic = kea<MakeLogicType<EngineCreationValues, Engin
   listeners: ({ values, actions }) => ({
     submitEngine: async () => {
       const { http } = HttpLogic.values;
-      const { name, language } = values;
-
-      const body = JSON.stringify({ name, language });
+      const { name, language, engineType, selectedIndex } = values;
 
       try {
-        await http.post('/internal/app_search/engines', { body });
+        if (engineType === 'appSearch') {
+          const body = JSON.stringify({ name, language });
+
+          await http.post('/internal/app_search/engines', { body });
+        } else {
+          const body = JSON.stringify({
+            name,
+            search_index: {
+              type: 'elasticsearch',
+              index_name: selectedIndex,
+            },
+          });
+          await http.post('/internal/app_search/elasticsearch/engines', { body });
+        }
         actions.onEngineCreationSuccess();
       } catch (e) {
         flashAPIErrors(e);

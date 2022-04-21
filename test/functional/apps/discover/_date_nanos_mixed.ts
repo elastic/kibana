@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await security.testUser.restoreDefaults();
-      esArchiver.unload('test/functional/fixtures/es_archiver/date_nanos_mixed');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/date_nanos_mixed');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
     });
 

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Logger, CoreSetup } from 'kibana/server';
+import { Logger, CoreSetup } from '@kbn/core/server';
 import moment from 'moment';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../task_manager/server';
+} from '@kbn/task-manager-plugin/server';
 
 import {
   getTotalCountAggregations,
@@ -138,6 +138,16 @@ export function telemetryTaskRunner(
                     dailyFailedAndUnrecognizedTasks.countByStatusByRuleType,
                   avg_execution_time_per_day: dailyExecutionCounts.avgExecutionTime,
                   avg_execution_time_by_type_per_day: dailyExecutionCounts.avgExecutionTimeByType,
+                  avg_es_search_duration_per_day: dailyExecutionCounts.avgEsSearchDuration,
+                  avg_es_search_duration_by_type_per_day:
+                    dailyExecutionCounts.avgEsSearchDurationByType,
+                  avg_total_search_duration_per_day: dailyExecutionCounts.avgTotalSearchDuration,
+                  avg_total_search_duration_by_type_per_day:
+                    dailyExecutionCounts.avgTotalSearchDurationByType,
+                  percentile_num_generated_actions_per_day:
+                    dailyExecutionCounts.generatedActionsPercentiles,
+                  percentile_num_generated_actions_by_type_per_day:
+                    dailyExecutionCounts.generatedActionsPercentilesByType,
                 },
                 runAt: getNextMidnight(),
               };

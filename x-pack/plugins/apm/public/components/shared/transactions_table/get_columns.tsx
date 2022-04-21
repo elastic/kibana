@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -16,23 +17,21 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ValuesType } from 'utility-types';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { TimeRangeComparisonType } from '../../../../common/runtime_types/comparison_type_rt';
 import {
   asMillisecondDuration,
   asPercent,
   asTransactionRate,
 } from '../../../../common/utils/formatters';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
-import { ImpactBar } from '../impact_bar';
-import { TransactionDetailLink } from '../links/apm/transaction_detail_link';
-import { ListMetric } from '../list_metric';
-import { ITableColumn } from '../managed_table';
-import { TruncateWithTooltip } from '../truncate_with_tooltip';
-import { getLatencyColumnLabel } from './get_latency_column_label';
 import {
   ChartType,
   getTimeSeriesColor,
 } from '../charts/helper/get_timeseries_color';
+import { ImpactBar } from '../impact_bar';
+import { TransactionDetailLink } from '../links/apm/transaction_detail_link';
+import { ListMetric } from '../list_metric';
+import { TruncateWithTooltip } from '../truncate_with_tooltip';
+import { getLatencyColumnLabel } from './get_latency_column_label';
 
 type TransactionGroupMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -46,18 +45,20 @@ type TransactionGroupDetailedStatistics =
 export function getColumns({
   serviceName,
   latencyAggregationType,
+  transactionGroupDetailedStatisticsLoading,
   transactionGroupDetailedStatistics,
   comparisonEnabled,
   shouldShowSparkPlots = true,
-  comparisonType,
+  offset,
 }: {
   serviceName: string;
   latencyAggregationType?: LatencyAggregationType;
+  transactionGroupDetailedStatisticsLoading: boolean;
   transactionGroupDetailedStatistics?: TransactionGroupDetailedStatistics;
   comparisonEnabled?: boolean;
   shouldShowSparkPlots?: boolean;
-  comparisonType?: TimeRangeComparisonType;
-}): Array<ITableColumn<ServiceTransactionGroupItem>> {
+  offset?: string;
+}): Array<EuiBasicTableColumn<ServiceTransactionGroupItem>> {
   return [
     {
       field: 'name',
@@ -77,7 +78,7 @@ export function getColumns({
                 transactionType={type}
                 latencyAggregationType={latencyAggregationType}
                 comparisonEnabled={comparisonEnabled}
-                comparisonType={comparisonType}
+                offset={offset}
               >
                 {name}
               </TransactionDetailLink>
@@ -106,6 +107,7 @@ export function getColumns({
             color={currentPeriodColor}
             compact
             hideSeries={!shouldShowSparkPlots}
+            isLoading={transactionGroupDetailedStatisticsLoading}
             series={currentTimeseries}
             comparisonSeries={
               comparisonEnabled ? previousTimeseries : undefined
@@ -140,6 +142,7 @@ export function getColumns({
             color={currentPeriodColor}
             compact
             hideSeries={!shouldShowSparkPlots}
+            isLoading={transactionGroupDetailedStatisticsLoading}
             series={currentTimeseries}
             comparisonSeries={
               comparisonEnabled ? previousTimeseries : undefined
@@ -196,6 +199,7 @@ export function getColumns({
             color={currentPeriodColor}
             compact
             hideSeries={!shouldShowSparkPlots}
+            isLoading={transactionGroupDetailedStatisticsLoading}
             series={currentTimeseries}
             comparisonSeries={
               comparisonEnabled ? previousTimeseries : undefined

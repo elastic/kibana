@@ -282,7 +282,7 @@ on the {kib} index at startup. {kib} users still need to authenticate with
 {es}, which is proxied through the {kib} server.
 
 |[[elasticsearch-service-account-token]] `elasticsearch.serviceAccountToken:`
- | beta[]. If your {es} is protected with basic authentication, this token provides the credentials
+ | If your {es} is protected with basic authentication, this token provides the credentials
 that the {kib} server uses to perform maintenance on the {kib} index at startup. This setting
 is an alternative to `elasticsearch.username` and `elasticsearch.password`.
 
@@ -359,7 +359,7 @@ When `includeElasticMapsService` is turned off, only tile layer configured by <<
  | Specifies the URL of a self hosted <<elastic-maps-server,{hosted-ems}>>
 
 | [[tilemap-settings]] `map.tilemap.options.attribution:` {ess-icon}
- | The map attribution string. Provide attributions in markdown and use '|' to delimit attributions, for example: `"[attribution 1](https://www.attribution1)|[attribution 2](https://www.attribution2)"`.
+ | The map attribution string. Provide attributions in markdown and use `\|` to delimit attributions, for example: `"[attribution 1](https://www.attribution1)\|[attribution 2](https://www.attribution2)"`.
 *Default: `"© [Elastic Maps Service](https://www.elastic.co/elastic-maps-service)"`*
 
 | [[tilemap-max-zoom]] `map.tilemap.options.maxZoom:` {ess-icon}
@@ -675,41 +675,43 @@ out through *Advanced Settings*. *Default: `true`*
 sources and images. When false, Vega can only get data from {es}. *Default: `false`*
 
 | `xpack.ccr.ui.enabled`
-Set this value to false to disable the Cross-Cluster Replication UI.
+| Set this value to false to disable the Cross-Cluster Replication UI.
 *Default: `true`*
 
 |[[settings-explore-data-in-context]] `xpack.discoverEnhanced.actions.`
 `exploreDataInContextMenu.enabled`
  | Enables the *Explore underlying data* option that allows you to open *Discover* from a dashboard panel and view the panel data. *Default: `false`*
 
+  When you create visualizations using the *Lens* drag-and-drop editor, you can use the toolbar to open and explore your data in *Discover*. For more information, check out <<explore-lens-data-in-discover, Explore the data in Discover>>. 
+
 |[[settings-explore-data-in-chart]] `xpack.discoverEnhanced.actions.`
 `exploreDataInChart.enabled`
  | Enables you to view the underlying documents in a data series from a dashboard panel. *Default: `false`*
 
 | `xpack.ilm.ui.enabled`
-Set this value to false to disable the Index Lifecycle Policies UI.
+ | Set this value to false to disable the Index Lifecycle Policies UI.
 *Default: `true`*
 
 | `xpack.index_management.ui.enabled`
-Set this value to false to disable the Index Management UI.
+ | Set this value to false to disable the Index Management UI.
 *Default: `true`*
 
 | `xpack.license_management.ui.enabled`
-Set this value to false to disable the License Management UI.
+ | Set this value to false to disable the License Management UI.
 *Default: `true`*
 
 | `xpack.remote_clusters.ui.enabled`
-Set this value to false to disable the Remote Clusters UI.
+ | Set this value to false to disable the Remote Clusters UI.
 *Default: `true`*
 
 | `xpack.rollup.ui.enabled:`
-Set this value to false to disable the Rollup Jobs UI. *Default: true*
+ | Set this value to false to disable the Rollup Jobs UI. *Default: true*
 
 | `xpack.snapshot_restore.ui.enabled:`
-Set this value to false to disable the Snapshot and Restore UI. *Default: true*
+ | Set this value to false to disable the Snapshot and Restore UI. *Default: true*
 
 | `xpack.upgrade_assistant.ui.enabled:`
-Set this value to false to disable the Upgrade Assistant UI. *Default: true*
+ | Set this value to false to disable the Upgrade Assistant UI. *Default: true*
 
 | `i18n.locale` {ess-icon}
  | Set this value to change the {kib} interface language.

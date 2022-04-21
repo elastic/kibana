@@ -36,12 +36,19 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { capitalize } from 'lodash';
-import { KibanaFeature } from '../../../../../features/public';
+import { KibanaFeature } from '@kbn/features-plugin/public';
 import {
   formatDuration,
   getDurationNumberInItsUnit,
   getDurationUnitValue,
-} from '../../../../../alerting/common/parse_duration';
+  parseDuration,
+} from '@kbn/alerting-plugin/common/parse_duration';
+import {
+  RuleActionParam,
+  ALERTS_FEATURE_ID,
+  RecoveredActionGroup,
+  isActionGroupDisabledForActionTypeId,
+} from '@kbn/alerting-plugin/common';
 import { RuleReducerAction, InitialRule } from './rule_reducer';
 import {
   RuleTypeModel,
@@ -55,12 +62,6 @@ import {
 } from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { ActionForm } from '../action_connector_form';
-import {
-  AlertActionParam as RuleActionParam,
-  ALERTS_FEATURE_ID,
-  RecoveredActionGroup,
-  isActionGroupDisabledForActionTypeId,
-} from '../../../../../alerting/common';
 import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilities';
 import { SolutionFilter } from './solution_filter';
 import './rule_form.scss';
@@ -73,8 +74,8 @@ import { checkRuleTypeEnabled } from '../../lib/check_rule_type_enabled';
 import { ruleTypeCompare, ruleTypeGroupCompare } from '../../lib/rule_type_compare';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { SectionLoading } from '../../components/section_loading';
-import { DEFAULT_ALERT_INTERVAL } from '../../constants';
 import { useLoadRuleTypes } from '../../hooks/use_load_rule_types';
+import { getInitialInterval } from './get_initial_interval';
 
 const ENTER_KEY = 13;
 
@@ -97,9 +98,6 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   filteredSolutions?: string[] | undefined;
 }
 
-const defaultScheduleInterval = getDurationNumberInItsUnit(DEFAULT_ALERT_INTERVAL);
-const defaultScheduleIntervalUnit = getDurationUnitValue(DEFAULT_ALERT_INTERVAL);
-
 export const RuleForm = ({
   rule,
   config,
@@ -121,10 +119,16 @@ export const RuleForm = ({
     kibanaFeatures,
     charts,
     data,
+    unifiedSearch,
+    dataViews,
   } = useKibana().services;
   const canShowActions = hasShowActionsCapability(capabilities);
 
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
+
+  const defaultRuleInterval = getInitialInterval(config.minimumScheduleInterval?.value);
+  const defaultScheduleInterval = getDurationNumberInItsUnit(defaultRuleInterval);
+  const defaultScheduleIntervalUnit = getDurationUnitValue(defaultRuleInterval);
 
   const [ruleInterval, setRuleInterval] = useState<number | undefined>(
     rule.schedule.interval
@@ -238,15 +242,10 @@ export const RuleForm = ({
     if (rule.schedule.interval) {
       const interval = getDurationNumberInItsUnit(rule.schedule.interval);
       const intervalUnit = getDurationUnitValue(rule.schedule.interval);
-
-      if (interval !== defaultScheduleInterval) {
-        setRuleInterval(interval);
-      }
-      if (intervalUnit !== defaultScheduleIntervalUnit) {
-        setRuleIntervalUnit(intervalUnit);
-      }
+      setRuleInterval(interval);
+      setRuleIntervalUnit(intervalUnit);
     }
-  }, [rule.schedule.interval]);
+  }, [rule.schedule.interval, defaultScheduleInterval, defaultScheduleIntervalUnit]);
 
   const setRuleProperty = useCallback(
     <Key extends keyof Rule>(key: Key, value: Rule[Key] | null) => {
@@ -526,6 +525,8 @@ export const RuleForm = ({
               metadata={metadata}
               charts={charts}
               data={data}
+              dataViews={dataViews}
+              unifiedSearch={unifiedSearch}
             />
           </Suspense>
         </EuiErrorBoundary>
@@ -588,11 +589,49 @@ export const RuleForm = ({
         type="questionInCircle"
         content={i18n.translate('xpack.triggersActionsUI.sections.ruleForm.checkWithTooltip', {
           defaultMessage:
-            'Define how often to evaluate the condition. Checks are queued; they run as close to the defined value as capacity allows. The xpack.alerting.minimumScheduleInterval setting defines the minimum value.',
+            'Define how often to evaluate the condition. Checks are queued; they run as close to the defined value as capacity allows.',
         })}
       />
     </>
   );
+
+  const getHelpTextForInterval = () => {
+    if (!config || !config.minimumScheduleInterval) {
+      return '';
+    }
+
+    // No help text if there is an error
+    if (errors['schedule.interval'].length > 0) {
+      return '';
+    }
+
+    if (config.minimumScheduleInterval.enforce) {
+      // Always show help text if minimum is enforced
+      return i18n.translate('xpack.triggersActionsUI.sections.ruleForm.checkEveryHelpText', {
+        defaultMessage: 'Interval must be at least {minimum}.',
+        values: {
+          minimum: formatDuration(config.minimumScheduleInterval.value, true),
+        },
+      });
+    } else if (
+      rule.schedule.interval &&
+      parseDuration(rule.schedule.interval) < parseDuration(config.minimumScheduleInterval.value)
+    ) {
+      // Only show help text if current interval is less than suggested
+      return i18n.translate(
+        'xpack.triggersActionsUI.sections.ruleForm.checkEveryHelpSuggestionText',
+        {
+          defaultMessage:
+            'Intervals less than {minimum} are not recommended due to performance considerations.',
+          values: {
+            minimum: formatDuration(config.minimumScheduleInterval.value, true),
+          },
+        }
+      );
+    } else {
+      return '';
+    }
+  };
 
   return (
     <EuiForm>
@@ -669,16 +708,7 @@ export const RuleForm = ({
             fullWidth
             data-test-subj="intervalFormRow"
             display="rowCompressed"
-            helpText={
-              errors['schedule.interval'].length > 0
-                ? ''
-                : i18n.translate('xpack.triggersActionsUI.sections.ruleForm.checkEveryHelpText', {
-                    defaultMessage: 'Interval must be at least {minimum}.',
-                    values: {
-                      minimum: formatDuration(config.minimumScheduleInterval ?? '1m', true),
-                    },
-                  })
-            }
+            helpText={getHelpTextForInterval()}
             label={labelForRuleChecked}
             isInvalid={errors['schedule.interval'].length > 0}
             error={errors['schedule.interval']}

@@ -124,6 +124,10 @@ export class Printer {
       return 'interface';
     }
 
+    if (node.kind === ts.SyntaxKind.EnumDeclaration) {
+      return 'enum';
+    }
+
     if (ts.isVariableDeclaration(node)) {
       return this.getVariableDeclarationType(node);
     }
@@ -131,9 +135,18 @@ export class Printer {
 
   private printModifiers(exportInfo: ExportInfo | undefined, node: ts.Declaration) {
     const flags = ts.getCombinedModifierFlags(node);
+    const keyword = this.getDeclarationKeyword(node);
     const modifiers: string[] = [];
     if (exportInfo) {
-      modifiers.push(exportInfo.type);
+      // always use `export` for explicit types
+      if (keyword) {
+        modifiers.push('export');
+      } else {
+        modifiers.push(exportInfo.type);
+      }
+    }
+    if ((keyword === 'var' || keyword === 'const') && !exportInfo) {
+      modifiers.push('declare');
     }
     if (flags & ts.ModifierFlags.Default) {
       modifiers.push('default');
@@ -160,7 +173,6 @@ export class Printer {
       modifiers.push('async');
     }
 
-    const keyword = this.getDeclarationKeyword(node);
     if (keyword) {
       modifiers.push(keyword);
     }
@@ -292,7 +304,13 @@ export class Printer {
       case ts.SyntaxKind.BigIntLiteral:
       case ts.SyntaxKind.NumericLiteral:
       case ts.SyntaxKind.StringKeyword:
-        return [this.printNode(node)];
+      case ts.SyntaxKind.TypeReference:
+      case ts.SyntaxKind.IntersectionType:
+        return [node.getFullText().trim()];
+    }
+
+    if (ts.isEnumDeclaration(node)) {
+      return [node.getFullText().trim() + '\n'];
     }
 
     if (ts.isFunctionDeclaration(node)) {
@@ -335,6 +353,7 @@ export class Printer {
         this.printModifiers(exportInfo, node),
         this.getMappedSourceNode(node.name),
         ...(node.type ? [': ', this.printNode(node.type)] : []),
+        ...(node.initializer ? [' = ', this.printNode(node.initializer)] : []),
         ';\n',
       ];
     }
@@ -362,6 +381,9 @@ export class Printer {
         this.printModifiers(exportInfo, node),
         node.name ? this.getMappedSourceNode(node.name) : [],
         this.printTypeParameters(node),
+        node.heritageClauses
+          ? ` ${node.heritageClauses.map((c) => c.getFullText().trim()).join(' ')}`
+          : [],
         ' {\n',
         node.members.flatMap((m) => {
           const memberText = m.getText();

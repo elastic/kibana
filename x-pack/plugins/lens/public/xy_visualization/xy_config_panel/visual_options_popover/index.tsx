@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { ValidLayer } from '@kbn/expression-xy-plugin/common';
 import { ToolbarPopover, TooltipWrapper, ValueLabelsSettings } from '../../../shared_components';
 import { MissingValuesOptions } from './missing_values_option';
 import { LineCurveOption } from './line_curve_option';
 import { FillOpacityOption } from './fill_opacity_option';
 import { XYState } from '../../types';
 import { hasHistogramSeries } from '../../state_helpers';
-import { ValidLayer } from '../../../../common/expressions';
 import type { FramePublicAPI } from '../../../types';
 import { getDataLayers } from '../../visualization_helpers';
 
@@ -115,8 +115,16 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
         <MissingValuesOptions
           isFittingEnabled={isFittingEnabled}
           fittingFunction={state?.fittingFunction}
+          emphasizeFitting={state?.emphasizeFitting}
+          endValue={state?.endValue}
           onFittingFnChange={(newVal) => {
             setState({ ...state, fittingFunction: newVal });
+          }}
+          onEmphasizeFittingChange={(newVal) => {
+            setState({ ...state, emphasizeFitting: newVal });
+          }}
+          onEndValueChange={(newVal) => {
+            setState({ ...state, endValue: newVal });
           }}
         />
 

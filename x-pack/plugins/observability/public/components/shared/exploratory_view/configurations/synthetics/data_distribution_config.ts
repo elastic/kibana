@@ -46,7 +46,7 @@ export function getSyntheticsDistributionConfig({ series, dataView }: ConfigProp
       },
     ],
     hasOperationType: false,
-    filterFields: ['monitor.type', 'observer.geo.name', 'tags'],
+    filterFields: ['monitor.type', 'observer.geo.name', 'tags', 'url.full'],
     breakdownFields: [
       'observer.geo.name',
       'monitor.name',

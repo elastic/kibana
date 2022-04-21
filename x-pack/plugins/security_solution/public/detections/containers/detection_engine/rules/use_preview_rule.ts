@@ -7,8 +7,12 @@
 
 import { useEffect, useState } from 'react';
 
-import { Unit } from '@elastic/datemath';
-import { RULE_PREVIEW_INVOCATION_COUNT } from '../../../../../common/detection_engine/constants';
+import { Unit } from '@kbn/datemath';
+import {
+  RULE_PREVIEW_FROM,
+  RULE_PREVIEW_INTERVAL,
+  RULE_PREVIEW_INVOCATION_COUNT,
+} from '../../../../../common/detection_engine/constants';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
   PreviewResponse,
@@ -31,16 +35,24 @@ export const usePreviewRule = (timeframe: Unit = 'h') => {
   const [isLoading, setIsLoading] = useState(false);
   const { addError } = useAppToasts();
   let invocationCount = RULE_PREVIEW_INVOCATION_COUNT.HOUR;
+  let interval = RULE_PREVIEW_INTERVAL.HOUR;
+  let from = RULE_PREVIEW_FROM.HOUR;
 
   switch (timeframe) {
     case 'd':
       invocationCount = RULE_PREVIEW_INVOCATION_COUNT.DAY;
+      interval = RULE_PREVIEW_INTERVAL.DAY;
+      from = RULE_PREVIEW_FROM.DAY;
       break;
     case 'w':
       invocationCount = RULE_PREVIEW_INVOCATION_COUNT.WEEK;
+      interval = RULE_PREVIEW_INTERVAL.WEEK;
+      from = RULE_PREVIEW_FROM.WEEK;
       break;
     case 'M':
       invocationCount = RULE_PREVIEW_INVOCATION_COUNT.MONTH;
+      interval = RULE_PREVIEW_INTERVAL.MONTH;
+      from = RULE_PREVIEW_FROM.MONTH;
       break;
   }
 
@@ -60,7 +72,14 @@ export const usePreviewRule = (timeframe: Unit = 'h') => {
         try {
           setIsLoading(true);
           const previewRuleResponse = await previewRule({
-            rule: { ...transformOutput(rule), invocationCount },
+            rule: {
+              ...transformOutput({
+                ...rule,
+                interval,
+                from,
+              }),
+              invocationCount,
+            },
             signal: abortCtrl.signal,
           });
           if (isSubscribed) {
@@ -82,7 +101,7 @@ export const usePreviewRule = (timeframe: Unit = 'h') => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [rule, addError, invocationCount]);
+  }, [rule, addError, invocationCount, from, interval]);
 
   return { isLoading, response, rule, setRule };
 };

@@ -8,7 +8,7 @@
 import { useState } from 'react';
 
 import { toElasticsearchQuery, fromKueryExpression, luceneStringToDsl } from '@kbn/es-query';
-import { Query } from '../../../../../../../../../../src/plugins/data/public';
+import { Query } from '@kbn/data-plugin/public';
 
 import { getPivotQuery } from '../../../../../common';
 
@@ -24,7 +24,7 @@ import { StepDefineFormProps } from '../step_define_form';
 
 export const useSearchBar = (
   defaults: StepDefineExposedState,
-  indexPattern: StepDefineFormProps['searchItems']['indexPattern']
+  dataView: StepDefineFormProps['searchItems']['dataView']
 ) => {
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>({
@@ -53,7 +53,7 @@ export const useSearchBar = (
       switch (query.language) {
         case QUERY_LANGUAGE_KUERY:
           setSearchQuery(
-            toElasticsearchQuery(fromKueryExpression(query.query as string), indexPattern)
+            toElasticsearchQuery(fromKueryExpression(query.query as string), dataView)
           );
           return;
         case QUERY_LANGUAGE_LUCENE:

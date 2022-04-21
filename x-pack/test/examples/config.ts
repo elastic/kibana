@@ -37,6 +37,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./search_examples'),
       require.resolve('./embedded_lens'),
       require.resolve('./reporting_examples'),
+      require.resolve('./screenshotting'),
     ],
 
     kbnTestServer: {

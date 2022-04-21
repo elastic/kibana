@@ -33,8 +33,9 @@ import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
 import { hasRuleChanged, haveRuleParamsChanged } from './has_rule_changed';
 import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
-import { DEFAULT_ALERT_INTERVAL } from '../../constants';
+import { DEFAULT_RULE_INTERVAL } from '../../constants';
 import { triggersActionsUiConfig } from '../../../common/lib/config_api';
+import { getInitialInterval } from './get_initial_interval';
 
 const RuleAdd = ({
   consumer,
@@ -58,7 +59,7 @@ const RuleAdd = ({
       consumer,
       ruleTypeId,
       schedule: {
-        interval: DEFAULT_ALERT_INTERVAL,
+        interval: DEFAULT_RULE_INTERVAL,
       },
       actions: [],
       tags: [],
@@ -147,6 +148,14 @@ const RuleAdd = ({
   }, [rule, actionTypeRegistry]);
 
   useEffect(() => {
+    if (config.minimumScheduleInterval && !initialValues?.schedule?.interval) {
+      setRuleProperty('schedule', {
+        interval: getInitialInterval(config.minimumScheduleInterval.value),
+      });
+    }
+  }, [config.minimumScheduleInterval, initialValues]);
+
+  useEffect(() => {
     if (rule.ruleTypeId && ruleTypeIndex) {
       const type = ruleTypeIndex.get(rule.ruleTypeId);
       if (type?.defaultScheduleInterval && !changedFromDefaultInterval) {
@@ -156,7 +165,7 @@ const RuleAdd = ({
   }, [rule.ruleTypeId, ruleTypeIndex, rule.schedule.interval, changedFromDefaultInterval]);
 
   useEffect(() => {
-    if (rule.schedule.interval !== DEFAULT_ALERT_INTERVAL && !changedFromDefaultInterval) {
+    if (rule.schedule.interval !== DEFAULT_RULE_INTERVAL && !changedFromDefaultInterval) {
       setChangedFromDefaultInterval(true);
     }
   }, [rule.schedule.interval, changedFromDefaultInterval]);

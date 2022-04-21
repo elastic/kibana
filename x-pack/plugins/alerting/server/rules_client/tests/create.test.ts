@@ -7,21 +7,21 @@
 
 import { schema } from '@kbn/config-schema';
 import { RulesClient, ConstructorOptions, CreateOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
+import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
-import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
-import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
-import { ActionsAuthorization, ActionsClient } from '../../../../actions/server';
-import { TaskStatus } from '../../../../task_manager/server';
-import { auditLoggerMock } from '../../../../security/server/audit/mocks';
+import { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
 import { getDefaultRuleMonitoring } from '../../task_runner/task_runner';
 
-jest.mock('../../../../../../src/core/server/saved_objects/service/lib/utils', () => ({
+jest.mock('@kbn/core/server/saved_objects/service/lib/utils', () => ({
   SavedObjectsUtils: {
     generateId: () => 'mock-saved-object-id',
   },
@@ -52,7 +52,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getEventLogClient: jest.fn(),
   kibanaVersion,
   auditLogger,
-  minimumScheduleInterval: '1m',
+  minimumScheduleInterval: { value: '1m', enforce: false },
 };
 
 beforeEach(() => {
@@ -456,6 +456,7 @@ describe('create()', () => {
                                                                             "id": "1",
                                                                             "params": Object {
                                                                               "alertId": "1",
+                                                                              "consumer": "bar",
                                                                               "spaceId": "default",
                                                                             },
                                                                             "schedule": Object {
@@ -1166,7 +1167,7 @@ describe('create()', () => {
         injectReferences: injectReferencesFn,
       },
       config: {
-        execution: {
+        run: {
           actions: { max: 1000 },
         },
       },
@@ -1339,7 +1340,7 @@ describe('create()', () => {
         injectReferences: injectReferencesFn,
       },
       config: {
-        execution: {
+        run: {
           actions: { max: 1000 },
         },
       },
@@ -2098,7 +2099,7 @@ describe('create()', () => {
       async executor() {},
       producer: 'alerts',
       config: {
-        execution: {
+        run: {
           actions: { max: 1000 },
         },
       },
@@ -2546,7 +2547,73 @@ describe('create()', () => {
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });
 
-  test('throws error when creating with an interval less than the minimum configured one', async () => {
+  test('logs warning when creating with an interval less than the minimum configured one when enforce = false', async () => {
+    const data = getMockData({ schedule: { interval: '1s' } });
+    ruleTypeRegistry.get.mockImplementation(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {},
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: jest.fn(),
+        injectReferences: jest.fn(),
+      },
+    }));
+    const createdAttributes = {
+      ...data,
+      alertTypeId: '123',
+      schedule: { interval: '1s' },
+      params: {
+        bar: true,
+      },
+      createdAt: '2019-02-12T21:01:22.479Z',
+      createdBy: 'elastic',
+      updatedBy: 'elastic',
+      updatedAt: '2019-02-12T21:01:22.479Z',
+      muteAll: false,
+      mutedInstanceIds: [],
+      actions: [
+        {
+          group: 'default',
+          actionRef: 'action_0',
+          actionTypeId: 'test',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+    };
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: createdAttributes,
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+
+    await rulesClient.create({ data });
+    expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
+      `Rule schedule interval (1s) for "123" rule type with ID "1" is less than the minimum value (1m). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent creation of these rules.`
+    );
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+    expect(taskManager.schedule).toHaveBeenCalled();
+  });
+
+  test('throws error when creating with an interval less than the minimum configured one when enforce = true', async () => {
+    rulesClient = new RulesClient({
+      ...rulesClientParams,
+      minimumScheduleInterval: { value: '1m', enforce: true },
+    });
     ruleTypeRegistry.get.mockImplementation(() => ({
       id: '123',
       name: 'Test',
@@ -2562,7 +2629,7 @@ describe('create()', () => {
         injectReferences: jest.fn(),
       },
       config: {
-        execution: {
+        run: {
           actions: { max: 1000 },
         },
       },

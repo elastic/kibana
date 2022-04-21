@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { PluginSetupContract } from '../../../../../alerting/server';
+import { PluginSetupContract } from '@kbn/alerting-plugin/server';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
 import {
   LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
@@ -78,6 +78,14 @@ const alertReasonMessageActionVariableDescription = i18n.translate(
   }
 );
 
+const viewInAppUrlActionVariableDescription = i18n.translate(
+  'xpack.infra.logs.alerting.threshold.viewInAppUrlActionVariableDescription',
+  {
+    defaultMessage:
+      'Link to the view or feature within Elastic that can be used to investigate the alert and its context further',
+  }
+);
+
 export async function registerLogThresholdRuleType(
   alertingPlugin: PluginSetupContract,
   libs: InfraBackendLibs
@@ -117,6 +125,10 @@ export async function registerLogThresholdRuleType(
         {
           name: 'denominatorConditions',
           description: denominatorConditionsActionVariableDescription,
+        },
+        {
+          name: 'viewInAppUrl',
+          description: viewInAppUrlActionVariableDescription,
         },
       ],
     },

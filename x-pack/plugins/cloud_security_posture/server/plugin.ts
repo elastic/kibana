@@ -11,18 +11,27 @@ import type {
   CoreStart,
   Plugin,
   Logger,
-} from '../../../../src/core/server';
+} from '@kbn/core/server';
+import { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
+import { DeepReadonly } from 'utility-types';
+import { DeletePackagePoliciesResponse, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { CspAppService } from './lib/csp_app_services';
 import type {
   CspServerPluginSetup,
   CspServerPluginStart,
   CspServerPluginSetupDeps,
   CspServerPluginStartDeps,
+  CspRequestHandlerContext,
 } from './types';
 import { defineRoutes } from './routes';
-import { cspRuleAssetType } from './saved_objects/cis_1_4_1/csp_rule_type';
-import { initializeCspRules } from './saved_objects/cis_1_4_1/initialize_rules';
+import { cspRuleTemplateAssetType } from './saved_objects/csp_rule_template';
+import { cspRuleAssetType } from './saved_objects/csp_rule_type';
 import { initializeCspTransformsIndices } from './create_indices/create_transforms_indices';
+import {
+  onPackagePolicyPostCreateCallback,
+  onPackagePolicyDeleteCallback,
+} from './fleet_integration/fleet_integration';
+import { CIS_KUBERNETES_PACKAGE_NAME } from '../common/constants';
 
 export interface CspAppContext {
   logger: Logger;
@@ -54,8 +63,9 @@ export class CspPlugin
     };
 
     core.savedObjects.registerType(cspRuleAssetType);
+    core.savedObjects.registerType(cspRuleTemplateAssetType);
 
-    const router = core.http.createRouter();
+    const router = core.http.createRouter<CspRequestHandlerContext>();
 
     // Register server side APIs
     defineRoutes(router, cspAppContext);
@@ -68,8 +78,43 @@ export class CspPlugin
       ...plugins.fleet,
     });
 
-    initializeCspRules(core.savedObjects.createInternalRepository());
     initializeCspTransformsIndices(core.elasticsearch.client.asInternalUser, this.logger);
+    plugins.fleet.fleetSetupCompleted().then(() => {
+      plugins.fleet.registerExternalCallback(
+        'packagePolicyPostCreate',
+        async (
+          packagePolicy: PackagePolicy,
+          context: RequestHandlerContext,
+          request: KibanaRequest
+        ): Promise<PackagePolicy> => {
+          if (packagePolicy.package?.name === CIS_KUBERNETES_PACKAGE_NAME) {
+            await onPackagePolicyPostCreateCallback(
+              this.logger,
+              packagePolicy,
+              context.core.savedObjects.client
+            );
+          }
+
+          return packagePolicy;
+        }
+      );
+
+      plugins.fleet.registerExternalCallback(
+        'postPackagePolicyDelete',
+        async (deletedPackagePolicies: DeepReadonly<DeletePackagePoliciesResponse>) => {
+          for (const deletedPackagePolicy of deletedPackagePolicies) {
+            if (deletedPackagePolicy.package?.name === CIS_KUBERNETES_PACKAGE_NAME) {
+              await onPackagePolicyDeleteCallback(
+                this.logger,
+                deletedPackagePolicy,
+                core.savedObjects.createInternalRepository()
+              );
+            }
+          }
+        }
+      );
+    });
+
     return {};
   }
   public stop() {}

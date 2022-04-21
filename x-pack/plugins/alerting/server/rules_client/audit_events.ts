@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EcsEventOutcome, EcsEventType } from 'src/core/server';
-import { AuditEvent } from '../../../security/server';
+import { EcsEventOutcome, EcsEventType } from '@kbn/core/server';
+import { AuditEvent } from '@kbn/security-plugin/server';
 
 export enum RuleAuditAction {
   CREATE = 'rule_create',
@@ -25,6 +25,7 @@ export enum RuleAuditAction {
   AGGREGATE = 'rule_aggregate',
   GET_EXECUTION_LOG = 'rule_get_execution_log',
   SNOOZE = 'rule_snooze',
+  UNSNOOZE = 'rule_unsnooze',
 }
 
 type VerbsTuple = [string, string, string];
@@ -50,6 +51,7 @@ const eventVerbs: Record<RuleAuditAction, VerbsTuple> = {
     'accessed execution log for',
   ],
   rule_snooze: ['snooze', 'snoozing', 'snoozed'],
+  rule_unsnooze: ['unsnooze', 'unsnoozing', 'unsnoozed'],
 };
 
 const eventTypes: Record<RuleAuditAction, EcsEventType> = {
@@ -69,6 +71,7 @@ const eventTypes: Record<RuleAuditAction, EcsEventType> = {
   rule_aggregate: 'access',
   rule_get_execution_log: 'access',
   rule_snooze: 'change',
+  rule_unsnooze: 'change',
 };
 
 export interface RuleAuditEventParams {

@@ -7,7 +7,8 @@
 
 import { useMemo } from 'react';
 import { isEmpty } from 'lodash';
-import { TypedLensByValueInput } from '../../../../../../lens/public';
+import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
 import {
   AllSeries,
@@ -22,16 +23,17 @@ import { ReportViewType, SeriesUrl, UrlFilter } from '../types';
 import { DataViewState, useAppDataViewContext } from './use_app_data_view';
 import { ALL_VALUES_SELECTED } from '../../field_value_suggestions/field_value_combobox';
 import { useTheme } from '../../../../hooks/use_theme';
-import { EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
 import { LABEL_FIELDS_BREAKDOWN } from '../configurations/constants';
 import { ReportConfigMap, useExploratoryView } from '../contexts/exploratory_view_config';
 
-export const getFiltersFromDefs = (reportDefinitions: SeriesUrl['reportDefinitions']) => {
+export const getFiltersFromDefs = (
+  reportDefinitions: SeriesUrl['reportDefinitions'] | SeriesUrl['textReportDefinitions']
+) => {
   return Object.entries(reportDefinitions ?? {})
     .map(([field, value]) => {
       return {
         field,
-        values: value,
+        values: Array.isArray(value) ? value : [value],
       };
     })
     .filter(({ values }) => !values.includes(ALL_VALUES_SELECTED)) as UrlFilter[];
@@ -63,7 +65,8 @@ export function getLayerConfigs(
       });
 
       const filters: UrlFilter[] = (series.filters ?? []).concat(
-        getFiltersFromDefs(series.reportDefinitions)
+        getFiltersFromDefs(series.reportDefinitions),
+        getFiltersFromDefs(series.textReportDefinitions)
       );
 
       const color = `euiColorVis${seriesIndex}`;

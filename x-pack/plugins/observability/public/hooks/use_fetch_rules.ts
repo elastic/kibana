@@ -6,20 +6,21 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
-import { loadRules, Rule } from '../../../triggers_actions_ui/public';
+import { isEmpty } from 'lodash';
+import { loadRules } from '@kbn/triggers-actions-ui-plugin/public';
 import { RULES_LOAD_ERROR } from '../pages/rules/translations';
-import { FetchRulesProps } from '../pages/rules/types';
+import { FetchRulesProps, RuleState } from '../pages/rules/types';
 import { OBSERVABILITY_RULE_TYPES } from '../pages/rules/config';
 import { useKibana } from '../utils/kibana_react';
 
-interface RuleState {
-  isLoading: boolean;
-  data: Rule[];
-  error: string | null;
-  totalItemCount: number;
-}
-
-export function useFetchRules({ searchText, ruleLastResponseFilter, page, sort }: FetchRulesProps) {
+export function useFetchRules({
+  searchText,
+  ruleLastResponseFilter,
+  typesFilter,
+  setPage,
+  page,
+  sort,
+}: FetchRulesProps) {
   const { http } = useKibana().services;
 
   const [rulesState, setRulesState] = useState<RuleState>({
@@ -29,6 +30,9 @@ export function useFetchRules({ searchText, ruleLastResponseFilter, page, sort }
     totalItemCount: 0,
   });
 
+  const [noData, setNoData] = useState<boolean>(true);
+  const [initialLoad, setInitialLoad] = useState<boolean>(true);
+
   const fetchRules = useCallback(async () => {
     setRulesState((oldState) => ({ ...oldState, isLoading: true }));
 
@@ -37,7 +41,7 @@ export function useFetchRules({ searchText, ruleLastResponseFilter, page, sort }
         http,
         page,
         searchText,
-        typesFilter: OBSERVABILITY_RULE_TYPES,
+        typesFilter: typesFilter.length > 0 ? typesFilter : OBSERVABILITY_RULE_TYPES,
         ruleStatusesFilter: ruleLastResponseFilter,
         sort,
       });
@@ -47,10 +51,22 @@ export function useFetchRules({ searchText, ruleLastResponseFilter, page, sort }
         data: response.data,
         totalItemCount: response.total,
       }));
+
+      if (!response.data?.length && page.index > 0) {
+        setPage({ ...page, index: 0 });
+      }
+      const isFilterApplied = !(
+        isEmpty(searchText) &&
+        isEmpty(ruleLastResponseFilter) &&
+        isEmpty(typesFilter)
+      );
+
+      setNoData(response.data.length === 0 && !isFilterApplied);
     } catch (_e) {
       setRulesState((oldState) => ({ ...oldState, isLoading: false, error: RULES_LOAD_ERROR }));
     }
-  }, [http, page, searchText, ruleLastResponseFilter, sort]);
+    setInitialLoad(false);
+  }, [http, page, setPage, searchText, ruleLastResponseFilter, typesFilter, sort]);
   useEffect(() => {
     fetchRules();
   }, [fetchRules]);
@@ -59,5 +75,7 @@ export function useFetchRules({ searchText, ruleLastResponseFilter, page, sort }
     rulesState,
     reload: fetchRules,
     setRulesState,
+    noData,
+    initialLoad,
   };
 }

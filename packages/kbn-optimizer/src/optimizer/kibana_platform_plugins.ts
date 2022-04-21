@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { simpleKibanaPlatformPluginDiscovery } from '@kbn/dev-utils';
+import { simpleKibanaPlatformPluginDiscovery } from '@kbn/plugin-discovery';
 
 export interface KibanaPlatformPlugin {
   readonly directory: string;

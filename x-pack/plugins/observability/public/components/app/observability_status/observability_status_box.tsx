@@ -17,8 +17,10 @@ import {
   EuiTitle,
   EuiLink,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useUiTracker } from '../../../hooks/use_track_metric';
+import { useKibana } from '../../../utils/kibana_react';
 
 export interface ObservabilityStatusBoxProps {
   id: string;
@@ -31,6 +33,7 @@ export interface ObservabilityStatusBoxProps {
   learnMoreLink: string;
   goToAppTitle: string;
   goToAppLink: string;
+  weight: number;
 }
 
 export function ObservabilityStatusBox(props: ObservabilityStatusBoxProps) {
@@ -42,6 +45,7 @@ export function ObservabilityStatusBox(props: ObservabilityStatusBoxProps) {
 }
 
 export function CompletedStatusBox({
+  id,
   title,
   modules,
   addLink,
@@ -49,6 +53,14 @@ export function CompletedStatusBox({
   goToAppTitle,
   goToAppLink,
 }: ObservabilityStatusBoxProps) {
+  const { application } = useKibana().services;
+  const trackMetric = useUiTracker({ app: 'observability-overview' });
+
+  const goToAddLink = useCallback(() => {
+    trackMetric({ metric: `guided_setup_add_integrations_${id}` });
+    application.navigateToUrl(addLink);
+  }, [addLink, application, trackMetric, id]);
+
   return (
     <EuiPanel color="plain" hasBorder={true}>
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -66,7 +78,7 @@ export function CompletedStatusBox({
           </div>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size="s" iconType="plusInCircle" flush="right" href={addLink}>
+          <EuiButtonEmpty size="s" iconType="plusInCircle" flush="right" onClick={goToAddLink}>
             {addTitle}
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -107,12 +119,21 @@ export function CompletedStatusBox({
 }
 
 export function EmptyStatusBox({
+  id,
   title,
   description,
   learnMoreLink,
   addTitle,
   addLink,
 }: ObservabilityStatusBoxProps) {
+  const { application } = useKibana().services;
+  const trackMetric = useUiTracker({ app: 'observability-overview' });
+
+  const goToAddLink = useCallback(() => {
+    trackMetric({ metric: `guided_setup_add_data_${id}` });
+    application.navigateToUrl(addLink);
+  }, [id, trackMetric, application, addLink]);
+
   return (
     <EuiPanel color="warning" hasBorder={true}>
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -139,7 +160,7 @@ export function EmptyStatusBox({
 
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButton color="primary" href={addLink} fill>
+          <EuiButton color="primary" onClick={goToAddLink} fill>
             {addTitle}
           </EuiButton>
         </EuiFlexItem>

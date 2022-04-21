@@ -12,11 +12,13 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
 } from '@elastic/eui';
+import { noop } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { useStateToaster } from '../../../../common/components/toasters';
+import { BulkAction } from '../../../../../common/detection_engine/schemas/common';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useUpdateRulesCache } from '../../../containers/detection_engine/rules/use_find_rules_query';
-import { enableRulesAction } from '../../../pages/detection_engine/rules/all/actions';
+import { executeRulesBulkAction } from '../../../pages/detection_engine/rules/all/actions';
 import { useRulesTableContextOptional } from '../../../pages/detection_engine/rules/all/rules_table/rules_table_context';
 
 const StaticSwitch = styled(EuiSwitch)`
@@ -47,26 +49,29 @@ export const RuleSwitchComponent = ({
   onChange,
 }: RuleSwitchProps) => {
   const [myIsLoading, setMyIsLoading] = useState(false);
-  const [, dispatchToaster] = useStateToaster();
   const rulesTableContext = useRulesTableContextOptional();
   const updateRulesCache = useUpdateRulesCache();
+  const toasts = useAppToasts();
 
   const onRuleStateChange = useCallback(
     async (event: EuiSwitchEvent) => {
       setMyIsLoading(true);
-      const rules = await enableRulesAction(
-        [id],
-        event.target.checked,
-        dispatchToaster,
-        rulesTableContext?.actions.setLoadingRules
-      );
-      if (rules?.[0]) {
-        updateRulesCache(rules);
-        onChange?.(rules[0].enabled);
+      const bulkActionResponse = await executeRulesBulkAction({
+        setLoadingRules: rulesTableContext?.actions.setLoadingRules,
+        toasts,
+        onSuccess: rulesTableContext ? undefined : noop,
+        action: event.target.checked ? BulkAction.enable : BulkAction.disable,
+        search: { ids: [id] },
+        visibleRuleIds: [],
+      });
+      if (bulkActionResponse?.attributes.results.updated.length) {
+        // The rule was successfully updated
+        updateRulesCache(bulkActionResponse.attributes.results.updated);
+        onChange?.(bulkActionResponse.attributes.results.updated[0].enabled);
       }
       setMyIsLoading(false);
     },
-    [dispatchToaster, id, onChange, rulesTableContext?.actions.setLoadingRules, updateRulesCache]
+    [id, onChange, rulesTableContext, toasts, updateRulesCache]
   );
 
   const showLoader = useMemo((): boolean => {
