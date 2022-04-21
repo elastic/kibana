@@ -58,7 +58,7 @@ export function initMVTRoutes({
 
       const abortController = makeAbortController(request);
 
-      const { stream, headers } = await getEsTile({
+      const { stream, headers, statusCode } = await getEsTile({
         url: `${API_ROOT_PATH}/${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`,
         core,
         logger,
@@ -72,7 +72,7 @@ export function initMVTRoutes({
         abortController,
       });
 
-      return sendResponse(response, stream, headers);
+      return sendResponse(response, stream, headers, statusCode);
     }
   );
 
@@ -104,7 +104,7 @@ export function initMVTRoutes({
 
       const abortController = makeAbortController(request);
 
-      const { stream, headers } = await getEsGridTile({
+      const { stream, headers, statusCode } = await getEsGridTile({
         url: `${API_ROOT_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`,
         core,
         logger,
@@ -120,23 +120,31 @@ export function initMVTRoutes({
         abortController,
       });
 
-      return sendResponse(response, stream, headers);
+      return sendResponse(response, stream, headers, statusCode);
     }
   );
 }
 
-function sendResponse(
+export function sendResponse(
   response: KibanaResponseFactory,
-  gzipTileStream: Stream | null,
-  headers?: IncomingHttpHeaders
+  tileStream: Stream | null,
+  headers: IncomingHttpHeaders,
+  statusCode: number
 ) {
+  if (statusCode >= 400) {
+    return response.customError({
+      statusCode,
+      body: tileStream ? tileStream : statusCode.toString(),
+    });
+  }
+
   const cacheControl = `public, max-age=${CACHE_TIMEOUT_SECONDS}`;
   const lastModified = `${new Date().toUTCString()}`;
-  if (gzipTileStream && headers) {
+  if (tileStream) {
     // use the content-encoding and content-length headers from elasticsearch if they exist
     const { 'content-length': contentLength, 'content-encoding': contentEncoding } = headers;
     return response.ok({
-      body: gzipTileStream,
+      body: tileStream,
       headers: {
         'content-disposition': 'inline',
         ...(contentLength && { 'content-length': contentLength }),
