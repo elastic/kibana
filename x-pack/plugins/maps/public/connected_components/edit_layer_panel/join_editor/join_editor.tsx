@@ -87,12 +87,12 @@ export function JoinEditor({
   };
 
   function renderContent() {
-    const disabledReason = layer.getJoinsDisabledReason();
-    const tooltipMessage = isFeatureEditorOpenForLayer
-      ? i18n.translate('xpack.maps.filterEditor.isJoinsNotApplied', {
-          defaultMessage: 'Term joins are not applied while editing features',
-        })
-      : null;
+    let disabledReason = layer.getJoinsDisabledReason();
+    if (isFeatureEditorOpenForLayer) {
+      disabledReason = i18n.translate('xpack.maps.filterEditor.isJoinsNotApplied', {
+        defaultMessage: 'Term joins are not applied while editing features',
+      });
+    }
 
     return disabledReason ? (
       <EuiCallOut color="warning">{disabledReason}</EuiCallOut>

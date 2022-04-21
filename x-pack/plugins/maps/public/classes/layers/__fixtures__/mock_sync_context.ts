@@ -20,7 +20,7 @@ export class MockSyncContext implements DataRequestContext {
   updateSourceData: (newData: unknown) => void;
   forceRefreshDueToDrawing: boolean;
   isForceRefresh: boolean;
-  isFeatureEditorOpenForLayer: false;
+  isFeatureEditorOpenForLayer: boolean;
 
   constructor({ dataFilters }: { dataFilters: Partial<DataFilters> }) {
     const mapFilters: DataFilters = {

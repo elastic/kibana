@@ -69,13 +69,6 @@ export async function canSkipSourceUpdate({
     return false;
   }
 
-  if (
-    prevDataRequest?.getMeta().isFeatureEditorOpenForLayer !==
-    nextRequestMeta.isFeatureEditorOpenForLayer
-  ) {
-    return false;
-  }
-
   const timeAware = await source.isTimeAware();
   const isFieldAware = source.isFieldAware();
   const isQueryAware = source.isQueryAware();
@@ -90,6 +83,10 @@ export async function canSkipSourceUpdate({
   }
   const prevMeta = prevDataRequest.getMeta();
   if (!prevMeta) {
+    return false;
+  }
+
+  if (prevMeta.isFeatureEditorOpenForLayer !== nextRequestMeta.isFeatureEditorOpenForLayer) {
     return false;
   }
 

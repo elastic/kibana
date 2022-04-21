@@ -96,8 +96,6 @@ To open an existing index for drawing:
 
 . Click *Add layer*.
 
-. Set *Scaling* to *Limit results to 10,000*.
-
 . Click *Save & close*.
 
 . In the legend, click the layer name and select *Edit features*.

@@ -550,6 +550,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     registerCancelCallback,
     dataFilters,
     isForceRefresh,
+    isFeatureEditorOpenForLayer,
   }: { join: InnerJoin } & DataRequestContext): Promise<JoinState> {
     const joinSource = join.getRightJoinSource();
     const sourceDataId = join.getSourceDataRequestId();
@@ -560,7 +561,8 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       joinSource.getFieldNames(),
       dataFilters,
       joinSource.getWhereQuery(),
-      isForceRefresh
+      isForceRefresh,
+      isFeatureEditorOpenForLayer
     ) as VectorJoinSourceRequestMeta;
 
     const prevDataRequest = this.getDataRequest(sourceDataId);

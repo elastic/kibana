@@ -90,12 +90,9 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
     }
 
     if (
-      (source as ESSearchSource).getApplyGlobalQuery() ||
       (source as ESSearchSource).getSyncMeta().scalingType === SCALING_TYPES.CLUSTERS ||
-      (await vectorLayer.isFilteredByGlobalTime()) ||
       vectorLayer.isPreviewLayer() ||
-      !vectorLayer.isVisible() ||
-      vectorLayer.hasJoins()
+      !vectorLayer.isVisible()
     ) {
       return false;
     }
@@ -193,10 +190,9 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
           toolTipContent: this.state.isFeatureEditingEnabled
             ? null
             : i18n.translate('xpack.maps.layerTocActions.editFeaturesTooltip.disabledMessage', {
-                defaultMessage:
-                  'Edit features only supported for document layers without clustering, term joins, time filtering, or global search.',
+                defaultMessage: `To enable edit features, select 'Use vector tiles' in 'Scaling'.`,
               }),
-          disabled: false,
+          disabled: !this.state.isFeatureEditingEnabled,
           onClick: async () => {
             this._closePopover();
             const supportedShapeTypes = await (
