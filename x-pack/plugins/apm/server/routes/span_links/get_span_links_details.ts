@@ -18,6 +18,7 @@ import {
   SPAN_TYPE,
   AGENT_NAME,
 } from '../../../common/elasticsearch_fieldnames';
+import { Environment } from '../../../common/environment_rt';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { SpanLinks } from '../../../typings/es_schemas/raw/fields/span_links';
 import { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
@@ -34,6 +35,7 @@ export interface SpanLinkDetails {
   duration?: number;
   spanSubtype?: string;
   spanType?: string;
+  environment?: Environment;
 }
 
 // TODO: caue add kuery filter
@@ -94,33 +96,52 @@ export async function getSpanLinksDetails({
     },
   });
 
-  const spanLinksDetails = response.hits.hits.map(({ _source: source }) => {
+  // Creates a map for all span links details found
+  const spanLinksDetailsMap = response.hits.hits.reduce<
+    Record<string, SpanLinkDetails>
+  >((acc, { _source: source }) => {
     const commontProps = {
       traceId: source.trace.id,
       serviceName: source.service.name,
       agentName: source.agent.name,
+      environment: source.service.environment as Environment,
     };
+
     if (source.processor.event === ProcessorEvent.transaction) {
       const transaction = source as TransactionRaw;
+      const key = `${transaction.trace.id}:${transaction.transaction.id}`;
       return {
-        ...commontProps,
-        spanId: transaction.transaction.id,
-        spanName: transaction.transaction.name,
-        duration: transaction.transaction.duration.us,
+        ...acc,
+        [key]: {
+          ...commontProps,
+          spanId: transaction.transaction.id,
+          spanName: transaction.transaction.name,
+          duration: transaction.transaction.duration.us,
+        },
       };
     }
+
     const span = source as SpanRaw;
+    const key = `${span.trace.id}:${span.span.id}`;
     return {
-      ...commontProps,
-      spanId: span.span.id,
-      spanName: span.span.name,
-      duration: span.span.duration.us,
-      spanSubtype: span.span.subtype,
-      spanType: span.span.type,
+      ...acc,
+      [key]: {
+        ...commontProps,
+        spanId: span.span.id,
+        spanName: span.span.name,
+        duration: span.span.duration.us,
+        spanSubtype: span.span.subtype,
+        spanType: span.span.type,
+      },
     };
+  }, {});
+
+  // It's important to keep the original order of the span links,
+  // so loops trough the original list merging external links and links with details.
+  // external links are links that the details were not found in the query above.
+  return spanLinks.map((item) => {
+    const key = `${item.trace.id}:${item.span.id}`;
+    const details = spanLinksDetailsMap[key];
+    return details ? details : { traceId: item.trace.id, spanId: item.span.id };
   });
-
-  // TODO: caue: merge to add span links that don't have details
-
-  return spanLinksDetails;
 }

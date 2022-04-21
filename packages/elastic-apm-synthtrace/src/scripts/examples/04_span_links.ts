@@ -6,15 +6,16 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { shuffle } from 'lodash';
 import { apm, ApmFields, EntityArrayIterable, timerange } from '../..';
+import { generateShortId } from '../../lib/utils/generate_id';
 import { Scenario } from '../scenario';
 
 function generateExternalSpanLinks() {
   // randomly creates external span links 0 - 10
   return Array(Math.floor(Math.random() * 11))
     .fill(0)
-    .map(() => ({ span: { id: uuid.v4() }, trace: { id: uuid() } }));
+    .map(() => ({ span: { id: generateShortId() }, trace: { id: generateShortId() } }));
 }
 function generateIncomeEventsSpanLinks() {
   const range = timerange(
@@ -74,7 +75,7 @@ const scenario: Scenario<ApmFields> = async () => {
             .children(
               instanceJava
                 .span('Span links', 'external')
-                .defaults({ 'span.links': [...externalSpanLinks, ...incomingSpanLinks] })
+                .defaults({ 'span.links': shuffle([...externalSpanLinks, ...incomingSpanLinks]) })
                 .timestamp(timestamp + 50)
                 .duration(900)
                 .success()
