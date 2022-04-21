@@ -1033,9 +1033,10 @@ function trackAlertDurations<
     const state = originalAlertIds.includes(id)
       ? originalAlerts[id].getState()
       : currentAlerts[id].getState();
-    const duration = state.start
-      ? `${new Date(currentTime).valueOf() - new Date(state.start as string).valueOf()}000000` // nanoseconds
-      : undefined;
+    const durationInMs =
+      new Date(currentTime).valueOf() - new Date(state.start as string).valueOf();
+    const durationInNanoStr = durationInMs !== 0 ? `${durationInMs}000000` : '0';
+    const duration = state.start ? durationInNanoStr : undefined;
     currentAlerts[id].replaceState({
       ...state,
       ...(state.start ? { start: state.start } : {}),
@@ -1046,9 +1047,10 @@ function trackAlertDurations<
   // Inject end time into alert state of recovered alerts
   for (const id of recoveredAlertIds) {
     const state = recoveredAlerts[id].getState();
-    const duration = state.start
-      ? `${new Date(currentTime).valueOf() - new Date(state.start as string).valueOf()}000000` // nanoseconds
-      : undefined;
+    const durationInMs =
+      new Date(currentTime).valueOf() - new Date(state.start as string).valueOf();
+    const durationInNanoStr = durationInMs !== 0 ? `${durationInMs}000000` : '0';
+    const duration = state.start ? durationInNanoStr : undefined;
     recoveredAlerts[id].replaceState({
       ...state,
       ...(duration ? { duration } : {}),

@@ -767,7 +767,7 @@ describe('Task Runner Cancel', () => {
         action: 'new-instance',
         category: ['alerts'],
         kind: 'alert',
-        duration: 0,
+        duration: '0',
         start: '1970-01-01T00:00:00.000Z',
       },
       kibana: {
@@ -809,7 +809,7 @@ describe('Task Runner Cancel', () => {
       event: {
         action: 'active-instance',
         category: ['alerts'],
-        duration: 0,
+        duration: '0',
         kind: 'alert',
         start: '1970-01-01T00:00:00.000Z',
       },

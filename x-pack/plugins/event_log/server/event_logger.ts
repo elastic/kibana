@@ -61,7 +61,8 @@ export class EventLogger implements IEventLogger {
 
     const end = Date.now();
     event.event.end = new Date(end).toISOString();
-    event.event.duration = `${end - start}000000`; // nanoseconds
+    const durationInMs = end - start;
+    event.event.duration = durationInMs !== 0 ? `${durationInMs}000000` : '0'; // nanoseconds
   }
 
   // non-blocking, but spawns an async task to do the work
