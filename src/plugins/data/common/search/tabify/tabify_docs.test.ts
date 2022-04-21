@@ -10,8 +10,8 @@ import { tabifyDocs, flattenHit } from './tabify_docs';
 import { IndexPattern, DataView } from '../..';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { fieldFormatsMock } from '../../../../field_formats/common/mocks';
-import { stubbedSavedObjectIndexPattern } from '../../../../data_views/common/data_view.stub';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { stubbedSavedObjectIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
 
 class MockFieldFormatter {}
 

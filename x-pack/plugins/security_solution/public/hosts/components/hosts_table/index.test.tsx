@@ -18,9 +18,9 @@ import {
 } from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 import { createStore, State } from '../../../common/store';
-import { hostsModel } from '../../../hosts/store';
-import { HostsTableType } from '../../../hosts/store/model';
-import { HostsTable } from './index';
+import { hostsModel } from '../../store';
+import { HostsTableType } from '../../store/model';
+import { HostsTable } from '.';
 import { mockData } from './mock';
 import { render } from '@testing-library/react';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';

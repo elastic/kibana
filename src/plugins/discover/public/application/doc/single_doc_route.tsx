@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useIndexPattern } from '../../utils/use_index_pattern';
@@ -16,7 +17,6 @@ import { withQueryParams } from '../../utils/with_query_params';
 import { useMainRouteBreadcrumb } from '../../utils/use_navigation_props';
 import { Doc } from './components/doc';
 import { useDiscoverServices } from '../../utils/use_discover_services';
-import { useExecutionContext } from '../../../../kibana_react/public';
 
 export interface SingleDocRouteProps {
   /**

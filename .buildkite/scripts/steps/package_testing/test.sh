@@ -20,7 +20,7 @@ elif [[ "$TEST_PACKAGE" == "docker" ]]; then
 fi
 cd ..
 
-export VAGRANT_CWD=test/package
+export VAGRANT_CWD=$PWD/test/package
 vagrant up "$TEST_PACKAGE" --no-provision
 
 node scripts/es snapshot \
@@ -28,6 +28,16 @@ node scripts/es snapshot \
   -E discovery.type=single-node \
   --license=trial &
 while ! timeout 1 bash -c "echo > /dev/tcp/localhost/9200"; do sleep 30; done
+
+function echoKibanaLogs {
+  echo '--- Kibana logs'
+  if [[ "$TEST_PACKAGE" == "deb" ]] || [[ "$TEST_PACKAGE" == "rpm" ]]; then
+    vagrant ssh $TEST_PACKAGE -t -c 'sudo cat /var/log/kibana/kibana.log'
+  elif [[ "$TEST_PACKAGE" == "docker" ]]; then
+    vagrant ssh $TEST_PACKAGE -t -c 'sudo docker logs kibana'
+  fi
+}
+trap "echoKibanaLogs" EXIT
 
 vagrant provision "$TEST_PACKAGE"
 

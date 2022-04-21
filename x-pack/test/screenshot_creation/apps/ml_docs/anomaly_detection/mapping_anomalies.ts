@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 
-import { LOGS_INDEX_PATTERN } from '../index';
+import { LOGS_INDEX_PATTERN } from '..';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const header = getPageObject('header');

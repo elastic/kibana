@@ -18,9 +18,9 @@ jest.mock('./edit_space', () => ({
   },
 }));
 
-import { coreMock, scopedHistoryMock, themeServiceMock } from 'src/core/public/mocks';
+import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 
-import { featuresPluginMock } from '../../../features/public/mocks';
 import type { PluginsStart } from '../plugin';
 import { spacesManagerMock } from '../spaces_manager/mocks';
 import { spacesManagementApp } from './spaces_management_app';

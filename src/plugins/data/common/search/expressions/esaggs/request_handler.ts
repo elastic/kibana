@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { KibanaExecutionContext } from 'src/core/public';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { defer } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { Adapters } from 'src/plugins/inspector/common';
+import { Adapters } from '@kbn/inspector-plugin/common';
 
-import { calculateBounds, Filter, IndexPattern, Query, TimeRange } from '../../../../common';
+import { calculateBounds, Filter, IndexPattern, Query, TimeRange } from '../../..';
 
 import { IAggConfigs } from '../../aggs';
 import { ISearchStartSearchSource } from '../../search_source';

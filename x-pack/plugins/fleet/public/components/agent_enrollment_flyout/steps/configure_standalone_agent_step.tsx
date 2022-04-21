@@ -111,6 +111,6 @@ export const ConfigureStandaloneAgentStep = ({
         )}
       </>
     ),
-    status: !yaml ? 'loading' : 'incomplete',
+    status: !yaml ? 'loading' : undefined,
   };
 };

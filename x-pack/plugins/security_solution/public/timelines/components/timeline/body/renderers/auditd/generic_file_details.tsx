@@ -9,7 +9,6 @@ import { EuiFlexGroup, EuiSpacer, IconType } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 
-import { BrowserFields } from '../../../../../../common/containers/source';
 import { Ecs } from '../../../../../../../common/ecs';
 import { DraggableBadge } from '../../../../../../common/components/draggables';
 
@@ -135,7 +134,6 @@ export const AuditdGenericFileLine = React.memo<Props>(
 AuditdGenericFileLine.displayName = 'AuditdGenericFileLine';
 
 interface GenericDetailsProps {
-  browserFields: BrowserFields;
   contextId: string;
   data: Ecs;
   text: string;

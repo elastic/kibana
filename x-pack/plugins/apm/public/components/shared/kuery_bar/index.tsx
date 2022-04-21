@@ -10,11 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { uniqueId } from 'lodash';
 import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { DataView } from '../../../../../../../src/plugins/data/common';
-import {
-  esKuery,
-  QuerySuggestion,
-} from '../../../../../../../src/plugins/data/public';
+import { DataView } from '@kbn/data-plugin/common';
+import { esKuery, QuerySuggestion } from '@kbn/data-plugin/public';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';

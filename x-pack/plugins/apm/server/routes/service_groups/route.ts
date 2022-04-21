@@ -9,11 +9,11 @@ import * as t from 'io-ts';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { kueryRt, rangeRt } from '../default_api_types';
-import { getServiceGroups } from '../service_groups/get_service_groups';
-import { getServiceGroup } from '../service_groups/get_service_group';
-import { saveServiceGroup } from '../service_groups/save_service_group';
-import { deleteServiceGroup } from '../service_groups/delete_service_group';
-import { lookupServices } from '../service_groups/lookup_services';
+import { getServiceGroups } from './get_service_groups';
+import { getServiceGroup } from './get_service_group';
+import { saveServiceGroup } from './save_service_group';
+import { deleteServiceGroup } from './delete_service_group';
+import { lookupServices } from './lookup_services';
 import {
   ServiceGroup,
   SavedServiceGroup,

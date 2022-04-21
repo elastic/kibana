@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { FieldFormat, FormatFactory } from '../../../../field_formats/common';
-import type { Datatable } from '../../../../expressions/public';
+import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import { BucketColumns } from '../../common/types';
 
 export const generateFormatters = (visData: Datatable, formatFactory: FormatFactory) =>

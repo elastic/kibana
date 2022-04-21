@@ -9,7 +9,12 @@ import { i18n } from '@kbn/i18n';
 
 import { docLinks } from '../../../shared/doc_links';
 
-import { SOURCE_NAMES, SOURCE_OBJ_TYPES, GITHUB_LINK_TITLE } from '../../constants';
+import {
+  SOURCE_CATEGORIES,
+  SOURCE_NAMES,
+  SOURCE_OBJ_TYPES,
+  GITHUB_LINK_TITLE,
+} from '../../constants';
 import { FeatureIds, SourceDataItem } from '../../types';
 
 export const staticExternalSourceData: SourceDataItem = {
@@ -23,7 +28,7 @@ export const staticExternalSourceData: SourceDataItem = {
     documentationUrl: docLinks.workplaceSearchExternalSharePointOnline,
     applicationPortalUrl: 'https://portal.azure.com/',
   },
-  objTypes: [SOURCE_OBJ_TYPES.FOLDERS, SOURCE_OBJ_TYPES.SITES, SOURCE_OBJ_TYPES.ALL_FILES],
+  objTypes: [SOURCE_OBJ_TYPES.ALL_STORED_FILES],
   features: {
     basicOrgContext: [
       FeatureIds.SyncFrequency,
@@ -367,6 +372,23 @@ export const staticSourceData: SourceDataItem[] = [
     internalConnectorAvailable: true,
   },
   {
+    name: SOURCE_NAMES.NETWORK_DRVE,
+    iconName: SOURCE_NAMES.NETWORK_DRVE,
+    categories: [SOURCE_CATEGORIES.STORAGE],
+    serviceType: 'network_drive', // this doesn't exist on the BE
+    configuration: {
+      isPublicKey: false,
+      hasOauthRedirect: false,
+      needsBaseUrl: false,
+      documentationUrl: docLinks.workplaceSearchCustomSources, // TODO Update this when we have a doclink
+      applicationPortalUrl: '',
+      githubRepository: 'elastic/enterprise-search-network-drive-connector',
+    },
+    accountContextOnly: false,
+    internalConnectorAvailable: false,
+    customConnectorAvailable: true,
+  },
+  {
     name: SOURCE_NAMES.ONEDRIVE,
     iconName: SOURCE_NAMES.ONEDRIVE,
     serviceType: 'one_drive',
@@ -394,6 +416,27 @@ export const staticSourceData: SourceDataItem[] = [
     },
     accountContextOnly: false,
     internalConnectorAvailable: true,
+  },
+  {
+    name: SOURCE_NAMES.OUTLOOK,
+    iconName: SOURCE_NAMES.OUTLOOK,
+    categories: [
+      SOURCE_CATEGORIES.COMMUNICATIONS,
+      SOURCE_CATEGORIES.PRODUCTIVITY,
+      SOURCE_CATEGORIES.MICROSOFT,
+    ],
+    serviceType: 'outlook', // this doesn't exist on the BE
+    configuration: {
+      isPublicKey: false,
+      hasOauthRedirect: false,
+      needsBaseUrl: false,
+      documentationUrl: docLinks.workplaceSearchCustomSources, // TODO Update this when we have a doclink
+      applicationPortalUrl: '',
+      githubRepository: 'elastic/enterprise-search-outlook-connector',
+    },
+    accountContextOnly: false,
+    internalConnectorAvailable: false,
+    customConnectorAvailable: true,
   },
   {
     name: SOURCE_NAMES.SALESFORCE,
@@ -431,7 +474,6 @@ export const staticSourceData: SourceDataItem[] = [
     accountContextOnly: false,
     internalConnectorAvailable: true,
   },
-
   {
     name: SOURCE_NAMES.SALESFORCE_SANDBOX,
     iconName: SOURCE_NAMES.SALESFORCE_SANDBOX,
@@ -527,7 +569,6 @@ export const staticSourceData: SourceDataItem[] = [
         FeatureIds.SyncedItems,
       ],
     },
-
     accountContextOnly: false,
     internalConnectorAvailable: true,
     externalConnectorAvailable: true,
@@ -537,21 +578,11 @@ export const staticSourceData: SourceDataItem[] = [
     name: SOURCE_NAMES.SHAREPOINT_SERVER,
     iconName: SOURCE_NAMES.SHAREPOINT_SERVER,
     categories: [
-      i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.fileSharing', {
-        defaultMessage: 'File Sharing',
-      }),
-      i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.storage', {
-        defaultMessage: 'Storage',
-      }),
-      i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.cloud', {
-        defaultMessage: 'Cloud',
-      }),
-      i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.microsoft', {
-        defaultMessage: 'Microsoft',
-      }),
-      i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.categories.office', {
-        defaultMessage: 'Office 365',
-      }),
+      SOURCE_CATEGORIES.FILE_SHARING,
+      SOURCE_CATEGORIES.STORAGE,
+      SOURCE_CATEGORIES.CLOUD,
+      SOURCE_CATEGORIES.MICROSOFT,
+      SOURCE_CATEGORIES.OFFICE_365,
     ],
     serviceType: 'share_point_server', // this doesn't exist on the BE
     configuration: {
@@ -588,7 +619,27 @@ export const staticSourceData: SourceDataItem[] = [
     accountContextOnly: true,
     internalConnectorAvailable: true,
   },
-
+  {
+    name: SOURCE_NAMES.TEAMS,
+    iconName: SOURCE_NAMES.TEAMS,
+    categories: [
+      SOURCE_CATEGORIES.COMMUNICATIONS,
+      SOURCE_CATEGORIES.PRODUCTIVITY,
+      SOURCE_CATEGORIES.MICROSOFT,
+    ],
+    serviceType: 'teams', // this doesn't exist on the BE
+    configuration: {
+      isPublicKey: false,
+      hasOauthRedirect: false,
+      needsBaseUrl: false,
+      documentationUrl: docLinks.workplaceSearchCustomSources, // TODO Update this when we have a doclink
+      applicationPortalUrl: '',
+      githubRepository: 'elastic/enterprise-search-teams-connector',
+    },
+    accountContextOnly: false,
+    internalConnectorAvailable: false,
+    customConnectorAvailable: true,
+  },
   {
     name: SOURCE_NAMES.ZENDESK,
     iconName: SOURCE_NAMES.ZENDESK,
@@ -617,6 +668,23 @@ export const staticSourceData: SourceDataItem[] = [
     },
     accountContextOnly: false,
     internalConnectorAvailable: true,
+  },
+  {
+    name: SOURCE_NAMES.ZOOM,
+    iconName: SOURCE_NAMES.ZOOM,
+    categories: [SOURCE_CATEGORIES.COMMUNICATIONS, SOURCE_CATEGORIES.PRODUCTIVITY],
+    serviceType: 'zoom', // this doesn't exist on the BE
+    configuration: {
+      isPublicKey: false,
+      hasOauthRedirect: false,
+      needsBaseUrl: false,
+      documentationUrl: docLinks.workplaceSearchCustomSources, // TODO Update this when we have a doclink
+      applicationPortalUrl: '',
+      githubRepository: 'elastic/enterprise-search-zoom-connector',
+    },
+    accountContextOnly: false,
+    internalConnectorAvailable: false,
+    customConnectorAvailable: true,
   },
 ];
 

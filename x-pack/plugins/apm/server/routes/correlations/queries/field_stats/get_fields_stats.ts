@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { chunk } from 'lodash';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { FieldValuePair } from '../../../../../common/correlations/types';

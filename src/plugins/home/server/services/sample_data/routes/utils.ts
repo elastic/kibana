@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { RequestHandlerContext, Logger } from 'src/core/server';
+import type { RequestHandlerContext, Logger } from '@kbn/core/server';
 import type { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { SampleDataInstaller } from '../sample_data_installer';
 import { getUniqueObjectTypes } from '../lib/utils';

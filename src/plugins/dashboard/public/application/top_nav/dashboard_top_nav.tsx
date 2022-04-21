@@ -12,6 +12,18 @@ import { EuiHorizontalRule } from '@elastic/eui';
 import UseUnmount from 'react-use/lib/useUnmount';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { OverlayRef } from '@kbn/core/public';
+import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
+import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import {
+  AddFromLibraryButton,
+  LazyLabsFlyout,
+  PrimaryActionButton,
+  QuickButtonGroup,
+  QuickButtonProps,
+  SolutionToolbar,
+  withSuspense,
+} from '@kbn/presentation-util-plugin/public';
 import { saveDashboard } from '../lib';
 import { TopNavIds } from './top_nav_ids';
 import { EditorMenu } from './editor_menu';
@@ -21,13 +33,10 @@ import { DashboardSaveModal } from './save_modal';
 import { showCloneModal } from './show_clone_modal';
 import { ShowShareModal } from './show_share_modal';
 import { getTopNavConfig } from './get_top_nav_config';
-import { OverlayRef } from '../../../../../core/public';
 import { useKibana } from '../../services/kibana_react';
 import { showOptionsPopover } from './show_options_popover';
 import { DashboardConstants } from '../../dashboard_constants';
-import { TopNavMenuProps } from '../../../../navigation/public';
 import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
-import { BaseVisType, VisTypeAlias } from '../../../../visualizations/public';
 import { DashboardAppState, DashboardSaveOptions, NavAction } from '../../types';
 import { isErrorEmbeddable, openAddPanelFlyout, ViewMode } from '../../services/embeddable';
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../../types';
@@ -44,16 +53,6 @@ import {
   useDashboardDispatch,
   useDashboardSelector,
 } from '../state';
-
-import {
-  AddFromLibraryButton,
-  LazyLabsFlyout,
-  PrimaryActionButton,
-  QuickButtonGroup,
-  QuickButtonProps,
-  SolutionToolbar,
-  withSuspense,
-} from '../../../../presentation_util/public';
 
 export interface DashboardTopNavState {
   chromeIsVisible: boolean;

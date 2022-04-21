@@ -9,7 +9,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import type { VisEditorOptionsProps } from '../../../../visualizations/public';
+import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 
 import type { VisParams } from '../types';
 import { MetricsAxisOptions, PointSeriesOptions } from './components/options';

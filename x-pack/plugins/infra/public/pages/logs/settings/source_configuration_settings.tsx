@@ -16,8 +16,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { Prompt, useTrackPageview } from '../../../../../observability/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { Prompt, useTrackPageview } from '@kbn/observability-plugin/public';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';
 import { useLogViewContext } from '../../../hooks/use_log_view';

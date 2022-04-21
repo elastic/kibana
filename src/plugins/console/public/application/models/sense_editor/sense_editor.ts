@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 
-import { XJson } from '../../../../../es_ui_shared/public';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
 import RowParser from '../../../lib/row_parser';
 import * as utils from '../../../lib/utils';

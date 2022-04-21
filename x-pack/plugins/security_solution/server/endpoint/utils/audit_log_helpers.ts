@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
+import { Logger } from '@kbn/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { SearchRequest } from 'src/plugins/data/public';
+import type { SearchRequest } from '@kbn/data-plugin/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TransportResult } from '@elastic/elasticsearch';
-import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../fleet/common';
+import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import {
   ENDPOINT_ACTIONS_INDEX,
   ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
@@ -30,7 +30,7 @@ import {
   LogsEndpointActionResponse,
   ActivityLogEntry,
 } from '../../../common/endpoint/types';
-import { doesLogsEndpointActionsIndexExist } from '../utils';
+import { doesLogsEndpointActionsIndexExist } from '.';
 
 const actionsIndices = [AGENT_ACTIONS_INDEX, ENDPOINT_ACTIONS_INDEX];
 // search all responses indices irrelevant of namespace
