@@ -579,11 +579,6 @@ describe('<EditPolicy /> serialization', () => {
         const [requestUrl, requestBody] = lastReq;
         const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
 
-<<<<<<< HEAD
-        console.log(parsedReqBody);
-
-=======
->>>>>>> 262510cee4e (Finish fixing tests)
         expect(requestUrl).toBe(`${API_BASE_PATH}/policies`);
         expect(parsedReqBody.phases.frozen).toEqual({
           min_age: '1234m',
