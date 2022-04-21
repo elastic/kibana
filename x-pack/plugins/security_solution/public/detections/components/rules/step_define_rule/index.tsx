@@ -73,12 +73,12 @@ export const stepDefineDefaultValue: DefineStepRule = {
   queryBar: {
     query: { query: '', language: 'kuery' },
     filters: [],
-    saved_id: undefined,
+    saved_id: null,
   },
   threatQueryBar: {
     query: { query: DEFAULT_THREAT_MATCH_QUERY, language: 'kuery' },
     filters: [],
-    saved_id: undefined,
+    saved_id: null,
   },
   requiredFields: [],
   relatedIntegrations: [],
