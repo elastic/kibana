@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Style } from '@kbn/mapbox-gl';
+import type { StyleSpecification } from '@kbn/mapbox-gl';
 
 export const vegaLayerId = 'vega';
 export const defaultMapConfig = {
@@ -15,7 +15,7 @@ export const defaultMapConfig = {
   tileSize: 256,
 };
 
-export const defaultMabBoxStyle: Style = {
+export const defaultMabBoxStyle: StyleSpecification = {
   /**
    * according to the MapBox documentation that value should be '8'
    * @see (https://docs.mapbox.com/mapbox-gl-js/style-spec/root/#version)
