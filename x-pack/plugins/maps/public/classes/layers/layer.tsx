@@ -35,6 +35,7 @@ import {
   StyleMetaDescriptor,
 } from '../../../common/descriptor_types';
 import { ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
+import { IVectorSource } from '../sources/vector_source';
 import { DataRequestContext } from '../../actions';
 import { IStyle } from '../styles/style';
 import { LICENSED_FEATURES } from '../../licensed_features';
@@ -377,6 +378,20 @@ export class AbstractLayer implements ILayer {
   }
 
   isLayerLoading(): boolean {
+    // __areTilesLoaded is not set until after intial render
+    // To avoid showing no results icon when page is first rendered,
+    // indicate as loading until elasticsearch vector tile layers have either meta featues or errors.
+    const source = this.getSource();
+    if (
+      source.isESSource() &&
+      'isMvt' in source &&
+      (source as IVectorSource).isMvt() &&
+      this._getMetaFromTiles().length === 0 &&
+      !this.hasErrors()
+    ) {
+      return true;
+    }
+
     const areTilesLoading =
       typeof this._descriptor.__areTilesLoaded !== 'undefined'
         ? !this._descriptor.__areTilesLoaded
