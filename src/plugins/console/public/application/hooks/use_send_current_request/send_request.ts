@@ -15,12 +15,12 @@ import { BaseResponseType } from '../../../types';
 
 const { collapseLiteralStrings } = XJson;
 
-export interface EsRequestArgs {
+export interface RequestArgs {
   http: HttpSetup;
   requests: Array<{ url: string; method: string; data: string[] }>;
 }
 
-export interface ESResponseObject<V = unknown> {
+export interface ResponseObject<V = unknown> {
   statusCode: number;
   statusText: string;
   timeMs: number;
@@ -28,17 +28,17 @@ export interface ESResponseObject<V = unknown> {
   value: V;
 }
 
-export interface ESRequestResult<V = unknown> {
+export interface RequestResult<V = unknown> {
   request: { data: string; method: string; path: string };
-  response: ESResponseObject<V>;
+  response: ResponseObject<V>;
 }
 
 let CURRENT_REQ_ID = 0;
-export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]> {
+export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
   const requests = args.requests.slice();
   return new Promise((resolve, reject) => {
     const reqId = ++CURRENT_REQ_ID;
-    const results: ESRequestResult[] = [];
+    const results: RequestResult[] = [];
     if (reqId !== CURRENT_REQ_ID) {
       return;
     }
@@ -59,11 +59,11 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
         return;
       }
       const req = requests.shift()!;
-      const esPath = req.url;
-      const esMethod = req.method;
-      let esData = collapseLiteralStrings(req.data.join('\n'));
-      if (esData) {
-        esData += '\n';
+      const path = req.url;
+      const method = req.method;
+      let data = collapseLiteralStrings(req.data.join('\n'));
+      if (data) {
+        data += '\n';
       } // append a new line for bulk requests.
 
       const startTime = Date.now();
@@ -71,9 +71,9 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
       try {
         const { response, body } = await es.send({
           http: args.http,
-          method: esMethod,
-          path: esPath,
-          data: esData,
+          method,
+          path,
+          data,
           asResponse: true,
         });
 
@@ -115,9 +115,9 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
                 value,
               },
               request: {
-                data: esData,
-                method: esMethod,
-                path: esPath,
+                data,
+                method,
+                path,
               },
             });
 
@@ -127,25 +127,19 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
         }
       } catch (error) {
         let value;
-        let contentType: string | null = '';
+        const { response, body } = error as IHttpFetchError;
+        const contentType = response?.headers.get('Content-Type') ?? '';
+        const statusCode = response?.status ?? 500;
+        const statusText = error?.response?.statusText ?? 'error';
 
-        const { response, body = {} } = error as IHttpFetchError;
-        if (response) {
-          const { status, headers } = response;
-          if (body) {
-            value = JSON.stringify(body, null, 2); // ES error should be shown
-            contentType = headers.get('Content-Type');
-          } else {
-            value = 'Request failed to get to the server (status code: ' + status + ')';
-            contentType = headers.get('Content-Type');
-          }
-
-          if (isMultiRequest) {
-            value = '# ' + req.method + ' ' + req.url + '\n' + value;
-          }
+        if (body) {
+          value = JSON.stringify(body, null, 2);
         } else {
-          value =
-            "\n\nFailed to connect to Console's backend.\nPlease check the Kibana server is up and running";
+          value = 'Request failed to get to the server (status code: ' + statusCode + ')';
+        }
+
+        if (isMultiRequest) {
+          value = '# ' + req.method + ' ' + req.url + '\n' + value;
         }
 
         reject({
@@ -153,13 +147,13 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
             value,
             contentType,
             timeMs: Date.now() - startTime,
-            statusCode: error?.response?.status ?? 500,
-            statusText: error?.response?.statusText ?? 'error',
+            statusCode,
+            statusText,
           },
           request: {
-            data: esData,
-            method: esMethod,
-            path: esPath,
+            data,
+            method,
+            path,
           },
         });
       }
