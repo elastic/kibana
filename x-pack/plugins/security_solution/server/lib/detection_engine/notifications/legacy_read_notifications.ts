@@ -38,7 +38,7 @@ export const legacyReadNotifications = async ({
   } else if (ruleAlertId != null) {
     const notificationFromFind = await legacyFindNotifications({
       rulesClient,
-      filter: `alert.attributes.params.alertRuleId: "${ruleAlertId}"`,
+      filter: `alert.attributes.params.ruleAlertId: "${ruleAlertId}"`,
       page: 1,
     });
     if (
