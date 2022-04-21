@@ -9,10 +9,10 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TransportResult } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
-import { NotFoundError } from '../errors';
-import { EndpointError } from '../../../common/endpoint/errors';
-import { ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN } from '../../../common/endpoint/constants';
-import { SecuritySolutionRequestHandlerContext } from '../../types';
+import { NotFoundError } from '../../errors';
+import { EndpointError } from '../../../../common/endpoint/errors';
+import { ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN } from '../../../../common/endpoint/constants';
+import { SecuritySolutionRequestHandlerContext } from '../../../types';
 import {
   ActivityLog,
   ActivityLogEntry,
@@ -24,7 +24,7 @@ import {
   ActionDetails,
   ActivityLogAction,
   EndpointActivityLogAction,
-} from '../../../common/endpoint/types';
+} from '../../../../common/endpoint/types';
 import {
   ACTION_REQUEST_INDICES,
   ACTION_RESPONSE_INDICES,
@@ -35,8 +35,8 @@ import {
   getActionResponsesResult,
   getTimeSortedData,
   getUniqueLogData,
-} from '../utils';
-import { EndpointMetadataService } from './metadata';
+} from '../../utils';
+import { EndpointMetadataService } from '../metadata';
 
 const PENDING_ACTION_RESPONSE_MAX_LAPSED_TIME = 300000; // 300k ms === 5 minutes
 
