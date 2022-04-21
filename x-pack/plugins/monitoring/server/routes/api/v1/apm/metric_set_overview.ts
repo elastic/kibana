@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { MetricDescriptor } from '../../../../lib/details/get_metrics';
+import { NamedMetricDescriptor } from '../../../../lib/details/get_metrics';
 
-export const metricSet: MetricDescriptor[] = [
+export const metricSet: NamedMetricDescriptor[] = [
   {
     name: 'apm_cpu',
     keys: ['apm_cpu_total'],

@@ -13,7 +13,14 @@ import { getTimezone } from '../get_timezone';
 import { LegacyRequest } from '../../types';
 import { INDEX_PATTERN_TYPES } from '../../../common/constants';
 
-export type MetricDescriptor = string | { keys: string | string[]; name: string };
+export interface NamedMetricDescriptor {
+  keys: string | string[];
+  name: string;
+}
+
+export type SimpleMetricDescriptor = string;
+
+export type MetricDescriptor = SimpleMetricDescriptor | NamedMetricDescriptor;
 
 // TODO: Switch to an options object argument here
 export async function getMetrics(
