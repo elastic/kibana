@@ -58,7 +58,6 @@ pageLoadAssetSize:
   transform: 41007
   triggersActionsUi: 103400
   upgradeAssistant: 81241
-  uptime: 40825
   urlForwarding: 32579
   usageCollection: 39762
   visDefaultEditor: 50178
@@ -116,7 +115,7 @@ pageLoadAssetSize:
   reporting: 57003
   visTypeHeatmap: 25340
   expressionGauge: 25000
-  controls: 34788
+  controls: 40000
   expressionPartitionVis: 26338
   sharedUX: 16225
   ux: 20784
@@ -128,3 +127,4 @@ pageLoadAssetSize:
   expressionXY: 26500
   eventAnnotation: 19334
   screenshotting: 22870
+  synthetics: 40958
