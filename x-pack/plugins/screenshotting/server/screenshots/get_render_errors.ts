@@ -58,6 +58,7 @@ export const getRenderErrors = async (
   } catch (error) {
     kbnLogger.error(error);
     eventLogger.error(error, Actions.GET_RENDER_ERRORS);
+    throw error;
   }
 
   return errorsFound;

@@ -96,6 +96,7 @@ export const getElementPositionAndAttributes = async (
     kbnLogger.error(err);
     eventLogger.error(err, Actions.GET_ELEMENT_POSITION_DATA);
     elementsPositionAndAttributes = null;
+    // no throw
   }
 
   spanEnd({ element_positions: elementsPositionAndAttributes?.length });

@@ -60,6 +60,7 @@ export const getScreenshots = async (
   } catch (error) {
     kbnLogger.error(error);
     eventLogger.error(error, Actions.GET_SCREENSHOT);
+    throw error;
   }
 
   kbnLogger.info(`screenshots taken: ${screenshots.length}`);
