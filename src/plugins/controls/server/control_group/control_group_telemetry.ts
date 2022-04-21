@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { Serializable } from 'child_process';
 import { set } from 'lodash';
-import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import { PersistableStateService } from '../../../kibana_utils/common/';
 import {
   ControlGroupTelemetry,
   RawControlGroupAttributes,
@@ -87,8 +88,8 @@ const reportControlTypes = (
 };
 
 export const controlGroupTelemetry: PersistableStateService['telemetry'] = (
-  state,
-  stats
+  state: Serializable | null | undefined,
+  stats: Record<string, any>
 ): ControlGroupTelemetry => {
   const controlGroupStats = initializeControlGroupTelemetry(stats);
   const controlGroupInput = rawControlGroupAttributesToControlGroupInput(
