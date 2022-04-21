@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-const SYNTHETICS_CALLOUT_LS_KEY = 'xpack.synthetics.syntheticsCallout.display';
+const SYNTHETICS_CALLOUT_LS_KEY = 'xpack.uptime.syntheticsCallout.display';
 const shouldShowSyntheticsCallout = () => {
   let value = localStorage.getItem(SYNTHETICS_CALLOUT_LS_KEY);
   if (value === null) {

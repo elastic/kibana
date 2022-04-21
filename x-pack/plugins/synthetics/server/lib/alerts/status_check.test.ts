@@ -240,7 +240,7 @@ describe('status check alert', () => {
       expect(alertInstanceMock.scheduleActions).toHaveBeenCalledTimes(2);
       expect(alertInstanceMock.scheduleActions.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
-          "xpack.synthetics.alerts.actionGroups.monitorStatus",
+          "xpack.uptime.alerts.actionGroups.monitorStatus",
           Object {
             "reason": "First from harrisburg failed 234 times in the last 15 mins. Alert when > 5.",
             "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/Zmlyc3Q=?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z&filters=%5B%5B%22observer.geo.name%22%2C%5B%22harrisburg%22%5D%5D%5D",
@@ -311,7 +311,7 @@ describe('status check alert', () => {
       expect(alertInstanceMock.scheduleActions).toHaveBeenCalledTimes(2);
       expect(alertInstanceMock.scheduleActions.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
-          "xpack.synthetics.alerts.actionGroups.monitorStatus",
+          "xpack.uptime.alerts.actionGroups.monitorStatus",
           Object {
             "reason": "First from harrisburg failed 234 times in the last 15m. Alert when > 5.",
             "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/Zmlyc3Q=?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z&filters=%5B%5B%22observer.geo.name%22%2C%5B%22harrisburg%22%5D%5D%5D",
@@ -783,28 +783,28 @@ describe('status check alert', () => {
       expect(alertInstanceMock.scheduleActions.mock.calls).toMatchInlineSnapshot(`
         Array [
           Array [
-            "xpack.synthetics.alerts.actionGroups.monitorStatus",
+            "xpack.uptime.alerts.actionGroups.monitorStatus",
             Object {
               "reason": "Foo from harrisburg 35 days availability is 99.28%. Alert when < 99.34%.",
               "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/Zm9v?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z&filters=%5B%5B%22observer.geo.name%22%2C%5B%22harrisburg%22%5D%5D%5D",
             },
           ],
           Array [
-            "xpack.synthetics.alerts.actionGroups.monitorStatus",
+            "xpack.uptime.alerts.actionGroups.monitorStatus",
             Object {
               "reason": "Foo from fairbanks 35 days availability is 98.03%. Alert when < 99.34%.",
               "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/Zm9v?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z&filters=%5B%5B%22observer.geo.name%22%2C%5B%22fairbanks%22%5D%5D%5D",
             },
           ],
           Array [
-            "xpack.synthetics.alerts.actionGroups.monitorStatus",
+            "xpack.uptime.alerts.actionGroups.monitorStatus",
             Object {
               "reason": "Unreliable from fairbanks 35 days availability is 90.92%. Alert when < 99.34%.",
               "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/dW5yZWxpYWJsZQ==?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z&filters=%5B%5B%22observer.geo.name%22%2C%5B%22fairbanks%22%5D%5D%5D",
             },
           ],
           Array [
-            "xpack.synthetics.alerts.actionGroups.monitorStatus",
+            "xpack.uptime.alerts.actionGroups.monitorStatus",
             Object {
               "reason": "no-name from fairbanks 35 days availability is 90.92%. Alert when < 99.34%.",
               "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/bm8tbmFtZQ==?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z&filters=%5B%5B%22observer.geo.name%22%2C%5B%22fairbanks%22%5D%5D%5D",
@@ -943,11 +943,11 @@ describe('status check alert', () => {
     it('contains the expected static fields like id, name, etc.', () => {
       expect(alert.id).toBe('xpack.synthetics.alerts.monitorStatus');
       expect(alert.name).toBe('Uptime monitor status');
-      expect(alert.defaultActionGroupId).toBe('xpack.synthetics.alerts.actionGroups.monitorStatus');
+      expect(alert.defaultActionGroupId).toBe('xpack.uptime.alerts.actionGroups.monitorStatus');
       expect(alert.actionGroups).toMatchInlineSnapshot(`
         Array [
           Object {
-            "id": "xpack.synthetics.alerts.actionGroups.monitorStatus",
+            "id": "xpack.uptime.alerts.actionGroups.monitorStatus",
             "name": "Uptime Down Monitor",
           },
         ]

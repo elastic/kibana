@@ -44,9 +44,9 @@ describe('Alert Actions factory', () => {
       defaultActions: [
         {
           actionTypeId: '.pagerduty',
-          group: 'xpack.synthetics.alerts.actionGroups.monitorStatus',
+          group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
           params: {
-            dedupKey: 'always-downxpack.synthetics.alerts.actionGroups.monitorStatus',
+            dedupKey: 'always-downxpack.uptime.alerts.actionGroups.monitorStatus',
             eventAction: 'trigger',
             severity: 'error',
             summary:
@@ -61,17 +61,17 @@ describe('Alert Actions factory', () => {
         group: 'recovered',
         id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         params: {
-          dedupKey: 'always-downxpack.synthetics.alerts.actionGroups.monitorStatus',
+          dedupKey: 'always-downxpack.uptime.alerts.actionGroups.monitorStatus',
           eventAction: 'resolve',
           summary:
             'Monitor Always Down Local Port with url tcp://localhost:18278 has recovered with status Up',
         },
       },
       {
-        group: 'xpack.synthetics.alerts.actionGroups.monitorStatus',
+        group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
         id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         params: {
-          dedupKey: 'always-downxpack.synthetics.alerts.actionGroups.monitorStatus',
+          dedupKey: 'always-downxpack.uptime.alerts.actionGroups.monitorStatus',
           eventAction: 'trigger',
           severity: 'error',
           summary:
@@ -87,9 +87,9 @@ describe('Alert Actions factory', () => {
       defaultActions: [
         {
           actionTypeId: '.pagerduty',
-          group: 'xpack.synthetics.alerts.actionGroups.monitorStatus',
+          group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
           params: {
-            dedupKey: 'always-downxpack.synthetics.alerts.actionGroups.monitorStatus',
+            dedupKey: 'always-downxpack.uptime.alerts.actionGroups.monitorStatus',
             eventAction: 'trigger',
             severity: 'error',
             summary:
@@ -104,17 +104,17 @@ describe('Alert Actions factory', () => {
         group: 'recovered',
         id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         params: {
-          dedupKey: 'always-downxpack.synthetics.alerts.actionGroups.monitorStatus',
+          dedupKey: 'always-downxpack.uptime.alerts.actionGroups.monitorStatus',
           eventAction: 'resolve',
           summary:
             'Monitor Always Down Local Port with url tcp://localhost:18278 has recovered with status Up',
         },
       },
       {
-        group: 'xpack.synthetics.alerts.actionGroups.monitorStatus',
+        group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
         id: 'f2a3b195-ed76-499a-805d-82d24d4eeba9',
         params: {
-          dedupKey: 'always-downxpack.synthetics.alerts.actionGroups.monitorStatus',
+          dedupKey: 'always-downxpack.uptime.alerts.actionGroups.monitorStatus',
           eventAction: 'trigger',
           severity: 'error',
           summary:
