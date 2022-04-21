@@ -16,7 +16,7 @@ import { BazelPackage } from './bazel_package';
 import { BAZEL_PACKAGE_DIRS } from './bazel_package_dirs';
 
 export function discoverBazelPackageLocations(repoRoot: string) {
-  return globby
+  const packagesWithPackageJson = globby
     .sync(
       BAZEL_PACKAGE_DIRS.map((dir) => `${dir}/*/package.json`),
       {
@@ -26,6 +26,24 @@ export function discoverBazelPackageLocations(repoRoot: string) {
     )
     .sort((a, b) => a.localeCompare(b))
     .map((path) => Path.dirname(path));
+
+  const packagesWithBuildBazel = globby
+    .sync(
+      BAZEL_PACKAGE_DIRS.map((dir) => `${dir}/*/BUILD.bazel`),
+      {
+        cwd: repoRoot,
+        absolute: true,
+      }
+    )
+    .map((path) => Path.dirname(path))
+    .reduce((accum: { [key: string]: boolean }, curr: string) => {
+      accum[curr] = true;
+      return accum;
+    }, {});
+
+  // NOTE: only return as discovered packages the ones with package.json + BUILD.bazel files.
+  // In the future we can change this to only discover the ones with kibana.json files.
+  return packagesWithPackageJson.filter((pkg) => !!packagesWithBuildBazel[pkg]);
 }
 
 export async function discoverBazelPackages(repoRoot: string = REPO_ROOT) {
