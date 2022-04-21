@@ -93,7 +93,7 @@ export function sendRequestToES(args: EsRequestArgs): Promise<ESRequestResult[]>
             if (body instanceof ArrayBuffer) {
               value = body;
             } else {
-              value = JSON.stringify(body, null, 2);
+              value = typeof body === 'string' ? body : JSON.stringify(body, null, 2);
             }
 
             const warnings = response.headers.get('warning');
