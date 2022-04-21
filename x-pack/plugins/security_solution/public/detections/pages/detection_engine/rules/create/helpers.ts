@@ -267,7 +267,6 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         ...(ruleType === 'query' &&
           ruleFields.queryBar?.saved_id && { type: 'saved_query' as Type }),
       };
-  console.error('FORMATTING DEFINE STEP RULE', JSON.stringify(ruleFields, null, 2));
   return {
     ...baseFields,
     ...typeFields,
@@ -398,6 +397,7 @@ export const formatRule = <T>(
 
 export const formatPreviewRule = ({
   index,
+  dataViewId,
   query,
   threatIndex,
   threatQuery,
@@ -409,6 +409,7 @@ export const formatPreviewRule = ({
   anomalyThreshold,
 }: {
   index: string[];
+  dataViewId: string;
   threatIndex: string[];
   query: FieldValueQueryBar;
   threatQuery: FieldValueQueryBar;
@@ -422,6 +423,7 @@ export const formatPreviewRule = ({
   const defineStepData = {
     ...stepDefineDefaultValue,
     index,
+    dataViewId,
     queryBar: query,
     ruleType,
     threatIndex,

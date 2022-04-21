@@ -89,6 +89,7 @@ export const usePreviewRoute = ({
       setRule(
         formatPreviewRule({
           index,
+          dataViewId,
           query,
           ruleType,
           threatIndex,
@@ -103,6 +104,7 @@ export const usePreviewRoute = ({
     }
   }, [
     index,
+    dataViewId,
     isRequestTriggered,
     query,
     rule,

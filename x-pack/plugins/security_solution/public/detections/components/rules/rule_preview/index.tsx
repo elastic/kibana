@@ -105,6 +105,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   } = usePreviewRoute({
     index,
     isDisabled,
+    dataViewId,
     query,
     threatIndex,
     threatQuery,
