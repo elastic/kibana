@@ -42,7 +42,7 @@ export function registerRoutes({
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
   config: SavedObjectConfig;
-  migratorPromise: Promise<IKibanaMigrator>;
+  migratorPromise: Promise<IKibanaMigrator | undefined>;
   kibanaVersion: string;
   kibanaIndex: string;
 }) {

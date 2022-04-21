@@ -93,7 +93,7 @@ afterEach(() => {
 });
 
 describe('#preboot', () => {
-  afterEach(async () => elasticsearchService?.stop());
+  afterEach(async () => await elasticsearchService?.stop());
 
   describe('#config', () => {
     it('exposes `hosts`', async () => {
@@ -181,7 +181,7 @@ describe('#preboot', () => {
 });
 
 describe('#setup', () => {
-  afterEach(async () => elasticsearchService?.stop());
+  afterEach(async () => await elasticsearchService?.stop());
 
   it('returns legacy Elasticsearch config as a part of the contract', async () => {
     const setupContract = await elasticsearchService.setup(setupDeps);
@@ -233,7 +233,7 @@ describe('#setup', () => {
 });
 
 describe('#start', () => {
-  afterEach(async () => elasticsearchService?.stop());
+  afterEach(async () => await elasticsearchService?.stop());
 
   it('throws if called before `setup`', async () => {
     await expect(() => elasticsearchService.start()).rejects.toMatchInlineSnapshot(
@@ -275,7 +275,7 @@ describe('#start', () => {
   });
 
   describe('skipStartupConnectionCheck', () => {
-    afterEach(async () => elasticsearchService?.stop());
+    afterEach(async () => await elasticsearchService?.stop());
     it('should validate the connection by default', async () => {
       await elasticsearchService.setup(setupDeps);
       expect(isValidConnectionMock).not.toHaveBeenCalled();

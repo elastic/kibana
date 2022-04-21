@@ -12,7 +12,7 @@ import { catchAndReturnBoomErrors } from './utils';
 
 export const registerMigrateRoute = (
   router: IRouter,
-  migratorPromise: Promise<IKibanaMigrator>
+  migratorPromise: Promise<IKibanaMigrator | undefined>
 ) => {
   router.post(
     {
@@ -24,6 +24,9 @@ export const registerMigrateRoute = (
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
       const migrator = await migratorPromise;
+      if (!migrator) {
+        throw new Error('SavedObjectsService not started, no migrator available');
+      }
       await migrator.runMigrations({ rerun: true });
       return res.ok({
         body: {

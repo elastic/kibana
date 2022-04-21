@@ -297,7 +297,7 @@ export class SavedObjectsService
   private clientFactoryProvider?: SavedObjectsClientFactoryProvider;
   private clientFactoryWrappers: WrappedClientFactoryWrapper[] = [];
 
-  private migrator$ = new Subject<IKibanaMigrator>();
+  private migrator$ = new Subject<IKibanaMigrator | undefined>();
   private typeRegistry = new SavedObjectTypeRegistry();
   private started = false;
 
@@ -347,7 +347,10 @@ export class SavedObjectsService
 
     return {
       status$: calculateStatus$(
-        this.migrator$.pipe(switchMap((migrator) => migrator.getStatus$())),
+        this.migrator$.pipe(
+          filter(Boolean),
+          switchMap((migrator) => migrator.getStatus$())
+        ),
         elasticsearch.status$
       ),
       setClientFactoryProvider: (provider) => {
@@ -507,6 +510,7 @@ export class SavedObjectsService
   }
 
   public stop() {
+    this.migrator$.next(undefined);
     this.migrator$.complete();
   }
 
