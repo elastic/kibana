@@ -30,6 +30,7 @@ import { ActionsClient } from '../actions_client';
 import { ActionExecutionSource } from './action_execution_source';
 import { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
+import { NodeLevelMetrics } from '../monitoring';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -46,6 +47,7 @@ export interface ActionExecutorContext {
   actionTypeRegistry: ActionTypeRegistryContract;
   eventLogger: IEventLogger;
   preconfiguredActions: PreConfiguredAction[];
+  nodeLevelMetrics?: NodeLevelMetrics;
 }
 
 export interface TaskInfo {
@@ -247,9 +249,13 @@ export class ActionExecutor {
           status: 'ok',
         };
 
-        result.actionTypeId = actionTypeId;
-
         event.event = event.event || {};
+
+        this.actionExecutorContext?.nodeLevelMetrics?.execution(
+          actionId,
+          actionTypeId,
+          event.event?.duration ? event.event?.duration / Millis2Nanos : undefined
+        );
 
         if (result.status === 'ok') {
           span?.setOutcome('success');
@@ -262,6 +268,7 @@ export class ActionExecutor {
           event.error = event.error || {};
           event.error.message = actionErrorToMessage(result);
           logger.warn(`action execution failure: ${actionLabel}: ${event.error.message}`);
+          this.actionExecutorContext?.nodeLevelMetrics?.failure(actionId, actionTypeId);
         } else {
           span?.setOutcome('failure');
           event.event.outcome = 'failure';
@@ -271,6 +278,7 @@ export class ActionExecutor {
           logger.warn(
             `action execution failure: ${actionLabel}: returned unexpected result "${result.status}"`
           );
+          this.actionExecutorContext?.nodeLevelMetrics?.failure(actionId, actionTypeId);
         }
 
         eventLogger.logEvent(event);
@@ -347,7 +355,7 @@ export class ActionExecutor {
     });
 
     eventLogger.logEvent(event);
-    return this.actionInfo;
+    this.actionExecutorContext?.nodeLevelMetrics?.timeout(actionId, this.actionInfo.actionTypeId);
   }
 }
 

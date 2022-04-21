@@ -29,8 +29,9 @@ export class NodeLevelMetrics {
   }
 
   public failure(ruleId: string, reason: RuleExecutionStatusErrorReasons) {
-    this.monitoringCollection.reportCounter(`${PREFIX}rule_${reason}_failures`, {
+    this.monitoringCollection.reportCounter(`${PREFIX}rule_failures`, {
       rule_id: ruleId,
+      failure_reason: reason,
     });
   }
 

@@ -39,9 +39,9 @@ export interface MetricSet {
 }
 
 export type KibanaIdentifier = Record<string, string> & {
-  version: string;
-  uuid: string;
-  cluster_uuid?: string;
+  kibana_version: string;
+  kibana_uuid: string;
+  es_cluster_uuid?: string;
 };
 
 export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSetup, void, {}, {}> {
@@ -114,8 +114,8 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
   start(core: CoreStart) {
     this.client = core.elasticsearch.client;
     const kibanaDimensions: KibanaIdentifier = {
-      version: this.kibanaVersion!,
-      uuid: this.kibanaUuid!,
+      kibana_version: this.kibanaVersion!,
+      kibana_uuid: this.kibanaUuid!,
     };
 
     (async () => {
@@ -123,7 +123,7 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
         filter_path: 'cluster_uuid',
       });
 
-      kibanaDimensions.cluster_uuid = response.cluster_uuid;
+      kibanaDimensions.es_cluster_uuid = response.cluster_uuid;
     })();
 
     setInterval(async () => {

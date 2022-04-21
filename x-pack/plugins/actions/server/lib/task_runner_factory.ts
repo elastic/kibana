@@ -34,7 +34,6 @@ import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects
 import { asSavedObjectExecutionSource } from './action_execution_source';
 import { RelatedSavedObjects, validatedRelatedSavedObjects } from './related_saved_objects';
 import { injectSavedObjectReferences } from './action_task_params_utils';
-import { NodeLevelMetrics } from '../monitoring';
 
 export interface TaskRunnerContext {
   logger: Logger;
@@ -43,7 +42,6 @@ export interface TaskRunnerContext {
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   basePathService: IBasePath;
   getUnsecuredSavedObjectsClient: (request: KibanaRequest) => SavedObjectsClientContract;
-  nodeLevelMetrics?: NodeLevelMetrics;
 }
 
 export class TaskRunnerFactory {
@@ -75,7 +73,6 @@ export class TaskRunnerFactory {
       spaceIdToNamespace,
       basePathService,
       getUnsecuredSavedObjectsClient,
-      nodeLevelMetrics,
     } = this.taskRunnerContext!;
 
     const taskInfo = {
@@ -134,14 +131,12 @@ export class TaskRunnerFactory {
           }
         }
 
-        nodeLevelMetrics?.execution(actionId, executorResult?.actionTypeId);
         if (
           executorResult &&
           executorResult?.status === 'error' &&
           executorResult?.retry !== undefined &&
           isRetryableBasedOnAttempts
         ) {
-          nodeLevelMetrics?.failure(actionId);
           logger.error(
             `Action '${actionId}' failed ${
               !!executorResult.retry ? willRetryMessage : willNotRetryMessage
@@ -155,7 +150,6 @@ export class TaskRunnerFactory {
             executorResult.retry as boolean | Date
           );
         } else if (executorResult && executorResult?.status === 'error') {
-          nodeLevelMetrics?.failure(actionId, executorResult?.actionTypeId);
           logger.error(
             `Action '${actionId}' failed ${willNotRetryMessage}: ${executorResult.message}`
           );
@@ -198,7 +192,7 @@ export class TaskRunnerFactory {
         const path = addSpaceIdToPath('/', spaceId);
         basePathService.set(request, path);
 
-        const actionInfo = await actionExecutor.logCancellation({
+        await actionExecutor.logCancellation({
           actionId,
           request,
           consumer,
@@ -206,8 +200,6 @@ export class TaskRunnerFactory {
           relatedSavedObjects: (relatedSavedObjects || []) as RelatedSavedObjects,
           ...getSourceFromReferences(references),
         });
-
-        nodeLevelMetrics?.timeout(actionId, actionInfo?.actionTypeId);
 
         logger.debug(
           `Cancelling action task for action with id ${actionId} - execution error due to timeout.`

@@ -438,6 +438,11 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     const getScopedSavedObjectsClientWithoutAccessToActions = (request: KibanaRequest) =>
       core.savedObjects.getScopedClient(request);
 
+    let nodeLevelMetrics;
+    if (plugins.monitoringCollection) {
+      nodeLevelMetrics = new NodeLevelMetrics(plugins.monitoringCollection);
+    }
+
     actionExecutor!.initialize({
       logger,
       eventLogger: this.eventLogger!,
@@ -452,12 +457,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       encryptedSavedObjectsClient,
       actionTypeRegistry: actionTypeRegistry!,
       preconfiguredActions,
+      nodeLevelMetrics,
     });
-
-    let nodeLevelMetrics;
-    if (plugins.monitoringCollection) {
-      nodeLevelMetrics = new NodeLevelMetrics(plugins.monitoringCollection);
-    }
 
     taskRunnerFactory!.initialize({
       logger,
@@ -467,7 +468,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       spaceIdToNamespace: (spaceId?: string) => spaceIdToNamespace(plugins.spaces, spaceId),
       getUnsecuredSavedObjectsClient: (request: KibanaRequest) =>
         this.getUnsecuredSavedObjectsClient(core.savedObjects, request),
-      nodeLevelMetrics,
     });
 
     this.eventLogService!.isEsContextReady().then(() => {

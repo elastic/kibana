@@ -32,7 +32,6 @@ type ActionTypeExecutorResultStatus = typeof ActionTypeExecutorResultStatusValue
 
 export interface ActionTypeExecutorResult<Data> {
   actionId: string;
-  actionTypeId?: string;
   status: ActionTypeExecutorResultStatus;
   message?: string;
   serviceMessage?: string;
