@@ -84,6 +84,13 @@ const uploadPipeline = (pipelineContent) => {
     }
 
     if (
+      (await doAnyChangesMatch([/^x-pack\/test\/performance/])) ||
+      process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/performance.yml'));
+    }
+
+    if (
       (await doAnyChangesMatch([/^x-pack\/plugins\/apm/])) ||
       process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
