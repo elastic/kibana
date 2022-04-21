@@ -269,4 +269,94 @@ describe('AssignmentService', () => {
       expect(assignableTypes).toEqual(['updatable-a', 'updatable-b']);
     });
   });
+
+  describe('internal service', () => {
+    beforeEach(() => {
+      service = new AssignmentService({
+        internal: true,
+        typeRegistry,
+        authorization,
+        client: savedObjectClient,
+      });
+    });
+
+    describe('#updateTagAssignments', () => {
+      beforeEach(() => {
+        getUpdatableSavedObjectTypesMock.mockImplementation(({ types }) => Promise.resolve(types));
+
+        savedObjectClient.bulkGet.mockResolvedValue({
+          saved_objects: [],
+        });
+      });
+
+      it('does not calls `getUpdatableSavedObjectTypes`', async () => {
+        getUpdatableSavedObjectTypesMock.mockResolvedValue(['dashboard']);
+
+        await service.updateTagAssignments({
+          tags: ['tag-1', 'tag-2'],
+          assign: [
+            { type: 'dashboard', id: 'dash-1' },
+            { type: 'map', id: 'map-1' },
+          ],
+          unassign: [],
+        });
+
+        expect(getUpdatableSavedObjectTypesMock).not.toHaveBeenCalled();
+        expect(savedObjectClient.bulkGet).toHaveBeenCalledTimes(1);
+        expect(savedObjectClient.bulkGet).toHaveBeenCalledWith([
+          { type: 'dashboard', id: 'dash-1', fields: [] },
+          { type: 'map', id: 'map-1', fields: [] },
+        ]);
+      });
+    });
+
+    describe('#findAssignableObjects', () => {
+      beforeEach(() => {
+        typeRegistry.getType.mockImplementation(
+          (name) =>
+            ({
+              management: {
+                defaultSearchField: `${name}-search-field`,
+              },
+            } as any)
+        );
+        savedObjectClient.find.mockResolvedValue({
+          saved_objects: [],
+          total: 0,
+          page: 1,
+          per_page: 20,
+        });
+      });
+
+      it('does not calls `getUpdatableSavedObjectTypes`', async () => {
+        getUpdatableSavedObjectTypesMock.mockResolvedValue(['dashboard']);
+
+        await service.findAssignableObjects({
+          types: ['dashboard', 'map'],
+          search: 'term',
+          maxResults: 20,
+        });
+
+        expect(getUpdatableSavedObjectTypesMock).not.toHaveBeenCalled();
+        expect(savedObjectClient.find).toHaveBeenCalledTimes(1);
+        expect(savedObjectClient.find).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: ['dashboard', 'map'],
+          })
+        );
+      });
+    });
+
+    describe('#getAssignableTypes', () => {
+      it('does not calls `getUpdatableSavedObjectTypes`', async () => {
+        await service.getAssignableTypes(['type-a', 'type-b']);
+
+        expect(getUpdatableSavedObjectTypesMock).not.toHaveBeenCalled();
+      });
+      it('returns the list of all taggable types', async () => {
+        const assignableTypes = await service.getAssignableTypes();
+        expect(assignableTypes).toEqual(taggableTypes);
+      });
+    });
+  });
 });
