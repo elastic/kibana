@@ -2253,6 +2253,26 @@ describe('successful migrations', () => {
       });
     });
 
+    describe('8.3.0', () => {
+      test('removes internal tags', () => {
+        const migration830 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.3.0'];
+        const alert = getMockData(
+          {
+            tags: [
+              '__internal_immutable:false',
+              '__internal_rule_id:064e3fed-6328-416b-bb85-c08265088f41',
+              'test-tag',
+            ],
+          },
+          true
+        );
+
+        const migratedAlert830 = migration830(alert, migrationContext);
+
+        expect(migratedAlert830.attributes.tags).toEqual(['test-tag']);
+      });
+    });
+
     describe('Metrics Inventory Threshold rule', () => {
       test('Migrates incorrect action group spelling', () => {
         const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];

@@ -423,5 +423,18 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         severity: '80-critical',
       });
     });
+
+    it('8.3.0 removes internal tags', async () => {
+      const response = await es.get<{ alert: RawRule }>(
+        {
+          index: '.kibana',
+          id: 'alert:8990af61-c09a-11ec-9164-4bfd6fc32c43',
+        },
+        { meta: true }
+      );
+
+      expect(response.statusCode).to.equal(200);
+      expect(response.body._source?.alert?.tags).to.eql(['test-tag-1', 'foo-tag']);
+    });
   });
 }

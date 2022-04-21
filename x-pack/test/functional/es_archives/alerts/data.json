@@ -896,3 +896,54 @@
     }
   }
 }
+
+{
+  "type":"doc",
+  "value":{
+     "id":"alert:8990af61-c09a-11ec-9164-4bfd6fc32c43",
+     "index":".kibana_1",
+     "source":{
+        "alert":{
+           "name":"Test remove internal tags",
+           "alertTypeId":"siem.signals",
+           "consumer":"alertsFixture",
+           "params":{
+              "immutable":true,
+              "ruleId":"bf9638eb-7d3c-4f40-83d7-8c40a7c80f2e"
+           },
+           "schedule":{
+              "interval":"1m"
+           },
+           "enabled":true,
+           "actions":[
+              
+           ],
+           "throttle":null,
+           "apiKeyOwner":null,
+           "apiKey":null,
+           "createdBy":"elastic",
+           "updatedBy":"elastic",
+           "createdAt":"2021-07-27T20:42:55.896Z",
+           "muteAll":false,
+           "mutedInstanceIds":[
+              
+           ],
+           "scheduledTaskId":null,
+           "tags":[
+              "__internal_rule_id:364e3fed-6328-416b-bb85-c08265088f41",
+              "__internal_immutable:false",
+              "test-tag-1",
+              "foo-tag"
+           ]
+        },
+        "type":"alert",
+        "migrationVersion":{
+           "alert":"7.8.0"
+        },
+        "updated_at":"2021-08-13T23:00:11.985Z",
+        "references":[
+           
+        ]
+     }
+  }
+}
