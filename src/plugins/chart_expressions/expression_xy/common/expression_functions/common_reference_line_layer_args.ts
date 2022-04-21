@@ -12,7 +12,7 @@ import { ReferenceLineLayerFn, ExtendedReferenceLineLayerFn } from '../types';
 
 type CommonReferenceLineLayerFn = ReferenceLineLayerFn | ExtendedReferenceLineLayerFn;
 
-export const commonReferenceLineLayerArgs: Omit<CommonReferenceLineLayerFn['args'], 'table'> = {
+export const commonReferenceLineLayerArgs: CommonReferenceLineLayerFn['args'] = {
   accessors: {
     types: ['string'],
     help: strings.getRLAccessorsHelp(),
