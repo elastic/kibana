@@ -14,6 +14,7 @@ interface LegendSizeSettingsProps {
   legendSize: number | undefined;
   onLegendSizeChange: (size?: number) => void;
   isVerticalLegend: boolean;
+  showAutoOption: boolean;
 }
 
 const legendSizeOptions: Array<{ value: string; inputDisplay: string }> = [
@@ -50,6 +51,7 @@ export const LegendSizeSettings = ({
   legendSize,
   onLegendSizeChange,
   isVerticalLegend,
+  showAutoOption,
 }: LegendSizeSettingsProps) => {
   useEffect(() => {
     if (legendSize && !isVerticalLegend) {
@@ -65,21 +67,20 @@ export const LegendSizeSettings = ({
 
   if (!isVerticalLegend) return null;
 
-  const options =
-    legendSize !== LegendSizes.AUTO
-      ? legendSizeOptions
-      : [
-          {
-            value: LegendSizes.AUTO.toString(),
-            inputDisplay: i18n.translate(
-              'xpack.lens.shared.legendSizeSetting.legendSizeOptions.auto',
-              {
-                defaultMessage: 'Auto',
-              }
-            ),
-          },
-          ...legendSizeOptions,
-        ];
+  const options = showAutoOption
+    ? [
+        {
+          value: LegendSizes.AUTO.toString(),
+          inputDisplay: i18n.translate(
+            'xpack.lens.shared.legendSizeSetting.legendSizeOptions.auto',
+            {
+              defaultMessage: 'Auto',
+            }
+          ),
+        },
+        ...legendSizeOptions,
+      ]
+    : legendSizeOptions;
 
   return (
     <EuiFormRow

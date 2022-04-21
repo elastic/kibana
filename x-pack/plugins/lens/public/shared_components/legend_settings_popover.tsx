@@ -127,6 +127,11 @@ export interface LegendSettingsPopoverProps {
    * Callback on legend size change
    */
   onLegendSizeChange: (size?: number) => void;
+  /**
+   * Whether to show auto legend size option. Should only be true for pre 8.3 visualizations that already had it as their setting.
+   * (We're trying to get people to stop using it so it can eventually be removed.)
+   */
+  showAutoLegendSizeOption: boolean;
 }
 
 const DEFAULT_TRUNCATE_LINES = 1;
@@ -185,6 +190,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
   onTruncateLegendChange = () => {},
   legendSize,
   onLegendSizeChange,
+  showAutoLegendSizeOption,
 }) => {
   return (
     <ToolbarPopover
@@ -231,6 +237,7 @@ export const LegendSettingsPopover: React.FunctionComponent<LegendSettingsPopove
             isVerticalLegend={
               !position || position === Position.Left || position === Position.Right
             }
+            showAutoOption={showAutoLegendSizeOption}
           />
           {location && (
             <ColumnsNumberSetting
