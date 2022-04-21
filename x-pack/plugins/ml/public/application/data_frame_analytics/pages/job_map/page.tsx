@@ -120,7 +120,7 @@ export const Page: FC = () => {
         </MlPageHeader>
       ) : null}
       {jobId !== undefined ? (
-        <MlPageHeader>
+        <MlPageHeader key={`${jobId}-id`}>
           <FormattedMessage
             data-test-subj="mlPageDataFrameAnalyticsMapTitle"
             id="xpack.ml.dataframe.analyticsMap.analyticsIdTitle"
