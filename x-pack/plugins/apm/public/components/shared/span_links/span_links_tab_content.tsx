@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiBadge, EuiSpacer } from '@elastic/eui';
+import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SpanLinks } from '.';
 import { SpanLinks as SpanLinksType } from '../../../../typings/es_schemas/raw/fields/span_links';
@@ -27,11 +27,13 @@ export function getSpanLinksTabContent({
       <>
         {i18n.translate('xpack.apm.propertiesTable.tabs.spanLinks', {
           defaultMessage: 'Span links',
-        })}{' '}
-        <EuiBadge>
-          {(incomingSpanLinks?.length || 0) + (outgoingSpanLinks?.length || 0)}
-        </EuiBadge>
+        })}
       </>
+    ),
+    append: (
+      <EuiNotificationBadge color="subdued">
+        {(incomingSpanLinks?.length || 0) + (outgoingSpanLinks?.length || 0)}
+      </EuiNotificationBadge>
     ),
     content: (
       <>
