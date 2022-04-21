@@ -8,9 +8,9 @@
 import constate from 'constate';
 import useAsync from 'react-use/lib/useAsync';
 
-import type { CoreStart } from 'src/core/public';
+import type { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import type { UserData } from '../../common';
 import { UserProfileAPIClient } from '../account_management';
 import type { AuthenticationServiceSetup } from '../authentication';
