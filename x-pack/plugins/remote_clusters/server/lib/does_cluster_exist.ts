@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'src/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 
 export async function doesClusterExist(
   clusterClient: IScopedClusterClient,

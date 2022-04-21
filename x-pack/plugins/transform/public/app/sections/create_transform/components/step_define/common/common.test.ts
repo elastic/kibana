@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { getPivotDropdownOptions } from '../common';
-import { DataView } from '../../../../../../../../../../src/plugins/data_views/public';
+import { getPivotDropdownOptions } from '.';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { FilterAggForm } from './filter_agg/components';
-import type { RuntimeField } from '../../../../../../../../../../src/plugins/data/common';
+import type { RuntimeField } from '@kbn/data-plugin/common';
 
 describe('Transform: Define Pivot Common', () => {
   test('getPivotDropdownOptions()', () => {

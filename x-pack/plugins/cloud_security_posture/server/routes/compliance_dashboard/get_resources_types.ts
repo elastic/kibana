@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type {
   AggregationsMultiBucketAggregateBase as Aggregation,
   QueryDslQueryContainer,
@@ -13,7 +13,6 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ComplianceDashboardData } from '../../../common/types';
 import { KeyDocCount } from './compliance_dashboard';
-import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
 
 export interface ResourceTypeQueryResult {
   aggs_by_resource_type: Aggregation<ResourceTypeBucket>;
@@ -44,11 +43,13 @@ export const resourceTypeAggQuery = {
   },
 };
 
-export const getRisksEsQuery = (query: QueryDslQueryContainer): SearchRequest => ({
-  index: CSP_KUBEBEAT_INDEX_PATTERN,
+export const getRisksEsQuery = (query: QueryDslQueryContainer, pitId: string): SearchRequest => ({
   size: 0,
   query,
   aggs: resourceTypeAggQuery,
+  pit: {
+    id: pitId,
+  },
 });
 
 export const getResourceTypeFromAggs = (
@@ -63,14 +64,14 @@ export const getResourceTypeFromAggs = (
 
 export const getResourcesTypes = async (
   esClient: ElasticsearchClient,
-  query: QueryDslQueryContainer
+  query: QueryDslQueryContainer,
+  pitId: string
 ): Promise<ComplianceDashboardData['resourcesTypes']> => {
   const resourceTypesQueryResult = await esClient.search<unknown, ResourceTypeQueryResult>(
-    getRisksEsQuery(query),
-    { meta: true }
+    getRisksEsQuery(query, pitId)
   );
 
-  const resourceTypes = resourceTypesQueryResult.body.aggregations?.aggs_by_resource_type.buckets;
+  const resourceTypes = resourceTypesQueryResult.aggregations?.aggs_by_resource_type.buckets;
   if (!Array.isArray(resourceTypes)) throw new Error('missing resources types buckets');
 
   return getResourceTypeFromAggs(resourceTypes);

@@ -21,8 +21,8 @@ import {
   LIST_INDEX,
   LIST_ITEM_URL,
 } from '@kbn/securitysolution-list-constants';
-import { ToolingLog } from '@kbn/dev-utils';
-import { getImportListItemAsBuffer } from '../../plugins/lists/common/schemas/request/import_list_item_schema.mock';
+import { ToolingLog } from '@kbn/tooling-log';
+import { getImportListItemAsBuffer } from '@kbn/lists-plugin/common/schemas/request/import_list_item_schema.mock';
 import { countDownTest } from '../detection_engine_api_integration/utils';
 
 /**

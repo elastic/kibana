@@ -6,7 +6,7 @@
  */
 import { errors } from '@elastic/elasticsearch';
 import type { SecurityHasPrivilegesIndexPrivilegesCheck } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Logger, RequestHandler } from 'kibana/server';
+import type { Logger, RequestHandler } from '@kbn/core/server';
 import {
   API_GET_ILM_POLICY_STATUS,
   API_MIGRATE_ILM_POLICY_URL,

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
-import { securityMock } from '../../../../plugins/security/server/mocks';
+import { KibanaRequest } from '@kbn/core/server';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { ActionsAuthorization } from './actions_authorization';
 import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
-import { AuthenticatedUser } from '../../../security/server';
+import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { AuthorizationMode } from './get_authorization_mode_by_source';
 
 const request = {} as KibanaRequest;

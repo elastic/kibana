@@ -6,11 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { CASE_CONFIGURE_URL, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import {
-  CASE_CONFIGURE_URL,
-  SECURITY_SOLUTION_OWNER,
-} from '../../../../../../plugins/cases/common/constants';
 import {
   getConfiguration,
   getConfigureSavedObjectsFromES,
