@@ -165,6 +165,22 @@ describe('<EditPolicy /> serialization', () => {
   });
 
   describe('hot phase', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setDefaultResponses();
+
+      await act(async () => {
+        testBed = await setupSerializationTestBed(httpSetup, {
+          appServicesContext: {
+            license: licensingMock.createLicense({ license: { type: 'enterprise' } }),
+          },
+        });
+      });
+
+      const { component } = testBed;
+
+      component.update();
+    });
+
     test('setting all values', async () => {
       const { actions } = testBed;
 
@@ -218,7 +234,7 @@ describe('<EditPolicy /> serialization', () => {
     test('setting searchable snapshot', async () => {
       const { actions } = testBed;
 
-      await actions.hot.setSearchableSnapshot('my-repo');
+      await actions.hot.setSearchableSnapshot('abc');
 
       await actions.savePolicy();
 
@@ -227,9 +243,7 @@ describe('<EditPolicy /> serialization', () => {
       const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
 
       expect(requestUrl).toBe(`${API_BASE_PATH}/policies`);
-      expect(parsedReqBody.phases.hot.actions.searchable_snapshot.snapshot_repository).toBe(
-        'my-repo'
-      );
+      expect(parsedReqBody.phases.hot.actions.searchable_snapshot.snapshot_repository).toBe('abc');
     });
 
     test('disabling rollover', async () => {
@@ -521,8 +535,6 @@ describe('<EditPolicy /> serialization', () => {
 
       const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
       const [requestUrl, requestBody] = lastReq;
-      console.log(requestUrl);
-      console.log(requestBody);
       const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
 
       expect(requestUrl).toBe(`${API_BASE_PATH}/policies`);
@@ -534,7 +546,7 @@ describe('<EditPolicy /> serialization', () => {
       });
     });
 
-    describe.skip('deserialization', () => {
+    describe('deserialization', () => {
       beforeEach(async () => {
         const policyToEdit = getDefaultHotPhasePolicy();
         policyToEdit.policy.phases.frozen = {
@@ -567,8 +579,11 @@ describe('<EditPolicy /> serialization', () => {
         const [requestUrl, requestBody] = lastReq;
         const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
 
+<<<<<<< HEAD
         console.log(parsedReqBody);
 
+=======
+>>>>>>> 262510cee4e (Finish fixing tests)
         expect(requestUrl).toBe(`${API_BASE_PATH}/policies`);
         expect(parsedReqBody.phases.frozen).toEqual({
           min_age: '1234m',

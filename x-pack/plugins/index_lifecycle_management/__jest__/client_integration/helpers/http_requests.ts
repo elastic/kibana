@@ -21,17 +21,25 @@ export interface ResponseError {
 }
 
 export const init = () => {
+  let isResponseDelayed = false;
+  const getDelayResponse = () => isResponseDelayed;
+  const setDelayResponse = (shouldDelayResponse: boolean) => {
+    isResponseDelayed = shouldDelayResponse;
+  };
+
   const httpSetup = httpServiceMock.createSetupContract();
-  const httpRequestsMockHelpers = registerHttpRequestMockHelpers(httpSetup);
+  const httpRequestsMockHelpers = registerHttpRequestMockHelpers(httpSetup, getDelayResponse);
 
   return {
     httpSetup,
+    setDelayResponse,
     httpRequestsMockHelpers,
   };
 };
 
 const registerHttpRequestMockHelpers = (
-  httpSetup: ReturnType<typeof httpServiceMock.createStartContract>
+  httpSetup: ReturnType<typeof httpServiceMock.createStartContract>,
+  shouldDelayResponse: () => boolean
 ) => {
   const mockResponses = new Map<HttpMethod, Map<string, Promise<unknown>>>(
     ['GET', 'PUT', 'DELETE', 'POST'].map(
@@ -39,8 +47,16 @@ const registerHttpRequestMockHelpers = (
     )
   );
 
-  const mockMethodImplementation = (method: HttpMethod, path: string) =>
-    mockResponses.get(method)?.get(path) ?? Promise.resolve({});
+  const mockMethodImplementation = (method: HttpMethod, path: string) => {
+    const responsePromise = mockResponses.get(method)?.get(path) ?? Promise.resolve({});
+    if (shouldDelayResponse()) {
+      return new Promise((resolve) => {
+        setTimeout(() => resolve(responsePromise), 1000);
+      });
+    }
+
+    return responsePromise;
+  };
 
   httpSetup.get.mockImplementation((path) =>
     mockMethodImplementation('GET', path as unknown as string)
