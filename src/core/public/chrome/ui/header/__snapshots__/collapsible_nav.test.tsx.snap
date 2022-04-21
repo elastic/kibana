@@ -89,6 +89,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
       "thrownError": null,
     }
   }
+  dockedBreakpoint={1440}
   homeHref="/"
   id="collapsibe-nav"
   isLocked={false}
@@ -2170,6 +2171,7 @@ exports[`CollapsibleNav renders the default nav 1`] = `
       "thrownError": null,
     }
   }
+  dockedBreakpoint={1440}
   homeHref="/"
   id="collapsibe-nav"
   isLocked={false}
@@ -2356,6 +2358,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
       "thrownError": null,
     }
   }
+  dockedBreakpoint={1440}
   homeHref="/"
   id="collapsibe-nav"
   isLocked={false}
@@ -2543,6 +2546,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
       "thrownError": null,
     }
   }
+  dockedBreakpoint={1440}
   homeHref="/"
   id="collapsibe-nav"
   isLocked={true}

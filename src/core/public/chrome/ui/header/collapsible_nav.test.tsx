@@ -63,6 +63,7 @@ function mockProps() {
     navigateToUrl: () => Promise.resolve(),
     customNavLink$: new BehaviorSubject(undefined),
     button: <button />,
+    dockedBreakpoint: 1440,
   };
 }
 
@@ -86,8 +87,9 @@ function clickGroup(component: ReactWrapper, group: string) {
 describe('CollapsibleNav', () => {
   // this test is mostly an "EUI works as expected" sanity check
   // the docking button should be visible at 1440 wdith and up
-  resizeWindow(1440, 900);
+  
   it('renders the default nav', () => {
+    resizeWindow(1440, 900);
     const onLock = sinon.spy();
     const component = mount(<CollapsibleNav {...mockProps()} onIsLockedUpdate={onLock} />);
     expect(component).toMatchSnapshot();
