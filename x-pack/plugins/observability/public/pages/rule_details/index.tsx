@@ -297,13 +297,23 @@ export function RuleDetailsPage() {
 
                 <EuiSpacer size="l" />
 
-                <EuiFlexGroup>
+                <EuiFlexGroup justifyContent="flexStart">
                   <ItemTitleRuleSummary
                     translationKey="xpack.observability.ruleDetails.conditions"
                     defaultMessage="Conditions"
                   />
+                  <EuiFlexItem component="div" grow={3}>
+                    <EuiText size="m">
+                      <EuiButtonEmpty onClick={() => setEditFlyoutVisible(true)}>
+                        {String((params.criteria as any[]).length)}{' '}
+                        {i18n.translate('xpack.observability.ruleDetails.conditions', {
+                          defaultMessage: 'conditions',
+                        })}
+                      </EuiButtonEmpty>
+                    </EuiText>
+                  </EuiFlexItem>
 
-                  <ItemValueRuleSummary itemValue={String((params.criteria as any[]).length)} />
+                  {/* <ItemValueRuleSummary itemValue={String((params.criteria as any[]).length)} /> */}
                 </EuiFlexGroup>
 
                 <EuiSpacer size="l" />
