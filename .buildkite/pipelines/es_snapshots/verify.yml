@@ -79,7 +79,6 @@ steps:
       queue: kibana-default
     depends_on:
       - default-cigroup
-      - default-cigroup-docker
       - oss-cigroup
       - jest-integration
       - api-integration
