@@ -82,10 +82,11 @@ Array [
     id="event_range"
     key="event_range"
     outside={false}
-    outsideDimension={16}
+    outsideDimension={4}
     style={
       Object {
-        "fill": "#f04e98",
+        "fill": "#F04E981A",
+        "opacity": 1,
       }
     }
   />,
@@ -221,27 +222,6 @@ exports[`XYChart component annotations should render simplified annotations when
   domainType="xDomain"
   id="annotation"
   key="annotation"
-  marker={
-    <Marker
-      config={
-        Object {
-          "axisMode": "bottom",
-          "label": "Annotation",
-          "roundedTimestamp": 1647591917100,
-          "time": "2022-03-18T08:25:17.140Z",
-          "type": "manual_point_event_annotation",
-        }
-      }
-      hasReducedPadding={false}
-      isHorizontal={true}
-      label="Annotation"
-    />
-  }
-  markerBody={
-    <MarkerBody
-      isHorizontal={true}
-    />
-  }
   markerPosition="top"
   style={
     Object {
@@ -289,10 +269,11 @@ Array [
     id="event_range"
     key="event_range"
     outside={false}
-    outsideDimension={16}
+    outsideDimension={2}
     style={
       Object {
-        "fill": "#f04e98",
+        "fill": "#F04E981A",
+        "opacity": 1,
       }
     }
   />,

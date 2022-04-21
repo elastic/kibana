@@ -142,6 +142,9 @@ export const getRangeAnnotations = (layers: AnnotationLayerConfigResult[]) => {
     .sort((a, b) => moment(a.time).valueOf() - moment(b.time).valueOf());
 };
 
+export const OUTSIDE_RECT_ANNOTATION_WIDTH = 8;
+export const OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION = 2;
+
 export const getAnnotationsGroupedByInterval = (
   layers: AnnotationLayerConfigResult[],
   minInterval?: number,

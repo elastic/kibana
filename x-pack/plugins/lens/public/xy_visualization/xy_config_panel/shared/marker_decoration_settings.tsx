@@ -137,7 +137,7 @@ export const IconSelectSetting = ({
   currentConfig?: MarkerDecorationConfig;
   setConfig: (config: MarkerDecorationConfig) => void;
   customIconSet?: IconSet;
-  defaultIcon: string;
+  defaultIcon?: string;
 }) => {
   return (
     <EuiFormRow

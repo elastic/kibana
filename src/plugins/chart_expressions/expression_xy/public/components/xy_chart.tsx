@@ -65,7 +65,13 @@ import { getLegendAction } from './legend_action';
 import { ReferenceLineAnnotations, computeChartMargins } from './reference_lines';
 import { visualizationDefinitions } from '../definitions';
 import { XYLayerConfigResult } from '../../common/types';
-import { Annotations, getAnnotationsGroupedByInterval, getRangeAnnotations } from './annotations';
+import {
+  Annotations,
+  getAnnotationsGroupedByInterval,
+  getRangeAnnotations,
+  OUTSIDE_RECT_ANNOTATION_WIDTH,
+  OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION,
+} from './annotations';
 
 import './xy_chart.scss';
 
@@ -510,18 +516,6 @@ export function XYChart({
               : undefined,
         },
       };
-
-  const OUTSIDE_RECT_ANNOTATION_WIDTH = 8;
-  const OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION = 2;
-
-  const outsideDimension =
-    rangeAnnotations.length && annotationsLayers?.[0].hide
-      ? OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION
-      : shouldUseNewTimeAxis
-      ? Number(MULTILAYER_TIME_AXIS_STYLE.tickLine?.padding) +
-        Number(chartTheme.axes?.tickLabel?.fontSize)
-      : Number(chartTheme.axes?.tickLine?.size) || OUTSIDE_RECT_ANNOTATION_WIDTH;
-
   return (
     <Chart ref={chartRef}>
       <Settings
@@ -933,7 +927,14 @@ export function XYChart({
           isBarChart={filteredBarLayers.length > 0}
           minInterval={minInterval}
           hide={annotationsLayers?.[0].hide}
-          outsideDimension={outsideDimension}
+          outsideDimension={
+            rangeAnnotations.length && shouldHideDetails
+              ? OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION
+              : shouldUseNewTimeAxis
+              ? Number(MULTILAYER_TIME_AXIS_STYLE.tickLine?.padding || 0) +
+                Number(chartTheme.axes?.tickLabel?.fontSize || 0)
+              : Number(chartTheme.axes?.tickLine?.size) || OUTSIDE_RECT_ANNOTATION_WIDTH
+          }
         />
       ) : null}
     </Chart>

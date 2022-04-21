@@ -2589,7 +2589,7 @@ describe('XYChart component', () => {
       const { data, args } = sampleArgsWithAnnotations([
         createLayerWithAnnotations([defaultLineStaticAnnotation, defaultRangeStaticAnnotation]),
       ]);
-      (args.layers[0] as AnnotationLayerConfigResult).hide = true;
+      (args.layers[1] as AnnotationLayerConfigResult).hide = true;
       const component = mount(<XYChart {...defaultProps} data={data} args={args} />);
       expect(component.find('LineAnnotation')).toMatchSnapshot();
       expect(component.find('RectAnnotation')).toMatchSnapshot();
