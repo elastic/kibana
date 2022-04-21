@@ -102,6 +102,7 @@ export class ConsolePageObject extends FtrService {
   public async enterRequest(request: string = '\nGET _search') {
     const textArea = await this.getEditorTextArea();
     await textArea.pressKeys(request);
+    await textArea.pressKeys(Key.ENTER);
   }
 
   public async enterText(text: string) {

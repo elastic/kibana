@@ -26,7 +26,7 @@ import { ConsoleMenu } from '../../../../components';
 import { useEditorReadContext, useServicesContext } from '../../../../contexts';
 import {
   useSaveCurrentTextObject,
-  useSendCurrentRequest,
+  useSendCurrentRequestToES,
   useSetInputEditor,
 } from '../../../../hooks';
 import * as senseEditor from '../../../../models/sense_editor';
@@ -72,7 +72,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
 
   const { settings } = useEditorReadContext();
   const setInputEditor = useSetInputEditor();
-  const sendCurrentRequest = useSendCurrentRequest();
+  const sendCurrentRequestToES = useSendCurrentRequestToES();
   const saveCurrentTextObject = useSaveCurrentTextObject();
 
   const editorRef = useRef<HTMLDivElement | null>(null);
@@ -231,11 +231,11 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
     if (!isKeyboardShortcutsDisabled) {
       registerCommands({
         senseEditor: editorInstanceRef.current!,
-        sendCurrentRequest,
+        sendCurrentRequestToES,
         openDocumentation,
       });
     }
-  }, [openDocumentation, settings, sendCurrentRequest]);
+  }, [sendCurrentRequestToES, openDocumentation, settings]);
 
   useEffect(() => {
     const { current: editor } = editorInstanceRef;
@@ -262,7 +262,7 @@ function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
             >
               <EuiLink
                 color="success"
-                onClick={sendCurrentRequest}
+                onClick={sendCurrentRequestToES}
                 data-test-subj="sendRequestButton"
                 aria-label={i18n.translate('console.sendRequestButtonTooltip', {
                   defaultMessage: 'Click to send request',
