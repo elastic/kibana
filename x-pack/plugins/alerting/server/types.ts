@@ -16,15 +16,13 @@ import {
   AggregationsAggregate,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { ISearchSource, ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import {
   IScopedClusterClient,
   SavedObjectAttributes,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { LicenseType } from '@kbn/licensing-plugin/server';
-import { ISearchSource, ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { AlertFactoryDoneUtils, PublicAlert } from './alert';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';

@@ -54,6 +54,7 @@ import {
 import { createSecurityRuleTypeWrapper } from '../../rule_types/create_security_rule_type_wrapper';
 import { RULE_PREVIEW_INVOCATION_COUNT } from '../../../../../common/detection_engine/constants';
 import { RuleExecutionContext, StatusChangeArgs } from '../../rule_execution_log';
+import { wrapSearchSourceFetch } from './utils/wrap_search_source_fetch';
 
 const PREVIEW_TIMEOUT_SECONDS = 60;
 
@@ -85,7 +86,7 @@ export const previewRulesRoute = async (
       }
       try {
         const [, { data, security: securityService }] = await getStartServices();
-        const searchSourceClient = data.search.searchSource.asScoped(request);
+        const searchSourceClient = await data.search.searchSource.asScoped(request);
         const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution.getAppClient();
 
@@ -239,7 +240,10 @@ export const previewRulesRoute = async (
                   abortController,
                   scopedClusterClient: context.core.elasticsearch.client,
                 }),
-                searchSourceClient,
+                searchSourceUtils: {
+                  searchSourceClient,
+                  wrappedFetch: wrapSearchSourceFetch(abortController),
+                },
                 uiSettingsClient: context.core.uiSettings.client,
               },
               spaceId,

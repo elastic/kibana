@@ -10,14 +10,12 @@ import {
   AggregationsAggregate,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Logger } from '@kbn/core/server';
 import {
   getTime,
   ISearchSource,
   ISearchStartSearchSource,
   SortDirection,
 } from '@kbn/data-plugin/common';
-import { OnlySearchSourceAlertParams } from '../types';
 import { OnlySearchSourceAlertParams } from '../types';
 
 interface SearchSourceUtils {

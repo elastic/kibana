@@ -21,12 +21,15 @@ import type {
   AggregationsAggregate,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient, ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ISearchSource } from '@kbn/data-plugin/common';
-import { IScopedClusterClient, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { RuleExecutionMetrics } from '../types';
-import { Rule } from '../types';
+import { LogSearchMetricsOpts, RuleInfo } from './types';
 
-type RuleInfo = Pick<Rule, 'name' | 'alertTypeId' | 'id'> & { spaceId: string };
+export type LogSearchMetricsFn = (metrics: LogSearchMetricsOpts) => void;
+
+type WrapEsClientOpts = Omit<WrapScopedClusterClientOpts, 'scopedClusterClient'> & {
+  esClient: ElasticsearchClient;
+};
+
 interface WrapScopedClusterClientFactoryOpts {
   scopedClusterClient: IScopedClusterClient;
   rule: RuleInfo;
@@ -38,17 +41,7 @@ type WrapScopedClusterClientOpts = WrapScopedClusterClientFactoryOpts & {
   logMetricsFn: LogSearchMetricsFn;
 };
 
-type WrapEsClientOpts = Omit<WrapScopedClusterClientOpts, 'scopedClusterClient'> & {
-  esClient: ElasticsearchClient;
-};
-
-interface LogSearchMetricsOpts {
-  esSearchDuration: number;
-  totalSearchDuration: number;
-}
-type LogSearchMetricsFn = (metrics: LogSearchMetricsOpts) => void;
-
-export function createWrappedSearchClientsFactory(opts: WrapScopedClusterClientFactoryOpts) {
+export function createWrappedScopedClusterClientFactory(opts: WrapScopedClusterClientFactoryOpts) {
   let numSearches: number = 0;
   let esSearchDurationMs: number = 0;
   let totalSearchDurationMs: number = 0;
@@ -59,12 +52,10 @@ export function createWrappedSearchClientsFactory(opts: WrapScopedClusterClientF
     totalSearchDurationMs += metrics.totalSearchDuration;
   }
 
-  const wrappedScopedClusterClient = wrapScopedClusterClient({ ...opts, logMetricsFn: logMetrics });
-  const wrappedSearchSourceFetch = wrapSearchSourceFetch({ ...opts, logMetricsFn: logMetrics });
+  const wrappedClient = wrapScopedClusterClient({ ...opts, logMetricsFn: logMetrics });
 
   return {
-    scopedClusterClient: () => wrappedScopedClusterClient,
-    searchSourceFetch: () => wrappedSearchSourceFetch,
+    client: () => wrappedClient,
     getMetrics: (): RuleExecutionMetrics => {
       return {
         esSearchDurationMs,
@@ -72,27 +63,6 @@ export function createWrappedSearchClientsFactory(opts: WrapScopedClusterClientF
         numSearches,
       };
     },
-  };
-}
-
-export function wrapSearchSourceFetch(opts: WrapScopedClusterClientOpts) {
-  return async (searchSource: ISearchSource) => {
-    try {
-      const start = Date.now();
-      opts.logger.debug(
-        `executing query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${opts.rule.spaceId}`
-      );
-      const result = await searchSource.fetch({ abortSignal: opts.abortController.signal });
-
-      const durationMs = Date.now() - start;
-      opts.logMetricsFn({ esSearchDuration: result.took ?? 0, totalSearchDuration: durationMs });
-      return result;
-    } catch (e) {
-      if (opts.abortController.signal.aborted) {
-        throw new Error('Search has been aborted due to cancelled execution');
-      }
-      throw e;
-    }
   };
 }
 

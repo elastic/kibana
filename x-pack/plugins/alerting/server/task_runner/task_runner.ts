@@ -73,7 +73,8 @@ import {
   ScheduleActionsForRecoveredAlertsParams,
   TrackAlertDurationsParams,
 } from './types';
-import { createWrappedSearchClientsFactory } from '../lib/wrap_scoped_cluster_client';
+import { createWrappedScopedClusterClientFactory } from '../lib/wrap_scoped_cluster_client';
+import { wrapSearchSourceFetch } from '../lib/wrap_search_source_fetch';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -355,9 +356,7 @@ export class TaskRunner<
     const eventLogger = this.context.eventLogger;
     const ruleLabel = `${this.ruleType.id}:${ruleId}: '${name}'`;
 
-    const scopedClusterClient = this.context.elasticsearch.client.asScoped(fakeRequest);
-    const wrappedScopedClusterClient = createWrappedSearchClientsFactory({
-      scopedClusterClient,
+    const wrappedClientOptions = {
       rule: {
         name: rule.name,
         alertTypeId: rule.alertTypeId,
@@ -366,11 +365,17 @@ export class TaskRunner<
       },
       logger: this.logger,
       abortController: this.searchAbortController,
+    };
+    const scopedClusterClient = this.context.elasticsearch.client.asScoped(fakeRequest);
+    const wrappedScopedClusterClient = createWrappedScopedClusterClientFactory({
+      scopedClusterClient,
+      ...wrappedClientOptions,
     });
+    const wrappedSearchSourceFetch = wrapSearchSourceFetch(wrappedClientOptions);
     const searchSourceClient = await this.context.data.search.searchSource.asScoped(fakeRequest);
     const searchSourceUtils = {
       searchSourceClient,
-      wrappedFetch: wrappedScopedClusterClient.searchSourceFetch(),
+      wrappedFetch: wrappedSearchSourceFetch.fetch,
     };
 
     let updatedRuleTypeState: void | Record<string, unknown>;
@@ -396,7 +401,7 @@ export class TaskRunner<
             savedObjectsClient,
             searchSourceUtils,
             uiSettingsClient: this.context.uiSettings.asScopedToClient(savedObjectsClient),
-            scopedClusterClient: wrappedScopedClusterClient.scopedClusterClient(),
+            scopedClusterClient: wrappedScopedClusterClient.client(),
             alertFactory: createAlertFactory<
               InstanceState,
               InstanceContext,
@@ -456,7 +461,12 @@ export class TaskRunner<
       name: rule.name,
     };
 
-    const searchMetrics = wrappedScopedClusterClient.getMetrics();
+    const scopedClusterClientMetrics = wrappedScopedClusterClient.getMetrics();
+    const searchSourceMetrics = wrappedSearchSourceFetch.getMetrics();
+
+    const searchMetrics = !!scopedClusterClientMetrics.numSearches
+      ? scopedClusterClientMetrics
+      : searchSourceMetrics;
 
     // Cleanup alerts that are no longer scheduling actions to avoid over populating the alertInstances object
     const alertsWithScheduledActions = pickBy(
