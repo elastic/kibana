@@ -200,9 +200,14 @@ export class ScreenshotObservableHandler {
         'screenshotting',
         'read'
       );
-      // position panel elements for print layout
-      await layout.positionElements?.(driver, eventLogger.kbnLogger);
-      spanEnd();
+      try {
+        // position panel elements for print layout
+        await layout.positionElements?.(driver, eventLogger.kbnLogger);
+        spanEnd();
+      } catch (error) {
+        eventLogger.error(error, Actions.GET_ELEMENT_POSITION_DATA);
+        throw error;
+      }
 
       await waitForRenderComplete(
         driver,
