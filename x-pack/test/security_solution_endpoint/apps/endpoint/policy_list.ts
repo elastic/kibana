@@ -66,7 +66,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await policyInfo.cleanup();
         }
       });
-      it('shows the policy list table with policies', async () => {
+      it('shows the policy list table', async () => {
         await pageObjects.policy.navigateToPolicyList();
         await testSubjects.existOrFail('policyListTable');
       });
