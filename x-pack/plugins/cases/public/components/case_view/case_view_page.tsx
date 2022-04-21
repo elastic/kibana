@@ -263,7 +263,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             <EuiSpacer size="m" />
             <EuiTabs>{renderTabs()}</EuiTabs>
             <EuiSpacer size="l" />
-            <EuiFlexGroup data-test-subj={`case-view-tab-content${activeTabId}`}>
+            <EuiFlexGroup data-test-subj={`case-view-tab-content-${activeTabId}`}>
               {selectedTabContent}
             </EuiFlexGroup>
           </ContentWrapper>
