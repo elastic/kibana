@@ -265,7 +265,7 @@ describe('getHitsMeta', () => {
     });
   });
 
-  test('should extract doc_count = 0 from meta features when there are no matches', () => {
+  test('should extract hits meta from  meta features', () => {
     const metaFeatures = [
       {
         type: 'Feature',
