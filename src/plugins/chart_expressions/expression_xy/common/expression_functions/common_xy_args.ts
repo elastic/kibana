@@ -23,10 +23,7 @@ import { LayeredXyVisFn, XyVisFn } from '../types';
 
 type CommonXYFn = XyVisFn | LayeredXyVisFn;
 
-export const commonXYArgs: Omit<
-  CommonXYFn['args'],
-  'dataLayers' | 'referenceLineLayers' | 'annotationLayers' | 'layers'
-> = {
+export const commonXYArgs: CommonXYFn['args'] = {
   xTitle: {
     types: ['string'],
     help: strings.getXTitleHelp(),
