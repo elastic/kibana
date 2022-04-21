@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { XyVisFn } from '../types';
 import { XY_VIS, DATA_LAYER, REFERENCE_LINE_LAYER, ANNOTATION_LAYER } from '../constants';
 import { strings } from '../i18n';
@@ -36,15 +35,11 @@ export const xyVisFunction: XyVisFn = {
     },
     splitColumnAccessor: {
       types: ['vis_dimension', 'string'],
-      help: i18n.translate('expressionXY.xyVis.splitColumnAccessor.help', {
-        defaultMessage: 'Specifies split column of the xy chart',
-      }),
+      help: strings.getSplitColumnAccessorHelp(),
     },
     splitRowAccessor: {
       types: ['vis_dimension', 'string'],
-      help: i18n.translate('expressionXY.xyVis.splitRowAccessor.help', {
-        defaultMessage: 'Specifies split row of the xy chart',
-      }),
+      help: strings.getSplitRowAccessorHelp(),
     },
   },
   async fn(data, args, handlers) {

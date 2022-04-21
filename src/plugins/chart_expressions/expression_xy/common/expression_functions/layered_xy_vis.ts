@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { LayeredXyVisFn } from '../types';
 import {
   XY_VIS_RENDERER,
@@ -29,9 +28,7 @@ export const layeredXyVisFunction: LayeredXyVisFn = {
     ...commonXYArgs,
     layers: {
       types: [EXTENDED_DATA_LAYER, EXTENDED_REFERENCE_LINE_LAYER, EXTENDED_ANNOTATION_LAYER],
-      help: i18n.translate('expressionXY.layeredXyVis.layers.help', {
-        defaultMessage: 'Layers of visual series',
-      }),
+      help: strings.getLayersHelp(),
       multi: true,
     },
   },
