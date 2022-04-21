@@ -27,12 +27,13 @@ import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import { PLUGIN_ID } from '../../../../../../common/constants/app';
 import type { ManagementAppMountParams } from '../../../../../../../../../src/plugins/management/public';
 
-import { checkGetManagementMlJobsResolver } from '../../../../capabilities/check_capabilities';
 import {
   KibanaContextProvider,
   KibanaThemeProvider,
   RedirectAppLinks,
 } from '../../../../../../../../../src/plugins/kibana_react/public';
+
+import { checkGetManagementMlJobsResolver } from '../../../../capabilities/check_capabilities';
 
 // @ts-ignore undeclared module
 import { JobsListView } from '../../../../jobs/jobs_list/components/jobs_list_view/index';
