@@ -22,7 +22,6 @@ export { registerConfigUsageCollector } from './config_usage';
 export {
   registerUiCountersUsageCollector,
   registerUiCounterSavedObjectType,
-  registerUiCountersRollups,
 } from './ui_counters';
 export {
   registerUsageCountersRollups,
