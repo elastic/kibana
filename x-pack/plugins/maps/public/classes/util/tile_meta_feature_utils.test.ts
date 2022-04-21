@@ -258,7 +258,7 @@ describe('getHitsMeta', () => {
           took: 7,
         },
       },
-    ] as TileMetaFeature[];;
+    ] as TileMetaFeature[];
     expect(getHitsMeta(metaFeatures, 10000)).toEqual({
       tilesWithFeatures: 0,
       tilesWithTrimmedResults: 0,
@@ -368,7 +368,7 @@ describe('getHitsMeta', () => {
           took: 10,
         },
       },
-    ] as TileMetaFeature[];;
+    ] as TileMetaFeature[];
     expect(getHitsMeta(metaFeatures, 10000)).toEqual({
       tilesWithFeatures: 3,
       tilesWithTrimmedResults: 2,
