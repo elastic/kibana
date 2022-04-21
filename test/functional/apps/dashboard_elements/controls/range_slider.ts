@@ -25,6 +25,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
+  const validateRange = async (
+    compare: 'value' | 'placeholder', // if 'value', compare actual selections; otherwise, compare the default range
+    controlId: string,
+    expectedLowerBound: string,
+    expectedUpperBound: string
+  ) => {
+    expect(await dashboardControls.rangeSliderGetLowerBoundAttribute(controlId, compare)).to.be(
+      expectedLowerBound
+    );
+    expect(await dashboardControls.rangeSliderGetUpperBoundAttribute(controlId, compare)).to.be(
+      expectedUpperBound
+    );
+  };
+
   describe('Range Slider Control', async () => {
     before(async () => {
       await security.testUser.setRoles([
@@ -82,12 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         expect(await dashboardControls.getControlsCount()).to.be(2);
         const secondId = (await dashboardControls.getAllControlIds())[1];
-        expect(
-          await dashboardControls.rangeSliderGetLowerBoundAttribute(secondId, 'placeholder')
-        ).to.be('100');
-        expect(
-          await dashboardControls.rangeSliderGetUpperBoundAttribute(secondId, 'placeholder')
-        ).to.be('1200');
+        validateRange('placeholder', secondId, '100', '1200');
         // data views should be properly propagated from the control group to the dashboard
         expect(await filterBar.getIndexPatterns()).to.be('logstash-*,kibana_sample_data_flights');
       });
@@ -112,12 +121,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.controlsEditorSetfield('dayOfWeek');
         await dashboardControls.controlEditorSave();
         await dashboardControls.rangeSliderWaitForLoading();
-        expect(
-          await dashboardControls.rangeSliderGetLowerBoundAttribute(firstId, 'placeholder')
-        ).to.be('0');
-        expect(
-          await dashboardControls.rangeSliderGetUpperBoundAttribute(firstId, 'placeholder')
-        ).to.be('6');
+        validateRange('placeholder', firstId, '0', '6');
+
         // when creating a new filter, the ability to select a data view should be removed, because the dashboard now only has one data view
         await retry.try(async () => {
           await testSubjects.click('addFilter');
@@ -150,31 +155,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('applies filter from the first control on the second control', async () => {
         await dashboardControls.rangeSliderWaitForLoading();
         const secondId = (await dashboardControls.getAllControlIds())[1];
-        const availableMin = await dashboardControls.rangeSliderGetLowerBoundAttribute(
-          secondId,
-          'placeholder'
-        );
-        expect(availableMin).to.be('100');
-        const availabeMax = await dashboardControls.rangeSliderGetUpperBoundAttribute(
-          secondId,
-          'placeholder'
-        );
-        expect(availabeMax).to.be('1000');
+        validateRange('placeholder', secondId, '100', '1000');
+      });
+
+      it('editing field clears selections', async () => {
+        const secondId = (await dashboardControls.getAllControlIds())[1];
+        await dashboardControls.editExistingControl(secondId);
+        await dashboardControls.controlsEditorSetfield('FlightDelayMin');
+        await dashboardControls.controlEditorSave();
+
+        await dashboardControls.rangeSliderWaitForLoading();
+        validateRange('value', secondId, '', '');
+      });
+
+      it('editing other control settings keeps selections', async () => {
+        const secondId = (await dashboardControls.getAllControlIds())[1];
+        await dashboardControls.rangeSliderSetLowerBound(secondId, '50');
+        await dashboardControls.rangeSliderSetUpperBound(secondId, '100');
+        await dashboardControls.rangeSliderWaitForLoading();
+
+        await dashboardControls.editExistingControl(secondId);
+        await dashboardControls.controlEditorSetTitle('Minimum Flight Delay');
+        await dashboardControls.controlEditorSetWidth('large');
+        await dashboardControls.controlEditorSave();
+
+        await dashboardControls.rangeSliderWaitForLoading();
+        validateRange('value', secondId, '50', '100');
       });
 
       it('can clear out selections by clicking the reset button', async () => {
         const firstId = (await dashboardControls.getAllControlIds())[0];
         await dashboardControls.rangeSliderClearSelection(firstId);
-        const lowerBoundSelection = await dashboardControls.rangeSliderGetLowerBoundAttribute(
-          firstId,
-          'value'
-        );
-        expect(lowerBoundSelection.length).to.be(0);
-        const upperBoundSelection = await dashboardControls.rangeSliderGetUpperBoundAttribute(
-          firstId,
-          'value'
-        );
-        expect(upperBoundSelection.length).to.be(0);
+        validateRange('value', firstId, '', '');
       });
 
       it('deletes an existing control', async () => {
