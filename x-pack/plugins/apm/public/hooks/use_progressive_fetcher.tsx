@@ -17,12 +17,6 @@ import {
   ProgressiveLoadingQuality,
 } from '@kbn/observability-plugin/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  apmProgressiveLoading,
-  getProbabilityFromProgressiveLoadingQuality,
-  ProgressiveLoadingQuality,
-} from '@kbn/observability-plugin/common';
 import type { APMServerRouteRepository } from '../../server';
 
 import type {
