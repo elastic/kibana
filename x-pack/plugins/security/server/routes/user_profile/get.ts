@@ -7,8 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
-import type { RouteDefinitionParams } from '../';
-import type { AuthenticatedUserProfile } from '../../../common/';
+import type { RouteDefinitionParams } from '..';
+import type { AuthenticatedUserProfile } from '../../../common';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
@@ -28,8 +28,7 @@ export function defineGetUserProfileRoute({
     createLicensedRouteHandler(async (context, request, response) => {
       const session = await getSession().get(request);
       if (!session) {
-        logger.warn('User profile requested without valid session.');
-        return response.unauthorized();
+        return response.notFound();
       }
       if (!session.userProfileId) {
         logger.warn(`User profile missing from current session. (sid: ${session.sid})`);

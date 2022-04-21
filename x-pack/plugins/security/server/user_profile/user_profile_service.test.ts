@@ -7,7 +7,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 
-import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { userProfileMock } from '../../common/model/user_profile.mock';
 import { securityMock } from '../mocks';

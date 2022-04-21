@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { applicationServiceMock } from 'src/core/public/mocks';
+import { applicationServiceMock } from '@kbn/core/public/mocks';
 
 import type { AuthenticatedUser } from './authenticated_user';
 import { canUserChangeDetails, canUserChangePassword, isUserAnonymous } from './authenticated_user';

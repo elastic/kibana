@@ -118,7 +118,7 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
         );
         onSuccess?.();
       } catch (error) {
-        if ((error as any).body?.message === 'security_exception') {
+        if ((error as any).body?.statusCode === 403) {
           form.setError(
             'current_password',
             i18n.translate(

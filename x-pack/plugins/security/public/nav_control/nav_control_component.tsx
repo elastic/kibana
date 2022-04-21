@@ -93,7 +93,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
 
   if (!isAnonymous) {
     const hasCustomProfileLinks = userMenuLinks.some(({ setAsProfile }) => setAsProfile === true);
-    const profileMenuItem = {
+    const profileMenuItem: EuiContextMenuPanelItemDescriptor = {
       name: (
         <FormattedMessage
           id="xpack.security.navControlComponent.editProfileLinkText"

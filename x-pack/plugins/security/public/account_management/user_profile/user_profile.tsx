@@ -8,21 +8,19 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
+  EuiButtonGroup,
   EuiColorPicker,
   EuiDescribedFormGroup,
-  EuiFieldText,
+  EuiDescriptionList,
   EuiFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiIcon,
-  EuiKeyPadMenu,
-  EuiKeyPadMenuItem,
+  EuiIconTip,
   EuiPageTemplate,
   EuiSpacer,
-  EuiSplitPanel,
-  EuiToolTip,
+  EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { Form, FormikProvider, useFormik, useFormikContext } from 'formik';
@@ -85,11 +83,67 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
   const formik = useUserProfileForm({ user, data });
   const formChanges = useFormChanges();
   const titleId = useGeneratedHtmlId();
-  const [showDeleteFlyout, setShowDeleteFlyout] = useState(false);
+  const [showChangePasswordFlyout, setShowChangePasswordFlyout] = useState(false);
 
   const isReservedUser = isUserReserved(user);
   const canChangePassword = canUserChangePassword(user);
   const canChangeDetails = canUserChangeDetails(user, services.application.capabilities);
+
+  const rightSideItems = [
+    {
+      title: (
+        <FormattedMessage
+          id="xpack.security.accountManagement.userProfile.usernameLabel"
+          defaultMessage="Username"
+        />
+      ),
+      description: user.username,
+      helpText: (
+        <FormattedMessage
+          id="xpack.security.accountManagement.userProfile.usernameHelpText"
+          defaultMessage="Username can't be changed once created."
+        />
+      ),
+    },
+  ];
+
+  if (!canChangeDetails) {
+    if (user.full_name) {
+      rightSideItems.push({
+        title: (
+          <FormattedMessage
+            id="xpack.security.accountManagement.userProfile.fullNameLabel"
+            defaultMessage="Full name"
+          />
+        ),
+        description: user.full_name,
+        helpText: (
+          <FormattedMessage
+            id="xpack.security.accountManagement.userProfile.fullNameHelpText"
+            defaultMessage="Contact an administrator to change your full name."
+          />
+        ),
+      });
+    }
+
+    if (user.email) {
+      rightSideItems.push({
+        title: (
+          <FormattedMessage
+            id="xpack.security.accountManagement.userProfile.emailLabel"
+            defaultMessage="Email address"
+          />
+        ),
+        description: user.email,
+        helpText: (
+          <FormattedMessage
+            id="xpack.security.accountManagement.userProfile.emailHelpText"
+            defaultMessage="Contact an administrator to change your email address."
+          />
+        ),
+      });
+    }
+  }
 
   return (
     <FormikProvider value={formik}>
@@ -99,10 +153,11 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
             defaultMessage: 'Profile',
           })}
         >
-          {showDeleteFlyout ? (
+          {showChangePasswordFlyout ? (
             <ChangePasswordFlyout
               username={user.username}
-              onCancel={() => setShowDeleteFlyout(false)}
+              onCancel={() => setShowChangePasswordFlyout(false)}
+              onSuccess={() => setShowChangePasswordFlyout(false)}
             />
           ) : null}
 
@@ -115,134 +170,81 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                 />
               ),
               pageTitleProps: { id: titleId },
-              rightSideItems: [
-                canChangePassword ? (
-                  <EuiButton onClick={() => setShowDeleteFlyout(true)} iconType="lock" fill>
-                    <FormattedMessage
-                      id="xpack.security.accountManagement.userProfile.changePasswordButton"
-                      defaultMessage="Change password"
-                    />
-                  </EuiButton>
-                ) : (
-                  <EuiToolTip
-                    content={
-                      <FormattedMessage
-                        id="xpack.security.accountManagement.userProfile.cannotChangePasswordWarning"
-                        defaultMessage="You can't change the password for this account."
-                      />
-                    }
-                  >
-                    <EuiButton iconType="lock" isDisabled fill>
-                      <FormattedMessage
-                        id="xpack.security.accountManagement.userProfile.changePasswordButton"
-                        defaultMessage="Change password"
-                      />
-                    </EuiButton>
-                  </EuiToolTip>
-                ),
-              ],
+              rightSideItems: rightSideItems.reverse().map((item) => (
+                <EuiDescriptionList
+                  textStyle="reverse"
+                  listItems={[
+                    {
+                      title: (
+                        <EuiText color="subdued" size="s">
+                          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
+                            <EuiFlexItem grow={false}>{item.title}</EuiFlexItem>
+                            <EuiFlexItem grow={false} style={{ marginLeft: '0.33em' }}>
+                              <EuiIconTip type="questionInCircle" content={item.helpText} />
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        </EuiText>
+                      ),
+                      description: item.description,
+                    },
+                  ]}
+                  compressed
+                />
+              )),
             }}
             bottomBar={formChanges.count > 0 ? <SaveChangesBottomBar /> : null}
             restrictWidth={900}
           >
-            {isReservedUser ? (
-              <>
-                <EuiCallOut
+            <Form aria-labelledby={titleId}>
+              {canChangeDetails ? (
+                <EuiDescribedFormGroup
+                  fullWidth
                   title={
+                    <h2>
+                      <FormattedMessage
+                        id="xpack.security.accountManagement.userProfile.detailsGroupTitle"
+                        defaultMessage="Details"
+                      />
+                    </h2>
+                  }
+                  description={
                     <FormattedMessage
-                      id="xpack.security.accountManagement.userProfile.reservedUserWarning"
-                      defaultMessage="This user is built in and only the password can be changed."
+                      id="xpack.security.accountManagement.userProfile.detailsGroupDescription"
+                      defaultMessage="Provide basic information about yourself."
                     />
                   }
-                  iconType="lock"
-                />
-                <EuiSpacer />
-              </>
-            ) : null}
-
-            <Form aria-labelledby={titleId}>
-              <EuiDescribedFormGroup
-                fullWidth
-                title={
-                  <h2>
-                    <FormattedMessage
-                      id="xpack.security.accountManagement.userProfile.detailsGroupTitle"
-                      defaultMessage="Details"
-                    />
-                  </h2>
-                }
-                description={
-                  <FormattedMessage
-                    id="xpack.security.accountManagement.userProfile.detailsGroupDescription"
-                    defaultMessage="Provide basic information about yourself."
-                  />
-                }
-              >
-                {isReservedUser ? (
-                  <EuiFormRow
+                >
+                  <FormRow
                     label={
-                      <FormattedMessage
-                        id="xpack.security.accountManagement.userProfile.usernameLabel"
-                        defaultMessage="Username"
-                      />
+                      <FormLabel for="user.full_name">
+                        <FormattedMessage
+                          id="xpack.security.accountManagement.userProfile.fullNameLabel"
+                          defaultMessage="Full name"
+                        />
+                      </FormLabel>
                     }
+                    labelAppend={<OptionalText />}
                     fullWidth
-                    isDisabled
                   >
-                    <EuiFieldText icon="user" value={user.username} fullWidth />
-                  </EuiFormRow>
-                ) : (
-                  <>
-                    <FormRow
-                      label={
-                        <FormLabel for="user.full_name">
-                          <FormattedMessage
-                            id="xpack.security.accountManagement.userProfile.fullNameLabel"
-                            defaultMessage="Full name"
-                          />
-                        </FormLabel>
-                      }
-                      helpText={
-                        !canChangeDetails ? (
-                          <FormattedMessage
-                            id="xpack.security.accountManagement.userProfile.fullNameHelpText"
-                            defaultMessage="You can't change this information."
-                          />
-                        ) : null
-                      }
-                      labelAppend={canChangeDetails ? <OptionalText /> : null}
-                      isDisabled={!canChangeDetails}
-                      fullWidth
-                    >
-                      <FormField name="user.full_name" fullWidth />
-                    </FormRow>
+                    <FormField name="user.full_name" fullWidth />
+                  </FormRow>
 
-                    <FormRow
-                      label={
-                        <FormLabel for="user.email">
-                          <FormattedMessage
-                            id="xpack.security.accountManagement.userProfile.emailLabel"
-                            defaultMessage="Email address"
-                          />
-                        </FormLabel>
-                      }
-                      helpText={
-                        !canChangeDetails ? (
-                          <FormattedMessage
-                            id="xpack.security.accountManagement.userProfile.emailHelpText"
-                            defaultMessage="You can't change this information."
-                          />
-                        ) : null
-                      }
-                      labelAppend={canChangeDetails ? <OptionalText /> : null}
-                      isDisabled={!canChangeDetails}
-                      fullWidth
-                    >
-                      <FormField type="email" name="user.email" fullWidth />
-                    </FormRow>
-                  </>
-                )}
-              </EuiDescribedFormGroup>
+                  <FormRow
+                    label={
+                      <FormLabel for="user.email">
+                        <FormattedMessage
+                          id="xpack.security.accountManagement.userProfile.emailLabel"
+                          defaultMessage="Email address"
+                        />
+                      </FormLabel>
+                    }
+                    labelAppend={<OptionalText />}
+                    fullWidth
+                  >
+                    <FormField type="email" name="user.email" fullWidth />
+                  </FormRow>
+                </EuiDescribedFormGroup>
+              ) : null}
 
               <EuiDescribedFormGroup
                 fullWidth
@@ -261,59 +263,8 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   />
                 }
               >
-                {!isReservedUser && (
-                  <>
-                    <EuiFormRow fullWidth>
-                      <EuiKeyPadMenu
-                        checkable={{
-                          legend: (
-                            <FormLabel for="avatarType">
-                              <FormattedMessage
-                                id="xpack.security.accountManagement.userProfile.avatarTypeGroupDescription"
-                                defaultMessage="Avatar type"
-                              />
-                            </FormLabel>
-                          ),
-                        }}
-                      >
-                        <EuiKeyPadMenuItem
-                          checkable="single"
-                          name="avatarType"
-                          label={
-                            <FormattedMessage
-                              id="xpack.security.accountManagement.userProfile.initialsAvatarTypeLabel"
-                              defaultMessage="Initials"
-                            />
-                          }
-                          onChange={() => formik.setFieldValue('avatarType', 'initials')}
-                          isSelected={formik.values.avatarType === 'initials'}
-                          isDisabled={isReservedUser}
-                        >
-                          <EuiIcon type="lettering" size="l" />
-                        </EuiKeyPadMenuItem>
-                        <EuiKeyPadMenuItem
-                          checkable="single"
-                          name="avatarType"
-                          label={
-                            <FormattedMessage
-                              id="xpack.security.accountManagement.userProfile.imageAvatarTypeLabel"
-                              defaultMessage="Image"
-                            />
-                          }
-                          onChange={() => formik.setFieldValue('avatarType', 'image')}
-                          isSelected={formik.values.avatarType === 'image'}
-                          isDisabled={isReservedUser}
-                        >
-                          <EuiIcon type="image" size="l" />
-                        </EuiKeyPadMenuItem>
-                      </EuiKeyPadMenu>
-                    </EuiFormRow>
-                    <EuiSpacer />
-                  </>
-                )}
-
-                <EuiSplitPanel.Outer direction="row" hasBorder>
-                  <EuiSplitPanel.Inner grow={false} color="subdued">
+                <EuiFlexGroup responsive={false} alignItems="center">
+                  <EuiFlexItem grow={false}>
                     {formik.values.avatarType === 'image' && !formik.values.data.avatar.imageUrl ? (
                       <UserAvatar size="xl" />
                     ) : (
@@ -332,145 +283,231 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                         size="xl"
                       />
                     )}
-                  </EuiSplitPanel.Inner>
-                  <EuiSplitPanel.Inner color="plain">
-                    {formik.values.avatarType === 'image' ? (
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <FormRow
+                      name="avatarType"
+                      label={
+                        <FormLabel for="avatarType">
+                          <FormattedMessage
+                            id="xpack.security.accountManagement.userProfile.avatarTypeGroupDescription"
+                            defaultMessage="Avatar type"
+                          />
+                        </FormLabel>
+                      }
+                      fullWidth
+                    >
+                      <EuiButtonGroup
+                        legend={i18n.translate(
+                          'xpack.security.accountManagement.userProfile.avatarTypeGroupDescription',
+                          {
+                            defaultMessage: 'Avatar type',
+                          }
+                        )}
+                        buttonSize="m"
+                        idSelected={formik.values.avatarType}
+                        options={[
+                          {
+                            id: 'initials',
+                            label: (
+                              <FormattedMessage
+                                id="xpack.security.accountManagement.userProfile.initialsAvatarTypeLabel"
+                                defaultMessage="Initials"
+                              />
+                            ),
+                            iconType: 'lettering',
+                          },
+                          {
+                            id: 'image',
+                            label: (
+                              <FormattedMessage
+                                id="xpack.security.accountManagement.userProfile.imageAvatarTypeLabel"
+                                defaultMessage="Image"
+                              />
+                            ),
+                            iconType: 'image',
+                          },
+                        ]}
+                        onChange={(id: string) => formik.setFieldValue('avatarType', id)}
+                        isFullWidth
+                      />
+                    </FormRow>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer />
+
+                {formik.values.avatarType === 'image' ? (
+                  <FormRow
+                    label={
+                      <FormLabel for="data.avatar.imageUrl">
+                        <FormattedMessage
+                          id="xpack.security.accountManagement.userProfile.imageUrlLabel"
+                          defaultMessage="Image"
+                        />
+                      </FormLabel>
+                    }
+                    fullWidth
+                  >
+                    <FormField
+                      as={EuiFilePicker}
+                      name="data.avatar.imageUrl"
+                      value={undefined} /* EuiFilePicker breaks if value is provided  */
+                      initialPromptText={
+                        <FormattedMessage
+                          id="xpack.security.accountManagement.userProfile.imageUrlPromptText"
+                          defaultMessage="Select image file"
+                        />
+                      }
+                      onChange={createImageHandler((imageUrl) => {
+                        formik.setFieldValue('data.avatar.imageUrl', imageUrl ?? '');
+                      })}
+                      validate={{
+                        required: i18n.translate(
+                          'xpack.security.accountManagement.userProfile.imageUrlRequiredError',
+                          {
+                            defaultMessage: 'Upload an image.',
+                          }
+                        ),
+                      }}
+                      accept={IMAGE_FILE_TYPES.join(',')}
+                      display="default"
+                      fullWidth
+                    />
+                  </FormRow>
+                ) : (
+                  <EuiFlexGroup responsive={false} alignItems="center">
+                    <EuiFlexItem grow={false} style={{ width: 64 }}>
                       <FormRow
                         label={
-                          <FormLabel for="data.avatar.imageUrl">
+                          <FormLabel for="data.avatar.initials">
                             <FormattedMessage
-                              id="xpack.security.accountManagement.userProfile.imageUrlLabel"
-                              defaultMessage="Image"
+                              id="xpack.security.accountManagement.userProfile.initialsLabel"
+                              defaultMessage="Initials"
                             />
                           </FormLabel>
                         }
-                        isDisabled={isReservedUser}
                         fullWidth
                       >
                         <FormField
-                          as={EuiFilePicker}
-                          name="data.avatar.imageUrl"
-                          value={undefined} /* EuiFilePicker breaks if value is provided  */
-                          initialPromptText={
-                            <FormattedMessage
-                              id="xpack.security.accountManagement.userProfile.imageUrlPromptText"
-                              defaultMessage="Select image file"
-                            />
-                          }
-                          onChange={createImageHandler((imageUrl) => {
-                            formik.setFieldValue('data.avatar.imageUrl', imageUrl ?? '');
-                          })}
+                          name="data.avatar.initials"
                           validate={{
                             required: i18n.translate(
-                              'xpack.security.accountManagement.userProfile.imageUrlRequiredError',
+                              'xpack.security.accountManagement.userProfile.initialsRequiredError',
                               {
-                                defaultMessage: 'Upload an image.',
+                                defaultMessage: 'Enter initials.',
                               }
                             ),
+                            maxLength: {
+                              value: 2,
+                              message: i18n.translate(
+                                'xpack.security.accountManagement.userProfile.initialsMaxLengthError',
+                                {
+                                  defaultMessage: 'Enter no more than 2 characters.',
+                                }
+                              ),
+                            },
                           }}
-                          accept={IMAGE_FILE_TYPES.join(',')}
-                          display="default"
                           fullWidth
                         />
                       </FormRow>
-                    ) : (
-                      <>
-                        <FormRow
-                          label={
-                            <FormLabel for="data.avatar.initials">
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <FormRow
+                        label={
+                          <FormLabel for="data.avatar.color">
+                            <FormattedMessage
+                              id="xpack.security.accountManagement.userProfile.colorLabel"
+                              defaultMessage="Color"
+                            />
+                          </FormLabel>
+                        }
+                        labelAppend={
+                          !isReservedUser ? (
+                            <EuiButtonEmpty
+                              onClick={() =>
+                                formik.setFieldValue('data.avatar.color', getRandomColor())
+                              }
+                              size="xs"
+                              flush="right"
+                              style={{ height: 18 }}
+                            >
                               <FormattedMessage
-                                id="xpack.security.accountManagement.userProfile.initialsLabel"
-                                defaultMessage="Initials"
+                                id="xpack.security.accountManagement.userProfile.randomizeButton"
+                                defaultMessage="Randomize"
                               />
-                            </FormLabel>
-                          }
-                          isDisabled={isReservedUser}
-                          fullWidth
-                        >
-                          <FormField
-                            name="data.avatar.initials"
-                            validate={{
-                              required: i18n.translate(
-                                'xpack.security.accountManagement.userProfile.initialsRequiredError',
+                            </EuiButtonEmpty>
+                          ) : null
+                        }
+                        fullWidth
+                      >
+                        <FormField
+                          as={EuiColorPicker}
+                          name="data.avatar.color"
+                          color={formik.values.data.avatar.color}
+                          validate={{
+                            required: i18n.translate(
+                              'xpack.security.accountManagement.userProfile.colorRequiredError',
+                              {
+                                defaultMessage: 'Select a color.',
+                              }
+                            ),
+                            pattern: {
+                              value: VALID_HEX_COLOR,
+                              message: i18n.translate(
+                                'xpack.security.accountManagement.userProfile.colorPatternError',
                                 {
-                                  defaultMessage: 'Enter initials.',
+                                  defaultMessage: 'Enter a valid HEX color code.',
                                 }
                               ),
-                              maxLength: {
-                                value: 2,
-                                message: i18n.translate(
-                                  'xpack.security.accountManagement.userProfile.initialsMaxLengthError',
-                                  {
-                                    defaultMessage: 'Enter no more than 2 characters.',
-                                  }
-                                ),
-                              },
-                            }}
-                            fullWidth
-                          />
-                        </FormRow>
-
-                        <FormRow
-                          label={
-                            <FormLabel for="data.avatar.color">
-                              <FormattedMessage
-                                id="xpack.security.accountManagement.userProfile.colorLabel"
-                                defaultMessage="Color"
-                              />
-                            </FormLabel>
-                          }
-                          labelAppend={
-                            !isReservedUser ? (
-                              <EuiButtonEmpty
-                                onClick={() =>
-                                  formik.setFieldValue('data.avatar.color', getRandomColor())
-                                }
-                                size="xs"
-                                flush="right"
-                                style={{ height: 18 }}
-                              >
-                                <FormattedMessage
-                                  id="xpack.security.accountManagement.userProfile.randomizeButton"
-                                  defaultMessage="Randomize"
-                                />
-                              </EuiButtonEmpty>
-                            ) : null
-                          }
-                          isDisabled={isReservedUser}
+                            },
+                          }}
+                          onChange={(value: string) => {
+                            formik.setFieldValue('data.avatar.color', value);
+                          }}
                           fullWidth
-                        >
-                          <FormField
-                            as={EuiColorPicker}
-                            name="data.avatar.color"
-                            color={formik.values.data.avatar.color}
-                            validate={{
-                              required: i18n.translate(
-                                'xpack.security.accountManagement.userProfile.colorRequiredError',
-                                {
-                                  defaultMessage: 'Select a color.',
-                                }
-                              ),
-                              pattern: {
-                                value: VALID_HEX_COLOR,
-                                message: i18n.translate(
-                                  'xpack.security.accountManagement.userProfile.colorPatternError',
-                                  {
-                                    defaultMessage: 'Enter a valid HEX color code.',
-                                  }
-                                ),
-                              },
-                            }}
-                            onChange={(value: string) => {
-                              formik.setFieldValue('data.avatar.color', value);
-                            }}
-                            fullWidth
-                          />
-                        </FormRow>
-                      </>
-                    )}
-                  </EuiSplitPanel.Inner>
-                </EuiSplitPanel.Outer>
+                        />
+                      </FormRow>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                )}
               </EuiDescribedFormGroup>
+
+              {canChangePassword ? (
+                <EuiDescribedFormGroup
+                  fullWidth
+                  title={
+                    <h2>
+                      <FormattedMessage
+                        id="xpack.security.accountManagement.userProfile.passwordGroupTitle"
+                        defaultMessage="Password"
+                      />
+                    </h2>
+                  }
+                  description={
+                    <FormattedMessage
+                      id="xpack.security.accountManagement.userProfile.passwordGroupDescription"
+                      defaultMessage="Protect your data with a strong password."
+                    />
+                  }
+                >
+                  <EuiFormRow
+                    label={
+                      <FormattedMessage
+                        id="xpack.security.accountManagement.userProfile.passwordLabel"
+                        defaultMessage="Password"
+                      />
+                    }
+                    fullWidth
+                  >
+                    <EuiButton onClick={() => setShowChangePasswordFlyout(true)} iconType="lock">
+                      <FormattedMessage
+                        id="xpack.security.accountManagement.userProfile.changePasswordButton"
+                        defaultMessage="Change password"
+                      />
+                    </EuiButton>
+                  </EuiFormRow>
+                </EuiDescribedFormGroup>
+              ) : null}
             </Form>
             <EuiSpacer />
           </EuiPageTemplate>

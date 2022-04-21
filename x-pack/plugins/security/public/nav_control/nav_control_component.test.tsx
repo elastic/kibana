@@ -69,6 +69,11 @@ describe('SecurityNavControl', () => {
         aria-label="Account menu"
         data-test-subj="userMenuButton"
         onClick={[Function]}
+        style={
+          Object {
+            "lineHeight": "normal",
+          }
+        }
       >
         <UserAvatar
           data-test-subj="userMenuAvatar"
@@ -125,6 +130,11 @@ describe('SecurityNavControl', () => {
         aria-label="Account menu"
         data-test-subj="userMenuButton"
         onClick={[Function]}
+        style={
+          Object {
+            "lineHeight": "normal",
+          }
+        }
       >
         <EuiLoadingSpinner
           size="m"
