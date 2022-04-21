@@ -8,10 +8,20 @@
 import { useLocation, useRouteMatch } from 'react-router-dom';
 import { keyBy } from 'lodash';
 import { useMemo } from 'react';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { useMlKibana } from '../contexts/kibana';
 import type { MlRoute } from './router';
 
+/**
+ * Provides an active route of the ML app.
+ * @param routesList
+ */
 export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
   const { pathname } = useLocation();
+
+  const {
+    services: { executionContext },
+  } = useMlKibana();
 
   /**
    * Temp fix for routes with params.
@@ -32,6 +42,12 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
     const pathnameKey = pathname.replace(/\/$/, '');
     return routesMap[pathnameKey];
   }, [pathname]);
+
+  useExecutionContext(executionContext, {
+    name: 'Machine Learning',
+    type: 'application',
+    page: activeRoute.path,
+  });
 
   return activeRoute ?? routesMap['/overview'];
 };
