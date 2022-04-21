@@ -13,6 +13,8 @@ import { connect, ConnectedProps } from 'react-redux';
 import { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import { get } from 'lodash/fp';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
+import { useSecurityFlyout } from '../../flyouts';
+import { OsqueryActionItem } from '../../osquery/osquery_action_item';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { buildGetAlertByIdQuery } from '../../../../common/components/exceptions/helpers';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
@@ -28,7 +30,6 @@ import { TimelineId } from '../../../../../common/types';
 import { AlertData, EcsHit } from '../../../../common/components/exceptions/types';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { useSignalIndex } from '../../../containers/detection_engine/alerts/use_signal_index';
-import { EventFiltersFlyout } from '../../../../management/pages/event_filters/view/components/flyout';
 import { useAlertsActions } from './use_alerts_actions';
 import { useExceptionFlyout } from './use_add_exception_flyout';
 import { useExceptionActions } from './use_add_exception_actions';
@@ -64,6 +65,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const [routeProps] = useRouteSpy();
+  const { flyoutDispatch } = useSecurityFlyout();
 
   const onMenuItemClick = useCallback(() => {
     setPopover(false);
@@ -142,8 +144,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     timelineId,
   });
 
-  const { closeAddEventFilterModal, isAddEventFilterModalOpen, onAddEventFilterClick } =
-    useEventFilterModal();
+  const { onAddEventFilterClick } = useEventFilterModal({ ecsData: ecsRowData });
 
   const { actionItems: statusActionItems } = useAlertsActions({
     alertStatus,
@@ -175,18 +176,41 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     onAddEventFilterClick: handleOnAddEventFilterClick,
     disabled: !isEvent || !canCreateEndpointEventFilters,
   });
+
+  const agentId = useMemo(() => get(0, ecsRowData?.agent?.id), [ecsRowData]);
+  const osqueryActionItem = useMemo(
+    () =>
+      OsqueryActionItem({
+        handleClick: () => {
+          flyoutDispatch({
+            type: 'osquery',
+            payload: { agentId, onClose: () => flyoutDispatch({ type: null }) },
+          });
+          closePopover();
+        },
+      }),
+
+    [agentId, closePopover, flyoutDispatch]
+  );
+
   const items: React.ReactElement[] = useMemo(
     () =>
       !isEvent && ruleId
-        ? [...addToCaseActionItems, ...statusActionItems, ...exceptionActionItems]
+        ? [
+            ...addToCaseActionItems,
+            ...statusActionItems,
+            ...exceptionActionItems,
+            osqueryActionItem,
+          ]
         : [...addToCaseActionItems, ...eventFilterActionItems],
     [
-      statusActionItems,
-      addToCaseActionItems,
-      eventFilterActionItems,
-      exceptionActionItems,
       isEvent,
       ruleId,
+      addToCaseActionItems,
+      statusActionItems,
+      exceptionActionItems,
+      osqueryActionItem,
+      eventFilterActionItems,
     ]
   );
 
@@ -225,9 +249,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
             onRuleChange={onRuleChange}
           />
         )}
-      {isAddEventFilterModalOpen && ecsRowData != null && (
-        <EventFiltersFlyout data={ecsRowData} onCancel={closeAddEventFilterModal} />
-      )}
     </>
   );
 };

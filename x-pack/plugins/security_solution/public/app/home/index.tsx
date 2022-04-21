@@ -9,6 +9,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
+import { useSecurityFlyout } from '../../detections/components/flyouts';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { SecuritySolutionAppWrapper } from '../../common/components/page';
 import { HelpMenu } from '../../common/components/help_menu';
@@ -46,7 +47,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({
   // a background task solution can be built on the server side. Once a background task solution is available we
   // can remove this.
   useUpgradeSecurityPackages();
-
+  const { FlyoutComponent } = useSecurityFlyout();
   return (
     <SecuritySolutionAppWrapper className="kbnAppWrapper">
       <ConsoleManager>
@@ -57,6 +58,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({
             {children}
           </SecuritySolutionTemplateWrapper>
         </DragDropContextWrapper>
+        <FlyoutComponent />
         <HelpMenu />
       </ConsoleManager>
     </SecuritySolutionAppWrapper>

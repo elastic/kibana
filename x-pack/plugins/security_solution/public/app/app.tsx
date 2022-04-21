@@ -15,6 +15,7 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
 
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { FlyoutProvider } from '../detections/components/flyouts';
 import { ManageUserInfo } from '../detections/components/user_info';
 import { DEFAULT_DARK_MODE, APP_NAME, APP_ID } from '../../common/constants';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
@@ -68,20 +69,22 @@ const StartAppComponent: FC<StartAppComponent> = ({
                 <MlCapabilitiesProvider>
                   <UserPrivilegesProvider kibanaCapabilities={capabilities}>
                     <ManageUserInfo>
-                      <ReactQueryClientProvider>
-                        <CasesContext
-                          owner={[APP_ID]}
-                          userCanCrud={casesPermissions?.crud ?? false}
-                        >
-                          <PageRouter
-                            history={history}
-                            onAppLeave={onAppLeave}
-                            setHeaderActionMenu={setHeaderActionMenu}
+                      <FlyoutProvider>
+                        <ReactQueryClientProvider>
+                          <CasesContext
+                            owner={[APP_ID]}
+                            userCanCrud={casesPermissions?.crud ?? false}
                           >
-                            {children}
-                          </PageRouter>
-                        </CasesContext>
-                      </ReactQueryClientProvider>
+                            <PageRouter
+                              history={history}
+                              onAppLeave={onAppLeave}
+                              setHeaderActionMenu={setHeaderActionMenu}
+                            >
+                              {children}
+                            </PageRouter>
+                          </CasesContext>
+                        </ReactQueryClientProvider>
+                      </FlyoutProvider>
                     </ManageUserInfo>
                   </UserPrivilegesProvider>
                 </MlCapabilitiesProvider>

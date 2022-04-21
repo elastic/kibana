@@ -5,17 +5,32 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
+import { FlyoutTypes, useSecurityFlyout } from '../../flyouts';
+import { Ecs } from '../../../../../common/ecs';
 
-export const useEventFilterModal = () => {
-  const [isAddEventFilterModalOpen, setIsAddEventFilterModalOpen] = useState<boolean>(false);
+interface IProps extends Record<string, unknown> {
+  ecsData: Ecs | null;
+}
+
+export const useEventFilterModal = (props: IProps) => {
+  const { flyoutDispatch } = useSecurityFlyout();
+
+  const closeAddEventFilterModal = useCallback((): void => {
+    flyoutDispatch({ type: null });
+  }, [flyoutDispatch]);
 
   const onAddEventFilterClick = useCallback((): void => {
-    setIsAddEventFilterModalOpen(true);
-  }, []);
-  const closeAddEventFilterModal = useCallback((): void => {
-    setIsAddEventFilterModalOpen(false);
-  }, []);
+    if (props.ecsData != null) {
+      flyoutDispatch({
+        type: FlyoutTypes.EVENT_FILTER,
+        payload: {
+          closeAddEventFilterModal,
+          ...props,
+        },
+      });
+    }
+  }, [closeAddEventFilterModal, flyoutDispatch, props]);
 
-  return { closeAddEventFilterModal, isAddEventFilterModalOpen, onAddEventFilterClick };
+  return { onAddEventFilterClick };
 };

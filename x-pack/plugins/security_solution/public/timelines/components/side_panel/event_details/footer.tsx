@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
 import { find } from 'lodash/fp';
 import { connect, ConnectedProps } from 'react-redux';
+import { FlyoutTypes, useSecurityFlyout } from '../../../../detections/components/flyouts';
 import { TakeActionDropdown } from '../../../../detections/components/take_action_dropdown';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
 import { TimelineId } from '../../../../../common/types';
 import { useExceptionFlyout } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_flyout';
 import { AddExceptionFlyoutWrapper } from '../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
-import { EventFiltersFlyout } from '../../../../management/pages/event_filters/view/components/flyout';
 import { useEventFilterModal } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_modal';
 import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { Ecs } from '../../../../../common/ecs';
 import { inputsModel, inputsSelectors, State } from '../../../../common/store';
-import { OsqueryFlyout } from '../../../../detections/components/osquery/osquery_flyout';
 
 interface EventDetailsFooterProps {
   detailsData: TimelineEventsDetailsItem[] | null;
@@ -107,16 +106,25 @@ export const EventDetailsFooterComponent = React.memo(
       refetch: refetchAll,
       timelineId,
     });
-    const { closeAddEventFilterModal, isAddEventFilterModalOpen, onAddEventFilterClick } =
-      useEventFilterModal();
-
-    const [isOsqueryFlyoutOpenWithAgentId, setOsqueryFlyoutOpenWithAgentId] = useState<
-      null | string
-    >(null);
+    const { onAddEventFilterClick } = useEventFilterModal({
+      ecsData: detailsEcsData,
+      maskProps: { style: 'z-index: 5000' },
+    });
+    const { flyoutDispatch } = useSecurityFlyout();
 
     const closeOsqueryFlyout = useCallback(() => {
-      setOsqueryFlyoutOpenWithAgentId(null);
-    }, [setOsqueryFlyoutOpenWithAgentId]);
+      flyoutDispatch({ type: null });
+    }, [flyoutDispatch]);
+
+    const openOsqueryFlyout = useCallback(
+      (agentId) => {
+        flyoutDispatch({
+          type: FlyoutTypes.OSQUERY,
+          payload: { agentId, onClose: closeOsqueryFlyout },
+        });
+      },
+      [closeOsqueryFlyout, flyoutDispatch]
+    );
 
     return (
       <>
@@ -137,7 +145,7 @@ export const EventDetailsFooterComponent = React.memo(
                   refetch={refetchAll}
                   indexName={expandedEvent.indexName}
                   timelineId={timelineId}
-                  onOsqueryClick={setOsqueryFlyoutOpenWithAgentId}
+                  onOsqueryClick={openOsqueryFlyout}
                 />
               )}
             </EuiFlexItem>
@@ -157,16 +165,6 @@ export const EventDetailsFooterComponent = React.memo(
               onConfirm={onAddExceptionConfirm}
             />
           )}
-        {isAddEventFilterModalOpen && detailsEcsData != null && (
-          <EventFiltersFlyout
-            data={detailsEcsData}
-            onCancel={closeAddEventFilterModal}
-            maskProps={{ style: 'z-index: 5000' }}
-          />
-        )}
-        {isOsqueryFlyoutOpenWithAgentId && detailsEcsData != null && (
-          <OsqueryFlyout agentId={isOsqueryFlyoutOpenWithAgentId} onClose={closeOsqueryFlyout} />
-        )}
       </>
     );
   }
