@@ -3096,6 +3096,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/location_free_xpack_pkg@link:bazel-bin/x-pack/plugins/location_free_xpack_pkg":
+  version "0.0.0"
+  uid ""
+
 "@kbn/logging-mocks@link:bazel-bin/packages/kbn-logging-mocks":
   version "0.0.0"
   uid ""
@@ -6177,6 +6181,10 @@
   uid ""
 
 "@types/kbn__location_free_pkg_three@link:bazel-bin/src/plugins/location_free_pkg_three/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__location_free_xpack_pkg@link:bazel-bin/x-pack/plugins/location_free_xpack_pkg/npm_module_types":
   version "0.0.0"
   uid ""
 

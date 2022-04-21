@@ -110,6 +110,7 @@ filegroup(
     "//src/plugins/location_free_pkg_three:build",
     "//src/plugins/location_free_pkg_two:build",
     "//src/plugins/location-free-pkg:build",
+    "//x-pack/plugins/location_free_xpack_pkg:build",
   ],
 )
 
@@ -203,6 +204,7 @@ filegroup(
     "//src/plugins/location_free_pkg_three:build_types",
     "//src/plugins/location_free_pkg_two:build_types",
     "//src/plugins/location-free-pkg:build_types",
+    "//x-pack/plugins/location_free_xpack_pkg:build_types",
   ],
 )
 
