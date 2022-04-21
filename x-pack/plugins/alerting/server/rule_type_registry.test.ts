@@ -61,7 +61,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -87,7 +87,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -125,7 +125,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -154,7 +154,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -186,7 +186,7 @@ describe('Create Lifecycle', () => {
         producer: 'alerts',
         defaultScheduleInterval: 'foobar',
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -279,7 +279,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -313,7 +313,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -351,7 +351,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -393,7 +393,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -424,7 +424,7 @@ describe('Create Lifecycle', () => {
         producer: 'alerts',
         ruleTaskTimeout: '20m',
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -461,7 +461,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -489,7 +489,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -510,7 +510,7 @@ describe('Create Lifecycle', () => {
           executor: jest.fn(),
           producer: 'alerts',
           config: {
-            execution: {
+            run: {
               actions: { max: 1000 },
             },
           },
@@ -537,7 +537,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -561,7 +561,7 @@ describe('Create Lifecycle', () => {
           "state": Array [],
         },
         "config": Object {
-          "execution": Object {
+          "run": Object {
             "actions": Object {
               "max": 1000,
             },
@@ -616,7 +616,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         producer: 'alerts',
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -715,7 +715,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
         config: {
-          execution: {
+          run: {
             actions: { max: 1000 },
           },
         },
@@ -753,7 +753,7 @@ function ruleTypeWithVariables<ActionGroupIds extends string>(
     async executor() {},
     producer: 'alerts',
     config: {
-      execution: {
+      run: {
         actions: { max: 1000 },
       },
     },

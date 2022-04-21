@@ -107,6 +107,9 @@ Object {
                   "isHistogram": Array [
                     false,
                   ],
+                  "layerId": Array [
+                    "first",
+                  ],
                   "palette": Array [
                     Object {
                       "chain": Array [
