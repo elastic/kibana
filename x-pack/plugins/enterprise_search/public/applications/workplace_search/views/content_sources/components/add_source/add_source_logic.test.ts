@@ -54,6 +54,7 @@ describe('AddSourceLogic', () => {
     buttonLoading: false,
     clientIdValue: '',
     clientSecretValue: '',
+    clientBasicApiKeyValue: '',
     baseUrlValue: '',
     loginValue: '',
     passwordValue: '',
@@ -131,6 +132,7 @@ describe('AddSourceLogic', () => {
         clientIdValue: sourceConfigData.configuredFields.clientId,
         baseUrlValue: sourceConfigData.configuredFields.baseUrl,
         clientSecretValue: sourceConfigData.configuredFields.clientSecret,
+        clientBasicApiKeyValue: sourceConfigData.configuredFields.basicApiKey,
       });
     });
 
@@ -159,6 +161,15 @@ describe('AddSourceLogic', () => {
       expect(AddSourceLogic.values).toEqual({
         ...DEFAULT_VALUES,
         clientSecretValue: 'secret',
+      });
+    });
+
+    it('setClientBasicApiKeyValue', () => {
+      AddSourceLogic.actions.setClientBasicApiKeyValue('basicApiKey');
+
+      expect(AddSourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        clientBasicApiKeyValue: 'basicApiKey',
       });
     });
 
@@ -280,6 +291,7 @@ describe('AddSourceLogic', () => {
         sourceConfigData: sourceConfigDataMock,
         clientIdValue: '',
         clientSecretValue: '',
+        clientBasicApiKeyValue: '',
         baseUrlValue: '',
       });
     });
@@ -678,6 +690,7 @@ describe('AddSourceLogic', () => {
             base_url: AddSourceLogic.values.baseUrlValue,
             client_id: AddSourceLogic.values.clientIdValue,
             client_secret: AddSourceLogic.values.clientSecretValue,
+            basic_api_key: AddSourceLogic.values.clientBasicApiKeyValue,
             service_type: sourceConfigData.serviceType,
             private_key: sourceConfigData.configuredFields?.privateKey,
             public_key: sourceConfigData.configuredFields?.publicKey,
@@ -786,6 +799,7 @@ describe('AddSourceLogic', () => {
           });
           AddSourceLogic.actions.setClientIdValue('');
           AddSourceLogic.actions.setClientSecretValue('');
+          AddSourceLogic.actions.setClientBasicApiKeyValue('');
           AddSourceLogic.actions.setBaseUrlValue('');
           ExternalConnectorLogic.actions.setExternalConnectorUrl('');
           ExternalConnectorLogic.actions.setExternalConnectorApiKey('');

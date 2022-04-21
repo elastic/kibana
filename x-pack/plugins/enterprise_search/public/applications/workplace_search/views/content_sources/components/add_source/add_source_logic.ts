@@ -118,7 +118,7 @@ export interface SourceConfigData {
     baseUrl?: string;
     clientId?: string;
     clientSecret?: string;
-    clientBasicApiKey?: string;
+    basicApiKey?: string;
     externalConnectorUrl?: string;
     externalConnectorApiKey?: string;
   };
@@ -286,7 +286,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       '',
       {
         setClientBasicApiKeyValue: (_, clientBasicApiKeyValue) => clientBasicApiKeyValue,
-        setSourceConfigData: (_, { configuredFields: { clientBasicApiKey } }) => clientBasicApiKey || '',
+        setSourceConfigData: (_, { configuredFields: { basicApiKey } }) => basicApiKey || '',
         resetSourceState: () => '',
       },
     ],
@@ -456,6 +456,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         baseUrlValue,
         clientIdValue,
         clientSecretValue,
+        clientBasicApiKeyValue,
         sourceConfigData,
       } = values;
 
@@ -480,6 +481,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         base_url: baseUrlValue || undefined,
         client_id: clientIdValue || undefined,
         client_secret: clientSecretValue || undefined,
+        basic_api_key: clientBasicApiKeyValue || undefined,
         service_type: serviceType,
         private_key: sourceConfigData.configuredFields?.privateKey,
         public_key: sourceConfigData.configuredFields?.publicKey,
