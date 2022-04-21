@@ -8,7 +8,7 @@
 import {
   settingsObjectId,
   settingsObjectType,
-} from '@kbn/uptime-plugin/server/lib/saved_objects/uptime_settings';
+} from '@kbn/synthetics-plugin/server/lib/saved_objects/uptime_settings';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
