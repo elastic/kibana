@@ -8,14 +8,14 @@
 
 import type { ContextValue } from '../../contexts';
 
-jest.mock('./send_request', () => ({ sendRequest: jest.fn(() => Promise.resolve()) }));
+jest.mock('./send_request_to_es', () => ({ sendRequestToES: jest.fn(() => Promise.resolve()) }));
 
-import { sendRequest } from './send_request';
+import { sendRequestToES } from './send_request_to_es';
 import { serviceContextMock } from '../../contexts/services_context.mock';
 
-const mockedSendRequest = sendRequest as jest.Mock;
+const mockedSendRequestToES = sendRequestToES as jest.Mock;
 
-describe('sendRequest', () => {
+describe('sendRequestToES', () => {
   let mockContextValue: ContextValue;
 
   beforeEach(() => {
@@ -26,8 +26,8 @@ describe('sendRequest', () => {
     jest.resetAllMocks();
   });
 
-  it('should send request', async () => {
-    mockedSendRequest.mockResolvedValue([
+  it('should send request to ES', async () => {
+    mockedSendRequestToES.mockResolvedValue([
       {
         response: {
           statusCode: 200,
@@ -40,17 +40,17 @@ describe('sendRequest', () => {
       http: mockContextValue.services.http,
       requests: [{ method: 'PUT', url: 'test', data: [] }],
     };
-    const results = await sendRequest(args);
+    const results = await sendRequestToES(args);
 
     const [request] = results;
     expect(request.response.statusCode).toEqual(200);
     expect(request.response.value).toContain('"acknowledged": true');
-    expect(mockedSendRequest).toHaveBeenCalledWith(args);
-    expect(mockedSendRequest).toHaveBeenCalledTimes(1);
+    expect(mockedSendRequestToES).toHaveBeenCalledWith(args);
+    expect(mockedSendRequestToES).toHaveBeenCalledTimes(1);
   });
 
-  it('should send multiple requests', async () => {
-    mockedSendRequest.mockResolvedValue([
+  it('should send multiple requests to ES', async () => {
+    mockedSendRequestToES.mockResolvedValue([
       {
         response: {
           statusCode: 200,
@@ -70,17 +70,17 @@ describe('sendRequest', () => {
         { method: 'GET', url: 'test-2', data: [] },
       ],
     };
-    const results = await sendRequest(args);
+    const results = await sendRequestToES(args);
 
     const [firstRequest, secondRequest] = results;
     expect(firstRequest.response.statusCode).toEqual(200);
     expect(secondRequest.response.statusCode).toEqual(200);
-    expect(mockedSendRequest).toHaveBeenCalledWith(args);
-    expect(mockedSendRequest).toHaveBeenCalledTimes(1);
+    expect(mockedSendRequestToES).toHaveBeenCalledWith(args);
+    expect(mockedSendRequestToES).toHaveBeenCalledTimes(1);
   });
 
   it('should handle errors', async () => {
-    mockedSendRequest.mockRejectedValue({
+    mockedSendRequestToES.mockRejectedValue({
       response: {
         statusCode: 500,
         statusText: 'error',
@@ -88,46 +88,45 @@ describe('sendRequest', () => {
     });
 
     try {
-      await sendRequest({
+      await sendRequestToES({
         http: mockContextValue.services.http,
         requests: [{ method: 'GET', url: 'test', data: [] }],
       });
     } catch (error) {
       expect(error.response.statusCode).toEqual(500);
       expect(error.response.statusText).toEqual('error');
-      expect(mockedSendRequest).toHaveBeenCalledTimes(1);
+      expect(mockedSendRequestToES).toHaveBeenCalledTimes(1);
     }
   });
-
   describe('successful response value', () => {
     describe('with text', () => {
       it('should return value with lines separated', async () => {
-        mockedSendRequest.mockResolvedValue('\ntest_index-1    []\ntest_index-2    []\n');
-        const response = await sendRequest({
+        mockedSendRequestToES.mockResolvedValue('\ntest_index-1    [] \ntest_index-2    []\n');
+        const response = await sendRequestToES({
           http: mockContextValue.services.http,
           requests: [{ method: 'GET', url: 'test-1', data: [] }],
         });
 
         expect(response).toMatchInlineSnapshot(`
           "
-          test_index-1    []
+          test_index-1    [] 
           test_index-2    []
           "
         `);
-        expect(mockedSendRequest).toHaveBeenCalledTimes(1);
+        expect(mockedSendRequestToES).toHaveBeenCalledTimes(1);
       });
     });
 
     describe('with parsed json', () => {
       it('should stringify value', async () => {
-        mockedSendRequest.mockResolvedValue(JSON.stringify({ test: 'some value' }));
-        const response = await sendRequest({
+        mockedSendRequestToES.mockResolvedValue(JSON.stringify({ test: 'some value' }));
+        const response = await sendRequestToES({
           http: mockContextValue.services.http,
           requests: [{ method: 'GET', url: 'test-2', data: [] }],
         });
 
         expect(typeof response).toBe('string');
-        expect(mockedSendRequest).toHaveBeenCalledTimes(1);
+        expect(mockedSendRequestToES).toHaveBeenCalledTimes(1);
       });
     });
   });
