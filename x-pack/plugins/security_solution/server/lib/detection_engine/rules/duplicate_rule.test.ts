@@ -22,7 +22,7 @@ describe('duplicateRule', () => {
           id: 'oldTestRuleId',
           notifyWhen: 'onActiveAlert',
           name: 'test',
-          tags: ['test', '__internal_rule_id:oldTestRuleId'],
+          tags: ['test'],
           alertTypeId: 'siem.signals',
           consumer: 'siem',
           params: {
@@ -127,8 +127,6 @@ describe('duplicateRule', () => {
         },
         "tags": Array [
           "test",
-          "__internal_rule_id:newId",
-          "__internal_immutable:false",
         ],
         "throttle": null,
       }

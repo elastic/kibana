@@ -34,12 +34,12 @@ export const convertRulesFilterToKQL = ({
 }: FilterOptions): string => {
   const filters: string[] = [];
 
-  if (showCustomRules) {
-    filters.push(`alert.attributes.params.immutable: false`);
-  }
-
-  if (showElasticRules) {
-    filters.push(`alert.attributes.params.immutable: true`);
+  if (showCustomRules && showElasticRules) {
+    filters.push('alert.attributes.params.immutable: (true OR false)');
+  } else if (showElasticRules) {
+    filters.push('alert.attributes.params.immutable: true');
+  } else if (showCustomRules) {
+    filters.push('alert.attributes.params.immutable: false');
   }
 
   if (tags.length > 0) {

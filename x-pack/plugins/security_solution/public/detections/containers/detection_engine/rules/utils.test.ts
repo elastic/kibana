@@ -50,6 +50,16 @@ describe('convertRulesFilterToKQL', () => {
     expect(kql).toBe(`alert.attributes.params.immutable: true`);
   });
 
+  it('handles presence of "showElasticRules" and "showCustomRules" at the same time properly', () => {
+    const kql = convertRulesFilterToKQL({
+      ...filterOptions,
+      showElasticRules: true,
+      showCustomRules: true,
+    });
+
+    expect(kql).toBe(`alert.attributes.params.immutable: (true OR false)`);
+  });
+
   it('handles presence of "tags" properly', () => {
     const kql = convertRulesFilterToKQL({ ...filterOptions, tags: ['tag1', 'tag2'] });
 
