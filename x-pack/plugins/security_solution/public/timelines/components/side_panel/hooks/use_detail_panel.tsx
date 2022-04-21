@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useRef } from 'react';
+import React, { useMemo, useCallback, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import type { EntityType } from '@kbn/timelines-plugin/common';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
@@ -16,6 +16,7 @@ import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { DetailsPanel as DetailsPanelComponent } from '..';
+import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
 
 export interface UseDetailPanelConfig {
   entityType?: EntityType;
@@ -42,6 +43,7 @@ export const useDetailPanel = ({
   const { browserFields, docValueFields, selectedPatterns, runtimeMappings } =
     useSourcererDataView(sourcererScope);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const [isLoadedFromSessionView, setIsLoadedFromSessionView] = useState(false);
   const dispatch = useDispatch();
 
   const expandedDetail = useDeepEqualSelector(
@@ -82,6 +84,7 @@ export const useDetailPanel = ({
 
   const openDetailsPanel = useCallback(
     (eventId?: string, onClose?: () => void) => {
+      setIsLoadedFromSessionView(true);
       loadDetailsPanel(eventId);
       onPanelClose.current = onClose ?? (() => {});
     },
@@ -90,6 +93,7 @@ export const useDetailPanel = ({
 
   const handleOnDetailsPanelClosed = useCallback(() => {
     if (onPanelClose.current) onPanelClose.current();
+    setIsLoadedFromSessionView(false);
     dispatch(timelineActions.toggleDetailPanel({ tabType, timelineId }));
 
     if (
@@ -110,6 +114,7 @@ export const useDetailPanel = ({
           docValueFields={docValueFields}
           entityType={entityType}
           handleOnPanelClosed={handleOnDetailsPanelClosed}
+          indexPatternOverride={isLoadedFromSessionView ? `${DEFAULT_ALERTS_INDEX}-*` : undefined}
           isFlyoutView={isFlyoutView}
           runtimeMappings={runtimeMappings}
           tabType={tabType}
@@ -122,6 +127,7 @@ export const useDetailPanel = ({
       entityType,
       handleOnDetailsPanelClosed,
       isFlyoutView,
+      isLoadedFromSessionView,
       runtimeMappings,
       shouldShowDetailsPanel,
       tabType,

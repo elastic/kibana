@@ -60,6 +60,7 @@ interface EventDetailsPanelProps {
     refetch?: () => void;
   };
   handleOnEventClosed: () => void;
+  indexPatternOverride?: string;
   isDraggable?: boolean;
   isFlyoutView?: boolean;
   runtimeMappings: MappingRuntimeFields;
@@ -74,6 +75,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   entityType = 'events', // Default to events so only alerts have to pass entityType in
   expandedEvent,
   handleOnEventClosed,
+  indexPatternOverride,
   isDraggable,
   isFlyoutView,
   runtimeMappings,
@@ -85,7 +87,7 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     {
       docValueFields,
       entityType,
-      indexName: expandedEvent.indexName ?? '',
+      indexName: indexPatternOverride ?? expandedEvent.indexName ?? '',
       eventId: expandedEvent.eventId ?? '',
       runtimeMappings,
       skip: !expandedEvent.eventId,
