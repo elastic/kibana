@@ -430,7 +430,7 @@ export const QueryBarTopRow = React.memo(
         <EuiFlexGroup gutterSize="s" responsive={false}>
           {renderFilterButtonGroup()}
           {shouldRenderQueryInput() && (
-            <EuiFlexItem>
+            <EuiFlexItem data-test-subj="unifiedQueryInput">
               <QueryStringInput
                 disableAutoFocus={props.disableAutoFocus}
                 indexPatterns={props.indexPatterns!}

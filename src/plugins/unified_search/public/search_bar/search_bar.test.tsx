@@ -22,17 +22,13 @@ const mockTimeHistory = {
   get: () => {
     return [];
   },
+  add: jest.fn(),
+  get$: () => {
+    return {
+      pipe: () => {},
+    };
+  },
 };
-
-jest.mock('../filter_bar', () => {
-  return {
-    FilterBar: () => <div className="filterBar" />,
-  };
-});
-
-jest.mock('../query_string_input/query_bar_top_row', () => {
-  return () => <div className="queryBar" />;
-});
 
 const noop = jest.fn();
 
@@ -88,7 +84,25 @@ function wrapSearchBarInContext(testProps: any) {
     storage: createMockStorage(),
     data: {
       query: {
-        savedQueries: {},
+        savedQueries: {
+          findSavedQueries: () =>
+            Promise.resolve({
+              queries: [
+                {
+                  id: 'testwewe',
+                  attributes: {
+                    title: 'Saved query 1',
+                    description: '',
+                    query: {
+                      query: 'category.keyword : "Men\'s Shoes" ',
+                      language: 'kuery',
+                    },
+                    filters: [],
+                  },
+                },
+              ],
+            }),
+        },
       },
     },
   };
@@ -104,8 +118,9 @@ function wrapSearchBarInContext(testProps: any) {
 
 describe('SearchBar', () => {
   const SEARCH_BAR_ROOT = '.uniSearchBar';
-  const FILTER_BAR = '.filterBar';
-  const QUERY_BAR = '.queryBar';
+  const FILTER_BAR = '[data-test-subj="unifiedFilterBar"]';
+  const QUERY_BAR = '.kbnQueryBar';
+  const QUERY_INPUT = '[data-test-subj="unifiedQueryInput"]';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -118,23 +133,9 @@ describe('SearchBar', () => {
       })
     );
 
-    expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
-    expect(component.find(FILTER_BAR).length).toBe(0);
-    expect(component.find(QUERY_BAR).length).toBe(1);
-  });
-
-  it('Should render empty when timepicker is off and no options provided', () => {
-    const component = mount(
-      wrapSearchBarInContext({
-        indexPatterns: [mockIndexPattern],
-        showDatePicker: false,
-        showFilterBar: false,
-      })
-    );
-
-    expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
-    expect(component.find(FILTER_BAR).length).toBe(0);
-    expect(component.find(QUERY_BAR).length).toBe(0);
+    expect(component.find(SEARCH_BAR_ROOT)).toBeTruthy();
+    expect(component.find(FILTER_BAR).length).toBeFalsy();
+    expect(component.find(QUERY_BAR).length).toBeTruthy();
   });
 
   it('Should render filter bar, when required fields are provided', () => {
@@ -143,14 +144,15 @@ describe('SearchBar', () => {
         indexPatterns: [mockIndexPattern],
         showDatePicker: false,
         showQueryInput: true,
+        showFilterBar: true,
         onFiltersUpdated: noop,
         filters: [],
       })
     );
 
-    expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
-    expect(component.find(FILTER_BAR).length).toBe(1);
-    expect(component.find(QUERY_BAR).length).toBe(1);
+    expect(component.find(SEARCH_BAR_ROOT)).toBeTruthy();
+    expect(component.find(FILTER_BAR).length).toBeTruthy();
+    expect(component.find(QUERY_BAR).length).toBeTruthy();
   });
 
   it('Should NOT render filter bar, if disabled', () => {
@@ -164,9 +166,9 @@ describe('SearchBar', () => {
       })
     );
 
-    expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
-    expect(component.find(FILTER_BAR).length).toBe(0);
-    expect(component.find(QUERY_BAR).length).toBe(0);
+    expect(component.find(SEARCH_BAR_ROOT)).toBeTruthy();
+    expect(component.find(FILTER_BAR).length).toBeFalsy();
+    expect(component.find(QUERY_BAR).length).toBeTruthy();
   });
 
   it('Should render query bar, when required fields are provided', () => {
@@ -179,12 +181,12 @@ describe('SearchBar', () => {
       })
     );
 
-    expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
-    expect(component.find(FILTER_BAR).length).toBe(0);
-    expect(component.find(QUERY_BAR).length).toBe(1);
+    expect(component.find(SEARCH_BAR_ROOT)).toBeTruthy();
+    expect(component.find(FILTER_BAR).length).toBeFalsy();
+    expect(component.find(QUERY_BAR).length).toBeTruthy();
   });
 
-  it('Should NOT render query bar, if disabled', () => {
+  it('Should NOT render the input query input, if disabled', () => {
     const component = mount(
       wrapSearchBarInContext({
         indexPatterns: [mockIndexPattern],
@@ -192,12 +194,13 @@ describe('SearchBar', () => {
         onQuerySubmit: noop,
         query: kqlQuery,
         showQueryBar: false,
+        showQueryInput: false,
       })
     );
 
-    expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
-    expect(component.find(FILTER_BAR).length).toBe(0);
-    expect(component.find(QUERY_BAR).length).toBe(0);
+    expect(component.find(SEARCH_BAR_ROOT)).toBeTruthy();
+    expect(component.find(FILTER_BAR).length).toBeFalsy();
+    expect(component.find(QUERY_INPUT).length).toBeFalsy();
   });
 
   it('Should render query bar and filter bar', () => {
@@ -213,8 +216,9 @@ describe('SearchBar', () => {
       })
     );
 
-    expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
-    expect(component.find(FILTER_BAR).length).toBe(1);
-    expect(component.find(QUERY_BAR).length).toBe(1);
+    expect(component.find(SEARCH_BAR_ROOT)).toBeTruthy();
+    expect(component.find(FILTER_BAR).length).toBeTruthy();
+    expect(component.find(QUERY_BAR).length).toBeTruthy();
+    expect(component.find(QUERY_INPUT).length).toBeTruthy();
   });
 });

@@ -416,6 +416,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           onFiltersUpdated={this.props.onFiltersUpdated}
           indexPatterns={this.props.indexPatterns!}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          data-test-subj="unifiedFilterBar"
         />
       );
     }
