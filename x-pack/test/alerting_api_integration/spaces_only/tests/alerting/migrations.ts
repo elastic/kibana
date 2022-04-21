@@ -398,14 +398,9 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       // Only the rule that was enabled should be tagged
       expect(responseEnabledBeforeMigration.body._source?.alert?.tags).to.eql([
-        '__internal_rule_id:064e3fed-6328-416b-bb85-c08265088f41',
-        '__internal_immutable:false',
         'auto_disabled_8.0',
       ]);
-      expect(responseDisabledBeforeMigration.body._source?.alert?.tags).to.eql([
-        '__internal_rule_id:364e3fed-6328-416b-bb85-c08265088f41',
-        '__internal_immutable:false',
-      ]);
+      expect(responseDisabledBeforeMigration.body._source?.alert?.tags).to.eql([]);
     });
 
     it('8.2.0 migrates params to mapped_params for specific params properties', async () => {

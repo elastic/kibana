@@ -671,10 +671,7 @@
      "source":{
         "alert":{
            "name":"enabled 7.16.1 query rule",
-           "tags":[
-              "__internal_rule_id:064e3fed-6328-416b-bb85-c08265088f41",
-              "__internal_immutable:false"
-           ],
+           "tags":[],
            "alertTypeId":"siem.signals",
            "consumer":"siem",
            "params":{
@@ -767,10 +764,7 @@
      "source":{
         "alert":{
            "name":"disabled 7.16.1 query rule",
-           "tags":[
-              "__internal_rule_id:364e3fed-6328-416b-bb85-c08265088f41",
-              "__internal_immutable:false"
-           ],
+           "tags":[],
            "alertTypeId":"siem.signals",
            "consumer":"siem",
            "params":{
