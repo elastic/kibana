@@ -89,7 +89,6 @@ const createSavedObjectsServiceMock = () => {
 
   mocked.setup.mockResolvedValue(createInternalSetupContractMock());
   mocked.start.mockResolvedValue(createInternalStartContractMock());
-  mocked.stop.mockResolvedValue();
   return mocked;
 };
 
