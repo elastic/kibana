@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { KibanaRequest } from '@kbn/core/server';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { APMConfig } from '../..';
-import { KibanaRequest } from '../../../../../../src/core/server';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { APMRouteHandlerResources } from '../../routes/typings';
 import {
   ApmIndicesConfig,

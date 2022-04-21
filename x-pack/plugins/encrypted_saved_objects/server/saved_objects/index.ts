@@ -7,7 +7,6 @@
 
 import pMap from 'p-map';
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   ISavedObjectsPointInTimeFinder,
   ISavedObjectsRepository,
@@ -18,9 +17,10 @@ import type {
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsServiceSetup,
   StartServicesAccessor,
-} from 'src/core/server';
+} from '@kbn/core/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { SecurityPluginSetup } from '../../../security/server';
 import type { EncryptedSavedObjectsService } from '../crypto';
 import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
 import { getDescriptorNamespace, normalizeNamespace } from './get_descriptor_namespace';
@@ -49,7 +49,27 @@ export interface EncryptedSavedObjectsClient {
     options?: SavedObjectsBaseOptions
   ) => Promise<SavedObject<T>>;
 
-  createPointInTimeFinderAsInternalUser<T = unknown, A = unknown>(
+  /**
+   * API method, that can be used to help page through large sets of saved objects and returns decrypted properties in result SO.
+   * Its interface matches interface of the corresponding Saved Objects API `createPointInTimeFinder` method:
+   *
+   * @example
+   * ```ts
+   * const finder = await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser({
+   *   filter,
+   *   type: 'my-saved-object-type',
+   *   perPage: 1000,
+   * });
+   * for await (const response of finder.find()) {
+   *   // process response
+   * }
+   * ```
+   *
+   * @param findOptions matches interface of corresponding argument of Saved Objects API `createPointInTimeFinder` {@link SavedObjectsCreatePointInTimeFinderOptions}
+   * @param dependencies matches interface of corresponding argument of Saved Objects API `createPointInTimeFinder` {@link SavedObjectsCreatePointInTimeFinderDependencies}
+   *
+   */
+  createPointInTimeFinderDecryptedAsInternalUser<T = unknown, A = unknown>(
     findOptions: SavedObjectsCreatePointInTimeFinderOptions,
     dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
   ): Promise<ISavedObjectsPointInTimeFinder<T, A>>;
@@ -94,6 +114,11 @@ export function setupSavedObjects({
       ): Promise<SavedObject<T>> => {
         const [internalRepository, typeRegistry] = await internalRepositoryAndTypeRegistryPromise;
         const savedObject = await internalRepository.get(type, id, options);
+
+        if (service.isRegistered(savedObject.type) === false) {
+          return savedObject as SavedObject<T>;
+        }
+
         return {
           ...savedObject,
           attributes: (await service.decryptAttributes(
@@ -107,7 +132,7 @@ export function setupSavedObjects({
         };
       },
 
-      createPointInTimeFinderAsInternalUser: async <T = unknown, A = unknown>(
+      createPointInTimeFinderDecryptedAsInternalUser: async <T = unknown, A = unknown>(
         findOptions: SavedObjectsCreatePointInTimeFinderOptions,
         dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
       ): Promise<ISavedObjectsPointInTimeFinder<T, A>> => {
@@ -117,10 +142,14 @@ export function setupSavedObjects({
 
         async function* encryptedFinder() {
           for await (const res of finderAsyncGenerator) {
-            const encryptedSavedObjects = await pMap(res.saved_objects, async (savedObject) => ({
-              ...savedObject,
-              attributes: (await service.decryptAttributes(
-                {
+            const encryptedSavedObjects = await pMap(
+              res.saved_objects,
+              async (savedObject) => {
+                if (service.isRegistered(savedObject.type) === false) {
+                  return savedObject;
+                }
+
+                const descriptor = {
                   type: savedObject.type,
                   id: savedObject.id,
                   namespace: getDescriptorNamespace(
@@ -128,10 +157,33 @@ export function setupSavedObjects({
                     savedObject.type,
                     findOptions.namespaces
                   ),
-                },
-                savedObject.attributes as Record<string, unknown>
-              )) as T,
-            }));
+                };
+
+                try {
+                  return {
+                    ...savedObject,
+                    attributes: (await service.decryptAttributes(
+                      descriptor,
+                      savedObject.attributes as Record<string, unknown>
+                    )) as T,
+                  };
+                } catch (error) {
+                  // catch error and enrich SO with it, return stripped attributes. Then consumer of API can decide either proceed
+                  // with only unsecured properties or stop when error happens
+                  const { attributes: strippedAttrs } = await service.stripOrDecryptAttributes(
+                    descriptor,
+                    savedObject.attributes as Record<string, unknown>
+                  );
+                  return {
+                    ...savedObject,
+                    attributes: strippedAttrs as T,
+                    error: { ...error, message: `Decryption error: "${error.message}"` },
+                  };
+                }
+              },
+              { concurrency: 50 }
+            );
+
             yield { ...res, saved_objects: encryptedSavedObjects };
           }
         }

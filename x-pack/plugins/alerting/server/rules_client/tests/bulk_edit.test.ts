@@ -7,16 +7,16 @@
 
 import { schema } from '@kbn/config-schema';
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
+import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { RecoveredActionGroup, RuleTypeParams } from '../../../common';
-import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
-import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
-import { ActionsAuthorization, ActionsClient } from '../../../../actions/server';
-import { auditLoggerMock } from '../../../../security/server/audit/mocks';
+import { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 
@@ -92,12 +92,14 @@ describe('bulkEdit()', () => {
   const mockCreatePointInTimeFinderAsInternalUser = (
     response = { saved_objects: [existingDecryptedRule] }
   ) => {
-    encryptedSavedObjects.createPointInTimeFinderAsInternalUser = jest.fn().mockResolvedValue({
-      close: jest.fn(),
-      find: function* asyncGenerator() {
-        yield response;
-      },
-    });
+    encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
+      .fn()
+      .mockResolvedValue({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield response;
+        },
+      });
   };
 
   beforeEach(async () => {
@@ -521,7 +523,7 @@ describe('bulkEdit()', () => {
   });
 
   describe('apiKeys', () => {
-    test('should call createPointInTimeFinderAsInternalUser that returns api Keys', async () => {
+    test('should call createPointInTimeFinderDecryptedAsInternalUser that returns api Keys', async () => {
       await rulesClient.bulkEdit({
         filter: 'alert.attributes.tags: "APM"',
         operations: [
@@ -533,7 +535,9 @@ describe('bulkEdit()', () => {
         ],
       });
 
-      expect(encryptedSavedObjects.createPointInTimeFinderAsInternalUser).toHaveBeenCalledWith({
+      expect(
+        encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser
+      ).toHaveBeenCalledWith({
         filter: {
           arguments: [
             {
@@ -552,7 +556,7 @@ describe('bulkEdit()', () => {
           function: 'is',
           type: 'function',
         },
-        perPage: 1000,
+        perPage: 100,
         type: 'alert',
         namespaces: ['default'],
       });

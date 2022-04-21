@@ -46,6 +46,7 @@ export const useUpdatePack = ({ withRedirect, options }: UseUpdatePackProps) => 
         if (withRedirect) {
           navigateToApp(PLUGIN_ID, { path: pagePathGetters.packs() });
         }
+
         toasts.addSuccess(
           i18n.translate('xpack.osquery.updatePack.successToastMessageText', {
             defaultMessage: 'Successfully updated "{packName}" pack',

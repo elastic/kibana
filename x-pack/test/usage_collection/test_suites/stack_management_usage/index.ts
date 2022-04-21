@@ -6,8 +6,8 @@
  */
 
 import _ from 'lodash';
+import { stackManagementSchema } from '@kbn/kibana-usage-collection-plugin/server/collectors/management/schema';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { stackManagementSchema } from '../../../../../src/plugins/kibana_usage_collection/server/collectors/management/schema';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // FLAKY: https://github.com/elastic/kibana/issues/119038

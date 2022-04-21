@@ -9,8 +9,8 @@
 import React, { FC, useCallback, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import { DataViewField } from '../../../../data_views/public';
-import { useReduxEmbeddableContext } from '../../../../presentation_util/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
+import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 import { useStateObservable } from '../../hooks/use_state_observable';
 import { RangeSliderPopover } from './range_slider_popover';
 import { rangeSliderReducers } from './range_slider_reducers';

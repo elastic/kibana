@@ -10,23 +10,23 @@ import React from 'react';
 import { OutPortal, PortalNode } from 'react-reverse-portal';
 import minimatch from 'minimatch';
 import type { Filter, Query } from '@kbn/es-query';
-import { IndexPatternMapping } from './types';
-import { getLayerList } from './map_config';
-import { MAP_SAVED_OBJECT_TYPE } from '../../../../../maps/public';
+import { MAP_SAVED_OBJECT_TYPE } from '@kbn/maps-plugin/public';
 import type {
   RenderTooltipContentParams,
   MapEmbeddable,
   MapEmbeddableInput,
-} from '../../../../../../plugins/maps/public';
-import * as i18n from './translations';
-
+} from '@kbn/maps-plugin/public';
 import {
   EmbeddableStart,
   isErrorEmbeddable,
   EmbeddableOutput,
   ViewMode,
   ErrorEmbeddable,
-} from '../../../../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
+import { IndexPatternMapping } from './types';
+import { getLayerList } from './map_config';
+import * as i18n from './translations';
+
 import { IndexPatternSavedObject } from '../../../common/hooks/types';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 

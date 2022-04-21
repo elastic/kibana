@@ -7,7 +7,7 @@
 
 import { Readable } from 'stream';
 
-import { SavedObjectAttributes, SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectAttributes, SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   MachineLearningJobIdOrUndefined,
   From,
@@ -42,6 +42,8 @@ import type { VersionOrUndefined, Version } from '@kbn/securitysolution-io-ts-ty
 import { SIGNALS_ID, ruleTypeMappings } from '@kbn/securitysolution-rules';
 
 import type { ListArrayOrUndefined, ListArray } from '@kbn/securitysolution-io-ts-list-types';
+import { RulesClient, PartialRule, BulkEditOperation } from '@kbn/alerting-plugin/server';
+import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import {
@@ -93,8 +95,6 @@ import {
   NamespaceOrUndefined,
 } from '../../../../common/detection_engine/schemas/common';
 
-import { RulesClient, PartialRule, BulkEditOperation } from '../../../../../alerting/server';
-import { SanitizedRule } from '../../../../../alerting/common';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
 import { IRuleExecutionLogForRoutes } from '../rule_execution_log';
@@ -292,7 +292,6 @@ export interface BulkEditRulesOptions {
   ids?: string[];
   paramsModifier?: (params: RuleParams) => Promise<RuleParams>;
 }
-
 
 export interface LegacyMigrateParams {
   rulesClient: RulesClient;

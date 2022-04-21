@@ -9,7 +9,7 @@ import React from 'react';
 import { HasDataContextValue } from '../../context/has_data_context';
 import * as hasData from '../../hooks/use_has_data';
 import { render } from '../../utils/test_helper';
-import { HomePage } from './';
+import { HomePage } from '.';
 
 const mockHistoryPush = jest.fn();
 jest.mock('react-router-dom', () => ({

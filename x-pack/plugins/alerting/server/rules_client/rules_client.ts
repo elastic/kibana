@@ -34,8 +34,21 @@ import {
   SavedObjectAttributes,
   SavedObjectsBulkUpdateObject,
   SavedObjectsUpdateResponse,
-} from '../../../../../src/core/server';
-import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
+} from '@kbn/core/server';
+import { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
+import {
+  GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
+  InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
+} from '@kbn/security-plugin/server';
+import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import {
+  IEvent,
+  IEventLogClient,
+  IEventLogger,
+  SAVED_OBJECT_REL_PRIMARY,
+} from '@kbn/event-log-plugin/server';
+import { AuditLogger } from '@kbn/security-plugin/server';
 import {
   Rule,
   PartialRule,
@@ -62,12 +75,6 @@ import {
   validateMutatedRuleTypeParams,
   convertRuleIdsToKueryNode,
 } from '../lib';
-import {
-  GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
-  InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
-} from '../../../security/server';
-import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
-import { TaskManagerStartContract } from '../../../task_manager/server';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
 import { RegistryRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import {
@@ -78,15 +85,8 @@ import {
   AlertingAuthorizationFilterType,
   AlertingAuthorizationFilterOpts,
 } from '../authorization';
-import {
-  IEvent,
-  IEventLogClient,
-  IEventLogger,
-  SAVED_OBJECT_REL_PRIMARY,
-} from '../../../event_log/server';
 import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
 import { alertSummaryFromEventLog } from '../lib/alert_summary_from_event_log';
-import { AuditLogger } from '../../../security/server';
 import { parseDuration } from '../../common/parse_duration';
 import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
@@ -1493,12 +1493,14 @@ export class RulesClient {
     errors: BulkEditError[];
   }> {
     const rulesFinder =
-      await this.encryptedSavedObjectsClient.createPointInTimeFinderAsInternalUser<RawRule>({
-        filter,
-        type: 'alert',
-        perPage: 1000,
-        ...(this.namespace ? { namespaces: [this.namespace] } : undefined),
-      });
+      await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
+        {
+          filter,
+          type: 'alert',
+          perPage: 100,
+          ...(this.namespace ? { namespaces: [this.namespace] } : undefined),
+        }
+      );
 
     const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
     const errors: BulkEditError[] = [];

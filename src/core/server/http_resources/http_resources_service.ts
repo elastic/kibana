@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
+import { RequestHandlerContext } from '..';
 
 import { CoreContext } from '../core_context';
 import {

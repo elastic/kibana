@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import type { RouteDefinitionParams } from '../';
+import type { RouteDefinitionParams } from '..';
 import { wrapError } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 

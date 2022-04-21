@@ -23,28 +23,27 @@ import type {
   ServiceStatus,
   ElasticsearchClient,
   SavedObjectsClientContract,
-} from 'kibana/server';
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+} from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
-import type { TelemetryPluginSetup, TelemetryPluginStart } from 'src/plugins/telemetry/server';
+import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 
-import {
-  DEFAULT_APP_CATEGORIES,
-  SavedObjectsClient,
-  ServiceStatusLevels,
-} from '../../../../src/core/server';
-import type { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
-import type { LicensingPluginStart } from '../../licensing/server';
+import { DEFAULT_APP_CATEGORIES, SavedObjectsClient, ServiceStatusLevels } from '@kbn/core/server';
+import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
   EncryptedSavedObjectsPluginStart,
   EncryptedSavedObjectsPluginSetup,
-} from '../../encrypted_saved_objects/server';
-import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
-import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+} from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+
 import type { FleetConfigType, FleetAuthz } from '../common';
 import { INTEGRATIONS_PLUGIN_ID } from '../common';
-import type { CloudSetup } from '../../cloud/server';
-import type { SpacesPluginStart } from '../../spaces/server';
 
 import {
   PLUGIN_ID,

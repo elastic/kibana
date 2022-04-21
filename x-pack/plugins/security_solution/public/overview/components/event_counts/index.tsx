@@ -10,12 +10,12 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { ID as OverviewHostQueryId } from '../../containers/overview_host';
 import { OverviewHost } from '../overview_host';
 import { OverviewNetwork } from '../overview_network';
 import { useKibana } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
-import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import {

@@ -5,16 +5,10 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from 'src/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type {
-  AggregationsMultiBucketAggregateBase as Aggregation,
-  AggregationsTopHitsAggregate,
-  QueryDslQueryContainer,
-  SearchRequest,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ComplianceDashboardData } from '../../../common/types';
-import { CSP_KUBEBEAT_INDEX_PATTERN, STATS_ROUTE_PATH } from '../../../common/constants';
+import { LATEST_FINDINGS_INDEX_PATTERN, STATS_ROUTE_PATH } from '../../../common/constants';
 import { CspAppContext } from '../../plugin';
 import { getResourcesTypes } from './get_resources_types';
 import { ClusterWithoutTrend, getClusters } from './get_clusters';
@@ -22,58 +16,10 @@ import { getStats } from './get_stats';
 import { CspRouter } from '../../types';
 import { getTrends, Trends } from './get_trends';
 
-export interface ClusterBucket {
-  ordered_top_hits: AggregationsTopHitsAggregate;
-}
-
-interface ClustersQueryResult {
-  aggs_by_cluster_id: Aggregation<ClusterBucket>;
-}
-
 export interface KeyDocCount<TKey = string> {
   key: TKey;
   doc_count: number;
 }
-
-export const getLatestFindingQuery = (): SearchRequest => ({
-  index: CSP_KUBEBEAT_INDEX_PATTERN,
-  size: 0,
-  query: {
-    match_all: {},
-  },
-  aggs: {
-    aggs_by_cluster_id: {
-      terms: { field: 'cluster_id.keyword' },
-      aggs: {
-        ordered_top_hits: {
-          top_hits: {
-            size: 1,
-            sort: {
-              '@timestamp': {
-                order: 'desc',
-              },
-            },
-          },
-        },
-      },
-    },
-  },
-});
-
-const getLatestCyclesIds = async (esClient: ElasticsearchClient): Promise<string[]> => {
-  const queryResult = await esClient.search<unknown, ClustersQueryResult>(getLatestFindingQuery(), {
-    meta: true,
-  });
-
-  const clusters = queryResult.body.aggregations?.aggs_by_cluster_id.buckets;
-  if (!Array.isArray(clusters)) throw new Error('missing aggs by cluster id');
-
-  return clusters.map((c) => {
-    const topHit = c.ordered_top_hits.hits.hits[0];
-    if (!topHit) throw new Error('missing cluster latest hit');
-    return topHit._source.cycle_id;
-  });
-};
 
 const getClustersTrends = (clustersWithoutTrends: ClusterWithoutTrend[], trends: Trends) =>
   clustersWithoutTrends.map((cluster) => ({
@@ -87,7 +33,6 @@ const getClustersTrends = (clustersWithoutTrends: ClusterWithoutTrend[], trends:
 const getSummaryTrend = (trends: Trends) =>
   trends.map(({ timestamp, summary }) => ({ timestamp, ...summary }));
 
-// TODO: Utilize ES "Point in Time" feature https://www.elastic.co/guide/en/elasticsearch/reference/current/point-in-time-api.html
 export const defineGetComplianceDashboardRoute = (
   router: CspRouter,
   cspContext: CspAppContext
@@ -100,21 +45,28 @@ export const defineGetComplianceDashboardRoute = (
     async (context, _, response) => {
       try {
         const esClient = context.core.elasticsearch.client.asCurrentUser;
-        const latestCyclesIds = await getLatestCyclesIds(esClient);
+
+        const { id: pitId } = await esClient.openPointInTime({
+          index: LATEST_FINDINGS_INDEX_PATTERN,
+          keep_alive: '30s',
+        });
+
         const query: QueryDslQueryContainer = {
-          bool: {
-            should: latestCyclesIds.map((id) => ({
-              match: { 'cycle_id.keyword': { query: id } },
-            })),
-          },
+          match_all: {},
         };
 
         const [stats, resourcesTypes, clustersWithoutTrends, trends] = await Promise.all([
-          getStats(esClient, query),
-          getResourcesTypes(esClient, query),
-          getClusters(esClient, query),
+          getStats(esClient, query, pitId),
+          getResourcesTypes(esClient, query, pitId),
+          getClusters(esClient, query, pitId),
           getTrends(esClient),
         ]);
+
+        // Try closing the PIT, if it fails we can safely ignore the error since it closes itself after the keep alive
+        //   ends. Not waiting on the promise returned from the `closePointInTime` call to avoid delaying the request
+        esClient.closePointInTime({ id: pitId }).catch((err) => {
+          cspContext.logger.warn(`Could not close PIT for stats endpoint: ${err}`);
+        });
 
         const clusters = getClustersTrends(clustersWithoutTrends, trends);
         const trend = getSummaryTrend(trends);
@@ -131,6 +83,7 @@ export const defineGetComplianceDashboardRoute = (
         });
       } catch (err) {
         const error = transformError(err);
+        cspContext.logger.error(`Error while fetching CSP stats: ${err}`);
 
         return response.customError({
           body: { message: error.message },

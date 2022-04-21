@@ -9,10 +9,10 @@ import {
   SavedObjectsClientContract,
   ISavedObjectsRepository,
   SavedObjectsErrorHelpers,
-} from '../../../../../src/core/server';
+} from '@kbn/core/server';
 
 import { partiallyUpdateAlert, PartiallyUpdateableAlertAttributes } from './partially_update_alert';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 const MockSavedObjectsClientContract = savedObjectsClientMock.create();
 const MockISavedObjectsRepository =

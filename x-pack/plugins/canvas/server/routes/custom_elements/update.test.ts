@@ -9,8 +9,8 @@ import sinon from 'sinon';
 import { CustomElement } from '../../../types';
 import { CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
 import { initializeUpdateCustomElementRoute } from './update';
-import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
-import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
+import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from '@kbn/core/server';
+import { savedObjectsClientMock, httpServerMock } from '@kbn/core/server/mocks';
 import { okResponse } from '../ok_response';
 import { getMockedRouterDeps } from '../test_helpers';
 

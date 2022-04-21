@@ -11,7 +11,7 @@ import { Action, ActionDefinition, ActionInternal, createAction } from '../actio
 import { createHelloWorldAction } from '../tests/test_samples';
 import { TriggerRegistry, ActionRegistry } from '../types';
 import { Trigger } from '../triggers';
-import { OverlayStart } from 'kibana/public';
+import { OverlayStart } from '@kbn/core/public';
 
 const FOO_TRIGGER = 'FOO_TRIGGER';
 const BAR_TRIGGER = 'BAR_TRIGGER';

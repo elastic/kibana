@@ -11,8 +11,8 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { SavedObjectsFindOptions } from '../../../../../../../../src/core/server';
-import { AuthenticatedUser } from '../../../../../../security/common/model';
+import { SavedObjectsFindOptions } from '@kbn/core/server';
+import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import {
   PinnedEventSavedObject,
@@ -23,7 +23,7 @@ import {
 } from '../../../../../common/types/timeline/pinned_event';
 import { FrameworkRequest } from '../../../framework';
 
-import { createTimeline } from '../../saved_object/timelines';
+import { createTimeline } from '../timelines';
 import { pinnedEventSavedObjectType } from '../../saved_object_mappings/pinned_events';
 import { pinnedEventFieldsMigrator } from './field_migrator';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
