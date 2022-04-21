@@ -8,20 +8,20 @@ Returns all user activity for the specified case.
 
 deprecated::[8.1.0]
 
-=== Request
+=== {api-request-title}
 
 `GET <kibana host>:<port>/api/cases/<case ID>/user_actions`
 
 `GET <kibana host>:<port>/s/<space_id>/api/cases/<case ID>/user_actions`
 
-=== Prerequisite
+=== {api-prereq-title}
 
 You must have `read` privileges for the *Cases* feature in the *Management*,
 *{observability}*, or *Security* section of the
 <<kibana-feature-privileges,{kib} feature privileges>>, depending on the
 `owner` of the cases you're seeking.
 
-=== Path parameters
+=== {api-path-parms-title}
 
 `<case_id>`::
 (Required, string) An identifier for the case to retrieve. Use 
@@ -31,12 +31,12 @@ You must have `read` privileges for the *Cases* feature in the *Management*,
 (Optional, string) An identifier for the space. If it is not specified, the
 default space is used.
 
-==== Response code
+=== {api-response-codes-title}
 
 `200`::
    Indicates a successful call.
 
-==== Example
+=== {api-examples-title}
 
 Gets all activity for case ID `a18b38a0-71b0-11ea-a0b2-c51ea50a58e2`:
 

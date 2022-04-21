@@ -40,7 +40,7 @@ default space is used.
 `200`::
    Indicates a successful call.
 
-=== {api-example-title}
+=== {api-examples-title}
 
 Push the case to an external service:
 
