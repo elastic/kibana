@@ -28,6 +28,7 @@ import {
   EuiFlexGrid,
   EuiHorizontalRule,
   EuiStat,
+  IconType,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 // import { hasExecuteActionsCapability } from './config';
@@ -44,9 +45,11 @@ import { useKibana } from '../../utils/kibana_react';
 function PageTitle(rule: Rule) {
   return (
     <>
+      {/* TODO:Add return back to rule navigation button */}
       {rule.name} <ExperimentalBadge />
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem component="span" grow={false}>
+          {/* TODO: formate dates */}
           <EuiText color="subdued" size="s">
             <b>Last updated</b> by {rule.updatedBy} on {rule.updatedAt} &emsp;
             <b>Created</b> by {rule.createdBy} on {rule.createdAt}
@@ -126,6 +129,46 @@ export function RuleDetailsPage() {
     }
   };
 
+  interface ActionsComponentProps {
+    actions: any[];
+  }
+  interface MapActionTypeIcon {
+    [key: string]: string | IconType;
+  }
+  const mapActionTypeIcon: MapActionTypeIcon = {
+    /* TODO:  Add the rest of the application logs (SVGs ones) */
+    '.server-log': 'logsApp',
+    '.email': 'email',
+    '.pagerduty': 'apps',
+    '.index': 'indexOpen',
+    '.slack': 'logoSlack',
+    '.webhook': 'logoWebhook',
+  };
+
+  function ActionsComponent({ actions }: ActionsComponentProps) {
+    if (actions.length <= 0) return <EuiText size="m">0</EuiText>;
+
+    const uniqueActions = Array.from(new Set(actions.map((action: any) => action.actionTypeId)));
+    return (
+      <EuiFlexGroup direction="column">
+        {uniqueActions.map((actionTypeId) => (
+          <>
+            <EuiFlexGroup alignItems="flexStart">
+              <EuiFlexItem grow={false}>
+                <EuiIcon size="l" type={mapActionTypeIcon[actionTypeId] ?? 'apps'} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                {/* TODO: Get the user-typed connector name?  */}
+                <EuiText size="m">{actionTypeId}</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+          </>
+        ))}
+      </EuiFlexGroup>
+    );
+  }
+
   useBreadcrumbs([
     {
       text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
@@ -170,7 +213,8 @@ export function RuleDetailsPage() {
   } = rule;
 
   const { description } = ruleTypeRegistry.get(rule?.ruleTypeId);
-  const uniqueActions = Array.from(new Set(actions.map((action: any) => action.actionTypeId)));
+
+  // console.log('uniqueActions', uniqueActions);
 
   console.log(rule);
   console.log('editFlyoutVisible', editFlyoutVisible);
@@ -302,18 +346,17 @@ export function RuleDetailsPage() {
                     translationKey="xpack.observability.ruleDetails.conditions"
                     defaultMessage="Conditions"
                   />
-                  <EuiFlexItem component="div" grow={3}>
+                  <EuiFlexItem grow={3}>
                     <EuiText size="m">
                       <EuiButtonEmpty onClick={() => setEditFlyoutVisible(true)}>
                         {String((params.criteria as any[]).length)}{' '}
+                        {/* TODO:  Add [s] to the conditions word based on how many conditions */}
                         {i18n.translate('xpack.observability.ruleDetails.conditions', {
                           defaultMessage: 'conditions',
                         })}
                       </EuiButtonEmpty>
                     </EuiText>
                   </EuiFlexItem>
-
-                  {/* <ItemValueRuleSummary itemValue={String((params.criteria as any[]).length)} /> */}
                 </EuiFlexGroup>
 
                 <EuiSpacer size="l" />
@@ -325,6 +368,7 @@ export function RuleDetailsPage() {
                     defaultMessage="Runs every"
                   />
 
+                  {/* TODO:  format interval*/}
                   <ItemValueRuleSummary itemValue={interval} />
                 </EuiFlexGroup>
 
@@ -340,13 +384,14 @@ export function RuleDetailsPage() {
                 </EuiFlexGroup>
 
                 <EuiSpacer size="l" />
-                <EuiFlexGroup>
+                <EuiFlexGroup alignItems="baseline">
                   <ItemTitleRuleSummary
                     translationKey="xpack.observability.ruleDetails.actions"
                     defaultMessage="Actions"
                   />
-
-                  <ItemValueRuleSummary itemValue={String(uniqueActions.length)} />
+                  <EuiFlexItem grow={3}>
+                    <ActionsComponent actions={actions} />
+                  </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
