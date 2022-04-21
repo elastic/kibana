@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { HttpSetup } from '@kbn/core/public';
 import {
   createNodeAllocationActions,
   createReplicasAction,
@@ -16,8 +17,8 @@ type SetupReturn = ReturnType<typeof setupGeneralNodeAllocation>;
 
 export type GeneralNodeAllocationTestBed = SetupReturn extends Promise<infer U> ? U : SetupReturn;
 
-export const setupGeneralNodeAllocation = async () => {
-  const testBed = await initTestBed();
+export const setupGeneralNodeAllocation = async (httpSetup: HttpSetup) => {
+  const testBed = await initTestBed(httpSetup);
 
   return {
     ...testBed,

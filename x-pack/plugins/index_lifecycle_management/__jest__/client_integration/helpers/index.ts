@@ -7,4 +7,4 @@
 
 export * from './actions';
 
-export { setupEnvironment } from './setup_environment';
+export { setupEnvironment, WithAppDependencies } from './setup_environment';

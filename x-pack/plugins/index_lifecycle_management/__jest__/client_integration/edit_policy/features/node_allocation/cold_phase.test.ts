@@ -11,7 +11,7 @@ import { NodeAllocationTestBed, setupColdPhaseNodeAllocation } from './cold_phas
 
 describe('<EditPolicy /> node allocation in the cold phase', () => {
   let testBed: NodeAllocationTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, setDelayResponse, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -19,17 +19,15 @@ describe('<EditPolicy /> node allocation in the cold phase', () => {
 
   afterAll(() => {
     jest.useRealTimers();
-    server.restore();
   });
 
   const setup = async () => {
     await act(async () => {
-      testBed = await setupColdPhaseNodeAllocation();
+      testBed = await setupColdPhaseNodeAllocation(httpSetup);
     });
   };
 
   beforeEach(async () => {
-    server.respondImmediately = true;
     httpRequestsMockHelpers.setLoadPolicies([]);
     httpRequestsMockHelpers.setListNodes({
       nodesByRoles: { data: ['node1'] },
@@ -64,7 +62,8 @@ describe('<EditPolicy /> node allocation in the cold phase', () => {
 
   describe('when using node attributes', () => {
     test('shows spinner for node attributes input when loading', async () => {
-      server.respondImmediately = false;
+      // We don't want the request to resolve immediately.
+      setDelayResponse(true);
 
       const { actions } = testBed;
       await actions.toggleColdPhase();
@@ -78,6 +77,9 @@ describe('<EditPolicy /> node allocation in the cold phase', () => {
       expect(actions.hasWillUseFallbackTierUsingNodeAttributesNotice()).toBeFalsy();
       expect(actions.hasDefaultToDataNodesNotice()).toBeFalsy();
       expect(actions.hasNoTiersAvailableUsingNodeAttributesNotice()).toBeFalsy();
+
+      // Reset delayed response status
+      setDelayResponse(false);
     });
 
     describe('and some are defined', () => {
