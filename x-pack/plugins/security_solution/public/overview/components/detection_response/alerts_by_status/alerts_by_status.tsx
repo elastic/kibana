@@ -135,7 +135,6 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
             inspectMultiple
             toggleStatus={toggleStatus}
             toggleQuery={setToggleStatus}
-            height={40}
           >
             <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>
@@ -151,19 +150,22 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
           </HeaderSection>
           {toggleStatus && (
             <>
-              <EuiSpacer size="l" />
               <EuiFlexGroup justifyContent="center" gutterSize="none">
                 <EuiFlexItem grow={false}>
-                  <EuiSpacer size="xs" />
-                  {!loading && (
-                    <EuiText className="eui-textCenter" size="s">
-                      <b>
-                        <FormattedCount count={totalAlerts} />
-                      </b>
-                      <> </>
-                      <small>{ALERTS(totalAlerts)}</small>
-                    </EuiText>
-                  )}
+                  <EuiText className="eui-textCenter" size="s">
+                    {loading ? (
+                      <EuiSpacer size="l" />
+                    ) : (
+                      <>
+                        <b>
+                          <FormattedCount count={totalAlerts} />
+                        </b>
+                        <> </>
+                        <small>{ALERTS(totalAlerts)}</small>
+                      </>
+                    )}
+                  </EuiText>
+
                   <EuiSpacer size="l" />
                   <EuiFlexGroup justifyContent="center">
                     <StyledFlexItem key="alerts-status-open" grow={false}>

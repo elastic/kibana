@@ -25,20 +25,21 @@ import * as i18n from '../../containers/query_toggle/translations';
 interface HeaderProps {
   border?: boolean;
   height?: number;
+  className?: string;
+  $hideSubtitle?: boolean;
 }
 
-const Header = styled.header.attrs(() => ({
-  className: 'siemHeaderSection',
-}))<HeaderProps>`
+const Header = styled.header<HeaderProps>`
   &.toggle-expand {
     .header-section-content {
       height: 48px;
     }
 
-    .header-section-titles {
-      margin-top: ${({ theme }) => theme.eui.paddingSizes.m};
-    }
-  }
+    ${({ $hideSubtitle, theme }) =>
+      !$hideSubtitle &&
+      `.header-section-titles {
+              margin-top:  ${theme.eui.paddingSizes.m};
+        }`}
 
   ${({ height }) =>
     height &&
@@ -105,10 +106,16 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
 
   const classNames = classnames({
     'toggle-expand': toggleStatus,
-    'toggle-collapsed': !toggleStatus,
+    siemHeaderSection: true,
   });
   return (
-    <Header data-test-subj="header-section" border={border} height={height} className={classNames}>
+    <Header
+      data-test-subj="header-section"
+      border={border}
+      height={height}
+      className={classNames}
+      $hideSubtitle={hideSubtitle}
+    >
       <EuiFlexGroup
         alignItems={stackHeader ? undefined : 'center'}
         direction={stackHeader ? 'column' : 'row'}
