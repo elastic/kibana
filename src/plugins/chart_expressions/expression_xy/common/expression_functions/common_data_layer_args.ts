@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { SeriesTypes, XScaleTypes, YScaleTypes, Y_CONFIG } from '../constants';
 import { strings } from '../i18n';
 import { DataLayerFn, ExtendedDataLayerFn } from '../types';
@@ -58,9 +57,7 @@ export const commonDataLayerArgs: CommonDataLayerFn['args'] = {
   },
   markSizeAccessor: {
     types: ['string'],
-    help: i18n.translate('expressionXY.dataLayer.markSizeAccessor.help', {
-      defaultMessage: 'Mark size accessor',
-    }),
+    help: strings.getMarkSizeAccessorHelp(),
   },
   lineWidth: {
     types: ['number'],
