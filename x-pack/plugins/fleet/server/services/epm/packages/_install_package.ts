@@ -23,6 +23,7 @@ import type { InstallablePackage, InstallSource, PackageAssetReference } from '.
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type { AssetReference, Installation, InstallType } from '../../../types';
 import { installTemplates } from '../elasticsearch/template/install';
+import { removeLegacyTemplates } from '../elasticsearch/template/remove_legacy';
 import {
   installPipelines,
   isTopLevelPipeline,
@@ -160,6 +161,12 @@ export async function _installPackage({
       paths,
       savedObjectsClient
     );
+
+    try {
+      await removeLegacyTemplates({ packageInfo, esClient, logger });
+    } catch (e) {
+      logger.warn(`Error removing legacy templates: ${e.message}`);
+    }
 
     // update current backing indices of each data stream
     await updateCurrentWriteIndices(esClient, logger, installedTemplates);
