@@ -47,7 +47,7 @@ export const BSecureSearchFactory = (retry: RetryService) => ({
     space,
   }: SendOptions): Promise<T> => {
     const spaceUrl = getSpaceUrlPrefix(space);
-    const response = await retry.try(async () => {
+    const { body } = await retry.try(async () => {
       let result;
       const url = `${spaceUrl}/internal/search/${strategy}`;
       if (referer && kibanaVersion) {
@@ -79,22 +79,11 @@ export const BSecureSearchFactory = (retry: RetryService) => ({
           .set('kbn-xsrf', 'true')
           .send(options);
       }
-      // eslint-disable-next-line no-console
-      console.log('result:', JSON.stringify(result));
-      if (result.status === 500 || result.status === 200) {
+      if ((result.status === 500 || result.status === 200) && result.body) {
         return result;
       }
       throw new Error('try again');
     });
-
-    // eslint-disable-next-line no-console
-    console.log('*** CHRIS RESPONSE ***');
-    // eslint-disable-next-line no-console
-    console.log('keys: ', Object.keys(response));
-    // eslint-disable-next-line no-console
-    console.log(JSON.stringify(response));
-    const body = response.body; // || response.text;
-
     if (body.isRunning) {
       const result = await retry.try(async () => {
         const resp = await supertestWithoutAuth
