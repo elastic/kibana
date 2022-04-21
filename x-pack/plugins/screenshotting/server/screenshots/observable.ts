@@ -245,9 +245,7 @@ export class ScreenshotObservableHandler {
           try {
             screenshots = await getScreenshots(this.driver, this.eventLogger, elements);
           } catch (e) {
-            const newError = new errors.FailedToCaptureScreenshot(e.message);
-            this.eventLogger.error(newError, Actions.GET_SCREENSHOT);
-            throw newError;
+            throw new errors.FailedToCaptureScreenshot(e.message);
           }
           const { timeRange, error: setupError, renderErrors } = data;
 

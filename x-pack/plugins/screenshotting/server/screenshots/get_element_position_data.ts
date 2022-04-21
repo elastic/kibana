@@ -38,6 +38,8 @@ export const getElementPositionAndAttributes = async (
   eventLogger: EventLogger,
   layout: Layout
 ): Promise<ElementsPositionAndAttribute[] | null> => {
+  const { kbnLogger } = eventLogger;
+
   const spanEnd = eventLogger.log(
     'get element position data',
     Actions.GET_ELEMENT_POSITION_DATA,
@@ -82,7 +84,7 @@ export const getElementPositionAndAttributes = async (
         args: [screenshotSelector, { title: 'data-title', description: 'data-description' }],
       },
       { context: CONTEXT_ELEMENTATTRIBUTES },
-      eventLogger.kbnLogger
+      kbnLogger
     );
 
     if (!elementsPositionAndAttributes?.length) {
@@ -91,6 +93,7 @@ export const getElementPositionAndAttributes = async (
       );
     }
   } catch (err) {
+    kbnLogger.error(err);
     eventLogger.error(err, Actions.GET_ELEMENT_POSITION_DATA);
     elementsPositionAndAttributes = null;
   }

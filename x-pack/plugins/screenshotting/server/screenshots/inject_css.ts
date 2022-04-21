@@ -24,6 +24,8 @@ export const injectCustomCss = async (
     return;
   }
 
+  const { kbnLogger } = eventLogger;
+
   const spanEnd = eventLogger.log(
     'inject CSS into the page',
     Actions.INJECT_CSS,
@@ -44,9 +46,10 @@ export const injectCustomCss = async (
         args: [buffer.toString()],
       },
       { context: CONTEXT_INJECTCSS },
-      eventLogger.kbnLogger
+      kbnLogger
     );
   } catch (err) {
+    kbnLogger.error(err);
     eventLogger.error(err, Actions.INJECT_CSS);
     throw new Error(
       `An error occurred when trying to update Kibana CSS for reporting. ${err.message}`

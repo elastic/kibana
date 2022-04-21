@@ -59,10 +59,7 @@ export const getScreenshots = async (
     }
   } catch (error) {
     kbnLogger.error(error);
-    eventLogger.error(
-      `An error occurred when trying to capture screenshots: ${error.message}`,
-      Actions.GET_NUMBER_OF_ITEMS
-    );
+    eventLogger.error(error, Actions.GET_SCREENSHOT);
   }
 
   kbnLogger.info(`screenshots taken: ${screenshots.length}`);

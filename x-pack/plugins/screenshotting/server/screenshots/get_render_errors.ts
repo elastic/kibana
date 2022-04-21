@@ -57,10 +57,7 @@ export const getRenderErrors = async (
     spanEnd({ render_errors: renderErrors });
   } catch (error) {
     kbnLogger.error(error);
-    eventLogger.error(
-      `An error occurred when checking the page for rendering errors`,
-      Actions.GET_RENDER_ERRORS
-    );
+    eventLogger.error(error, Actions.GET_RENDER_ERRORS);
   }
 
   return errorsFound;

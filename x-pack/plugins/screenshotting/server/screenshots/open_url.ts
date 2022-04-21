@@ -19,6 +19,7 @@ export const openUrl = async (
   context: Context,
   headers: Headers
 ): Promise<void> => {
+  const { kbnLogger } = eventLogger;
   const spanEnd = eventLogger.log('open url', Actions.OPEN_URL, 'screenshotting', 'wait');
 
   // If we're moving to another page in the app, we'll want to wait for the app to tell us
@@ -27,8 +28,10 @@ export const openUrl = async (
   const waitForSelector = page > 1 ? `[data-shared-page="${page}"]` : DEFAULT_PAGELOAD_SELECTOR;
 
   try {
-    await browser.open(url, { context, headers, waitForSelector, timeout }, eventLogger.kbnLogger);
+    await browser.open(url, { context, headers, waitForSelector, timeout }, kbnLogger);
   } catch (err) {
+    kbnLogger.error(err);
+
     const newError = new Error(
       `An error occurred when trying to open the Kibana URL: ${err.message}`
     );

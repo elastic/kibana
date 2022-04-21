@@ -145,6 +145,7 @@ export class Screenshots {
                 catchError((error) => {
                   screen.checkPageIsOpen(); // this fails the job if the browser has closed
 
+                  this.logger.error(error);
                   eventLogger.error(error, Actions.SCREENSHOTTING);
                   return of({ ...DEFAULT_SETUP_RESULT, error }); // allow failover screenshot capture
                 }),

@@ -41,6 +41,7 @@ export const waitForVisualizations = async (
   toEqual: number,
   layout: Layout
 ): Promise<void> => {
+  const { kbnLogger } = eventLogger;
   const spanEnd = eventLogger.log(
     'waiting for each visualization to complete rendering',
     Actions.WAIT_VISUALIZATIONS,
@@ -50,8 +51,7 @@ export const waitForVisualizations = async (
 
   const { renderComplete: renderCompleteSelector } = layout.selectors;
 
-  const logger = eventLogger.kbnLogger;
-  logger.debug(`waiting for ${toEqual} rendered elements to be in the DOM`);
+  kbnLogger.debug(`waiting for ${toEqual} rendered elements to be in the DOM`);
 
   try {
     await browser.waitFor({
@@ -60,8 +60,9 @@ export const waitForVisualizations = async (
       timeout,
     });
 
-    logger.debug(`found ${toEqual} rendered elements in the DOM`);
+    kbnLogger.debug(`found ${toEqual} rendered elements in the DOM`);
   } catch (err) {
+    kbnLogger.error(err);
     const newError = new Error(
       `An error occurred when trying to wait for ${toEqual} visualizations to finish rendering. ${err.message}`
     );
