@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { FeatureCatalogueCategory, HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
@@ -57,7 +57,7 @@ export class RollupPlugin implements Plugin {
         icon: 'indexRollupApp',
         path: `/app/management/data/rollup_jobs/job_list`,
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin',
       });
     }
 
