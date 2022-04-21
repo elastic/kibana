@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { buildBazelProductionProjects } from './build_bazel_production_projects';
-export { buildNonBazelProductionProjects } from './build_non_bazel_production_projects';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-bazel-runner'],
+};

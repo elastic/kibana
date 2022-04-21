@@ -1089,8 +1089,10 @@ export interface SavedObjectReferenceWithContext {
         name: string;
     }>;
     isMissing?: boolean;
+    originId?: string;
     spaces: string[];
     spacesWithMatchingAliases?: string[];
+    spacesWithMatchingOrigins?: string[];
     type: string;
 }
 
