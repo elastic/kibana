@@ -46,17 +46,19 @@ export const createRulesRoute = (
       }
 
       try {
-        const core = await context.core;
-        const securitySolution = await context.securitySolution;
-        const licensing = await context.licensing;
-        const alerting = await context.alerting;
-        const lists = await context.lists;
+        const ctx = await context.resolve([
+          'core',
+          'securitySolution',
+          'licensing',
+          'alerting',
+          'lists',
+        ]);
 
-        const rulesClient = alerting.getRulesClient();
-        const ruleExecutionLog = securitySolution.getRuleExecutionLog();
-        const esClient = core.elasticsearch.client;
-        const savedObjectsClient = core.savedObjects.client;
-        const siemClient = securitySolution.getAppClient();
+        const rulesClient = ctx.alerting.getRulesClient();
+        const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
+        const esClient = ctx.core.elasticsearch.client;
+        const savedObjectsClient = ctx.core.savedObjects.client;
+        const siemClient = ctx.securitySolution.getAppClient();
 
         if (request.body.rule_id != null) {
           const rule = await readRules({
@@ -80,7 +82,7 @@ export const createRulesRoute = (
         );
 
         const mlAuthz = buildMlAuthz({
-          license: licensing.license,
+          license: ctx.licensing.license,
           ml,
           request,
           savedObjectsClient,
@@ -99,7 +101,7 @@ export const createRulesRoute = (
         }
 
         // This will create the endpoint list if it does not exist yet
-        await lists?.getExceptionListClient().createEndpointList();
+        await ctx.lists?.getExceptionListClient().createEndpointList();
 
         const createdRule = await rulesClient.create({
           data: internalRule,

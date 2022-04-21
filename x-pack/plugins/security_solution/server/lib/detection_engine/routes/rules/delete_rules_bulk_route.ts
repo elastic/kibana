@@ -61,13 +61,11 @@ export const deleteRulesBulkRoute = (
 
     const siemResponse = buildSiemResponse(response);
 
-    const core = await context.core;
-    const securitySolution = await context.securitySolution;
-    const alerting = await context.alerting;
+    const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
 
-    const rulesClient = alerting.getRulesClient();
-    const ruleExecutionLog = securitySolution.getRuleExecutionLog();
-    const savedObjectsClient = core.savedObjects.client;
+    const rulesClient = ctx.alerting.getRulesClient();
+    const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
+    const savedObjectsClient = ctx.core.savedObjects.client;
 
     const rules = await Promise.all(
       request.body.map(async (payloadRule) => {

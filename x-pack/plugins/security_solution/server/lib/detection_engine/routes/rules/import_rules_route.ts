@@ -76,25 +76,27 @@ export const importRulesRoute = (
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const core = await context.core;
-        const securitySolution = await context.securitySolution;
-        const licensing = await context.licensing;
-        const alerting = await context.alerting;
-        const lists = await context.lists;
-        const actions = await context.actions;
+        const ctx = await context.resolve([
+          'core',
+          'securitySolution',
+          'alerting',
+          'actions',
+          'lists',
+          'licensing',
+        ]);
 
-        const rulesClient = alerting.getRulesClient();
-        const actionsClient = actions.getActionsClient();
-        const esClient = core.elasticsearch.client;
-        const actionSOClient = core.savedObjects.getClient({
+        const rulesClient = ctx.alerting.getRulesClient();
+        const actionsClient = ctx.actions.getActionsClient();
+        const esClient = ctx.core.elasticsearch.client;
+        const actionSOClient = ctx.core.savedObjects.getClient({
           includedHiddenTypes: ['action'],
         });
-        const savedObjectsClient = core.savedObjects.client;
-        const siemClient = securitySolution.getAppClient();
-        const exceptionsClient = lists?.getExceptionListClient();
+        const savedObjectsClient = ctx.core.savedObjects.client;
+        const siemClient = ctx.securitySolution.getAppClient();
+        const exceptionsClient = ctx.lists?.getExceptionListClient();
 
         const mlAuthz = buildMlAuthz({
-          license: licensing.license,
+          license: ctx.licensing.license,
           ml,
           request,
           savedObjectsClient,
@@ -179,7 +181,7 @@ export const importRulesRoute = (
           savedObjectsClient,
           exceptionsClient,
           isRuleRegistryEnabled,
-          spaceId: securitySolution.getSpaceId(),
+          spaceId: ctx.securitySolution.getSpaceId(),
           signalsIndex,
           existingLists: foundReferencedExceptionLists,
         });
