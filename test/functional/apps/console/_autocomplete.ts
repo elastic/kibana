@@ -87,6 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       beforeEach(async () => {
         await PageObjects.console.clearTextArea();
         await PageObjects.console.enterRequest('\n POST _snapshot/test_repo');
+        await PageObjects.console.pressEnter();
       });
 
       await asyncForEach(CONDITIONAL_TEMPLATES, async ({ type, template }) => {
