@@ -13,6 +13,7 @@ import './global_mocks';
 import { HttpSetup } from '@kbn/core/public';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import { notificationServiceMock, fatalErrorsServiceMock } from '@kbn/core/public/mocks';
+import { executionContextServiceMock } from '@kbn/core/public/execution_context/execution_context_service.mock';
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { init as initHttp } from '../../../public/application/services/http';
@@ -28,6 +29,7 @@ const appContextMock = {
   license: licensingMock.createLicense({ license: { type: 'enterprise' } }),
   docLinks: docLinksServiceMock.createStartContract(),
   getUrlForApp: () => {},
+  executionContext: executionContextServiceMock.createSetupContract(),
 };
 
 export const WithAppDependencies =
