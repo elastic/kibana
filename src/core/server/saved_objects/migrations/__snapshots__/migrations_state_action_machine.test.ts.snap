@@ -33,6 +33,7 @@ Object {
               ],
               "maxBatchSizeBytes": 100000000,
               "migrationDocLinks": Object {
+                "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
                 "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
               },
               "outdatedDocuments": Array [],
@@ -197,6 +198,7 @@ Object {
               ],
               "maxBatchSizeBytes": 100000000,
               "migrationDocLinks": Object {
+                "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
                 "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
               },
               "outdatedDocuments": Array [],
@@ -365,6 +367,7 @@ Object {
               ],
               "maxBatchSizeBytes": 100000000,
               "migrationDocLinks": Object {
+                "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
                 "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
               },
               "outdatedDocuments": Array [],
@@ -537,6 +540,7 @@ Object {
               ],
               "maxBatchSizeBytes": 100000000,
               "migrationDocLinks": Object {
+                "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
                 "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
               },
               "outdatedDocuments": Array [],
@@ -735,6 +739,7 @@ Object {
               ],
               "maxBatchSizeBytes": 100000000,
               "migrationDocLinks": Object {
+                "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
                 "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
               },
               "outdatedDocuments": Array [
@@ -910,6 +915,7 @@ Object {
               ],
               "maxBatchSizeBytes": 100000000,
               "migrationDocLinks": Object {
+                "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
                 "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
               },
               "outdatedDocuments": Array [

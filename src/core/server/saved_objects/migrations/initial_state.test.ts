@@ -116,6 +116,8 @@ describe('createInitialState', () => {
       migrationDocLinks: {
         resolveMigrationFailures:
           'https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html',
+        repeatedTimeoutRequests:
+          'https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail',
       },
     });
   });

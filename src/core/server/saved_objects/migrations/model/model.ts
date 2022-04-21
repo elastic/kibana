@@ -244,7 +244,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // we get a response.
         // If the cluster hit the low watermark for disk usage the LEGACY_CREATE_REINDEX_TARGET action will
         // continue to timeout and eventually lead to a failed migration.
-        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for information on how to resolve the issue.`;
+        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
         return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
       } else {
         return throwBadResponse(stateP, left);
@@ -366,7 +366,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // we get a response.
         // In the event of retries running out, we link to the docs to help with diagnosing
         // the problem.
-        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for information on how to resolve the issue.`;
+        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
         return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
       } else {
         return throwBadResponse(stateP, left);
@@ -461,7 +461,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         //
         // If there is a problem CREATE_REINDEX_TEMP action will
         // continue to timeout and eventually lead to a failed migration.
-        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for information on how to resolve the issue.`;
+        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
         return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
       } else {
         return throwBadResponse(stateP, left);
@@ -696,7 +696,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // `_cluster/allocation/explain?index=${targetIndex}` API.
         // Unless the root cause is identified and addressed, the request will
         // continue to timeout and eventually lead to a failed migration.
-        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for information on how to resolve the issue.`;
+        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
         return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
       } else {
         throwBadResponse(stateP, left);
@@ -951,7 +951,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // If the cluster hit the low watermark for disk usage the action will continue to timeout.
         // Unless the disk space is addressed, the LEGACY_CREATE_REINDEX_TARGET action will
         // continue to timeout and eventually lead to a failed migration.
-        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.resolveMigrationFailures} for information on how to resolve the issue.`;
+        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
         return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
       } else {
         return throwBadResponse(stateP, left);

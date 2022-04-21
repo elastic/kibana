@@ -96,6 +96,7 @@ describe('migrations v2 model', () => {
     excludeFromUpgradeFilterHooks: {},
     migrationDocLinks: {
       resolveMigrationFailures: 'resolveMigrationFailures',
+      repeatedTimeoutRequests: 'repeatedTimeoutRequests',
     },
   };
 
