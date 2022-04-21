@@ -13,7 +13,6 @@ import {
   getIdError,
   transformFindAlerts,
   transform,
-  transformTags,
   getIdBulkError,
   transformAlertsToRules,
   getDuplicates,
@@ -23,7 +22,6 @@ import {
   migrateLegacyActionsIds,
 } from './utils';
 import { getAlertMock } from '../__mocks__/request_responses';
-import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import { PartialFilter } from '../../types';
 import { BulkError, createBulkErrorObject } from '../utils';
 import { getOutputRuleAlertForRest } from '../__mocks__/utils';
@@ -102,9 +100,9 @@ describe.each([
       expect(ruleWithEnabledFalse).toEqual(expected);
     });
 
-    test('should work with tags but filter out any internal tags', () => {
+    test('should work with tags', () => {
       const fullRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
-      fullRule.tags = ['tag 1', 'tag 2', `${INTERNAL_IDENTIFIER}_some_other_value`];
+      fullRule.tags = ['tag 1', 'tag 2'];
       const rule = internalRuleToAPIResponse(fullRule);
       const expected = getOutputRuleAlertForRest();
       expected.tags = ['tag 1', 'tag 2'];
@@ -386,23 +384,6 @@ describe.each([
       const unsafeCast = { data: [{ random: 1 }] } as unknown as PartialRule;
       const output = transform(unsafeCast, undefined, isRuleRegistryEnabled);
       expect(output).toBeNull();
-    });
-  });
-
-  describe('transformTags', () => {
-    test('it returns tags that have no internal structures', () => {
-      expect(transformTags(['tag 1', 'tag 2'])).toEqual(['tag 1', 'tag 2']);
-    });
-
-    test('it returns empty tags given empty tags', () => {
-      expect(transformTags([])).toEqual([]);
-    });
-
-    test('it returns tags with internal tags stripped out', () => {
-      expect(transformTags(['tag 1', `${INTERNAL_IDENTIFIER}_some_value`, 'tag 2'])).toEqual([
-        'tag 1',
-        'tag 2',
-      ]);
     });
   });
 
