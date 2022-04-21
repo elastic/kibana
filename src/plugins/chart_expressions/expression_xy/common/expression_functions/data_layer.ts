@@ -6,30 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { DataLayerArgs, DataLayerConfigResult } from '../types';
-import {
-  DATA_LAYER,
-  LayerTypes,
-  SeriesTypes,
-  XScaleTypes,
-  YScaleTypes,
-  Y_CONFIG,
-} from '../constants';
+import { DataLayerFn } from '../types';
+import { DATA_LAYER, LayerTypes } from '../constants';
+import { strings } from '../i18n';
+import { commonDataLayerArgs } from './common_data_layer_args';
 
-export const dataLayerFunction: ExpressionFunctionDefinition<
-  typeof DATA_LAYER,
-  Datatable,
-  DataLayerArgs,
-  DataLayerConfigResult
-> = {
+export const dataLayerFunction: DataLayerFn = {
   name: DATA_LAYER,
   aliases: [],
   type: DATA_LAYER,
-  help: i18n.translate('expressionXY.dataLayer.help', {
-    defaultMessage: `Configure a layer in the xy chart`,
-  }),
+  help: strings.getDataLayerFnHelp(),
   inputTypes: ['datatable'],
   args: {
     hide: {
@@ -138,6 +124,7 @@ export const dataLayerFunction: ExpressionFunctionDefinition<
       }),
     },
   },
+  args: { ...commonDataLayerArgs },
   fn(table, args) {
     return {
       type: DATA_LAYER,

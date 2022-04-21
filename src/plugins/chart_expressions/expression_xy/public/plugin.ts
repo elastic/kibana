@@ -29,7 +29,7 @@ import {
   extendedReferenceLineLayerFunction,
   annotationLayerFunction,
   extendedAnnotationLayerFunction,
-} from '../common';
+} from '../common/expression_functions';
 import { GetStartDepsFn, getXyChartRenderer } from './expression_renderers';
 
 export interface XYPluginStartDependencies {

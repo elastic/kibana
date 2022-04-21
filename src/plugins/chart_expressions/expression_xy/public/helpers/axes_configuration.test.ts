@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AxisConfig, DataLayerConfigResult } from '../../common';
+import { DataLayerConfig, AxisConfig } from '../../common';
 import { LayerTypes } from '../../common/constants';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { getAxesConfiguration } from './axes_configuration';
@@ -227,7 +227,8 @@ describe('axes_configuration', () => {
     },
   ];
 
-  const sampleLayer: DataLayerConfigResult = {
+  const sampleLayer: DataLayerConfig = {
+    layerId: 'first',
     type: 'dataLayer',
     layerType: LayerTypes.DATA,
     seriesType: 'line',
@@ -251,7 +252,7 @@ describe('axes_configuration', () => {
     expect(groups.length).toEqual(1);
     expect(groups[0].position).toEqual('left');
     expect(groups[0].series[0].accessor).toEqual('yAccessorId');
-    expect(groups[0].series[0].layer).toEqual(0);
+    expect(groups[0].series[0].layer).toEqual('first');
   });
 
   it('should map auto series to right axis if formatters do not match', () => {
@@ -296,7 +297,7 @@ describe('axes_configuration', () => {
     expect(groups.length).toEqual(1);
     expect(groups[0].position).toEqual('right');
     expect(groups[0].series[0].accessor).toEqual('yAccessorId');
-    expect(groups[0].series[0].layer).toEqual(0);
+    expect(groups[0].series[0].layer).toEqual('first');
   });
 
   it('should map series with matching formatters to same axis', () => {

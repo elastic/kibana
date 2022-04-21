@@ -90,14 +90,14 @@ export type {
   LensMultiTable,
   ValueLabelMode,
   AxisExtentMode,
+  DataLayerConfig,
   FittingFunction,
   AxisExtentConfig,
   LegendConfigResult,
   AxesSettingsConfig,
-  DataLayerConfigResult,
   AxisExtentConfigResult,
   ReferenceLineLayerArgs,
-  ReferenceLineLayerConfigResult,
+  ReferenceLineLayerConfig,
 } from '@kbn/expression-xy-plugin/common';
 export type { LensEmbeddableInput } from './embeddable';
 export { layerTypes } from '../common';

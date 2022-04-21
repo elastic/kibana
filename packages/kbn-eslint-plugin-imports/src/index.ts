@@ -9,6 +9,7 @@
 export * from './get_import_resolver';
 import { NoUnresolvableImportsRule } from './rules/no_unresolvable_imports';
 import { UniformImportsRule } from './rules/uniform_imports';
+import { ExportsMovedPackagesRule } from './rules/exports_moved_packages';
 
 /**
  * Custom ESLint rules, add `'@kbn/eslint-plugin-imports'` to your eslint config to use them
@@ -17,4 +18,5 @@ import { UniformImportsRule } from './rules/uniform_imports';
 export const rules = {
   no_unresolvable_imports: NoUnresolvableImportsRule,
   uniform_imports: UniformImportsRule,
+  exports_moved_packages: ExportsMovedPackagesRule,
 };

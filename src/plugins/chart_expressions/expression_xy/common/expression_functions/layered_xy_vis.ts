@@ -7,112 +7,34 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition, Datatable } from '@kbn/expressions-plugin';
-import { LayeredXYArgs, XYExtendedLayerConfigResult, XYRender } from '../types';
+import { LayeredXyVisFn } from '../types';
 import {
-  XYCurveTypes,
-  LEGEND_CONFIG,
-  ValueLabelModes,
-  FittingFunctions,
   XY_VIS_RENDERER,
-  X_AXIS_CONFIG,
-  Y_AXIS_CONFIG,
   EXTENDED_DATA_LAYER,
   EXTENDED_REFERENCE_LINE_LAYER,
   LAYERED_XY_VIS,
-  EndValues,
   EXTENDED_ANNOTATION_LAYER,
+  X_AXIS_CONFIG,
+  Y_AXIS_CONFIG,
 } from '../constants';
 import { logDatatables } from '../utils';
+import { commonXYArgs } from './common_xy_args';
+import { strings } from '../i18n';
+import { appendLayerIds } from '../helpers';
 
-export const layeredXyVisFunction: ExpressionFunctionDefinition<
-  typeof LAYERED_XY_VIS,
-  Datatable,
-  LayeredXYArgs,
-  XYRender
-> = {
+export const layeredXyVisFunction: LayeredXyVisFn = {
   name: LAYERED_XY_VIS,
   type: 'render',
   inputTypes: ['datatable'],
-  help: i18n.translate('expressionXY.layeredXyVis.help', {
-    defaultMessage: 'An X/Y chart',
-  }),
+  help: strings.getXYHelp(),
   args: {
-    legend: {
-      types: [LEGEND_CONFIG],
-      help: i18n.translate('expressionXY.layeredXyVis.legend.help', {
-        defaultMessage: 'Configure the chart legend.',
-      }),
-    },
-    fittingFunction: {
-      types: ['string'],
-      options: [...Object.values(FittingFunctions)],
-      help: i18n.translate('expressionXY.layeredXyVis.fittingFunction.help', {
-        defaultMessage: 'Define how missing values are treated',
-      }),
-      strict: true,
-    },
-    endValue: {
-      types: ['string'],
-      options: [...Object.values(EndValues)],
-      help: i18n.translate('expressionXY.layeredXyVis.endValue.help', {
-        defaultMessage: 'End value',
-      }),
-    },
-    emphasizeFitting: {
-      types: ['boolean'],
-      default: false,
-      help: '',
-    },
-    valueLabels: {
-      types: ['string'],
-      options: [...Object.values(ValueLabelModes)],
-      help: i18n.translate('expressionXY.layeredXyVis.valueLabels.help', {
-        defaultMessage: 'Value labels mode',
-      }),
-      strict: true,
-    },
+    ...commonXYArgs,
     layers: {
       types: [EXTENDED_DATA_LAYER, EXTENDED_REFERENCE_LINE_LAYER, EXTENDED_ANNOTATION_LAYER],
       help: i18n.translate('expressionXY.layeredXyVis.layers.help', {
         defaultMessage: 'Layers of visual series',
       }),
       multi: true,
-    },
-    curveType: {
-      types: ['string'],
-      options: [...Object.values(XYCurveTypes)],
-      help: i18n.translate('expressionXY.layeredXyVis.curveType.help', {
-        defaultMessage: 'Define how curve type is rendered for a line chart',
-      }),
-      strict: true,
-    },
-    fillOpacity: {
-      types: ['number'],
-      help: i18n.translate('expressionXY.layeredXyVis.fillOpacity.help', {
-        defaultMessage: 'Define the area chart fill opacity',
-      }),
-    },
-    hideEndzones: {
-      types: ['boolean'],
-      default: false,
-      help: i18n.translate('expressionXY.layeredXyVis.hideEndzones.help', {
-        defaultMessage: 'Hide endzone markers for partial data',
-      }),
-    },
-    valuesInLegend: {
-      types: ['boolean'],
-      default: false,
-      help: i18n.translate('expressionXY.layeredXyVis.valuesInLegend.help', {
-        defaultMessage: 'Show values in legend',
-      }),
-    },
-    ariaLabel: {
-      types: ['string'],
-      help: i18n.translate('expressionXY.layeredXyVis.ariaLabel.help', {
-        defaultMessage: 'Specifies the aria label of the xy chart',
-      }),
-      required: false,
     },
     axes: {
       types: [Y_AXIS_CONFIG],
@@ -129,9 +51,7 @@ export const layeredXyVisFunction: ExpressionFunctionDefinition<
     },
   },
   fn(data, args, handlers) {
-    const layers = (args.layers ?? []).filter<XYExtendedLayerConfigResult>(
-      (layer): layer is XYExtendedLayerConfigResult => layer !== undefined
-    );
+    const layers = appendLayerIds(args.layers ?? [], 'layers');
 
     logDatatables(layers, handlers);
 

@@ -18,10 +18,10 @@ export const EXTENDED_DATA_LAYER = 'extendedDataLayer';
 export const LEGEND_CONFIG = 'legendConfig';
 export const XY_VIS_RENDERER = 'xyVis';
 export const ANNOTATION_LAYER = 'annotationLayer';
+export const EXTENDED_ANNOTATION_LAYER = 'extendedAnnotationLayer';
 export const AXIS_EXTENT_CONFIG = 'axisExtentConfig';
 export const REFERENCE_LINE_LAYER = 'referenceLineLayer';
 export const EXTENDED_REFERENCE_LINE_LAYER = 'extendedReferenceLineLayer';
-export const EXTENDED_ANNOTATION_LAYER = 'extendedAnnotationLayer';
 
 export const LayerTypes = {
   DATA: 'data',

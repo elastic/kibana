@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import type { CommonXYLayerConfigResult, ExtendedYConfig, YConfig } from '../../common';
+import type { CommonXYLayerConfig, ExtendedYConfig, YConfig } from '../../common';
 import { getDataLayers, isAnnotationsLayer, isDataLayer } from './visualization';
 
-export function isHorizontalChart(layers: CommonXYLayerConfigResult[]) {
+export function isHorizontalChart(layers: CommonXYLayerConfig[]) {
   return getDataLayers(layers).every((l) => l.isHorizontal);
 }
 
-export const getSeriesColor = (layer: CommonXYLayerConfigResult, accessor: string) => {
+export const getSeriesColor = (layer: CommonXYLayerConfig, accessor: string) => {
   if ((isDataLayer(layer) && layer.splitAccessor) || isAnnotationsLayer(layer)) {
     return null;
   }

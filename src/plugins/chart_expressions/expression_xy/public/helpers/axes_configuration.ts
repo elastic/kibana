@@ -10,18 +10,18 @@ import { Position } from '@elastic/charts';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { FormatFactory } from '../types';
 import {
-  YAxisConfig,
+  CommonXYDataLayerConfig,
+  CommonXYReferenceLineLayerConfig,
   ExtendedYConfigResult,
-  CommonXYDataLayerConfigResult,
-  CommonXYReferenceLineLayerConfigResult,
   ExtendedYConfig,
+  YAxisConfig,
   YConfig,
 } from '../../common';
 import { AxisModes } from '../../common/constants';
 import { isDataLayer } from './visualization';
 
 export interface Series {
-  layer: number;
+  layer: string;
   accessor: string;
 }
 
@@ -51,7 +51,7 @@ export function isFormatterCompatible(
 }
 
 export function groupAxesByType(
-  layers: Array<CommonXYDataLayerConfigResult | CommonXYReferenceLineLayerConfigResult>,
+  layers: Array<CommonXYDataLayerConfig | CommonXYReferenceLineLayerConfig>,
   axes?: YAxisConfig[]
 ) {
   const series: AxesSeries = {
@@ -60,7 +60,7 @@ export function groupAxesByType(
     right: [],
   };
 
-  layers.forEach((layer, index) => {
+  layers.forEach((layer) => {
     const { table } = layer;
     layer.accessors.forEach((accessor) => {
       const yConfig: Array<ExtendedYConfig | YConfig> | undefined = layer.yConfig;
@@ -87,7 +87,7 @@ export function groupAxesByType(
         series[key] = [];
       }
       series[key].push({
-        layer: index,
+        layer: layer.layerId,
         accessor,
         fieldFormat: formatter,
         axisId: yConfigByAccessor?.axisId,
@@ -161,7 +161,7 @@ function axisGlobalConfig(position: Position, axes?: YAxisConfig[]) {
 }
 
 export function getAxesConfiguration(
-  layers: Array<CommonXYDataLayerConfigResult | CommonXYReferenceLineLayerConfigResult>,
+  layers: Array<CommonXYDataLayerConfig | CommonXYReferenceLineLayerConfig>,
   shouldRotate: boolean,
   axes?: YAxisConfig[],
   formatFactory?: FormatFactory

@@ -21,14 +21,7 @@ import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
 import { DimensionEditor } from './xy_config_panel/dimension_editor';
 import { LayerHeader } from './xy_config_panel/layer_header';
-import type {
-  Visualization,
-  AccessorConfig,
-  FramePublicAPI,
-  VisualizationDimensionChangeProps,
-  VisualizationConfigProps,
-  VisualizationToolbarProps,
-} from '../types';
+import type { Visualization, AccessorConfig, FramePublicAPI } from '../types';
 import {
   State,
   visualizationTypes,
@@ -45,7 +38,6 @@ import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expr
 import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
 import { getColumnToLabelMap } from './state_helpers';
 import {
-  convertActiveDataFromIndexesToLayers,
   getGroupsAvailableInData,
   getReferenceConfiguration,
   getReferenceSupportedLayer,
@@ -82,46 +74,6 @@ import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_pane
 import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel';
 import { DimensionTrigger } from '../shared_components/dimension_trigger';
 import { defaultAnnotationLabel } from './annotations/helpers';
-
-type ConvertActiveDataFn = (
-  activeData?: FramePublicAPI['activeData'],
-  state?: State
-) => FramePublicAPI['activeData'];
-
-const updateFrame = (
-  state: State | undefined,
-  frame: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>,
-  convertActiveData?: ConvertActiveDataFn
-) => {
-  if (!frame) {
-    return frame;
-  }
-
-  const activeData = convertActiveData?.(frame?.activeData, state) ?? frame?.activeData;
-  return Object.assign(frame, { activeData });
-};
-
-const isVisualizationDimensionChangeProps = (
-  props:
-    | VisualizationConfigProps<State>
-    | VisualizationDimensionChangeProps<State>
-    | VisualizationToolbarProps<State>
-): props is VisualizationDimensionChangeProps<State> => {
-  if ((props as VisualizationDimensionChangeProps<State>).prevState) {
-    return true;
-  }
-  return false;
-};
-
-function updateProps<
-  T extends
-    | VisualizationConfigProps<State>
-    | VisualizationDimensionChangeProps<State>
-    | VisualizationToolbarProps<State>
->(props: T, convertActiveData?: ConvertActiveDataFn) {
-  const state = isVisualizationDimensionChangeProps(props) ? props.prevState : props.state;
-  return { ...props, frame: updateFrame(state, props.frame), convertActiveData };
-}
 
 export const getXyVisualization = ({
   paletteService,
@@ -225,36 +177,34 @@ export const getXyVisualization = ({
   },
 
   getSupportedLayers(state, frame) {
-    const newFrame = frame ? updateFrame(state, frame, this.convertActiveData) : frame;
     return [
       supportedDataLayer,
-      getAnnotationsSupportedLayer(state, newFrame),
-      getReferenceSupportedLayer(state, newFrame),
+      getAnnotationsSupportedLayer(state, frame),
+      getReferenceSupportedLayer(state, frame),
     ];
   },
 
   getConfiguration({ state, frame, layerId }) {
-    const newFrame = updateFrame(state, frame, this.convertActiveData);
     const layer = state.layers.find((l) => l.layerId === layerId);
     if (!layer) {
       return { groups: [] };
     }
 
     if (isAnnotationsLayer(layer)) {
-      return getAnnotationsConfiguration({ state, frame: newFrame, layer });
+      return getAnnotationsConfiguration({ state, frame, layer });
     }
 
     const sortedAccessors: string[] = getSortedAccessors(
-      newFrame.datasourceLayers[layer.layerId],
+      frame.datasourceLayers[layer.layerId],
       layer
     );
     if (isReferenceLayer(layer)) {
-      return getReferenceConfiguration({ state, frame: newFrame, layer, sortedAccessors });
+      return getReferenceConfiguration({ state, frame, layer, sortedAccessors });
     }
 
     const mappedAccessors = getMappedAccessors({
       state,
-      frame: newFrame,
+      frame,
       layer,
       fieldFormats,
       paletteService,
@@ -262,14 +212,14 @@ export const getXyVisualization = ({
     });
 
     if (isReferenceLayer(layer)) {
-      return getReferenceConfiguration({ state, frame: newFrame, layer, sortedAccessors });
+      return getReferenceConfiguration({ state, frame, layer, sortedAccessors });
     }
 
     const dataLayer: XYDataLayerConfig = layer;
 
     const dataLayers = getDataLayers(state.layers);
     const isHorizontal = isHorizontalChart(state.layers);
-    const { left, right } = groupAxesByType([layer], newFrame.activeData);
+    const { left, right } = groupAxesByType([layer], frame.activeData);
     // Check locally if it has one accessor OR one accessor per axis
     const layerHasOnlyOneAccessor = Boolean(
       dataLayer.accessors.length < 2 ||
@@ -289,10 +239,7 @@ export const getXyVisualization = ({
             Boolean(l.xAccessor) === Boolean(dataLayer.xAccessor) &&
             Boolean(l.splitAccessor) === Boolean(dataLayer.splitAccessor)
           ) {
-            const { left: localLeft, right: localRight } = groupAxesByType(
-              [l],
-              newFrame.activeData
-            );
+            const { left: localLeft, right: localRight } = groupAxesByType([l], frame.activeData);
             // return true only if matching axis are found
             return (
               l.accessors.length &&
@@ -356,8 +303,7 @@ export const getXyVisualization = ({
   },
 
   setDimension(props) {
-    const newProps = updateProps(props, this.convertActiveData);
-    const { prevState, layerId, columnId, groupId } = newProps;
+    const { prevState, layerId, columnId, groupId } = props;
 
     const foundLayer: XYLayerConfig | undefined = prevState.layers.find(
       (l) => l.layerId === layerId
@@ -367,10 +313,10 @@ export const getXyVisualization = ({
     }
 
     if (isReferenceLayer(foundLayer)) {
-      return setReferenceDimension(newProps);
+      return setReferenceDimension(props);
     }
     if (isAnnotationsLayer(foundLayer)) {
-      return setAnnotationsDimension(newProps);
+      return setAnnotationsDimension(props);
     }
 
     const newLayer: XYDataLayerConfig = Object.assign({}, foundLayer);
@@ -470,7 +416,6 @@ export const getXyVisualization = ({
   },
 
   removeDimension({ prevState, layerId, columnId, frame }) {
-    const newFrame = updateFrame(prevState, frame, this.convertActiveData);
     const foundLayer = prevState.layers.find((l) => l.layerId === layerId);
     if (!foundLayer) {
       return prevState;
@@ -508,8 +453,8 @@ export const getXyVisualization = ({
     // check for data layers if they all still have xAccessors
     const groupsAvailable = getGroupsAvailableInData(
       getDataLayers(prevState.layers),
-      newFrame.datasourceLayers,
-      newFrame.activeData
+      frame.datasourceLayers,
+      frame.activeData
     );
 
     if (
@@ -529,11 +474,10 @@ export const getXyVisualization = ({
   },
 
   renderLayerHeader(domElement, props) {
-    const newProps = updateProps(props, this.convertActiveData);
     render(
       <KibanaThemeProvider theme$={kibanaTheme.theme$}>
         <I18nProvider>
-          <LayerHeader {...newProps} />
+          <LayerHeader {...props} />
         </I18nProvider>
       </KibanaThemeProvider>,
       domElement
@@ -541,11 +485,10 @@ export const getXyVisualization = ({
   },
 
   renderToolbar(domElement, props) {
-    const newProps = updateProps(props, this.convertActiveData);
     render(
       <KibanaThemeProvider theme$={kibanaTheme.theme$}>
         <I18nProvider>
-          <XyToolbar {...newProps} useLegacyTimeAxis={useLegacyTimeAxis} />
+          <XyToolbar {...props} useLegacyTimeAxis={useLegacyTimeAxis} />
         </I18nProvider>
       </KibanaThemeProvider>,
       domElement
@@ -553,10 +496,8 @@ export const getXyVisualization = ({
   },
 
   renderDimensionEditor(domElement, props) {
-    const newProps = updateProps(props, this.convertActiveData);
-
     const allProps = {
-      ...newProps,
+      ...props,
       formatFactory: fieldFormats.deserialize,
       paletteService,
     };
@@ -578,9 +519,6 @@ export const getXyVisualization = ({
   },
 
   shouldBuildDatasourceExpressionManually: () => true,
-
-  convertActiveData: (activeData, state) =>
-    convertActiveDataFromIndexesToLayers(activeData, state?.layers),
 
   toExpression: (state, layers, attributes, datasourceExpressionsByLayers = {}) =>
     toExpression(
@@ -675,7 +613,6 @@ export const getXyVisualization = ({
     if (state?.layers.length === 0 || !frame.activeData) {
       return;
     }
-    const newFrame = updateFrame(state, frame, this.convertActiveData);
 
     const filteredLayers = [
       ...getDataLayers(state.layers),
@@ -686,7 +623,7 @@ export const getXyVisualization = ({
 
     for (const layer of filteredLayers) {
       const { layerId, accessors } = layer;
-      const rows = newFrame.activeData?.[layerId] && newFrame.activeData[layerId].rows;
+      const rows = frame.activeData?.[layerId] && frame.activeData[layerId].rows;
       if (!rows) {
         break;
       }

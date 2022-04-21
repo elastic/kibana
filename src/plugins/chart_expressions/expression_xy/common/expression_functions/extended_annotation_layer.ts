@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { LayerTypes, EXTENDED_ANNOTATION_LAYER } from '../constants';
-import { ExtendedAnnotationLayerArgs, ExtendedAnnotationLayerConfigResult } from '../types';
+import { ExtendedAnnotationLayerConfigResult, ExtendedAnnotationLayerArgs } from '../types';
+import { strings } from '../i18n';
 
 export function extendedAnnotationLayerFunction(): ExpressionFunctionDefinition<
   typeof EXTENDED_ANNOTATION_LAYER,
@@ -22,35 +22,29 @@ export function extendedAnnotationLayerFunction(): ExpressionFunctionDefinition<
     aliases: [],
     type: EXTENDED_ANNOTATION_LAYER,
     inputTypes: ['datatable'],
-    help: i18n.translate('expressionXY.extendedAnnotationLayer.help', {
-      defaultMessage: `Configure an annotation layer in the xy chart`,
-    }),
+    help: strings.getAnnotationLayerFnHelp(),
     args: {
       hide: {
         types: ['boolean'],
         default: false,
-        help: 'Show details',
+        help: strings.getAnnotationLayerHideHelp(),
       },
       annotations: {
         types: ['manual_event_annotation'],
-        help: i18n.translate('expressionXY.extendedAnnotationLayer.annotations.help', {
-          defaultMessage: 'Annotationss',
-        }),
+        help: strings.getAnnotationLayerAnnotationsHelp(),
         multi: true,
       },
-      table: {
-        types: ['datatable'],
-        help: i18n.translate('expressionXY.extendedAnnotationLayer.table.help', {
-          defaultMessage: 'Table',
-        }),
+      layerId: {
+        types: ['string'],
+        help: strings.getLayerIdHelp(),
       },
     },
     fn: (input, args) => {
       return {
         type: EXTENDED_ANNOTATION_LAYER,
         ...args,
+        annotations: args.annotations ?? [],
         layerType: LayerTypes.ANNOTATIONS,
-        table: args.table ?? input,
       };
     },
   };
