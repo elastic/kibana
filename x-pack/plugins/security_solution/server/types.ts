@@ -26,7 +26,6 @@ import { EndpointAuthz } from '../common/endpoint/types/authz';
 export { AppClient };
 
 export interface SecuritySolutionApiRequestHandlerContext {
-  // why is this here?
   core: CoreRequestHandlerContext;
   endpointAuthz: EndpointAuthz;
   getConfig: () => ConfigType;
