@@ -387,7 +387,7 @@ export class ElasticsearchService {
   }
 
   private async checkCompatibility(internalClient: ElasticsearchClient) {
-    return firstValueFrom(
+    return await firstValueFrom(
       pollEsNodesVersion({
         internalClient,
         log: this.logger,

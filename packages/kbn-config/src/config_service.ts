@@ -10,7 +10,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Type } from '@kbn/config-schema';
 import { isEqual } from 'lodash';
 import { BehaviorSubject, combineLatest, firstValueFrom, Observable } from 'rxjs';
-import { distinctUntilChanged, first, map, shareReplay, tap } from 'rxjs/operators';
+import { distinctUntilChanged, map, shareReplay, tap } from 'rxjs/operators';
 import { Logger, LoggerFactory } from '@kbn/logging';
 
 import { Config, ConfigPath, Env } from '.';
@@ -124,7 +124,7 @@ export class ConfigService {
   public async validate(params: ConfigValidateParameters = { logDeprecations: true }) {
     const namespaces = [...this.schemas.keys()];
     for (let i = 0; i < namespaces.length; i++) {
-      await this.getValidatedConfigAtPath$(namespaces[i]).pipe(first()).toPromise();
+      await firstValueFrom(this.getValidatedConfigAtPath$(namespaces[i]));
     }
 
     if (params.logDeprecations) {
@@ -177,7 +177,7 @@ export class ConfigService {
     }
 
     const validatedConfig = hasSchema
-      ? await this.atPath<{ enabled?: boolean }>(path).pipe(first()).toPromise()
+      ? await firstValueFrom(this.atPath<{ enabled?: boolean }>(path))
       : undefined;
 
     const isDisabled = validatedConfig?.enabled === false;

@@ -23,7 +23,7 @@ import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 export async function isValidConnection(
   esNodesCompatibility$: Observable<NodesVersionCompatibility>
 ): Promise<NodesVersionCompatibility> {
-  return firstValueFrom(
+  return await firstValueFrom(
     esNodesCompatibility$.pipe(
       filter(({ nodesInfoRequestError, isCompatible }) => {
         if (
