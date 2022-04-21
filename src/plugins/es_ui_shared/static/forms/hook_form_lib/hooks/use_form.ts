@@ -660,6 +660,15 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   // -- EFFECTS
   // ----------------------------------
   useEffect(() => {
+    if (!isMounted.current) {
+      return;
+    }
+
+    // Whenever the "defaultValue" prop changes, reinitialize our ref
+    defaultValueDeserialized.current = defaultValueInitialized;
+  }, [defaultValueInitialized]);
+
+  useEffect(() => {
     isMounted.current = true;
 
     return () => {
