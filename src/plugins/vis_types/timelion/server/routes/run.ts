@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { IRouter, Logger, CoreSetup } from 'kibana/server';
+import { IRouter, Logger, CoreSetup } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import _ from 'lodash';
 // @ts-ignore
-import chainRunnerFn from '../handlers/chain_runner.js';
+import chainRunnerFn from '../handlers/chain_runner';
 // @ts-ignore
 import getNamespacesSettings from '../lib/get_namespaced_settings';
 // @ts-ignore

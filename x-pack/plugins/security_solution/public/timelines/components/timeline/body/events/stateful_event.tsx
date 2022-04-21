@@ -8,6 +8,8 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
+import type { SetEventsDeleted, SetEventsLoading } from '@kbn/timelines-plugin/common';
+import { StatefulEventContext } from '@kbn/timelines-plugin/public';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import {
   ColumnHeaderOptions,
@@ -18,7 +20,6 @@ import {
   TimelineId,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
-import type { SetEventsDeleted, SetEventsLoading } from '../../../../../../../timelines/common';
 import {
   TimelineItem,
   TimelineNonEcsData,
@@ -39,7 +40,6 @@ import { StatefulRowRenderer } from './stateful_row_renderer';
 import { NOTES_BUTTON_CLASS_NAME } from '../../properties/helpers';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
 import { useGetMappedNonEcsValue } from '../data_driven_columns';
-import { StatefulEventContext } from '../../../../../../../timelines/public';
 
 interface Props {
   actionsColumnWidth: number;

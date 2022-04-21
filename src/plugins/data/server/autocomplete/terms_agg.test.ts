@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '../../../../core/server/mocks';
-import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+import { coreMock } from '@kbn/core/server/mocks';
+import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { ConfigSchema } from '../../config';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { termsAggSuggestions } from './terms_agg';

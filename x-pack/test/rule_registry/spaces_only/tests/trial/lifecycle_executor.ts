@@ -5,25 +5,22 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, LogMeta } from 'kibana/server';
+import type { ElasticsearchClient, Logger, LogMeta } from '@kbn/core/server';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
-import { mappingFromFieldMap } from '../../../../../plugins/rule_registry/common/mapping_from_field_map';
+import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
 import {
   AlertConsumers,
   ALERT_REASON,
   ALERT_UUID,
-} from '../../../../../plugins/rule_registry/common/technical_rule_data_field_names';
+} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import {
   createLifecycleExecutor,
   WrappedLifecycleRuleState,
-} from '../../../../../plugins/rule_registry/server/utils/create_lifecycle_executor';
+} from '@kbn/rule-registry-plugin/server/utils/create_lifecycle_executor';
+import { Dataset, IRuleDataClient, RuleDataService } from '@kbn/rule-registry-plugin/server';
+import { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
-import {
-  Dataset,
-  IRuleDataClient,
-  RuleDataService,
-} from '../../../../../plugins/rule_registry/server';
 import {
   MockRuleParams,
   MockRuleState,
@@ -31,7 +28,6 @@ import {
   MockAlertState,
   MockAllowedActionGroups,
 } from '../../../common/types';
-import { RuleExecutorOptions } from '../../../../../plugins/alerting/server';
 import { cleanupRegistryIndices } from '../../../common/lib/helpers/cleanup_registry_indices';
 
 // eslint-disable-next-line import/no-default-export

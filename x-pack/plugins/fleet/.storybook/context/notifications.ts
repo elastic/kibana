@@ -8,7 +8,7 @@
 import uuid from 'uuid';
 import { of } from 'rxjs';
 import { action } from '@storybook/addon-actions';
-import type { NotificationsStart } from 'kibana/public';
+import type { NotificationsStart } from '@kbn/core/public';
 
 const handler = (type: string, ...rest: any[]) => {
   action(`${type} Toast`)(rest);

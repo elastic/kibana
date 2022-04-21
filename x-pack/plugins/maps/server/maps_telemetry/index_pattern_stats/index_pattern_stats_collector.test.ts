@@ -8,7 +8,7 @@
 import { asyncForEach } from '@kbn/std';
 // @ts-ignore
 import mapSavedObjects from '../test_resources/sample_map_saved_objects.json';
-import { DataViewsService } from '../../../../../../src/plugins/data_views/common';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { IndexPatternStatsCollector } from './index_pattern_stats_collector';
 
 test('returns zeroed telemetry data when there are no saved objects', async () => {

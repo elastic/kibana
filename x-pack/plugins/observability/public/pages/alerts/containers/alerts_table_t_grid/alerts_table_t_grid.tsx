@@ -38,22 +38,24 @@ import styled from 'styled-components';
 import React, { Suspense, useMemo, useState, useCallback, useEffect } from 'react';
 
 import { pick } from 'lodash';
-import { getAlertsPermissions } from '../../../../hooks/use_alert_permission';
 import type {
   TGridType,
   TGridState,
   TGridModel,
   SortDirection,
-} from '../../../../../../timelines/public';
-
-import type { TopAlert } from '../alerts_page/alerts_page';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+} from '@kbn/timelines-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   ActionProps,
   ColumnHeaderOptions,
   ControlColumnProps,
   RowRenderer,
-} from '../../../../../../timelines/common';
+} from '@kbn/timelines-plugin/common';
+import { CaseAttachments } from '@kbn/cases-plugin/public';
+import { CommentType } from '@kbn/cases-plugin/common';
+import { getAlertsPermissions } from '../../../../hooks/use_alert_permission';
+
+import type { TopAlert } from '../alerts_page/alerts_page';
 
 import { getRenderCellValue } from '../../components/render_cell_value';
 import { observabilityAppId, observabilityFeatureId } from '../../../../../common';
@@ -63,8 +65,6 @@ import { LazyAlertsFlyout } from '../../../..';
 import { parseAlert } from '../../components/parse_alert';
 import { translations, paths } from '../../../../config';
 import { addDisplayNames } from './add_display_names';
-import { CaseAttachments } from '../../../../../../cases/public';
-import { CommentType } from '../../../../../../cases/common';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from './translations';
 import { ObservabilityAppServices } from '../../../../application/types';
 

@@ -8,25 +8,22 @@
 import { waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
 import React from 'react';
-import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
-import { AGENT_API_ROUTES, PACKAGE_POLICY_API_ROOT } from '../../../../../../fleet/common';
+import { AGENT_API_ROUTES, PACKAGE_POLICY_API_ROOT } from '@kbn/fleet-plugin/common';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { getEndpointListPath, getPoliciesPath, getPolicyDetailPath } from '../../../common/routing';
-import { getHostIsolationExceptionItems } from '../../host_isolation_exceptions/service';
 import { policyListApiPathHandlers } from '../store/test_mock_utils';
 import { PolicyDetails } from './policy_details';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { exceptionsFindHttpMocks } from '../../mocks/exceptions_list_http_mocks';
 
 jest.mock('./policy_forms/components/policy_form_layout');
 jest.mock('../../../../common/components/user_privileges');
-jest.mock('../../host_isolation_exceptions/service');
 jest.mock('../../../../common/hooks/use_experimental_features');
 
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
-const getHostIsolationExceptionItemsMock = getHostIsolationExceptionItems as jest.Mock;
 const useIsExperimentalFeatureMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 describe('Policy Details', () => {
@@ -211,6 +208,8 @@ describe('Policy Details', () => {
     });
 
     describe('without canIsolateHost permissions', () => {
+      let findExceptionsApiHttpMock: ReturnType<typeof exceptionsFindHttpMocks>;
+
       beforeEach(() => {
         useUserPrivilegesMock.mockReturnValue({
           endpointPrivileges: {
@@ -218,38 +217,48 @@ describe('Policy Details', () => {
             canIsolateHost: false,
           },
         });
+
+        findExceptionsApiHttpMock = exceptionsFindHttpMocks(http);
       });
 
       it('should not display the host isolation exceptions tab with no privileges and no assigned exceptions', async () => {
-        getHostIsolationExceptionItemsMock.mockReturnValue({ total: 0, data: [] });
+        findExceptionsApiHttpMock.responseProvider.exceptionsFind.mockReturnValue({
+          data: [],
+          total: 0,
+          page: 1,
+          per_page: 100,
+        });
         policyView = render();
         await asyncActions;
         policyView.update();
         await waitFor(() => {
-          expect(getHostIsolationExceptionItemsMock).toHaveBeenCalled();
+          expect(findExceptionsApiHttpMock.responseProvider.exceptionsFind).toHaveBeenCalled();
         });
         expect(policyView.find('button#hostIsolationExceptions')).toHaveLength(0);
       });
 
       it('should not display the host isolation exceptions tab with no privileges and no data', async () => {
-        getHostIsolationExceptionItemsMock.mockReturnValue({ total: 0 });
+        findExceptionsApiHttpMock.responseProvider.exceptionsFind.mockReturnValue({
+          data: [],
+          total: 0,
+          page: 1,
+          per_page: 100,
+        });
         policyView = render();
         await asyncActions;
         policyView.update();
         await waitFor(() => {
-          expect(getHostIsolationExceptionItemsMock).toHaveBeenCalled();
+          expect(findExceptionsApiHttpMock.responseProvider.exceptionsFind).toHaveBeenCalled();
         });
         expect(policyView.find('button#hostIsolationExceptions')).toHaveLength(0);
       });
 
       it('should display the host isolation exceptions tab with no privileges if there are assigned exceptions', async () => {
-        // simulate existing assigned policies
-        getHostIsolationExceptionItemsMock.mockReturnValue(getFoundExceptionListItemSchemaMock(1));
         policyView = render();
         await asyncActions;
         policyView.update();
         await waitFor(() => {
-          expect(getHostIsolationExceptionItemsMock).toHaveBeenCalled();
+          expect(findExceptionsApiHttpMock.responseProvider.exceptionsFind).toHaveBeenCalled();
         });
         expect(policyView.find('button#hostIsolationExceptions')).toHaveLength(1);
       });

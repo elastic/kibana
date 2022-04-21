@@ -9,16 +9,13 @@ jest.mock('../../routes/security');
 
 import type { MockedLogger } from '@kbn/logging-mocks';
 
-import type {
-  ElasticsearchClient,
-  SavedObjectsClientContract,
-} from '../../../../../../src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
   loggingSystemMock,
   savedObjectsClientMock,
-} from '../../../../../../src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 
 import { FleetUnauthorizedError } from '../../errors';
 import type { InstallablePackage } from '../../types';

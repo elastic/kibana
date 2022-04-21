@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { RequestHandlerContext, KibanaRequest } from 'src/core/server';
+import type { RequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 
 export interface ScreenshotModePluginStart {
   /**

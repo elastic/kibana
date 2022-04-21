@@ -16,7 +16,7 @@ import type { FullAgentPolicy } from '../../../../common/types/models/agent_poli
 
 import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../services';
 
-import { StandaloneInstructions } from '../../enrollment_instructions/standalone';
+import { StandaloneInstructions, ManualInstructions } from '../../enrollment_instructions';
 
 import {
   useGetOneEnrollmentAPIKey,
@@ -45,6 +45,7 @@ import {
   AgentEnrollmentConfirmationStep,
   InstallManagedAgentStep,
   IncomingDataConfirmationStep,
+  DownloadStep,
 } from '.';
 
 export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
@@ -163,7 +164,6 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
       InstallStandaloneAgentStep({
         installCommand: standaloneInstallCommands,
         isK8s,
-        selectedPolicyId: selectedPolicy?.id,
       })
     );
 
@@ -203,7 +203,9 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   onClickViewAgents,
   isK8s,
   installedPackagePolicy,
+  isFleetServerPolicySelected,
 }) => {
+  const kibanaVersion = useKibanaVersion();
   const core = useStartServices();
   const { docLinks } = core;
   const link = docLinks.links.fleet.troubleshooting;
@@ -211,11 +213,14 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
 
   const apiKey = useGetOneEnrollmentAPIKey(selectedApiKeyId);
   const apiKeyData = apiKey?.data;
+  const enrollToken = apiKey.data ? apiKey.data.item.api_key : '';
+
   const enrolledAgentIds = usePollingAgentCount(selectedPolicy?.id || '');
 
   const fleetServerHosts = useMemo(() => {
     return settings?.fleet_server_hosts || [];
   }, [settings]);
+  const installManagedCommands = ManualInstructions(enrollToken, fleetServerHosts, kibanaVersion);
 
   const instructionsSteps = useMemo(() => {
     const steps: EuiContainedStepProps[] = !agentPolicy
@@ -243,11 +248,17 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
       );
     }
 
+    if (isK8s === 'IS_KUBERNETES') {
+      steps.push(
+        DownloadStep(isFleetServerPolicySelected || false, isK8s || '', enrollToken || '')
+      );
+    }
+
     steps.push(
       InstallManagedAgentStep({
+        installCommand: installManagedCommands,
         apiKeyData,
         selectedApiKeyId,
-        fleetServerHosts,
         isK8s,
       })
     );
@@ -268,6 +279,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           agentDataConfirmed,
           setAgentDataConfirmed,
           installedPolicy: installedPackagePolicy,
+          troubleshootLink: link,
         })
       );
     }
@@ -282,14 +294,16 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     setSelectedPolicyId,
     refreshAgentPolicies,
     selectionType,
-    apiKeyData,
-    fleetServerHosts,
     isK8s,
+    installManagedCommands,
+    apiKeyData,
+    enrolledAgentIds,
     mode,
     setMode,
+    isFleetServerPolicySelected,
+    enrollToken,
     onClickViewAgents,
     link,
-    enrolledAgentIds,
     agentDataConfirmed,
     installedPackagePolicy,
   ]);
