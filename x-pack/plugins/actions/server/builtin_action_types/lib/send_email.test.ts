@@ -799,7 +799,7 @@ describe('send_email module', () => {
 
     await sendEmail(mockLogger, sendEmailOptions, connectorTokenClientM);
     expect(requestOAuthClientCredentialsTokenMock.mock.calls.length).toBe(1);
-    expect(connectorTokenClientM.deleteConnectorTokens.mock.calls.length).toBe(1);
+    expect(connectorTokenClientM.updateOrReplace.mock.calls.length).toBe(1);
 
     expect(sendEmailGraphApiMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
