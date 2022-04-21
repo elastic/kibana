@@ -15,6 +15,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../../actions_config.mock';
 import { serviceNowCommonFields, serviceNowChoices } from './mocks';
 import { snExternalServiceConfig } from './config';
+import { connectorTokenClientMock } from '../lib/connector_token_client.mock';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 jest.mock('axios');
@@ -30,6 +31,7 @@ jest.mock('../lib/axios_utils', () => {
 axios.create = jest.fn(() => axios);
 const requestMock = utils.request as jest.Mock;
 const configurationUtilities = actionsConfigMock.create();
+const connectorTokenClient = connectorTokenClientMock.create();
 
 const getImportSetAPIResponse = (update = false) => ({
   import_set: 'ISET01',
@@ -148,6 +150,7 @@ describe('ServiceNow service', () => {
 
   beforeEach(() => {
     service = createExternalService(
+      '123',
       {
         // The trailing slash at the end of the url is intended.
         // All API calls need to have the trailing slash removed.
@@ -156,7 +159,8 @@ describe('ServiceNow service', () => {
       },
       logger,
       configurationUtilities,
-      snExternalServiceConfig['.servicenow']
+      snExternalServiceConfig['.servicenow'],
+      connectorTokenClient
     );
   });
 
@@ -168,13 +172,15 @@ describe('ServiceNow service', () => {
     test('throws without url', () => {
       expect(() =>
         createExternalService(
+          '123',
           {
             config: { apiUrl: null },
             secrets: { username: 'admin', password: 'admin' },
           },
           logger,
           configurationUtilities,
-          snExternalServiceConfig['.servicenow']
+          snExternalServiceConfig['.servicenow'],
+          connectorTokenClient
         )
       ).toThrow();
     });
@@ -182,13 +188,15 @@ describe('ServiceNow service', () => {
     test('throws without username', () => {
       expect(() =>
         createExternalService(
+          '123',
           {
             config: { apiUrl: 'test.com' },
             secrets: { username: '', password: 'admin' },
           },
           logger,
           configurationUtilities,
-          snExternalServiceConfig['.servicenow']
+          snExternalServiceConfig['.servicenow'],
+          connectorTokenClient
         )
       ).toThrow();
     });
@@ -196,13 +204,15 @@ describe('ServiceNow service', () => {
     test('throws without password', () => {
       expect(() =>
         createExternalService(
+          '123',
           {
             config: { apiUrl: 'test.com' },
             secrets: { username: '', password: undefined },
           },
           logger,
           configurationUtilities,
-          snExternalServiceConfig['.servicenow']
+          snExternalServiceConfig['.servicenow'],
+          connectorTokenClient
         )
       ).toThrow();
     });
@@ -234,13 +244,15 @@ describe('ServiceNow service', () => {
 
     test('it should call request with correct arguments when table changes', async () => {
       service = createExternalService(
+        '123',
         {
           config: { apiUrl: 'https://example.com/' },
           secrets: { username: 'admin', password: 'admin' },
         },
         logger,
         configurationUtilities,
-        { ...snExternalServiceConfig['.servicenow'], table: 'sn_si_incident' }
+        { ...snExternalServiceConfig['.servicenow'], table: 'sn_si_incident' },
+        connectorTokenClient
       );
 
       requestMock.mockImplementation(() => ({
@@ -299,13 +311,15 @@ describe('ServiceNow service', () => {
 
       test('it should call request with correct arguments when table changes', async () => {
         service = createExternalService(
+          '123',
           {
             config: { apiUrl: 'https://example.com/' },
             secrets: { username: 'admin', password: 'admin' },
           },
           logger,
           configurationUtilities,
-          snExternalServiceConfig['.servicenow-sir']
+          snExternalServiceConfig['.servicenow-sir'],
+          connectorTokenClient
         );
 
         const res = await createIncident(service);
@@ -383,13 +397,15 @@ describe('ServiceNow service', () => {
     describe('table API', () => {
       beforeEach(() => {
         service = createExternalService(
+          '123',
           {
             config: { apiUrl: 'https://example.com/' },
             secrets: { username: 'admin', password: 'admin' },
           },
           logger,
           configurationUtilities,
-          { ...snExternalServiceConfig['.servicenow'], useImportAPI: false }
+          { ...snExternalServiceConfig['.servicenow'], useImportAPI: false },
+          connectorTokenClient
         );
       });
 
@@ -419,13 +435,15 @@ describe('ServiceNow service', () => {
 
       test('it should call request with correct arguments when table changes', async () => {
         service = createExternalService(
+          '123',
           {
             config: { apiUrl: 'https://example.com/' },
             secrets: { username: 'admin', password: 'admin' },
           },
           logger,
           configurationUtilities,
-          { ...snExternalServiceConfig['.servicenow-sir'], useImportAPI: false }
+          { ...snExternalServiceConfig['.servicenow-sir'], useImportAPI: false },
+          connectorTokenClient
         );
 
         mockIncidentResponse(false);
@@ -469,13 +487,15 @@ describe('ServiceNow service', () => {
 
       test('it should call request with correct arguments when table changes', async () => {
         service = createExternalService(
+          '123',
           {
             config: { apiUrl: 'https://example.com/' },
             secrets: { username: 'admin', password: 'admin' },
           },
           logger,
           configurationUtilities,
-          snExternalServiceConfig['.servicenow-sir']
+          snExternalServiceConfig['.servicenow-sir'],
+          connectorTokenClient
         );
 
         const res = await updateIncident(service);
@@ -555,13 +575,15 @@ describe('ServiceNow service', () => {
     describe('table API', () => {
       beforeEach(() => {
         service = createExternalService(
+          '123',
           {
             config: { apiUrl: 'https://example.com/' },
             secrets: { username: 'admin', password: 'admin' },
           },
           logger,
           configurationUtilities,
-          { ...snExternalServiceConfig['.servicenow'], useImportAPI: false }
+          { ...snExternalServiceConfig['.servicenow'], useImportAPI: false },
+          connectorTokenClient
         );
       });
 
@@ -592,13 +614,15 @@ describe('ServiceNow service', () => {
 
       test('it should call request with correct arguments when table changes', async () => {
         service = createExternalService(
+          '123',
           {
             config: { apiUrl: 'https://example.com/' },
             secrets: { username: 'admin', password: 'admin' },
           },
           logger,
           configurationUtilities,
-          { ...snExternalServiceConfig['.servicenow-sir'], useImportAPI: false }
+          { ...snExternalServiceConfig['.servicenow-sir'], useImportAPI: false },
+          connectorTokenClient
         );
 
         mockIncidentResponse(false);
@@ -647,13 +671,15 @@ describe('ServiceNow service', () => {
 
     test('it should call request with correct arguments when table changes', async () => {
       service = createExternalService(
+        '123',
         {
           config: { apiUrl: 'https://example.com/' },
           secrets: { username: 'admin', password: 'admin' },
         },
         logger,
         configurationUtilities,
-        { ...snExternalServiceConfig['.servicenow'], table: 'sn_si_incident' }
+        { ...snExternalServiceConfig['.servicenow'], table: 'sn_si_incident' },
+        connectorTokenClient
       );
 
       requestMock.mockImplementation(() => ({
@@ -715,13 +741,15 @@ describe('ServiceNow service', () => {
 
     test('it should call request with correct arguments when table changes', async () => {
       service = createExternalService(
+        '123',
         {
           config: { apiUrl: 'https://example.com/' },
           secrets: { username: 'admin', password: 'admin' },
         },
         logger,
         configurationUtilities,
-        { ...snExternalServiceConfig['.servicenow'], table: 'sn_si_incident' }
+        { ...snExternalServiceConfig['.servicenow'], table: 'sn_si_incident' },
+        connectorTokenClient
       );
 
       requestMock.mockImplementation(() => ({
@@ -819,13 +847,15 @@ describe('ServiceNow service', () => {
 
       test('it does not log if useOldApi = true', async () => {
         service = createExternalService(
+          '123',
           {
             config: { apiUrl: 'https://example.com/' },
             secrets: { username: 'admin', password: 'admin' },
           },
           logger,
           configurationUtilities,
-          { ...snExternalServiceConfig['.servicenow'], useImportAPI: false }
+          { ...snExternalServiceConfig['.servicenow'], useImportAPI: false },
+          connectorTokenClient
         );
         await service.checkIfApplicationIsInstalled();
         expect(requestMock).not.toHaveBeenCalled();

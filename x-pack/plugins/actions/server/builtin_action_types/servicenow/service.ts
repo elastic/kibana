@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import axios, { AxiosResponse } from 'axios';
+import { AxiosResponse } from 'axios';
 
 import { Logger } from '@kbn/core/server';
 import {
@@ -25,21 +25,27 @@ import * as i18n from './translations';
 import { ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType } from './types';
 import { request } from '../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { createServiceError, getPushedDate, prepareIncident } from './utils';
+import { createServiceError, getAxiosInstance, getPushedDate, prepareIncident } from './utils';
+import { ConnectorTokenClientContract } from '../../types';
 
 export const SYS_DICTIONARY_ENDPOINT = `api/now/table/sys_dictionary`;
 
 export const createExternalService: ServiceFactory = (
+  connectorId: string,
   { config, secrets }: ExternalServiceCredentials,
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities,
-  { table, importSetTable, useImportAPI, appScope }: SNProductsConfigValue
+  { table, importSetTable, useImportAPI, appScope }: SNProductsConfigValue,
+  connectorTokenClient: ConnectorTokenClientContract
 ): ExternalService => {
-  const { apiUrl: url, usesTableApi: usesTableApiConfigValue } =
-    config as ServiceNowPublicConfigurationType;
+  const {
+    apiUrl: url,
+    usesTableApi: usesTableApiConfigValue,
+    isOAuth,
+  } = config as ServiceNowPublicConfigurationType;
   const { username, password } = secrets as ServiceNowSecretConfigurationType;
 
-  if (!url || !username || !password) {
+  if (!url || (isOAuth && (!username || !password))) {
     throw Error(`[Action]${i18n.SERVICENOW}: Wrong configuration.`);
   }
 
@@ -54,8 +60,13 @@ export const createExternalService: ServiceFactory = (
    */
   const getVersionUrl = () => `${urlWithoutTrailingSlash}/api/${appScope}/elastic_api/health`;
 
-  const axiosInstance = axios.create({
-    auth: { username, password },
+  const axiosInstance = getAxiosInstance({
+    connectorId,
+    logger,
+    configurationUtilities,
+    credentials: { config, secrets },
+    snServiceUrl: urlWithoutTrailingSlash,
+    connectorTokenClient,
   });
 
   const useTableApi = !useImportAPI || usesTableApiConfigValue;

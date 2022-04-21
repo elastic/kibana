@@ -15,8 +15,10 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../../actions_config.mock';
 import { observables } from './mocks';
 import { snExternalServiceConfig } from './config';
+import { connectorTokenClientMock } from '../lib/connector_token_client.mock';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+const connectorTokenClient = connectorTokenClientMock.create();
 
 jest.mock('axios');
 jest.mock('../lib/axios_utils', () => {
@@ -93,13 +95,15 @@ describe('ServiceNow SIR service', () => {
 
   beforeEach(() => {
     service = createExternalServiceSIR(
+      '123',
       {
         config: { apiUrl: 'https://example.com/' },
         secrets: { username: 'admin', password: 'admin' },
       },
       logger,
       configurationUtilities,
-      snExternalServiceConfig['.servicenow-sir']
+      snExternalServiceConfig['.servicenow-sir'],
+      connectorTokenClient
     ) as ExternalServiceSIR;
   });
 

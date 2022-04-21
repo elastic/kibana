@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import axios from 'axios';
-
 import { Logger } from '@kbn/core/server';
 import {
   ExternalServiceCredentials,
@@ -17,11 +15,11 @@ import {
   ServiceFactory,
 } from './types';
 
-import { ServiceNowSecretConfigurationType } from './types';
 import { request } from '../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import { createExternalService } from './service';
-import { createServiceError } from './utils';
+import { createServiceError, getAxiosInstance } from './utils';
+import { ConnectorTokenClientContract } from '../../types';
 
 const getAddObservableToIncidentURL = (url: string, incidentID: string) =>
   `${url}/api/x_elas2_sir_int/elastic_api/incident/${incidentID}/observables`;
@@ -30,21 +28,29 @@ const getBulkAddObservableToIncidentURL = (url: string, incidentID: string) =>
   `${url}/api/x_elas2_sir_int/elastic_api/incident/${incidentID}/observables/bulk`;
 
 export const createExternalServiceSIR: ServiceFactory<ExternalServiceSIR> = (
+  connectorId: string,
   credentials: ExternalServiceCredentials,
   logger: Logger,
   configurationUtilities: ActionsConfigurationUtilities,
-  serviceConfig: SNProductsConfigValue
+  serviceConfig: SNProductsConfigValue,
+  connectorTokenClient: ConnectorTokenClientContract
 ): ExternalServiceSIR => {
   const snService = createExternalService(
+    connectorId,
     credentials,
     logger,
     configurationUtilities,
-    serviceConfig
+    serviceConfig,
+    connectorTokenClient
   );
 
-  const { username, password } = credentials.secrets as ServiceNowSecretConfigurationType;
-  const axiosInstance = axios.create({
-    auth: { username, password },
+  const axiosInstance = getAxiosInstance({
+    connectorId,
+    logger,
+    configurationUtilities,
+    credentials,
+    snServiceUrl: snService.getUrl(),
+    connectorTokenClient,
   });
 
   const _addObservable = async (data: Observable | Observable[], url: string) => {
