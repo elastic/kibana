@@ -211,6 +211,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     const renderTabs = useCallback(() => {
       return tabs.map((tab, index) => (
         <EuiTab
+          data-test-subj={`case-view-tab-title-${tab.id}`}
           key={index}
           onClick={() => navigateToCaseView({ detailName: caseId, tabId: tab.id })}
           isSelected={tab.id === activeTabId}
@@ -262,8 +263,8 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             <EuiSpacer size="m" />
             <EuiTabs>{renderTabs()}</EuiTabs>
             <EuiSpacer size="l" />
-            <EuiFlexGroup>
-              <EuiFlexItem>{selectedTabContent}</EuiFlexItem>
+            <EuiFlexGroup data-test-subj={`case-view-tab-content${activeTabId}`}>
+              {selectedTabContent}
             </EuiFlexGroup>
           </ContentWrapper>
         </WhitePageWrapper>
