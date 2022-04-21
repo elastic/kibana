@@ -18,6 +18,12 @@ import { CollapsibleNav } from './collapsible_nav';
 
 const { kibana, observability, security, management } = DEFAULT_APP_CATEGORIES;
 
+const resizeWindow = (x: number, y: number) => {
+  window.innerWidth = x;
+  window.innerHeight = y;
+  window.dispatchEvent(new Event('resize'));
+};
+
 function mockLink({ title = 'discover', category }: Partial<ChromeNavLink>) {
   return {
     title,
@@ -79,6 +85,8 @@ function clickGroup(component: ReactWrapper, group: string) {
 
 describe('CollapsibleNav', () => {
   // this test is mostly an "EUI works as expected" sanity check
+  // the docking button should be present at 1440 wdith and up
+  resizeWindow(1440, 900);
   it('renders the default nav', () => {
     const onLock = sinon.spy();
     const component = mount(<CollapsibleNav {...mockProps()} onIsLockedUpdate={onLock} />);
