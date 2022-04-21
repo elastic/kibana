@@ -9,7 +9,6 @@ import React from 'react';
 
 import { render } from '@testing-library/react';
 
-import { SecurityPageName } from '../../../../../common/constants';
 import { TestProviders } from '../../../../common/mock';
 import { parsedVulnerableHostsAlertsResult } from './mock_data';
 import { UseHostAlertsItems } from './use_host_alerts_items';
