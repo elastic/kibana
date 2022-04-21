@@ -10,12 +10,13 @@ import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-plugin/common';
 import * as TEST_SUBJECTS from './test_subjects';
-import type { CspFindingsRequest, CspFindingsResult } from './use_findings';
+import type { CspFindingsResult } from './use_findings';
+import type { FindingsBaseURLQuery } from './types';
 import type { CspClientPluginStartDeps } from '../../types';
 import { PLUGIN_NAME } from '../../../common';
 import { FINDINGS_SEARCH_PLACEHOLDER } from './translations';
 
-type SearchBarQueryProps = Pick<CspFindingsRequest, 'query' | 'filters'>;
+type SearchBarQueryProps = Pick<FindingsBaseURLQuery, 'query' | 'filters'>;
 
 interface FindingsSearchBarProps extends SearchBarQueryProps {
   setQuery(v: Partial<SearchBarQueryProps>): void;

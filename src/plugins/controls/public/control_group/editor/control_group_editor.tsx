@@ -44,10 +44,7 @@ import { ControlStyle, ControlWidth } from '../../types';
 import { ParentIgnoreSettings } from '../..';
 import { ControlsPanels } from '../types';
 import { ControlGroupInput } from '..';
-import {
-  DEFAULT_CONTROL_WIDTH,
-  getDefaultControlGroupInput,
-} from '../../../common/control_group/control_group_constants';
+import { DEFAULT_CONTROL_WIDTH, getDefaultControlGroupInput } from '../../../common';
 
 interface EditControlGroupProps {
   initialInput: ControlGroupInput;
