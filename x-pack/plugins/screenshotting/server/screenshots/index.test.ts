@@ -5,14 +5,6 @@
  * 2.0.
  */
 
-jest.mock('../cloud/read_cgroup_mem_limit', () => {
-  return {
-    ...jest.requireActual('../cloud/read_cgroup_mem_limit'),
-    readMemoryLimit: jest.fn(() => 1 * Math.pow(1024, 3)), // 1GB in bytes
-  };
-});
-
-import { readMemoryLimit } from '../cloud/read_cgroup_mem_limit';
 import type { Logger, PackageInfo } from '@kbn/core/server';
 import { httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { lastValueFrom, of, throwError } from 'rxjs';
@@ -50,6 +42,7 @@ describe('Screenshot Observable Pipeline', () => {
   beforeEach(async () => {
     cloud = {
       isCloudEnabled: false,
+      instanceSizeMb: 1024, // 1GB
       apm: {},
     } as CloudSetup;
     driver = createMockBrowserDriver();
@@ -225,7 +218,7 @@ describe('Screenshot Observable Pipeline', () => {
     });
 
     it('generates a report when OS memory is 2GB on cloud', async () => {
-      (readMemoryLimit as jest.Mock).mockImplementation(() => 2 * Math.pow(1024, 3));
+      cloud.instanceSizeMb = 2048;
       await lastValueFrom(
         screenshots.getScreenshots({
           ...options,
