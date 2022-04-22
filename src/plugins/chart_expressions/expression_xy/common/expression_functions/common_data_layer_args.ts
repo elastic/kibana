@@ -84,8 +84,4 @@ export const commonDataLayerArgs: Omit<CommonDataLayerFn['args'], 'table'> = {
     help: strings.getPaletteHelp(),
     default: '{palette}',
   },
-  xAxisId: {
-    types: ['string'],
-    help: strings.getXAxisIdHelp(),
-  },
 };

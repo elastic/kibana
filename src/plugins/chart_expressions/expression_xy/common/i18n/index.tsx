@@ -145,10 +145,6 @@ export const strings = {
     i18n.translate('expressionXY.dataLayer.palette.help', {
       defaultMessage: 'Palette',
     }),
-  getXAxisIdHelp: () =>
-    i18n.translate('expressionXY.dataLayer.xAxisId.help', {
-      defaultMessage: 'Id of x-axis',
-    }),
   getTableHelp: () =>
     i18n.translate('expressionXY.layers.table.help', {
       defaultMessage: 'Table',

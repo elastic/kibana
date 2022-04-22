@@ -123,7 +123,6 @@ export interface DataLayerArgs {
   // palette will always be set on the expression
   palette: PaletteOutput;
   yConfig?: YConfigResult[];
-  xAxisId?: string;
 }
 
 export interface ValidLayer extends DataLayerConfigResult {
@@ -149,7 +148,6 @@ export interface ExtendedDataLayerArgs {
   // palette will always be set on the expression
   yConfig?: YConfigResult[];
   table?: Datatable;
-  xAxisId?: string;
 }
 
 export interface LegendConfig {
