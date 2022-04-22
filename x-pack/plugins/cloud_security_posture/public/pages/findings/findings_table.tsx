@@ -22,13 +22,11 @@ import * as TEST_SUBJECTS from './test_subjects';
 import * as TEXT from './translations';
 import type { CspFinding } from './types';
 import { CspEvaluationBadge } from '../../components/csp_evaluation_badge';
-import type { CspFindingsRequest, CspFindingsResult } from './use_findings';
+import type { FindingsGroupByNoneQuery, CspFindingsResult } from './use_findings';
 import { FindingsRuleFlyout } from './findings_flyout';
 
-type TableQueryProps = Pick<CspFindingsRequest, 'sort' | 'from' | 'size'>;
-
-interface BaseFindingsTableProps extends TableQueryProps {
-  setQuery(query: Partial<TableQueryProps>): void;
+interface BaseFindingsTableProps extends FindingsGroupByNoneQuery {
+  setQuery(query: Partial<FindingsGroupByNoneQuery>): void;
 }
 
 type FindingsTableProps = CspFindingsResult & BaseFindingsTableProps;
@@ -119,7 +117,7 @@ const getEuiPaginationFromEsSearchSource = ({
 });
 
 const getEuiSortFromEsSearchSource = (
-  sort: TableQueryProps['sort']
+  sort: FindingsGroupByNoneQuery['sort']
 ): EuiBasicTableProps<CspFinding>['sorting'] => {
   if (!sort.length) return;
 
@@ -133,7 +131,7 @@ const getEuiSortFromEsSearchSource = (
 const getEsSearchQueryFromEuiTableParams = ({
   page,
   sort,
-}: Criteria<CspFinding>): Partial<TableQueryProps> => ({
+}: Criteria<CspFinding>): Partial<FindingsGroupByNoneQuery> => ({
   ...(!!page && { from: page.index * page.size, size: page.size }),
   sort: sort ? [{ [sort.field]: SortDirection[sort.direction] }] : undefined,
 });
