@@ -20,10 +20,7 @@ import { LayeredXyVisFn, XyVisFn } from '../types';
 
 type CommonXYFn = XyVisFn | LayeredXyVisFn;
 
-export const commonXYArgs: Omit<
-  CommonXYFn['args'],
-  'dataLayers' | 'referenceLineLayers' | 'annotationLayers' | 'layers'
-> = {
+export const commonXYArgs: CommonXYFn['args'] = {
   legend: {
     types: [LEGEND_CONFIG],
     help: strings.getLegendHelp(),

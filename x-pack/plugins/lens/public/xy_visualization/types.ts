@@ -101,7 +101,6 @@ export interface XYReferenceLineLayerConfig {
   layerId: string;
   accessors: string[];
   yConfig?: YConfig[];
-  palette?: PaletteOutput;
   layerType: 'referenceLine';
 }
 

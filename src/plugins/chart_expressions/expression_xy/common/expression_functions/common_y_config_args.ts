@@ -11,18 +11,17 @@ import { YConfigFn, ExtendedYConfigFn } from '../types';
 
 type CommonYConfigFn = YConfigFn | ExtendedYConfigFn;
 
-export const commonYConfigArgs: Pick<CommonYConfigFn['args'], 'forAccessor' | 'color' | 'axisId'> =
-  {
-    forAccessor: {
-      types: ['string'],
-      help: strings.getForAccessorHelp(),
-    },
-    color: {
-      types: ['string'],
-      help: strings.getColorHelp(),
-    },
-    axisId: {
-      types: ['string'],
-      help: strings.getAxisIdHelp(),
-    },
-  };
+export const commonYConfigArgs: CommonYConfigFn['args'] = {
+  forAccessor: {
+    types: ['string'],
+    help: strings.getForAccessorHelp(),
+  },
+  axisId: {
+    types: ['string'],
+    help: strings.getAxisIdHelp(),
+  },
+  color: {
+    types: ['string'],
+    help: strings.getColorHelp(),
+  },
+};
