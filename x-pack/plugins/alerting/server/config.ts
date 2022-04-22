@@ -58,7 +58,7 @@ export const configSchema = schema.object({
 });
 
 for (const schemaEntry of configSchema.getSchemaStructure()) {
- console.log(`config key: xpack.alerting.${schemaEntry.path.join('.')} (${schemaEntry.type})`);
+  console.log(`config key: xpack.alerting.${schemaEntry.path.join('.')} (${schemaEntry.type})`);
 }
 
 export type AlertingConfig = TypeOf<typeof configSchema>;
