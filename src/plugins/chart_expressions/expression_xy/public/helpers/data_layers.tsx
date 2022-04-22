@@ -118,7 +118,7 @@ export const getIsAlreadyFormattedLayerInfo = (
 export const getAreAlreadyFormattedLayersInfo = (
   layers: CommonXYDataLayerConfig[],
   formatFactory: FormatFactory
-): Record<number, Record<string, boolean>> =>
+): Record<string, Record<string, boolean>> =>
   layers.reduce<Record<number, Record<string, boolean>>>(
     (areAlreadyFormatted, layer) => ({
       ...areAlreadyFormatted,

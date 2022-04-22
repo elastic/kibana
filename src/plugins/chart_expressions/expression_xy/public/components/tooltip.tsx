@@ -7,25 +7,16 @@
  */
 
 import { TooltipInfo } from '@elastic/charts';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import React, { FC } from 'react';
-
-export type AccessorsFormatters = Record<string, FieldFormat>;
-
-export interface LayerFormatters {
-  xAccessors: AccessorsFormatters;
-  yAccessors: AccessorsFormatters;
-  splitSeriesAccessors: AccessorsFormatters;
-  splitColumnAccessors: AccessorsFormatters;
-  splitRowAccessors: AccessorsFormatters;
-}
-
-export type LayersFormatters = Record<string, LayerFormatters>;
+import { LayersAccessorsTitles, LayersFieldFormats } from '../helpers';
 
 type Props = TooltipInfo & {
-  formatters: LayersFormatters;
+  fieldFormats: LayersFieldFormats;
+  titles: LayersAccessorsTitles;
+  formatFactory: FormatFactory;
 };
 
-export const Tooltip: FC<Props> = ({ header, values, formatters }) => {
+export const Tooltip: FC<Props> = ({ header, values, fieldFormats, titles, formatFactory }) => {
   return <div>123</div>;
 };

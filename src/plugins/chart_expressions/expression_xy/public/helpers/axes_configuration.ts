@@ -14,7 +14,7 @@ import {
   ExtendedYConfig,
   YConfig,
 } from '../../common';
-import { isDataLayer } from './visualization';
+import { LayersFieldFormats } from './layers';
 
 export interface Series {
   layer: string;
@@ -40,7 +40,8 @@ export function isFormatterCompatible(
 }
 
 export function groupAxesByType(
-  layers: Array<CommonXYDataLayerConfig | CommonXYReferenceLineLayerConfig>
+  layers: Array<CommonXYDataLayerConfig | CommonXYReferenceLineLayerConfig>,
+  fieldFormats: LayersFieldFormats
 ) {
   const series: {
     auto: FormattedMetric[];
@@ -55,30 +56,12 @@ export function groupAxesByType(
   };
 
   layers.forEach((layer) => {
-    const { table } = layer;
+    const { layerId } = layer;
     layer.accessors.forEach((accessor) => {
       const yConfig: Array<YConfig | ExtendedYConfig> | undefined = layer.yConfig;
-      const mode =
-        yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode || 'auto';
-      let formatter: SerializedFieldFormat = table.columns?.find((column) => column.id === accessor)
-        ?.meta?.params || { id: 'number' };
-      if (
-        isDataLayer(layer) &&
-        layer.seriesType.includes('percentage') &&
-        formatter.id !== 'percent'
-      ) {
-        formatter = {
-          id: 'percent',
-          params: {
-            pattern: '0.[00]%',
-          },
-        };
-      }
-      series[mode].push({
-        layer: layer.layerId,
-        accessor,
-        fieldFormat: formatter,
-      });
+      const mode = yConfig?.find(({ forAccessor }) => forAccessor === accessor)?.axisMode || 'auto';
+      const fieldFormat = fieldFormats[layerId].yAccessors[accessor]!;
+      series[mode].push({ layer: layer.layerId, accessor, fieldFormat });
     });
   });
 
@@ -113,9 +96,10 @@ export function groupAxesByType(
 export function getAxesConfiguration(
   layers: Array<CommonXYDataLayerConfig | CommonXYReferenceLineLayerConfig>,
   shouldRotate: boolean,
-  formatFactory?: FormatFactory
+  formatFactory: FormatFactory | undefined,
+  fieldFormats: LayersFieldFormats
 ): GroupsConfiguration {
-  const series = groupAxesByType(layers);
+  const series = groupAxesByType(layers, fieldFormats);
 
   const axisGroups: GroupsConfiguration = [];
 
@@ -139,3 +123,22 @@ export function getAxesConfiguration(
 
   return axisGroups;
 }
+
+type LayerGroups = Series & {
+  groupId: 'left' | 'right';
+};
+
+export const getGroupsAndAccessorsByLayers = (
+  groups: GroupsConfiguration
+): Record<string, LayerGroups[]> => {
+  return groups.reduce<Record<string, LayerGroups[]>>((groupsByLayers, group) => {
+    return group.series.reduce<Record<string, LayerGroups[]>>((layers, series) => {
+      const layer = layers[series.layer] ?? [];
+      const prevLayer = groupsByLayers[series.layer] ?? [];
+      return {
+        ...layers,
+        [series.layer]: [...prevLayer, ...layer, { ...series, groupId: group.groupId }],
+      };
+    }, {});
+  }, {});
+};

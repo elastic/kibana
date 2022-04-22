@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import {
   Chart,
   Settings,
@@ -40,6 +40,8 @@ import {
   getDataLayers,
   Series,
   getAreAlreadyFormattedLayersInfo,
+  getLayersFormats,
+  getLayersTitles,
 } from '../helpers';
 import {
   getFilteredLayers,
@@ -165,6 +167,10 @@ export function XYChart({
   }
 
   const dataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
+  const fieldFormats = useMemo(
+    () => getLayersFormats(dataLayers, { splitColumnAccessor, splitRowAccessor }),
+    [dataLayers, splitColumnAccessor, splitRowAccessor]
+  );
 
   // use formatting hint of first x axis column to format ticks
   const xAxisColumn = dataLayers[0]?.table.columns.find(({ id }) => id === dataLayers[0].xAccessor);
@@ -184,9 +190,38 @@ export function XYChart({
     filteredLayers.some((layer) => isDataLayer(layer) && layer.splitAccessor);
   const shouldRotate = isHorizontalChart(dataLayers);
 
-  const yAxesConfiguration = getAxesConfiguration(filteredLayers, shouldRotate, formatFactory);
+  const yAxesConfiguration = getAxesConfiguration(
+    filteredLayers,
+    shouldRotate,
+    formatFactory,
+    fieldFormats
+  );
 
   const xTitle = args.xTitle || (xAxisColumn && xAxisColumn.name);
+  const yAxesMap = {
+    left: yAxesConfiguration.find(({ groupId }) => groupId === 'left'),
+    right: yAxesConfiguration.find(({ groupId }) => groupId === 'right'),
+  };
+
+  const titles = useMemo(
+    () =>
+      getLayersTitles(
+        dataLayers,
+        { splitColumnAccessor, splitRowAccessor },
+        { xTitle: args.xTitle, yTitle: args.yTitle, yRightTitle: args.yRightTitle },
+        yAxesConfiguration
+      ),
+    [
+      args.xTitle,
+      args.yRightTitle,
+      args.yTitle,
+      dataLayers,
+      splitColumnAccessor,
+      splitRowAccessor,
+      yAxesConfiguration,
+    ]
+  );
+
   const axisTitlesVisibilitySettings = args.axisTitlesVisibilitySettings || {
     x: true,
     yLeft: true,
@@ -217,24 +252,10 @@ export function XYChart({
     isHistogramViz
   );
 
-  const yAxesMap = {
-    left: yAxesConfiguration.find(({ groupId }) => groupId === 'left'),
-    right: yAxesConfiguration.find(({ groupId }) => groupId === 'right'),
-  };
-
-  const getYAxesTitles = (axisSeries: Series[], groupId: 'right' | 'left') => {
-    const yTitle = groupId === 'right' ? args.yRightTitle : args.yTitle;
-    return (
-      yTitle ||
-      axisSeries
-        .map(
-          (series) =>
-            filteredLayers
-              .find(({ layerId }) => series.layer === layerId)
-              ?.table.columns.find((column) => column.id === series.accessor)?.name
-        )
-        .filter((name) => Boolean(name))[0]
-    );
+  const getYAxesTitles = (axisSeries: Series[]) => {
+    return axisSeries
+      .map(({ layer, accessor }) => titles[layer].yTitles[accessor])
+      .filter((name) => Boolean(name))[0];
   };
 
   const referenceLineLayers = getReferenceLayers(layers);
@@ -518,7 +539,13 @@ export function XYChart({
           boundary: document.getElementById('app-fixed-viewport') ?? undefined,
           headerFormatter: (d) => safeXAccessorLabelRenderer(d.value),
           customTooltip: ({ header, values }) => (
-            <Tooltip header={header} values={values} formatters={{}} />
+            <Tooltip
+              header={header}
+              values={values}
+              titles={titles}
+              fieldFormats={fieldFormats}
+              formatFactory={formatFactory}
+            />
           ),
         }}
         allowBrushingLastHistogramBin={isTimeViz}
@@ -561,7 +588,7 @@ export function XYChart({
             id={axis.groupId}
             groupId={axis.groupId}
             position={axis.position}
-            title={getYAxesTitles(axis.series, axis.groupId)}
+            title={getYAxesTitles(axis.series)}
             gridLine={{
               visible:
                 axis.groupId === 'right'
