@@ -24,7 +24,8 @@ export const getCasesByAlertIdRoute = createCasesRoute({
     try {
       const alertID = request.params.alert_id;
 
-      const casesClient = await context.cases.getCasesClient();
+      const caseContext = await context.cases;
+      const casesClient = await caseContext.getCasesClient();
       const options = request.query as CasesByAlertIDRequest;
 
       return response.ok({

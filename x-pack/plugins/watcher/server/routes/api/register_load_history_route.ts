@@ -46,7 +46,8 @@ export function registerLoadHistoryRoute({
       const id = request.params.id;
 
       try {
-        const responseFromES = await fetchHistoryItem(ctx.core.elasticsearch.client, id);
+        const esClient = (await ctx.core).elasticsearch.client;
+        const responseFromES = await fetchHistoryItem(esClient, id);
         const hit = get(responseFromES, 'hits.hits[0]');
         if (!hit) {
           return response.notFound({ body: `Watch History Item with id = ${id} not found` });

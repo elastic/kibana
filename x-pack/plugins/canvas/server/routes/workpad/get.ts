@@ -23,7 +23,8 @@ export function initializeGetWorkpadRoute(deps: RouteInitializerDeps) {
       },
     },
     catchErrorHandler(async (context, request, response) => {
-      const workpad = await context.canvas.workpad.get(request.params.id);
+      const canvasContext = await context.canvas;
+      const workpad = await canvasContext.workpad.get(request.params.id);
 
       shimWorkpad(workpad);
 

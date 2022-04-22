@@ -36,7 +36,7 @@ export const registerPrivilegesRoute = ({ router, config }: RouteDependencies) =
         return res.ok({ body: privilegesResult });
       }
 
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
 
       const { has_all_requested: hasAllPrivileges, cluster } =
         await clusterClient.asCurrentUser.security.hasPrivileges({

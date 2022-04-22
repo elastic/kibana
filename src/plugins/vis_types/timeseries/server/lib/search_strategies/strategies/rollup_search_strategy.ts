@@ -38,10 +38,10 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
     indexPattern: string
   ) {
     try {
-      const body =
-        await requestContext.core.elasticsearch.client.asCurrentUser.rollup.getRollupIndexCaps({
-          index: indexPattern,
-        });
+      const esClient = (await requestContext.core).elasticsearch.client;
+      const body = await esClient.asCurrentUser.rollup.getRollupIndexCaps({
+        index: indexPattern,
+      });
 
       return body;
     } catch (e) {
@@ -64,7 +64,7 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
     ) {
       const rollupData = await this.getRollupData(requestContext, indexPatternString);
       const rollupIndices = getRollupIndices(rollupData);
-      const uiSettings = requestContext.core.uiSettings.client;
+      const uiSettings = (await requestContext.core).uiSettings.client;
 
       isViable = rollupIndices.length === 1;
 

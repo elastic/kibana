@@ -12,7 +12,7 @@ export function registerListRoute({ router }: RouteDependencies) {
   router.get(
     { path: '/internal/enterprise_search/indices', validate: false },
     async (context, _, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       try {
         const indices = await fetchIndices(client);
         return response.ok({

@@ -37,7 +37,8 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     },
     async (context, request, response) => {
       try {
-        const body = await context.savedQuery.create(request.body);
+        const savedQuery = await context.savedQuery;
+        const body = await savedQuery.create(request.body);
         return response.ok({ body });
       } catch (e) {
         // TODO: Handle properly
@@ -57,7 +58,8 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     async (context, request, response) => {
       const { id } = request.params;
       try {
-        const body = await context.savedQuery.update(id, request.body);
+        const savedQuery = await context.savedQuery;
+        const body = await savedQuery.update(id, request.body);
         return response.ok({ body });
       } catch (e) {
         // TODO: Handle properly
@@ -76,7 +78,8 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     async (context, request, response) => {
       const { id } = request.params;
       try {
-        const body = await context.savedQuery.get(id);
+        const savedQuery = await context.savedQuery;
+        const body = await savedQuery.get(id);
         return response.ok({ body });
       } catch (e) {
         // TODO: Handle properly
@@ -92,7 +95,8 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     },
     async (context, request, response) => {
       try {
-        const count = await context.savedQuery.count();
+        const savedQuery = await context.savedQuery;
+        const count = await savedQuery.count();
         return response.ok({ body: `${count}` });
       } catch (e) {
         // TODO: Handle properly
@@ -114,7 +118,8 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     },
     async (context, request, response) => {
       try {
-        const body = await context.savedQuery.find(request.body);
+        const savedQuery = await context.savedQuery;
+        const body = await savedQuery.find(request.body);
         return response.ok({ body });
       } catch (e) {
         // TODO: Handle properly
@@ -130,7 +135,8 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     },
     async (context, request, response) => {
       try {
-        const body = await context.savedQuery.getAll();
+        const savedQuery = await context.savedQuery;
+        const body = await savedQuery.getAll();
         return response.ok({ body });
       } catch (e) {
         // TODO: Handle properly
@@ -149,7 +155,8 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     async (context, request, response) => {
       const { id } = request.params;
       try {
-        const body = await context.savedQuery.delete(id);
+        const savedQuery = await context.savedQuery;
+        const body = await savedQuery.delete(id);
         return response.ok({ body });
       } catch (e) {
         // TODO: Handle properly

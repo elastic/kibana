@@ -29,7 +29,8 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
       options: { tags: [`access:${PLUGIN_ID}-readPacks`] },
     },
     async (context, request, response) => {
-      const savedObjectsClient = context.core.savedObjects.client;
+      const coreContext = await context.core;
+      const savedObjectsClient = coreContext.savedObjects.client;
 
       const { attributes, references, ...rest } =
         await savedObjectsClient.get<PackSavedObjectAttributes>(

@@ -88,7 +88,8 @@ export class SampleTaskManagerFixturePlugin
         req: KibanaRequest<any, any, any, any>,
         res: KibanaResponseFactory
       ): Promise<IKibanaResponse<any>> {
-        await context.core.elasticsearch.client.asInternalUser.indices.refresh({
+        const coreCtx = await context.core;
+        await coreCtx.elasticsearch.client.asInternalUser.indices.refresh({
           index: '.kibana_task_manager',
         });
         return res.ok({ body: {} });

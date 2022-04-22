@@ -73,7 +73,7 @@ export const aggregateRulesRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = context.alerting.getRulesClient();
+        const rulesClient = (await context.alerting).getRulesClient();
         const options = rewriteQueryReq({
           ...req.query,
           has_reference: req.query.has_reference || undefined,

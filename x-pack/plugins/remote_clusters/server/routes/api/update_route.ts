@@ -47,7 +47,7 @@ export const register = (deps: RouteDependencies): void => {
     response
   ) => {
     try {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
 
       const { name } = request.params;
 

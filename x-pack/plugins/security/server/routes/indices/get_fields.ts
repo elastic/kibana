@@ -18,14 +18,14 @@ export function defineGetFieldsRoutes({ router }: RouteDefinitionParams) {
     },
     async (context, request, response) => {
       try {
-        const indexMappings =
-          await context.core.elasticsearch.client.asCurrentUser.indices.getFieldMapping({
-            index: request.params.query,
-            fields: '*',
-            allow_no_indices: false,
-            include_defaults: true,
-            filter_path: '*.mappings.*.mapping.*.type',
-          });
+        const esClient = (await context.core).elasticsearch.client;
+        const indexMappings = await esClient.asCurrentUser.indices.getFieldMapping({
+          index: request.params.query,
+          fields: '*',
+          allow_no_indices: false,
+          include_defaults: true,
+          filter_path: '*.mappings.*.mapping.*.type',
+        });
 
         // The flow is the following (see response format at https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-get-field-mapping.html):
         // 1. Iterate over all matched indices.

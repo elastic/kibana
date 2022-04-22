@@ -39,7 +39,8 @@ export function registerRemoveRoute({
       const { indexNames } = body;
 
       try {
-        await removeLifecycle(context.core.elasticsearch.client.asCurrentUser, indexNames);
+        const esClient = (await context.core).elasticsearch.client;
+        await removeLifecycle(esClient.asCurrentUser, indexNames);
         return response.ok();
       } catch (error) {
         return handleEsError({ error, response });

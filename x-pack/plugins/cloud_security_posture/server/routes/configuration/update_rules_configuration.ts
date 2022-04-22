@@ -106,13 +106,14 @@ export const defineUpdateRulesConfigRoute = (router: CspRouter, cspContext: CspA
       validate: { query: configurationUpdateInputSchema },
     },
     async (context, request, response) => {
-      if (!context.fleet.authz.fleet.all) {
+      if (!(await context.fleet).authz.fleet.all) {
         return response.forbidden();
       }
 
       try {
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
-        const soClient = context.core.savedObjects.client;
+        const coreContext = await context.core;
+        const esClient = coreContext.elasticsearch.client.asCurrentUser;
+        const soClient = coreContext.savedObjects.client;
         const packagePolicyService = cspContext.service.packagePolicyService;
         const packagePolicyId = request.query.package_policy_id;
 

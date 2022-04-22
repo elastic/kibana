@@ -46,11 +46,19 @@ export const createRulesRoute = (
       }
 
       try {
-        const rulesClient = context.alerting.getRulesClient();
-        const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
-        const esClient = context.core.elasticsearch.client;
-        const savedObjectsClient = context.core.savedObjects.client;
-        const siemClient = context.securitySolution.getAppClient();
+        const ctx = await context.resolve([
+          'core',
+          'securitySolution',
+          'licensing',
+          'alerting',
+          'lists',
+        ]);
+
+        const rulesClient = ctx.alerting.getRulesClient();
+        const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
+        const esClient = ctx.core.elasticsearch.client;
+        const savedObjectsClient = ctx.core.savedObjects.client;
+        const siemClient = ctx.securitySolution.getAppClient();
 
         if (request.body.rule_id != null) {
           const rule = await readRules({
@@ -74,7 +82,7 @@ export const createRulesRoute = (
         );
 
         const mlAuthz = buildMlAuthz({
-          license: context.licensing.license,
+          license: ctx.licensing.license,
           ml,
           request,
           savedObjectsClient,
@@ -93,7 +101,7 @@ export const createRulesRoute = (
         }
 
         // This will create the endpoint list if it does not exist yet
-        await context.lists?.getExceptionListClient().createEndpointList();
+        await ctx.lists?.getExceptionListClient().createEndpointList();
 
         const createdRule = await rulesClient.create({
           data: internalRule,

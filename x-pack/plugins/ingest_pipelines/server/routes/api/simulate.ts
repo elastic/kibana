@@ -29,7 +29,7 @@ export const registerSimulateRoute = ({
       },
     },
     async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
 
       const { pipeline, documents, verbose } = req.body;
 

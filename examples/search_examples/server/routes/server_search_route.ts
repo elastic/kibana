@@ -33,8 +33,9 @@ export function registerServerSearchRoute(router: IRouter<DataRequestHandlerCont
       const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
       try {
-        const res = await context
-          .search!.search(
+        const search = await context.search;
+        const res = await search
+          .search(
             {
               params: {
                 index,

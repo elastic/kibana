@@ -8,7 +8,7 @@
 import type {
   KibanaResponseFactory,
   RequestHandler,
-  RequestHandlerContext,
+  CustomRequestHandlerContext,
   RouteMethod,
   SavedObjectsClientContract,
   IRouter,
@@ -18,7 +18,7 @@ import type { FleetAuthz } from '../../common/authz';
 import type { AgentClient } from '../services';
 
 /** @internal */
-export interface FleetRequestHandlerContext extends RequestHandlerContext {
+export type FleetRequestHandlerContext = CustomRequestHandlerContext<{
   fleet: {
     /** {@link FleetAuthz} */
     authz: FleetAuthz;
@@ -36,7 +36,7 @@ export interface FleetRequestHandlerContext extends RequestHandlerContext {
     };
     spaceId: string;
   };
-}
+}>;
 
 /**
  * Convenience type for request handlers in Fleet that includes the FleetRequestHandlerContext type

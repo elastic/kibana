@@ -113,7 +113,7 @@ const servicesRoute = createApmServerRoute({
       serviceGroup: serviceGroupId,
       probability,
     } = params.query;
-    const savedObjectsClient = context.core.savedObjects.client;
+    const savedObjectsClient = (await context.core).savedObjects.client;
 
     const [setup, serviceGroup] = await Promise.all([
       setupRequest(resources),
@@ -403,6 +403,7 @@ const serviceAnnotationsRoute = createApmServerRoute({
     const { params, plugins, context, request, logger } = resources;
     const { serviceName } = params.path;
     const { environment, start, end } = params.query;
+    const esClient = (await context.core).elasticsearch.client;
 
     const { observability } = plugins;
 
@@ -431,7 +432,7 @@ const serviceAnnotationsRoute = createApmServerRoute({
       searchAggregatedTransactions,
       serviceName,
       annotationsClient,
-      client: context.core.elasticsearch.client.asCurrentUser,
+      client: esClient.asCurrentUser,
       logger,
       start,
       end,
@@ -1238,7 +1239,8 @@ const sortedAndFilteredServicesRoute = createApmServerRoute({
       };
     }
 
-    const savedObjectsClient = resources.context.core.savedObjects.client;
+    const savedObjectsClient = (await resources.context.core).savedObjects
+      .client;
 
     const [setup, serviceGroup] = await Promise.all([
       setupRequest(resources),

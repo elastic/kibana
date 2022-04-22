@@ -28,7 +28,7 @@ const serviceGroupsRoute = createApmServerRoute({
     resources
   ): Promise<{ serviceGroups: SavedServiceGroup[] }> => {
     const { context } = resources;
-    const savedObjectsClient = context.core.savedObjects.client;
+    const savedObjectsClient = (await context.core).savedObjects.client;
     const serviceGroups = await getServiceGroups({ savedObjectsClient });
     return { serviceGroups };
   },
@@ -46,7 +46,7 @@ const serviceGroupRoute = createApmServerRoute({
   },
   handler: async (resources): Promise<{ serviceGroup: SavedServiceGroup }> => {
     const { context, params } = resources;
-    const savedObjectsClient = context.core.savedObjects.client;
+    const savedObjectsClient = (await context.core).savedObjects.client;
     const serviceGroup = await getServiceGroup({
       savedObjectsClient,
       serviceGroupId: params.query.serviceGroup,
@@ -75,7 +75,7 @@ const serviceGroupSaveRoute = createApmServerRoute({
   handler: async (resources): Promise<void> => {
     const { context, params } = resources;
     const { start, end, serviceGroupId } = params.query;
-    const savedObjectsClient = context.core.savedObjects.client;
+    const savedObjectsClient = (await context.core).savedObjects.client;
     const setup = await setupRequest(resources);
     const items = await lookupServices({
       setup,
@@ -107,7 +107,7 @@ const serviceGroupDeleteRoute = createApmServerRoute({
   handler: async (resources): Promise<void> => {
     const { context, params } = resources;
     const { serviceGroupId } = params.query;
-    const savedObjectsClient = context.core.savedObjects.client;
+    const savedObjectsClient = (await context.core).savedObjects.client;
     await deleteServiceGroup({
       savedObjectsClient,
       serviceGroupId,

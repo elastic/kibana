@@ -29,7 +29,7 @@ export const getEnrollmentApiKeysHandler: RequestHandler<
   TypeOf<typeof GetEnrollmentAPIKeysRequestSchema.query>
 > = async (context, request, response) => {
   // Use kibana_system and depend on authz checks on HTTP layer to prevent abuse
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const esClient = (await context.core).elasticsearch.client.asInternalUser;
 
   try {
     const { items, total, page, perPage } = await APIKeyService.listEnrollmentApiKeys(esClient, {
@@ -55,8 +55,9 @@ export const postEnrollmentApiKeyHandler: RequestHandler<
   undefined,
   TypeOf<typeof PostEnrollmentAPIKeyRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const { elasticsearch, savedObjects } = await context.core;
+  const soClient = savedObjects.client;
+  const esClient = elasticsearch.client.asInternalUser;
   try {
     // validate policy id
     await agentPolicyService.get(soClient, request.body.policy_id).catch((err) => {
@@ -84,7 +85,7 @@ export const postEnrollmentApiKeyHandler: RequestHandler<
 export const deleteEnrollmentApiKeyHandler: RequestHandler<
   TypeOf<typeof DeleteEnrollmentAPIKeyRequestSchema.params>
 > = async (context, request, response) => {
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const esClient = (await context.core).elasticsearch.client.asInternalUser;
   try {
     await APIKeyService.deleteEnrollmentApiKey(esClient, request.params.keyId);
 
@@ -105,7 +106,7 @@ export const getOneEnrollmentApiKeyHandler: RequestHandler<
   TypeOf<typeof GetOneEnrollmentAPIKeyRequestSchema.params>
 > = async (context, request, response) => {
   // Use kibana_system and depend on authz checks on HTTP layer to prevent abuse
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const esClient = (await context.core).elasticsearch.client.asInternalUser;
   try {
     const apiKey = await APIKeyService.getEnrollmentAPIKey(esClient, request.params.keyId);
     const body: GetOneEnrollmentAPIKeyResponse = { item: apiKey };

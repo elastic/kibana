@@ -15,7 +15,8 @@ export const getReportersRoute = createCasesRoute({
   path: CASE_REPORTERS_URL,
   handler: async ({ context, request, response }) => {
     try {
-      const client = await context.cases.getCasesClient();
+      const caseContext = await context.cases;
+      const client = await caseContext.getCasesClient();
       const options = request.query as AllReportersFindRequest;
 
       return response.ok({ body: await client.cases.getReporters({ ...options }) });

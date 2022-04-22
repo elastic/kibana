@@ -67,7 +67,7 @@ export const getRuleExecutionLogRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = context.alerting.getRulesClient();
+        const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
         return res.ok({
           body: await rulesClient.getExecutionLogForRule(rewriteReq({ id, ...req.query })),

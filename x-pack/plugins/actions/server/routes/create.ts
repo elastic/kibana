@@ -51,7 +51,7 @@ export const createActionRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const actionsClient = context.actions.getActionsClient();
+        const actionsClient = (await context.actions).getActionsClient();
         const action = rewriteBodyReq(req.body);
         return res.ok({
           body: rewriteBodyRes(await actionsClient.create({ action })),

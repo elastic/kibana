@@ -14,11 +14,10 @@ export function defineGetAllUsersRoutes({ router }: RouteDefinitionParams) {
     { path: '/internal/security/users', validate: false },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
+        const esClient = (await context.core).elasticsearch.client;
         return response.ok({
           // Return only values since keys (user names) are already duplicated there.
-          body: Object.values(
-            await context.core.elasticsearch.client.asCurrentUser.security.getUser()
-          ),
+          body: Object.values(await esClient.asCurrentUser.security.getUser()),
         });
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));

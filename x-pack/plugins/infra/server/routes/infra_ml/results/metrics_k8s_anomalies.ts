@@ -45,7 +45,7 @@ export const initGetK8sAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
       const { sort, pagination } = getSortAndPagination(sortParam, paginationParam);
 
       try {
-        assertHasInfraMlPlugins(requestContext);
+        const infraMlContext = await assertHasInfraMlPlugins(requestContext);
 
         const {
           data: anomalies,
@@ -53,7 +53,7 @@ export const initGetK8sAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
           hasMoreEntries,
           timing,
         } = await getMetricK8sAnomalies({
-          context: requestContext.infra,
+          context: await infraMlContext.infra,
           sourceId,
           anomalyThreshold,
           startTime,

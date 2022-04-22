@@ -42,6 +42,7 @@ export interface LogEntriesParams {
   cursor?: { before: LogEntryCursor | 'last' } | { after: LogEntryCursor | 'first' };
   highlightTerm?: string;
 }
+
 export interface LogEntriesAroundParams {
   startTimestamp: number;
   endTimestamp: number;
@@ -130,11 +131,9 @@ export class InfraLogEntriesDomain {
     columnOverrides?: LogViewColumnConfiguration[]
   ): Promise<{ entries: LogEntry[]; hasMoreBefore?: boolean; hasMoreAfter?: boolean }> {
     const [, , { logViews }] = await this.libs.getStartServices();
+    const { savedObjects, elasticsearch } = await requestContext.core;
     const resolvedLogView = await logViews
-      .getClient(
-        requestContext.core.savedObjects.client,
-        requestContext.core.elasticsearch.client.asCurrentUser
-      )
+      .getClient(savedObjects.client, elasticsearch.client.asCurrentUser)
       .getResolvedLogView(sourceId);
     const columnDefinitions = columnOverrides ?? resolvedLogView.columns;
 
@@ -192,11 +191,9 @@ export class InfraLogEntriesDomain {
     filterQuery?: LogEntryQuery
   ): Promise<LogEntriesSummaryBucket[]> {
     const [, , { logViews }] = await this.libs.getStartServices();
+    const { savedObjects, elasticsearch } = await requestContext.core;
     const resolvedLogView = await logViews
-      .getClient(
-        requestContext.core.savedObjects.client,
-        requestContext.core.elasticsearch.client.asCurrentUser
-      )
+      .getClient(savedObjects.client, elasticsearch.client.asCurrentUser)
       .getResolvedLogView(sourceId);
     const dateRangeBuckets = await this.adapter.getContainedLogSummaryBuckets(
       requestContext,
@@ -219,11 +216,9 @@ export class InfraLogEntriesDomain {
     filterQuery?: LogEntryQuery
   ): Promise<LogEntriesSummaryHighlightsBucket[][]> {
     const [, , { logViews }] = await this.libs.getStartServices();
+    const { savedObjects, elasticsearch } = await requestContext.core;
     const resolvedLogView = await logViews
-      .getClient(
-        requestContext.core.savedObjects.client,
-        requestContext.core.elasticsearch.client.asCurrentUser
-      )
+      .getClient(savedObjects.client, elasticsearch.client.asCurrentUser)
       .getResolvedLogView(sourceId);
     const messageFormattingRules = compileFormattingRules(
       getBuiltinRules(resolvedLogView.messageField)

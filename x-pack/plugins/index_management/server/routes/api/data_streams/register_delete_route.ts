@@ -21,7 +21,7 @@ export function registerDeleteRoute({ router, lib: { handleEsError } }: RouteDep
       validate: { body: bodySchema },
     },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       const { dataStreams } = request.body as TypeOf<typeof bodySchema>;
 
       const responseBody: { dataStreamsDeleted: string[]; errors: any[] } = {

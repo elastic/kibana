@@ -57,13 +57,14 @@ export function registerAnnotationAPIs({
         });
       }
 
-      const esClient = context.core.elasticsearch.client.asCurrentUser;
+      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+      const license = (await context.licensing)?.license;
 
       const client = createAnnotationsClient({
         index,
         esClient,
         logger,
-        license: context.licensing?.license,
+        license,
       });
 
       try {

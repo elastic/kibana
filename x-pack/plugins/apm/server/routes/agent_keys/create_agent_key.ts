@@ -26,6 +26,7 @@ export async function createAgentKey({
     privileges,
     resources: [resource],
   };
+  const coreContext = await context.core;
 
   // Elasticsearch will allow a user without the right apm privileges to create API keys, but the keys won't validate
   // check first whether the user has the right privileges, and bail out early if not
@@ -33,7 +34,7 @@ export async function createAgentKey({
     application: userApplicationPrivileges,
     username,
     has_all_requested: hasRequiredPrivileges,
-  } = await context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges(
+  } = await coreContext.elasticsearch.client.asCurrentUser.security.hasPrivileges(
     {
       body: {
         application: [application],
@@ -80,11 +81,9 @@ export async function createAgentKey({
   };
 
   const agentKey =
-    await context.core.elasticsearch.client.asCurrentUser.security.createApiKey(
-      {
-        body,
-      }
-    );
+    await coreContext.elasticsearch.client.asCurrentUser.security.createApiKey({
+      body,
+    });
 
   return {
     agentKey,

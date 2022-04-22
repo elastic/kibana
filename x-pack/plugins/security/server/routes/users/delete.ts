@@ -21,7 +21,8 @@ export function defineDeleteUserRoutes({ router }: RouteDefinitionParams) {
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        await context.core.elasticsearch.client.asCurrentUser.security.deleteUser({
+        const esClient = (await context.core).elasticsearch.client;
+        await esClient.asCurrentUser.security.deleteUser({
           username: request.params.username,
         });
 

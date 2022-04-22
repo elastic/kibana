@@ -88,14 +88,14 @@ export function registerListRoute({
     { path: addBasePath('/nodes/list'), validate: false },
     license.guardApiRoute(async (context, request, response) => {
       try {
-        const settingsResponse =
-          await context.core.elasticsearch.client.asCurrentUser.transport.request({
-            method: 'GET',
-            path: '/_nodes/settings',
-            querystring: {
-              format: 'json',
-            },
-          });
+        const esClient = (await context.core).elasticsearch.client;
+        const settingsResponse = await esClient.asCurrentUser.transport.request({
+          method: 'GET',
+          path: '/_nodes/settings',
+          querystring: {
+            format: 'json',
+          },
+        });
         const body: ListNodesRouteResponse = convertSettingsIntoLists(
           settingsResponse as Settings,
           disallowedNodeAttributes

@@ -48,9 +48,11 @@ export class CspPlugin
     >
 {
   private readonly logger: Logger;
+
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
+
   private readonly CspAppService = new CspAppService();
 
   public setup(
@@ -88,11 +90,8 @@ export class CspPlugin
           request: KibanaRequest
         ): Promise<PackagePolicy> => {
           if (packagePolicy.package?.name === CIS_KUBERNETES_PACKAGE_NAME) {
-            await onPackagePolicyPostCreateCallback(
-              this.logger,
-              packagePolicy,
-              context.core.savedObjects.client
-            );
+            const soClient = (await context.core).savedObjects.client;
+            await onPackagePolicyPostCreateCallback(this.logger, packagePolicy, soClient);
           }
 
           return packagePolicy;
@@ -117,5 +116,6 @@ export class CspPlugin
 
     return {};
   }
+
   public stop() {}
 }

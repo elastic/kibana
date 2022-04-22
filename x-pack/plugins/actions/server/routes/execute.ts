@@ -46,7 +46,7 @@ export const executeActionRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const actionsClient = context.actions.getActionsClient();
+        const actionsClient = (await context.actions).getActionsClient();
         const { params } = req.body;
         const { id } = req.params;
         const body: ActionTypeExecutorResult<unknown> = await actionsClient.execute({

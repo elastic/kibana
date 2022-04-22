@@ -20,10 +20,8 @@ export class CorePluginExecutionContext implements Plugin {
         },
       },
       async (context, request, response) => {
-        const { headers } = await context.core.elasticsearch.client.asCurrentUser.ping(
-          {},
-          { meta: true }
-        );
+        const esClient = (await context.core).elasticsearch.client;
+        const { headers } = await esClient.asCurrentUser.ping({}, { meta: true });
         return response.ok({ body: headers || {} });
       }
     );

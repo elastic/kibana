@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { RequestHandler } from '@kbn/core/server';
 import { requestContextMock } from '../../lib/detection_engine/routes/__mocks__';
 import { EndpointApiNeededAuthz, withEndpointAuthz } from './with_endpoint_authz';
@@ -14,7 +14,7 @@ import { EndpointAuthorizationError } from '../errors';
 
 describe('When using `withEndpointAuthz()`', () => {
   let mockRequestHandler: jest.Mocked<RequestHandler>;
-  let mockContext: jest.Mocked<ReturnType<typeof requestContextMock.create>>;
+  let mockContext: ReturnType<typeof requestContextMock.create>;
   let mockRequest: ReturnType<typeof httpServerMock.createKibanaRequest>;
   let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -58,10 +58,10 @@ describe('When using `withEndpointAuthz()`', () => {
       },
       { canCreateArtifactsByPolicy: false },
     ],
-  ])('should grant access when needed authz is %j', (neededAuthz, authzOverrides) => {
+  ])('should grant access when needed authz is %j', async (neededAuthz, authzOverrides) => {
     Object.assign(mockContext.securitySolution.endpointAuthz, authzOverrides);
-    withEndpointAuthz(neededAuthz, logger, mockRequestHandler)(
-      mockContext,
+    await withEndpointAuthz(neededAuthz, logger, mockRequestHandler)(
+      coreMock.createCustomRequestHandlerContext(mockContext),
       mockRequest,
       mockResponse
     );
@@ -85,11 +85,11 @@ describe('When using `withEndpointAuthz()`', () => {
       },
       { canCreateArtifactsByPolicy: false },
     ],
-  ])('should deny access when not authorized for %j', (neededAuthz, authzOverrides) => {
+  ])('should deny access when not authorized for %j', async (neededAuthz, authzOverrides) => {
     Object.assign(mockContext.securitySolution.endpointAuthz, authzOverrides);
 
-    withEndpointAuthz(neededAuthz, logger, mockRequestHandler)(
-      mockContext,
+    await withEndpointAuthz(neededAuthz, logger, mockRequestHandler)(
+      coreMock.createCustomRequestHandlerContext(mockContext),
       mockRequest,
       mockResponse
     );

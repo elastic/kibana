@@ -78,7 +78,7 @@ async function findExistingSampleObjects(
     .map(({ savedObjects }) => savedObjects.map(({ type, id }) => ({ type, id })))
     .flat();
   const objectTypes = getUniqueObjectTypes(objects);
-  const client = getSavedObjectsClient(context, objectTypes);
+  const client = await getSavedObjectsClient(context, objectTypes);
   const findSampleObjectsResult = await findSampleObjects({ client, logger, objects });
 
   let objectCounter = 0;
@@ -101,18 +101,20 @@ async function getSampleDatasetStatus(
     return { status: NOT_INSTALLED };
   }
 
+  const { elasticsearch } = await context.core;
+
   for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
     const dataIndexConfig = sampleDataset.dataIndices[i];
     const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
     try {
-      const indexExists = await context.core.elasticsearch.client.asCurrentUser.indices.exists({
+      const indexExists = await elasticsearch.client.asCurrentUser.indices.exists({
         index,
       });
       if (!indexExists) {
         return { status: NOT_INSTALLED };
       }
 
-      const count = await context.core.elasticsearch.client.asCurrentUser.count({
+      const count = await elasticsearch.client.asCurrentUser.count({
         index,
       });
       if (count.count === 0) {

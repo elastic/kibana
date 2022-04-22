@@ -33,7 +33,7 @@ export function registerPipelinesListRoute(router: LogstashPluginRouter) {
       checkLicense,
       router.handleLegacyErrors(async (context, request, response) => {
         try {
-          const { client } = context.core.elasticsearch;
+          const { client } = (await context.core).elasticsearch;
           const pipelinesRecord = (await fetchPipelines(client.asCurrentUser)) as Record<
             string,
             any

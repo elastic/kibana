@@ -35,7 +35,7 @@ export class SavedObjectTaggingPlugin implements Plugin<{}, {}, SetupDeps, {}> {
     http.registerRouteHandlerContext<TagsHandlerContext, 'tags'>(
       'tags',
       async (context, req, res) => {
-        return new TagsRequestHandlerContext(req, context.core, security);
+        return new TagsRequestHandlerContext(req, await context.core, security);
       }
     );
 

@@ -66,7 +66,8 @@ export function registerHistoryRoute({
       const { startTime } = request.query;
 
       try {
-        const hits = await fetchHistoryItems(ctx.core.elasticsearch.client, watchId, startTime);
+        const esClient = (await ctx.core).elasticsearch.client;
+        const hits = await fetchHistoryItems(esClient, watchId, startTime);
         const watchHistoryItems = hits.map((hit: any) => {
           const id = get(hit, '_id');
           const watchHistoryItemJson = get(hit, '_source');

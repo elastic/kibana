@@ -61,7 +61,8 @@ export const registerCreateRoute = (router: IRouter, { coreUsageData }: RouteDep
         references,
         initialNamespaces,
       };
-      const result = await context.core.savedObjects.client.create(type, attributes, options);
+      const { savedObjects } = await context.core;
+      const result = await savedObjects.client.create(type, attributes, options);
       return res.ok({ body: result });
     })
   );

@@ -27,6 +27,13 @@ export type MaybePromise<T> = T | Promise<T>;
 export type ShallowPromise<T> = T extends Promise<infer U> ? Promise<U> : Promise<T>;
 
 /**
+ * Unwrap all promise attributes of the given type
+ */
+export type AwaitedProperties<T> = {
+  [K in keyof T]: Awaited<T[K]>;
+};
+
+/**
  * Minimal interface for an object resembling an `Observable`.
  */
 export interface ObservableLike<T> {

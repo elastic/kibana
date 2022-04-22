@@ -52,15 +52,16 @@ export const healthRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         try {
+          const alertingContext = await context.alerting;
           // Verify that user has access to at least one rule type
-          const ruleTypes = Array.from(await context.alerting.getRulesClient().listAlertTypes());
+          const ruleTypes = Array.from(await alertingContext.getRulesClient().listAlertTypes());
           if (ruleTypes.length > 0) {
-            const alertingFrameworkHealth = await context.alerting.getFrameworkHealth();
+            const alertingFrameworkHealth = await alertingContext.getFrameworkHealth();
 
             const securityHealth = await getSecurityHealth(
               async () => (licenseState ? licenseState.getIsSecurityEnabled() : null),
               async () => encryptedSavedObjects.canEncrypt,
-              context.alerting.areApiKeysEnabled
+              alertingContext.areApiKeysEnabled
             );
 
             const frameworkHealth: AlertingFrameworkHealth = {

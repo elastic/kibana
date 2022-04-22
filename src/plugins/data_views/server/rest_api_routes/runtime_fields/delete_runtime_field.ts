@@ -73,8 +73,9 @@ const deleteRuntimeFieldRouteFactory =
         },
       },
       handleErrors(async (ctx, req, res) => {
-        const savedObjectsClient = ctx.core.savedObjects.client;
-        const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+        const core = await ctx.core;
+        const savedObjectsClient = core.savedObjects.client;
+        const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
         const [, , { dataViewsServiceFactory }] = await getStartServices();
         const dataViewsService = await dataViewsServiceFactory(
           savedObjectsClient,

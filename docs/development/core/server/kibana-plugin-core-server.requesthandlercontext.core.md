@@ -7,22 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-core: {
-        savedObjects: {
-            client: SavedObjectsClientContract;
-            typeRegistry: ISavedObjectTypeRegistry;
-            getClient: (options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
-            getExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
-            getImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
-        };
-        elasticsearch: {
-            client: IScopedClusterClient;
-        };
-        uiSettings: {
-            client: IUiSettingsClient;
-        };
-        deprecations: {
-            client: DeprecationsClient;
-        };
-    };
+core: Promise<CoreRequestHandlerContext>;
 ```

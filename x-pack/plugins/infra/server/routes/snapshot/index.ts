@@ -37,10 +37,8 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
         fold(throwErrors(Boom.badRequest), identity)
       );
 
-      const source = await libs.sources.getSourceConfiguration(
-        requestContext.core.savedObjects.client,
-        snapshotRequest.sourceId
-      );
+      const soClient = (await requestContext.core).savedObjects.client;
+      const source = await libs.sources.getSourceConfiguration(soClient, snapshotRequest.sourceId);
       const compositeSize = libs.configuration.inventory.compositeSize;
       const [, , { logViews }] = await libs.getStartServices();
       const logQueryFields: LogQueryFields | undefined = await logViews

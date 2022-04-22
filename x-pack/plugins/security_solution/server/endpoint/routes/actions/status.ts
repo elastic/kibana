@@ -47,7 +47,7 @@ export const actionStatusRequestHandler = function (
   SecuritySolutionRequestHandlerContext
 > {
   return async (context, req, res) => {
-    const esClient = context.core.elasticsearch.client.asInternalUser;
+    const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const agentIDs: string[] = Array.isArray(req.query.agent_ids)
       ? [...new Set(req.query.agent_ids)]
       : [req.query.agent_ids];

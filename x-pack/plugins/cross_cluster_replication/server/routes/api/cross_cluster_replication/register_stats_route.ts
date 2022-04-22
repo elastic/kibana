@@ -23,7 +23,7 @@ export const registerStatsRoute = ({
       validate: false,
     },
     license.guardApiRoute(async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
 
       try {
         const { auto_follow_stats: autoFollowStats } = await client.asCurrentUser.ccr.stats();

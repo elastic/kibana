@@ -41,9 +41,10 @@ export function createTimeSeriesQueryRoute(
   ): Promise<IKibanaResponse> {
     logger.debug(`route ${path} request: ${JSON.stringify(req.body)}`);
 
+    const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
     const result = await timeSeriesQuery({
       logger,
-      esClient: ctx.core.elasticsearch.client.asCurrentUser,
+      esClient,
       query: req.body,
     });
 

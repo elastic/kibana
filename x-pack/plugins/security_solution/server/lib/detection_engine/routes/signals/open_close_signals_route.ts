@@ -49,11 +49,13 @@ export const setSignalsStatusRoute = (
     },
     async (context, request, response) => {
       const { conflicts, signal_ids: signalIds, query, status } = request.body;
-      const esClient = context.core.elasticsearch.client.asCurrentUser;
-      const siemClient = context.securitySolution?.getAppClient();
+      const core = await context.core;
+      const securitySolution = await context.securitySolution;
+      const esClient = core.elasticsearch.client.asCurrentUser;
+      const siemClient = securitySolution?.getAppClient();
       const siemResponse = buildSiemResponse(response);
       const validationErrors = setSignalStatusValidateTypeDependents(request.body);
-      const spaceId = context.securitySolution?.getSpaceId() ?? 'default';
+      const spaceId = securitySolution?.getSpaceId() ?? 'default';
 
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });

@@ -28,7 +28,7 @@ export async function getVisData(
   request: VisTypeTimeseriesVisDataRequest,
   framework: Framework
 ): Promise<TimeseriesVisData> {
-  const uiSettings = requestContext.core.uiSettings.client;
+  const uiSettings = (await requestContext.core).uiSettings.client;
   const esShardTimeout = await framework.getEsShardTimeout();
   const fieldFormatService = await framework.getFieldFormatsService(uiSettings);
   const indexPatternsService = await framework.getIndexPatternsService(requestContext);

@@ -13,8 +13,8 @@ export function registerFetchRoute({ router, license, lib: { handleEsError } }: 
     { path: addBasePath('/snapshot_policies'), validate: false },
     license.guardApiRoute(async (context, request, response) => {
       try {
-        const policiesByName =
-          await context.core.elasticsearch.client.asCurrentUser.slm.getLifecycle();
+        const esClient = (await context.core).elasticsearch.client;
+        const policiesByName = await esClient.asCurrentUser.slm.getLifecycle();
         return response.ok({ body: Object.keys(policiesByName) });
       } catch (error) {
         return handleEsError({ error, response });

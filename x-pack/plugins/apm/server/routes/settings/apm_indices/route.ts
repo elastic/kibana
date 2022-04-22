@@ -46,8 +46,9 @@ const apmIndicesRoute = createApmServerRoute({
     import('./../../../../../observability/common/typings').ApmIndicesConfig
   > => {
     const { context, config } = resources;
+    const savedObjectsClient = (await context.core).savedObjects.client;
     return await getApmIndices({
-      savedObjectsClient: context.core.savedObjects.client,
+      savedObjectsClient,
       config,
     });
   },
@@ -80,7 +81,7 @@ const saveApmIndicesRoute = createApmServerRoute({
   > => {
     const { params, context } = resources;
     const { body } = params;
-    const savedObjectsClient = context.core.savedObjects.client;
+    const savedObjectsClient = (await context.core).savedObjects.client;
     return await saveApmIndices(savedObjectsClient, body);
   },
 });

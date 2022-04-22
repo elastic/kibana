@@ -49,16 +49,17 @@ export function initIndexingRoutes({
       },
     },
     async (context, request, response) => {
+      const coreContext = await context.core;
       const { index, mappings } = request.body;
       const indexPatternsService = await dataPlugin.indexPatterns.indexPatternsServiceFactory(
-        context.core.savedObjects.client,
-        context.core.elasticsearch.client.asCurrentUser,
+        coreContext.savedObjects.client,
+        coreContext.elasticsearch.client.asCurrentUser,
         request
       );
       const result = await createDocSource(
         index,
         mappings,
-        context.core.elasticsearch.client,
+        coreContext.elasticsearch.client,
         indexPatternsService
       );
       if (result.success) {
@@ -92,10 +93,11 @@ export function initIndexingRoutes({
       },
     },
     async (context, request, response) => {
+      const coreContext = await context.core;
       const result = await writeDataToIndex(
         request.body.index,
         request.body.data,
-        context.core.elasticsearch.client.asCurrentUser
+        coreContext.elasticsearch.client.asCurrentUser
       );
       if (result.success) {
         return response.ok({ body: result });
@@ -123,7 +125,8 @@ export function initIndexingRoutes({
     },
     async (context, request, response) => {
       try {
-        const resp = await context.core.elasticsearch.client.asCurrentUser.delete({
+        const coreContext = await context.core;
+        const resp = await coreContext.elasticsearch.client.asCurrentUser.delete({
           index: request.body.index,
           id: request.params.featureId,
           refresh: true,
@@ -173,9 +176,10 @@ export function initIndexingRoutes({
       },
     },
     async (context, request, response) => {
+      const coreContext = await context.core;
       return await getMatchingIndexes(
         request.query.indexPattern,
-        context.core.elasticsearch.client,
+        coreContext.elasticsearch.client,
         response,
         logger
       );
@@ -194,8 +198,9 @@ export function initIndexingRoutes({
     async (context, request, response) => {
       const { index } = request.query;
       try {
+        const coreContext = await context.core;
         const mappingsResp =
-          await context.core.elasticsearch.client.asCurrentUser.indices.getMapping({
+          await coreContext.elasticsearch.client.asCurrentUser.indices.getMapping({
             index: request.query.index,
           });
         const isDrawingIndex =

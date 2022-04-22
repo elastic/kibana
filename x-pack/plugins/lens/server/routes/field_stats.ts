@@ -39,7 +39,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
       },
     },
     async (context, req, res) => {
-      const requestClient = context.core.elasticsearch.client.asCurrentUser;
+      const requestClient = (await context.core).elasticsearch.client.asCurrentUser;
       const { fromDate, toDate, fieldName, dslQuery, size } = req.body;
 
       const [{ savedObjects, elasticsearch }, { dataViews }] = await setup.getStartServices();

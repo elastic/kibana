@@ -44,7 +44,7 @@ export const defineGetComplianceDashboardRoute = (
     },
     async (context, _, response) => {
       try {
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
         const { id: pitId } = await esClient.openPointInTime({
           index: LATEST_FINDINGS_INDEX_PATTERN,

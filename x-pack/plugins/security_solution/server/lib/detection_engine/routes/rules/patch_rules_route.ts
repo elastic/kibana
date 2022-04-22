@@ -106,12 +106,12 @@ export const patchRulesRoute = (
         const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];
         const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
 
-        const rulesClient = context.alerting.getRulesClient();
-        const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
-        const savedObjectsClient = context.core.savedObjects.client;
+        const rulesClient = (await context.alerting).getRulesClient();
+        const ruleExecutionLog = (await context.securitySolution).getRuleExecutionLog();
+        const savedObjectsClient = (await context.core).savedObjects.client;
 
         const mlAuthz = buildMlAuthz({
-          license: context.licensing.license,
+          license: (await context.licensing).license,
           ml,
           request,
           savedObjectsClient,

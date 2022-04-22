@@ -45,8 +45,9 @@ export const getPrepackagedRulesStatusRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const savedObjectsClient = context.core.savedObjects.client;
-      const rulesClient = context.alerting.getRulesClient();
+      const ctx = await context.resolve(['core', 'alerting']);
+      const savedObjectsClient = ctx.core.savedObjects.client;
+      const rulesClient = ctx.alerting.getRulesClient();
       const ruleAssetsClient = ruleAssetSavedObjectsClientFactory(savedObjectsClient);
 
       try {

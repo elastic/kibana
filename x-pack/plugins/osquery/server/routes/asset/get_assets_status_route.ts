@@ -25,7 +25,7 @@ export const getAssetsStatusRoute = (router: IRouter, osqueryContext: OsqueryApp
       options: { tags: [`access:${PLUGIN_ID}-writePacks`] },
     },
     async (context, request, response) => {
-      const savedObjectsClient = context.core.savedObjects.client;
+      const savedObjectsClient = (await context.core).savedObjects.client;
 
       let installation;
 

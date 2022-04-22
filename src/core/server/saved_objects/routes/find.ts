@@ -73,8 +73,8 @@ export const registerFindRoute = (router: IRouter, { coreUsageData }: RouteDepen
           });
         }
       }
-
-      const result = await context.core.savedObjects.client.find({
+      const { savedObjects } = await context.core;
+      const result = await savedObjects.client.find({
         perPage: query.per_page,
         page: query.page,
         type: Array.isArray(query.type) ? query.type : [query.type],

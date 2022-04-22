@@ -25,7 +25,7 @@ export const registerGetAllowedTypesRoute = (router: IRouter) => {
       validate: false,
     },
     async (context, req, res) => {
-      const allowedTypes = context.core.savedObjects.typeRegistry
+      const allowedTypes = (await context.core).savedObjects.typeRegistry
         .getImportableAndExportableTypes()
         .filter((type) => type.management!.visibleInManagement ?? true)
         .map(convertType);

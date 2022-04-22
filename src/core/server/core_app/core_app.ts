@@ -89,7 +89,8 @@ export class CoreApp {
     const resources = coreSetup.httpResources.createRegistrar(router);
 
     router.get({ path: '/', validate: false }, async (context, req, res) => {
-      const defaultRoute = await context.core.uiSettings.client.get<string>('defaultRoute');
+      const { uiSettings } = await context.core;
+      const defaultRoute = await uiSettings.client.get<string>('defaultRoute');
       const basePath = httpSetup.basePath.get(req);
       const url = `${basePath}${defaultRoute}`;
 

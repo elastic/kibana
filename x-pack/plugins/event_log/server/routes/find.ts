@@ -38,7 +38,7 @@ export const findRoute = (router: EventLogRouter, systemLogger: Logger) => {
       if (!context.eventLog) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for eventLog' });
       }
-      const eventLogClient = context.eventLog.getEventLogClient();
+      const eventLogClient = (await context.eventLog).getEventLogClient();
       const {
         params: { id, type },
         query,

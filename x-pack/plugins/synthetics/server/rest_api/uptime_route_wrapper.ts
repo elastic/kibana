@@ -21,20 +21,21 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
     tags: ['access:uptime-read', ...(uptimeRoute?.writeAccess ? ['access:uptime-write'] : [])],
   },
   handler: async (context, request, response) => {
-    const { client: esClient } = context.core.elasticsearch;
+    const coreContext = await context.core;
+    const { client: esClient } = coreContext.elasticsearch;
     let savedObjectsClient: SavedObjectsClientContract;
     if (server.config?.service) {
-      savedObjectsClient = context.core.savedObjects.getClient({
+      savedObjectsClient = coreContext.savedObjects.getClient({
         includedHiddenTypes: [syntheticsServiceApiKey.name],
       });
     } else {
-      savedObjectsClient = context.core.savedObjects.client;
+      savedObjectsClient = coreContext.savedObjects.client;
     }
 
     // specifically needed for the synthetics service api key generation
     server.authSavedObjectsClient = savedObjectsClient;
 
-    const isInspectorEnabled = await context.core.uiSettings.client.get<boolean>(
+    const isInspectorEnabled = await coreContext.uiSettings.client.get<boolean>(
       enableInspectEsQueries
     );
 

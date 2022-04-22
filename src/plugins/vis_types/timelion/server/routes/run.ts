@@ -77,10 +77,11 @@ export function runRoute(
     },
     router.handleLegacyErrors(async (context, request, response) => {
       const [, { dataViews }] = await core.getStartServices();
-      const uiSettings = await context.core.uiSettings.client.getAll();
+      const coreCtx = await context.core;
+      const uiSettings = await coreCtx.uiSettings.client.getAll();
       const indexPatternsService = await dataViews.dataViewsServiceFactory(
-        context.core.savedObjects.client,
-        context.core.elasticsearch.client.asCurrentUser
+        coreCtx.savedObjects.client,
+        coreCtx.elasticsearch.client.asCurrentUser
       );
 
       const tlConfig = getTlConfig({

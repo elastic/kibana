@@ -270,13 +270,21 @@ export const performBulkActionRoute = (
       request.events.completed$.subscribe(() => abortController.abort());
 
       try {
-        const rulesClient = context.alerting.getRulesClient();
-        const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
-        const exceptionsClient = context.lists?.getExceptionListClient();
-        const savedObjectsClient = context.core.savedObjects.client;
+        const ctx = await context.resolve([
+          'core',
+          'securitySolution',
+          'alerting',
+          'licensing',
+          'lists',
+        ]);
+
+        const rulesClient = ctx.alerting.getRulesClient();
+        const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
+        const exceptionsClient = ctx.lists?.getExceptionListClient();
+        const savedObjectsClient = ctx.core.savedObjects.client;
 
         const mlAuthz = buildMlAuthz({
-          license: context.licensing.license,
+          license: ctx.licensing.license,
           ml,
           request,
           savedObjectsClient,

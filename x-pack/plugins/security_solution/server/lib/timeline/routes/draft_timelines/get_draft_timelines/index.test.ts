@@ -83,7 +83,7 @@ describe('get draft timelines', () => {
           timeline: [],
         });
         const req = getDraftTimelinesRequest(TimelineType.default);
-        const response = await server.inject(req, context);
+        const response = await server.inject(req, requestContextMock.convertContext(context));
         expect(mockPersistTimeline).toHaveBeenCalled();
         expect(mockPersistTimeline.mock.calls[0][3]).toEqual({
           ...draftTimelineDefaults,
@@ -107,7 +107,7 @@ describe('get draft timelines', () => {
 
         const response = await server.inject(
           getDraftTimelinesRequest(TimelineType.default),
-          context
+          requestContextMock.convertContext(context)
         );
         expect(mockPersistTimeline).not.toHaveBeenCalled();
         expect(response.status).toEqual(200);

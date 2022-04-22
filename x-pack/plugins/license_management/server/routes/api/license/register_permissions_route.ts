@@ -15,7 +15,7 @@ export function registerPermissionsRoute({
   config: { isSecurityEnabled },
 }: RouteDependencies) {
   router.post({ path: addBasePath('/permissions'), validate: false }, async (ctx, req, res) => {
-    const { client } = ctx.core.elasticsearch;
+    const { client } = (await ctx.core).elasticsearch;
 
     try {
       return res.ok({

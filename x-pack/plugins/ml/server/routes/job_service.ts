@@ -268,11 +268,8 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
       try {
-        const { jobsSummary } = jobServiceProvider(
-          client,
-          mlClient,
-          context.alerting?.getRulesClient()
-        );
+        const alerting = await context.alerting;
+        const { jobsSummary } = jobServiceProvider(client, mlClient, alerting?.getRulesClient());
         const { jobIds } = request.body;
         const resp = await jobsSummary(jobIds);
 
@@ -304,10 +301,11 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, response, context }) => {
       try {
+        const alerting = await context.alerting;
         const { getJobIdsWithGeo } = jobServiceProvider(
           client,
           mlClient,
-          context.alerting?.getRulesClient()
+          alerting?.getRulesClient()
         );
 
         const resp = await getJobIdsWithGeo();
@@ -409,10 +407,11 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
       try {
+        const alerting = await context.alerting;
         const { createFullJobsList } = jobServiceProvider(
           client,
           mlClient,
-          context.alerting?.getRulesClient()
+          alerting?.getRulesClient()
         );
         const { jobIds } = request.body;
         const resp = await createFullJobsList(jobIds);

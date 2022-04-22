@@ -64,7 +64,10 @@ describe('installPrepackagedTimelines', () => {
       mockCheckTimelinesStatusBeforeInstallResult
     );
 
-    await server.inject(installPrepackedTimelinesRequest(), context);
+    await server.inject(
+      installPrepackedTimelinesRequest(),
+      requestContextMock.convertContext(context)
+    );
 
     expect(installPrepackagedTimelines).toHaveBeenCalled();
   });
@@ -81,7 +84,10 @@ describe('installPrepackagedTimelines', () => {
       timelines_updated: 0,
     });
 
-    const result = await server.inject(installPrepackedTimelinesRequest(), context);
+    const result = await server.inject(
+      installPrepackedTimelinesRequest(),
+      requestContextMock.convertContext(context)
+    );
 
     expect(result.body).toEqual({
       errors: [],
@@ -95,7 +101,10 @@ describe('installPrepackagedTimelines', () => {
   test('should not call installPrepackagedTimelines if it has nothing to install or update', async () => {
     (checkTimelinesStatus as jest.Mock).mockReturnValue(mockCheckTimelinesStatusAfterInstallResult);
 
-    await server.inject(installPrepackedTimelinesRequest(), context);
+    await server.inject(
+      installPrepackedTimelinesRequest(),
+      requestContextMock.convertContext(context)
+    );
 
     expect(installPrepackagedTimelines).not.toHaveBeenCalled();
   });
@@ -103,7 +112,10 @@ describe('installPrepackagedTimelines', () => {
   test('should return success if it has nothing to install or update', async () => {
     (checkTimelinesStatus as jest.Mock).mockReturnValue(mockCheckTimelinesStatusAfterInstallResult);
 
-    const result = await server.inject(installPrepackedTimelinesRequest(), context);
+    const result = await server.inject(
+      installPrepackedTimelinesRequest(),
+      requestContextMock.convertContext(context)
+    );
 
     expect(result.body).toEqual({
       errors: [],

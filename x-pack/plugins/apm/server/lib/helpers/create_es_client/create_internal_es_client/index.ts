@@ -21,14 +21,16 @@ import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
 
 export type APMIndexDocumentParams<T> = estypes.IndexRequest<T>;
 
-export type APMInternalClient = ReturnType<typeof createInternalESClient>;
+export type APMInternalClient = Awaited<
+  ReturnType<typeof createInternalESClient>
+>;
 
-export function createInternalESClient({
+export async function createInternalESClient({
   context,
   debug,
   request,
 }: Pick<APMRouteHandlerResources, 'context' | 'request'> & { debug: boolean }) {
-  const { asInternalUser } = context.core.elasticsearch.client;
+  const { asInternalUser } = (await context.core).elasticsearch.client;
 
   function callEs<T extends { body: any }>(
     operationName: string,

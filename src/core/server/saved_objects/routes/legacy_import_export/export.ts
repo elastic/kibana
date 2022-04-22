@@ -38,7 +38,7 @@ export const registerLegacyExportRoute = (
       );
 
       const ids = Array.isArray(req.query.dashboard) ? req.query.dashboard : [req.query.dashboard];
-      const { client } = ctx.core.savedObjects;
+      const { client } = (await ctx.core).savedObjects;
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementLegacyDashboardsExport({ request: req }).catch(() => {});

@@ -30,7 +30,8 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
       options: { tags: [`access:${PLUGIN_ID}-writeSavedQueries`] },
     },
     async (context, request, response) => {
-      const savedObjectsClient = context.core.savedObjects.client;
+      const coreContext = await context.core;
+      const savedObjectsClient = coreContext.savedObjects.client;
 
       // eslint-disable-next-line @typescript-eslint/naming-convention
       const { id, description, platform, query, version, interval, ecs_mapping } = request.body;

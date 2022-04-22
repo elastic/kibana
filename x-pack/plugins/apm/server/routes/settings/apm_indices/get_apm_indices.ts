@@ -74,9 +74,8 @@ export async function getApmIndexSettings({
     ReturnType<typeof getApmIndicesSavedObject>
   >;
   try {
-    apmIndicesSavedObject = await getApmIndicesSavedObject(
-      context.core.savedObjects.client
-    );
+    const soClient = (await context.core).savedObjects.client;
+    apmIndicesSavedObject = await getApmIndicesSavedObject(soClient);
   } catch (error: any) {
     if (error.output && error.output.statusCode === 404) {
       apmIndicesSavedObject = {};

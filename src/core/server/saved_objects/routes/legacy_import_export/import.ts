@@ -46,7 +46,7 @@ export const registerLegacyImportRoute = (
         "The import dashboard API '/api/kibana/dashboards/import' is deprecated. Use the saved objects import objects API '/api/saved_objects/_import' instead."
       );
 
-      const { client } = ctx.core.savedObjects;
+      const { client } = (await ctx.core).savedObjects;
       const objects = req.body.objects as SavedObject[];
       const { force, exclude } = req.query;
 

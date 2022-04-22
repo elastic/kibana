@@ -39,7 +39,8 @@ interface ESDataStreamInfo {
 
 export const getListHandler: RequestHandler = async (context, request, response) => {
   // Query datastreams as the current user as the Kibana internal user may not have all the required permission
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const { savedObjects, elasticsearch } = await context.core;
+  const esClient = elasticsearch.client.asCurrentUser;
 
   const body: GetDataStreamsResponse = {
     data_streams: [],
@@ -54,7 +55,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
     ] = await Promise.all([
       esClient.indices.getDataStream({ name: DATA_STREAM_INDEX_PATTERN }),
       esClient.indices.dataStreamsStats({ name: DATA_STREAM_INDEX_PATTERN, human: true }),
-      getPackageSavedObjects(context.core.savedObjects.client),
+      getPackageSavedObjects(savedObjects.client),
     ]);
 
     const dataStreamsInfoByName = keyBy<ESDataStreamInfo>(dataStreamsInfo, 'name');
@@ -81,7 +82,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
       allDashboards[pkgSavedObject.id] = dashboards;
       return allDashboards;
     }, {});
-    const allDashboardSavedObjectsResponse = await context.core.savedObjects.client.bulkGet<{
+    const allDashboardSavedObjectsResponse = await savedObjects.client.bulkGet<{
       title?: string;
     }>(
       Object.values(dashboardIdsByPackageName).flatMap((dashboardIds) =>

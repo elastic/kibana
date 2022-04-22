@@ -15,9 +15,10 @@ export function defineGetAllRolesRoutes({ router, authz, getFeatures }: RouteDef
     { path: '/api/security/role', validate: false },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
+        const esClient = (await context.core).elasticsearch.client;
         const [features, elasticsearchRoles] = await Promise.all([
           getFeatures(),
-          await context.core.elasticsearch.client.asCurrentUser.security.getRole(),
+          await esClient.asCurrentUser.security.getRole(),
         ]);
 
         // Transform elasticsearch roles into Kibana roles and return in a list sorted by the role name.

@@ -146,12 +146,12 @@ export const defineGetBenchmarksRoute = (router: CspRouter, cspContext: CspAppCo
       validate: { query: benchmarksInputSchema },
     },
     async (context, request, response) => {
-      if (!context.fleet.authz.fleet.all) {
+      if (!(await context.fleet).authz.fleet.all) {
         return response.forbidden();
       }
 
       try {
-        const soClient = context.core.savedObjects.client;
+        const soClient = (await context.core).savedObjects.client;
         const { query } = request;
 
         const agentService = cspContext.service.agentService;

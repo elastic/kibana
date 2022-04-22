@@ -9,7 +9,7 @@ A function that returns a context value for a specific key of given context type
 <b>Signature:</b>
 
 ```typescript
-export declare type IContextProvider<Context extends RequestHandlerContext, ContextName extends keyof Context> = (context: Omit<Context, ContextName>, ...rest: HandlerParameters<RequestHandler>) => Promise<Context[ContextName]> | Context[ContextName];
+export declare type IContextProvider<Context extends RequestHandlerContext, ContextName extends keyof Context> = (context: Omit<Context, ContextName>, ...rest: HandlerParameters<RequestHandler>) => MaybePromise<Awaited<Context[ContextName]>>;
 ```
 
 ## Remarks

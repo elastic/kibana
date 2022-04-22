@@ -38,10 +38,8 @@ export const initInventoryMetaRoute = (libs: InfraBackendLibs) => {
         fold(throwErrors(Boom.badRequest), identity)
       );
 
-      const { configuration } = await libs.sources.getSourceConfiguration(
-        requestContext.core.savedObjects.client,
-        sourceId
-      );
+      const soClient = (await requestContext.core).savedObjects.client;
+      const { configuration } = await libs.sources.getSourceConfiguration(soClient, sourceId);
 
       const awsMetadata = await getCloudMetadata(
         framework,

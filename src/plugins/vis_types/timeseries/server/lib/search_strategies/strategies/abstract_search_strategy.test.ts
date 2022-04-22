@@ -84,7 +84,7 @@ describe('AbstractSearchStrategy', () => {
     );
 
     expect(responses).toEqual([{}]);
-    expect(requestContext.search.search).toHaveBeenCalledWith(
+    expect((await requestContext.search).search).toHaveBeenCalledWith(
       {
         params: {
           body: {},

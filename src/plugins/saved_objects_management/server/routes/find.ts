@@ -47,7 +47,7 @@ export const registerFindRoute = (
     router.handleLegacyErrors(async (context, req, res) => {
       const { query } = req;
       const managementService = await managementServicePromise;
-      const { getClient, typeRegistry } = context.core.savedObjects;
+      const { getClient, typeRegistry } = (await context.core).savedObjects;
 
       const searchTypes = Array.isArray(query.type) ? query.type : [query.type];
       const includedFields = Array.isArray(query.fields) ? query.fields : [query.fields];

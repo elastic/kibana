@@ -34,13 +34,17 @@ describe('GET all roles', () => {
       mockRouteDefinitionParams.authz.applicationName = application;
       mockRouteDefinitionParams.getFeatures = jest.fn().mockResolvedValue([]);
 
-      const mockContext = {
-        core: coreMock.createRequestHandlerContext(),
-        licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } } as any,
-      };
+      const mockCoreContext = coreMock.createRequestHandlerContext();
+      const mockLicensingContext = {
+        license: { check: jest.fn().mockReturnValue(licenseCheckResult) },
+      } as any;
+      const mockContext = coreMock.createCustomRequestHandlerContext({
+        core: mockCoreContext,
+        licensing: mockLicensingContext,
+      });
 
       if (apiResponse) {
-        mockContext.core.elasticsearch.client.asCurrentUser.security.getRole.mockResponseImplementation(
+        mockCoreContext.elasticsearch.client.asCurrentUser.security.getRole.mockResponseImplementation(
           (() => ({ body: apiResponse() })) as any
         );
       }
@@ -61,10 +65,10 @@ describe('GET all roles', () => {
 
       if (apiResponse) {
         expect(
-          mockContext.core.elasticsearch.client.asCurrentUser.security.getRole
+          mockCoreContext.elasticsearch.client.asCurrentUser.security.getRole
         ).toHaveBeenCalled();
       }
-      expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
+      expect(mockLicensingContext.license.check).toHaveBeenCalledWith('security', 'basic');
     });
   };
 

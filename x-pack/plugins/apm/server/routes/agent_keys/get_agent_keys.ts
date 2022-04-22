@@ -27,7 +27,7 @@ export async function getAgentKeys({
     },
   };
 
-  const esClient = context.core.elasticsearch.client;
+  const esClient = (await context.core).elasticsearch.client;
   const apiResponse = await esClient.asCurrentUser.transport.request<{
     api_keys: ApiKey[];
   }>({

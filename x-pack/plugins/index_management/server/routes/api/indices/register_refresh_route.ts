@@ -18,7 +18,7 @@ export function registerRefreshRoute({ router, lib: { handleEsError } }: RouteDe
   router.post(
     { path: addBasePath('/indices/refresh'), validate: { body: bodySchema } },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       const { indices = [] } = request.body as typeof bodySchema.type;
 
       const params = {

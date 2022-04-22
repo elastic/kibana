@@ -21,7 +21,8 @@ export function defineDisableUserRoutes({ router }: RouteDefinitionParams) {
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        await context.core.elasticsearch.client.asCurrentUser.security.disableUser({
+        const esClient = (await context.core).elasticsearch.client;
+        await esClient.asCurrentUser.security.disableUser({
           username: request.params.username,
         });
 

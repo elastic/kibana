@@ -56,7 +56,7 @@ export function registerRoutes(
       },
     },
     async (context, request, response) => {
-      const { asCurrentUser } = context.core.elasticsearch.client;
+      const { asCurrentUser } = (await context.core).elasticsearch.client;
       const indexPatterns = new IndexPatternsFetcher(asCurrentUser);
       const { pattern, interval, look_back: lookBack, meta_fields: metaFields } = request.query;
 

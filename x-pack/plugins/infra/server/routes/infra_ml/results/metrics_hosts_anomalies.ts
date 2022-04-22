@@ -47,7 +47,7 @@ export const initGetHostsAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
       const { sort, pagination } = getSortAndPagination(sortParam, paginationParam);
 
       try {
-        assertHasInfraMlPlugins(requestContext);
+        const infraMlContext = await assertHasInfraMlPlugins(requestContext);
 
         const {
           data: anomalies,
@@ -55,7 +55,7 @@ export const initGetHostsAnomaliesRoute = ({ framework }: InfraBackendLibs) => {
           hasMoreEntries,
           timing,
         } = await getMetricsHostsAnomalies({
-          context: requestContext.infra,
+          context: await infraMlContext.infra,
           sourceId,
           anomalyThreshold,
           startTime,

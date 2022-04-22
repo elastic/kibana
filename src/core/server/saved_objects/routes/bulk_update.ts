@@ -44,7 +44,8 @@ export const registerBulkUpdateRoute = (router: IRouter, { coreUsageData }: Rout
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsBulkUpdate({ request: req }).catch(() => {});
 
-      const savedObject = await context.core.savedObjects.client.bulkUpdate(req.body);
+      const { savedObjects } = await context.core;
+      const savedObject = await savedObjects.client.bulkUpdate(req.body);
       return res.ok({ body: savedObject });
     })
   );

@@ -22,7 +22,7 @@ export const createRouteWithAuth = (
     savedObjectsClient,
     server,
   }) => {
-    const { statusCode, message } = libs.license(context.licensing.license);
+    const { statusCode, message } = libs.license((await context.licensing).license);
     if (statusCode === 200) {
       return handler({
         uptimeEsClient,

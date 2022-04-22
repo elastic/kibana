@@ -93,7 +93,7 @@ describe('create timelines', () => {
         createTimelinesRoute(server.router, createMockConfig(), securitySetup);
 
         const mockRequest = getCreateTimelinesRequest(createTimelineWithoutTimelineId);
-        await server.inject(mockRequest, context);
+        await server.inject(mockRequest, requestContextMock.convertContext(context));
       });
 
       test('should Create a new timeline savedObject', async () => {
@@ -123,7 +123,7 @@ describe('create timelines', () => {
       test('returns 200 when create timeline successfully', async () => {
         const response = await server.inject(
           getCreateTimelinesRequest(createTimelineWithoutTimelineId),
-          context
+          requestContextMock.convertContext(context)
         );
         expect(response.status).toEqual(200);
       });
@@ -157,7 +157,7 @@ describe('create timelines', () => {
       test('returns error message', async () => {
         const response = await server.inject(
           getCreateTimelinesRequest(createTimelineWithTimelineId),
-          context
+          requestContextMock.convertContext(context)
         );
         expect(response.body).toEqual({
           message: CREATE_TIMELINE_ERROR_MESSAGE,
@@ -195,7 +195,7 @@ describe('create timelines', () => {
         createTimelinesRoute(server.router, createMockConfig(), securitySetup);
 
         const mockRequest = getCreateTimelinesRequest(createTemplateTimelineWithoutTimelineId);
-        await server.inject(mockRequest, context);
+        await server.inject(mockRequest, requestContextMock.convertContext(context));
       });
 
       test('should Create a new timeline template savedObject', async () => {
@@ -227,7 +227,7 @@ describe('create timelines', () => {
       test('returns 200 when create timeline successfully', async () => {
         const response = await server.inject(
           getCreateTimelinesRequest(createTimelineWithoutTimelineId),
-          context
+          requestContextMock.convertContext(context)
         );
         expect(response.status).toEqual(200);
       });
@@ -264,7 +264,7 @@ describe('create timelines', () => {
       test('returns error message', async () => {
         const response = await server.inject(
           getCreateTimelinesRequest(updateTemplateTimelineWithTimelineId),
-          context
+          requestContextMock.convertContext(context)
         );
         expect(response.body).toEqual({
           message: CREATE_TEMPLATE_TIMELINE_ERROR_MESSAGE,

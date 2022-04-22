@@ -23,7 +23,7 @@ export const createGetMonitorDetailsRoute: UMRestApiRouteFactory = (libs: UMServ
   handler: async ({ uptimeEsClient, context, request }): Promise<any> => {
     const { monitorId, dateStart, dateEnd } = request.query;
 
-    const rulesClient = context.alerting?.getRulesClient();
+    const rulesClient = (await context.alerting)?.getRulesClient();
 
     return await libs.requests.getMonitorDetails({
       uptimeEsClient,

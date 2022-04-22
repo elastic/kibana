@@ -9,6 +9,7 @@ import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
   httpServerMock,
+  coreMock,
 } from '@kbn/core/server/mocks';
 import { produce } from 'immer';
 import type {
@@ -1270,7 +1271,7 @@ describe('Package policy service', () => {
       await packagePolicyService.runExternalCallbacks(
         'packagePolicyCreate',
         newPackagePolicy,
-        context,
+        coreMock.createCustomRequestHandlerContext(context),
         request
       );
       expect(callbackCallingOrder).toEqual(['a', 'b']);
@@ -1283,7 +1284,7 @@ describe('Package policy service', () => {
       await packagePolicyService.runExternalCallbacks(
         'packagePolicyCreate',
         newPackagePolicy,
-        context,
+        coreMock.createCustomRequestHandlerContext(context),
         request
       );
 
@@ -1330,7 +1331,7 @@ describe('Package policy service', () => {
           await packagePolicyService.runExternalCallbacks(
             'packagePolicyCreate',
             newPackagePolicy,
-            context,
+            coreMock.createCustomRequestHandlerContext(context),
             request
           );
         } catch (e) {
@@ -1349,7 +1350,7 @@ describe('Package policy service', () => {
           packagePolicyService.runExternalCallbacks(
             'packagePolicyCreate',
             newPackagePolicy,
-            context,
+            coreMock.createCustomRequestHandlerContext(context),
             request
           )
         ).rejects.toThrow('callbackThree threw error on purpose');
@@ -1438,15 +1439,16 @@ describe('Package policy service', () => {
       appContextService.addExternalCallback('packagePolicyPostCreate', callbackA);
       appContextService.addExternalCallback('packagePolicyPostCreate', callbackB);
 
+      const requestContext = coreMock.createCustomRequestHandlerContext(context);
       await packagePolicyService.runExternalCallbacks(
         'packagePolicyPostCreate',
         packagePolicy,
-        context,
+        requestContext,
         request
       );
 
-      expect(callbackA).toHaveBeenCalledWith(packagePolicy, context, request);
-      expect(callbackB).toHaveBeenCalledWith(packagePolicy, context, request);
+      expect(callbackA).toHaveBeenCalledWith(packagePolicy, requestContext, request);
+      expect(callbackB).toHaveBeenCalledWith(packagePolicy, requestContext, request);
       expect(callbackCallingOrder).toEqual(['a', 'b']);
     });
   });
@@ -3326,6 +3328,7 @@ describe('Package policy service', () => {
     beforeEach(() => {
       savedObjectsClient = savedObjectsClientMock.create();
     });
+
     function mockPackage(pkgName: string) {
       const mockPackagePolicy = createPackagePolicyMock();
 
@@ -3346,6 +3349,7 @@ describe('Package policy service', () => {
         attributes,
       });
     }
+
     it('should return success if package and policy versions match', async () => {
       mockPackage('apache');
 

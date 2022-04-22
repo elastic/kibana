@@ -15,7 +15,8 @@ export const findCaseRoute = createCasesRoute({
   path: `${CASES_URL}/_find`,
   handler: async ({ context, request, response }) => {
     try {
-      const casesClient = await context.cases.getCasesClient();
+      const caseContext = await context.cases;
+      const casesClient = await caseContext.getCasesClient();
       const options = request.query as CasesFindRequest;
 
       return response.ok({

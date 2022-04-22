@@ -9,6 +9,7 @@
 import { of } from 'rxjs';
 import { duration } from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
+import { isPromise } from '@kbn/std';
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import type {
   PluginInitializerContext,
@@ -66,7 +67,11 @@ export { executionContextServiceMock } from './execution_context/execution_conte
 export { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 export { analyticsServiceMock } from './analytics/analytics_service.mock';
 
-export type { ElasticsearchClientMock } from './elasticsearch/client/mocks';
+export type {
+  ElasticsearchClientMock,
+  ClusterClientMock,
+  ScopedClusterClientMock,
+} from './elasticsearch/client/mocks';
 
 type MockedPluginInitializerConfig<T> = jest.Mocked<PluginInitializerContext<T>['config']>;
 
@@ -280,6 +285,40 @@ function createCoreRequestHandlerContextMock() {
   };
 }
 
+export type CustomRequestHandlerMock<T> = {
+  core: Promise<ReturnType<typeof createCoreRequestHandlerContextMock>>;
+  resolve: jest.MockedFunction<any>;
+} & {
+  [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>;
+};
+
+const createCustomRequestHandlerContextMock = <T>(contextParts: T): CustomRequestHandlerMock<T> => {
+  const mock = Object.entries(contextParts).reduce(
+    (context, [key, value]) => {
+      // @ts-expect-error type matching from inferred types is hard
+      context[key] = isPromise(value) ? value : Promise.resolve(value);
+      return context;
+    },
+    {
+      core: Promise.resolve(createCoreRequestHandlerContextMock()),
+    } as CustomRequestHandlerMock<T>
+  );
+
+  mock.resolve = jest.fn().mockImplementation(async () => {
+    const resolved = {};
+    for (const propName of Object.keys(mock)) {
+      if (propName === 'resolve') {
+        continue;
+      }
+      // @ts-expect-error type matching from inferred types is hard
+      resolved[propName] = await mock[propName];
+    }
+    return resolved;
+  });
+
+  return mock;
+};
+
 export const coreMock = {
   createPreboot: createCorePrebootMock,
   createSetup: createCoreSetupMock,
@@ -289,4 +328,5 @@ export const coreMock = {
   createInternalStart: createInternalCoreStartMock,
   createPluginInitializerContext: pluginInitializerContextMock,
   createRequestHandlerContext: createCoreRequestHandlerContextMock,
+  createCustomRequestHandlerContext: createCustomRequestHandlerContextMock,
 };

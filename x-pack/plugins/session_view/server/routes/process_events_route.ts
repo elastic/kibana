@@ -27,7 +27,7 @@ export const registerProcessEventsRoute = (router: IRouter) => {
       },
     },
     async (context, request, response) => {
-      const client = context.core.elasticsearch.client.asCurrentUser;
+      const client = (await context.core).elasticsearch.client.asCurrentUser;
       const { sessionEntityId, cursor, forward = true } = request.query;
       const body = await doSearch(client, sessionEntityId, cursor, forward);
 
