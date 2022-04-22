@@ -207,7 +207,7 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
         <>
           <EuiCallOut
             title={i18n.translate('xpack.reporting.listing.infoPanel.callout.failedReportTitle', {
-              defaultMessage: 'Report failed',
+              defaultMessage: 'No report generated',
             })}
             color="danger"
           >

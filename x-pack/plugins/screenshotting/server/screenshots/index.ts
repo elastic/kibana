@@ -240,7 +240,7 @@ export class Screenshots {
   getScreenshots(options: PdfScreenshotOptions): Observable<PdfScreenshotResult>;
   getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult>;
   getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult> {
-    if (this.systemHasInsufficientMemory()) {
+    if (true) {
       return throwError(() => new errors.InsufficientMemoryAvailableOnCloudError());
     }
     const transaction = apm.startTransaction('screenshot-pipeline', 'screenshotting');
