@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { compactNotationParts } from './submenu';
+import { compactNotationParts } from '.';
 
-describe('The Resolver node pills number presentation', () => {
+describe('compactNotationParts', () => {
   describe('When given a small number under 1000', () => {
     it('does not change the presentation of small numbers', () => {
       expect(compactNotationParts(1)).toEqual([1, '', '']);
