@@ -10,18 +10,18 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 
-export const i18nTexts = {
+export const sharedI18nTexts = {
   cloud: {
     insufficientMemoryError: (helpUrl: string) => (
       <FormattedMessage
         id="xpack.reporting.listing.infoPanel.callout.cloud.insufficientMemoryError"
-        defaultMessage="This report cannot be generated. {link}."
+        defaultMessage="Kibana needs more memory to generate this report. Check the {link}."
         values={{
           link: (
             <EuiLink href={helpUrl}>
               {i18n.translate(
                 'xpack.reporting.listing.infoPanel.callout.cloud.insufficientMemoryError.urlLink',
-                { defaultMessage: 'See minimum RAM requirements' }
+                { defaultMessage: 'minimum RAM requirements' }
               )}
             </EuiLink>
           ),

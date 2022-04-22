@@ -22,7 +22,7 @@ import { VisualReportingSoftDisabledError } from '../../../common/errors';
 import type { Job } from '../../lib/job';
 import { useKibana } from '../../shared_imports';
 
-import { i18nTexts } from './i18n_texts';
+import { sharedI18nTexts } from '../../shared_i18n_texts';
 
 // TODO: Move all of these i18n texts to ./i18n_texts.tsx
 const NA = i18n.translate('xpack.reporting.listing.infoPanel.notApplicableLabel', {
@@ -196,7 +196,9 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
      * should only occur on cloud.
      */
     info.error_code === VisualReportingSoftDisabledError.code
-      ? i18nTexts.cloud.insufficientMemoryError(docLinks.links.reporting.cloudMinimumRequirements)
+      ? sharedI18nTexts.cloud.insufficientMemoryError(
+          docLinks.links.reporting.cloudMinimumRequirements
+        )
       : info.getError();
 
   return (
