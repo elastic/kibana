@@ -7,6 +7,10 @@
  */
 
 import { kibanaPackageJson as pkg } from '@kbn/utils';
+import { foo as foo1 } from '@kbn/location-free-pkg';
+import { foo as foo2 } from '@kbn/location-free-pkg-two';
+import { foo as foo3 } from '@kbn/location_free_pkg_three';
+import { foo as foo4 } from '@kbn/location_free_xpack_pkg';
 
 import Command from '../cli/command';
 import { EncryptionConfig } from './encryption_config';
@@ -39,6 +43,10 @@ program.command('*', null, { noHelp: true }).action(function (cmd) {
 const subCommand = argv[2] && !String(argv[2][0]).match(/^-|^\.|\//);
 if (!subCommand) {
   program.defaultHelp();
+
+  if (1 === 0) {
+    console.log(foo1, foo2, foo3, foo4);
+  }
 }
 
 program.parse(process.argv);
