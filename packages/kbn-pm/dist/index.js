@@ -60399,9 +60399,8 @@ async function runCommand(command, config) {
       }
     } else {
       _utils_log__WEBPACK_IMPORTED_MODULE_3__[/* log */ "a"].error(error);
-    }
+    } // process.exit(1);
 
-    process.exit(1);
   }
 }
 
@@ -61604,7 +61603,8 @@ class Project {
 /* harmony import */ var util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__("util");
 /* harmony import */ var util__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(util__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__("./src/utils/errors.ts");
-/* harmony import */ var _project__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./src/utils/project.ts");
+/* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__("./src/utils/log.ts");
+/* harmony import */ var _project__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__("./src/utils/project.ts");
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -61612,6 +61612,7 @@ class Project {
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 
 
 
@@ -61635,7 +61636,7 @@ async function getProjects(rootPath, projectsPathsPatterns, {
     for (const filePath of pathsToProcess) {
       const projectConfigPath = normalize(filePath);
       const projectDir = path__WEBPACK_IMPORTED_MODULE_1___default.a.dirname(projectConfigPath);
-      const project = await _project__WEBPACK_IMPORTED_MODULE_4__[/* Project */ "a"].fromPath(projectDir);
+      const project = await _project__WEBPACK_IMPORTED_MODULE_5__[/* Project */ "a"].fromPath(projectDir);
       const excludeProject = exclude.includes(project.name) || include.length > 0 && !include.includes(project.name) || bazelOnly && !project.isBazelPackage();
 
       if (excludeProject) {
@@ -61710,7 +61711,7 @@ function buildProjectGraph(projects) {
     const dependencies = project.allDependencies;
 
     if (!project.isSinglePackageJsonProject && Object.keys(dependencies).length > 0) {
-      throw new _errors__WEBPACK_IMPORTED_MODULE_3__[/* CliError */ "a"](`${project.name} is not allowed to hold local dependencies. Please declare them at the root package.json`);
+      _log__WEBPACK_IMPORTED_MODULE_4__[/* log */ "a"].warning(`${project.name} is not allowed to hold local dependencies and they will be discarded. Please declare them at the root package.json`);
     }
 
     if (!project.isSinglePackageJsonProject) {

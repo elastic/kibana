@@ -11,6 +11,7 @@ import path from 'path';
 import { promisify } from 'util';
 
 import { CliError } from './errors';
+import { log } from './log';
 import { Project } from './project';
 
 const glob = promisify(globSync);
@@ -119,8 +120,8 @@ export function buildProjectGraph(projects: ProjectMap) {
     const dependencies = project.allDependencies;
 
     if (!project.isSinglePackageJsonProject && Object.keys(dependencies).length > 0) {
-      throw new CliError(
-        `${project.name} is not allowed to hold local dependencies. Please declare them at the root package.json`
+      log.warning(
+        `${project.name} is not allowed to hold local dependencies and they will be discarded. Please declare them at the root package.json`
       );
     }
 
