@@ -14,8 +14,8 @@ import { Observable } from 'rxjs';
 
 import { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
-import { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
 import { FieldSpec, getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
+import { PluginSetup as UnifiedSearchPluginSetup } from '@kbn/unified-search-plugin/server';
 import {
   OptionsListRequestBody,
   OptionsListResponse,
@@ -23,7 +23,7 @@ import {
 
 export const setupOptionsListSuggestionsRoute = (
   { http }: CoreSetup,
-  getAutocompleteSettings: DataPluginSetup['autocomplete']['getAutocompleteSettings']
+  getAutocompleteSettings: UnifiedSearchPluginSetup['autocomplete']['getAutocompleteSettings']
 ) => {
   const router = http.createRouter();
 

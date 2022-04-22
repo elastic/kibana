@@ -387,6 +387,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       regressionEvaluation: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfa-regression.html#ml-dfanalytics-regression-evaluation`,
       classificationAucRoc: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfa-classification.html#ml-dfanalytics-class-aucroc`,
       setUpgradeMode: `${ELASTICSEARCH_DOCS}ml-set-upgrade-mode.html`,
+      trainedModels: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-trained-models.html`,
     },
     transforms: {
       guide: `${ELASTICSEARCH_DOCS}transforms.html`,
@@ -641,6 +642,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     legal: {
       privacyStatement: `${ELASTIC_WEBSITE_URL}legal/privacy-statement`,
+    },
+    kibanaUpgradeSavedObjects: {
+      resolveMigrationFailures: `${KIBANA_DOCS}resolve-migrations-failures.html`,
     },
   });
 };
