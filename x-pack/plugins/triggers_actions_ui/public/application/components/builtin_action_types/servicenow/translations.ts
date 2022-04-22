@@ -49,14 +49,6 @@ export const AUTHENTICATION_LABEL = i18n.translate(
   }
 );
 
-export const REMEMBER_VALUES_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.rememberValuesLabel',
-  {
-    defaultMessage:
-      'Remember these values. You must reenter them each time you edit the connector.',
-  }
-);
-
 export const REENTER_VALUES_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.reenterValuesLabel',
   {
@@ -334,5 +326,138 @@ export const SEVERITY_REQUIRED_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.severityRequiredSelectFieldLabel',
   {
     defaultMessage: 'Severity (required)',
+  }
+);
+
+export const CLIENTID_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.clientIdTextFieldLabel',
+  {
+    defaultMessage: 'Client ID',
+  }
+);
+
+export const CLIENTSECRET_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.clientSecretTextFieldLabel',
+  {
+    defaultMessage: 'Client Secret',
+  }
+);
+
+export const KEY_ID_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.keyIdTextFieldLabel',
+  {
+    defaultMessage: 'JWT Verifier Key ID',
+  }
+);
+
+export const USER_EMAIL_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.userEmailTextFieldLabel',
+  {
+    defaultMessage: 'User Identifier (Email)',
+  }
+);
+
+export const PRIVATE_KEY_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.privateKeyTextFieldLabel',
+  {
+    defaultMessage: 'Private Key',
+  }
+);
+
+export const PRIVATE_KEY_PASSWORD_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.privateKeyPassTextFieldLabel',
+  {
+    defaultMessage: 'Private Key Password',
+  }
+);
+
+export const CLIENTID_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredClientIdTextField',
+  {
+    defaultMessage: 'Client ID is required.',
+  }
+);
+
+export const PRIVATE_KEY_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredPrivateKeyTextField',
+  {
+    defaultMessage: 'Private Key is required.',
+  }
+);
+
+export const PRIVATE_KEY_PASSWORD_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredPrivateKeyPasswordTextField',
+  {
+    defaultMessage: 'Private Key Password is required.',
+  }
+);
+
+export const CLIENTSECRET_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredClientSecretTextField',
+  {
+    defaultMessage: 'Client Secret is required.',
+  }
+);
+
+export const USER_EMAIL_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredUserEmailTextField',
+  {
+    defaultMessage: 'User Identifier is required.',
+  }
+);
+
+export const KEYID_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredKeyIdTextField',
+  {
+    defaultMessage: 'JWT Verifier Key ID is required.',
+  }
+);
+
+export const SERVICENOW_ITSM_DESC = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITSM.selectMessageText',
+  {
+    defaultMessage: 'Create an incident in ServiceNow ITSM.',
+  }
+);
+
+export const SERVICENOW_SIR_DESC = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowSIR.selectMessageText',
+  {
+    defaultMessage: 'Create an incident in ServiceNow SecOps.',
+  }
+);
+
+export const SERVICENOW_ITSM_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITSM.actionTypeTitle',
+  {
+    defaultMessage: 'ServiceNow ITSM',
+  }
+);
+
+export const SERVICENOW_SIR_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowSIR.actionTypeTitle',
+  {
+    defaultMessage: 'ServiceNow SecOps',
+  }
+);
+
+export const SERVICENOW_ITOM_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITOM.actionTypeTitle',
+  {
+    defaultMessage: 'ServiceNow ITOM',
+  }
+);
+
+export const SERVICENOW_ITOM_DESC = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITOM.selectMessageText',
+  {
+    defaultMessage: 'Create an event in ServiceNow ITOM.',
+  }
+);
+
+export const IS_OAUTH = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.useOAuth',
+  {
+    defaultMessage: 'Use OAuth authentication',
   }
 );

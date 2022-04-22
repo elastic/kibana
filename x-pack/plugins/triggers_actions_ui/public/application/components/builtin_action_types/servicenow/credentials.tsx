@@ -6,12 +6,19 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+  EuiSwitch,
+  EuiSwitchEvent,
+} from '@elastic/eui';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import * as i18n from './translations';
 import { ServiceNowActionConnector } from './types';
 import { CredentialsApiUrl } from './credentials_api_url';
-import { CredentialsAuth } from './credentials_auth';
+import { CredentialsAuth, OAuth } from './auth_types';
 
 interface Props {
   action: ActionConnectorFieldsProps<ServiceNowActionConnector>['action'];
@@ -30,6 +37,23 @@ const CredentialsComponent: React.FC<Props> = ({
   editActionSecrets,
   editActionConfig,
 }) => {
+  const { isOAuth } = action.config;
+
+  const switchIsOAuth = (e: EuiSwitchEvent) => {
+    editActionConfig('isOAuth', e.target.checked);
+    if (!e.target.checked) {
+      editActionConfig('clientId', null);
+      editActionConfig('userIdentifierValue', null);
+      editActionConfig('jwtKeyId', null);
+      editActionSecrets('clientSecret', null);
+      editActionSecrets('privateKey', null);
+      editActionSecrets('privateKeyPassword', null);
+    } else {
+      editActionSecrets('username', null);
+      editActionSecrets('password', null);
+    }
+  };
+
   return (
     <>
       <EuiFlexGroup direction="column">
@@ -54,14 +78,33 @@ const CredentialsComponent: React.FC<Props> = ({
           </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiSwitch
+        label={i18n.IS_OAUTH}
+        disabled={readOnly}
+        checked={isOAuth || false}
+        onChange={switchIsOAuth}
+      />
+      <EuiSpacer size="l" />
       <EuiFlexItem>
-        <CredentialsAuth
-          action={action}
-          errors={errors}
-          readOnly={readOnly}
-          isLoading={isLoading}
-          editActionSecrets={editActionSecrets}
-        />
+        {isOAuth ? (
+          <OAuth
+            action={action}
+            errors={errors}
+            readOnly={readOnly}
+            isLoading={isLoading}
+            editActionSecrets={editActionSecrets}
+            editActionConfig={editActionConfig}
+          />
+        ) : (
+          <CredentialsAuth
+            action={action}
+            errors={errors}
+            readOnly={readOnly}
+            isLoading={isLoading}
+            editActionSecrets={editActionSecrets}
+          />
+        )}
       </EuiFlexItem>
     </>
   );

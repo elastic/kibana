@@ -6,105 +6,128 @@
  */
 
 import { lazy } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
-  GenericValidationResult,
   ActionTypeModel,
   ConnectorValidationResult,
+  GenericValidationResult,
 } from '../../../../types';
 import {
   ServiceNowActionConnector,
   ServiceNowConfig,
-  ServiceNowSecrets,
-  ServiceNowITSMActionParams,
-  ServiceNowSIRActionParams,
   ServiceNowITOMActionParams,
+  ServiceNowITSMActionParams,
+  ServiceNowSecrets,
+  ServiceNowSIRActionParams,
 } from './types';
 import { isValidUrl } from '../../../lib/value_validators';
 import { getConnectorDescriptiveTitle, getSelectedConnectorIcon } from './helpers';
+import {
+  SERVICENOW_ITOM_DESC,
+  SERVICENOW_ITOM_TITLE,
+  SERVICENOW_ITSM_DESC,
+  SERVICENOW_ITSM_TITLE,
+  SERVICENOW_SIR_DESC,
+  SERVICENOW_SIR_TITLE,
+} from './translations';
 
 const validateConnector = async (
   action: ServiceNowActionConnector
-): Promise<ConnectorValidationResult<ServiceNowConfig, ServiceNowSecrets>> => {
+): Promise<ConnectorValidationResult<Omit<ServiceNowConfig, 'isOAuth'>, ServiceNowSecrets>> => {
   const translations = await import('./translations');
-  const configErrors = {
+
+  const configErrorsCommon = {
     apiUrl: new Array<string>(),
     usesTableApi: new Array<string>(),
   };
-  const secretsErrors = {
+
+  const configErrorsOAuth = {
+    clientId: new Array<string>(),
+    userIdentifierValue: new Array<string>(),
+    jwtKeyId: new Array<string>(),
+  };
+
+  const secretsErrorsBasicAuth = {
     username: new Array<string>(),
     password: new Array<string>(),
   };
 
-  const validationResult = {
-    config: { errors: configErrors },
-    secrets: { errors: secretsErrors },
+  const secretsErrorsOAuth = {
+    clientSecret: new Array<string>(),
+    privateKey: new Array<string>(),
+    privateKeyPassword: new Array<string>(),
   };
 
   if (!action.config.apiUrl) {
-    configErrors.apiUrl = [...configErrors.apiUrl, translations.API_URL_REQUIRED];
+    configErrorsCommon.apiUrl = [...configErrorsCommon.apiUrl, translations.API_URL_REQUIRED];
   }
 
   if (action.config.apiUrl) {
     if (!isValidUrl(action.config.apiUrl)) {
-      configErrors.apiUrl = [...configErrors.apiUrl, translations.API_URL_INVALID];
+      configErrorsCommon.apiUrl = [...configErrorsCommon.apiUrl, translations.API_URL_INVALID];
     } else if (!isValidUrl(action.config.apiUrl, 'https:')) {
-      configErrors.apiUrl = [...configErrors.apiUrl, translations.API_URL_REQUIRE_HTTPS];
+      configErrorsCommon.apiUrl = [
+        ...configErrorsCommon.apiUrl,
+        translations.API_URL_REQUIRE_HTTPS,
+      ];
     }
   }
 
-  if (!action.secrets.username) {
-    secretsErrors.username = [...secretsErrors.username, translations.USERNAME_REQUIRED];
+  if (action.config.isOAuth) {
+    if (!action.config.clientId) {
+      configErrorsOAuth.clientId = [...configErrorsOAuth.clientId, translations.CLIENTID_REQUIRED];
+    }
+
+    if (!action.config.userIdentifierValue) {
+      configErrorsOAuth.userIdentifierValue = [
+        ...configErrorsOAuth.userIdentifierValue,
+        translations.USER_EMAIL_REQUIRED,
+      ];
+    }
+
+    if (!action.config.jwtKeyId) {
+      configErrorsOAuth.jwtKeyId = [...configErrorsOAuth.jwtKeyId, translations.KEYID_REQUIRED];
+    }
+
+    if (!action.secrets.clientSecret) {
+      secretsErrorsOAuth.clientSecret = [
+        ...secretsErrorsOAuth.clientSecret,
+        translations.CLIENTSECRET_REQUIRED,
+      ];
+    }
+
+    if (!action.secrets.privateKey) {
+      secretsErrorsOAuth.privateKey = [
+        ...secretsErrorsOAuth.privateKey,
+        translations.PRIVATE_KEY_REQUIRED,
+      ];
+    }
+
+    if (!action.secrets.privateKeyPassword) {
+      secretsErrorsOAuth.privateKeyPassword = [
+        ...secretsErrorsOAuth.privateKeyPassword,
+        translations.PRIVATE_KEY_PASSWORD_REQUIRED,
+      ];
+    }
+  } else {
+    if (!action.secrets.username) {
+      secretsErrorsBasicAuth.username = [
+        ...secretsErrorsBasicAuth.username,
+        translations.USERNAME_REQUIRED,
+      ];
+    }
+    if (!action.secrets.password) {
+      secretsErrorsBasicAuth.password = [
+        ...secretsErrorsBasicAuth.password,
+        translations.PASSWORD_REQUIRED,
+      ];
+    }
   }
 
-  if (!action.secrets.password) {
-    secretsErrors.password = [...secretsErrors.password, translations.PASSWORD_REQUIRED];
-  }
-
-  return validationResult;
+  return {
+    config: { errors: { ...configErrorsCommon, ...configErrorsOAuth } },
+    secrets: { errors: { ...secretsErrorsBasicAuth, ...secretsErrorsOAuth } },
+  };
 };
-
-export const SERVICENOW_ITSM_DESC = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITSM.selectMessageText',
-  {
-    defaultMessage: 'Create an incident in ServiceNow ITSM.',
-  }
-);
-
-export const SERVICENOW_SIR_DESC = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowSIR.selectMessageText',
-  {
-    defaultMessage: 'Create an incident in ServiceNow SecOps.',
-  }
-);
-
-export const SERVICENOW_ITSM_TITLE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITSM.actionTypeTitle',
-  {
-    defaultMessage: 'ServiceNow ITSM',
-  }
-);
-
-export const SERVICENOW_SIR_TITLE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowSIR.actionTypeTitle',
-  {
-    defaultMessage: 'ServiceNow SecOps',
-  }
-);
-
-export const SERVICENOW_ITOM_TITLE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITOM.actionTypeTitle',
-  {
-    defaultMessage: 'ServiceNow ITOM',
-  }
-);
-
-export const SERVICENOW_ITOM_DESC = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.serviceNowITOM.selectMessageText',
-  {
-    defaultMessage: 'Create an event in ServiceNow ITOM.',
-  }
-);
 
 export function getServiceNowITSMActionType(): ActionTypeModel<
   ServiceNowConfig,
