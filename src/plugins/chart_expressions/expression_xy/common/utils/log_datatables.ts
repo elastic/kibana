@@ -21,6 +21,9 @@ export const logDatatables = (layers: CommonXYLayerConfig[], handlers: Execution
     return;
   }
 
+  handlers.inspectorAdapters.tables.reset();
+  handlers.inspectorAdapters.tables.allowCsvExport = true;
+
   layers.forEach((layer) => {
     if (layer.layerType === LayerTypes.ANNOTATIONS) {
       return;
