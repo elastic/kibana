@@ -7,7 +7,6 @@
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
-  httpServerMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import {
@@ -18,7 +17,10 @@ import {
   RuleTypeState,
 } from '@kbn/alerting-plugin/server';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import {
+  searchSourceCommonMock,
+  searchSourceInstanceMock,
+} from '@kbn/data-plugin/common/search/search_source/mocks';
 
 export const createDefaultAlertExecutorOptions = <
   Params extends RuleTypeParams = never,
@@ -77,11 +79,10 @@ export const createDefaultAlertExecutorOptions = <
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
     shouldWriteAlerts: () => shouldWriteAlerts,
     shouldStopExecution: () => false,
-    searchSourceClient: Promise.resolve(
-      dataPluginMock
-        .createStartContract()
-        .search.searchSource.asScoped(httpServerMock.createKibanaRequest())
-    ),
+    searchSourceUtils: {
+      searchSourceClient: searchSourceCommonMock,
+      wrappedFetch: () => searchSourceInstanceMock.fetch(),
+    },
   },
   state,
   updatedBy: null,
