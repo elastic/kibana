@@ -77,4 +77,4 @@ export interface ControlsPluginStartDeps {
 }
 
 // re-export from common
-export type { ControlWidth, ControlInput, ControlStyle } from '../common/types';
+export type { ControlWidth, ControlInput, DataControlInput, ControlStyle } from '../common/types';
