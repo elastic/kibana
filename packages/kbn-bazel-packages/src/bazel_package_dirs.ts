@@ -7,7 +7,6 @@
  */
 
 import Path from 'path';
-import normalizePath from 'normalize-path';
 import globby from 'globby';
 import { REPO_ROOT } from '@kbn/utils';
 
@@ -44,11 +43,4 @@ export function getAllBazelPackageDirs() {
  */
 export function getAllRepoRelativeBazelPackageDirs() {
   return getAllBazelPackageDirs().map((path) => Path.relative(REPO_ROOT, path));
-}
-
-/**
- * Resolve all the BAZEL_PACKAGE_DIRS to repo-relative normalized paths
- */
-export function getAllNormalizedRepoRelativeBazelPackageDirs() {
-  return getAllRepoRelativeBazelPackageDirs().map((path) => normalizePath(path));
 }

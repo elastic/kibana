@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getAllNormalizedRepoRelativeBazelPackageDirs } from '@kbn/bazel-packages';
+import { discoverBazelPackages } from '@kbn/bazel-packages';
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 
@@ -28,7 +28,7 @@ const transpileWithBabel = async (srcGlobs: string[], build: Build, preset: stri
         '!**/node_modules/**',
         '!**/bower_components/**',
         '!**/__tests__/**',
-        ...getAllNormalizedRepoRelativeBazelPackageDirs().map((dir) => `!${dir}/**`),
+        ...(await discoverBazelPackages()).map((pkg) => `!${pkg.normalizedRepoRelativeDir}/**`),
       ]),
       {
         cwd: buildRoot,

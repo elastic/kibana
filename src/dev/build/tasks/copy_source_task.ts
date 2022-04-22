@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getAllNormalizedRepoRelativeBazelPackageDirs } from '@kbn/bazel-packages';
+import { discoverBazelPackages } from '@kbn/bazel-packages';
 
 import { copyAll, Task } from '../lib';
 
@@ -47,8 +47,8 @@ export const CopySource: Task = {
         'tsconfig*.json',
         '.i18nrc.json',
         'kibana.d.ts',
-        // explicitly ignore all package roots, even if they're not selected by previous patterns
-        ...getAllNormalizedRepoRelativeBazelPackageDirs().map((dir) => `!${dir}/**`),
+        // explicitly ignore all bazel package locations, even if they're not selected by previous patterns
+        ...(await discoverBazelPackages()).map((pkg) => `!${pkg.normalizedRepoRelativeDir}/**`),
       ],
     });
   },

@@ -11,7 +11,7 @@ import { writeFileSync } from 'fs';
 import { promisify } from 'util';
 import { pipeline } from 'stream';
 
-import { getAllNormalizedRepoRelativeBazelPackageDirs } from '@kbn/bazel-packages';
+import { discoverBazelPackages } from '@kbn/bazel-packages';
 import { REPO_ROOT } from '@kbn/utils';
 import { transformFileStream, transformFileWithBabel } from '@kbn/dev-utils';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -51,9 +51,9 @@ async function reportTask() {
 
 async function copySourceAndBabelify() {
   // get bazel packages inside x-pack
-  const xpackBazelPackages = getAllNormalizedRepoRelativeBazelPackageDirs()
-    .filter((dir) => dir.startsWith('x-pack/'))
-    .map((dir) => `${dir.replace('x-pack/', '')}/**`);
+  const xpackBazelPackages = (await discoverBazelPackages())
+    .filter((pkg) => pkg.normalizedRepoRelativeDir.startsWith('x-pack/'))
+    .map((pkg) => `${pkg.normalizedRepoRelativeDir.replace('x-pack/', '')}/**`);
 
   // copy source files and apply some babel transformations in the process
   await asyncPipeline(
