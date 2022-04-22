@@ -130,8 +130,13 @@ export function QueryBarMenuPanels({
   useEffect(() => {
     const hasFilters = Boolean(filters && filters.length > 0);
     const hasQuery = Boolean(query && query.query);
-    setHasFiltersOrQuery(hasFilters || hasQuery);
-  }, [filters, query]);
+    const hasQueryOrFilters = hasFilters || hasQuery;
+    setHasFiltersOrQuery(hasQueryOrFilters);
+
+    if (!hasQueryOrFilters && savedQuery) {
+      onClearSavedQuery?.();
+    }
+  }, [filters, onClearSavedQuery, query, savedQuery]);
 
   const getDateRange = () => {
     const defaultTimeSetting = uiSettings!.get(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
