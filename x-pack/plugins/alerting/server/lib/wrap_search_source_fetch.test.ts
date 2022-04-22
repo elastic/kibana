@@ -26,6 +26,18 @@ const rule = {
 };
 
 describe('wrapSearchSourceFetch', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   test('searches properly', async () => {
     const abortController = new AbortController();
 
@@ -64,6 +76,33 @@ describe('wrapSearchSourceFetch', () => {
       wrappedFetch.bind({}, searchSourceInstanceMock)
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Search has been aborted due to cancelled execution"`
+    );
+  });
+
+  test('keeps track of number of queries', async () => {
+    const abortController = new AbortController();
+    abortController.abort();
+
+    (searchSourceInstanceMock.fetch as jest.Mock).mockResolvedValue({ took: 333 });
+
+    const { fetch: wrappedFetch, getMetrics } = wrapSearchSourceFetch({
+      logger,
+      rule,
+      abortController,
+    });
+
+    wrappedFetch(searchSourceInstanceMock);
+    wrappedFetch(searchSourceInstanceMock);
+    wrappedFetch(searchSourceInstanceMock);
+
+    expect(searchSourceInstanceMock.fetch).toHaveBeenCalledTimes(3);
+
+    const stats = getMetrics();
+    expect(stats.numSearches).toEqual(3);
+    expect(stats.esSearchDurationMs).toEqual(999);
+
+    expect(logger.debug).toHaveBeenCalledWith(
+      `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {}`
     );
   });
 });
