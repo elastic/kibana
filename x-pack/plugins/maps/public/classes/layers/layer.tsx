@@ -35,7 +35,6 @@ import {
   StyleMetaDescriptor,
 } from '../../../common/descriptor_types';
 import { ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
-import { IVectorSource } from '../sources/vector_source';
 import { DataRequestContext } from '../../actions';
 import { IStyle } from '../styles/style';
 import { LICENSED_FEATURES } from '../../licensed_features';
