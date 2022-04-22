@@ -9,6 +9,7 @@
 import Path from 'path';
 
 import globby from 'globby';
+import normalizePath from 'normalize-path';
 import { REPO_ROOT } from '@kbn/utils';
 import { asyncMapWithLimit } from '@kbn/std';
 
@@ -24,6 +25,9 @@ export function discoverBazelPackageLocations(repoRoot: string) {
         absolute: true,
       }
     )
+    // NOTE: removing x-pack for now in case a package is added to the x-pack root folder and a BUILD.bazel
+    // is also added into x-pack
+    .filter((path) => !normalizePath(path).includes('x-pack/package.json'))
     .sort((a, b) => a.localeCompare(b))
     .map((path) => Path.dirname(path));
 
