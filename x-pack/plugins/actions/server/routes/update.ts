@@ -50,7 +50,7 @@ export const updateActionRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const actionsClient = context.actions.getActionsClient();
+        const actionsClient = (await context.actions).getActionsClient();
         const { id } = req.params;
         const { name, config, secrets } = req.body;
 
