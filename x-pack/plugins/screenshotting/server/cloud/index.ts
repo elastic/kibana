@@ -7,10 +7,9 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import { readMemoryLimit } from './read_cgroup_mem_limit';
 
-const MIN_CLOUD_OS_MEM_GB: number = 2;
-const MIN_CLOUD_OS_MEM_BYTES: number = MIN_CLOUD_OS_MEM_GB * Math.pow(1024, 3);
+const MIN_CLOUD_MEM_GB: number = 2;
+const MIN_CLOUD_MEM_MB: number = MIN_CLOUD_MEM_GB * 1024;
 
 /**
  * If we are on Cloud we need to ensure that we have sufficient memory available,
@@ -21,8 +20,10 @@ export function systemHasInsufficientMemory(
   cloud: undefined | CloudSetup,
   logger: Logger
 ): boolean {
-  if (!Boolean(cloud?.isCloudEnabled || cloud?.deploymentId)) return false;
-  const limit = readMemoryLimit();
-  logger.info(`Memory limit from cgroup (in bytes): ${limit}`);
-  return limit < MIN_CLOUD_OS_MEM_BYTES;
+  if (cloud?.isCloudEnabled && typeof cloud?.instanceSizeMb === 'number') {
+    const instanceSizeMb = cloud.instanceSizeMb;
+    logger.info(`Memory limit read from cloud (in MB): ${cloud?.instanceSizeMb}`);
+    return instanceSizeMb < MIN_CLOUD_MEM_MB;
+  }
+  return false;
 }

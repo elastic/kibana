@@ -233,13 +233,7 @@ export class Screenshots {
   }
 
   systemHasInsufficientMemory(): boolean {
-    try {
-      return systemHasInsufficientMemory(this.cloud, this.logger.get('cloud'));
-    } catch (e) {
-      // Best effort, if we are unable to check system memory we should not
-      // block the ability to generate reports.
-      return false;
-    }
+    return systemHasInsufficientMemory(this.cloud, this.logger.get('cloud'));
   }
 
   getScreenshots(options: PngScreenshotOptions): Observable<PngScreenshotResult>;
