@@ -22636,7 +22636,6 @@
     "xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportMessage": "レポート'{reportObjectTitle}'には、スプレッドシートアプリケーションで式と解釈される可能性のある文字が含まれています。",
     "xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportTitle": "{reportType}には式を含めることができます",
     "xpack.reporting.publicNotifier.downloadReportButtonLabel": "レポートをダウンロード",
-    "xpack.reporting.publicNotifier.error.calloutTitle": "レポートジョブが失敗しました",
     "xpack.reporting.publicNotifier.error.checkManagement": "詳細については、{path}に移動してください。",
     "xpack.reporting.publicNotifier.error.couldNotCreateReportTitle": "'{reportObjectTitle}'の{reportType}レポートを作成できませんでした。",
     "xpack.reporting.publicNotifier.error.reportingSectionUrlLinkLabel": "スタック管理 > Kibana > レポート",
