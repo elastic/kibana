@@ -10,6 +10,14 @@ import _ from 'lodash';
 import { kibanaPackageJson as pkg } from '@kbn/utils';
 import Command from './command';
 import serveCommand from './serve/serve';
+import { foo as foo1 } from '@kbn/location-free-pkg';
+import { foo as foo2 } from '@kbn/location-free-pkg-two';
+import { foo as foo3 } from '@kbn/location_free_pkg_three';
+import { foo as foo4 } from '@kbn/location_free_xpack_pkg';
+
+if (1 === 0) {
+  console.log(foo1, foo2, foo3, foo4);
+}
 
 const argv = process.argv.slice();
 const program = new Command('bin/kibana');
