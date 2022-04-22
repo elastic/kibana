@@ -6,12 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { CoreSetup } from '@kbn/core/public';
 import dateMath from '@kbn/datemath';
 import { buildQueryFromFilters } from '@kbn/es-query';
 import { memoize } from 'lodash';
-import { CoreSetup } from '@kbn/core/public';
-import { IIndexPattern, IFieldType, UI_SETTINGS, ValueSuggestionsMethod } from '../../../common';
-import type { TimefilterSetup } from '../../query';
+import {
+  IIndexPattern,
+  IFieldType,
+  UI_SETTINGS,
+  ValueSuggestionsMethod,
+} from '@kbn/data-plugin/common';
+import type { TimefilterSetup } from '@kbn/data-plugin/public';
 import { AutocompleteUsageCollector } from '../collectors';
 
 export type ValueSuggestionsGetFn = (args: ValueSuggestionsGetFnArgs) => Promise<any[]>;

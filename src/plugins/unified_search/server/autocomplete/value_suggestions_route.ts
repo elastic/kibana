@@ -9,8 +9,8 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { firstValueFrom, Observable } from 'rxjs';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
-import { getRequestAbortedSignal } from '../lib';
 import type { ConfigSchema } from '../../config';
 import { termsEnumSuggestions } from './terms_enum';
 import { termsAggSuggestions } from './terms_agg';
