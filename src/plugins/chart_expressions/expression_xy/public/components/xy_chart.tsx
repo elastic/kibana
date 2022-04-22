@@ -58,6 +58,7 @@ import { SplitChart } from './split_chart';
 import { Annotations, getAnnotationsGroupedByInterval } from './annotations';
 import { SeriesTypes, ValueLabelModes } from '../../common/constants';
 import { DataLayers } from './data_layers';
+import { Tooltip } from './tooltip';
 
 import './xy_chart.scss';
 
@@ -516,6 +517,9 @@ export function XYChart({
         tooltip={{
           boundary: document.getElementById('app-fixed-viewport') ?? undefined,
           headerFormatter: (d) => safeXAccessorLabelRenderer(d.value),
+          customTooltip: ({ header, values }) => (
+            <Tooltip header={header} values={values} formatters={{}} />
+          ),
         }}
         allowBrushingLastHistogramBin={isTimeViz}
         rotation={shouldRotate ? 90 : 0}

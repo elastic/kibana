@@ -118,8 +118,8 @@ export const getIsAlreadyFormattedLayerInfo = (
 export const getAreAlreadyFormattedLayersInfo = (
   layers: CommonXYDataLayerConfig[],
   formatFactory: FormatFactory
-): Record<string, Record<string, boolean>> =>
-  layers.reduce<Record<string, Record<string, boolean>>>(
+): Record<number, Record<string, boolean>> =>
+  layers.reduce<Record<number, Record<string, boolean>>>(
     (areAlreadyFormatted, layer) => ({
       ...areAlreadyFormatted,
       [layer.layerId]: getIsAlreadyFormattedLayerInfo(layer, formatFactory),
@@ -256,7 +256,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   return {
     splitSeriesAccessors: layer.splitAccessor ? [layer.splitAccessor] : [],
     stackAccessors: isStacked ? [layer.xAccessor as string] : [],
-    id: layer.splitAccessor ? `${layer.splitAccessor}-${accessor}` : `${accessor}`,
+    id: layer.layerId,
     xAccessor: layer.xAccessor || 'unifiedX',
     yAccessors: [accessor],
     data: rows,
