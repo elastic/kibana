@@ -13,7 +13,7 @@ interface Props {
   applyGlobalQuery: boolean;
   label: string;
   setApplyGlobalQuery: (applyGlobalQuery: boolean) => void;
-  isFeatureEditorOpenForLayer: boolean;
+  isFeatureEditorOpenForLayer?: boolean;
 }
 
 export function GlobalFilterCheckbox({

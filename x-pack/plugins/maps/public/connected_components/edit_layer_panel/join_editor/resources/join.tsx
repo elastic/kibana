@@ -35,7 +35,6 @@ interface Props {
   onRemove: () => void;
   leftFields: JoinField[];
   leftSourceName: string;
-  isFeatureEditorOpenForLayer: boolean;
 }
 
 interface State {
@@ -211,7 +210,6 @@ export class Join extends Component<Props, State> {
           label={i18n.translate('xpack.maps.layerPanel.join.applyGlobalQueryCheckboxLabel', {
             defaultMessage: `Apply global search to join`,
           })}
-          isFeatureEditorOpenForLayer={this.props.isFeatureEditorOpenForLayer}
         />
       );
       if (this.state.indexPattern && this.state.indexPattern.timeFieldName) {
@@ -224,7 +222,6 @@ export class Join extends Component<Props, State> {
             label={i18n.translate('xpack.maps.layerPanel.join.applyGlobalTimeCheckboxLabel', {
               defaultMessage: `Apply global time to join`,
             })}
-            isFeatureEditorOpenForLayer={this.props.isFeatureEditorOpenForLayer}
           />
         );
       }

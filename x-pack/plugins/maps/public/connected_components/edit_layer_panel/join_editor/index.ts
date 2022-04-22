@@ -9,21 +9,15 @@ import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { JoinEditor } from './join_editor';
-import {
-  getSelectedLayerJoinDescriptors,
-  getSelectedLayer,
-  getEditState,
-} from '../../../selectors/map_selectors';
+import { getSelectedLayerJoinDescriptors } from '../../../selectors/map_selectors';
 import { setJoinsForLayer } from '../../../actions';
 import { MapStoreState } from '../../../reducers/store';
 import { ILayer } from '../../../classes/layers/layer';
 import { JoinDescriptor } from '../../../../common/descriptor_types';
 
 function mapStateToProps(state: MapStoreState) {
-  const layer = getSelectedLayer(state)!;
   return {
     joins: getSelectedLayerJoinDescriptors(state),
-    isFeatureEditorOpenForLayer: getEditState(state)?.layerId === layer.getId(),
   };
 }
 

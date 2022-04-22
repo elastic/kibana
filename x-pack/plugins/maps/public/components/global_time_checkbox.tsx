@@ -12,7 +12,7 @@ interface Props {
   applyGlobalTime: boolean;
   label: string;
   setApplyGlobalTime: (applyGlobalTime: boolean) => void;
-  isFeatureEditorOpenForLayer: boolean;
+  isFeatureEditorOpenForLayer?: boolean;
 }
 
 export function GlobalTimeCheckbox({

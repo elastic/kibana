@@ -29,17 +29,9 @@ export interface Props {
   layerDisplayName: string;
   leftJoinFields: JoinField[];
   onChange: (layer: IVectorLayer, joins: JoinDescriptor[]) => void;
-  isFeatureEditorOpenForLayer: boolean;
 }
 
-export function JoinEditor({
-  joins,
-  layer,
-  onChange,
-  leftJoinFields,
-  layerDisplayName,
-  isFeatureEditorOpenForLayer,
-}: Props) {
+export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDisplayName }: Props) {
   const renderJoins = () => {
     return joins.map((joinDescriptor: JoinDescriptor, index: number) => {
       const handleOnChange = (updatedDescriptor: JoinDescriptor) => {
@@ -65,7 +57,6 @@ export function JoinEditor({
               onRemove={handleOnRemove}
               leftFields={leftJoinFields}
               leftSourceName={layerDisplayName}
-              isFeatureEditorOpenForLayer={isFeatureEditorOpenForLayer}
             />
           </Fragment>
         );
@@ -87,12 +78,7 @@ export function JoinEditor({
   };
 
   function renderContent() {
-    let disabledReason = layer.getJoinsDisabledReason();
-    if (isFeatureEditorOpenForLayer) {
-      disabledReason = i18n.translate('xpack.maps.filterEditor.isJoinsNotApplied', {
-        defaultMessage: 'Term joins are not applied while editing features',
-      });
-    }
+    const disabledReason = layer.getJoinsDisabledReason();
 
     return disabledReason ? (
       <EuiCallOut color="warning">{disabledReason}</EuiCallOut>

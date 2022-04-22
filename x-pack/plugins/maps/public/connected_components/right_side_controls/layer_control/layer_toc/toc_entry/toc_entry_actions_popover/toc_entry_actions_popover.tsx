@@ -92,7 +92,8 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
     if (
       (source as ESSearchSource).getSyncMeta().scalingType === SCALING_TYPES.CLUSTERS ||
       vectorLayer.isPreviewLayer() ||
-      !vectorLayer.isVisible()
+      !vectorLayer.isVisible() ||
+      vectorLayer.hasJoins()
     ) {
       return false;
     }
@@ -190,7 +191,8 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
           toolTipContent: this.state.isFeatureEditingEnabled
             ? null
             : i18n.translate('xpack.maps.layerTocActions.editFeaturesTooltip.disabledMessage', {
-                defaultMessage: `To enable edit features, select 'Use vector tiles' in 'Scaling'.`,
+                defaultMessage:
+                  'Edit features is only supported for layers without clustering and term joins',
               }),
           disabled: !this.state.isFeatureEditingEnabled,
           onClick: async () => {
