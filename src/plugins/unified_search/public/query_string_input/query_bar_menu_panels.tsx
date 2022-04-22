@@ -130,12 +130,7 @@ export function QueryBarMenuPanels({
   useEffect(() => {
     const hasFilters = Boolean(filters && filters.length > 0);
     const hasQuery = Boolean(query && query.query);
-    const hasQueryOrFilters = hasFilters || hasQuery;
-    setHasFiltersOrQuery(hasQueryOrFilters);
-
-    if (!hasQueryOrFilters && savedQuery) {
-      onClearSavedQuery?.();
-    }
+    setHasFiltersOrQuery(hasFilters || hasQuery);
   }, [filters, onClearSavedQuery, query, savedQuery]);
 
   const getDateRange = () => {
@@ -339,7 +334,7 @@ export function QueryBarMenuPanels({
                 <strong>{savedQuery ? savedQuery.attributes.title : 'Filter set'}</strong>
               </EuiText>
             </EuiFlexItem>
-            {savedQuery && savedQueryHasChanged && Boolean(showSaveQuery) && (
+            {savedQuery && savedQueryHasChanged && Boolean(showSaveQuery) && hasFiltersOrQuery && (
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup
                   direction="row"
