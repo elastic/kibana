@@ -8,8 +8,9 @@
 
 import indexPatternResponse from './__fixtures__/index_pattern_response.json';
 
+import { indexPatterns as indexPatternsUtils, KueryNode } from '@kbn/data-plugin/public';
 import { setupGetFieldSuggestions } from './field';
-import { indexPatterns as indexPatternsUtils, QuerySuggestionGetFnArgs, KueryNode } from '../../..';
+import { QuerySuggestionGetFnArgs } from '../query_suggestion_provider';
 import { coreMock } from '@kbn/core/public/mocks';
 
 const mockKueryNode = (kueryNode: Partial<KueryNode>) => kueryNode as unknown as KueryNode;

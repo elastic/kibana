@@ -32,7 +32,7 @@ import {
   getNewExceptionItem,
 } from '@kbn/securitysolution-list-utils';
 import { DataViewBase } from '@kbn/es-query';
-import type { AutocompleteStart } from '@kbn/data-plugin/public';
+import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
 
 import { AndOrBadge } from '../and_or_badge';
 

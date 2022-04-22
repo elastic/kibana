@@ -256,7 +256,7 @@ export const SeverityField = ({
 
                       <EuiFlexItemComboBoxColumn>
                         <AutocompleteFieldMatchComponent
-                          autocompleteService={services.data.autocomplete}
+                          autocompleteService={services.unifiedSearch.autocomplete}
                           placeholder={''}
                           selectedField={getFieldTypeByMapping(severityMappingItem, indices)}
                           selectedValue={severityMappingItem.value}

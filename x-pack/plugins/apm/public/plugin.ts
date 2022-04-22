@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -17,9 +18,10 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import type {
-  DataPublicPluginSetup,
   DataPublicPluginStart,
+  DataPublicPluginSetup,
 } from '@kbn/data-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
@@ -63,6 +65,7 @@ export type ApmPluginStart = void;
 export interface ApmPluginSetupDeps {
   alerting?: AlertingPluginPublicSetup;
   data: DataPublicPluginSetup;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;

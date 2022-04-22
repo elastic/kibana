@@ -6,17 +6,18 @@
  */
 
 import React, { ChangeEvent } from 'react';
-import { shallow, mount } from 'enzyme';
+import { act } from 'react-dom/test-utils';
+import { EuiRange } from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import { EuiFormRow } from '@elastic/eui';
+import { shallow, mount } from 'enzyme';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
 import { percentileOperation } from '.';
 import { IndexPattern, IndexPatternLayer } from '../../types';
 import { PercentileIndexPatternColumn } from './percentile';
-import { EuiRange } from '@elastic/eui';
-import { act } from 'react-dom/test-utils';
-import { EuiFormRow } from '@elastic/eui';
 import { TermsIndexPatternColumn } from './terms';
 
 jest.mock('lodash', () => {
@@ -36,6 +37,7 @@ const defaultProps = {
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
+  unifiedSearch: unifiedSearchPluginMock.createStartContract(),
   http: {} as HttpSetup,
   indexPattern: {
     ...createMockedIndexPattern(),

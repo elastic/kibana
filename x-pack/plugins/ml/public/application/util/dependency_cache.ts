@@ -20,7 +20,7 @@ import type {
   ChromeRecentlyAccessed,
   IBasePath,
 } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
@@ -38,7 +38,7 @@ export interface DependencyCache {
   theme: ThemeServiceStart | null;
   recentlyAccessed: ChromeRecentlyAccessed | null;
   fieldFormats: FieldFormatsStart | null;
-  autocomplete: DataPublicPluginStart['autocomplete'] | null;
+  autocomplete: UnifiedSearchPublicPluginStart['autocomplete'] | null;
   basePath: IBasePath | null;
   savedObjectsClient: SavedObjectsClientContract | null;
   application: ApplicationStart | null;

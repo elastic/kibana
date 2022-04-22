@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { ReactWrapper, mount } from 'enzyme';
 import React from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import { waitFor } from '@testing-library/dom';
+import { coreMock } from '@kbn/core/public/mocks';
 import {
   doesNotExistOperator,
   existsOperator,
@@ -24,8 +23,9 @@ import { validateFilePathInput } from '@kbn/securitysolution-utils';
 import { useFindLists } from '@kbn/securitysolution-list-hooks';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { coreMock } from '@kbn/core/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { waitFor } from '@testing-library/dom';
+import { ReactWrapper, mount } from 'enzyme';
 
 import { getFoundListSchemaMock } from '../../../../common/schemas/response/found_list_schema.mock';
 
@@ -35,7 +35,7 @@ jest.mock('@kbn/securitysolution-list-hooks');
 jest.mock('@kbn/securitysolution-utils');
 
 const mockKibanaHttpService = coreMock.createStart().http;
-const { autocomplete: autocompleteStartMock } = dataPluginMock.createStartContract();
+const { autocomplete: autocompleteStartMock } = unifiedSearchPluginMock.createStartContract();
 
 describe('BuilderEntryItem', () => {
   let wrapper: ReactWrapper;

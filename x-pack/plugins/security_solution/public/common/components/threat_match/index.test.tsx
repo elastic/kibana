@@ -42,7 +42,7 @@ describe('ThreatMatchComponent', () => {
   beforeEach(() => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
-        data: {
+        unifiedSearch: {
           autocomplete: {
             getValueSuggestions: getValueSuggestionsMock,
           },

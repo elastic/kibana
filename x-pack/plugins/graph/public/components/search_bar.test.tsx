@@ -59,6 +59,8 @@ function getServiceMocks() {
       query: {
         savedQueries: {},
       },
+    },
+    unifiedSearch: {
       autocomplete: {
         hasQuerySuggestions: () => false,
       },

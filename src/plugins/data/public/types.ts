@@ -16,7 +16,6 @@ import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/
 import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { Setup as InspectorSetup } from '@kbn/inspector-plugin/public';
 import { DatatableUtilitiesService } from '../common';
-import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
 import type { ISearchSetup, ISearchStart } from './search';
 import { QuerySetup, QueryStart } from './query';
@@ -42,7 +41,6 @@ export interface DataStartDependencies {
  * Data plugin public Setup contract
  */
 export interface DataPublicPluginSetup {
-  autocomplete: AutocompleteSetup;
   search: ISearchSetup;
   query: QuerySetup;
 }
@@ -64,11 +62,6 @@ export interface DataPublicPluginStart {
    * {@link DataPublicPluginStartActions}
    */
   actions: DataPublicPluginStartActions;
-  /**
-   * autocomplete service
-   * {@link AutocompleteStart}
-   */
-  autocomplete: AutocompleteStart;
   /**
    * data views service
    * {@link DataViewsContract}

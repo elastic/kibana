@@ -24,7 +24,6 @@ export interface ControlsDataService {
   ) => Observable<{ min?: number; max?: number }>;
   getDataView: DataPublicPluginStart['dataViews']['get'];
   getDataView$: (id: string) => Observable<DataView>;
-  autocomplete: DataPublicPluginStart['autocomplete'];
   query: DataPublicPluginStart['query'];
   searchSource: DataPublicPluginStart['search']['searchSource'];
   timefilter: DataPublicPluginStart['query']['timefilter']['timefilter'];

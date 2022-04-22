@@ -112,7 +112,7 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
   onConfirm,
   onRuleChange,
 }: EditExceptionFlyoutProps) {
-  const { http, data } = useKibana().services;
+  const { http, unifiedSearch } = useKibana().services;
   const [comment, setComment] = useState('');
   const [errorsExist, setErrorExists] = useState(false);
   const { rule: maybeRule, loading: isRuleLoading } = useRuleAsync(ruleId);
@@ -360,7 +360,7 @@ export const EditExceptionFlyout = memo(function EditExceptionFlyout({
                 allowLargeValueLists:
                   !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type),
                 httpService: http,
-                autocompleteService: data.autocomplete,
+                autocompleteService: unifiedSearch.autocomplete,
                 exceptionListItems: [exceptionItem],
                 listType: exceptionListType,
                 listId: exceptionItem.list_id,
