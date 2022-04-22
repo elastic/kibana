@@ -42,6 +42,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   }
 
   public setup(core: CoreSetup, { usageCollection, security }: PluginsSetup) {
+    this.logger.fatal(`TEST LOG ENV ${process.env}`);
     this.logger.debug('Setting up Cloud plugin');
     const isCloudEnabled = getIsCloudEnabled(this.config.id);
     registerCloudUsageCollector(usageCollection, { isCloudEnabled });
