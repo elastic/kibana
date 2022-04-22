@@ -145,6 +145,10 @@ export const configSchema = schema.object(
   }
 );
 
+for (const schemaEntry of configSchema.getSchemaStructure()) {
+  console.log(`config key: xpack.task_manager.${schemaEntry.path.join('.')} (${schemaEntry.type})`);
+}
+
 export type TaskManagerConfig = TypeOf<typeof configSchema>;
 export type TaskExecutionFailureThreshold = TypeOf<typeof taskExecutionFailureThresholdSchema>;
 export type EventLoopDelayConfig = TypeOf<typeof eventLoopDelaySchema>;

@@ -114,6 +114,10 @@ export const configSchema = schema.object({
   microsoftGraphApiUrl: schema.maybe(schema.string()),
 });
 
+for (const schemaEntry of configSchema.getSchemaStructure()) {
+  console.log(`config key: xpack.actions.${schemaEntry.path.join('.')} (${schemaEntry.type})`);
+}
+
 export type ActionsConfig = TypeOf<typeof configSchema>;
 
 // It would be nicer to add the proxyBypassHosts / proxyOnlyHosts restriction on

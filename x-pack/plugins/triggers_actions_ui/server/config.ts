@@ -33,6 +33,10 @@ export const configSchema = schema.object({
   }),
 });
 
+for (const schemaEntry of configSchema.getSchemaStructure()) {
+  console.log(`config key: xpack.triggers_actions_ui.${schemaEntry.path.join('.')} (${schemaEntry.type})`);
+}
+
 export type ConfigSchema = TypeOf<typeof configSchema>;
 
 export type ConfigType = ConfigSchema & {

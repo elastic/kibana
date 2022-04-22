@@ -57,6 +57,10 @@ export const configSchema = schema.object({
   rules: rulesSchema,
 });
 
+for (const schemaEntry of configSchema.getSchemaStructure()) {
+ console.log(`config key: xpack.alerting.${schemaEntry.path.join('.')} (${schemaEntry.type})`);
+}
+
 export type AlertingConfig = TypeOf<typeof configSchema>;
 export type RulesConfig = TypeOf<typeof rulesSchema>;
 export type RuleTypeConfig = Omit<RulesConfig, 'ruleTypeOverrides' | 'minimumScheduleInterval'>;

@@ -29,6 +29,10 @@ export const ConfigSchema = schema.object({
   indexEntries: schema.boolean({ defaultValue: true }),
 });
 
+for (const schemaEntry of ConfigSchema.getSchemaStructure()) {
+  console.log(`config key: xpack.event_log.${schemaEntry.path.join('.')} (${schemaEntry.type})`);
+}
+
 export type IEventLogConfig = TypeOf<typeof ConfigSchema>;
 
 // the object exposed by plugin.setup()
