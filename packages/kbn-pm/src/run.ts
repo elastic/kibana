@@ -149,7 +149,7 @@ export async function runCommand(command: ICommand, config: Omit<ICommandConfig,
       log.error(error);
     }
 
-    // process.exit(1);
+    process.exit(1);
   }
 }
 

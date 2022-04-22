@@ -60399,8 +60399,9 @@ async function runCommand(command, config) {
       }
     } else {
       _utils_log__WEBPACK_IMPORTED_MODULE_3__[/* log */ "a"].error(error);
-    } // process.exit(1);
+    }
 
+    process.exit(1);
   }
 }
 
