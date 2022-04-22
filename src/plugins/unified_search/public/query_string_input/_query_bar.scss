@@ -4,9 +4,9 @@
   height: $euiFormControlHeight;
   display: flex;
 
-  > [aria-expanded="true"] {
+  > [aria-expanded='true'] {
     // Using filter allows it to adhere the children's bounds
-    filter: drop-shadow(0px 5.7px 12px rgba($euiShadowColor, shadowOpacity(.05)));
+    filter: drop-shadow(0 5.7px 12px rgba($euiShadowColor, shadowOpacity(.05)));
   }
 }
 
