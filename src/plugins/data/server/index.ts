@@ -16,6 +16,8 @@ import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 export * from './deprecated';
 export { getEsQueryConfig, DEFAULT_QUERY_LANGUAGE } from '../common';
 
+export { getRequestAbortedSignal } from './lib';
+
 /**
  * Exporters (CSV)
  */
@@ -68,7 +70,6 @@ import {
   // tabify
   calcAutoIntervalLessThan,
 } from '../common';
-import { autocompleteConfigDeprecationProvider } from './config_deprecations';
 
 export type {
   ParsedInterval,
@@ -121,9 +122,7 @@ export type { DataPluginSetup as PluginSetup, DataPluginStart as PluginStart };
 export { DataServerPlugin as Plugin };
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
-  deprecations: autocompleteConfigDeprecationProvider,
   exposeToBrowser: {
-    autocomplete: true,
     search: true,
   },
   schema: configSchema,
