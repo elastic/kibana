@@ -54,7 +54,9 @@ const listCustomLinksRoute = createApmServerRoute({
     >;
   }> => {
     const { context, params } = resources;
-    if (!isActiveGoldLicense(context.licensing.license)) {
+    const licensingContext = await context.licensing;
+
+    if (!isActiveGoldLicense(licensingContext.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
     const setup = await setupRequest(resources);
@@ -76,14 +78,16 @@ const createCustomLinkRoute = createApmServerRoute({
   options: { tags: ['access:apm', 'access:apm_write'] },
   handler: async (resources): Promise<void> => {
     const { context, params } = resources;
-    if (!isActiveGoldLicense(context.licensing.license)) {
+    const licensingContext = await context.licensing;
+
+    if (!isActiveGoldLicense(licensingContext.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
     const setup = await setupRequest(resources);
     const customLink = params.body;
 
     notifyFeatureUsage({
-      licensingPlugin: context.licensing,
+      licensingPlugin: licensingContext,
       featureName: 'customLinks',
     });
 
@@ -104,8 +108,9 @@ const updateCustomLinkRoute = createApmServerRoute({
   },
   handler: async (resources): Promise<void> => {
     const { params, context } = resources;
+    const licensingContext = await context.licensing;
 
-    if (!isActiveGoldLicense(context.licensing.license)) {
+    if (!isActiveGoldLicense(licensingContext.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
     const setup = await setupRequest(resources);
@@ -133,8 +138,9 @@ const deleteCustomLinkRoute = createApmServerRoute({
   },
   handler: async (resources): Promise<{ result: string }> => {
     const { context, params } = resources;
+    const licensingContext = await context.licensing;
 
-    if (!isActiveGoldLicense(context.licensing.license)) {
+    if (!isActiveGoldLicense(licensingContext.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
     const setup = await setupRequest(resources);
