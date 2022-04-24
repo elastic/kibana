@@ -50,7 +50,7 @@ export const getCspRules = async (
 ) => {
   const cspRules = await soClient.find<CspRuleSchema>({
     type: cspRuleAssetSavedObjectType,
-    filter: `csp_rule.attributes.package_policy_id: ${packagePolicy.id} AND csp_rule.attributes.policy_id: ${packagePolicy.policy_id}`,
+    filter: `${cspRuleAssetSavedObjectType}.attributes.package_policy_id: ${packagePolicy.id} AND ${cspRuleAssetSavedObjectType}.attributes.policy_id: ${packagePolicy.policy_id}`,
     searchFields: ['name'],
     // TODO: research how to get all rules
     perPage: 10000,
