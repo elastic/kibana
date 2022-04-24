@@ -27,8 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
 
-  // Failing: See https://github.com/elastic/kibana/issues/129785
-  describe.skip('visual builder', function describeIndexTests() {
+  describe('visual builder', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles([
         'kibana_admin',
@@ -172,62 +171,62 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         describe('Clicking on the chart', () => {
-          it(`should create a filter`, async () => {
-            await visualBuilder.setMetricsGroupByTerms('machine.os.raw', {
-              include: 'win 7',
-              exclude: 'ios',
-            });
-            await visualBuilder.clickSeriesOption();
+          const act = async (visName: string, clickCoordinates: { x: number; y: number }) => {
             await testSubjects.click('visualizeSaveButton');
 
-            await timeToVisualize.saveFromModal('My TSVB viz 1', {
+            await timeToVisualize.saveFromModal(visName, {
               addToDashboard: 'new',
               saveToLibrary: false,
             });
 
             await dashboard.waitForRenderComplete();
-            const el = await elasticChart.getCanvas();
 
             await retry.try(async () => {
-              // click on specific coordinates
-              await browser
-                .getActions()
-                .move({ x: 105, y: 115, origin: el._webElement })
-                .click()
-                .perform();
-              await common.sleep(2000);
-              await testSubjects.click('applyFiltersPopoverButton');
-              await testSubjects.missingOrFail('applyFiltersPopoverButton');
+              const el = await elasticChart.getCanvas();
+
+              await el.clickMouseButton({
+                xOffset: clickCoordinates.x,
+                yOffset: clickCoordinates.y,
+              });
+              await common.sleep(1000);
+              await testSubjects.existOrFail('applyFiltersPopoverButton');
             });
 
+            await testSubjects.click('applyFiltersPopoverButton');
+          };
+
+          const cleanup = async () => {
+            const discardDashboardPromptButton = 'discardDashboardPromptButton';
+            await common.navigateToApp('dashboard');
+            if (await testSubjects.exists(discardDashboardPromptButton)) {
+              await dashboard.clickUnsavedChangesDiscard(discardDashboardPromptButton, true);
+            }
+          };
+
+          afterEach(async () => {
+            await cleanup();
+          });
+
+          it(`should create a filter`, async () => {
+            await visualBuilder.setMetricsGroupByTerms('machine.os.raw', {
+              include: 'win 7',
+              exclude: 'ios',
+            });
+            await act('viz_1', { x: 105, y: 115 });
             const hasMachineRawFilter = await filterBar.hasFilter('machine.os.raw', 'win 7');
             expect(hasMachineRawFilter).to.be(true);
           });
 
           it('should create a filter for series with multiple split by terms fields one of which has formatting', async () => {
-            const expectedFilterPills = ['0, win xp, logstash-2015.09.20'];
+            const expectedFilterPills = ['0, win 7'];
             await visualBuilder.setMetricsGroupByTerms('bytes');
             await visualBuilder.setAnotherGroupByTermsField('machine.os.raw');
-            await visualBuilder.setAnotherGroupByTermsField('_index');
-
             await visualBuilder.clickSeriesOption();
             await visualBuilder.setChartType('Bar');
-            await visualBuilder.setStackedType('Stacked');
             await visualBuilder.clickPanelOptions('timeSeries');
             await visualBuilder.setIntervalValue('1w');
 
-            const el = await elasticChart.getCanvas();
-            await el.scrollIntoViewIfNecessary();
-            await browser
-              .getActions()
-              .move({ x: 100, y: 65, origin: el._webElement })
-              .click()
-              .perform();
-
-            await retry.try(async () => {
-              await testSubjects.click('applyFiltersPopoverButton');
-              await testSubjects.missingOrFail('applyFiltersPopoverButton');
-            });
+            await act('vis_2', { x: -100, y: 10 });
 
             const filterPills = await filterBar.getFiltersLabel();
             expect(filterPills).to.eql(expectedFilterPills);
