@@ -29,9 +29,9 @@ export const FleetServerHostComboBox: React.FunctionComponent<Props> = ({
   const [createdOptions, setCreatedOptions] = useState<string[]>([]);
 
   const options = [
-    ...createdOptions.map((option) => ({ label: option, value: option })),
-    ...fleetServerHostSettings.map((host) => ({ label: host, value: host })),
-  ];
+    ...createdOptions,
+    ...fleetServerHostSettings,
+  ].map((option) => ({ label: option, value: option }));
 
   const handleChange = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
     const host = selectedOptions[0].value ?? '';
