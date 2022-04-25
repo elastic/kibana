@@ -8,14 +8,16 @@
 import React, { memo, PropsWithChildren, useMemo } from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
+export class SecuritySolutionQueryClient extends QueryClient {}
+
 export type ReactQueryClientProviderProps = PropsWithChildren<{
-  queryClient?: QueryClient;
+  queryClient?: SecuritySolutionQueryClient;
 }>;
 
 export const ReactQueryClientProvider = memo<ReactQueryClientProviderProps>(
   ({ queryClient, children }) => {
     const client = useMemo(() => {
-      return queryClient || new QueryClient();
+      return queryClient || new SecuritySolutionQueryClient();
     }, [queryClient]);
     return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
   }
