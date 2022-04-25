@@ -187,6 +187,7 @@ export const mockDefineStepRule = (): DefineStepRule => ({
   anomalyThreshold: 50,
   machineLearningJobId: [],
   index: ['filebeat-'],
+  dataViewId: undefined,
   queryBar: mockQueryBar,
   threatQueryBar: mockQueryBar,
   threatMapping: [],

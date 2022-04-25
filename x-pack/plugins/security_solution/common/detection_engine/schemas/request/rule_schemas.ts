@@ -147,6 +147,7 @@ const baseParams = {
   },
   optional: {
     building_block_type,
+    data_view_id,
     note,
     license,
     outcome,
@@ -169,7 +170,6 @@ const baseParams = {
     author,
     false_positives,
     from,
-    data_view_id,
     // maxSignals not used in ML rules but probably should be used
     max_signals,
     risk_score_mapping,
@@ -211,6 +211,7 @@ const eqlRuleParams = {
   },
   optional: {
     index,
+    data_view_id,
     filters,
     event_category_override,
   },
@@ -233,6 +234,7 @@ const threatMatchRuleParams = {
   },
   optional: {
     index,
+    data_view_id,
     filters,
     saved_id,
     threat_filters,
@@ -258,6 +260,7 @@ const queryRuleParams = {
   },
   optional: {
     index,
+    data_view_id,
     filters,
     saved_id,
   },
@@ -283,6 +286,7 @@ const savedQueryRuleParams = {
     // Having language, query, and filters possibly defined adds more code confusion and probably user confusion
     // if the saved object gets deleted for some reason
     index,
+    data_view_id,
     query,
     filters,
   },
@@ -306,6 +310,7 @@ const thresholdRuleParams = {
   },
   optional: {
     index,
+    data_view_id,
     filters,
     saved_id,
   },

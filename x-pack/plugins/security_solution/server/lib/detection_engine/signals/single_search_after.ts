@@ -33,7 +33,7 @@ interface SingleSearchAfterParams {
   timestampOverride: TimestampOverrideOrUndefined;
   buildRuleMessage: BuildRuleMessage;
   trackTotalHits?: boolean;
-  runtimeMappings: estypes.MappingRuntimeFields;
+  runtimeMappings?: estypes.MappingRuntimeFields | null;
 }
 
 // utilize search_after for paging results into bulk.

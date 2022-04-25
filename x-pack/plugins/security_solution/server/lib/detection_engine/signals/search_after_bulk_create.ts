@@ -21,7 +21,10 @@ import {
 } from './utils';
 import { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
 import { withSecuritySpan } from '../../../utils/with_security_span';
-import { DataViewAttributes } from '../../../../../../../src/plugins/data_views/common';
+import {
+  DataViewAttributes,
+  SavedObject,
+} from '../../../../../../../src/plugins/data_views/common';
 
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkCreate = async ({
@@ -64,15 +67,18 @@ export const searchAfterAndBulkCreate = async ({
       });
     }
 
-    const kibanaIndexPattern = await services.savedObjectsClient.get<DataViewAttributes>(
-      'index-pattern',
-      dataViewId
-    );
     // logger.debug(`kibana index pattern ${JSON.stringify(kibanaIndexPattern, null, 2)}`);
     let runtimeMappings = {};
-    if (kibanaIndexPattern?.attributes.runtimeFieldMap != null) {
-      runtimeMappings = JSON.parse(kibanaIndexPattern.attributes.runtimeFieldMap);
-      logger.debug(`runtime mappings ${runtimeMappings}`);
+    let kibanaIndexPattern: SavedObject<DataViewAttributes> | null = null;
+    if (dataViewId != null) {
+      kibanaIndexPattern = await services.savedObjectsClient.get<DataViewAttributes>(
+        'index-pattern',
+        dataViewId
+      );
+      if (kibanaIndexPattern?.attributes.runtimeFieldMap != null) {
+        runtimeMappings = JSON.parse(kibanaIndexPattern.attributes.runtimeFieldMap);
+        logger.debug(`runtime mappings ${runtimeMappings}`);
+      }
     }
     signalsCreatedCount = 0;
     while (signalsCreatedCount < tuple.maxSignals) {
@@ -85,7 +91,7 @@ export const searchAfterAndBulkCreate = async ({
             searchAfterSortIds: sortIds,
             // TODO: use a kibana config key for determining whether to default to dataview or inputIndexPattern
             index:
-              dataViewId != null // default to data view id if present on rule definition.
+              dataViewId != null && kibanaIndexPattern != null // default to data view id if present on rule definition.
                 ? kibanaIndexPattern.attributes.title.split(',')
                 : inputIndexPattern,
             runtimeMappings,

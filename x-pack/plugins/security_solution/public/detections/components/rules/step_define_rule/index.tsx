@@ -55,7 +55,6 @@ import {
   UseMultiFields,
   useForm,
   useFormData,
-  FIELD_TYPES,
 } from '../../../../shared_imports';
 import { schema } from './schema';
 import * as i18n from './translations';
@@ -72,12 +71,7 @@ import { RulePreview } from '../rule_preview';
 import { getIsRulePreviewDisabled } from '../rule_preview/helpers';
 import { Sourcerer } from '../../../../common/components/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import {
-  sourcererActions,
-  sourcererModel,
-  sourcererSelectors,
-} from '../../../../common/store/sourcerer';
-import { usePickIndexPatterns } from '../../../../common/components/sourcerer/use_pick_index_patterns';
+import { sourcererSelectors } from '../../../../common/store/sourcerer';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
 const CommonUseField = getUseField({ component: Field });
@@ -167,9 +161,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     // browserFields,
     // docValueFields,
     indexPattern: dataViewIndexPattern,
-    runtimeMappings,
     // selectedPatterns,
-    dataViewId: sourcererDataViewId,
     loading: isLoadingDataViewIndexPattern,
   } = useSourcererDataView(sourcererPathName);
   // // console.log('SELECTED PATTERNS', selectedPatterns);
@@ -178,14 +170,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   // // console.log('DATA VIEW ID', selectedDataViewId);
   const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
   const {
-    defaultDataView,
     kibanaDataViews,
-    signalIndexName,
-    sourcererScope: {
-      selectedDataViewId,
-      selectedPatterns,
-      missingPatterns: sourcererMissingPatterns,
-    },
+    sourcererScope: { selectedDataViewId },
   } = useDeepEqualSelector((state) => sourcererScopeSelector(state, sourcererPathName));
 
   // console.log('ALL OPTIONS', kibanaDataViews);
@@ -253,8 +239,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   // TODO: update the logic for browserField stuff.
   // if 'index' is selected, use these browser fields
   // otherwise use the dataview browserfields
-  const [indexPatternsLoading, { browserFields, indexPatterns: indexIndexPatterns }] =
-    useFetchIndex(index);
+  const [, { browserFields, indexPatterns: indexIndexPatterns }] = useFetchIndex(index);
 
   const [indexPattern, setIndexPattern] = useState(dataViewIndexPattern);
 

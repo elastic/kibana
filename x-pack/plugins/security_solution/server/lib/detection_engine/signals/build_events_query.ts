@@ -15,7 +15,7 @@ interface BuildEventsSearchQuery {
   from: string;
   to: string;
   filter: estypes.QueryDslQueryContainer;
-  runtimeMappings?: estypes.MappingRuntimeFields;
+  runtimeMappings?: estypes.MappingRuntimeFields | null;
   size: number;
   sortOrder?: estypes.SortOrder;
   searchAfterSortIds: estypes.SortResults | undefined;
@@ -128,6 +128,7 @@ export const buildEventsSearchQuery = ({
     },
   });
 
+  // TODO: ensure null / undefined runtimeMappings doesn't blow anything up
   const searchQuery = {
     allow_no_indices: true,
     runtime_mappings: runtimeMappings,

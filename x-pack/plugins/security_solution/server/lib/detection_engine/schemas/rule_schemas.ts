@@ -47,7 +47,7 @@ import {
   false_positives,
   rule_id,
   immutable,
-  data_view_id,
+  dataViewIdOrUndefined,
   indexOrUndefined,
   licenseOrUndefined,
   output_index,
@@ -77,12 +77,23 @@ import { SERVER_APP_ID } from '../../../../common/constants';
 import { SanitizedRuleConfig } from '../../../../../alerting/common';
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
+
+export const indexUndefOrDataViewUndef = t.intersection([
+  t.exact(
+    t.type({
+      index: indexOrUndefined,
+    })
+  ),
+  t.partial({ dataViewId: dataViewIdOrUndefined }),
+]);
+
+export type IndexUndefOrDataViewUndef = t.TypeOf<typeof indexUndefOrDataViewUndef>;
+
 export const baseRuleParams = t.exact(
   t.type({
     author,
     buildingBlockType: buildingBlockTypeOrUndefined,
     description,
-    dataViewId: data_view_id,
     namespace: namespaceOrUndefined,
     note: noteOrUndefined,
     falsePositives: false_positives,
@@ -111,71 +122,86 @@ export const baseRuleParams = t.exact(
 );
 export type BaseRuleParams = t.TypeOf<typeof baseRuleParams>;
 
-const eqlSpecificRuleParams = t.type({
-  type: t.literal('eql'),
-  language: t.literal('eql'),
-  index: indexOrUndefined,
-  query,
-  filters: filtersOrUndefined,
-  eventCategoryOverride: eventCategoryOverrideOrUndefined,
-});
+const eqlSpecificRuleParams = t.intersection([
+  t.type({
+    type: t.literal('eql'),
+    language: t.literal('eql'),
+    index: indexOrUndefined,
+    query,
+    filters: filtersOrUndefined,
+    eventCategoryOverride: eventCategoryOverrideOrUndefined,
+  }),
+  t.partial({ dataViewId: dataViewIdOrUndefined }),
+]);
 export const eqlRuleParams = t.intersection([baseRuleParams, eqlSpecificRuleParams]);
 export type EqlRuleParams = t.TypeOf<typeof eqlRuleParams>;
 
-const threatSpecificRuleParams = t.type({
-  type: t.literal('threat_match'),
-  language: nonEqlLanguages,
-  index: indexOrUndefined,
-  query,
-  filters: filtersOrUndefined,
-  savedId: savedIdOrUndefined,
-  threatFilters: filtersOrUndefined,
-  threatQuery: threat_query,
-  threatMapping: threat_mapping,
-  threatLanguage: t.union([nonEqlLanguages, t.undefined]),
-  threatIndex: threat_index,
-  threatIndicatorPath: threatIndicatorPathOrUndefined,
-  concurrentSearches: concurrentSearchesOrUndefined,
-  itemsPerSearch: itemsPerSearchOrUndefined,
-});
-export const threatRuleParams = t.intersection([baseRuleParams, threatSpecificRuleParams]);
-export type ThreatRuleParams = t.TypeOf<typeof threatRuleParams>;
-
-const querySpecificRuleParams = t.exact(
+const threatSpecificRuleParams = t.intersection([
   t.type({
-    type: t.literal('query'),
+    type: t.literal('threat_match'),
     language: nonEqlLanguages,
     index: indexOrUndefined,
     query,
     filters: filtersOrUndefined,
     savedId: savedIdOrUndefined,
-  })
-);
+    threatFilters: filtersOrUndefined,
+    threatQuery: threat_query,
+    threatMapping: threat_mapping,
+    threatLanguage: t.union([nonEqlLanguages, t.undefined]),
+    threatIndex: threat_index,
+    threatIndicatorPath: threatIndicatorPathOrUndefined,
+    concurrentSearches: concurrentSearchesOrUndefined,
+    itemsPerSearch: itemsPerSearchOrUndefined,
+  }),
+  t.partial({ dataViewId: dataViewIdOrUndefined }),
+]);
+export const threatRuleParams = t.intersection([baseRuleParams, threatSpecificRuleParams]);
+export type ThreatRuleParams = t.TypeOf<typeof threatRuleParams>;
+
+const querySpecificRuleParams = t.intersection([
+  t.exact(
+    t.type({
+      type: t.literal('query'),
+      language: nonEqlLanguages,
+      index: indexOrUndefined,
+      query,
+      filters: filtersOrUndefined,
+      savedId: savedIdOrUndefined,
+    })
+  ),
+  t.partial({ dataViewId: dataViewIdOrUndefined }),
+]);
 export const queryRuleParams = t.intersection([baseRuleParams, querySpecificRuleParams]);
 export type QueryRuleParams = t.TypeOf<typeof queryRuleParams>;
 
-const savedQuerySpecificRuleParams = t.type({
-  type: t.literal('saved_query'),
-  // Having language, query, and filters possibly defined adds more code confusion and probably user confusion
-  // if the saved object gets deleted for some reason
-  language: nonEqlLanguages,
-  index: indexOrUndefined,
-  query: queryOrUndefined,
-  filters: filtersOrUndefined,
-  savedId: saved_id,
-});
+const savedQuerySpecificRuleParams = t.intersection([
+  t.type({
+    type: t.literal('saved_query'),
+    // Having language, query, and filters possibly defined adds more code confusion and probably user confusion
+    // if the saved object gets deleted for some reason
+    language: nonEqlLanguages,
+    index: indexOrUndefined,
+    query: queryOrUndefined,
+    filters: filtersOrUndefined,
+    savedId: saved_id,
+  }),
+  t.partial({ dataViewId: dataViewIdOrUndefined }),
+]);
 export const savedQueryRuleParams = t.intersection([baseRuleParams, savedQuerySpecificRuleParams]);
 export type SavedQueryRuleParams = t.TypeOf<typeof savedQueryRuleParams>;
 
-const thresholdSpecificRuleParams = t.type({
-  type: t.literal('threshold'),
-  language: nonEqlLanguages,
-  index: indexOrUndefined,
-  query,
-  filters: filtersOrUndefined,
-  savedId: savedIdOrUndefined,
-  threshold: thresholdNormalized,
-});
+const thresholdSpecificRuleParams = t.intersection([
+  t.type({
+    type: t.literal('threshold'),
+    language: nonEqlLanguages,
+    index: indexOrUndefined,
+    query,
+    filters: filtersOrUndefined,
+    savedId: savedIdOrUndefined,
+    threshold: thresholdNormalized,
+  }),
+  t.partial({ dataViewId: dataViewIdOrUndefined }),
+]);
 export const thresholdRuleParams = t.intersection([baseRuleParams, thresholdSpecificRuleParams]);
 export type ThresholdRuleParams = t.TypeOf<typeof thresholdRuleParams>;
 

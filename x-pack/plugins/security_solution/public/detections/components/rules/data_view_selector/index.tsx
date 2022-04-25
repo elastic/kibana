@@ -6,15 +6,8 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiComboBox,
-  EuiFormRow,
-  EuiComboBoxOptionOption,
-} from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { FieldHook } from '../../../../shared_imports';
 import * as i18n from './translations';
@@ -25,7 +18,6 @@ interface DataViewSelectorProps {
   field: FieldHook;
   dataViewId: string;
 }
-type Event = React.ChangeEvent<HTMLInputElement>;
 
 export const DataViewSelector = ({
   kibanaDataViews = [],
