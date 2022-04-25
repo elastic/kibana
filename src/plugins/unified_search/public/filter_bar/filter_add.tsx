@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexItem, EuiPopover } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import { buildEmptyFilter, Filter } from '@kbn/es-query';
 import React, { useState } from 'react';
 
@@ -14,12 +14,12 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { IDataPluginServices } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FILTER_EDITOR_WIDTH } from './filter_item';
 import { FilterEditor } from './filter_editor';
 
 export interface Props {
   dataViews: DataView[];
-  renderButton: (onClick: () => void) => JSX.Element;
   onAdd: (filter: Filter) => void;
   timeRangeForSuggestionsOverride?: boolean;
 }
@@ -41,17 +41,31 @@ export const FilterAdd = (props: Props) => {
 
   const onAddFilterClick = () => setIsAddFilterPopoverOpen(!isAddFilterPopoverOpen);
 
+  const openPopoverButton = (
+    <EuiButtonEmpty
+      size="s"
+      onClick={onAddFilterClick}
+      data-test-subj="addFilter"
+      className="globalFilterBar__addButton"
+    >
+      +{' '}
+      <FormattedMessage
+        id="unifiedSearch.filter.filterBar.addFilterButtonLabel"
+        defaultMessage="Add filter"
+      />
+    </EuiButtonEmpty>
+  );
+
   return (
     <EuiFlexItem grow={false}>
       <EuiPopover
         id="addFilterPopover"
-        button={props.renderButton(onAddFilterClick)}
+        button={openPopoverButton}
         isOpen={isAddFilterPopoverOpen}
         closePopover={() => setIsAddFilterPopoverOpen(false)}
         anchorPosition="downLeft"
         panelPaddingSize="none"
         initialFocus=".filterEditor__hiddenItem"
-        display="block"
         ownFocus
         repositionOnScroll
       >

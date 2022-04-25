@@ -7,10 +7,12 @@
 
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { EsQueryAlertParams, SearchType } from './types';
 
 export interface TriggersAndActionsUiDeps {
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export const isSearchSourceAlert = (

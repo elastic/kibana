@@ -364,7 +364,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           isLoading={this.props.isLoading}
           fillSubmitButton={this.props.fillSubmitButton || false}
           prepend={
-            this.props.showFilterBar && this.state.query
+            this.state.query
               ? this.renderSavedQueryManagement(
                   this.props.onClearSavedQuery,
                   this.props.showSaveQuery,

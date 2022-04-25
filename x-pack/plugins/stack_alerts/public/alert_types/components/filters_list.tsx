@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n-react';
 
@@ -16,16 +16,15 @@ import { FilterItem } from '@kbn/unified-search-plugin/public';
 import { useTriggersAndActionsUiDeps } from '../es_query/util';
 
 interface FiltersListProps {
-  dataView: DataView;
   filters: Filter[];
+  dataViews: DataView[];
   onUpdateFilters: (filters: Filter[]) => void;
 }
 
 const FilterItemComponent = injectI18n(FilterItem);
 
-export const FiltersList = ({ filters, dataView, onUpdateFilters }: FiltersListProps) => {
+export const FiltersList = ({ filters, dataViews, onUpdateFilters }: FiltersListProps) => {
   const { uiSettings } = useTriggersAndActionsUiDeps();
-  const dataViews = useMemo(() => [dataView], [dataView]);
 
   const onUpdate = (newFilter: Filter, index: number) => {
     const newFilters = [...filters];

@@ -7,7 +7,7 @@
 
 import React, { memo, PropsWithChildren } from 'react';
 import { i18n } from '@kbn/i18n';
-import { isEqual } from 'lodash';
+import deepEqual from 'fast-deep-equal';
 
 import 'brace/theme/github';
 
@@ -23,8 +23,8 @@ function areSearchSourceExpressionPropsEqual(
   prevProps: Readonly<PropsWithChildren<SearchSourceExpressionProps>>,
   nextProps: Readonly<PropsWithChildren<SearchSourceExpressionProps>>
 ) {
-  const areErrorsEqual = isEqual(prevProps.errors, nextProps.errors);
-  const areRuleParamsEqual = isEqual(prevProps.ruleParams, nextProps.ruleParams);
+  const areErrorsEqual = deepEqual(prevProps.errors, nextProps.errors);
+  const areRuleParamsEqual = deepEqual(prevProps.ruleParams, nextProps.ruleParams);
   return areErrorsEqual && areRuleParamsEqual;
 }
 

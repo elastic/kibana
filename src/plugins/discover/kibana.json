@@ -12,6 +12,7 @@
     "urlForwarding",
     "navigation",
     "uiActions",
+    "unifiedSearch",
     "savedObjects",
     "dataViewFieldEditor",
     "dataViewEditor"

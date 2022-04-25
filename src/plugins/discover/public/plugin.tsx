@@ -35,6 +35,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DocViewInput, DocViewInputFn } from './services/doc_views/doc_views_types';
 import { DocViewsRegistry } from './services/doc_views/doc_views_registry';
 import {
@@ -172,6 +173,7 @@ export interface DiscoverStartPlugins {
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   spaces?: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 /**

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { Fragment, useCallback, useMemo, useReducer } from 'react';
+import React, { Fragment, useCallback, useMemo, useReducer, useState } from 'react';
 import './search_source_expression.scss';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiTitle, EuiExpression, EuiCallOut } from '@elastic/eui';
+import { EuiSpacer, EuiTitle, EuiExpression } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Filter, DataView, Query, ISearchSource } from '@kbn/data-plugin/common';
 import {
@@ -18,13 +18,12 @@ import {
   ValueExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { FilterAdd } from '@kbn/unified-search-plugin/public';
-import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
+import { mapAndFlattenFilters, SavedQuery } from '@kbn/data-plugin/public';
 import { DataViewOption, EsQueryAlertParams, SearchType } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
 import { useTriggersAndActionsUiDeps } from '../util';
 import { FiltersList } from '../../components/filters_list';
-import { QueryPopover } from '../../components/query_popover';
 
 interface SearchSourceParamsState {
   index: DataView;
@@ -50,10 +49,13 @@ interface SearchSourceExpressionFormProps {
 }
 
 export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProps) => {
+  const { data, unifiedSearch } = useTriggersAndActionsUiDeps();
   const { searchSource, ruleParams, errors, setParam } = props;
   const { thresholdComparator, threshold, timeWindowSize, timeWindowUnit, size } = ruleParams;
-  const { data } = useTriggersAndActionsUiDeps();
+  const [savedQuery, setSavedQuery] = useState<SavedQuery>();
+  const SearchBar = unifiedSearch.ui.SearchBar;
 
+  // part of alert rule params
   const [{ index: dataView, query, filter: filters }, dispatch] =
     useReducer<SearchSourceStateReducer>(
       (currentState, action) => {
@@ -85,21 +87,14 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
   const onAddFilter = (newFilter: Filter) => onUpdateFilters([...filters, newFilter]);
 
-  const onChangeQuery = (newQuery: Query) => dispatch({ type: 'query', payload: newQuery });
+  const onChangeQuery = ({ query: newQuery }: { query?: Query }) =>
+    dispatch({ type: 'query', payload: newQuery || { ...query, query: '' } });
 
-  const renderAddFilterPopoverButton = (onClick: () => void) => {
-    return (
-      <EuiExpression
-        className="dscExpressionParam searchSourceAlertFilters"
-        title={'sas'}
-        description={'Filter'}
-        value={
-          <FiltersList filters={filters} dataView={dataView} onUpdateFilters={onUpdateFilters} />
-        }
-        display="columns"
-        onClick={onClick}
-      />
-    );
+  const onSavedQueryUpdated = (newSavedQuery: SavedQuery) => setSavedQuery(newSavedQuery);
+
+  const onClearSavedQuery = () => {
+    setSavedQuery(undefined);
+    dispatch({ type: 'query', payload: { ...query, query: '' } });
   };
 
   return (
@@ -112,30 +107,46 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
           />
         </h5>
       </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiCallOut
-        size="s"
-        title={
-          <FormattedMessage
-            id="xpack.stackAlerts.searchThreshold.ui.notEditable"
-            defaultMessage="The data view, query, and filter are initialized in Discover and cannot be edited."
-          />
-        }
-        iconType="iInCircle"
-      />
+
       <EuiSpacer size="s" />
       <DataViewSelectPopover
         selectedDataViewTitle={dataView.title}
         onSelectDataView={onSelectDataView}
       />
 
-      <QueryPopover query={query} dataViews={dataViews} onChangeQuery={onChangeQuery} />
+      <EuiSpacer size="s" />
 
-      <FilterAdd
-        renderButton={renderAddFilterPopoverButton}
-        dataViews={dataViews}
-        onAdd={onAddFilter}
+      <SearchBar
+        appName="discover"
+        displayStyle="inPage"
+        placeholder={i18n.translate('xpack.stackAlerts.searchSource.ui.searchQuery', {
+          defaultMessage: 'Search query',
+        })}
+        query={query}
+        indexPatterns={dataViews}
+        onQueryChange={onChangeQuery}
+        savedQueryId={savedQuery?.id}
+        onClearSavedQuery={onClearSavedQuery}
+        onSavedQueryUpdated={onSavedQueryUpdated}
+        showSaveQuery={true}
+        showQueryBar={true}
+        showQueryInput={true}
+        showFilterBar={false}
+        showDatePicker={false}
+        showAutoRefreshOnly={false}
+        customSubmitButton={<></>}
       />
+
+      <EuiExpression
+        className="dscExpressionParam searchSourceAlertFilters"
+        title={'sas'}
+        description={<FilterAdd dataViews={dataViews} onAdd={onAddFilter} />}
+        value={
+          <FiltersList filters={filters} dataViews={dataViews} onUpdateFilters={onUpdateFilters} />
+        }
+        display="columns"
+      />
+
       <EuiSpacer size="s" />
       <EuiTitle size="xs">
         <h5>
