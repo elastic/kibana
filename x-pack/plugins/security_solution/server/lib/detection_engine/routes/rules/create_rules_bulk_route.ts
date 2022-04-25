@@ -49,12 +49,15 @@ export const createRulesBulkRoute = (
       logDeprecatedBulkEndpoint(logger, DETECTION_ENGINE_RULES_BULK_CREATE);
 
       const siemResponse = buildSiemResponse(response);
-      const rulesClient = context.alerting.getRulesClient();
-      const savedObjectsClient = context.core.savedObjects.client;
-      const siemClient = context.securitySolution.getAppClient();
+
+      const ctx = await context.resolve(['core', 'securitySolution', 'licensing', 'alerting']);
+
+      const rulesClient = ctx.alerting.getRulesClient();
+      const savedObjectsClient = ctx.core.savedObjects.client;
+      const siemClient = ctx.securitySolution.getAppClient();
 
       const mlAuthz = buildMlAuthz({
-        license: context.licensing.license,
+        license: ctx.licensing.license,
         ml,
         request,
         savedObjectsClient,

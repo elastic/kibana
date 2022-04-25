@@ -87,7 +87,10 @@ describe('get_prepackaged_rule_status_route', () => {
 
   describe('status codes', () => {
     test('returns 200', async () => {
-      const response = await server.inject(getPrepackagedRulesStatusRequest(), context);
+      const response = await server.inject(
+        getPrepackagedRulesStatusRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
@@ -95,7 +98,10 @@ describe('get_prepackaged_rule_status_route', () => {
       clients.rulesClient.find.mockImplementation(async () => {
         throw new Error('Test error');
       });
-      const response = await server.inject(getPrepackagedRulesStatusRequest(), context);
+      const response = await server.inject(
+        getPrepackagedRulesStatusRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',
@@ -108,7 +114,7 @@ describe('get_prepackaged_rule_status_route', () => {
     test('0 rules installed, 0 custom rules, 1 rules not installed, and 1 rule not updated', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
       const request = getPrepackagedRulesStatusRequest();
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
@@ -125,7 +131,7 @@ describe('get_prepackaged_rule_status_route', () => {
     test('1 rule installed, 1 custom rules, 0 rules not installed, and 1 rule to not updated', async () => {
       clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
       const request = getPrepackagedRulesStatusRequest();
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
@@ -145,7 +151,7 @@ describe('get_prepackaged_rule_status_route', () => {
         mockCheckTimelinesStatusBeforeInstallResult
       );
       const request = getPrepackagedRulesStatusRequest();
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
@@ -165,7 +171,7 @@ describe('get_prepackaged_rule_status_route', () => {
         mockCheckTimelinesStatusAfterInstallResult
       );
       const request = getPrepackagedRulesStatusRequest();
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({

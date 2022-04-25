@@ -21,7 +21,8 @@ export const postCommentRoute = createCasesRoute({
   },
   handler: async ({ context, request, response }) => {
     try {
-      const casesClient = await context.cases.getCasesClient();
+      const caseContext = await context.cases;
+      const casesClient = await caseContext.getCasesClient();
       const caseId = request.params.case_id;
       const comment = request.body as CommentRequest;
 

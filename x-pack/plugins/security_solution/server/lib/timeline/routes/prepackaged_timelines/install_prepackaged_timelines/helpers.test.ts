@@ -54,7 +54,11 @@ describe('installPrepackagedTimelines', () => {
     });
 
     const request = addPrepackagedRulesRequest();
-    frameworkRequest = await buildFrameworkRequest(context, securitySetup, request);
+    frameworkRequest = await buildFrameworkRequest(
+      requestContextMock.convertContext(context),
+      securitySetup,
+      request
+    );
   });
 
   afterEach(() => {

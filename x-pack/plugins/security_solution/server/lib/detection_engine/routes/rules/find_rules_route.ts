@@ -45,9 +45,10 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
 
       try {
         const { query } = request;
-        const rulesClient = context.alerting.getRulesClient();
-        const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
-        const savedObjectsClient = context.core.savedObjects.client;
+        const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
+        const rulesClient = ctx.alerting.getRulesClient();
+        const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
+        const savedObjectsClient = ctx.core.savedObjects.client;
 
         const rules = await findRules({
           rulesClient,

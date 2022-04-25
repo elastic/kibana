@@ -27,6 +27,7 @@ import { defineRoutes } from './routes';
 import { cspRuleTemplateAssetType } from './saved_objects/csp_rule_template';
 import { cspRuleAssetType } from './saved_objects/csp_rule_type';
 import { initializeCspTransformsIndices } from './create_indices/create_transforms_indices';
+import { initializeCspTransforms } from './create_transforms/create_transforms';
 import {
   onPackagePolicyPostCreateCallback,
   onPackagePolicyDeleteCallback,
@@ -48,9 +49,11 @@ export class CspPlugin
     >
 {
   private readonly logger: Logger;
+
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
+
   private readonly CspAppService = new CspAppService();
 
   public setup(
@@ -78,7 +81,9 @@ export class CspPlugin
       ...plugins.fleet,
     });
 
-    initializeCspTransformsIndices(core.elasticsearch.client.asInternalUser, this.logger);
+    initializeCspTransformsIndices(core.elasticsearch.client.asInternalUser, this.logger).then(
+      (_) => initializeCspTransforms(core.elasticsearch.client.asInternalUser, this.logger)
+    );
     plugins.fleet.fleetSetupCompleted().then(() => {
       plugins.fleet.registerExternalCallback(
         'packagePolicyPostCreate',
@@ -88,11 +93,8 @@ export class CspPlugin
           request: KibanaRequest
         ): Promise<PackagePolicy> => {
           if (packagePolicy.package?.name === CIS_KUBERNETES_PACKAGE_NAME) {
-            await onPackagePolicyPostCreateCallback(
-              this.logger,
-              packagePolicy,
-              context.core.savedObjects.client
-            );
+            const soClient = (await context.core).savedObjects.client;
+            await onPackagePolicyPostCreateCallback(this.logger, packagePolicy, soClient);
           }
 
           return packagePolicy;
@@ -117,5 +119,6 @@ export class CspPlugin
 
     return {};
   }
+
   public stop() {}
 }

@@ -49,7 +49,10 @@ describe('create_rules_bulk', () => {
 
   describe('status codes', () => {
     test('returns 200', async () => {
-      const response = await server.inject(getReadBulkRequest(), context);
+      const response = await server.inject(
+        getReadBulkRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
   });
@@ -62,7 +65,10 @@ describe('create_rules_bulk', () => {
           .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
       });
 
-      const response = await server.inject(createBulkMlRuleRequest(), context);
+      const response = await server.inject(
+        createBulkMlRuleRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([
         {
@@ -81,14 +87,20 @@ describe('create_rules_bulk', () => {
           getBasicNoShardsSearchResponse()
         )
       );
-      const response = await server.inject(getReadBulkRequest(), context);
+      const response = await server.inject(
+        getReadBulkRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(200);
     });
 
     test('returns a duplicate error if rule_id already exists', async () => {
       clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      const response = await server.inject(getReadBulkRequest(), context);
+      const response = await server.inject(
+        getReadBulkRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([
@@ -105,7 +117,10 @@ describe('create_rules_bulk', () => {
       clients.rulesClient.create.mockImplementation(async () => {
         throw new Error('Test error');
       });
-      const response = await server.inject(getReadBulkRequest(), context);
+      const response = await server.inject(
+        getReadBulkRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([
@@ -124,7 +139,7 @@ describe('create_rules_bulk', () => {
         path: DETECTION_ENGINE_RULES_BULK_CREATE,
         body: [getCreateRulesSchemaMock(), getCreateRulesSchemaMock()],
       });
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([

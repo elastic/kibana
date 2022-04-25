@@ -44,9 +44,10 @@ export const deleteRulesRoute = (router: SecuritySolutionPluginRouter) => {
       try {
         const { id, rule_id: ruleId } = request.query;
 
-        const rulesClient = context.alerting.getRulesClient();
-        const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
-        const savedObjectsClient = context.core.savedObjects.client;
+        const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
+        const rulesClient = ctx.alerting.getRulesClient();
+        const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
+        const savedObjectsClient = ctx.core.savedObjects.client;
 
         const rule = await readRules({ rulesClient, id, ruleId });
         const migratedRule = await legacyMigrate({

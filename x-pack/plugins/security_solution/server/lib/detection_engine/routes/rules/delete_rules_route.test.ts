@@ -34,21 +34,30 @@ describe('delete_rules', () => {
 
   describe('status codes with actionClient and alertClient', () => {
     test('returns 200 when deleting a single rule with a valid actionClient and alertClient by alertId', async () => {
-      const response = await server.inject(getDeleteRequest(), context);
+      const response = await server.inject(
+        getDeleteRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(200);
     });
 
     test('returns 200 when deleting a single rule with a valid actionClient and alertClient by id', async () => {
       clients.rulesClient.resolve.mockResolvedValue(resolveRuleMock(getQueryRuleParams()));
-      const response = await server.inject(getDeleteRequestById(), context);
+      const response = await server.inject(
+        getDeleteRequestById(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(200);
     });
 
     test('returns 404 when deleting a single rule that does not exist with a valid actionClient and alertClient', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
-      const response = await server.inject(getDeleteRequest(), context);
+      const response = await server.inject(
+        getDeleteRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({
@@ -61,7 +70,10 @@ describe('delete_rules', () => {
       clients.rulesClient.delete.mockImplementation(async () => {
         throw new Error('Test error');
       });
-      const response = await server.inject(getDeleteRequest(), context);
+      const response = await server.inject(
+        getDeleteRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',
@@ -77,7 +89,7 @@ describe('delete_rules', () => {
         path: DETECTION_ENGINE_RULES_URL,
         query: {},
       });
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
       expect(response.status).toEqual(400);
       expect(response.body).toEqual({
         message: ['either "id" or "rule_id" must be set'],

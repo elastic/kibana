@@ -56,7 +56,7 @@ describe('import_rules_route', () => {
 
   describe('status codes', () => {
     test('returns 200 when importing a single rule with a valid actionClient and alertClient', async () => {
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);
     });
@@ -64,7 +64,10 @@ describe('import_rules_route', () => {
     test('returns 500 if more than 10,000 rules are imported', async () => {
       const ruleIds = new Array(10001).fill(undefined).map((__, index) => `rule-${index}`);
       const multiRequest = getImportRulesRequest(buildHapiStream(ruleIdsToNdJsonString(ruleIds)));
-      const response = await server.inject(multiRequest, context);
+      const response = await server.inject(
+        multiRequest,
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
@@ -82,7 +85,7 @@ describe('import_rules_route', () => {
           .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
       });
 
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
         errors: [
@@ -108,7 +111,7 @@ describe('import_rules_route', () => {
         .mockImplementation(() => {
           throw new Error('Test error');
         });
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({ message: 'Test error', status_code: 500 });
 
@@ -118,7 +121,7 @@ describe('import_rules_route', () => {
     test('returns 400 if file extension type is not .ndjson', async () => {
       const requestPayload = buildHapiStream(ruleIdsToNdJsonString(['rule-1']), 'wrong.html');
       const badRequest = getImportRulesRequest(requestPayload);
-      const response = await server.inject(badRequest, context);
+      const response = await server.inject(badRequest, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(400);
       expect(response.body).toEqual({ message: 'Invalid file extension .html', status_code: 400 });
@@ -128,7 +131,7 @@ describe('import_rules_route', () => {
   describe('single rule import', () => {
     test('returns 200 if rule imported successfully', async () => {
       clients.rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams()));
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
         errors: [],
@@ -143,7 +146,7 @@ describe('import_rules_route', () => {
     test('returns reported conflict if error parsing rule', async () => {
       const requestPayload = buildHapiStream('this is not a valid ndjson string!');
       const badRequest = getImportRulesRequest(requestPayload);
-      const response = await server.inject(badRequest, context);
+      const response = await server.inject(badRequest, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
@@ -167,7 +170,7 @@ describe('import_rules_route', () => {
     describe('rule with existing rule_id', () => {
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
         clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // extant rule
-        const response = await server.inject(request, context);
+        const response = await server.inject(request, requestContextMock.convertContext(context));
 
         expect(response.status).toEqual(200);
         expect(response.body).toEqual({
@@ -193,7 +196,10 @@ describe('import_rules_route', () => {
         const overwriteRequest = getImportRulesRequestOverwriteTrue(
           buildHapiStream(ruleIdsToNdJsonString(['rule-1']))
         );
-        const response = await server.inject(overwriteRequest, context);
+        const response = await server.inject(
+          overwriteRequest,
+          requestContextMock.convertContext(context)
+        );
 
         expect(response.status).toEqual(200);
         expect(response.body).toEqual({
@@ -213,7 +219,10 @@ describe('import_rules_route', () => {
       const multiRequest = getImportRulesRequest(
         buildHapiStream(ruleIdsToNdJsonString(['rule-1', 'rule-2']))
       );
-      const response = await server.inject(multiRequest, context);
+      const response = await server.inject(
+        multiRequest,
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
@@ -229,7 +238,10 @@ describe('import_rules_route', () => {
     test('returns 200 if many rules are imported successfully', async () => {
       const ruleIds = new Array(9999).fill(undefined).map((__, index) => `rule-${index}`);
       const multiRequest = getImportRulesRequest(buildHapiStream(ruleIdsToNdJsonString(ruleIds)));
-      const response = await server.inject(multiRequest, context);
+      const response = await server.inject(
+        multiRequest,
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
@@ -253,7 +265,7 @@ describe('import_rules_route', () => {
       const badPayload = buildHapiStream(rulesToNdJsonString(rulesWithoutRuleIds));
       const badRequest = getImportRulesRequest(badPayload);
 
-      const response = await server.inject(badRequest, context);
+      const response = await server.inject(badRequest, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
@@ -286,7 +298,10 @@ describe('import_rules_route', () => {
         const multiRequest = getImportRulesRequest(
           buildHapiStream(ruleIdsToNdJsonString(['rule-1', 'rule-1']))
         );
-        const response = await server.inject(multiRequest, context);
+        const response = await server.inject(
+          multiRequest,
+          requestContextMock.convertContext(context)
+        );
 
         expect(response.status).toEqual(200);
         expect(response.body).toEqual({
@@ -312,7 +327,10 @@ describe('import_rules_route', () => {
           buildHapiStream(ruleIdsToNdJsonString(['rule-1', 'rule-1']))
         );
 
-        const response = await server.inject(multiRequest, context);
+        const response = await server.inject(
+          multiRequest,
+          requestContextMock.convertContext(context)
+        );
         expect(response.status).toEqual(200);
         expect(response.body).toEqual({
           errors: [],
@@ -334,7 +352,10 @@ describe('import_rules_route', () => {
         const multiRequest = getImportRulesRequest(
           buildHapiStream(ruleIdsToNdJsonString(['rule-1', 'rule-2', 'rule-3']))
         );
-        const response = await server.inject(multiRequest, context);
+        const response = await server.inject(
+          multiRequest,
+          requestContextMock.convertContext(context)
+        );
         expect(response.status).toEqual(200);
         expect(response.body).toEqual({
           errors: [
@@ -358,7 +379,10 @@ describe('import_rules_route', () => {
         const multiRequest = getImportRulesRequestOverwriteTrue(
           buildHapiStream(ruleIdsToNdJsonString(['rule-1', 'rule-2', 'rule-3']))
         );
-        const response = await server.inject(multiRequest, context);
+        const response = await server.inject(
+          multiRequest,
+          requestContextMock.convertContext(context)
+        );
         expect(response.status).toEqual(200);
         expect(response.body).toEqual({
           errors: [],

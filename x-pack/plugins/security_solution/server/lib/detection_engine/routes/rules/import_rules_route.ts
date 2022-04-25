@@ -75,16 +75,25 @@ export const importRulesRoute = (
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const rulesClient = context.alerting.getRulesClient();
-        const actionsClient = context.actions.getActionsClient();
-        const actionSOClient = context.core.savedObjects.getClient({
+        const ctx = await context.resolve([
+          'core',
+          'securitySolution',
+          'alerting',
+          'actions',
+          'lists',
+          'licensing',
+        ]);
+
+        const rulesClient = ctx.alerting.getRulesClient();
+        const actionsClient = ctx.actions.getActionsClient();
+        const actionSOClient = ctx.core.savedObjects.getClient({
           includedHiddenTypes: ['action'],
         });
-        const savedObjectsClient = context.core.savedObjects.client;
-        const exceptionsClient = context.lists?.getExceptionListClient();
+        const savedObjectsClient = ctx.core.savedObjects.client;
+        const exceptionsClient = ctx.lists?.getExceptionListClient();
 
         const mlAuthz = buildMlAuthz({
-          license: context.licensing.license,
+          license: ctx.licensing.license,
           ml,
           request,
           savedObjectsClient,
@@ -160,7 +169,7 @@ export const importRulesRoute = (
           rulesClient,
           savedObjectsClient,
           exceptionsClient,
-          spaceId: context.securitySolution.getSpaceId(),
+          spaceId: ctx.securitySolution.getSpaceId(),
           existingLists: foundReferencedExceptionLists,
         });
 
