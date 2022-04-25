@@ -45,7 +45,7 @@ import { useKibana } from '../../utils/kibana_react';
 function PageTitle(rule: Rule) {
   return (
     <>
-      {/* TODO:Add return back to rule navigation button */}
+      {/* TODO: Add return back to rule navigation button */}
       {rule.name} <ExperimentalBadge />
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem component="span" grow={false}>
@@ -233,13 +233,12 @@ export function RuleDetailsPage() {
                   closePopover={() => setIsRuleEditPopoverOpen(false)}
                   button={
                     <EuiFlexItem grow={false}>
-                      <EuiButton
+                      <EuiButtonIcon
+                        display="base"
                         size="m"
-                        data-test-subj="openEditRuleFlyoutButton"
-                        iconType="menu"
+                        iconType="boxesHorizontal"
+                        aria-label="More"
                         onClick={() => setIsRuleEditPopoverOpen(true)}
-                        name="edit"
-                        color="primary"
                       />
                     </EuiFlexItem>
                   }
