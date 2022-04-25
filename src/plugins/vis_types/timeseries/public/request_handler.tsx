@@ -86,7 +86,7 @@ export const metricsRequestHandler = async ({
         if (error) {
           const coreStart = getCoreStart();
           coreStart.notifications.toasts.addDanger({
-            title: i18n.translate('visTypeTimeseries.requestHandler.visDaraErrorMessage', {
+            title: i18n.translate('visTypeTimeseries.requestHandler.visDataErrorMessage', {
               defaultMessage: 'Cannot retrieve search results',
             }),
             text: toMountPoint(
