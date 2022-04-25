@@ -18,7 +18,8 @@
     "share",
     "taskManager",
     "triggersActionsUi",
-    "usageCollection"
+    "usageCollection",
+    "unifiedSearch"
   ],
   "server": true,
   "ui": true,
