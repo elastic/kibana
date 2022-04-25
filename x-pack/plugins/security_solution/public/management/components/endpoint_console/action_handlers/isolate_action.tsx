@@ -53,7 +53,7 @@ export const handleIsolateAction = async (
 
     isPending = !(await fetchActionDetails(isolateActionId)).data.isCompleted;
 
-    if (!isPending && !isTimedOut) {
+    if (isPending && !isTimedOut) {
       await sleep();
     }
   }

@@ -7,18 +7,14 @@
 
 import { RequestHandler } from '@kbn/core/server';
 import { TypeOf } from '@kbn/config-schema';
-import { errorHandler } from '../error_handler';
-import {
-  ActionDetailsRequestSchema,
-  ActionStatusRequestSchema,
-} from '../../../../common/endpoint/schema/actions';
-import { ACTION_DETAILS_ROUTE, ACTION_STATUS_ROUTE } from '../../../../common/endpoint/constants';
+import { ActionStatusRequestSchema } from '../../../../common/endpoint/schema/actions';
+import { ACTION_STATUS_ROUTE } from '../../../../common/endpoint/constants';
 import {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
 import { EndpointAppContext } from '../../types';
-import { getActionDetailsById, getPendingActionCounts } from '../../services';
+import { getPendingActionCounts } from '../../services';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 
 /**
@@ -41,47 +37,7 @@ export function registerActionStatusRoutes(
       actionStatusRequestHandler(endpointContext)
     )
   );
-
-  // Details for a given action id
-  router.get(
-    {
-      path: ACTION_DETAILS_ROUTE,
-      validate: ActionDetailsRequestSchema,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canAccessEndpointManagement'] },
-      endpointContext.logFactory.get('hostIsolationDetails'),
-      getActionDetailsRequestHandler(endpointContext)
-    )
-  );
 }
-
-export const getActionDetailsRequestHandler = (
-  endpointContext: EndpointAppContext
-): RequestHandler<
-  TypeOf<typeof ActionDetailsRequestSchema.params>,
-  never,
-  never,
-  SecuritySolutionRequestHandlerContext
-> => {
-  return async (context, req, res) => {
-    try {
-      return res.ok({
-        body: {
-          data: await getActionDetailsById(
-            (
-              await context.core
-            ).elasticsearch.client.asInternalUser,
-            req.params.action_id
-          ),
-        },
-      });
-    } catch (error) {
-      return errorHandler(endpointContext.logFactory.get('EndpointActionDetails'), res, error);
-    }
-  };
-};
 
 export const actionStatusRequestHandler = function (
   endpointContext: EndpointAppContext
