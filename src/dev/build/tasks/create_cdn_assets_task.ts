@@ -29,7 +29,6 @@ export const CreateCdnAssets: Task = {
     const plugins = globby.sync([
       `${buildSource}/x-pack/plugins/*/kibana.json`,
       `${buildSource}/src/plugins/*/kibana.json`,
-      '!node_modules',
     ]);
     asyncForEach(plugins, async (path) => {
       const spec = JSON.parse(readFileSync(path, 'utf8'));
@@ -41,7 +40,7 @@ export const CreateCdnAssets: Task = {
     });
     await compressTar({
       source: assets,
-      destination: config.resolveFromTarget(`kibana-${buildVersion}}-cdn-assets.tar.gz`),
+      destination: config.resolveFromTarget(`kibana-${buildVersion}F*}-cdn-assets.tar.gz`),
       archiverOptions: {
         gzip: true,
         gzipOptions: {
