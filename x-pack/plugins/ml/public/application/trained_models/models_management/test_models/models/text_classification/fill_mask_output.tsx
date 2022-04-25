@@ -6,21 +6,28 @@
  */
 
 import React, { FC } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiProgress, EuiTitle } from '@elastic/eui';
 
-import type { FormattedTextClassificationResponse } from './common';
+import type { FillMaskInference } from '.';
 
 const MASK = '[MASK]';
 
-export const getFillMaskOutputComponent =
-  (inputText: string) => (output: FormattedTextClassificationResponse) =>
-    <FillMaskOutput result={output} inputText={inputText} />;
+export const getFillMaskOutputComponent = (inferrer: FillMaskInference) => (inputText: string) =>
+  <FillMaskOutput inputText={inputText} inferrer={inferrer} />;
 
 const FillMaskOutput: FC<{
-  result: FormattedTextClassificationResponse;
   inputText: string;
-}> = ({ result, inputText }) => {
-  const title = result[0]?.value ? inputText.replace(MASK, result[0].value) : inputText;
+  inferrer: FillMaskInference;
+}> = ({ inferrer, inputText }) => {
+  const result = useObservable(inferrer.inferenceResult$);
+  if (!result) {
+    return null;
+  }
+
+  const title = result.response[0]?.value
+    ? inputText.replace(MASK, result.response[0].value)
+    : inputText;
   return (
     <>
       <EuiTitle size="xs">
@@ -29,7 +36,7 @@ const FillMaskOutput: FC<{
 
       <EuiSpacer />
 
-      {result.map(({ value, predictionProbability }) => (
+      {result.response.map(({ value, predictionProbability }) => (
         <>
           <EuiProgress value={predictionProbability * 100} max={100} size="m" />
           <EuiSpacer size="s" />

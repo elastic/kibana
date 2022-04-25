@@ -5,18 +5,26 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useEffect, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 
 import { EuiSpacer, EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 import { TextInput } from '../text_input';
+import { ZeroShotClassificationInference } from './zero_shot_classification_inference';
 
 const ClassNameInput: FC<{
-  disabled: boolean;
-  inputText: string;
-  setInputText(input: string): void;
-}> = ({ disabled, inputText, setInputText }) => {
+  setExternalInputText: (inputText: string) => void;
+  inferrer: ZeroShotClassificationInference;
+}> = ({ setExternalInputText, inferrer }) => {
+  const [inputText, setInputText] = useState('');
+
+  useEffect(() => {
+    setExternalInputText(inputText);
+  }, [inputText]);
+
+  const isRunning = useObservable(inferrer.isRunning$);
   return (
     <EuiFormRow
       label={i18n.translate(
@@ -28,7 +36,7 @@ const ClassNameInput: FC<{
     >
       <EuiFieldText
         value={inputText}
-        disabled={disabled === true}
+        disabled={isRunning === true}
         fullWidth
         onChange={(e) => {
           setInputText(e.target.value);
@@ -38,18 +46,26 @@ const ClassNameInput: FC<{
   );
 };
 
-export const ZeroShotClassificationInput: FC<{
-  disabled: boolean;
-  inputText: string;
-  inputText2: string;
-  setInputText(input: string): void;
-  setInputText2(input: string): void;
-}> = ({ disabled, inputText, setInputText, inputText2, setInputText2 }) => {
-  return (
-    <>
-      <TextInput disabled={disabled} inputText={inputText} setInputText={setInputText} />
-      <EuiSpacer />
-      <ClassNameInput disabled={disabled} inputText={inputText2} setInputText={setInputText2} />
-    </>
-  );
-};
+export const getZeroShotClassificationInput =
+  (inferrer: ZeroShotClassificationInference, placeholder?: string) => () => {
+    let inputText = '';
+    let inputText2 = '';
+
+    return {
+      inputComponent: (
+        <>
+          <TextInput
+            placeholder={placeholder}
+            setExternalInputText={(txt: string) => (inputText = txt)}
+            inferrer={inferrer}
+          />
+          <EuiSpacer />
+          <ClassNameInput
+            setExternalInputText={(txt: string) => (inputText2 = txt)}
+            inferrer={inferrer}
+          />
+        </>
+      ),
+      infer: () => inferrer.infer(inputText, inputText2),
+    };
+  };

@@ -17,14 +17,20 @@ export type FormattedNerResponse = Array<{
 interface InferResponse {
   response: FormattedNerResponse;
   rawResponse: estypes.MlInferTrainedModelDeploymentResponse;
+  inputText: string;
 }
 
 export class NerInference extends InferenceBase<InferResponse> {
   public async infer(inputText: string) {
+    this.isRunning$.next(true);
     const payload = { docs: { [this.inputField]: inputText } };
     const resp = await this.trainedModelsApi.inferTrainedModel(this.model.model_id, payload, '30s');
 
-    return { response: parseResponse(resp), rawResponse: resp };
+    const processedResponse = { response: parseResponse(resp), rawResponse: resp, inputText };
+    this.inferenceResult$.next(processedResponse);
+    this.isRunning$.next(false);
+
+    return processedResponse;
   }
 }
 

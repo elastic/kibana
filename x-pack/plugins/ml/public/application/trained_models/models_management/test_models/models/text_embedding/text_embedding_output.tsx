@@ -6,17 +6,24 @@
  */
 
 import React, { FC } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTextArea, EuiCopy, EuiButton } from '@elastic/eui';
 
-import type { FormattedTextEmbeddingResponse } from './text_embedding_inference';
+import type { TextEmbeddingInference } from './text_embedding_inference';
 
-export const getTextEmbeddingOutputComponent = (output: FormattedTextEmbeddingResponse) => (
-  <TextEmbeddingOutput result={output} />
-);
+export const getTextEmbeddingOutputComponent = (inferrer: TextEmbeddingInference) => () =>
+  <TextEmbeddingOutput inferrer={inferrer} />;
 
-const TextEmbeddingOutput: FC<{ result: FormattedTextEmbeddingResponse }> = ({ result }) => {
-  const value = result.predictedValue.toString();
+const TextEmbeddingOutput: FC<{
+  inferrer: TextEmbeddingInference;
+}> = ({ inferrer }) => {
+  const result = useObservable(inferrer.inferenceResult$);
+  if (!result) {
+    return null;
+  }
+
+  const value = result.response.predictedValue.toString();
   return (
     <>
       <EuiTextArea value={value} fullWidth style={{ height: 300 }} />

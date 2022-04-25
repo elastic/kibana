@@ -6,7 +6,7 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import React, { FC, useState } from 'react';
+import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { getNerOutputComponent, NerInference } from './models/ner';
@@ -17,14 +17,14 @@ import {
   getTextClassificationOutputComponent,
   TextClassificationInference,
   ZeroShotClassificationInference,
-  ZeroShotClassificationInput,
   FillMaskInference,
   getFillMaskOutputComponent,
+  getZeroShotClassificationInput,
 } from './models/text_classification';
 
 import { getTextEmbeddingOutputComponent, TextEmbeddingInference } from './models/text_embedding';
 
-import { TextInput } from './models/text_input';
+import { getGeneralInputComponent } from './models/text_input';
 
 import {
   TRAINED_MODEL_TYPE,
@@ -39,48 +39,38 @@ interface Props {
 
 export const SelectedModel: FC<Props> = ({ model }) => {
   const { trainedModels } = useMlApiContext();
-  const [inputText, setInputText] = useState('');
-  const [inputText2, setInputText2] = useState('');
-  const [isRunning, setIsRunning] = useState(false);
+  // const [inputText, setInputText] = useState('');
+  // const [inputText2, setInputText2] = useState('');
+  // const [isRunning, setIsRunning] = useState(false);
 
   if (model === null) {
     return null;
   }
 
-  const getComp = (infer: any, getOutputComponent: any, getInputComponent: any) => {
-    return (
-      <InferenceInputForm
-        getOutputComponent={getOutputComponent}
-        getInputComponent={getInputComponent}
-        inputText={inputText}
-        infer={infer}
-        isRunning={isRunning}
-        setIsRunning={setIsRunning}
-      />
-    );
-  };
-
-  const getGeneralInputComponent = (placeholder?: string) => (
-    <TextInput
-      disabled={isRunning}
-      inputText={inputText}
-      setInputText={setInputText}
-      placeholder={placeholder}
-    />
-  );
+  // const getComp = (getOutputComponent: any, getInputComponent: any) => {
+  //   return (
+  //     <InferenceInputForm
+  //       getOutputComponent={getOutputComponent}
+  //       getInputComponent={getInputComponent}
+  //       // infer={infer}
+  //       // isRunning={isRunning}
+  //       // setIsRunning={setIsRunning}
+  //     />
+  //   );
+  // };
 
   if (model.model_type === TRAINED_MODEL_TYPE.PYTORCH) {
     if (Object.keys(model.inference_config)[0] === SUPPORTED_PYTORCH_TASKS.NER) {
       const inferrer = new NerInference(trainedModels, model);
-
+      // eslint-disable-next-line no-console
+      console.log(222222);
+      // return <>{getComp(() => getNerOutputComponent, getGeneralInputComponent(inferrer))}</>;
       return (
-        <>
-          {getComp(
-            () => inferrer.infer(inputText),
-            getNerOutputComponent,
-            getGeneralInputComponent
-          )}
-        </>
+        <InferenceInputForm
+          inferrer={inferrer}
+          getOutputComponent={getNerOutputComponent(inferrer)}
+          getInputComponent={getGeneralInputComponent(inferrer)}
+        />
       );
     }
 
@@ -88,13 +78,11 @@ export const SelectedModel: FC<Props> = ({ model }) => {
       const inferrer = new TextClassificationInference(trainedModels, model);
 
       return (
-        <>
-          {getComp(
-            () => inferrer.infer(inputText),
-            getTextClassificationOutputComponent,
-            getGeneralInputComponent
-          )}
-        </>
+        <InferenceInputForm
+          inferrer={inferrer}
+          getOutputComponent={getTextClassificationOutputComponent(inferrer)}
+          getInputComponent={getGeneralInputComponent(inferrer)}
+        />
       );
     }
 
@@ -103,24 +91,12 @@ export const SelectedModel: FC<Props> = ({ model }) => {
     ) {
       const inferrer = new ZeroShotClassificationInference(trainedModels, model);
 
-      const getZeroShotInputComponent = () => (
-        <ZeroShotClassificationInput
-          disabled={isRunning}
-          inputText={inputText}
-          inputText2={inputText2}
-          setInputText={setInputText}
-          setInputText2={setInputText2}
-        />
-      );
-
       return (
-        <>
-          {getComp(
-            () => inferrer.infer(inputText, inputText2),
-            getTextClassificationOutputComponent,
-            getZeroShotInputComponent
-          )}
-        </>
+        <InferenceInputForm
+          inferrer={inferrer}
+          getOutputComponent={getTextClassificationOutputComponent(inferrer)}
+          getInputComponent={getZeroShotClassificationInput(inferrer)}
+        />
       );
     }
 
@@ -128,13 +104,11 @@ export const SelectedModel: FC<Props> = ({ model }) => {
       const inferrer = new TextEmbeddingInference(trainedModels, model);
 
       return (
-        <>
-          {getComp(
-            () => inferrer.infer(inputText),
-            getTextEmbeddingOutputComponent,
-            getGeneralInputComponent
-          )}
-        </>
+        <InferenceInputForm
+          inferrer={inferrer}
+          getOutputComponent={getTextEmbeddingOutputComponent(inferrer)}
+          getInputComponent={getGeneralInputComponent(inferrer)}
+        />
       );
     }
 
@@ -149,13 +123,11 @@ export const SelectedModel: FC<Props> = ({ model }) => {
       );
 
       return (
-        <>
-          {getComp(
-            () => inferrer.infer(inputText),
-            getFillMaskOutputComponent(inputText),
-            () => getGeneralInputComponent(placeholder)
-          )}
-        </>
+        <InferenceInputForm
+          inferrer={inferrer}
+          getOutputComponent={getFillMaskOutputComponent(inferrer)}
+          getInputComponent={getGeneralInputComponent(inferrer, placeholder)}
+        />
       );
     }
   }
@@ -163,13 +135,11 @@ export const SelectedModel: FC<Props> = ({ model }) => {
     const inferrer = new LangIdentInference(trainedModels, model);
 
     return (
-      <>
-        {getComp(
-          () => inferrer.infer(inputText),
-          getLangIdentOutputComponent,
-          getGeneralInputComponent
-        )}
-      </>
+      <InferenceInputForm
+        inferrer={inferrer}
+        getOutputComponent={getLangIdentOutputComponent(inferrer)}
+        getInputComponent={getGeneralInputComponent(inferrer)}
+      />
     );
   }
 

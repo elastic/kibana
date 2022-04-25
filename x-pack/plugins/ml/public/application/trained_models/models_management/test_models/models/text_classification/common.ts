@@ -24,13 +24,15 @@ export type FormattedTextClassificationResponse = Array<{
 }>;
 
 export interface InferResponse {
+  inputText: string;
   response: FormattedTextClassificationResponse;
   rawResponse: TextClassificationResponse;
 }
 
 export function processResponse(
   resp: TextClassificationResponse,
-  model: estypes.MlTrainedModelConfig
+  model: estypes.MlTrainedModelConfig,
+  inputText: string
 ): InferResponse {
   const labels: string[] =
     // @ts-expect-error inference config is wrong
@@ -77,5 +79,6 @@ export function processResponse(
       .sort((a, b) => a.predictionProbability - b.predictionProbability)
       .reverse(),
     rawResponse: resp,
+    inputText,
   };
 }

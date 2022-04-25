@@ -16,12 +16,14 @@ export type FormattedLangIdentResponse = Array<{
 }>;
 
 interface InferResponse {
+  inputText: string;
   response: FormattedLangIdentResponse;
   rawResponse: estypes.IngestSimulateResponse;
 }
 
 export class LangIdentInference extends InferenceBase<InferResponse> {
   public async infer(inputText: string) {
+    this.isRunning$.next(true);
     const payload: estypes.IngestSimulateRequest['body'] = {
       pipeline: {
         processors: [
@@ -54,15 +56,21 @@ export class LangIdentInference extends InferenceBase<InferResponse> {
     if (resp.docs.length) {
       const topClasses = resp.docs[0].doc?._source._ml?.lang_ident?.top_classes ?? [];
 
-      return {
+      const r = {
         response: topClasses.map((t: any) => ({
           className: t.class_name,
           classProbability: t.class_probability,
           classScore: t.class_score,
         })),
         rawResponse: resp,
+        inputText,
       };
+      this.inferenceResult$.next(r);
+      return r;
     }
-    return { response: [], rawResponse: resp };
+    this.isRunning$.next(false);
+    const r = { response: [], rawResponse: resp, inputText };
+    this.inferenceResult$.next(r);
+    return r;
   }
 }

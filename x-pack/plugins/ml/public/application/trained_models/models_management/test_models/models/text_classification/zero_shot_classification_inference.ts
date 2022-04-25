@@ -11,6 +11,7 @@ import type { InferResponse, TextClassificationResponse } from './common';
 
 export class ZeroShotClassificationInference extends InferenceBase<InferResponse> {
   public async infer(inputText: string, labelsText?: string) {
+    this.isRunning$.next(true);
     const inputLabels = labelsText?.split(',').map((l) => l.trim());
     const payload = {
       docs: { [this.inputField]: inputText },
@@ -27,6 +28,10 @@ export class ZeroShotClassificationInference extends InferenceBase<InferResponse
       '30s'
     )) as unknown as TextClassificationResponse;
 
-    return processResponse(resp, this.model);
+    const processedResponse = processResponse(resp, this.model, inputText);
+    this.inferenceResult$.next(processedResponse);
+    this.isRunning$.next(false);
+
+    return processedResponse;
   }
 }

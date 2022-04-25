@@ -18,15 +18,17 @@ export interface FormattedTextEmbeddingResponse {
 }
 
 export interface InferResponse {
+  inputText: string;
   response: FormattedTextEmbeddingResponse;
   rawResponse: TextEmbeddingResponse;
 }
 
 export class TextEmbeddingInference extends InferenceBase<InferResponse> {
   public async infer(inputText: string) {
+    this.isRunning$.next(true);
     const payload = {
       docs: { [this.inputField]: inputText },
-      inference_config: { fill_mask: { num_top_classes: 5 } },
+      // inference_config: { text_embedding: { num_top_classes: 5 } },
     };
     const resp = (await this.trainedModelsApi.inferTrainedModel(
       this.model.model_id,
@@ -34,11 +36,19 @@ export class TextEmbeddingInference extends InferenceBase<InferResponse> {
       '30s'
     )) as unknown as TextEmbeddingResponse;
 
-    return processResponse(resp, this.model);
+    const processedResponse = processResponse(resp, this.model, inputText);
+    this.inferenceResult$.next(processedResponse);
+    this.isRunning$.next(false);
+
+    return processedResponse;
   }
 }
 
-function processResponse(resp: TextEmbeddingResponse, model: estypes.MlTrainedModelConfig) {
+function processResponse(
+  resp: TextEmbeddingResponse,
+  model: estypes.MlTrainedModelConfig,
+  inputText: string
+) {
   const predictedValue = resp.predicted_value;
-  return { response: { predictedValue }, rawResponse: resp };
+  return { response: { predictedValue }, rawResponse: resp, inputText };
 }

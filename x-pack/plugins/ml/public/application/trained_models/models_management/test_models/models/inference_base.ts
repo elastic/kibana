@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
@@ -18,6 +19,8 @@ export type FormattedNerResponse = Array<{
 
 export abstract class InferenceBase<TInferResponse> {
   protected readonly inputField: string;
+  public inferenceResult$ = new BehaviorSubject<TInferResponse | null>(null);
+  public isRunning$ = new BehaviorSubject<boolean>(false);
 
   constructor(
     protected trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
