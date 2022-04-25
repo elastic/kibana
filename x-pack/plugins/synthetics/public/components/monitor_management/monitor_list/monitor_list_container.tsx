@@ -9,8 +9,6 @@ import React, { useCallback, Dispatch } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
-import { ConfigKey } from '../../../../common/runtime_types';
-import { getMonitors } from '../../../state/actions';
 import { monitorManagementListSelector } from '../../../state/selectors';
 import { MonitorAsyncError } from './monitor_async_error';
 import { useInlineErrors } from '../hooks/use_inline_errors';
