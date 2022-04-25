@@ -12,13 +12,20 @@ import {
   CoreStart,
   Plugin,
   PluginInitializerContext,
-} from 'kibana/public';
+} from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import { AppNavLinkStatus } from '@kbn/core/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
+import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
+import { setServices } from './application/kibana_services';
+import { ConfigSchema } from '../config';
 import {
   EnvironmentService,
   EnvironmentServiceSetup,
-  FeatureCatalogueCategory,
   FeatureCatalogueRegistry,
   FeatureCatalogueRegistrySetup,
   TutorialService,
@@ -28,14 +35,6 @@ import {
   WelcomeService,
   WelcomeServiceSetup,
 } from './services';
-import { ConfigSchema } from '../config';
-import { setServices } from './application/kibana_services';
-import { DataViewsPublicPluginStart } from '../../data_views/public';
-import { UsageCollectionSetup } from '../../usage_collection/public';
-import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
-import { AppNavLinkStatus } from '../../../core/public';
-import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
-import { SharePluginSetup } from '../../share/public';
 
 export interface HomePluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
@@ -124,7 +123,7 @@ export class HomePublicPlugin
       icon: 'indexOpen',
       showOnHomePage: true,
       path: `${HOME_APP_BASE_PATH}#/tutorial_directory`,
-      category: 'data' as FeatureCatalogueCategory.DATA,
+      category: 'data',
       order: 500,
     });
 

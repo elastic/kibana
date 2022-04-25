@@ -7,7 +7,7 @@
 
 import { chunk, get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from 'src/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import {
   transformError,
   getBootstrapIndexExists,
@@ -47,11 +47,12 @@ export const createIndexRoute = (router: SecuritySolutionPluginRouter) => {
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const siemClient = context.securitySolution?.getAppClient();
+        const securitySolution = await context.securitySolution;
+        const siemClient = securitySolution?.getAppClient();
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
         }
-        await createDetectionIndex(context.securitySolution);
+        await createDetectionIndex(securitySolution);
         return response.ok({ body: { acknowledged: true } });
       } catch (err) {
         const error = transformError(err);

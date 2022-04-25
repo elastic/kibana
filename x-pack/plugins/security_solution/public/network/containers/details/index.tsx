@@ -10,6 +10,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { inputsModel } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
@@ -20,7 +21,6 @@ import {
   NetworkDetailsRequestOptions,
   NetworkDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
-import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';

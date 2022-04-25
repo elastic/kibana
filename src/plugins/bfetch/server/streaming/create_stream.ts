@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Logger } from 'kibana/server';
+import { Logger } from '@kbn/core/server';
 import { Stream } from 'stream';
 import { Observable } from 'rxjs';
 import { createCompressedStream } from './create_compressed_stream';

@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { isEqual } from 'lodash';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   InfraWaffleMapBounds,
   InfraWaffleMapGroupOfNodes,

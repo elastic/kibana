@@ -4,46 +4,40 @@
 <titleabbrev>Get tags</titleabbrev>
 ++++
 
-Aggregates and returns all unique tags from all cases.
+Aggregates and returns a list of case tags.
 
-=== Request
+=== {api-request-title}
 
 `GET <kibana host>:<port>/api/cases/tags`
 
 `GET <kibana host>:<port>/s/<space_id>/api/cases/tags`
 
-=== Prerequisite
+=== {api-prereq-title}
 
 You must have `read` privileges for the *Cases* feature in the *Management*,
 *{observability}*, or *Security* section of the
 <<kibana-feature-privileges,{kib} feature privileges>>, depending on the
 `owner` of the cases you're seeking.
 
-=== Path parameters
-
-`<case_id>`::
-(Required, string) An identifier for the case to retrieve. Use 
-<<cases-api-find-cases>> to retrieve case IDs.
+=== {api-path-parms-title}
 
 `<space_id>`::
 (Optional, string) An identifier for the space. If it is not specified, the
 default space is used.
 
-=== Query parameters
+=== {api-query-parms-title}
 
 `owner`::
-(Optional, string or array of strings) Specifies the set of applications to 
-limit the retrieved tags. If not specified, the response contains all tags from 
-cases that the user has access to read.
+(Optional, string or array of strings) A filter to limit the retrieved tags to a specific set of applications.
+Valid values are: `cases`, `observability`, and `securitySolution`. If this parameter is omitted, the response
+contains tags from all cases that the user has access to read.
 
-==== Response code
+=== {api-response-codes-title}
 
 `200`::
    Indicates a successful call.
 
-==== Example
-
-Gets all tags for all cases:
+=== {api-examples-title}
 
 [source,sh]
 --------------------------------------------------
@@ -51,8 +45,7 @@ GET api/cases/tags
 --------------------------------------------------
 // KIBANA
 
-The API returns a JSON object with the names and email addresses of users who 
-opened cases. For example: 
+The API returns a JSON object with tags from all the cases that the user has access to read. For example: 
 
 [source,json]
 --------------------------------------------------

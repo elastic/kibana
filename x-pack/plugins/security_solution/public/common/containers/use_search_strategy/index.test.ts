@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useSearchStrategy } from './index';
+import { useSearchStrategy } from '.';
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import { useObservable } from '@kbn/securitysolution-hook-utils';

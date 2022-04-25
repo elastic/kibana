@@ -8,18 +8,18 @@
 
 import _ from 'lodash';
 import React, { useEffect, useRef } from 'react';
-import { CoreStart } from '../../../../core/public';
-import { IStorageWrapper } from '../../../kibana_utils/public';
-import { KibanaContextProvider } from '../../../kibana_react/public';
-import { QueryStart, SavedQuery, DataPublicPluginStart } from '../../../data/public';
-import { Filter, Query, TimeRange } from '../../../data/common';
+import { CoreStart } from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryStart, SavedQuery, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { Filter, Query, TimeRange } from '@kbn/data-plugin/common';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { SearchBar } from '.';
 import type { SearchBarOwnProps } from '.';
 import { useFilterManager } from './lib/use_filter_manager';
 import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
 import { useQueryStringManager } from './lib/use_query_string_manager';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;

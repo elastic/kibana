@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from 'src/core/server';
+import { SavedObjectReference } from '@kbn/core/server';
 import {
   InfraSavedSourceConfiguration,
   InfraSourceConfiguration,

@@ -10,10 +10,11 @@ import { getOr, isEmpty, noop } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
+import { isErrorResponse, isCompleteResponse } from '@kbn/data-plugin/common';
 import { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
-import { inputsModel } from '../../../common/store';
-import { createFilter } from '../../../common/containers/helpers';
-import { useKibana } from '../../../common/lib/kibana';
+import { inputsModel } from '../../store';
+import { createFilter } from '../helpers';
+import { useKibana } from '../../lib/kibana';
 import {
   MatrixHistogramQuery,
   MatrixHistogramRequestOptions,
@@ -21,7 +22,6 @@ import {
   MatrixHistogramData,
   MatrixHistogramTypeToAggName,
 } from '../../../../common/search_strategy/security_solution';
-import { isErrorResponse, isCompleteResponse } from '../../../../../../../src/plugins/data/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';

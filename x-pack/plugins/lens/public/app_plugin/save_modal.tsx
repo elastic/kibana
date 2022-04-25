@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 
 import {
   TagEnhancedSavedObjectSaveModalOrigin,

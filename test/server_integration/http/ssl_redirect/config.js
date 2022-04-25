@@ -19,7 +19,7 @@ export default async function ({ readConfigFile }) {
   const redirectPort = httpConfig.get('servers.kibana.port') + 1234;
 
   return {
-    testFiles: [require.resolve('./')],
+    testFiles: [require.resolve('.')],
     services: {
       ...httpConfig.get('services'),
       supertest: createKibanaSupertestProvider({

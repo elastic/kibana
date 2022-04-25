@@ -123,6 +123,7 @@ export const CLUSTER_ALERTS_ADDRESS_CONFIG_KEY = 'cluster_alerts.email_notificat
 
 export const STANDALONE_CLUSTER_CLUSTER_UUID = '__standalone_cluster__';
 
+export const CCS_REMOTE_PATTERN = '*';
 export const INDEX_PATTERN = '.monitoring-*';
 export const INDEX_PATTERN_KIBANA = '.monitoring-kibana-*';
 export const INDEX_PATTERN_LOGSTASH = '.monitoring-logstash-*';

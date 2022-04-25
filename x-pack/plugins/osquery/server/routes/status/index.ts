@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from '../../../../../../src/core/server';
+import { IRouter } from '@kbn/core/server';
 import { createStatusRoute } from './create_status_route';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 

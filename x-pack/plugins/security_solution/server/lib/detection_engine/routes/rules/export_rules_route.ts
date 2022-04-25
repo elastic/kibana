@@ -6,7 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import {
   exportRulesQuerySchema,
   ExportRulesQuerySchemaDecoded,
@@ -45,9 +45,9 @@ export const exportRulesRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const rulesClient = context.alerting.getRulesClient();
-      const exceptionsClient = context.lists?.getExceptionListClient();
-      const savedObjectsClient = context.core.savedObjects.client;
+      const rulesClient = (await context.alerting).getRulesClient();
+      const exceptionsClient = (await context.lists)?.getExceptionListClient();
+      const savedObjectsClient = (await context.core).savedObjects.client;
 
       try {
         const exportSizeLimit = config.maxRuleImportExportSize;

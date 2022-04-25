@@ -9,7 +9,7 @@ import React from 'react';
 
 import { mountWithIntl } from '../../../test_helpers';
 
-import { FormattedDateTime } from './';
+import { FormattedDateTime } from '.';
 
 describe('FormattedDateTime', () => {
   it('renders a standard i18n-friendly combined date & time stamp', () => {

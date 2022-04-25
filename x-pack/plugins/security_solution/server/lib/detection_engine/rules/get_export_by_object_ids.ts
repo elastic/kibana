@@ -8,14 +8,14 @@
 import { chunk } from 'lodash';
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 
-import { Logger } from 'src/core/server';
-import { ExceptionListClient } from '../../../../../lists/server';
+import { Logger } from '@kbn/core/server';
+import { ExceptionListClient } from '@kbn/lists-plugin/server';
+import { RulesClient, RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
-import { RulesClient, RuleExecutorServices } from '../../../../../alerting/server';
 
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 
-import { isAlertType } from '../rules/types';
+import { isAlertType } from './types';
 import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
 import { findRules } from './find_rules';
 import { getRuleExceptionsForExport } from './get_export_rule_exceptions';

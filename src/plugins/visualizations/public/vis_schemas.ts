@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { SerializedFieldFormat } from '../../field_formats/common';
-import { IAggConfig, search } from '../../data/public';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { IAggConfig, search } from '@kbn/data-plugin/public';
 
 import { Vis, VisToExpressionAstParams } from './types';
 
