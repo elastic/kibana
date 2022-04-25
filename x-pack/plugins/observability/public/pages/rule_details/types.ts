@@ -61,3 +61,7 @@ export interface ItemValueRuleSummaryProps {
 export interface ActionsProps {
   actions: any[];
 }
+
+export const EVENT_LOG_LIST_TAB = 'rule_event_log_list';
+export const ALERT_LIST_TAB = 'rule_alert_list';
+export const EVENT_ERROR_LOG_TAB = 'rule_error_log_list';

@@ -21,11 +21,18 @@ import {
   EuiHealth,
   EuiPopover,
   EuiHorizontalRule,
+  EuiTabbedContent,
 } from '@elastic/eui';
 import { ActionGroup } from '../../../../alerting/common';
 import { AlertStatusValues } from '../../../../alerting/common';
 import { RuleType, AlertStatus } from '../../../../triggers_actions_ui/public';
-import { AlertListItem, RuleDetailsPathParams } from './types';
+import {
+  AlertListItem,
+  RuleDetailsPathParams,
+  EVENT_ERROR_LOG_TAB,
+  EVENT_LOG_LIST_TAB,
+  ALERT_LIST_TAB,
+} from './types';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
@@ -78,6 +85,32 @@ export function RuleDetailsPage() {
       text: rule && rule.name,
     },
   ]);
+  const tabs = [
+    {
+      id: EVENT_LOG_LIST_TAB,
+      name: i18n.translate('xpack.observability.ruleDetails.rule.eventLogTabText', {
+        defaultMessage: 'Execution history',
+      }),
+      'data-test-subj': 'eventLogListTab',
+      content: <EuiText>Execution history</EuiText>,
+    },
+    {
+      id: ALERT_LIST_TAB,
+      name: i18n.translate('xpack.observability.ruleDetails.rule.alertsTabText', {
+        defaultMessage: 'Alerts',
+      }),
+      'data-test-subj': 'ruleAlertListTab',
+      content: <EuiText>Alerts</EuiText>,
+    },
+    {
+      id: EVENT_ERROR_LOG_TAB,
+      name: i18n.translate('xpack.observability.ruleDetails.rule.errorLogTabText', {
+        defaultMessage: 'Error log',
+      }),
+      'data-test-subj': 'errorLogTab',
+      content: <EuiText>Error log</EuiText>,
+    },
+  ];
 
   if (!rule || errorRule) {
     return <EuiFlexItem>Error | No data</EuiFlexItem>;
@@ -291,12 +324,13 @@ export function RuleDetailsPage() {
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
-
       {editFlyoutVisible && <EditAlertFlyout />}
       {errorRule &&
         toasts.addDanger({
           title: errorRule,
         })}
+      <EuiSpacer size="l" />
+      <EuiTabbedContent data-test-subj="ruleDetailsTabbedContent" tabs={tabs} />
     </ObservabilityPageTemplate>
   );
 }
