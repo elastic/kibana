@@ -32,7 +32,7 @@ export const ALLOWED_HOSTS_ERROR = (message: string) =>
   });
 
 export const VALIDATE_OAUTH_MISSING_FIELD_ERROR = (field: string, isOAuth: boolean) =>
-  i18n.translate('xpack.actions.builtin.configuration.apiValidateConnectorError', {
+  i18n.translate('xpack.actions.builtin.configuration.apiValidateMissingOAuthFieldError', {
     defaultMessage: '{field} must be provided when isOAuth = {isOAuth}',
     values: {
       field,
@@ -41,7 +41,7 @@ export const VALIDATE_OAUTH_MISSING_FIELD_ERROR = (field: string, isOAuth: boole
   });
 
 export const VALIDATE_OAUTH_POPULATED_FIELD_ERROR = (field: string, isOAuth: boolean) =>
-  i18n.translate('xpack.actions.builtin.configuration.apiAllowedHostsError', {
+  i18n.translate('xpack.actions.builtin.configuration.apiValidateOAuthFieldError', {
     defaultMessage: '{field} should not be provided with isOAuth = {isOAuth}',
     values: {
       field,
