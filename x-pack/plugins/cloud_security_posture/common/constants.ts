@@ -36,3 +36,5 @@ export const INTERNAL_FEATURE_FLAGS = {
   showRisksMock: false,
   showFindingsGroupBy: false,
 } as const;
+
+export const cspRuleAssetSavedObjectType = 'csp_rule';

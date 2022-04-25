@@ -20,9 +20,12 @@ import { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/comm
 import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import { CspAppContext } from '../../plugin';
 import { CspRulesConfigSchema } from '../../../common/schemas/csp_configuration';
-import { CspRuleSchema, cspRuleAssetSavedObjectType } from '../../../common/schemas/csp_rule';
-import { UPDATE_RULES_CONFIG_ROUTE_PATH } from '../../../common/constants';
-import { CIS_KUBERNETES_PACKAGE_NAME } from '../../../common/constants';
+import { CspRuleSchema } from '../../../common/schemas/csp_rule';
+import {
+  CIS_KUBERNETES_PACKAGE_NAME,
+  UPDATE_RULES_CONFIG_ROUTE_PATH,
+  cspRuleAssetSavedObjectType,
+} from '../../../common/constants';
 import { CspRouter } from '../../types';
 
 export const getPackagePolicy = async (

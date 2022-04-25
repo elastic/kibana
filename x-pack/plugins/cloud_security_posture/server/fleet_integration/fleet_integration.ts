@@ -17,8 +17,8 @@ import {
   cloudSecurityPostureRuleTemplateSavedObjectType,
   CloudSecurityPostureRuleTemplateSchema,
 } from '../../common/schemas/csp_rule_template';
-import { CIS_KUBERNETES_PACKAGE_NAME } from '../../common/constants';
-import { CspRuleSchema, cspRuleAssetSavedObjectType } from '../../common/schemas/csp_rule';
+import { CIS_KUBERNETES_PACKAGE_NAME, cspRuleAssetSavedObjectType } from '../../common/constants';
+import { CspRuleSchema } from '../../common/schemas/csp_rule';
 
 type ArrayElement<ArrayType extends readonly unknown[]> = ArrayType extends ReadonlyArray<
   infer ElementType
