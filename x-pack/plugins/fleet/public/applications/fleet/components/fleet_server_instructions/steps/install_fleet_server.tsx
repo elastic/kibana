@@ -78,7 +78,7 @@ const InstallFleetServerStepContent: React.FunctionComponent<{
       <EuiText>
         <FormattedMessage
           id="xpack.fleet.fleetServerFlyout.installFleetServerInstructions"
-          defaultMessage="Install fleet Server agent on a centralized host so that other hosts you wish to monitor can connect to it. In production, we recommend using one or more dedicated hosts. "
+          defaultMessage="Install Fleet Server agent on a centralized host so that other hosts you wish to monitor can connect to it. In production, we recommend using one or more dedicated hosts. "
         />
       </EuiText>
 
