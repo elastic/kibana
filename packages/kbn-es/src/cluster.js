@@ -288,12 +288,28 @@ exports.Cluster = class Cluster {
     this._log.info(chalk.bold('Starting'));
     this._log.indent(4);
 
-    const esArgs = [
+    let defaultEsArgs = [
       'action.destructive_requires_name=true',
-      'ingest.geoip.downloader.enabled=false',
-      'search.check_ccs_compatibility=true',
       'cluster.routing.allocation.disk.threshold_enabled=false',
-    ].concat(options.esArgs || []);
+    ];
+
+    if (process.env.JEST_WORKER_ID) {
+      defaultEsArgs = defaultEsArgs.concat([
+        'ingest.geoip.downloader.enabled=false',
+        'search.check_ccs_compatibility=true',
+      ]);
+    }
+
+    // ensures commandline can override defaultEsArgs
+    const esOptions = defaultEsArgs
+      .concat(options.esArgs || [])
+      .map((opt) => opt.split('='))
+      .reduce((p, c) => {
+        p[c[0].trim()] = c[1].trim();
+        return p;
+      }, {});
+
+    const esArgs = Object.keys(esOptions).map((k) => `${k}=${esOptions[k]}`);
 
     // Add to esArgs if ssl is enabled
     if (this._ssl) {
