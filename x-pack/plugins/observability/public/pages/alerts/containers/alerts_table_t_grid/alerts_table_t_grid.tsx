@@ -34,6 +34,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+
 import styled from 'styled-components';
 import React, { Suspense, useMemo, useState, useCallback, useEffect } from 'react';
 
@@ -68,13 +70,13 @@ import { addDisplayNames } from './add_display_names';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from './translations';
 import { ObservabilityAppServices } from '../../../../application/types';
 
-const ALERT_TABLE_STATE_STORAGE_KEY = 'xpack.observability.alert.tableState';
-
 interface AlertsTableTGridProps {
   indexNames: string[];
   rangeFrom: string;
   rangeTo: string;
   kuery?: string;
+  stateStorageKey: string;
+  storage: IStorageWrapper;
   setRefetch: (ref: () => void) => void;
 }
 
@@ -302,7 +304,7 @@ const FIELDS_WITHOUT_CELL_ACTIONS = [
 ];
 
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
-  const { indexNames, rangeFrom, rangeTo, kuery, setRefetch } = props;
+  const { indexNames, rangeFrom, rangeTo, kuery, setRefetch, stateStorageKey, storage } = props;
 
   const {
     timelines,
@@ -311,7 +313,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
 
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
   const [tGridState, setTGridState] = useState<Partial<TGridModel> | null>(
-    JSON.parse(localStorage.getItem(ALERT_TABLE_STATE_STORAGE_KEY) ?? 'null')
+    storage.get(stateStorageKey)
   );
 
   const casePermissions = useGetUserCasesPermissions();
@@ -330,17 +332,17 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
 
   useEffect(() => {
     if (tGridState) {
-      const newState = JSON.stringify({
+      const newState = {
         ...tGridState,
         columns: tGridState.columns?.map((c) =>
           pick(c, ['columnHeaderType', 'displayAsText', 'id', 'initialWidth', 'linkField'])
         ),
-      });
-      if (newState !== localStorage.getItem(ALERT_TABLE_STATE_STORAGE_KEY)) {
-        localStorage.setItem(ALERT_TABLE_STATE_STORAGE_KEY, newState);
+      };
+      if (newState !== storage.get(stateStorageKey)) {
+        storage.set(stateStorageKey, newState);
       }
     }
-  }, [tGridState]);
+  }, [tGridState, stateStorageKey, storage]);
 
   const setEventsDeleted = useCallback<ObservabilityActionsProps['setEventsDeleted']>((action) => {
     if (action.isDeleted) {
