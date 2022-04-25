@@ -40,7 +40,7 @@ export const CreateCdnAssets: Task = {
     });
     await compressTar({
       source: assets,
-      destination: config.resolveFromTarget(`kibana-${buildVersion}F*}-cdn-assets.tar.gz`),
+      destination: config.resolveFromTarget(`kibana-${buildVersion}-cdn-assets.tar.gz`),
       archiverOptions: {
         gzip: true,
         gzipOptions: {
