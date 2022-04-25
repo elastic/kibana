@@ -90,7 +90,11 @@ export async function getLimitedPackages(options: {
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<string[]> {
   const { savedObjectsClient } = options;
-  const allPackages = await getPackages({ savedObjectsClient, experimental: true });
+  const allPackages = await getPackages({
+    savedObjectsClient,
+    experimental: true,
+    includeInstallStatus: true,
+  });
   const installedPackages = allPackages.filter(
     (pkg) => pkg.status === installationStatuses.Installed
   );
