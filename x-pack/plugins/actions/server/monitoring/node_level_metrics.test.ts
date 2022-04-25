@@ -18,27 +18,27 @@ describe('NodeLevelMetrics', () => {
   describe('execution', () => {
     it('should register a counter when called', () => {
       const metrics = new NodeLevelMetrics(monitoringCollection);
-      metrics.execution('actionA');
+      metrics.execution('actionA', 'actionTypeA');
       expect(monitoringCollection.reportCounter).toHaveBeenCalledTimes(1);
       expect(monitoringCollection.reportCounter).toHaveBeenCalledWith(
         'kibana_alerting_node_action_executions',
-        { action_id: 'actionA' }
+        { action_id: 'actionA', action_type_id: 'actionTypeA' }
       );
     });
 
     it('should report a gauge when provided with an execution time', () => {
       const executionTime = 1000;
       const metrics = new NodeLevelMetrics(monitoringCollection);
-      metrics.execution('actionA', 'actionType', executionTime);
+      metrics.execution('actionA', 'actionTypeA', executionTime);
       expect(monitoringCollection.reportCounter).toHaveBeenCalledTimes(1);
       expect(monitoringCollection.reportCounter).toHaveBeenCalledWith(
         'kibana_alerting_node_action_executions',
-        { action_id: 'actionA' }
+        { action_id: 'actionA', action_type_id: 'actionTypeA' }
       );
       expect(monitoringCollection.reportGauge).toHaveBeenCalledTimes(1);
       expect(monitoringCollection.reportGauge).toHaveBeenCalledWith(
         'kibana_alerting_node_action_execution_time',
-        { action_id: 'actionA' },
+        { action_id: 'actionA', action_type_id: 'actionTypeA' },
         executionTime
       );
     });
@@ -47,11 +47,11 @@ describe('NodeLevelMetrics', () => {
   describe('failure', () => {
     it('should register a counter when called', () => {
       const metrics = new NodeLevelMetrics(monitoringCollection);
-      metrics.failure('actionA');
+      metrics.failure('actionA', 'actionTypeA');
       expect(monitoringCollection.reportCounter).toHaveBeenCalledTimes(1);
       expect(monitoringCollection.reportCounter).toHaveBeenCalledWith(
         `kibana_alerting_node_action_failures`,
-        { action_id: 'actionA' }
+        { action_id: 'actionA', action_type_id: 'actionTypeA' }
       );
     });
   });
@@ -59,22 +59,22 @@ describe('NodeLevelMetrics', () => {
   describe('timeout', () => {
     it('should register a counter when called', () => {
       const metrics = new NodeLevelMetrics(monitoringCollection);
-      metrics.timeout('actionA');
+      metrics.timeout('actionA', 'actionTypeA');
       expect(monitoringCollection.reportCounter).toHaveBeenCalledTimes(1);
       expect(monitoringCollection.reportCounter).toHaveBeenCalledWith(
         `kibana_alerting_node_action_timeouts`,
-        { action_id: 'actionA' }
+        { action_id: 'actionA', action_type_id: 'actionTypeA' }
       );
     });
 
     it('should report the timeout if provided', () => {
       const timeout = '1000';
       const metrics = new NodeLevelMetrics(monitoringCollection);
-      metrics.timeout('actionA', timeout);
+      metrics.timeout('actionA', 'actionTypeA', timeout);
       expect(monitoringCollection.reportCounter).toHaveBeenCalledTimes(1);
       expect(monitoringCollection.reportCounter).toHaveBeenCalledWith(
         `kibana_alerting_node_action_timeouts`,
-        { action_id: 'actionA', timeout }
+        { action_id: 'actionA', action_type_id: 'actionTypeA', timeout }
       );
     });
   });

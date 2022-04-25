@@ -7,9 +7,11 @@
 import { coreMock } from '@kbn/core/public/mocks';
 import { CoreSetup } from '@kbn/core/server';
 import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
-import { MetricSet, ValidMetricResult } from '@kbn/monitoring-collection-plugin/server';
+import { MetricSet } from '@kbn/monitoring-collection-plugin/server';
 import { registerClusterLevelMetrics } from './cluster_level_metrics';
 import { ActionsPluginsStart } from '../plugin';
+import { ValidMetricSet } from '@kbn/monitoring-collection-plugin/common/types';
+import { ClusterLevelMetricsType } from '../../common/monitoring/types';
 
 jest.useFakeTimers('modern');
 jest.setSystemTime(new Date('2020-03-09').getTime());
@@ -33,7 +35,7 @@ describe('registerClusterLevelMetrics()', () => {
   });
 
   it('should get overdue actions', async () => {
-    const metrics: Record<string, MetricSet> = {};
+    const metrics: Record<string, MetricSet<ValidMetricSet>> = {};
     monitoringCollection.registerMetricSet.mockImplementation((set) => {
       metrics[set.id] = set;
     });
@@ -54,13 +56,11 @@ describe('registerClusterLevelMetrics()', () => {
     ];
     taskManagerFetch.mockImplementation(async () => ({ docs }));
 
-    const result = (await metrics.kibana_alerting_cluster_actions.fetch()) as Record<
-      string,
-      ValidMetricResult
-    >;
-    expect(result.overdue_count).toBe(docs.length);
-    expect(result.overdue_delay_p50).toBe(1000);
-    expect(result.overdue_delay_p99).toBe(1000);
+    const result =
+      (await metrics.kibana_alerting_cluster_actions.fetch()) as ClusterLevelMetricsType;
+    expect(result.kibana_alerting_cluster_actions_overdue_count).toBe(docs.length);
+    expect(result.kibana_alerting_cluster_actions_overdue_delay_p50).toBe(1000);
+    expect(result.kibana_alerting_cluster_actions_overdue_delay_p99).toBe(1000);
     expect(taskManagerFetch).toHaveBeenCalledWith({
       query: {
         bool: {
@@ -132,7 +132,7 @@ describe('registerClusterLevelMetrics()', () => {
   });
 
   it('should calculate accurate p50 and p99', async () => {
-    const metrics: Record<string, MetricSet> = {};
+    const metrics: Record<string, MetricSet<ValidMetricSet>> = {};
     monitoringCollection.registerMetricSet.mockImplementation((set) => {
       metrics[set.id] = set;
     });
@@ -152,12 +152,10 @@ describe('registerClusterLevelMetrics()', () => {
     ];
     taskManagerFetch.mockImplementation(async () => ({ docs }));
 
-    const result = (await metrics.kibana_alerting_cluster_actions.fetch()) as Record<
-      string,
-      ValidMetricResult
-    >;
-    expect(result.overdue_count).toBe(docs.length);
-    expect(result.overdue_delay_p50).toBe(3000);
-    expect(result.overdue_delay_p99).toBe(40000);
+    const result =
+      (await metrics.kibana_alerting_cluster_actions.fetch()) as ClusterLevelMetricsType;
+    expect(result.kibana_alerting_cluster_actions_overdue_count).toBe(docs.length);
+    expect(result.kibana_alerting_cluster_actions_overdue_delay_p50).toBe(3000);
+    expect(result.kibana_alerting_cluster_actions_overdue_delay_p99).toBe(40000);
   });
 });

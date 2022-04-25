@@ -12,6 +12,7 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { CoreSetup } from '@kbn/core/server';
 import { ActionsPluginsStart } from '../plugin';
+import { ClusterLevelMetricsType } from '../../common/monitoring/types';
 
 export function registerClusterLevelMetrics({
   monitoringCollection,
@@ -20,9 +21,8 @@ export function registerClusterLevelMetrics({
   monitoringCollection: MonitoringCollectionSetup;
   core: CoreSetup<ActionsPluginsStart, unknown>;
 }) {
-  monitoringCollection.registerMetricSet({
+  monitoringCollection.registerMetricSet<ClusterLevelMetricsType>({
     id: `kibana_alerting_cluster_actions`,
-    keys: ['overdue_count', 'overdue_delay_p50', 'overdue_delay_p99'],
     fetch: async () => {
       const [_, pluginStart] = await core.getStartServices();
       const now = +new Date();
@@ -53,9 +53,9 @@ export function registerClusterLevelMetrics({
       const p50 = stats.percentile(overdueTasksDelay, 0.5);
       const p99 = stats.percentile(overdueTasksDelay, 0.99);
       return {
-        overdue_count: overdueTasks.length,
-        overdue_delay_p50: isNaN(p50) ? 0 : p50,
-        overdue_delay_p99: isNaN(p99) ? 0 : p99,
+        kibana_alerting_cluster_actions_overdue_count: overdueTasks.length,
+        kibana_alerting_cluster_actions_overdue_delay_p50: isNaN(p50) ? 0 : p50,
+        kibana_alerting_cluster_actions_overdue_delay_p99: isNaN(p99) ? 0 : p99,
       };
     },
   });

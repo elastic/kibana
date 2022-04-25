@@ -8,6 +8,7 @@
 import React from 'react';
 
 import { IExecutionLogWithErrorsResult } from '@kbn/alerting-plugin/common';
+import { RuleMonitoringMetrics } from '@kbn/alerting-plugin/common/monitoring/types';
 import {
   Rule,
   RuleType,
@@ -72,7 +73,7 @@ export interface ComponentOpts {
   resolveRule: (id: Rule['id']) => Promise<ResolvedRule>;
   snoozeRule: (rule: Rule, snoozeEndTime: string | -1) => Promise<void>;
   unsnoozeRule: (rule: Rule) => Promise<void>;
-  loadMonitoring: (id: Rule['id']) => Promise<any>;
+  loadMonitoring: (id: Rule['id']) => Promise<RuleMonitoringMetrics>;
 }
 
 export type PropsWithOptionalApiHandlers<T> = Omit<T, keyof ComponentOpts> & Partial<ComponentOpts>;

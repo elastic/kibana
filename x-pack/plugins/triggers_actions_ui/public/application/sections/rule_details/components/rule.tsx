@@ -21,6 +21,7 @@ import {
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { RuleMonitoringMetrics } from '@kbn/alerting-plugin/common/monitoring/types';
 import moment from 'moment';
 import {
   ActionGroup,
@@ -50,6 +51,7 @@ import { suspendedComponentWithProps } from '../../../lib/suspended_component_wi
 
 const RuleEventLogListWithApi = lazy(() => import('./rule_event_log_list'));
 const RuleErrorLogWithApi = lazy(() => import('./rule_error_log'));
+const RuleMetricsWithApi = lazy(() => import('./rule_metrics'));
 
 const RuleAlertList = lazy(() => import('./rule_alert_list'));
 
@@ -64,11 +66,13 @@ type RuleProps = {
   onChangeDuration: (length: number) => void;
   durationEpoch?: number;
   isLoadingChart?: boolean;
+  monitoring?: RuleMonitoringMetrics;
 } & Pick<RuleApis, 'muteAlertInstance' | 'unmuteAlertInstance'>;
 
 const EVENT_LOG_LIST_TAB = 'rule_event_log_list';
 const ALERT_LIST_TAB = 'rule_alert_list';
 const EVENT_ERROR_LOG_TAB = 'rule_error_log_list';
+const METRICS_TAB = 'rule_metrics';
 
 export function RuleComponent({
   rule,
@@ -83,6 +87,7 @@ export function RuleComponent({
   onChangeDuration,
   durationEpoch = Date.now(),
   isLoadingChart,
+  monitoring,
 }: RuleProps) {
   const alerts = Object.entries(ruleSummary.alerts)
     .map(([alertId, alert]) => alertToListItem(durationEpoch, ruleType, alertId, alert))
@@ -148,6 +153,14 @@ export function RuleComponent({
         RuleErrorLogWithApi,
         'xl'
       )({ requestRefresh, rule, refreshToken }),
+    },
+    {
+      id: METRICS_TAB,
+      name: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.rule.metricsTabText', {
+        defaultMessage: 'Metrics',
+      }),
+      'data-test-subj': 'metricsTab',
+      content: suspendedComponentWithProps(RuleMetricsWithApi, 'xl')({ monitoring }),
     },
   ];
 

@@ -6,8 +6,7 @@
  */
 
 import { MonitoringCollectionStart } from '@kbn/monitoring-collection-plugin/server';
-
-const PREFIX = `kibana_alerting_node_`;
+import { NodeLevelMetricsEnum } from '../../common/monitoring/types';
 
 export class NodeLevelMetrics {
   private monitoringCollection: MonitoringCollectionStart;
@@ -16,32 +15,41 @@ export class NodeLevelMetrics {
     this.monitoringCollection = monitoringCollection;
   }
 
-  public execution(actionId: string, actionType?: string, executionTime?: number) {
-    const dimensions: Record<string, string> = { action_id: actionId };
-    if (actionType) {
-      dimensions.action_type = actionType;
-    }
-
-    this.monitoringCollection.reportCounter(`${PREFIX}action_executions`, dimensions);
+  public execution(actionId: string, actionTypeId: string, executionTime?: number) {
+    this.monitoringCollection.reportCounter(
+      NodeLevelMetricsEnum.kibana_alerting_node_action_executions,
+      { action_id: actionId, action_type_id: actionTypeId }
+    );
     if (typeof executionTime === 'number') {
       this.monitoringCollection.reportGauge(
-        `${PREFIX}action_execution_time`,
-        dimensions,
+        NodeLevelMetricsEnum.kibana_alerting_node_action_execution_time,
+        { action_id: actionId, action_type_id: actionTypeId },
         executionTime
       );
     }
   }
 
-  public failure(actionId: string, actionType?: string) {
-    const dimensions: Record<string, string> = { action_id: actionId };
-    if (actionType) dimensions.action_type = actionType;
-    this.monitoringCollection.reportCounter(`${PREFIX}action_failures`, dimensions);
+  public failure(actionId: string, actionTypeId: string) {
+    this.monitoringCollection.reportCounter(
+      NodeLevelMetricsEnum.kibana_alerting_node_action_failures,
+      {
+        action_id: actionId,
+        action_type_id: actionTypeId,
+      }
+    );
   }
 
-  public timeout(actionId: string, actionType?: string, timeout?: string) {
-    const dimensions: Record<string, string> = { action_id: actionId };
-    if (timeout) dimensions.timeout = timeout;
-    if (actionType) dimensions.action_type = actionType;
-    this.monitoringCollection.reportCounter(`${PREFIX}action_timeouts`, dimensions);
+  public timeout(actionId: string, actionTypeId: string, timeout?: string) {
+    const dimensions: Record<string, string> = {
+      action_id: actionId,
+      action_type_id: actionTypeId,
+    };
+    if (timeout) {
+      dimensions.timeout = timeout;
+    }
+    this.monitoringCollection.reportCounter(
+      NodeLevelMetricsEnum.kibana_alerting_node_action_timeouts,
+      dimensions
+    );
   }
 }

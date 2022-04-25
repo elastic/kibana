@@ -7,8 +7,7 @@
 
 import { MonitoringCollectionStart } from '@kbn/monitoring-collection-plugin/server';
 import { RuleExecutionStatusErrorReasons } from '../types';
-
-const PREFIX = `kibana_alerting_node_`;
+import { NodeLevelMetricsEnum } from '../../common/monitoring/types';
 
 export class NodeLevelMetrics {
   private monitoringCollection: MonitoringCollectionStart;
@@ -18,10 +17,13 @@ export class NodeLevelMetrics {
   }
 
   public execution(ruleId: string, executionTime?: number) {
-    this.monitoringCollection.reportCounter(`${PREFIX}rule_executions`, { rule_id: ruleId });
+    this.monitoringCollection.reportCounter(
+      NodeLevelMetricsEnum.kibana_alerting_node_rule_executions,
+      { rule_id: ruleId }
+    );
     if (typeof executionTime === 'number') {
       this.monitoringCollection.reportGauge(
-        `${PREFIX}rule_execution_time`,
+        NodeLevelMetricsEnum.kibana_alerting_node_rule_execution_time,
         { rule_id: ruleId },
         executionTime
       );
@@ -29,10 +31,13 @@ export class NodeLevelMetrics {
   }
 
   public failure(ruleId: string, reason: RuleExecutionStatusErrorReasons) {
-    this.monitoringCollection.reportCounter(`${PREFIX}rule_failures`, {
-      rule_id: ruleId,
-      failure_reason: reason,
-    });
+    this.monitoringCollection.reportCounter(
+      NodeLevelMetricsEnum.kibana_alerting_node_rule_failures,
+      {
+        rule_id: ruleId,
+        failure_reason: reason,
+      }
+    );
   }
 
   public timeout(ruleId: string, timeout?: string) {
@@ -40,6 +45,9 @@ export class NodeLevelMetrics {
     if (timeout) {
       dimensions.timeout = timeout;
     }
-    this.monitoringCollection.reportCounter(`${PREFIX}rule_timeouts`, dimensions);
+    this.monitoringCollection.reportCounter(
+      NodeLevelMetricsEnum.kibana_alerting_node_rule_timeouts,
+      dimensions
+    );
   }
 }

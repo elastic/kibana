@@ -15,6 +15,7 @@ import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spaces_service.mock';
 import { ActionType } from '../types';
 import { actionsMock, actionsClientMock } from '../mocks';
+import { nodeLevelMetricsMock } from '../monitoring/node_level_metrics.mock';
 import { pick } from 'lodash';
 
 const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
@@ -34,6 +35,7 @@ const executeParams = {
   request: {} as KibanaRequest,
 };
 
+const nodeLevelMetrics = nodeLevelMetricsMock.create();
 const spacesMock = spacesServiceMock.createStartContract();
 const loggerMock = loggingSystemMock.create().get();
 const getActionsClientWithRequest = jest.fn();
@@ -46,6 +48,7 @@ actionExecutor.initialize({
   encryptedSavedObjectsClient,
   eventLogger,
   preconfiguredActions: [],
+  nodeLevelMetrics,
 });
 
 beforeEach(() => {
@@ -724,6 +727,39 @@ test('writes to event log for execute and execute start when consumer and relate
     },
     message: 'action executed: test:1: action-1',
   });
+});
+
+test('increments monitoring metrics after execution', async () => {
+  const executorMock = setupActionExecutorMock();
+  executorMock.mockResolvedValue({
+    actionId: '1',
+    status: 'ok',
+  });
+  await actionExecutor.execute(executeParams);
+
+  expect(nodeLevelMetrics.execution).toHaveBeenCalledTimes(1);
+});
+
+test('increments monitoring metrics after a failed execution', async () => {
+  const executorMock = setupActionExecutorMock();
+  executorMock.mockRejectedValue(new Error('this action execution is intended to fail'));
+  await actionExecutor.execute(executeParams);
+  expect(nodeLevelMetrics.execution).toHaveBeenCalledTimes(1);
+  expect(nodeLevelMetrics.failure).toHaveBeenCalledTimes(1);
+});
+
+test('increments monitoring metrics after a timeout', async () => {
+  setupActionExecutorMock();
+
+  await actionExecutor.logCancellation({
+    actionId: 'action1',
+    executionId: '123abc',
+    consumer: 'test-consumer',
+    relatedSavedObjects: [],
+    request: {} as KibanaRequest,
+  });
+
+  expect(nodeLevelMetrics.timeout).toHaveBeenCalledTimes(1);
 });
 
 function setupActionExecutorMock() {

@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ToastsApi } from '@kbn/core/public';
+import { RuleMonitoringMetrics } from '@kbn/alerting-plugin/common/monitoring/types';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Rule, RuleSummary, RuleType } from '../../../../types';
 import {
@@ -39,7 +40,7 @@ export const RuleRoute: React.FunctionComponent<WithRuleSummaryProps> = ({
   } = useKibana().services;
 
   const [ruleSummary, setRuleSummary] = useState<RuleSummary | null>(null);
-  const [monitoring, setMonitoring] = useState();
+  const [monitoring, setMonitoring] = useState<RuleMonitoringMetrics>();
   const [numberOfExecutions, setNumberOfExecutions] = useState(60);
   const [isLoadingChart, setIsLoadingChart] = useState(true);
   const ruleID = useRef<string | null>(null);
@@ -90,6 +91,7 @@ export const RuleRoute: React.FunctionComponent<WithRuleSummaryProps> = ({
       refreshToken={refreshToken}
       rule={rule}
       ruleType={ruleType}
+      monitoring={monitoring}
       readOnly={readOnly}
       ruleSummary={ruleSummary}
       numberOfExecutions={numberOfExecutions}

@@ -7,7 +7,6 @@
 import apm from 'elastic-apm-node';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  CoreSetup,
   Plugin,
   PluginInitializerContext,
   Logger,
@@ -17,9 +16,10 @@ import {
 } from '@kbn/core/server';
 import { METRICSET_ALLOWLIST } from './constants';
 import { MonitoringCollectionConfig } from './config';
+import { ValidMetricSet } from '../common/types';
 
 export interface MonitoringCollectionSetup {
-  registerMetricSet: (metric: MetricSet) => void;
+  registerMetricSet: <T extends ValidMetricSet>(metric: MetricSet<T>) => void;
   aggregateMonitoringData: (
     query: estypes.QueryDslQueryContainer,
     aggs: Record<string, estypes.AggregationsAggregationContainer>
@@ -30,12 +30,10 @@ export interface MonitoringCollectionStart {
   reportCounter: (name: string, dimensions: Record<string, string>, amount?: number) => void;
   registerCustomElasticsearchClient: (customClient: ICustomClusterClient) => void;
 }
-export type ValidMetricResult = number;
 
-export interface MetricSet {
+export interface MetricSet<T extends ValidMetricSet> {
   id: string;
-  keys: string[];
-  fetch: () => Promise<Record<string, ValidMetricResult>>;
+  fetch: () => Promise<T>;
 }
 
 export type KibanaIdentifier = Record<string, string> & {
@@ -49,8 +47,8 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
   private readonly logger: Logger;
   private readonly config: MonitoringCollectionConfig;
 
-  private metricSets: Record<string, MetricSet> = {};
-  private results: Record<string, Record<string, ValidMetricResult>> = {};
+  private metricSets: Record<string, MetricSet<ValidMetricSet>> = {};
+  private results: Record<string, ValidMetricSet> = {};
   private client?: IClusterClient | ICustomClusterClient;
   private kibanaVersion?: string;
   private kibanaUuid?: string;
@@ -61,12 +59,12 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
     this.config = initializerContext.config.get();
   }
 
-  setup(core: CoreSetup) {
+  setup() {
     this.kibanaVersion = this.initializerContext.env.packageInfo.version;
     this.kibanaUuid = this.initializerContext.env.instanceUuid;
 
     return {
-      registerMetricSet: (metricSet: MetricSet) => {
+      registerMetricSet: <T extends ValidMetricSet>(metricSet: MetricSet<T>) => {
         if (this.metricSets.hasOwnProperty(metricSet.id)) {
           this.logger.warn(
             `Skipping registration of metric set '${metricSet.id}'. It was has already been registered.`
@@ -81,10 +79,6 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
         }
 
         this.results[metricSet.id] = {};
-        for (const key of metricSet.keys) {
-          apm.registerMetric(`${metricSet.id}_${key}`, () => this.results[metricSet.id][key] ?? 0);
-          this.results[metricSet.id][key] = 0;
-        }
         this.metricSets[metricSet.id] = metricSet;
       },
       // Maybe this belongs in start but this will be used by routes which are usually created in setup
@@ -128,11 +122,11 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
 
     setInterval(async () => {
       const ids = Object.keys(this.metricSets);
+      // TODO: think about how to make this not suck
+      // abort controller, maybe chunk it and perform with some backoff?
       const results = await Promise.all(ids.map((id) => this.metricSets[id].fetch()));
       ids.forEach((id, idIndex) => {
-        for (const key of this.metricSets[id].keys) {
-          this.results[id][key] = results[idIndex][key];
-        }
+        this.results[id] = results[idIndex];
       });
     }, this.config.interval);
 
@@ -152,6 +146,9 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
         }
       },
       reportGauge: (name: string, dimensions: Record<string, string>, value: number) => {
+        // if (typeof name !== 'string') {
+
+        // }
         try {
           apm.registerMetric(name, { ...dimensions, ...kibanaDimensions }, () => value);
         } catch (err) {

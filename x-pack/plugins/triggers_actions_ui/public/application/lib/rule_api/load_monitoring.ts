@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
+import { AsApiContract } from '@kbn/actions-plugin/common';
+import { RuleMonitoringMetrics } from '@kbn/alerting-plugin/common/monitoring/types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
-import { AsApiContract } from '../../../../../actions/common';
 
 export interface LoadMonitoringProps {
   ruleId: string;
@@ -17,9 +18,8 @@ export const loadMonitoring = async ({
   ruleId,
   http,
 }: LoadMonitoringProps & { http: HttpSetup }) => {
-  const result = await http.get<AsApiContract<any>>(
+  const result = await http.get<AsApiContract<RuleMonitoringMetrics>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${ruleId}/monitoring/aggregate`
   );
-
   return result; // rewriteBodyRes(result);
 };
