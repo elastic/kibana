@@ -12,7 +12,7 @@ import { PluginOpaqueId, PackageInfo, EnvironmentMode } from '../../server/types
 import { CoreContext } from '../core_system';
 import { PluginWrapper } from './plugin';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
-import { CoreSetup, CoreStart } from '../';
+import { CoreSetup, CoreStart } from '..';
 
 /**
  * The available core services passed to a `PluginInitializer`

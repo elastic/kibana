@@ -145,28 +145,3 @@ describe('#getExecutables()', () => {
     expect(() => createProjectWith({ bin: 1 }).getExecutables()).toThrowErrorMatchingSnapshot();
   });
 });
-
-describe('#getIntermediateBuildDirectory', () => {
-  test('is the same as the project path when not specified', () => {
-    const project = createProjectWith({}, 'packages/my-project');
-    const path = project.getIntermediateBuildDirectory();
-
-    expect(path).toBe(project.path);
-  });
-
-  test('appends the `intermediateBuildDirectory` to project path when specified', () => {
-    const project = createProjectWith(
-      {
-        kibana: {
-          build: {
-            intermediateBuildDirectory: 'quux',
-          },
-        },
-      },
-      'packages/my-project'
-    );
-    const path = project.getIntermediateBuildDirectory();
-
-    expect(path).toBe(join(project.path, 'quux'));
-  });
-});

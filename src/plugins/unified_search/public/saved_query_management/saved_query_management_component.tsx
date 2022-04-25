@@ -24,7 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useState, Fragment, useRef } from 'react';
 import { sortBy } from 'lodash';
-import { SavedQuery, SavedQueryService } from '../../../data/public';
+import { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';
 import { SavedQueryListItem } from './saved_query_list_item';
 
 const perPage = 50;

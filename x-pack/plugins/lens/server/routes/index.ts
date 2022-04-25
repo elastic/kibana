@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, Logger } from 'src/core/server';
+import { CoreSetup, Logger } from '@kbn/core/server';
 import { PluginStartContract } from '../plugin';
 import { existingFieldsRoute } from './existing_fields';
 import { initFieldsRoute } from './field_stats';

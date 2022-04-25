@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '../../../common/processor_event';
 import {
   AGENT_NAME,
   SERVICE_NAME,
   SERVICE_RUNTIME_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { rangeQuery } from '../../../../observability/server';
 import { Setup } from '../../lib/helpers/setup_request';
 
 interface ServiceAgent {

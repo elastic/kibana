@@ -29,6 +29,9 @@
         },
         "name" : "test"
       },
+      "host": {
+        "name": "test-host"
+      },
       "service" : {
         "type" : "system"
       },
@@ -69,6 +72,9 @@
           }
         },
         "name" : "test"
+      },
+      "host": {
+        "name": "test-host"
       },
       "service" : {
         "type" : "system"

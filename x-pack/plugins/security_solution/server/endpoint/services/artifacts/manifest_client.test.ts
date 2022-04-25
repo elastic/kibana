@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { ManifestSchemaVersion } from '../../../../common/endpoint/schema/common';
 import { ManifestConstants } from '../../lib/artifacts';
 import { getInternalManifestMock } from '../../schemas/artifacts/saved_objects.mock';

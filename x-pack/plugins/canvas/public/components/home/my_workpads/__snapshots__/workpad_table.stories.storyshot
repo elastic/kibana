@@ -18,6 +18,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
             className="euiFormControlLayout__childrenWrapper"
           >
             <input
+              aria-invalid={false}
               aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
               className="euiFieldSearch euiFieldSearch--fullWidth"
               data-test-subj="tableListSearchBox"

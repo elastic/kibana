@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import { compact, keyBy } from 'lodash';
-import { rangeQuery } from '../../../../observability/server';
+import { rangeQuery } from '@kbn/observability-plugin/server';
 import { apmMlAnomalyQuery } from './apm_ml_anomaly_query';
 import {
   ApmMlDetectorType,

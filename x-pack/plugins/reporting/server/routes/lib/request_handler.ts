@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import type { KibanaRequest, KibanaResponseFactory, Logger } from 'kibana/server';
+import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import type { ReportingCore } from '../..';
 import { API_BASE_URL } from '../../../common/constants';
 import { checkParamsVersion, cryptoFactory } from '../../lib';

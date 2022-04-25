@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, Logger } from 'src/core/server';
+import { CoreSetup, Logger } from '@kbn/core/server';
 import { AlertingSetup } from '../../types';
 import { getAlertType } from './alert_type';
 

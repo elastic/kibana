@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Observable, Subscription, combineLatest } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { Observable, Subscription, combineLatest, firstValueFrom } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { pick } from '@kbn/std';
 
-import type { RequestHandlerContext } from 'src/core/server';
+import type { RequestHandlerContext } from '..';
 import type { InternalExecutionContextSetup } from '../execution_context';
 import { CoreService } from '../../types';
 import { Logger } from '../logging';
@@ -84,7 +84,7 @@ export class HttpService
 
   public async preboot(deps: PrebootDeps): Promise<InternalHttpServicePreboot> {
     this.log.debug('setting up preboot server');
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = await firstValueFrom(this.config$);
 
     const prebootSetup = await this.prebootServer.setup(config);
     prebootSetup.server.route({
@@ -147,7 +147,7 @@ export class HttpService
       }
     });
 
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = await firstValueFrom(this.config$);
 
     const { registerRouter, ...serverContract } = await this.httpServer.setup(
       config,
@@ -196,7 +196,7 @@ export class HttpService
   }
 
   public async start() {
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = await firstValueFrom(this.config$);
     if (this.shouldListen(config)) {
       this.log.debug('stopping preboot server');
       await this.prebootServer.stop();

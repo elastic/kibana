@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Logger } from 'kibana/server';
-import { ElasticsearchClient } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 interface DisableWatchesResponse {
   exporters: Array<

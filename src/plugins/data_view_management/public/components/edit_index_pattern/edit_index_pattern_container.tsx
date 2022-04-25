@@ -8,12 +8,12 @@
 
 import React, { useEffect, useState } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { DataView } from '../../../../../plugins/data_views/public';
-import { useKibana } from '../../../../../plugins/kibana_react/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
-import { EditIndexPattern } from '../edit_index_pattern';
+import { EditIndexPattern } from '.';
 
 const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ ...props }) => {
   const { dataViews, setBreadcrumbs } = useKibana<IndexPatternManagmentContext>().services;

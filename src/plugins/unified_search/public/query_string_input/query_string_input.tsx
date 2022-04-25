@@ -27,30 +27,25 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { compact, debounce, isEqual, isFunction } from 'lodash';
-import { Toast } from '../../../../core/public';
-import {
-  IDataPluginServices,
-  IIndexPattern,
-  Query,
-  QuerySuggestion,
-  QuerySuggestionTypes,
-  getQueryLog,
-} from '../../../data/public';
+import { Toast } from '@kbn/core/public';
+import { IDataPluginServices, Query, getQueryLog } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import type { PersistedLog } from '@kbn/data-plugin/public';
+import { getFieldSubtypeNested, KIBANA_USER_QUERY_LANGUAGE_KEY } from '@kbn/data-plugin/common';
+import { KibanaReactContextValue, toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { matchPairs } from './match_pairs';
 import { toUser } from './to_user';
 import { fromUser } from './from_user';
-import type { PersistedLog } from '../../../data/public';
-import { getFieldSubtypeNested, KIBANA_USER_QUERY_LANGUAGE_KEY } from '../../../data/common';
-import { KibanaReactContextValue, toMountPoint } from '../../../kibana_react/public';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
 import type { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '../typeahead';
 import { onRaf } from '../utils';
-import { getTheme } from '../services';
+import { QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
+import { getTheme, getAutocomplete } from '../services';
 
 export interface QueryStringInputProps {
-  indexPatterns: Array<IIndexPattern | string>;
+  indexPatterns: Array<DataView | string>;
   query: Query;
   disableAutoFocus?: boolean;
   screenTitle?: string;
@@ -104,7 +99,7 @@ interface State {
   suggestionLimit: number;
   selectionStart: number | null;
   selectionEnd: number | null;
-  indexPatterns: IIndexPattern[];
+  indexPatterns: DataView[];
 
   /**
    * Part of state because passed down to child components
@@ -170,7 +165,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
     ) as string[];
     const objectPatterns = this.props.indexPatterns.filter(
       (indexPattern) => typeof indexPattern !== 'string'
-    ) as IIndexPattern[];
+    ) as DataView[];
 
     // abort the previous fetch to avoid overriding with outdated data
     // issue https://github.com/elastic/kibana/issues/80831
@@ -181,7 +176,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
     const objectPatternsFromStrings = (await fetchIndexPatterns(
       this.services.data.indexPatterns,
       stringPatterns
-    )) as IIndexPattern[];
+    )) as DataView[];
 
     if (!currentAbortController.signal.aborted) {
       this.setState({
@@ -201,7 +196,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
     const queryString = this.getQueryString();
 
     const recentSearchSuggestions = this.getRecentSearchSuggestions(queryString);
-    const hasQuerySuggestions = this.services.data.autocomplete.hasQuerySuggestions(language);
+    const hasQuerySuggestions = getAutocomplete().hasQuerySuggestions(language);
 
     if (
       !hasQuerySuggestions ||
@@ -222,7 +217,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
       if (this.abortController) this.abortController.abort();
       this.abortController = new AbortController();
       const suggestions =
-        (await this.services.data.autocomplete.getQuerySuggestions({
+        (await getAutocomplete().getQuerySuggestions({
           language,
           indexPatterns,
           query: queryString,

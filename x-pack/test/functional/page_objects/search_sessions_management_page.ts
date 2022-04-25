@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SEARCH_SESSIONS_TABLE_ID } from '../../../../src/plugins/data/common';
+import { SEARCH_SESSIONS_TABLE_ID } from '@kbn/data-plugin/common';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrProviderContext) {

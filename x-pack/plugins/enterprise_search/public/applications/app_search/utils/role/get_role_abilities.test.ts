@@ -7,7 +7,7 @@
 
 import { DEFAULT_INITIAL_APP_DATA } from '../../../../../common/__mocks__';
 
-import { getRoleAbilities } from './';
+import { getRoleAbilities } from '.';
 
 describe('getRoleAbilities', () => {
   const mockRole = DEFAULT_INITIAL_APP_DATA.appSearch.role as any;

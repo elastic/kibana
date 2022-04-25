@@ -7,7 +7,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { PersistableState, PersistableStateDefinition } from '../../kibana_utils/common';
+import { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 import { EmbeddableStateWithType } from '../common/types';
 
 export type EmbeddableFactoryRegistry = Map<string, EmbeddableRegistryItem>;
