@@ -5,21 +5,11 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import {
-  ExternalServiceCredentials,
-  SNProductsConfigValue,
-  Observable,
-  ExternalServiceSIR,
-  ObservableResponse,
-  ServiceFactory,
-} from './types';
+import { Observable, ExternalServiceSIR, ObservableResponse, ServiceFactory } from './types';
 
 import { request } from '../lib/axios_utils';
-import { ActionsConfigurationUtilities } from '../../actions_config';
 import { createExternalService } from './service';
-import { createServiceError, getAxiosInstance } from './utils';
-import { ConnectorTokenClientContract } from '../../types';
+import { createServiceError } from './utils';
 
 const getAddObservableToIncidentURL = (url: string, incidentID: string) =>
   `${url}/api/x_elas2_sir_int/elastic_api/incident/${incidentID}/observables`;
@@ -27,30 +17,19 @@ const getAddObservableToIncidentURL = (url: string, incidentID: string) =>
 const getBulkAddObservableToIncidentURL = (url: string, incidentID: string) =>
   `${url}/api/x_elas2_sir_int/elastic_api/incident/${incidentID}/observables/bulk`;
 
-export const createExternalServiceSIR: ServiceFactory<ExternalServiceSIR> = (
-  connectorId: string,
-  credentials: ExternalServiceCredentials,
-  logger: Logger,
-  configurationUtilities: ActionsConfigurationUtilities,
-  serviceConfig: SNProductsConfigValue,
-  connectorTokenClient: ConnectorTokenClientContract
-): ExternalServiceSIR => {
-  const snService = createExternalService(
-    connectorId,
+export const createExternalServiceSIR: ServiceFactory<ExternalServiceSIR> = ({
+  credentials,
+  logger,
+  configurationUtilities,
+  serviceConfig,
+  axiosInstance,
+}): ExternalServiceSIR => {
+  const snService = createExternalService({
     credentials,
     logger,
     configurationUtilities,
     serviceConfig,
-    connectorTokenClient
-  );
-
-  const axiosInstance = getAxiosInstance({
-    connectorId,
-    logger,
-    configurationUtilities,
-    credentials,
-    snServiceUrl: snService.getUrl(),
-    connectorTokenClient,
+    axiosInstance,
   });
 
   const _addObservable = async (data: Observable | Observable[], url: string) => {

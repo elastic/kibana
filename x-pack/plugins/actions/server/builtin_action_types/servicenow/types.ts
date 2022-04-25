@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { AxiosError, AxiosResponse } from 'axios';
+import { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 import { TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
 import {
@@ -26,7 +26,6 @@ import {
   ExternalIncidentServiceConfigurationBaseSchema,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { ConnectorTokenClientContract } from '../../types';
 
 export type ServiceNowPublicConfigurationBaseType = TypeOf<
   typeof ExternalIncidentServiceConfigurationBaseSchema
@@ -287,14 +286,21 @@ export interface ExternalServiceSIR extends ExternalService {
   ) => Promise<ObservableResponse[]>;
 }
 
-export type ServiceFactory<T = ExternalService> = (
-  connectorId: string,
-  credentials: ExternalServiceCredentials,
-  logger: Logger,
-  configurationUtilities: ActionsConfigurationUtilities,
-  serviceConfig: SNProductsConfigValue,
-  connectorTokenClient: ConnectorTokenClientContract
-) => T;
+interface ServiceFactoryOpts {
+  credentials: ExternalServiceCredentials;
+  logger: Logger;
+  configurationUtilities: ActionsConfigurationUtilities;
+  serviceConfig: SNProductsConfigValue;
+  axiosInstance: AxiosInstance;
+}
+
+export type ServiceFactory<T = ExternalService> = ({
+  credentials,
+  logger,
+  configurationUtilities,
+  serviceConfig,
+  axiosInstance,
+}: ServiceFactoryOpts) => T;
 
 /**
  * ITOM

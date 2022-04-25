@@ -39,6 +39,7 @@ import {
   ExternalServiceApiITOM,
   ExternalServiceITOM,
   ServiceNowPublicConfigurationBaseType,
+  ExternalService,
 } from './types';
 import {
   ServiceNowITOMActionTypeId,
@@ -53,6 +54,7 @@ import { apiSIR } from './api_sir';
 import { throwIfSubActionIsNotSupported } from './utils';
 import { createExternalServiceITOM } from './service_itom';
 import { apiITOM } from './api_itom';
+import { createServiceWrapper } from './create_service_wrapper';
 
 export {
   ServiceNowITSMActionTypeId,
@@ -187,23 +189,24 @@ async function executor(
     ExecutorParams
   >
 ): Promise<ActionTypeExecutorResult<ServiceNowExecutorResultData | {}>> {
-  const { actionId, config, params, secrets } = execOptions;
+  const { actionId, config, params, secrets, services } = execOptions;
   const { subAction, subActionParams } = params;
-  const connectorTokenClient = execOptions.services.connectorTokenClient;
+  const connectorTokenClient = services.connectorTokenClient;
   const externalServiceConfig = snExternalServiceConfig[actionTypeId];
   let data: ServiceNowExecutorResultData | null = null;
 
-  const externalService = createService(
-    actionId,
-    {
+  const externalService = createServiceWrapper<ExternalService>({
+    connectorId: actionId,
+    credentials: {
       config,
       secrets,
     },
     logger,
     configurationUtilities,
-    externalServiceConfig,
-    connectorTokenClient
-  );
+    serviceConfig: externalServiceConfig,
+    connectorTokenClient,
+    createServiceFn: createService,
+  });
 
   const apiAsRecord = api as unknown as Record<string, unknown>;
   throwIfSubActionIsNotSupported({ api: apiAsRecord, subAction, supportedSubActions, logger });
@@ -270,17 +273,18 @@ async function executorITOM(
   const externalServiceConfig = snExternalServiceConfig[actionTypeId];
   let data: ServiceNowExecutorResultData | null = null;
 
-  const externalService = createService(
-    actionId,
-    {
+  const externalService = createServiceWrapper<ExternalServiceITOM>({
+    connectorId: actionId,
+    credentials: {
       config,
       secrets,
     },
     logger,
     configurationUtilities,
-    externalServiceConfig,
-    connectorTokenClient
-  ) as ExternalServiceITOM;
+    serviceConfig: externalServiceConfig,
+    connectorTokenClient,
+    createServiceFn: createService,
+  });
 
   const apiAsRecord = api as unknown as Record<string, unknown>;
 

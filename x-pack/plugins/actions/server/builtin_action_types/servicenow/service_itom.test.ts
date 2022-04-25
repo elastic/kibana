@@ -15,10 +15,8 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../../actions_config.mock';
 import { snExternalServiceConfig } from './config';
 import { itomEventParams, serviceNowChoices } from './mocks';
-import { connectorTokenClientMock } from '../lib/connector_token_client.mock';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
-const connectorTokenClient = connectorTokenClientMock.create();
 
 jest.mock('axios');
 jest.mock('../lib/axios_utils', () => {
@@ -37,17 +35,16 @@ describe('ServiceNow SIR service', () => {
   let service: ExternalServiceITOM;
 
   beforeEach(() => {
-    service = createExternalServiceITOM(
-      '123',
-      {
-        config: { apiUrl: 'https://example.com/' },
+    service = createExternalServiceITOM({
+      credentials: {
+        config: { apiUrl: 'https://example.com/', isOAuth: false },
         secrets: { username: 'admin', password: 'admin' },
       },
       logger,
       configurationUtilities,
-      snExternalServiceConfig['.servicenow-itom'],
-      connectorTokenClient
-    ) as ExternalServiceITOM;
+      serviceConfig: snExternalServiceConfig['.servicenow-itom'],
+      axiosInstance: axios,
+    }) as ExternalServiceITOM;
   });
 
   beforeEach(() => {

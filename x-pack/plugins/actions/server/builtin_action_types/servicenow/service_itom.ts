@@ -5,47 +5,27 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import {
-  ExternalServiceCredentials,
-  SNProductsConfigValue,
-  ServiceFactory,
-  ExternalServiceITOM,
-  ExecutorSubActionAddEventParams,
-} from './types';
+import { ServiceFactory, ExternalServiceITOM, ExecutorSubActionAddEventParams } from './types';
 
 import { request } from '../lib/axios_utils';
-import { ActionsConfigurationUtilities } from '../../actions_config';
 import { createExternalService } from './service';
-import { createServiceError, getAxiosInstance } from './utils';
-import { ConnectorTokenClientContract } from '../../types';
+import { createServiceError } from './utils';
 
 const getAddEventURL = (url: string) => `${url}/api/global/em/jsonv2`;
 
-export const createExternalServiceITOM: ServiceFactory<ExternalServiceITOM> = (
-  connectorId: string,
-  credentials: ExternalServiceCredentials,
-  logger: Logger,
-  configurationUtilities: ActionsConfigurationUtilities,
-  serviceConfig: SNProductsConfigValue,
-  connectorTokenClient: ConnectorTokenClientContract
-): ExternalServiceITOM => {
-  const snService = createExternalService(
-    connectorId,
+export const createExternalServiceITOM: ServiceFactory<ExternalServiceITOM> = ({
+  credentials,
+  logger,
+  configurationUtilities,
+  serviceConfig,
+  axiosInstance,
+}): ExternalServiceITOM => {
+  const snService = createExternalService({
     credentials,
     logger,
     configurationUtilities,
     serviceConfig,
-    connectorTokenClient
-  );
-
-  const axiosInstance = getAxiosInstance({
-    connectorId,
-    logger,
-    configurationUtilities,
-    credentials,
-    snServiceUrl: snService.getUrl(),
-    connectorTokenClient,
+    axiosInstance,
   });
 
   const addEvent = async (params: ExecutorSubActionAddEventParams) => {
