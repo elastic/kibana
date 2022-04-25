@@ -82,6 +82,7 @@ export interface DocLinks {
     readonly crawlRules: string;
     readonly curations: string;
     readonly duplicateDocuments: string;
+    readonly elasticsearchIndexedEngines: string;
     readonly entryPoints: string;
     readonly guide: string;
     readonly indexingDocuments: string;
@@ -358,6 +359,7 @@ export interface DocLinks {
     learnMoreBlog: string;
     apiKeysLearnMore: string;
     onPremRegistry: string;
+    secureLogstash: string;
   }>;
   readonly ecs: {
     readonly guide: string;
@@ -395,5 +397,8 @@ export interface DocLinks {
   };
   readonly legal: {
     readonly privacyStatement: string;
+  };
+  readonly kibanaUpgradeSavedObjects: {
+    readonly resolveMigrationFailures: string;
   };
 }

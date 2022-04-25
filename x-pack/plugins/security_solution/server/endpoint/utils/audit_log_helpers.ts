@@ -197,7 +197,7 @@ export const getActionRequestsResult = async ({
 
   let actionRequests: TransportResult<estypes.SearchResponse<unknown>, unknown>;
   try {
-    const esClient = context.core.elasticsearch.client.asInternalUser;
+    const esClient = (await context.core).elasticsearch.client.asInternalUser;
     actionRequests = await esClient.search(actionsSearchQuery, { ...queryOptions, meta: true });
     const actionIds = actionRequests?.body?.hits?.hits?.map((e) => {
       return logsEndpointActionsRegex.test(e._index)
@@ -256,7 +256,7 @@ export const getActionResponsesResult = async ({
 
   let actionResponses: TransportResult<estypes.SearchResponse<unknown>, unknown>;
   try {
-    const esClient = context.core.elasticsearch.client.asInternalUser;
+    const esClient = (await context.core).elasticsearch.client.asInternalUser;
     actionResponses = await esClient.search(responsesSearchQuery, { ...queryOptions, meta: true });
   } catch (error) {
     logger.error(error);

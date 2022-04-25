@@ -7,11 +7,11 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 
 import { Filter, Query, TimeRange } from '../../services/data';
 import { ViewMode } from '../../services/embeddable';
 import { DashboardOptions, DashboardPanelMap, DashboardState } from '../../types';
-import { DashboardContainerControlGroupInput } from '../embeddable';
 
 export const dashboardStateSlice = createSlice({
   name: 'dashboardState',
@@ -44,7 +44,7 @@ export const dashboardStateSlice = createSlice({
     },
     setControlGroupState: (
       state,
-      action: PayloadAction<DashboardContainerControlGroupInput | undefined>
+      action: PayloadAction<PersistableControlGroupInput | undefined>
     ) => {
       state.controlGroupInput = action.payload;
     },
