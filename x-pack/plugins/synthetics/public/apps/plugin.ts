@@ -128,7 +128,7 @@ export class UptimePlugin
                 sortKey: 500,
                 entries: [
                   {
-                    label: i18n.translate('xpack.uptime.overview.heading', {
+                    label: i18n.translate('xpack.synthetics.overview.heading', {
                       defaultMessage: 'Monitors',
                     }),
                     app: 'uptime',
@@ -137,7 +137,7 @@ export class UptimePlugin
                     ignoreTrailingSlash: true,
                   },
                   {
-                    label: i18n.translate('xpack.uptime.certificatesPage.heading', {
+                    label: i18n.translate('xpack.synthetics.certificatesPage.heading', {
                       defaultMessage: 'TLS Certificates',
                     }),
                     app: 'uptime',
