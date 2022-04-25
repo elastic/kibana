@@ -232,15 +232,13 @@ export function RuleDetailsPage() {
                   isOpen={isRuleEditPopoverOpen}
                   closePopover={() => setIsRuleEditPopoverOpen(false)}
                   button={
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonIcon
-                        display="base"
-                        size="m"
-                        iconType="boxesHorizontal"
-                        aria-label="More"
-                        onClick={() => setIsRuleEditPopoverOpen(true)}
-                      />
-                    </EuiFlexItem>
+                    <EuiButtonIcon
+                      display="base"
+                      size="m"
+                      iconType="boxesHorizontal"
+                      aria-label="More"
+                      onClick={() => setIsRuleEditPopoverOpen(true)}
+                    />
                   }
                 >
                   <EuiButtonEmpty
