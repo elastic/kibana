@@ -63,6 +63,7 @@ interface LiveQueryFormProps {
   formType?: FormType;
   enabled?: boolean;
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
+  hideFullscreen?: true;
 }
 
 const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
@@ -73,6 +74,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   ecsMappingField = true,
   formType = 'steps',
   enabled = true,
+  hideFullscreen,
   addToTimeline,
 }) => {
   const ecsFieldRef = useRef<ECSMappingEditorFieldRef>();
@@ -147,8 +149,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     schema: formSchema,
     onSubmit: async (formData, isValid) => {
       const ecsFieldValue = await ecsFieldRef?.current?.validate();
-
-      if (isValid) {
+      if (isValid && (!ecsMappingField || !!ecsFieldValue)) {
         try {
           await mutateAsync(
             pickBy(
@@ -270,9 +271,9 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const ecsFieldProps = useMemo(
     () => ({
-      isDisabled: !permissions.writeSavedQueries,
+      isDisabled: !permissions.writeLiveQueries,
     }),
-    [permissions.writeSavedQueries]
+    [permissions.writeLiveQueries]
   );
 
   const isSavedQueryDisabled = useMemo(
@@ -394,10 +395,11 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           actionId={actionId}
           endDate={data?.actions[0].expiration}
           agentIds={agentIds}
+          hideFullscreen={hideFullscreen}
           addToTimeline={addToTimeline}
         />
       ) : null,
-    [actionId, agentIds, data?.actions, addToTimeline]
+    [actionId, agentIds, data?.actions, addToTimeline, hideFullscreen]
   );
 
   const formSteps: EuiContainedStepProps[] = useMemo(
@@ -462,6 +464,9 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       <Form form={form}>
         {formType === 'steps' ? <EuiSteps steps={formSteps} /> : simpleForm}
         <UseField path="savedQueryId" component={GhostFormField} />
+
+
+
       </Form>
       {showSavedQueryFlyout ? (
         <SavedQueryFlyout

@@ -11,7 +11,7 @@ import {
   MetricsSourceConfigurationResponse,
   PartialMetricsSourceConfigurationProperties,
   metricsSourceConfigurationResponseRT,
-} from '../../../../plugins/infra/common/metrics_sources';
+} from '@kbn/infra-plugin/common/metrics_sources';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { pluginServices } from './services';
 import {
   ControlsPluginSetup,
@@ -36,7 +37,6 @@ import {
   TimeSliderControlEmbeddableInput,
 } from './control_types/time_slider';
 import { controlsService } from './services/kibana/controls';
-import { EmbeddableFactory } from '../../embeddable/public';
 
 export class ControlsPlugin
   implements

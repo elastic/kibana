@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { rawAlertInstance } from './alert_instance';
 import { DateFromString } from './date_from_string';
-import { IntervalSchedule, RuleMonitoring } from './alert';
+import { IntervalSchedule, RuleMonitoring } from './rule';
 
 export const ruleStateSchema = t.partial({
   alertTypeState: t.record(t.string, t.unknown),
@@ -24,7 +24,7 @@ const ruleExecutionMetricsSchema = t.partial({
 
 const alertExecutionStore = t.partial({
   numberOfTriggeredActions: t.number,
-  numberOfScheduledActions: t.number,
+  numberOfGeneratedActions: t.number,
   triggeredActionsStatus: t.string,
 });
 

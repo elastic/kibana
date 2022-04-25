@@ -3930,7 +3930,15 @@
         "label": "KibanaServices",
         "description": [],
         "signature": [
-          "{ application?: ",
+          "{ analytics?: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.AnalyticsServiceStart",
+            "text": "AnalyticsServiceStart"
+          },
+          " | undefined; application?: ",
           {
             "pluginId": "core",
             "scope": "public",

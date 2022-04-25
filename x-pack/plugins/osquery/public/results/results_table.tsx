@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 
-import { pagePathGetters } from '../../../fleet/public';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { useAllResults } from './use_all_results';
 import { Direction, ResultEdges } from '../../common/search_strategy';
 import { useKibana } from '../common/lib/kibana';
@@ -197,6 +197,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
           // @ts-expect-error update types
           acc[value?.field] = [...(acc[value?.field] ?? []), key];
         }
+
         return acc;
       },
       {},
@@ -276,6 +277,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             });
             seen.add(fieldName);
           }
+
           return acc;
         }
 
@@ -293,6 +295,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             });
             seen.add(displayAsText);
           }
+
           return acc;
         }
 
@@ -392,6 +395,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         // @ts-expect-error update types
         <DataContext.Provider value={allResultsData?.edges}>
           <EuiDataGrid
+            data-test-subj="osqueryResultsTable"
             aria-label="Osquery results"
             columns={columns}
             columnVisibility={columnVisibility}

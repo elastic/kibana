@@ -115,10 +115,7 @@
                             "type": "string"
                           }
                         },
-                        "required": [
-                          "name",
-                          "version"
-                        ]
+                        "required": ["name", "version"]
                       }
                     }
                   }
@@ -340,21 +337,13 @@
                       "properties": {
                         "status": {
                           "type": "string",
-                          "enum": [
-                            "installed",
-                            "installing",
-                            "install_failed",
-                            "not_installed"
-                          ]
+                          "enum": ["installed", "installing", "install_failed", "not_installed"]
                         },
                         "savedObject": {
                           "type": "string"
                         }
                       },
-                      "required": [
-                        "status",
-                        "savedObject"
-                      ]
+                      "required": ["status", "savedObject"]
                     }
                   ]
                 }
@@ -410,16 +399,11 @@
                             ]
                           }
                         },
-                        "required": [
-                          "id",
-                          "type"
-                        ]
+                        "required": ["id", "type"]
                       }
                     }
                   },
-                  "required": [
-                    "response"
-                  ]
+                  "required": ["response"]
                 }
               }
             }
@@ -478,16 +462,11 @@
                             ]
                           }
                         },
-                        "required": [
-                          "id",
-                          "type"
-                        ]
+                        "required": ["id", "type"]
                       }
                     }
                   },
-                  "required": [
-                    "response"
-                  ]
+                  "required": ["response"]
                 }
               }
             }
@@ -539,21 +518,13 @@
                       "properties": {
                         "status": {
                           "type": "string",
-                          "enum": [
-                            "installed",
-                            "installing",
-                            "install_failed",
-                            "not_installed"
-                          ]
+                          "enum": ["installed", "installing", "install_failed", "not_installed"]
                         },
                         "savedObject": {
                           "type": "string"
                         }
                       },
-                      "required": [
-                        "status",
-                        "savedObject"
-                      ]
+                      "required": ["status", "savedObject"]
                     }
                   ]
                 }
@@ -616,10 +587,7 @@
                             ]
                           }
                         },
-                        "required": [
-                          "id",
-                          "type"
-                        ]
+                        "required": ["id", "type"]
                       }
                     },
                     "_meta": {
@@ -627,18 +595,12 @@
                       "properties": {
                         "install_source": {
                           "type": "string",
-                          "enum": [
-                            "registry",
-                            "upload",
-                            "bundled"
-                          ]
+                          "enum": ["registry", "upload", "bundled"]
                         }
                       }
                     }
                   },
-                  "required": [
-                    "items"
-                  ]
+                  "required": ["items"]
                 }
               }
             }
@@ -699,16 +661,11 @@
                             ]
                           }
                         },
-                        "required": [
-                          "id",
-                          "type"
-                        ]
+                        "required": ["id", "type"]
                       }
                     }
                   },
-                  "required": [
-                    "items"
-                  ]
+                  "required": ["items"]
                 }
               }
             }
@@ -779,16 +736,11 @@
                             ]
                           }
                         },
-                        "required": [
-                          "id",
-                          "type"
-                        ]
+                        "required": ["id", "type"]
                       }
                     }
                   },
-                  "required": [
-                    "items"
-                  ]
+                  "required": ["items"]
                 }
               }
             }
@@ -888,9 +840,7 @@
                       "$ref": "#/components/schemas/package_usage_stats"
                     }
                   },
-                  "required": [
-                    "response"
-                  ]
+                  "required": ["response"]
                 }
               }
             }
@@ -965,10 +915,7 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "admin_username",
-                  "admin_password"
-                ]
+                "required": ["admin_username", "admin_password"]
               }
             }
           }
@@ -1209,9 +1156,7 @@
                         "type": "string"
                       }
                     },
-                    "required": [
-                      "success"
-                    ]
+                    "required": ["success"]
                   }
                 }
               }
@@ -1272,9 +1217,7 @@
                       "$ref": "#/components/schemas/agent"
                     }
                   },
-                  "required": [
-                    "item"
-                  ]
+                  "required": ["item"]
                 }
               }
             }
@@ -1297,9 +1240,7 @@
                       "$ref": "#/components/schemas/agent"
                     }
                   },
-                  "required": [
-                    "item"
-                  ]
+                  "required": ["item"]
                 }
               }
             }
@@ -1325,14 +1266,10 @@
                   "properties": {
                     "action": {
                       "type": "string",
-                      "enum": [
-                        "deleted"
-                      ]
+                      "enum": ["deleted"]
                     }
                   },
-                  "required": [
-                    "action"
-                  ]
+                  "required": ["action"]
                 }
               }
             }
@@ -1452,9 +1389,7 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "policy_id"
-                ]
+                "required": ["policy_id"]
               }
             }
           }
@@ -1501,9 +1436,7 @@
                     },
                     "statusCode": {
                       "type": "number",
-                      "enum": [
-                        400
-                      ]
+                      "enum": [400]
                     }
                   }
                 }
@@ -1611,9 +1544,7 @@
                         "type": "string"
                       }
                     },
-                    "required": [
-                      "success"
-                    ]
+                    "required": ["success"]
                   }
                 }
               }
@@ -1649,10 +1580,7 @@
                     ]
                   }
                 },
-                "required": [
-                  "policy_id",
-                  "agents"
-                ]
+                "required": ["policy_id", "agents"]
               }
             }
           }
@@ -1680,9 +1608,7 @@
                         "type": "string"
                       }
                     },
-                    "required": [
-                      "success"
-                    ]
+                    "required": ["success"]
                   }
                 }
               }
@@ -1721,9 +1647,7 @@
                     ]
                   }
                 },
-                "required": [
-                  "agents"
-                ]
+                "required": ["agents"]
               }
             }
           }
@@ -1758,12 +1682,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "items",
-                    "total",
-                    "page",
-                    "perPage"
-                  ]
+                  "required": ["items", "total", "page", "perPage"]
                 }
               }
             }
@@ -1847,9 +1766,7 @@
                       "$ref": "#/components/schemas/agent_policy"
                     }
                   },
-                  "required": [
-                    "item"
-                  ]
+                  "required": ["item"]
                 }
               }
             }
@@ -1874,9 +1791,7 @@
                       "$ref": "#/components/schemas/agent_policy"
                     }
                   },
-                  "required": [
-                    "item"
-                  ]
+                  "required": ["item"]
                 }
               }
             }
@@ -1930,9 +1845,7 @@
                       "$ref": "#/components/schemas/agent_policy"
                     }
                   },
-                  "required": [
-                    "item"
-                  ]
+                  "required": ["item"]
                 }
               }
             }
@@ -1951,9 +1864,7 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "name"
-                ]
+                "required": ["name"]
               }
             }
           },
@@ -1980,10 +1891,7 @@
                       "type": "boolean"
                     }
                   },
-                  "required": [
-                    "id",
-                    "success"
-                  ]
+                  "required": ["id", "success"]
                 }
               }
             }
@@ -1999,9 +1907,7 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "agentPolicyId"
-                ]
+                "required": ["agentPolicyId"]
               }
             }
           }
@@ -2077,12 +1983,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "items",
-                    "page",
-                    "perPage",
-                    "total"
-                  ]
+                  "required": ["items", "page", "perPage", "total"]
                 }
               }
             }
@@ -2108,9 +2009,7 @@
                     },
                     "action": {
                       "type": "string",
-                      "enum": [
-                        "created"
-                      ]
+                      "enum": ["created"]
                     }
                   }
                 }
@@ -2153,9 +2052,7 @@
                       "$ref": "#/components/schemas/enrollment_api_key"
                     }
                   },
-                  "required": [
-                    "item"
-                  ]
+                  "required": ["item"]
                 }
               }
             }
@@ -2177,14 +2074,10 @@
                   "properties": {
                     "action": {
                       "type": "string",
-                      "enum": [
-                        "deleted"
-                      ]
+                      "enum": ["deleted"]
                     }
                   },
-                  "required": [
-                    "action"
-                  ]
+                  "required": ["action"]
                 }
               }
             }
@@ -2234,12 +2127,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "items",
-                    "page",
-                    "perPage",
-                    "total"
-                  ]
+                  "required": ["items", "page", "perPage", "total"]
                 }
               }
             }
@@ -2264,9 +2152,7 @@
                     },
                     "action": {
                       "type": "string",
-                      "enum": [
-                        "created"
-                      ]
+                      "enum": ["created"]
                     }
                   }
                 }
@@ -2308,9 +2194,7 @@
                       "$ref": "#/components/schemas/enrollment_api_key"
                     }
                   },
-                  "required": [
-                    "item"
-                  ]
+                  "required": ["item"]
                 }
               }
             }
@@ -2331,14 +2215,10 @@
                   "properties": {
                     "action": {
                       "type": "string",
-                      "enum": [
-                        "deleted"
-                      ]
+                      "enum": ["deleted"]
                     }
                   },
-                  "required": [
-                    "action"
-                  ]
+                  "required": ["action"]
                 }
               }
             }
@@ -2380,9 +2260,7 @@
                       "type": "number"
                     }
                   },
-                  "required": [
-                    "items"
-                  ]
+                  "required": ["items"]
                 }
               }
             }
@@ -2408,9 +2286,7 @@
                       "$ref": "#/components/schemas/package_policy"
                     }
                   },
-                  "required": [
-                    "item"
-                  ]
+                  "required": ["item"]
                 }
               }
             }
@@ -2472,9 +2348,7 @@
                     "type": "boolean"
                   }
                 },
-                "required": [
-                  "packagePolicyIds"
-                ]
+                "required": ["packagePolicyIds"]
               }
             }
           }
@@ -2499,10 +2373,7 @@
                         "type": "boolean"
                       }
                     },
-                    "required": [
-                      "id",
-                      "success"
-                    ]
+                    "required": ["id", "success"]
                   }
                 }
               }
@@ -2533,9 +2404,7 @@
                     }
                   }
                 },
-                "required": [
-                  "packagePolicyIds"
-                ]
+                "required": ["packagePolicyIds"]
               }
             }
           }
@@ -2560,10 +2429,7 @@
                         "type": "boolean"
                       }
                     },
-                    "required": [
-                      "id",
-                      "success"
-                    ]
+                    "required": ["id", "success"]
                   }
                 }
               }
@@ -2592,9 +2458,7 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "packagePolicyIds"
-                ]
+                "required": ["packagePolicyIds"]
               }
             }
           }
@@ -2619,9 +2483,7 @@
                         "$ref": "#/components/schemas/upgrade_agent_diff"
                       }
                     },
-                    "required": [
-                      "hasErrors"
-                    ]
+                    "required": ["hasErrors"]
                   }
                 }
               }
@@ -2646,9 +2508,7 @@
                       "$ref": "#/components/schemas/package_policy"
                     }
                   },
-                  "required": [
-                    "item"
-                  ]
+                  "required": ["item"]
                 }
               }
             }
@@ -2693,10 +2553,7 @@
                       "type": "boolean"
                     }
                   },
-                  "required": [
-                    "item",
-                    "sucess"
-                  ]
+                  "required": ["item", "sucess"]
                 }
               }
             }
@@ -2779,9 +2636,7 @@
                   },
                   "type": {
                     "type": "string",
-                    "enum": [
-                      "elasticsearch"
-                    ]
+                    "enum": ["elasticsearch"]
                   },
                   "is_default": {
                     "type": "boolean"
@@ -2802,10 +2657,7 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "name",
-                  "type"
-                ]
+                "required": ["name", "type"]
               }
             }
           }
@@ -2829,9 +2681,7 @@
                       "$ref": "#/components/schemas/output"
                     }
                   },
-                  "required": [
-                    "item"
-                  ]
+                  "required": ["item"]
                 }
               }
             }
@@ -2864,9 +2714,7 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "id"
-                  ]
+                  "required": ["id"]
                 }
               }
             }
@@ -2892,9 +2740,7 @@
                   },
                   "type": {
                     "type": "string",
-                    "enum": [
-                      "elasticsearch"
-                    ]
+                    "enum": ["elasticsearch"]
                   },
                   "is_default": {
                     "type": "boolean"
@@ -2918,10 +2764,7 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "name",
-                  "type"
-                ]
+                "required": ["name", "type"]
               }
             }
           }
@@ -2938,9 +2781,7 @@
                       "$ref": "#/components/schemas/output"
                     }
                   },
-                  "required": [
-                    "item"
-                  ]
+                  "required": ["item"]
                 }
               }
             }
@@ -3059,17 +2900,11 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "name",
-                "message"
-              ]
+              "required": ["name", "message"]
             }
           }
         },
-        "required": [
-          "isInitialized",
-          "nonFatalErrors"
-        ]
+        "required": ["isInitialized", "nonFatalErrors"]
       },
       "preconfigured_agent_policies": {
         "title": "Preconfigured agent policies",
@@ -3091,10 +2926,7 @@
             "type": "array",
             "items": {
               "type": "string",
-              "enum": [
-                "logs",
-                "metrics"
-              ]
+              "enum": ["logs", "metrics"]
             }
           },
           "namespace": {
@@ -3191,20 +3023,14 @@
                         }
                       }
                     },
-                    "required": [
-                      "type"
-                    ]
+                    "required": ["type"]
                   }
                 }
               }
             }
           }
         },
-        "required": [
-          "name",
-          "namespace",
-          "package_policies"
-        ]
+        "required": ["name", "namespace", "package_policies"]
       },
       "settings": {
         "title": "Settings",
@@ -3226,10 +3052,7 @@
             }
           }
         },
-        "required": [
-          "fleet_server_hosts",
-          "id"
-        ]
+        "required": ["fleet_server_hosts", "id"]
       },
       "fleet_settings_response": {
         "title": "Fleet settings response",
@@ -3239,9 +3062,7 @@
             "$ref": "#/components/schemas/settings"
           }
         },
-        "required": [
-          "item"
-        ]
+        "required": ["item"]
       },
       "get_categories_response": {
         "title": "Get categories response",
@@ -3263,11 +3084,7 @@
                   "type": "number"
                 }
               },
-              "required": [
-                "id",
-                "title",
-                "count"
-              ]
+              "required": ["id", "title", "count"]
             }
           },
           "items": {
@@ -3285,17 +3102,11 @@
                   "type": "number"
                 }
               },
-              "required": [
-                "id",
-                "title",
-                "count"
-              ]
+              "required": ["id", "title", "count"]
             }
           }
         },
-        "required": [
-          "items"
-        ]
+        "required": ["items"]
       },
       "search_result": {
         "title": "Search result",
@@ -3362,9 +3173,7 @@
             }
           }
         },
-        "required": [
-          "items"
-        ]
+        "required": ["items"]
       },
       "bulk_install_packages_response": {
         "title": "Bulk install packages response",
@@ -3400,9 +3209,7 @@
             }
           }
         },
-        "required": [
-          "items"
-        ]
+        "required": ["items"]
       },
       "package_info": {
         "title": "Package information",
@@ -3482,10 +3289,7 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "src",
-                "path"
-              ]
+              "required": ["src", "path"]
             }
           },
           "icons": {
@@ -3535,10 +3339,7 @@
                         "type": "string"
                       }
                     },
-                    "required": [
-                      "name",
-                      "default"
-                    ]
+                    "required": ["name", "default"]
                   }
                 },
                 "type": {
@@ -3548,14 +3349,7 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "title",
-                "name",
-                "release",
-                "ingeset_pipeline",
-                "type",
-                "package"
-              ]
+              "required": ["title", "name", "release", "ingeset_pipeline", "type", "package"]
             }
           },
           "download": {
@@ -3617,9 +3411,7 @@
             "type": "integer"
           }
         },
-        "required": [
-          "agent_policy_count"
-        ]
+        "required": ["agent_policy_count"]
       },
       "fleet_status_response": {
         "title": "Fleet status response",
@@ -3632,29 +3424,23 @@
             "type": "array",
             "items": {
               "type": "string",
-              "enum": [
-                "tls_required",
-                "api_keys",
-                "fleet_admin_user",
-                "fleet_server",
-                "encrypted_saved_object_encryption_key_required"
-              ]
+              "enum": ["tls_required", "api_keys", "fleet_admin_user", "fleet_server"]
+            }
+          },
+          "missing_optional_features": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["encrypted_saved_object_encryption_key_required"]
             }
           }
         },
-        "required": [
-          "isReady",
-          "missing_requirements"
-        ]
+        "required": ["isReady", "missing_requirements", "missing_optional_features"]
       },
       "agent_type": {
         "type": "string",
         "title": "Agent type",
-        "enum": [
-          "PERMANENT",
-          "EPHEMERAL",
-          "TEMPORARY"
-        ]
+        "enum": ["PERMANENT", "EPHEMERAL", "TEMPORARY"]
       },
       "agent_metadata": {
         "title": "Agent metadata",
@@ -3663,13 +3449,7 @@
       "agent_status": {
         "type": "string",
         "title": "Agent status",
-        "enum": [
-          "offline",
-          "error",
-          "online",
-          "inactive",
-          "warning"
-        ]
+        "enum": ["offline", "error", "online", "inactive", "warning"]
       },
       "agent": {
         "title": "Agent",
@@ -3724,13 +3504,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "type",
-          "active",
-          "enrolled_at",
-          "id",
-          "status"
-        ]
+        "required": ["type", "active", "enrolled_at", "id", "status"]
       },
       "get_agents_response": {
         "title": "Get Agent response",
@@ -3759,12 +3533,7 @@
             "type": "number"
           }
         },
-        "required": [
-          "items",
-          "total",
-          "page",
-          "perPage"
-        ]
+        "required": ["items", "total", "page", "perPage"]
       },
       "bulk_upgrade_agents": {
         "title": "Bulk upgrade agents",
@@ -3790,10 +3559,7 @@
             ]
           }
         },
-        "required": [
-          "agents",
-          "version"
-        ]
+        "required": ["agents", "version"]
       },
       "upgrade_agent": {
         "title": "Upgrade agent",
@@ -3805,9 +3571,7 @@
                 "type": "string"
               }
             },
-            "required": [
-              "version"
-            ]
+            "required": ["version"]
           },
           {
             "type": "object",
@@ -3819,9 +3583,7 @@
                 "type": "string"
               }
             },
-            "required": [
-              "version"
-            ]
+            "required": ["version"]
           }
         ]
       },
@@ -3838,12 +3600,7 @@
               },
               "type": {
                 "type": "string",
-                "enum": [
-                  "POLICY_CHANGE",
-                  "UNENROLL",
-                  "UPGRADE",
-                  "POLICY_REASSIGN"
-                ]
+                "enum": ["POLICY_CHANGE", "UNENROLL", "UPGRADE", "POLICY_REASSIGN"]
               }
             }
           },
@@ -3857,12 +3614,7 @@
                 "properties": {
                   "log_level": {
                     "type": "string",
-                    "enum": [
-                      "debug",
-                      "info",
-                      "warning",
-                      "error"
-                    ]
+                    "enum": ["debug", "info", "warning", "error"]
                   }
                 }
               }
@@ -3890,10 +3642,7 @@
             "type": "array",
             "items": {
               "type": "string",
-              "enum": [
-                "metrics",
-                "logs"
-              ]
+              "enum": ["metrics", "logs"]
             }
           },
           "data_output_id": {
@@ -3905,10 +3654,7 @@
             "nullable": true
           }
         },
-        "required": [
-          "name",
-          "namespace"
-        ]
+        "required": ["name", "namespace"]
       },
       "new_package_policy": {
         "title": "New package policy",
@@ -3931,10 +3677,7 @@
                 "type": "string"
               }
             },
-            "required": [
-              "name",
-              "version"
-            ]
+            "required": ["name", "version"]
           },
           "namespace": {
             "type": "string"
@@ -3970,10 +3713,7 @@
                   "type": "object"
                 }
               },
-              "required": [
-                "type",
-                "enabled"
-              ]
+              "required": ["type", "enabled"]
             }
           },
           "policy_id": {
@@ -3986,10 +3726,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "inputs",
-          "name"
-        ]
+        "required": ["inputs", "name"]
       },
       "package_policy": {
         "title": "Package policy",
@@ -4008,10 +3745,7 @@
                 "items": {}
               }
             },
-            "required": [
-              "id",
-              "revision"
-            ]
+            "required": ["id", "revision"]
           },
           {
             "$ref": "#/components/schemas/new_package_policy"
@@ -4031,10 +3765,7 @@
               },
               "status": {
                 "type": "string",
-                "enum": [
-                  "active",
-                  "inactive"
-                ]
+                "enum": ["active", "inactive"]
               },
               "packagePolicies": {
                 "oneOf": [
@@ -4072,10 +3803,7 @@
                 "type": "number"
               }
             },
-            "required": [
-              "id",
-              "status"
-            ]
+            "required": ["id", "status"]
           }
         ]
       },
@@ -4152,13 +3880,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "id",
-          "api_key_id",
-          "api_key",
-          "active",
-          "created_at"
-        ]
+        "required": ["id", "api_key_id", "api_key", "active", "created_at"]
       },
       "upgrade_diff": {
         "title": "Package policy Upgrade dryrun",
@@ -4224,16 +3946,10 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "dataset",
-                  "type"
-                ]
+                "required": ["dataset", "type"]
               }
             },
-            "required": [
-              "id",
-              "data_stream"
-            ]
+            "required": ["id", "data_stream"]
           }
         ]
       },
@@ -4263,9 +3979,7 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "namespace"
-                ]
+                "required": ["namespace"]
               },
               "use_output": {
                 "type": "string"
@@ -4284,10 +3998,7 @@
                         "type": "string"
                       }
                     },
-                    "required": [
-                      "name",
-                      "version"
-                    ]
+                    "required": ["name", "version"]
                   }
                 }
               },
@@ -4295,14 +4006,7 @@
                 "$ref": "#/components/schemas/full_agent_policy_input_stream"
               }
             },
-            "required": [
-              "id",
-              "name",
-              "revision",
-              "type",
-              "data_stream",
-              "use_output"
-            ]
+            "required": ["id", "name", "revision", "type", "data_stream", "use_output"]
           }
         ]
       },
@@ -4340,11 +4044,7 @@
                 "type": "string"
               }
             },
-            "required": [
-              "name",
-              "title",
-              "version"
-            ]
+            "required": ["name", "title", "version"]
           },
           "namespace": {
             "type": "string"
@@ -4380,11 +4080,7 @@
                   "type": "object"
                 }
               },
-              "required": [
-                "type",
-                "enabled",
-                "streams"
-              ]
+              "required": ["type", "enabled", "streams"]
             }
           },
           "policy_id": {
@@ -4400,12 +4096,7 @@
             "type": "boolean"
           }
         },
-        "required": [
-          "name",
-          "namespace",
-          "policy_id",
-          "enabled"
-        ]
+        "required": ["name", "namespace", "policy_id", "enabled"]
       },
       "output": {
         "title": "Output",
@@ -4425,9 +4116,7 @@
           },
           "type": {
             "type": "string",
-            "enum": [
-              "elasticsearch"
-            ]
+            "enum": ["elasticsearch"]
           },
           "hosts": {
             "type": "array",
@@ -4465,12 +4154,7 @@
             }
           }
         },
-        "required": [
-          "id",
-          "is_default",
-          "name",
-          "type"
-        ]
+        "required": ["id", "is_default", "name", "type"]
       }
     }
   },

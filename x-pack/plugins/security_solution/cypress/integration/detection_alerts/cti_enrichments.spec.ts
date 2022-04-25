@@ -6,9 +6,9 @@
  */
 
 import { getNewThreatIndicatorRule } from '../../objects/rule';
-import { cleanKibana, reload } from '../../tasks/common';
+import { cleanKibana } from '../../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 import {
   JSON_TEXT,
   TABLE_CELL,
@@ -21,16 +21,11 @@ import {
 } from '../../screens/alerts_details';
 import { TIMELINE_FIELD } from '../../screens/rule_details';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
-import {
-  expandFirstAlert,
-  goToManageAlertsDetectionRules,
-  setEnrichmentDates,
-  viewThreatIntelTab,
-} from '../../tasks/alerts';
+import { expandFirstAlert, setEnrichmentDates, viewThreatIntelTab } from '../../tasks/alerts';
 import { createCustomIndicatorRule } from '../../tasks/api_calls/rules';
 import { openJsonView, openThreatIndicatorDetails } from '../../tasks/alerts_details';
 
-import { ALERTS_URL } from '../../urls/navigation';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 import { addsFieldsToTimeline } from '../../tasks/rule_details';
 
 describe('CTI Enrichment', () => {
@@ -38,10 +33,8 @@ describe('CTI Enrichment', () => {
     cleanKibana();
     esArchiverLoad('threat_indicator');
     esArchiverLoad('suspicious_source_event');
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    goToManageAlertsDetectionRules();
+    login();
     createCustomIndicatorRule(getNewThreatIndicatorRule());
-    reload();
   });
 
   after(() => {
@@ -50,8 +43,7 @@ describe('CTI Enrichment', () => {
   });
 
   beforeEach(() => {
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    goToManageAlertsDetectionRules();
+    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
   });
 

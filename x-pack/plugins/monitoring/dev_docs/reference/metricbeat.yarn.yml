@@ -29,6 +29,11 @@ metricbeat.modules:
       # filebeat
       - "http://host.docker.internal:5067"
 
+  - module: logstash
+    xpack.enabled: true
+    period: 10s
+    hosts:
+      - "host.docker.internal:9600"
 
 output.elasticsearch:
   hosts: [ "host.docker.internal:9200" ]

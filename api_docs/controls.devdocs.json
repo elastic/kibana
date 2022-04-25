@@ -138,6 +138,21 @@
           },
           {
             "parentPluginId": "controls",
+            "id": "def-public.ControlGroupContainer.closeAllFlyouts",
+            "type": "Function",
+            "tags": [],
+            "label": "closeAllFlyouts",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-public.ControlGroupContainer.getCreateControlButton",
             "type": "Function",
             "tags": [
@@ -424,6 +439,43 @@
                 "description": [],
                 "signature": [
                   "Partial<TEmbeddableInput>"
+                ],
+                "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupContainer.onRemoveEmbeddable",
+            "type": "Function",
+            "tags": [],
+            "label": "onRemoveEmbeddable",
+            "description": [],
+            "signature": [
+              "(idToRemove: string) => ",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.ControlsPanels",
+                "text": "ControlsPanels"
+              }
+            ],
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.ControlGroupContainer.onRemoveEmbeddable.$1",
+                "type": "string",
+                "tags": [],
+                "label": "idToRemove",
+                "description": [],
+                "signature": [
+                  "string"
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
                 "deprecated": false,
@@ -2326,7 +2378,7 @@
             "label": "controlEditorComponent",
             "description": [],
             "signature": [
-              "({ onChange, initialInput, setValidState, setDefaultTitle, }: ",
+              "({ onChange, initialInput, setValidState, setDefaultTitle, getRelevantDataViewId, setLastUsedDataViewId, }: ",
               {
                 "pluginId": "controls",
                 "scope": "public",

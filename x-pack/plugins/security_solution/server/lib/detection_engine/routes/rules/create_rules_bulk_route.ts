@@ -7,12 +7,13 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { getIndexExists } from '@kbn/securitysolution-es-utils';
+import { Logger } from '@kbn/core/server';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { createRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
-  DETECTION_ENGINE_RULES_URL,
+  DETECTION_ENGINE_RULES_BULK_CREATE,
   NOTIFICATION_THROTTLE_NO_ACTIONS,
 } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
@@ -25,15 +26,20 @@ import { buildRouteValidation } from '../../../../utils/build_validation/route_v
 
 import { transformBulkError, createBulkErrorObject, buildSiemResponse } from '../utils';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
+import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from './utils/deprecation';
 
+/**
+ * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
+ */
 export const createRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  isRuleRegistryEnabled: boolean
+  isRuleRegistryEnabled: boolean,
+  logger: Logger
 ) => {
   router.post(
     {
-      path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+      path: DETECTION_ENGINE_RULES_BULK_CREATE,
       validate: {
         body: buildRouteValidation(createRulesBulkSchema),
       },
@@ -42,14 +48,19 @@ export const createRulesBulkRoute = (
       },
     },
     async (context, request, response) => {
+      logDeprecatedBulkEndpoint(logger, DETECTION_ENGINE_RULES_BULK_CREATE);
+
       const siemResponse = buildSiemResponse(response);
-      const rulesClient = context.alerting.getRulesClient();
-      const esClient = context.core.elasticsearch.client;
-      const savedObjectsClient = context.core.savedObjects.client;
-      const siemClient = context.securitySolution.getAppClient();
+
+      const ctx = await context.resolve(['core', 'securitySolution', 'licensing', 'alerting']);
+
+      const rulesClient = ctx.alerting.getRulesClient();
+      const esClient = ctx.core.elasticsearch.client;
+      const savedObjectsClient = ctx.core.savedObjects.client;
+      const siemClient = ctx.securitySolution.getAppClient();
 
       const mlAuthz = buildMlAuthz({
-        license: context.licensing.license,
+        license: ctx.licensing.license,
         ml,
         request,
         savedObjectsClient,
@@ -138,9 +149,16 @@ export const createRulesBulkRoute = (
       ];
       const [validated, errors] = validate(rulesBulk, rulesBulkSchema);
       if (errors != null) {
-        return siemResponse.error({ statusCode: 500, body: errors });
+        return siemResponse.error({
+          statusCode: 500,
+          body: errors,
+          headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_CREATE),
+        });
       } else {
-        return response.ok({ body: validated ?? {} });
+        return response.ok({
+          body: validated ?? {},
+          headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_CREATE),
+        });
       }
     }
   );

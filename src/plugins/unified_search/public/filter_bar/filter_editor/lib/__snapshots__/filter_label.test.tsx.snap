@@ -1,0 +1,68 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`alias 1`] = `
+<div>
+  
+  geo.coordinates in US
+</div>
+`;
+
+exports[`alias with error status 1`] = `
+<div>
+  <span
+    class="euiTextColor euiTextColor--danger"
+  >
+     NOT 
+  </span>
+  geo.coordinates in US
+  : 
+  <span
+    class="globalFilterLabel__value"
+  >
+    Error
+  </span>
+</div>
+`;
+
+exports[`alias with warning status 1`] = `
+<div>
+  <span
+    class="euiTextColor euiTextColor--danger"
+  >
+     NOT 
+  </span>
+  geo.coordinates in US
+  : 
+  <span
+    class="globalFilterLabel__value"
+  >
+    Warning
+  </span>
+</div>
+`;
+
+exports[`error 1`] = `
+<div>
+  
+  machine.os
+  : 
+  <span
+    class="globalFilterLabel__value"
+  >
+    Error
+  </span>
+</div>
+`;
+
+exports[`warning 1`] = `
+<div>
+  
+  machine.os
+  : 
+  <span
+    class="globalFilterLabel__value"
+  >
+    Warning
+  </span>
+</div>
+`;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertExecutorOptions, AlertTypeParams } from '../../types';
+import { RuleExecutorOptions, RuleTypeParams } from '../../types';
 import { ActionContext } from './action_context';
 import { EsQueryAlertParams, EsQueryAlertState } from './alert_type_params';
 import { ActionGroupId } from './constants';
@@ -19,7 +19,7 @@ export type OnlySearchSourceAlertParams = Omit<
   searchType: 'searchSource';
 };
 
-export type ExecutorOptions<P extends AlertTypeParams> = AlertExecutorOptions<
+export type ExecutorOptions<P extends RuleTypeParams> = RuleExecutorOptions<
   P,
   EsQueryAlertState,
   {},

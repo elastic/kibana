@@ -6,7 +6,7 @@
  */
 
 import { mapToReportingError } from './map_to_reporting_error';
-import { errors } from '../../../screenshotting/common';
+import { errors } from '@kbn/screenshotting-plugin/common';
 import {
   UnknownError,
   BrowserCouldNotLaunchError,

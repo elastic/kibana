@@ -12,9 +12,9 @@ import type {
   IRouter,
   KibanaRequest,
   KibanaResponseFactory,
-} from 'src/core/server';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
-import * as kbnTestServer from 'src/core/test_helpers/kbn_server';
+} from '@kbn/core/server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
 
 import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
 

@@ -512,7 +512,7 @@
               "; }>; getById: (getByIdParams: { id: string; }) => Promise<",
               "GetResponse",
               "<unknown>>; delete: (deleteParams: { id: string; }) => Promise<",
-              "DeleteResponse",
+              "WriteResponseBase",
               ">; } | undefined>; }; start: () => Promise<undefined>; }; ruleRegistry: { setup: ",
               {
                 "pluginId": "ruleRegistry",

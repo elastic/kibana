@@ -9,7 +9,7 @@ export const PROCESS_EVENTS_ROUTE = '/internal/session_view/process_events_route
 export const ALERTS_ROUTE = '/internal/session_view/alerts_route';
 export const ALERT_STATUS_ROUTE = '/internal/session_view/alert_status_route';
 export const SESSION_ENTRY_LEADERS_ROUTE = '/internal/session_view/session_entry_leaders_route';
-export const PROCESS_EVENTS_INDEX = 'logs-endpoint.events.process-default';
+export const PROCESS_EVENTS_INDEX = 'logs-endpoint.events.process-*';
 export const PREVIEW_ALERTS_INDEX = '.preview.alerts-security.alerts-default';
 export const ENTRY_SESSION_ENTITY_ID_PROPERTY = 'process.entry_leader.entity_id';
 export const ALERT_UUID_PROPERTY = 'kibana.alert.uuid';
@@ -41,15 +41,16 @@ export const PROCESS_EVENTS_PER_PAGE = 1000;
 // causes a session to only list and highlight up to 1000 alerts, even though there could
 // be far greater than this amount. UX should be added to let the end user know this is
 // happening and to revise their rule to be more specific.
-export const ALERTS_PER_PAGE = 1000;
+export const ALERTS_PER_PAGE = 501;
 
 // when showing the count of alerts in details panel tab, if the number
-// exceeds ALERT_COUNT_THRESHOLD we put a + next to it, e.g  999+
-export const ALERT_COUNT_THRESHOLD = 999;
+// exceeds ALERT_COUNT_THRESHOLD we put a + next to it, e.g  500+
+export const ALERT_COUNT_THRESHOLD = 500;
 
 // react-query caching keys
 export const QUERY_KEY_PROCESS_EVENTS = 'sessionViewProcessEvents';
 export const QUERY_KEY_ALERTS = 'sessionViewAlerts';
+export const LOCAL_STORAGE_DISPLAY_OPTIONS_KEY = 'sessionView:displayOptions';
 
 export const MOUSE_EVENT_PLACEHOLDER = { stopPropagation: () => undefined } as React.MouseEvent;
 

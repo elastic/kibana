@@ -12,7 +12,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 
 import { create } from './create';
-import { XJson } from '../../../../../es_ui_shared/public';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import editorInput1 from './__fixtures__/editor_input1.txt';
 
 const { collapseLiteralStrings } = XJson;
@@ -455,11 +455,11 @@ describe('Editor', () => {
     editorInput1,
     { start: { lineNumber: 7 }, end: { lineNumber: 14 } },
     `
-curl -XGET "http://localhost:9200/_stats?level=shards"
+curl -XGET "http://localhost:9200/_stats?level=shards" -H "kbn-xsrf: reporting"
 
 #in between comment
 
-curl -XPUT "http://localhost:9200/index_1/type1/1" -H 'Content-Type: application/json' -d'
+curl -XPUT "http://localhost:9200/index_1/type1/1" -H "kbn-xsrf: reporting" -H "Content-Type: application/json" -d'
 {
   "f": 1
 }'`.trim()
@@ -470,7 +470,7 @@ curl -XPUT "http://localhost:9200/index_1/type1/1" -H 'Content-Type: application
     editorInput1,
     { start: { lineNumber: 29 }, end: { lineNumber: 33 } },
     `
-curl -XPOST "http://localhost:9200/_sql?format=txt" -H 'Content-Type: application/json' -d'
+curl -XPOST "http://localhost:9200/_sql?format=txt" -H "kbn-xsrf: reporting" -H "Content-Type: application/json" -d'
 {
   "query": "SELECT prenom FROM claude_index WHERE prenom = '\\''claude'\\'' ",
   "fetch_size": 1
