@@ -58,6 +58,7 @@ describe('Alert Event Details', () => {
     cy.getBySel('ruleSwitch').click();
     cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
     cy.visit('/app/security/alerts');
+    cy.wait(500);
     cy.getBySel('expand-event').first().click();
     cy.getBySel('take-action-dropdown-btn').click();
     cy.getBySel('osquery-action-item').click();
@@ -65,16 +66,16 @@ describe('Alert Event Details', () => {
     inputQuery('select * from uptime;');
     submitQuery();
     checkResults();
-    cy.getBySel('add-to-timeline').click();
+    cy.contains('Save for later').click();
+    cy.contains('Save query');
+    cy.get('.euiButtonEmpty--flushLeft').contains('Cancel').click();
+    cy.getBySel('add-to-timeline').first().click();
     cy.getBySel('globalToastList').contains('Added');
-    cy.contains('Cancel').click();
-    cy.contains(TIMELINE_NAME).click();
-    cy.getBySel('draggableWrapperKeyboardHandler').contains('action_id: "');
     cy.getBySel(RESULTS_TABLE).within(() => {
       cy.getBySel(RESULTS_TABLE_BUTTON).should('not.exist');
     });
-    cy.contains('Save for later').click();
-    cy.contains('Save query');
-    cy.contains(/^Save$/);
+    cy.contains('Cancel').click();
+    cy.contains(TIMELINE_NAME).click();
+    cy.getBySel('draggableWrapperKeyboardHandler').contains('action_id: "');
   });
 });
