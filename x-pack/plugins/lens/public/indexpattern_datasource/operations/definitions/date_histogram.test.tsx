@@ -10,6 +10,7 @@ import type { DateHistogramIndexPatternColumn } from './date_histogram';
 import { dateHistogramOperation } from '.';
 import { shallow } from 'enzyme';
 import { EuiSwitch } from '@elastic/eui';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
@@ -19,6 +20,7 @@ import type { IndexPatternLayer, IndexPattern } from '../../types';
 import { getFieldByNameFactory } from '../../pure_helpers';
 
 const dataStart = dataPluginMock.createStartContract();
+const unifiedSearchStart = unifiedSearchPluginMock.createStartContract();
 dataStart.search.aggs.calculateAutoTimeExpression = getCalculateAutoTimeExpression(
   (path: string) => {
     if (path === UI_SETTINGS.HISTOGRAM_MAX_BARS) {
@@ -93,6 +95,7 @@ const defaultOptions = {
     toDate: 'now',
   },
   data: dataStart,
+  unifiedSearch: unifiedSearchStart,
   http: {} as HttpSetup,
   indexPattern: indexPattern1,
   operationDefinitionMap: {},
