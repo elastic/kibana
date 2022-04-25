@@ -899,11 +899,60 @@
      "source":{
         "alert":{
            "name":"Test remove internal tags",
-           "alertTypeId":"siem.signals",
-           "consumer":"alertsFixture",
+           "alertTypeId":"siem.queryRule",
+           "consumer":"siem",
            "params":{
               "immutable":true,
-              "ruleId":"bf9638eb-7d3c-4f40-83d7-8c40a7c80f2e"
+              "ruleId":"bf9638eb-7d3c-4f40-83d7-8c40a7c80f2e",
+              "author":[
+                 
+              ],
+              "description":"remove interns tags mock rule",
+              "falsePositives":[
+                 
+              ],
+              "from":"now-36000060s",
+              "license":"",
+              "outputIndex":".siem-signals-default",
+              "meta":{
+                 "from":"10000h"
+              },
+              "maxSignals":100,
+              "riskScore":21,
+              "riskScoreMapping":[
+                 
+              ],
+              "severity":"low",
+              "severityMapping":[
+                 
+              ],
+              "threat":[
+                 
+              ],
+              "to":"now",
+              "references":[
+                 
+              ],
+              "version":4,
+              "exceptionsList":[
+              ],
+              "type":"query",
+              "language":"kuery",
+              "index":[
+                 "apm-*-transaction*",
+                 "traces-apm*",
+                 "auditbeat-*",
+                 "endgame-*",
+                 "filebeat-*",
+                 "logs-*",
+                 "packetbeat-*",
+                 "winlogbeat-*",
+                 "test-index-3"
+              ],
+              "query":"*:*",
+              "filters":[
+                 
+              ]
            },
            "schedule":{
               "interval":"1m"
@@ -932,7 +981,7 @@
         },
         "type":"alert",
         "migrationVersion":{
-           "alert":"7.8.0"
+           "alert":"8.2.0"
         },
         "updated_at":"2021-08-13T23:00:11.985Z",
         "references":[
