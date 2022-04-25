@@ -162,6 +162,18 @@ export class DataViewField implements IFieldType {
     );
   }
 
+  public get timeSeriesMetric() {
+    return this.spec.time_series_metric;
+  }
+
+  public get timeSeriesDimension() {
+    return this.spec.time_series_dimension;
+  }
+
+  public get indices() {
+    return this.spec.indices;
+  }
+
   public get visualizable() {
     const notVisualizableFieldTypes: string[] = [KBN_FIELD_TYPES.UNKNOWN, KBN_FIELD_TYPES.CONFLICT];
     return this.aggregatable && !notVisualizableFieldTypes.includes(this.spec.type);
@@ -202,6 +214,9 @@ export class DataViewField implements IFieldType {
       readFromDocValues: this.readFromDocValues,
       subType: this.subType,
       customLabel: this.customLabel,
+      time_series_dimension: this.timeSeriesDimension,
+      time_series_metric: this.timeSeriesMetric,
+      indices: this.indices,
     };
   }
 
@@ -227,6 +242,9 @@ export class DataViewField implements IFieldType {
       customLabel: this.customLabel,
       shortDotsEnable: this.spec.shortDotsEnable,
       runtimeField: this.runtimeField,
+      time_series_dimension: this.timeSeriesDimension,
+      time_series_metric: this.timeSeriesMetric,
+      indices: this.indices,
       isMapped: this.isMapped,
     };
   }

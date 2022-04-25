@@ -117,6 +117,9 @@ export function readFieldCapsResponse(
             {}
           ),
           metadata_field: capsByType[types[0]].metadata_field,
+          time_series_dimension: capsByType[types[0]].time_series_dimension,
+          time_series_metric: capsByType[types[0]].time_series_metric,
+          indices: capsByType[types[0]].indices,
         };
         // This is intentionally using a "hash" and a "push" to be highly optimized with very large indexes
         agg.array.push(field);
@@ -133,6 +136,9 @@ export function readFieldCapsResponse(
         aggregatable: isAggregatable,
         readFromDocValues: shouldReadFieldFromDocValues(isAggregatable, esType),
         metadata_field: capsByType[types[0]].metadata_field,
+        time_series_dimension: capsByType[types[0]].time_series_dimension,
+        time_series_metric: capsByType[types[0]].time_series_metric,
+        indices: capsByType[types[0]].indices,
       };
       // This is intentionally using a "hash" and a "push" to be highly optimized with very large indexes
       agg.array.push(field);

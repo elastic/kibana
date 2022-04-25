@@ -256,6 +256,9 @@ export interface FieldSpec extends DataViewFieldBase {
   // not persisted
   shortDotsEnable?: boolean;
   isMapped?: boolean;
+  time_series_dimension: boolean,
+  time_series_metric: string,
+  indices: string[]
 }
 
 export type DataViewFieldMap = Record<string, FieldSpec>;
