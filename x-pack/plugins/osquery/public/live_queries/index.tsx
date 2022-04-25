@@ -29,7 +29,6 @@ interface LiveQueryProps {
   enabled?: boolean;
   formType?: 'steps' | 'simple';
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
-  hideFullscreen?: true;
 }
 
 const LiveQueryComponent: React.FC<LiveQueryProps> = ({
@@ -47,7 +46,6 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   formType,
   enabled,
   addToTimeline,
-  hideFullscreen,
 }) => {
   const { data: hasActionResultsPrivileges, isLoading } = useActionResultsPrivileges();
 
@@ -118,7 +116,6 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
       formType={formType}
       enabled={enabled}
       addToTimeline={addToTimeline}
-      hideFullscreen={hideFullscreen}
     />
   );
 };

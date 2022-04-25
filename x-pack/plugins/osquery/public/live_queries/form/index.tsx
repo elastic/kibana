@@ -63,7 +63,6 @@ interface LiveQueryFormProps {
   formType?: FormType;
   enabled?: boolean;
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
-  hideFullscreen?: true;
 }
 
 const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
@@ -74,7 +73,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   ecsMappingField = true,
   formType = 'steps',
   enabled = true,
-  hideFullscreen,
   addToTimeline,
 }) => {
   const ecsFieldRef = useRef<ECSMappingEditorFieldRef>();
@@ -395,11 +393,10 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           actionId={actionId}
           endDate={data?.actions[0].expiration}
           agentIds={agentIds}
-          hideFullscreen={hideFullscreen}
           addToTimeline={addToTimeline}
         />
       ) : null,
-    [actionId, agentIds, data?.actions, addToTimeline, hideFullscreen]
+    [actionId, agentIds, data?.actions, addToTimeline]
   );
 
   const formSteps: EuiContainedStepProps[] = useMemo(
@@ -447,13 +444,16 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     if (defaultValue?.agentSelection) {
       setFieldValue('agentSelection', defaultValue?.agentSelection);
     }
+
     if (defaultValue?.query) {
       setFieldValue('query', defaultValue?.query);
     }
+
     // TODO: Set query and ECS mapping from savedQueryId object
     if (defaultValue?.savedQueryId) {
       setFieldValue('savedQueryId', defaultValue?.savedQueryId);
     }
+
     if (!isEmpty(defaultValue?.ecs_mapping)) {
       setFieldValue('ecs_mapping', defaultValue?.ecs_mapping);
     }
@@ -464,9 +464,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       <Form form={form}>
         {formType === 'steps' ? <EuiSteps steps={formSteps} /> : simpleForm}
         <UseField path="savedQueryId" component={GhostFormField} />
-
-
-
       </Form>
       {showSavedQueryFlyout ? (
         <SavedQueryFlyout
