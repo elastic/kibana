@@ -53,6 +53,7 @@ export interface ILayer {
   supportsFitToBounds(): Promise<boolean>;
   getAttributions(): Promise<Attribution[]>;
   getLabel(): string;
+  getLocale(): string;
   hasLegendDetails(): Promise<boolean>;
   renderLegendDetails(): ReactElement<any> | null;
   showAtZoomLevel(zoom: number): boolean;
@@ -102,6 +103,7 @@ export interface ILayer {
   isPreviewLayer: () => boolean;
   areLabelsOnTop: () => boolean;
   supportsLabelsOnTop: () => boolean;
+  supportsLabelLocales: () => boolean;
   isFittable(): Promise<boolean>;
   isIncludeInFitToBounds(): boolean;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
@@ -255,6 +257,10 @@ export class AbstractLayer implements ILayer {
 
   getLabel(): string {
     return this._descriptor.label ? this._descriptor.label : '';
+  }
+
+  getLocale(): string {
+    return this._descriptor.locale ? this._descriptor.locale : 'en';
   }
 
   getLayerIcon(isTocIcon: boolean): LayerIcon {
@@ -465,6 +471,10 @@ export class AbstractLayer implements ILayer {
   }
 
   supportsLabelsOnTop(): boolean {
+    return false;
+  }
+
+  supportsLabelLocales(): boolean {
     return false;
   }
 

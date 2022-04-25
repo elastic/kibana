@@ -114,7 +114,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
     const requestToken = Symbol(`layer-source-refresh:${this.getId()} - source`);
     try {
       startLoading(SOURCE_DATA_REQUEST_ID, requestToken, nextMeta);
-      const styleAndSprites = await this.getSource().getVectorStyleSheetAndSpriteMeta(isRetina());
+      const styleAndSprites = await this.getSource().getVectorStyleSheetAndSpriteMeta(isRetina(), this.getLocale());
       const spriteSheetImageData = styleAndSprites.spriteMeta
         ? await this._loadSpriteSheetImageData(styleAndSprites.spriteMeta.png)
         : undefined;
@@ -419,6 +419,10 @@ export class EmsVectorTileLayer extends AbstractLayer {
 
   supportsLabelsOnTop() {
     return true;
+  }
+
+  supportsLabelLocales(): boolean {
+      return true;
   }
 
   async getLicensedFeatures() {

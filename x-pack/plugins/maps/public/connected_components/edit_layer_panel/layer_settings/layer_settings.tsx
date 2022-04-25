@@ -7,6 +7,8 @@
 
 import React, { ChangeEvent, Fragment } from 'react';
 import {
+  EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiTitle,
   EuiPanel,
   EuiFormRow,
@@ -30,6 +32,7 @@ export interface Props {
   clearLayerAttribution: (layerId: string) => void;
   setLayerAttribution: (id: string, attribution: Attribution) => void;
   updateLabel: (layerId: string, label: string) => void;
+  updateLocale: (layerId: string, locale: string) => void;
   updateMinZoom: (layerId: string, minZoom: number) => void;
   updateMaxZoom: (layerId: string, maxZoom: number) => void;
   updateAlpha: (layerId: string, alpha: number) => void;
@@ -46,6 +49,11 @@ export function LayerSettings(props: Props) {
   const onLabelChange = (event: ChangeEvent<HTMLInputElement>) => {
     const label = event.target.value;
     props.updateLabel(layerId, label);
+  };
+
+  const onLocaleChange = (options: EuiComboBoxOptionOption[]) => {
+    const { key } = options[0];
+    if (key) props.updateLocale(layerId, key);
   };
 
   const onZoomChange = (value: [string, string]) => {
@@ -135,6 +143,43 @@ export function LayerSettings(props: Props) {
     );
   };
 
+  const renderShowLocaleSelector = () => {
+    if (!props.layer.supportsLabelLocales()) {
+      return null;
+    }
+
+    const languages = [
+      {
+        key: 'en',
+        label: 'English',
+      },
+      {
+        key: 'fr',
+        label: 'French',
+      },
+      {
+        key: 'jp',
+        label: 'Japanese',
+      },
+    ];
+
+    return (
+      <EuiFormRow
+        display="columnCompressed"
+        // TODO i18n
+        label="Label language"
+        helpText="Display labels in a different language"
+      >
+        <EuiComboBox
+          options={languages}
+          singleSelection={{ asPlainText: true }}
+          selectedOptions={languages.filter(({ key }) => key === props.layer.getLocale())}
+          onChange={onLocaleChange}
+        />
+      </EuiFormRow>
+    );
+  };
+
   const renderShowLabelsOnTop = () => {
     if (!props.layer.supportsLabelsOnTop()) {
       return null;
@@ -174,6 +219,7 @@ export function LayerSettings(props: Props) {
         {renderShowLabelsOnTop()}
         <AttributionFormRow layer={props.layer} onChange={onAttributionChange} />
         {renderIncludeInFitToBounds()}
+        {renderShowLocaleSelector()}
       </EuiPanel>
 
       <EuiSpacer size="s" />

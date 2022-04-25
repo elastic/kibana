@@ -8,6 +8,7 @@
 import React from 'react';
 import { Adapters } from '@kbn/inspector-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { TMSService } from '@elastic/ems-client';
 import { AbstractSource, SourceEditorArgs } from '../source';
 import { ITMSSource } from '../tms_source';
 import { getEmsTmsServices } from '../../../util';
@@ -139,9 +140,12 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
     return 'ems/' + this.getTileLayerId();
   }
 
-  async getVectorStyleSheetAndSpriteMeta(isRetina: boolean) {
+  async getVectorStyleSheetAndSpriteMeta(isRetina: boolean, locale?: string) {
     const emsTMSService = await this._getEMSTMSService();
-    const styleSheet = await emsTMSService.getVectorStyleSheet();
+    let styleSheet = await emsTMSService.getVectorStyleSheet();
+    if (styleSheet !== undefined && locale !== undefined) {
+      styleSheet = TMSService.transformLanguage(styleSheet, locale);
+    }
     const spriteMeta = await emsTMSService.getSpriteSheetMeta(isRetina);
     return {
       vectorStyleSheet: styleSheet,
