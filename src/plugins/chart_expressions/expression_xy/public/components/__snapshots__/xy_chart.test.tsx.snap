@@ -67,7 +67,7 @@ Array [
     zIndex={2}
   />,
   <RectAnnotation
-    customTooltipDetails={[Function]}
+    customTooltip={[Function]}
     dataValues={
       Array [
         Object {
@@ -254,7 +254,7 @@ Array [
     zIndex={2}
   />,
   <RectAnnotation
-    customTooltipDetails={[Function]}
+    customTooltip={[Function]}
     dataValues={
       Array [
         Object {
