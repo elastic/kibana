@@ -39,7 +39,7 @@ export function handleEvents(): RequestHandler<
       query: { limit, afterEvent },
       body,
     } = req;
-    const client = context.core.elasticsearch.client;
+    const client = (await context.core).elasticsearch.client;
     const query = new EventsQuery({
       pagination: PaginationBuilder.createBuilder(limit, afterEvent),
       indexPatterns: body.indexPatterns,
