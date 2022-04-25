@@ -223,7 +223,7 @@ describe('utils', () => {
           secrets: {
             clientSecret: 'clientSecret',
             privateKey: 'privateKey',
-            privateKeyPassword: 'privateKeyPassword',
+            privateKeyPassword: null,
             username: null,
             password: null,
           },

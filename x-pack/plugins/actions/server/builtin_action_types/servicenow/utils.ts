@@ -163,8 +163,7 @@ export const getAccessToken = async ({
       !clientSecret ||
       !jwtKeyId ||
       !privateKey ||
-      !userIdentifierValue ||
-      !privateKeyPassword
+      !userIdentifierValue
     ) {
       return null;
     }

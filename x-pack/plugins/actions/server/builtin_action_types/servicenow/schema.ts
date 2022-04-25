@@ -34,7 +34,7 @@ export const ExternalIncidentServiceSecretConfiguration = {
   username: schema.nullable(schema.string()), // required if isOAuth = false
   clientSecret: schema.nullable(schema.string()), // required if isOAuth = true
   privateKey: schema.nullable(schema.string()), // required if isOAuth = true
-  privateKeyPassword: schema.nullable(schema.string()), // required if isOAuth = true
+  privateKeyPassword: schema.nullable(schema.string()),
 };
 
 export const ExternalIncidentServiceSecretConfigurationSchema = schema.object(
