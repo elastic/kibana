@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut } from '@elastic/eui';
+import { fetchActionDetails } from '../../../services/actions';
 import { EndpointError } from '../../../../../common/endpoint/errors';
 import { HostInfo } from '../../../../../common/endpoint/types';
 import { Command, CommandExecutionResponse } from '../../console/types';
@@ -39,6 +40,23 @@ export const handleIsolateAction = async (
   }
 
   // Wait for it to receive a response
+  // FIXME:PT need to redesign execute Command so that we don't do this.
+  const maxAttempts = 1000;
+  const sleep = async () => new Promise((r) => setTimeout(r, 5000));
+  let attempts = 0;
+  let isTimedOut = false;
+  let isPending = true;
+
+  while (isPending) {
+    attempts++;
+    isTimedOut = attempts >= maxAttempts;
+
+    isPending = !(await fetchActionDetails(isolateActionId)).data.isCompleted;
+
+    if (!isPending && !isTimedOut) {
+      await sleep();
+    }
+  }
 
   // Return response
   return {
