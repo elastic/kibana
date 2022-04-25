@@ -39,7 +39,7 @@ const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 export type RuleAction = Omit<RuleActionOrig, 'actionTypeId'>;
 
 const getRecoveryMessage = (selectedMonitor: Ping) => {
-  return i18n.translate('xpack.uptime.alerts.monitorStatus.recoveryMessage', {
+  return i18n.translate('xpack.synthetics.alerts.monitorStatus.recoveryMessage', {
     defaultMessage: 'Monitor {monitor} with url {url} has recovered with status Up',
     values: {
       monitor: selectedMonitor?.monitor?.name || selectedMonitor?.monitor?.id,
