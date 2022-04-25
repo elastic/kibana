@@ -30,7 +30,6 @@ import type { Benchmark, PackagePolicyCspRulesStatus } from '../../../common/typ
 import { isNonNullable } from '../../../common/utils/helpers';
 import { CspRouter } from '../../types';
 import { getCspRules } from '../configuration/update_rules_configuration';
-import { act } from 'react-dom/test-utils';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
 
@@ -138,15 +137,35 @@ export const createBenchmarkEntry = (
   rules: packagePolicyCspRules,
 });
 
+// const createBenchmarks = (
+//   agentPolicies: GetAgentPoliciesResponseItem[],
+//   packagePolicies: PackagePolicy[]
+// ): Benchmark[] =>
+//   packagePolicies.flatMap((packagePolicy) => {
+//     const zoo = agentPolicies
+//       .map((agentPolicy) => {
+//         const agentPkgPolicies = agentPolicy.package_policies as string[];
+//         const isExistsOnAgent = agentPkgPolicies.find(
+//           (pkgPolicy) => pkgPolicy === packagePolicy.id
+//         );
+//         if (isExistsOnAgent) {
+//           return createBenchmarkEntry(agentPolicy, packagePolicy);
+//         }
+//         return;
+//       })
+//       .filter(isNonNullable);
+//     return zoo;
+//   });
+
 const createBenchmarks = async (
   soClient: SavedObjectsClientContract,
   agentPolicies: GetAgentPoliciesResponseItem[],
   packagePolicies: PackagePolicy[]
 ): Promise<Benchmark[]> => {
-  const foo = packagePolicies
-    .flatMap((packagePolicy) => {
-      return Promise.all(
-        agentPolicies.map(async (agentPolicy) => {
+  const foo = Promise.all(
+    packagePolicies.flatMap((packagePolicy) => {
+      const zoo = agentPolicies
+        .map(async (agentPolicy) => {
           const agentPkgPolicies = agentPolicy.package_policies as string[];
           const isExistsOnAgent = agentPkgPolicies.find(
             (pkgPolicy) => pkgPolicy === packagePolicy.id
@@ -157,11 +176,12 @@ const createBenchmarks = async (
           }
           return;
         })
-      );
-      // .filter(isNonNullable);
+        .filter(isNonNullable);
+
+      return zoo;
     })
-    .filter(isNonNullable);
-  return foo;
+  );
+  return foo as Promise<Benchmark[]>;
 };
 
 export const defineGetBenchmarksRoute = (router: CspRouter, cspContext: CspAppContext): void =>
@@ -200,7 +220,11 @@ export const defineGetBenchmarksRoute = (router: CspRouter, cspContext: CspAppCo
           agentPolicyService
         );
         const enrichAgentPolicies = await addRunningAgentToAgentPolicy(agentService, agentPolicies);
-        const benchmarks = createBenchmarks(soClient, enrichAgentPolicies, packagePolicies.items);
+        const benchmarks = await createBenchmarks(
+          soClient,
+          enrichAgentPolicies,
+          packagePolicies.items
+        );
 
         return response.ok({
           body: {
