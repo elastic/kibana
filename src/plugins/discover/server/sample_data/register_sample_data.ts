@@ -7,10 +7,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SampleDataRegistrySetup } from '../../../home/server';
+import type { SampleDataRegistrySetup } from '@kbn/home-plugin/server';
 import { APP_ICON } from '../../common';
 
-// TODO: update
+// TODO: update and use Discover locator instead
 const getSampleSearchPath = (objId: string) => `/app/discover#/view/${encodeURIComponent(objId)}`;
 
 export function registerSampleData(sampleDataRegistry: SampleDataRegistrySetup) {
@@ -32,6 +32,7 @@ export function registerSampleData(sampleDataRegistry: SampleDataRegistrySetup) 
           getPath: getSampleSearchPath,
           label: linkLabel,
           icon: APP_ICON,
+          order: -1,
         },
       ]);
     }
