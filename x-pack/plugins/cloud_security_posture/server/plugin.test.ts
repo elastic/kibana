@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import {
   createPackagePolicyServiceMock,
   createArtifactsClientMock,
@@ -26,9 +26,19 @@ import {
 } from '@kbn/fleet-plugin/server';
 import { CIS_KUBERNETES_PACKAGE_NAME } from '../common/constants';
 import Chance from 'chance';
+import type { AwaitedProperties } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import { RequestHandlerContext } from '@kbn/core/server';
 
 const chance = new Chance();
+
+const mockRouteContext = {
+  core: {
+    savedObjects: {
+      client: savedObjectsClientMock.create(),
+    },
+  },
+} as unknown as AwaitedProperties<RequestHandlerContext>;
 
 const createMockFleetStartContract = (): DeeplyMockedKeys<FleetStartContract> => {
   return {
@@ -58,8 +68,9 @@ describe('Cloud Security Posture Plugin', () => {
       data: dataPluginMock.createStartContract(),
     };
 
-    const contextMock = { core: coreMock.createRequestHandlerContext() };
-    contextMock.core.savedObjects.client.find.mockReturnValue(
+    const contextMock = coreMock.createCustomRequestHandlerContext(mockRouteContext);
+    const findMock = mockRouteContext.core.savedObjects.client.find as jest.Mock;
+    findMock.mockReturnValue(
       Promise.resolve({
         saved_objects: [],
         total: 0,
