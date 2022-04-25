@@ -14,11 +14,15 @@ module.exports = (_, options = {}) => {
       [
         require.resolve('@babel/preset-env'),
         {
-          targets: {
-            esmodules: true,
-          },
+          ...(options.esmodules === false
+            ? {}
+            : {
+                targets: {
+                  esmodules: true,
+                },
+                modules: false,
+              }),
           useBuiltIns: 'entry',
-          modules: false,
           // Please read the explanation for this
           // in node_preset.js
           corejs: '3.21.1',
