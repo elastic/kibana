@@ -13,7 +13,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('Getting Started ', function () {
-    this.tags(['ciGroup6']);
+    this.tags(['ciGroup5']);
 
     before(async function () {
       await browser.setWindowSize(1200, 800);
