@@ -12,12 +12,8 @@ import {
   EmbeddableStateWithType,
 } from '../../../embeddable/common';
 import { SavedObjectReference } from '../../../../core/types';
-import {
-  DashboardContainerControlGroupInput,
-  DashboardContainerStateWithType,
-  DashboardPanelState,
-} from '../types';
-import { CONTROL_GROUP_TYPE } from '../../../controls/common';
+import { DashboardContainerStateWithType, DashboardPanelState } from '../types';
+import { CONTROL_GROUP_TYPE, PersistableControlGroupInput } from '../../../controls/common';
 
 const getPanelStatePrefix = (state: DashboardPanelState) => `${state.explicitInput.id}:`;
 
@@ -95,7 +91,7 @@ export const createInject = (
         controlGroupReferences
       );
       workingState.controlGroupInput =
-        injectedControlGroupState as unknown as DashboardContainerControlGroupInput;
+        injectedControlGroupState as unknown as PersistableControlGroupInput;
     }
 
     return workingState as EmbeddableStateWithType;
@@ -160,7 +156,7 @@ export const createExtract = (
           id: controlGroupId,
         });
       workingState.controlGroupInput =
-        extractedControlGroupState as unknown as DashboardContainerControlGroupInput;
+        extractedControlGroupState as unknown as PersistableControlGroupInput;
       const prefixedControlGroupReferences = controlGroupReferences.map((reference) => ({
         ...reference,
         name: `${controlGroupReferencePrefix}${reference.name}`,

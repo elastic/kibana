@@ -5,11 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { isEmpty } from 'lodash';
 import { ISavedObjectsRepository, SavedObjectAttributes } from 'src/core/server';
-import { EmbeddablePersistableStateService } from 'src/plugins/embeddable/common';
+import {
+  ControlGroupTelemetry,
+  CONTROL_GROUP_TYPE,
+  RawControlGroupAttributes,
+} from '../../../controls/common';
+import { EmbeddablePersistableStateService } from '../../../embeddable/common';
 import { SavedDashboardPanel730ToLatest } from '../../common';
 import { injectReferences } from '../../common/saved_dashboard_references';
+import { initializeControlGroupTelemetry } from '../../../controls/server';
 export interface DashboardCollectorData {
   panels: {
     total: number;
@@ -26,6 +32,7 @@ export interface DashboardCollectorData {
       };
     };
   };
+  controls: ControlGroupTelemetry;
 }
 
 export const getEmptyDashboardData = (): DashboardCollectorData => ({
@@ -35,6 +42,7 @@ export const getEmptyDashboardData = (): DashboardCollectorData => ({
     by_value: 0,
     by_type: {},
   },
+  controls: initializeControlGroupTelemetry({}),
 });
 
 export const getEmptyPanelTypeData = () => ({
@@ -91,6 +99,19 @@ export async function collectDashboardTelemetry(
     const attributes = injectReferences(dashboard, {
       embeddablePersistableStateService: embeddableService,
     });
+
+    const controlGroupAttributes: RawControlGroupAttributes | undefined =
+      attributes.controlGroupInput as unknown as RawControlGroupAttributes;
+    if (!isEmpty(controlGroupAttributes)) {
+      collectorData.controls = embeddableService.telemetry(
+        {
+          ...controlGroupAttributes,
+          type: CONTROL_GROUP_TYPE,
+          id: `DASHBOARD_${CONTROL_GROUP_TYPE}`,
+        },
+        collectorData.controls
+      ) as ControlGroupTelemetry;
+    }
 
     const panels = JSON.parse(
       attributes.panelsJSON as string

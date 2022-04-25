@@ -7,18 +7,14 @@
  */
 import semverGt from 'semver/functions/gt';
 import { SavedObjectAttributes, SavedObjectReference } from '../../../core/types';
-import {
-  DashboardContainerControlGroupInput,
-  DashboardContainerStateWithType,
-  DashboardPanelState,
-  RawControlGroupAttributes,
-} from './types';
+import { DashboardContainerStateWithType, DashboardPanelState } from './types';
 import { EmbeddablePersistableStateService } from '../../embeddable/common/types';
 import {
   convertPanelStateToSavedDashboardPanel,
   convertSavedDashboardPanelToPanelState,
 } from './embeddable/embeddable_saved_object_converters';
 import { SavedDashboardPanel } from './types';
+import { PersistableControlGroupInput, RawControlGroupAttributes } from '../../controls/common';
 
 export interface ExtractDeps {
   embeddablePersistableStateService: EmbeddablePersistableStateService;
@@ -41,7 +37,7 @@ function dashboardAttributesToState(attributes: SavedObjectAttributes): {
     inputPanels = JSON.parse(attributes.panelsJSON) as SavedDashboardPanel[];
   }
 
-  let controlGroupInput: DashboardContainerControlGroupInput | undefined;
+  let controlGroupInput: PersistableControlGroupInput | undefined;
   if (attributes.controlGroupInput) {
     const rawControlGroupInput =
       attributes.controlGroupInput as unknown as RawControlGroupAttributes;
