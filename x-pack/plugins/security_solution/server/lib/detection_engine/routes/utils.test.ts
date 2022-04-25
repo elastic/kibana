@@ -10,10 +10,7 @@ import { transformBulkError, BulkError, convertToSnakeCase, SiemResponseFactory 
 import { responseMock } from './__mocks__';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('utils - %s', (_, isRuleRegistryEnabled) => {
+describe('utils', () => {
   describe('transformBulkError', () => {
     test('returns transformed object if it is a custom error object', () => {
       const customError = new CustomHttpRequestError('some custom error message', 400);

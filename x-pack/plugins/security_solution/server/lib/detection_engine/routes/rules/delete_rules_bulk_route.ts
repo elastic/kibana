@@ -40,11 +40,7 @@ type Handler = RequestHandler<
 /**
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
  */
-export const deleteRulesBulkRoute = (
-  router: SecuritySolutionPluginRouter,
-  isRuleRegistryEnabled: boolean,
-  logger: Logger
-) => {
+export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   const config: Config = {
     validate: {
       body: buildRouteValidation<typeof queryRulesBulkSchema, QueryRulesBulkSchemaDecoded>(
@@ -81,7 +77,7 @@ export const deleteRulesBulkRoute = (
         }
 
         try {
-          const rule = await readRules({ rulesClient, id, ruleId, isRuleRegistryEnabled });
+          const rule = await readRules({ rulesClient, id, ruleId });
           const migratedRule = await legacyMigrate({
             rulesClient,
             savedObjectsClient,
@@ -102,8 +98,7 @@ export const deleteRulesBulkRoute = (
           return transformValidateBulkError(
             idOrRuleIdOrUnknown,
             migratedRule,
-            ruleExecutionSummary,
-            isRuleRegistryEnabled
+            ruleExecutionSummary
           );
         } catch (err) {
           return transformBulkError(idOrRuleIdOrUnknown, err);

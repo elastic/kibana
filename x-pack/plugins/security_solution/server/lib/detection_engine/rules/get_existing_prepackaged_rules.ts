@@ -14,26 +14,21 @@ export const FILTER_NON_PREPACKED_RULES = `alert.attributes.tags: "${INTERNAL_IM
 export const FILTER_PREPACKED_RULES = `alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:true"`;
 
 export const getNonPackagedRulesCount = async ({
-  isRuleRegistryEnabled,
   rulesClient,
 }: {
-  isRuleRegistryEnabled: boolean;
   rulesClient: RulesClient;
 }): Promise<number> => {
-  return getRulesCount({ isRuleRegistryEnabled, rulesClient, filter: FILTER_NON_PREPACKED_RULES });
+  return getRulesCount({ rulesClient, filter: FILTER_NON_PREPACKED_RULES });
 };
 
 export const getRulesCount = async ({
   rulesClient,
   filter,
-  isRuleRegistryEnabled,
 }: {
   rulesClient: RulesClient;
   filter: string;
-  isRuleRegistryEnabled: boolean;
 }): Promise<number> => {
   const firstRule = await findRules({
-    isRuleRegistryEnabled,
     rulesClient,
     filter,
     perPage: 1,
@@ -48,15 +43,12 @@ export const getRulesCount = async ({
 export const getRules = async ({
   rulesClient,
   filter,
-  isRuleRegistryEnabled,
 }: {
   rulesClient: RulesClient;
   filter: string;
-  isRuleRegistryEnabled: boolean;
 }) => {
-  const count = await getRulesCount({ rulesClient, filter, isRuleRegistryEnabled });
+  const count = await getRulesCount({ rulesClient, filter });
   const rules = await findRules({
-    isRuleRegistryEnabled,
     rulesClient,
     filter,
     perPage: count,
@@ -66,7 +58,7 @@ export const getRules = async ({
     fields: undefined,
   });
 
-  if (isAlertTypes(isRuleRegistryEnabled, rules.data)) {
+  if (isAlertTypes(rules.data)) {
     return rules.data;
   } else {
     // If this was ever true, you have a really messed up system.
@@ -77,28 +69,22 @@ export const getRules = async ({
 
 export const getNonPackagedRules = async ({
   rulesClient,
-  isRuleRegistryEnabled,
 }: {
   rulesClient: RulesClient;
-  isRuleRegistryEnabled: boolean;
 }): Promise<RuleAlertType[]> => {
   return getRules({
     rulesClient,
     filter: FILTER_NON_PREPACKED_RULES,
-    isRuleRegistryEnabled,
   });
 };
 
 export const getExistingPrepackagedRules = async ({
   rulesClient,
-  isRuleRegistryEnabled,
 }: {
   rulesClient: RulesClient;
-  isRuleRegistryEnabled: boolean;
 }): Promise<RuleAlertType[]> => {
   return getRules({
     rulesClient,
     filter: FILTER_PREPACKED_RULES,
-    isRuleRegistryEnabled,
   });
 };

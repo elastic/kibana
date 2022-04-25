@@ -8,7 +8,7 @@
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import {
   getEmptyFindResult,
-  resolveAlertMock,
+  resolveRuleMock,
   getDeleteRequest,
   getFindResultWithSingleHit,
   getDeleteRequestById,
@@ -18,10 +18,7 @@ import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { deleteRulesRoute } from './delete_rules_route';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('delete_rules - %s', (_, isRuleRegistryEnabled) => {
+describe('delete_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 
@@ -29,10 +26,10 @@ describe.each([
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
 
-    deleteRulesRoute(server.router, isRuleRegistryEnabled);
+    deleteRulesRoute(server.router);
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -46,9 +43,7 @@ describe.each([
     });
 
     test('returns 200 when deleting a single rule with a valid actionClient and alertClient by id', async () => {
-      clients.rulesClient.resolve.mockResolvedValue(
-        resolveAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
-      );
+      clients.rulesClient.resolve.mockResolvedValue(resolveRuleMock(getQueryRuleParams()));
       const response = await server.inject(
         getDeleteRequestById(),
         requestContextMock.convertContext(context)

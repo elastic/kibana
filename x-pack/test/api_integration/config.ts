@@ -37,7 +37,6 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
         '--xpack.ruleRegistry.write.cache.enabled=false',
         '--xpack.uptime.service.password=test',
         '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify(['ruleRegistryEnabled'])}`,
       ],
     },
     esTestCluster: {

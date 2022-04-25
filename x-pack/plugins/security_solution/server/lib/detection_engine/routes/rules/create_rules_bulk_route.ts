@@ -6,7 +6,6 @@
  */
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import { getIndexExists } from '@kbn/securitysolution-es-utils';
 import { Logger } from '@kbn/core/server';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { createRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
@@ -34,7 +33,6 @@ import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from './ut
 export const createRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  isRuleRegistryEnabled: boolean,
   logger: Logger
 ) => {
   router.post(
@@ -55,7 +53,6 @@ export const createRulesBulkRoute = (
       const ctx = await context.resolve(['core', 'securitySolution', 'licensing', 'alerting']);
 
       const rulesClient = ctx.alerting.getRulesClient();
-      const esClient = ctx.core.elasticsearch.client;
       const savedObjectsClient = ctx.core.savedObjects.client;
       const siemClient = ctx.securitySolution.getAppClient();
 
@@ -76,7 +73,6 @@ export const createRulesBulkRoute = (
             if (payloadRule.rule_id != null) {
               const rule = await readRules({
                 id: undefined,
-                isRuleRegistryEnabled,
                 rulesClient,
                 ruleId: payloadRule.rule_id,
               });
@@ -88,11 +84,7 @@ export const createRulesBulkRoute = (
                 });
               }
             }
-            const internalRule = convertCreateAPIToInternalSchema(
-              payloadRule,
-              siemClient,
-              isRuleRegistryEnabled
-            );
+            const internalRule = convertCreateAPIToInternalSchema(payloadRule, siemClient);
             try {
               const validationErrors = createRuleValidateTypeDependents(payloadRule);
               if (validationErrors.length) {
@@ -104,15 +96,6 @@ export const createRulesBulkRoute = (
               }
 
               throwAuthzError(await mlAuthz.validateRuleType(internalRule.params.type));
-              const finalIndex = internalRule.params.outputIndex;
-              const indexExists = await getIndexExists(esClient.asCurrentUser, finalIndex);
-              if (!isRuleRegistryEnabled && !indexExists) {
-                return createBulkErrorObject({
-                  ruleId: internalRule.params.ruleId,
-                  statusCode: 400,
-                  message: `To create a rule, the index must exist first. Index ${finalIndex} does not exist`,
-                });
-              }
 
               const createdRule = await rulesClient.create({
                 data: internalRule,
@@ -123,12 +106,7 @@ export const createRulesBulkRoute = (
                 await rulesClient.muteAll({ id: createdRule.id });
               }
 
-              return transformValidateBulkError(
-                internalRule.params.ruleId,
-                createdRule,
-                null,
-                isRuleRegistryEnabled
-              );
+              return transformValidateBulkError(internalRule.params.ruleId, createdRule, null);
             } catch (err) {
               return transformBulkError(
                 internalRule.params.ruleId,
