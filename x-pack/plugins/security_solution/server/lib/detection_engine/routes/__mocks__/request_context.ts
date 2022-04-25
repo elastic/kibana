@@ -6,6 +6,7 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types/jest';
+import type { AwaitedProperties } from '@kbn/utility-types';
 import { coreMock } from '@kbn/core/server/mocks';
 
 import { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
@@ -62,10 +63,11 @@ export const createMockClients = () => {
 
 type MockClients = ReturnType<typeof createMockClients>;
 
-type SecuritySolutionRequestHandlerContextMock =
-  MockedKeys<SecuritySolutionRequestHandlerContext> & {
-    core: MockClients['core'];
-  };
+export type SecuritySolutionRequestHandlerContextMock = MockedKeys<
+  AwaitedProperties<Omit<SecuritySolutionRequestHandlerContext, 'resolve'>>
+> & {
+  core: MockClients['core'];
+};
 
 const createRequestContextMock = (
   clients: MockClients = createMockClients(),
@@ -87,6 +89,14 @@ const createRequestContextMock = (
       getExtensionPointClient: jest.fn(),
     },
   };
+};
+
+const convertRequestContextMock = (
+  context: AwaitedProperties<SecuritySolutionRequestHandlerContextMock>
+): SecuritySolutionRequestHandlerContext => {
+  return coreMock.createCustomRequestHandlerContext(
+    context
+  ) as unknown as SecuritySolutionRequestHandlerContext;
 };
 
 const createSecuritySolutionRequestContextMock = (
@@ -127,6 +137,7 @@ const createTools = () => {
 
 export const requestContextMock = {
   create: createRequestContextMock,
+  convertContext: convertRequestContextMock,
   createMockClients,
   createTools,
 };
