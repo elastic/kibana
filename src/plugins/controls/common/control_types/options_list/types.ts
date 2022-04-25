@@ -8,14 +8,11 @@
 
 import { BoolQuery } from '@kbn/es-query';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
-import { ControlInput } from '../../types';
+import { DataControlInput } from '../../types';
 
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
 
-export interface OptionsListEmbeddableInput extends ControlInput {
-  fieldName: string;
-  dataViewId: string;
-
+export interface OptionsListEmbeddableInput extends DataControlInput {
   selectedOptions?: string[];
   singleSelect?: boolean;
   loading?: boolean;
