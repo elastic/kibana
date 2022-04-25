@@ -33,6 +33,13 @@ export const serviceApiKeyPrivileges = {
       ] as SecurityIndexPrivilege[],
     },
   ],
+  applications: [
+    {
+      privileges: ['feature_uptime.all'],
+      application: 'kibana-.kibana',
+      resources: [ALL_SPACES_ID],
+    },
+  ],
 };
 
 export const getAPIKeyForSyntheticsService = async ({
@@ -85,14 +92,6 @@ export const generateAPIKey = async ({
     role_descriptors: {
       synthetics_writer: serviceApiKeyPrivileges,
     },
-    kibana_feature_descriptors: [
-      {
-        spaces: [ALL_SPACES_ID],
-        feature: {
-          uptime: ['all'],
-        },
-      },
-    ],
     metadata: {
       description:
         'Created for synthetics service to be passed to the heartbeat to communicate with ES',
