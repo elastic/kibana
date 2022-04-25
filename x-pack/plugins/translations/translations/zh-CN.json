@@ -7499,8 +7499,6 @@
     "xpack.apm.fleetIntegration.apmAgent.editDisacoveryRule.type": "类型",
     "xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.addRule": "添加规则",
     "xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.autoAttachment": "自动附件",
-    "xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.betaBadge.label": "公测版",
-    "xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.betaBadge.tooltipContent": "用于 Java 的自动附件不是 GA 版。请通过报告错误来帮助我们。",
     "xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.discoveryRules": "发现规则",
     "xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.editRule.add": "添加",
     "xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.editRule.helpText": "从允许的参数中选择",

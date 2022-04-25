@@ -7382,8 +7382,6 @@
     "xpack.apm.fleetIntegration.apmAgent.editDisacoveryRule.type": "Type",
     "xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.addRule": "Ajouter une règle",
     "xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.autoAttachment": "Rattachement automatique",
-    "xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.betaBadge.label": "BÊTA",
-    "xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.betaBadge.tooltipContent": "Le rattachement automatique pour Java n'est pas disponible. Nous vous remercions de bien vouloir nous aider en nous signalant tout bug.",
     "xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.discoveryRules": "Règles de découverte",
     "xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.editRule.add": "Ajouter",
     "xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.editRule.helpText": "Choisir parmi les paramètres autorisés",

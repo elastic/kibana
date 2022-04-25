@@ -7482,8 +7482,6 @@
     "xpack.apm.fleetIntegration.apmAgent.editDisacoveryRule.type": "型",
     "xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.addRule": "ルールを追加",
     "xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.autoAttachment": "自動接続",
-    "xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.betaBadge.label": "BETA",
-    "xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.betaBadge.tooltipContent": "Javaの自動接続は一般公開されていません。不具合が発生したら報告してください。",
     "xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.discoveryRules": "検出ルール",
     "xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.editRule.add": "追加",
     "xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.editRule.helpText": "許可されたパラメーターから選択",
