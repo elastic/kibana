@@ -8,6 +8,13 @@
 import { HttpSetup } from 'kibana/public';
 import { Rule, RuleSummary } from '../../../../triggers_actions_ui/public';
 
+export interface RuleDetailsPathParams {
+  ruleId: string;
+}
+export interface PageHeaderProps {
+  rule: Rule;
+}
+
 export interface FetchRuleProps {
   ruleId: string;
   http: HttpSetup;
@@ -42,4 +49,15 @@ export interface AlertListItem {
   duration: number;
   isMuted: boolean;
   sortPriority: number;
+}
+export interface ItemTitleRuleSummaryProps {
+  translationKey: string;
+  defaultMessage: string;
+}
+export interface ItemValueRuleSummaryProps {
+  itemValue: string;
+  extraSpace?: boolean;
+}
+export interface ActionsProps {
+  actions: any[];
 }

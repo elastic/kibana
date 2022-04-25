@@ -18,89 +18,31 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
-  EuiIcon,
   EuiPanel,
   EuiTitle,
   EuiHealth,
   EuiPopover,
   EuiHorizontalRule,
-  IconType,
 } from '@elastic/eui';
-
-import { RuleExecutionStatusValues, ActionGroup } from '../../../../alerting/common';
+import { ActionGroup } from '../../../../alerting/common';
 import { AlertStatusValues } from '../../../../alerting/common';
-
-import { Rule, RuleType, AlertStatus } from '../../../../triggers_actions_ui/public';
-import { AlertListItem } from './types';
+import { RuleType, AlertStatus } from '../../../../triggers_actions_ui/public';
+import { AlertListItem, RuleDetailsPathParams } from './types';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { RULES_BREADCRUMB_TEXT } from '../rules/translations';
-import { ExperimentalBadge } from '../../components/shared/experimental_badge';
+import { PageTitle, ItemTitleRuleSummary, ItemValueRuleSummary, Actions } from './components';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchRuleSummary } from '../../hooks/use_fetch_rule_summary';
+import { getColorStatusBased } from './utils';
 
-function PageTitle(rule: Rule) {
-  return (
-    <>
-      {/* TODO: Add return back to rule navigation button */}
-      {rule.name} <ExperimentalBadge />
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem component="span" grow={false}>
-          {/* TODO: formate dates */}
-          <EuiText color="subdued" size="s">
-            <b>Last updated</b> by {rule.updatedBy} on {rule.updatedAt} &emsp;
-            <b>Created</b> by {rule.createdBy} on {rule.createdAt}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem style={{ alignSelf: 'flexStart' }} component="span" grow={false}>
-          <EuiPanel hasShadow={false} hasBorder={true} paddingSize={'none'}>
-            <EuiButtonEmpty iconType="tag" color="text">
-              {rule.tags.length}
-            </EuiButtonEmpty>
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
-  );
-}
-
-interface ItemTitleRuleSummaryProps {
-  translationKey: string;
-  defaultMessage: string;
-}
-
-function ItemTitleRuleSummary({ translationKey, defaultMessage }: ItemTitleRuleSummaryProps) {
-  return (
-    <EuiTitle size="xs">
-      <EuiFlexItem grow={1}>
-        {i18n.translate(translationKey, {
-          defaultMessage,
-        })}
-      </EuiFlexItem>
-    </EuiTitle>
-  );
-}
-interface ItemValueRuleSummaryProps {
-  itemValue: string;
-  extraSpace?: boolean;
-}
-
-function ItemValueRuleSummary({ itemValue, extraSpace = true }: ItemValueRuleSummaryProps) {
-  return (
-    <EuiFlexItem grow={extraSpace ? 3 : 1}>
-      <EuiText size="m">{itemValue}</EuiText>
-    </EuiFlexItem>
-  );
-}
-interface RuleDetailsPathParams {
-  ruleId: string;
-}
 export function RuleDetailsPage() {
   const {
     http,
     triggersActionsUi: { ruleTypeRegistry },
     application: { capabilities },
+    notifications: { toasts },
     triggersActionsUi,
   } = useKibana().services;
 
@@ -122,63 +64,6 @@ export function RuleDetailsPage() {
       setAlerts(sortedAlerts);
     }
   }, [ruleSummary, errorRuleSummary]);
-
-  const getColorStatusBased = (ruleStatus: string) => {
-    switch (ruleStatus) {
-      case RuleExecutionStatusValues[0]:
-        return 'primary';
-      case RuleExecutionStatusValues[1]:
-        return 'success';
-      case RuleExecutionStatusValues[2]:
-        return 'danger';
-      case RuleExecutionStatusValues[3]:
-        return 'warning';
-      case RuleExecutionStatusValues[4]:
-        return 'subdued';
-      default:
-        return 'subdued';
-    }
-  };
-
-  interface ActionsComponentProps {
-    actions: any[];
-  }
-  interface MapActionTypeIcon {
-    [key: string]: string | IconType;
-  }
-  const mapActionTypeIcon: MapActionTypeIcon = {
-    /* TODO:  Add the rest of the application logs (SVGs ones) */
-    '.server-log': 'logsApp',
-    '.email': 'email',
-    '.pagerduty': 'apps',
-    '.index': 'indexOpen',
-    '.slack': 'logoSlack',
-    '.webhook': 'logoWebhook',
-  };
-
-  function ActionsComponent({ actions }: ActionsComponentProps) {
-    if (actions && actions.length <= 0) return <EuiText size="m">0</EuiText>;
-
-    const uniqueActions = Array.from(new Set(actions.map((action: any) => action.actionTypeId)));
-    return (
-      <EuiFlexGroup direction="column">
-        {uniqueActions.map((actionTypeId) => (
-          <>
-            <EuiFlexGroup alignItems="flexStart">
-              <EuiFlexItem grow={false}>
-                <EuiIcon size="l" type={mapActionTypeIcon[actionTypeId] ?? 'apps'} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                {/* TODO: Get the user-typed connector name?  */}
-                <EuiText size="m">{actionTypeId}</EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
-          </>
-        ))}
-      </EuiFlexGroup>
-    );
-  }
 
   useBreadcrumbs([
     {
@@ -212,6 +97,7 @@ export function RuleDetailsPage() {
         }),
       []
     );
+
   const isRuleTypeEditableInContext = (ruleTypeId: string) =>
     ruleTypeRegistry.has(ruleTypeId) ? !ruleTypeRegistry.get(ruleTypeId).requiresAppContext : false;
 
@@ -234,7 +120,7 @@ export function RuleDetailsPage() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: PageTitle(rule),
+        pageTitle: <PageTitle rule={rule} />,
         bottomBorder: false,
         rightSideItems: isRuleTypeEditableInContext(ruleTypeId)
           ? [
@@ -399,7 +285,7 @@ export function RuleDetailsPage() {
                     defaultMessage="Actions"
                   />
                   <EuiFlexItem grow={3}>
-                    <ActionsComponent actions={actions} />
+                    <Actions actions={actions} />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
@@ -409,6 +295,10 @@ export function RuleDetailsPage() {
       </EuiFlexGroup>
 
       {editFlyoutVisible && <EditAlertFlyout />}
+      {errorRule &&
+        toasts.addDanger({
+          title: errorRule,
+        })}
     </ObservabilityPageTemplate>
   );
 }
