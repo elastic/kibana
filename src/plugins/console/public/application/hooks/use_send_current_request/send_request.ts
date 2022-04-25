@@ -128,9 +128,9 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
       } catch (error) {
         let value;
         const { response, body } = error as IHttpFetchError;
-        const contentType = response?.headers.get('Content-Type') ?? '';
+        const contentType = (response?.headers.get('Content-Type') as BaseResponseType) ?? '';
         const statusCode = response?.status ?? 500;
-        const statusText = error?.response?.statusText ?? 'error';
+        const statusText = response?.statusText ?? 'error';
 
         if (body) {
           value = JSON.stringify(body, null, 2);
@@ -142,7 +142,7 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
           value = '# ' + req.method + ' ' + req.url + '\n' + value;
         }
 
-        reject({
+        const result = {
           response: {
             value,
             contentType,
@@ -155,7 +155,16 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
             method,
             path,
           },
-        });
+        };
+
+        // Reject on unknown errors
+        if (!response) {
+          reject(result);
+        }
+
+        // Add error to the list of results
+        results.push(result);
+        await sendNextRequest();
       }
     };
 
