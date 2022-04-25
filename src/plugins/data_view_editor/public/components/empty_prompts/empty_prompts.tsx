@@ -27,6 +27,7 @@ interface Props {
   onCancel: () => void;
   allSources: MatchedItem[];
   loadSources: () => void;
+  skipEmptyPrompt?: boolean;
 }
 
 export function isUserDataIndex(source: MatchedItem) {
@@ -45,7 +46,13 @@ export function isUserDataIndex(source: MatchedItem) {
   return true;
 }
 
-export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSources }) => {
+export const EmptyPrompts: FC<Props> = ({
+  allSources,
+  onCancel,
+  children,
+  loadSources,
+  skipEmptyPrompt,
+}) => {
   const {
     services: { docLinks, application, http, searchClient, dataViews },
   } = useKibana<DataViewEditorContext>();
@@ -93,7 +100,7 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
           <PromptFooter onCancel={onCancel} />
         </>
       );
-    } else {
+    } else if (!skipEmptyPrompt) {
       // first time
       return (
         <>
@@ -108,6 +115,8 @@ export const EmptyPrompts: FC<Props> = ({ allSources, onCancel, children, loadSo
           <PromptFooter onCancel={onCancel} />
         </>
       );
+    } else {
+      setGoToForm(true);
     }
   }
 
