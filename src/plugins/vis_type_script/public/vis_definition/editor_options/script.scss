@@ -1,0 +1,11 @@
+.visEditor--script {
+
+  .visEditorSidebar__config>*,
+  .visEditor--script__textarea {
+    flex-grow: 1;
+  }
+
+  .scriptEditor {
+    height: 100%;
+  }
+}

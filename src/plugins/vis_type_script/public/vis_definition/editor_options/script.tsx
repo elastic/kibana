@@ -21,6 +21,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { VisEditorOptionsProps } from '../../../../visualizations/public';
 import type { VisParams } from '../../types';
 
+import './script.scss';
+
 function ScriptOptions({ stateParams, setValue }: VisEditorOptionsProps<VisParams>) {
   const onScriptUpdate = useCallback(
     ({ target: { value } }: React.ChangeEvent<HTMLTextAreaElement>) => setValue('script', value),
@@ -29,7 +31,7 @@ function ScriptOptions({ stateParams, setValue }: VisEditorOptionsProps<VisParam
 
   return (
     <EuiPanel paddingSize="s">
-      <EuiFlexGroup direction="column" gutterSize="m" className="mkdEditor">
+      <EuiFlexGroup direction="column" gutterSize="m" className="scriptEditor">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="baseline">
             <EuiFlexItem grow={false}>
