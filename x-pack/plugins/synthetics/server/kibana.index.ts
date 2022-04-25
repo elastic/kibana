@@ -8,6 +8,7 @@
 import { Request, Server } from '@hapi/hapi';
 import { Logger } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { UPTIME_RULE_TYPES } from '../common/constants/alerts';
 import { PLUGIN } from '../common/constants/plugin';
 import { compose } from './lib/compose/kibana';
 import { initUptimeServer } from './uptime_server';
@@ -48,12 +49,7 @@ export const initServerWithKibana = (
     management: {
       insightsAndAlerting: ['triggersActions'],
     },
-    alerting: [
-      'xpack.uptime.alerts.tls',
-      'xpack.uptime.alerts.tlsCertificate',
-      'xpack.uptime.alerts.monitorStatus',
-      'xpack.uptime.alerts.durationAnomaly',
-    ],
+    alerting: UPTIME_RULE_TYPES,
     privileges: {
       all: {
         app: ['uptime', 'kibana'],
@@ -65,20 +61,10 @@ export const initServerWithKibana = (
         },
         alerting: {
           rule: {
-            all: [
-              'xpack.uptime.alerts.tls',
-              'xpack.uptime.alerts.tlsCertificate',
-              'xpack.uptime.alerts.monitorStatus',
-              'xpack.uptime.alerts.durationAnomaly',
-            ],
+            all: UPTIME_RULE_TYPES,
           },
           alert: {
-            all: [
-              'xpack.uptime.alerts.tls',
-              'xpack.uptime.alerts.tlsCertificate',
-              'xpack.uptime.alerts.monitorStatus',
-              'xpack.uptime.alerts.durationAnomaly',
-            ],
+            all: UPTIME_RULE_TYPES,
           },
         },
         management: {
@@ -96,20 +82,10 @@ export const initServerWithKibana = (
         },
         alerting: {
           rule: {
-            read: [
-              'xpack.uptime.alerts.tls',
-              'xpack.uptime.alerts.tlsCertificate',
-              'xpack.uptime.alerts.monitorStatus',
-              'xpack.uptime.alerts.durationAnomaly',
-            ],
+            read: UPTIME_RULE_TYPES,
           },
           alert: {
-            read: [
-              'xpack.uptime.alerts.tls',
-              'xpack.uptime.alerts.tlsCertificate',
-              'xpack.uptime.alerts.monitorStatus',
-              'xpack.uptime.alerts.durationAnomaly',
-            ],
+            read: UPTIME_RULE_TYPES,
           },
         },
         management: {

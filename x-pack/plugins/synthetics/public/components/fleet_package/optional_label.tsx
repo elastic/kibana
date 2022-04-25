@@ -12,7 +12,7 @@ export const OptionalLabel = () => {
   return (
     <EuiText size="xs" color="subdued">
       <FormattedMessage
-        id="xpack.uptime.createPackagePolicy.stepConfigure.inputVarFieldOptionalLabel"
+        id="xpack.synthetics.createPackagePolicy.stepConfigure.inputVarFieldOptionalLabel"
         defaultMessage="Optional"
       />
     </EuiText>

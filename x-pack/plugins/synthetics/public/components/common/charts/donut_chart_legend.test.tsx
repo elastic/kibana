@@ -19,16 +19,16 @@ describe('DonutChartLegend', () => {
     const component = renderWithIntl(<DonutChartLegend down={down} up={up} />);
 
     expect(
-      component.find('[data-test-subj="xpack.uptime.snapshot.donutChart.up.label"]').text()
+      component.find('[data-test-subj="xpack.synthetics.snapshot.donutChart.up.label"]').text()
     ).toBe(STATUS_UP_LABEL);
-    expect(component.find('[data-test-subj="xpack.uptime.snapshot.donutChart.up"]').text()).toBe(
-      `${up}`
-    );
     expect(
-      component.find('[data-test-subj="xpack.uptime.snapshot.donutChart.down.label"]').text()
+      component.find('[data-test-subj="xpack.synthetics.snapshot.donutChart.up"]').text()
+    ).toBe(`${up}`);
+    expect(
+      component.find('[data-test-subj="xpack.synthetics.snapshot.donutChart.down.label"]').text()
     ).toBe(STATUS_DOWN_LABEL);
-    expect(component.find('[data-test-subj="xpack.uptime.snapshot.donutChart.down"]').text()).toBe(
-      `${down}`
-    );
+    expect(
+      component.find('[data-test-subj="xpack.synthetics.snapshot.donutChart.down"]').text()
+    ).toBe(`${down}`);
   });
 });

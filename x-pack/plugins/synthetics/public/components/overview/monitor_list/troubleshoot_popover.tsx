@@ -48,7 +48,7 @@ export const TroubleshootPopover = () => {
         <EuiText size="s">
           <p>
             <FormattedMessage
-              id="xpack.uptime.monitorList.noMessage.troubleshoot"
+              id="xpack.synthetics.monitorList.noMessage.troubleshoot"
               defaultMessage="Try using an absolute date range. If monitors appears afterwards,
               there may be an issue with the system clock where Heartbeat or Kibana is installed."
             />
@@ -77,21 +77,21 @@ export const TroubleshootPopover = () => {
 };
 
 export const APPLY_ABSOLUTE_DATE_RANGE = i18n.translate(
-  'xpack.uptime.monitorList.troubleshoot.tryDateRange',
+  'xpack.synthetics.monitorList.troubleshoot.tryDateRange',
   {
     defaultMessage: 'Apply absolute date range',
   }
 );
 
 export const WHERE_ARE_MY_MONITORS = i18n.translate(
-  'xpack.uptime.monitorList.troubleshoot.whereAreMyMonitors',
+  'xpack.synthetics.monitorList.troubleshoot.whereAreMyMonitors',
   {
     defaultMessage: 'Where are my monitors?',
   }
 );
 
 export const SYSTEM_CLOCK_OUT_OF_SYNC = i18n.translate(
-  'xpack.uptime.monitorList.troubleshoot.systemClockOutOfSync',
+  'xpack.synthetics.monitorList.troubleshoot.systemClockOutOfSync',
   {
     defaultMessage: 'System clock may be out of sync',
   }

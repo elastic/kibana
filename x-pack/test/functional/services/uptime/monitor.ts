@@ -23,19 +23,19 @@ export function UptimeMonitorProvider({ getService, getPageObjects }: FtrProvide
       });
     },
     async setPingListLocation(location: string) {
-      await testSubjects.click('xpack.uptime.pingList.locationSelect', 5000);
-      return testSubjects.click(`xpack.uptime.pingList.locationOptions.${location}`, 5000);
+      await testSubjects.click('xpack.synthetics.pingList.locationSelect', 5000);
+      return testSubjects.click(`xpack.synthetics.pingList.locationOptions.${location}`, 5000);
     },
     async setPingListStatus(status: string) {
-      await testSubjects.click('xpack.uptime.pingList.statusSelect', 5000);
-      return testSubjects.click(`xpack.uptime.pingList.statusOptions.${status}`, 5000);
+      await testSubjects.click('xpack.synthetics.pingList.statusSelect', 5000);
+      return testSubjects.click(`xpack.synthetics.pingList.statusOptions.${status}`, 5000);
     },
     async checkForPingListTimestamps(timestamps: string[]): Promise<void> {
       return retry.tryForTime(10000, async () => {
         await Promise.all(
           timestamps.map(
             async (timestamp) =>
-              await testSubjects.existOrFail(`xpack.uptime.pingList.ping-${timestamp}`)
+              await testSubjects.existOrFail(`xpack.synthetics.pingList.ping-${timestamp}`)
           )
         );
       });

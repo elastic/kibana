@@ -111,10 +111,10 @@ export const MonitorConfig = ({ isEdit = false }: { isEdit: boolean }) => {
   );
 };
 
-const TEST_RESULT = i18n.translate('xpack.uptime.monitorManagement.testResult', {
+const TEST_RESULT = i18n.translate('xpack.synthetics.monitorManagement.testResult', {
   defaultMessage: 'Test result',
 });
 
-const CLOSE_LABEL = i18n.translate('xpack.uptime.monitorManagement.closeButtonLabel', {
+const CLOSE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.closeButtonLabel', {
   defaultMessage: 'Close',
 });

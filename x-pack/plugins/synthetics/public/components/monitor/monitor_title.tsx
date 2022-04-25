@@ -42,28 +42,28 @@ export const MonitorPageTitleContent: React.FC = () => {
       case 'http':
         return (
           <FormattedMessage
-            id="xpack.uptime.monitorDetails.title.pingType.http"
+            id="xpack.synthetics.monitorDetails.title.pingType.http"
             defaultMessage="HTTP ping"
           />
         );
       case 'tcp':
         return (
           <FormattedMessage
-            id="xpack.uptime.monitorDetails.title.pingType.tcp"
+            id="xpack.synthetics.monitorDetails.title.pingType.tcp"
             defaultMessage="TCP ping"
           />
         );
       case 'icmp':
         return (
           <FormattedMessage
-            id="xpack.uptime.monitorDetails.title.pingType.icmp"
+            id="xpack.synthetics.monitorDetails.title.pingType.icmp"
             defaultMessage="ICMP ping"
           />
         );
       case 'browser':
         return (
           <FormattedMessage
-            id="xpack.uptime.monitorDetails.title.pingType.browser"
+            id="xpack.synthetics.monitorDetails.title.pingType.browser"
             defaultMessage="Browser"
           />
         );
@@ -85,7 +85,7 @@ export const MonitorPageTitleContent: React.FC = () => {
             <EuiBadge color="hollow">
               {renderMonitorType(type)}{' '}
               <FormattedMessage
-                id="xpack.uptime.monitorDetails.title.disclaimer.description"
+                id="xpack.synthetics.monitorDetails.title.disclaimer.description"
                 defaultMessage="(BETA)"
               />
             </EuiBadge>
@@ -96,7 +96,7 @@ export const MonitorPageTitleContent: React.FC = () => {
             <EuiText>
               <EuiLink href="https://www.elastic.co/what-is/synthetic-monitoring" target="_blank">
                 <FormattedMessage
-                  id="xpack.uptime.monitorDetails.title.disclaimer.link"
+                  id="xpack.synthetics.monitorDetails.title.disclaimer.link"
                   defaultMessage="See more"
                 />
               </EuiLink>

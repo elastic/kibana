@@ -8,6 +8,7 @@
 import { mockSearchResult } from './helper';
 import { getMonitorAlerts, getMonitorDetails } from './get_monitor_details';
 import * as statusCheck from '../alerts/status_check';
+import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 
 describe('getMonitorDetails', () => {
   it('getMonitorDetails will provide expected calls', async () => {
@@ -128,7 +129,7 @@ const dummyAlertRules = {
         availability: { range: 30, rangeUnit: 'd', threshold: '99' },
         filters: { tags: [], 'url.port': [], 'observer.geo.name': [], 'monitor.type': ['browser'] },
       },
-      rule_type_id: 'xpack.uptime.alerts.monitorStatus',
+      rule_type_id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
       created_by: null,
       updated_by: null,
       created_at: '2021-10-20T20:52:20.050Z',
@@ -163,7 +164,7 @@ const dummyAlertRules = {
         availability: { range: 30, rangeUnit: 'd', threshold: '99' },
         filters: { tags: [], 'url.port': [], 'observer.geo.name': [], 'monitor.type': ['http'] },
       },
-      rule_type_id: 'xpack.uptime.alerts.monitorStatus',
+      rule_type_id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
       created_by: null,
       updated_by: null,
       created_at: '2021-10-20T20:54:08.529Z',
@@ -198,7 +199,7 @@ const dummyAlertRules = {
         availability: { range: 30, rangeUnit: 'd', threshold: '99' },
         filters: { tags: [], 'url.port': [], 'observer.geo.name': [], 'monitor.type': ['http'] },
       },
-      rule_type_id: 'xpack.uptime.alerts.monitorStatus',
+      rule_type_id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
       created_by: null,
       updated_by: null,
       created_at: '2021-10-20T20:57:38.451Z',

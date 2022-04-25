@@ -16,7 +16,7 @@ const bodyDocsLink =
 export const DocLinkForBody = () => {
   const docsLink = (
     <EuiLink href={bodyDocsLink} target="_blank">
-      {i18n.translate('xpack.uptime.pingList.drawer.body.docsLink', {
+      {i18n.translate('xpack.synthetics.pingList.drawer.body.docsLink', {
         defaultMessage: 'docs',
         description: 'Docs link to set response body',
       })}
@@ -26,7 +26,7 @@ export const DocLinkForBody = () => {
   return (
     <EuiText>
       <FormattedMessage
-        id="xpack.uptime.pingList.expandedRow.response_body.notRecorded"
+        id="xpack.synthetics.pingList.expandedRow.response_body.notRecorded"
         defaultMessage="Body not recorded. Read our {docsLink} for more information on recording response bodies."
         values={{ docsLink }}
       />

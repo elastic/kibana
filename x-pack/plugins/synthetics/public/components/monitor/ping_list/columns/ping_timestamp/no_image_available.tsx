@@ -21,7 +21,7 @@ export const NoImageAvailable = () => {
     <BorderedText data-test-subj="pingTimestampNoImageAvailable">
       <strong>
         <FormattedMessage
-          id="xpack.uptime.synthetics.screenshot.noImageMessage"
+          id="xpack.synthetics.synthetics.screenshot.noImageMessage"
           defaultMessage="No image available"
         />
       </strong>

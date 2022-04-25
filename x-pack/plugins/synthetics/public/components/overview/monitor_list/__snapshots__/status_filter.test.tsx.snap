@@ -6,7 +6,7 @@ exports[`StatusFilterComponent renders without errors for valid props 1`] = `
 >
   <button
     class="euiButtonEmpty euiButtonEmpty--text euiFilterButton euiFilterButton-hasActiveFilters euiFilterButton--withNext"
-    data-test-subj="xpack.uptime.filterBar.filterStatusAll"
+    data-test-subj="xpack.synthetics.filterBar.filterStatusAll"
     type="button"
   >
     <span
@@ -27,7 +27,7 @@ exports[`StatusFilterComponent renders without errors for valid props 1`] = `
   </button>
   <button
     class="euiButtonEmpty euiButtonEmpty--text euiFilterButton euiFilterButton--withNext"
-    data-test-subj="xpack.uptime.filterBar.filterStatusUp"
+    data-test-subj="xpack.synthetics.filterBar.filterStatusUp"
     type="button"
   >
     <span
@@ -48,7 +48,7 @@ exports[`StatusFilterComponent renders without errors for valid props 1`] = `
   </button>
   <button
     class="euiButtonEmpty euiButtonEmpty--text euiFilterButton"
-    data-test-subj="xpack.uptime.filterBar.filterStatusDown"
+    data-test-subj="xpack.synthetics.filterBar.filterStatusDown"
     type="button"
   >
     <span

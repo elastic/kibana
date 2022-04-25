@@ -40,11 +40,11 @@ export function monitorDetailsPageProvider({ page, kibanaUrl }: { page: Page; ki
     },
 
     async setStatusFilterUp() {
-      await page.click('[data-test-subj="xpack.uptime.filterBar.filterStatusUp"]');
+      await page.click('[data-test-subj="xpack.synthetics.filterBar.filterStatusUp"]');
     },
 
     async setStatusFilterDown() {
-      await page.click('[data-test-subj="xpack.uptime.filterBar.filterStatusDown"]');
+      await page.click('[data-test-subj="xpack.synthetics.filterBar.filterStatusDown"]');
     },
 
     async refreshFromES() {

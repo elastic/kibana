@@ -12,7 +12,7 @@ import { AlertInstanceContext } from '@kbn/alerting-plugin/common';
 import { Alert } from '@kbn/alerting-plugin/server';
 import { UptimeAlertTypeFactory } from './types';
 import { updateState } from './common';
-import { TLS_LEGACY } from '../../../common/constants/alerts';
+import { CLIENT_ALERT_TYPES, TLS_LEGACY } from '../../../common/constants/alerts';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 import { Cert, CertResult } from '../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
@@ -93,7 +93,7 @@ export const getCertSummary = (
 };
 
 export const tlsLegacyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server, libs) => ({
-  id: 'xpack.uptime.alerts.tls',
+  id: CLIENT_ALERT_TYPES.TLS_LEGACY,
   producer: 'uptime',
   name: tlsTranslations.legacyAlertFactoryName,
   validate: {

@@ -111,6 +111,6 @@ export function TestNowMode({
   );
 }
 
-const PushingLabel = i18n.translate('xpack.uptime.testRun.pushing.description', {
+const PushingLabel = i18n.translate('xpack.synthetics.testRun.pushing.description', {
   defaultMessage: 'Pushing the monitor to service...',
 });

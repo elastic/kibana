@@ -110,7 +110,7 @@ export const fetchMonitorAlertRecords = async (): Promise<AlertsResult> => {
   const data = {
     page: 1,
     per_page: 500,
-    filter: 'alert.attributes.alertTypeId:(xpack.uptime.alerts.monitorStatus)',
+    filter: `alert.attributes.alertTypeId:(${CLIENT_ALERT_TYPES.MONITOR_STATUS})`,
     default_search_operator: 'AND',
     sort_field: 'name.keyword',
     sort_order: 'asc',
@@ -126,7 +126,7 @@ export const fetchAlertRecords = async ({
   const data = {
     page: 1,
     per_page: 500,
-    filter: 'alert.attributes.alertTypeId:(xpack.uptime.alerts.durationAnomaly)',
+    filter: `alert.attributes.alertTypeId:(${CLIENT_ALERT_TYPES.DURATION_ANOMALY})`,
     default_search_operator: 'AND',
     sort_field: 'name.keyword',
     sort_order: 'asc',

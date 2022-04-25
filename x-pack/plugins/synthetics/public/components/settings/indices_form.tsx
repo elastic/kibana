@@ -29,7 +29,7 @@ export const IndicesForm: React.FC<SettingsFormProps> = ({
     <EuiTitle size="s">
       <h3>
         <FormattedMessage
-          id="xpack.uptime.sourceConfiguration.indicesSectionTitle"
+          id="xpack.synthetics.sourceConfiguration.indicesSectionTitle"
           defaultMessage="Indices"
         />
       </h3>
@@ -39,14 +39,14 @@ export const IndicesForm: React.FC<SettingsFormProps> = ({
       title={
         <h4>
           <FormattedMessage
-            id="xpack.uptime.sourceConfiguration.heartbeatIndicesTitle"
+            id="xpack.synthetics.sourceConfiguration.heartbeatIndicesTitle"
             defaultMessage="Uptime indices"
           />
         </h4>
       }
       description={
         <FormattedMessage
-          id="xpack.uptime.sourceConfiguration.heartbeatIndicesDescription"
+          id="xpack.synthetics.sourceConfiguration.heartbeatIndicesDescription"
           defaultMessage="Index pattern for matching indices that contain Heartbeat data"
         />
       }
@@ -57,7 +57,7 @@ export const IndicesForm: React.FC<SettingsFormProps> = ({
         fullWidth
         helpText={
           <FormattedMessage
-            id="xpack.uptime.sourceConfiguration.heartbeatIndicesDefaultValue"
+            id="xpack.synthetics.sourceConfiguration.heartbeatIndicesDefaultValue"
             defaultMessage="The default value is {defaultValue}"
             values={{
               defaultValue: <EuiCode>{DYNAMIC_SETTINGS_DEFAULTS.heartbeatIndices}</EuiCode>,
@@ -67,7 +67,7 @@ export const IndicesForm: React.FC<SettingsFormProps> = ({
         isInvalid={!!fieldErrors?.heartbeatIndices}
         label={
           <FormattedMessage
-            id="xpack.uptime.sourceConfiguration.heartbeatIndicesLabel"
+            id="xpack.synthetics.sourceConfiguration.heartbeatIndicesLabel"
             defaultMessage="Heartbeat indices"
           />
         }

@@ -7,18 +7,24 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ENABLE_STATUS_ALERT = i18n.translate('xpack.uptime.monitorList.enableDownAlert', {
+export const ENABLE_STATUS_ALERT = i18n.translate('xpack.synthetics.monitorList.enableDownAlert', {
   defaultMessage: 'Enable status alerts',
 });
 
-export const DISABLE_STATUS_ALERT = i18n.translate('xpack.uptime.monitorList.disableDownAlert', {
-  defaultMessage: 'Disable status alerts',
-});
+export const DISABLE_STATUS_ALERT = i18n.translate(
+  'xpack.synthetics.monitorList.disableDownAlert',
+  {
+    defaultMessage: 'Disable status alerts',
+  }
+);
 
-export const EXPAND_TAGS_LABEL = i18n.translate('xpack.uptime.monitorList.tags.expand', {
+export const EXPAND_TAGS_LABEL = i18n.translate('xpack.synthetics.monitorList.tags.expand', {
   defaultMessage: 'Click to view remaining tags',
 });
 
-export const EXPAND_LOCATIONS_LABEL = i18n.translate('xpack.uptime.monitorList.locations.expand', {
-  defaultMessage: 'Click to view remaining locations',
-});
+export const EXPAND_LOCATIONS_LABEL = i18n.translate(
+  'xpack.synthetics.monitorList.locations.expand',
+  {
+    defaultMessage: 'Click to view remaining locations',
+  }
+);

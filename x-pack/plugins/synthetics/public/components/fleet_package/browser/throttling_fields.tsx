@@ -38,7 +38,7 @@ export const ThrottlingDisabledCallout = () => {
     <EuiCallOut
       title={
         <FormattedMessage
-          id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.automatic_node_cap.title"
+          id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.automatic_node_cap.title"
           defaultMessage="Automatic cap"
         />
       }
@@ -46,7 +46,7 @@ export const ThrottlingDisabledCallout = () => {
       iconType="alert"
     >
       <FormattedMessage
-        id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.automatic_node_cap.message"
+        id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.automatic_node_cap.message"
         defaultMessage="When disabling throttling, your monitor will still have its bandwidth capped by the configurations of the Synthetics Nodes in which it's running."
       />
     </EuiCallOut>
@@ -58,7 +58,7 @@ export const ThrottlingExceededCallout = () => {
     <EuiCallOut
       title={
         <FormattedMessage
-          id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.exceeded_throttling.title"
+          id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.exceeded_throttling.title"
           defaultMessage="You've exceeded the Synthetics Node bandwidth limits"
         />
       }
@@ -66,7 +66,7 @@ export const ThrottlingExceededCallout = () => {
       iconType="alert"
     >
       <FormattedMessage
-        id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.exceeded_throttling.message"
+        id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.exceeded_throttling.message"
         defaultMessage="When using throttling values larger than a Synthetics Node bandwidth limit, your monitor will still have its bandwidth capped."
       />
     </EuiCallOut>
@@ -82,7 +82,7 @@ export const ThrottlingExceededMessage = ({
 }) => {
   return (
     <FormattedMessage
-      id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.throttling_exceeded.message"
+      id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.throttling_exceeded.message"
       defaultMessage="You have exceeded the { throttlingField } limit for Synthetic Nodes. The { throttlingField } value can't be larger than { limit }Mbps."
       values={{ throttlingField, limit }}
     />
@@ -115,7 +115,7 @@ export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth, onField
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.download.label"
+            id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.download.label"
             defaultMessage="Download Speed"
           />
         }
@@ -126,7 +126,7 @@ export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth, onField
             <ThrottlingExceededMessage throttlingField="download" limit={maxDownload} />
           ) : (
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.download.error"
+              id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.download.error"
               defaultMessage="Download speed must be greater than zero."
             />
           )
@@ -154,7 +154,7 @@ export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth, onField
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.upload.label"
+            id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.upload.label"
             defaultMessage="Upload Speed"
           />
         }
@@ -165,7 +165,7 @@ export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth, onField
             <ThrottlingExceededMessage throttlingField="upload" limit={maxUpload} />
           ) : (
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.upload.error"
+              id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.upload.error"
               defaultMessage="Upload speed must be greater than zero."
             />
           )
@@ -193,7 +193,7 @@ export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth, onField
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.latency.label"
+            id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.latency.label"
             defaultMessage="Latency"
           />
         }
@@ -201,7 +201,7 @@ export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth, onField
         isInvalid={!!validate[ConfigKey.LATENCY]?.(fields)}
         error={
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.latency.error"
+            id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.latency.error"
             defaultMessage="Latency must not be negative."
           />
         }
@@ -238,14 +238,14 @@ export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth, onField
       title={
         <h4>
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.title"
+            id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.title"
             defaultMessage="Throttling options"
           />
         </h4>
       }
       description={
         <FormattedMessage
-          id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.description"
+          id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.description"
           defaultMessage="Control the monitor's download and upload speeds, and its latency to simulate your application's behaviour on slower or laggier networks."
         />
       }
@@ -257,7 +257,7 @@ export const ThrottlingFields = memo<Props>(({ validate, minColumnWidth, onField
         checked={fields[ConfigKey.IS_THROTTLING_ENABLED]}
         label={
           <FormattedMessage
-            id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.switch.description"
+            id="xpack.synthetics.createPackagePolicy.stepConfigure.browserAdvancedSettings.throttling.switch.description"
             defaultMessage="Enable throttling"
           />
         }

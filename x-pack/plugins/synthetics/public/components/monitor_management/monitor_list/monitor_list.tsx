@@ -115,7 +115,7 @@ export const MonitorManagementList = ({
     {
       align: 'left' as const,
       field: ConfigKey.NAME as string,
-      name: i18n.translate('xpack.uptime.monitorManagement.monitorList.monitorName', {
+      name: i18n.translate('xpack.synthetics.monitorManagement.monitorList.monitorName', {
         defaultMessage: 'Monitor name',
       }),
       sortable: true,
@@ -130,7 +130,7 @@ export const MonitorManagementList = ({
     {
       align: 'left' as const,
       field: ConfigKey.MONITOR_TYPE,
-      name: i18n.translate('xpack.uptime.monitorManagement.monitorList.monitorType', {
+      name: i18n.translate('xpack.synthetics.monitorManagement.monitorList.monitorType', {
         defaultMessage: 'Monitor type',
       }),
       sortable: true,
@@ -138,7 +138,7 @@ export const MonitorManagementList = ({
     {
       align: 'left' as const,
       field: ConfigKey.TAGS,
-      name: i18n.translate('xpack.uptime.monitorManagement.monitorList.tags', {
+      name: i18n.translate('xpack.synthetics.monitorManagement.monitorList.tags', {
         defaultMessage: 'Tags',
       }),
       render: (tags: string[]) => (tags ? <MonitorTags tags={tags} /> : null),
@@ -146,7 +146,7 @@ export const MonitorManagementList = ({
     {
       align: 'left' as const,
       field: ConfigKey.LOCATIONS,
-      name: i18n.translate('xpack.uptime.monitorManagement.monitorList.locations', {
+      name: i18n.translate('xpack.synthetics.monitorManagement.monitorList.locations', {
         defaultMessage: 'Locations',
       }),
       render: (locations: ServiceLocations) =>
@@ -155,7 +155,7 @@ export const MonitorManagementList = ({
     {
       align: 'left' as const,
       field: ConfigKey.SCHEDULE,
-      name: i18n.translate('xpack.uptime.monitorManagement.monitorList.schedule', {
+      name: i18n.translate('xpack.synthetics.monitorManagement.monitorList.schedule', {
         defaultMessage: 'Frequency (min)',
       }),
       render: (schedule: CommonFields[ConfigKey.SCHEDULE]) => schedule?.number,
@@ -163,7 +163,7 @@ export const MonitorManagementList = ({
     {
       align: 'left' as const,
       field: ConfigKey.URLS,
-      name: i18n.translate('xpack.uptime.monitorManagement.monitorList.URL', {
+      name: i18n.translate('xpack.synthetics.monitorManagement.monitorList.URL', {
         defaultMessage: 'URL',
       }),
       sortable: true,
@@ -174,7 +174,7 @@ export const MonitorManagementList = ({
     {
       align: 'left' as const,
       field: ConfigKey.ENABLED as string,
-      name: i18n.translate('xpack.uptime.monitorManagement.monitorList.enabled', {
+      name: i18n.translate('xpack.synthetics.monitorManagement.monitorList.enabled', {
         defaultMessage: 'Enabled',
       }),
       render: (_enabled: boolean, monitor: EncryptedSyntheticsMonitorWithId) => (
@@ -188,7 +188,7 @@ export const MonitorManagementList = ({
     },
     {
       align: 'left' as const,
-      name: i18n.translate('xpack.uptime.monitorManagement.monitorList.actions', {
+      name: i18n.translate('xpack.synthetics.monitorManagement.monitorList.actions', {
         defaultMessage: 'Actions',
       }),
       render: (fields: EncryptedSyntheticsMonitorWithId) => (
@@ -208,7 +208,7 @@ export const MonitorManagementList = ({
     <EuiPanel hasBorder>
       <EuiSpacer size="m" />
       <EuiBasicTable
-        aria-label={i18n.translate('xpack.uptime.monitorManagement.monitorList.title', {
+        aria-label={i18n.translate('xpack.synthetics.monitorManagement.monitorList.title', {
           defaultMessage: 'Monitor Management list',
         })}
         error={error?.message}

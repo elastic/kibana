@@ -135,47 +135,47 @@ export const AddMonitorBtn = () => {
   );
 };
 
-const ADD_MONITOR_LABEL = i18n.translate('xpack.uptime.monitorManagement.addMonitorLabel', {
+const ADD_MONITOR_LABEL = i18n.translate('xpack.synthetics.monitorManagement.addMonitorLabel', {
   defaultMessage: 'Add monitor',
 });
 
 const SYNTHETICS_ENABLE_LABEL = i18n.translate(
-  'xpack.uptime.monitorManagement.syntheticsEnableLabel',
+  'xpack.synthetics.monitorManagement.syntheticsEnableLabel',
   {
     defaultMessage: 'Enable',
   }
 );
 
 const SYNTHETICS_ENABLE_FAILURE = i18n.translate(
-  'xpack.uptime.monitorManagement.syntheticsEnabledFailure',
+  'xpack.synthetics.monitorManagement.syntheticsEnabledFailure',
   {
     defaultMessage: 'Monitor Management was not able to be enabled. Please contact support.',
   }
 );
 
 const SYNTHETICS_DISABLE_FAILURE = i18n.translate(
-  'xpack.uptime.monitorManagement.syntheticsDisabledFailure',
+  'xpack.synthetics.monitorManagement.syntheticsDisabledFailure',
   {
     defaultMessage: 'Monitor Management was not able to be disabled. Please contact support.',
   }
 );
 
 const SYNTHETICS_ENABLE_SUCCESS = i18n.translate(
-  'xpack.uptime.monitorManagement.syntheticsEnableSuccess',
+  'xpack.synthetics.monitorManagement.syntheticsEnableSuccess',
   {
     defaultMessage: 'Monitor Management enabled successfully.',
   }
 );
 
 const SYNTHETICS_DISABLE_SUCCESS = i18n.translate(
-  'xpack.uptime.monitorManagement.syntheticsDisabledSuccess',
+  'xpack.synthetics.monitorManagement.syntheticsDisabledSuccess',
   {
     defaultMessage: 'Monitor Management disabled successfully.',
   }
 );
 
 const SYNTHETICS_DISABLED_MESSAGE = i18n.translate(
-  'xpack.uptime.monitorManagement.syntheticsDisabled',
+  'xpack.synthetics.monitorManagement.syntheticsDisabled',
   {
     defaultMessage:
       'Monitor Management is currently disabled. Please contact an administrator to enable Monitor Management.',
@@ -183,7 +183,7 @@ const SYNTHETICS_DISABLED_MESSAGE = i18n.translate(
 );
 
 const SYNTHETICS_ENABLE_TOOL_TIP_MESSAGE = i18n.translate(
-  'xpack.uptime.monitorManagement.syntheticsEnableToolTip',
+  'xpack.synthetics.monitorManagement.syntheticsEnableToolTip',
   {
     defaultMessage:
       'Enable Monitor Management to create lightweight and real-browser monitors from locations around the world.',
@@ -191,7 +191,7 @@ const SYNTHETICS_ENABLE_TOOL_TIP_MESSAGE = i18n.translate(
 );
 
 const SYNTHETICS_DISABLE_TOOL_TIP_MESSAGE = i18n.translate(
-  'xpack.uptime.monitorManagement.syntheticsDisableToolTip',
+  'xpack.synthetics.monitorManagement.syntheticsDisableToolTip',
   {
     defaultMessage:
       'Disabling Monitor Management will immediately stop the execution of monitors in all test locations and prevent the creation of new monitors.',
@@ -199,7 +199,7 @@ const SYNTHETICS_DISABLE_TOOL_TIP_MESSAGE = i18n.translate(
 );
 
 const API_KEYS_DISABLED_TOOL_TIP_MESSAGE = i18n.translate(
-  'xpack.uptime.monitorManagement.apiKeysDisabledToolTip',
+  'xpack.synthetics.monitorManagement.apiKeysDisabledToolTip',
   {
     defaultMessage:
       'API Keys are disabled for this cluster. Monitor Management requires the use of API keys to write back to your Elasticsearch cluster. To enable API keys, please contact an administrator.',

@@ -85,7 +85,7 @@ export const SourceField = ({ onChange, onFieldBlur, defaultConfig = defaultValu
 
   const zipUrlLabel = (
     <FormattedMessage
-      id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.label"
+      id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.label"
       defaultMessage="Zip URL"
     />
   );
@@ -104,13 +104,13 @@ export const SourceField = ({ onChange, onFieldBlur, defaultConfig = defaultValu
             isInvalid={!config.zipUrl}
             error={
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.error"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.error"
                 defaultMessage="Zip URL is required"
               />
             }
             helpText={
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.helpText"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.helpText"
                 defaultMessage="Location of the synthetics project repository zip file."
               />
             }
@@ -128,14 +128,14 @@ export const SourceField = ({ onChange, onFieldBlur, defaultConfig = defaultValu
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.brower.proxyURL.label"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.brower.proxyURL.label"
                 defaultMessage="Proxy Zip URL"
               />
             }
             labelAppend={<OptionalLabel />}
             helpText={
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.http.helpText"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.http.helpText"
                 defaultMessage="HTTP proxy for Zip URL."
               />
             }
@@ -152,14 +152,14 @@ export const SourceField = ({ onChange, onFieldBlur, defaultConfig = defaultValu
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrlFolder.label"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrlFolder.label"
                 defaultMessage="Folder"
               />
             }
             labelAppend={<OptionalLabel />}
             helpText={
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrlFolder.helpText"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrlFolder.helpText"
                 defaultMessage="Relative directory path where the synthetic journey files are located in the repository."
               />
             }
@@ -176,21 +176,21 @@ export const SourceField = ({ onChange, onFieldBlur, defaultConfig = defaultValu
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.params.label"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.params.label"
                 defaultMessage="Params"
               />
             }
             labelAppend={<OptionalLabel />}
             helpText={
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.params.helpText"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.params.helpText"
                 defaultMessage="A JSON object that defines any variables your tests require."
               />
             }
           >
             <CodeEditor
               ariaLabel={i18n.translate(
-                'xpack.uptime.createPackagePolicy.stepConfigure.requestBody.codeEditor.json.ariaLabel',
+                'xpack.synthetics.createPackagePolicy.stepConfigure.requestBody.codeEditor.json.ariaLabel',
                 {
                   defaultMessage: 'JSON code editor',
                 }
@@ -208,14 +208,14 @@ export const SourceField = ({ onChange, onFieldBlur, defaultConfig = defaultValu
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrlUsername.label"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrlUsername.label"
                 defaultMessage="Zip URL Username"
               />
             }
             labelAppend={<OptionalLabel />}
             helpText={
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrlUsername.helpText"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrlUsername.helpText"
                 defaultMessage="The username for authenticating with the zip endpoint."
               />
             }
@@ -232,14 +232,14 @@ export const SourceField = ({ onChange, onFieldBlur, defaultConfig = defaultValu
           <EuiFormRow
             label={
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrlPassword.abel"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrlPassword.abel"
                 defaultMessage="Zip URL Password"
               />
             }
             labelAppend={<OptionalLabel />}
             helpText={
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrlPassword.helpText"
+                id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrlPassword.helpText"
                 defaultMessage="The password for authenticating with the zip endpoint."
               />
             }
@@ -260,7 +260,7 @@ export const SourceField = ({ onChange, onFieldBlur, defaultConfig = defaultValu
       id: 'syntheticsBrowserInlineConfig',
       name: (
         <FormattedMessage
-          id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.label"
+          id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.label"
           defaultMessage="Inline script"
         />
       ),
@@ -270,20 +270,20 @@ export const SourceField = ({ onChange, onFieldBlur, defaultConfig = defaultValu
           isInvalid={!config.inlineScript}
           error={
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.error"
+              id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.error"
               defaultMessage="Script is required"
             />
           }
           helpText={
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.helpText"
+              id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.helpText"
               defaultMessage="Runs Synthetic test scripts that are defined inline."
             />
           }
         >
           <CodeEditor
             ariaLabel={i18n.translate(
-              'xpack.uptime.createPackagePolicy.stepConfigure.requestBody.codeEditor.javascript.ariaLabel',
+              'xpack.synthetics.createPackagePolicy.stepConfigure.requestBody.codeEditor.javascript.ariaLabel',
               {
                 defaultMessage: 'JavaScript code editor',
               }
@@ -305,21 +305,21 @@ export const SourceField = ({ onChange, onFieldBlur, defaultConfig = defaultValu
         <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
           <EuiFlexItem grow={false}>
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.browser.scriptRecorder.label"
+              id="xpack.synthetics.createPackagePolicy.stepConfigure.browser.scriptRecorder.label"
               defaultMessage="Script recorder"
             />
           </EuiFlexItem>
           <StyledBetaBadgeWrapper grow={false}>
             <EuiBetaBadge
               label={i18n.translate(
-                'xpack.uptime.createPackagePolicy.stepConfigure.browser.scriptRecorder.experimentalLabel',
+                'xpack.synthetics.createPackagePolicy.stepConfigure.browser.scriptRecorder.experimentalLabel',
                 {
                   defaultMessage: 'Tech preview',
                 }
               )}
               iconType="beaker"
               tooltipContent={i18n.translate(
-                'xpack.uptime.createPackagePolicy.stepConfigure.browser.scriptRecorder.experimentalTooltip',
+                'xpack.synthetics.createPackagePolicy.stepConfigure.browser.scriptRecorder.experimentalTooltip',
                 {
                   defaultMessage:
                     'Preview the quickest way to create Elastic Synthetics monitoring scripts with our Elastic Synthetics Recorder',

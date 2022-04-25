@@ -114,14 +114,17 @@ export const MonitorListTabs = ({
   );
 };
 
-export const REFRESH_LABEL = i18n.translate('xpack.uptime.monitorList.refresh', {
+export const REFRESH_LABEL = i18n.translate('xpack.synthetics.monitorList.refresh', {
   defaultMessage: 'Refresh',
 });
 
-export const INVALID_MONITORS_LABEL = i18n.translate('xpack.uptime.monitorList.invalidMonitors', {
-  defaultMessage: 'Invalid monitors',
-});
+export const INVALID_MONITORS_LABEL = i18n.translate(
+  'xpack.synthetics.monitorList.invalidMonitors',
+  {
+    defaultMessage: 'Invalid monitors',
+  }
+);
 
-export const ALL_MONITORS_LABEL = i18n.translate('xpack.uptime.monitorList.allMonitors', {
+export const ALL_MONITORS_LABEL = i18n.translate('xpack.synthetics.monitorList.allMonitors', {
   defaultMessage: 'All monitors',
 });

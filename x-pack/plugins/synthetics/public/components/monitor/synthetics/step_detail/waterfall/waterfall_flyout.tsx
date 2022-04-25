@@ -24,26 +24,26 @@ import { MiddleTruncatedText } from '../../waterfall';
 import { WaterfallMetadataEntry } from '../../waterfall/types';
 import { OnFlyoutClose } from '../../waterfall/components/use_flyout';
 
-export const DETAILS = i18n.translate('xpack.uptime.synthetics.waterfall.flyout.details', {
+export const DETAILS = i18n.translate('xpack.synthetics.synthetics.waterfall.flyout.details', {
   defaultMessage: 'Details',
 });
 
 export const CERTIFICATES = i18n.translate(
-  'xpack.uptime.synthetics.waterfall.flyout.certificates',
+  'xpack.synthetics.synthetics.waterfall.flyout.certificates',
   {
     defaultMessage: 'Certificate headers',
   }
 );
 
 export const REQUEST_HEADERS = i18n.translate(
-  'xpack.uptime.synthetics.waterfall.flyout.requestHeaders',
+  'xpack.synthetics.synthetics.waterfall.flyout.requestHeaders',
   {
     defaultMessage: 'Request headers',
   }
 );
 
 export const RESPONSE_HEADERS = i18n.translate(
-  'xpack.uptime.synthetics.waterfall.flyout.responseHeaders',
+  'xpack.synthetics.synthetics.waterfall.flyout.responseHeaders',
   {
     defaultMessage: 'Response headers',
   }

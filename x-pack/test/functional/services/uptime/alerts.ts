@@ -13,18 +13,18 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
 
   return {
     async openFlyout(alertType: 'monitorStatus' | 'tls') {
-      await testSubjects.click('xpack.uptime.alertsPopover.toggleButton');
-      await testSubjects.click('xpack.uptime.openAlertContextPanel');
+      await testSubjects.click('xpack.synthetics.alertsPopover.toggleButton');
+      await testSubjects.click('xpack.synthetics.openAlertContextPanel');
       if (alertType === 'monitorStatus') {
-        await testSubjects.click('xpack.uptime.toggleAlertFlyout');
+        await testSubjects.click('xpack.synthetics.toggleAlertFlyout');
       } else if (alertType === 'tls') {
-        await testSubjects.click('xpack.uptime.toggleTlsAlertFlyout');
+        await testSubjects.click('xpack.synthetics.toggleTlsAlertFlyout');
       }
       // ensure the flyout has opened
       await testSubjects.exists('ruleNameInput');
     },
     async openMonitorStatusAlertType(alertType: string) {
-      await testSubjects.click(`xpack.uptime.alerts.${alertType}-SelectOption`);
+      await testSubjects.click(`xpack.synthetics.alerts.${alertType}-SelectOption`);
     },
     async setAlertTags(tags: string[]) {
       for (let i = 0; i < tags.length; i += 1) {
@@ -55,15 +55,15 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
     },
     async setAlertStatusNumTimes(value: string) {
       await this.setAlertExpressionValue(
-        'xpack.uptime.alerts.monitorStatus.numTimesExpression',
-        'xpack.uptime.alerts.monitorStatus.numTimesField',
+        'xpack.synthetics.alerts.monitorStatus.numTimesExpression',
+        'xpack.synthetics.alerts.monitorStatus.numTimesField',
         value
       );
     },
     async setAlertTimerangeSelection(value: string) {
       await this.setAlertExpressionValue(
-        'xpack.uptime.alerts.monitorStatus.timerangeValueExpression',
-        'xpack.uptime.alerts.monitorStatus.timerangeValueField',
+        'xpack.synthetics.alerts.monitorStatus.timerangeValueExpression',
+        'xpack.synthetics.alerts.monitorStatus.timerangeValueField',
         value
       );
     },
@@ -81,9 +81,9 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
     },
     async setMonitorStatusSelectableToHours() {
       await this.setAlertExpressionSelectable(
-        'xpack.uptime.alerts.monitorStatus.timerangeUnitExpression',
-        'xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable',
-        ['xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable.hoursOption']
+        'xpack.synthetics.alerts.monitorStatus.timerangeUnitExpression',
+        'xpack.synthetics.alerts.monitorStatus.timerangeUnitSelectable',
+        ['xpack.synthetics.alerts.monitorStatus.timerangeUnitSelectable.hoursOption']
       );
     },
     async clickAddFilter() {
