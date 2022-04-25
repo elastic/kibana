@@ -1,0 +1,13 @@
+{
+  "id": "visTypeScript",
+  "owner": {
+    "name": "Kibana Presentation",
+    "githubTeam": "kibana-presentation"
+  },
+  "description": "Adds a script-based visualization type",
+  "version": "kibana",
+  "ui": true,
+  "server": false,
+  "requiredPlugins": ["expressions", "visualizations"],
+  "requiredBundles": ["expressions", "visualizations", "visDefaultEditor"]
+}
