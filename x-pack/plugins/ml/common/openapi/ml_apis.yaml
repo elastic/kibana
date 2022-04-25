@@ -14,7 +14,10 @@ servers:
 paths:
   /s/{spaceId}/api/ml/saved_objects/sync:
     get:
-      description: Synchronizes Kibana saved objects for machine learning jobs.
+      description: >
+        Synchronizes Kibana saved objects for machine learning jobs and trained models.
+        You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges.
+        This API runs automatically when you start Kibana and periodically thereafter.
       parameters:
         - $ref: '#/components/parameters/spaceParam'
         - $ref: '#/components/parameters/simulateParam'
@@ -28,7 +31,10 @@ paths:
                   $ref: '#/components/schemas/syncResponse'
   /api/ml/saved_objects/sync:
     get:
-      description: Synchronizes Kibana saved objects for machine learning jobs.
+      description: >
+        Synchronizes Kibana saved objects for machine learning jobs and trained models.
+        You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges.
+        This API runs automatically when you start Kibana and periodically thereafter.
       parameters:
         - $ref: '#/components/parameters/simulateParam'
       responses:
@@ -82,7 +88,7 @@ components:
                type: boolean
         savedObjectsCreated:
           type: object
-          description: If saved objects are missing for machine learning jobs, they are created. This list contains the job identifiers and indicates whether the synchronization was successful.
+          description: If saved objects are missing for machine learning jobs or trained models, they are created. This list contains the job and model identifiers and indicates whether the synchronization was successful.
           properties:
             anomaly-detector:
               type: object
@@ -93,6 +99,14 @@ components:
                     type: boolean
                     example: true
             data-frame-analytics:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+            trained-model:
               type: object
               additionalProperties:
                 type: object
@@ -102,7 +116,7 @@ components:
                     example: true
         savedObjectsDeleted:
           type: object
-          description: If saved objects exist for machine learning jobs that no longer exist, they are deleted. This list contains the job identifiers and indicates whether the synchronization was successful.
+          description: If saved objects exist for machine learning jobs or trained models that no longer exist, they are deleted. This list contains the job and model identifiers and indicates whether the synchronization was successful.
           properties:
             anomaly-detector:
               type: object
@@ -113,6 +127,14 @@ components:
                     type: boolean
                     example: true
             data-frame-analytics:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+            trained-model:
               type: object
               additionalProperties:
                 type: object

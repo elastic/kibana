@@ -15,6 +15,6 @@ Then generate the `bundled` files with the following commands:
 
     ```
     npx @redocly/openapi-cli bundle --ext yaml --output bundled.yaml ml_apis.yaml
-    npx @redocly/openapi-cli bundle --ext json --output bundled.json ml_apis.json
+    npx @redocly/openapi-cli bundle --ext json --output bundled.json ml_apis.yaml
     ```
 
