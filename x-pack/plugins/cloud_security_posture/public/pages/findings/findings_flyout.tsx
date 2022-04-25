@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiCodeBlock,
   EuiFlexItem,
@@ -23,8 +23,14 @@ import {
   EuiFlexGroup,
   EuiIcon,
   type PropsOf,
+  EuiAccordion,
+  EuiCode,
+  EuiPanel,
+  EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { assertNever } from '@kbn/std';
+import { getFlattenedObject } from '@kbn/std';
 import type { CspFinding } from './types';
 import { CspEvaluationBadge } from '../../components/csp_evaluation_badge';
 import * as TEXT from './translations';
@@ -48,6 +54,7 @@ interface Card {
 
 interface FindingFlyoutProps {
   onClose(): void;
+
   findings: CspFinding;
 }
 
@@ -114,7 +121,7 @@ const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab
     case 'remediation':
       return <Cards data={getRemediationCards(findings)} />;
     case 'resource':
-      return <Cards data={getResourceCards(findings)} />;
+      return <ResourceTab data={findings} />;
     case 'general':
       return <Cards data={getGeneralCards(findings)} />;
     default:
@@ -122,42 +129,85 @@ const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab
   }
 };
 
-const getResourceCards = ({ resource, host }: CspFinding): Card[] => [
-  {
-    title: TEXT.RESOURCE,
-    listItems: [
-      [TEXT.FILENAME, <CodeBlock>{resource.filename}</CodeBlock>],
-      [TEXT.MODE, resource.mode],
-      [TEXT.PATH, <CodeBlock>{resource.path}</CodeBlock>],
-      [TEXT.TYPE, resource.type],
-      [TEXT.UID, resource.uid],
+const getDescriptionDisplay = (value: any) => {
+  if (typeof value === 'boolean') return <EuiCode>{value ? 'true' : 'false'}</EuiCode>;
+  if (value === undefined) return <EuiCode>{'undefined'}</EuiCode>;
+  if (value === null) return <EuiCode>{'null'}</EuiCode>;
+  if (typeof value === 'object') {
+    return (
+      <EuiCodeBlock isCopyable={true} overflowHeight={300}>
+        {JSON.stringify(value, null, 2)}
+      </EuiCodeBlock>
+    );
+  }
+
+  return <EuiText size="s">{value}</EuiText>;
+};
+
+const prepareDescriptionList = (data) =>
+  Object.entries(getFlattenedObject(data))
+    .slice()
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([key, value]) => ({
+      title: (
+        <EuiText size="s">
+          <strong>{key}</strong>
+        </EuiText>
+      ),
+      description: getDescriptionDisplay(value),
+    }));
+
+const ResourceTab = ({ data }: { data: CspFinding }) => {
+  const { euiTheme } = useEuiTheme();
+
+  const accordions = useMemo(
+    () => [
+      {
+        title: 'Resource',
+        id: 'resourceAccordion',
+        listItems: prepareDescriptionList(data.resource),
+      },
+      {
+        title: 'Host',
+        id: 'hostAccordion',
+        listItems: prepareDescriptionList(data.host),
+      },
     ],
-  },
-  {
-    title: TEXT.HOST,
-    listItems: [
-      [TEXT.ARCHITECTURE, host.architecture],
-      [TEXT.CONTAINERIZED, host.containerized ? 'true' : 'false'],
-      [TEXT.HOSTNAME, host.hostname],
-      [TEXT.ID, <CodeBlock>{host.id}</CodeBlock>],
-      [TEXT.IP, <CodeBlock>{host.ip.join(', ')}</CodeBlock>],
-      [TEXT.MAC, <CodeBlock>{host.mac.join(', ')}</CodeBlock>],
-      [TEXT.NAME, host.name],
-    ],
-  },
-  {
-    title: TEXT.OS,
-    listItems: [
-      [TEXT.CODENAME, host.os.codename],
-      [TEXT.FAMILY, host.os.family],
-      [TEXT.KERNEL, host.os.kernel],
-      [TEXT.NAME, host.os.name],
-      [TEXT.PLATFORM, host.os.platform],
-      [TEXT.TYPE, host.os.type],
-      [TEXT.VERSION, host.os.version],
-    ],
-  },
-];
+    [data.host, data.resource]
+  );
+
+  return (
+    <>
+      {accordions.map((accordion) => (
+        <>
+          <EuiPanel hasShadow={false} hasBorder>
+            <EuiAccordion
+              id={accordion.id}
+              buttonContent={
+                <EuiText>
+                  <strong>{accordion.title}</strong>
+                </EuiText>
+              }
+              arrowDisplay="right"
+              initialIsOpen
+            >
+              <EuiDescriptionList
+                listItems={accordion.listItems}
+                type="column"
+                style={{
+                  marginTop: euiTheme.size.l,
+                }}
+                titleProps={{ style: { width: '35%' } }}
+                descriptionProps={{ style: { width: '65%' } }}
+              />
+            </EuiAccordion>
+          </EuiPanel>
+          <EuiSpacer size="m" />
+        </>
+      ))}
+    </>
+  );
+};
 
 const getGeneralCards = ({ rule }: CspFinding): Card[] => [
   {
