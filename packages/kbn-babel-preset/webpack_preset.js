@@ -14,6 +14,9 @@ module.exports = (_, options = {}) => {
       [
         require.resolve('@babel/preset-env'),
         {
+          targets: {
+            esmodules: true,
+          },
           useBuiltIns: 'entry',
           modules: false,
           // Please read the explanation for this
