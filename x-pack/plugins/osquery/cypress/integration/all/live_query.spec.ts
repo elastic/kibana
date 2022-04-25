@@ -58,9 +58,18 @@ describe('ALL - Live Query', () => {
     });
     cy.react(RESULTS_TABLE_CELL_WRRAPER, {
       props: { id: 'message', index: 1 },
-    });
+    }).should('exist');
+    cy.wait(500);
     cy.react(RESULTS_TABLE_CELL_WRRAPER, {
       props: { id: 'osquery.days.number', index: 2 },
-    }).react('EuiIconIndexMapping');
+    }).should('exist');
+
+    cy.react(RESULTS_TABLE_CELL_WRRAPER, {
+      props: { id: 'osquery.days.number', index: 2 },
+    }).within(() => {
+      cy.get('.euiToolTipAnchor').within(() => {
+        cy.get('svg').should('exist');
+      });
+    });
   });
 });
