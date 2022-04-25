@@ -63,7 +63,7 @@ const DeploymentModeStepContent = ({
       <EuiText>
         <FormattedMessage
           id="xpack.fleet.fleetServerSetup.stepDeploymentModeDescriptionText"
-          defaultMessage="Fleet uses Transport Layer Security (TLS) to encrypt traffic between Elastic Agents and other components in the Elastic Stack. Choose a deployment mode to determine how you wish to handle certificates. Your selection will affect the Fleet Server set up command shown in a later step."
+          defaultMessage="Fleet uses Transport Layer Security (TLS) to encrypt traffic between Elastic Agents and other components in the Elastic Stack. Choose a deployment mode to determine how you wish to handle certificates. Your selection will affect the Fleet Server setup command shown in a later step."
         />
       </EuiText>
       <EuiSpacer size="m" />
