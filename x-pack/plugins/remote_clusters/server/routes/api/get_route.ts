@@ -21,7 +21,7 @@ export const register = (deps: RouteDependencies): void => {
 
   const allHandler: RequestHandler<unknown, unknown, unknown> = async (ctx, request, response) => {
     try {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const clusterSettings = await clusterClient.asCurrentUser.cluster.getSettings();
 
       const transientClusterNames = Object.keys(
