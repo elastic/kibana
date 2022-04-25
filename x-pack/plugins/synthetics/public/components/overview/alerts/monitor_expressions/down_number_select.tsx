@@ -35,13 +35,13 @@ export const DownNoExpressionSelect: React.FC<Props> = ({
       content={
         <AlertFieldNumber
           aria-label={labels.ENTER_NUMBER_OF_DOWN_COUNTS}
-          data-test-subj="xpack.uptime.alerts.monitorStatus.numTimesField"
+          data-test-subj="xpack.synthetics.alerts.monitorStatus.numTimesField"
           disabled={false}
           fieldValue={numTimes}
           setFieldValue={setNumTimes}
         />
       }
-      data-test-subj="xpack.uptime.alerts.monitorStatus.numTimesExpression"
+      data-test-subj="xpack.synthetics.alerts.monitorStatus.numTimesExpression"
       description={hasFilters ? labels.MATCHING_MONITORS_DOWN : labels.ANY_MONITOR_DOWN}
       id="ping-count"
       isEnabled={isEnabled}
