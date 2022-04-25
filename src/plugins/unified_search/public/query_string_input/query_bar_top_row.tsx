@@ -41,6 +41,7 @@ import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../utils/shallow_equal';
 import { AddFilterPopover } from './add_filter_popover';
 import { DataViewPicker, DataViewPickerProps } from '../dataview_picker';
+import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 
 const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any
@@ -414,17 +415,11 @@ export const QueryBarTopRow = React.memo(
       return (
         (Boolean(props.showAddFilter) || Boolean(props.prepend)) && (
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup
-              className={classNames('kbnQueryBar__buttonGroup', {
-                'kbnQueryBar__buttonGroup--small': shouldShowDatePickerAsBadge(),
-                'kbnQueryBar__buttonGroup--attached': renderFilterMenuOnly(),
-              })}
-              gutterSize="none"
-              responsive={false}
-            >
-              <EuiFlexItem grow={false}>{props.prepend}</EuiFlexItem>
-              {renderAddButton()}
-            </EuiFlexGroup>
+            <FilterButtonGroup
+              items={[props.prepend, renderAddButton()]}
+              attached={renderFilterMenuOnly()}
+              size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
+            />
           </EuiFlexItem>
         )
       );

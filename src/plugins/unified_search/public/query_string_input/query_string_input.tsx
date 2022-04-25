@@ -49,6 +49,7 @@ import type { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '../typeahead';
 import { onRaf } from '../utils';
 import { getTheme } from '../services';
+import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 
 export interface QueryStringInputProps {
   indexPatterns: Array<DataView | string>;
@@ -710,27 +711,34 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
       'aria-owns': 'kbnTypeahead__items',
     };
     const ariaCombobox = { ...isSuggestionsVisible, role: 'combobox' };
+
+    const simpleLanguageSwitcher = this.props.disableLanguageSwitcher ? null : (
+      <QueryLanguageSwitcher
+        language={this.props.query.language}
+        anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
+        onSelectLanguage={this.onSelectLanguage}
+        nonKqlMode={this.props.nonKqlMode}
+      />
+    );
+
+    const prependElement =
+      this.props.prepend || simpleLanguageSwitcher ? (
+        <FilterButtonGroup attached items={[this.props.prepend, simpleLanguageSwitcher]} />
+      ) : undefined;
+
     const containerClassName = classNames('kbnQueryBar__wrap', this.props.className);
     const inputClassName = classNames('kbnQueryBar__textarea', {
       'kbnQueryBar__textarea--withIcon': this.props.iconType,
       'kbnQueryBar__textarea--isClearable': this.props.isClearable,
-      'kbnQueryBar__textarea--withPrepend': this.props.prepend,
+      'kbnQueryBar__textarea--withPrepend': prependElement,
       'kbnQueryBar__textarea--isSuggestionsVisible':
         isSuggestionsVisible && !isEmpty(this.state.suggestions),
     });
     const inputWrapClassName = classNames('kbnQueryBar__textareaWrap');
-
     return (
       <div className={containerClassName} onFocus={this.onFocusWithin} onBlur={this.onBlurWithin}>
-        {this.props.prepend}
-        {this.props.disableLanguageSwitcher ? null : (
-          <QueryLanguageSwitcher
-            language={this.props.query.language}
-            anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
-            onSelectLanguage={this.onSelectLanguage}
-            nonKqlMode={this.props.nonKqlMode}
-          />
-        )}
+        {prependElement}
+
         <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
           <div
             {...ariaCombobox}
