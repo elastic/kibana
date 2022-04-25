@@ -6,16 +6,16 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { LastUpdated } from './last_updated';
-import { REFRESH_LABEL } from '../exploratory_view';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 
 export function RefreshButton() {
   const { setLastRefresh, chartTimeRangeContext } = useSeriesStorage();
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="xs">
+    <EuiFlexGroup alignItems="center" gutterSize="m">
       <EuiFlexItem style={{ textAlign: 'right', minWidth: 280 }}>
         <LastUpdated chartTimeRange={chartTimeRangeContext} />
       </EuiFlexItem>
@@ -27,3 +27,10 @@ export function RefreshButton() {
     </EuiFlexGroup>
   );
 }
+
+export const REFRESH_LABEL = i18n.translate(
+  'xpack.observability.overview.exploratoryView.refresh',
+  {
+    defaultMessage: 'Refresh',
+  }
+);

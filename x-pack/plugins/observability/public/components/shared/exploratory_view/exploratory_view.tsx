@@ -212,17 +212,6 @@ const SHOW_CHART_LABEL = i18n.translate('xpack.observability.overview.explorator
   defaultMessage: 'Show chart',
 });
 
-const PREVIEW_LABEL = i18n.translate('xpack.observability.overview.exploratoryView.preview', {
-  defaultMessage: 'Preview',
-});
-
-export const REFRESH_LABEL = i18n.translate(
-  'xpack.observability.overview.exploratoryView.refresh',
-  {
-    defaultMessage: 'Refresh',
-  }
-);
-
 const LENS_NOT_AVAILABLE = i18n.translate(
   'xpack.observability.overview.exploratoryView.lensDisabled',
   {
