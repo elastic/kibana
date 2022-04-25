@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import moment from 'moment';
 import { EuiText, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { ExperimentalBadge } from '../../../components/shared/experimental_badge';
 import { PageHeaderProps } from '../types';
@@ -16,10 +17,9 @@ export function PageTitle({ rule }: PageHeaderProps) {
       {rule.name} <ExperimentalBadge />
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem component="span" grow={false}>
-          {/* TODO: formate dates */}
           <EuiText color="subdued" size="s">
-            <b>Last updated</b> by {rule.updatedBy} on {rule.updatedAt} &emsp;
-            <b>Created</b> by {rule.createdBy} on {rule.createdAt}
+            <b>Last updated</b> by {rule.updatedBy} on {moment(rule.updatedAt).format('ll')} &emsp;
+            <b>Created</b> by {rule.createdBy} on {moment(rule.createdAt).format('ll')}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem style={{ alignSelf: 'flexStart' }} component="span" grow={false}>

@@ -7,9 +7,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import moment from 'moment';
-
 import { useParams } from 'react-router-dom';
-
 import { i18n } from '@kbn/i18n';
 import {
   EuiText,
