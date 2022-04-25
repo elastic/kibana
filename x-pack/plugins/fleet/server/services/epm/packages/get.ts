@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
+import type { SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
 import semverGte from 'semver/functions/gte';
 
 import {
