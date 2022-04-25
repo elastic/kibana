@@ -695,7 +695,7 @@ export const getSignalsMigrationStatusRequest = () =>
 export const legacyGetNotificationResult = (): LegacyRuleNotificationAlertType => ({
   id: '200dbf2f-b269-4bf9-aa85-11ba32ba73ba',
   name: 'Notification for Rule Test',
-  tags: ['__internal_rule_alert_id:85b64e8a-2e40-4096-86af-5ac172c10825'],
+  tags: [],
   alertTypeId: 'siem.notifications',
   consumer: 'siem',
   params: {
