@@ -6,6 +6,7 @@
  */
 import React, { useState } from 'react';
 import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { GetApiKeyBtn } from './get_api_key_btn';
 
 export const ManagementSettings = () => {
@@ -19,11 +20,23 @@ export const ManagementSettings = () => {
       closePopover={() => setIsPopoverOpen(false)}
       style={{ margin: 'auto' }}
     >
-      <EuiPopoverTitle>Generate API Key</EuiPopoverTitle>
-      <EuiText>
-        You can generate an API key which can be used with push command from Synthetics agent.
-      </EuiText>
+      <EuiPopoverTitle>{GET_API_KEY_GENERATE}</EuiPopoverTitle>
+      <EuiText>{GET_API_KEY_LABEL_DESCRIPTION}</EuiText>
       <GetApiKeyBtn />
     </EuiPopover>
   );
 };
+
+const GET_API_KEY_GENERATE = i18n.translate(
+  'xpack.uptime.monitorManagement.getAPIKeyLabel.generate',
+  {
+    defaultMessage: 'Generate API Key',
+  }
+);
+
+const GET_API_KEY_LABEL_DESCRIPTION = i18n.translate(
+  'xpack.uptime.monitorManagement.getAPIKeyLabel.description',
+  {
+    defaultMessage: 'Get API key',
+  }
+);

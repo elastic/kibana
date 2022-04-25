@@ -7,6 +7,7 @@
 import React, { useState } from 'react';
 import { EuiButton, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import { useFetcher } from '@kbn/observability-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { fetchServiceAPIKey } from '../../state/api';
 
 export const GetApiKeyBtn = () => {
@@ -30,7 +31,7 @@ export const GetApiKeyBtn = () => {
           setLoadAPIKey(true);
         }}
       >
-        Get API key
+        {GET_API_KEY_LABEL}
       </EuiButton>
       <EuiSpacer />
       {data && (
@@ -41,3 +42,7 @@ export const GetApiKeyBtn = () => {
     </>
   );
 };
+
+const GET_API_KEY_LABEL = i18n.translate('xpack.uptime.monitorManagement.getAPIKeyLabel', {
+  defaultMessage: 'Get API key',
+});
