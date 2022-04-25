@@ -21,21 +21,21 @@ export type TrackedEsSearches = Record<
   }
 >;
 
-export interface DataResponseMeta {
+export type DataResponseMeta = {
   type: PANEL_TYPES;
   uiRestrictions: TimeseriesUIRestrictions;
   trackedEsSearches: TrackedEsSearches;
-}
+} & Record<string, PanelSeries>;
 
-export interface TableData extends DataResponseMeta {
+export type TableData = DataResponseMeta & {
   series?: PanelData[];
   pivot_label?: string;
-}
+};
 
 // series data is not fully typed yet
 export type SeriesData = DataResponseMeta & {
   error?: string;
-} & Record<string, PanelSeries>;
+};
 
 export interface PanelSeries {
   annotations: Record<string, Annotation[]>;

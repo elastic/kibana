@@ -5,9 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Adapters } from '@kbn/inspector-plugin';
 import { KibanaContext, handleResponse } from '@kbn/data-plugin/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { EuiCodeBlock } from '@elastic/eui';
 import { getTimezone } from './application/lib/get_timezone';
 import { getUISettings, getDataStart, getCoreStart } from './services';
 import { ROUTES, UI_SETTINGS } from '../common/constants';
@@ -77,6 +81,22 @@ export const metricsRequestHandler = async ({
           context: executionContext,
           signal: abortController.signal,
         });
+
+        const { error } = visData[visParams.id];
+        if (error) {
+          const coreStart = getCoreStart();
+          coreStart.notifications.toasts.addDanger({
+            title: i18n.translate('visTypeTimeseries.requestHandler.visDaraErrorMessage', {
+              defaultMessage: 'Cannot retrieve search results',
+            }),
+            text: toMountPoint(
+              <EuiCodeBlock isCopyable={true} paddingSize="s">
+                {error}
+              </EuiCodeBlock>,
+              { theme$: coreStart.theme.theme$ }
+            ),
+          });
+        }
 
         inspectorAdapters?.requests?.reset();
 
