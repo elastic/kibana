@@ -27,6 +27,7 @@ import { FilterBar } from '../filter_bar';
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementComponent } from '../saved_query_management';
+import { SuggestionsListSize } from '../typeahead/suggestions_component';
 
 export interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
@@ -82,6 +83,8 @@ export interface SearchBarOwnProps {
   displayStyle?: 'inPage' | 'detached';
   // super update button background fill control
   fillSubmitButton?: boolean;
+  // defines size of suggestions query popover
+  suggestionsSize?: SuggestionsListSize;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -394,6 +397,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           nonKqlMode={this.props.nonKqlMode}
           nonKqlModeHelpText={this.props.nonKqlModeHelpText}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          suggestionsSize={this.props.suggestionsSize}
         />
       );
     }

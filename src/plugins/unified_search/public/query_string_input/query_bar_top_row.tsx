@@ -37,6 +37,7 @@ import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import QueryStringInputUI from './query_string_input';
 import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../utils';
+import type { SuggestionsListSize } from '../typeahead/suggestions_component';
 
 const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any
@@ -78,6 +79,7 @@ export interface QueryBarTopRowProps {
   showAutoRefreshOnly?: boolean;
   timeHistory?: TimeHistoryContract;
   timeRangeForSuggestionsOverride?: boolean;
+  suggestionsSize?: SuggestionsListSize;
 }
 
 const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -363,6 +365,7 @@ export const QueryBarTopRow = React.memo(
             nonKqlMode={props.nonKqlMode}
             nonKqlModeHelpText={props.nonKqlModeHelpText}
             timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+            size={props.suggestionsSize}
           />
         </EuiFlexItem>
       );

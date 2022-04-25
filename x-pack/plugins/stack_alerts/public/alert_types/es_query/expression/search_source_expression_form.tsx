@@ -136,6 +136,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         onQueryChange={onChangeQuery}
         savedQueryId={savedQuery?.id}
         filters={filters}
+        suggestionsSize="s"
         onClearSavedQuery={onClearSavedQuery}
         onSavedQueryUpdated={onSavedQueryUpdated}
         showSaveQuery={true}
