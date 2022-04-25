@@ -47,8 +47,8 @@ export const getPackagePolicy = async (
 export const getCspRules = async (
   soClient: SavedObjectsClientContract,
   packagePolicy: PackagePolicy
-) => {
-  const cspRules = await soClient.find<CspRuleSchema>({
+): Promise<SavedObjectsFindResponse<CspRuleSchema, unknown>> => {
+  const cspRules = soClient.find<CspRuleSchema>({
     type: cspRuleAssetSavedObjectType,
     filter: `${cspRuleAssetSavedObjectType}.attributes.package_policy_id: ${packagePolicy.id} AND ${cspRuleAssetSavedObjectType}.attributes.policy_id: ${packagePolicy.policy_id}`,
     searchFields: ['name'],

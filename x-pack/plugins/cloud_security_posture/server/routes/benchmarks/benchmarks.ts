@@ -26,9 +26,11 @@ import {
   BenchmarksQuerySchema,
 } from '../../../common/schemas/benchmark';
 import { CspAppContext } from '../../plugin';
-import type { Benchmark } from '../../../common/types';
+import type { Benchmark, PackagePolicyCspRulesStatus } from '../../../common/types';
 import { isNonNullable } from '../../../common/utils/helpers';
 import { CspRouter } from '../../types';
+import { getCspRules } from '../configuration/update_rules_configuration';
+import { act } from 'react-dom/test-utils';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
 
@@ -92,9 +94,24 @@ const addRunningAgentToAgentPolicy = async (
   );
 };
 
+const addPackagePolicyCspRules = async (
+  soClient: SavedObjectsClientContract,
+  packagePolicy: PackagePolicy
+): Promise<PackagePolicyCspRulesStatus> => {
+  const rules = await getCspRules(soClient, packagePolicy);
+  const activatedRules = rules.saved_objects.filter((cspRule) => cspRule.attributes.enabled);
+  const packagePolicyRules = {
+    all: rules.total,
+    enabled: activatedRules.length,
+    disabled: rules.total - activatedRules.length,
+  };
+  return packagePolicyRules;
+};
+
 export const createBenchmarkEntry = (
   agentPolicy: GetAgentPoliciesResponseItem,
-  packagePolicy: PackagePolicy
+  packagePolicy: PackagePolicy,
+  packagePolicyCspRules: PackagePolicyCspRulesStatus
 ): Benchmark => ({
   package_policy: {
     id: packagePolicy.id,
@@ -118,26 +135,34 @@ export const createBenchmarkEntry = (
     name: agentPolicy.name,
     agents: agentPolicy.agents,
   },
+  rules: packagePolicyCspRules,
 });
 
-const createBenchmarks = (
+const createBenchmarks = async (
+  soClient: SavedObjectsClientContract,
   agentPolicies: GetAgentPoliciesResponseItem[],
   packagePolicies: PackagePolicy[]
-): Benchmark[] =>
-  packagePolicies.flatMap((packagePolicy) => {
-    return agentPolicies
-      .map((agentPolicy) => {
-        const agentPkgPolicies = agentPolicy.package_policies as string[];
-        const isExistsOnAgent = agentPkgPolicies.find(
-          (pkgPolicy) => pkgPolicy === packagePolicy.id
-        );
-        if (isExistsOnAgent) {
-          return createBenchmarkEntry(agentPolicy, packagePolicy);
-        }
-        return;
-      })
-      .filter(isNonNullable);
-  });
+): Promise<Benchmark[]> => {
+  const foo = packagePolicies
+    .flatMap((packagePolicy) => {
+      return Promise.all(
+        agentPolicies.map(async (agentPolicy) => {
+          const agentPkgPolicies = agentPolicy.package_policies as string[];
+          const isExistsOnAgent = agentPkgPolicies.find(
+            (pkgPolicy) => pkgPolicy === packagePolicy.id
+          );
+          if (isExistsOnAgent) {
+            const packagePolicyCspRules = await addPackagePolicyCspRules(soClient, packagePolicy);
+            return createBenchmarkEntry(agentPolicy, packagePolicy, packagePolicyCspRules);
+          }
+          return;
+        })
+      );
+      // .filter(isNonNullable);
+    })
+    .filter(isNonNullable);
+  return foo;
+};
 
 export const defineGetBenchmarksRoute = (router: CspRouter, cspContext: CspAppContext): void =>
   router.get(
@@ -175,7 +200,7 @@ export const defineGetBenchmarksRoute = (router: CspRouter, cspContext: CspAppCo
           agentPolicyService
         );
         const enrichAgentPolicies = await addRunningAgentToAgentPolicy(agentService, agentPolicies);
-        const benchmarks = createBenchmarks(enrichAgentPolicies, packagePolicies.items);
+        const benchmarks = createBenchmarks(soClient, enrichAgentPolicies, packagePolicies.items);
 
         return response.ok({
           body: {
