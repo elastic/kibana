@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandlerContext } from '@kbn/core/server';
+import type { IRouter, CustomRequestHandlerContext } from '@kbn/core/server';
 import { ITagsClient } from '../common/types';
 import { IAssignmentService } from './services';
 
@@ -17,9 +17,9 @@ export interface ITagsRequestHandlerContext {
 /**
  * @internal
  */
-export interface TagsHandlerContext extends RequestHandlerContext {
+export type TagsHandlerContext = CustomRequestHandlerContext<{
   tags: ITagsRequestHandlerContext;
-}
+}>;
 
 /**
  * @internal
