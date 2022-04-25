@@ -16,7 +16,6 @@ import type {
 } from '@kbn/core/server';
 import { DeepReadonly } from 'utility-types';
 import { DeletePackagePoliciesResponse, PackagePolicy } from '@kbn/fleet-plugin/common';
-import { initializeCspTransforms } from './create_transforms/create_transforms';
 import { CspAppService } from './lib/csp_app_services';
 import type {
   CspServerPluginSetup,
