@@ -31,7 +31,7 @@ import {
 } from '../elasticsearch/ingest_pipeline';
 import { getAllTemplateRefs } from '../elasticsearch/template/install';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
-import { installKibanaAssets, getKibanaAssets } from '../kibana/assets/install';
+import { installKibanaAssetsAndReferences } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 import { installTransform } from '../elasticsearch/transform/install';
 import { installMlModel } from '../elasticsearch/ml_model';
@@ -40,8 +40,7 @@ import { saveArchiveEntries } from '../archive/storage';
 import { ConcurrentInstallOperationError } from '../../../errors';
 import { packagePolicyService } from '../..';
 
-import { createInstallation, saveKibanaAssetsRefs, updateVersion } from './install';
-import { deleteKibanaSavedObjectsAssets } from './remove';
+import { createInstallation } from './install';
 import { withPackageSpan } from './utils';
 
 // this is only exported for testing
@@ -106,21 +105,19 @@ export async function _installPackage({
       });
     }
 
-    const installedKibanaAssetsRefs = await withPackageSpan('Install Kibana assets', async () => {
-      const kibanaAssets = await getKibanaAssets(paths);
-      if (installedPkg) await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg });
-      // save new kibana refs before installing the assets
-      const assetRefs = await saveKibanaAssetsRefs(savedObjectsClient, pkgName, kibanaAssets);
-
-      await installKibanaAssets({
-        logger,
+    const kibanaAssetPromise = withPackageSpan('Install Kibana assets', () =>
+      installKibanaAssetsAndReferences({
+        savedObjectsClient,
         savedObjectsImporter,
         pkgName,
-        kibanaAssets,
-      });
-
-      return assetRefs;
-    });
+        paths,
+        installedPkg,
+        logger,
+      })
+    );
+    // Necessary to avoid async promise rejection warning
+    // See https://stackoverflow.com/questions/40920179/should-i-refrain-from-handling-promise-rejection-asynchronously
+    kibanaAssetPromise.catch(() => {});
 
     // the rest of the installation must happen in sequential order
     // currently only the base package has an ILM policy
@@ -191,8 +188,9 @@ export async function _installPackage({
         )
       );
     }
-    const installedTemplateRefs = getAllTemplateRefs(installedTemplates);
 
+    const installedTemplateRefs = getAllTemplateRefs(installedTemplates);
+    const installedKibanaAssetsRefs = await kibanaAssetPromise;
     const packageAssetResults = await withPackageSpan('Update archive entries', () =>
       saveArchiveEntries({
         savedObjectsClient,
@@ -208,11 +206,9 @@ export async function _installPackage({
       })
     );
 
-    // update to newly installed version when all assets are successfully installed
-    if (installedPkg) await updateVersion(savedObjectsClient, pkgName, pkgVersion);
-
     const updatedPackage = await withPackageSpan('Update install status', () =>
       savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+        version: pkgVersion,
         install_version: pkgVersion,
         install_status: 'installed',
         package_assets: packageAssetRefs,

@@ -271,10 +271,13 @@ async function installPackageFromRegistry({
       installType,
     });
 
-    // get latest package version
-    const latestPackage = await Registry.fetchFindLatestPackageOrThrow(pkgName, {
-      ignoreConstraints,
-    });
+    // get latest package version and requested version in parallel for performance
+    const [latestPackage, { paths, packageInfo }] = await Promise.all([
+      Registry.fetchFindLatestPackageOrThrow(pkgName, {
+        ignoreConstraints,
+      }),
+      Registry.getRegistryPackage(pkgName, pkgVersion),
+    ]);
 
     // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
     const installOutOfDateVersionOk =
@@ -318,9 +321,6 @@ async function installPackageFromRegistry({
         }`
       );
     }
-
-    // get package info
-    const { paths, packageInfo } = await Registry.getRegistryPackage(pkgName, pkgVersion);
 
     if (!licenseService.hasAtLeast(packageInfo.license || 'basic')) {
       const err = new Error(`Requires ${packageInfo.license} license`);
@@ -632,9 +632,14 @@ export const saveKibanaAssetsRefs = async (
   kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>
 ) => {
   const assetRefs = Object.values(kibanaAssets).flat().map(toAssetReference);
-  await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-    installed_kibana: assetRefs,
-  });
+  await savedObjectsClient.update(
+    PACKAGES_SAVED_OBJECT_TYPE,
+    pkgName,
+    {
+      installed_kibana: assetRefs,
+    },
+    { refresh: false }
+  );
   return assetRefs;
 };
 
@@ -656,9 +661,14 @@ export const saveInstalledEsRefs = async (
       }
     }, [] as EsAssetReference[]) || [];
 
-  await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-    installed_es: deduplicatedAssets,
-  });
+  await savedObjectsClient.update(
+    PACKAGES_SAVED_OBJECT_TYPE,
+    pkgName,
+    {
+      installed_es: deduplicatedAssets,
+    },
+    { refresh: false }
+  );
   return installedAssets;
 };
 

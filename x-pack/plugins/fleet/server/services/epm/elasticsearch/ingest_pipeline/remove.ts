@@ -54,9 +54,14 @@ export const deletePipelineRefs = async (
     if (!id.includes(pkgVersion)) return true;
     return false;
   });
-  return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-    installed_es: filteredAssets,
-  });
+  return savedObjectsClient.update(
+    PACKAGES_SAVED_OBJECT_TYPE,
+    pkgName,
+    {
+      installed_es: filteredAssets,
+    },
+    { refresh: false }
+  );
 };
 export async function deletePipeline(esClient: ElasticsearchClient, id: string): Promise<void> {
   // '*' shouldn't ever appear here, but it still would delete all ingest pipelines
