@@ -43,7 +43,7 @@ export {
   WriteOperations,
   AlertingAuthorizationEntity,
 } from './authorization';
-export { NodeLevelMetricsType, ClusterLevelMetricsType } from '../common/monitoring/types';
+export type { NodeLevelMetricsType, ClusterLevelMetricsType } from '../common/monitoring/types';
 
 export const plugin = (initContext: PluginInitializerContext) => new AlertingPlugin(initContext);
 
