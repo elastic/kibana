@@ -24,7 +24,7 @@ exports[`TimeExpressionSelect component should renders against props 1`] = `
           >
             within
           </span>
-
+           
           <span
             class="euiExpression__value"
           >
@@ -52,7 +52,7 @@ exports[`TimeExpressionSelect component should renders against props 1`] = `
           <span
             class="euiExpression__description"
           />
-
+           
           <span
             class="euiExpression__value"
           >

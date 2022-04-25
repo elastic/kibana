@@ -125,7 +125,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           // we're not testing the flyout's ability to associate alerts with action connectors
           expect(actions).to.eql([]);
 
-          expect(alertTypeId).to.eql('xpack.synthetics.alerts.monitorStatus');
+          expect(alertTypeId).to.eql('xpack.uptime.alerts.monitorStatus');
           expect(consumer).to.eql('uptime');
           expect(interval).to.eql('11m');
           expect(tags).to.eql(['uptime', 'another']);
@@ -206,7 +206,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         } = alert;
         try {
           expect(actions).to.eql([]);
-          expect(alertTypeId).to.eql('xpack.synthetics.alerts.tlsCertificate');
+          expect(alertTypeId).to.eql('xpack.uptime.alerts.tlsCertificate');
           expect(consumer).to.eql('uptime');
           expect(tags).to.eql(['uptime', 'certs']);
           expect(params).to.eql({});
