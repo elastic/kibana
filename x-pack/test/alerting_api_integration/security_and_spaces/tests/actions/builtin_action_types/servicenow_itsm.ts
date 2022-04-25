@@ -92,6 +92,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
             config: {
               apiUrl: serviceNowSimulatorURL,
               usesTableApi: false,
+              isOAuth: false,
             },
             secrets: mockServiceNow.secrets,
           })
@@ -106,6 +107,10 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
           config: {
             apiUrl: serviceNowSimulatorURL,
             usesTableApi: false,
+            isOAuth: false,
+            clientId: null,
+            jwtKeyId: null,
+            userIdentifierValue: null,
           },
         });
 
@@ -122,6 +127,10 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
           config: {
             apiUrl: serviceNowSimulatorURL,
             usesTableApi: false,
+            isOAuth: false,
+            clientId: null,
+            jwtKeyId: null,
+            userIdentifierValue: null,
           },
         });
       });

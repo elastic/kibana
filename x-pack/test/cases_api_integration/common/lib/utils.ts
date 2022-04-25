@@ -214,6 +214,7 @@ export const getServiceNowConnector = () => ({
   config: {
     apiUrl: 'http://some.non.existent.com',
     usesTableApi: false,
+    isOAuth: false,
   },
 });
 

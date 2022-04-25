@@ -96,6 +96,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
             config: {
               apiUrl: serviceNowSimulatorURL,
               usesTableApi: false,
+              isOAuth: false,
             },
             secrets: mockServiceNow.secrets,
           })
@@ -110,6 +111,10 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
           config: {
             apiUrl: serviceNowSimulatorURL,
             usesTableApi: false,
+            isOAuth: false,
+            clientId: null,
+            jwtKeyId: null,
+            userIdentifierValue: null,
           },
         });
 
@@ -126,6 +131,10 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
           config: {
             apiUrl: serviceNowSimulatorURL,
             usesTableApi: false,
+            isOAuth: false,
+            clientId: null,
+            jwtKeyId: null,
+            userIdentifierValue: null,
           },
         });
       });
@@ -228,6 +237,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
             config: {
               apiUrl: serviceNowSimulatorURL,
               usesTableApi: false,
+              isOAuth: false,
             },
             secrets: mockServiceNow.secrets,
           });

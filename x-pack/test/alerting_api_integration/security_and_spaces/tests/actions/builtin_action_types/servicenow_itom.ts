@@ -85,6 +85,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
             connector_type_id: '.servicenow-itom',
             config: {
               apiUrl: serviceNowSimulatorURL,
+              isOAuth: false,
             },
             secrets: mockServiceNow.secrets,
           })
@@ -98,6 +99,10 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
           is_missing_secrets: false,
           config: {
             apiUrl: serviceNowSimulatorURL,
+            isOAuth: false,
+            clientId: null,
+            jwtKeyId: null,
+            userIdentifierValue: null,
           },
         });
 
@@ -113,6 +118,10 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
           is_missing_secrets: false,
           config: {
             apiUrl: serviceNowSimulatorURL,
+            isOAuth: false,
+            clientId: null,
+            jwtKeyId: null,
+            userIdentifierValue: null,
           },
         });
       });

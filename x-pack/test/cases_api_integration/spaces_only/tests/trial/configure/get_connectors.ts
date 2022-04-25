@@ -110,6 +110,10 @@ export default ({ getService }: FtrProviderContext): void => {
           config: {
             apiUrl: 'http://some.non.existent.com',
             usesTableApi: false,
+            isOAuth: false,
+            clientId: null,
+            jwtKeyId: null,
+            userIdentifierValue: null,
           },
           isPreconfigured: false,
           isMissingSecrets: false,
@@ -122,6 +126,10 @@ export default ({ getService }: FtrProviderContext): void => {
           config: {
             apiUrl: 'http://some.non.existent.com',
             usesTableApi: false,
+            isOAuth: false,
+            clientId: null,
+            jwtKeyId: null,
+            userIdentifierValue: null,
           },
           isPreconfigured: false,
           isMissingSecrets: false,

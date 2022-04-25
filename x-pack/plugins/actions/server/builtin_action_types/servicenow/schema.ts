@@ -11,7 +11,6 @@ import { DEFAULT_ALERTS_GROUPING_KEY } from './config';
 export const ExternalIncidentServiceConfigurationBase = {
   apiUrl: schema.string(),
   isOAuth: schema.boolean({ defaultValue: false }),
-  userIdentifierType: schema.nullable(schema.string({ defaultValue: 'email' })),
   userIdentifierValue: schema.nullable(schema.string()), // required if isOAuth = true
   clientId: schema.nullable(schema.string()), // required if isOAuth = true
   jwtKeyId: schema.nullable(schema.string()), // required if isOAuth = true
