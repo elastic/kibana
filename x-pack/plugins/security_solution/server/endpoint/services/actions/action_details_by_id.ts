@@ -39,23 +39,45 @@ export const getActionDetailsById = async (
   let actionResponses: Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>;
 
   try {
-    const actionRequestEsSearchResults = await esClient
-      .search<EndpointAction | LogsEndpointAction>(
-        {
-          index: ACTION_REQUEST_INDICES,
-          body: {
-            query: {
-              bool: {
-                filter: [{ term: { action_id: actionId } }],
+    // Get both the Action Request(s) and action Response(s)
+    const [actionRequestEsSearchResults, actionResponsesEsSearchResults] = await Promise.all([
+      // Get the action request(s)
+      esClient
+        .search<EndpointAction | LogsEndpointAction>(
+          {
+            index: ACTION_REQUEST_INDICES,
+            body: {
+              query: {
+                bool: {
+                  filter: [{ term: { action_id: actionId } }],
+                },
               },
             },
           },
-        },
-        {
-          ignore: [404],
-        }
-      )
-      .catch(catchAndWrapError);
+          {
+            ignore: [404],
+          }
+        )
+        .catch(catchAndWrapError),
+
+      // Get the Action Response(s)
+      esClient
+        .search<EndpointActionResponse | LogsEndpointActionResponse>(
+          {
+            index: ACTION_RESPONSE_INDICES,
+            size: 1000,
+            body: {
+              query: {
+                bool: {
+                  filter: [{ term: { action_id: actionId } }],
+                },
+              },
+            },
+          },
+          { ignore: [404] }
+        )
+        .catch(catchAndWrapError),
+    ]);
 
     actionRequestsLogEntries = getUniqueLogData(
       categorizeActionResults({
@@ -70,24 +92,6 @@ export const getActionDetailsById = async (
     if (actionDoc) {
       normalizedActionRequest = mapToNormalizedActionRequest(actionDoc);
     }
-
-    const actionResponsesEsSearchResults = await esClient
-      .search<EndpointActionResponse | LogsEndpointActionResponse>(
-        {
-          index: ACTION_RESPONSE_INDICES,
-          size: 1000,
-          body: {
-            query: {
-              bool: {
-                filter: [{ term: { action_id: actionId } }],
-              },
-            },
-          },
-          // FIXME:PT need to sort this in ascending order
-        },
-        { ignore: [404] }
-      )
-      .catch(catchAndWrapError);
 
     actionResponses = getUniqueLogData(
       categorizeResponseResults({
