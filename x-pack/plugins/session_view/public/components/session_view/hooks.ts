@@ -95,15 +95,19 @@ export const useFetchSessionViewProcessEvents = (
   return query;
 };
 
-export const useFetchSessionViewAlerts = (sessionEntityId: string) => {
+export const useFetchSessionViewAlerts = (
+  sessionEntityId: string,
+  investigatedAlertId?: string
+) => {
   const { http } = useKibana<CoreStart>().services;
-  const cachingKeys = [QUERY_KEY_ALERTS, sessionEntityId];
+  const cachingKeys = [QUERY_KEY_ALERTS, sessionEntityId, investigatedAlertId];
   const query = useQuery(
     cachingKeys,
     async () => {
       const res = await http.get<ProcessEventResults>(ALERTS_ROUTE, {
         query: {
           sessionEntityId,
+          investigatedAlertId,
         },
       });
 

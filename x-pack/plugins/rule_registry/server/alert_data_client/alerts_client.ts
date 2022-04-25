@@ -97,6 +97,7 @@ interface SingleSearchAfterAndAudit {
   track_total_hits?: boolean | undefined;
   size?: number | undefined;
   operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
+  sort?: [{ [column: string]: string }];
   lastSortIds?: Array<string | number> | undefined;
 }
 
@@ -224,6 +225,7 @@ export class AlertsClient {
     size,
     index,
     operation,
+    sort,
     lastSortIds = [],
   }: SingleSearchAfterAndAudit) {
     try {
@@ -243,7 +245,7 @@ export class AlertsClient {
         _source,
         track_total_hits: trackTotalHits,
         size,
-        sort: [
+        sort: sort || [
           {
             '@timestamp': {
               order: 'asc',
@@ -605,6 +607,8 @@ export class AlertsClient {
     track_total_hits: trackTotalHits,
     size,
     index,
+    sort,
+    lastSortIds,
   }: {
     query?: object | undefined;
     aggs?: object | undefined;
@@ -612,6 +616,8 @@ export class AlertsClient {
     track_total_hits?: boolean | undefined;
     _source?: string[] | undefined;
     size?: number | undefined;
+    sort?: [{ [column: string]: string }] | undefined;
+    lastSortIds?: string[] | undefined;
   }) {
     try {
       // first search for the alert by id, then use the alert info to check if user has access to it
@@ -623,6 +629,8 @@ export class AlertsClient {
         size,
         index,
         operation: ReadOperations.Find,
+        sort,
+        lastSortIds,
       });
 
       if (alertsSearchResponse == null) {

@@ -118,7 +118,7 @@ export const SessionView = ({
     hasPreviousPage,
   } = useFetchSessionViewProcessEvents(sessionEntityId, currentJumpToCursor);
 
-  const alertsQuery = useFetchSessionViewAlerts(sessionEntityId);
+  const alertsQuery = useFetchSessionViewAlerts(sessionEntityId, investigatedAlertId);
   const { data: alerts, error: alertsError, isFetching: alertsFetching } = alertsQuery;
 
   const hasData = alerts && data && data.pages?.[0].events.length > 0;
