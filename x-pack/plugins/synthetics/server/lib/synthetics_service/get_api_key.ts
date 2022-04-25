@@ -33,13 +33,6 @@ export const serviceApiKeyPrivileges = {
       ] as SecurityIndexPrivilege[],
     },
   ],
-  applications: [
-    {
-      privileges: ['feature_uptime.all'],
-      application: 'kibana-.kibana',
-      resources: [ALL_SPACES_ID],
-    },
-  ],
 };
 
 export const getAPIKeyForSyntheticsService = async ({
@@ -67,10 +60,12 @@ export const generateAPIKey = async ({
   server,
   security,
   request,
+  uptimePrivileges = false,
 }: {
   server: UptimeServerSetup;
   request?: KibanaRequest;
   security: SecurityPluginStart;
+  uptimePrivileges?: boolean;
 }) => {
   const isApiKeysEnabled = await security.authc.apiKeys?.areAPIKeysEnabled();
 
@@ -87,10 +82,22 @@ export const generateAPIKey = async ({
     throw new SyntheticsForbiddenError();
   }
 
+  const apiKeyPrivileges: Record<string, any> = { ...serviceApiKeyPrivileges };
+
+  if (uptimePrivileges) {
+    apiKeyPrivileges.applications = [
+      {
+        privileges: ['feature_uptime.all'],
+        application: 'kibana-.kibana',
+        resources: [ALL_SPACES_ID],
+      },
+    ];
+  }
+
   return security.authc.apiKeys?.create(request, {
     name: 'synthetics-api-key',
     role_descriptors: {
-      synthetics_writer: serviceApiKeyPrivileges,
+      synthetics_writer: apiKeyPrivileges,
     },
     metadata: {
       description:

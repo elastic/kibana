@@ -37,6 +37,7 @@ const GET_API_KEY_GENERATE = i18n.translate(
 const GET_API_KEY_LABEL_DESCRIPTION = i18n.translate(
   'xpack.uptime.monitorManagement.getAPIKeyLabel.description',
   {
-    defaultMessage: 'Get API key',
+    defaultMessage:
+      'You can generate an API key which can be used with push command from Synthetics agent.',
   }
 );

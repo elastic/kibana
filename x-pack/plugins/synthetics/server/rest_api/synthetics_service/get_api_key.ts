@@ -19,6 +19,7 @@ export const getAPIKeySyntheticsRoute: UMRestApiRouteFactory = (libs) => ({
       request,
       security,
       server,
+      uptimePrivileges: true,
     });
 
     return { apiKey };

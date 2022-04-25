@@ -121,6 +121,8 @@ export const fetchServiceAllowed = async (): Promise<SyntheticsServiceAllowed> =
   return await apiService.get(API_URLS.SERVICE_ALLOWED);
 };
 
-export const fetchServiceAPIKey = async (): Promise<CreateAPIKeyResult> => {
+export const fetchServiceAPIKey = async (): Promise<{
+  apiKey: CreateAPIKeyResult & { encoded: string };
+}> => {
   return await apiService.get(API_URLS.SYNTHETICS_APIKEY);
 };
