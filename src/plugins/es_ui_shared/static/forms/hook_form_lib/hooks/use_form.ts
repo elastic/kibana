@@ -377,7 +377,6 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     const fieldsToOutput = getFieldsForOutput(fieldsRefs.current, {
       stripEmptyFields: formOptions.stripEmptyFields,
     });
-
     const fieldsValue = mapFormFields(fieldsToOutput, (field) => field.__serializeValue());
     return serializer
       ? serializer(unflattenObject<I>(fieldsValue))
