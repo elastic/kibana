@@ -82,7 +82,7 @@ export const metricsRequestHandler = async ({
           signal: abortController.signal,
         });
 
-        const { error } = visData[visParams.id];
+        const error = visData[visParams.id]?.error;
         if (error) {
           const coreStart = getCoreStart();
           coreStart.notifications.toasts.addDanger({
