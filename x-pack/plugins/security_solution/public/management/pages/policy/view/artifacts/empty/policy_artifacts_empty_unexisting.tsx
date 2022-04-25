@@ -10,7 +10,6 @@ import { EuiEmptyPrompt, EuiButton, EuiPageTemplate } from '@elastic/eui';
 import { useGetLinkTo } from './use_policy_artifacts_empty_hooks';
 import { POLICY_ARTIFACT_EMPTY_UNEXISTING_LABELS } from './translations';
 import { EventFiltersPageLocation } from '../../../../event_filters/types';
-import { TrustedAppsListPageLocation } from '../../../../trusted_apps/state';
 import { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
 
 interface CommonProps {
@@ -19,10 +18,7 @@ interface CommonProps {
   labels: typeof POLICY_ARTIFACT_EMPTY_UNEXISTING_LABELS;
   getPolicyArtifactsPath: (policyId: string) => string;
   getArtifactPath: (
-    location?:
-      | Partial<EventFiltersPageLocation>
-      | Partial<TrustedAppsListPageLocation>
-      | Partial<ArtifactListPageUrlParams>
+    location?: Partial<EventFiltersPageLocation> | Partial<ArtifactListPageUrlParams>
   ) => string;
 }
 
