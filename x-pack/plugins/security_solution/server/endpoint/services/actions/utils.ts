@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EndpointAction, LogsEndpointAction } from '../../../../common/endpoint/types';
+import {
+  ActivityLogActionResponse,
+  EndpointAction,
+  EndpointActionResponse,
+  EndpointActivityLogActionResponse,
+  LogsEndpointAction,
+  LogsEndpointActionResponse,
+} from '../../../../common/endpoint/types';
 
 /**
  * Type guard to check if a given Action is in the shape of the Endpoint Action.
@@ -21,6 +28,16 @@ export const isLogsEndpointAction = (
     'agent' in item &&
     '@timestamp' in item
   );
+};
+
+/**
+ * Type guard to track if a given action response is in the shape of the Endpoint Action Response (from the endpoint index)
+ * @param item
+ */
+export const isLogsEndpointActionResponse = (
+  item: EndpointActionResponse | LogsEndpointActionResponse
+): item is LogsEndpointActionResponse => {
+  return 'EndpointActions' in item && 'agent' in item;
 };
 
 interface NormalizedActionRequest {
@@ -69,4 +86,109 @@ export const mapToNormalizedActionRequest = (
     createdBy: actionRequest.user_id,
     createdAt: actionRequest['@timestamp'],
   };
+};
+
+interface ActionCompletionInfo {
+  isCompleted: boolean;
+  completedAt: undefined | string;
+}
+
+export const getActionCompletionInfo = (
+  /** List of agents that the action was sent to */
+  agentIds: string[],
+  /** List of action Log responses received for the action */
+  actionResponses: Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>
+): ActionCompletionInfo => {
+  const completedInfo: ActionCompletionInfo = {
+    isCompleted: true,
+    completedAt: undefined,
+  };
+
+  const responsesByAgentId = mapActionResponsesByAgentId(actionResponses);
+
+  for (const agentId of agentIds) {
+    if (!responsesByAgentId[agentId] || !responsesByAgentId[agentId].isCompleted) {
+      completedInfo.isCompleted = false;
+      break;
+    }
+  }
+
+  // If completed, then get the completed at date
+  if (completedInfo.isCompleted) {
+    for (const normalizedAgentResponse of Object.values(responsesByAgentId)) {
+      if (
+        !completedInfo.completedAt ||
+        completedInfo.completedAt < (normalizedAgentResponse.completedAt ?? '')
+      ) {
+        completedInfo.completedAt = normalizedAgentResponse.completedAt;
+      }
+    }
+  }
+
+  return completedInfo;
+};
+
+interface NormalizedAgentActionResponse {
+  isCompleted: boolean;
+  completedAt: undefined | string;
+  fleetResponse: undefined | ActivityLogActionResponse;
+  endpointResponse: undefined | EndpointActivityLogActionResponse;
+}
+
+type ActionResponseByAgentId = Record<string, NormalizedAgentActionResponse>;
+
+/**
+ * Given a list of Action Responses, it will return a Map where keys are the Agent ID and
+ * value is a object having information about the action responsess associated with that agent id
+ * @param actionResponses
+ */
+const mapActionResponsesByAgentId = (
+  actionResponses: Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>
+): ActionResponseByAgentId => {
+  const response: ActionResponseByAgentId = {};
+
+  for (const actionResponse of actionResponses) {
+    if (actionResponse.type === 'fleetResponse' || actionResponse.type === 'response') {
+      const agentId = getAgentIdFromActionResponse(actionResponse);
+
+      if (!response[agentId]) {
+        response[agentId] = {
+          isCompleted: false,
+          completedAt: undefined,
+          fleetResponse: undefined,
+          endpointResponse: undefined,
+        };
+      }
+
+      if (actionResponse.type === 'fleetResponse') {
+        response[agentId].fleetResponse = actionResponse;
+      } else {
+        response[agentId].endpointResponse = actionResponse;
+      }
+
+      response[agentId].isCompleted = Boolean(response[agentId].endpointResponse);
+
+      if (response[agentId].isCompleted) {
+        response[agentId].completedAt = response[agentId].endpointResponse?.item.data['@timestamp'];
+      }
+    }
+  }
+
+  return response;
+};
+
+/**
+ * Given an Action response, this will return the Agent ID for that action response.
+ * @param actionResponse
+ */
+const getAgentIdFromActionResponse = (
+  actionResponse: ActivityLogActionResponse | EndpointActivityLogActionResponse
+): string => {
+  const responseData = actionResponse.item.data;
+
+  if (isLogsEndpointActionResponse(responseData)) {
+    return Array.isArray(responseData.agent.id) ? responseData.agent.id[0] : responseData.agent.id;
+  }
+
+  return responseData.agent_id;
 };

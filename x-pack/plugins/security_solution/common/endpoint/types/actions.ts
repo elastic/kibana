@@ -43,6 +43,7 @@ interface ActionResponseFields {
 
 /**
  * An endpoint Action created in the Endpoint's `.logs-endpoint.actions-default` index.
+ * @since v7.16
  */
 export interface LogsEndpointAction {
   '@timestamp': string;
@@ -56,6 +57,10 @@ export interface LogsEndpointAction {
   };
 }
 
+/**
+ * An Action response written by the endpoint to the Endpoint `.logs-endpoint.action.responses` datastream
+ * @since v7.16
+ */
 export interface LogsEndpointActionResponse {
   '@timestamp': string;
   agent: {
@@ -143,11 +148,17 @@ export interface ActivityLogActionResponse {
     data: EndpointActionResponse;
   };
 }
+
+/**
+ * One of the possible Response Action Log entry - Eitehr a Fleet Action request, Fleet action response,
+ * Endpoint action request and/or endpoint action response.
+ */
 export type ActivityLogEntry =
   | ActivityLogAction
   | ActivityLogActionResponse
   | EndpointActivityLogAction
   | EndpointActivityLogActionResponse;
+
 export interface ActivityLog {
   page: number;
   pageSize: number;

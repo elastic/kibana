@@ -70,7 +70,9 @@ export const getActionDetailsRequestHandler = (
       return res.ok({
         body: {
           data: await getActionDetailsById(
-            context.core.elasticsearch.client.asInternalUser,
+            (
+              await context.core
+            ).elasticsearch.client.asInternalUser,
             req.params.action_id
           ),
         },

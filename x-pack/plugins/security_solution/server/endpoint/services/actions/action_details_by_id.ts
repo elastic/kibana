@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { mapToNormalizedActionRequest } from './utils';
+import { getActionCompletionInfo, mapToNormalizedActionRequest } from './utils';
 import {
   ActionDetails,
   ActivityLogAction,
@@ -103,8 +103,10 @@ export const getActionDetailsById = async (
     throw new NotFoundError(`Action with id '${actionId}' not found.`);
   }
 
-  const isCompleted = false; // FIXME:PT calculate
-  const completedAt = undefined; // FIXME:PT calculate
+  const { isCompleted, completedAt } = getActionCompletionInfo(
+    normalizedActionRequest.agents,
+    actionResponses
+  );
 
   const actionDetails: ActionDetails = {
     id: actionId,
