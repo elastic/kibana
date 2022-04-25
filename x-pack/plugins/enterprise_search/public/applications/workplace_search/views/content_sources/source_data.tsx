@@ -42,11 +42,7 @@ export const staticExternalSourceData: SourceDataItem = {
     ],
     basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
     platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
-    platinumPrivateContext: [
-      FeatureIds.Private,
-      FeatureIds.SyncFrequency,
-      FeatureIds.SyncedItems,
-    ],
+    platinumPrivateContext: [FeatureIds.Private, FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
   },
   accountContextOnly: false,
   internalConnectorAvailable: true,
