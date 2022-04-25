@@ -34,7 +34,7 @@ export const createVegaTypeDefinition = (): VisTypeDefinition<VisParams> => {
       defaultMessage: 'Requires knowledge of Vega syntax.',
     }),
     icon: 'visVega',
-    group: VisGroups.PROMOTED,
+    group: VisGroups.TOOLS,
     titleInWizard: i18n.translate('visTypeVega.type.vegaTitleInWizard', {
       defaultMessage: 'Custom visualization',
     }),

@@ -20,8 +20,8 @@ export const scriptVisDefinition: VisTypeDefinition<VisParams> = {
   name: 'script',
   title: 'Script-based',
   isAccessible: true,
-  icon: 'visText',
-  group: VisGroups.TOOLS,
+  icon: 'visVega',
+  group: VisGroups.PROMOTED,
   titleInWizard: i18n.translate('visTypeScript.titleInWizard', {
     defaultMessage: 'Script-based',
   }),
