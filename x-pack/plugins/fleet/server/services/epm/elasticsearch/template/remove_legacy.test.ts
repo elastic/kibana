@@ -10,11 +10,11 @@ import type {
   IndicesGetIndexTemplateIndexTemplateItem,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import type { Logger } from '@kbn/core/server';
+import type { Logger } from 'src/core/server';
 
 import uuid from 'uuid';
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from 'src/core/server/mocks';
 
 import type { InstallablePackage, RegistryDataStream } from '../../../../types';
 

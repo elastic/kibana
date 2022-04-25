@@ -9,7 +9,7 @@ import type {
   ClusterComponentTemplate,
   IndicesGetIndexTemplateIndexTemplateItem,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from 'src/core/server';
 
 import type { InstallablePackage, RegistryDataStream } from '../../../../types';
 import { getRegistryDataStreamAssetBaseName } from '..';
