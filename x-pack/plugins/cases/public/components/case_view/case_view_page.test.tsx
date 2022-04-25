@@ -31,6 +31,7 @@ import { caseViewProps, caseData } from './index.test';
 import { useCaseViewNavigation, useUrlParams } from '../../common/navigation/hooks';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/constants';
 import userEvent from '@testing-library/user-event';
+import { useIsMainApplication } from '../../common/hooks';
 
 jest.mock('../../containers/use_update_case');
 jest.mock('../../containers/use_get_case_metrics');
@@ -40,6 +41,7 @@ jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../user_actions/timestamp');
 jest.mock('../../common/navigation/hooks');
+jest.mock('../../common/hooks');
 
 const useUrlParamsMock = useUrlParams as jest.Mock;
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
@@ -48,6 +50,7 @@ const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
+const useIsMainApplicationMock = useIsMainApplication as jest.Mock;
 
 export const caseProps: CaseViewPageProps = {
   ...caseViewProps,
@@ -103,6 +106,7 @@ describe('CaseViewPage', () => {
     useGetCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
     usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });
     useConnectorsMock.mockReturnValue({ connectors: connectorsMock, loading: false });
+    useIsMainApplicationMock.mockReturnValue(false);
   });
 
   it('should render CaseViewPage', async () => {
@@ -646,6 +650,15 @@ describe('CaseViewPage', () => {
           detailName: caseData.id,
           tabId: CASE_VIEW_PAGE_TABS.ALERTS,
         });
+      });
+    });
+
+    it('should not display the alerts tab in stack management', async () => {
+      useIsMainApplicationMock.mockReturnValue(true);
+      const result = appMockRender.render(<CaseViewPage {...caseProps} />);
+      await act(async () => {
+        expect(result.queryByTestId('case-view-tab-content-activity')).toBeTruthy();
+        expect(result.queryByTestId('case-view-tab-content-alerts')).toBeFalsy();
       });
     });
   });

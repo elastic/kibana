@@ -17,6 +17,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/constants';
 import { Case, UpdateKey } from '../../../common/ui';
+import { useIsMainApplication } from '../../common/hooks';
 import { useCaseViewNavigation, useUrlParams } from '../../common/navigation';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
@@ -50,6 +51,8 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     const { userCanCrud } = useCasesContext();
     const { metricsFeatures } = useCasesFeatures();
     useCasesTitleBreadcrumbs(caseData.title);
+
+    const isMainApplication = useIsMainApplication();
 
     const { navigateToCaseView } = useCaseViewNavigation();
     const { urlParams } = useUrlParams();
@@ -180,16 +183,20 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             />
           ),
         },
-        {
-          id: CASE_VIEW_PAGE_TABS.ALERTS,
-          name: ALERTS_TAB,
-          content: (
-            <EuiEmptyPrompt
-              icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
-              title={<h2>{'Alerts table placeholder'}</h2>}
-            />
-          ),
-        },
+        ...(!isMainApplication
+          ? [
+              {
+                id: CASE_VIEW_PAGE_TABS.ALERTS,
+                name: ALERTS_TAB,
+                content: (
+                  <EuiEmptyPrompt
+                    icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
+                    title={<h2>{'Alerts table placeholder'}</h2>}
+                  />
+                ),
+              },
+            ]
+          : []),
       ],
       [
         actionsNavigation,
@@ -198,6 +205,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
         fetchCaseMetrics,
         getCaseUserActions,
         initLoadingData,
+        isMainApplication,
         ruleDetailsNavigation,
         showAlertDetails,
         updateCase,
