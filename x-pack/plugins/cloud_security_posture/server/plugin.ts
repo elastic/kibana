@@ -27,6 +27,7 @@ import { defineRoutes } from './routes';
 import { cspRuleTemplateAssetType } from './saved_objects/csp_rule_template';
 import { cspRuleAssetType } from './saved_objects/csp_rule_type';
 import { initializeCspTransformsIndices } from './create_indices/create_transforms_indices';
+import { initializeCspTransforms } from './create_transforms/create_transforms';
 import {
   onPackagePolicyPostCreateCallback,
   onPackagePolicyDeleteCallback,
@@ -80,7 +81,9 @@ export class CspPlugin
       ...plugins.fleet,
     });
 
-    initializeCspTransformsIndices(core.elasticsearch.client.asInternalUser, this.logger);
+    initializeCspTransformsIndices(core.elasticsearch.client.asInternalUser, this.logger).then(
+      (_) => initializeCspTransforms(core.elasticsearch.client.asInternalUser, this.logger)
+    );
     plugins.fleet.fleetSetupCompleted().then(() => {
       plugins.fleet.registerExternalCallback(
         'packagePolicyPostCreate',
