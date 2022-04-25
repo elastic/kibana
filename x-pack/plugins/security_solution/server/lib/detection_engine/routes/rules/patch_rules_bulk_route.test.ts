@@ -63,14 +63,20 @@ describe.each([
 
   describe('status codes', () => {
     test('returns 200', async () => {
-      const response = await server.inject(getPatchBulkRequest(), context);
+      const response = await server.inject(
+        getPatchBulkRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
     test('returns an error in the response when updating a single rule that does not exist', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
       (legacyMigrate as jest.Mock).mockResolvedValue(null);
-      const response = await server.inject(getPatchBulkRequest(), context);
+      const response = await server.inject(
+        getPatchBulkRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([
         {
@@ -93,7 +99,7 @@ describe.each([
           },
         ],
       });
-      await server.inject(request, context);
+      await server.inject(request, requestContextMock.convertContext(context));
 
       expect(clients.rulesClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -118,7 +124,7 @@ describe.each([
         path: DETECTION_ENGINE_RULES_BULK_UPDATE,
         body: [typicalMlRulePayload()],
       });
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([
@@ -144,7 +150,7 @@ describe.each([
         path: DETECTION_ENGINE_RULES_BULK_UPDATE,
         body: [payloadWithoutType],
       });
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([
@@ -168,7 +174,7 @@ describe.each([
         path: DETECTION_ENGINE_RULES_BULK_UPDATE,
         body: [{ ...getCreateRulesSchemaMock(), rule_id: undefined }],
       });
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([

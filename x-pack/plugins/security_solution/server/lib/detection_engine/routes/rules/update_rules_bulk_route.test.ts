@@ -63,7 +63,10 @@ describe.each([
 
   describe('status codes', () => {
     test('returns 200', async () => {
-      const response = await server.inject(getUpdateBulkRequest(), context);
+      const response = await server.inject(
+        getUpdateBulkRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
@@ -77,7 +80,10 @@ describe.each([
           rule_id: 'rule-1',
         },
       ];
-      const response = await server.inject(getUpdateBulkRequest(), context);
+      const response = await server.inject(
+        getUpdateBulkRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual(expected);
@@ -94,7 +100,10 @@ describe.each([
           rule_id: 'rule-1',
         },
       ];
-      const response = await server.inject(getUpdateBulkRequest(), context);
+      const response = await server.inject(
+        getUpdateBulkRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
       expect(response.body).toEqual(expected);
     });
@@ -111,7 +120,7 @@ describe.each([
         body: [typicalMlRulePayload()],
       });
 
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([
         {
@@ -134,7 +143,7 @@ describe.each([
         path: DETECTION_ENGINE_RULES_BULK_UPDATE,
         body: [{ ...getCreateRulesSchemaMock(), rule_id: undefined }],
       });
-      const response = await server.inject(noIdRequest, context);
+      const response = await server.inject(noIdRequest, requestContextMock.convertContext(context));
       expect(response.body).toEqual([
         {
           error: { message: 'either "id" or "rule_id" must be set', status_code: 400 },

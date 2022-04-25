@@ -66,14 +66,20 @@ describe.each([
 
   describe('status codes', () => {
     test('returns 200', async () => {
-      const response = await server.inject(getPatchRequest(), context);
+      const response = await server.inject(
+        getPatchRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
     test('returns 404 when updating a single rule that does not exist', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
       (legacyMigrate as jest.Mock).mockResolvedValue(null);
-      const response = await server.inject(getPatchRequest(), context);
+      const response = await server.inject(
+        getPatchRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({
         message: 'rule_id: "rule-1" not found',
@@ -84,7 +90,10 @@ describe.each([
     test('returns error if requesting a non-rule', async () => {
       clients.rulesClient.find.mockResolvedValue(nonRuleFindResult(isRuleRegistryEnabled));
       (legacyMigrate as jest.Mock).mockResolvedValue(null);
-      const response = await server.inject(getPatchRequest(), context);
+      const response = await server.inject(
+        getPatchRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({
         message: expect.stringContaining('not found'),
@@ -96,7 +105,10 @@ describe.each([
       clients.rulesClient.update.mockImplementation(async () => {
         throw new Error('Test error');
       });
-      const response = await server.inject(getPatchRequest(), context);
+      const response = await server.inject(
+        getPatchRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',
@@ -115,7 +127,7 @@ describe.each([
           machine_learning_job_id: 'some_job_id',
         },
       });
-      await server.inject(request, context);
+      await server.inject(request, requestContextMock.convertContext(context));
 
       expect(clients.rulesClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -140,7 +152,7 @@ describe.each([
         path: DETECTION_ENGINE_RULES_URL,
         body: typicalMlRulePayload(),
       });
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(403);
       expect(response.body).toEqual({
@@ -161,7 +173,7 @@ describe.each([
         path: DETECTION_ENGINE_RULES_URL,
         body: payloadWithoutType,
       });
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(403);
       expect(response.body).toEqual({
@@ -178,7 +190,7 @@ describe.each([
         path: DETECTION_ENGINE_RULES_URL,
         body: { ...getPatchRulesSchemaMock(), rule_id: undefined },
       });
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
       expect(response.body).toEqual({
         message: ['either "id" or "rule_id" must be set'],
         status_code: 400,

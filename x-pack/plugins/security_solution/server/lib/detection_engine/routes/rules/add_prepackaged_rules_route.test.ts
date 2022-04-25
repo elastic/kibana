@@ -117,7 +117,7 @@ describe('add_prepackaged_rules_route', () => {
   describe('status codes', () => {
     test('returns 200', async () => {
       const request = addPrepackagedRulesRequest();
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);
     });
@@ -127,7 +127,7 @@ describe('add_prepackaged_rules_route', () => {
     test('1 rule is installed and 0 are updated when find results are empty', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
       const request = addPrepackagedRulesRequest();
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
@@ -140,7 +140,7 @@ describe('add_prepackaged_rules_route', () => {
 
     test('1 rule is updated and 0 are installed when we return a single find and the versions are different', async () => {
       const request = addPrepackagedRulesRequest();
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
@@ -170,7 +170,7 @@ describe('add_prepackaged_rules_route', () => {
       ],
     });
     const request = addPrepackagedRulesRequest();
-    const response = await server.inject(request, context);
+    const response = await server.inject(request, requestContextMock.convertContext(context));
     expect(response.body).toEqual({
       rules_installed: 0,
       rules_updated: 1,
@@ -189,7 +189,7 @@ describe('add_prepackaged_rules_route', () => {
       errors: [],
     });
     const request = addPrepackagedRulesRequest();
-    const response = await server.inject(request, context);
+    const response = await server.inject(request, requestContextMock.convertContext(context));
     expect(response.body).toEqual({
       rules_installed: 0,
       rules_updated: 1,
@@ -208,7 +208,7 @@ describe('add_prepackaged_rules_route', () => {
       errors: [],
     });
     const request = addPrepackagedRulesRequest();
-    const response = await server.inject(request, context);
+    const response = await server.inject(request, requestContextMock.convertContext(context));
     expect(response.body).toEqual({
       rules_installed: 0,
       rules_updated: 1,
@@ -235,7 +235,7 @@ describe('add_prepackaged_rules_route', () => {
       ],
     });
     const request = addPrepackagedRulesRequest();
-    const response = await server.inject(request, context);
+    const response = await server.inject(request, requestContextMock.convertContext(context));
     expect(response.body).toEqual({
       rules_installed: 0,
       rules_updated: 1,
