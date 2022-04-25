@@ -36,13 +36,23 @@ export const formatAuthenticationData = (
     },
   };
 
-  const lastSuccessFields = getFormattedFields(authenticationsLastSuccessFields, hit, fieldMap, 'lastSuccess');
+  const lastSuccessFields = getFormattedFields(
+    authenticationsLastSuccessFields,
+    hit,
+    fieldMap,
+    'lastSuccess'
+  );
   if (lastSuccessFields) {
-    console.log('jj')
+    console.log('jj');
     flattenedFields = set('lastSuccess.node', lastSuccessFields, flattenedFields);
   }
 
-  const lastFailureFields = getFormattedFields(authenticationsLastFailureFields, hit, fieldMap, 'lasFailure');
+  const lastFailureFields = getFormattedFields(
+    authenticationsLastFailureFields,
+    hit,
+    fieldMap,
+    'lasFailure'
+  );
   if (lastSuccessFields) {
     flattenedFields = set('lastFailure.node', lastFailureFields, flattenedFields);
   }
@@ -60,7 +70,6 @@ const getFormattedFields = (
     const esField = get(`${parentField}['${fieldName}']`, fieldMap);
 
     if (!isEmpty(esField)) {
-
       const fieldValue = get(`${parentField}['${esField}']`, hit.fields);
 
       if (!isEmpty(fieldValue)) {
@@ -71,7 +80,7 @@ const getFormattedFields = (
         );
       }
     }
-    console.log(flattenedFields)
+    console.log(flattenedFields);
 
     return flattenedFields;
   }, {});

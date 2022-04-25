@@ -119,8 +119,8 @@ export const buildQuery = ({
         'host*',
         'source*',
         {
-          "field": "@timestamp",
-          "format": "strict_date_optional_time"
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
         },
       ],
     },
