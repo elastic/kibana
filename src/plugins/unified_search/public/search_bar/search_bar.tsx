@@ -27,7 +27,7 @@ import { FilterBar } from '../filter_bar';
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementComponent } from '../saved_query_management';
-import { SuggestionsListSize } from '../typeahead/suggestions_component';
+import type { SuggestionsListSize } from '../typeahead/suggestions_component';
 
 export interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
