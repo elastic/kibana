@@ -329,6 +329,8 @@ describe('utils', () => {
     });
 
     test('creates new assertion if stored access token exists but is expired', async () => {
+      const createdAt = new Date().toISOString();
+      const expiresAt = new Date(Date.now() - 100).toISOString();
       connectorTokenClient.get.mockResolvedValueOnce({
         hasErrors: false,
         connectorToken: {
@@ -336,8 +338,8 @@ describe('utils', () => {
           connectorId: '123',
           tokenType: 'access_token',
           token: 'testtokenvalue',
-          createdAt: new Date().toISOString(),
-          expiresAt: new Date(Date.now() - 100).toISOString(),
+          createdAt,
+          expiresAt,
         },
       });
       (createJWTAssertion as jest.Mock).mockReturnValueOnce('newassertion');
@@ -374,8 +376,8 @@ describe('utils', () => {
           connectorId: '123',
           tokenType: 'access_token',
           token: 'testtokenvalue',
-          createdAt: new Date().toISOString(),
-          expiresAt: new Date(Date.now() - 100).toISOString(),
+          createdAt,
+          expiresAt,
         },
         newToken: 'access_token brandnewaccesstoken',
         expiresInSec: 1000,

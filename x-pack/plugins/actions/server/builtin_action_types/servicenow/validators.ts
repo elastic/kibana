@@ -16,19 +16,47 @@ import * as i18n from './translations';
 
 export const validateCommonConfig = (
   configurationUtilities: ActionsConfigurationUtilities,
-  configObject: ServiceNowPublicConfigurationType
+  config: ServiceNowPublicConfigurationType
 ) => {
+  const { isOAuth, apiUrl, userIdentifierValue, clientId, jwtKeyId } = config;
+
   try {
-    configurationUtilities.ensureUriAllowed(configObject.apiUrl);
+    configurationUtilities.ensureUriAllowed(apiUrl);
   } catch (allowedListError) {
     return i18n.ALLOWED_HOSTS_ERROR(allowedListError.message);
+  }
+
+  if (isOAuth) {
+    if (userIdentifierValue == null) {
+      return i18n.VALIDATE_OAUTH_MISSING_FIELD_ERROR('userIdentiferValue', true);
+    }
+
+    if (clientId == null) {
+      return i18n.VALIDATE_OAUTH_MISSING_FIELD_ERROR('clientId', true);
+    }
+
+    if (jwtKeyId == null) {
+      return i18n.VALIDATE_OAUTH_MISSING_FIELD_ERROR('jwtKeyId', true);
+    }
   }
 };
 
 export const validateCommonSecrets = (
   configurationUtilities: ActionsConfigurationUtilities,
   secrets: ServiceNowSecretConfigurationType
-) => {};
+) => {
+  const { username, password, clientSecret, privateKey } = secrets;
+
+  // Username and password must be set and set together
+  if (!username || !password) {
+    return i18n.BASIC_AUTH_CREDENTIALS_ERROR;
+  }
+
+  // Client secret and private key must be set and set together
+  if (!clientSecret || !privateKey) {
+    return i18n.OAUTH_CREDENTIALS_ERROR;
+  }
+};
 
 export const validateCommonConnector = (
   config: ServiceNowPublicConfigurationType,
