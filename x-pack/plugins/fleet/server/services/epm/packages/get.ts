@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
+import type { SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
+import semverGte from 'semver/functions/gte';
 
 import {
   isPackageLimited,
@@ -98,52 +99,18 @@ export async function getPackageSavedObjects(
 
 export const getInstallations = getPackageSavedObjects;
 
-export async function getPackageInfoFromRegistry(options: {
+export async function getPackageInfo({
+  savedObjectsClient,
+  pkgName,
+  pkgVersion,
+  skipArchive = false,
+}: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   pkgVersion: string;
+  /** Avoid loading the registry archive into the cache (only use for performance reasons). Defaults to `false` */
+  skipArchive?: boolean;
 }): Promise<PackageInfo> {
-  const { savedObjectsClient, pkgName, pkgVersion } = options;
-  const [savedObject, latestPackage] = await Promise.all([
-    getInstallationObject({ savedObjectsClient, pkgName }),
-    Registry.fetchFindLatestPackageOrThrow(pkgName),
-  ]);
-
-  // If no package version is provided, use the installed version in the response
-  let responsePkgVersion = pkgVersion || savedObject?.attributes.install_version;
-  // If no installed version of the given package exists, default to the latest version of the package
-  if (!responsePkgVersion) {
-    responsePkgVersion = latestPackage.version;
-  }
-  const packageInfo = await Registry.fetchInfo(pkgName, responsePkgVersion);
-
-  // Fix the paths
-  const paths =
-    packageInfo?.assets?.map((path) =>
-      path.replace(`/package/${pkgName}/${pkgVersion}`, `${pkgName}-${pkgVersion}`)
-    ) ?? [];
-
-  // add properties that aren't (or aren't yet) on the package
-  const additions: EpmPackageAdditions = {
-    latestVersion: latestPackage.version,
-    title: packageInfo.title || nameAsTitle(packageInfo.name),
-    assets: Registry.groupPathsByService(paths || []),
-    removable: true,
-    notice: Registry.getNoticePath(paths || []),
-    keepPoliciesUpToDate: savedObject?.attributes.keep_policies_up_to_date ?? false,
-  };
-  const updated = { ...packageInfo, ...additions };
-
-  return createInstallableFrom(updated, savedObject);
-}
-
-export async function getPackageInfo(options: {
-  savedObjectsClient: SavedObjectsClientContract;
-  pkgName: string;
-  pkgVersion: string;
-}): Promise<PackageInfo> {
-  const { savedObjectsClient, pkgName, pkgVersion } = options;
-
   const [savedObject, latestPackage] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
     Registry.fetchFindLatestPackageOrUndefined(pkgName),
@@ -154,20 +121,39 @@ export async function getPackageInfo(options: {
   }
 
   // If no package version is provided, use the installed version in the response, fallback to package from registry
-  const responsePkgVersion =
-    pkgVersion ?? savedObject?.attributes.install_version ?? latestPackage!.version;
+  const resolvedPkgVersion =
+    pkgVersion !== ''
+      ? pkgVersion
+      : savedObject?.attributes.install_version ?? latestPackage!.version;
 
-  const getPackageRes = await getPackageFromSource({
-    pkgName,
-    pkgVersion: responsePkgVersion,
-    savedObjectsClient,
-    installedPkg: savedObject?.attributes,
-  });
-  const { paths, packageInfo } = getPackageRes;
+  // If same version is available in registry and skipArchive is true, use the info from the registry (faster),
+  // otherwise build it from the archive
+  let paths: string[];
+  let packageInfo: RegistryPackage | ArchivePackage | undefined = skipArchive
+    ? await Registry.fetchInfo(pkgName, pkgVersion).catch(() => undefined)
+    : undefined;
+
+  if (packageInfo) {
+    // Fix the paths
+    paths =
+      packageInfo.assets?.map((path) =>
+        path.replace(`/package/${pkgName}/${pkgVersion}`, `${pkgName}-${pkgVersion}`)
+      ) ?? [];
+  } else {
+    ({ paths, packageInfo } = await getPackageFromSource({
+      pkgName,
+      pkgVersion: resolvedPkgVersion,
+      savedObjectsClient,
+      installedPkg: savedObject?.attributes,
+    }));
+  }
 
   // add properties that aren't (or aren't yet) on the package
   const additions: EpmPackageAdditions = {
-    latestVersion: latestPackage?.version ?? responsePkgVersion,
+    latestVersion:
+      latestPackage?.version && semverGte(latestPackage.version, resolvedPkgVersion)
+        ? latestPackage.version
+        : resolvedPkgVersion,
     title: packageInfo.title || nameAsTitle(packageInfo.name),
     assets: Registry.groupPathsByService(paths || []),
     removable: true,
