@@ -8,17 +8,7 @@
 
 import type { ConfigDeprecationProvider } from '@kbn/core/server';
 
-export const autocompleteConfigDeprecationProvider: ConfigDeprecationProvider = ({
-  renameFromRoot,
-}) => [
-  renameFromRoot(
-    'kibana.autocompleteTerminateAfter',
-    'data.autocomplete.valueSuggestions.terminateAfter',
-    { level: 'warning' }
-  ),
-  renameFromRoot('kibana.autocompleteTimeout', 'data.autocomplete.valueSuggestions.timeout', {
-    level: 'warning',
-  }),
+export const configDeprecationProvider: ConfigDeprecationProvider = ({ renameFromRoot }) => [
   renameFromRoot('xpack.data_enhanced.search.sessions', 'data.search.sessions', {
     level: 'warning',
   }),
