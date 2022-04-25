@@ -7,6 +7,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
+import { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import { cleanWriteTargets } from '../../utils/clean_write_targets';
 import { getApmWriteTargets } from '../utils/get_apm_write_targets';
 import { Logger } from '../../utils/create_logger';
@@ -218,7 +219,11 @@ export class ApmSynthtraceEsClient {
     const mappings = aggregator.getMappings();
     const dimensions = aggregator.getDimensions();
 
-    if (dimensions.length === 0) return;
+    const indexSettings: IndicesIndexSettings = { lifecycle: { name: 'metrics' } };
+    if (dimensions.length > 0) {
+      indexSettings.mode = 'time_series';
+      indexSettings.routing_path = dimensions;
+    }
 
     await this.client.cluster.putComponentTemplate({
       name: `${datastreamName}-mappings`,
@@ -235,11 +240,7 @@ export class ApmSynthtraceEsClient {
       name: `${datastreamName}-settings`,
       template: {
         settings: {
-          index: {
-            lifecycle: { name: 'metrics' },
-            mode: 'time_series',
-            routing_path: dimensions,
-          },
+          index: indexSettings,
         },
       },
       _meta: {
@@ -258,5 +259,7 @@ export class ApmSynthtraceEsClient {
     this.logger.info(`Created index template for ${datastreamName}-*`);
 
     await this.client.indices.createDataStream({ name: datastreamName + '-default' });
+
+    await aggregator.bootstrapElasticsearch(this.client);
   }
 }

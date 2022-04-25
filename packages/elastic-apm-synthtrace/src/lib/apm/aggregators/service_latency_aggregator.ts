@@ -22,10 +22,9 @@ interface LatencyState {
 
 export type ServiceFields = Fields &
   Partial<{
-    'timestamp.us'?: number;
+    observer: Observer;
     'ecs.version': string;
     'metricset.name': string;
-    observer: Observer;
     'processor.event': string;
     'processor.name': string;
     'service.name': string;
@@ -51,9 +50,6 @@ export class ServiceLatencyAggregator implements StreamAggregator<ApmFields> {
         '@timestamp': {
           type: 'date',
           format: 'date_optional_time||epoch_millis',
-        },
-        message: {
-          type: 'wildcard',
         },
         service: {
           type: 'object',
