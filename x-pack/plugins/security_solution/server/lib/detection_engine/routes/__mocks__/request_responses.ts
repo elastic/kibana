@@ -696,10 +696,13 @@ export const getSignalsMigrationStatusRequest = () =>
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
-export const legacyGetNotificationResult = (
+export const legacyGetNotificationResult = ({
   id = '456',
-  ruleId = '123'
-): LegacyRuleNotificationAlertType => ({
+  ruleId = '123',
+}: {
+  id?: string;
+  ruleId?: string;
+} = {}): LegacyRuleNotificationAlertType => ({
   id,
   name: 'Notification for Rule Test',
   tags: [`__internal_rule_alert_id:${ruleId}`],
@@ -893,7 +896,7 @@ export const legacyGetFindNotificationsResultWithSingleHit = (
   page: 1,
   perPage: 1,
   total: 1,
-  data: [legacyGetNotificationResult(ruleId)],
+  data: [legacyGetNotificationResult({ ruleId })],
 });
 
 /**
