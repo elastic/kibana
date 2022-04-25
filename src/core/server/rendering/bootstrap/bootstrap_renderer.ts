@@ -67,7 +67,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       themeVersion,
       darkMode,
     });
-    const buildHash = 46534; //packageInfo.buildNum;
+    const buildHash = packageInfo.buildNum;
     const regularBundlePath = `${staticBaseUrl || serverBasePath}/${buildHash}/bundles`;
 
     const bundlePaths = getPluginsBundlePaths({
