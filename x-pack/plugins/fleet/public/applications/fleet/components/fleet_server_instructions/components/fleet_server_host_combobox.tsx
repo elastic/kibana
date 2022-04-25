@@ -28,10 +28,10 @@ export const FleetServerHostComboBox: React.FunctionComponent<Props> = ({
   // Track options that are created inline
   const [createdOptions, setCreatedOptions] = useState<string[]>([]);
 
-  const options = [
-    ...createdOptions,
-    ...fleetServerHostSettings,
-  ].map((option) => ({ label: option, value: option }));
+  const options = [...createdOptions, ...fleetServerHostSettings].map((option) => ({
+    label: option,
+    value: option,
+  }));
 
   const handleChange = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
     const host = selectedOptions[0].value ?? '';
