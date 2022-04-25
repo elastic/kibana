@@ -304,8 +304,6 @@ describe('#start(installPath)', () => {
         Array [
           Array [
             "action.destructive_requires_name=true",
-            "ingest.geoip.downloader.enabled=false",
-            "search.check_ccs_compatibility=true",
             "cluster.routing.allocation.disk.threshold_enabled=false",
           ],
           undefined,
@@ -371,8 +369,9 @@ describe('#run()', () => {
     expect(config).toContain(`xpack.security.http.ssl.keystore.type=PKCS12`);
   });
 
-  it(`doesn't setup SSL when disabled`, async () => {
+  it(`respects jest config option`, async () => {
     mockEsBin({ start: true });
+    process.env.JEST_WORKER_ID = '1';
 
     extractConfigFiles.mockReturnValueOnce([]);
 
@@ -386,6 +385,30 @@ describe('#run()', () => {
             "action.destructive_requires_name=true",
             "ingest.geoip.downloader.enabled=false",
             "search.check_ccs_compatibility=true",
+            "cluster.routing.allocation.disk.threshold_enabled=false",
+          ],
+          undefined,
+          Object {
+            "log": <ToolingLog>,
+          },
+        ],
+      ]
+    `);
+  });
+
+  it(`doesn't setup SSL when disabled`, async () => {
+    mockEsBin({ start: true });
+
+    extractConfigFiles.mockReturnValueOnce([]);
+
+    const cluster = new Cluster({ log, ssl: false });
+    await cluster.run();
+
+    expect(extractConfigFiles.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Array [
+            "action.destructive_requires_name=true",
             "cluster.routing.allocation.disk.threshold_enabled=false",
           ],
           undefined,
