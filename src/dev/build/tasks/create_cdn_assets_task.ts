@@ -16,7 +16,7 @@ export const CreateCdnAssets: Task = {
     const assets = config.resolveFromRepo('build', 'cdn-assets');
     await mkdirp(assets);
 
-    copyAll(buildSource, assets, {
+    await copyAll(buildSource, assets, {
       select: ['**/target/public/*'],
     });
     await compressTar({
@@ -28,8 +28,7 @@ export const CreateCdnAssets: Task = {
           level: 9,
         },
       },
-      createRootDirectory: true,
-      rootDirectoryName: build.getRootDirectory(),
+      createRootDirectory: false,
     });
   },
 };
