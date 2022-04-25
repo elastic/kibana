@@ -25,6 +25,7 @@ import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 import { FleetStart } from '@kbn/fleet-plugin/public';
@@ -58,6 +59,7 @@ export interface ClientPluginsSetup {
 export interface ClientPluginsStart {
   fleet?: FleetStart;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   discover: DiscoverStart;
   inspector: InspectorPluginStart;
   embeddable: EmbeddableStart;
@@ -126,7 +128,7 @@ export class UptimePlugin
                 sortKey: 500,
                 entries: [
                   {
-                    label: i18n.translate('xpack.uptime.overview.heading', {
+                    label: i18n.translate('xpack.synthetics.overview.heading', {
                       defaultMessage: 'Monitors',
                     }),
                     app: 'uptime',
@@ -135,7 +137,7 @@ export class UptimePlugin
                     ignoreTrailingSlash: true,
                   },
                   {
-                    label: i18n.translate('xpack.uptime.certificatesPage.heading', {
+                    label: i18n.translate('xpack.synthetics.certificatesPage.heading', {
                       defaultMessage: 'TLS Certificates',
                     }),
                     app: 'uptime',

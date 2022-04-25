@@ -340,14 +340,16 @@ export class MonitoringPlugin
           res: KibanaResponseFactory
         ) => {
           const plugins = (await getCoreServices())[1];
+          const coreContext = await context.core;
+          const actionContext = await context.actions;
           const legacyRequest: LegacyRequest = {
             ...req,
             logger: this.log,
             getLogger: this.getLogger,
             payload: req.body,
             getKibanaStatsCollector: () => this.legacyShimDependencies.kibanaStatsCollector,
-            getUiSettingsService: () => context.core.uiSettings.client,
-            getActionTypeRegistry: () => context.actions?.listTypes(),
+            getUiSettingsService: () => coreContext.uiSettings.client,
+            getActionTypeRegistry: () => actionContext?.listTypes(),
             getRulesClient: () => {
               try {
                 return plugins.alerting.getRulesClientWithRequest(req);
@@ -386,7 +388,7 @@ export class MonitoringPlugin
                       const client =
                         name === 'monitoring'
                           ? cluster.asScoped(req).asCurrentUser
-                          : context.core.elasticsearch.client.asCurrentUser;
+                          : coreContext.elasticsearch.client.asCurrentUser;
                       return await Globals.app.getLegacyClusterShim(client, endpoint, params);
                     },
                   }),
