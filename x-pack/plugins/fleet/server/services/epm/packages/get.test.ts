@@ -356,7 +356,7 @@ describe('When using EPM `get` services', () => {
           name: 'my-package',
           version: '1.0.0',
           assets: [],
-        } as RegistryPackage);
+        } as unknown as RegistryPackage);
 
         await expect(
           getPackageInfo({
