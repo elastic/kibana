@@ -20,6 +20,7 @@ export const CreateCdnAssets: Task = {
   async run(config, log, build) {
     const buildSource = build.resolvePath();
     const buildNum = config.getBuildNumber();
+    const buildVersion = config.getBuildVersion();
     const assets = config.resolveFromRepo('build', 'cdn-assets');
     const bundles = resolve(assets, String(buildNum), 'bundles');
     const plugin = resolve(bundles, 'plugin');
@@ -40,7 +41,7 @@ export const CreateCdnAssets: Task = {
     });
     await compressTar({
       source: assets,
-      destination: config.resolveFromTarget(`kibana-${config.getBuildVersion()}-cdn-assets.tar.gz`),
+      destination: config.resolveFromTarget(`kibana-${buildVersion}}-cdn-assets.tar.gz`),
       archiverOptions: {
         gzip: true,
         gzipOptions: {
