@@ -6,13 +6,7 @@
  * Side Public License, v 1.
  */
 
-import Path from 'path';
-import Fs from 'fs';
-import { promisify } from 'util';
-
 import { mkdirp, compressTar, Task, copyAll } from '../lib';
-
-const asyncStat = promisify(Fs.stat);
 
 export const CreateCdnAssets: Task = {
   description: 'Creating CDN assets',
