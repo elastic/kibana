@@ -47,7 +47,7 @@ export const CreateCdnAssets: Task = {
           level: 9,
         },
       },
-      createRootDirectory: false,
+      createRootDirectory: true,
     });
   },
 };
