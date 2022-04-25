@@ -20,14 +20,7 @@ import type {
   ColumnHeaderOptions,
   SortColumnTimeline,
   SortDirection,
-  TimelineEventsType,
 } from '../../../../common/types/timeline';
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const omitTypenameAndEmpty = (k: string, v: any): any | undefined =>
-  k !== '__typename' && v != null ? v : undefined;
-
-export const stringifyEvent = (ecs: Ecs): string => JSON.stringify(ecs, omitTypenameAndEmpty, 2);
 
 /**
  * Creates mapping of eventID -> fieldData for given fieldsToKeep. Used to store additional field
@@ -75,27 +68,6 @@ export const getEventIdToDataMapping = (
 
 export const isEventBuildingBlockType = (event: Ecs): boolean =>
   !isEmpty(event.kibana?.alert?.building_block_type);
-
-export const isEvenEqlSequence = (event: Ecs): boolean => {
-  if (!isEmpty(event.eql?.sequenceNumber)) {
-    try {
-      const sequenceNumber = (event.eql?.sequenceNumber ?? '').split('-')[0];
-      return parseInt(sequenceNumber, 10) % 2 === 0;
-    } catch {
-      return false;
-    }
-  }
-  return false;
-};
-/** Return eventType raw or signal or eql */
-export const getEventType = (event: Ecs): Omit<TimelineEventsType, 'all'> => {
-  if (!isEmpty(event.signal?.rule?.id)) {
-    return 'signal';
-  } else if (!isEmpty(event.eql?.parentId)) {
-    return 'eql';
-  }
-  return 'raw';
-};
 
 /** Maps (Redux) `SortDirection` to the `direction` values used by `EuiDataGrid` */
 export const mapSortDirectionToDirection = (sortDirection: SortDirection): 'asc' | 'desc' => {
