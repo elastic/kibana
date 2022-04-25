@@ -94,8 +94,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_tsvb_chart'));
     });
 
-    describe('visualize ciGroup11', function () {
-      this.tags('ciGroup11');
+    describe('visualize ciGroup12', function () {
+      this.tags('ciGroup12');
 
       loadTestFile(require.resolve('./_tag_cloud'));
       loadTestFile(require.resolve('./_tsvb_time_series'));
