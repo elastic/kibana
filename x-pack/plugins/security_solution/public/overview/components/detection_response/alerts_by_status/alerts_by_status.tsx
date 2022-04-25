@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiProgress,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { ShapeTreeNode } from '@elastic/charts';
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -63,6 +71,8 @@ const chartConfigs: Array<{ key: Severity; label: string; color: string }> = [
 const DETECTION_RESPONSE_ALERTS_BY_STATUS_ID = 'detection-response-alerts-by-status';
 
 export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
+  const { euiTheme } = useEuiTheme();
+
   const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTION_RESPONSE_ALERTS_BY_STATUS_ID);
   const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.alerts);
   const { navigateTo } = useNavigation();
@@ -111,6 +121,16 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
       : (donutData?.open?.total ?? 0) +
         (donutData?.acknowledged?.total ?? 0) +
         (donutData?.closed?.total ?? 0);
+
+  const emptyLabelStyle = useMemo(
+    () =>
+      totalAlerts === 0
+        ? {
+            color: euiTheme.colors.disabled,
+          }
+        : {},
+    [euiTheme.colors.disabled, totalAlerts]
+  );
 
   const fillColor: FillColor = useCallback((d: ShapeTreeNode) => {
     return chartConfigs.find((cfg) => cfg.label === d.dataName)?.color ?? emptyDonutColor;
@@ -161,7 +181,7 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
                           <FormattedCount count={totalAlerts} />
                         </b>
                         <> </>
-                        <small>{ALERTS(totalAlerts)}</small>
+                        <small style={emptyLabelStyle}>{ALERTS(totalAlerts)}</small>
                       </>
                     )}
                   </EuiText>

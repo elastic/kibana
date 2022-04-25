@@ -6,9 +6,17 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { Rotation, ScaleType } from '@elastic/charts';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import { FormattedNumber } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
 import { BarChart } from '../../../../common/components/charts/barchart';
@@ -29,6 +37,7 @@ import { SecurityPageName } from '../../../../../common/constants';
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { appendSearch } from '../../../../common/components/link_to/helpers';
 import { useNavigation } from '../../../../common/lib/kibana';
+
 const CASES_BY_STATUS_ID = 'casesByStatus';
 
 export const numberFormatter = (value: string | number): string => value.toLocaleString();
@@ -81,11 +90,61 @@ export const barchartConfigs = {
   customHeight: 146,
 };
 
-const Wrapper = styled.div`
-  width: 400px;
+const barColors = {
+  empty: 'rgba(105, 112, 125, 0.1)',
+  open: '#79aad9',
+  'in-progress': '#f1d86f',
+  closed: '#d3dae6',
+};
+
+const emptyChartSettings = [
+  {
+    key: 'open',
+    value: [{ y: 20, x: OPEN, g: OPEN }],
+    color: barColors.empty,
+  },
+  {
+    key: 'in-progress',
+    value: [{ y: 20, x: IN_PROGRESS, g: IN_PROGRESS }],
+    color: barColors.empty,
+  },
+  {
+    key: 'closed',
+    value: [{ y: 20, x: CLOSED, g: CLOSED }],
+    color: barColors.empty,
+  },
+];
+
+const StyledEuiFlexItem = styled(EuiFlexItem)`
+  align-items: center;
+  width: 60%;
 `;
 
-export const CasesByStatus: React.FC = () => {
+const Wrapper = styled.div`
+  width: 100%;
+  position: relative;
+`;
+
+const BarChartMask = styled.div<{ $totalCounts: number }>`
+  background-color: transparent;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: ${({ $totalCounts }) =>
+    /* If all totalCounts equals 0, disable chart interaction*/
+    $totalCounts === 0 ? 1 : 0};
+`;
+
+const CasesByStatusComponent: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
+  const emptyLabelStyle = useMemo(
+    () => ({
+      color: euiTheme.colors.disabled,
+    }),
+    [euiTheme.colors.disabled]
+  );
   const { toggleStatus, setToggleStatus } = useQueryToggle(CASES_BY_STATUS_ID);
   const { getAppUrl, navigateTo } = useNavigation();
   const { search } = useFormatUrl(SecurityPageName.case);
@@ -103,23 +162,26 @@ export const CasesByStatus: React.FC = () => {
   });
 
   const chartData = useMemo(
-    () => [
-      {
-        key: 'open',
-        value: [{ y: open, x: OPEN, g: OPEN }],
-        color: '#79aad9',
-      },
-      {
-        key: 'in-progress',
-        value: [{ y: inProgress, x: IN_PROGRESS, g: IN_PROGRESS }],
-        color: '#f1d86f',
-      },
-      {
-        key: 'closed',
-        value: [{ y: closed, x: CLOSED, g: CLOSED }],
-        color: '#d3dae6',
-      },
-    ],
+    () =>
+      open === 0 && inProgress === 0 && closed === 0
+        ? emptyChartSettings
+        : [
+            {
+              key: 'open',
+              value: [{ y: open, x: OPEN, g: OPEN }],
+              color: barColors.open,
+            },
+            {
+              key: 'in-progress',
+              value: [{ y: inProgress, x: IN_PROGRESS, g: IN_PROGRESS }],
+              color: barColors['in-progress'],
+            },
+            {
+              key: 'closed',
+              value: [{ y: closed, x: CLOSED, g: CLOSED }],
+              color: barColors.closed,
+            },
+          ],
     [closed, inProgress, open]
   );
 
@@ -155,19 +217,26 @@ export const CasesByStatus: React.FC = () => {
                   </b>
                   <> </>
                   <small>
-                    <EuiLink onClick={goToCases}>{CASES(totalCounts)}</EuiLink>
+                    {totalCounts === 0 ? (
+                      <span style={emptyLabelStyle}>{CASES(totalCounts)}</span>
+                    ) : (
+                      <EuiLink onClick={goToCases}>{CASES(totalCounts)}</EuiLink>
+                    )}
                   </small>
                 </>
               )}
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ alignItems: 'center', width: '60%' }}>
+          <StyledEuiFlexItem grow={false}>
             <Wrapper data-test-subj="chart-wrapper">
+              <BarChartMask $totalCounts={totalCounts} />
               <BarChart configs={barchartConfigs} barChart={chartData} />
             </Wrapper>
-          </EuiFlexItem>
+          </StyledEuiFlexItem>
         </EuiFlexGroup>
       )}
     </EuiPanel>
   );
 };
+
+export const CasesByStatus = React.memo(CasesByStatusComponent);
