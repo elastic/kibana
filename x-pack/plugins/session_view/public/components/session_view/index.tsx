@@ -250,11 +250,7 @@ export const SessionView = ({
 
             return (
               <>
-                <EuiResizablePanel
-                  initialSize={isDetailOpen ? 75 : 100}
-                  minSize="60%"
-                  paddingSize="none"
-                >
+                <EuiResizablePanel initialSize={100} minSize="60%" paddingSize="none">
                   {hasError && (
                     <EuiEmptyPrompt
                       iconType="alert"
@@ -308,7 +304,7 @@ export const SessionView = ({
                 <EuiResizableButton css={styles.resizeHandle} />
                 <EuiResizablePanel
                   id="session-detail-panel"
-                  initialSize={25}
+                  initialSize={30}
                   minSize="320px"
                   paddingSize="none"
                   css={styles.detailPanel}
