@@ -9,9 +9,9 @@ import { useHistory } from 'react-router-dom';
 import { Query } from '@kbn/es-query';
 import { allNavigationItems } from '../navigation/constants';
 import { encodeQuery } from '../navigation/query_utils';
-import { CspFindingsRequest } from '../../pages/findings/use_findings';
+import { FindingsBaseURLQuery } from '../../pages/findings/types';
 
-const getFindingsQuery = (queryValue: Query['query']): Pick<CspFindingsRequest, 'query'> => {
+const getFindingsQuery = (queryValue: Query['query']): Pick<FindingsBaseURLQuery, 'query'> => {
   const query =
     typeof queryValue === 'string'
       ? queryValue

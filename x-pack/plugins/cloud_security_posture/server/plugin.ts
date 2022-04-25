@@ -101,11 +101,8 @@ export class CspPlugin
         ): Promise<PackagePolicy> => {
           if (packagePolicy.package?.name === CIS_KUBERNETES_PACKAGE_NAME) {
             await this.initialize(core);
-            await onPackagePolicyPostCreateCallback(
-              this.logger,
-              packagePolicy,
-              context.core.savedObjects.client
-            );
+            const soClient = (await context.core).savedObjects.client;
+            await onPackagePolicyPostCreateCallback(this.logger, packagePolicy, soClient);
           }
 
           return packagePolicy;
