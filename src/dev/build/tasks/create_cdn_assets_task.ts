@@ -61,6 +61,7 @@ export const CreateCdnAssets: Task = {
         },
       },
       createRootDirectory: true,
+      rootDirectoryName: `kibana-${buildVersion}-cdn-assets`,
     });
   },
 };
