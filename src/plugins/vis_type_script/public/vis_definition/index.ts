@@ -14,6 +14,7 @@ import { ScriptOptions } from './editor_options/script';
 import { SettingsOptions } from './editor_options/settings_lazy';
 import { toExpressionAst } from '../expression/to_ast';
 import { VisParams } from '../types';
+import { DEFAULT_VIS } from './default_vis';
 
 export const scriptVisDefinition: VisTypeDefinition<VisParams> = {
   name: 'script',
@@ -29,7 +30,9 @@ export const scriptVisDefinition: VisTypeDefinition<VisParams> = {
   }),
   toExpressionAst,
   visConfig: {
-    defaults: {},
+    defaults: {
+      script: DEFAULT_VIS,
+    },
   },
   editorConfig: {
     optionTabs: [
