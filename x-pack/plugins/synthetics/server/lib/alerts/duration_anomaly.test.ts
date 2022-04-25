@@ -12,7 +12,6 @@ import {
 import { durationAnomalyAlertFactory } from './duration_anomaly';
 import { DURATION_ANOMALY } from '../../../common/constants/alerts';
 import { AnomaliesTableRecord, AnomalyRecordDoc } from '@kbn/ml-plugin/common/types/anomalies';
-import { DynamicSettings } from '../../../common/runtime_types';
 import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
 import { getSeverityType } from '@kbn/ml-plugin/common/util/anomaly_utils';
 import { Ping } from '../../../common/runtime_types/ping';
@@ -32,34 +31,6 @@ interface MockAnomalyResult {
 
 const monitorId = 'uptime-monitor';
 const mockUrl = 'https://elastic.co';
-
-/**
- * This function aims to provide an easy way to give mock props that will
- * reduce boilerplate for tests.
- * @param dynamic the expiration and aging thresholds received at alert creation time
- * @param params the params received at alert creation time
- * @param state the state the alert maintains
- */
-const mockOptions = (
-  dynamicCertSettings?: {
-    certExpirationThreshold: DynamicSettings['certExpirationThreshold'];
-    certAgeThreshold: DynamicSettings['certAgeThreshold'];
-  },
-  state = {},
-  params = {
-    timerange: { from: 'now-15m', to: 'now' },
-    monitorId,
-    severity: 'warning',
-  }
-): any => {
-  const { services } = createRuleTypeMocks(dynamicCertSettings);
-
-  return {
-    params,
-    state,
-    services,
-  };
-};
 
 const mockAnomaliesResult: MockAnomalyResult = {
   anomalies: [
@@ -92,6 +63,50 @@ const mockPing: Partial<Ping> = {
   url: {
     full: mockUrl,
   },
+};
+
+const mockRecoveredAlerts = mockAnomaliesResult.anomalies.map((result) => ({
+  firstCheckedAt: 'date',
+  firstTriggeredAt: undefined,
+  lastCheckedAt: 'date',
+  lastResolvedAt: undefined,
+  isTriggered: false,
+  anomalyStartTimestamp: 'date',
+  currentTriggerStarted: undefined,
+  expectedResponseTime: `${Math.round(result.typicalSort / 1000)} ms`,
+  lastTriggeredAt: undefined,
+  monitor: monitorId,
+  monitorUrl: mockPing.url?.full,
+  observerLocation: result.entityValue,
+  severity: getSeverityType(result.severity),
+  severityScore: result.severity,
+  slowestAnomalyResponse: `${Math.round(result.actualSort / 1000)} ms`,
+  bucketSpan: result.source.bucket_span,
+}));
+
+/**
+ * This function aims to provide an easy way to give mock props that will
+ * reduce boilerplate for tests.
+ * @param dynamic the expiration and aging thresholds received at alert creation time
+ * @param params the params received at alert creation time
+ * @param state the state the alert maintains
+ */
+const mockOptions = (
+  state = {},
+  params = {
+    timerange: { from: 'now-15m', to: 'now' },
+    monitorId,
+    severity: 'warning',
+  }
+): any => {
+  const { services, setContext } = createRuleTypeMocks(mockRecoveredAlerts);
+
+  return {
+    params,
+    state,
+    services,
+    setContext,
+  };
 };
 
 describe('duration anomaly alert', () => {
@@ -173,12 +188,10 @@ describe('duration anomaly alert', () => {
             [ALERT_EVALUATION_THRESHOLD]: anomaly.typicalSort,
             [ALERT_REASON]: `Abnormal (${getSeverityType(
               anomaly.severity
-            )} level) response time detected on uptime-monitor with url ${
-              mockPing.url?.full
-            } at date. Anomaly severity score is ${anomaly.severity}.
-Response times as high as ${slowestResponse} ms have been detected from location ${
-              anomaly.entityValue
-            }. Expected response time is ${typicalResponse} ms.`,
+            )} level) response time detected on uptime-monitor with url ${mockPing.url?.full
+              } at date. Anomaly severity score is ${anomaly.severity}.
+Response times as high as ${slowestResponse} ms have been detected from location ${anomaly.entityValue
+              }. Expected response time is ${typicalResponse} ms.`,
           },
           id: `${DURATION_ANOMALY.id}${index}`,
         });
@@ -203,12 +216,10 @@ Response times as high as ${slowestResponse} ms have been detected from location
         });
         const reasonMsg = `Abnormal (${getSeverityType(
           anomaly.severity
-        )} level) response time detected on uptime-monitor with url ${
-          mockPing.url?.full
-        } at date. Anomaly severity score is ${anomaly.severity}.
-        Response times as high as ${slowestResponse} ms have been detected from location ${
-          anomaly.entityValue
-        }. Expected response time is ${typicalResponse} ms.`;
+        )} level) response time detected on uptime-monitor with url ${mockPing.url?.full
+          } at date. Anomaly severity score is ${anomaly.severity}.
+Response times as high as ${slowestResponse} ms have been detected from location ${anomaly.entityValue
+          }. Expected response time is ${typicalResponse} ms.`;
 
         reasonMessages.push(reasonMsg);
       });
@@ -252,6 +263,37 @@ Response times as high as ${slowestResponse} ms have been detected from location
           },
         ]
       `);
+    });
+
+    it('sets alert recovery context for recovered alerts', async () => {
+      toISOStringSpy.mockImplementation(() => mockDate);
+      const mockResultServiceProviderGetter: jest.Mock<{
+        getAnomaliesTableData: jest.Mock<MockAnomalyResult>;
+      }> = jest.fn();
+      const mockGetAnomliesTableDataGetter: jest.Mock<MockAnomalyResult> = jest.fn();
+      const mockGetLatestMonitorGetter: jest.Mock<Partial<Ping>> = jest.fn();
+
+      mockGetLatestMonitorGetter.mockReturnValue(mockPing);
+      mockGetAnomliesTableDataGetter.mockReturnValue(mockAnomaliesResult);
+      mockResultServiceProviderGetter.mockReturnValue({
+        getAnomaliesTableData: mockGetAnomliesTableDataGetter,
+      });
+      const { server, libs, plugins } = bootstrapDependencies(
+        { getLatestMonitor: mockGetLatestMonitorGetter },
+        {
+          ml: {
+            resultsServiceProvider: mockResultServiceProviderGetter,
+          },
+        }
+      );
+      const alert = durationAnomalyAlertFactory(server, libs, plugins);
+      const options = mockOptions();
+      // @ts-ignore the executor can return `void`, but ours never does
+      const state: Record<string, any> = await alert.executor(options);
+      expect(options.setContext).toHaveBeenCalledTimes(2);
+      mockRecoveredAlerts.forEach((alertState) => {
+        expect(options.setContext).toHaveBeenCalledWith(alertState);
+      });
     });
   });
 });

@@ -7,7 +7,7 @@
 import moment from 'moment';
 import { tlsAlertFactory, getCertSummary } from './tls';
 import { TLS } from '../../../common/constants/alerts';
-import { CertResult, DynamicSettings } from '../../../common/runtime_types';
+import { CertResult } from '../../../common/runtime_types';
 import { createRuleTypeMocks, bootstrapDependencies } from './test_utils';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 
@@ -19,24 +19,6 @@ import { savedObjectsAdapter, UMSavedObjectsAdapter } from '../saved_objects/sav
  * @param params the params received at alert creation time
  * @param state the state the alert maintains
  */
-const mockOptions = (
-  dynamicCertSettings?: {
-    certExpirationThreshold: DynamicSettings['certExpirationThreshold'];
-    certAgeThreshold: DynamicSettings['certAgeThreshold'];
-  },
-  state = {}
-): any => {
-  const { services } = createRuleTypeMocks(dynamicCertSettings);
-  const params = {
-    timerange: { from: 'now-15m', to: 'now' },
-  };
-
-  return {
-    params,
-    state,
-    services,
-  };
-};
 
 const mockCertResult: CertResult = {
   certs: [
@@ -74,6 +56,35 @@ const mockCertResult: CertResult = {
     },
   ],
   total: 4,
+};
+
+const mockRecoveredAlerts = [
+  {
+    commonName: mockCertResult.certs[0].common_name ?? '',
+    issuer: mockCertResult.certs[0].issuer ?? '',
+    summary: 'sample summary',
+    status: 'expired',
+  },
+  {
+    commonName: mockCertResult.certs[1].common_name ?? '',
+    issuer: mockCertResult.certs[1].issuer ?? '',
+    summary: 'sample summary 2',
+    status: 'aging',
+  },
+];
+
+const mockOptions = (state = {}): any => {
+  const { services, setContext } = createRuleTypeMocks(mockRecoveredAlerts);
+  const params = {
+    timerange: { from: 'now-15m', to: 'now' },
+  };
+
+  return {
+    params,
+    state,
+    services,
+    setContext,
+  };
 };
 
 describe('tls alert', () => {
@@ -168,6 +179,22 @@ describe('tls alert', () => {
           notValidBefore: `now-${certSettings.certAgeThreshold}d`,
         })
       );
+    });
+
+    it('sets alert recovery context for recovered alerts', async () => {
+      toISOStringSpy.mockImplementation(() => 'foo date string');
+      const mockGetter: jest.Mock<CertResult> = jest.fn();
+
+      mockGetter.mockReturnValue(mockCertResult);
+      const { server, libs, plugins } = bootstrapDependencies({ getCerts: mockGetter });
+      const alert = tlsAlertFactory(server, libs, plugins);
+      const options = mockOptions();
+      // @ts-ignore the executor can return `void`, but ours never does
+      const state: Record<string, any> = await alert.executor(options);
+      expect(options.setContext).toHaveBeenCalledTimes(2);
+      mockRecoveredAlerts.forEach((alertState) => {
+        expect(options.setContext).toHaveBeenCalledWith(alertState);
+      });
     });
   });
 

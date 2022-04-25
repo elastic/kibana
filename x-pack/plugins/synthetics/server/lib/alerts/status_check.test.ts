@@ -56,6 +56,53 @@ const mockMonitors = [
   },
 ];
 
+const mockRecoveredAlerts = [
+  {
+    currentTriggerStarted: '2022-04-25T14:36:31.511Z',
+    firstCheckedAt: '2022-04-25T14:10:30.785Z',
+    firstTriggeredAt: '2022-04-25T14:10:30.785Z',
+    lastCheckedAt: '2022-04-25T14:36:31.511Z',
+    lastTriggeredAt: '2022-04-25T14:36:31.511Z',
+    lastResolvedAt: '2022-04-25T14:23:43.007Z',
+    isTriggered: true,
+    monitorUrl: 'https://expired.badssl.com/',
+    monitorId: 'expired-badssl',
+    monitorName: 'BadSSL Expired',
+    monitorType: 'http',
+    latestErrorMessage:
+      'Get "https://expired.badssl.com/": x509: certificate has expired or is not yet valid: current time 2022-04-25T10:36:27-04:00 is after 2015-04-12T23:59:59Z',
+    observerLocation: 'Unnamed-location',
+    observerHostname: 'Dominiques-MacBook-Pro-2.local',
+    reason:
+      'BadSSL Expired from Unnamed-location failed 2 times in the last 3 mins. Alert when > 1.',
+    statusMessage: 'failed 2 times in the last 3 mins. Alert when > 1.',
+    start: '2022-04-25T14:36:31.621Z',
+    duration: 315110000000,
+  },
+  {
+    currentTriggerStarted: '2022-04-25T14:36:31.511Z',
+    firstCheckedAt: '2022-04-25T14:10:30.785Z',
+    firstTriggeredAt: '2022-04-25T14:10:30.785Z',
+    lastCheckedAt: '2022-04-25T14:36:31.511Z',
+    lastTriggeredAt: '2022-04-25T14:36:31.511Z',
+    lastResolvedAt: '2022-04-25T14:23:43.007Z',
+    isTriggered: true,
+    monitorUrl: 'https://invalid.badssl.com/',
+    monitorId: 'expired-badssl',
+    monitorName: 'BadSSL Expired',
+    monitorType: 'http',
+    latestErrorMessage:
+      'Get "https://invalid.badssl.com/": x509: certificate has expired or is not yet valid: current time 2022-04-25T10:36:27-04:00 is after 2015-04-12T23:59:59Z',
+    observerLocation: 'Unnamed-location',
+    observerHostname: 'Dominiques-MacBook-Pro-2.local',
+    reason:
+      'BadSSL Expired from Unnamed-location failed 2 times in the last 3 mins. Alert when > 1.',
+    statusMessage: 'failed 2 times in the last 3 mins. Alert when > 1.',
+    start: '2022-04-25T14:36:31.621Z',
+    duration: 315110000000,
+  },
+];
+
 const mockCommonAlertDocumentFields = (monitorInfo: GetMonitorStatusResult['monitorInfo']) => ({
   'agent.name': monitorInfo.agent?.name,
   'error.message': monitorInfo.error?.message,
@@ -65,6 +112,8 @@ const mockCommonAlertDocumentFields = (monitorInfo: GetMonitorStatusResult['moni
   'url.full': monitorInfo.url?.full,
   'observer.geo.name': monitorInfo.observer?.geo?.name,
 });
+
+const setContext = jest.fn();
 
 const mockStatusAlertDocument = (
   monitor: GetMonitorStatusResult,
@@ -91,11 +140,10 @@ const mockAvailabilityAlertDocument = (monitor: GetMonitorAvailabilityResult) =>
   return {
     fields: {
       ...mockCommonAlertDocumentFields(monitor.monitorInfo),
-      [ALERT_REASON]: `${monitorInfo.monitor.name || monitorInfo.monitor.id} from ${
-        monitorInfo.observer?.geo?.name
-      } 35 days availability is ${(monitor.availabilityRatio! * 100).toFixed(
-        2
-      )}%. Alert when < 99.34%.`,
+      [ALERT_REASON]: `${monitorInfo.monitor.name || monitorInfo.monitor.id} from ${monitorInfo.observer?.geo?.name
+        } 35 days availability is ${(monitor.availabilityRatio! * 100).toFixed(
+          2
+        )}%. Alert when < 99.34%.`,
     },
     id: getInstanceId(monitorInfo, `${monitorInfo?.monitor.id}-${monitorInfo.observer?.geo?.name}`),
   };
@@ -121,13 +169,14 @@ const mockOptions = (
     },
   }
 ): any => {
-  const { services } = createRuleTypeMocks();
+  const { services, setContext } = createRuleTypeMocks(mockRecoveredAlerts);
 
   return {
     params,
     state,
     services,
     rule,
+    setContext,
   };
 };
 
@@ -142,6 +191,7 @@ describe('status check alert', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
+
   describe('executor', () => {
     it('does not trigger when there are no monitors down', async () => {
       expect.assertions(5);
@@ -957,6 +1007,26 @@ describe('status check alert', () => {
         })
       );
     });
+
+    it('sets alert recovery context for recovered alerts', async () => {
+      toISOStringSpy.mockImplementation(() => 'foo date string');
+      const mockGetter: jest.Mock<GetMonitorStatusResult[]> = jest.fn();
+
+      mockGetter.mockReturnValue(mockMonitors);
+      const { server, libs, plugins } = bootstrapDependencies({ getMonitorStatus: mockGetter });
+      const alert = statusCheckAlertFactory(server, libs, plugins);
+      const options = mockOptions();
+      // @ts-ignore the executor can return `void`, but ours never does
+      const state: Record<string, any> = await alert.executor(options);
+      expect(options.setContext).toHaveBeenCalledTimes(2);
+      mockRecoveredAlerts.forEach((alertState) => {
+        expect(options.setContext).toHaveBeenCalledWith(alertState);
+      });
+    });
+  });
+
+  describe('alert recovery', () => {
+    it('sets context for alert recovery', () => { });
   });
 
   describe('alert factory', () => {

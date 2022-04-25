@@ -21,7 +21,7 @@ import {
   GetMonitorAvailabilityParams,
 } from '../../../common/runtime_types';
 import { MONITOR_STATUS } from '../../../common/constants/alerts';
-import { updateState, getViewInAppUrl } from './common';
+import { updateState, getViewInAppUrl, setRecoveredAlertsContext } from './common';
 import {
   commonMonitorStateI18,
   commonStateTranslations,
@@ -47,6 +47,7 @@ import {
 import { getMonitorRouteFromMonitorId } from '../../../common/utils/get_monitor_url';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof MONITOR_STATUS>;
+
 /**
  * Returns the appropriate range for filtering the documents by `@timestamp`.
  *
@@ -74,22 +75,6 @@ export function getTimestampRange({
     from,
   };
 }
-
-const getMonIdByLoc = (monitorId: string, location: string) => {
-  return monitorId + '-' + location;
-};
-
-const uniqueDownMonitorIds = (items: GetMonitorStatusResult[]): Set<string> =>
-  items.reduce(
-    (acc, { monitorId, location }) => acc.add(getMonIdByLoc(monitorId, location)),
-    new Set<string>()
-  );
-
-const uniqueAvailMonitorIds = (items: GetMonitorAvailabilityResult[]): Set<string> =>
-  items.reduce(
-    (acc, { monitorId, location }) => acc.add(getMonIdByLoc(monitorId, location)),
-    new Set<string>()
-  );
 
 export const getUniqueIdsByLoc = (
   downMonitorsByLocation: GetMonitorStatusResult[],
@@ -140,8 +125,8 @@ export const formatFilterString = async (
       libs?.requests?.getIndexPattern
         ? libs?.requests?.getIndexPattern({ uptimeEsClient })
         : getUptimeIndexPattern({
-            uptimeEsClient,
-          }),
+          uptimeEsClient,
+        }),
     filters,
     search
   );
@@ -222,6 +207,22 @@ export const getInstanceId = (monitorInfo: Ping, monIdByLoc: string) => {
   return `${urlText}_${monIdByLoc}`;
 };
 
+const getMonIdByLoc = (monitorId: string, location: string) => {
+  return monitorId + '-' + location;
+};
+
+const uniqueDownMonitorIds = (items: GetMonitorStatusResult[]): Set<string> =>
+  items.reduce(
+    (acc, { monitorId, location }) => acc.add(getMonIdByLoc(monitorId, location)),
+    new Set<string>()
+  );
+
+const uniqueAvailMonitorIds = (items: GetMonitorAvailabilityResult[]): Set<string> =>
+  items.reduce(
+    (acc, { monitorId, location }) => acc.add(getMonIdByLoc(monitorId, location)),
+    new Set<string>()
+  );
+
 export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (server, libs) => ({
   id: 'xpack.uptime.alerts.monitorStatus',
   producer: 'uptime',
@@ -287,10 +288,17 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
   },
   isExportable: true,
   minimumLicenseRequired: 'basic',
+  doesSetRecoveryContext: true,
   async executor({
     params: rawParams,
     state,
-    services: { savedObjectsClient, scopedClusterClient, alertWithLifecycle, getAlertStartedDate },
+    services: {
+      savedObjectsClient,
+      scopedClusterClient,
+      alertWithLifecycle,
+      getAlertStartedDate,
+      alertFactory,
+    },
     rule: {
       schedule: { interval },
     },
@@ -315,14 +323,12 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
     });
 
     const filterString = await formatFilterString(uptimeEsClient, filters, search, libs);
-
     const timespanInterval = `${String(timerangeCount)}${timerangeUnit}`;
     // Range filter for `monitor.timespan`, the range of time the ping is valid
     const timespanRange = oldVersionTimeRange || {
       from: `now-${timespanInterval}`,
       to: 'now',
     };
-
     // Range filter for `@timestamp`, the time the document was indexed
     const timestampRange = getTimestampRange({
       ruleScheduleLookback: `now-${interval}`,
@@ -390,6 +396,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
           ...context,
         });
       }
+      setRecoveredAlertsContext(alertFactory);
       return updateState(state, downMonitorsByLocation.length > 0);
     }
 
@@ -450,6 +457,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         ...updateState(state, true),
         ...context,
       });
+
       const relativeViewInAppUrl = getMonitorRouteFromMonitorId({
         monitorId: monitorSummary.monitorId,
         dateRangeEnd: 'now',
@@ -464,6 +472,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
         ...context,
       });
     });
+    setRecoveredAlertsContext(alertFactory);
     return updateState(state, downMonitorsByLocation.length > 0);
   },
 });

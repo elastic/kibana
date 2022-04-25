@@ -15,7 +15,12 @@ import {
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { AnomaliesTableRecord } from '@kbn/ml-plugin/common/types/anomalies';
 import { getSeverityType } from '@kbn/ml-plugin/common/util/anomaly_utils';
-import { updateState, generateAlertMessage, getViewInAppUrl } from './common';
+import {
+  updateState,
+  generateAlertMessage,
+  getViewInAppUrl,
+  setRecoveredAlertsContext,
+} from './common';
 import { DURATION_ANOMALY } from '../../../common/constants/alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
 import { UptimeCorePluginsSetup } from '../adapters/framework';
@@ -106,7 +111,13 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
   minimumLicenseRequired: 'platinum',
   async executor({
     params,
-    services: { alertWithLifecycle, scopedClusterClient, savedObjectsClient, getAlertStartedDate },
+    services: {
+      alertWithLifecycle,
+      scopedClusterClient,
+      savedObjectsClient,
+      getAlertStartedDate,
+      alertFactory,
+    },
     state,
     startedAt,
   }) {
@@ -169,6 +180,8 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
         });
       });
     }
+
+    setRecoveredAlertsContext(alertFactory);
 
     return updateState(state, foundAnomalies);
   },
