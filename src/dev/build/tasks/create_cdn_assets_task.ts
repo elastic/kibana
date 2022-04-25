@@ -28,8 +28,8 @@ export const CreateCdnAssets: Task = {
     // Plugins
     await mkdirp(plugin);
     const plugins = globby.sync([
-      `${buildSource}/x-pack/plugins/*/kibana.json`,
-      `${buildSource}/src/plugins/*/kibana.json`,
+      `${buildSource}/x-pack/plugins/**/kibana.json`,
+      `${buildSource}/src/plugins/**/kibana.json`,
     ]);
     asyncForEach(plugins, async (path) => {
       const spec = JSON.parse(readFileSync(path, 'utf8'));
