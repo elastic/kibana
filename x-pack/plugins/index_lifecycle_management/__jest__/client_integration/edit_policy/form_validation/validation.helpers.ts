@@ -6,7 +6,7 @@
  */
 
 import { TestBedConfig } from '@kbn/test/jest';
-import { HttpSetup } from '@kbn/core/public';
+import { HttpSetup } from 'src/core/public';
 import {
   createColdPhaseActions,
   createDeletePhaseActions,

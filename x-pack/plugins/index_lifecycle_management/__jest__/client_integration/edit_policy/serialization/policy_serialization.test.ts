@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 import { licensingMock } from '../../../../../licensing/public/mocks';
-import { HttpFetchOptionsWithPath } from '@kbn/core/public';
+import { HttpFetchOptionsWithPath } from 'src/core/public';
 import { setupEnvironment } from '../../helpers';
 import { API_BASE_PATH } from '../../../../common/constants';
 import {
@@ -492,6 +492,7 @@ describe('<EditPolicy /> serialization', () => {
                     },
                     number_of_replicas: 123,
                   },
+                  freeze: {},
                   readonly: {},
                 },
               },

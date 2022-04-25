@@ -7,8 +7,8 @@
 
 import { act } from 'react-dom/test-utils';
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
+import { HttpSetup } from 'src/core/public';
 import { App } from '../../../public/application/app';
-import { HttpSetup } from '@kbn/core/public';
 import { WithAppDependencies } from '../helpers';
 
 const getTestBedConfig = (initialEntries: string[]): TestBedConfig => ({

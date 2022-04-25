@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { registerTestBed, TestBedConfig } from '@kbn/test-jest-helpers';
+import { registerTestBed, TestBedConfig } from '@kbn/test/jest';
 
-import { HttpSetup } from '@kbn/core/public';
+import { HttpSetup } from 'src/core/public';
 import { WithAppDependencies } from '../helpers';
 import { EditPolicy } from '../../../public/application/sections/edit_policy';
 import { AppServicesContext } from '../../../public/types';

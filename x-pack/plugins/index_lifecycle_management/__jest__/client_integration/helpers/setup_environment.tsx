@@ -10,12 +10,11 @@ import { merge } from 'lodash';
 
 import './global_mocks';
 
-import { HttpSetup } from '@kbn/core/public';
-import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
-import { notificationServiceMock, fatalErrorsServiceMock } from '@kbn/core/public/mocks';
-import { executionContextServiceMock } from '@kbn/core/public/execution_context/execution_context_service.mock';
-import { docLinksServiceMock } from '@kbn/core/public/mocks';
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { HttpSetup } from 'src/core/public';
+import { notificationServiceMock, fatalErrorsServiceMock } from 'src/core/public/mocks';
+import { docLinksServiceMock } from 'src/core/public/mocks';
+import { usageCollectionPluginMock } from '../../../../../../src/plugins/usage_collection/public/mocks';
+import { licensingMock } from '../../../../licensing/public/mocks';
 import { init as initHttp } from '../../../public/application/services/http';
 import { init as initHttpRequests } from './http_requests';
 import { init as initUiMetric } from '../../../public/application/services/ui_metric';
@@ -29,7 +28,6 @@ const appContextMock = {
   license: licensingMock.createLicense({ license: { type: 'enterprise' } }),
   docLinks: docLinksServiceMock.createStartContract(),
   getUrlForApp: () => {},
-  executionContext: executionContextServiceMock.createSetupContract(),
 };
 
 export const WithAppDependencies =

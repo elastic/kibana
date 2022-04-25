@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { HttpFetchOptionsWithPath } from '@kbn/core/public';
+import { HttpFetchOptionsWithPath } from 'src/core/public';
 import { setupEnvironment } from '../../../helpers';
 import {
   GeneralNodeAllocationTestBed,
