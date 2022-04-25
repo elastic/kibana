@@ -32,19 +32,19 @@ import {
   XYBrushEvent,
   XYChartElementEvent,
 } from '@elastic/charts';
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import {
   CurrentTime,
   Endzones,
   getAdjustedInterval,
   renderEndzoneTooltip,
-} from '../../../../../../charts/public';
+} from '@kbn/charts-plugin/public';
+import { LEGACY_TIME_AXIS, MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DataCharts$, DataChartsMessage } from '../../utils/use_saved_search';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../utils/use_data_state';
-import { LEGACY_TIME_AXIS, MULTILAYER_TIME_AXIS_STYLE } from '../../../../../../charts/common';
 
 export interface DiscoverHistogramProps {
   savedSearchData$: DataCharts$;

@@ -12,8 +12,8 @@ import {
   ReturnPersistExceptionList,
   usePersistExceptionList,
 } from '@kbn/securitysolution-list-hooks';
+import { coreMock } from '@kbn/core/public/mocks';
 
-import { coreMock } from '../../../../../../src/core/public/mocks';
 import { getCreateExceptionListSchemaMock } from '../../../common/schemas/request/create_exception_list_schema.mock';
 import { getUpdateExceptionListSchemaMock } from '../../../common/schemas/request/update_exception_list_schema.mock';
 import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';

@@ -6,7 +6,7 @@
  */
 
 import { createPromiseFromStreams } from '@kbn/utils';
-import { SecurityPluginSetup } from '../../../../../../../security/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import { FrameworkRequest } from '../../../../framework';
 import {
@@ -57,7 +57,11 @@ describe.each([
     });
 
     const request = addPrepackagedRulesRequest();
-    frameworkRequest = await buildFrameworkRequest(context, securitySetup, request);
+    frameworkRequest = await buildFrameworkRequest(
+      requestContextMock.convertContext(context),
+      securitySetup,
+      request
+    );
   });
 
   afterEach(() => {

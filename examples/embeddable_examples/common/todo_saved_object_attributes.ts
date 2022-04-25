@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectAttributes } from '../../../src/core/types';
+import { SavedObjectAttributes } from '@kbn/core/types';
 
 export interface TodoSavedObjectAttributes extends SavedObjectAttributes {
   task: string;

@@ -15,7 +15,7 @@ import {
   ARIA_ROWINDEX_ATTRIBUTE,
   onKeyDownFocusHandler,
   getActionsColumnWidth,
-} from '../../../../../../timelines/public';
+} from '@kbn/timelines-plugin/public';
 import { CellValueElementProps } from '../cell_rendering';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
 import {
@@ -260,7 +260,6 @@ export const StatefulBody = React.memo<Props>(
             <Events
               containerRef={containerRef}
               actionsColumnWidth={actionsColumnWidth}
-              browserFields={browserFields}
               columnHeaders={columnHeaders}
               data={data}
               eventIdToNoteIds={eventIdToNoteIds}

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { stubIndexPattern, phraseFilter } from 'src/plugins/data/common/stubs';
+import { stubIndexPattern, phraseFilter } from '../../../../common/stubs';
 import { getDisplayValueFromFilter } from './get_display_value';
-import { FieldFormat } from '../../../../../field_formats/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 describe('getDisplayValueFromFilter', () => {
   beforeEach(() => {

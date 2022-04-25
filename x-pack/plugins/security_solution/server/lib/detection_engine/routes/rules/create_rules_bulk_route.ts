@@ -7,6 +7,7 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { getIndexExists } from '@kbn/securitysolution-es-utils';
+import { Logger } from '@kbn/core/server';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { createRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
@@ -26,7 +27,6 @@ import { buildRouteValidation } from '../../../../utils/build_validation/route_v
 import { transformBulkError, createBulkErrorObject, buildSiemResponse } from '../utils';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from './utils/deprecation';
-import { Logger } from '../../../../../../../../src/core/server';
 
 /**
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
@@ -51,13 +51,16 @@ export const createRulesBulkRoute = (
       logDeprecatedBulkEndpoint(logger, DETECTION_ENGINE_RULES_BULK_CREATE);
 
       const siemResponse = buildSiemResponse(response);
-      const rulesClient = context.alerting.getRulesClient();
-      const esClient = context.core.elasticsearch.client;
-      const savedObjectsClient = context.core.savedObjects.client;
-      const siemClient = context.securitySolution.getAppClient();
+
+      const ctx = await context.resolve(['core', 'securitySolution', 'licensing', 'alerting']);
+
+      const rulesClient = ctx.alerting.getRulesClient();
+      const esClient = ctx.core.elasticsearch.client;
+      const savedObjectsClient = ctx.core.savedObjects.client;
+      const siemClient = ctx.securitySolution.getAppClient();
 
       const mlAuthz = buildMlAuthz({
-        license: context.licensing.license,
+        license: ctx.licensing.license,
         ml,
         request,
         savedObjectsClient,

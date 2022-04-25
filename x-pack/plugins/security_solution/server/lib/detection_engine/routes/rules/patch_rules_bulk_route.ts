@@ -6,6 +6,7 @@
  */
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { Logger } from '@kbn/core/server';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import {
   patchRulesBulkSchema,
@@ -26,7 +27,6 @@ import { readRules } from '../../rules/read_rules';
 import { PartialFilter } from '../../types';
 import { legacyMigrate } from '../../rules/utils';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from './utils/deprecation';
-import { Logger } from '../../../../../../../../src/core/server';
 
 /**
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
@@ -54,12 +54,14 @@ export const patchRulesBulkRoute = (
 
       const siemResponse = buildSiemResponse(response);
 
-      const rulesClient = context.alerting.getRulesClient();
-      const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
-      const savedObjectsClient = context.core.savedObjects.client;
+      const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
+
+      const rulesClient = ctx.alerting.getRulesClient();
+      const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
+      const savedObjectsClient = ctx.core.savedObjects.client;
 
       const mlAuthz = buildMlAuthz({
-        license: context.licensing.license,
+        license: ctx.licensing.license,
         ml,
         request,
         savedObjectsClient,

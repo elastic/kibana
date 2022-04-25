@@ -7,8 +7,8 @@
  */
 import { ShapeTreeNode } from '@elastic/charts';
 import type { PaletteDefinition, SeriesLayer } from '@kbn/coloring';
-import { dataPluginMock } from '../../../../../data/public/mocks';
-import type { DataPublicPluginStart } from '../../../../../data/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getColor } from './get_color';
 import { createMockVisData, createMockBucketColumns, createMockPieParams } from '../../mocks';
 import { ChartTypes } from '../../../common/types';

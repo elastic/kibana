@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSpacer } from '@el
 import { i18n } from '@kbn/i18n';
 import { isUndefined } from 'lodash';
 import { ActionParamsProps } from '../../../../types';
-import { PagerDutyActionParams } from '.././types';
+import { PagerDutyActionParams } from '../types';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
 
 const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDutyActionParams>> = ({

@@ -8,7 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { pick, transform, uniq } from 'lodash';
 
-import type { IClusterClient, KibanaRequest } from 'src/core/server';
+import type { IClusterClient, KibanaRequest } from '@kbn/core/server';
 
 import { GLOBAL_RESOURCE } from '../../common/constants';
 import { ResourceSerializer } from './resource_serializer';

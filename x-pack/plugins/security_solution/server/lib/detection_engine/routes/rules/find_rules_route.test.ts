@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { requestContextMock, requestMock, serverMock } from '../__mocks__';
@@ -45,7 +45,10 @@ describe.each([
 
   describe('status codes', () => {
     test('returns 200', async () => {
-      const response = await server.inject(getFindRequest(), context);
+      const response = await server.inject(
+        getFindRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
@@ -53,7 +56,10 @@ describe.each([
       clients.rulesClient.find.mockImplementation(async () => {
         throw new Error('Test error');
       });
-      const response = await server.inject(getFindRequest(), context);
+      const response = await server.inject(
+        getFindRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',
