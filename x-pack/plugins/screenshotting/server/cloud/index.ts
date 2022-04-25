@@ -13,7 +13,7 @@ const MIN_CLOUD_MEM_MB: number = MIN_CLOUD_MEM_GB * 1024;
 
 /**
  * If we are on Cloud we need to ensure that we have sufficient memory available,
- * if we do not Chromium cannot start. See {@link MIN_CLOUD_OS_MEM_BYTES}.
+ * if we do not Chromium cannot start. See {@link MIN_CLOUD_MEM_MB}.
  *
  */
 export function systemHasInsufficientMemory(
@@ -22,7 +22,7 @@ export function systemHasInsufficientMemory(
 ): boolean {
   if (cloud?.isCloudEnabled && typeof cloud?.instanceSizeMb === 'number') {
     const instanceSizeMb = cloud.instanceSizeMb;
-    logger.info(`Memory limit read from cloud (in MB): ${cloud?.instanceSizeMb}`);
+    logger.info(`Memory limit read from cloud (in MB): ${instanceSizeMb}`);
     return instanceSizeMb < MIN_CLOUD_MEM_MB;
   }
   return false;
