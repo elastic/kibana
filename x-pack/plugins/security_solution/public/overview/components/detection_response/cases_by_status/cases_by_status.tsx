@@ -17,6 +17,7 @@ import {
 import { Rotation, ScaleType } from '@elastic/charts';
 import styled from 'styled-components';
 import { FormattedNumber } from '@kbn/i18n-react';
+import numeral from '@elastic/numeral';
 import { BarChart } from '../../../../common/components/charts/barchart';
 import { LastUpdatedAt } from '../util';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
@@ -35,7 +36,6 @@ import { SecurityPageName } from '../../../../../common/constants';
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { appendSearch } from '../../../../common/components/link_to/helpers';
 import { useNavigation } from '../../../../common/lib/kibana';
-
 const CASES_BY_STATUS_ID = 'casesByStatus';
 
 export const numberFormatter = (value: string | number): string => value.toLocaleString();
