@@ -136,11 +136,8 @@ export const syncDashboardControlGroup = async ({
     controlGroup
       .getOutput$()
       .pipe(
-        distinctUntilChanged(
-          (
-            { filters: filtersA }: { filters: Filter[] },
-            { filters: filtersB }: { filters: Filter[] }
-          ) => compareAllFilters(filtersA, filtersB)
+        distinctUntilChanged(({ filters: filtersA }, { filters: filtersB }) =>
+          compareAllFilters(filtersA, filtersB)
         )
       )
       .subscribe(() => {

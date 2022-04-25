@@ -15,6 +15,7 @@ import {
 import { EmbeddablePersistableStateService } from '../../../embeddable/common';
 import { SavedDashboardPanel730ToLatest } from '../../common';
 import { injectReferences } from '../../common/saved_dashboard_references';
+import { initializeControlGroupTelemetry } from '../../../controls/server';
 export interface DashboardCollectorData {
   panels: {
     total: number;
@@ -120,7 +121,4 @@ export async function collectDashboardTelemetry(
   }
 
   return collectorData;
-}
-function initializeControlGroupTelemetry(arg0: {}): ControlGroupTelemetry {
-  throw new Error('Function not implemented.');
 }
