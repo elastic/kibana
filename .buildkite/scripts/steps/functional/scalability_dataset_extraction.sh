@@ -18,7 +18,7 @@ for i in "${journeys[@]}"; do
     JOURNEY_NAME="${i}"
     echo "Looking for JOURNEY=${JOURNEY_NAME} and BUILD_ID=${BUILD_ID} in APM traces"
 
-    ./node_modules/.bin/performance-testing-dataset-extractor -u "${USER_FROM_VAULT}" -p "${PASS_FROM_VAULT}" -c "${ES_SERVER_URL}" -s "2022-04-12T00:01:00.000Z" -j "${BUILD_ID}" -n "${JOURNEY_NAME}"
+    ./node_modules/.bin/performance-testing-dataset-extractor -u "${USER_FROM_VAULT}" -p "${PASS_FROM_VAULT}" -c "${ES_SERVER_URL}" -b "${BUILD_ID}" -n "${JOURNEY_NAME}"
 done
 
 # archive json files with traces and upload as build artifacts
