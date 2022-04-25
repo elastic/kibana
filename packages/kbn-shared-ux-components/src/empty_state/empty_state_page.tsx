@@ -26,14 +26,17 @@ export const EmptyStatePage = ({ onDataViewCreated, noDataConfig }: Props) => {
       setHasUserDataViews(await hasUserDataView());
     };
     // TODO: add error handling
+    // https://github.com/elastic/kibana/issues/130913
     checkData().catch(() => {});
   }, [hasESData, hasUserDataView]);
 
   if (!dataExists) {
     return <NoDataConfigPage noDataConfig={noDataConfig} />;
   }
+
   if (!hasUserDataViews) {
     return <NoDataViews onDataViewCreated={onDataViewCreated} />;
   }
+
   return null;
 };
