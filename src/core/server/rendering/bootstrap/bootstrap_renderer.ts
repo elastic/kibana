@@ -22,6 +22,7 @@ export type BootstrapRenderer = (options: RenderedOptions) => Promise<RendererRe
 
 interface FactoryOptions {
   serverBasePath: string;
+  staticBaseUrl?: string;
   packageInfo: PackageInfo;
   uiPlugins: UiPlugins;
   auth: HttpAuth;
@@ -41,6 +42,7 @@ interface RendererResult {
 export const bootstrapRendererFactory: BootstrapRendererFactory = ({
   packageInfo,
   serverBasePath,
+  staticBaseUrl,
   uiPlugins,
   auth,
 }) => {
@@ -66,7 +68,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       darkMode,
     });
     const buildHash = packageInfo.buildNum;
-    const regularBundlePath = `${serverBasePath}/${buildHash}/bundles`;
+    const regularBundlePath = `${staticBaseUrl || serverBasePath}/${buildHash}/bundles`;
 
     const bundlePaths = getPluginsBundlePaths({
       uiPlugins,

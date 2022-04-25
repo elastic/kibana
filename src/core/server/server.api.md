@@ -210,13 +210,14 @@ export interface BaseDeprecationDetails {
 // @public
 export class BasePath {
     // @internal
-    constructor(serverBasePath?: string, publicBaseUrl?: string);
+    constructor(serverBasePath?: string, publicBaseUrl?: string, staticBaseUrl?: string);
     get: (request: KibanaRequest) => string;
     prepend: (path: string) => string;
     readonly publicBaseUrl?: string;
     remove: (path: string) => string;
     readonly serverBasePath: string;
     set: (request: KibanaRequest, requestSpecificBasePath: string) => void;
+    readonly staticBaseUrl?: string;
 }
 
 // Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
