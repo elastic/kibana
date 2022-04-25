@@ -379,10 +379,6 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     });
 
     const fieldsValue = mapFormFields(fieldsToOutput, (field) => field.__serializeValue());
-    console.error(
-      'inside use form hook - GET FORM DATA',
-      serializer ? serializer(unflattenObject<I>(fieldsValue)) : unflattenObject<T>(fieldsValue)
-    );
     return serializer
       ? serializer(unflattenObject<I>(fieldsValue))
       : unflattenObject<T>(fieldsValue);
@@ -438,10 +434,7 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
     }
   }, []);
 
-  const getFields: FormHook<T, I>['getFields'] = useCallback(() => {
-    console.error('field refs', fieldsRefs.current);
-    return fieldsRefs.current;
-  }, []);
+  const getFields: FormHook<T, I>['getFields'] = useCallback(() => fieldsRefs.current, []);
 
   const getFieldDefaultValue: FormHook<T, I>['getFieldDefaultValue'] = useCallback(
     (fieldName) => get(defaultValueDeserialized.current ?? {}, fieldName),
