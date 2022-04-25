@@ -30,7 +30,7 @@ import {
   LogsEndpointActionResponse,
   ActivityLogEntry,
 } from '../../../common/endpoint/types';
-import { doesLogsEndpointActionsIndexExist } from '.';
+import { doesLogsEndpointActionsIndexExist } from './yes_no_data_stream';
 
 export const ACTION_REQUEST_INDICES = [AGENT_ACTIONS_INDEX, ENDPOINT_ACTIONS_INDEX];
 // search all responses indices irrelevant of namespace

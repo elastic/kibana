@@ -28,6 +28,7 @@ import {
 } from '../../utils';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import { NotFoundError } from '../../errors';
+import { ACTIONS_SEARCH_PAGE_SIZE } from './constants';
 
 export const getActionDetailsById = async (
   esClient: ElasticsearchClient,
@@ -65,7 +66,7 @@ export const getActionDetailsById = async (
         .search<EndpointActionResponse | LogsEndpointActionResponse>(
           {
             index: ACTION_RESPONSE_INDICES,
-            size: 1000,
+            size: ACTIONS_SEARCH_PAGE_SIZE,
             body: {
               query: {
                 bool: {
