@@ -40,6 +40,11 @@ kibana_vars=(
     csp.report_to
     data.autocomplete.valueSuggestions.terminateAfter
     data.autocomplete.valueSuggestions.timeout
+    unifiedSearch.autocomplete.valueSuggestions.terminateAfter
+    unifiedSearch.autocomplete.valueSuggestions.timeout
+    unifiedSearch.autocomplete.querySuggestions.enabled
+    unifiedSearch.autocomplete.valueSuggestions.enabled
+    unifiedSearch.autocomplete.valueSuggestions.tiers
     elasticsearch.customHeaders
     elasticsearch.hosts
     elasticsearch.logQueries
