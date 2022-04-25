@@ -16,7 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { Rotation, ScaleType } from '@elastic/charts';
-import styled, { useTheme } from 'styled-components';
+import styled from 'styled-components';
 import { FormattedNumber } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
 import { BarChart } from '../../../../common/components/charts/barchart';
@@ -55,11 +55,6 @@ export const barchartConfigs = {
   },
   axis: {
     xTickFormatter: numberFormatter,
-
-    tickLabel: {
-      padding: 16,
-      fontSize: 16,
-    },
     left: {
       style: {
         tickLine: {
@@ -97,7 +92,7 @@ const barColors = {
   closed: '#d3dae6',
 };
 
-const emptyChartSettings = [
+export const emptyChartSettings = [
   {
     key: 'open',
     value: [{ y: 20, x: OPEN, g: OPEN }],
@@ -125,16 +120,14 @@ const Wrapper = styled.div`
   position: relative;
 `;
 
-const BarChartMask = styled.div<{ $totalCounts: number }>`
+const BarChartMask = styled.div`
   background-color: transparent;
   width: 100%;
   height: 100%;
   position: absolute;
   top: 0;
   left: 0;
-  z-index: ${({ $totalCounts }) =>
-    /* If all totalCounts equals 0, disable chart interaction*/
-    $totalCounts === 0 ? 1 : 0};
+  z-index: 1;
 `;
 
 const CasesByStatusComponent: React.FC = () => {
@@ -229,7 +222,8 @@ const CasesByStatusComponent: React.FC = () => {
           </EuiFlexItem>
           <StyledEuiFlexItem grow={false}>
             <Wrapper data-test-subj="chart-wrapper">
-              <BarChartMask $totalCounts={totalCounts} />
+              {/* If all totalCounts equals 0, disable chart interaction*/}
+              {totalCounts === 0 && <BarChartMask data-test-subj="bar-chart-mask" />}
               <BarChart configs={barchartConfigs} barChart={chartData} />
             </Wrapper>
           </StyledEuiFlexItem>

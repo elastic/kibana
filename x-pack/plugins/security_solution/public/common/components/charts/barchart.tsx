@@ -165,7 +165,7 @@ export const BarChartBase = React.memo(BarChartBaseComponent);
 
 BarChartBase.displayName = 'BarChartBase';
 
-interface BarChartComponentProps {
+export interface BarChartComponentProps {
   barChart: ChartSeriesData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
   stackByField?: string;
