@@ -49,7 +49,7 @@ function mockProps() {
   return {
     appId$: new BehaviorSubject('test'),
     basePath: httpServiceMock.createSetupContract({ basePath: '/test' }).basePath,
-    id: 'collapsibe-nav',
+    id: 'collapsible-nav',
     isLocked: false,
     isNavOpen: false,
     homeHref: '/',
@@ -86,9 +86,8 @@ function clickGroup(component: ReactWrapper, group: string) {
 
 describe('CollapsibleNav', () => {
   // this test is mostly an "EUI works as expected" sanity check
-  // the docking button should be visible at 1440 wdith and up
-  
   it('renders the default nav', () => {
+    // docking (aka locking) is only possible at 1440 wdith and up
     resizeWindow(1440, 900);
     const onLock = sinon.spy();
     const component = mount(<CollapsibleNav {...mockProps()} onIsLockedUpdate={onLock} />);
@@ -97,6 +96,7 @@ describe('CollapsibleNav', () => {
     component.setProps({ isOpen: true });
     expect(component).toMatchSnapshot();
 
+    // isLocked (on CollapsibleNav) is passed to isDocked on (EuiCollapsibleNav)
     component.setProps({ isLocked: true });
     expect(component).toMatchSnapshot();
 
