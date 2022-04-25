@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import moment from 'moment';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getTraceItems } from './get_trace_items';
 import { getTopTracesPrimaryStats } from './get_top_traces_primary_stats';
@@ -93,7 +94,13 @@ const tracesByIdRoute = createApmServerRoute({
 
     const [traceItems, outgoingSpanLinks] = await Promise.all([
       getTraceItems(traceId, setup, start, end),
-      getOutgoingSpanLinks({ traceId, setup }),
+      getOutgoingSpanLinks({
+        traceId,
+        setup,
+        // Only fetch items within a limited time range
+        start: moment(end).subtract(4, 'days').valueOf(),
+        end,
+      }),
     ]);
 
     return { ...traceItems, outgoingSpanLinks };
