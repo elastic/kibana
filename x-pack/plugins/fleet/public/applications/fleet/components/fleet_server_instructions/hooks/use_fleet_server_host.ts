@@ -30,8 +30,10 @@ export const useFleetServerHost = (): FleetServerHostForm => {
   const { data: settings } = useGetSettings();
 
   useEffect(() => {
-    if (settings?.item.fleet_server_hosts.length) {
-      setFleetServerHost(settings.item.fleet_server_hosts[0]);
+    const settingsFleetServerHosts = settings?.item.fleet_server_hosts ?? [];
+
+    if (settingsFleetServerHosts.length) {
+      setFleetServerHost(settingsFleetServerHosts[0]);
     }
   }, [settings?.item.fleet_server_hosts]);
 
