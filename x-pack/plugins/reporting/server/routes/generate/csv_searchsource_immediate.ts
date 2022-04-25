@@ -7,12 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { KibanaRequest } from 'src/core/server';
-import { Writable } from 'stream';
 import { ReportingCore } from '../../';
+import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '../../../common/constants';
 import { runTaskFnFactory } from '../../export_types/csv_searchsource_immediate/execute_job';
 import { JobParamsDownloadCSV } from '../../export_types/csv_searchsource_immediate/types';
-import { LevelLogger as Logger } from '../../lib';
-import { TaskRunResult } from '../../lib/tasks';
+import { LevelLogger as Logger, PassThroughStream } from '../../lib';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 import { RequestHandler } from '../lib/request_handler';
 
@@ -64,50 +63,37 @@ export function registerGenerateCsvFromSavedObjectImmediate(
     authorizedUserPreRouting(
       reporting,
       async (user, context, req: CsvFromSavedObjectRequest, res) => {
-        const logger = parentLogger.clone(['csv_searchsource_immediate']);
+        const logger = parentLogger.clone([CSV_SEARCHSOURCE_IMMEDIATE_TYPE]);
         const runTaskFn = runTaskFnFactory(reporting, logger);
         const requestHandler = new RequestHandler(reporting, user, context, req, res, logger);
+        const stream = new PassThroughStream();
 
         try {
-          let buffer = Buffer.from('');
-          const stream = new Writable({
-            write(chunk, encoding, callback) {
-              buffer = Buffer.concat([
-                buffer,
-                Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding),
-              ]);
-              callback();
-            },
-          });
+          const taskPromise = runTaskFn(null, req.body, context, stream, req)
+            .then(() => {
+              logger.info(`Job output size: ${stream.bytesWritten} bytes.`);
 
-          const { content_type: jobOutputContentType }: TaskRunResult = await runTaskFn(
-            null,
-            req.body,
-            context,
-            stream,
-            req
-          );
-          stream.end();
-          const jobOutputContent = buffer.toString();
-          const jobOutputSize = buffer.byteLength;
+              if (!stream.bytesWritten) {
+                logger.warn('CSV Job Execution created empty content result');
+              }
+            })
+            .finally(() => stream.end());
 
-          logger.info(`Job output size: ${jobOutputSize} bytes.`);
+          await Promise.race([stream.firstBytePromise, taskPromise]);
 
-          // convert null to undefined so the value can be sent to h.response()
-          if (jobOutputContent === null) {
-            logger.warn('CSV Job Execution created empty content result');
-          }
+          taskPromise.catch(logger.error);
 
           return res.ok({
-            body: jobOutputContent || '',
+            body: stream,
             headers: {
-              'content-type': jobOutputContentType ? jobOutputContentType : [],
+              'content-type': 'text/csv;charset=utf-8',
               'accept-ranges': 'none',
             },
           });
-        } catch (err) {
-          logger.error(err);
-          return requestHandler.handleError(err);
+        } catch (error) {
+          logger.error(error as Error);
+
+          return requestHandler.handleError(error as Error);
         }
       }
     )
