@@ -32,6 +32,7 @@ import {
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { KibanaFeature } from '@kbn/features-plugin/common';
+import { registerAlertsTableConfiguration } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_page/register_alerts_table_configuration';
 import { ConfigSchema } from '.';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
 import { createLazyObservabilityPageTemplate } from './components/shared';
@@ -268,6 +269,7 @@ export class Plugin
 
   public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
     const { application } = coreStart;
+    const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
 
     const config = this.initializerContext.config.get();
 
@@ -284,6 +286,8 @@ export class Plugin
       navigateToApp: application.navigateToApp,
       navigationSections$: this.navigationRegistry.sections$,
     });
+
+    registerAlertsTableConfiguration({ alertsTableConfigurationRegistry });
 
     return {
       navigation: {
