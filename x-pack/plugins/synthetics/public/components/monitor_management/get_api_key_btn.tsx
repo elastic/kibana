@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { EuiButton, EuiCodeBlock } from '@elastic/eui';
+import { EuiButton, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import { useFetcher } from '@kbn/observability-plugin/public';
 import { fetchServiceAPIKey } from '../../state/api';
 
@@ -21,6 +21,7 @@ export const GetApiKeyBtn = () => {
 
   return (
     <>
+      <EuiSpacer />
       <EuiButton
         fill
         isLoading={loading}
@@ -31,6 +32,7 @@ export const GetApiKeyBtn = () => {
       >
         Get API key
       </EuiButton>
+      <EuiSpacer />
       {data && (
         <EuiCodeBlock language="javascript" isCopyable>
           {data?.apiKey.encoded}
