@@ -68,9 +68,6 @@ const applyBulkActionEditToRuleParams = (
       break;
   }
 
-  // increase version
-  ruleParams.version += 1;
-
   return ruleParams;
 };
 

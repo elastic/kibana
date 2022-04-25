@@ -8,12 +8,20 @@
 import {
   BulkActionEditPayload,
   BulkActionEditType,
+  BulkActionEditForRuleAttributes,
+  BulkActionEditForRuleParams,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 
+/**
+ * Split bulk edit actions in 2 chinks: actions applied to params and
+ * actions applied to attributes
+ * @param actions BulkActionEditPayload
+ * @returns lists of actions
+ */
 export const splitBulkEditActions = (actions: BulkActionEditPayload[]) => {
   const splitActions: {
-    attributesActions: BulkActionEditPayload[];
-    paramsActions: BulkActionEditPayload[];
+    attributesActions: BulkActionEditForRuleAttributes[];
+    paramsActions: BulkActionEditForRuleParams[];
   } = {
     attributesActions: [],
     paramsActions: [],

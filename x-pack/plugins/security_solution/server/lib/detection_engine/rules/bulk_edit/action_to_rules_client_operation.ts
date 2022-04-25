@@ -8,12 +8,12 @@
 import type { BulkEditOperation } from '@kbn/alerting-plugin/server';
 
 import {
-  BulkActionEditPayload,
+  BulkActionEditForRuleAttributes,
   BulkActionEditType,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 export const bulkEditActionToRulesClientOperation = (
-  action: BulkActionEditPayload
+  action: BulkActionEditForRuleAttributes
 ): BulkEditOperation => {
   switch (action.type) {
     // tags actions
@@ -38,6 +38,4 @@ export const bulkEditActionToRulesClientOperation = (
         value: action.value,
       };
   }
-
-  throw Error('No action match');
 };
