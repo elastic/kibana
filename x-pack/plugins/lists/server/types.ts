@@ -6,10 +6,10 @@
  */
 
 import {
+  CustomRequestHandlerContext,
   ElasticsearchClient,
   IContextProvider,
   IRouter,
-  RequestHandlerContext,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -24,6 +24,7 @@ import type {
 
 export type ContextProvider = IContextProvider<ListsRequestHandlerContext, 'lists'>;
 export type ListsPluginStart = void;
+
 export interface PluginsStart {
   security: SecurityPluginStart | undefined | null;
   spaces: SpacesPluginStart | undefined | null;
@@ -60,9 +61,9 @@ export interface ListsApiRequestHandlerContext {
 /**
  * @internal
  */
-export interface ListsRequestHandlerContext extends RequestHandlerContext {
+export type ListsRequestHandlerContext = CustomRequestHandlerContext<{
   lists?: ListsApiRequestHandlerContext;
-}
+}>;
 
 /**
  * @internal
