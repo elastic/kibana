@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
+  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -23,6 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover filter editor', function describeIndexTests() {
     before(async function () {
+      await security.testUser.setRoles(['kibana_admin', 'version_test', 'test_logstash_reader']);
       log.debug('load kibana index with default index pattern');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
@@ -110,6 +112,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
         });
       });
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
   });
 }
