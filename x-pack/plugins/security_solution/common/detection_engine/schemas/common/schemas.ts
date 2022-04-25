@@ -14,6 +14,7 @@ import {
   PositiveInteger,
   PositiveIntegerGreaterThanZero,
   UUID,
+  LimitedSizeArray,
 } from '@kbn/securitysolution-io-ts-types';
 import * as t from 'io-ts';
 
@@ -312,7 +313,8 @@ export type ThresholdNormalized = t.TypeOf<typeof thresholdNormalized>;
 export const thresholdNormalizedOrUndefined = t.union([thresholdNormalized, t.undefined]);
 export type ThresholdNormalizedOrUndefined = t.TypeOf<typeof thresholdNormalizedOrUndefined>;
 
-export const newTermsFields = t.array(t.string);
+// New terms rule type currently only supports a single term, but should support more in the future
+export const newTermsFields = LimitedSizeArray({ codec: t.string, minSize: 1, maxSize: 1 });
 export type NewTermsFields = t.TypeOf<typeof newTermsFields>;
 
 export const newTermsFieldsOrUndefined = t.union([newTermsFields, t.undefined]);

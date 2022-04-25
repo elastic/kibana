@@ -66,6 +66,7 @@ export interface RunOpts<TParams extends RuleParams> {
   wrapHits: WrapHits;
   wrapSequences: WrapSequences;
   ruleDataReader: IRuleDataReader;
+  mergeStrategy: ConfigType['alertMergeStrategy'];
 }
 
 export type SecurityAlertType<

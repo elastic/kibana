@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { chunk } from 'lodash';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Moment } from 'moment';
 import dateMath from '@elastic/datemath';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { NEW_TERMS_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import { getSafeSortIds } from '@kbn/rule-data-utils';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import { newTermsRuleParams, NewTermsRuleParams } from '../../schemas/rule_schemas';
@@ -20,13 +18,11 @@ import { getInputIndex } from '../../signals/get_input_output_index';
 import { singleSearchAfter } from '../../signals/single_search_after';
 import { getFilter } from '../../signals/get_filter';
 import { ESSearchResponse } from '../../../../../../../../src/core/types/elasticsearch';
-import { filterEventsAgainstList } from '../../signals/filters/filter_events_against_list';
 import { SignalSource } from '../../signals/types';
 import { buildReasonMessageForNewTermsAlert } from '../../signals/reason_formatters';
 import { GenericBulkCreateResponse } from '../factories';
 import { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas/alerts';
-import { ESBoolQuery } from '../../../../../common/typed_json';
-import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
+import { wrapNewTermsAlerts } from '../factories/utils/wrap_new_terms_alerts';
 
 interface BulkCreateResults {
   bulkCreateTimes: string[];
@@ -90,9 +86,17 @@ export const createNewTermsAlertType = (
     producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {
-        runOpts: { buildRuleMessage, bulkCreate, exceptionItems, listClient, tuple, wrapHits },
+        runOpts: {
+          buildRuleMessage,
+          bulkCreate,
+          completeRule,
+          exceptionItems,
+          tuple,
+          mergeStrategy,
+        },
         services,
         params,
+        spaceId,
       } = execOptions;
 
       const inputIndex = await getInputIndex({
@@ -120,12 +124,11 @@ export const createNewTermsAlertType = (
         throw Error(`Failed to parse 'historyWindowStart'`);
       }
 
-      // All of the newTermsFields are included in a single request to ES, but we'll process
-      // each term separately in a loop below
       const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
-        aggregations: buildAggregations({
+        aggregations: buildAggregation({
           newValueWindowStart: tuple.from,
-          fields: params.newTermsFields,
+          field: params.newTermsFields[0],
+          maxSignals: params.maxSignals,
           timestampOverride: params.timestampOverride,
         }),
         runtimeMappings: buildRuntimeMappings({
@@ -160,28 +163,38 @@ export const createNewTermsAlertType = (
         searchErrors,
       };
 
-      // TODO: include `field` in alert doc
-      let combinedExcludedBuckets: BucketPageInfo[] = [];
+      const eventsAndTerms: Array<{
+        event: estypes.SearchHit<SignalSource>;
+        newTerms: Array<string | number>;
+      }> = [];
+      const bucketsForField = searchResultWithAggs.aggregations.new_terms.buckets;
+      bucketsForField.forEach((bucket) => {
+        eventsAndTerms.push({
+          event: bucket.docs.hits.hits[0],
+          newTerms: [bucket.key],
+        });
+      });
 
-      // Start processing each new terms field separately
-      for (const field of params.newTermsFields) {
-        const bucketsForField = searchResultWithAggs.aggregations[field].buckets;
-        const events = bucketsForField.map((bucket) => bucket.docs.hits.hits[0]);
-
-        const [included, excluded] = await filterEventsAgainstList({
+      /* const [included, excluded] = await filterEventsAgainstList({
           listClient,
           exceptionsList: exceptionItems,
           logger,
           events,
           buildRuleMessage,
-        });
+        });*/
 
-        const wrappedDocs = wrapHits(included, buildReasonMessageForNewTermsAlert);
+      const wrappedAlerts = wrapNewTermsAlerts({
+        eventsAndTerms,
+        spaceId,
+        completeRule,
+        mergeStrategy,
+        buildReasonMessage: buildReasonMessageForNewTermsAlert,
+      });
 
-        // TODO: better way of aggregating results from multiple separate bulkCreate calls
-        addBulkCreateResults(bulkCreateResults, await bulkCreate(wrappedDocs));
+      // TODO: better way of aggregating results from multiple separate bulkCreate calls
+      addBulkCreateResults(bulkCreateResults, await bulkCreate(wrappedAlerts));
 
-        const excludedBuckets = bucketsForField
+      /* const excludedBuckets = bucketsForField
           .filter((bucket) =>
             excluded.some(
               (event) =>
@@ -207,10 +220,9 @@ export const createNewTermsAlertType = (
             };
           });
 
-        combinedExcludedBuckets.push(...excludedBuckets);
-      }
+        combinedExcludedBuckets.push(...excludedBuckets); */
 
-      const pageSize = 1000;
+      /* const pageSize = 1000;
       const CHUNK_SIZE = 10;
       while (combinedExcludedBuckets.length > 0) {
         // Process one page of each excluded bucket and for each page return either: 1. a candidate alert
@@ -288,10 +300,10 @@ export const createNewTermsAlertType = (
         );
         addBulkCreateResults(bulkCreateResults, await bulkCreate(wrappedAlerts));
         combinedExcludedBuckets = newPageResults.map((result) => result.result);
-      }
+      } */
 
       return {
-        // If an error doesn't cause us to throw then we still count the execution as a success.
+        // If an error occurs but doesn't cause us to throw then we still count the execution as a success.
         // Should be refactored for better clarity, but that's how it is for now.
         success: true,
         warning: false,
@@ -310,50 +322,18 @@ export const createNewTermsAlertType = (
 
 type AggregationsResult = ESSearchResponse<
   SignalSource,
-  { body: { aggregations: ReturnType<typeof buildAggregations> } }
+  { body: { aggregations: ReturnType<typeof buildAggregation> } }
 >;
-
-interface BucketPageInfo {
-  bucketFilter: ESBoolQuery;
-  searchAfterSortIds: estypes.SortResults | undefined;
-}
-
-interface BucketAlertResult {
-  type: 'alert';
-  result: estypes.SearchHit<SignalSource>;
-}
-
-interface BucketPageResult {
-  type: 'newPage';
-  result: BucketPageInfo;
-}
-
-type BucketResult = BucketAlertResult | BucketPageResult;
-
-const buildAggregations = ({
-  newValueWindowStart,
-  fields,
-  timestampOverride,
-}: {
-  newValueWindowStart: Moment;
-  fields: string[];
-  timestampOverride: string | undefined;
-}) => {
-  return fields.reduce<Record<string, ReturnType<typeof buildAggregation>>>((acc, field) => {
-    return {
-      ...acc,
-      [field]: buildAggregation({ newValueWindowStart, field, timestampOverride }),
-    };
-  }, {});
-};
 
 const buildAggregation = ({
   newValueWindowStart,
   field,
+  maxSignals,
   timestampOverride,
 }: {
   newValueWindowStart: Moment;
   field: string;
+  maxSignals: number;
   timestampOverride: string | undefined;
 }) => {
   // If we have a timestampOverride, compute a runtime field that emits the override for each document if it exists,
@@ -361,40 +341,42 @@ const buildAggregation = ({
   // runtime field, so we just use @timestamp directly.
   const timestampField = timestampOverride ? 'kibana.combined_timestamp' : '@timestamp';
   return {
-    terms: {
-      field,
-      // TODO: configure size based on max_signals
-      size: 10000,
-      order: {
-        first_seen: 'desc' as const,
-      },
-    },
-    aggs: {
-      docs: {
-        top_hits: {
-          size: 1,
-          sort: [
-            {
-              [timestampField]: 'asc' as const,
-            },
-          ],
+    new_terms: {
+      terms: {
+        field,
+        // TODO: configure size based on max_signals
+        size: maxSignals,
+        order: {
+          first_seen: 'desc' as const,
         },
       },
-      first_seen: {
-        min: {
-          field: timestampField,
-        },
-      },
-      filtering_agg: {
-        bucket_selector: {
-          buckets_path: {
-            first_seen_value: 'first_seen',
+      aggs: {
+        docs: {
+          top_hits: {
+            size: 1,
+            sort: [
+              {
+                [timestampField]: 'asc' as const,
+              },
+            ],
           },
-          script: {
-            params: {
-              start_time: newValueWindowStart.valueOf(),
+        },
+        first_seen: {
+          min: {
+            field: timestampField,
+          },
+        },
+        filtering_agg: {
+          bucket_selector: {
+            buckets_path: {
+              first_seen_value: 'first_seen',
             },
-            source: 'params.first_seen_value > params.start_time',
+            script: {
+              params: {
+                start_time: newValueWindowStart.valueOf(),
+              },
+              source: 'params.first_seen_value > params.start_time',
+            },
           },
         },
       },

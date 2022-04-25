@@ -1,0 +1,65 @@
+{
+  "type": "doc",
+  "value": {
+    "index": "timestamp-fallback-test",
+    "source": {
+      "message": "hello world",
+      "@timestamp": "2020-12-16T15:15:18.570Z",
+      "host": {
+        "name": "host-1"
+      }
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "timestamp-fallback-test",
+    "source": {
+      "message": "hello world",
+      "@timestamp": "2020-12-16T15:15:18.570Z",
+      "event": {
+        "ingested": "2020-12-16T15:16:18.570Z"
+      },
+      "host": {
+        "name": "host-2"
+      }
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "timestamp-fallback-test",
+    "source": {
+      "message": "hello world",
+      "@timestamp": "2020-12-16T16:15:18.570Z",
+      "host": {
+        "name": "host-3"
+      }
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "timestamp-fallback-test",
+    "source": {
+      "message": "hello world",
+      "@timestamp": "2020-12-16T16:15:18.570Z",
+      "event": {
+        "ingested": "2020-12-16T16:16:18.570Z"
+      },
+      "host": {
+        "name": "host-4"
+      }
+    },
+    "type": "_doc"
+  }
+}

@@ -511,10 +511,30 @@ export const schema: FormSchema<DefineStepRule> = {
             i18n.translate(
               'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.newTermsFieldsRequired',
               {
-                defaultMessage: 'A minimum of one field is required.',
+                defaultMessage: 'Number of fields must be 1.',
               }
             )
           )(...args);
+        },
+      },
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc>
+        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
+          const [{ formData }] = args;
+          const needsValidation = isNewTermsRule(formData.ruleType);
+          if (!needsValidation) {
+            return;
+          }
+          return fieldValidators.maxLengthField({
+            length: 1,
+            message: i18n.translate(
+              'xpack.securitySolution.detectionEngine.validations.thresholdFieldFieldData.arrayLengthGreaterThanMaxErrorMessage',
+              {
+                defaultMessage: 'Number of fields must be 1.',
+              }
+            ),
+          })(...args);
         },
       },
     ],
