@@ -77,8 +77,9 @@ export function SpanLinks({ spanLinks }: Props) {
   ];
 
   if (
-    !data &&
-    (status === FETCH_STATUS.LOADING || status === FETCH_STATUS.NOT_INITIATED)
+    !data ||
+    status === FETCH_STATUS.LOADING ||
+    status === FETCH_STATUS.NOT_INITIATED
   ) {
     return (
       <div
