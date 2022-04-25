@@ -110,9 +110,10 @@ describe('Update rules configuration API', () => {
   });
 
   it('validate getCspRules input parameters', async () => {
+    const packagePolicy = createPackagePolicyMock();
     mockSoClient = savedObjectsClientMock.create();
     mockSoClient.find.mockResolvedValueOnce({} as SavedObjectsFindResponse);
-    await getCspRules(mockSoClient);
+    await getCspRules(mockSoClient, packagePolicy);
     expect(mockSoClient.find).toBeCalledTimes(1);
     expect(mockSoClient.find).toHaveBeenCalledWith(
       expect.objectContaining({ type: cspRuleAssetSavedObjectType })
@@ -127,23 +128,21 @@ describe('Update rules configuration API', () => {
       saved_objects: [
         {
           type: 'csp_rule',
-          id: '1.1.1',
-          attributes: { enabled: true },
+          rego_rule_id: '1.1.1',
+          attributes: { enabled: true, rego_rule_id: 'cis_1_1_1' },
         },
         {
           type: 'csp_rule',
-          id: '1.1.2',
-          attributes: { enabled: false },
+          attributes: { enabled: false, rego_rule_id: 'cis_1_1_2' },
         },
         {
           type: 'csp_rule',
-          id: '1.1.3',
-          attributes: { enabled: true },
+          attributes: { enabled: true, rego_rule_id: 'cis_1_1_3' },
         },
       ],
-    } as SavedObjectsFindResponse<CspRuleSchema>;
+    } as unknown as SavedObjectsFindResponse<CspRuleSchema>;
     const cspConfig = await createRulesConfig(cspRules);
-    expect(cspConfig).toMatchObject({ activated_rules: { cis_k8s: ['1.1.1', '1.1.3'] } });
+    expect(cspConfig).toMatchObject({ activated_rules: { cis_k8s: ['cis_1_1_1', 'cis_1_1_3'] } });
   });
 
   it('create empty csp rules config when all rules are disabled', async () => {
@@ -154,16 +153,19 @@ describe('Update rules configuration API', () => {
       saved_objects: [
         {
           type: 'csp_rule',
-          id: '1.1.1',
-          attributes: { enabled: false },
+          rego_rule_id: '1.1.1',
+          attributes: { enabled: false, rego_rule_id: 'cis_1_1_1' },
         },
         {
           type: 'csp_rule',
-          id: '1.1.2',
-          attributes: { enabled: false },
+          attributes: { enabled: false, rego_rule_id: 'cis_1_1_2' },
+        },
+        {
+          type: 'csp_rule',
+          attributes: { enabled: false, rego_rule_id: 'cis_1_1_3' },
         },
       ],
-    } as SavedObjectsFindResponse<CspRuleSchema>;
+    } as unknown as SavedObjectsFindResponse<CspRuleSchema>;
     const cspConfig = await createRulesConfig(cspRules);
     expect(cspConfig).toMatchObject({ activated_rules: { cis_k8s: [] } });
   });
