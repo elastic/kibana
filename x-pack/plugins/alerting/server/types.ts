@@ -7,11 +7,10 @@
 
 import type {
   IRouter,
-  RequestHandlerContext,
+  CustomRequestHandlerContext,
   SavedObjectReference,
   IUiSettingsClient,
 } from '@kbn/core/server';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   AggregationsAggregate,
   SearchResponse,
@@ -23,6 +22,7 @@ import {
   SavedObjectAttributes,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { AlertFactoryDoneUtils, PublicAlert } from './alert';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
@@ -64,9 +64,9 @@ export interface AlertingApiRequestHandlerContext {
 /**
  * @internal
  */
-export interface AlertingRequestHandlerContext extends RequestHandlerContext {
+export type AlertingRequestHandlerContext = CustomRequestHandlerContext<{
   alerting: AlertingApiRequestHandlerContext;
-}
+}>;
 
 /**
  * @internal
