@@ -17,7 +17,7 @@ import { executionContextServiceMock } from '../../execution_context/execution_c
 import { ServerMetricsCollector } from '../collectors/server';
 import { setTimeout as setTimeoutPromise } from 'timers/promises';
 
-describe('ServerMetricsCollector', () => {
+describe.skip('ServerMetricsCollector', () => {
   let server: HttpService;
   let collector: ServerMetricsCollector;
   let hapiServer: HapiServer;
