@@ -287,7 +287,7 @@ export class Plugin
       navigationSections$: this.navigationRegistry.sections$,
     });
 
-    registerAlertsTableConfiguration({ alertsTableConfigurationRegistry });
+    registerAlertsTableConfiguration(alertsTableConfigurationRegistry);
 
     return {
       navigation: {
