@@ -23,6 +23,7 @@ export interface BuildOptions {
   createGenericFolders: boolean;
   createPlatformFolders: boolean;
   createArchives: boolean;
+  createCdnAssets: boolean;
   createRpmPackage: boolean;
   createDebPackage: boolean;
   createDockerUBI: boolean;
@@ -103,6 +104,10 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
 
     await run(Tasks.PathLength);
     await run(Tasks.UuidVerification);
+  }
+
+  if (options.createCdnAssets) {
+    await run(Tasks.CreateCdnAssets);
   }
 
   /**
