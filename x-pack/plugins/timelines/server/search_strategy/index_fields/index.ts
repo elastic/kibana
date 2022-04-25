@@ -267,10 +267,10 @@ export const formatFirstFields = async (
 ): Promise<IndexField[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
+      const indexFieldNameHash: Record<string, number> = {};
       resolve(
         responsesFieldSpec.reduce(
           (accumulator: IndexField[], fieldSpec: FieldSpec[], indexesAliasId: number) => {
-            const indexFieldNameHash: Record<string, number> = {};
             const indexesAliasIdx = responsesFieldSpec.length > 1 ? indexesAliasId : null;
             [...missingFields, ...fieldSpec].forEach((index) => {
               const item = createFieldItem(beatFields, indexesAlias, index, indexesAliasIdx);
