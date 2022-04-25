@@ -29,6 +29,7 @@ it('build default and oss dist for current platform, without packages, by defaul
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
         "createArchives": true,
+        "createCdnAssets": true,
         "createDebPackage": false,
         "createDockerCloud": false,
         "createDockerContexts": true,
@@ -63,6 +64,7 @@ it('builds packages if --all-platforms is passed', () => {
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
         "createArchives": true,
+        "createCdnAssets": true,
         "createDebPackage": true,
         "createDockerCloud": true,
         "createDockerContexts": true,
@@ -97,6 +99,7 @@ it('limits packages if --rpm passed with --all-platforms', () => {
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
         "createArchives": true,
+        "createCdnAssets": true,
         "createDebPackage": false,
         "createDockerCloud": false,
         "createDockerContexts": true,
@@ -131,6 +134,7 @@ it('limits packages if --deb passed with --all-platforms', () => {
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
         "createArchives": true,
+        "createCdnAssets": true,
         "createDebPackage": true,
         "createDockerCloud": false,
         "createDockerContexts": true,
@@ -166,6 +170,7 @@ it('limits packages if --docker passed with --all-platforms', () => {
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
         "createArchives": true,
+        "createCdnAssets": true,
         "createDebPackage": false,
         "createDockerCloud": true,
         "createDockerContexts": true,
@@ -208,6 +213,7 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
         "createArchives": true,
+        "createCdnAssets": true,
         "createDebPackage": false,
         "createDockerCloud": true,
         "createDockerContexts": true,
@@ -243,6 +249,7 @@ it('limits packages if --all-platforms passed with --skip-docker-ubuntu', () => 
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
         "createArchives": true,
+        "createCdnAssets": true,
         "createDebPackage": true,
         "createDockerCloud": true,
         "createDockerContexts": true,

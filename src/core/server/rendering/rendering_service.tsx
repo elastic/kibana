@@ -44,11 +44,12 @@ export class RenderingService {
     uiPlugins,
   }: RenderingPrebootDeps): Promise<InternalRenderingServicePreboot> {
     http.registerRoutes<InternalRenderingRequestHandlerContext>('', (router) => {
+      const { staticBaseUrl } = http.basePath;
       registerBootstrapRoute({
         router,
         renderer: bootstrapRendererFactory({
           uiPlugins,
-          serverBasePath: http.basePath.serverBasePath,
+          staticBaseUrl,
           packageInfo: this.coreContext.env.packageInfo,
           auth: http.auth,
         }),
@@ -66,11 +67,13 @@ export class RenderingService {
     status,
     uiPlugins,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
+    const { staticBaseUrl } = http.basePath;
+
     registerBootstrapRoute({
       router: http.createRouter<InternalRenderingRequestHandlerContext>(''),
       renderer: bootstrapRendererFactory({
         uiPlugins,
-        serverBasePath: http.basePath.serverBasePath,
+        staticBaseUrl,
         packageInfo: this.coreContext.env.packageInfo,
         auth: http.auth,
       }),
@@ -93,7 +96,7 @@ export class RenderingService {
     };
     const buildNum = env.packageInfo.buildNum;
     const basePath = http.basePath.get(request);
-    const { serverBasePath, publicBaseUrl } = http.basePath;
+    const { serverBasePath, publicBaseUrl, staticBaseUrl } = http.basePath;
     const settings = {
       defaults: uiSettings.getRegistered() ?? {},
       user: isAnonymousPage ? {} : await uiSettings.getUserProvided(),
@@ -120,7 +123,7 @@ export class RenderingService {
     const stylesheetPaths = getStylesheetPaths({
       darkMode,
       themeVersion,
-      basePath: serverBasePath,
+      basePath: staticBaseUrl,
       buildNum,
     });
 
@@ -128,7 +131,7 @@ export class RenderingService {
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,
-      uiPublicUrl: `${basePath}/ui`,
+      uiStaticUrl: `${staticBaseUrl}/ui`,
       bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
       i18n: i18n.translate,
       locale: i18n.getLocale(),

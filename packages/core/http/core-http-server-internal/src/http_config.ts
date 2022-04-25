@@ -37,6 +37,7 @@ const configSchema = schema.object(
     name: schema.string({ defaultValue: () => hostname() }),
     autoListen: schema.boolean({ defaultValue: true }),
     publicBaseUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+    staticBaseUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
     basePath: schema.maybe(
       schema.string({
         validate: match(validBasePathRegex, "must start with a slash, don't end with one"),
@@ -202,6 +203,7 @@ export class HttpConfig implements IHttpConfig {
   public maxPayload: ByteSizeValue;
   public basePath?: string;
   public publicBaseUrl?: string;
+  public staticBaseUrl?: string;
   public rewriteBasePath: boolean;
   public ssl: SslConfig;
   public compression: { enabled: boolean; referrerWhitelist?: string[] };
@@ -239,6 +241,7 @@ export class HttpConfig implements IHttpConfig {
     this.maxPayload = rawHttpConfig.maxPayload;
     this.name = rawHttpConfig.name;
     this.basePath = rawHttpConfig.basePath;
+    this.staticBaseUrl = rawHttpConfig.staticBaseUrl;
     this.publicBaseUrl = rawHttpConfig.publicBaseUrl;
     this.keepaliveTimeout = rawHttpConfig.keepaliveTimeout;
     this.socketTimeout = rawHttpConfig.socketTimeout;

@@ -67,6 +67,7 @@ const createBasePathMock = (
 ): BasePathMocked => ({
   serverBasePath,
   publicBaseUrl,
+  staticBaseUrl: serverBasePath,
   get: jest.fn().mockReturnValue(serverBasePath),
   set: jest.fn(),
   prepend: jest.fn(),

@@ -95,6 +95,12 @@ steps:
 
   - wait
 
+  - command: .buildkite/scripts/steps/artifacts/static_assets.sh
+    label: 'Publish Static Assets'
+    agents:
+      queue: n2-2
+    timeout_in_minutes: 30
+
   - command: .buildkite/scripts/steps/artifacts/publish.sh
     label: 'Publish Kibana Artifacts'
     agents:

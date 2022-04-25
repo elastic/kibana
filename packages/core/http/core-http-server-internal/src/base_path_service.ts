@@ -22,9 +22,16 @@ export class BasePath implements IBasePath {
   public readonly serverBasePath: string;
   public readonly publicBaseUrl?: string;
 
-  constructor(serverBasePath: string = '', publicBaseUrl?: string) {
+  /**
+   * An optional URL to load static assets from. If configured, bundles and other static files will be loaded from
+   */
+  public readonly staticBaseUrl: string;
+
+  /** @internal */
+  constructor(serverBasePath: string = '', publicBaseUrl?: string, staticBaseUrl?: string) {
     this.serverBasePath = serverBasePath;
     this.publicBaseUrl = publicBaseUrl;
+    this.staticBaseUrl = staticBaseUrl || serverBasePath;
   }
 
   public get = (request: KibanaRequest) => {

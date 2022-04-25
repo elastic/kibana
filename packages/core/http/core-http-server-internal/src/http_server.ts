@@ -154,7 +154,11 @@ export class HttpServer {
     // It's important to have setupRequestStateAssignment call the very first, otherwise context passing will be broken.
     // That's the only reason why context initialization exists in this method.
     this.setupRequestStateAssignment(config, executionContext);
-    const basePathService = new BasePath(config.basePath, config.publicBaseUrl);
+    const basePathService = new BasePath(
+      config.basePath,
+      config.publicBaseUrl,
+      config.staticBaseUrl
+    );
     this.setupBasePathRewrite(config, basePathService);
     this.setupConditionalCompression(config);
     this.setupResponseLogging();

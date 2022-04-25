@@ -103,6 +103,14 @@ export interface IBasePath {
    * Should be used for generating external URL links back to this Kibana instance.
    */
   readonly publicBaseUrl?: string;
+
+  /**
+   * A url used to retrieve static assets base URL, if configured. Includes protocol, host, port (optional).
+   *
+   * @remarks
+   * Should be used for generating external URL links back to this Kibana instance.
+   */
+  readonly staticBaseUrl?: string;
 }
 /**
  * APIs for working with external URLs.
