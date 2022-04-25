@@ -242,11 +242,11 @@ export function AgentInstructionsAccordion({
                     <EuiFlexItem grow={false}>
                       <EuiBetaBadge
                         label={i18n.translate(
-                          'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.betaBadge.label',
-                          { defaultMessage: 'BETA' }
+                          'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.experimentalBadge.label',
+                          { defaultMessage: 'Experimental' }
                         )}
                         tooltipContent={i18n.translate(
-                          'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.betaBadge.tooltipContent',
+                          'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.experimentalBadge.tooltipContent',
                           {
                             defaultMessage:
                               'Auto-attachment for Java is not GA. Please help us by reporting any bugs.',
