@@ -217,10 +217,19 @@ export const getDateHistogramBucketAgg = ({
             // this DSL will anyway not be used before we're passing this code with an actual interval.
             return;
           }
-          output.params = {
-            ...output.params,
-            ...dateHistogramInterval(interval.expression),
-          };
+
+          const shouldForceFixedInterval = agg
+            .getIndexPattern()
+            ?.getFieldByName(agg.params.field)
+            ?.indices.some((index) => index.fixed_interval);
+          if (shouldForceFixedInterval) {
+            output.params.fixed_interval = interval.expression;
+          } else {
+            output.params = {
+              ...output.params,
+              ...dateHistogramInterval(interval.expression),
+            };
+          }
 
           const scaleMetrics =
             scaleMetricValues && interval.scaled && interval.scale && interval.scale < 1;
