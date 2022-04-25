@@ -85,7 +85,7 @@ jest.mock(
 jest.mock('../../services/epm/packages', () => {
   return {
     ensureInstalledPackage: jest.fn(() => Promise.resolve()),
-    getPackageInfoFromRegistry: jest.fn(() => Promise.resolve()),
+    getPackageInfo: jest.fn(() => Promise.resolve()),
   };
 });
 
