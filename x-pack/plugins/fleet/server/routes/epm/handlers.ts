@@ -171,13 +171,13 @@ export const getFileHandler: FleetRequestHandler<
         body: buffer,
         statusCode: 200,
         headers: {
-          'cache-control': 'max-age=10, public',
+          ...CACHE_CONTROL_10_MINUTES_HEADER,
           'content-type': contentType,
         },
       });
     } else {
       const registryResponse = await getFile(pkgName, pkgVersion, filePath);
-      const headersToProxy: KnownHeaders[] = ['content-type', 'cache-control'];
+      const headersToProxy: KnownHeaders[] = ['content-type'];
       const proxiedHeaders = headersToProxy.reduce((headers, knownHeader) => {
         const value = registryResponse.headers.get(knownHeader);
         if (value !== null) {
@@ -189,7 +189,7 @@ export const getFileHandler: FleetRequestHandler<
       return response.custom({
         body: registryResponse.body,
         statusCode: registryResponse.status,
-        headers: proxiedHeaders,
+        headers: { ...CACHE_CONTROL_10_MINUTES_HEADER, ...proxiedHeaders },
       });
     }
   } catch (error) {
