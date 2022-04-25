@@ -10,7 +10,7 @@ import path from 'path';
 import type { TypeOf } from '@kbn/config-schema';
 import mime from 'mime-types';
 import semverValid from 'semver/functions/valid';
-import type { ResponseHeaders, KnownHeaders } from '@kbn/core/server';
+import type { ResponseHeaders, KnownHeaders, HttpResponseOptions } from '@kbn/core/server';
 
 import type {
   GetInfoResponse,
@@ -62,6 +62,10 @@ import { getAsset } from '../../services/epm/archive/storage';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
 import { updatePackage } from '../../services/epm/packages/update';
 
+const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
+  'cache-control': 'max-age=600',
+};
+
 export const getCategoriesHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetCategoriesRequestSchema.query>
@@ -72,7 +76,7 @@ export const getCategoriesHandler: FleetRequestHandler<
       items: res,
       response: res,
     };
-    return response.ok({ body });
+    return response.ok({ body, headers: { ...CACHE_CONTROL_10_MINUTES_HEADER } });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }
