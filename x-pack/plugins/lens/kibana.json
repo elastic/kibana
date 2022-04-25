@@ -22,7 +22,8 @@
     "dataViewFieldEditor",
     "expressionGauge",
     "expressionHeatmap",
-    "eventAnnotation"
+    "eventAnnotation",
+    "unifiedSearch"
   ],
   "optionalPlugins": [
     "expressionXY",

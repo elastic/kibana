@@ -14,7 +14,7 @@
     "screenshotMode",
     "management"
   ],
-  "serviceFolders": ["search", "query", "autocomplete", "ui"],
+  "serviceFolders": ["search", "query", "ui"],
   "optionalPlugins": ["usageCollection", "taskManager", "security"],
   "extraPublicDirs": ["common"],
   "requiredBundles": ["kibanaUtils", "kibanaReact", "inspector"],

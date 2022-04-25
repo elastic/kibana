@@ -24,13 +24,10 @@ import { SearchService } from './search/search_service';
 import { QueryService } from './query/query_service';
 import { ScriptsService } from './scripts';
 import { KqlTelemetryService } from './kql_telemetry';
-import { AutocompleteService } from './autocomplete';
 import { getUiSettings } from './ui_settings';
 import { QuerySetup } from './query';
-import { AutocompleteSetup } from './autocomplete/autocomplete_service';
 
 export interface DataPluginSetup {
-  autocomplete: AutocompleteSetup;
   search: ISearchSetup;
   query: QuerySetup;
   /**
@@ -81,7 +78,6 @@ export class DataServerPlugin
   private readonly searchService: SearchService;
   private readonly scriptsService: ScriptsService;
   private readonly kqlTelemetryService: KqlTelemetryService;
-  private readonly autocompleteService: AutocompleteService;
   private readonly queryService = new QueryService();
   private readonly logger: Logger;
 
@@ -90,7 +86,6 @@ export class DataServerPlugin
     this.searchService = new SearchService(initializerContext, this.logger);
     this.scriptsService = new ScriptsService();
     this.kqlTelemetryService = new KqlTelemetryService(initializerContext);
-    this.autocompleteService = new AutocompleteService(initializerContext);
   }
 
   public setup(
@@ -119,7 +114,6 @@ export class DataServerPlugin
     });
 
     return {
-      autocomplete: this.autocompleteService.setup(core),
       search: searchSetup,
       query: querySetup,
       fieldFormats,

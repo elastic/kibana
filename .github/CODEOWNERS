@@ -132,7 +132,7 @@
 #CC# /x-pack/plugins/observability/ @elastic/apm-ui
 
 # Uptime
-/x-pack/plugins/uptime @elastic/uptime
+/x-pack/plugins/synthetics @elastic/uptime
 /x-pack/plugins/ux @elastic/uptime
 /x-pack/test/functional_with_es_ssl/apps/uptime  @elastic/uptime
 /x-pack/test/functional/apps/uptime @elastic/uptime

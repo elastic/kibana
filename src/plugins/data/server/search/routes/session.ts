@@ -37,7 +37,8 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
         request.body;
 
       try {
-        const response = await context.search!.saveSession(sessionId, {
+        const searchContext = await context.search;
+        const response = await searchContext.saveSession(sessionId, {
           name,
           appId,
           expires,
@@ -71,7 +72,8 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
     async (context, request, res) => {
       const { id } = request.params;
       try {
-        const response = await context.search!.getSession(id);
+        const searchContext = await context.search;
+        const response = await searchContext!.getSession(id);
 
         return res.ok({
           body: response,
@@ -105,7 +107,8 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
     async (context, request, res) => {
       const { page, perPage, sortField, sortOrder, filter, searchFields, search } = request.body;
       try {
-        const response = await context.search!.findSessions({
+        const searchContext = await context.search;
+        const response = await searchContext!.findSessions({
           page,
           perPage,
           sortField,
@@ -140,7 +143,8 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
     async (context, request, res) => {
       const { id } = request.params;
       try {
-        await context.search!.deleteSession(id);
+        const searchContext = await context.search;
+        await searchContext.deleteSession(id);
 
         return res.ok();
       } catch (e) {
@@ -166,7 +170,8 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
     async (context, request, res) => {
       const { id } = request.params;
       try {
-        await context.search!.cancelSession(id);
+        const searchContext = await context.search;
+        await searchContext.cancelSession(id);
 
         return res.ok();
       } catch (e) {
@@ -197,7 +202,8 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
       const { id } = request.params;
       const { name, expires } = request.body;
       try {
-        const response = await context.search!.updateSession(id, { name, expires });
+        const searchContext = await context.search;
+        const response = await searchContext.updateSession(id, { name, expires });
 
         return res.ok({
           body: response,
@@ -228,7 +234,8 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
       const { id } = request.params;
       const { expires } = request.body;
       try {
-        const response = await context.search!.extendSession(id, new Date(expires));
+        const searchContext = await context.search;
+        const response = await searchContext.extendSession(id, new Date(expires));
 
         return res.ok({
           body: response,

@@ -19,7 +19,6 @@ import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { DatatableUtilitiesService } from '../common';
-import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
 import type { ISearchSetup, ISearchStart } from './search';
 import { QuerySetup, QueryStart } from './query';
@@ -48,7 +47,6 @@ export interface DataStartDependencies {
  * Data plugin public Setup contract
  */
 export interface DataPublicPluginSetup {
-  autocomplete: AutocompleteSetup;
   search: ISearchSetup;
   query: QuerySetup;
 }
@@ -70,11 +68,6 @@ export interface DataPublicPluginStart {
    * {@link DataPublicPluginStartActions}
    */
   actions: DataPublicPluginStartActions;
-  /**
-   * autocomplete service
-   * {@link AutocompleteStart}
-   */
-  autocomplete: AutocompleteStart;
   /**
    * data views service
    * {@link DataViewsContract}

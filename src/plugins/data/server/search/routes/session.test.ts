@@ -10,8 +10,9 @@ import type { MockedKeys } from '@kbn/utility-types/jest';
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
-import type { PluginStart as DataPluginStart, DataRequestHandlerContext } from '../..';
+import type { PluginStart as DataPluginStart } from '../..';
 import { dataPluginMock } from '../../mocks';
+
 import { registerSessionRoutes } from './session';
 
 enum PostHandlerIndex {
@@ -23,7 +24,7 @@ enum PostHandlerIndex {
 
 describe('registerSessionRoutes', () => {
   let mockCoreSetup: MockedKeys<CoreSetup<{}, DataPluginStart>>;
-  let mockContext: jest.Mocked<DataRequestHandlerContext>;
+  let mockContext: ReturnType<typeof dataPluginMock.createRequestHandlerContext>;
   let mockLogger: Logger;
 
   beforeEach(() => {
@@ -44,7 +45,7 @@ describe('registerSessionRoutes', () => {
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const [, saveHandler] = mockRouter.post.mock.calls[PostHandlerIndex.SAVE];
 
-    saveHandler(mockContext, mockRequest, mockResponse);
+    await saveHandler(mockContext, mockRequest, mockResponse);
 
     expect(mockContext.search!.saveSession).toHaveBeenCalledWith(sessionId, { name });
   });
@@ -59,7 +60,7 @@ describe('registerSessionRoutes', () => {
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const [[, getHandler]] = mockRouter.get.mock.calls;
 
-    getHandler(mockContext, mockRequest, mockResponse);
+    await getHandler(mockContext, mockRequest, mockResponse);
 
     expect(mockContext.search!.getSession).toHaveBeenCalledWith(id);
   });
@@ -78,7 +79,7 @@ describe('registerSessionRoutes', () => {
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const [, findHandler] = mockRouter.post.mock.calls[PostHandlerIndex.FIND];
 
-    findHandler(mockContext, mockRequest, mockResponse);
+    await findHandler(mockContext, mockRequest, mockResponse);
 
     expect(mockContext.search!.findSessions).toHaveBeenCalledWith(body);
   });
@@ -96,7 +97,7 @@ describe('registerSessionRoutes', () => {
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const [, updateHandler] = mockRouter.put.mock.calls[0];
 
-    updateHandler(mockContext, mockRequest, mockResponse);
+    await updateHandler(mockContext, mockRequest, mockResponse);
 
     expect(mockContext.search!.updateSession).toHaveBeenCalledWith(id, body);
   });
@@ -111,7 +112,7 @@ describe('registerSessionRoutes', () => {
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const [, cancelHandler] = mockRouter.post.mock.calls[PostHandlerIndex.CANCEL];
 
-    cancelHandler(mockContext, mockRequest, mockResponse);
+    await cancelHandler(mockContext, mockRequest, mockResponse);
 
     expect(mockContext.search!.cancelSession).toHaveBeenCalledWith(id);
   });
@@ -143,7 +144,7 @@ describe('registerSessionRoutes', () => {
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const [, extendHandler] = mockRouter.post.mock.calls[PostHandlerIndex.EXTEND];
 
-    extendHandler(mockContext, mockRequest, mockResponse);
+    await extendHandler(mockContext, mockRequest, mockResponse);
 
     expect(mockContext.search.extendSession).toHaveBeenCalledWith(id, new Date(expires));
   });
