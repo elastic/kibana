@@ -122,6 +122,10 @@ export interface BaseState extends ControlState {
     string,
     SavedObjectTypeExcludeFromUpgradeFilterHook
   >;
+  /**
+   * DocLinks for savedObjects. to reference online documentation
+   */
+  readonly migrationDocLinks: Record<string, string>;
 }
 
 export interface InitState extends BaseState {
