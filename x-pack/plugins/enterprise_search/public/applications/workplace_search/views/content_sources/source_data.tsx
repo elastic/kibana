@@ -18,17 +18,22 @@ import {
 import { FeatureIds, SourceDataItem } from '../../types';
 
 export const staticExternalSourceData: SourceDataItem = {
-  name: SOURCE_NAMES.SHAREPOINT,
-  iconName: SOURCE_NAMES.SHAREPOINT,
+  name: SOURCE_NAMES.EXTERNAL,
+  iconName: SOURCE_NAMES.EXTERNAL,
   serviceType: 'external',
   configuration: {
     isPublicKey: false,
     hasOauthRedirect: true,
-    needsBaseUrl: false,
-    documentationUrl: docLinks.workplaceSearchExternalSharePointOnline,
-    applicationPortalUrl: 'https://portal.azure.com/',
+    needsBaseUrl: true,
+    documentationUrl: docLinks.workplaceSearchConfluenceCloud,
+    applicationPortalUrl: 'https://developer.atlassian.com/console/myapps/',
   },
-  objTypes: [SOURCE_OBJ_TYPES.ALL_STORED_FILES],
+  objTypes: [
+    SOURCE_OBJ_TYPES.PAGES,
+    SOURCE_OBJ_TYPES.ATTACHMENTS,
+    SOURCE_OBJ_TYPES.BLOG_POSTS,
+    SOURCE_OBJ_TYPES.SPACES,
+  ],
   features: {
     basicOrgContext: [
       FeatureIds.SyncFrequency,
@@ -37,7 +42,11 @@ export const staticExternalSourceData: SourceDataItem = {
     ],
     basicOrgContextExcludedFeatures: [FeatureIds.DocumentLevelPermissions],
     platinumOrgContext: [FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
-    platinumPrivateContext: [FeatureIds.Private, FeatureIds.SyncFrequency, FeatureIds.SyncedItems],
+    platinumPrivateContext: [
+      FeatureIds.Private,
+      FeatureIds.SyncFrequency,
+      FeatureIds.SyncedItems,
+    ],
   },
   accountContextOnly: false,
   internalConnectorAvailable: true,
