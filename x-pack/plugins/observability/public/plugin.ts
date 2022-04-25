@@ -32,7 +32,6 @@ import {
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { KibanaFeature } from '@kbn/features-plugin/common';
-import { registerAlertsTableConfiguration } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_page/register_alerts_table_configuration';
 import { ConfigSchema } from '.';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
 import { createLazyObservabilityPageTemplate } from './components/shared';
@@ -45,6 +44,7 @@ import { getExploratoryViewEmbeddable } from './components/shared/exploratory_vi
 import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/utils';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import getAppDataView from './utils/observability_data_views/get_app_data_view';
+import { registerAlertsTableConfiguration } from './config/register_alerts_table_configuration';
 
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
