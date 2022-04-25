@@ -37,6 +37,7 @@ module.exports = (_, argv) => {
         'regenerator-runtime/runtime',
         'whatwg-fetch',
         'symbol-observable',
+        'node-libs-browser',
 
         /**
          * babel runtime helpers referenced from entry chunks
