@@ -321,11 +321,13 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
           headerCellRender: () => null,
           rowCellRender: (actionProps: EuiDataGridCellValueElementProps) => {
             const eventId = data[actionProps.rowIndex]._id;
+
             return addToTimeline({ query: ['_id', eventId], isIcon: true });
           },
         },
       ];
     }
+
     return [];
   }, [addToTimeline, allResultsData?.edges]);
 
