@@ -28,7 +28,7 @@ import type {
   PackageSpecCategory,
 } from './package_spec';
 
-export type InstallationStatus = typeof installationStatuses & undefined;
+export type InstallationStatus = typeof installationStatuses;
 
 export enum InstallStatus {
   installed = 'installed',
