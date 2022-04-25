@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandlerContext, IScopedClusterClient } from '@kbn/core/server';
+import type { IRouter, CustomRequestHandlerContext, IScopedClusterClient } from '@kbn/core/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
@@ -63,6 +63,6 @@ export interface SnapshotRestoreContext {
 /**
  * @internal
  */
-export interface SnapshotRestoreRequestHandlerContext extends RequestHandlerContext {
+export type SnapshotRestoreRequestHandlerContext = CustomRequestHandlerContext<{
   snapshotRestore: SnapshotRestoreContext;
-}
+}>;
