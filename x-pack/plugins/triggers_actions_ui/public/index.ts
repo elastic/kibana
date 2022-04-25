@@ -34,6 +34,7 @@ export type {
   AlertsData,
   BulkActionsObjectProp,
   RuleSummary,
+  AlertStatus,
 } from './types';
 
 export {
@@ -56,6 +57,7 @@ export { Plugin };
 export * from './plugin';
 // TODO remove this import when we expose the Rules tables as a component
 export { loadRules } from './application/lib/rule_api/rules';
+export { loadRuleSummary } from './application/lib/rule_api/rule_summary';
 export { deleteRules } from './application/lib/rule_api/delete';
 export { enableRule } from './application/lib/rule_api/enable';
 export { disableRule } from './application/lib/rule_api/disable';

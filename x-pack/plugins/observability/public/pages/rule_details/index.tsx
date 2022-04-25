@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import moment from 'moment';
 
 import { useParams } from 'react-router-dom';
@@ -17,30 +17,28 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
   EuiButtonIcon,
   EuiIcon,
   EuiPanel,
   EuiTitle,
   EuiHealth,
   EuiPopover,
-  EuiContextMenu,
-  EuiFlexGrid,
   EuiHorizontalRule,
-  EuiStat,
   IconType,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-// import { hasExecuteActionsCapability } from './config';
-import { RuleExecutionStatusValues } from '../../../../alerting/common';
 
-import { Rule } from '../../../../triggers_actions_ui/public';
+import { RuleExecutionStatusValues, ActionGroup } from '../../../../alerting/common';
+import { AlertStatusValues } from '../../../../alerting/common';
+
+import { Rule, RuleType, AlertStatus } from '../../../../triggers_actions_ui/public';
+import { AlertListItem } from './types';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { RULES_BREADCRUMB_TEXT } from '../rules/translations';
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 import { useKibana } from '../../utils/kibana_react';
+import { useFetchRuleSummary } from '../../hooks/use_fetch_rule_summary';
 
 function PageTitle(rule: Rule) {
   return (
@@ -108,9 +106,22 @@ export function RuleDetailsPage() {
 
   const { ruleId } = useParams<RuleDetailsPathParams>();
   const { ObservabilityPageTemplate } = usePluginContext();
-  const { isLoading, rule, error, reload } = useFetchRule({ ruleId });
+  const { isLoadingRule, rule, errorRule, reloadRule } = useFetchRule({ ruleId, http });
+  const { isLoadingRuleSummary, ruleSummary, errorRuleSummary, reloadRuleSummary } =
+    useFetchRuleSummary({ ruleId, http });
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
   const [isRuleEditPopoverOpen, setIsRuleEditPopoverOpen] = useState(false);
+  const [alerts, setAlerts] = useState<AlertListItem[]>([]);
+
+  useEffect(() => {
+    if (!errorRuleSummary && ruleSummary?.alerts) {
+      const durationEpoch = Date.now();
+      const sortedAlerts = Object.entries(ruleSummary.alerts)
+        .map(([alertId, alert]) => alertToListItem(durationEpoch, alertId, alert))
+        .sort((leftAlert, rightAlert) => leftAlert.sortPriority - rightAlert.sortPriority);
+      setAlerts(sortedAlerts);
+    }
+  }, [ruleSummary, errorRuleSummary]);
 
   const getColorStatusBased = (ruleStatus: string) => {
     switch (ruleStatus) {
@@ -146,7 +157,7 @@ export function RuleDetailsPage() {
   };
 
   function ActionsComponent({ actions }: ActionsComponentProps) {
-    if (actions.length <= 0) return <EuiText size="m">0</EuiText>;
+    if (actions && actions.length <= 0) return <EuiText size="m">0</EuiText>;
 
     const uniqueActions = Array.from(new Set(actions.map((action: any) => action.actionTypeId)));
     return (
@@ -185,9 +196,10 @@ export function RuleDetailsPage() {
     },
   ]);
 
-  if (!rule || error) {
+  if (!rule || errorRule) {
     return <EuiFlexItem>Error | No data</EuiFlexItem>;
   }
+
   const EditAlertFlyout = () =>
     useMemo(
       () =>
@@ -196,7 +208,7 @@ export function RuleDetailsPage() {
           onClose: () => {
             setEditFlyoutVisible(false);
           },
-          onSave: reload,
+          onSave: reloadRule,
         }),
       []
     );
@@ -217,7 +229,7 @@ export function RuleDetailsPage() {
   // console.log('uniqueActions', uniqueActions);
 
   console.log(rule);
-  console.log('editFlyoutVisible', editFlyoutVisible);
+  console.log(ruleSummary?.alerts);
 
   return (
     <ObservabilityPageTemplate
@@ -294,7 +306,7 @@ export function RuleDetailsPage() {
                   translationKey="xpack.observability.ruleDetails.last24hAlerts"
                   defaultMessage="Alerts (last 24 h)"
                 />
-                <ItemValueRuleSummary extraSpace={false} itemValue={'TODO'} />
+                <ItemValueRuleSummary extraSpace={false} itemValue={String(alerts.length)} />
               </EuiFlexGroup>
               <EuiSpacer size="l" />
               <EuiSpacer size="l" />
@@ -346,7 +358,7 @@ export function RuleDetailsPage() {
                   <EuiFlexItem grow={3}>
                     <EuiText size="m">
                       <EuiButtonEmpty onClick={() => setEditFlyoutVisible(true)}>
-                        {String((params.criteria as any[]).length)}{' '}
+                        {params.criteria ? String((params.criteria as any[]).length) : 0}{' '}
                         {/* TODO:  Add [s] to the conditions word based on how many conditions */}
                         {i18n.translate('xpack.observability.ruleDetails.conditions', {
                           defaultMessage: 'conditions',
@@ -399,4 +411,59 @@ export function RuleDetailsPage() {
       {editFlyoutVisible && <EditAlertFlyout />}
     </ObservabilityPageTemplate>
   );
+}
+
+const ACTIVE_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleDetails.rulesList.status.active',
+  { defaultMessage: 'Active' }
+);
+
+const INACTIVE_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleDetails.rulesList.status.inactive',
+  { defaultMessage: 'Recovered' }
+);
+function getActionGroupName(ruleType: RuleType, actionGroupId?: string): string | undefined {
+  actionGroupId = actionGroupId || ruleType.defaultActionGroupId;
+  const actionGroup = ruleType?.actionGroups?.find(
+    (group: ActionGroup<string>) => group.id === actionGroupId
+  );
+  return actionGroup?.name;
+}
+
+export function alertToListItem(
+  durationEpoch: number,
+  // ruleType: RuleType,
+  alertId: string,
+  alert: AlertStatus
+): AlertListItem {
+  const isMuted = !!alert?.muted;
+  const status =
+    alert?.status === 'Active'
+      ? {
+          label: ACTIVE_LABEL,
+          // actionGroup: getActionGroupName(ruleType, alert?.actionGroupId),
+          healthColor: 'primary',
+        }
+      : { label: INACTIVE_LABEL, healthColor: 'subdued' };
+  const start = alert?.activeStartDate ? new Date(alert.activeStartDate) : undefined;
+  const duration = start ? durationEpoch - start.valueOf() : 0;
+  const sortPriority = getSortPriorityByStatus(alert?.status);
+  return {
+    alert: alertId,
+    status,
+    start,
+    duration,
+    isMuted,
+    sortPriority,
+  };
+}
+
+function getSortPriorityByStatus(status?: AlertStatusValues): number {
+  switch (status) {
+    case 'Active':
+      return 0;
+    case 'OK':
+      return 1;
+  }
+  return 2;
 }

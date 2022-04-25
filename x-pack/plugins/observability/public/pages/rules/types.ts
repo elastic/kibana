@@ -86,12 +86,3 @@ export interface RulesTableProps {
   onSortChange: (changedSort: EuiTableSortingType<RuleTableItem>['sort']) => void;
   isLoading: boolean;
 }
-export interface FetchRuleSummaryProps {
-  ruleId: string;
-}
-
-export interface RuleSummary {
-  isLoading: boolean;
-  rule: Rule | null;
-  error: boolean;
-}

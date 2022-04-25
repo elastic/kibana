@@ -6,20 +6,18 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
-import { FetchRuleSummaryProps, RuleSummary } from '../pages/rules/types';
+import { FetchRuleProps, FetchRule } from '../pages/rule_details/types';
 import { loadRule } from '../../../triggers_actions_ui/public';
-import { useKibana } from '../utils/kibana_react';
 
-export function useFetchRule({ ruleId }: FetchRuleSummaryProps) {
-  const { http } = useKibana().services;
-  const [ruleSummary, setRuleSummary] = useState<RuleSummary>({
-    isLoading: false,
+export function useFetchRule({ ruleId, http }: FetchRuleProps) {
+  const [ruleSummary, setRuleSummary] = useState<FetchRule>({
+    isLoadingRule: false,
     rule: null,
-    error: false,
+    errorRule: false,
   });
 
   const fetchRuleSummary = useCallback(async () => {
-    setRuleSummary((oldState: RuleSummary) => ({ ...oldState, isLoading: true }));
+    setRuleSummary((oldState: FetchRule) => ({ ...oldState, isLoading: true }));
 
     try {
       const response = await loadRule({
@@ -27,15 +25,15 @@ export function useFetchRule({ ruleId }: FetchRuleSummaryProps) {
         ruleId,
       });
       setRuleSummary({
-        isLoading: false,
+        isLoadingRule: false,
         rule: response,
-        error: false,
+        errorRule: false,
       });
     } catch (_e) {
       setRuleSummary({
-        isLoading: false,
+        isLoadingRule: false,
         rule: null,
-        error: true,
+        errorRule: true,
       });
     }
   }, [ruleId, http]);
@@ -43,5 +41,5 @@ export function useFetchRule({ ruleId }: FetchRuleSummaryProps) {
     fetchRuleSummary();
   }, [fetchRuleSummary]);
 
-  return { ...ruleSummary, reload: fetchRuleSummary };
+  return { ...ruleSummary, reloadRule: fetchRuleSummary };
 }
