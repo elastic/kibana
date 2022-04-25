@@ -293,7 +293,7 @@ exports.Cluster = class Cluster {
       'cluster.routing.allocation.disk.threshold_enabled=false',
     ];
 
-    if (process.env.JEST_WORKER_ID) {
+    if (process.env.JEST_WORKER_ID || opts.testDefaults) {
       defaultEsArgs = defaultEsArgs.concat([
         'ingest.geoip.downloader.enabled=false',
         'search.check_ccs_compatibility=true',

@@ -30,6 +30,7 @@ exports.help = (defaults = {}) => {
       -E                Additional key=value settings to pass to Elasticsearch
       --skip-ready-check  Disable the ready check,
       --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
+      --test-defaults   Start Elasticsearch with Kibana's integration tests defaults
 
     Example:
 
@@ -46,10 +47,11 @@ exports.run = async (defaults = {}) => {
       esArgs: 'E',
       skipReadyCheck: 'skip-ready-check',
       readyTimeout: 'ready-timeout',
+      testDefaults: 'test-defaults',
     },
 
     string: ['ready-timeout'],
-    boolean: ['skip-ready-check'],
+    boolean: ['skip-ready-check', 'test-defaults'],
 
     default: defaults,
   });

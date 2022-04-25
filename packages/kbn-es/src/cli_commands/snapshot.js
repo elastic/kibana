@@ -36,6 +36,7 @@ exports.help = (defaults = {}) => {
       --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
       --plugins         Comma seperated list of Elasticsearch plugins to install
       --secure-files     Comma seperated list of secure_setting_name=/path pairs
+      --test-defaults   Start Elasticsearch with Kibana's integration tests defaults
 
     Example:
 
@@ -62,10 +63,11 @@ exports.run = async (defaults = {}) => {
       skipReadyCheck: 'skip-ready-check',
       readyTimeout: 'ready-timeout',
       secureFiles: 'secure-files',
+      testDefaults: 'test-defaults',
     },
 
     string: ['version', 'ready-timeout'],
-    boolean: ['download-only', 'use-cached', 'skip-ready-check'],
+    boolean: ['download-only', 'use-cached', 'skip-ready-check', 'test-defaults'],
 
     default: defaults,
   });
