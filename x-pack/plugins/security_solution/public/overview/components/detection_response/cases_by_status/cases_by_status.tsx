@@ -6,14 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { Rotation, ScaleType } from '@elastic/charts';
 import styled from 'styled-components';
 import { FormattedNumber } from '@kbn/i18n-react';
@@ -162,9 +155,7 @@ export const CasesByStatus: React.FC = () => {
                   </b>
                   <> </>
                   <small>
-                    <EuiButtonEmpty onClick={goToCases} flush="left">
-                      {CASES(totalCounts)}
-                    </EuiButtonEmpty>
+                    <EuiLink onClick={goToCases}>{CASES(totalCounts)}</EuiLink>
                   </small>
                 </>
               )}
