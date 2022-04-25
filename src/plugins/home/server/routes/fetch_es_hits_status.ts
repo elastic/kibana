@@ -22,7 +22,7 @@ export const registerHitsStatusRoute = (router: IRouter) => {
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { index, query } = req.body;
-      const client = context.core.elasticsearch.client;
+      const client = (await context.core).elasticsearch.client;
 
       try {
         const body = await client.asCurrentUser.search({
