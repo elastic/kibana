@@ -91,9 +91,9 @@ describe('wrapSearchSourceFetch', () => {
       abortController,
     });
 
-    wrappedFetch(searchSourceInstanceMock);
-    wrappedFetch(searchSourceInstanceMock);
-    wrappedFetch(searchSourceInstanceMock);
+    await wrappedFetch(searchSourceInstanceMock);
+    await wrappedFetch(searchSourceInstanceMock);
+    await wrappedFetch(searchSourceInstanceMock);
 
     expect(searchSourceInstanceMock.fetch).toHaveBeenCalledTimes(3);
 
@@ -102,7 +102,7 @@ describe('wrapSearchSourceFetch', () => {
     expect(stats.esSearchDurationMs).toEqual(999);
 
     expect(logger.debug).toHaveBeenCalledWith(
-      `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {}`
+      'executing query for rule .test-rule-type:abcdefg in space my-space'
     );
   });
 });

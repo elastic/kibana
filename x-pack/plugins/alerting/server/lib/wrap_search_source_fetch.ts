@@ -48,12 +48,10 @@ export function wrapSearchSourceFetch({
         throw e;
       }
     },
-    getMetrics: (): RuleExecutionMetrics => {
-      return {
-        esSearchDurationMs,
-        totalSearchDurationMs,
-        numSearches,
-      };
-    },
+    getMetrics: (): RuleExecutionMetrics => ({
+      esSearchDurationMs,
+      totalSearchDurationMs,
+      numSearches,
+    }),
   };
 }
