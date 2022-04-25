@@ -9,6 +9,7 @@
 import { defaults, keyBy, sortBy } from 'lodash';
 
 import { ElasticsearchClient } from '@kbn/core/server';
+import { convertEsError } from '../errors';
 import { callFieldCapsApi } from '../es_api';
 import { readFieldCapsResponse } from './field_caps_response';
 import { mergeOverrides } from './overrides';
@@ -21,6 +22,27 @@ interface FieldCapabilitiesParams {
   metaFields: string[];
   fieldCapsOptions?: { allow_no_indices: boolean };
   filter?: QueryDslQueryContainer;
+}
+
+async function callMappingApi(params: any) {
+  const {
+    callCluster,
+    indices,
+    fieldCapsOptions = {
+      allow_no_indices: false,
+    },
+  } = params;
+  try {
+    return await callCluster.indices.getMapping(
+      {
+        index: indices,
+        ...fieldCapsOptions,
+      },
+      { meta: true }
+    );
+  } catch (error) {
+    throw convertEsError(indices, error);
+  }
 }
 
 /**
@@ -37,6 +59,44 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
   const { callCluster, indices = [], fieldCapsOptions, filter, metaFields = [] } = params;
   const esFieldCaps = await callFieldCapsApi({ callCluster, indices, fieldCapsOptions, filter });
   const fieldsFromFieldCapsByName = keyBy(readFieldCapsResponse(esFieldCaps.body), 'name');
+
+  // get mapping to retrieve additional field information for TSDB/rollups
+  const mappings = await callMappingApi({ callCluster, indices, fieldCapsOptions, filter });
+
+  const parseMapping = (index: string, mapping: any, currentPath: string[] = []) => {
+    Object.keys(mapping).forEach((fieldName) => {
+      const path = [...currentPath, fieldName];
+      const fullFieldName = path.join('.');
+
+      if (mapping[fieldName].properties) {
+        parseMapping(index, mapping[fieldName].properties, path);
+      } else if (mapping[fieldName].type) {
+        if (!fieldsFromFieldCapsByName[fullFieldName].indices) {
+          fieldsFromFieldCapsByName[fullFieldName].indices = [];
+        }
+        const indexInfo: any = { name: index };
+        if (mapping[fieldName].time_series_metric) {
+          indexInfo.time_series_metric = mapping[fieldName].time_series_metric;
+        }
+        if (mapping[fieldName].time_series_dimension) {
+          indexInfo.time_series_dimension = mapping[fieldName].time_series_dimension;
+        }
+        if (mapping[fieldName].metrics) {
+          indexInfo.allowed_metrics = mapping[fieldName].metrics;
+          indexInfo.default_metric = mapping[fieldName].default_metric;
+        }
+        if (mapping[fieldName].meta) {
+          indexInfo.fixed_interval = mapping[fieldName].meta?.fixed_interval;
+          indexInfo.time_zone = mapping[fieldName].meta?.time_zone;
+        }
+        fieldsFromFieldCapsByName[fullFieldName].indices!.push(indexInfo);
+      }
+    });
+  };
+
+  Object.keys(mappings.body).forEach((index) => {
+    parseMapping(index, mappings.body[index].mappings.properties);
+  });
 
   const allFieldsUnsorted = Object.keys(fieldsFromFieldCapsByName)
     // not all meta fields are provided, so remove and manually add

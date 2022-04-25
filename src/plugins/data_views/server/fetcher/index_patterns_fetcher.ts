@@ -19,6 +19,7 @@ import {
 } from './lib';
 
 export interface FieldDescriptor {
+  indices?: any[];
   aggregatable: boolean;
   name: string;
   readFromDocValues: boolean;

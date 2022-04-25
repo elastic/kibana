@@ -235,6 +235,16 @@ export interface FieldSpecExportFmt {
   indexed?: boolean;
 }
 
+export interface DataViewIndex {
+  name: string;
+  allowed_metrics: string[];
+  default_metric: string[];
+  time_series_dimension: boolean;
+  time_series_metric: string;
+  fixed_interval: string;
+  time_zone: string;
+}
+
 /**
  * @public
  * Serialized version of IndexPatternField
@@ -256,9 +266,7 @@ export interface FieldSpec extends DataViewFieldBase {
   // not persisted
   shortDotsEnable?: boolean;
   isMapped?: boolean;
-  time_series_dimension: boolean,
-  time_series_metric: string,
-  indices: string[]
+  indices: DataViewIndex[];
 }
 
 export type DataViewFieldMap = Record<string, FieldSpec>;
