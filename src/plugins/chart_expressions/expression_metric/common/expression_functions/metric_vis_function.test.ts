@@ -10,7 +10,7 @@ import { metricVisFunction } from './metric_vis_function';
 import type { MetricArguments } from '..';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
-import { LabelPosition } from '../constants';
+import { LabelPosition, IconPositions, IconBackgroundTypes } from '../constants';
 
 describe('interpreter/functions#metric', () => {
   const fn = functionWrapper(metricVisFunction());
@@ -22,6 +22,12 @@ describe('interpreter/functions#metric', () => {
   let args: MetricArguments;
   beforeEach(() => {
     args = {
+      iconType: 'heart',
+      iconColor: '#FF0000',
+      iconPosition: IconPositions.BELOW,
+      iconSize: 'l',
+      iconAlignment: 'center',
+      iconBackground: IconBackgroundTypes.SHADOW,
       percentageMode: false,
       colorMode: 'None',
       palette: {

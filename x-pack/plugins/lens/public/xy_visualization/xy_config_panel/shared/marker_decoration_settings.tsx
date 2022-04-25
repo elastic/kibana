@@ -134,7 +134,7 @@ export const IconSelectSetting = ({
   customIconSet,
 }: {
   currentConfig?: MarkerDecorationConfig;
-  setConfig: (config: MarkerDecorationConfig) => void;
+  setConfig: (config: { icon: string }) => void;
   customIconSet?: IconSet;
 }) => {
   return (

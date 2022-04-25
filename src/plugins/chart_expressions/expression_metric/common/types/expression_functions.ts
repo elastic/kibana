@@ -15,8 +15,9 @@ import {
 } from '@kbn/expressions-plugin';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
+import { $Values } from '@kbn/utility-types';
 import { VisParams, visType, LabelPositionType } from './expression_renderers';
-import { EXPRESSION_METRIC_NAME } from '../constants';
+import { EXPRESSION_METRIC_NAME, IconBackgroundTypes, IconPositions } from '../constants';
 
 export interface MetricArguments {
   percentageMode: boolean;
@@ -30,6 +31,12 @@ export interface MetricArguments {
   bucket?: ExpressionValueVisDimension | string;
   colorFullBackground: boolean;
   autoScale?: boolean;
+  iconType: string;
+  iconColor: string;
+  iconPosition: IconPosition;
+  iconSize: 'xl' | 'xxl' | 'l' | 'm';
+  iconBackground: IconBackgroundType;
+  iconAlignment: 'center' | 'start' | 'end';
 }
 
 export type MetricInput = Datatable;
@@ -46,3 +53,6 @@ export type MetricVisExpressionFunctionDefinition = ExpressionFunctionDefinition
   MetricArguments,
   ExpressionValueRender<MetricVisRenderConfig>
 >;
+
+export type IconBackgroundType = $Values<typeof IconBackgroundTypes>;
+export type IconPosition = $Values<typeof IconPositions>;

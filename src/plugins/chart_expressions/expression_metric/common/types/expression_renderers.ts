@@ -16,6 +16,7 @@ import {
 } from '@kbn/charts-plugin/common';
 import { Style } from '@kbn/expressions-plugin/common';
 import { LabelPosition } from '../constants';
+import { IconBackgroundType, IconPosition } from './expression_functions';
 
 export const visType = 'metric';
 
@@ -38,6 +39,12 @@ export interface MetricVisParam {
   style: MetricStyle;
   colorFullBackground: boolean;
   autoScale?: boolean;
+  iconType: string;
+  iconColor: string;
+  iconPosition: IconPosition;
+  iconSize: 'xl' | 'xxl' | 'l' | 'm';
+  iconBackground: IconBackgroundType;
+  iconAlignment: 'center' | 'start' | 'end';
 }
 
 export interface VisParams {

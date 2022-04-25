@@ -12,3 +12,17 @@ export const LabelPosition = {
   BOTTOM: 'bottom',
   TOP: 'top',
 } as const;
+
+export const IconPositions = {
+  AUTO: 'auto',
+  LEFT: 'left',
+  RIGHT: 'right',
+  ABOVE: 'above',
+  BELOW: 'below',
+} as const;
+
+export const IconBackgroundTypes = {
+  NONE: 'none',
+  SHADOW: 'shadow',
+  COLOR: 'color',
+} as const;

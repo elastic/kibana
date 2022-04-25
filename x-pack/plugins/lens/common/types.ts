@@ -12,6 +12,7 @@ import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { ColorMode } from '@kbn/charts-plugin/common';
+import { IconPosition } from '@kbn/expression-xy-plugin/common';
 import {
   CategoryDisplay,
   layerTypes,
@@ -107,4 +108,10 @@ export interface MetricState {
   titlePosition?: 'top' | 'bottom';
   size?: string;
   textAlign?: 'left' | 'right' | 'center';
+  iconType?: string;
+  iconColor?: string;
+  iconPosition?: IconPosition;
+  iconSize?: 'xl' | 'xxl' | 'l' | 'm';
+  iconBackground?: 'none' | 'shadow' | 'color';
+  iconAlignment?: 'start' | 'center' | 'end';
 }

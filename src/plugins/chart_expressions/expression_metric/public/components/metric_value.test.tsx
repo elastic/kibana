@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { MetricVisValue } from './metric_value';
 import { MetricOptions, MetricStyle, VisParams } from '../../common/types';
-import { LabelPosition } from '../../common/constants';
+import { IconBackgroundTypes, IconPositions, LabelPosition } from '../../common/constants';
 
 const baseMetric: MetricOptions = { label: 'Foo', value: 'foo', lightText: false };
 const font: MetricStyle = {
@@ -25,6 +25,15 @@ const font: MetricStyle = {
   /* stylelint-enable */
 };
 
+const iconProps = {
+  iconType: 'empty',
+  iconColor: '#FF0000',
+  iconPosition: IconPositions.BELOW,
+  iconSize: 'l',
+  iconBackground: IconBackgroundTypes.SHADOW,
+  iconAlignment: 'center',
+} as const;
+
 const labelConfig: VisParams['metric']['labels'] = {
   show: true,
   position: LabelPosition.BOTTOM,
@@ -35,6 +44,7 @@ describe('MetricVisValue', () => {
   it('should be wrapped in button if having a click listener', () => {
     const component = shallow(
       <MetricVisValue
+        {...iconProps}
         style={font}
         metric={baseMetric}
         onFilter={() => {}}
@@ -48,6 +58,7 @@ describe('MetricVisValue', () => {
   it('should not be wrapped in button without having a click listener', () => {
     const component = shallow(
       <MetricVisValue
+        {...iconProps}
         style={font}
         metric={baseMetric}
         colorFullBackground={false}
@@ -61,6 +72,7 @@ describe('MetricVisValue', () => {
     const onFilter = jest.fn();
     const component = shallow(
       <MetricVisValue
+        {...iconProps}
         style={font}
         metric={baseMetric}
         onFilter={onFilter}
@@ -75,6 +87,7 @@ describe('MetricVisValue', () => {
   it('should not add -isfilterable class if onFilter is not provided', () => {
     const component = shallow(
       <MetricVisValue
+        {...iconProps}
         style={font}
         metric={baseMetric}
         colorFullBackground={false}
@@ -89,6 +102,7 @@ describe('MetricVisValue', () => {
     const onFilter = jest.fn();
     const component = shallow(
       <MetricVisValue
+        {...iconProps}
         style={font}
         metric={baseMetric}
         onFilter={onFilter}
@@ -103,6 +117,7 @@ describe('MetricVisValue', () => {
   it('should add correct class name if colorFullBackground is true', () => {
     const component = shallow(
       <MetricVisValue
+        {...iconProps}
         style={font}
         metric={baseMetric}
         onFilter={() => {}}

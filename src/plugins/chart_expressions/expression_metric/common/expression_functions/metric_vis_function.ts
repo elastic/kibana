@@ -16,7 +16,12 @@ import {
 import { ColorMode } from '@kbn/charts-plugin/common';
 import { visType } from '../types';
 import { MetricVisExpressionFunctionDefinition } from '../types';
-import { EXPRESSION_METRIC_NAME, LabelPosition } from '../constants';
+import {
+  EXPRESSION_METRIC_NAME,
+  IconBackgroundTypes,
+  IconPositions,
+  LabelPosition,
+} from '../constants';
 
 const errors = {
   severalMetricsAndColorFullBackgroundSpecifiedError: () =>
@@ -125,6 +130,58 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       }),
       required: false,
     },
+    iconType: {
+      default: 'empty',
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.icon.iconType.help', {
+        defaultMessage: 'Icon type',
+      }),
+    },
+    iconColor: {
+      default: '#000000',
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.icon.iconColor.help', {
+        defaultMessage: 'Icon color',
+      }),
+    },
+    iconPosition: {
+      default: IconPositions.RIGHT,
+      types: ['string'],
+      options: [
+        IconPositions.ABOVE,
+        IconPositions.AUTO,
+        IconPositions.BELOW,
+        IconPositions.LEFT,
+        IconPositions.RIGHT,
+      ],
+      help: i18n.translate('expressionMetricVis.function.icon.iconPosition.help', {
+        defaultMessage: 'Icon aligment',
+      }),
+    },
+    iconSize: {
+      default: 'm',
+      types: ['string'],
+      options: ['m', 'l', 'xl', 'xxl'],
+      help: i18n.translate('expressionMetricVis.function.icon.iconSize.help', {
+        defaultMessage: 'Icon size',
+      }),
+    },
+    iconBackground: {
+      default: IconBackgroundTypes.SHADOW,
+      types: ['string'],
+      options: [IconBackgroundTypes.NONE, IconBackgroundTypes.SHADOW, IconBackgroundTypes.COLOR],
+      help: i18n.translate('expressionMetricVis.function.icon.iconBackground.help', {
+        defaultMessage: 'Icon background',
+      }),
+    },
+    iconAlignment: {
+      default: 'center',
+      types: ['string'],
+      options: ['center', 'end', 'start'],
+      help: i18n.translate('expressionMetricVis.function.icon.iconAlignment.help', {
+        defaultMessage: 'Icon alignment',
+      }),
+    },
   },
   fn(input, args, handlers) {
     if (args.percentageMode && !args.palette?.params) {
@@ -191,6 +248,12 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
               ...args.font,
             },
             autoScale: args.autoScale,
+            iconType: args.iconType,
+            iconColor: args.iconColor,
+            iconPosition: args.iconPosition,
+            iconSize: args.iconSize,
+            iconBackground: args.iconBackground,
+            iconAlignment: args.iconAlignment,
           },
           dimensions: {
             metrics: args.metric,

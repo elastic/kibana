@@ -4,6 +4,12 @@ exports[`MetricVisComponent should render correct structure for multi-value metr
 Array [
   <MetricVisValue
     colorFullBackground={false}
+    iconAlignment="center"
+    iconBackground="shadow"
+    iconColor="#FF0000"
+    iconPosition="below"
+    iconSize="l"
+    iconType="empty"
     key="0"
     labelConfig={
       Object {
@@ -38,6 +44,12 @@ Array [
   />,
   <MetricVisValue
     colorFullBackground={false}
+    iconAlignment="center"
+    iconBackground="shadow"
+    iconColor="#FF0000"
+    iconPosition="below"
+    iconSize="l"
+    iconType="empty"
     key="1"
     labelConfig={
       Object {
@@ -76,6 +88,12 @@ Array [
 exports[`MetricVisComponent should render correct structure for single metric 1`] = `
 <MetricVisValue
   colorFullBackground={false}
+  iconAlignment="center"
+  iconBackground="shadow"
+  iconColor="#FF0000"
+  iconPosition="below"
+  iconSize="l"
+  iconType="empty"
   key="0"
   labelConfig={
     Object {

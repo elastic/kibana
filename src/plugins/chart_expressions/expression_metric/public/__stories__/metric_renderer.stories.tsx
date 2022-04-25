@@ -15,7 +15,7 @@ import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
 import { getMetricVisRenderer } from '../expression_renderers';
 import { MetricStyle, MetricVisRenderConfig, visType } from '../../common/types';
-import { LabelPosition } from '../../common/constants';
+import { IconBackgroundTypes, IconPositions, LabelPosition } from '../../common/constants';
 
 const palette: CustomPaletteState = {
   colors: ['rgb(219 231 38)', 'rgb(112 38 231)', 'rgb(38 124 231)'],
@@ -66,6 +66,12 @@ const config: MetricVisRenderConfig = {
       percentageMode: false,
       colorFullBackground: false,
       style,
+      iconType: 'heart',
+      iconColor: '#FF0000',
+      iconPosition: IconPositions.BELOW,
+      iconSize: 'l',
+      iconBackground: IconBackgroundTypes.SHADOW,
+      iconAlignment: 'center',
     },
     dimensions: {
       metrics: [

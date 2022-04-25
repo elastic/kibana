@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import MetricVisComponent, { MetricVisComponentProps } from './metric_component';
-import { LabelPosition } from '../../common/constants';
+import { IconBackgroundTypes, IconPositions, LabelPosition } from '../../common/constants';
 
 jest.mock('../services', () => ({
   getFormatService: () => {
@@ -59,6 +59,12 @@ describe('MetricVisComponent', function () {
         style: { spec: {}, type: 'style', css: '' },
         position: LabelPosition.BOTTOM,
       },
+      iconType: 'empty',
+      iconColor: '#FF0000',
+      iconPosition: IconPositions.BELOW,
+      iconSize: 'l',
+      iconBackground: IconBackgroundTypes.SHADOW,
+      iconAlignment: 'center',
     },
     dimensions: {
       metrics: [{ accessor: 0, type: 'vis_dimension', format: { params: {}, id: 'number' } }],

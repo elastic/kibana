@@ -45,6 +45,32 @@ const getFontSizeAndUnit = (fontSize: string) => {
   };
 };
 
+function getIconAlignment(
+  textAlign?: MetricState['textAlign'],
+  iconPosition?: MetricState['iconPosition']
+) {
+  if (iconPosition === 'left' || iconPosition === 'right' || textAlign === 'center') {
+    return 'center';
+  }
+  if (textAlign === 'right') {
+    return 'end';
+  }
+  return 'start';
+}
+
+function getIconSize(textSize: string) {
+  if (textSize === 'xs') {
+    return 'm';
+  }
+  if (textSize === 's') {
+    return 'l';
+  }
+  if (['l', 'm'].includes(textSize)) {
+    return 'xl';
+  }
+  return 'xxl';
+}
+
 const toExpression = (
   paletteService: PaletteRegistry,
   state: MetricState,
@@ -94,7 +120,15 @@ const toExpression = (
     xl: fontSizes.xxl.size * 2.5,
     xxl: fontSizes.xxl.size * 3,
   };
-  const metricFontSize = labelToMetricFontSizeMap[state?.size || DEFAULT_TITLE_SIZE];
+  const isReducedMode = attributes?.mode === 'reduced';
+
+  const metricFontSize = !isReducedMode
+    ? labelToMetricFontSizeMap[state?.size || DEFAULT_TITLE_SIZE]
+    : labelToMetricFontSizeMap.xs;
+
+  const iconAlignment = getIconAlignment(state?.textAlign, state?.iconPosition);
+
+  const iconSize = getIconSize(state?.size || DEFAULT_TITLE_SIZE);
 
   return {
     type: 'expression',
@@ -115,7 +149,6 @@ const toExpression = (
                     align: [state?.textAlign || DEFAULT_TEXT_ALIGNMENT],
                     size: [metricFontSize],
                     weight: ['600'],
-                    lHeight: [metricFontSize * 1.5],
                     sizeUnit: [labelFont.sizeUnit],
                   },
                 },
@@ -153,7 +186,7 @@ const toExpression = (
               ],
             },
           ],
-          showLabels: [!attributes?.mode || attributes?.mode === 'full'],
+          showLabels: [!isReducedMode],
           colorMode: !canColor ? [ColorMode.None] : [state?.colorMode || ColorMode.None],
           autoScale: [true],
           colorFullBackground: [true],
@@ -161,6 +194,12 @@ const toExpression = (
             state?.colorMode && state?.colorMode !== ColorMode.None
               ? [paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)]
               : [],
+          iconType: [!isReducedMode && state?.iconType ? state?.iconType : 'empty'],
+          iconColor: [state?.iconColor || ''],
+          iconPosition: [state?.iconPosition || 'below'],
+          iconSize: [iconSize],
+          iconBackground: [state?.iconBackground || 'shadow'],
+          iconAlignment: [iconAlignment],
         },
       },
     ],

@@ -15,7 +15,7 @@ export function hasIcon(icon: string | undefined): icon is string {
 
 export type IconSet = Array<{ value: string; label: string; icon?: IconType }>;
 
-export const euiIconsSet = [
+export const defualtEuiIconSet = [
   {
     value: 'empty',
     label: i18n.translate('xpack.lens.xyChart.iconSelect.noIconLabel', {
@@ -87,7 +87,7 @@ const IconView = (props: { value?: string; label: string; icon?: IconType }) => 
 export const IconSelect = ({
   value,
   onChange,
-  customIconSet = euiIconsSet,
+  customIconSet = defualtEuiIconSet,
 }: {
   value?: string;
   onChange: (newIcon: string) => void;

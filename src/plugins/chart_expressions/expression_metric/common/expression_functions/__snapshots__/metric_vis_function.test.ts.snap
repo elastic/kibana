@@ -42,6 +42,12 @@ Object {
       "metric": Object {
         "autoScale": undefined,
         "colorFullBackground": false,
+        "iconAlignment": "center",
+        "iconBackground": "shadow",
+        "iconColor": "#FF0000",
+        "iconPosition": "below",
+        "iconSize": "l",
+        "iconType": "heart",
         "labels": Object {
           "position": "bottom",
           "show": true,

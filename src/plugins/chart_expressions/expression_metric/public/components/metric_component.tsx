@@ -150,6 +150,12 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
         autoScale={this.props.visParams.metric.autoScale}
         colorFullBackground={this.props.visParams.metric.colorFullBackground}
         labelConfig={this.props.visParams.metric.labels}
+        iconBackground={this.props.visParams.metric.iconBackground}
+        iconAlignment={this.props.visParams.metric.iconAlignment}
+        iconColor={this.props.visParams.metric.iconColor}
+        iconPosition={this.props.visParams.metric.iconPosition}
+        iconSize={this.props.visParams.metric.iconSize}
+        iconType={this.props.visParams.metric.iconType}
       />
     );
   };
