@@ -35,7 +35,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
     this._isSymbolizedAsIcon = isSymbolizedAsIcon;
   }
 
-  supportsMbFeatureState() {
+  supportsFeatureState() {
     // mb style "icon-size" does not support feature state
     if (this.getStyleName() === VECTOR_STYLES.ICON_SIZE && this._isSymbolizedAsIcon) {
       return false;
@@ -46,7 +46,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
       return false;
     }
 
-    return super.supportsMbFeatureState();
+    return true;
   }
 
   syncHaloWidthWithMb(mbLayerId: string, mbMap: MbMap) {
