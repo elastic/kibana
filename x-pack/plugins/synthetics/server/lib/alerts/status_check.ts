@@ -20,7 +20,7 @@ import {
   Ping,
   GetMonitorAvailabilityParams,
 } from '../../../common/runtime_types';
-import { MONITOR_STATUS } from '../../../common/constants/alerts';
+import { CLIENT_ALERT_TYPES, MONITOR_STATUS } from '../../../common/constants/alerts';
 import { updateState, getViewInAppUrl, setRecoveredAlertsContext } from './common';
 import {
   commonMonitorStateI18,
@@ -125,8 +125,8 @@ export const formatFilterString = async (
       libs?.requests?.getIndexPattern
         ? libs?.requests?.getIndexPattern({ uptimeEsClient })
         : getUptimeIndexPattern({
-          uptimeEsClient,
-        }),
+            uptimeEsClient,
+          }),
     filters,
     search
   );
@@ -224,9 +224,9 @@ const uniqueAvailMonitorIds = (items: GetMonitorAvailabilityResult[]): Set<strin
   );
 
 export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (server, libs) => ({
-  id: 'xpack.uptime.alerts.monitorStatus',
+  id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
   producer: 'uptime',
-  name: i18n.translate('xpack.uptime.alerts.monitorStatus', {
+  name: i18n.translate('xpack.synthetics.alerts.monitorStatus', {
     defaultMessage: 'Uptime monitor status',
   }),
   validate: {

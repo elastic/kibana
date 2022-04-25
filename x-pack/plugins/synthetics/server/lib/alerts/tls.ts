@@ -10,7 +10,7 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { UptimeAlertTypeFactory } from './types';
 import { updateState, generateAlertMessage, setRecoveredAlertsContext } from './common';
-import { TLS } from '../../../common/constants/alerts';
+import { CLIENT_ALERT_TYPES, TLS } from '../../../common/constants/alerts';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 import { Cert, CertResult } from '../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
@@ -44,13 +44,13 @@ const getValidAfter = ({ not_after: date }: Cert): TLSContent => {
   const formattedDate = moment(date).format('MMM D, YYYY z');
   return relativeDate >= 0
     ? {
-      summary: tlsTranslations.validAfterExpiredString(formattedDate, relativeDate),
-      status: tlsTranslations.expiredLabel,
-    }
+        summary: tlsTranslations.validAfterExpiredString(formattedDate, relativeDate),
+        status: tlsTranslations.expiredLabel,
+      }
     : {
-      summary: tlsTranslations.validAfterExpiringString(formattedDate, Math.abs(relativeDate)),
-      status: tlsTranslations.expiringLabel,
-    };
+        summary: tlsTranslations.validAfterExpiringString(formattedDate, Math.abs(relativeDate)),
+        status: tlsTranslations.expiringLabel,
+      };
 };
 
 const getValidBefore = ({ not_before: date }: Cert): TLSContent => {
@@ -59,13 +59,13 @@ const getValidBefore = ({ not_before: date }: Cert): TLSContent => {
   const formattedDate = moment(date).format('MMM D, YYYY z');
   return relativeDate >= 0
     ? {
-      summary: tlsTranslations.validBeforeExpiredString(formattedDate, relativeDate),
-      status: tlsTranslations.agingLabel,
-    }
+        summary: tlsTranslations.validBeforeExpiredString(formattedDate, relativeDate),
+        status: tlsTranslations.agingLabel,
+      }
     : {
-      summary: tlsTranslations.validBeforeExpiringString(formattedDate, Math.abs(relativeDate)),
-      status: tlsTranslations.invalidLabel,
-    };
+        summary: tlsTranslations.validBeforeExpiringString(formattedDate, Math.abs(relativeDate)),
+        status: tlsTranslations.invalidLabel,
+      };
 };
 
 export const getCertSummary = (
@@ -94,7 +94,7 @@ export const getCertSummary = (
 };
 
 export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server, libs) => ({
-  id: 'xpack.uptime.alerts.tlsCertificate',
+  id: CLIENT_ALERT_TYPES.TLS,
   producer: 'uptime',
   name: tlsTranslations.alertFactoryName,
   validate: {
@@ -129,11 +129,13 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server,
       uptimeEsClient,
       pageIndex: 0,
       size: 1000,
-      notValidAfter: `now+${dynamicSettings?.certExpirationThreshold ??
+      notValidAfter: `now+${
+        dynamicSettings?.certExpirationThreshold ??
         DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold
-        }d`,
-      notValidBefore: `now-${dynamicSettings?.certAgeThreshold ?? DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold
-        }d`,
+      }d`,
+      notValidBefore: `now-${
+        dynamicSettings?.certAgeThreshold ?? DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold
+      }d`,
       sortBy: 'common_name',
       direction: 'desc',
     });
@@ -145,7 +147,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server,
         const absoluteExpirationThreshold = moment()
           .add(
             dynamicSettings.certExpirationThreshold ??
-            DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold,
+              DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold,
             'd'
           )
           .valueOf();

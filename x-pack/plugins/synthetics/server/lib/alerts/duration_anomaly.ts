@@ -21,7 +21,7 @@ import {
   getViewInAppUrl,
   setRecoveredAlertsContext,
 } from './common';
-import { DURATION_ANOMALY } from '../../../common/constants/alerts';
+import { CLIENT_ALERT_TYPES, DURATION_ANOMALY } from '../../../common/constants/alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
 import { UptimeCorePluginsSetup } from '../adapters/framework';
 import { UptimeAlertTypeFactory } from './types';
@@ -82,7 +82,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
   libs,
   plugins
 ) => ({
-  id: 'xpack.uptime.alerts.durationAnomaly',
+  id: CLIENT_ALERT_TYPES.DURATION_ANOMALY,
   producer: 'uptime',
   name: durationAnomalyTranslations.alertFactoryName,
   validate: {

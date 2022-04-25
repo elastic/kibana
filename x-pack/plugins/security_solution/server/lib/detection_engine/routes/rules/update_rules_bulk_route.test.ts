@@ -10,7 +10,7 @@ import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../mach
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import {
   getEmptyFindResult,
-  getAlertMock,
+  getRuleMock,
   getFindResultWithSingleHit,
   getUpdateBulkRequest,
   typicalMlRulePayload,
@@ -24,10 +24,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('update_rules_bulk - %s', (_, isRuleRegistryEnabled) => {
+describe('update_rules_bulk', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
@@ -38,19 +35,20 @@ describe.each([
     ml = mlServicesMock.createSetupContract();
     const logger = loggingSystemMock.createLogger();
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
-    clients.rulesClient.update.mockResolvedValue(
-      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
-    );
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
     clients.appClient.getSignalsIndex.mockReturnValue('.siem-signals-test-index');
 
-    updateRulesBulkRoute(server.router, ml, isRuleRegistryEnabled, logger);
+    updateRulesBulkRoute(server.router, ml, logger);
   });
 
   describe('status codes', () => {
     test('returns 200', async () => {
-      const response = await server.inject(getUpdateBulkRequest(), context);
+      const response = await server.inject(
+        getUpdateBulkRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
@@ -62,7 +60,10 @@ describe.each([
           rule_id: 'rule-1',
         },
       ];
-      const response = await server.inject(getUpdateBulkRequest(), context);
+      const response = await server.inject(
+        getUpdateBulkRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual(expected);
@@ -79,7 +80,10 @@ describe.each([
           rule_id: 'rule-1',
         },
       ];
-      const response = await server.inject(getUpdateBulkRequest(), context);
+      const response = await server.inject(
+        getUpdateBulkRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
       expect(response.body).toEqual(expected);
     });
@@ -96,7 +100,7 @@ describe.each([
         body: [typicalMlRulePayload()],
       });
 
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([
         {
@@ -117,7 +121,7 @@ describe.each([
         path: DETECTION_ENGINE_RULES_BULK_UPDATE,
         body: [{ ...getCreateRulesSchemaMock(), rule_id: undefined }],
       });
-      const response = await server.inject(noIdRequest, context);
+      const response = await server.inject(noIdRequest, requestContextMock.convertContext(context));
       expect(response.body).toEqual([
         {
           error: { message: 'either "id" or "rule_id" must be set', status_code: 400 },
