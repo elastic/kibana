@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RuleExecutionStatusValues } from '../../../../alerting/common';
+import { RuleExecutionStatusValues } from '@kbn/alerting-plugin/common';
 
 export const getColorStatusBased = (ruleStatus: string) => {
   switch (ruleStatus) {

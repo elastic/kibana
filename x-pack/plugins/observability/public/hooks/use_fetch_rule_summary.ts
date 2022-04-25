@@ -6,8 +6,8 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
+import { loadRuleSummary } from '@kbn/triggers-actions-ui-plugin/public';
 import { FetchRuleSummaryProps, FetchRuleSummary } from '../pages/rule_details/types';
-import { loadRuleSummary } from '../../../triggers_actions_ui/public';
 
 export function useFetchRuleSummary({ ruleId, http }: FetchRuleSummaryProps) {
   const [ruleSummary, setRuleSummary] = useState<FetchRuleSummary>({

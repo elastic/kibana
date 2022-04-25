@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HttpSetup } from 'kibana/public';
-import { Rule, RuleSummary } from '../../../../triggers_actions_ui/public';
+import { HttpSetup } from '@kbn/core/public';
+import { Rule, RuleSummary } from '@kbn/triggers-actions-ui-plugin/public';
 
 export interface RuleDetailsPathParams {
   ruleId: string;

@@ -23,9 +23,9 @@ import {
   EuiHorizontalRule,
   EuiTabbedContent,
 } from '@elastic/eui';
-import { ActionGroup } from '../../../../alerting/common';
-import { AlertStatusValues } from '../../../../alerting/common';
-import { RuleType, AlertStatus } from '../../../../triggers_actions_ui/public';
+import { ActionGroup } from '@kbn/alerting-plugin/common';
+import { AlertStatusValues } from '@kbn/alerting-plugin/common';
+import { RuleType, AlertStatus } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   AlertListItem,
   RuleDetailsPathParams,
