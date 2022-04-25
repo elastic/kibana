@@ -1,7 +1,7 @@
 ---
-id: sharedUX/Components/EmptyStatePage
-slug: /shared-ux-components/empty_state_page
-title: Empty State Page
+id: sharedUX/Components/KibanaNoDataPage
+slug: /shared-ux-components/kibana_no_data_page
+title: Kibana No Data Page
 summary: A page to be displayed when there is no data in Elasticsearch, or no data views
 tags: ['shared-ux', 'component']
 date: 2022-04-20
@@ -12,7 +12,7 @@ date: 2022-04-20
 Many plugins display "no data" page, either when there is no data in Elasticsearch, or there haven't been any data views created yet. This component is meant
 to be used in those scenarios. It displays an appropriate message to the user and facilitate addition of integrations and creation of data views. 
 
-## Component: `EmptyStatePage`
+## Component: `KibanaNoDataPage`
 
 - uses `hasUserDataView` and `hasData` API from `HasData` service in `data_views` plugin to check for existence of data / data views
 - uses `onDataViewCreated` callback to be called once the data view has been created

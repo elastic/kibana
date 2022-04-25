@@ -18,23 +18,6 @@ export const LazyToolbarButton = React.lazy(() =>
 export const RedirectAppLinks = React.lazy(() => import('./redirect_app_links'));
 
 /**
- * A pure `NoDataViews` component, with no services hooks. Consumers should use `React.Suspennse` or the
- * `withSuspense` HOC to load this component.
- */
-export const EmptyStatePageLazy = React.lazy(() =>
-  import('./empty_state').then(({ EmptyStatePage }) => ({
-    default: EmptyStatePage,
-  }))
-);
-
-/**
- * A pure `NoDataViews` component, with no services hooks. The component is wrapped by the `withSuspense` HOC.
- * This component can be used directly by consumers and will load the `LazyNoDataViewsComponent` lazily with
- * a predefined fallback and error boundary.
- */
-export const EmptyStatePage = withSuspense(EmptyStatePageLazy);
-
-/**
  * A `ToolbarButton` component that is wrapped by the `withSuspense` HOC.  This component can
  * be used directly by consumers and will load the `LazyToolbarButton` component lazily with
  * a predefined fallback and error boundary.
@@ -60,6 +43,23 @@ export const LazyIconButtonGroup = React.lazy(() =>
  * The IconButtonGroup component that is wrapped by the `withSuspence` HOC.
  */
 export const IconButtonGroup = withSuspense(LazyIconButtonGroup);
+
+/**
+ *  A `KibanaNoDataPage` component, with service hooks. Consumers should use `React.Suspennse` or the
+ * `withSuspense` HOC to load this component.
+ */
+export const KibanaNoDataPageLazy = React.lazy(() =>
+  import('./empty_state').then(({ KibanaNoDataPage }) => ({
+    default: KibanaNoDataPage,
+  }))
+);
+
+/**
+ * A `KibanaNoDataPage` component. The component is wrapped by the `withSuspense` HOC.
+ * This component can be used directly by consumers and will load the `KibanaNoDataPageLazy` lazily with
+ * a predefined fallback and error boundary.
+ */
+export const KibanaNoDataPage = withSuspense(KibanaNoDataPageLazy);
 
 /**
  * The lazily loaded `KibanaPageTemplate` component that is wrapped by the `withSuspense` HOC. Consumers should use

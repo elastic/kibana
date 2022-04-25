@@ -10,12 +10,12 @@ import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { servicesFactory, DataServiceFactoryConfig } from '@kbn/shared-ux-storybook';
 import { SharedUxServicesProvider } from '@kbn/shared-ux-services';
-import mdx from './empty_state_page.mdx';
+import mdx from './kibana_no_data_page.mdx';
 import { NoDataPageProps } from '../page_template';
-import { EmptyStatePage } from './empty_state_page';
+import { KibanaNoDataPage } from './kibana_no_data_page';
 
 export default {
-  title: 'Empty State Page',
+  title: 'No Data/Kibana No Data Page',
   description: 'A component to display when there is no data available',
   parameters: {
     docs: {
@@ -36,17 +36,17 @@ const noDataConfig = {
   docsLink: 'http://www.docs.com',
 };
 
-type Params = Pick<NoDataPageProps, 'solution' | 'logo' | 'pageTitle'> & DataServiceFactoryConfig;
+type Params = Pick<NoDataPageProps, 'solution' | 'logo'> & DataServiceFactoryConfig;
 
 export const PureComponent = (params: Params) => {
-  const { solution, logo, pageTitle, hasESData, hasUserDataView } = params;
+  const { solution, logo, hasESData, hasUserDataView } = params;
   const serviceParams = { hasESData, hasUserDataView, hasDataViews: false };
   const services = servicesFactory(serviceParams);
   return (
     <SharedUxServicesProvider {...services}>
-      <EmptyStatePage
+      <KibanaNoDataPage
         onDataViewCreated={action('onDataViewCreated')}
-        noDataConfig={{ ...noDataConfig, solution, logo, pageTitle }}
+        noDataConfig={{ ...noDataConfig, solution, logo, pageTitle: 'Your Solution Name' }}
       />
     </SharedUxServicesProvider>
   );
@@ -54,10 +54,6 @@ export const PureComponent = (params: Params) => {
 
 PureComponent.argTypes = {
   solution: {
-    control: 'text',
-    defaultValue: 'Observability',
-  },
-  pageTitle: {
     control: 'text',
     defaultValue: 'Observability',
   },

@@ -15,7 +15,7 @@ export interface Props {
   noDataConfig: NoDataPageProps;
 }
 
-export const EmptyStatePage = ({ onDataViewCreated, noDataConfig }: Props) => {
+export const KibanaNoDataPage = ({ onDataViewCreated, noDataConfig }: Props) => {
   const { hasESData, hasUserDataView } = useData();
   const [dataExists, setDataExists] = useState(false);
   const [hasUserDataViews, setHasUserDataViews] = useState(false);

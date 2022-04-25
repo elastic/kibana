@@ -7,4 +7,4 @@
  */
 
 export { NoDataViews, NoDataViewsComponent } from './no_data_views';
-export { EmptyStatePage } from './empty_state_page';
+export { KibanaNoDataPage } from './kibana_no_data_page';

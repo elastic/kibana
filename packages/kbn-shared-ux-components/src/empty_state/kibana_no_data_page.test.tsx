@@ -12,11 +12,11 @@ import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { SharedUxServicesProvider, mockServicesFactory } from '@kbn/shared-ux-services';
 
-import { EmptyStatePage } from './empty_state_page';
+import { KibanaNoDataPage } from './kibana_no_data_page';
 import { NoDataConfigPage } from '../page_template';
 import { NoDataViews } from './no_data_views';
 
-describe('empty state page', () => {
+describe('Kibana No Data Page', () => {
   const noDataConfig = {
     solution: 'Analytics',
     pageTitle: 'Analytics',
@@ -43,7 +43,7 @@ describe('empty state page', () => {
     const services = mockServicesFactory({ config: { ...config, hasESData: false } });
     const component = mountWithIntl(
       <SharedUxServicesProvider {...services}>
-        <EmptyStatePage noDataConfig={noDataConfig} onDataViewCreated={onDataViewCreated} />
+        <KibanaNoDataPage noDataConfig={noDataConfig} onDataViewCreated={onDataViewCreated} />
       </SharedUxServicesProvider>
     );
 
@@ -58,7 +58,7 @@ describe('empty state page', () => {
     const services = mockServicesFactory({ config: { ...config, hasESData: true } });
     const component = mountWithIntl(
       <SharedUxServicesProvider {...services}>
-        <EmptyStatePage noDataConfig={noDataConfig} onDataViewCreated={onDataViewCreated} />
+        <KibanaNoDataPage noDataConfig={noDataConfig} onDataViewCreated={onDataViewCreated} />
       </SharedUxServicesProvider>
     );
 
