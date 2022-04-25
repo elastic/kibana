@@ -21,6 +21,7 @@ import {
   SOURCES_PATH,
   PRIVATE_SOURCES_PATH,
   SOURCE_DETAILS_PATH,
+  getAddPath,
 } from './routes';
 
 const TestComponent = ({ id, isOrg }: { id: string; isOrg?: boolean }) => {
@@ -85,4 +86,35 @@ describe('getReindexJobRoute', () => {
       `/p/sources/${SOURCE_ID}/schemas/${REINDEX_ID}`
     );
   });
+});
+
+describe('getAddPath', () => {
+  it('should handle a service type', () => {
+    expect(getAddPath('share_point')).toEqual('/sources/add/share_point');
+  });
+
+  it('should should handle an external service type with no base service type', () => {
+    expect(getAddPath('external')).toEqual('/sources/add/external');
+  });
+
+  it('should should handle an external service type with a base service type', () => {
+    expect(getAddPath('external', 'share_point')).toEqual('/sources/add/share_point/external');
+  });
+  it('should should handle a custom service type with no base service type', () => {
+    expect(getAddPath('external')).toEqual('/sources/add/external');
+  });
+
+  it('should should handle a custom service type with a base service type', () => {
+    expect(getAddPath('custom', 'share_point_server')).toEqual(
+      '/sources/add/share_point_server/custom'
+    );
+  });
+});
+
+describe('getEditPath', () => {
+  it('should handle a service type', () => {
+    expect(getAddPath('share_point')).toEqual('/sources/add/share_point');
+  });
+
+  // TODO this should handle base service type once we are getting it back from registered external connectors
 });

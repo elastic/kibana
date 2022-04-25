@@ -110,7 +110,7 @@ export const Overview: React.FC = () => {
 
   const serviceType = contentSource.baseServiceType || contentSource.serviceType;
 
-  const sourceData = getSourceData(serviceType) || staticCustomSourceData;
+  const sourceData = getSourceData(serviceType);
 
   const [isSyncing, setIsSyncing] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -431,7 +431,11 @@ export const Overview: React.FC = () => {
         </h6>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <CustomSourceDeployment source={contentSource} sourceData={sourceData} small />
+      <CustomSourceDeployment
+        source={contentSource}
+        sourceData={sourceData || staticCustomSourceData}
+        small
+      />
     </>
   );
 

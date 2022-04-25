@@ -98,6 +98,7 @@ export const SourcesRouter: React.FC = () => {
             key={i}
             exact
             path={`${getSourcesPath(getAddPath(serviceType), isOrganization)}/choice`}
+            data-test-subj="ConnectorChoiceRoute"
           >
             {!hasPlatinumLicense && accountContextOnly ? (
               <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
@@ -117,6 +118,7 @@ export const SourcesRouter: React.FC = () => {
               getAddPath(serviceType, baseServiceType),
               isOrganization
             )}/intro`}
+            data-test-subj="ConnectorIntroRoute"
           >
             {!hasPlatinumLicense && accountContextOnly ? (
               <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
@@ -133,6 +135,7 @@ export const SourcesRouter: React.FC = () => {
             key={i}
             exact
             path={`${getSourcesPath(getAddPath(serviceType, baseServiceType), isOrganization)}/`}
+            data-test-subj="AddSourceRoute"
           >
             {!hasPlatinumLicense && accountContextOnly ? (
               <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
@@ -150,6 +153,7 @@ export const SourcesRouter: React.FC = () => {
             getAddPath(sourceData.serviceType, sourceData.baseServiceType),
             isOrganization
           )}/connect`}
+          data-test-subj="AddSourceConnectRoute"
         >
           <AddSource connect sourceData={sourceData} />
         </Route>
@@ -162,6 +166,7 @@ export const SourcesRouter: React.FC = () => {
             getAddPath(sourceData.serviceType, sourceData.baseServiceType),
             isOrganization
           )}/reauthenticate`}
+          data-test-subj="AddSourceReauthenticateRoute"
         >
           <AddSource reAuthenticate sourceData={sourceData} />
         </Route>
@@ -176,6 +181,7 @@ export const SourcesRouter: React.FC = () => {
                 getAddPath(sourceData.serviceType, sourceData.baseServiceType),
                 isOrganization
               )}/configure`}
+              data-test-subj="AddSourceConfigureRoute"
             >
               <AddSource configure sourceData={sourceData} />
             </Route>
@@ -191,6 +197,7 @@ export const SourcesRouter: React.FC = () => {
               getAddPath(serviceType, baseServiceType),
               isOrganization
             )}/connector_config`}
+            data-test-subj="ExternalConnectorConfigRoute"
           >
             {!hasPlatinumLicense && accountContextOnly ? (
               <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
@@ -207,6 +214,7 @@ export const SourcesRouter: React.FC = () => {
             key={i}
             exact
             path={`${getSourcesPath(getAddPath(serviceType, baseServiceType), isOrganization)}/`}
+            data-test-subj="AddCustomSourceRoute"
           >
             {!hasPlatinumLicense && accountContextOnly ? (
               <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />

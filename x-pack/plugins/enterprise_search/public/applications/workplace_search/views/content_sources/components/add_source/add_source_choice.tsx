@@ -22,18 +22,18 @@ import { ConfigurationChoice } from './configuration_choice';
 
 import './add_source.scss';
 
-interface AddSourceIntroProps {
+interface AddSourceChoiceProps {
   sourceData: SourceDataItem;
 }
 
-export const AddSourceChoice: React.FC<AddSourceIntroProps> = (props) => {
+export const AddSourceChoice: React.FC<AddSourceChoiceProps> = (props) => {
   const { name } = props.sourceData;
   const { isOrganization } = useValues(AppLogic);
 
   const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
 
   return (
-    <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name || '...']}>
+    <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name]}>
       <ConfigurationChoice sourceData={props.sourceData} />
     </Layout>
   );

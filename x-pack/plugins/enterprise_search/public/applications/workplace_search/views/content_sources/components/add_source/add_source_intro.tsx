@@ -31,26 +31,26 @@ interface AddSourceIntroProps {
 }
 
 export const AddSourceIntro: React.FC<AddSourceIntroProps> = (props) => {
-  const { name, categories, serviceType, baseServiceType } = props.sourceData;
+  const { name, categories = [], serviceType, baseServiceType } = props.sourceData;
   const { isOrganization } = useValues(AppLogic);
 
   const header = (
     <AddSourceHeader
       name={name}
       serviceType={baseServiceType || serviceType}
-      categories={categories || []}
+      categories={categories}
     />
   );
   const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
   const to =
     `${getSourcesPath(getAddPath(serviceType, baseServiceType), isOrganization)}/` +
     (hasMultipleConnectorOptions(props.sourceData.serviceType)
-      ? '/choice'
+      ? 'choice'
       : serviceType === 'external'
-      ? '/connector_config'
-      : '/');
+      ? 'connector_config'
+      : '');
   return (
-    <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name || '...']}>
+    <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name]}>
       <ConfigurationIntro name={name} advanceStepTo={to} header={header} />
     </Layout>
   );

@@ -23,7 +23,11 @@ jest.mock('../../../../../app_logic', () => ({
 
 import { SourceConfigData } from '../add_source_logic';
 
-import { ExternalConnectorLogic, ExternalConnectorValues } from './external_connector_logic';
+import {
+  ExternalConnectorLogic,
+  ExternalConnectorProps,
+  ExternalConnectorValues,
+} from './external_connector_logic';
 
 describe('ExternalConnectorLogic', () => {
   const { mount } = new LogicMounter(ExternalConnectorLogic);
@@ -55,9 +59,13 @@ describe('ExternalConnectorLogic', () => {
     sourceConfigData,
   };
 
+  const DEFAULT_PROPS: ExternalConnectorProps = {
+    baseServiceType: 'share_point',
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
-    mount();
+    mount({}, DEFAULT_PROPS);
   });
 
   it('has expected default values', () => {
@@ -107,6 +115,7 @@ describe('ExternalConnectorLogic', () => {
           sourceConfigData: newSourceConfigData,
         });
       });
+
       it('sets undefined api key to empty string', () => {
         const newSourceConfigData = {
           ...sourceConfigData,
@@ -126,9 +135,12 @@ describe('ExternalConnectorLogic', () => {
 
     describe('saveExternalConnectorConfigSuccess', () => {
       it('turns off the button loading flag', () => {
-        mount({
-          buttonLoading: true,
-        });
+        mount(
+          {
+            buttonLoading: true,
+          },
+          DEFAULT_PROPS
+        );
 
         ExternalConnectorLogic.actions.saveExternalConnectorConfigSuccess('external');
 
@@ -138,9 +150,12 @@ describe('ExternalConnectorLogic', () => {
 
     describe('saveExternalConnectorConfigError', () => {
       it('turns off the button loading flag', () => {
-        mount({
-          buttonLoading: true,
-        });
+        mount(
+          {
+            buttonLoading: true,
+          },
+          DEFAULT_PROPS
+        );
 
         ExternalConnectorLogic.actions.saveExternalConnectorConfigError();
 
@@ -170,6 +185,7 @@ describe('ExternalConnectorLogic', () => {
         });
       });
     });
+
     describe('setUrlValidation', () => {
       it('updates the url validation', () => {
         ExternalConnectorLogic.actions.setUrlValidation(false);
@@ -177,6 +193,7 @@ describe('ExternalConnectorLogic', () => {
         expect(ExternalConnectorLogic.values).toEqual({ ...DEFAULT_VALUES, urlValid: false });
       });
     });
+
     describe('setShowInsecureUrlCallout', () => {
       it('updates the url validation', () => {
         ExternalConnectorLogic.actions.setShowInsecureUrlCallout(true);
@@ -202,10 +219,11 @@ describe('ExternalConnectorLogic', () => {
       });
 
       itShowsServerErrorAsFlashMessage(http.get, () => {
-        mount();
+        mount({}, DEFAULT_PROPS);
         ExternalConnectorLogic.actions.fetchExternalSource();
       });
     });
+
     describe('fetchExternalSourceSuccess', () => {
       it('should show insecure URL callout if url is insecure', () => {
         const setSpy = jest.spyOn(ExternalConnectorLogic.actions, 'setShowInsecureUrlCallout');
@@ -282,8 +300,9 @@ describe('ExternalConnectorLogic', () => {
         expect(flashSuccessToast).toHaveBeenCalled();
         expect(validSpy).not.toHaveBeenCalled();
         expect(saveExternalConnectorConfigSuccess).toHaveBeenCalled();
-        expect(navigateToUrl).toHaveBeenCalledWith('/sources/add/external');
+        expect(navigateToUrl).toHaveBeenCalledWith('/sources/add/share_point/external');
       });
+
       it('does not save the external connector config if url is invalid', async () => {
         const validSpy = jest.spyOn(ExternalConnectorLogic.actions, 'setUrlValidation');
         const saveExternalConnectorConfigSuccess = jest.spyOn(
@@ -302,13 +321,14 @@ describe('ExternalConnectorLogic', () => {
         expect(navigateToUrl).not.toHaveBeenCalled();
       });
       itShowsServerErrorAsFlashMessage(http.post, () => {
-        mount();
+        mount({}, DEFAULT_PROPS);
         ExternalConnectorLogic.actions.saveExternalConnectorConfig({
           url: 'http://url',
           apiKey: 'apiKey',
         });
       });
     });
+
     describe('validateUrl', () => {
       it('should correctly validate a valid URL', () => {
         ExternalConnectorLogic.actions.setExternalConnectorUrl('https://validUrl');
