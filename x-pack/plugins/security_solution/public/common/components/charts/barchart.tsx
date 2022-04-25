@@ -10,6 +10,7 @@ import React, { useMemo } from 'react';
 import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
 import { getOr, get, isNumber } from 'lodash/fp';
 import deepmerge from 'deepmerge';
+import numeral from '@elastic/numeral';
 import uuid from 'uuid';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
@@ -87,6 +88,34 @@ export const BarChartBaseComponent = ({
     ...deepmerge(get('configs.settings', chartConfigs), { theme }),
   };
 
+  const xAxisStyle = useMemo(
+    () =>
+      deepmerge(
+        {
+          tickLine: {
+            size: tickSize,
+          },
+        },
+        getOr({}, 'configs.axis.bottom.style', chartConfigs)
+      ),
+    [chartConfigs, tickSize]
+  );
+
+  const yAxisStyle = useMemo(
+    () =>
+      deepmerge(
+        {
+          tickLine: {
+            size: tickSize,
+          },
+        },
+        getOr({}, 'configs.axis.left.style', chartConfigs)
+      ),
+    [chartConfigs, tickSize]
+  );
+
+  const xAxisLabelFormat = get('configs.axis.bottom.labelFormat', chartConfigs);
+
   return chartConfigs.width && chartConfigs.height ? (
     <Chart>
       <Settings {...settings} showLegend={settings.showLegend && !forceHiddenLegend} />
@@ -115,28 +144,15 @@ export const BarChartBaseComponent = ({
         id={xAxisId}
         position={Position.Bottom}
         showOverlappingTicks={false}
-        style={deepmerge(
-          {
-            tickLine: {
-              size: tickSize,
-            },
-          },
-          get('configs.axis.bottom.style', chartConfigs)
-        )}
+        style={xAxisStyle}
         tickFormat={xTickFormatter}
+        labelFormat={xAxisLabelFormat}
       />
 
       <Axis
         id={yAxisId}
         position={Position.Left}
-        style={deepmerge(
-          {
-            tickLine: {
-              size: tickSize,
-            },
-          },
-          get('configs.axis.left.style', chartConfigs)
-        )}
+        style={yAxisStyle}
         tickFormat={yTickFormatter}
         title={yAxisTitle}
       />

@@ -53,6 +53,7 @@ export const barchartConfigs = {
   },
   axis: {
     xTickFormatter: numberFormatter,
+
     tickLabel: {
       padding: 16,
       fontSize: 16,
@@ -78,6 +79,7 @@ export const barchartConfigs = {
           fontSize: 10.5,
         },
       },
+      labelFormat: (d: unknown) => numeral(d).format('0'),
     },
   },
   settings: {
@@ -168,7 +170,7 @@ export const CasesByStatus: React.FC = () => {
               )}
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ alignItems: 'center' }}>
+          <EuiFlexItem grow={false} style={{ alignItems: 'center', width: '60%' }}>
             <Wrapper data-test-subj="chart-wrapper">
               <BarChart configs={barchartConfigs} barChart={chartData} />
             </Wrapper>
