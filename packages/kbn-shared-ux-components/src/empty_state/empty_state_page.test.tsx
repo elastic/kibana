@@ -9,7 +9,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { SharedUxServicesProvider, mockServicesFactory } from '@kbn/shared-ux-services';
 
 import { EmptyStatePage } from './empty_state_page';
@@ -41,7 +40,7 @@ describe('empty state page', () => {
 
   test('renders NoDataConfigPage', async () => {
     const services = mockServicesFactory({ config: { ...config, hasESData: false } });
-    const component = mountWithIntl(
+    const component = shallow(
       <SharedUxServicesProvider {...services}>
         <EmptyStatePage noDataConfig={noDataConfig} onDataViewCreated={onDataViewCreated} />
       </SharedUxServicesProvider>
@@ -50,7 +49,6 @@ describe('empty state page', () => {
     await act(() => new Promise(setImmediate));
     component.update();
 
-    expect(component).toMatchSnapshot();
     expect(component.find(NoDataConfigPage).length).toBe(1);
     expect(component.find(NoDataViews).length).toBe(0);
   });
@@ -66,7 +64,6 @@ describe('empty state page', () => {
     await act(() => new Promise(setImmediate));
     component.update();
 
-    expect(component).toMatchSnapshot();
     expect(component.find(NoDataViews).length).toBe(1);
     expect(component.find(NoDataConfigPage).length).toBe(0);
   });
