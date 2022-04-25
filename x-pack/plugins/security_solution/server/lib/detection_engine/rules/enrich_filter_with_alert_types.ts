@@ -1,4 +1,3 @@
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,19 +8,18 @@
 import { SIGNALS_ID, ruleTypeMappings } from '@kbn/securitysolution-rules';
 
 export const enrichFilterWithAlertTypes = (
-    filter: string | null | undefined,
-    isRuleRegistryEnabled: boolean = false
-  ) => {
-    const alertTypeFilter = isRuleRegistryEnabled
-      ? `(${Object.values(ruleTypeMappings)
-          .map((type) => `alert.attributes.alertTypeId: ${type}`)
-          .filter((type, i, arr) => type != null && arr.indexOf(type) === i)
-          .join(' OR ')})`
-      : `alert.attributes.alertTypeId: ${SIGNALS_ID}`;
-    if (filter == null) {
-      return alertTypeFilter;
-    } else {
-      return `${alertTypeFilter} AND ${filter}`;
-    }
-  };
-  
+  filter: string | null | undefined,
+  isRuleRegistryEnabled: boolean = false
+) => {
+  const alertTypeFilter = isRuleRegistryEnabled
+    ? `(${Object.values(ruleTypeMappings)
+        .map((type) => `alert.attributes.alertTypeId: ${type}`)
+        .filter((type, i, arr) => type != null && arr.indexOf(type) === i)
+        .join(' OR ')})`
+    : `alert.attributes.alertTypeId: ${SIGNALS_ID}`;
+  if (filter == null) {
+    return alertTypeFilter;
+  } else {
+    return `${alertTypeFilter} AND ${filter}`;
+  }
+};
