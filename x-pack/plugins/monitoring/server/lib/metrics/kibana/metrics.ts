@@ -276,6 +276,7 @@ export const metrics = {
     format: SMALL_FLOAT,
     metricAgg: 'max',
     units: '',
+    isMetricbeatOnly: true,
   }),
   kibana_instance_rule_executions: new KibanaInstanceRuleMetric({
     derivative: true,
@@ -292,6 +293,7 @@ export const metrics = {
     format: SMALL_FLOAT,
     metricAgg: 'max',
     units: '',
+    isMetricbeatOnly: true,
   }),
   kibana_instance_action_failures: new KibanaInstanceActionMetric({
     derivative: true,
@@ -308,6 +310,7 @@ export const metrics = {
     format: SMALL_FLOAT,
     metricAgg: 'max',
     units: '',
+    isMetricbeatOnly: true,
   }),
   kibana_instance_action_executions: new KibanaInstanceActionMetric({
     derivative: true,
@@ -324,6 +327,7 @@ export const metrics = {
     format: SMALL_FLOAT,
     metricAgg: 'max',
     units: '',
+    isMetricbeatOnly: true,
   }),
 
   kibana_cluster_rule_overdue_count: new KibanaClusterRuleMetric({
@@ -340,6 +344,7 @@ export const metrics = {
     format: SMALL_FLOAT,
     metricAgg: 'max',
     units: '',
+    isMetricbeatOnly: true,
   }),
   kibana_cluster_rule_overdue_p50: new KibanaClusterRuleMetric({
     field: 'kibana.cluster_rules.overdue.delay.p50',
@@ -355,6 +360,7 @@ export const metrics = {
     format: SMALL_FLOAT,
     metricAgg: 'max',
     units: '',
+    isMetricbeatOnly: true,
   }),
   kibana_cluster_rule_overdue_p99: new KibanaClusterRuleMetric({
     field: 'kibana.cluster_rules.overdue.delay.p99',
@@ -370,6 +376,7 @@ export const metrics = {
     format: SMALL_FLOAT,
     metricAgg: 'max',
     units: '',
+    isMetricbeatOnly: true,
   }),
   kibana_cluster_action_overdue_count: new KibanaClusterActionMetric({
     field: 'kibana.cluster_actions.overdue.count',
@@ -388,6 +395,7 @@ export const metrics = {
     format: SMALL_FLOAT,
     metricAgg: 'max',
     units: '',
+    isMetricbeatOnly: true,
   }),
   kibana_cluster_action_overdue_p50: new KibanaClusterActionMetric({
     field: 'kibana.cluster_actions.overdue.delay.p50',
@@ -403,6 +411,7 @@ export const metrics = {
     format: SMALL_FLOAT,
     metricAgg: 'max',
     units: '',
+    isMetricbeatOnly: true,
   }),
   kibana_cluster_action_overdue_p99: new KibanaClusterActionMetric({
     field: 'kibana.cluster_actions.overdue.delay.p99',
@@ -418,5 +427,6 @@ export const metrics = {
     format: SMALL_FLOAT,
     metricAgg: 'max',
     units: '',
+    isMetricbeatOnly: true,
   }),
 };

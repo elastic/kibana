@@ -12,7 +12,14 @@ import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
 
 type KibanaClusterMetricOptions = Pick<
   MetricOptions,
-  'field' | 'label' | 'description' | 'format' | 'units' | 'metricAgg' | 'derivative'
+  | 'field'
+  | 'label'
+  | 'description'
+  | 'format'
+  | 'units'
+  | 'metricAgg'
+  | 'derivative'
+  | 'isMetricbeatOnly'
 > &
   Partial<Pick<MetricOptions, 'title'>>;
 
