@@ -37,7 +37,9 @@ describe('find_rules', () => {
   test.each(fullFilterTestCases)(
     'it returns a full filter with an AND if sent down [rule registry enabled: %p]',
     (isRuleRegistryEnabled, expected) => {
-      expect(enrichFilterWithAlertTypes('alert.attributes.enabled: true', isRuleRegistryEnabled)).toEqual(expected);
+      expect(
+        enrichFilterWithAlertTypes('alert.attributes.enabled: true', isRuleRegistryEnabled)
+      ).toEqual(expected);
     }
   );
 

@@ -1,0 +1,43 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { BulkEditOperation } from '@kbn/alerting-plugin/server';
+
+import {
+  BulkActionEditPayload,
+  BulkActionEditType,
+} from '../../../../../common/detection_engine/schemas/common/schemas';
+
+export const bulkEditActionToRulesClientOperation = (
+  action: BulkActionEditPayload
+): BulkEditOperation => {
+  switch (action.type) {
+    // tags actions
+    case BulkActionEditType.add_tags:
+      return {
+        field: 'tags',
+        operation: 'add',
+        value: action.value,
+      };
+
+    case BulkActionEditType.delete_tags:
+      return {
+        field: 'tags',
+        operation: 'delete',
+        value: action.value,
+      };
+
+    case BulkActionEditType.set_tags:
+      return {
+        field: 'tags',
+        operation: 'set',
+        value: action.value,
+      };
+  }
+
+  throw Error('No action match');
+};

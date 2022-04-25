@@ -38,12 +38,6 @@ import { duplicateRule } from '../../rules/duplicate_rule';
 import { findRules } from '../../rules/find_rules';
 import { readRules } from '../../rules/read_rules';
 import { bulkEditRules } from '../../rules/bulk_edit_rules';
-import {
-  operationAdapterForRulesClient,
-  splitBulkEditActions,
-  ruleParamsModifier,
-} from '../../rules/bulk_action_edit';
-import { editRule } from '../../rules/edit_rule';
 import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { buildSiemResponse } from '../utils';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
@@ -300,21 +294,13 @@ export const performBulkActionRoute = (
         const query = body.query !== '' ? body.query : undefined;
 
         if (body.action === BulkAction.edit) {
-          const { rulesClientOperations, ruleParamsModifierActions } = splitBulkEditActions(
-            body.edit
-          );
-
           const { rules, errors } = await bulkEditRules({
             rulesClient,
             isRuleRegistryEnabled,
             filter: query,
-            ...(body.ids ? { ids: body.ids ?? [] } : {}),
-            operations: rulesClientOperations.map(operationAdapterForRulesClient),
-            paramsModifier: async (ruleParams: RuleAlertType['params']) => {
-              throwAuthzError(await mlAuthz.validateRuleType(ruleParams.type));
-
-              return ruleParamsModifier(ruleParams, ruleParamsModifierActions);
-            },
+            ids: body.ids,
+            actions: body.edit,
+            mlAuthz,
           });
 
           return buildBulkResponse(response, { updated: rules, errors });
