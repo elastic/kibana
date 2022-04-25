@@ -47,18 +47,18 @@ export interface ChartSeriesConfigs {
     xScaleType?: ScaleType | undefined;
     yScaleType?: ScaleType | undefined;
     stackAccessors?: string[] | undefined;
-    barSeriesStyle?: BarSeriesStyle;
+    barSeriesStyle?: Partial<BarSeriesStyle>;
   };
   axis?: {
     xTickFormatter?: TickFormatter | undefined;
     yTickFormatter?: TickFormatter | undefined;
     tickSize?: number | undefined;
     left?: {
-      style?: AxisStyle;
+      style?: Partial<AxisStyle>;
       labelFormat?: (d: unknown) => string;
     };
     bottom?: {
-      style?: AxisStyle;
+      style?: Partial<AxisStyle>;
       labelFormat?: (d: unknown) => string;
     };
   };

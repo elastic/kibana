@@ -6,15 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiText } from '@elastic/eui';
 import { Rotation, ScaleType } from '@elastic/charts';
 import styled from 'styled-components';
 import { FormattedNumber } from '@kbn/i18n-react';
@@ -50,6 +42,7 @@ export const barchartConfigs = {
     barSeriesStyle: {
       rect: {
         widthPixel: 22,
+        opacity: 1,
       },
     },
   },
@@ -112,32 +105,14 @@ export const emptyChartSettings = [
 
 const StyledEuiFlexItem = styled(EuiFlexItem)`
   align-items: center;
-  width: 60%;
+  width: 70%;
 `;
 
 const Wrapper = styled.div`
   width: 100%;
-  position: relative;
-`;
-
-const BarChartMask = styled.div`
-  background-color: transparent;
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1;
 `;
 
 const CasesByStatusComponent: React.FC = () => {
-  const { euiTheme } = useEuiTheme();
-  const emptyLabelStyle = useMemo(
-    () => ({
-      color: euiTheme.colors.disabled,
-    }),
-    [euiTheme.colors.disabled]
-  );
   const { toggleStatus, setToggleStatus } = useQueryToggle(CASES_BY_STATUS_ID);
   const { getAppUrl, navigateTo } = useNavigation();
   const { search } = useFormatUrl(SecurityPageName.case);
@@ -155,26 +130,23 @@ const CasesByStatusComponent: React.FC = () => {
   });
 
   const chartData = useMemo(
-    () =>
-      open === 0 && inProgress === 0 && closed === 0
-        ? emptyChartSettings
-        : [
-            {
-              key: 'open',
-              value: [{ y: open, x: OPEN, g: OPEN }],
-              color: barColors.open,
-            },
-            {
-              key: 'in-progress',
-              value: [{ y: inProgress, x: IN_PROGRESS, g: IN_PROGRESS }],
-              color: barColors['in-progress'],
-            },
-            {
-              key: 'closed',
-              value: [{ y: closed, x: CLOSED, g: CLOSED }],
-              color: barColors.closed,
-            },
-          ],
+    () => [
+      {
+        key: 'open',
+        value: [{ y: open, x: OPEN, g: OPEN }],
+        color: barColors.open,
+      },
+      {
+        key: 'in-progress',
+        value: [{ y: inProgress, x: IN_PROGRESS, g: IN_PROGRESS }],
+        color: barColors['in-progress'],
+      },
+      {
+        key: 'closed',
+        value: [{ y: closed, x: CLOSED, g: CLOSED }],
+        color: barColors.closed,
+      },
+    ],
     [closed, inProgress, open]
   );
 
@@ -200,30 +172,22 @@ const CasesByStatusComponent: React.FC = () => {
       {!isLoading && toggleStatus && (
         <EuiFlexGroup justifyContent="center" alignItems="center" direction="column" gutterSize="s">
           <EuiFlexItem>
-            <EuiText className="eui-textCenter" size="s" grow={false}>
-              {isLoading ? (
-                <EuiSpacer size="l" />
-              ) : (
+            {totalCounts !== 0 && (
+              <EuiText className="eui-textCenter" size="s" grow={false}>
                 <>
                   <b>
                     <FormattedNumber value={totalCounts} />
                   </b>
                   <> </>
                   <small>
-                    {totalCounts === 0 ? (
-                      <span style={emptyLabelStyle}>{CASES(totalCounts)}</span>
-                    ) : (
-                      <EuiLink onClick={goToCases}>{CASES(totalCounts)}</EuiLink>
-                    )}
+                    <EuiLink onClick={goToCases}>{CASES(totalCounts)}</EuiLink>
                   </small>
                 </>
-              )}
-            </EuiText>
+              </EuiText>
+            )}
           </EuiFlexItem>
           <StyledEuiFlexItem grow={false}>
             <Wrapper data-test-subj="chart-wrapper">
-              {/* If all totalCounts equals 0, disable chart interaction*/}
-              {totalCounts === 0 && <BarChartMask data-test-subj="bar-chart-mask" />}
               <BarChart configs={barchartConfigs} barChart={chartData} />
             </Wrapper>
           </StyledEuiFlexItem>
