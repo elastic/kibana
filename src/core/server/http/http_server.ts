@@ -150,9 +150,9 @@ export class HttpServer {
     // That's the only reason why context initialization exists in this method.
     this.setupRequestStateAssignment(config, executionContext);
     const basePathService = new BasePath(
-      config.basePath, 
+      config.basePath,
       config.publicBaseUrl,
-      config.staticBaseUrl,
+      config.staticBaseUrl
     );
     this.setupBasePathRewrite(config, basePathService);
     this.setupConditionalCompression(config);

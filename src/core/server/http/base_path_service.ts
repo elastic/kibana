@@ -34,7 +34,7 @@ export class BasePath {
   public readonly publicBaseUrl?: string;
 
   /**
-   * An optional URL to load static assets from. If configured, bundles and other static files will be loaded from 
+   * An optional URL to load static assets from. If configured, bundles and other static files will be loaded from
    */
   public readonly staticBaseUrl?: string;
 

@@ -40,7 +40,7 @@ export class RenderingService {
     uiPlugins,
   }: RenderingPrebootDeps): Promise<InternalRenderingServicePreboot> {
     http.registerRoutes('', (router) => {
-      const {serverBasePath, staticBaseUrl} = http.basePath;
+      const { serverBasePath, staticBaseUrl } = http.basePath;
       registerBootstrapRoute({
         router,
         renderer: bootstrapRendererFactory({
@@ -63,7 +63,7 @@ export class RenderingService {
     status,
     uiPlugins,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
-    const {serverBasePath, staticBaseUrl} = http.basePath;
+    const { serverBasePath, staticBaseUrl } = http.basePath;
     registerBootstrapRoute({
       router: http.createRouter(''),
       renderer: bootstrapRendererFactory({
