@@ -153,8 +153,9 @@ export const getSourcererDataViewRoute = (
           request,
           true
         );
-
-        const siemDataView = await dataViewService.get(dataViewId);
+        const allDataViews: DataViewListItem[] = await dataViewService.getIdsWithTitle();
+        const siemDataView: DataViewListItem | null =
+          allDataViews.find((dv) => dv.id === dataViewId) ?? null;
         const kibanaDataView = siemDataView
           ? await buildSourcererDataView(
               siemDataView,
