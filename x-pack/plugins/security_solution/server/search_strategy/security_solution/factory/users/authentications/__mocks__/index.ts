@@ -26,7 +26,7 @@ export const mockOptions: UserAuthenticationsRequestOptions = {
     'winlogbeat-*',
   ],
   stackByField: AuthStackByField.userName,
-  docValueFields: [
+  dateFields: [
     {
       field: '@timestamp',
       format: 'date_time',
@@ -2385,7 +2385,6 @@ export const expectedDsl = {
   ],
   ignore_unavailable: true,
   body: {
-    docvalue_fields: mockOptions.docValueFields,
     aggregations: {
       stack_by_count: { cardinality: { field: 'user.name' } },
       stack_by: {

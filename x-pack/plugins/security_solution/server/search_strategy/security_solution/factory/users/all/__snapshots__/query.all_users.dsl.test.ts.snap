@@ -4,6 +4,7 @@ exports[`buildUsersQuery build query from options correctly 1`] = `
 Object {
   "allow_no_indices": true,
   "body": Object {
+    "_source": false,
     "aggregations": Object {
       "user_count": Object {
         "cardinality": Object {
@@ -46,6 +47,9 @@ Object {
         "format": "date_time",
       },
     ],
+    "fields": Array [
+      "user.*", "@timestamp"
+    ],
     "query": Object {
       "bool": Object {
         "filter": Array [
@@ -81,10 +85,6 @@ Object {
       },
     },
     "size": 0,
-    "_source": false,
-    "fields": Array [
-      "user.*", "@timestamp"
-    ],
   },
   "ignore_unavailable": true,
   "index": Array [

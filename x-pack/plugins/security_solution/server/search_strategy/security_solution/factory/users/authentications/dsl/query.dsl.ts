@@ -32,7 +32,7 @@ export const buildQuery = ({
   timerange: { from, to },
   pagination: { querySize },
   defaultIndex,
-  docValueFields,
+  dateFields,
 }: UserAuthenticationsRequestOptions) => {
   const esFields = authenticationsLastSuccessFields;
 
@@ -115,10 +115,13 @@ export const buildQuery = ({
       _source: false,
       fields: [
         ...esFields,
-        ...(docValueFields && !isEmpty(docValueFields) ? docValueFields : []),
+        ...(dateFields && !isEmpty(dateFields) ? dateFields : []),
         'host*',
         'source*',
-        '@timestamp',
+        {
+          "field": "@timestamp",
+          "format": "strict_date_optional_time"
+        },
       ],
     },
     track_total_hits: false,

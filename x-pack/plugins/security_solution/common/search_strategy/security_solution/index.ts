@@ -6,6 +6,7 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IEsSearchRequest } from '@kbn/data-plugin/common';
+import { QueryDslFieldAndFormat } from '@elastic/elasticsearch/lib/api/types';
 import { ESQuery } from '../../typed_json';
 import {
   HostDetailsStrategyResponse,
@@ -113,6 +114,7 @@ export interface RequestBasicOptions extends IEsSearchRequest {
   defaultIndex: string[];
   docValueFields?: estypes.QueryDslFieldAndFormat[];
   factoryQueryType?: FactoryQueryTypes;
+  dateFields: QueryDslFieldAndFormat[];
 }
 
 /** A mapping of semantic fields to their document counterparts */
