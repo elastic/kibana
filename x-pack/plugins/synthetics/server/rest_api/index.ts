@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getAPIKeySyntheticsRoute } from './synthetics_service/get_api_key';
 import {
   createGetPingHistogramRoute,
   createGetPingsRoute,
@@ -81,4 +82,5 @@ export const restApiRoutes: UMRestApiRouteFactory[] = [
   runOnceSyntheticsMonitorRoute,
   testNowMonitorRoute,
   getServiceAllowedRoute,
+  getAPIKeySyntheticsRoute,
 ];

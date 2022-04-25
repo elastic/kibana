@@ -44,4 +44,5 @@ export enum API_URLS {
   RUN_ONCE_MONITOR = '/internal/uptime/service/monitors/run_once',
   TRIGGER_MONITOR = '/internal/uptime/service/monitors/trigger',
   SERVICE_ALLOWED = '/internal/uptime/service/allowed',
+  SYNTHETICS_APIKEY = '/internal/uptime/service/api_key',
 }

@@ -11,9 +11,10 @@ import type {
 import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import {
-  getSyntheticsServiceAPIKey,
   deleteSyntheticsServiceApiKey,
+  getSyntheticsServiceAPIKey,
   setSyntheticsServiceApiKey,
   syntheticsServiceApiKey,
 } from '../saved_objects/service_api_key';
@@ -55,17 +56,14 @@ export const getAPIKeyForSyntheticsService = async ({
   }
 };
 
-export const generateAndSaveServiceAPIKey = async ({
+export const generateAPIKey = async ({
   server,
   security,
   request,
-  authSavedObjectsClient,
 }: {
   server: UptimeServerSetup;
   request?: KibanaRequest;
   security: SecurityPluginStart;
-  // authSavedObject is needed for write operations
-  authSavedObjectsClient?: SavedObjectsClientContract;
 }) => {
   const isApiKeysEnabled = await security.authc.apiKeys?.areAPIKeysEnabled();
 
@@ -82,16 +80,39 @@ export const generateAndSaveServiceAPIKey = async ({
     throw new SyntheticsForbiddenError();
   }
 
-  const apiKeyResult = await security.authc.apiKeys?.create(request, {
+  return security.authc.apiKeys?.create(request, {
     name: 'synthetics-api-key',
     role_descriptors: {
       synthetics_writer: serviceApiKeyPrivileges,
     },
+    kibana_feature_descriptors: [
+      {
+        spaces: [ALL_SPACES_ID],
+        feature: {
+          uptime: ['all'],
+        },
+      },
+    ],
     metadata: {
       description:
         'Created for synthetics service to be passed to the heartbeat to communicate with ES',
     },
   });
+};
+
+export const generateAndSaveServiceAPIKey = async ({
+  server,
+  security,
+  request,
+  authSavedObjectsClient,
+}: {
+  server: UptimeServerSetup;
+  request?: KibanaRequest;
+  security: SecurityPluginStart;
+  // authSavedObject is needed for write operations
+  authSavedObjectsClient?: SavedObjectsClientContract;
+}) => {
+  const apiKeyResult = await generateAPIKey({ server, request, security });
 
   if (apiKeyResult) {
     const { id, name, api_key: apiKey } = apiKeyResult;

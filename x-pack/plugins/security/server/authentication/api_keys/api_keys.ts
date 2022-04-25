@@ -8,6 +8,8 @@
 import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 
 import type { SecurityLicense } from '../../../common/licensing';
+import type { PutPayloadSchemaType } from '../../routes/authorization/roles/model/put_payload';
+import { transformPutPayloadToElasticsearchRole } from '../../routes/authorization/roles/model/put_payload';
 import {
   BasicHTTPAuthorizationHeaderCredentials,
   HTTPAuthorizationHeader,
@@ -29,6 +31,7 @@ export interface ConstructorOptions {
 export interface CreateAPIKeyParams {
   name: string;
   role_descriptors: Record<string, any>;
+  kibana_feature_descriptors?: PutPayloadSchemaType['kibana'];
   expiration?: string;
   metadata?: Record<string, any>;
 }
@@ -175,20 +178,39 @@ export class APIKeys {
    */
   async create(
     request: KibanaRequest,
-    params: CreateAPIKeyParams
+    {
+      kibana_feature_descriptors: kibanaFeatureDescriptors,
+      role_descriptors: roleDescriptors,
+      name,
+      metadata,
+      expiration,
+    }: CreateAPIKeyParams
   ): Promise<CreateAPIKeyResult | null> {
     if (!this.license.isEnabled()) {
       return null;
     }
 
+    const { applications } = transformPutPayloadToElasticsearchRole(
+      { kibana: kibanaFeatureDescriptors, elasticsearch: {} },
+      'kibana-.kibana'
+    );
+
     this.logger.debug('Trying to create an API key');
+
+    if (applications.length > 0) {
+      Object.keys(roleDescriptors).forEach((role) => {
+        const roleDescriptor = roleDescriptors[role];
+
+        roleDescriptor.applications = applications;
+      });
+    }
 
     // User needs `manage_api_key` privilege to use this API
     let result: CreateAPIKeyResult;
     try {
-      result = await this.clusterClient
-        .asScoped(request)
-        .asCurrentUser.security.createApiKey({ body: params });
+      result = await this.clusterClient.asScoped(request).asCurrentUser.security.createApiKey({
+        body: { role_descriptors: roleDescriptors, name, metadata, expiration },
+      });
       this.logger.debug('API key was created successfully');
     } catch (e) {
       this.logger.error(`Failed to create API key: ${e.message}`);

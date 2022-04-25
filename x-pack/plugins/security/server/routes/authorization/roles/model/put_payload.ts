@@ -103,7 +103,7 @@ const spacesSchema = schema.oneOf(
 
 const FEATURE_NAME_VALUE_REGEX = /^[a-zA-Z0-9_-]+$/;
 
-type PutPayloadSchemaType = TypeOf<ReturnType<typeof getPutPayloadSchema>>;
+export type PutPayloadSchemaType = TypeOf<ReturnType<typeof getPutPayloadSchema>>;
 export function getPutPayloadSchema(
   getBasePrivilegeNames: () => { global: string[]; space: string[] }
 ) {
@@ -255,7 +255,7 @@ export const transformPutPayloadToElasticsearchRole = (
   } as Omit<ElasticsearchRole, 'name'>;
 };
 
-const transformPrivilegesToElasticsearchPrivileges = (
+export const transformPrivilegesToElasticsearchPrivileges = (
   application: string,
   kibanaPrivileges: PutPayloadSchemaType['kibana'] = []
 ) => {

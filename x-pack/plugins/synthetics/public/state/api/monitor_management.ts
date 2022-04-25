@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { CreateAPIKeyResult } from '@kbn/security-plugin/server';
 import { API_URLS } from '../../../common/constants';
 import {
   FetchMonitorManagementListQueryArgs,
@@ -118,4 +119,8 @@ export const fetchEnableSynthetics = async (): Promise<void> => {
 
 export const fetchServiceAllowed = async (): Promise<SyntheticsServiceAllowed> => {
   return await apiService.get(API_URLS.SERVICE_ALLOWED);
+};
+
+export const fetchServiceAPIKey = async (): Promise<CreateAPIKeyResult> => {
+  return await apiService.get(API_URLS.SYNTHETICS_APIKEY);
 };
