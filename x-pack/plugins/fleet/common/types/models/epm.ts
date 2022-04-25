@@ -28,7 +28,7 @@ import type {
   PackageSpecCategory,
 } from './package_spec';
 
-export type InstallationStatus = typeof installationStatuses;
+export type InstallationStatus = typeof installationStatuses & undefined;
 
 export enum InstallStatus {
   installed = 'installed',
@@ -427,11 +427,16 @@ export interface PackageUsageStats {
 }
 
 export type Installable<T> =
+  | InstallStatusExcluded<T>
   | InstalledRegistry<T>
   | Installing<T>
   | NotInstalled<T>
   | InstallFailed<T>
   | InstalledBundled<T>;
+
+export type InstallStatusExcluded<T = {}> = T & {
+  status: undefined;
+};
 
 export type InstalledRegistry<T = {}> = T & {
   status: InstallationStatus['Installed'];

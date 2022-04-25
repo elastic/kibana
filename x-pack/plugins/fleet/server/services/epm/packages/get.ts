@@ -20,6 +20,8 @@ import type {
   RegistryPackage,
   EpmPackageAdditions,
   GetCategoriesRequest,
+  Installable,
+  RegistrySearchResult,
 } from '../../../../common/types';
 import type { Installation, PackageInfo } from '../../../types';
 import { IngestManagerError, PackageNotFoundError } from '../../../errors';
@@ -45,9 +47,10 @@ export async function getCategories(options: GetCategoriesRequest['query']) {
 export async function getPackages(
   options: {
     savedObjectsClient: SavedObjectsClientContract;
+    includeInstallStatus?: boolean;
   } & Registry.SearchParams
 ) {
-  const { savedObjectsClient, experimental, category } = options;
+  const { savedObjectsClient, experimental, category, includeInstallStatus = false } = options;
   const registryItems = await Registry.fetchList({ category, experimental }).then((items) => {
     return items.map((item) =>
       Object.assign({}, item, { title: item.title || nameAsTitle(item.name) }, { id: item.name })
@@ -63,7 +66,23 @@ export async function getPackages(
       )
     )
     .sort(sortByName);
-  return packageList;
+
+  if (includeInstallStatus) {
+    return packageList;
+  }
+
+  // Exclude the `installStatus` value unless the `includeInstallStatus` query parameter is set to true
+  // to better facilitate response caching
+  const packageListWithoutStatus = packageList.map((pkg) => {
+    const newPkg = {
+      ...pkg,
+      status: undefined,
+    };
+
+    return newPkg;
+  });
+
+  return packageListWithoutStatus;
 }
 
 // Get package names for packages which cannot have more than one package policy on an agent policy
