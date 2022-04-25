@@ -29,7 +29,8 @@ export const findSavedQueryRoute = (router: IRouter) => {
       options: { tags: [`access:${PLUGIN_ID}-readSavedQueries`] },
     },
     async (context, request, response) => {
-      const savedObjectsClient = context.core.savedObjects.client;
+      const coreContext = await context.core;
+      const savedObjectsClient = coreContext.savedObjects.client;
 
       const savedQueries = await savedObjectsClient.find<{
         ecs_mapping: Array<{ field: string; value: string }>;
