@@ -37,7 +37,9 @@ module.exports = (_, argv) => {
         'regenerator-runtime/runtime',
         'whatwg-fetch',
         'symbol-observable',
-        'node-libs-browser',
+        // Parts of node-libs-browser that are used in many places across Kibana
+        'buffer',
+        'punycode',
 
         /**
          * babel runtime helpers referenced from entry chunks
