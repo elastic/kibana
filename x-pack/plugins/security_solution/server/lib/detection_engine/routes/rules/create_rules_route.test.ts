@@ -99,7 +99,10 @@ describe('create_rules', () => {
   describe('unhappy paths', () => {
     test('returns a duplicate error if rule_id already exists', async () => {
       clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      const response = await server.inject(getCreateRequest(), context);
+      const response = await server.inject(
+        getCreateRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(409);
       expect(response.body).toEqual({
