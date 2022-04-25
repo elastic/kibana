@@ -8,15 +8,13 @@
 
 import React from 'react';
 
+import './index.scss';
+
 const getSandboxDocument = (script: string) => {
   // may be possible to remove this iframe-level nonce once we can use the top-level CSP
   // see https://github.com/elastic/kibana/issues/101579 for status tracking
   const nonce = crypto.randomUUID();
-  const d3Url = 'https://unpkg.com/d3@7.4.4/dist/d3.min.js';
-
-  const onLoadScript = `window.addEventListener('load', () => {
-    ${script}
-  })`;
+  const d3Url = 'https://unpkg.com/d3@3.4.0/d3.min.js';
 
   return `
     <!DOCTYPE html>
@@ -24,24 +22,22 @@ const getSandboxDocument = (script: string) => {
       <head>
         <meta http-equiv="content-security-policy" content="default-src none; script-src 'nonce-${nonce}' ${d3Url}">
         <script src="${d3Url}"></script>
-        <script nonce="${nonce}">${onLoadScript}</script>
-      </head>
-      
-      <body>
-        <canvas></canvas>
-      </body>
+        <script nonce="${nonce}">window.addEventListener('load', () => {${script}})</script>
+      </head>  
+      <body></body>
     <html>
     `;
 };
 
-export const VisSandbox: React.FunctionComponent<{ script: string }> = ({
+export const ScriptRenderer: React.FunctionComponent<{ script: string }> = ({
   script: visualizationScript,
 }: {
   script: string;
 }) => {
   return (
     <iframe
-      title="script-based-visualization-sandbox"
+      className="script-based-visualization-renderer"
+      title="script-based-visualization-renderer"
       srcDoc={getSandboxDocument(visualizationScript)}
       sandbox="allow-scripts"
     />

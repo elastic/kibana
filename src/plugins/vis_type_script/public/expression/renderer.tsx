@@ -11,7 +11,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import type { ExpressionRenderDefinition } from '../../../expressions';
 import { VisualizationContainer } from '../../../visualizations/public';
 import { VisParams } from '../types';
-import { VisSandbox } from '../sandbox';
+import { ScriptRenderer } from '../renderer';
 
 export interface RenderValue {
   visType: 'script';
@@ -29,7 +29,7 @@ export const scriptVisRenderer: ExpressionRenderDefinition<RenderValue> = {
 
     render(
       <VisualizationContainer className="scriptVis" handlers={handlers}>
-        <VisSandbox script={visParams.script} />
+        <ScriptRenderer script={visParams.script} />
       </VisualizationContainer>,
       domNode
     );
