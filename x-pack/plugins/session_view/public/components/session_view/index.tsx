@@ -124,7 +124,6 @@ export const SessionView = ({
   const hasData = alerts && data && data.pages?.[0].events.length > 0;
   const hasError = error || alertsError;
   const renderIsLoading = (isFetching || alertsFetching) && !(data && alerts);
-  // const renderDetails = isDetailOpen && selectedProcess;
   const { data: newUpdatedAlertsStatus } = useFetchAlertStatus(
     updatedAlertsStatus,
     fetchAlertStatus[0] ?? ''
