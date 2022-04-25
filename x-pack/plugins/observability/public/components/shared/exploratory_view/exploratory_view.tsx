@@ -204,6 +204,10 @@ const ShowPreview = styled(EuiButtonEmpty)`
   bottom: 34px;
 `;
 
+const PREVIEW_LABEL = i18n.translate('xpack.observability.overview.exploratoryView.preview', {
+  defaultMessage: 'Preview',
+});
+
 const HIDE_CHART_LABEL = i18n.translate('xpack.observability.overview.exploratoryView.hideChart', {
   defaultMessage: 'Hide chart',
 });
