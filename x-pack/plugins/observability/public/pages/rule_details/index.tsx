@@ -27,6 +27,12 @@ import { ActionGroup } from '@kbn/alerting-plugin/common';
 import { AlertStatusValues } from '@kbn/alerting-plugin/common';
 import { RuleType, AlertStatus } from '@kbn/triggers-actions-ui-plugin/public';
 import {
+  enableRule,
+  disableRule,
+  snoozeRule,
+  unsnoozeRule,
+} from '@kbn/triggers-actions-ui-plugin/public';
+import {
   AlertListItem,
   RuleDetailsPathParams,
   EVENT_ERROR_LOG_TAB,
@@ -128,7 +134,7 @@ export function RuleDetailsPage() {
         }),
       []
     );
-
+  // TODO:Is this check enough from permissions stand point?
   const isRuleTypeEditableInContext = (ruleTypeId: string) =>
     ruleTypeRegistry.has(ruleTypeId) ? !ruleTypeRegistry.get(ruleTypeId).requiresAppContext : false;
 
@@ -143,10 +149,8 @@ export function RuleDetailsPage() {
 
   const { description } = ruleTypeRegistry.get(rule?.ruleTypeId);
 
-  // console.log('uniqueActions', uniqueActions);
-
-  console.log(rule);
-  console.log(ruleSummary?.alerts);
+  console.log('rule', rule);
+  console.log('ruleSummary', ruleSummary);
 
   return (
     <ObservabilityPageTemplate
@@ -155,37 +159,61 @@ export function RuleDetailsPage() {
         bottomBorder: false,
         rightSideItems: isRuleTypeEditableInContext(ruleTypeId)
           ? [
-              <>
-                <EuiPopover
-                  id="contextRuleEditMenu"
-                  isOpen={isRuleEditPopoverOpen}
-                  closePopover={() => setIsRuleEditPopoverOpen(false)}
-                  button={
-                    <EuiButtonIcon
-                      display="base"
-                      size="m"
-                      iconType="boxesHorizontal"
-                      aria-label="More"
-                      onClick={() => setIsRuleEditPopoverOpen(true)}
-                    />
-                  }
-                >
-                  <EuiButtonEmpty
-                    size="m"
-                    iconType="pencil"
-                    onClick={() => {
-                      setIsRuleEditPopoverOpen(false);
-                      setEditFlyoutVisible(true);
-                    }}
+              <EuiFlexGroup direction="rowReverse" alignItems="center">
+                <EuiFlexItem>
+                  <EuiPopover
+                    id="contextRuleEditMenu"
+                    isOpen={isRuleEditPopoverOpen}
+                    closePopover={() => setIsRuleEditPopoverOpen(false)}
+                    button={
+                      <EuiButtonIcon
+                        display="base"
+                        size="m"
+                        iconType="boxesHorizontal"
+                        aria-label="More"
+                        onClick={() => setIsRuleEditPopoverOpen(true)}
+                      />
+                    }
                   >
-                    <EuiText size="m">
-                      {i18n.translate('xpack.observability.ruleDetails.editRule', {
-                        defaultMessage: 'Edit rule',
+                    <EuiButtonEmpty
+                      size="m"
+                      iconType="pencil"
+                      onClick={() => {
+                        setIsRuleEditPopoverOpen(false);
+                        setEditFlyoutVisible(true);
+                      }}
+                    >
+                      <EuiText size="m">
+                        {i18n.translate('xpack.observability.ruleDetails.editRule', {
+                          defaultMessage: 'Edit rule',
+                        })}
+                      </EuiText>
+                    </EuiButtonEmpty>
+                  </EuiPopover>
+                </EuiFlexItem>
+                <EuiSpacer size="s" />
+                <EuiFlexItem>
+                  <EuiTitle size="xxs">
+                    <EuiFlexItem>
+                      {i18n.translate('xpack.observability.ruleDetails.triggreAction.status', {
+                        defaultMessage: 'Status',
                       })}
-                    </EuiText>
-                  </EuiButtonEmpty>
-                </EuiPopover>
-              </>,
+                    </EuiFlexItem>
+                  </EuiTitle>
+
+                  {triggersActionsUi.getRuleStatusDropdown({
+                    rule,
+                    enableRule: async () => await enableRule({ http, id: rule.id }),
+                    disableRule: async () => await disableRule({ http, id: rule.id }),
+                    onRuleChanged: () => reloadRule(),
+                    isEditable: isRuleTypeEditableInContext(rule.ruleTypeId),
+                    snoozeRule: async (snoozeEndTime: string | -1) => {
+                      await snoozeRule({ http, id: rule.id, snoozeEndTime });
+                    },
+                    unsnoozeRule: async () => await unsnoozeRule({ http, id: rule.id }),
+                  })}
+                </EuiFlexItem>
+              </EuiFlexGroup>,
             ]
           : [],
       }}
