@@ -7,18 +7,16 @@
 
 import type {
   IRouter,
-  RequestHandlerContext,
+  CustomRequestHandlerContext,
   SavedObjectReference,
   IUiSettingsClient,
-} from '@kbn/core/server';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
-import { LicenseType } from '@kbn/licensing-plugin/server';
-import {
   IScopedClusterClient,
   SavedObjectAttributes,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { LicenseType } from '@kbn/licensing-plugin/server';
 import { AlertFactoryDoneUtils, PublicAlert } from './alert';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
@@ -60,9 +58,9 @@ export interface AlertingApiRequestHandlerContext {
 /**
  * @internal
  */
-export interface AlertingRequestHandlerContext extends RequestHandlerContext {
+export type AlertingRequestHandlerContext = CustomRequestHandlerContext<{
   alerting: AlertingApiRequestHandlerContext;
-}
+}>;
 
 /**
  * @internal
