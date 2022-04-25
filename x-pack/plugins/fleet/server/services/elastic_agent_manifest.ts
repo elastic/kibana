@@ -66,6 +66,11 @@ spec:
             - name: proc
               mountPath: /hostfs/proc
               readOnly: true
+            - name: etc-kubernetes
+              mountPath: /hostfs/etc/kubernetes
+            - name: var-lib
+              mountPath: /hostfs/var/lib
+              readOnly: true
             - name: cgroup
               mountPath: /hostfs/sys/fs/cgroup
               readOnly: true
@@ -75,6 +80,15 @@ spec:
             - name: varlog
               mountPath: /var/log
               readOnly: true
+            - name: passwd
+              mountPath: /hostfs/etc/passwd
+              readOnly: true
+            - name: group
+              mountPath: /hostfs/etc/group
+              readOnly: true
+            - name: systemd
+              mountPath: /hostfs/etc/systemd
+              readOnly: true
       volumes:
         - name: datastreams
           configMap:
@@ -83,6 +97,18 @@ spec:
         - name: proc
           hostPath:
             path: /proc
+        - name: etc-kubernetes
+          hostPath:
+            path: /etc/kubernetes
+        - name: var-lib
+          hostPath:
+            path: /var/lib
+        - name: passwd
+          hostPath:
+            path: /etc/passwd
+        - name: group
+          hostPath:
+            path: /etc/group
         - name: cgroup
           hostPath:
             path: /sys/fs/cgroup
@@ -92,6 +118,9 @@ spec:
         - name: varlog
           hostPath:
             path: /var/log
+        - name: systemd
+          hostPath:
+            path: /etc/systemd
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -222,7 +251,9 @@ metadata:
 ---
 `;
 
-export const elasticAgentManagedManifest = `apiVersion: apps/v1
+export const elasticAgentManagedManifest = `
+---
+apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: elastic-agent
@@ -285,6 +316,11 @@ spec:
             - name: proc
               mountPath: /hostfs/proc
               readOnly: true
+            - name: etc-kubernetes
+              mountPath: /hostfs/etc/kubernetes
+            - name: var-lib
+              mountPath: /hostfs/var/lib
+              readOnly: true
             - name: cgroup
               mountPath: /hostfs/sys/fs/cgroup
               readOnly: true
@@ -294,10 +330,31 @@ spec:
             - name: varlog
               mountPath: /var/log
               readOnly: true
+            - name: passwd
+              mountPath: /hostfs/etc/passwd
+              readOnly: true
+            - name: group
+              mountPath: /hostfs/etc/group
+              readOnly: true
+            - name: systemd
+              mountPath: /hostfs/etc/systemd
+              readOnly: true
       volumes:
         - name: proc
           hostPath:
             path: /proc
+        - name: etc-kubernetes
+          hostPath:
+            path: /etc/kubernetes
+        - name: var-lib
+          hostPath:
+            path: /var/lib
+        - name: passwd
+          hostPath:
+            path: /etc/passwd
+        - name: group
+          hostPath:
+            path: /etc/group
         - name: cgroup
           hostPath:
             path: /sys/fs/cgroup
@@ -307,6 +364,9 @@ spec:
         - name: varlog
           hostPath:
             path: /var/log
+        - name: systemd
+          hostPath:
+            path: /etc/systemd
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
