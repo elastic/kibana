@@ -16,7 +16,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
 
   describe('discover app', function () {
-    this.tags('ciGroup6');
+    this.tags('ciGroup5');
 
     before(function () {
       return browser.setWindowSize(SCREEN_WIDTH, 1000);

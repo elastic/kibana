@@ -108,6 +108,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
             getNumOverlapped(selectedGroups, groups.overlap)
         );
       }
+
       onChange(newAgentSelection);
       setSelectedOptions(selection);
     },
@@ -131,6 +132,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
         }
       }
     };
+
     if (agentSelection && !defaultValueInitialized.current && options.length) {
       if (agentSelection.allAgentsSelected) {
         const allAgentsOptions = find(['label', ALL_AGENTS_LABEL], options);
@@ -175,6 +177,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
 
   const renderOption = useCallback((option, searchVal, contentClassName) => {
     const { label, value } = option;
+
     return value?.groupType === AGENT_GROUP_KEY.Agent ? (
       <EuiHealth color={value?.status === 'online' ? 'success' : 'danger'}>
         <span className={contentClassName}>
