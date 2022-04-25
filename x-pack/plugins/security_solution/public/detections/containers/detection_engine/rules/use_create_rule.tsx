@@ -37,8 +37,6 @@ export const useCreateRule = (): ReturnCreateRule => {
       if (rule != null) {
         try {
           setIsLoading(true);
-          console.error('RULE', JSON.stringify(rule, null, 2));
-          console.error('TRANSFORMED RULE', JSON.stringify(transformOutput(rule), null, 2));
           const createRuleResponse = await createRule({
             rule: transformOutput(rule),
             signal: abortCtrl.signal,

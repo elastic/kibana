@@ -346,7 +346,6 @@ export const previewRulesRoute = async (
           { ignore: [404] }
         );
 
-        console.error('WAS IT A SUCCESS?');
         return response.ok({
           body: {
             previewId,
@@ -355,7 +354,6 @@ export const previewRulesRoute = async (
           },
         });
       } catch (err) {
-        console.error('THERE WAS AN ERROR HERE', err);
         const error = transformError(err as Error);
         return siemResponse.error({
           body: {
