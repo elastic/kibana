@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { compileFnName } from '@kbn/handlebars';
-
 export async function compile(
   urlTemplate: string,
   context: object,
   doEncode: boolean = true
 ): Promise<string> {
-  const handlebarsTemplate = (await import('./handlebars').then((m) => m.handlebars))[
-    compileFnName
-  ](urlTemplate, {
+  const { handlebars } = await import('./handlebars');
+  const { compileFnName } = await import('@kbn/handlebars');
+  const handlebarsTemplate = handlebars[compileFnName](urlTemplate, {
     strict: true,
     noEscape: true,
   });
