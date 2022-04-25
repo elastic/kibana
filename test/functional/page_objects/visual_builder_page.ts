@@ -286,7 +286,6 @@ export class VisualBuilderPageObject extends FtrService {
 
     await drilldownEl.clearValue();
     await drilldownEl.type(value, { charByChar: true });
-    await this.header.waitUntilLoadingHasFinished();
   }
 
   /**
@@ -407,13 +406,11 @@ export class VisualBuilderPageObject extends FtrService {
   public async selectAggType(value: string, nth = 0) {
     const elements = await this.testSubjects.findAll('aggSelector');
     await this.comboBox.setElement(elements[nth], value);
-    return await this.header.waitUntilLoadingHasFinished();
   }
 
   public async fillInExpression(expression: string, nth = 0) {
     const expressions = await this.testSubjects.findAll('mathExpression');
     await expressions[nth].type(expression);
-    return await this.header.waitUntilLoadingHasFinished();
   }
 
   public async fillInVariable(name = 'test', metric = 'Count', nth = 0) {
@@ -422,7 +419,6 @@ export class VisualBuilderPageObject extends FtrService {
     await varNameInput.type(name);
     const metricSelectWrapper = await elements[nth].findByCssSelector('.tvbAggs__varMetricWrapper');
     await this.comboBox.setElement(metricSelectWrapper, metric);
-    return await this.header.waitUntilLoadingHasFinished();
   }
 
   public async selectGroupByField(fieldName: string) {
@@ -433,7 +429,6 @@ export class VisualBuilderPageObject extends FtrService {
     const el = await this.testSubjects.find('columnLabelName');
     await el.clearValue();
     await el.type(value);
-    await this.header.waitUntilLoadingHasFinished();
   }
 
   /**
@@ -454,7 +449,6 @@ export class VisualBuilderPageObject extends FtrService {
     const testSubj = `${visType}Editor${tab}Btn`;
     await this.retry.try(async () => {
       await this.testSubjects.click(testSubj);
-      await this.header.waitUntilLoadingHasFinished();
       if (!(await (await this.testSubjects.find(testSubj)).elementHasClass('euiTab-isSelected'))) {
         throw new Error('tab not active');
       }
@@ -480,7 +474,6 @@ export class VisualBuilderPageObject extends FtrService {
   public async setAnnotationFilter(query: string) {
     const annotationQueryBar = await this.testSubjects.find('annotationQueryBar');
     await annotationQueryBar.type(query);
-    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async setAnnotationFields(fields: string) {
@@ -550,21 +543,17 @@ export class VisualBuilderPageObject extends FtrService {
         await this.comboBox.setCustom(metricsIndexPatternInput, value);
       }
     }
-
-    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async setIntervalValue(value: string) {
     const el = await this.testSubjects.find('metricsIndexPatternInterval');
     await el.clearValueWithKeyboard();
     await el.type(value);
-    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async setDropLastBucket(value: boolean) {
     const option = await this.testSubjects.find(`metricsDropLastBucket-${value ? 'yes' : 'no'}`);
     (await option.findByCssSelector('label')).click();
-    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async setOverrideIndexPattern(value: boolean) {
@@ -572,7 +561,6 @@ export class VisualBuilderPageObject extends FtrService {
       `seriesOverrideIndexPattern-${value ? 'yes' : 'no'}`
     );
     (await option.findByCssSelector('label')).click();
-    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async waitForIndexPatternTimeFieldOptionsLoaded() {
@@ -847,13 +835,11 @@ export class VisualBuilderPageObject extends FtrService {
   public async setSeriesFilter(query: string) {
     const seriesFilterQueryInput = await this.testSubjects.find('seriesConfigQueryBar');
     await seriesFilterQueryInput.type(query);
-    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async setPanelFilter(query: string) {
     const panelFilterQueryInput = await this.testSubjects.find('panelFilterQueryBar');
     await panelFilterQueryInput.type(query);
-    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async setMetricsDataTimerangeMode(value: string) {
@@ -908,7 +894,6 @@ export class VisualBuilderPageObject extends FtrService {
     chartData?: DebugState,
     itemType: 'areas' | 'bars' | 'annotations' = 'areas'
   ) {
-    await this.header.waitUntilLoadingHasFinished();
     return (await this.getChartDebugState(chartData))?.[itemType];
   }
 
