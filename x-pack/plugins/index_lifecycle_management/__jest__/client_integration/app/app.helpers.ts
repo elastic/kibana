@@ -5,23 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-import { createBreadcrumbsMock } from '../../../public/application/services/breadcrumbs.mock';
-import { licensingMock } from '../../../../licensing/public/mocks';
+import { HttpSetup } from 'src/core/public';
 import { App } from '../../../public/application/app';
-
-const breadcrumbService = createBreadcrumbsMock();
-
-const AppWithContext = (props: any) => {
-  return (
-    <KibanaContextProvider services={{ breadcrumbService, license: licensingMock.createLicense() }}>
-      <App {...props} />
-    </KibanaContextProvider>
-  );
-};
+import { WithAppDependencies } from '../helpers';
 
 const getTestBedConfig = (initialEntries: string[]): TestBedConfig => ({
   memoryRouter: {
@@ -32,9 +20,6 @@ const getTestBedConfig = (initialEntries: string[]): TestBedConfig => ({
   },
 });
 
-const initTestBed = (initialEntries: string[]) =>
-  registerTestBed(AppWithContext, getTestBedConfig(initialEntries))();
-
 export interface AppTestBed extends TestBed {
   actions: {
     clickPolicyNameLink: () => void;
@@ -42,8 +27,15 @@ export interface AppTestBed extends TestBed {
   };
 }
 
-export const setup = async (initialEntries: string[]): Promise<AppTestBed> => {
-  const testBed = await initTestBed(initialEntries);
+export const setup = async (
+  httpSetup: HttpSetup,
+  initialEntries: string[]
+): Promise<AppTestBed> => {
+  const initTestBed = registerTestBed(
+    WithAppDependencies(App, httpSetup),
+    getTestBedConfig(initialEntries)
+  );
+  const testBed = await initTestBed();
 
   const clickPolicyNameLink = async () => {
     const { component, find } = testBed;
