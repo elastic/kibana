@@ -41,6 +41,7 @@ export interface OnlyEsQueryAlertParams {
 export interface OnlySearchSourceAlertParams {
   searchType: 'searchSource';
   searchConfiguration: SerializedSearchSourceFields;
+  savedQueryId?: string;
 }
 
 export type DataViewOption = EuiComboBoxOptionOption<string>;

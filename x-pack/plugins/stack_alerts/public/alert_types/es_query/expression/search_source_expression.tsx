@@ -10,6 +10,7 @@ import './search_source_expression.scss';
 import { EuiSpacer, EuiLoadingSpinner, EuiEmptyPrompt, EuiCallOut } from '@elastic/eui';
 import { ISearchSource } from '@kbn/data-plugin/common';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { SavedQuery } from '@kbn/data-plugin/public';
 import { EsQueryAlertParams, SearchType } from '../types';
 import { useTriggersAndActionsUiDeps } from '../util';
 import { SearchSourceExpressionForm } from './search_source_expression_form';
@@ -36,6 +37,7 @@ export const SearchSourceExpression = ({
   const { data } = useTriggersAndActionsUiDeps();
 
   const searchSourceRef = useRef<ISearchSource>();
+  const [savedQuery, setSavedQuery] = useState<SavedQuery>();
   const [paramsError, setParamsError] = useState<Error>();
 
   const setParam = useCallback(
@@ -65,6 +67,12 @@ export const SearchSourceExpression = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.search.searchSource, data.dataViews, searchConfiguration]);
 
+  useEffect(() => {
+    if (ruleParams.savedQueryId) {
+      data.query.savedQueries.getSavedQuery(ruleParams.savedQueryId).then(setSavedQuery);
+    }
+  }, [data.query.savedQueries, ruleParams.savedQueryId]);
+
   if (paramsError) {
     return (
       <>
@@ -85,6 +93,7 @@ export const SearchSourceExpression = ({
       searchSource={searchSourceRef.current}
       errors={errors}
       ruleParams={ruleParams}
+      initialSavedQuery={savedQuery}
       setParam={setParam}
     />
   );

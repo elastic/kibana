@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useCallback, useMemo, useReducer, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import './search_source_expression.scss';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiTitle, EuiExpression } from '@elastic/eui';
@@ -45,17 +45,20 @@ interface SearchSourceExpressionFormProps {
   searchSource: ISearchSource;
   ruleParams: EsQueryAlertParams<SearchType.searchSource>;
   errors: IErrorObject;
+  initialSavedQuery?: SavedQuery;
   setParam: (paramField: string, paramValue: unknown) => void;
 }
 
 export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProps) => {
   const { data, unifiedSearch } = useTriggersAndActionsUiDeps();
-  const { searchSource, ruleParams, errors, setParam } = props;
+  const { searchSource, ruleParams, errors, initialSavedQuery, setParam } = props;
   const { thresholdComparator, threshold, timeWindowSize, timeWindowUnit, size } = ruleParams;
   const [savedQuery, setSavedQuery] = useState<SavedQuery>();
   const SearchBar = unifiedSearch.ui.SearchBar;
 
-  // part of alert rule params
+  useEffect(() => setSavedQuery(initialSavedQuery), [initialSavedQuery]);
+
+  // part of alert search source rule params
   const [{ index: dataView, query, filter: filters }, dispatch] =
     useReducer<SearchSourceStateReducer>(
       (currentState, action) => {
@@ -90,7 +93,13 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
   const onChangeQuery = ({ query: newQuery }: { query?: Query }) =>
     dispatch({ type: 'query', payload: newQuery || { ...query, query: '' } });
 
-  const onSavedQueryUpdated = (newSavedQuery: SavedQuery) => setSavedQuery(newSavedQuery);
+  const onSavedQueryUpdated = (newSavedQuery: SavedQuery) => {
+    setSavedQuery(newSavedQuery);
+    const newFilters = newSavedQuery.attributes.filters;
+    if (newFilters) {
+      dispatch({ type: 'filter', payload: newFilters });
+    }
+  };
 
   const onClearSavedQuery = () => {
     setSavedQuery(undefined);
@@ -126,6 +135,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         indexPatterns={dataViews}
         onQueryChange={onChangeQuery}
         savedQueryId={savedQuery?.id}
+        filters={filters}
         onClearSavedQuery={onClearSavedQuery}
         onSavedQueryUpdated={onSavedQueryUpdated}
         showSaveQuery={true}
@@ -135,6 +145,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         showDatePicker={false}
         showAutoRefreshOnly={false}
         customSubmitButton={<></>}
+        dateRangeFrom={undefined}
+        dateRangeTo={undefined}
       />
 
       <EuiExpression
