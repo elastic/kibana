@@ -8,7 +8,7 @@
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import type { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
-import type { HomeServerPluginSetup } from '../../home/server';
+import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { getUiSettings } from './ui_settings';
 import { capabilitiesProvider } from './capabilities_provider';
 import { getSavedSearchObjectType } from './saved_objects';
