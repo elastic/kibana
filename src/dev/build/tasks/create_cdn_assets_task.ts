@@ -24,8 +24,9 @@ export const CreateCdnAssets: Task = {
     const assets = config.resolveFromRepo('build', 'cdn-assets');
     const bundles = resolve(assets, String(buildNum), 'bundles');
     const plugin = resolve(bundles, 'plugin');
-    await mkdirp(plugin);
 
+    // Plugins
+    await mkdirp(plugin);
     const plugins = globby.sync([
       `${buildSource}/x-pack/plugins/*/kibana.json`,
       `${buildSource}/src/plugins/*/kibana.json`,
@@ -34,10 +35,22 @@ export const CreateCdnAssets: Task = {
       const spec = JSON.parse(readFileSync(path, 'utf8'));
       const { id, version } = spec;
       const dest = resolve(plugin, id, version);
-      await copyAll(resolve(dirname(path), 'target/public'), dest, {
-        select: ['*'],
-      });
+      await copyAll(resolve(dirname(path), 'target/public'), dest);
     });
+
+    // Core
+    await copyAll(resolve(buildSource, 'src/core/target/public'), resolve(bundles, 'core'));
+
+    // Shared dependencies
+    await copyAll(
+      resolve(buildSource, 'node_modules/@kbn/ui-shared-deps-npm/shared_built_assets'),
+      resolve(bundles, 'kbn-ui-shared-deps-npm')
+    );
+    await copyAll(
+      resolve(buildSource, 'node_modules/@kbn/ui-shared-deps-src/shared_built_assets'),
+      resolve(bundles, 'kbn-ui-shared-deps-src')
+    );
+
     await compressTar({
       source: assets,
       destination: config.resolveFromTarget(`kibana-${buildVersion}-cdn-assets.tar.gz`),
