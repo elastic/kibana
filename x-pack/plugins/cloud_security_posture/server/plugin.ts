@@ -133,11 +133,9 @@ export class CspPlugin
 
   public stop() {}
 
-  initialize(core: CoreStart): Promise<unknown> {
+  async initialize(core: CoreStart): Promise<void> {
     this.logger.debug('initialize');
-    return initializeCspTransformsIndices(
-      core.elasticsearch.client.asInternalUser,
-      this.logger
-    ).then((_) => initializeCspTransforms(core.elasticsearch.client.asInternalUser, this.logger));
+    await initializeCspTransformsIndices(core.elasticsearch.client.asInternalUser, this.logger);
+    await initializeCspTransforms(core.elasticsearch.client.asInternalUser, this.logger);
   }
 }
