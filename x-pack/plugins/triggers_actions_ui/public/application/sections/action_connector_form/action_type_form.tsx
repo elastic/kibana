@@ -63,6 +63,7 @@ export type ActionTypeFormProps = {
   | 'setActionParamsProperty'
   | 'messageVariables'
   | 'defaultActionMessage'
+  | 'defaultRecoveryMessage'
 >;
 
 const preconfiguredMessage = i18n.translate(
