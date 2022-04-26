@@ -46,7 +46,7 @@ export const PureComponent = (params: Params) => {
     <SharedUxServicesProvider {...services}>
       <KibanaNoDataPage
         onDataViewCreated={action('onDataViewCreated')}
-        noDataConfig={{ ...noDataConfig, solution, logo, pageTitle: 'Your Solution Name' }}
+        noDataConfig={{ ...noDataConfig, solution, logo }}
       />
     </SharedUxServicesProvider>
   );
