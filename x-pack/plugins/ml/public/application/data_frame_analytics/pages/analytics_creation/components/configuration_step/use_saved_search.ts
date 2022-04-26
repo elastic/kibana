@@ -50,6 +50,16 @@ export function useSavedSearch() {
         const filterQuery = buildQueryFromFilters(filter, currentDataView);
         if (qry.bool === undefined) {
           qry.bool = {};
+          // toElasticsearchQuery may add a single match_all item to the
+          // root of its returned query, rather than putting it inside
+          // a bool.should
+          // in this case, move it to a bool.should
+          if (qry.match_all !== undefined) {
+            qry.bool.should = {
+              match_all: qry.match_all,
+            };
+            delete qry.match_all;
+          }
         }
 
         if (Array.isArray(qry.bool.filter) === false) {
