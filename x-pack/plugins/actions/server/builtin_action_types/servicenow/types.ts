@@ -26,6 +26,9 @@ import {
   ExternalIncidentServiceConfigurationBaseSchema,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
+import { SNProductsConfigValue } from '../../../common';
+
+export type { SNProductsConfigValue, SNProductsConfig } from '../../../common';
 
 export type ServiceNowPublicConfigurationBaseType = TypeOf<
   typeof ExternalIncidentServiceConfigurationBaseSchema
@@ -247,17 +250,6 @@ export interface GetApplicationInfoResponse {
   scope: string;
   version: string;
 }
-
-export interface SNProductsConfigValue {
-  table: string;
-  appScope: string;
-  useImportAPI: boolean;
-  importSetTable: string;
-  commentFieldKey: string;
-  appId?: string;
-}
-
-export type SNProductsConfig = Record<string, SNProductsConfigValue>;
 
 export enum ObservableTypes {
   ip4 = 'ipv4-addr',

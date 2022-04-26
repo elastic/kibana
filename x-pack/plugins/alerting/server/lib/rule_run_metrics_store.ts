@@ -6,12 +6,18 @@
  */
 
 import { set } from 'lodash';
+import { ActionsCompletion } from '../types';
 import { ActionsConfigMap } from './get_actions_config_map';
-import { ActionsCompletion } from '../task_runner/types';
 
 interface State {
+  numSearches: number;
+  totalSearchDurationMs: number;
+  esSearchDurationMs: number;
   numberOfTriggeredActions: number;
   numberOfGeneratedActions: number;
+  numberOfActiveAlerts: number;
+  numberOfRecoveredAlerts: number;
+  numberOfNewAlerts: number;
   connectorTypes: {
     [key: string]: {
       triggeredActionsStatus: ActionsCompletion;
@@ -21,10 +27,19 @@ interface State {
   };
 }
 
-export class AlertExecutionStore {
+export type RuleRunMetrics = Omit<State, 'connectorTypes'> & {
+  triggeredActionsStatus: ActionsCompletion;
+};
+export class RuleRunMetricsStore {
   private state: State = {
+    numSearches: 0,
+    totalSearchDurationMs: 0,
+    esSearchDurationMs: 0,
     numberOfTriggeredActions: 0,
     numberOfGeneratedActions: 0,
+    numberOfActiveAlerts: 0,
+    numberOfRecoveredAlerts: 0,
+    numberOfNewAlerts: 0,
     connectorTypes: {},
   };
 
@@ -35,25 +50,66 @@ export class AlertExecutionStore {
     );
     return hasPartial ? ActionsCompletion.PARTIAL : ActionsCompletion.COMPLETE;
   };
+  public getNumSearches = () => {
+    return this.state.numSearches;
+  };
+  public getTotalSearchDurationMs = () => {
+    return this.state.totalSearchDurationMs;
+  };
+  public getEsSearchDurationMs = () => {
+    return this.state.esSearchDurationMs;
+  };
   public getNumberOfTriggeredActions = () => {
     return this.state.numberOfTriggeredActions;
   };
   public getNumberOfGeneratedActions = () => {
     return this.state.numberOfGeneratedActions;
   };
+  public getNumberOfActiveAlerts = () => {
+    return this.state.numberOfActiveAlerts;
+  };
+  public getNumberOfRecoveredAlerts = () => {
+    return this.state.numberOfRecoveredAlerts;
+  };
+  public getNumberOfNewAlerts = () => {
+    return this.state.numberOfNewAlerts;
+  };
   public getStatusByConnectorType = (actionTypeId: string) => {
     return this.state.connectorTypes[actionTypeId];
   };
+  public getMetrics = (): RuleRunMetrics => {
+    const { connectorTypes, ...metrics } = this.state;
+    return {
+      ...metrics,
+      triggeredActionsStatus: this.getTriggeredActionsStatus(),
+    };
+  };
 
   // Setters
+  public setNumSearches = (numSearches: number) => {
+    this.state.numSearches = numSearches;
+  };
+  public setTotalSearchDurationMs = (totalSearchDurationMs: number) => {
+    this.state.totalSearchDurationMs = totalSearchDurationMs;
+  };
+  public setEsSearchDurationMs = (esSearchDurationMs: number) => {
+    this.state.esSearchDurationMs = esSearchDurationMs;
+  };
   public setNumberOfTriggeredActions = (numberOfTriggeredActions: number) => {
     this.state.numberOfTriggeredActions = numberOfTriggeredActions;
   };
-
   public setNumberOfGeneratedActions = (numberOfGeneratedActions: number) => {
     this.state.numberOfGeneratedActions = numberOfGeneratedActions;
   };
-
+  public setNumberOfActiveAlerts = (numberOfActiveAlerts: number) => {
+    this.state.numberOfActiveAlerts = numberOfActiveAlerts;
+  };
+  public setNumberOfRecoveredAlerts = (numberOfRecoveredAlerts: number) => {
+    this.state.numberOfRecoveredAlerts = numberOfRecoveredAlerts;
+  };
+  public setNumberOfNewAlerts = (numberOfNewAlerts: number) => {
+    this.state.numberOfNewAlerts = numberOfNewAlerts;
+  };
   public setTriggeredActionsStatusByConnectorType = ({
     actionTypeId,
     status,
@@ -90,11 +146,9 @@ export class AlertExecutionStore {
   public incrementNumberOfTriggeredActions = () => {
     this.state.numberOfTriggeredActions++;
   };
-
   public incrementNumberOfGeneratedActions = (incrementBy: number) => {
     this.state.numberOfGeneratedActions += incrementBy;
   };
-
   public incrementNumberOfTriggeredActionsByConnectorType = (actionTypeId: string) => {
     const currentVal = this.state.connectorTypes[actionTypeId]?.numberOfTriggeredActions || 0;
     set(this.state, `connectorTypes["${actionTypeId}"].numberOfTriggeredActions`, currentVal + 1);
