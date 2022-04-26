@@ -10,6 +10,7 @@ import React from 'react';
 import { createEndpoint, fromIframe } from '@remote-ui/rpc';
 
 import './index.scss';
+import { VisTypeScriptKibanaApi } from '../kibana_api';
 
 const getSandboxDocument = (script: string) => {
   // may be possible to remove this iframe-level nonce once we can use the top-level CSP
@@ -30,18 +31,11 @@ const getSandboxDocument = (script: string) => {
           const endpoint = createEndpoint(fromInsideIframe());
 
           const KIBANA_API = {
-            searchEs: () => {
+            esSearch: (payload, options) => {
               console.log('Calling search inside an iframe')
-              endpoint.call.searchEs();
+              return endpoint.call.esSearch(payload, options);
             }
           }
-
-          endpoint.expose({
-             onUpdate: () => {
-                console.log('Running an update from an iframe')
-             }
-          })
-
 
           window.KIBANA_API = KIBANA_API;
         </script>
@@ -53,29 +47,33 @@ const getSandboxDocument = (script: string) => {
     `;
 };
 
-export const ScriptRenderer: React.FunctionComponent<{ script: string }> = ({
+export const ScriptRenderer: React.FunctionComponent<{
+  script: string;
+  kibanaApi: VisTypeScriptKibanaApi;
+}> = ({
   script: visualizationScript,
+  kibanaApi,
 }: {
   script: string;
+  kibanaApi: VisTypeScriptKibanaApi;
 }) => {
   const iframeRef = React.useRef<HTMLIFrameElement | null>(null);
 
   React.useEffect(() => {
     if (!iframeRef.current) throw new Error('Iframe init error');
     const iframeEl = iframeRef.current;
-    const endpoint = createEndpoint<{ onUpdate: () => void }>(fromIframe(iframeEl));
+    const endpoint = createEndpoint(fromIframe(iframeEl));
 
     endpoint.expose({
-      searchEs: () => {
-        // eslint-disable-next-line no-console
-        console.log('Running search from parent');
+      esSearch: (payload, options) => {
+        return kibanaApi.esSearch(payload, options);
       },
     });
 
-    // eslint-disable-next-line no-console
-    console.log('Calling on update from parent');
-    endpoint.call.onUpdate();
-  }, []);
+    return () => {
+      endpoint.terminate();
+    };
+  }, [kibanaApi]);
 
   return (
     <iframe

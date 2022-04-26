@@ -14,24 +14,39 @@ import { scriptVisDefinition } from './vis_definition';
 import { ConfigSchema } from '../config';
 import { scriptVisRenderer } from './expression/renderer';
 import { createScriptVisFn } from './expression/fn';
+import { DataPublicPluginStart } from '../../data/public';
 
 /** @internal */
-export interface ScriptVisPluginDependencies {
+export interface ScriptVisPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
 }
 
 /** @internal */
-export class ScriptVisPlugin implements Plugin<void, void> {
+export interface ScriptVisPluginStartDependencies {
+  data: DataPublicPluginStart;
+}
+
+/** @internal */
+export class ScriptVisPlugin
+  implements Plugin<void, void, ScriptVisPluginSetupDependencies, ScriptVisPluginStartDependencies>
+{
   initializerContext: PluginInitializerContext<ConfigSchema>;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup, { expressions, visualizations }: ScriptVisPluginDependencies) {
+  public setup(
+    core: CoreSetup<ScriptVisPluginStartDependencies>,
+    { expressions, visualizations }: ScriptVisPluginSetupDependencies
+  ) {
     visualizations.createBaseVisualization(scriptVisDefinition);
-    expressions.registerRenderer(scriptVisRenderer);
+    expressions.registerRenderer(
+      scriptVisRenderer(() =>
+        core.getStartServices().then(([coreStart, plugins]) => ({ data: plugins.data }))
+      )
+    );
     expressions.registerFunction(createScriptVisFn);
   }
 
