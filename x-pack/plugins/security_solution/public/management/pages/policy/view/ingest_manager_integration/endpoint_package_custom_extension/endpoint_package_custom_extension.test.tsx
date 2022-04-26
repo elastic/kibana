@@ -97,4 +97,16 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
       expect(renderResult.queryByTestId('hostIsolationExceptions-fleetCard')).toBeNull();
     });
   });
+
+  it('should only show loading spinner if loading', () => {
+    useEndpointPrivilegesMock.mockReturnValue({
+      ...getEndpointPrivilegesInitialStateMock(),
+      loading: true,
+    });
+    render();
+
+    expect(renderResult.getByTestId('endpointExtensionLoadingSpinner')).toBeInTheDocument();
+    expect(renderResult.queryByTestId('fleetEndpointPackageCustomContent')).toBeNull();
+    expect(renderResult.queryByTestId('noIngestPermissions')).toBeNull();
+  });
 });
