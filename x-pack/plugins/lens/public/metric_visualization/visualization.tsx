@@ -194,7 +194,7 @@ const toExpression = (
               : [],
           iconType: [!isReducedMode && state?.iconType ? state?.iconType : 'empty'],
           iconColor: [state?.iconColor || ''],
-          iconPosition: [state?.iconPosition || 'below'],
+          iconPosition: [state?.iconPosition || 'left'],
           iconSize: [iconSize],
           iconBackground: [state?.iconBackground || 'shadow'],
           iconAlignment: [iconAlignment],

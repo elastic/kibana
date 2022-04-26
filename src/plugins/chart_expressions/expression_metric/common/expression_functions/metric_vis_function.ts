@@ -145,11 +145,10 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       }),
     },
     iconPosition: {
-      default: IconPositions.RIGHT,
+      default: IconPositions.LEFT,
       types: ['string'],
       options: [
         IconPositions.ABOVE,
-        IconPositions.AUTO,
         IconPositions.BELOW,
         IconPositions.LEFT,
         IconPositions.RIGHT,

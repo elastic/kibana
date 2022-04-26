@@ -137,65 +137,6 @@ const metricIconSet = [
   },
 ];
 
-// export const defualtEuiIconSet = [
-//   {
-//     value: 'empty',
-//     label: i18n.translate('xpack.lens.xyChart.iconSelect.noIconLabel', {
-//       defaultMessage: 'None',
-//     }),
-//   },
-//   {
-//     value: 'asterisk',
-//     label: i18n.translate('xpack.lens.xyChart.iconSelect.asteriskIconLabel', {
-//       defaultMessage: 'Asterisk',
-//     }),
-//   },
-//   {
-//     value: 'bell',
-//     label: i18n.translate('xpack.lens.xyChart.iconSelect.bellIconLabel', {
-//       defaultMessage: 'Bell',
-//     }),
-//   },
-//   {
-//     value: 'bolt',
-//     label: i18n.translate('xpack.lens.xyChart.iconSelect.boltIconLabel', {
-//       defaultMessage: 'Bolt',
-//     }),
-//   },
-//   {
-//     value: 'bug',
-//     label: i18n.translate('xpack.lens.xyChart.iconSelect.bugIconLabel', {
-//       defaultMessage: 'Bug',
-//     }),
-//   },
-//   {
-//     value: 'editorComment',
-//     label: i18n.translate('xpack.lens.xyChart.iconSelect.commentIconLabel', {
-//       defaultMessage: 'Comment',
-//     }),
-//   },
-//   {
-//     value: 'alert',
-//     label: i18n.translate('xpack.lens.xyChart.iconSelect.alertIconLabel', {
-//       defaultMessage: 'Alert',
-//     }),
-//   },
-//   {
-//     value: 'flag',
-//     label: i18n.translate('xpack.lens.xyChart.iconSelect.flagIconLabel', {
-//       defaultMessage: 'Flag',
-//     }),
-//   },
-//   {
-//     value: 'tag',
-//     label: i18n.translate('xpack.lens.xyChart.iconSelect.tagIconLabel', {
-//       defaultMessage: 'Tag',
-//     }),
-//   },
-// ];
-
-export const DEFAULT_TITLE_POSITION = 'top';
-
 const iconPositionOptions = [
   {
     id: 'above',
@@ -304,7 +245,7 @@ export const IconOptions: React.FC<IconProps> = ({ state, setState }) => {
           data-test-subj="lnsMissingValuesSelect"
           legend="This is a basic group"
           options={iconPositionOptions}
-          idSelected={state.iconPosition ?? DEFAULT_TITLE_POSITION}
+          idSelected={state.iconPosition ?? 'left'}
           onChange={(value) => {
             setState({ ...state, iconPosition: value as MetricState['iconPosition'] });
           }}

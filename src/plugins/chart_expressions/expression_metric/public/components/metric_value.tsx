@@ -55,8 +55,8 @@ export const MetricVisValue = ({
     'mtrVis__container--light': metric.lightText,
     'mtrVis__container-isfilterable': onFilter,
     'mtrVis__container-isfull': !autoScale && colorFullBackground,
-    'mtrVis__container-iconLeft': iconPosition === 'left',
-    'mtrVis__container-iconRight': iconPosition === 'right',
+    'mtrVis__container-iconLeft': iconPosition === 'left' && iconType !== 'empty',
+    'mtrVis__container-iconRight': iconPosition === 'right' && iconType !== 'empty',
   });
 
   // for autoScale true we should add background to upper level so that correct colorize full container

@@ -14,7 +14,6 @@ export const LabelPosition = {
 } as const;
 
 export const IconPositions = {
-  AUTO: 'auto',
   LEFT: 'left',
   RIGHT: 'right',
   ABOVE: 'above',
