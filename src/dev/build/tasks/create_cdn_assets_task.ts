@@ -10,6 +10,7 @@ import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { asyncForEach } from '@kbn/std';
 
+import del from 'del';
 import globby from 'globby';
 
 import { mkdirp, compressTar, Task, copyAll } from '../lib';
@@ -24,6 +25,9 @@ export const CreateCdnAssets: Task = {
     const assets = config.resolveFromRepo('build', 'cdn-assets');
     const bundles = resolve(assets, String(buildNum), 'bundles');
     const plugin = resolve(bundles, 'plugin');
+
+    await del(assets);
+    await mkdirp(assets);
 
     // Plugins
     await mkdirp(plugin);
@@ -40,6 +44,7 @@ export const CreateCdnAssets: Task = {
 
     // Core
     await copyAll(resolve(buildSource, 'src/core/target/public'), resolve(bundles, 'core'));
+    await copyAll(resolve(buildSource, 'src/core/server/core_app/assets'), resolve(assets, 'ui'));
 
     // Shared dependencies
     await copyAll(
@@ -54,7 +59,6 @@ export const CreateCdnAssets: Task = {
       resolve(buildSource, 'node_modules/@kbn/ui-framework/dist'),
       resolve(assets, 'node_modules/@kbn/ui-framework/dist')
     );
-    await copyAll(resolve(buildSource, 'src/core/server/core_app/assets'), resolve(assets, 'ui'));
 
     await compressTar({
       source: assets,
