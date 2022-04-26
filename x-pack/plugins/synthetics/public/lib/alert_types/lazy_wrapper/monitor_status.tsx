@@ -27,7 +27,7 @@ export default function MonitorStatusAlert({ core, plugins, params }: Props) {
   return (
     <ReduxProvider store={store}>
       <KibanaContextProvider services={{ ...core, ...plugins }}>
-        <UptimeDataViewContextProvider data={plugins.data}>
+        <UptimeDataViewContextProvider dataViews={plugins.dataViews}>
           <AlertMonitorStatus {...params} autocomplete={plugins.unifiedSearch.autocomplete} />
         </UptimeDataViewContextProvider>
       </KibanaContextProvider>
