@@ -127,7 +127,7 @@ export class RenderingService {
         env,
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
-          translationsUrl: `${staticBaseUrl}/translations/${i18n.getLocale()}.json`,
+          translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
         },
         theme: {
           darkMode,
