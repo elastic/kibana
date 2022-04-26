@@ -929,7 +929,7 @@ export class RulesClient {
           terms: { field: 'alert.attributes.muteAll' },
         },
         tags: {
-          terms: { field: 'alert.attributes.tags' },
+          terms: { field: 'alert.attributes.tags', order: { _key: 'asc' } },
         },
         snoozed: {
           date_range: {

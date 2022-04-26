@@ -313,7 +313,6 @@ export const RulesList: React.FunctionComponent = () => {
           isEmpty(typesFilter) &&
           isEmpty(actionTypesFilter) &&
           isEmpty(ruleStatusesFilter) &&
-          isRuleTagFilterEnabled &&
           isEmpty(tagsFilter)
         );
 
