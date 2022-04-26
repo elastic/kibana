@@ -78,7 +78,7 @@ export class SampleDataViewDataButton extends React.Component {
         icon: <EuiIcon type={icon} size="m" />,
         href: this.addBasePath(path),
         onClick: createAppNavigationHandler(path),
-        'data-test-subj': rest['data-test-subj'],
+        ...(rest['data-test-subj'] ? { 'data-test-subj': rest['data-test-subj'] } : {}),
       };
     });
 
