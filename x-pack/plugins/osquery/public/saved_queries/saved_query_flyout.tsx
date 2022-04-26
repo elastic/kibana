@@ -31,6 +31,8 @@ interface AddQueryFlyoutProps {
   isExternal?: true;
 }
 
+const additionalZIndexStyle = { style: 'z-index: 6000' };
+
 const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
   defaultValue,
   onClose,
@@ -58,8 +60,7 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
         ownFocus
         onClose={onClose}
         aria-labelledby="flyoutTitle"
-        // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-        maskProps={isExternal && { style: 'z-index: 6000' }} // For an edge case to display above the alerts flyout
+        maskProps={isExternal && additionalZIndexStyle} // For an edge case to display above the alerts flyout
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
