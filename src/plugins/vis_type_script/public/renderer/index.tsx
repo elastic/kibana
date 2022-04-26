@@ -11,6 +11,8 @@ import { createEndpoint, fromIframe } from '@remote-ui/rpc';
 
 import './index.scss';
 
+export const KIBANA_API_CONSTANT_NAME = 'KIBANA_API';
+
 const getSandboxDocument = (script: string) => {
   // may be possible to remove this iframe-level nonce once we can use the top-level CSP
   // see https://github.com/elastic/kibana/issues/101579 for status tracking
@@ -29,7 +31,7 @@ const getSandboxDocument = (script: string) => {
 
           const endpoint = createEndpoint(fromInsideIframe());
 
-          const KIBANA_API = {
+          const ${KIBANA_API_CONSTANT_NAME} = {
             searchEs: () => {
               console.log('Calling search inside an iframe')
               endpoint.call.searchEs();
@@ -43,7 +45,7 @@ const getSandboxDocument = (script: string) => {
           })
 
 
-          window.KIBANA_API = KIBANA_API;
+          window.${KIBANA_API_CONSTANT_NAME} = ${KIBANA_API_CONSTANT_NAME};
         </script>
 
         <script nonce="${nonce}">window.addEventListener('load', () => {${script}})</script>
