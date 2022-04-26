@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import indexDetailFixture from './fixtures/index_detail';
+import indexDetailFixture from './fixtures/index_detail.json';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

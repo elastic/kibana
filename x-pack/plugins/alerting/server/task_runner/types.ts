@@ -6,7 +6,10 @@
  */
 
 import { Dictionary } from 'lodash';
-import { KibanaRequest, Logger } from 'kibana/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { IEventLogger } from '@kbn/event-log-plugin/server';
+import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import {
   ActionGroup,
   RuleAction,
@@ -20,13 +23,12 @@ import {
   RuleTaskState,
   SanitizedRule,
 } from '../../common';
-import { ConcreteTaskInstance } from '../../../task_manager/server';
 import { Alert } from '../alert';
-import { IEventLogger } from '../../../event_log/server';
 import { NormalizedRuleType } from '../rule_type_registry';
 import { ExecutionHandler } from './create_execution_handler';
-import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
 import { RawRule } from '../types';
+import { ActionsConfigMap } from '../lib/get_actions_config_map';
+import { AlertExecutionStore } from '../lib/alert_execution_store';
 
 export interface RuleTaskRunResultWithActions {
   state: RuleExecutionState;
@@ -145,6 +147,7 @@ export interface CreateExecutionHandlerOptions<
   ruleParams: RuleTypeParams;
   supportsEphemeralTasks: boolean;
   maxEphemeralActionsPerRule: number;
+  actionsConfigMap: ActionsConfigMap;
 }
 
 export interface ExecutionHandlerOptions<ActionGroupIds extends string> {
@@ -159,10 +162,4 @@ export interface ExecutionHandlerOptions<ActionGroupIds extends string> {
 export enum ActionsCompletion {
   COMPLETE = 'complete',
   PARTIAL = 'partial',
-}
-
-export interface AlertExecutionStore {
-  numberOfTriggeredActions: number;
-  numberOfScheduledActions: number;
-  triggeredActionsStatus: ActionsCompletion;
 }

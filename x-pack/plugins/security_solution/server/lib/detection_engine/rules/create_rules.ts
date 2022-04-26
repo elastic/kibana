@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { SIGNALS_ID, ruleTypeMappings } from '@kbn/securitysolution-rules';
+import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
+import { RuleTypeParams, SanitizedRule } from '@kbn/alerting-plugin/common';
 import {
   normalizeMachineLearningJobIds,
   normalizeThresholdObject,
 } from '../../../../common/detection_engine/utils';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { RuleTypeParams, SanitizedRule } from '../../../../../alerting/common';
 import {
   DEFAULT_INDICATOR_SOURCE_PATH,
   NOTIFICATION_THROTTLE_NO_ACTIONS,
@@ -75,7 +75,6 @@ export const createRules = async ({
   version,
   exceptionsList,
   actions,
-  isRuleRegistryEnabled,
   id,
 }: CreateRulesOptions): Promise<SanitizedRule<RuleTypeParams>> => {
   const rule = await rulesClient.create<RuleTypeParams>({
@@ -85,7 +84,7 @@ export const createRules = async ({
     data: {
       name,
       tags: addTags(tags, ruleId, immutable),
-      alertTypeId: isRuleRegistryEnabled ? ruleTypeMappings[type] : SIGNALS_ID,
+      alertTypeId: ruleTypeMappings[type],
       consumer: SERVER_APP_ID,
       params: {
         anomalyThreshold,

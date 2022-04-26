@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
+import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plugin/server';
 import { transformActionParams } from './transform_action_params';
-import { asSavedObjectExecutionSource } from '../../../actions/server';
-import { SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { injectActionParams } from './inject_action_params';
 import { AlertInstanceContext, AlertInstanceState, RuleTypeParams, RuleTypeState } from '../types';
 
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import { isEphemeralTaskRejectedDueToCapacityError } from '../../../task_manager/server';
 import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
 import { ActionsCompletion, CreateExecutionHandlerOptions, ExecutionHandlerOptions } from './types';
 
@@ -46,6 +46,7 @@ export function createExecutionHandler<
   ruleParams,
   supportsEphemeralTasks,
   maxEphemeralActionsPerRule,
+  actionsConfigMap,
 }: CreateExecutionHandlerOptions<
   Params,
   ExtractedParams,
@@ -58,6 +59,7 @@ export function createExecutionHandler<
   const ruleTypeActionGroups = new Map(
     ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
   );
+
   return async ({
     actionGroup,
     actionSubgroup,
@@ -107,7 +109,7 @@ export function createExecutionHandler<
         }),
       }));
 
-    alertExecutionStore.numberOfScheduledActions += actions.length;
+    alertExecutionStore.incrementNumberOfGeneratedActions(actions.length);
 
     const ruleLabel = `${ruleType.id}:${ruleId}: '${ruleName}'`;
 
@@ -115,21 +117,48 @@ export function createExecutionHandler<
     let ephemeralActionsToSchedule = maxEphemeralActionsPerRule;
 
     for (const action of actions) {
-      if (alertExecutionStore.numberOfTriggeredActions >= ruleType.config!.execution.actions.max) {
-        alertExecutionStore.triggeredActionsStatus = ActionsCompletion.PARTIAL;
+      const { actionTypeId } = action;
+
+      alertExecutionStore.incrementNumberOfGeneratedActionsByConnectorType(actionTypeId);
+
+      if (alertExecutionStore.hasReachedTheExecutableActionsLimit(actionsConfigMap)) {
+        alertExecutionStore.setTriggeredActionsStatusByConnectorType({
+          actionTypeId,
+          status: ActionsCompletion.PARTIAL,
+        });
+        logger.debug(
+          `Rule "${ruleId}" skipped scheduling action "${action.id}" because the maximum number of allowed actions has been reached.`
+        );
         break;
       }
 
       if (
-        !actionsPlugin.isActionExecutable(action.id, action.actionTypeId, { notifyUsage: true })
+        alertExecutionStore.hasReachedTheExecutableActionsLimitByConnectorType({
+          actionTypeId,
+          actionsConfigMap,
+        })
       ) {
+        if (!alertExecutionStore.hasConnectorTypeReachedTheLimit(actionTypeId)) {
+          logger.debug(
+            `Rule "${ruleId}" skipped scheduling action "${action.id}" because the maximum number of allowed actions for connector type ${actionTypeId} has been reached.`
+          );
+        }
+        alertExecutionStore.setTriggeredActionsStatusByConnectorType({
+          actionTypeId,
+          status: ActionsCompletion.PARTIAL,
+        });
+        continue;
+      }
+
+      if (!actionsPlugin.isActionExecutable(action.id, actionTypeId, { notifyUsage: true })) {
         logger.warn(
           `Rule "${ruleId}" skipped scheduling action "${action.id}" because it is disabled`
         );
         continue;
       }
 
-      alertExecutionStore.numberOfTriggeredActions++;
+      alertExecutionStore.incrementNumberOfTriggeredActions();
+      alertExecutionStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
 
       const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
 
@@ -155,7 +184,7 @@ export function createExecutionHandler<
       };
 
       // TODO would be nice  to add the action name here, but it's not available
-      const actionLabel = `${action.actionTypeId}:${action.id}`;
+      const actionLabel = `${actionTypeId}:${action.id}`;
       if (supportsEphemeralTasks && ephemeralActionsToSchedule > 0) {
         ephemeralActionsToSchedule--;
         try {
@@ -190,7 +219,7 @@ export function createExecutionHandler<
           {
             type: 'action',
             id: action.id,
-            typeId: action.actionTypeId,
+            typeId: actionTypeId,
           },
         ],
         ...namespace,

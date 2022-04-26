@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo, useCallback } from 'react';
 import useSet from 'react-use/lib/useSet';
 
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   LogEntryCategory,
   LogEntryCategoryDataset,

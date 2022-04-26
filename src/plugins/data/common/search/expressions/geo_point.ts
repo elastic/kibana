@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, ExpressionValueBoxed } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition, ExpressionValueBoxed } from '@kbn/expressions-plugin/common';
 
 interface Point {
   lat: number;

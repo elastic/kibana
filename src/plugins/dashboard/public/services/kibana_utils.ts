@@ -10,7 +10,7 @@ export type {
   ISyncStateRef,
   IKbnUrlStateStorage,
   ReduxLikeStateContainer,
-} from '../../../kibana_utils/public';
+} from '@kbn/kibana-utils-plugin/public';
 export {
   Storage,
   unhashUrl,
@@ -23,4 +23,4 @@ export {
   SavedObjectNotFound,
   createStateContainer,
   createKbnUrlStateStorage,
-} from '../../../kibana_utils/public';
+} from '@kbn/kibana-utils-plugin/public';

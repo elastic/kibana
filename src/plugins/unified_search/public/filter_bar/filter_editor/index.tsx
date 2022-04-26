@@ -32,6 +32,9 @@ import {
 import { get } from 'lodash';
 import React, { Component } from 'react';
 import { XJsonLang } from '@kbn/monaco';
+import { DataView, IFieldType } from '@kbn/data-views-plugin/common';
+import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import {
   getFieldFromFilter,
@@ -44,13 +47,10 @@ import { Operator } from './lib/filter_operators';
 import { PhraseValueInput } from './phrase_value_input';
 import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
-import { IIndexPattern, IFieldType } from '../../../../data/common';
-import { getIndexPatternFromFilter } from '../../../../data/public';
-import { CodeEditor } from '../../../../kibana_react/public';
 
 export interface Props {
   filter: Filter;
-  indexPatterns: IIndexPattern[];
+  indexPatterns: DataView[];
   onSubmit: (filter: Filter) => void;
   onCancel: () => void;
   intl: InjectedIntl;
@@ -58,7 +58,7 @@ export interface Props {
 }
 
 interface State {
-  selectedIndexPattern?: IIndexPattern;
+  selectedIndexPattern?: DataView;
   selectedField?: IFieldType;
   selectedOperator?: Operator;
   params: any;
@@ -371,6 +371,7 @@ class FilterEditorUI extends Component<Props, State> {
             field={this.state.selectedField}
             values={this.state.params}
             onChange={this.onParamsChange}
+            onParamsUpdate={this.onParamsUpdate}
             timeRangeForSuggestionsOverride={this.props.timeRangeForSuggestionsOverride}
             fullWidth
           />
@@ -432,7 +433,7 @@ class FilterEditorUI extends Component<Props, State> {
     return isFilterValid(indexPattern, field, operator, params);
   }
 
-  private onIndexPatternChange = ([selectedIndexPattern]: IIndexPattern[]) => {
+  private onIndexPatternChange = ([selectedIndexPattern]: DataView[]) => {
     const selectedField = undefined;
     const selectedOperator = undefined;
     const params = undefined;
@@ -467,6 +468,10 @@ class FilterEditorUI extends Component<Props, State> {
 
   private onParamsChange = (params: any) => {
     this.setState({ params });
+  };
+
+  private onParamsUpdate = (value: string) => {
+    this.setState((prevState) => ({ params: [value, ...(prevState.params || [])] }));
   };
 
   private onQueryDslChange = (queryDsl: string) => {
@@ -513,7 +518,7 @@ class FilterEditorUI extends Component<Props, State> {
   };
 }
 
-function IndexPatternComboBox(props: GenericComboBoxProps<IIndexPattern>) {
+function IndexPatternComboBox(props: GenericComboBoxProps<DataView>) {
   return GenericComboBox(props);
 }
 

@@ -1,0 +1,125 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WithSolutionNav renders wrapped component 1`] = `
+<TestComponent
+  pageSideBar={
+    <KibanaPageTemplateSolutionNav
+      icon="logoKibana"
+      isOpenOnDesktop={true}
+      items={
+        Array [
+          Object {
+            "id": "1",
+            "items": Array [
+              Object {
+                "id": "1.1",
+                "name": "Ingest Node Pipelines",
+              },
+              Object {
+                "id": "1.2",
+                "name": "Logstash Pipelines",
+              },
+              Object {
+                "id": "1.3",
+                "name": "Beats Central Management",
+              },
+            ],
+            "name": "Ingest",
+          },
+          Object {
+            "id": "2",
+            "items": Array [
+              Object {
+                "id": "2.1",
+                "name": "Index Management",
+              },
+              Object {
+                "id": "2.2",
+                "name": "Index Lifecycle Policies",
+              },
+              Object {
+                "id": "2.3",
+                "name": "Snapshot and Restore",
+              },
+            ],
+            "name": "Data",
+          },
+        ]
+      }
+      name="Kibana"
+      onCollapse={[Function]}
+    />
+  }
+  pageSideBarProps={
+    Object {
+      "className": "kbnPageTemplate__pageSideBar",
+      "paddingSize": "none",
+    }
+  }
+/>
+`;
+
+exports[`WithSolutionNav with children 1`] = `
+<TestComponent
+  pageSideBar={
+    <KibanaPageTemplateSolutionNav
+      icon="logoKibana"
+      isOpenOnDesktop={true}
+      items={
+        Array [
+          Object {
+            "id": "1",
+            "items": Array [
+              Object {
+                "id": "1.1",
+                "name": "Ingest Node Pipelines",
+              },
+              Object {
+                "id": "1.2",
+                "name": "Logstash Pipelines",
+              },
+              Object {
+                "id": "1.3",
+                "name": "Beats Central Management",
+              },
+            ],
+            "name": "Ingest",
+          },
+          Object {
+            "id": "2",
+            "items": Array [
+              Object {
+                "id": "2.1",
+                "name": "Index Management",
+              },
+              Object {
+                "id": "2.2",
+                "name": "Index Lifecycle Policies",
+              },
+              Object {
+                "id": "2.3",
+                "name": "Snapshot and Restore",
+              },
+            ],
+            "name": "Data",
+          },
+        ]
+      }
+      name="Kibana"
+      onCollapse={[Function]}
+    />
+  }
+  pageSideBarProps={
+    Object {
+      "className": "kbnPageTemplate__pageSideBar",
+      "paddingSize": "none",
+    }
+  }
+>
+  <div
+    className="child"
+  >
+    Child component
+  </div>
+</TestComponent>
+`;

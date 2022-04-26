@@ -22,9 +22,9 @@ const ruleExecutionMetricsSchema = t.partial({
   esSearchDurationMs: t.number,
 });
 
-const alertExecutionStore = t.partial({
+const alertExecutionMetrics = t.partial({
   numberOfTriggeredActions: t.number,
-  numberOfScheduledActions: t.number,
+  numberOfGeneratedActions: t.number,
   triggeredActionsStatus: t.string,
 });
 
@@ -32,7 +32,7 @@ export type RuleExecutionMetrics = t.TypeOf<typeof ruleExecutionMetricsSchema>;
 export type RuleTaskState = t.TypeOf<typeof ruleStateSchema>;
 export type RuleExecutionState = RuleTaskState & {
   metrics: RuleExecutionMetrics;
-  alertExecutionStore: t.TypeOf<typeof alertExecutionStore>;
+  alertExecutionMetrics: t.TypeOf<typeof alertExecutionMetrics>;
 };
 
 export const ruleParamsSchema = t.intersection([
