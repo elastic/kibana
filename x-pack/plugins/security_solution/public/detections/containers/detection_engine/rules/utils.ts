@@ -35,7 +35,7 @@ export const convertRulesFilterToKQL = ({
   const filters: string[] = [];
 
   if (showCustomRules && showElasticRules) {
-    filters.push('alert.attributes.params.immutable: (true OR false)');
+    // if both showCustomRules && showElasticRules selected we omit filter, as it includes all existing rules
   } else if (showElasticRules) {
     filters.push('alert.attributes.params.immutable: true');
   } else if (showCustomRules) {

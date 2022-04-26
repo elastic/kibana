@@ -57,7 +57,7 @@ describe('convertRulesFilterToKQL', () => {
       showCustomRules: true,
     });
 
-    expect(kql).toBe(`alert.attributes.params.immutable: (true OR false)`);
+    expect(kql).toBe('');
   });
 
   it('handles presence of "tags" properly', () => {
