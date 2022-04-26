@@ -60,12 +60,9 @@ export const ALERTS = (totalAlerts: number) =>
     values: { totalAlerts },
     defaultMessage: 'total {totalAlerts, plural, =1 {alert} other {alerts}}',
   });
-export const ALERTS_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionResponse.alertsByStatus.title',
-  {
-    defaultMessage: 'Alerts',
-  }
-);
+export const ALERTS_TEXT = i18n.translate('xpack.securitySolution.detectionResponse.alerts', {
+  defaultMessage: 'Alerts',
+});
 export const UPDATING = i18n.translate('xpack.securitySolution.detectionResponse.updating', {
   defaultMessage: 'Updating...',
 });
@@ -157,38 +154,6 @@ export const VIEW_ALL_HOST_ALERTS = i18n.translate(
     defaultMessage: 'View all other host alerts',
   }
 );
-
-export const SEVERITY_CRITICAL_COLUMN = i18n.translate(
-  'xpack.securitySolution.detectionResponse.severityCritical',
-  {
-    defaultMessage: 'Critical',
-  }
-);
-
-export const SEVERITY_HIGH_COLUMN = i18n.translate(
-  'xpack.securitySolution.detectionResponse.severityHigh',
-  {
-    defaultMessage: 'High',
-  }
-);
-
-export const SEVERITY_MEDIUM_COLUMN = i18n.translate(
-  'xpack.securitySolution.detectionResponse.severityMedium',
-  {
-    defaultMessage: 'Medium',
-  }
-);
-
-export const SEVERITY_LOW_COLUMN = i18n.translate(
-  'xpack.securitySolution.detectionResponse.severityLow',
-  {
-    defaultMessage: 'Low',
-  }
-);
-
-export const ALERTS_COLUMN = i18n.translate('xpack.securitySolution.detectionResponse.alerts', {
-  defaultMessage: 'Alerts',
-});
 
 export const HOST_ALERTS_HOSTNAME_COLUMN = i18n.translate(
   'xpack.securitySolution.detectionResponse.hostAlertsHostName',

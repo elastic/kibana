@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 
 import { SecurityPageName } from '../../../../app/types';
+import { FormattedCount } from '../../../../common/components/formatted_number';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
 import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
@@ -101,39 +102,36 @@ const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo }) => [
     name: i18n.USER_ALERTS_USERNAME_COLUMN,
     truncateText: true,
     textOnly: true,
-
-    render: (userName: string) => (
-      <UserDetailsLink testingId="userSeverityAlertsTable-userName" userName={userName} />
-    ),
+    'data-test-subj': 'userSeverityAlertsTable-userName',
+    render: (userName: string) => <UserDetailsLink userName={userName} />,
   },
   {
     field: 'totalAlerts',
-    name: i18n.ALERTS_COLUMN,
-    render: (totalAlerts: number, { userName }) => (
-      <div data-test-subj="userSeverityAlertsTable-totalAlerts">{totalAlerts}</div>
-    ),
+    name: i18n.ALERTS_TEXT,
+    'data-test-subj': 'userSeverityAlertsTable-totalAlerts',
+    render: (totalAlerts: number) => <FormattedCount count={totalAlerts} />,
   },
   {
     field: 'critical',
-    name: i18n.SEVERITY_CRITICAL_COLUMN,
+    name: i18n.STATUS_CRITICAL_LABEL,
     render: (count: number) => (
       <EuiHealth data-test-subj="userSeverityAlertsTable-critical" color={SEVERITY_COLOR.critical}>
-        {count}
+        <FormattedCount count={count} />
       </EuiHealth>
     ),
   },
   {
     field: 'high',
-    name: i18n.SEVERITY_HIGH_COLUMN,
+    name: i18n.STATUS_HIGH_LABEL,
     render: (count: number) => (
       <EuiHealth data-test-subj="userSeverityAlertsTable-high" color={SEVERITY_COLOR.high}>
-        {count}
+        <FormattedCount count={count} />
       </EuiHealth>
     ),
   },
   {
     field: 'medium',
-    name: i18n.SEVERITY_MEDIUM_COLUMN,
+    name: i18n.STATUS_MEDIUM_LABEL,
     render: (count: number) => (
       <EuiHealth data-test-subj="userSeverityAlertsTable-medium" color={SEVERITY_COLOR.medium}>
         {count}
@@ -142,10 +140,10 @@ const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo }) => [
   },
   {
     field: 'low',
-    name: i18n.SEVERITY_LOW_COLUMN,
+    name: i18n.STATUS_LOW_LABEL,
     render: (count: number) => (
       <EuiHealth data-test-subj="userSeverityAlertsTable-low" color={SEVERITY_COLOR.low}>
-        {count}
+        <FormattedCount count={count} />
       </EuiHealth>
     ),
   },

@@ -55,8 +55,7 @@ const UserDetailsLinkComponent: React.FC<{
   title?: string;
   isButton?: boolean;
   onClick?: (e: SyntheticEvent) => void;
-  testingId?: string;
-}> = ({ children, Component, userName, isButton, onClick, title, testingId }) => {
+}> = ({ children, Component, userName, isButton, onClick, title }) => {
   const encodedUserName = encodeURIComponent(userName);
 
   const { formatUrl, search } = useFormatUrl(SecurityPageName.users);
@@ -75,7 +74,7 @@ const UserDetailsLinkComponent: React.FC<{
   return isButton ? (
     <GenericLinkButton
       Component={Component}
-      dataTestSubj={testingId || 'data-grid-user-details'}
+      dataTestSubj="data-grid-user-details"
       href={formatUrl(getUsersDetailsUrl(encodedUserName))}
       onClick={onClick ?? goToUsersDetails}
       title={title ?? userName}
@@ -84,7 +83,7 @@ const UserDetailsLinkComponent: React.FC<{
     </GenericLinkButton>
   ) : (
     <LinkAnchor
-      data-test-subj={testingId || 'users-link-anchor'}
+      data-test-subj="users-link-anchor"
       onClick={onClick ?? goToUsersDetails}
       href={formatUrl(getUsersDetailsUrl(encodedUserName))}
     >
@@ -104,8 +103,7 @@ const HostDetailsLinkComponent: React.FC<{
   onClick?: (e: SyntheticEvent) => void;
   hostTab?: HostsTableType;
   title?: string;
-  testingId?: string;
-}> = ({ children, Component, hostName, isButton, onClick, testingId, title, hostTab }) => {
+}> = ({ children, Component, hostName, isButton, onClick, title, hostTab }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.hosts);
   const { navigateToApp } = useKibana().services.application;
 
@@ -135,7 +133,7 @@ const HostDetailsLinkComponent: React.FC<{
   return isButton ? (
     <GenericLinkButton
       Component={Component}
-      dataTestSubj={testingId || 'data-grid-host-details'}
+      dataTestSubj="data-grid-host-details"
       href={href}
       iconType="expand"
       onClick={onClick ?? goToHostDetails}
@@ -147,7 +145,7 @@ const HostDetailsLinkComponent: React.FC<{
     <LinkAnchor
       onClick={onClick ?? goToHostDetails}
       href={href}
-      data-test-subj={testingId || 'host-details-button'}
+      data-test-subj="host-details-button"
     >
       {children ? children : hostName}
     </LinkAnchor>
