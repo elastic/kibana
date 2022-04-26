@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { useHttp } from '../../../../../../common/lib/kibana/hooks';
 import { PackageCustomExtensionComponentProps } from '../../../../../../../../fleet/public';
@@ -99,7 +99,7 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
   (props) => {
     const http = useHttp();
     const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
-    const { canAccessEndpointManagement } = useEndpointPrivileges();
+    const { loading, canAccessEndpointManagement } = useEndpointPrivileges();
 
     const trustedAppsApiClientInstance = useMemo(
       () => TrustedAppsApiClient.getInstance(http),
@@ -171,7 +171,13 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
       ]
     );
 
-    return canAccessEndpointManagement ? artifactCards : <NoPermissions />;
+    return loading ? (
+      <EuiLoadingSpinner data-test-subj="endpointExtensionLoadingSpinner" />
+    ) : canAccessEndpointManagement ? (
+      artifactCards
+    ) : (
+      <NoPermissions />
+    );
   }
 );
 
