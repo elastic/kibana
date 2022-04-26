@@ -4113,6 +4113,11 @@
     redux-thunk "^2.3.0"
     reselect "^4.0.0"
 
+"@remote-ui/rpc@1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@remote-ui/rpc/-/rpc-1.3.0.tgz#e9469803e8024707f096bd52041fdfe61154dac8"
+  integrity sha512-tO0nYON8IhErx/DYxufo7ccwnSh1Vo5mS41HAjUQ+fCctNmRABug0tjvCdOq1E6R6JAq1EbxN0U5w+7pYMcaFg==
+
 "@rushstack/node-core-library@3.43.2":
   version "3.43.2"
   resolved "https://registry.yarnpkg.com/@rushstack/node-core-library/-/node-core-library-3.43.2.tgz#f067371a94fd92ed8f9d9aa8201c5e9e17a19f0f"

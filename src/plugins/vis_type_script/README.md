@@ -10,6 +10,7 @@ Add the following to `kibana.yml` (**DO NOT USE IN PRODUCTION**):
 
 ```yml
 csp.warnLegacyBrowsers: false
+csp.strict: false
 csp.script_src:
   - 'unsafe-inline'
   - 'https://unpkg.com/'

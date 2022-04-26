@@ -194,6 +194,7 @@
     "@mapbox/mapbox-gl-draw": "1.3.0",
     "@mapbox/mapbox-gl-rtl-text": "0.2.3",
     "@reduxjs/toolkit": "^1.6.1",
+    "@remote-ui/rpc": "1.3.0",
     "@slack/webhook": "^5.0.4",
     "@turf/along": "6.0.1",
     "@turf/area": "6.0.1",

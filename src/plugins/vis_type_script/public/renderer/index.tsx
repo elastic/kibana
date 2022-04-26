@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { createEndpoint, fromIframe } from '@remote-ui/rpc';
 
 import './index.scss';
 
@@ -22,8 +23,31 @@ const getSandboxDocument = (script: string) => {
       <head>
         <meta http-equiv="content-security-policy" content="default-src none; script-src 'nonce-${nonce}' ${d3Url}">
         <script src="${d3Url}"></script>
+        <script nonce="${nonce}" type="module">
+          //  TODO: probably can't leave this using type=module
+          import { createEndpoint, fromInsideIframe } from "https://unpkg.com/@remote-ui/rpc@1.3.0/index.mjs";
+
+          const endpoint = createEndpoint(fromInsideIframe());
+
+          const KIBANA_API = {
+            searchEs: () => {
+              console.log('Calling search inside an iframe')
+              endpoint.call.searchEs();
+            }
+          }
+
+          endpoint.expose({
+             onUpdate: () => {
+                console.log('Running an update from an iframe')
+             }
+          })
+
+
+          window.KIBANA_API = KIBANA_API;
+        </script>
+
         <script nonce="${nonce}">window.addEventListener('load', () => {${script}})</script>
-      </head>  
+      </head>
       <body></body>
     <html>
     `;
@@ -34,8 +58,28 @@ export const ScriptRenderer: React.FunctionComponent<{ script: string }> = ({
 }: {
   script: string;
 }) => {
+  const iframeRef = React.useRef<HTMLIFrameElement | null>(null);
+
+  React.useEffect(() => {
+    if (!iframeRef.current) throw new Error('Iframe init error');
+    const iframeEl = iframeRef.current;
+    const endpoint = createEndpoint<{ onUpdate: () => void }>(fromIframe(iframeEl));
+
+    endpoint.expose({
+      searchEs: () => {
+        // eslint-disable-next-line no-console
+        console.log('Running search from parent');
+      },
+    });
+
+    // eslint-disable-next-line no-console
+    console.log('Calling on update from parent');
+    endpoint.call.onUpdate();
+  }, []);
+
   return (
     <iframe
+      ref={iframeRef}
       className="script-based-visualization-renderer"
       title="script-based-visualization-renderer"
       srcDoc={getSandboxDocument(visualizationScript)}
