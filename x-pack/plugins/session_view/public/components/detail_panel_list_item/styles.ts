@@ -19,7 +19,7 @@ export const useStyles = ({ display }: StylesDeps) => {
   const cached = useMemo(() => {
     const item: CSSObject = {
       display,
-      alignItems: 'center',
+      alignContent: 'center',
       padding: `0px ${euiTheme.size.s} `,
       width: '100%',
       fontWeight: 'inherit',
@@ -27,6 +27,13 @@ export const useStyles = ({ display }: StylesDeps) => {
       lineHeight: euiTheme.size.l,
       letterSpacing: '0px',
       textAlign: 'left',
+
+      '& .euiToolTipAnchor': {
+        width: `calc(100% - ${euiTheme.size.xl})`,
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+      },
     };
 
     const copiableItem: CSSObject = {
