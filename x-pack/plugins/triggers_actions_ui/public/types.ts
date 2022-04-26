@@ -415,3 +415,5 @@ export interface AlertsTableConfigurationRegistry {
   id: string;
   columns: EuiDataGridColumn[];
 }
+
+export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';

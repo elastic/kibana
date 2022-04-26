@@ -7,29 +7,30 @@
 import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFilterButton, EuiPopover, EuiFilterGroup, EuiFilterSelectItem } from '@elastic/eui';
+import { RuleStatus } from '../../../../types';
 
-type State = 'enabled' | 'muted' | 'disabled';
-
-const states: State[] = ['enabled', 'disabled', 'muted'];
+const states: RuleStatus[] = ['enabled', 'disabled', 'snoozed'];
 
 const optionStyles = {
   textTransform: 'capitalize' as const,
 };
 
-const getOptionDataTestSubj = (state: State) => `ruleStateFilterOption-${state}`;
+const getOptionDataTestSubj = (state: RuleStatus) => `ruleStateFilterOption-${state}`;
 
 export interface RuleStateFilterProps {
-  selectedStates: State[];
+  selectedStates: RuleStatus[];
   dataTestSubj?: string;
+  selectDataTestSubj?: string;
   buttonDataTestSubj?: string;
-  optionDataTestSubj?: (state: State) => string;
-  onChange: (selectedStates: State[]) => void;
+  optionDataTestSubj?: (state: RuleStatus) => string;
+  onChange: (selectedStates: RuleStatus[]) => void;
 }
 
 export const RuleStateFilter = (props: RuleStateFilterProps) => {
   const {
     selectedStates = [],
-    dataTestSubj = 'ruleStateFilterSelect',
+    dataTestSubj = 'ruleStateFilter',
+    selectDataTestSubj = 'ruleStateFilterSelect',
     buttonDataTestSubj = 'ruleStateFilterButton',
     optionDataTestSubj = getOptionDataTestSubj,
     onChange = () => {},
@@ -38,7 +39,7 @@ export const RuleStateFilter = (props: RuleStateFilterProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const onFilterItemClick = useCallback(
-    (newOption: State) => () => {
+    (newOption: RuleStatus) => () => {
       if (selectedStates.includes(newOption)) {
         onChange(selectedStates.filter((option) => option !== newOption));
         return;
@@ -53,7 +54,7 @@ export const RuleStateFilter = (props: RuleStateFilterProps) => {
   }, [setIsPopoverOpen]);
 
   return (
-    <EuiFilterGroup>
+    <EuiFilterGroup data-test-subj={dataTestSubj}>
       <EuiPopover
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(false)}
@@ -73,7 +74,7 @@ export const RuleStateFilter = (props: RuleStateFilterProps) => {
           </EuiFilterButton>
         }
       >
-        <div data-test-subj={dataTestSubj}>
+        <div data-test-subj={selectDataTestSubj}>
           {states.map((state) => {
             return (
               <EuiFilterSelectItem

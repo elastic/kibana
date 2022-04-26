@@ -5,16 +5,34 @@
  * 2.0.
  */
 
+import { RuleStatus } from '../../../types';
+
+const getEnablementFilter = (ruleStateFilter: RuleStatus[] = []) => {
+  const enablementFilters = ruleStateFilter.reduce<string[]>((result, filter) => {
+    if (filter === 'enabled') {
+      return [...result, 'true'];
+    }
+    if (filter === 'disabled') {
+      return [...result, 'false'];
+    }
+    return result;
+  }, []);
+  return `alert.attributes.enabled:(${enablementFilters.join(' or ')})`;
+};
+
 export const mapFiltersToKql = ({
   typesFilter,
   actionTypesFilter,
   ruleStatusesFilter,
+  ruleStateFilter,
 }: {
   typesFilter?: string[];
   actionTypesFilter?: string[];
   ruleStatusesFilter?: string[];
+  ruleStateFilter?: RuleStatus[];
 }): string[] => {
   const filters = [];
+
   if (typesFilter && typesFilter.length) {
     filters.push(`alert.attributes.alertTypeId:(${typesFilter.join(' or ')})`);
   }
@@ -32,5 +50,22 @@ export const mapFiltersToKql = ({
   if (ruleStatusesFilter && ruleStatusesFilter.length) {
     filters.push(`alert.attributes.executionStatus.status:(${ruleStatusesFilter.join(' or ')})`);
   }
+
+  if (ruleStateFilter && ruleStateFilter.length) {
+    const enablementFilter = getEnablementFilter(ruleStateFilter);
+    const snoozedFilter = `(alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)`;
+    const hasEnablement =
+      ruleStateFilter.includes('enabled') || ruleStateFilter.includes('disabled');
+    const hasSnoozed = ruleStateFilter.includes('snoozed');
+
+    if (hasEnablement && !hasSnoozed) {
+      filters.push(`${enablementFilter} and not ${snoozedFilter}`);
+    } else if (!hasEnablement && hasSnoozed) {
+      filters.push(snoozedFilter);
+    } else {
+      filters.push(`${enablementFilter} or ${snoozedFilter}`);
+    }
+  }
+
   return filters;
 };

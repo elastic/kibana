@@ -40,6 +40,32 @@ describe('mapFiltersToKql', () => {
     ).toEqual(['alert.attributes.executionStatus.status:(alert or statuses or filter)']);
   });
 
+  test('should handle ruleStateFilter', () => {
+    expect(
+      mapFiltersToKql({
+        ruleStateFilter: ['enabled', 'snoozed'],
+      })
+    ).toEqual([
+      'alert.attributes.enabled:(true) or (alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)',
+    ]);
+
+    expect(
+      mapFiltersToKql({
+        ruleStateFilter: ['enabled'],
+      })
+    ).toEqual([
+      'alert.attributes.enabled:(true) and not (alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)',
+    ]);
+
+    expect(
+      mapFiltersToKql({
+        ruleStateFilter: ['enabled', 'disabled', 'snoozed'],
+      })
+    ).toEqual([
+      'alert.attributes.enabled:(true or false) or (alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)',
+    ]);
+  });
+
   test('should handle typesFilter and actionTypesFilter', () => {
     expect(
       mapFiltersToKql({

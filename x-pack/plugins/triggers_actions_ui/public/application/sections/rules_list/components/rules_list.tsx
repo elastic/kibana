@@ -61,6 +61,7 @@ import {
   RuleTableItem,
   RuleType,
   RuleTypeIndex,
+  RuleStatus,
   Pagination,
   Percentiles,
   TriggersActionsUiConfig,
@@ -100,6 +101,8 @@ import { RuleDurationFormat } from './rule_duration_format';
 import { shouldShowDurationWarning } from '../../../lib/execution_duration_utils';
 import { getFormattedSuccessRatio } from '../../../lib/monitoring_utils';
 import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
+import { RuleStateFilter } from './rule_state_filter';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 
 const ENTER_KEY = 13;
 
@@ -156,6 +159,7 @@ export const RulesList: React.FunctionComponent = () => {
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
   const [ruleStatusesFilter, setRuleStatusesFilter] = useState<string[]>([]);
+  const [ruleStateFilter, setRuleStateFilter] = useState<RuleStatus[]>([]);
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
@@ -164,6 +168,8 @@ export const RulesList: React.FunctionComponent = () => {
     {}
   );
   const [showErrors, setShowErrors] = useState(false);
+
+  const isRuleStateFilterEnabled = getIsExperimentalFeatureEnabled('ruleStateFilter');
 
   useEffect(() => {
     (async () => {
@@ -228,6 +234,7 @@ export const RulesList: React.FunctionComponent = () => {
     JSON.stringify(typesFilter),
     JSON.stringify(actionTypesFilter),
     JSON.stringify(ruleStatusesFilter),
+    JSON.stringify(ruleStateFilter),
   ]);
 
   useEffect(() => {
@@ -287,6 +294,7 @@ export const RulesList: React.FunctionComponent = () => {
           typesFilter,
           actionTypesFilter,
           ruleStatusesFilter,
+          ruleStateFilter,
           sort,
         });
         await loadRuleAggs();
@@ -304,7 +312,9 @@ export const RulesList: React.FunctionComponent = () => {
           isEmpty(searchText) &&
           isEmpty(typesFilter) &&
           isEmpty(actionTypesFilter) &&
-          isEmpty(ruleStatusesFilter)
+          isEmpty(ruleStatusesFilter) &&
+          isRuleStateFilterEnabled &&
+          isEmpty(ruleStateFilter)
         );
 
         setNoData(rulesResponse.data.length === 0 && !isFilterApplied);
@@ -960,6 +970,13 @@ export const RulesList: React.FunctionComponent = () => {
     );
   };
 
+  const getRuleStateFilter = () => {
+    if (isRuleStateFilterEnabled) {
+      return [<RuleStateFilter selectedStates={ruleStateFilter} onChange={setRuleStateFilter} />];
+    }
+    return [];
+  };
+
   const toolsRight = [
     <TypeFilter
       key="type-filter"
@@ -971,6 +988,7 @@ export const RulesList: React.FunctionComponent = () => {
         })
       )}
     />,
+    ...getRuleStateFilter(),
     <ActionTypeFilter
       key="action-type-filter"
       actionTypes={actionTypes}
