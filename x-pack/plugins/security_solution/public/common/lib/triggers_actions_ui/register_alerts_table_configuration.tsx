@@ -5,51 +5,24 @@
  * 2.0.
  */
 
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AlertsTableConfigurationRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
-import {
-  DEFAULT_COLUMN_MIN_WIDTH,
-  DEFAULT_DATE_COLUMN_MIN_WIDTH,
-} from '../../../timelines/components/timeline/body/constants';
-import { APP_ID } from '../../../../common/constants';
 
-export const registerAlertsTableConfiguration = (
-  registry: AlertsTableConfigurationRegistryContract
+import { APP_ID } from '../../../../common/constants';
+import { getTimelinesInStorageByIds } from '../../../timelines/containers/local_storage';
+import { TimelineId } from '../../../../common/types';
+import { columns } from '../../../detections/configurations/security_solution_detections';
+
+const registerAlertsTableConfiguration = (
+  registry: AlertsTableConfigurationRegistryContract,
+  storage: Storage
 ) => {
+  const timelineStorage = getTimelinesInStorageByIds(storage, [TimelineId.detectionsPage]);
+  const alertColumns = timelineStorage[TimelineId.detectionsPage].columns ?? columns;
   registry.register({
     id: APP_ID,
-    columns: [
-      {
-        id: '@timestamp',
-        initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
-      },
-      {
-        id: 'message',
-        initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-      },
-      {
-        id: 'event.category',
-        initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-      },
-      {
-        id: 'event.action',
-        initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-      },
-      {
-        id: 'host.name',
-        initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-      },
-      {
-        id: 'source.ip',
-        initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-      },
-      {
-        id: 'destination.ip',
-        initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-      },
-      {
-        id: 'user.name',
-        initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-      },
-    ],
+    columns: alertColumns,
   });
 };
+
+export { registerAlertsTableConfiguration };

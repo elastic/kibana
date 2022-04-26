@@ -64,7 +64,6 @@ import {
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
 import { initDataView, SourcererModel, KibanaDataView } from './common/store/sourcerer/model';
 import { SecurityDataView } from './common/containers/sourcerer/api';
-import { registerAlertsTableConfiguration } from './common/lib/triggers_actions_ui/register_alerts_table_configuration';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   readonly kibanaVersion: string;
@@ -185,7 +184,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     };
   }
 
-  public start(core: CoreStart, plugins: StartPlugins) {
+  public async start(core: CoreStart, plugins: StartPlugins) {
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion });
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
     if (plugins.fleet) {
@@ -246,7 +245,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     // required to show the alert table inside cases
     const { alertsTableConfigurationRegistry } = plugins.triggersActionsUi;
-    registerAlertsTableConfiguration(alertsTableConfigurationRegistry);
+    const { registerAlertsTableConfiguration } = await this.lazyRegisterAlertsTableConfiguration();
+    registerAlertsTableConfiguration(alertsTableConfigurationRegistry, this.storage);
 
     return {};
   }
@@ -285,6 +285,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     return import(
       /* webpackChunkName: "lazy_sub_plugins" */
       './lazy_sub_plugins'
+    );
+  }
+
+  private lazyRegisterAlertsTableConfiguration() {
+    /**
+     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+     * See https://webpack.js.org/api/module-methods/#magic-comments
+     */
+    return import(
+      /* webpackChunkName: "lazy_sub_plugins" */
+      './common/lib/triggers_actions_ui/register_alerts_table_configuration'
     );
   }
 
