@@ -42,7 +42,7 @@ const getPackageNameQuery = (packageName: string, benchmarkFilter?: string): str
   return kquery;
 };
 
-export const getPackagePolicies = (
+export const getCspPackagePolicies = (
   soClient: SavedObjectsClientContract,
   packagePolicyService: PackagePolicyServiceInterface,
   packageName: string,
@@ -137,51 +137,27 @@ export const createBenchmarkEntry = (
   rules: packagePolicyCspRules,
 });
 
-// const createBenchmarks = (
-//   agentPolicies: GetAgentPoliciesResponseItem[],
-//   packagePolicies: PackagePolicy[]
-// ): Benchmark[] =>
-//   packagePolicies.flatMap((packagePolicy) => {
-//     const zoo = agentPolicies
-//       .map((agentPolicy) => {
-//         const agentPkgPolicies = agentPolicy.package_policies as string[];
-//         const isExistsOnAgent = agentPkgPolicies.find(
-//           (pkgPolicy) => pkgPolicy === packagePolicy.id
-//         );
-//         if (isExistsOnAgent) {
-//           return createBenchmarkEntry(agentPolicy, packagePolicy);
-//         }
-//         return;
-//       })
-//       .filter(isNonNullable);
-//     return zoo;
-//   });
-
 const createBenchmarks = async (
   soClient: SavedObjectsClientContract,
   agentPolicies: GetAgentPoliciesResponseItem[],
-  packagePolicies: PackagePolicy[]
+  cspPackagePolicies: PackagePolicy[]
 ): Promise<Benchmark[]> => {
-  const foo = Promise.all(
-    packagePolicies.flatMap((packagePolicy) => {
-      const zoo = agentPolicies
-        .map(async (agentPolicy) => {
-          const agentPkgPolicies = agentPolicy.package_policies as string[];
-          const isExistsOnAgent = agentPkgPolicies.find(
-            (pkgPolicy) => pkgPolicy === packagePolicy.id
-          );
-          if (isExistsOnAgent) {
-            const packagePolicyCspRules = await addPackagePolicyCspRules(soClient, packagePolicy);
-            return createBenchmarkEntry(agentPolicy, packagePolicy, packagePolicyCspRules);
-          }
-          return;
+  return Promise.all(
+    agentPolicies.flatMap((agentPolicy) => {
+      const cspPackagesOnAgent = agentPolicy.package_policies
+        .map((pckPolicy) => {
+          return cspPackagePolicies.find((cspPackagePolicy) => cspPackagePolicy.id === pckPolicy);
         })
         .filter(isNonNullable);
 
-      return zoo;
+      const benchmarks = cspPackagesOnAgent.map(async (cspPackage) => {
+        const packagePolicyCspRules = await addPackagePolicyCspRules(soClient, cspPackage);
+        const benchmark = createBenchmarkEntry(agentPolicy, cspPackage, packagePolicyCspRules);
+        return benchmark;
+      });
+      return benchmarks;
     })
   );
-  return foo as Promise<Benchmark[]>;
 };
 
 export const defineGetBenchmarksRoute = (router: CspRouter, cspContext: CspAppContext): void =>
@@ -207,7 +183,7 @@ export const defineGetBenchmarksRoute = (router: CspRouter, cspContext: CspAppCo
           throw new Error(`Failed to get Fleet services`);
         }
 
-        const packagePolicies = await getPackagePolicies(
+        const cspPackagePolicies = await getCspPackagePolicies(
           soClient,
           packagePolicyService,
           CIS_KUBERNETES_PACKAGE_NAME,
@@ -216,19 +192,20 @@ export const defineGetBenchmarksRoute = (router: CspRouter, cspContext: CspAppCo
 
         const agentPolicies = await getAgentPolicies(
           soClient,
-          packagePolicies.items,
+          cspPackagePolicies.items,
           agentPolicyService
         );
+
         const enrichAgentPolicies = await addRunningAgentToAgentPolicy(agentService, agentPolicies);
         const benchmarks = await createBenchmarks(
           soClient,
           enrichAgentPolicies,
-          packagePolicies.items
+          cspPackagePolicies.items
         );
 
         return response.ok({
           body: {
-            ...packagePolicies,
+            ...cspPackagePolicies,
             items: benchmarks,
           },
         });
