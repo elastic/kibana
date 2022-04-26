@@ -20,10 +20,12 @@ const partialObject = <P extends Props>(props: P) => {
 export type Module = TypeOf<typeof moduleSchema>;
 const moduleSchema = partialObject({
   identifier: schema.string(),
+  name: schema.string(),
   chunks: schema.arrayOf(schema.oneOf([schema.string(), schema.number()])),
   reasons: schema.arrayOf(
     partialObject({
       userRequest: schema.string(),
+      moduleIdentifier: schema.oneOf([schema.string(), schema.literal(null)]),
     })
   ),
 });

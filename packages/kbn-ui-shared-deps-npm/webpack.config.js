@@ -39,7 +39,6 @@ module.exports = (_, argv) => {
         'symbol-observable',
         // Parts of node-libs-browser that are used in many places across Kibana
         'buffer',
-        'inherits',
         'punycode',
         'util',
 
