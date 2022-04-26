@@ -79,6 +79,7 @@ export interface RuleAggregations {
   ruleEnabledStatus: { enabled: number; disabled: number };
   ruleMutedStatus: { muted: number; unmuted: number };
   ruleSnoozedStatus: { snoozed: number };
+  ruleTags: string[];
 }
 
 export interface MappedParamsProperties {

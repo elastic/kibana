@@ -14,6 +14,7 @@ import {
   EuiPopover,
   EuiSelectableProps,
   EuiSelectableOption,
+  EuiSpacer,
 } from '@elastic/eui';
 
 export interface RuleTagFilterProps {
@@ -24,9 +25,10 @@ export interface RuleTagFilterProps {
   noMatchesMessage?: EuiSelectableProps['noMatchesMessage'];
   emptyMessage?: EuiSelectableProps['emptyMessage'];
   errorMessage?: EuiSelectableProps['errorMessage'];
+  dataTestSubj?: string;
+  selectableDataTestSubj?: string;
   optionDataTestSubj?: (tag: string) => string;
   buttonDataTestSubj?: string;
-  dataTestSubj?: string;
   onChange: (tags: string[]) => void;
 }
 
@@ -41,9 +43,10 @@ export const RuleTagFilter = (props: RuleTagFilterProps) => {
     noMatchesMessage,
     emptyMessage,
     errorMessage,
+    dataTestSubj = 'ruleTagFilter',
+    selectableDataTestSubj = 'ruleTagFilterSelectable',
     optionDataTestSubj = getOptionDataTestSubj,
     buttonDataTestSubj = 'ruleTagFilterButton',
-    dataTestSubj = 'ruleTagFilterSelectable',
     onChange = () => {},
   } = props;
 
@@ -56,7 +59,7 @@ export const RuleTagFilter = (props: RuleTagFilterProps) => {
         checked: selectedTags.includes(tag) ? 'on' : undefined,
         'data-test-subj': optionDataTestSubj(tag),
       })),
-    [tags, selectedTags]
+    [tags, selectedTags, optionDataTestSubj]
   );
 
   const onChangeInternal = (newOptions: EuiSelectableOption[]) => {
@@ -93,11 +96,11 @@ export const RuleTagFilter = (props: RuleTagFilterProps) => {
   };
 
   return (
-    <EuiFilterGroup>
+    <EuiFilterGroup data-test-subj={dataTestSubj}>
       <EuiPopover isOpen={isPopoverOpen} closePopover={onClosePopover} button={renderButton()}>
         <EuiSelectable
           searchable
-          data-test-subj={dataTestSubj}
+          data-test-subj={selectableDataTestSubj}
           isLoading={isLoading}
           options={options}
           loadingMessage={loadingMessage}
@@ -109,6 +112,7 @@ export const RuleTagFilter = (props: RuleTagFilterProps) => {
           {(list, search) => (
             <>
               {search}
+              <EuiSpacer size="xs"/>
               {list}
             </>
           )}

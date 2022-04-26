@@ -40,6 +40,14 @@ describe('mapFiltersToKql', () => {
     ).toEqual(['alert.attributes.executionStatus.status:(alert or statuses or filter)']);
   });
 
+  test('should handle tagsFilter', () => {
+    expect(
+      mapFiltersToKql({
+        tagsFilter: ['a', 'b', 'c'],
+      })
+    ).toEqual(['alert.attributes.tags:(a or b or c)']);
+  });
+
   test('should handle typesFilter and actionTypesFilter', () => {
     expect(
       mapFiltersToKql({
@@ -52,17 +60,19 @@ describe('mapFiltersToKql', () => {
     ]);
   });
 
-  test('should handle typesFilter, actionTypesFilter and ruleStatusesFilter', () => {
+  test('should handle typesFilter, actionTypesFilter, ruleStatusesFilter and tagsFilter', () => {
     expect(
       mapFiltersToKql({
         typesFilter: ['type', 'filter'],
         actionTypesFilter: ['action', 'types', 'filter'],
         ruleStatusesFilter: ['alert', 'statuses', 'filter'],
+        tagsFilter: ['a', 'b', 'c'],
       })
     ).toEqual([
       'alert.attributes.alertTypeId:(type or filter)',
       '(alert.attributes.actions:{ actionTypeId:action } OR alert.attributes.actions:{ actionTypeId:types } OR alert.attributes.actions:{ actionTypeId:filter })',
       'alert.attributes.executionStatus.status:(alert or statuses or filter)',
+      'alert.attributes.tags:(a or b or c)',
     ]);
   });
 });

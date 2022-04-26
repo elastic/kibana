@@ -112,6 +112,22 @@ describe('aggregate()', () => {
             },
           ],
         },
+        tags: {
+          buckets: [
+            {
+              key: 'a',
+              doc_count: 10,
+            },
+            {
+              key: 'b',
+              doc_count: 20,
+            },
+            {
+              key: 'c',
+              doc_count: 30,
+            },
+          ],
+        },
       },
     });
 
@@ -160,6 +176,11 @@ describe('aggregate()', () => {
         "ruleSnoozedStatus": Object {
           "snoozed": 2,
         },
+        "ruleTags": Array [
+          "a",
+          "b",
+          "c",
+        ],
       }
     `);
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
@@ -186,6 +207,9 @@ describe('aggregate()', () => {
               format: 'strict_date_time',
               ranges: [{ from: 'now' }],
             },
+          },
+          tags: {
+            terms: { field: 'alert.attributes.tags' },
           },
         },
       },
@@ -220,6 +244,9 @@ describe('aggregate()', () => {
               format: 'strict_date_time',
               ranges: [{ from: 'now' }],
             },
+          },
+          tags: {
+            terms: { field: 'alert.attributes.tags' },
           },
         },
       },

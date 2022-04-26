@@ -100,6 +100,8 @@ import { RuleDurationFormat } from './rule_duration_format';
 import { shouldShowDurationWarning } from '../../../lib/execution_duration_utils';
 import { getFormattedSuccessRatio } from '../../../lib/monitoring_utils';
 import { triggersActionsUiConfig } from '../../../../common/lib/config_api';
+import { RuleTagFilter } from './rule_tag_filter';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 
 const ENTER_KEY = 13;
 
@@ -156,6 +158,8 @@ export const RulesList: React.FunctionComponent = () => {
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
   const [ruleStatusesFilter, setRuleStatusesFilter] = useState<string[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagsFilter, setTagsFilter] = useState<string[]>([]);
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
@@ -164,6 +168,8 @@ export const RulesList: React.FunctionComponent = () => {
     {}
   );
   const [showErrors, setShowErrors] = useState(false);
+
+  const isRuleTagFilterEnabled = getIsExperimentalFeatureEnabled('rulesListTagFilter');
 
   useEffect(() => {
     (async () => {
@@ -228,6 +234,7 @@ export const RulesList: React.FunctionComponent = () => {
     JSON.stringify(typesFilter),
     JSON.stringify(actionTypesFilter),
     JSON.stringify(ruleStatusesFilter),
+    JSON.stringify(tagsFilter),
   ]);
 
   useEffect(() => {
@@ -287,6 +294,7 @@ export const RulesList: React.FunctionComponent = () => {
           typesFilter,
           actionTypesFilter,
           ruleStatusesFilter,
+          tagsFilter,
           sort,
         });
         await loadRuleAggs();
@@ -304,7 +312,9 @@ export const RulesList: React.FunctionComponent = () => {
           isEmpty(searchText) &&
           isEmpty(typesFilter) &&
           isEmpty(actionTypesFilter) &&
-          isEmpty(ruleStatusesFilter)
+          isEmpty(ruleStatusesFilter) &&
+          isRuleTagFilterEnabled &&
+          isEmpty(tagsFilter)
         );
 
         setNoData(rulesResponse.data.length === 0 && !isFilterApplied);
@@ -334,6 +344,9 @@ export const RulesList: React.FunctionComponent = () => {
       });
       if (rulesAggs?.ruleExecutionStatus) {
         setRulesStatusesTotal(rulesAggs.ruleExecutionStatus);
+      }
+      if (rulesAggs?.ruleTags) {
+        setTags(rulesAggs.ruleTags);
       }
     } catch (e) {
       toasts.addDanger({
@@ -588,8 +601,8 @@ export const RulesList: React.FunctionComponent = () => {
         sortable: false,
         width: '50px',
         'data-test-subj': 'rulesTableCell-tagsPopover',
-        render: (tags: string[], item: RuleTableItem) => {
-          return tags.length > 0 ? (
+        render: (ruleTags: string[], item: RuleTableItem) => {
+          return ruleTags.length > 0 ? (
             <EuiPopover
               button={
                 <EuiBadge
@@ -603,7 +616,7 @@ export const RulesList: React.FunctionComponent = () => {
                   iconOnClick={() => setTagPopoverOpenIndex(item.index)}
                   iconOnClickAriaLabel="Tags"
                 >
-                  {tags.length}
+                  {ruleTags.length}
                 </EuiBadge>
               }
               anchorPosition="upCenter"
@@ -612,7 +625,7 @@ export const RulesList: React.FunctionComponent = () => {
             >
               <EuiPopoverTitle data-test-subj="ruleTagsPopoverTitle">Tags</EuiPopoverTitle>
               <div style={{ width: '300px' }} />
-              {tags.map((tag: string, index: number) => (
+              {ruleTags.map((tag: string, index: number) => (
                 <EuiBadge
                   data-test-subj="ruleTagsPopoverTag"
                   key={index}
@@ -960,6 +973,13 @@ export const RulesList: React.FunctionComponent = () => {
     );
   };
 
+  const getRuleTagFilter = () => {
+    if (isRuleTagFilterEnabled) {
+      return [<RuleTagFilter tags={tags} selectedTags={tagsFilter} onChange={setTagsFilter} />];
+    }
+    return [];
+  };
+
   const toolsRight = [
     <TypeFilter
       key="type-filter"
@@ -971,6 +991,7 @@ export const RulesList: React.FunctionComponent = () => {
         })
       )}
     />,
+    ...getRuleTagFilter(),
     <ActionTypeFilter
       key="action-type-filter"
       actionTypes={actionTypes}

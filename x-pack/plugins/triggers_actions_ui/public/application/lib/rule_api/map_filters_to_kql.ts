@@ -9,10 +9,12 @@ export const mapFiltersToKql = ({
   typesFilter,
   actionTypesFilter,
   ruleStatusesFilter,
+  tagsFilter,
 }: {
   typesFilter?: string[];
   actionTypesFilter?: string[];
   ruleStatusesFilter?: string[];
+  tagsFilter?: string[];
 }): string[] => {
   const filters = [];
   if (typesFilter && typesFilter.length) {
@@ -31,6 +33,9 @@ export const mapFiltersToKql = ({
   }
   if (ruleStatusesFilter && ruleStatusesFilter.length) {
     filters.push(`alert.attributes.executionStatus.status:(${ruleStatusesFilter.join(' or ')})`);
+  }
+  if (tagsFilter && tagsFilter.length) {
+    filters.push(`alert.attributes.tags:(${tagsFilter.join(' or ')})`);
   }
   return filters;
 };
