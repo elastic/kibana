@@ -7,17 +7,17 @@
 
 import { mockEnsureAuthorized } from './secure_spaces_client_wrapper.test.mocks';
 
-import { deepFreeze } from '@kbn/std';
 import type {
   EcsEventOutcome,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
-} from 'src/core/server';
-import { SavedObjectsErrorHelpers } from 'src/core/server';
-import { httpServerMock } from 'src/core/server/mocks';
+} from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core/server/mocks';
+import type { GetAllSpacesPurpose, LegacyUrlAliasTarget, Space } from '@kbn/spaces-plugin/server';
+import { spacesClientMock } from '@kbn/spaces-plugin/server/mocks';
+import { deepFreeze } from '@kbn/std';
 
-import type { GetAllSpacesPurpose, LegacyUrlAliasTarget, Space } from '../../../spaces/server';
-import { spacesClientMock } from '../../../spaces/server/mocks';
 import type { AuditEvent, AuditLogger } from '../audit';
 import { SavedObjectAction, SpaceAuditAction } from '../audit';
 import { auditLoggerMock } from '../audit/mocks';

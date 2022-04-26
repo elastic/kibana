@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { functionWrapper } from '../../../../../../src/plugins/presentation_util/common/lib';
+import { functionWrapper } from '@kbn/presentation-util-plugin/common/lib';
 import { emptyTable, testTable } from './__fixtures__/test_tables';
 import { columns } from './columns';
 

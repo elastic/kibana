@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState, RuleTypeDisabledError } from '../lib';
 import { MuteOptions } from '../rules_client';
@@ -38,7 +38,7 @@ export const muteAlertRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = context.alerting.getRulesClient();
+        const rulesClient = (await context.alerting).getRulesClient();
         const params = rewriteParamsReq(req.params);
         try {
           await rulesClient.muteInstance(params);

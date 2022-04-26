@@ -7,7 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../../common/mock';
-import { useHostsKpiUniqueIps } from './index';
+import { useHostsKpiUniqueIps } from '.';
 
 describe('kpi hosts - Unique Ips', () => {
   it('skip = true will cancel any running request', () => {

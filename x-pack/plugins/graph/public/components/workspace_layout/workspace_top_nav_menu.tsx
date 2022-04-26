@@ -8,10 +8,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Provider, useStore } from 'react-redux';
-import { AppMountParameters, Capabilities, CoreStart } from 'kibana/public';
+import { AppMountParameters, Capabilities, CoreStart } from '@kbn/core/public';
 import { useHistory, useLocation } from 'react-router-dom';
-import { NavigationPublicPluginStart as NavigationStart } from '../../../../../../src/plugins/navigation/public';
-import { toMountPoint, wrapWithTheme } from '../../../../../../src/plugins/kibana_react/public';
+import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
+import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { datasourceSelector, hasFieldsSelector } from '../../state_management';
 import { GraphSavePolicy, GraphWorkspaceSavedObject, Workspace } from '../../types';
 import { AsObservable, Settings, SettingsWorkspaceProps } from '../settings';

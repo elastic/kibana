@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSelect, EuiFormRow } from '@elastic/eui';
 import { ActionParamsProps } from '../../../../types';
-import { ServerLogActionParams } from '.././types';
+import { ServerLogActionParams } from '../types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 
 export const ServerLogParamsFields: React.FunctionComponent<

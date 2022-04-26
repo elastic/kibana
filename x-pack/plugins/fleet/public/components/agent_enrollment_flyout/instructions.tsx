@@ -32,6 +32,7 @@ export const Instructions = (props: InstructionProps) => {
     isFleetServerPolicySelected,
     settings,
     isLoadingAgentPolicies,
+    selectionType,
     setSelectionType,
     mode,
     isIntegrationFlow,
@@ -89,13 +90,17 @@ export const Instructions = (props: InstructionProps) => {
     } else if (showAgentEnrollment) {
       return (
         <>
-          <EuiText>
-            <FormattedMessage
-              id="xpack.fleet.agentEnrollment.managedDescription"
-              defaultMessage="Enroll an Elastic Agent in Fleet to automatically deploy updates and centrally manage the agent."
-            />
-          </EuiText>
-          <EuiSpacer size="l" />
+          {selectionType === 'tabs' && (
+            <>
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.fleet.agentEnrollment.managedDescription"
+                  defaultMessage="Enroll an Elastic Agent in Fleet to automatically deploy updates and centrally manage the agent."
+                />
+              </EuiText>
+              <EuiSpacer size="l" />
+            </>
+          )}
           {isFleetServerPolicySelected ? (
             <FleetServerSteps {...props} />
           ) : (

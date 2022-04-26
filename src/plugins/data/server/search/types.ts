@@ -13,8 +13,8 @@ import type {
   IUiSettingsClient,
   SavedObjectsClientContract,
   KibanaRequest,
-  RequestHandlerContext,
-} from 'src/core/server';
+  CustomRequestHandlerContext,
+} from '@kbn/core/server';
 import {
   ISearchOptions,
   ISearchStartSearchSource,
@@ -126,8 +126,8 @@ export interface ISearchStart<
 
 export type SearchRequestHandlerContext = IScopedSearchClient;
 
-export interface DataRequestHandlerContext extends RequestHandlerContext {
+export type DataRequestHandlerContext = CustomRequestHandlerContext<{
   search: SearchRequestHandlerContext;
-}
+}>;
 
 export type DataPluginRouter = IRouter<DataRequestHandlerContext>;

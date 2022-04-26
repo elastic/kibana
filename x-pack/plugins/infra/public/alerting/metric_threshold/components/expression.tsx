@@ -26,7 +26,8 @@ import {
   IErrorObject,
   RuleTypeParams,
   RuleTypeParamsExpressionProps,
-} from '../../../../../triggers_actions_ui/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
+import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import { Aggregators, Comparator, QUERY_INVALID } from '../../../../common/alerting/metrics';
 import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
@@ -37,7 +38,6 @@ import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { AlertContextMeta, AlertParams, MetricExpression } from '../types';
 import { ExpressionChart } from './expression_chart';
 import { ExpressionRow } from './expression_row';
-import { TimeUnitChar } from '../../../../../observability/common/utils/formatters/duration';
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 type Props = Omit<

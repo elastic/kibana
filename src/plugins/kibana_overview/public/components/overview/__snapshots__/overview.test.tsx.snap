@@ -682,6 +682,7 @@ exports[`Overview when there is no user data view 1`] = `
       Object {
         "actions": Object {
           "elasticAgent": Object {
+            "data-test-subj": "kbnOverviewAddIntegrations",
             "description": "Use Elastic Agent or Beats to collect data and build out Analytics solutions.",
             "title": "Add integrations",
           },

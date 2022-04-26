@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, ISavedObjectsRepository } from 'src/core/server';
+import { IRouter, ISavedObjectsRepository } from '@kbn/core/server';
 import { storeReport, reportSchema } from '../report';
 import { UsageCounter } from '../usage_counters';
 

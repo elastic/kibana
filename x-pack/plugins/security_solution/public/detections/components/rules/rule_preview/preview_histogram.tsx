@@ -28,7 +28,7 @@ import { alertsPreviewDefaultModel } from '../../alerts_table/default_config';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
 import { TimelineId } from '../../../../../common/types';
-import { APP_ID, APP_UI_ID, DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
+import { APP_UI_ID, DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../../../common/lib/cell_actions/constants';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { DetailsPanel } from '../../../../timelines/components/side_panel';
@@ -74,7 +74,7 @@ export const PreviewHistogram = ({
 }: PreviewHistogramProps) => {
   const dispatch = useDispatch();
   const { setQuery, isInitializing } = useGlobalTime();
-  const { timelines: timelinesUi, cases } = useKibana().services;
+  const { timelines: timelinesUi } = useKibana().services;
   const from = useMemo(() => `now-1${timeFrame}`, [timeFrame]);
   const to = useMemo(() => 'now', []);
   const startDate = useMemo(() => formatDate(from), [from]);
@@ -155,8 +155,6 @@ export const PreviewHistogram = ({
 
   const chartData = useMemo((): ChartSeriesData[] => [{ key: 'hits', value: data }], [data]);
 
-  const CasesContext = cases.ui.getCasesContext();
-
   return (
     <>
       <Panel height={DEFAULT_HISTOGRAM_HEIGHT} data-test-subj={'preview-histogram-panel'}>
@@ -194,54 +192,52 @@ export const PreviewHistogram = ({
         </EuiFlexGroup>
       </Panel>
       <EuiSpacer />
-      <CasesContext owner={[APP_ID]} userCanCrud={false}>
-        <FullScreenContainer $isFullScreen={globalFullScreen}>
-          <InspectButtonContainer>
-            {timelinesUi.getTGrid<'embedded'>({
-              additionalFilters: <></>,
-              appId: APP_UI_ID,
-              browserFields,
-              columns,
-              dataProviders,
-              deletedEventIds,
-              disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
-              docValueFields,
-              end: endDate,
-              entityType: 'events',
-              filters: [],
-              globalFullScreen,
-              hasAlertsCrud: false,
-              id: TimelineId.rulePreview,
-              indexNames: [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`],
-              indexPattern,
-              isLive: false,
-              isLoadingIndexPattern,
-              itemsPerPage,
-              itemsPerPageOptions,
-              kqlMode,
-              query: { query: `kibana.alert.rule.uuid:${previewId}`, language: 'kuery' },
-              renderCellValue: PreviewRenderCellValue,
-              rowRenderers: defaultRowRenderers,
-              runtimeMappings,
-              setQuery: () => {},
-              sort,
-              start: startDate,
-              tGridEventRenderedViewEnabled,
-              type: 'embedded',
-              leadingControlColumns: getPreviewTableControlColumn(1.5),
-            })}
-          </InspectButtonContainer>
-        </FullScreenContainer>
-        <DetailsPanel
-          browserFields={browserFields}
-          entityType={'events'}
-          docValueFields={docValueFields}
-          isFlyoutView
-          runtimeMappings={runtimeMappings}
-          timelineId={TimelineId.rulePreview}
-          isReadOnly
-        />
-      </CasesContext>
+      <FullScreenContainer $isFullScreen={globalFullScreen}>
+        <InspectButtonContainer>
+          {timelinesUi.getTGrid<'embedded'>({
+            additionalFilters: <></>,
+            appId: APP_UI_ID,
+            browserFields,
+            columns,
+            dataProviders,
+            deletedEventIds,
+            disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
+            docValueFields,
+            end: endDate,
+            entityType: 'events',
+            filters: [],
+            globalFullScreen,
+            hasAlertsCrud: false,
+            id: TimelineId.rulePreview,
+            indexNames: [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`],
+            indexPattern,
+            isLive: false,
+            isLoadingIndexPattern,
+            itemsPerPage,
+            itemsPerPageOptions,
+            kqlMode,
+            query: { query: `kibana.alert.rule.uuid:${previewId}`, language: 'kuery' },
+            renderCellValue: PreviewRenderCellValue,
+            rowRenderers: defaultRowRenderers,
+            runtimeMappings,
+            setQuery: () => {},
+            sort,
+            start: startDate,
+            tGridEventRenderedViewEnabled,
+            type: 'embedded',
+            leadingControlColumns: getPreviewTableControlColumn(1.5),
+          })}
+        </InspectButtonContainer>
+      </FullScreenContainer>
+      <DetailsPanel
+        browserFields={browserFields}
+        entityType={'events'}
+        docValueFields={docValueFields}
+        isFlyoutView
+        runtimeMappings={runtimeMappings}
+        timelineId={TimelineId.rulePreview}
+        isReadOnly
+      />
     </>
   );
 };

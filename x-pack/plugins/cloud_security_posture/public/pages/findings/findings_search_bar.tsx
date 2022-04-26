@@ -7,27 +7,27 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { DataView } from '@kbn/data-plugin/common';
 import * as TEST_SUBJECTS from './test_subjects';
-import type { CspFindingsRequest, CspFindingsResponse } from './use_findings';
+import type { CspFindingsResult } from './use_findings';
+import type { FindingsBaseURLQuery } from './types';
 import type { CspClientPluginStartDeps } from '../../types';
 import { PLUGIN_NAME } from '../../../common';
-import type { DataView } from '../../../../../../src/plugins/data/common';
 import { FINDINGS_SEARCH_PLACEHOLDER } from './translations';
 
-type SearchBarQueryProps = Pick<CspFindingsRequest, 'query' | 'filters'>;
+type SearchBarQueryProps = Pick<FindingsBaseURLQuery, 'query' | 'filters'>;
 
-interface BaseFindingsSearchBarProps extends SearchBarQueryProps {
+interface FindingsSearchBarProps extends SearchBarQueryProps {
   setQuery(v: Partial<SearchBarQueryProps>): void;
+  loading: CspFindingsResult['loading'];
 }
-
-type FindingsSearchBarProps = CspFindingsResponse & BaseFindingsSearchBarProps;
 
 export const FindingsSearchBar = ({
   dataView,
   query,
   filters,
-  status,
+  loading,
   setQuery,
 }: FindingsSearchBarProps & { dataView: DataView }) => {
   const { euiTheme } = useEuiTheme();
@@ -47,7 +47,7 @@ export const FindingsSearchBar = ({
         showQueryInput={true}
         showDatePicker={false}
         showSaveQuery={false}
-        isLoading={status === 'loading'}
+        isLoading={loading}
         indexPatterns={[dataView]}
         query={query}
         filters={filters}
