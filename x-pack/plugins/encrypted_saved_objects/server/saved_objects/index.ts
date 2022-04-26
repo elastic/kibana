@@ -115,7 +115,7 @@ export function setupSavedObjects({
         const [internalRepository, typeRegistry] = await internalRepositoryAndTypeRegistryPromise;
         const savedObject = await internalRepository.get(type, id, options);
 
-        if (service.isRegistered(savedObject.type) === false) {
+        if (!service.isRegistered(savedObject.type)) {
           return savedObject as SavedObject<T>;
         }
 
