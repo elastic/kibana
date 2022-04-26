@@ -27,6 +27,8 @@ import type { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plu
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
+import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+
 import type { FleetConfigType } from '../../common';
 import type {
   ExternalCallback,
@@ -58,6 +60,7 @@ class AppContextService {
   private externalCallbacks: ExternalCallbacksStorage = new Map();
   private telemetryEventsSender: TelemetryEventsSender | undefined;
   private esClusterClient: IClusterClient;
+  private spacesService: SpacesServiceStart;
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
@@ -75,6 +78,7 @@ class AppContextService {
     this.kibanaBranch = appContext.kibanaBranch;
     this.httpSetup = appContext.httpSetup;
     this.telemetryEventsSender = appContext.telemetryEventsSender;
+    this.spacesService = appContext.spacesService;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -213,6 +217,10 @@ class AppContextService {
 
   public getTelemetryEventsSender() {
     return this.telemetryEventsSender;
+  }
+
+  public getSpacesService() {
+    return this.spacesService;
   }
 }
 

@@ -12,6 +12,8 @@ import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
+import type { ISpacesClient } from '@kbn/spaces-plugin/server';
+
 import type { AgentSOAttributes, Agent, BulkActionResult, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
 import type { FleetServerAgent } from '../../../common';
@@ -70,13 +72,17 @@ export type GetAgentsOptions =
       showInactive?: boolean;
     };
 
-export async function getAgents(esClient: ElasticsearchClient, options: GetAgentsOptions) {
+export async function getAgents(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  options: GetAgentsOptions
+) {
   let agents: Agent[] = [];
   if ('agentIds' in options) {
     agents = await getAgentsById(esClient, options.agentIds);
   } else if ('kuery' in options) {
     agents = (
-      await getAllAgentsByKuery(esClient, {
+      await getAllAgentsByKuery(soClient, esClient, {
         kuery: options.kuery,
         showInactive: options.showInactive ?? false,
       })
@@ -91,10 +97,13 @@ export async function getAgents(esClient: ElasticsearchClient, options: GetAgent
 }
 
 export async function getAgentsByKuery(
+  soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   options: ListWithKuery & {
     showInactive: boolean;
-  }
+    showAllSpaces?: boolean;
+  },
+  spacesClient?: ISpacesClient
 ): Promise<{
   agents: Agent[];
   total: number;
@@ -109,6 +118,7 @@ export async function getAgentsByKuery(
     kuery,
     showInactive = false,
     showUpgradeable,
+    showAllSpaces,
   } = options;
   const filters = [];
 
@@ -159,6 +169,19 @@ export async function getAgentsByKuery(
       );
     }
   }
+  if (!showAllSpaces) {
+    // filter out agents using policies not in current space
+    const { items: agentPolicies } = await agentPolicyService.list(
+      soClient,
+      { page: 1, perPage: SO_SEARCH_LIMIT, showAllSpaces },
+      spacesClient
+    );
+    agents = agents.filter(
+      (agent) =>
+        agentPolicies.find((agentPolicy) => agent.policy_id === agentPolicy.id) !== undefined
+    );
+    total = agents.length;
+  }
 
   return {
     agents,
@@ -169,6 +192,7 @@ export async function getAgentsByKuery(
 }
 
 export async function getAllAgentsByKuery(
+  soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   options: Omit<ListWithKuery, 'page' | 'perPage'> & {
     showInactive: boolean;
@@ -177,7 +201,11 @@ export async function getAllAgentsByKuery(
   agents: Agent[];
   total: number;
 }> {
-  const res = await getAgentsByKuery(esClient, { ...options, page: 1, perPage: SO_SEARCH_LIMIT });
+  const res = await getAgentsByKuery(soClient, esClient, {
+    ...options,
+    page: 1,
+    perPage: SO_SEARCH_LIMIT,
+  });
 
   return {
     agents: res.agents,

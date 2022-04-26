@@ -101,7 +101,7 @@ export async function reassignAgents(
       }
     }
   } else if ('kuery' in options) {
-    givenAgents = await getAgents(esClient, options);
+    givenAgents = await getAgents(soClient, esClient, options);
   }
   const givenOrder =
     'agentIds' in options ? options.agentIds : givenAgents.map((agent) => agent.id);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import pMap from 'p-map';
 
 import type { KueryNode } from '@kbn/es-query';
@@ -51,6 +51,7 @@ function joinKuerys(...kuerys: Array<string | undefined>) {
 }
 
 export async function getAgentStatusForAgentPolicy(
+  soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   agentPolicyId?: string,
   filterKuery?: string
@@ -65,7 +66,7 @@ export async function getAgentStatusForAgentPolicy(
       AgentStatusKueryHelper.buildKueryForUpdatingAgents(),
     ],
     (kuery, index) =>
-      getAgentsByKuery(esClient, {
+      getAgentsByKuery(soClient, esClient, {
         showInactive: index === 0,
         perPage: 0,
         page: 1,

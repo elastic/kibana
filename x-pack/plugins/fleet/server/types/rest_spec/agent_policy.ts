@@ -14,6 +14,7 @@ import { ListWithKuerySchema } from '.';
 export const GetAgentPoliciesRequestSchema = {
   query: ListWithKuerySchema.extends({
     full: schema.maybe(schema.boolean()),
+    showAllSpaces: schema.boolean({ defaultValue: false }),
   }),
 };
 

@@ -16,6 +16,7 @@ export const GetAgentsRequestSchema = {
     kuery: schema.maybe(schema.string()),
     showInactive: schema.boolean({ defaultValue: false }),
     showUpgradeable: schema.boolean({ defaultValue: false }),
+    showAllSpaces: schema.boolean({ defaultValue: false }),
   }),
 };
 

@@ -51,10 +51,14 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const { full: withPackagePolicies = false, ...restOfQuery } = request.query;
   try {
-    const { items, total, page, perPage } = await agentPolicyService.list(soClient, {
-      withPackagePolicies,
-      ...restOfQuery,
-    });
+    const { items, total, page, perPage } = await agentPolicyService.list(
+      soClient,
+      {
+        withPackagePolicies,
+        ...restOfQuery,
+      },
+      appContextService.getSpacesService().createSpacesClient(request)
+    );
     const body: GetAgentPoliciesResponse = {
       items,
       total,
@@ -65,7 +69,7 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
     await pMap(
       items,
       (agentPolicy: GetAgentPoliciesResponseItem) =>
-        getAgentsByKuery(esClient, {
+        getAgentsByKuery(soClient, esClient, {
           showInactive: false,
           perPage: 0,
           page: 1,
