@@ -26,7 +26,7 @@ import {
   BenchmarksQuerySchema,
 } from '../../../common/schemas/benchmark';
 import { CspAppContext } from '../../plugin';
-import type { Benchmark, PackagePolicyCspRulesStatus } from '../../../common/types';
+import type { Benchmark, CspRulesStatus } from '../../../common/types';
 import { isNonNullable } from '../../../common/utils/helpers';
 import { CspRouter } from '../../types';
 import { getCspRules } from '../configuration/update_rules_configuration';
@@ -96,7 +96,7 @@ const addRunningAgentToAgentPolicy = async (
 const addPackagePolicyCspRules = async (
   soClient: SavedObjectsClientContract,
   packagePolicy: PackagePolicy
-): Promise<PackagePolicyCspRulesStatus> => {
+): Promise<CspRulesStatus> => {
   const rules = await getCspRules(soClient, packagePolicy);
   const activatedRules = rules.saved_objects.filter((cspRule) => cspRule.attributes.enabled);
   const packagePolicyRules = {
@@ -110,7 +110,7 @@ const addPackagePolicyCspRules = async (
 export const createBenchmarkEntry = (
   agentPolicy: GetAgentPoliciesResponseItem,
   packagePolicy: PackagePolicy,
-  packagePolicyCspRules: PackagePolicyCspRulesStatus
+  cspRulesStatus: CspRulesStatus
 ): Benchmark => ({
   package_policy: {
     id: packagePolicy.id,
@@ -134,7 +134,7 @@ export const createBenchmarkEntry = (
     name: agentPolicy.name,
     agents: agentPolicy.agents,
   },
-  rules: packagePolicyCspRules,
+  rules: cspRulesStatus,
 });
 
 const createBenchmarks = async (
@@ -151,8 +151,8 @@ const createBenchmarks = async (
         .filter(isNonNullable);
 
       const benchmarks = cspPackagesOnAgent.map(async (cspPackage) => {
-        const packagePolicyCspRules = await addPackagePolicyCspRules(soClient, cspPackage);
-        const benchmark = createBenchmarkEntry(agentPolicy, cspPackage, packagePolicyCspRules);
+        const cspRulesStatus = await addPackagePolicyCspRules(soClient, cspPackage);
+        const benchmark = createBenchmarkEntry(agentPolicy, cspPackage, cspRulesStatus);
         return benchmark;
       });
       return benchmarks;

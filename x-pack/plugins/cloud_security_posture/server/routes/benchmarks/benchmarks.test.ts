@@ -23,12 +23,12 @@ import {
 import {
   defineGetBenchmarksRoute,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  getPackagePolicies,
+  getCspPackagePolicies,
   getAgentPolicies,
   createBenchmarkEntry,
 } from './benchmarks';
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 import {
   createMockAgentPolicyService,
   createPackagePolicyServiceMock,
@@ -221,7 +221,7 @@ describe('benchmarks API', () => {
       it('should format request by package name', async () => {
         const mockPackagePolicyService = createPackagePolicyServiceMock();
 
-        await getPackagePolicies(mockSoClient, mockPackagePolicyService, 'myPackage', {
+        await getCspPackagePolicies(mockSoClient, mockPackagePolicyService, 'myPackage', {
           page: 1,
           per_page: 100,
           sort_order: 'desc',
@@ -239,7 +239,7 @@ describe('benchmarks API', () => {
       it('should build sort request by `sort_field` and default `sort_order`', async () => {
         const mockAgentPolicyService = createPackagePolicyServiceMock();
 
-        await getPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
+        await getCspPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
           page: 1,
           per_page: 100,
           sort_field: 'package_policy.name',
@@ -260,7 +260,7 @@ describe('benchmarks API', () => {
       it('should build sort request by `sort_field` and asc `sort_order`', async () => {
         const mockAgentPolicyService = createPackagePolicyServiceMock();
 
-        await getPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
+        await getCspPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
           page: 1,
           per_page: 100,
           sort_field: 'package_policy.name',
@@ -282,7 +282,7 @@ describe('benchmarks API', () => {
     it('should format request by benchmark_name', async () => {
       const mockAgentPolicyService = createPackagePolicyServiceMock();
 
-      await getPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
+      await getCspPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
         page: 1,
         per_page: 100,
         sort_order: 'desc',
@@ -329,9 +329,18 @@ describe('benchmarks API', () => {
         // @ts-expect-error
         agentPolicy.agents = 3;
 
-        const enrichAgentPolicy = await createBenchmarkEntry(agentPolicy, packagePolicy);
+        const cspRulesStatus = {
+          all: 100,
+          enabled: 52,
+          disabled: 48,
+        };
+        const enrichAgentPolicy = await createBenchmarkEntry(
+          agentPolicy,
+          packagePolicy,
+          cspRulesStatus
+        );
 
-        expect(enrichAgentPolicy).toMatchObject({
+        expect(enrichAgentPolicy).toEqual({
           package_policy: {
             id: 'c6d16e42-c32d-4dce-8a88-113cfe276ad1',
             name: 'endpoint-1',
@@ -348,6 +357,11 @@ describe('benchmarks API', () => {
             },
           },
           agent_policy: { id: 'some-uuid1', name: 'Test Policy', agents: 3 },
+          rules: {
+            all: 100,
+            disabled: 48,
+            enabled: 52,
+          },
         });
       });
     });
