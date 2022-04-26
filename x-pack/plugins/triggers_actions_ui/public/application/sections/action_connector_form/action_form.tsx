@@ -51,7 +51,7 @@ export interface ActionAccordionFormProps {
   actions: RuleAction[];
   defaultActionGroupId: string;
   actionGroups?: ActionGroupWithMessageVariables[];
-  defaultRecoveryMessage?: string;
+  defaultActionMessage?: string;
   setActionIdByIndex: (id: string, index: number) => void;
   setActionGroupIdByIndex?: (group: string, index: number) => void;
   setActions: (actions: RuleAction[]) => void;
