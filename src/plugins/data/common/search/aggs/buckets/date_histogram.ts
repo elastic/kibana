@@ -289,6 +289,20 @@ export const getDateHistogramBucketAgg = ({
         toExpressionAst: () => undefined,
       },
       {
+        name: 'forced_timezone',
+        shouldShow() {
+          return false;
+        },
+        default: false,
+        write: () => {},
+        serialize(val, agg) {
+          if (!agg) return undefined;
+          const shouldForceUTC = agg.params.field.indices.some((index) => index.fixed_interval);
+          return shouldForceUTC;
+        },
+        toExpressionAst: () => undefined,
+      },
+      {
         name: 'drop_partials',
         default: false,
         write: noop,

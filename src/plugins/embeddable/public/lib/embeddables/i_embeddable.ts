@@ -30,6 +30,7 @@ export interface EmbeddableOutput {
   title?: string;
   editable?: boolean;
   savedObjectId?: string;
+  forcedUTCTimezone?: boolean;
 }
 
 export interface IEmbeddable<
