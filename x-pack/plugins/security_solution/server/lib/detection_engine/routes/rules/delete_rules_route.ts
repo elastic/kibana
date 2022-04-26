@@ -21,10 +21,7 @@ import { buildSiemResponse } from '../utils';
 import { readRules } from '../../rules/read_rules';
 import { legacyMigrate } from '../../rules/utils';
 
-export const deleteRulesRoute = (
-  router: SecuritySolutionPluginRouter,
-  isRuleRegistryEnabled: boolean
-) => {
+export const deleteRulesRoute = (router: SecuritySolutionPluginRouter) => {
   router.delete(
     {
       path: DETECTION_ENGINE_RULES_URL,
@@ -52,7 +49,7 @@ export const deleteRulesRoute = (
         const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
         const savedObjectsClient = ctx.core.savedObjects.client;
 
-        const rule = await readRules({ isRuleRegistryEnabled, rulesClient, id, ruleId });
+        const rule = await readRules({ rulesClient, id, ruleId });
         const migratedRule = await legacyMigrate({
           rulesClient,
           savedObjectsClient,
@@ -75,7 +72,7 @@ export const deleteRulesRoute = (
           ruleExecutionLog,
         });
 
-        const transformed = transform(migratedRule, ruleExecutionSummary, isRuleRegistryEnabled);
+        const transformed = transform(migratedRule, ruleExecutionSummary);
         if (transformed == null) {
           return siemResponse.error({ statusCode: 500, body: 'failed to transform alert' });
         } else {

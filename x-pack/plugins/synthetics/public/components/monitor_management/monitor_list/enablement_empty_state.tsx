@@ -88,21 +88,21 @@ export const EnablementEmptyState = ({ focusButton }: { focusButton: boolean }) 
 };
 
 const MONITOR_MANAGEMENT_ENABLEMENT_LABEL = i18n.translate(
-  'xpack.uptime.monitorManagement.emptyState.enablement.enabled.title',
+  'xpack.synthetics.monitorManagement.emptyState.enablement.enabled.title',
   {
     defaultMessage: 'Enable Monitor Management',
   }
 );
 
 const MONITOR_MANAGEMENT_DISABLED_LABEL = i18n.translate(
-  'xpack.uptime.monitorManagement.emptyState.enablement.disabled.title',
+  'xpack.synthetics.monitorManagement.emptyState.enablement.disabled.title',
   {
     defaultMessage: 'Monitor Management is disabled',
   }
 );
 
 const MONITOR_MANAGEMENT_ENABLEMENT_MESSAGE = i18n.translate(
-  'xpack.uptime.monitorManagement.emptyState.enablement',
+  'xpack.synthetics.monitorManagement.emptyState.enablement',
   {
     defaultMessage:
       'Enable Monitor Management to run lightweight and real-browser monitors from hosted testing locations around the world. Enabling Monitor Management will generate an API key to allow the Synthetics Service to write back to your Elasticsearch cluster.',
@@ -110,7 +110,7 @@ const MONITOR_MANAGEMENT_ENABLEMENT_MESSAGE = i18n.translate(
 );
 
 const MONITOR_MANAGEMENT_DISABLED_MESSAGE = i18n.translate(
-  'xpack.uptime.monitorManagement.emptyState.enablement.disabledDescription',
+  'xpack.synthetics.monitorManagement.emptyState.enablement.disabledDescription',
   {
     defaultMessage:
       'Monitor Management is currently disabled. Monitor Management allows you to run lightweight and real-browser monitors from hosted testing locations around the world. To enable Monitor Management, please contact an administrator.',
@@ -118,18 +118,18 @@ const MONITOR_MANAGEMENT_DISABLED_MESSAGE = i18n.translate(
 );
 
 const MONITOR_MANAGEMENT_ENABLEMENT_BTN_LABEL = i18n.translate(
-  'xpack.uptime.monitorManagement.emptyState.enablement.title',
+  'xpack.synthetics.monitorManagement.emptyState.enablement.title',
   {
     defaultMessage: 'Enable',
   }
 );
 
-const DOCS_LABEL = i18n.translate('xpack.uptime.monitorManagement.emptyState.enablement.doc', {
+const DOCS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.emptyState.enablement.doc', {
   defaultMessage: 'Read the docs',
 });
 
 const LEARN_MORE_LABEL = i18n.translate(
-  'xpack.uptime.monitorManagement.emptyState.enablement.learnMore',
+  'xpack.synthetics.monitorManagement.emptyState.enablement.learnMore',
   {
     defaultMessage: 'Want to learn more?',
   }
