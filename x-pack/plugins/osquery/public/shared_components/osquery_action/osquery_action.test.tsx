@@ -88,7 +88,7 @@ const osqueryNotAvailable =
 const agentStatusError =
   'To run queries on this host, the Elastic Agent must be active. Check the status of this agent in Fleet.';
 
-describe.only('Osquery Action', () => {
+describe('Osquery Action', () => {
   it('should return empty prompt when agentFetched and no agentData', async () => {
     spyOsquery();
     mockKibana();
