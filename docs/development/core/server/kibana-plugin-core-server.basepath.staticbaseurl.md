@@ -9,5 +9,5 @@ An optional URL to load static assets from. If configured, bundles and other sta
 <b>Signature:</b>
 
 ```typescript
-readonly staticBaseUrl?: string;
+readonly staticBaseUrl: string;
 ```

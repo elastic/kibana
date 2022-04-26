@@ -217,7 +217,7 @@ export class BasePath {
     remove: (path: string) => string;
     readonly serverBasePath: string;
     set: (request: KibanaRequest, requestSpecificBasePath: string) => void;
-    readonly staticBaseUrl?: string;
+    readonly staticBaseUrl: string;
 }
 
 // Warning: (ae-forgotten-export) The symbol "BootstrapArgs" needs to be exported by the entry point index.d.ts
