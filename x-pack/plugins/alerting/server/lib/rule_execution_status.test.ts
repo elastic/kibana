@@ -10,9 +10,6 @@ import {
   ActionsCompletion,
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
-  EMPTY_RULE_RUN_METRICS,
-  EMPTY_RULE_RUN_STATE,
-  RuleRunMetrics,
 } from '../types';
 import {
   executionStatusFromState,
@@ -22,6 +19,7 @@ import {
 } from './rule_execution_status';
 import { ErrorWithReason } from './error_with_reason';
 import { translations } from '../constants/translations';
+import { RuleRunMetrics, RuleRunMetricsStore } from './rule_run_metrics_store';
 
 const MockLogger = loggingSystemMock.create().get();
 const executionMetrics = {
@@ -55,13 +53,14 @@ describe('RuleExecutionStatus', () => {
 
   describe('executionStatusFromState()', () => {
     test('empty task state', () => {
-      const { status, metrics } = executionStatusFromState(EMPTY_RULE_RUN_STATE);
+      const emptyRuleRunState = new RuleRunMetricsStore().getMetrics();
+      const { status, metrics } = executionStatusFromState({ metrics: emptyRuleRunState });
       checkDateIsNearNow(status.lastExecutionDate);
       expect(status.status).toBe('ok');
       expect(status.error).toBe(undefined);
       expect(status.warning).toBe(undefined);
 
-      testExpectedMetrics(metrics!, EMPTY_RULE_RUN_METRICS);
+      testExpectedMetrics(metrics!, emptyRuleRunState);
     });
 
     test('task state with no instances', () => {

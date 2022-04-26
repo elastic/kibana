@@ -11,12 +11,13 @@ import {
   RuleExecutionStatusValues,
   RuleExecutionStatusWarningReasons,
   RawRuleExecutionStatus,
-  RuleTaskStateAndMetrics,
 } from '../types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
-import { ActionsCompletion, RuleExecutionStatuses, RuleRunMetrics } from '../../common';
+import { ActionsCompletion, RuleExecutionStatuses } from '../../common';
 import { translations } from '../constants/translations';
+import { RuleTaskStateAndMetrics } from '../task_runner/types';
+import { RuleRunMetrics } from './rule_run_metrics_store';
 
 export interface IExecutionStatusAndMetrics {
   status: RuleExecutionStatus;

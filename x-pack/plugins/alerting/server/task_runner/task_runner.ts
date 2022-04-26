@@ -34,7 +34,6 @@ import {
   RawAlertInstance,
   RawRule,
   RawRuleExecutionStatus,
-  RuleTaskStateAndMetrics,
   RuleMonitoring,
   RuleMonitoringHistory,
   RuleTaskState,
@@ -52,8 +51,6 @@ import {
   AlertInstanceState,
   RuleTypeParams,
   RuleTypeState,
-  RuleRunMetrics,
-  EMPTY_RULE_RUN_METRICS,
   MONITORING_HISTORY_LIMIT,
   parseDuration,
   WithoutReservedActionGroups,
@@ -73,8 +70,10 @@ import {
   ScheduleActionsForRecoveredAlertsParams,
   TrackAlertDurationsParams,
   RuleRunResult,
+  RuleTaskStateAndMetrics,
 } from './types';
 import { IExecutionStatusAndMetrics } from '../lib/rule_execution_status';
+import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -232,6 +231,7 @@ export class TaskRunner<
       ruleParams,
       supportsEphemeralTasks: this.context.supportsEphemeralTasks,
       maxEphemeralActionsPerRule: this.context.maxEphemeralActionsPerRule,
+      actionsConfigMap: this.context.actionsConfigMap,
     });
   }
 
@@ -291,7 +291,7 @@ export class TaskRunner<
     alertId: string,
     alert: Alert<InstanceState, InstanceContext>,
     executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
-    ruleRunMetrics: RuleRunMetrics
+    ruleRunMetricsStore: RuleRunMetricsStore
   ) {
     const {
       actionGroup,
@@ -307,7 +307,7 @@ export class TaskRunner<
       context,
       state,
       alertId,
-      ruleRunMetrics,
+      ruleRunMetricsStore,
     });
   }
 
@@ -452,7 +452,12 @@ export class TaskRunner<
       name: rule.name,
     };
 
+    const ruleRunMetricsStore = new RuleRunMetricsStore();
+
     const searchMetrics = wrappedScopedClusterClient.getMetrics();
+    ruleRunMetricsStore.setNumSearches(searchMetrics.numSearches);
+    ruleRunMetricsStore.setTotalSearchDurationMs(searchMetrics.totalSearchDurationMs);
+    ruleRunMetricsStore.setEsSearchDurationMs(searchMetrics.esSearchDurationMs);
 
     // Cleanup alerts that are no longer scheduling actions to avoid over populating the alertInstances object
     const alertsWithScheduledActions = pickBy(
@@ -476,8 +481,6 @@ export class TaskRunner<
       recoveredAlerts,
     });
 
-    const ruleRunMetrics: RuleRunMetrics = { ...EMPTY_RULE_RUN_METRICS };
-
     if (this.shouldLogAndScheduleActionsForAlerts()) {
       generateNewAndRecoveredAlertEvents({
         eventLogger,
@@ -491,7 +494,7 @@ export class TaskRunner<
         ruleType,
         rule,
         spaceId,
-        ruleRunMetrics,
+        ruleRunMetricsStore,
       });
     }
 
@@ -529,7 +532,7 @@ export class TaskRunner<
       await Promise.all(
         alertsWithExecutableActions.map(
           ([alertId, alert]: [string, Alert<InstanceState, InstanceContext>]) =>
-            this.executeAlert(alertId, alert, executionHandler, ruleRunMetrics)
+            this.executeAlert(alertId, alert, executionHandler, ruleRunMetricsStore)
         )
       );
 
@@ -544,7 +547,7 @@ export class TaskRunner<
         mutedAlertIdsSet,
         logger: this.logger,
         ruleLabel,
-        ruleRunMetrics,
+        ruleRunMetricsStore,
       });
     } else {
       if (ruleIsSnoozed) {
@@ -564,10 +567,7 @@ export class TaskRunner<
     }
 
     return {
-      metrics: {
-        ...ruleRunMetrics,
-        ...searchMetrics,
-      },
+      metrics: ruleRunMetricsStore.getMetrics(),
       alertTypeState: updatedRuleTypeState || undefined,
       alertInstances: mapValues<
         Record<string, Alert<InstanceState, InstanceContext>>,
@@ -1101,7 +1101,7 @@ function generateNewAndRecoveredAlertEvents<
     rule,
     ruleType,
     spaceId,
-    ruleRunMetrics,
+    ruleRunMetricsStore,
   } = params;
   const originalAlertIds = Object.keys(originalAlerts);
   const currentAlertIds = Object.keys(currentAlerts);
@@ -1114,9 +1114,9 @@ function generateNewAndRecoveredAlertEvents<
     });
   }
 
-  ruleRunMetrics.numberOfActiveAlerts = currentAlertIds.length;
-  ruleRunMetrics.numberOfNewAlerts = newIds.length;
-  ruleRunMetrics.numberOfRecoveredAlerts = recoveredAlertIds.length;
+  ruleRunMetricsStore.setNumberOfActiveAlerts(currentAlertIds.length);
+  ruleRunMetricsStore.setNumberOfNewAlerts(newIds.length);
+  ruleRunMetricsStore.setNumberOfRecoveredAlerts(recoveredAlertIds.length);
 
   for (const id of recoveredAlertIds) {
     const { group: actionGroup, subgroup: actionSubgroup } =
@@ -1234,7 +1234,7 @@ async function scheduleActionsForRecoveredAlerts<
     executionHandler,
     mutedAlertIdsSet,
     ruleLabel,
-    ruleRunMetrics,
+    ruleRunMetricsStore,
   } = params;
   const recoveredIds = Object.keys(recoveredAlerts);
 
@@ -1252,7 +1252,7 @@ async function scheduleActionsForRecoveredAlerts<
         context: alert.getContext(),
         state: {},
         alertId: id,
-        ruleRunMetrics,
+        ruleRunMetricsStore,
       });
       alert.scheduleActions(recoveryActionGroup.id);
     }

@@ -20,48 +20,8 @@ export const ruleStateSchema = t.partial({
   previousStartedAt: t.union([t.null, DateFromString]),
 });
 
-const ruleRunActionsCompletion = t.union([
-  t.literal(ActionsCompletion.COMPLETE),
-  t.literal(ActionsCompletion.PARTIAL),
-]);
-
-const ruleRunMetricsSchema = t.type({
-  numSearches: t.number,
-  totalSearchDurationMs: t.number,
-  esSearchDurationMs: t.number,
-  numberOfTriggeredActions: t.number,
-  numberOfGeneratedActions: t.number,
-  numberOfActiveAlerts: t.number,
-  numberOfRecoveredAlerts: t.number,
-  numberOfNewAlerts: t.number,
-  triggeredActionsStatus: ruleRunActionsCompletion,
-});
-
-export type RuleRunMetrics = t.TypeOf<typeof ruleRunMetricsSchema>;
-
 // This is serialized in the rule task document
 export type RuleTaskState = t.TypeOf<typeof ruleStateSchema>;
-
-// This is the state of the alerting task after rule execution, which includes run metrics plus the task state
-export type RuleTaskStateAndMetrics = RuleTaskState & {
-  metrics: RuleRunMetrics;
-};
-
-export const EMPTY_RULE_RUN_METRICS: RuleRunMetrics = {
-  numSearches: 0,
-  totalSearchDurationMs: 0,
-  esSearchDurationMs: 0,
-  numberOfTriggeredActions: 0,
-  numberOfGeneratedActions: 0,
-  numberOfActiveAlerts: 0,
-  numberOfRecoveredAlerts: 0,
-  numberOfNewAlerts: 0,
-  triggeredActionsStatus: ActionsCompletion.COMPLETE,
-};
-
-export const EMPTY_RULE_RUN_STATE: RuleTaskStateAndMetrics = {
-  metrics: EMPTY_RULE_RUN_METRICS,
-};
 
 export const ruleParamsSchema = t.intersection([
   t.type({

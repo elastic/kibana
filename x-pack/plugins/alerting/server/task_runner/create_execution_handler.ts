@@ -52,6 +52,7 @@ export function createExecutionHandler<
   ruleParams,
   supportsEphemeralTasks,
   maxEphemeralActionsPerRule,
+  actionsConfigMap,
 }: CreateExecutionHandlerOptions<
   Params,
   ExtractedParams,
@@ -64,12 +65,13 @@ export function createExecutionHandler<
   const ruleTypeActionGroups = new Map(
     ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
   );
+
   return async ({
     actionGroup,
     actionSubgroup,
     context,
     state,
-    ruleRunMetrics,
+    ruleRunMetricsStore,
     alertId,
   }: ExecutionHandlerOptions<ActionGroupIds | RecoveryActionGroupId>) => {
     if (!ruleTypeActionGroups.has(actionGroup)) {
@@ -113,7 +115,7 @@ export function createExecutionHandler<
         }),
       }));
 
-    ruleRunMetrics.numberOfGeneratedActions += actions.length;
+    ruleRunMetricsStore.incrementNumberOfGeneratedActions(actions.length);
 
     const ruleLabel = `${ruleType.id}:${ruleId}: '${ruleName}'`;
 
@@ -121,21 +123,48 @@ export function createExecutionHandler<
     let ephemeralActionsToSchedule = maxEphemeralActionsPerRule;
 
     for (const action of actions) {
-      if (ruleRunMetrics.numberOfTriggeredActions >= ruleType.config!.run.actions.max) {
-        ruleRunMetrics.triggeredActionsStatus = ActionsCompletion.PARTIAL;
+      const { actionTypeId } = action;
+
+      ruleRunMetricsStore.incrementNumberOfGeneratedActionsByConnectorType(actionTypeId);
+
+      if (ruleRunMetricsStore.hasReachedTheExecutableActionsLimit(actionsConfigMap)) {
+        ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
+          actionTypeId,
+          status: ActionsCompletion.PARTIAL,
+        });
+        logger.debug(
+          `Rule "${ruleId}" skipped scheduling action "${action.id}" because the maximum number of allowed actions has been reached.`
+        );
         break;
       }
 
       if (
-        !actionsPlugin.isActionExecutable(action.id, action.actionTypeId, { notifyUsage: true })
+        ruleRunMetricsStore.hasReachedTheExecutableActionsLimitByConnectorType({
+          actionTypeId,
+          actionsConfigMap,
+        })
       ) {
+        if (!ruleRunMetricsStore.hasConnectorTypeReachedTheLimit(actionTypeId)) {
+          logger.debug(
+            `Rule "${ruleId}" skipped scheduling action "${action.id}" because the maximum number of allowed actions for connector type ${actionTypeId} has been reached.`
+          );
+        }
+        ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
+          actionTypeId,
+          status: ActionsCompletion.PARTIAL,
+        });
+        continue;
+      }
+
+      if (!actionsPlugin.isActionExecutable(action.id, actionTypeId, { notifyUsage: true })) {
         logger.warn(
           `Rule "${ruleId}" skipped scheduling action "${action.id}" because it is disabled`
         );
         continue;
       }
 
-      ruleRunMetrics.numberOfTriggeredActions++;
+      ruleRunMetricsStore.incrementNumberOfTriggeredActions();
+      ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
 
       const namespace = spaceId === 'default' ? {} : { namespace: spaceId };
 
@@ -161,7 +190,7 @@ export function createExecutionHandler<
       };
 
       // TODO would be nice  to add the action name here, but it's not available
-      const actionLabel = `${action.actionTypeId}:${action.id}`;
+      const actionLabel = `${actionTypeId}:${action.id}`;
       if (supportsEphemeralTasks && ephemeralActionsToSchedule > 0) {
         ephemeralActionsToSchedule--;
         try {
@@ -196,7 +225,7 @@ export function createExecutionHandler<
           {
             type: 'action',
             id: action.id,
-            typeId: action.actionTypeId,
+            typeId: actionTypeId,
           },
         ],
         ...namespace,
