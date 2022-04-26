@@ -13,7 +13,7 @@ import { FieldValueSuggestions, useInspectorContext } from '@kbn/observability-p
 import { useFilterUpdate } from '../../../hooks/use_filter_update';
 import { useSelectedFilters } from '../../../hooks/use_selected_filters';
 import { SelectedFilters } from './selected_filters';
-import { useUptimeDataView } from '../../../contexts/uptime_index_pattern_context';
+import { useUptimeDataView } from '../../../contexts/uptime_data_view_context';
 import { useGetUrlParams } from '../../../hooks';
 import { EXCLUDE_RUN_ONCE_FILTER } from '../../../../common/constants/client_defaults';
 

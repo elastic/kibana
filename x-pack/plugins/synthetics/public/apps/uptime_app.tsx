@@ -33,7 +33,7 @@ import { UptimeAlertsFlyoutWrapper } from '../components/overview';
 import { store, storage } from '../state';
 import { kibanaService } from '../state/kibana_service';
 import { ActionMenu } from '../components/common/header/action_menu';
-import { UptimeDataViewContextProvider } from '../contexts/uptime_index_pattern_context';
+import { UptimeDataViewContextProvider } from '../contexts/uptime_data_view_context';
 
 export interface UptimeAppColors {
   danger: string;

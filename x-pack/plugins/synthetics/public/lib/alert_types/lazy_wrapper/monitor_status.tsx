@@ -13,7 +13,7 @@ import { store } from '../../../state';
 import { ClientPluginsStart } from '../../../apps/plugin';
 import { kibanaService } from '../../../state/kibana_service';
 import { AlertMonitorStatus } from '../../../components/overview/alerts/alerts_containers/alert_monitor_status';
-import { UptimeDataViewContextProvider } from '../../../contexts/uptime_index_pattern_context';
+import { UptimeDataViewContextProvider } from '../../../contexts/uptime_data_view_context';
 
 interface Props {
   core: CoreStart;

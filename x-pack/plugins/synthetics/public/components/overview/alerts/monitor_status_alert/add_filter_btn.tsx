@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import * as labels from '../translations';
-import { useUptimeDataView } from '../../../../contexts/uptime_index_pattern_context';
+import { useUptimeDataView } from '../../../../contexts/uptime_data_view_context';
 
 interface Props {
   newFilters: string[];

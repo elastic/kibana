@@ -10,7 +10,7 @@ import { EuiButtonIcon, EuiExpression, EuiFlexGroup, EuiFlexItem, EuiSpacer } fr
 import { FieldValueSuggestions } from '@kbn/observability-plugin/public';
 import { filterLabels } from '../../filter_group/translations';
 import { alertFilterLabels, filterAriaLabels } from './translations';
-import { useUptimeDataView } from '../../../../contexts/uptime_index_pattern_context';
+import { useUptimeDataView } from '../../../../contexts/uptime_data_view_context';
 import { FILTER_FIELDS } from '../../../../../common/constants';
 import { useGetUrlParams } from '../../../../hooks';
 
