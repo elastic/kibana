@@ -414,7 +414,7 @@ export class RulesClient {
       updatedBy: username,
       createdAt: new Date(createTime).toISOString(),
       updatedAt: new Date(createTime).toISOString(),
-      snoozeEndTime: null,
+      snoozeSchedule: [],
       params: updatedParams as RawRule['params'],
       snoozeIndefinitely: false,
       mutedInstanceIds: [],
@@ -924,7 +924,7 @@ export class RulesClient {
         },
         snoozed: {
           date_range: {
-            field: 'alert.attributes.snoozeEndTime',
+            field: 'alert.attributes.snoozeSchedule.startTime',
             format: 'strict_date_time',
             ranges: [{ from: 'now' }],
           },
@@ -1775,7 +1775,7 @@ export class RulesClient {
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
     const updateAttributes = this.updateMeta({
-      snoozeEndTime: clearUnscheduledSnooze(attributes),
+      snoozeSchedule: clearUnscheduledSnooze(attributes),
       snoozeIndefinitely: false,
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
@@ -1839,7 +1839,7 @@ export class RulesClient {
     const updateAttributes = this.updateMeta({
       snoozeIndefinitely: true,
       mutedInstanceIds: [],
-      snoozeEndTime: clearUnscheduledSnooze(attributes),
+      snoozeSchedule: clearUnscheduledSnooze(attributes),
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
@@ -1902,7 +1902,7 @@ export class RulesClient {
     const updateAttributes = this.updateMeta({
       snoozeIndefinitely: false,
       mutedInstanceIds: [],
-      snoozeEndTime: clearUnscheduledSnooze(attributes),
+      snoozeSchedule: clearUnscheduledSnooze(attributes),
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
@@ -2171,7 +2171,7 @@ export class RulesClient {
       schedule: schedule as IntervalSchedule,
       actions: actions ? this.injectReferencesIntoActions(id, actions, references || []) : [],
       params: this.injectReferencesIntoParams(id, ruleType, params, references || []) as Params,
-      ...(includeSnoozeSchedule ? { snoozeEndTime: snoozeScheduleDates } : {}),
+      ...(includeSnoozeSchedule ? { snoozeSchedule: snoozeScheduleDates } : {}),
       ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
       ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
       ...(scheduledTaskId ? { scheduledTaskId } : {}),
