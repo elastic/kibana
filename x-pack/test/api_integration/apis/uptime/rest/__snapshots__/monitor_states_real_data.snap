@@ -8,15 +8,7 @@ Object {
     Object {
       "monitor_id": "0010-down",
       "state": Object {
-        "error": Object {
-          "message": "400 Bad Request",
-          "type": "validate",
-        },
         "monitor": Object {
-          "checkGroup": "d76f07d1-d445-11e9-88e3-3e80641b9c71",
-          "duration": Object {
-            "us": 37926,
-          },
           "name": "",
           "type": "http",
         },
@@ -143,15 +135,7 @@ Object {
     Object {
       "monitor_id": "0020-down",
       "state": Object {
-        "error": Object {
-          "message": "400 Bad Request",
-          "type": "validate",
-        },
         "monitor": Object {
-          "checkGroup": "d7712ecb-d445-11e9-88e3-3e80641b9c71",
-          "duration": Object {
-            "us": 14900,
-          },
           "name": "",
           "type": "http",
         },
