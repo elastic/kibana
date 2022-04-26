@@ -20,9 +20,11 @@ import { MonitorManagementListPageState } from './monitor_list';
 import { MonitorManagementPageAction } from '../hooks/use_monitor_list';
 
 export const MonitorListContainer = ({
+  isEnabled,
   pageState,
   dispatchPageAction,
 }: {
+  isEnabled?: boolean;
   pageState: MonitorManagementListPageState;
   dispatchPageAction: Dispatch<MonitorManagementPageAction>;
 }) => {
@@ -50,6 +52,10 @@ export const MonitorListContainer = ({
   });
 
   const { data: monitorSavedObjects, loading: objectsLoading } = useInvalidMonitors(errorSummaries);
+
+  if (!isEnabled && monitorList.list.total === 0) {
+    return null;
+  }
 
   return (
     <>

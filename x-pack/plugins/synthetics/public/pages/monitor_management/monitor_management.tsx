@@ -49,6 +49,8 @@ export const MonitorManagementPage: React.FC = () => {
 
   const { pageState, dispatchPageAction } = useMonitorList();
 
+  const showEmptyState = isEnabled !== undefined && monitorList.total === 0;
+
   return (
     <>
       <Loader
@@ -84,11 +86,13 @@ export const MonitorManagementPage: React.FC = () => {
             <EuiSpacer size="s" />
           </>
         ) : null}
-        <MonitorListContainer pageState={pageState} dispatchPageAction={dispatchPageAction} />
+        <MonitorListContainer
+          isEnabled={isEnabled}
+          pageState={pageState}
+          dispatchPageAction={dispatchPageAction}
+        />
       </Loader>
-      {isEnabled !== undefined && monitorList.total === 0 && (
-        <EnablementEmptyState focusButton={shouldFocusEnablementButton} />
-      )}
+      {showEmptyState && <EnablementEmptyState focusButton={shouldFocusEnablementButton} />}
     </>
   );
 };
