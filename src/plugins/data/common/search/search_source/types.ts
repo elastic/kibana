@@ -117,6 +117,8 @@ export interface SearchSourceFields {
   terminate_after?: number;
 
   parent?: SearchSourceFields;
+
+  skipHandlingShardFailiures?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
@@ -165,6 +167,8 @@ export type SerializedSearchSourceFields = {
   terminate_after?: number;
 
   parent?: SerializedSearchSourceFields;
+
+  skipHandlingShardFailiures?: boolean;
 };
 
 export interface SearchSourceOptions {

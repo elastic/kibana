@@ -304,6 +304,9 @@ export class SearchSource {
         if (searchRequest.index) {
           options.indexPattern = searchRequest.index;
         }
+        if (this.getField('skipHandlingShardFailiures')) {
+          options.skipHandlingShardFailiures = true;
+        }
 
         return this.fetchSearch$(searchRequest, options);
       }),
@@ -699,6 +702,8 @@ export class SearchSource {
   private flatten() {
     const { getConfig } = this.dependencies;
     const searchRequest = this.mergeProps();
+    searchRequest.skipHandlingShardFailiures = searchRequest.body.skipHandlingShardFailiures;
+    delete searchRequest.body.skipHandlingShardFailiures;
     searchRequest.body = searchRequest.body || {};
     const { body, index, query, filters, highlightAll } = searchRequest;
     searchRequest.indexType = this.getIndexType(index);
