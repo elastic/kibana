@@ -184,7 +184,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/get_packages_response'
       operationId: list-all-packages
-    parameters: []
+    parameters:
+      - in: query
+        name: includeInstallStatus
+        schema:
+          type: boolean
+          default: false
+        description: >-
+          Whether to include the install status of each package. Defaults to
+          false to allow for caching of package requests.
   /epm/packages/_bulk:
     post:
       summary: Packages - Bulk install

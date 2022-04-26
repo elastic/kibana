@@ -5,29 +5,25 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { prefixIndexPatternWithCcs } from '../../../../../common/ccs_utils';
-import { getStats, getBeats } from '../../../../lib/beats';
-import { handleError } from '../../../../lib/errors';
 import { INDEX_PATTERN_BEATS } from '../../../../../common/constants';
+import {
+  postBeatsListingRequestParamsRT,
+  postBeatsListingRequestPayloadRT,
+  postBeatsListingResponsePayloadRT,
+} from '../../../../../common/http_api/beats';
+import { getBeats, getStats } from '../../../../lib/beats';
+import { createValidationFunction } from '../../../../lib/create_route_validation_function';
+import { handleError } from '../../../../lib/errors';
+import { MonitoringCore } from '../../../../types';
 
-export function beatsListingRoute(server) {
+export function beatsListingRoute(server: MonitoringCore) {
   server.route({
-    method: 'POST',
+    method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/beats/beats',
-    config: {
-      validate: {
-        params: schema.object({
-          clusterUuid: schema.string(),
-        }),
-        body: schema.object({
-          ccs: schema.maybe(schema.string()),
-          timeRange: schema.object({
-            min: schema.string(),
-            max: schema.string(),
-          }),
-        }),
-      },
+    validate: {
+      params: createValidationFunction(postBeatsListingRequestParamsRT),
+      body: createValidationFunction(postBeatsListingRequestPayloadRT),
     },
     async handler(req) {
       const config = server.config;
@@ -41,10 +37,10 @@ export function beatsListingRoute(server) {
           getBeats(req, beatsIndexPattern, clusterUuid),
         ]);
 
-        return {
+        return postBeatsListingResponsePayloadRT.encode({
           stats,
           listing,
-        };
+        });
       } catch (err) {
         throw handleError(err, req);
       }
