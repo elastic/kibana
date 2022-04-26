@@ -6,7 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { AggFunctionsMapping } from '@kbn/data-plugin/public';
+import React from 'react';
+import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import { FieldBasedIndexPatternColumn, FormattedIndexPatternColumn } from '../column_types';
 import { IndexPatternLayer } from '../../../types';
 import {
   buildLabelFunction,
@@ -18,8 +22,15 @@ import {
 } from './utils';
 import { DEFAULT_TIME_SCALE } from '../../time_scale_utils';
 import { OperationDefinition } from '..';
-import { getFormatFromPreviousColumn, getFilter, combineErrorMessages } from '../helpers';
+import {
+  getFormatFromPreviousColumn,
+  getFilter,
+  combineErrorMessages,
+  getSafeName,
+  isColumnOfType,
+} from '../helpers';
 import { getDisallowedPreviousShiftMessage } from '../../../time_shift_utils';
+import { updateColumnParam } from '../../layer_helpers';
 
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.CounterRateOf', {
@@ -35,30 +46,23 @@ const ofName = buildLabelFunction((name?: string) => {
 });
 
 export type CounterRateIndexPatternColumn = FormattedIndexPatternColumn &
-  ReferenceBasedIndexPatternColumn & {
+  FieldBasedIndexPatternColumn & {
     operationType: 'counter_rate';
+    params: {
+      aggregate?: string;
+    };
   };
 
-export const counterRateOperation: OperationDefinition<
-  CounterRateIndexPatternColumn,
-  'fullReference'
-> = {
+export const counterRateOperation: OperationDefinition<CounterRateIndexPatternColumn, 'field'> = {
   type: 'counter_rate',
   priority: 1,
   displayName: i18n.translate('xpack.lens.indexPattern.counterRate', {
     defaultMessage: 'Counter rate',
   }),
-  input: 'fullReference',
-  selectionStyle: 'field',
-  requiredReferences: [
-    {
-      input: ['field', 'managedReference'],
-      specificOperations: ['max'],
-      validateMetadata: (meta) => meta.dataType === 'number' && !meta.isBucketed,
-    },
-  ],
-  getPossibleOperation: (indexPattern) => {
-    if (hasDateField(indexPattern)) {
+  input: 'field',
+  operationParams: [{ name: 'aggregate', type: 'string', required: false }],
+  getPossibleOperationForField: ({ type }) => {
+    if (type === 'number') {
       return {
         dataType: 'number',
         isBucketed: false,
@@ -67,56 +71,129 @@ export const counterRateOperation: OperationDefinition<
     }
   },
   getDefaultLabel: (column, indexPattern, columns) => {
-    const ref = columns[column.references[0]];
     return ofName(
-      ref && 'sourceField' in ref
-        ? indexPattern.getFieldByName(ref.sourceField)?.displayName
-        : undefined,
+      getSafeName(column.sourceField, indexPattern),
       column.timeScale,
       column.timeShift
     );
   },
-  toExpression: (layer, columnId) => {
-    return dateBasedOperationToExpression(layer, columnId, 'lens_counter_rate');
+  onFieldChange: (oldColumn, field) => {
+    return {
+      ...oldColumn,
+      label: ofName(field.displayName, oldColumn.timeScale, oldColumn.timeShift),
+      sourceField: field.name,
+    };
   },
-  buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }, columnParams) => {
-    const metric = layer.columns[referenceIds[0]];
+  toExpression: (layer, columnId) => {
+    if (!layer.columns[columnId].params?.aggregate) {
+      return dateBasedOperationToExpression(layer, columnId, 'lens_counter_rate');
+    }
+    return [];
+  },
+  buildColumn: ({ previousColumn, field, indexPattern }, columnParams) => {
     const counterRateColumnParams = columnParams as CounterRateIndexPatternColumn;
     const timeScale =
       previousColumn?.timeScale || counterRateColumnParams?.timeScale || DEFAULT_TIME_SCALE;
     return {
-      label: ofName(
-        metric && 'sourceField' in metric
-          ? indexPattern.getFieldByName(metric.sourceField)?.displayName
-          : undefined,
-        timeScale,
-        previousColumn?.timeShift
-      ),
+      label: ofName(getSafeName(field.name, indexPattern), timeScale, previousColumn?.timeShift),
       dataType: 'number',
       operationType: 'counter_rate',
       isBucketed: false,
       scale: 'ratio',
-      references: referenceIds,
-      timeScale,
+      sourceField: field.name,
       timeShift: columnParams?.shift || previousColumn?.timeShift,
       filter: getFilter(previousColumn, columnParams),
-      params: getFormatFromPreviousColumn(previousColumn),
+      params: {
+        aggregate: columnParams?.aggregate
+          ? columnParams.aggregate
+          : previousColumn &&
+            isColumnOfType<CounterRateIndexPatternColumn>('counter_rate', previousColumn)
+          ? previousColumn.params?.aggregate
+          : field?.indices.every((index) => index.time_series_metric)
+          ? 'Sum'
+          : undefined,
+        ...getFormatFromPreviousColumn(previousColumn),
+      },
     };
+  },
+  toEsAggsFn: (column, columnId, _indexPattern) => {
+    if (!column.params!.aggregate) {
+      return buildExpressionFunction<AggFunctionsMapping['aggMax']>('aggMax', {
+        id: columnId,
+        enabled: true,
+        schema: 'metric',
+        field: column.sourceField,
+        // time shift is added to wrapping aggFilteredMetric if filter is set
+        timeShift: column.filter ? undefined : column.timeShift,
+      }).toAst();
+    }
+    return buildExpressionFunction(`aggBucket${column.params!.aggregate}`, {
+      id: columnId,
+      enabled: true,
+      schema: 'metric',
+      // time shift is added to wrapping aggFilteredMetric if filter is set
+      timeShift: column.filter ? undefined : column.timeShift,
+      customMetric: buildExpression([
+        buildExpressionFunction<AggFunctionsMapping['aggRate']>('aggRate', {
+          id: columnId,
+          enabled: true,
+          schema: 'metric',
+          field: column.sourceField,
+          // time shift is added to wrapping aggFilteredMetric if filter is set
+          timeShift: column.filter ? undefined : column.timeShift,
+        }),
+      ]).toAst(),
+      emptyAsNull: column.params?.aggregate === 'Sum' ? true : undefined,
+      customBucket: buildExpression([
+        buildExpressionFunction('aggMultiTerms', {
+          id: `${columnId}-bucket`,
+          enabled: true,
+          schema: 'bucket',
+          fields: _indexPattern.fields
+            .filter((f) => f.indices && f.indices.every((i) => i.time_series_dimension))
+            .map((i) => i.name),
+        }),
+      ]).toAst(),
+    }).toAst();
+  },
+  paramEditor: ({ layer, currentColumn, layerId, indexPattern, columnId, updateLayer }) => {
+    const field = indexPattern.getFieldByName(currentColumn.sourceField);
+    if (!field?.indices.every((index) => index.time_series_metric)) {
+      return null;
+    }
+    const isShowAllDimensions = Object.values(layer.columns).some((c) => c.params?.allDimensions);
+    return (
+      <EuiFormRow label={<>Aggregate individual time series </>} display="rowCompressed" fullWidth>
+        <EuiSelect
+          compressed
+          data-test-subj="indexPattern-terms-orderBy"
+          disabled={isShowAllDimensions}
+          options={[
+            { text: 'sum', value: 'Sum' },
+            { text: 'min', value: 'Min' },
+            { text: 'max', value: 'Max' },
+            { text: 'avg', value: 'Avg' },
+          ]}
+          value={currentColumn.params?.aggregate || 'sum'}
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+            updateLayer(
+              updateColumnParam({
+                layer,
+                columnId,
+                paramName: 'aggregate',
+                value: e.target.value,
+              })
+            );
+          }}
+        />
+      </EuiFormRow>
+    );
   },
   isTransferable: (column, newIndexPattern) => {
     return hasDateField(newIndexPattern);
   },
   getErrorMessage: (layer: IndexPatternLayer, columnId: string) => {
-    return combineErrorMessages([
-      getErrorsForDateReference(
-        layer,
-        columnId,
-        i18n.translate('xpack.lens.indexPattern.counterRate', {
-          defaultMessage: 'Counter rate',
-        })
-      ),
-      getDisallowedPreviousShiftMessage(layer, columnId),
-    ]);
+    return combineErrorMessages([getDisallowedPreviousShiftMessage(layer, columnId)]);
   },
   getDisabledStatus(indexPattern, layer, layerType) {
     const opName = i18n.translate('xpack.lens.indexPattern.counterRate', {

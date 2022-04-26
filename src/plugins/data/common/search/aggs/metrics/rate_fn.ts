@@ -91,7 +91,7 @@ export const aggRate = (): FunctionDefinition => ({
         id,
         enabled,
         schema,
-        type: METRIC_TYPES.SUM,
+        type: METRIC_TYPES.RATE,
         params: {
           ...rest,
         },

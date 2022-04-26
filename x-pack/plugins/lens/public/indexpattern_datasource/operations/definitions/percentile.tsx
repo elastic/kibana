@@ -243,6 +243,7 @@ export const percentileOperation: OperationDefinition<
     );
 
     const field = indexPattern.getFieldByName(currentColumn.sourceField);
+    const isShowAllDimensions = Object.values(layer.columns).some((c) => c.params?.allDimensions);
     const isTSDB = !field?.indices.every((index) => index.time_series_metric);
 
     return (
@@ -277,10 +278,15 @@ export const percentileOperation: OperationDefinition<
           />
         </EuiFormRow>
         {isTSDB && (
-          <EuiFormRow label={<>Collapse by </>} display="rowCompressed" fullWidth>
+          <EuiFormRow
+            label={<>Aggregate individual time series </>}
+            display="rowCompressed"
+            fullWidth
+          >
             <EuiSelect
               compressed
               data-test-subj="indexPattern-terms-orderBy"
+              disabled={isShowAllDimensions}
               options={[
                 { text: 'sum', value: 'Sum' },
                 { text: 'min', value: 'Min' },

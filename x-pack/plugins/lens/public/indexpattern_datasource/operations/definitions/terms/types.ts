@@ -28,5 +28,6 @@ export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
     parentFormat?: {
       id: string;
     };
+    allDimensions?: boolean;
   };
 }

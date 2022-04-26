@@ -14,9 +14,10 @@ import {
   EuiComboBoxOptionOption,
   EuiSwitch,
   EuiToolTip,
+  EuiSelect,
 } from '@elastic/eui';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
-import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { buildExpressionFunction, buildExpression } from '@kbn/expressions-plugin/public';
 import { OperationDefinition } from '.';
 import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
 import { IndexPatternField, IndexPattern } from '../../types';
@@ -27,6 +28,7 @@ import {
   getInvalidFieldMessage,
   getSafeName,
   getFilter,
+  isColumnOfType,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
@@ -109,6 +111,7 @@ export interface LastValueIndexPatternColumn extends FieldBasedIndexPatternColum
     showArrayValues: boolean;
     // last value on numeric fields can be formatted
     format?: ValueFormatConfig;
+    aggregate?: string;
   };
 }
 
@@ -214,13 +217,21 @@ export const lastValueOperation: OperationDefinition<
       params: {
         showArrayValues,
         sortField: lastValueParams?.sortField || sortField,
+        aggregate: columnParams?.aggregate
+          ? columnParams.aggregate
+          : previousColumn &&
+            isColumnOfType<LastValueIndexPatternColumn>('last_value', previousColumn)
+          ? previousColumn.params?.aggregate
+          : field?.indices.every((index) => index.time_series_metric)
+          ? 'Sum'
+          : undefined,
         ...getFormatFromPreviousColumn(previousColumn),
       },
     };
   },
   filterable: true,
   shiftable: true,
-  toEsAggsFn: (column, columnId, indexPattern) => {
+  toEsAggsFn: (column, columnId, _indexPattern) => {
     const initialArgs = {
       id: columnId,
       enabled: true,
@@ -233,17 +244,39 @@ export const lastValueOperation: OperationDefinition<
       timeShift: column.filter ? undefined : column.timeShift,
     } as const;
 
-    return (
-      column.params.showArrayValues
-        ? buildExpressionFunction<AggFunctionsMapping['aggTopHit']>('aggTopHit', {
-            ...initialArgs,
-            aggregate: 'concat',
-          })
-        : buildExpressionFunction<AggFunctionsMapping['aggTopMetrics']>(
-            'aggTopMetrics',
-            initialArgs
-          )
-    ).toAst();
+    if (column.params.showArrayValues) {
+      return buildExpressionFunction<AggFunctionsMapping['aggTopHit']>('aggTopHit', {
+        ...initialArgs,
+        aggregate: 'concat',
+      }).toAst();
+    }
+    if (!column.params!.aggregate) {
+      return buildExpressionFunction<AggFunctionsMapping['aggTopMetrics']>(
+        'aggTopMetrics',
+        initialArgs
+      ).toAst();
+    }
+    return buildExpressionFunction(`aggBucket${column.params!.aggregate}`, {
+      id: columnId,
+      enabled: true,
+      schema: 'metric',
+      // time shift is added to wrapping aggFilteredMetric if filter is set
+      timeShift: column.filter ? undefined : column.timeShift,
+      customMetric: buildExpression([
+        buildExpressionFunction<AggFunctionsMapping['aggTopMetrics']>('aggTopMetrics', initialArgs),
+      ]).toAst(),
+      emptyAsNull: column.params?.aggregate === 'Sum' ? true : undefined,
+      customBucket: buildExpression([
+        buildExpressionFunction('aggMultiTerms', {
+          id: `${columnId}-bucket`,
+          enabled: true,
+          schema: 'bucket',
+          fields: _indexPattern.fields
+            .filter((f) => f.indices && f.indices.every((i) => i.time_series_dimension))
+            .map((i) => i.name),
+        }),
+      ]).toAst(),
+    }).toAst();
   },
 
   isTransferable: (column, newIndexPattern) => {
@@ -284,6 +317,9 @@ export const lastValueOperation: OperationDefinition<
 
       updateLayer(updatedLayer);
     };
+    const field = indexPattern.getFieldByName(currentColumn.sourceField);
+    const isTSDB = !field?.indices.every((index) => index.time_series_metric);
+    const isShowAllDimensions = Object.values(layer.columns).some((c) => c.params?.allDimensions);
 
     return (
       <>
@@ -310,10 +346,10 @@ export const lastValueOperation: OperationDefinition<
             aria-label={i18n.translate('xpack.lens.indexPattern.lastValue.sortField', {
               defaultMessage: 'Sort by date field',
             })}
-            options={dateFields?.map((field: IndexPatternField) => {
+            options={dateFields?.map((df: IndexPatternField) => {
               return {
-                value: field.name,
-                label: field.displayName,
+                value: df.name,
+                label: df.displayName,
               };
             })}
             onChange={(choices) => {
@@ -377,6 +413,36 @@ export const lastValueOperation: OperationDefinition<
             />
           </EuiToolTip>
         </EuiFormRow>
+        {isTSDB && (
+          <EuiFormRow
+            label={<>Aggregate individual time series </>}
+            display="rowCompressed"
+            fullWidth
+          >
+            <EuiSelect
+              compressed
+              data-test-subj="indexPattern-terms-orderBy"
+              disabled={isShowAllDimensions}
+              options={[
+                { text: 'sum', value: 'Sum' },
+                { text: 'min', value: 'Min' },
+                { text: 'max', value: 'Max' },
+                { text: 'avg', value: 'Avg' },
+              ]}
+              value={currentColumn.params?.aggregate || 'sum'}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                updateLayer(
+                  updateColumnParam({
+                    layer,
+                    columnId,
+                    paramName: 'aggregate',
+                    value: e.target.value,
+                  })
+                );
+              }}
+            />
+          </EuiFormRow>
+        )}
       </>
     );
   },

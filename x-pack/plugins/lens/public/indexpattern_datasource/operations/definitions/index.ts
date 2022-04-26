@@ -472,6 +472,14 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
     orderedColumnIds: string[]
   ) => ExpressionAstFunction;
   /**
+   * A chain of expression functions which will transform the table
+   */
+  toExpression?: (
+    layer: IndexPatternLayer,
+    columnId: string,
+    indexPattern: IndexPattern
+  ) => ExpressionAstFunction[];
+  /**
    * Validate that the operation has the right preconditions in the state. For example:
    *
    * - Requires a date histogram operation somewhere before it in order

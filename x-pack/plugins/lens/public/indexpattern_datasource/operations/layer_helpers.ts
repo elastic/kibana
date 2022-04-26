@@ -1126,11 +1126,24 @@ function addMetric(
 }
 
 export function getMetricOperationTypes(field: IndexPatternField) {
-  return operationDefinitions.sort(getSortScoreByPriority).filter((definition) => {
-    if (definition.input !== 'field') return;
-    const metadata = definition.getPossibleOperationForField(field);
-    return metadata && !metadata.isBucketed && metadata.dataType === 'number';
-  });
+  return operationDefinitions
+    .sort(getSortScoreByPriority)
+    .filter((definition) => {
+      if (definition.input !== 'field') return;
+      const metadata = definition.getPossibleOperationForField(field);
+      return metadata && !metadata.isBucketed && metadata.dataType === 'number';
+    })
+    .filter((op) =>
+      field.indices.every((i) =>
+        i.time_series_metric === 'counter'
+          ? op.type === 'counter_rate'
+          : !i.allowed_metrics ||
+            i.allowed_metrics.length === 0 ||
+            i.allowed_metrics.includes(
+              op.type === 'average' ? 'sum' : op.type === 'counter_rate' ? 'max' : op.type
+            )
+      )
+    );
 }
 
 export function updateColumnLabel<C extends GenericIndexPatternColumn>({

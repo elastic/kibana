@@ -220,7 +220,8 @@ export function isSortableByColumn(layer: IndexPatternLayer, columnId: string) {
     !column.isBucketed &&
     checkLastValue(column) &&
     !('references' in column) &&
-    !isReferenced(layer, columnId)
+    !isReferenced(layer, columnId) &&
+    !column.params?.aggregate
   );
 }
 

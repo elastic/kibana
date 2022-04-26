@@ -104,6 +104,7 @@ export const getAggTypesFunctions = () => [
   metrics.aggMedian,
   metrics.aggSinglePercentile,
   metrics.aggMin,
+  metrics.aggRate,
   metrics.aggMovingAvg,
   metrics.aggPercentileRanks,
   metrics.aggPercentiles,

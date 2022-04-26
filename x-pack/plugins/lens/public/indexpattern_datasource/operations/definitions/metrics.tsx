@@ -194,11 +194,17 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       if (!field?.indices.every((index) => index.time_series_metric)) {
         return null;
       }
+      const isShowAllDimensions = Object.values(layer.columns).some((c) => c.params?.allDimensions);
       return (
-        <EuiFormRow label={<>Collapse by </>} display="rowCompressed" fullWidth>
+        <EuiFormRow
+          label={<>Aggregate individual time series </>}
+          display="rowCompressed"
+          fullWidth
+        >
           <EuiSelect
             compressed
             data-test-subj="indexPattern-terms-orderBy"
+            disabled={isShowAllDimensions}
             options={[
               { text: 'sum', value: 'Sum' },
               { text: 'min', value: 'Min' },

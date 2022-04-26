@@ -211,7 +211,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       sourceField: field.name,
       isBucketed: true,
       params: {
-        size: previousBucketsLength === 0 ? 5 : DEFAULT_SIZE,
+        size: !existingMetricColumn ? 20 : previousBucketsLength === 0 ? 5 : DEFAULT_SIZE,
         orderBy: existingMetricColumn
           ? {
               type: 'column',
@@ -225,7 +225,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       },
     };
   },
-  toEsAggsFn: (column, columnId, _indexPattern, layer, uiSettings, orderedColumnIds) => {
+  toEsAggsFn: (column, columnId, indexPattern, layer, uiSettings, orderedColumnIds) => {
     if (column.params?.orderBy.type === 'rare') {
       return buildExpressionFunction<AggFunctionsMapping['aggRareTerms']>('aggRareTerms', {
         id: columnId,
@@ -243,12 +243,16 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       ? Math.max(1000, column.params.size * 1.5 + 10)
       : undefined;
 
-    if (column.params?.secondaryFields?.length) {
+    if (column.params?.secondaryFields?.length || column.params?.allDimensions) {
       return buildExpressionFunction<AggFunctionsMapping['aggMultiTerms']>('aggMultiTerms', {
         id: columnId,
         enabled: true,
         schema: 'segment',
-        fields: [column.sourceField, ...column.params.secondaryFields],
+        fields: column.params.allDimensions
+          ? indexPattern.fields
+              .filter((f) => f.indices && f.indices.every((i) => i.time_series_dimension))
+              .map((i) => i.name)
+          : [column.sourceField, ...column.params.secondaryFields!],
         orderBy:
           column.params.orderBy.type === 'alphabetical'
             ? '_key'
@@ -369,6 +373,9 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       groupId,
       incompleteParams,
     } = props;
+    const hasDimensions = indexPattern.fields.some(
+      (f) => f.indices && f.indices.every((i) => i.time_series_dimension)
+    );
     const onFieldSelectChange = useCallback(
       (fields: string[]) => {
         const column = layer.columns[columnId] as TermsIndexPatternColumn;
@@ -461,7 +468,30 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       props.incompleteOperation ||
       (fieldErrorMessage && !selectedColumn.params?.secondaryFields?.length)
     ) {
-      return <FieldInputBase {...props} />;
+      return (
+        <>
+          {hasDimensions && (
+            <EuiFormRow display="rowCompressed" hasChildLabel={false}>
+              <EuiSwitch
+                label="Show all dimensions"
+                checked={currentColumn?.params?.allDimensions}
+                onChange={() => {
+                  updateLayer(
+                    updateColumnParam({
+                      layer,
+                      columnId,
+                      paramName: 'allDimensions',
+                      value: !currentColumn?.params?.allDimensions,
+                    })
+                  );
+                }}
+                compressed
+              />
+            </EuiFormRow>
+          )}
+          {!currentColumn?.params?.allDimensions && <FieldInputBase {...props} />}
+        </>
+      );
     }
 
     const showScriptedFieldError = Boolean(
@@ -470,27 +500,50 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     const { invalidFields } = getFieldsByValidationState(indexPattern, selectedColumn);
 
     return (
-      <EuiFormRow
-        data-test-subj="indexPattern-field-selection-row"
-        label={i18n.translate('xpack.lens.indexPattern.terms.chooseFields', {
-          defaultMessage: '{count, plural, zero {Field} other {Fields}}',
-          values: {
-            count: selectedColumn.params?.secondaryFields?.length || 0,
-          },
-        })}
-        fullWidth
-        isInvalid={Boolean(showScriptedFieldError || invalidFields.length)}
-        error={getInputFieldErrorMessage(showScriptedFieldError, invalidFields)}
-      >
-        <FieldInputs
-          column={selectedColumn}
-          indexPattern={indexPattern}
-          existingFields={existingFields}
-          operationSupportMatrix={operationSupportMatrix}
-          onChange={onFieldSelectChange}
-          invalidFields={invalidFields}
-        />
-      </EuiFormRow>
+      <>
+        {hasDimensions && (
+          <EuiFormRow display="rowCompressed" hasChildLabel={false}>
+            <EuiSwitch
+              label="Show all dimensions"
+              checked={currentColumn?.params?.allDimensions}
+              onChange={() => {
+                updateLayer(
+                  updateColumnParam({
+                    layer,
+                    columnId,
+                    paramName: 'allDimensions',
+                    value: !currentColumn?.params?.allDimensions,
+                  })
+                );
+              }}
+              compressed
+            />
+          </EuiFormRow>
+        )}
+        {!currentColumn.params?.allDimensions && (
+          <EuiFormRow
+            data-test-subj="indexPattern-field-selection-row"
+            label={i18n.translate('xpack.lens.indexPattern.terms.chooseFields', {
+              defaultMessage: '{count, plural, zero {Field} other {Fields}}',
+              values: {
+                count: selectedColumn.params?.secondaryFields?.length || 0,
+              },
+            })}
+            fullWidth
+            isInvalid={Boolean(showScriptedFieldError || invalidFields.length)}
+            error={getInputFieldErrorMessage(showScriptedFieldError, invalidFields)}
+          >
+            <FieldInputs
+              column={selectedColumn}
+              indexPattern={indexPattern}
+              existingFields={existingFields}
+              operationSupportMatrix={operationSupportMatrix}
+              onChange={onFieldSelectChange}
+              invalidFields={invalidFields}
+            />
+          </EuiFormRow>
+        )}
+      </>
     );
   },
   paramEditor: function ParamEditor({ layer, updateLayer, currentColumn, columnId, indexPattern }) {
