@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
   EuiFlexGroup,
@@ -52,6 +53,10 @@ export const DocumentExplorerUpdateCallout = () => {
     updateStoredCalloutState(true, storage);
     setCalloutClosed(true);
   }, [storage]);
+
+  const onTakeTour = useCallback(() => {
+    onCloseCallout();
+  }, [onCloseCallout]);
 
   if (calloutClosed || !capabilities.advancedSettings.save) {
     return null;
@@ -94,17 +99,32 @@ export const DocumentExplorerUpdateCallout = () => {
           }}
         />
       </p>
-      <EuiButton
-        data-test-subj="document-explorer-update-callout-dismiss-button"
-        iconType="check"
-        size="s"
-        onClick={onCloseCallout}
+      <EuiFlexGroup
+        justifyContent="flexStart"
+        alignItems="center"
+        responsive={false}
+        gutterSize="m"
       >
-        <FormattedMessage
-          id="discover.docExplorerUpdateCallout.dismissButtonLabel"
-          defaultMessage="Got it"
-        />
-      </EuiButton>
+        <EuiFlexItem grow={false}>
+          <EuiButton size="s" onClick={onTakeTour}>
+            <FormattedMessage
+              id="discover.docExplorerUpdateCallout.takeTourButtonLabel"
+              defaultMessage="Take a tour"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            onClick={onCloseCallout}
+            data-test-subj="document-explorer-update-callout-dismiss-button"
+          >
+            <FormattedMessage
+              id="discover.docExplorerUpdateCallout.dismissButtonLabel"
+              defaultMessage="Dismiss"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiCallOut>
   );
 };
