@@ -10,10 +10,11 @@ import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition, Render } from '../../../expressions/public';
 import type { Arguments } from '../types';
 import type { RenderValue } from './renderer';
+import { ExpressionValueSearchContext } from '../../../data/common';
 
 type ScriptVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
   'scriptVis',
-  unknown,
+  ExpressionValueSearchContext | null,
   Arguments,
   Render<RenderValue>
 >;
@@ -21,7 +22,7 @@ type ScriptVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
 export const createScriptVisFn = (): ScriptVisExpressionFunctionDefinition => ({
   name: 'scriptVis',
   type: 'render',
-  inputTypes: [],
+  inputTypes: ['kibana_context', 'null'],
   help: i18n.translate('visTypeMarkdown.function.help', {
     defaultMessage: 'Script-based visualization',
   }),
@@ -43,6 +44,11 @@ export const createScriptVisFn = (): ScriptVisExpressionFunctionDefinition => ({
         visType: 'script',
         visParams: {
           script: args.script,
+        },
+        visSearchContext: {
+          timeRange: input?.timeRange,
+          query: input?.query,
+          filter: input?.filters,
         },
       },
     };

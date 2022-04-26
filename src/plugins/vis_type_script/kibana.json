@@ -8,6 +8,6 @@
   "version": "kibana",
   "ui": true,
   "server": false,
-  "requiredPlugins": ["expressions", "visualizations"],
+  "requiredPlugins": ["expressions", "visualizations", "data"],
   "requiredBundles": ["expressions", "visualizations", "visDefaultEditor"]
 }

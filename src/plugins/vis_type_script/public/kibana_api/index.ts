@@ -6,19 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { Filter, Query } from '@kbn/es-query';
-import { TimeRange } from '../../data/common';
-
-export interface Arguments {
-  script: string;
-}
-
-export interface VisParams {
-  script: Arguments['script'];
-}
-
-export interface VisSearchContext {
-  filters?: Filter[];
-  query?: Query | Query[];
-  timeRange?: TimeRange;
-}
+export * from './kibana_api';
