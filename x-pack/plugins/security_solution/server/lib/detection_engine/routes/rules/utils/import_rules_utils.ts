@@ -151,6 +151,8 @@ export const importRules = async ({
                 throttle,
                 version,
                 actions,
+                new_terms_fields: newTermsFields,
+                history_window_start: historyWindowStart,
               } = parsedRule;
 
               try {
@@ -226,6 +228,8 @@ export const importRules = async ({
                     version,
                     exceptionsList: [...exceptions],
                     actions,
+                    newTermsFields,
+                    historyWindowStart,
                   });
                   resolve({
                     rule_id: ruleId,

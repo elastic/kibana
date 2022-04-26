@@ -65,6 +65,8 @@ export const installPrepackagedRules = (
       note,
       version,
       exceptions_list: exceptionsList,
+      new_terms_fields: newTermsFields,
+      history_window_start: historyWindowStart,
     } = rule;
     // TODO: Fix these either with an is conversion or by better typing them within io-ts
     const filters: PartialFilter[] | undefined = filtersObject as PartialFilter[];
@@ -124,6 +126,8 @@ export const installPrepackagedRules = (
         version,
         exceptionsList,
         actions: [], // At this time there is no pre-packaged actions
+        newTermsFields,
+        historyWindowStart,
       }),
     ];
   }, []);

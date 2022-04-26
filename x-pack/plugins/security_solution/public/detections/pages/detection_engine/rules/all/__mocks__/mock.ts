@@ -203,6 +203,8 @@ export const mockDefineStepRule = (): DefineStepRule => ({
       value: '2',
     },
   },
+  newTermsFields: ['host.ip'],
+  historyWindowStart: 'now-7d',
 });
 
 export const mockScheduleStepRule = (): ScheduleStepRule => ({

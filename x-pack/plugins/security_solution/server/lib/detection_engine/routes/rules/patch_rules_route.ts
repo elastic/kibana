@@ -190,6 +190,8 @@ export const patchRulesRoute = (
           machineLearningJobId,
           actions,
           exceptionsList,
+          newTermsFields,
+          historyWindowStart,
         });
         if (rule != null && rule.enabled != null && rule.name != null) {
           const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);

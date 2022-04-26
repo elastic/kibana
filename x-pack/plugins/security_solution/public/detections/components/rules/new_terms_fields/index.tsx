@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { Field, FieldHook } from '../../../../shared_imports';
 import { BrowserFields } from '../../../../common/containers/source';

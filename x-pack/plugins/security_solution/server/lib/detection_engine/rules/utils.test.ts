@@ -91,6 +91,8 @@ describe('utils', () => {
           anomalyThreshold: undefined,
           machineLearningJobId: undefined,
           exceptionsList: [],
+          newTermsFields: undefined,
+          historyWindowStart: undefined,
         })
       ).toEqual(1);
     });
@@ -143,6 +145,8 @@ describe('utils', () => {
           anomalyThreshold: undefined,
           machineLearningJobId: undefined,
           exceptionsList: [],
+          newTermsFields: undefined,
+          historyWindowStart: undefined,
         })
       ).toEqual(2);
     });
@@ -195,6 +199,8 @@ describe('utils', () => {
           anomalyThreshold: undefined,
           machineLearningJobId: undefined,
           exceptionsList: [],
+          newTermsFields: undefined,
+          historyWindowStart: undefined,
         })
       ).toEqual(2);
     });

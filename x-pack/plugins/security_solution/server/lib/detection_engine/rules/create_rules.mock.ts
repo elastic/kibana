@@ -60,6 +60,8 @@ export const getCreateRulesOptionsMock = (isRuleRegistryEnabled: boolean): Creat
   version: 1,
   exceptionsList: [],
   actions: [],
+  newTermsFields: undefined,
+  historyWindowStart: undefined,
 });
 
 export const getCreateMlRulesOptionsMock = (
@@ -116,6 +118,8 @@ export const getCreateMlRulesOptionsMock = (
   version: 1,
   exceptionsList: [],
   actions: [],
+  newTermsFields: undefined,
+  historyWindowStart: undefined,
 });
 
 export const getCreateThreatMatchRulesOptionsMock = (
@@ -182,4 +186,6 @@ export const getCreateThreatMatchRulesOptionsMock = (
   to: 'now',
   type: 'threat_match',
   version: 1,
+  newTermsFields: undefined,
+  historyWindowStart: undefined,
 });
