@@ -136,7 +136,8 @@ async function fetchFieldExistence({
     });
   }
 
-  const metaFields: string[] = await context.core.uiSettings.client.get(UI_SETTINGS.META_FIELDS);
+  const uiSettingsClient = (await context.core).uiSettings.client;
+  const metaFields: string[] = await uiSettingsClient.get(UI_SETTINGS.META_FIELDS);
   const dataView = await dataViewsService.get(indexPatternId);
   const allFields = buildFieldList(dataView, metaFields);
   const existingFieldList = await dataViewsService.getFieldsForIndexPattern(dataView, {
@@ -169,7 +170,8 @@ async function legacyFetchFieldExistenceSampling({
   timeFieldName?: string;
   includeFrozen: boolean;
 }) {
-  const metaFields: string[] = await context.core.uiSettings.client.get(UI_SETTINGS.META_FIELDS);
+  const coreContext = await context.core;
+  const metaFields: string[] = await coreContext.uiSettings.client.get(UI_SETTINGS.META_FIELDS);
   const indexPattern = await dataViewsService.get(indexPatternId);
 
   const fields = buildFieldList(indexPattern, metaFields);
@@ -179,7 +181,7 @@ async function legacyFetchFieldExistenceSampling({
     fromDate,
     toDate,
     dslQuery,
-    client: context.core.elasticsearch.client.asCurrentUser,
+    client: coreContext.elasticsearch.client.asCurrentUser,
     index: indexPattern.title,
     timeFieldName: timeFieldName || indexPattern.timeFieldName,
     fields,
