@@ -638,7 +638,11 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   ]);
 
   return (
-    <EuiContextMenuPanel items={contextMenuItems} data-test-subj="mlAnomaliesListRowActionsMenu" />
+    <EuiContextMenuPanel
+      items={contextMenuItems}
+      watchedItemProps={['disabled']} // Ensures the 'View in Discover' link rerenders when loading completes
+      data-test-subj="mlAnomaliesListRowActionsMenu"
+    />
   );
 };
 
