@@ -119,7 +119,7 @@
           },
           "datafeedsRemoved": {
             "type": "object",
-            "description": "If saved objects exist for datafeeds that no longer exist, they are deleted. This list contains the datafeed identifiers and indicates whether the synchronization was successful.",
+            "description": "If a saved object for an anomaly detection job references a datafeed that no longer exists, it is deleted. This list contains the datafeed identifiers and indicates whether the synchronization was successful.",
             "additionalProperties": {
               "type": "object",
               "properties": {
