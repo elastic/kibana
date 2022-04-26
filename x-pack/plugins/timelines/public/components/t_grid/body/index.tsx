@@ -425,6 +425,36 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       }
     }, [bulkActions]);
 
+    const onCasesAttachToExistingCase = useMemo(() => {
+      if (
+        bulkActions &&
+        bulkActions !== true &&
+        bulkActions.onCasesAttachToExistingCase !== undefined
+      ) {
+        return (eventIds: string[]) => {
+          if (eventIds.length > 0 && bulkActions.onCasesAttachToExistingCase !== undefined) {
+            const items = data.filter((item) => {
+              return eventIds.find((event) => item._id === event);
+            });
+            bulkActions.onCasesAttachToExistingCase(items);
+          }
+        };
+      }
+    }, [bulkActions, data]);
+
+    const onCasesAttachToNewCase = useMemo(() => {
+      if (bulkActions && bulkActions !== true && bulkActions.onCasesAttachToNewCase) {
+        return (eventIds: string[]) => {
+          if (eventIds.length > 0 && bulkActions.onCasesAttachToNewCase !== undefined) {
+            const items = data.filter((item) => {
+              return eventIds.find((event) => item._id === event);
+            });
+            bulkActions.onCasesAttachToNewCase(items);
+          }
+        };
+      }
+    }, [bulkActions, data]);
+
     const showBulkActions = useMemo(() => {
       if (!hasAlertsCrud) {
         return false;
@@ -456,6 +486,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                 indexName={indexNames.join()}
                 onActionSuccess={onAlertStatusActionSuccess}
                 onActionFailure={onAlertStatusActionFailure}
+                onCasesAttachToExistingCase={onCasesAttachToExistingCase}
+                onCasesAttachToNewCase={onCasesAttachToNewCase}
                 refetch={refetch}
               />
             </Suspense>
@@ -470,6 +502,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         indexNames,
         onAlertStatusActionFailure,
         onAlertStatusActionSuccess,
+        onCasesAttachToExistingCase,
+        onCasesAttachToNewCase,
         refetch,
         showBulkActions,
         totalItems,
@@ -495,6 +529,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                     indexName={indexNames.join()}
                     onActionSuccess={onAlertStatusActionSuccess}
                     onActionFailure={onAlertStatusActionFailure}
+                    onCasesAttachToExistingCase={onCasesAttachToExistingCase}
+                    onCasesAttachToNewCase={onCasesAttachToNewCase}
                     refetch={refetch}
                   />
                 </Suspense>

@@ -170,6 +170,7 @@ export const useStatusBulkActionItems = ({
         </EuiContextMenuItem>
       );
     }
+
     if (onCasesAttachToExistingCase) {
       actionItems.push(
         <EuiContextMenuItem

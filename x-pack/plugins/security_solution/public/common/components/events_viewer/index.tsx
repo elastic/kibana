@@ -9,7 +9,7 @@ import React, { useRef, useCallback, useMemo, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
-import type { EntityType } from '@kbn/timelines-plugin/common';
+import type { EntityType, TimelineItem } from '@kbn/timelines-plugin/common';
 import { TGridCellAction } from '@kbn/timelines-plugin/common/types';
 import { inputsModel, State } from '../../store';
 import { inputsActions } from '../../store/actions';
@@ -186,14 +186,24 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
     newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
   };
-  const onAlertStatusActionSuccess = useCallback(() => {
-    if (id === TimelineId.active) {
-      refetchQuery([timelineQuery]);
-    } else {
-      refetchQuery(globalQueries);
-    }
-  }, [id, timelineQuery, globalQueries]);
-  const bulkActions = useMemo(() => ({ onAlertStatusActionSuccess }), [onAlertStatusActionSuccess]);
+  const bulkActions = useMemo(
+    () => ({
+      onAlertStatusActionSuccess: () => {
+        if (id === TimelineId.active) {
+          refetchQuery([timelineQuery]);
+        } else {
+          refetchQuery(globalQueries);
+        }
+      },
+      onCasesAttachToNewCase: (items: TimelineItem[]) => {
+        console.log('new one', items);
+      },
+      onCasesAttachToExistingCase: (items: TimelineItem[]) => {
+        console.log('existing one', items);
+      },
+    }),
+    [globalQueries, id, timelineQuery]
+  );
 
   const fieldBrowserOptions = useFieldBrowserOptions({
     sourcererScope: scopeId,

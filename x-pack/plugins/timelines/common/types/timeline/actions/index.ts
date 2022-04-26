@@ -10,7 +10,7 @@ import { EuiDataGridControlColumn, EuiDataGridCellValueElementProps } from '@ela
 import { OnRowSelected, SortColumnTimeline, TimelineTabs } from '..';
 import { BrowserFields } from '../../../search_strategy/index_fields';
 import { ColumnHeaderOptions } from '../columns';
-import { TimelineNonEcsData } from '../../../search_strategy';
+import { TimelineItem, TimelineNonEcsData } from '../../../search_strategy';
 import { Ecs } from '../../../ecs';
 import { FieldBrowserOptions } from '../../fields_browser';
 
@@ -122,6 +122,8 @@ export interface BulkActionsObjectProp {
   alertStatusActions?: boolean;
   onAlertStatusActionSuccess?: OnUpdateAlertStatusSuccess;
   onAlertStatusActionFailure?: OnUpdateAlertStatusError;
+  onCasesAttachToNewCase?: (items: TimelineItem[]) => void;
+  onCasesAttachToExistingCase?: (items: TimelineItem[]) => void;
 }
 export type BulkActionsProp = boolean | BulkActionsObjectProp;
 
