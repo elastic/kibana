@@ -49,7 +49,6 @@ interface Card {
 
 interface FindingFlyoutProps {
   onClose(): void;
-
   findings: CspFinding;
 }
 
