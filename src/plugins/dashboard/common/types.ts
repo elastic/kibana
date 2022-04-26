@@ -105,3 +105,5 @@ export interface DashboardContainerStateWithType extends EmbeddableStateWithType
   };
   controlGroupInput?: PersistableControlGroupInput;
 }
+
+export type UserContentType = 'dashboard';

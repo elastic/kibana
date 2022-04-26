@@ -91,6 +91,7 @@ export const useDashboardAppState = ({
     scopedHistory,
     spacesService,
     screenshotModeService,
+    userContent,
   } = services;
   const { docTitle } = chrome;
   const { notifications } = core;
@@ -131,6 +132,7 @@ export const useDashboardAppState = ({
       isEmbeddedExternally,
       dashboardCapabilities,
       dispatchDashboardStateChange,
+      userContent,
       $checkForUnsavedChanges: new Subject(),
       $onDashboardStateChange: dashboardAppState.$onDashboardStateChange,
       $triggerDashboardRefresh: dashboardAppState.$triggerDashboardRefresh,
@@ -365,6 +367,7 @@ export const useDashboardAppState = ({
     getStateTransfer,
     savedDashboards,
     usageCollection,
+    userContent,
     scopedHistory,
     notifications,
     dataViews,
