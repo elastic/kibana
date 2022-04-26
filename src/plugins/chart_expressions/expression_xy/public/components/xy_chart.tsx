@@ -180,7 +180,7 @@ export function XYChart({
     filteredLayers.some((layer) => isDataLayer(layer) && layer.splitAccessor);
   const shouldRotate = isHorizontalChart(dataLayers);
 
-  const yAxesConfiguration = getAxesConfiguration(filteredLayers, shouldRotate, formatFactory);
+  const yAxesConfiguration = getAxesConfiguration(dataLayers, shouldRotate, formatFactory);
 
   const xTitle = args.xTitle || (xAxisColumn && xAxisColumn.name);
   const axisTitlesVisibilitySettings = args.axisTitlesVisibilitySettings || {
