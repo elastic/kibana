@@ -39,7 +39,7 @@ export const runTaskFnFactory: RunTaskFnFactory<ImmediateExecuteFn> = function e
       ...immediateJobParams,
     };
 
-    const savedObjectsClient = context.core.savedObjects.client;
+    const savedObjectsClient = (await context.core).savedObjects.client;
     const uiSettings = await reporting.getUiSettingsServiceFactory(savedObjectsClient);
     const dataPluginStart = await reporting.getDataService();
     const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(uiSettings);

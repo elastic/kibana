@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandlerContext, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  IRouter,
+  CustomRequestHandlerContext,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { ITagsClient } from '../common/types';
 import { IAssignmentService } from './services';
 
@@ -48,9 +52,9 @@ export interface SavedObjectTaggingStart {
 /**
  * @internal
  */
-export interface TagsHandlerContext extends RequestHandlerContext {
+export type TagsHandlerContext = CustomRequestHandlerContext<{
   tags: ITagsRequestHandlerContext;
-}
+}>;
 
 /**
  * @internal
