@@ -11,7 +11,7 @@ import { buildMlAuthz } from '../../../machine_learning/authz';
 import {
   getEmptyFindResult,
   getRuleExecutionSummarySucceeded,
-  getAlertMock,
+  getRuleMock,
   getPatchRequest,
   getFindResultWithSingleHit,
   nonRuleFindResult,
@@ -33,10 +33,7 @@ jest.mock('../../rules/utils', () => {
   };
 });
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('patch_rules - %s', (_, isRuleRegistryEnabled) => {
+describe('patch_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
@@ -46,22 +43,16 @@ describe.each([
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
 
-    clients.rulesClient.get.mockResolvedValue(
-      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
-    ); // existing rule
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled)); // existing rule
-    clients.rulesClient.update.mockResolvedValue(
-      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
-    ); // successful update
+    clients.rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams())); // existing rule
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // existing rule
+    clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful update
     clients.ruleExecutionLog.getExecutionSummary.mockResolvedValue(
       getRuleExecutionSummarySucceeded()
     );
 
-    (legacyMigrate as jest.Mock).mockResolvedValue(
-      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
-    );
+    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
-    patchRulesRoute(server.router, ml, isRuleRegistryEnabled);
+    patchRulesRoute(server.router, ml);
   });
 
   describe('status codes', () => {
@@ -88,8 +79,8 @@ describe.each([
     });
 
     test('returns error if requesting a non-rule', async () => {
-      clients.rulesClient.find.mockResolvedValue(nonRuleFindResult(isRuleRegistryEnabled));
       (legacyMigrate as jest.Mock).mockResolvedValue(null);
+      clients.rulesClient.find.mockResolvedValue(nonRuleFindResult());
       const response = await server.inject(
         getPatchRequest(),
         requestContextMock.convertContext(context)

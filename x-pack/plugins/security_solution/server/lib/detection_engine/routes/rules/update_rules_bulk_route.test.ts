@@ -10,7 +10,7 @@ import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../mach
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import {
   getEmptyFindResult,
-  getAlertMock,
+  getRuleMock,
   getFindResultWithSingleHit,
   getUpdateBulkRequest,
   typicalMlRulePayload,
@@ -33,10 +33,7 @@ jest.mock('../../rules/utils', () => {
   };
 });
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('update_rules_bulk - %s', (_, isRuleRegistryEnabled) => {
+describe('update_rules_bulk', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
@@ -47,18 +44,14 @@ describe.each([
     ml = mlServicesMock.createSetupContract();
     const logger = loggingSystemMock.createLogger();
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
-    clients.rulesClient.update.mockResolvedValue(
-      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
-    );
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
     clients.appClient.getSignalsIndex.mockReturnValue('.siem-signals-test-index');
 
-    (legacyMigrate as jest.Mock).mockResolvedValue(
-      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
-    );
+    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
-    updateRulesBulkRoute(server.router, ml, isRuleRegistryEnabled, logger);
+    updateRulesBulkRoute(server.router, ml, logger);
   });
 
   describe('status codes', () => {

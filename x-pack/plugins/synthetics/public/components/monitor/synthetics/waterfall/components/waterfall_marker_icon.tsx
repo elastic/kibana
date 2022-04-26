@@ -16,7 +16,7 @@ export function WaterfallMarkerIcon({ field, label }: { field: string; label: st
   if (!field) {
     return (
       <EuiIcon
-        aria-label={i18n.translate('xpack.uptime.synthetics.markers.noFieldIcon.label', {
+        aria-label={i18n.translate('xpack.synthetics.synthetics.markers.noFieldIcon.label', {
           defaultMessage: 'An icon indicating that this marker has no field associated with it',
         })}
         type="dot"
@@ -34,9 +34,12 @@ export function WaterfallMarkerIcon({ field, label }: { field: string; label: st
       zIndex={100}
       button={
         <EuiButtonIcon
-          aria-label={i18n.translate('xpack.uptime.synthetics.markers.openEmbeddableButton.label', {
-            defaultMessage: 'Use this icon button to show metrics for this annotation marker.',
-          })}
+          aria-label={i18n.translate(
+            'xpack.synthetics.synthetics.markers.openEmbeddableButton.label',
+            {
+              defaultMessage: 'Use this icon button to show metrics for this annotation marker.',
+            }
+          )}
           iconType="dot"
           iconSize="l"
           color="text"

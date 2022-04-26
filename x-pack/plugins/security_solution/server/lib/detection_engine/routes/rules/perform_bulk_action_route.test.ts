@@ -14,7 +14,7 @@ import {
   getBulkActionEditRequest,
   getFindResultWithSingleHit,
   getFindResultWithMultiHits,
-  getAlertMock,
+  getRuleMock,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { performBulkActionRoute } from './perform_bulk_action_route';
@@ -38,27 +38,23 @@ jest.mock('../../rules/utils', () => {
   };
 });
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('perform_bulk_action - %s', (_, isRuleRegistryEnabled) => {
+describe('perform_bulk_action', () => {
   const readRulesMock = readRules as jest.Mock;
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  const mockRule = getFindResultWithSingleHit(isRuleRegistryEnabled).data[0];
+  const mockRule = getFindResultWithSingleHit().data[0];
 
   beforeEach(() => {
     server = serverMock.create();
     logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
-    (legacyMigrate as jest.Mock).mockResolvedValue(
-      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
-    );
-    performBulkActionRoute(server.router, ml, logger, isRuleRegistryEnabled);
+    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
+
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    performBulkActionRoute(server.router, ml, logger);
   });
 
   describe('status codes', () => {

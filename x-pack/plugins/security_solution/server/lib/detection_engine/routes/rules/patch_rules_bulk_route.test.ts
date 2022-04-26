@@ -15,7 +15,7 @@ import {
   getEmptyFindResult,
   getFindResultWithSingleHit,
   getPatchBulkRequest,
-  getAlertMock,
+  getRuleMock,
   typicalMlRulePayload,
 } from '../__mocks__/request_responses';
 import { serverMock, requestContextMock, requestMock } from '../__mocks__';
@@ -35,10 +35,7 @@ jest.mock('../../rules/utils', () => {
   };
 });
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('patch_rules_bulk - %s', (_, isRuleRegistryEnabled) => {
+describe('patch_rules_bulk', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
@@ -49,16 +46,12 @@ describe.each([
     ml = mlServicesMock.createSetupContract();
     const logger = loggingSystemMock.createLogger();
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled)); // rule exists
-    clients.rulesClient.update.mockResolvedValue(
-      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
-    ); // update succeeds
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
+    clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // update succeeds
 
-    (legacyMigrate as jest.Mock).mockResolvedValue(
-      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
-    );
+    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
-    patchRulesBulkRoute(server.router, ml, isRuleRegistryEnabled, logger);
+    patchRulesBulkRoute(server.router, ml, logger);
   });
 
   describe('status codes', () => {
