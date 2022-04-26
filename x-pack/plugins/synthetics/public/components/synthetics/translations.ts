@@ -7,14 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const STEP_NAME_LABEL = i18n.translate('xpack.uptime.stepList.stepName', {
+export const STEP_NAME_LABEL = i18n.translate('xpack.synthetics.stepList.stepName', {
   defaultMessage: 'Step name',
 });
 
-export const COLLAPSE_LABEL = i18n.translate('xpack.uptime.stepList.collapseRow', {
+export const COLLAPSE_LABEL = i18n.translate('xpack.synthetics.stepList.collapseRow', {
   defaultMessage: 'Collapse',
 });
 
-export const EXPAND_LABEL = i18n.translate('xpack.uptime.stepList.expandRow', {
+export const EXPAND_LABEL = i18n.translate('xpack.synthetics.stepList.expandRow', {
   defaultMessage: 'Expand',
 });
