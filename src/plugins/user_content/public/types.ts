@@ -9,7 +9,7 @@ import type { UserContentType as DashboardContentType } from '@kbn/dashboard-plu
 
 import { UserContentService } from './services';
 
-export type ContentType = DashboardContentType;
+export type UserContentType = DashboardContentType;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UserContentPluginSetup {}
