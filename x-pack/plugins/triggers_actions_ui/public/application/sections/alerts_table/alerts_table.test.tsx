@@ -127,7 +127,7 @@ describe('AlertsTable', () => {
             }}
           />
         );
-        userEvent.click(wrapper.queryAllByTestId('openFlyoutButton')[0]);
+        userEvent.click(wrapper.queryByTestId('expandColumnCellOpenFlyoutButton-0')!);
 
         const result = await wrapper.findAllByTestId('alertsFlyout');
         expect(result.length).toBe(1);
@@ -148,7 +148,7 @@ describe('AlertsTable', () => {
       it('should refetch data if flyout pagination exceeds the current page', async () => {
         const wrapper = render(<AlertsTable {...tableProps} />);
 
-        userEvent.click(wrapper.queryAllByTestId('openFlyoutButton')[0]);
+        userEvent.click(wrapper.queryByTestId('expandColumnCellOpenFlyoutButton-0')!);
         const result = await wrapper.findAllByTestId('alertsFlyout');
         expect(result.length).toBe(1);
 
@@ -157,6 +157,44 @@ describe('AlertsTable', () => {
 
         userEvent.click(wrapper.queryAllByTestId('alertsFlyoutPaginatePrevious')[0]);
         expect(fetchAlertsData.onPageChange).toHaveBeenCalledWith({ pageIndex: 0, pageSize: 1 });
+      });
+    });
+
+    describe('leading control columns', () => {
+      it('should return at least the flyout action control', async () => {
+        const wrapper = render(<AlertsTable {...tableProps} />);
+        expect(wrapper.getByTestId('expandColumnHeaderLabel').textContent).toBe('Actions');
+
+        userEvent.click(wrapper.queryByTestId('expandColumnCellOpenFlyoutButton-0')!);
+        expect(wrapper.queryByTestId('expandColumnCellAlertIcon-0')).not.toBeNull();
+      });
+
+      it('should only render an icon for the the active row', async () => {
+        const customTableProps = {
+          ...tableProps,
+          pageSize: 2,
+        };
+        const wrapper = render(<AlertsTable {...customTableProps} />);
+        userEvent.click(wrapper.queryByTestId('expandColumnCellOpenFlyoutButton-1')!);
+        expect(wrapper.queryByTestId('expandColumnCellAlertIcon-0')).toBeNull();
+        expect(wrapper.queryByTestId('expandColumnCellAlertIcon-1')).not.toBeNull();
+      });
+
+      it('should render other leading controls', () => {
+        const customTableProps = {
+          ...tableProps,
+          leadingControlColumns: [
+            {
+              id: 'selection',
+              width: 67,
+              headerCellRender: () => <span data-test-subj="testHeader">Test header</span>,
+              rowCellRender: () => <h2 data-test-subj="testCell">Test cell</h2>,
+            },
+          ],
+        };
+        const wrapper = render(<AlertsTable {...customTableProps} />);
+        expect(wrapper.queryByTestId('testHeader')).not.toBe(null);
+        expect(wrapper.queryByTestId('testCell')).not.toBe(null);
       });
     });
   });

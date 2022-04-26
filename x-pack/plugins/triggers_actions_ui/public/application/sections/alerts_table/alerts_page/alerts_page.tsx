@@ -24,7 +24,6 @@ import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { PLUGIN_ID } from '../../../../common/constants';
 import { AlertsTable } from '../alerts_table';
 import { useKibana } from '../../../../common/lib/kibana';
-// import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { AlertsData, RenderCellValueProps } from '../../../../types';
 
 const consumers = [
@@ -145,7 +144,7 @@ const AlertsPage: React.FunctionComponent = () => {
     pageSizeOptions: [2, 5, 10, 20, 50, 100],
     leadingControlColumns: [],
     renderCellValue: ({ alert, field }: RenderCellValueProps) => {
-      const value = (get(alert, field) ?? [])[0];
+      const value = get(alert, field, [])[0];
       return value ?? 'N/A';
     },
     showCheckboxes,

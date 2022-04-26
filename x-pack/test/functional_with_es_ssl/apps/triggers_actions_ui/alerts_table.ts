@@ -90,7 +90,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('should open a flyout and paginate through the flyout', async () => {
       await PageObjects.common.navigateToUrlWithBrowserHistory('triggersActions', '/alerts');
       await waitTableIsLoaded();
-      await testSubjects.click('openFlyoutButton');
+      await testSubjects.click('expandColumnCellOpenFlyoutButton-0');
       await waitFlyoutOpen();
 
       expect(await testSubjects.getVisibleText('alertsFlyoutTitle')).to.be(
