@@ -61,7 +61,10 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
     return emptyPrompt;
   }
 
-  if (!(permissions.runSavedQueries || permissions.writeLiveQueries)) {
+  if (
+    (!permissions.runSavedQueries || !permissions.readSavedQueries) &&
+    !permissions.writeLiveQueries
+  ) {
     return (
       <EuiEmptyPrompt
         icon={<OsqueryIcon />}
