@@ -19,6 +19,7 @@ import { DashboardGrid } from '../grid';
 import { context } from '../../../services/kibana_react';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 import { withSuspense } from '../../../services/presentation_util';
+import { DashboardTour } from '@kbn/dashboard-plugin/public/dashboard_tour';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;
@@ -66,6 +67,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   public componentDidMount() {
     this.mounted = true;
     this.subscription = this.props.container.getInput$().subscribe(() => {
+      // console.log('subscription fired');
       const { isFullScreenMode, useMargins, title, description, isEmbeddedExternally, panels } =
         this.props.container.getInput();
       if (this.mounted) {

@@ -22,6 +22,7 @@ import { EmbeddableRenderer, ViewMode } from '../services/embeddable';
 import { DashboardTopNav, isCompleteDashboardAppState } from './top_nav/dashboard_top_nav';
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../types';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
+import { DashboardEditTour, DashboardViewTour } from '../tour';
 export interface DashboardAppProps {
   history: History;
   savedDashboardId?: string;
@@ -119,6 +120,11 @@ export function DashboardApp({
     [dashboardAppState]
   );
 
+  const editMode = useMemo(
+    () => dashboardAppState.getLatestDashboardState?.().viewMode === ViewMode.EDIT,
+    [dashboardAppState]
+  );
+
   useEffect(() => {
     if (!embedSettings) chrome.setIsVisible(!printMode);
   }, [chrome, printMode, embedSettings]);
@@ -127,13 +133,19 @@ export function DashboardApp({
     <>
       {isCompleteDashboardAppState(dashboardAppState) && (
         <>
+          {editMode && (
+            <DashboardEditTour
+              panelCount={
+                Object.keys(dashboardAppState.dashboardContainer?.getInput().panels ?? {}).length
+              }
+            />
+          )}
           <DashboardTopNav
             printMode={printMode}
             redirectTo={redirectTo}
             embedSettings={embedSettings}
             dashboardAppState={dashboardAppState}
           />
-
           {dashboardAppState.savedDashboard.outcome === 'conflict' &&
           dashboardAppState.savedDashboard.id &&
           dashboardAppState.savedDashboard.aliasId
