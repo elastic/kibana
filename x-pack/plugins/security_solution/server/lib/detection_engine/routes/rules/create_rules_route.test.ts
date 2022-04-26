@@ -8,13 +8,12 @@
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import {
   getEmptyFindResult,
-  getAlertMock,
+  getRuleMock,
   getCreateRequest,
   getRuleExecutionSummarySucceeded,
   getFindResultWithSingleHit,
   createMlRuleRequest,
   getBasicEmptySearchResponse,
-  getBasicNoShardsSearchResponse,
 } from '../__mocks__/request_responses';
 import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../machine_learning/authz';
@@ -27,10 +26,7 @@ import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('create_rules - %s', (_, isRuleRegistryEnabled) => {
+describe('create_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
@@ -41,9 +37,7 @@ describe.each([
     ml = mlServicesMock.createSetupContract();
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no current rules
-    clients.rulesClient.create.mockResolvedValue(
-      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
-    ); // creation succeeds
+    clients.rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams())); // creation succeeds
     clients.ruleExecutionLog.getExecutionSummary.mockResolvedValue(
       getRuleExecutionSummarySucceeded()
     );
@@ -51,7 +45,7 @@ describe.each([
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
-    createRulesRoute(server.router, ml, isRuleRegistryEnabled);
+    createRulesRoute(server.router, ml);
   });
 
   describe('status codes', () => {
@@ -103,29 +97,8 @@ describe.each([
   });
 
   describe('unhappy paths', () => {
-    test('it returns a 400 if the index does not exist when rule registry not enabled', async () => {
-      context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(
-          getBasicNoShardsSearchResponse()
-        )
-      );
-      const response = await server.inject(
-        getCreateRequest(),
-        requestContextMock.convertContext(context)
-      );
-
-      expect(response.status).toEqual(isRuleRegistryEnabled ? 200 : 400);
-
-      if (!isRuleRegistryEnabled) {
-        expect(response.body).toEqual({
-          message: 'To create a rule, the index must exist first. Index undefined does not exist',
-          status_code: 400,
-        });
-      }
-    });
-
     test('returns a duplicate error if rule_id already exists', async () => {
-      clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+      clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
       const response = await server.inject(
         getCreateRequest(),
         requestContextMock.convertContext(context)
