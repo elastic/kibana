@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode } from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DetailPanelProcess } from '../../types';
@@ -15,7 +15,6 @@ import { DetailPanelListItem } from '../detail_panel_list_item';
 import { dataOrDash } from '../../utils/data_or_dash';
 import { getProcessExecutableCopyText, formatProcessArgs, getIsInterativeString } from './helpers';
 import { useStyles } from './styles';
-import { MAX_EXEC_DETAILSPANEL } from '../../../common/constants';
 
 interface DetailPanelProcessTabDeps {
   processDetail: DetailPanelProcess;
@@ -100,11 +99,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
       },
       {
         title: <DetailPanelListItem>args</DetailPanelListItem>,
-        description: (
-          <DetailPanelCopy textToCopy={leaderArgs}>
-            <span css={styles.description}>{leaderArgs}</span>
-          </DetailPanelCopy>
-        ),
+        description: <DetailPanelCopy textToCopy={leaderArgs}>{leaderArgs}</DetailPanelCopy>,
       },
       {
         title: <DetailPanelListItem>interactive</DetailPanelListItem>,
@@ -138,19 +133,11 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
       },
       {
         title: <DetailPanelListItem>start</DetailPanelListItem>,
-        description: (
-          <DetailPanelCopy textToCopy={start}>
-            <span css={styles.description}>{dataOrDash(start)}</span>
-          </DetailPanelCopy>
-        ),
+        description: <DetailPanelCopy textToCopy={start}>{dataOrDash(start)}</DetailPanelCopy>,
       },
       {
         title: <DetailPanelListItem>end</DetailPanelListItem>,
-        description: (
-          <DetailPanelCopy textToCopy={end ?? ''}>
-            <span css={styles.description}>{dataOrDash(end)}</span>
-          </DetailPanelCopy>
-        ),
+        description: <DetailPanelCopy textToCopy={end ?? ''}>{dataOrDash(end)}</DetailPanelCopy>,
       },
       {
         title: <DetailPanelListItem>exit_code</DetailPanelListItem>,
@@ -165,17 +152,13 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
       {
         title: <DetailPanelListItem>user.name</DetailPanelListItem>,
         description: (
-          <DetailPanelCopy textToCopy={userName}>
-            <span css={styles.description}>{dataOrDash(userName)}</span>
-          </DetailPanelCopy>
+          <DetailPanelCopy textToCopy={userName}>{dataOrDash(userName)}</DetailPanelCopy>
         ),
       },
       {
         title: <DetailPanelListItem>group.name</DetailPanelListItem>,
         description: (
-          <DetailPanelCopy textToCopy={groupName}>
-            <span css={styles.description}>{dataOrDash(groupName)}</span>
-          </DetailPanelCopy>
+          <DetailPanelCopy textToCopy={groupName}>{dataOrDash(groupName)}</DetailPanelCopy>
         ),
       },
     ];
@@ -196,7 +179,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
           title: <DetailPanelListItem>entry_meta.source.ip</DetailPanelListItem>,
           description: (
             <DetailPanelCopy textToCopy={entryMetaSourceIp}>
-              <span css={styles.description}>{dataOrDash(entryMetaSourceIp)}</span>
+              {dataOrDash(entryMetaSourceIp)}
             </DetailPanelCopy>
           ),
         }
@@ -227,11 +210,6 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
   const isInteractive = getIsInterativeString(tty);
   const processArgs = formatProcessArgs(args);
 
-  const [showAll, setShowAll] = useState(false);
-  const toggleShowAll = () => {
-    setShowAll(!showAll);
-  };
-
   return (
     <>
       <DetailPanelDescriptionList
@@ -248,11 +226,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
           },
           {
             title: <DetailPanelListItem>args</DetailPanelListItem>,
-            description: (
-              <DetailPanelCopy textToCopy={processArgs}>
-                <span css={styles.description}>{processArgs}</span>
-              </DetailPanelCopy>
-            ),
+            description: <DetailPanelCopy textToCopy={processArgs}>{processArgs}</DetailPanelCopy>,
           },
           {
             title: <DetailPanelListItem>executable</DetailPanelListItem>,
@@ -261,26 +235,19 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
                 textToCopy={getProcessExecutableCopyText(executable)}
                 display="block"
               >
-                {executable
-                  .slice(0, showAll ? executable.length : MAX_EXEC_DETAILSPANEL)
-                  .map((execTuple, idx) => {
-                    const [exec, eventAction] = execTuple;
-                    return (
-                      <div key={`executable-${idx}`} css={styles.description}>
-                        <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                          {dataOrDash(exec)}
-                        </EuiTextColor>
-                        <EuiTextColor color="subdued" css={styles.executableAction}>
-                          {eventAction}
-                        </EuiTextColor>
-                      </div>
-                    );
-                  })}
-                {executable.length > MAX_EXEC_DETAILSPANEL && (
-                  <button onClick={toggleShowAll} css={styles.showMore}>
-                    {!showAll ? 'Show more' : 'Show Less'}
-                  </button>
-                )}
+                {executable.map((execTuple, idx) => {
+                  const [exec, eventAction] = execTuple;
+                  return (
+                    <div key={`executable-${idx}`} css={styles.ellipsis}>
+                      <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+                        {dataOrDash(exec)}
+                      </EuiTextColor>
+                      <EuiTextColor color="subdued" css={styles.executableAction}>
+                        {eventAction}
+                      </EuiTextColor>
+                    </div>
+                  );
+                })}
               </DetailPanelCopy>
             ),
           },
@@ -316,19 +283,11 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
           },
           {
             title: <DetailPanelListItem>start</DetailPanelListItem>,
-            description: (
-              <DetailPanelCopy textToCopy={start}>
-                <span css={styles.description}>{dataOrDash(start)}</span>
-              </DetailPanelCopy>
-            ),
+            description: <DetailPanelCopy textToCopy={start}>{dataOrDash(start)}</DetailPanelCopy>,
           },
           {
             title: <DetailPanelListItem>end</DetailPanelListItem>,
-            description: (
-              <DetailPanelCopy textToCopy={end}>
-                <span css={styles.description}>{dataOrDash(end)}</span>
-              </DetailPanelCopy>
-            ),
+            description: <DetailPanelCopy textToCopy={end}>{dataOrDash(end)}</DetailPanelCopy>,
           },
           {
             title: <DetailPanelListItem>exit_code</DetailPanelListItem>,
@@ -343,17 +302,13 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
           {
             title: <DetailPanelListItem>user.name</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={userName}>
-                <span css={styles.description}>{dataOrDash(userName)}</span>
-              </DetailPanelCopy>
+              <DetailPanelCopy textToCopy={userName}>{dataOrDash(userName)}</DetailPanelCopy>
             ),
           },
           {
             title: <DetailPanelListItem>group.name</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={groupName}>
-                <span css={styles.description}>{dataOrDash(groupName)}</span>
-              </DetailPanelCopy>
+              <DetailPanelCopy textToCopy={groupName}>{dataOrDash(groupName)}</DetailPanelCopy>
             ),
           },
         ]}
