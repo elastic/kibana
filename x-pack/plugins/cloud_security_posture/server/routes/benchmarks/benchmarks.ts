@@ -93,11 +93,12 @@ const addRunningAgentToAgentPolicy = async (
   );
 };
 
-const addPackagePolicyCspRules = async (
+export const addPackagePolicyCspRules = async (
   soClient: SavedObjectsClientContract,
   packagePolicy: PackagePolicy
 ): Promise<CspRulesStatus> => {
   const rules = await getCspRules(soClient, packagePolicy);
+
   const activatedRules = rules.saved_objects.filter((cspRule) => cspRule.attributes.enabled);
   const packagePolicyRules = {
     all: rules.total,

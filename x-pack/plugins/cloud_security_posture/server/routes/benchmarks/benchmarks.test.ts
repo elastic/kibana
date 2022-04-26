@@ -26,6 +26,7 @@ import {
   getCspPackagePolicies,
   getAgentPolicies,
   createBenchmarkEntry,
+  addPackagePolicyCspRules,
 } from './benchmarks';
 
 import { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
@@ -319,6 +320,46 @@ describe('benchmarks API', () => {
         await getAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);
 
         expect(agentPolicyService.getByIds.mock.calls[0][1]).toHaveLength(2);
+      });
+    });
+
+    describe('test addPackagePolicyCspRules', () => {
+      it('should filter enabled rules', async () => {
+        const packagePolicy = createPackagePolicyMock();
+        mockSoClient.find.mockResolvedValueOnce({
+          total: 3,
+          saved_objects: [
+            {
+              type: 'csp_rule',
+              attributes: {
+                enabled: true,
+                rego_rule_id: 'cis_1_1_1',
+              },
+            },
+            {
+              type: 'csp_rule',
+              attributes: {
+                enabled: true,
+                rego_rule_id: 'cis_1_1_2',
+              },
+            },
+            {
+              type: 'csp_rule',
+              attributes: {
+                enabled: false,
+                rego_rule_id: 'cis_1_1_3',
+              },
+            },
+          ],
+        } as unknown as SavedObjectsFindResponse);
+
+        const cspRulesStatus = await addPackagePolicyCspRules(mockSoClient, packagePolicy);
+
+        expect(cspRulesStatus).toEqual({
+          all: 3,
+          enabled: 2,
+          disabled: 1,
+        });
       });
     });
 
