@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { CloudInstructions } from './fleet_server_cloud_instructions';
-export { EnrollmentRecommendation } from './enrollment_recommendation';
+export * from './install_command_utils';
