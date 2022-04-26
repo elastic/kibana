@@ -103,7 +103,6 @@ export interface DataLayerArgs {
   yScaleType: YScaleType;
   xScaleType: XScaleType;
   isHistogram: boolean;
-  // palette will always be set on the expression
   palette: PaletteOutput;
   yConfig?: YConfigResult[];
 }
@@ -123,9 +122,7 @@ export interface ExtendedDataLayerArgs {
   yScaleType: YScaleType;
   xScaleType: XScaleType;
   isHistogram: boolean;
-  // palette will always be set on the expression
   palette: PaletteOutput;
-  // palette will always be set on the expression
   yConfig?: YConfigResult[];
   table?: Datatable;
 }
