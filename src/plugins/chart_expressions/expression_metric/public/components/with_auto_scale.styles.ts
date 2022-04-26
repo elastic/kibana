@@ -15,6 +15,6 @@ export const autoScaleWrapperStyle = css({
   alignItems: 'center',
   maxWidth: '100%',
   maxHeight: '100%',
-  overflow: 'hidden',
+  overflow: 'visible',
   lineHeight: euiThemeVars.euiLineHeight,
 });

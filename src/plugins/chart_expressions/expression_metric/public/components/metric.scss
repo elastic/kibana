@@ -14,11 +14,13 @@
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
-  overflow: auto;
+  // overflow: auto;
+  overflow: hidden;
 }
 
 .mtrVis__value {
   @include euiTextTruncate;
+  overflow: visible !important;
   font-weight: $euiFontWeightBold;
 }
 
