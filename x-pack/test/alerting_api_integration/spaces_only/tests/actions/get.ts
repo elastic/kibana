@@ -40,6 +40,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
         .expect(200, {
           id: createdAction.id,
           is_preconfigured: false,
+          is_deprecated: false,
           is_missing_secrets: false,
           connector_type_id: 'test.index-record',
           name: 'My action',
@@ -81,8 +82,21 @@ export default function getActionTests({ getService }: FtrProviderContext) {
         .expect(200, {
           id: 'my-slack1',
           is_preconfigured: true,
+          is_deprecated: false,
           connector_type_id: '.slack',
           name: 'Slack#xyz',
+        });
+    });
+
+    it('should handle get action request for deprecated connectors from preconfigured list', async () => {
+      await supertest
+        .get(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/my-deprecated-servicenow`)
+        .expect(200, {
+          id: 'my-deprecated-servicenow',
+          is_preconfigured: true,
+          is_deprecated: true,
+          connector_type_id: '.servicenow',
+          name: 'ServiceNow#xyz',
         });
     });
 
@@ -109,6 +123,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
           .expect(200, {
             id: createdAction.id,
             isPreconfigured: false,
+            isDeprecated: false,
             actionTypeId: 'test.index-record',
             isMissingSecrets: false,
             name: 'My action',
@@ -150,6 +165,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
           .expect(200, {
             id: 'my-slack1',
             isPreconfigured: true,
+            isDeprecated: false,
             actionTypeId: '.slack',
             name: 'Slack#xyz',
           });

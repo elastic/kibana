@@ -102,7 +102,7 @@ export const useSettingsErrors = (
 };
 
 const REQUIRED_EMAIL = i18n.translate(
-  'xpack.uptime.sourceConfiguration.alertDefaultForm.requiredEmail',
+  'xpack.synthetics.sourceConfiguration.alertDefaultForm.requiredEmail',
   {
     defaultMessage: 'To email is required for email connector',
   }
@@ -119,7 +119,7 @@ const getInvalidEmailError = (value?: string[]) => {
     return;
   }
 
-  return i18n.translate('xpack.uptime.sourceConfiguration.alertDefaultForm.invalidEmail', {
+  return i18n.translate('xpack.synthetics.sourceConfiguration.alertDefaultForm.invalidEmail', {
     defaultMessage: '{val} is not a valid email.',
     values: { val: inValidEmail },
   });
