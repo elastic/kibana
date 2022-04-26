@@ -10,7 +10,9 @@ import React from 'react';
 import { createEndpoint, fromIframe } from '@remote-ui/rpc';
 
 import './index.scss';
-import { VisTypeScriptKibanaApi } from '../kibana_api';
+import type { SearchResponse, AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchRequest } from 'src/plugins/data/common';
+import { SearchOptions, VisTypeScriptKibanaApi } from '../kibana_api';
 
 export const KIBANA_API_CONSTANT_NAME = 'KIBANA_API';
 
@@ -32,17 +34,43 @@ const getSandboxDocument = (script: string) => {
 
           const endpoint = createEndpoint(fromInsideIframe());
 
+          const defer = () => {
+            const ret = {};
+
+            ret.promise = new Promise((resolve, reject) => {
+              ret.resolve = resolve;
+              ret.reject = reject;
+            });
+
+            return ret;
+          }
+
+          const searchDeferrals = {};
+          let searchCounter = 0;
+
+          endpoint.expose({
+            onSearchResult: (searchId, result) => {
+              searchDeferrals[searchId].resolve(result);
+            }
+          });
+
           const ${KIBANA_API_CONSTANT_NAME} = {
             searchEs: (payload, options) => {
-              console.log('Calling search inside an iframe')
-              return endpoint.call.esSearch(payload, options);
+              const searchId = searchCounter;
+              searchCounter++;
+
+              searchDeferrals[searchId] = defer();
+              
+              endpoint.call.esSearch(searchId, payload, options);
+
+              return searchDeferrals[searchId].promise;
             }
           }
 
           window.${KIBANA_API_CONSTANT_NAME} = ${KIBANA_API_CONSTANT_NAME};
         </script>
 
-        <script nonce="${nonce}">window.addEventListener('load', () => {${script}})</script>
+        <script nonce="${nonce}">window.addEventListener('load', async () => {${script}})</script>
       </head>
       <body></body>
     <html>
@@ -64,11 +92,17 @@ export const ScriptRenderer: React.FunctionComponent<{
   React.useEffect(() => {
     if (!iframeRef.current) throw new Error('Iframe init error');
     const iframeEl = iframeRef.current;
-    const endpoint = createEndpoint(fromIframe(iframeEl, { terminate: false }));
+    const endpoint = createEndpoint<{
+      onSearchResult: (
+        searchId: number,
+        result: SearchResponse<unknown, Record<string, AggregationsAggregate>>
+      ) => {};
+    }>(fromIframe(iframeEl, { terminate: false }));
 
     endpoint.expose({
-      esSearch: (payload, options) => {
-        return kibanaApi.esSearch(payload, options);
+      esSearch: async (searchId: number, payload: SearchRequest, options?: SearchOptions) => {
+        const searchResult = await kibanaApi.esSearch(payload, options);
+        endpoint.call.onSearchResult(searchId, searchResult);
       },
     });
 
