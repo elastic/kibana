@@ -14,7 +14,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
       this.tags('ciGroup11');
 
       loadTestFile(require.resolve('./aliases'));
-      loadTestFile(require.resolve('./create_endpoint_exceptions'));
       loadTestFile(require.resolve('./add_actions'));
       loadTestFile(require.resolve('./update_actions'));
       loadTestFile(require.resolve('./add_prepackaged_rules'));
@@ -52,6 +51,12 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
       loadTestFile(require.resolve('./throttle'));
       loadTestFile(require.resolve('./ignore_fields'));
       loadTestFile(require.resolve('./migrations'));
+    });
+
+    describe('', function () {
+      this.tags('ciGroup26');
+
+      loadTestFile(require.resolve('./create_endpoint_exceptions'));
     });
 
     describe('', function () {
