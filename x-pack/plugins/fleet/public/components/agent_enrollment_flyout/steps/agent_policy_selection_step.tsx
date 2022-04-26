@@ -40,7 +40,7 @@ export const AgentPolicySelectionStep = ({
       <>
         <SelectCreateAgentPolicy
           agentPolicies={agentPolicies}
-          selectedPolicy={selectedPolicy}
+          selectedPolicyId={selectedPolicy?.id}
           setSelectedPolicyId={setSelectedPolicyId}
           withKeySelection={setSelectedAPIKeyId ? true : false}
           selectedApiKeyId={selectedApiKeyId}

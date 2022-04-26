@@ -14,7 +14,7 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 import type { GetOneEnrollmentAPIKeyResponse } from '../../../../common/types/rest_spec/enrollment_api_key';
 
 import { InstallSection } from '../../enrollment_instructions/install_section';
-import type { CommandsByPlatform } from '../../../applications/fleet/sections/agents/agent_requirements_page/components/install_command_utils';
+import type { CommandsByPlatform } from '../../../applications/fleet/components/fleet_server_instructions/utils/install_command_utils';
 
 import type { K8sMode } from '../types';
 

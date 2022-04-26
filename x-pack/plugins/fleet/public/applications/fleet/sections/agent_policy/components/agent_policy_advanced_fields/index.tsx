@@ -28,10 +28,10 @@ import { useStartServices } from '../../../../hooks';
 
 import { AgentPolicyPackageBadge } from '../../../../components';
 
-import { policyHasFleetServer } from '../../../agents/services/has_fleet_server';
-
 import { AgentPolicyDeleteProvider } from '../agent_policy_delete_provider';
 import type { ValidationResults } from '../agent_policy_validation';
+
+import { policyHasFleetServer } from '../../../../services';
 
 import { useOutputOptions, DEFAULT_OUTPUT_VALUE } from './hooks';
 

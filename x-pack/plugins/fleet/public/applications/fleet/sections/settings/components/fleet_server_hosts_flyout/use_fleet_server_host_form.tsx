@@ -15,7 +15,7 @@ import { isDiffPathProtocol } from '../../../../../../../common';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
 import { getAgentAndPolicyCount } from '../../services/agent_and_policies_count';
 
-const URL_REGEX = /^(https?):\/\/[^\s$.?#].[^\s]*$/gm;
+const URL_REGEX = /^(https):\/\/[^\s$.?#].[^\s]*$/gm;
 
 const ConfirmTitle = () => (
   <FormattedMessage

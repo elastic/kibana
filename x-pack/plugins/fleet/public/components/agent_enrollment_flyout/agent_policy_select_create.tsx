@@ -20,7 +20,7 @@ import { AgentPolicySelection } from '.';
 
 interface Props {
   agentPolicies: AgentPolicy[];
-  selectedPolicy?: AgentPolicy;
+  selectedPolicyId?: string;
   setSelectedPolicyId: (agentPolicyId?: string) => void;
   excludeFleetServer?: boolean;
   withKeySelection: boolean;
@@ -34,7 +34,7 @@ export const SelectCreateAgentPolicy: React.FC<Props> = ({
   agentPolicies,
   excludeFleetServer,
   setSelectedPolicyId,
-  selectedPolicy,
+  selectedPolicyId,
   withKeySelection,
   selectedApiKeyId,
   onKeyChange,
@@ -111,7 +111,7 @@ export const SelectCreateAgentPolicy: React.FC<Props> = ({
           onKeyChange={onKeyChange}
           excludeFleetServer={excludeFleetServer}
           onClickCreatePolicy={onClickCreatePolicy}
-          selectedPolicy={selectedPolicy}
+          selectedPolicyId={selectedPolicyId}
           setSelectedPolicyId={setSelectedPolicyId}
           isFleetServerPolicy={isFleetServerPolicy}
         />

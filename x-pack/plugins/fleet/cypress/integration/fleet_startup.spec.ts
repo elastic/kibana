@@ -77,12 +77,15 @@ describe('Fleet startup', () => {
     });
 
     it('should create Fleet Server policy', () => {
+      cy.getBySel('fleetServerFlyoutTab-advanced').click();
       cy.getBySel('createFleetServerPolicyBtn').click();
 
       // verify policy is created and has fleet server and system package
       verifyPolicy('Fleet Server policy 1', ['Fleet Server', 'System']);
 
       navigateToTab(AGENTS_TAB);
+      cy.getBySel('fleetServerFlyoutTab-advanced').click();
+
       // verify create button changed to dropdown
       cy.getBySel('agentPolicyDropdown');
 

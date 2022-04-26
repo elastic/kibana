@@ -25,8 +25,7 @@ import {
   useFleetStatus,
 } from '../../hooks';
 
-import { useFleetServerInstructions } from '../../applications/fleet/sections/agents/agent_requirements_page/components';
-
+import { useAdvancedForm } from '../../applications/fleet/components/fleet_server_instructions/hooks';
 import { useFleetServerUnhealthy } from '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy';
 
 import type { FlyOutProps } from './types';
@@ -44,8 +43,8 @@ const TestComponent = (props: FlyOutProps) => (
   </KibanaContextProvider>
 );
 
-const setup = async (props?: FlyOutProps) => {
-  const testBed = await registerTestBed(TestComponent)(props);
+const setup = (props?: FlyOutProps) => {
+  const testBed = registerTestBed(TestComponent)(props);
   const { find, component } = testBed;
 
   return {
@@ -78,7 +77,7 @@ const testAgentPolicy: AgentPolicy = {
 describe('<AgentEnrollmentFlyout />', () => {
   let testBed: TestBed;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     (useGetSettings as jest.Mock).mockReturnValue({
       data: { item: { fleet_server_hosts: ['test'] } },
     });
@@ -93,13 +92,24 @@ describe('<AgentEnrollmentFlyout />', () => {
       data: { item: { package_policies: [] } },
     });
 
-    (useFleetServerInstructions as jest.Mock).mockReturnValue({
+    (useAdvancedForm as jest.Mock).mockReturnValue({
+      eligibleFleetServerPolicies: [{ name: 'test', id: 'test' }],
+      refreshEligibleFleetServerPolicies: jest.fn(),
+      fleetServerPolicyId: 'test',
+      setFleetServerPolicyId: jest.fn(),
+      isFleetServerReady: true,
       serviceToken: 'test',
-      getServiceToken: jest.fn(),
       isLoadingServiceToken: false,
-      installCommand: jest.fn(),
-      platform: 'test',
-      setPlatform: jest.fn(),
+      generateServiceToken: jest.fn(),
+      fleetServerHostForm: {
+        saveFleetServerHost: jest.fn(),
+        fleetServerHost: 'https://test.server:8220',
+        setFleetServerHost: jest.fn(),
+        error: '',
+        validateFleetServerHost: jest.fn(),
+      },
+      deploymentMode: 'quickstart',
+      setDeploymentMode: jest.fn(),
     });
 
     (useGetAgents as jest.Mock).mockReturnValue({
@@ -111,8 +121,8 @@ describe('<AgentEnrollmentFlyout />', () => {
       refreshAgentPolicies: jest.fn(),
     });
 
-    await act(async () => {
-      testBed = await setup({
+    act(() => {
+      testBed = setup({
         onClose: jest.fn(),
       });
       testBed.component.update();
@@ -123,15 +133,15 @@ describe('<AgentEnrollmentFlyout />', () => {
     jest.clearAllMocks();
   });
 
-  it('should show loading when agent policies are loading', async () => {
+  it('should show loading when agent policies are loading', () => {
     (useAgentEnrollmentFlyoutData as jest.Mock).mockReturnValue?.({
       agentPolicies: [],
       refreshAgentPolicies: jest.fn(),
       isLoadingInitialAgentPolicies: true,
     });
 
-    await act(async () => {
-      testBed = await setup({
+    act(() => {
+      testBed = setup({
         onClose: jest.fn(),
       });
       testBed.component.update();
@@ -143,7 +153,7 @@ describe('<AgentEnrollmentFlyout />', () => {
   });
 
   describe('managed instructions', () => {
-    it('uses the agent policy selection step', async () => {
+    it('uses the agent policy selection step', () => {
       const { exists } = testBed;
 
       expect(exists('agentEnrollmentFlyout')).toBe(true);
@@ -152,10 +162,10 @@ describe('<AgentEnrollmentFlyout />', () => {
     });
 
     describe('with a specific policy', () => {
-      beforeEach(async () => {
+      beforeEach(() => {
         jest.clearAllMocks();
-        await act(async () => {
-          testBed = await setup({
+        act(() => {
+          testBed = setup({
             agentPolicy: testAgentPolicy,
             onClose: jest.fn(),
           });
@@ -172,10 +182,10 @@ describe('<AgentEnrollmentFlyout />', () => {
     });
 
     describe('with a specific policy when no agentPolicies set', () => {
-      beforeEach(async () => {
+      beforeEach(() => {
         jest.clearAllMocks();
-        await act(async () => {
-          testBed = await setup({
+        act(() => {
+          testBed = setup({
             agentPolicy: testAgentPolicy,
             onClose: jest.fn(),
           });
@@ -189,41 +199,41 @@ describe('<AgentEnrollmentFlyout />', () => {
         expect(exists('agent-enrollment-key-selection-step')).toBe(true);
       });
     });
-  });
 
-  // Skipped due to UI changing in https://github.com/elastic/kibana/issues/125534. These tests should be rethought overall
-  // to provide value around the new flyout structure
-  describe.skip('standalone instructions', () => {
-    it('uses the agent policy selection step', async () => {
-      const { exists, actions } = testBed;
-      actions.goToStandaloneTab();
-
-      expect(exists('agentEnrollmentFlyout')).toBe(true);
-      expect(exists('agent-policy-selection-step')).toBe(true);
-      expect(exists('agent-enrollment-key-selection-step')).toBe(false);
-    });
-
-    describe('with a specific policy', () => {
-      beforeEach(async () => {
-        jest.clearAllMocks();
-        await act(async () => {
-          testBed = await setup({
-            agentPolicy: testAgentPolicy,
-            onClose: jest.fn(),
-          });
-          testBed.component.update();
-        });
-      });
-
-      it('does not use either of the agent policy selection or enrollment key steps', () => {
+    // Skipped due to UI changing in https://github.com/elastic/kibana/issues/125534. These tests should be rethought overall
+    // to provide value around the new flyout structure
+    describe.skip('standalone instructions', () => {
+      it('uses the agent policy selection step', async () => {
         const { exists, actions } = testBed;
-        jest.clearAllMocks();
-
         actions.goToStandaloneTab();
 
         expect(exists('agentEnrollmentFlyout')).toBe(true);
-        expect(exists('agent-policy-selection-step')).toBe(false);
+        expect(exists('agent-policy-selection-step')).toBe(true);
         expect(exists('agent-enrollment-key-selection-step')).toBe(false);
+      });
+
+      describe('with a specific policy', () => {
+        beforeEach(() => {
+          jest.clearAllMocks();
+          act(() => {
+            testBed = setup({
+              agentPolicy: testAgentPolicy,
+              onClose: jest.fn(),
+            });
+            testBed.component.update();
+          });
+        });
+
+        it('does not use either of the agent policy selection or enrollment key steps', () => {
+          const { exists, actions } = testBed;
+          jest.clearAllMocks();
+
+          actions.goToStandaloneTab();
+
+          expect(exists('agentEnrollmentFlyout')).toBe(true);
+          expect(exists('agent-policy-selection-step')).toBe(false);
+          expect(exists('agent-enrollment-key-selection-step')).toBe(false);
+        });
       });
     });
   });
