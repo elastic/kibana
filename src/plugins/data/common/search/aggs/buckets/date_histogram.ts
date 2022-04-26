@@ -218,10 +218,9 @@ export const getDateHistogramBucketAgg = ({
             return;
           }
 
-          const shouldForceFixedInterval = agg
-            .getIndexPattern()
-            ?.getFieldByName(agg.params.field)
-            ?.indices.some((index) => index.fixed_interval);
+          const shouldForceFixedInterval = agg.params.field?.indices.some(
+            (index) => index.fixed_interval
+          );
           if (shouldForceFixedInterval) {
             output.params.fixed_interval = interval.expression;
           } else {
