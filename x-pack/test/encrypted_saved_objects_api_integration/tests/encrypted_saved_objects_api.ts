@@ -454,7 +454,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       expect(decryptedResponse.saved_objects[0].error.message).to.be(
-        'Decryption error: "Unable to decrypt attribute "privateProperty""'
+        'Unable to decrypt attribute "privateProperty"'
       );
 
       expect(decryptedResponse.saved_objects[0].attributes).to.eql({
