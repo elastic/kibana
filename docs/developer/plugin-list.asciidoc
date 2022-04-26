@@ -329,6 +329,10 @@ The plugin exposes the static DefaultEditorController class to consume.
 |WARNING: Missing README.
 
 
+|{kib-repo}blob/{branch}/src/plugins/vis_type_script/README.md[visTypeScript]
+|This plugin defines the script-based visualization type. Users can use JavaScript and the popular D3 library to build script-based custom visualizations directly in Kibana.
+
+
 |{kib-repo}blob/{branch}/src/plugins/vis_types/table/README.md[visTypeTable]
 |Contains the data table visualization, that allows presenting data in a simple table format.
 
