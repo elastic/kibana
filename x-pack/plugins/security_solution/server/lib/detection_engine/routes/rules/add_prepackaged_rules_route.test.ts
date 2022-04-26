@@ -101,7 +101,7 @@ describe('add_prepackaged_rules_route', () => {
       errors: [],
     });
 
-    (legacyMigrate as jest.Mock).mockResolvedValue(getAlertMock(true, getQueryRuleParams()));
+    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(true, getQueryRuleParams()));
 
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
