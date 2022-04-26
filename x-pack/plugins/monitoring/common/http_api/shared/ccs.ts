@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { INTERNAL_IMMUTABLE_KEY } from '../../../../common/constants';
+import * as rt from 'io-ts';
 
-export const isElasticRule = (tags: string[] = []) =>
-  tags.includes(`${INTERNAL_IMMUTABLE_KEY}:true`);
+export const ccsRT = rt.string;
