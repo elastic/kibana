@@ -14,6 +14,8 @@ import { CodeEditor } from '../../../../kibana_react/public';
 import type { VisEditorOptionsProps } from '../../../../visualizations/public';
 import type { VisParams } from '../../types';
 
+import './script.scss';
+
 function ScriptOptions({ stateParams, setValue }: VisEditorOptionsProps<VisParams>) {
   const onScriptUpdate = useCallback((value: string) => setValue('script', value), [setValue]);
 
