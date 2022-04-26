@@ -183,12 +183,13 @@ function transformRoleApplicationsToKibanaPrivileges(
     };
   }
 
+  // TODO package resource can appear in multiple entries, and that is not invalid (all spaces and specific spaces)
   // if we have resources duplicated in entries, we won't transform these
-  if (allResources.length !== getUniqueList(allResources).length) {
-    return {
-      success: false,
-    };
-  }
+  // if (allResources.length !== getUniqueList(allResources).length) {
+  //   return {
+  //     success: false,
+  //   };
+  // }
 
   // if a feature privilege requires all spaces, but is assigned to other spaces, we won't transform these
   if (

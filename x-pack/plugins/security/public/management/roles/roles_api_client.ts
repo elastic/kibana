@@ -48,6 +48,7 @@ export class RolesAPIClient {
       if (kibanaPrivilege.base.length > 0) {
         kibanaPrivilege.feature = {};
       }
+      // TODO remove, for testing - packages will come from roles UI
       if (kibanaPrivilege.feature!.integrations) kibanaPrivilege.packages = ['endpoint'];
       else kibanaPrivilege.packages = [];
 
