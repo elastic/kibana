@@ -480,6 +480,7 @@ export default function ({ getService }: FtrProviderContext) {
         `${getURLAPIBaseURL()}create-point-in-time-finder-decrypted-as-internal-user?type=${encryptedSavedObjectType}`
       );
 
+      expect(decryptedResponse.saved_objects[0].error).to.be(undefined);
       expect(decryptedResponse.saved_objects[0].attributes).to.eql({
         ...savedObjectOriginalAttributes,
         publicPropertyExcludedFromAAD: updatedAttributes.publicPropertyExcludedFromAAD,
