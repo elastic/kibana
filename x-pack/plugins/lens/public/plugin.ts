@@ -240,6 +240,7 @@ export class LensPlugin {
       usageCollection,
     }: LensPluginSetupDependencies
   ) {
+    console.log(core.injectedMetadata.getCsp().nonce);
     const startServices = createStartServicesGetter(core.getStartServices);
 
     const getStartServices = async (): Promise<LensEmbeddableStartServices> => {

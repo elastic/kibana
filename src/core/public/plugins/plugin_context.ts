@@ -95,6 +95,7 @@ export function createPluginSetupContext<
     uiSettings: deps.uiSettings,
     injectedMetadata: {
       getInjectedVar: deps.injectedMetadata.getInjectedVar,
+      getCsp: deps.injectedMetadata.getCspConfig,
     },
     theme: deps.theme,
     getStartServices: () => plugin.startDependencies,

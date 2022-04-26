@@ -80,7 +80,7 @@ export class RenderingService {
     { http, uiPlugins, status }: RenderOptions,
     request: KibanaRequest,
     uiSettings: IUiSettingsClient,
-    { isAnonymousPage = false, vars, includeExposedConfigKeys }: IRenderOptions = {}
+    { isAnonymousPage = false, vars, includeExposedConfigKeys, nonce }: IRenderOptions = {}
   ) {
     const env = {
       mode: this.coreContext.env.mode,
@@ -131,7 +131,7 @@ export class RenderingService {
           darkMode,
           version: themeVersion,
         },
-        csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers },
+        csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers, nonce },
         externalUrl: http.externalUrl,
         vars: vars ?? {},
         uiPlugins: await Promise.all(
