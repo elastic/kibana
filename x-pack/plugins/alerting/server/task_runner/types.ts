@@ -27,6 +27,8 @@ import { Alert } from '../alert';
 import { NormalizedRuleType } from '../rule_type_registry';
 import { ExecutionHandler } from './create_execution_handler';
 import { RawRule } from '../types';
+import { ActionsConfigMap } from '../lib/get_actions_config_map';
+import { AlertExecutionStore } from '../lib/alert_execution_store';
 
 export interface RuleTaskRunResultWithActions {
   state: RuleExecutionState;
@@ -145,6 +147,7 @@ export interface CreateExecutionHandlerOptions<
   ruleParams: RuleTypeParams;
   supportsEphemeralTasks: boolean;
   maxEphemeralActionsPerRule: number;
+  actionsConfigMap: ActionsConfigMap;
 }
 
 export interface ExecutionHandlerOptions<ActionGroupIds extends string> {
@@ -159,10 +162,4 @@ export interface ExecutionHandlerOptions<ActionGroupIds extends string> {
 export enum ActionsCompletion {
   COMPLETE = 'complete',
   PARTIAL = 'partial',
-}
-
-export interface AlertExecutionStore {
-  numberOfTriggeredActions: number;
-  numberOfScheduledActions: number;
-  triggeredActionsStatus: ActionsCompletion;
 }

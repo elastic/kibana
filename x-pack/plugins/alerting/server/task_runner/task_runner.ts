@@ -65,8 +65,6 @@ import {
 } from '../lib/create_alert_event_log_record_object';
 import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
 import {
-  ActionsCompletion,
-  AlertExecutionStore,
   GenerateNewAndRecoveredAlertEventsParams,
   LogActiveAndRecoveredAlertsParams,
   RuleTaskInstance,
@@ -74,6 +72,7 @@ import {
   ScheduleActionsForRecoveredAlertsParams,
   TrackAlertDurationsParams,
 } from './types';
+import { AlertExecutionStore } from '../lib/alert_execution_store';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -231,6 +230,7 @@ export class TaskRunner<
       ruleParams,
       supportsEphemeralTasks: this.context.supportsEphemeralTasks,
       maxEphemeralActionsPerRule: this.context.maxEphemeralActionsPerRule,
+      actionsConfigMap: this.context.actionsConfigMap,
     });
   }
 
@@ -491,11 +491,7 @@ export class TaskRunner<
       });
     }
 
-    const alertExecutionStore: AlertExecutionStore = {
-      numberOfTriggeredActions: 0,
-      numberOfScheduledActions: 0,
-      triggeredActionsStatus: ActionsCompletion.COMPLETE,
-    };
+    const alertExecutionStore = new AlertExecutionStore();
 
     const ruleIsSnoozed = this.isRuleSnoozed(rule);
     if (!ruleIsSnoozed && this.shouldLogAndScheduleActionsForAlerts()) {
@@ -567,7 +563,11 @@ export class TaskRunner<
 
     return {
       metrics: searchMetrics,
-      alertExecutionStore,
+      alertExecutionMetrics: {
+        numberOfTriggeredActions: alertExecutionStore.getNumberOfTriggeredActions(),
+        numberOfGeneratedActions: alertExecutionStore.getNumberOfGeneratedActions(),
+        triggeredActionsStatus: alertExecutionStore.getTriggeredActionsStatus(),
+      },
       alertTypeState: updatedRuleTypeState || undefined,
       alertInstances: mapValues<
         Record<string, Alert<InstanceState, InstanceContext>>,
@@ -822,8 +822,8 @@ export class TaskRunner<
       );
       set(
         event,
-        'kibana.alert.rule.execution.metrics.number_of_scheduled_actions',
-        executionStatus.numberOfScheduledActions
+        'kibana.alert.rule.execution.metrics.number_of_generated_actions',
+        executionStatus.numberOfGeneratedActions
       );
     }
 
@@ -874,7 +874,7 @@ export class TaskRunner<
       executionState: RuleExecutionState
     ): RuleTaskState => {
       return {
-        ...omit(executionState, ['alertExecutionStore', 'metrics']),
+        ...omit(executionState, ['alertExecutionMetrics', 'metrics']),
         previousStartedAt: startedAt,
       };
     };
