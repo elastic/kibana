@@ -9,6 +9,7 @@ import { EuiErrorBoundary, EuiLoadingContent, EuiEmptyPrompt, EuiCode } from '@e
 import React, { useMemo } from 'react';
 import { QueryClientProvider } from 'react-query';
 import { i18n } from '@kbn/i18n';
+import { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider, useKibana } from '../../common/lib/kibana';
 
 import { LiveQuery } from '../../live_queries';
@@ -16,16 +17,19 @@ import { queryClient } from '../../query_client';
 import { OsqueryIcon } from '../../components/osquery_icon';
 import { KibanaThemeProvider } from '../../shared_imports';
 import { useIsOsqueryAvailable } from './use_is_osquery_available';
+import { StartPlugins } from '../../types';
 
 interface OsqueryActionProps {
   agentId?: string;
   formType: 'steps' | 'simple';
-  hideFullscreen?: true;
+  hideAgentsField?: boolean;
+  hideFullscreen?: boolean;
 }
 
 const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
   agentId,
   formType = 'simple',
+  hideAgentsField,
   hideFullscreen,
 }) => {
   const permissions = useKibana().services.application.capabilities.osquery;
@@ -139,18 +143,37 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
     );
   }
 
-  return <LiveQuery formType={formType} agentId={agentId} hideFullscreen={hideFullscreen} />;
+  return (
+    <LiveQuery
+      formType={formType}
+      agentId={agentId}
+      hideAgentsField={hideAgentsField}
+      hideFullscreen={hideFullscreen}
+    />
+  );
 };
 
 const OsqueryAction = React.memo(OsqueryActionComponent);
 
-// @ts-expect-error update types
-const OsqueryActionWrapperComponent = ({ services, agentId, formType, hideFullscreen }) => (
+type OsqueryActionWrapperProps = { services: CoreStart & StartPlugins } & OsqueryActionProps;
+
+const OsqueryActionWrapperComponent: React.FC<OsqueryActionWrapperProps> = ({
+  services,
+  agentId,
+  formType,
+  hideAgentsField = false,
+  hideFullscreen = false,
+}) => (
   <KibanaThemeProvider theme$={services.theme.theme$}>
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
         <QueryClientProvider client={queryClient}>
-          <OsqueryAction agentId={agentId} formType={formType} hideFullscreen={hideFullscreen} />
+          <OsqueryAction
+            agentId={agentId}
+            formType={formType}
+            hideAgentsField={hideAgentsField}
+            hideFullscreen={hideFullscreen}
+          />
         </QueryClientProvider>
       </EuiErrorBoundary>
     </KibanaContextProvider>

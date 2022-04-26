@@ -46,7 +46,7 @@ interface ResultsTableComponentProps {
   agentIds?: string[];
   endDate?: string;
   startDate?: string;
-  hideFullscreen?: true;
+  hideFullscreen?: boolean;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
@@ -107,11 +107,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   ]);
   const [columns, setColumns] = useState<EuiDataGridColumn[]>([]);
 
-  const {
-    data: allResultsData,
-    isFetched,
-    isLoading,
-  } = useAllResults({
+  const { data: allResultsData, isLoading } = useAllResults({
     actionId,
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
@@ -338,20 +334,44 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       setIsLive(() => {
         if (!agentIds?.length || expired) return false;
 
-        return !!(aggregations.totalResponded !== agentIds?.length);
+        return !!(
+          aggregations.totalResponded !== agentIds?.length ||
+          allResultsData?.totalCount !== aggregations?.totalRowCount ||
+          (allResultsData?.totalCount && !allResultsData?.edges.length)
+        );
       }),
-    [agentIds?.length, aggregations.failed, aggregations.totalResponded, expired]
+    [
+      agentIds?.length,
+      aggregations.totalResponded,
+      aggregations?.totalRowCount,
+      allResultsData?.edges.length,
+      allResultsData?.totalCount,
+      expired,
+    ]
   );
 
   if (!hasActionResultsPrivileges) {
     return (
-      <EuiCallOut title="Missing privileges" color="danger" iconType="alert">
+      <EuiCallOut
+        title={
+          <FormattedMessage
+            id="xpack.osquery.liveQuery.permissionDeniedPromptTitle"
+            defaultMessage="Permission denied"
+          />
+        }
+        color="danger"
+        iconType="alert"
+      >
         <p>
-          {'Your user role doesn’t have index read permissions on the '}
-          <EuiCode>logs-{OSQUERY_INTEGRATION_NAME}.result*</EuiCode>
-          {
-            'index. Access to this index is required to view osquery results. Administrators can update role permissions in Stack Management > Roles.'
-          }
+          <FormattedMessage
+            id="xpack.osquery.liveQuery.permissionDeniedPromptBody"
+            defaultMessage="To view query results, ask your administrator to update your user role to have index {read} privileges on the {logs} index."
+            // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+            values={{
+              read: <EuiCode>read</EuiCode>,
+              logs: <EuiCode>logs-{OSQUERY_INTEGRATION_NAME}.result*</EuiCode>,
+            }}
+          />
         </p>
       </EuiCallOut>
     );
@@ -365,13 +385,12 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     <>
       {isLive && <EuiProgress color="primary" size="xs" />}
 
-      {isFetched && !allResultsData?.edges.length && !aggregations?.totalRowCount ? (
+      {!allResultsData?.edges.length ? (
         <>
           <EuiCallOut title={generateEmptyDataMessage(aggregations.totalResponded)} />
           <EuiSpacer />
         </>
       ) : (
-        // @ts-expect-error update types
         <DataContext.Provider value={allResultsData?.edges}>
           <EuiDataGrid
             data-test-subj="osqueryResultsTable"

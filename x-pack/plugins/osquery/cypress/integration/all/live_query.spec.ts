@@ -61,6 +61,8 @@ describe('ALL - Live Query', () => {
     });
     cy.react(RESULTS_TABLE_CELL_WRRAPER, {
       props: { id: 'osquery.days.number', index: 2 },
-    }).react('EuiIconIndexMapping');
+    })
+      .react('EuiIconTip', { props: { type: 'indexMapping' } })
+      .should('exist');
   });
 });

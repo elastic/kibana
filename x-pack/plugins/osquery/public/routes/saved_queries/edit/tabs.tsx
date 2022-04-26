@@ -17,7 +17,7 @@ interface ResultTabsProps {
   agentIds?: string[];
   startDate?: string;
   endDate?: string;
-  hideFullscreen?: true;
+  hideFullscreen?: boolean;
 }
 
 const ResultTabsComponent: React.FC<ResultTabsProps> = ({
