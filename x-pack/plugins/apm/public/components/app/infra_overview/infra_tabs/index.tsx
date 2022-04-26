@@ -12,6 +12,7 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -105,7 +106,7 @@ function useTabs({
   );
 
   const hostFilter = useMemo(
-    () => ({
+    (): QueryDslQueryContainer => ({
       bool: {
         should: [
           { terms: { 'host.name': hostNames } },
