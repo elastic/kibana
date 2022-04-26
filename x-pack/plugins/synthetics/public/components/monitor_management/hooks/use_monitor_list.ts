@@ -33,7 +33,7 @@ export function useMonitorList() {
     if (viewType === 'all') {
       dispatch(getMonitors({ page: pageIndex, perPage: pageSize, sortOrder, sortField }));
     }
-  }, [dispatch, pageIndex, pageSize, sortField, sortOrder, viewType]);
+  }, [dispatch, pageIndex, pageSize, sortField, sortOrder, viewType, pageState]);
 
   return {
     pageState,

@@ -35,7 +35,7 @@ import {
 import { fetchEffectFactory } from './fetch_effect';
 
 export function* fetchMonitorManagementEffect() {
-  yield takeLatest(
+  yield takeLeading(
     getMonitors,
     fetchEffectFactory(fetchMonitorManagementList, getMonitorsSuccess, getMonitorsFailure)
   );
