@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiRange, EuiRangeProps } from '@elastic/eui';
+import { EuiFormRow, EuiRange, EuiRangeProps, EuiSelect } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
-import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { buildExpressionFunction, buildExpression } from '@kbn/expressions-plugin/public';
 import { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -24,11 +24,13 @@ import { FieldBasedIndexPatternColumn } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { useDebouncedValue } from '../../../shared_components';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
+import { updateColumnParam } from '../layer_helpers';
 
 export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'percentile';
   params: {
     percentile: number;
+    aggregate?: string;
     format?: {
       id: string;
       params?: {
@@ -68,6 +70,7 @@ export const percentileOperation: OperationDefinition<
   input: 'field',
   operationParams: [
     { name: 'percentile', type: 'number', required: false, defaultValue: DEFAULT_PERCENTILE_VALUE },
+    { name: 'aggregate', type: 'string', required: false },
   ],
   filterable: true,
   shiftable: true,
@@ -118,6 +121,14 @@ export const percentileOperation: OperationDefinition<
       timeShift: columnParams?.shift || previousColumn?.timeShift,
       params: {
         percentile: newPercentileParam,
+        aggregate: columnParams?.aggregate
+          ? columnParams.aggregate
+          : previousColumn &&
+            isColumnOfType<PercentileIndexPatternColumn>('percentile', previousColumn)
+          ? previousColumn.params?.aggregate
+          : field?.indices.every((index) => index.time_series_metric)
+          ? 'Sum'
+          : undefined,
         ...getFormatFromPreviousColumn(previousColumn),
       },
     };
@@ -130,18 +141,49 @@ export const percentileOperation: OperationDefinition<
     };
   },
   toEsAggsFn: (column, columnId, _indexPattern) => {
-    return buildExpressionFunction<AggFunctionsMapping['aggSinglePercentile']>(
-      'aggSinglePercentile',
-      {
-        id: columnId,
-        enabled: true,
-        schema: 'metric',
-        field: column.sourceField,
-        percentile: column.params.percentile,
-        // time shift is added to wrapping aggFilteredMetric if filter is set
-        timeShift: column.filter ? undefined : column.timeShift,
-      }
-    ).toAst();
+    if (!column.params!.aggregate) {
+      return buildExpressionFunction<AggFunctionsMapping['aggSinglePercentile']>(
+        'aggSinglePercentile',
+        {
+          id: columnId,
+          enabled: true,
+          schema: 'metric',
+          field: column.sourceField,
+          percentile: column.params.percentile,
+          // time shift is added to wrapping aggFilteredMetric if filter is set
+          timeShift: column.filter ? undefined : column.timeShift,
+        }
+      ).toAst();
+    }
+    return buildExpressionFunction(`aggBucket${column.params!.aggregate}`, {
+      id: columnId,
+      enabled: true,
+      schema: 'metric',
+      // time shift is added to wrapping aggFilteredMetric if filter is set
+      timeShift: column.filter ? undefined : column.timeShift,
+      customMetric: buildExpression([
+        buildExpressionFunction<AggFunctionsMapping['aggSinglePercentile']>('aggSinglePercentile', {
+          id: columnId,
+          enabled: true,
+          schema: 'metric',
+          field: column.sourceField,
+          percentile: column.params.percentile,
+          // time shift is added to wrapping aggFilteredMetric if filter is set
+          timeShift: column.filter ? undefined : column.timeShift,
+        }),
+      ]).toAst(),
+      emptyAsNull: column.params?.aggregate === 'Sum' ? true : undefined,
+      customBucket: buildExpression([
+        buildExpressionFunction('aggMultiTerms', {
+          id: `${columnId}-bucket`,
+          enabled: true,
+          schema: 'bucket',
+          fields: _indexPattern.fields
+            .filter((f) => f.indices && f.indices.every((i) => i.time_series_dimension))
+            .map((i) => i.name),
+        }),
+      ]).toAst(),
+    }).toAst();
   },
   getErrorMessage: (layer, columnId, indexPattern) =>
     combineErrorMessages([
@@ -200,36 +242,66 @@ export const percentileOperation: OperationDefinition<
       [handleInputChangeWithoutValidation]
     );
 
+    const field = indexPattern.getFieldByName(currentColumn.sourceField);
+    const isTSDB = !field?.indices.every((index) => index.time_series_metric);
+
     return (
-      <EuiFormRow
-        label={i18n.translate('xpack.lens.indexPattern.percentile.percentileValue', {
-          defaultMessage: 'Percentile',
-        })}
-        data-test-subj="lns-indexPattern-percentile-form"
-        display="rowCompressed"
-        fullWidth
-        isInvalid={!inputValueIsValid}
-        error={
-          !inputValueIsValid &&
-          i18n.translate('xpack.lens.indexPattern.percentile.errorMessage', {
-            defaultMessage: 'Percentile has to be an integer between 1 and 99',
-          })
-        }
-      >
-        <EuiRange
-          data-test-subj="lns-indexPattern-percentile-input"
-          compressed
-          value={inputValue ?? ''}
-          min={1}
-          max={99}
-          step={1}
-          onChange={handleInputChange}
-          showInput
-          aria-label={i18n.translate('xpack.lens.indexPattern.percentile.percentileValue', {
+      <>
+        <EuiFormRow
+          label={i18n.translate('xpack.lens.indexPattern.percentile.percentileValue', {
             defaultMessage: 'Percentile',
           })}
-        />
-      </EuiFormRow>
+          data-test-subj="lns-indexPattern-percentile-form"
+          display="rowCompressed"
+          fullWidth
+          isInvalid={!inputValueIsValid}
+          error={
+            !inputValueIsValid &&
+            i18n.translate('xpack.lens.indexPattern.percentile.errorMessage', {
+              defaultMessage: 'Percentile has to be an integer between 1 and 99',
+            })
+          }
+        >
+          <EuiRange
+            data-test-subj="lns-indexPattern-percentile-input"
+            compressed
+            value={inputValue ?? ''}
+            min={1}
+            max={99}
+            step={1}
+            onChange={handleInputChange}
+            showInput
+            aria-label={i18n.translate('xpack.lens.indexPattern.percentile.percentileValue', {
+              defaultMessage: 'Percentile',
+            })}
+          />
+        </EuiFormRow>
+        {isTSDB && (
+          <EuiFormRow label={<>Collapse by </>} display="rowCompressed" fullWidth>
+            <EuiSelect
+              compressed
+              data-test-subj="indexPattern-terms-orderBy"
+              options={[
+                { text: 'sum', value: 'Sum' },
+                { text: 'min', value: 'Min' },
+                { text: 'max', value: 'Max' },
+                { text: 'avg', value: 'Avg' },
+              ]}
+              value={currentColumn.params?.aggregate || 'sum'}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                updateLayer(
+                  updateColumnParam({
+                    layer,
+                    columnId,
+                    paramName: 'aggregate',
+                    value: e.target.value,
+                  })
+                );
+              }}
+            />
+          </EuiFormRow>
+        )}
+      </>
     );
   },
   documentation: {

@@ -27,6 +27,7 @@ export const getAggTypes = () => ({
     { name: METRIC_TYPES.COUNT, fn: metrics.getCountMetricAgg },
     { name: METRIC_TYPES.AVG, fn: metrics.getAvgMetricAgg },
     { name: METRIC_TYPES.SUM, fn: metrics.getSumMetricAgg },
+    { name: METRIC_TYPES.RATE, fn: metrics.getRateMetricAgg },
     { name: METRIC_TYPES.MEDIAN, fn: metrics.getMedianMetricAgg },
     { name: METRIC_TYPES.SINGLE_PERCENTILE, fn: metrics.getSinglePercentileMetricAgg },
     { name: METRIC_TYPES.MIN, fn: metrics.getMinMetricAgg },

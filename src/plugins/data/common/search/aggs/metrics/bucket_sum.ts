@@ -34,6 +34,7 @@ export const getBucketSumMetricAgg = () => {
     name: METRIC_TYPES.SUM_BUCKET,
     expressionName: aggBucketSumFnName,
     title: sumBucketTitle,
+    enableEmptyAsNull: true,
     makeLabel: (agg) => makeNestedLabel(agg, overallSumLabel),
     subtype,
     params: [...params()],

@@ -71,6 +71,9 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
       if (mapping[fieldName].properties) {
         parseMapping(index, mapping[fieldName].properties, path);
       } else if (mapping[fieldName].type) {
+        if (!fieldsFromFieldCapsByName[fullFieldName]) {
+          return;
+        }
         if (!fieldsFromFieldCapsByName[fullFieldName].indices) {
           fieldsFromFieldCapsByName[fullFieldName].indices = [];
         }

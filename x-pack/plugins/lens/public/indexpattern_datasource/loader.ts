@@ -52,6 +52,7 @@ export function convertDataViewIntoLensIndexPattern(dataView: DataView): IndexPa
         esTypes: field.esTypes,
         scripted: field.scripted,
         runtime: Boolean(field.runtimeField),
+        indices: field.indices,
       };
 
       // Simplifies tests by hiding optional properties instead of undefined

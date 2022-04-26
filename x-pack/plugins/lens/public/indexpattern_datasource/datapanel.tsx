@@ -370,6 +370,12 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         } else if (field.meta) {
           return 'metaFields';
         } else if (containsData(field)) {
+          if (field.indices && field.indices.every((i) => i.time_series_dimension)) {
+            return 'dimensions';
+          }
+          if (field.indices && field.indices.every((i) => i.time_series_metric)) {
+            return 'metrics';
+          }
           return 'availableFields';
         } else return 'emptyFields';
       }),
@@ -388,12 +394,60 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         title: '',
         hideDetails: true,
       },
+      Dimensions: {
+        fields: groupedFields.dimensions,
+        fieldCount: groupedFields.dimensions?.length,
+        isInitiallyOpen: true,
+        showInAccordion: true,
+        title: 'Dimensions',
+        helpText: isUsingSampling
+          ? i18n.translate('xpack.lens.indexPattern.allFieldsSamplingLabelHelp', {
+              defaultMessage:
+                'Available fields contain the data in the first 500 documents that match your filters. To view all fields, expand Empty fields. You are unable to create visualizations with full text, geographic, flattened, and object fields.',
+            })
+          : i18n.translate('xpack.lens.indexPattern.allFieldsLabelHelp', {
+              defaultMessage:
+                'Drag and drop available fields to the workspace and create visualizations. To change the available fields, select a different data view, edit your queries, or use a different time range. Some field types cannot be visualized in Lens, including full text and geographic fields.',
+            }),
+        isAffectedByGlobalFilter: !!filters.length,
+        isAffectedByTimeFilter: true,
+        // Show details on timeout but not failure
+        hideDetails: fieldInfoUnavailable && !existenceFetchTimeout,
+        defaultNoFieldsMessage: i18n.translate('xpack.lens.indexPatterns.noAvailableDataLabel', {
+          defaultMessage: `There are no available fields that contain data.`,
+        }),
+      },
+      Metrics: {
+        fields: groupedFields.metrics,
+        fieldCount: groupedFields.metrics?.length,
+        isInitiallyOpen: true,
+        showInAccordion: true,
+        title: 'Metrics',
+        helpText: isUsingSampling
+          ? i18n.translate('xpack.lens.indexPattern.allFieldsSamplingLabelHelp', {
+              defaultMessage:
+                'Available fields contain the data in the first 500 documents that match your filters. To view all fields, expand Empty fields. You are unable to create visualizations with full text, geographic, flattened, and object fields.',
+            })
+          : i18n.translate('xpack.lens.indexPattern.allFieldsLabelHelp', {
+              defaultMessage:
+                'Drag and drop available fields to the workspace and create visualizations. To change the available fields, select a different data view, edit your queries, or use a different time range. Some field types cannot be visualized in Lens, including full text and geographic fields.',
+            }),
+        isAffectedByGlobalFilter: !!filters.length,
+        isAffectedByTimeFilter: true,
+        // Show details on timeout but not failure
+        hideDetails: fieldInfoUnavailable && !existenceFetchTimeout,
+        defaultNoFieldsMessage: i18n.translate('xpack.lens.indexPatterns.noAvailableDataLabel', {
+          defaultMessage: `There are no available fields that contain data.`,
+        }),
+      },
       AvailableFields: {
         fields: groupedFields.availableFields,
         fieldCount: groupedFields.availableFields.length,
         isInitiallyOpen: true,
         showInAccordion: true,
-        title: fieldInfoUnavailable
+        title: groupedFields.metrics?.length
+          ? 'Other fields'
+          : fieldInfoUnavailable
           ? i18n.translate('xpack.lens.indexPattern.allFieldsLabel', {
               defaultMessage: 'All fields',
             })
@@ -452,6 +506,13 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         }),
       },
     };
+
+    if (!fieldGroupDefinitions.Dimensions.fieldCount) {
+      delete fieldGroupDefinitions.Dimensions;
+    }
+    if (!fieldGroupDefinitions.Metrics.fieldCount) {
+      delete fieldGroupDefinitions.Metrics;
+    }
 
     // do not show empty field accordion if there is no existence information
     if (fieldInfoUnavailable) {
