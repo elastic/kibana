@@ -14,7 +14,7 @@ import type { SearchResponse, AggregationsAggregate } from '@elastic/elasticsear
 import type { SearchRequest } from 'src/plugins/data/common';
 import { SearchOptions, VisTypeScriptKibanaApi } from '../kibana_api';
 
-export const KIBANA_API_CONSTANT_NAME = 'KIBANA_API';
+export const KIBANA_API_CONSTANT_NAME = 'KIBANA';
 
 const getSandboxDocument = (script: string) => {
   // may be possible to remove this iframe-level nonce once we can use the top-level CSP

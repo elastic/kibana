@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback } from 'react';
 import { EuiPanel, EuiTitle, EuiLink, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
