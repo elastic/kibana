@@ -11471,10 +11471,10 @@ cypress-file-upload@^5.0.8:
   resolved "https://registry.yarnpkg.com/cypress-file-upload/-/cypress-file-upload-5.0.8.tgz#d8824cbeaab798e44be8009769f9a6c9daa1b4a1"
   integrity sha512-+8VzNabRk3zG6x8f8BWArF/xA/W0VK4IZNx3MV0jFWrJS/qKn8eHfa5nU73P9fOQAgwHFJx7zjg4lwOnljMO8g==
 
-cypress-multi-reporters@^1.5.0:
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/cypress-multi-reporters/-/cypress-multi-reporters-1.5.0.tgz#fff2758c082b49e8b91fed39f9650c70bc06de0d"
-  integrity sha512-6rJ1rk1RpjZwTeydCDc8r3iOmWj2ZEYo++oDTJHNEu7eetb3W1cYDNo5CdxF/r0bo7TLQsOEpBHOCYBZfPVt/g==
+cypress-multi-reporters@^1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/cypress-multi-reporters/-/cypress-multi-reporters-1.6.0.tgz#2c6833b92e3df412c233657c55009e2d5e1cc7c1"
+  integrity sha512-JN9yMzDmPwwirzi95N2FC8VJZ0qp+uUJ1ixYHpJFaAtGgIx15LjVmASqQaxnDh8q57jIIJ6C0o7imiLU6N1YNQ==
   dependencies:
     debug "^4.1.1"
     lodash "^4.17.15"
@@ -11484,10 +11484,10 @@ cypress-pipe@^2.0.0:
   resolved "https://registry.yarnpkg.com/cypress-pipe/-/cypress-pipe-2.0.0.tgz#577df7a70a8603d89a96dfe4092a605962181af8"
   integrity sha512-KW9s+bz4tFLucH3rBGfjW+Q12n7S4QpUSSyxiGrgPOfoHlbYWzAGB3H26MO0VTojqf9NVvfd5Kt0MH5XMgbfyg==
 
-cypress-react-selector@^2.3.16:
-  version "2.3.16"
-  resolved "https://registry.yarnpkg.com/cypress-react-selector/-/cypress-react-selector-2.3.16.tgz#0a3af6327dcb1f59d57533dda142a1739a5de6ef"
-  integrity sha512-Ecj7iic5QJZU8mPKV9e9rgRi/TDvjykdfJB3V42ptqw+9G/Ef4iLTneCqyK287N7t7kLbo1mhXXcbj4J39KJlQ==
+cypress-react-selector@^2.3.17:
+  version "2.3.17"
+  resolved "https://registry.yarnpkg.com/cypress-react-selector/-/cypress-react-selector-2.3.17.tgz#010382b486c4ec342ab61bcd121bb4ccd79e4590"
+  integrity sha512-yBi3wv5XUuzcYXearR0PN8lz0kMk44TOP4LVhwK1e4IU1fuWtlyVag1i+2eg0sdKRJ8VePEgmJhgZfOgd3VEgg==
   dependencies:
     resq "1.10.2"
 
@@ -11501,10 +11501,10 @@ cypress-recurse@^1.20.0:
   resolved "https://registry.yarnpkg.com/cypress-recurse/-/cypress-recurse-1.20.0.tgz#66c09d876ce1c143daa62fea222b5b80067a7fc9"
   integrity sha512-8/gqot/XnVkSF8ssgn3zLRTfPw7Bum2tMIOxf6NO+Wqk0MBQdd4NPNVCObllZmmviLsGmF6ZXwlbXZ8TYvD6dw==
 
-cypress@^9.5.2:
-  version "9.5.2"
-  resolved "https://registry.yarnpkg.com/cypress/-/cypress-9.5.2.tgz#8fb6ee4a890fbc35620800810bf6fb11995927bd"
-  integrity sha512-gYiQYvJozMzDOriUV1rCt6CeRM/pRK4nhwGJj3nJQyX2BoUdTCVwp30xDMKc771HiNVhBtgj5o5/iBdVDVXQUg==
+cypress@^9.5.4:
+  version "9.6.0"
+  resolved "https://registry.yarnpkg.com/cypress/-/cypress-9.6.0.tgz#84473b3362255fa8f5e627a596e58575c9e5320f"
+  integrity sha512-nNwt9eBQmSENamwa8LxvggXksfyzpyYaQ7lNBLgks3XZ6dPE/6BCQFBzeAyAPt/bNXfH3tKPkAyhiAZPYkWoEg==
   dependencies:
     "@cypress/request" "^2.88.10"
     "@cypress/xvfb" "^1.2.4"
@@ -11538,7 +11538,7 @@ cypress@^9.5.2:
     listr2 "^3.8.3"
     lodash "^4.17.21"
     log-symbols "^4.0.0"
-    minimist "^1.2.5"
+    minimist "^1.2.6"
     ospath "^1.2.2"
     pretty-bytes "^5.6.0"
     proxy-from-env "1.0.0"
