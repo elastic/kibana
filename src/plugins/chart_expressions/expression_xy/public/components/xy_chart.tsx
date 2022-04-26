@@ -203,8 +203,8 @@ export function XYChart({
     filteredBarLayers.some((layer) => layer.accessors.length > 1) ||
     filteredBarLayers.some((layer) => isDataLayer(layer) && layer.splitAccessor);
 
-  const isTimeViz = Boolean(filteredLayers.every((l) => isDataLayer(l) && l.xScaleType === 'time'));
-  const isHistogramViz = filteredLayers.every((l) => isDataLayer(l) && l.isHistogram);
+  const isTimeViz = Boolean(dataLayers.every((l) => l.xScaleType === 'time'));
+  const isHistogramViz = dataLayers.every((l) => l.isHistogram);
 
   const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
     dataLayers,
