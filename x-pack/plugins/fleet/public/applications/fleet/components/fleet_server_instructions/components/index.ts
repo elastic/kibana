@@ -4,7 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { pageObjects } from '../functional/page_objects';
-
-export { pageObjects };
+export * from './fleet_server_host_combobox';
