@@ -112,7 +112,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
-  const soClient = fleetContext.epm.internalSoClient;
+  const soClient = appContextService.getInternalUserSOClient(request); // fleetContext.epm.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
@@ -147,7 +147,7 @@ export const updateAgentPolicyHandler: RequestHandler<
   TypeOf<typeof UpdateAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
-  const soClient = coreContext.savedObjects.client;
+  const soClient = appContextService.getInternalUserSOClient(request); // coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
   const { force, ...data } = request.body;
@@ -206,7 +206,7 @@ export const deleteAgentPoliciesHandler: RequestHandler<
   TypeOf<typeof DeleteAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
-  const soClient = coreContext.savedObjects.client;
+  const soClient = appContextService.getInternalUserSOClient(request); // coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   try {
     const body: DeleteAgentPolicyResponse = await agentPolicyService.delete(

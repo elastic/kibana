@@ -34,8 +34,9 @@ export async function agentPolicyUpdateEventHandler(
   action: string,
   agentPolicyId: string
 ) {
-  // `soClient` from ingest `appContextService` is used to create policy change actions
+  // `soClient` from `appContextService` is used to create policy change actions
   // to ensure encrypted SOs are handled correctly
+  // fakeRequest is not space aware (missing request path)
   const internalSoClient = appContextService.getInternalUserSOClient(fakeRequest);
 
   if (action === 'created') {
@@ -44,11 +45,11 @@ export async function agentPolicyUpdateEventHandler(
       agentPolicyId,
       forceRecreate: true,
     });
-    await agentPolicyService.deployPolicy(internalSoClient, agentPolicyId);
+    await agentPolicyService.deployPolicy(soClient, agentPolicyId);
   }
 
   if (action === 'updated') {
-    await agentPolicyService.deployPolicy(internalSoClient, agentPolicyId);
+    await agentPolicyService.deployPolicy(soClient, agentPolicyId);
   }
 
   if (action === 'deleted') {
