@@ -39,6 +39,7 @@ describe('resilient connector validation', () => {
       id: 'test',
       actionTypeId: '.resilient',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'resilient',
       config: {
         apiUrl: 'https://test/',

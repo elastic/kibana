@@ -25,6 +25,7 @@ import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 import { FleetStart } from '@kbn/fleet-plugin/public';
@@ -37,6 +38,7 @@ import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { PLUGIN } from '../../common/constants/plugin';
 import {
   LazySyntheticsPolicyCreateExtension,
@@ -58,6 +60,7 @@ export interface ClientPluginsSetup {
 export interface ClientPluginsStart {
   fleet?: FleetStart;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   discover: DiscoverStart;
   inspector: InspectorPluginStart;
   embeddable: EmbeddableStart;
@@ -65,6 +68,7 @@ export interface ClientPluginsStart {
   share: SharePluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesUiStart;
+  dataViews: DataViewsPublicPluginStart;
 }
 
 export interface UptimePluginServices extends Partial<CoreStart> {
@@ -126,7 +130,7 @@ export class UptimePlugin
                 sortKey: 500,
                 entries: [
                   {
-                    label: i18n.translate('xpack.uptime.overview.heading', {
+                    label: i18n.translate('xpack.synthetics.overview.heading', {
                       defaultMessage: 'Monitors',
                     }),
                     app: 'uptime',
@@ -135,7 +139,7 @@ export class UptimePlugin
                     ignoreTrailingSlash: true,
                   },
                   {
-                    label: i18n.translate('xpack.uptime.certificatesPage.heading', {
+                    label: i18n.translate('xpack.synthetics.certificatesPage.heading', {
                       defaultMessage: 'TLS Certificates',
                     }),
                     app: 'uptime',

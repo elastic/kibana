@@ -41,6 +41,7 @@ describe('xmatters connector validation', () => {
       actionTypeId: '.xmatters',
       name: 'xmatters',
       isPreconfigured: false,
+      isDeprecated: false,
       config: {
         configUrl: 'http://test.com',
         usesBasic: true,
@@ -74,6 +75,7 @@ describe('xmatters connector validation', () => {
       actionTypeId: '.xmatters',
       name: 'xmatters',
       isPreconfigured: false,
+      isDeprecated: false,
       config: {
         usesBasic: false,
       },
@@ -106,6 +108,8 @@ describe('xmatters connector validation', () => {
       config: {
         usesBasic: true,
       },
+      isPreconfigured: false,
+      isDeprecated: false,
     } as XmattersActionConnector;
 
     expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
@@ -137,6 +141,8 @@ describe('xmatters connector validation', () => {
         configUrl: 'invalid.url',
         usesBasic: true,
       },
+      isPreconfigured: false,
+      isDeprecated: false,
     } as XmattersActionConnector;
 
     expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({

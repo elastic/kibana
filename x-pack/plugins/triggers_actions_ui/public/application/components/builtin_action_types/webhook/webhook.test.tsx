@@ -41,6 +41,7 @@ describe('webhook connector validation', () => {
       actionTypeId: '.webhook',
       name: 'webhook',
       isPreconfigured: false,
+      isDeprecated: false,
       config: {
         method: 'PUT',
         url: 'http://test.com',
@@ -75,6 +76,7 @@ describe('webhook connector validation', () => {
       actionTypeId: '.webhook',
       name: 'webhook',
       isPreconfigured: false,
+      isDeprecated: false,
       config: {
         method: 'PUT',
         url: 'http://test.com',

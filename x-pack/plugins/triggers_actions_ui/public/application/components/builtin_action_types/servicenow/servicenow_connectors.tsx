@@ -22,7 +22,6 @@ import { InstallationCallout } from './installation_callout';
 import { UpdateConnector } from './update_connector';
 import { updateActionConnector } from '../../../lib/action_connector_api';
 import { Credentials } from './credentials';
-import { checkConnectorIsDeprecated } from '../../../../common/connectors_selection';
 
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowConnectorFields as default };
@@ -45,7 +44,7 @@ const ServiceNowConnectorFields: React.FC<
   } = useKibana().services;
   const { apiUrl, usesTableApi } = action.config;
   const { username, password } = action.secrets;
-  const requiresNewApplication = !checkConnectorIsDeprecated(action);
+  const requiresNewApplication = !action.isDeprecated;
 
   const [showUpdateConnector, setShowUpdateConnector] = useState(false);
 
