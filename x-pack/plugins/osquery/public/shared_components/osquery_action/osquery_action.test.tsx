@@ -7,15 +7,13 @@
 
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { coreMock } from '@kbn/core/public/mocks';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { render } from '@testing-library/react';
+import { QueryClientProvider } from 'react-query';
+
 import { OsqueryAction } from '.';
 import { queryClient } from '../../query_client';
-import { QueryClientProvider } from 'react-query';
 import * as hooks from './use_is_osquery_available';
 import { useKibana } from '../../common/lib/kibana';
-
 jest.mock('../../common/lib/kibana');
 
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
@@ -69,16 +67,9 @@ const properPermissions = {
 const renderWithContext = (Element: React.ReactElement) =>
   render(
     <IntlProvider locale={'en'}>
-      <KibanaReactContext.Provider>
-        <QueryClientProvider client={queryClient}>{Element}</QueryClientProvider>
-      </KibanaReactContext.Provider>
+      <QueryClientProvider client={queryClient}>{Element}</QueryClientProvider>
     </IntlProvider>
   );
-
-// const MY_BASE_PATH = 'my-base-path';
-const KibanaReactContext = createKibanaReactContext(
-  coreMock.createStart({ basePath: 'my-base-path' })
-);
 
 const emptyPrompt =
   'An Elastic Agent is not installed on this host. To run queries, install Elastic Agent on the host, and then add the Osquery Manager integration to the agent policy in Fleet.';
