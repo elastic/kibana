@@ -49,12 +49,18 @@ import type {
   PackageInfo,
 } from '../../../../types';
 import { InstallStatus } from '../../../../types';
-import { Error, EuiButtonWithTooltip, Loading } from '../../../../components';
+import { Error, Loading } from '../../../../components';
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
 import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from '../../components/release_badge';
 
-import { IntegrationAgentPolicyCount, UpdateIcon, IconPanel, LoadingIconPanel } from './components';
+import {
+  IntegrationAgentPolicyCount,
+  UpdateIcon,
+  IconPanel,
+  LoadingIconPanel,
+  AddIntegrationButton,
+} from './components';
 import { AssetsPage } from './assets';
 import { OverviewPage } from './overview';
 import { PackagePoliciesPage } from './policies';
@@ -375,10 +381,8 @@ export function Detail() {
               { isDivider: true },
               {
                 content: (
-                  <EuiButtonWithTooltip
-                    fill
-                    isDisabled={!userCanInstallPackages}
-                    iconType="plusInCircle"
+                  <AddIntegrationButton
+                    userCanInstallPackages={userCanInstallPackages}
                     href={getHref('add_integration_to_policy', {
                       pkgkey,
                       ...(integration ? { integration } : {}),
@@ -386,34 +390,10 @@ export function Detail() {
                         ? { agentPolicyId: agentPolicyIdFromContext }
                         : {}),
                     })}
+                    missingSecurityConfiguration={missingSecurityConfiguration}
+                    packageName={integrationInfo?.title || packageInfo.title}
                     onClick={handleAddIntegrationPolicyClick}
-                    data-test-subj="addIntegrationPolicyButton"
-                    tooltip={
-                      !userCanInstallPackages
-                        ? {
-                            content: missingSecurityConfiguration ? (
-                              <FormattedMessage
-                                id="xpack.fleet.epm.addPackagePolicyButtonSecurityRequiredTooltip"
-                                defaultMessage="To add Elastic Agent Integrations, you must have security enabled and have the All privilege for Fleet. Contact your administrator."
-                              />
-                            ) : (
-                              <FormattedMessage
-                                id="xpack.fleet.epm.addPackagePolicyButtonPrivilegesRequiredTooltip"
-                                defaultMessage="Elastic Agent Integrations require the All privilege for Fleet and All privilege for Integrations. Contact your administrator."
-                              />
-                            ),
-                          }
-                        : undefined
-                    }
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.epm.addPackagePolicyButtonText"
-                      defaultMessage="Add {packageName}"
-                      values={{
-                        packageName: integrationInfo?.title || packageInfo.title,
-                      }}
-                    />
-                  </EuiButtonWithTooltip>
+                  />
                 ),
               },
             ].map((item, index) => (
@@ -442,9 +422,9 @@ export function Detail() {
       pkgkey,
       integration,
       agentPolicyIdFromContext,
-      handleAddIntegrationPolicyClick,
       missingSecurityConfiguration,
       integrationInfo?.title,
+      handleAddIntegrationPolicyClick,
     ]
   );
 
