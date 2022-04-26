@@ -17,7 +17,6 @@ import Axios, { AxiosRequestConfig } from 'axios';
 // @ts-expect-error not "public", but necessary to prevent Jest shimming from breaking things
 import httpAdapter from 'axios/lib/adapters/http';
 import { ToolingLog } from '@kbn/tooling-log';
-import { asyncForEachWithLimit } from '@kbn/std';
 
 import { parseConfig, Config, CiStatsMetadata } from '@kbn/ci-stats-core';
 import type { CiStatsTestGroupInfo, CiStatsTestRun } from './ci_stats_test_group_types';
@@ -251,18 +250,9 @@ export class CiStatsReporter {
       return;
     }
 
-    const chunks: CiStatsTestRun[][] = [];
-    for (const testRun of testRuns) {
-      const chunk = chunks.at(-1);
-      if (!chunk || chunk.length >= 20) {
-        chunks.push([testRun]);
-      } else {
-        chunk.push(testRun);
-      }
-    }
-
-    // send test runs in chunks of 20, 10 chunks at a time
-    await asyncForEachWithLimit(chunks, 10, async (chunk) => {
+    let bufferBytes = 0;
+    const buffer: string[] = [];
+    const flushBuffer = async () => {
       await this.req<{ testRunCount: number }>({
         auth: true,
         path: '/v2/test_runs',
@@ -271,10 +261,26 @@ export class CiStatsReporter {
           groupId: groupResp.groupId,
           groupType: group.type,
         },
-        bodyDesc: `[${group.name}/${group.type}] Chunk of ${chunk.length} tests`,
-        body: chunk.map((test) => JSON.stringify(test)).join('\n'),
+        bodyDesc: `[${group.name}/${group.type}] Chunk of ${bufferBytes} bytes`,
+        body: buffer.join('\n'),
       });
-    });
+      buffer.length = 0;
+      bufferBytes = 0;
+    };
+
+    // send test runs in chunks of ~500kb
+    for (const testRun of testRuns) {
+      const json = JSON.stringify(testRun);
+      bufferBytes += json.length;
+      buffer.push(json);
+      if (bufferBytes >= 450000) {
+        await flushBuffer();
+      }
+    }
+
+    if (bufferBytes) {
+      await flushBuffer();
+    }
   }
 
   /**
