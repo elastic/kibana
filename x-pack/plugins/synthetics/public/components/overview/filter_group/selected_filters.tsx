@@ -8,17 +8,17 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FilterValueLabel } from '@kbn/observability-plugin/public';
-import { useIndexPattern } from '../../../contexts/uptime_index_pattern_context';
+import { useUptimeDataView } from '../../../contexts/uptime_index_pattern_context';
 import { useSelectedFilters } from '../../../hooks/use_selected_filters';
 
 interface Props {
   onChange: (fieldName: string, values: string[], notValues: string[]) => void;
 }
 export const SelectedFilters = ({ onChange }: Props) => {
-  const indexPattern = useIndexPattern();
+  const dataView = useUptimeDataView();
   const { filtersList } = useSelectedFilters();
 
-  if (!indexPattern) return null;
+  if (!dataView) return null;
 
   return (
     <EuiFlexGroup gutterSize="xs" wrap>
@@ -26,7 +26,7 @@ export const SelectedFilters = ({ onChange }: Props) => {
         ...selectedItems.map((value) => (
           <EuiFlexItem key={field + value} grow={false}>
             <FilterValueLabel
-              dataView={indexPattern}
+              dataView={dataView}
               removeFilter={() => {
                 onChange(
                   field,
@@ -51,7 +51,7 @@ export const SelectedFilters = ({ onChange }: Props) => {
         ...excludedItems.map((value) => (
           <EuiFlexItem key={field + value} grow={false}>
             <FilterValueLabel
-              dataView={indexPattern}
+              dataView={dataView}
               removeFilter={() => {
                 onChange(
                   field,
