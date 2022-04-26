@@ -23,11 +23,7 @@ jest.mock('../../../../../app_logic', () => ({
 
 import { SourceConfigData } from '../add_source_logic';
 
-import {
-  ExternalConnectorLogic,
-  ExternalConnectorProps,
-  ExternalConnectorValues,
-} from './external_connector_logic';
+import { ExternalConnectorLogic, ExternalConnectorValues } from './external_connector_logic';
 
 describe('ExternalConnectorLogic', () => {
   const { mount } = new LogicMounter(ExternalConnectorLogic);
@@ -59,13 +55,9 @@ describe('ExternalConnectorLogic', () => {
     sourceConfigData,
   };
 
-  const DEFAULT_PROPS: ExternalConnectorProps = {
-    baseServiceType: 'share_point',
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
-    mount({}, DEFAULT_PROPS);
+    mount();
   });
 
   it('has expected default values', () => {
@@ -135,12 +127,9 @@ describe('ExternalConnectorLogic', () => {
 
     describe('saveExternalConnectorConfigSuccess', () => {
       it('turns off the button loading flag', () => {
-        mount(
-          {
-            buttonLoading: true,
-          },
-          DEFAULT_PROPS
-        );
+        mount({
+          buttonLoading: true,
+        });
 
         ExternalConnectorLogic.actions.saveExternalConnectorConfigSuccess('external');
 
@@ -150,12 +139,9 @@ describe('ExternalConnectorLogic', () => {
 
     describe('saveExternalConnectorConfigError', () => {
       it('turns off the button loading flag', () => {
-        mount(
-          {
-            buttonLoading: true,
-          },
-          DEFAULT_PROPS
-        );
+        mount({
+          buttonLoading: true,
+        });
 
         ExternalConnectorLogic.actions.saveExternalConnectorConfigError();
 
@@ -219,7 +205,7 @@ describe('ExternalConnectorLogic', () => {
       });
 
       itShowsServerErrorAsFlashMessage(http.get, () => {
-        mount({}, DEFAULT_PROPS);
+        mount({});
         ExternalConnectorLogic.actions.fetchExternalSource();
       });
     });
@@ -321,7 +307,7 @@ describe('ExternalConnectorLogic', () => {
         expect(navigateToUrl).not.toHaveBeenCalled();
       });
       itShowsServerErrorAsFlashMessage(http.post, () => {
-        mount({}, DEFAULT_PROPS);
+        mount({});
         ExternalConnectorLogic.actions.saveExternalConnectorConfig({
           url: 'http://url',
           apiKey: 'apiKey',

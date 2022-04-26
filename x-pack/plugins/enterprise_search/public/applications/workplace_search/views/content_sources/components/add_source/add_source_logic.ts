@@ -103,6 +103,7 @@ export interface AddSourceActions {
 
 export interface SourceConfigData {
   serviceType: string;
+  baseServiceType?: string;
   name: string;
   configured: boolean;
   categories: string[];
@@ -364,6 +365,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       actions.getSourceConfigData(serviceType, addSourceProps);
     },
     getSourceConfigData: async ({ serviceType, addSourceProps }) => {
+      // TODO: Once multi-config support for connectors is added, this request url will need to include an ID
       const route = `/internal/workplace_search/org/settings/connectors/${serviceType}`;
 
       try {

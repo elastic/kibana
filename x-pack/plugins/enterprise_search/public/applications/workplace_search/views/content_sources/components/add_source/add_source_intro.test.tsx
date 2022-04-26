@@ -47,7 +47,7 @@ describe('AddSourceList', () => {
     const wrapper = shallow(<AddSourceIntro sourceData={getSourceData('external')} />);
 
     expect(wrapper.find(ConfigurationIntro).prop('advanceStepTo')).toEqual(
-      '/sources/add/external/connector_config'
+      '/sources/add/external/connector_registration'
     );
   });
 

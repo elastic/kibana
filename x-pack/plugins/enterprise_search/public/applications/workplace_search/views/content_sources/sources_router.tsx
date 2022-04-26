@@ -33,7 +33,11 @@ import { AddSourceChoice } from './components/add_source/add_source_choice';
 import { AddSourceIntro } from './components/add_source/add_source_intro';
 import { OrganizationSources } from './organization_sources';
 import { PrivateSources } from './private_sources';
-import { staticCustomSourceData, staticSourceData as sources } from './source_data';
+import {
+  staticCustomSourceData,
+  staticGenericExternalSourceData,
+  staticSourceData as sources,
+} from './source_data';
 import { SourceRouter } from './source_router';
 import { SourcesLogic } from './sources_logic';
 
@@ -108,7 +112,7 @@ export const SourcesRouter: React.FC = () => {
           </Route>
         );
       })}
-      {internalAndExternalSources.map((sourceData, i) => {
+      {internalSources.map((sourceData, i) => {
         const { baseServiceType, serviceType, accountContextOnly } = sourceData;
         return (
           <Route
@@ -128,6 +132,18 @@ export const SourcesRouter: React.FC = () => {
           </Route>
         );
       })}
+      <Route
+        exact
+        path={`${getSourcesPath(getAddPath('external'), isOrganization)}/intro`}
+        data-test-subj="ConnectorIntroRoute"
+      >
+        {!hasPlatinumLicense && staticGenericExternalSourceData.accountContextOnly ? (
+          <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
+        ) : (
+          // TODO: Make a bespoke component for this
+          <AddSourceIntro sourceData={staticGenericExternalSourceData} />
+        )}
+      </Route>
       {internalAndExternalSources.map((sourceData, i) => {
         const { baseServiceType, serviceType, accountContextOnly } = sourceData;
         return (
@@ -196,7 +212,7 @@ export const SourcesRouter: React.FC = () => {
             path={`${getSourcesPath(
               getAddPath(serviceType, baseServiceType),
               isOrganization
-            )}/connector_config`}
+            )}/connector_registration`}
             data-test-subj="ExternalConnectorConfigRoute"
           >
             {!hasPlatinumLicense && accountContextOnly ? (

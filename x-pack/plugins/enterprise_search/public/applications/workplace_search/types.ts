@@ -241,6 +241,7 @@ export interface ContentSourceStatus {
 
 export interface Connector {
   serviceType: string;
+  baseServiceType?: string;
   name: string;
   configured: boolean;
   supportedByLicense: boolean;

@@ -46,7 +46,10 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
 
   const goToExternal = () =>
     KibanaLogic.values.navigateToUrl(
-      `${getSourcesPath(getAddPath('external', serviceType), isOrganization)}/connector_config`
+      `${getSourcesPath(
+        getAddPath('external', serviceType),
+        isOrganization
+      )}/connector_registration`
     );
   const goToCustom = () =>
     KibanaLogic.values.navigateToUrl(

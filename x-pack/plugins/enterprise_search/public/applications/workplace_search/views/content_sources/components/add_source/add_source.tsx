@@ -35,16 +35,9 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
   const { initializeAddSource, setAddSourceStep, saveSourceConfig, resetSourceState } =
     useActions(AddSourceLogic);
   const { addSourceCurrentStep, sourceConfigData, dataLoading } = useValues(AddSourceLogic);
-  const { needsPermissions, accountContextOnly, privateSourcesEnabled } = sourceConfigData;
-  const {
-    name,
-    categories = [],
-    baseServiceType,
-    serviceType,
-    configuration,
-    features,
-    objTypes,
-  } = props.sourceData;
+  const { name, categories, needsPermissions, accountContextOnly, privateSourcesEnabled } =
+    sourceConfigData;
+  const { baseServiceType, serviceType, configuration, features, objTypes } = props.sourceData;
   const { isOrganization } = useValues(AppLogic);
   useEffect(() => {
     initializeAddSource(props);

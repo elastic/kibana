@@ -315,8 +315,11 @@ export const mergeServerAndStaticData = (
     const serverItem =
       staticItem.serviceType === 'custom'
         ? undefined
-        : // this should search by baseServiceType when the BE support baseServiceTypes for external sources
-          serverData.find(({ serviceType }) => serviceType === staticItem.serviceType);
+        : serverData.find(
+            ({ serviceType, baseServiceType }) =>
+              serviceType === staticItem.serviceType &&
+              baseServiceType === staticItem.baseServiceType
+          );
     const connectedSource =
       staticItem.serviceType === 'custom'
         ? contentSources.find(
@@ -330,8 +333,6 @@ export const mergeServerAndStaticData = (
       ...staticItem,
       ...serverItem,
       connected: !!connectedSource,
-      // this should search by baseServiceType when the BE support baseServiceTypes for external sources
-      name: staticItem.name,
     };
   });
 
