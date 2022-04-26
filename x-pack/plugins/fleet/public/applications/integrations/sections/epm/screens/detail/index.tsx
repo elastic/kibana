@@ -35,7 +35,7 @@ import {
   useAuthz,
   usePermissionCheck,
 } from '../../../../hooks';
-import { PLUGIN_ID, INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
+import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { useGetPackageInfoByKey, useLink, useAgentPolicyContext } from '../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 import type { DetailViewPanelName, PackageInfo } from '../../../../types';
@@ -45,7 +45,7 @@ import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
 import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from '../../components/release_badge';
 
-import { getInstallRouteOptions } from './utils';
+import { getInstallPkgRouteOptions } from './utils';
 
 import {
   IntegrationAgentPolicyCount,
@@ -264,14 +264,14 @@ export function Detail() {
         hash,
       });
 
-      const navigateOptions = getInstallRouteOptions({
+      const navigateOptions = getInstallPkgRouteOptions({
         currentPath,
         integration,
         agentPolicyId: agentPolicyIdFromContext,
         pkgkey,
       });
 
-      services.application.navigateToApp(PLUGIN_ID, navigateOptions);
+      services.application.navigateToApp(...navigateOptions);
     },
     [
       history,

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getInstallRouteOptions } from './get_install_route_options';
+export { getInstallPkgRouteOptions } from './get_install_route_options';

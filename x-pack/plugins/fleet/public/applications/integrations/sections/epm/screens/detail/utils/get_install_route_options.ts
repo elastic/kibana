@@ -7,7 +7,11 @@
 import type { CreatePackagePolicyRouteState } from '../../../../../types';
 import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, pagePathGetters } from '../../../../../constants';
 
-export const getInstallRouteOptions = ({
+/*
+ * When the install package button is pressed, this fn decides which page to navigate to
+ * by generating the options to be passed to `services.application.navigateToApp`.
+ */
+export const getInstallPkgRouteOptions = ({
   currentPath,
   integration,
   agentPolicyId,
@@ -17,7 +21,7 @@ export const getInstallRouteOptions = ({
   integration: string | null;
   agentPolicyId?: string;
   pkgkey: string;
-}): { path: string; state: unknown } => {
+}): [string, { path: string; state: unknown }] => {
   const integrationOpts: { integration?: string } = integration ? { integration } : {};
   const path = pagePathGetters.add_integration_to_policy({
     pkgkey,
@@ -74,5 +78,5 @@ export const getInstallRouteOptions = ({
     onCancelUrl: currentPath,
   };
 
-  return { path, state };
+  return [PLUGIN_ID, { path, state }];
 };
