@@ -757,6 +757,7 @@ export const LensTopNavMenu = ({
       data-test-subj="lnsApp_topNav"
       screenTitle={'lens'}
       appName={'lens'}
+      displayStyle="detached"
     />
   );
 };

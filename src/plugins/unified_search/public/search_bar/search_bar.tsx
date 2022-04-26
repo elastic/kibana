@@ -5,16 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import './search_bar.scss';
-// TODO: Can we get hooks working in this component to pass the EuiTheme through?
-// import { SearchBarStyles } from './search_bar.styles';
 
 import { compact } from 'lodash';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import { get, isEqual } from 'lodash';
-import { EuiIconProps } from '@elastic/eui';
+import { EuiIconProps, withEuiTheme, WithEuiThemeProps } from '@elastic/eui';
 import memoizeOne from 'memoize-one';
 
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -25,12 +22,14 @@ import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
 import { IDataPluginServices } from '@kbn/data-plugin/public';
 import { TimeRange } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/public';
+
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementList } from '../saved_query_management';
 import { QueryBarMenu } from '../query_string_input/query_bar_menu';
 import type { DataViewPickerProps } from '../dataview_picker';
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
+import { SearchBarStyles } from './search_bar.styles';
 
 export interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
@@ -102,7 +101,7 @@ interface State {
   dateRangeTo: string;
 }
 
-class SearchBarUI extends Component<SearchBarProps, State> {
+class SearchBarUI extends Component<SearchBarProps & WithEuiThemeProps, State> {
   public static defaultProps = {
     showQueryBar: true,
     showFilterBar: true,
@@ -341,6 +340,17 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 
   public render() {
+    const { theme } = this.props;
+    const styles = SearchBarStyles(theme);
+    const cssStyles = [
+      styles.uniSearchBar,
+      this.props.displayStyle && styles[this.props.displayStyle],
+    ];
+
+    const classes = classNames('uniSearchBar', {
+      [`uniSearchBar--${this.props.displayStyle}`]: this.props.displayStyle,
+    });
+
     const timeRangeForSuggestionsOverride = this.props.showDatePicker ? undefined : false;
 
     const saveAsNewQueryFormComponent = (
@@ -421,12 +431,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       );
     }
 
-    const classes = classNames('uniSearchBar', {
-      [`uniSearchBar--${this.props.displayStyle}`]: this.props.displayStyle,
-    });
-
     return (
-      <div className={classes} data-test-subj="globalQueryBar">
+      <div className={classes} css={cssStyles} data-test-subj="globalQueryBar">
         <QueryBarTopRow
           timeHistory={this.props.timeHistory}
           query={this.state.query}
@@ -500,4 +506,4 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
-export default injectI18n(withKibana(SearchBarUI));
+export default injectI18n(withEuiTheme(withKibana(SearchBarUI)));

@@ -17,6 +17,7 @@ const startMock = coreMock.createStart();
 
 import { mount } from 'enzyme';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { EuiThemeProvider } from '@elastic/eui';
 
 const mockTimeHistory = {
   get: () => {
@@ -108,11 +109,13 @@ function wrapSearchBarInContext(testProps: any) {
   };
 
   return (
-    <I18nProvider>
-      <KibanaContextProvider services={services}>
-        <SearchBar.WrappedComponent {...defaultOptions} {...testProps} />
-      </KibanaContextProvider>
-    </I18nProvider>
+    <EuiThemeProvider>
+      <I18nProvider>
+        <KibanaContextProvider services={services}>
+          <SearchBar.WrappedComponent {...defaultOptions} {...testProps} />
+        </KibanaContextProvider>
+      </I18nProvider>
+    </EuiThemeProvider>
   );
 }
 

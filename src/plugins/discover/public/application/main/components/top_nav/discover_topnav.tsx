@@ -197,6 +197,7 @@ export const DiscoverTopNav = ({
       showSearchBar={true}
       useDefaultBehaviors={true}
       dataViewPickerComponentProps={dataViewPickerProps}
+      displayStyle="detached"
     />
   );
 };
