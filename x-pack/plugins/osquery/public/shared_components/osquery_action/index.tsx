@@ -141,7 +141,7 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ agentId, formTyp
   return <LiveQuery formType={formType} agentId={agentId} isExternal={true} />;
 };
 
-const OsqueryAction = React.memo(OsqueryActionComponent);
+export const OsqueryAction = React.memo(OsqueryActionComponent);
 
 // @ts-expect-error update types
 const OsqueryActionWrapperComponent = ({ services, agentId, formType, isExternal }) => (
