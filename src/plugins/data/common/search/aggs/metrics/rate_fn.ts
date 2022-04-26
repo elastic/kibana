@@ -7,73 +7,63 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Assign } from '@kbn/utility-types';
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '..';
 
-export const aggBucketSumFnName = 'aggBucketSum';
+export const aggRateFnName = 'aggRate';
 
 type Input = any;
-type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.SUM_BUCKET>;
-type Arguments = Assign<
-  AggArgs,
-  { customBucket?: AggExpressionType; customMetric?: AggExpressionType; emptyAsNull?: boolean }
->;
+type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.RATE>;
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<
-  typeof aggBucketSumFnName,
+  typeof aggRateFnName,
   Input,
-  Arguments,
+  AggArgs,
   Output
 >;
 
-export const aggBucketSum = (): FunctionDefinition => ({
-  name: aggBucketSumFnName,
-  help: i18n.translate('data.search.aggs.function.metrics.bucket_sum.help', {
-    defaultMessage: 'Generates a serialized agg config for a Sum Bucket agg',
+export const aggRate = (): FunctionDefinition => ({
+  name: aggRateFnName,
+  help: i18n.translate('data.search.aggs.function.metrics.rate.help', {
+    defaultMessage: 'Generates a serialized agg config for a Rate agg',
   }),
   type: 'agg_type',
   args: {
     id: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.metrics.bucket_sum.id.help', {
+      help: i18n.translate('data.search.aggs.metrics.rate.id.help', {
         defaultMessage: 'ID for this aggregation',
       }),
     },
     enabled: {
       types: ['boolean'],
       default: true,
-      help: i18n.translate('data.search.aggs.metrics.bucket_sum.enabled.help', {
+      help: i18n.translate('data.search.aggs.metrics.rate.enabled.help', {
         defaultMessage: 'Specifies whether this aggregation should be enabled',
       }),
     },
     schema: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.metrics.bucket_sum.schema.help', {
+      help: i18n.translate('data.search.aggs.metrics.rate.schema.help', {
         defaultMessage: 'Schema to use for this aggregation',
       }),
     },
-    customBucket: {
-      types: ['agg_type'],
-      help: i18n.translate('data.search.aggs.metrics.bucket_sum.customBucket.help', {
-        defaultMessage: 'Agg config to use for building sibling pipeline aggregations',
-      }),
-    },
-    customMetric: {
-      types: ['agg_type'],
-      help: i18n.translate('data.search.aggs.metrics.bucket_sum.customMetric.help', {
-        defaultMessage: 'Agg config to use for building sibling pipeline aggregations',
+    field: {
+      types: ['string'],
+      required: true,
+      help: i18n.translate('data.search.aggs.metrics.rate.field.help', {
+        defaultMessage: 'Field to use for this aggregation',
       }),
     },
     json: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.metrics.bucket_sum.json.help', {
+      help: i18n.translate('data.search.aggs.metrics.rate.json.help', {
         defaultMessage: 'Advanced json to include when the agg is sent to Elasticsearch',
       }),
     },
     customLabel: {
       types: ['string'],
-      help: i18n.translate('data.search.aggs.metrics.bucket_sum.customLabel.help', {
+      help: i18n.translate('data.search.aggs.metrics.rate.customLabel.help', {
         defaultMessage: 'Represents a custom label for this aggregation',
       }),
     },
@@ -101,11 +91,9 @@ export const aggBucketSum = (): FunctionDefinition => ({
         id,
         enabled,
         schema,
-        type: METRIC_TYPES.SUM_BUCKET,
+        type: METRIC_TYPES.SUM,
         params: {
           ...rest,
-          customBucket: args.customBucket?.value,
-          customMetric: args.customMetric?.value,
         },
       },
     };

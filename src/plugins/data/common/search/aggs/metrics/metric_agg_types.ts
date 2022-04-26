@@ -26,6 +26,7 @@ export enum METRIC_TYPES {
   MOVING_FN = 'moving_avg',
   SERIAL_DIFF = 'serial_diff',
   SUM = 'sum',
+  RATE = 'rate',
   TOP_HITS = 'top_hits',
   TOP_METRICS = 'top_metrics',
   PERCENTILES = 'percentiles',

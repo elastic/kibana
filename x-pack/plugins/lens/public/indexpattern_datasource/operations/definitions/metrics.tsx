@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { buildExpressionFunction, buildExpression } from '@kbn/expressions-plugin/public';
 import { OperationDefinition, ParamEditorProps } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -36,6 +36,7 @@ type MetricColumn<T> = FieldBasedIndexPatternColumn & {
   params?: {
     emptyAsNull?: boolean;
     format?: ValueFormatConfig;
+    aggregate?: string;
   };
 };
 
@@ -86,6 +87,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     description,
     input: 'field',
     timeScalingMode: optionalTimeScaling ? 'optional' : undefined,
+    operationParams: [{ name: 'aggregate', type: 'string', required: false }],
     getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
       if (
         (supportedTypes.includes(fieldType) || (supportsDate && fieldType === 'date')) &&
@@ -127,6 +129,13 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         timeShift: columnParams?.shift || previousColumn?.timeShift,
         params: {
           ...getFormatFromPreviousColumn(previousColumn),
+          aggregate: columnParams?.aggregate
+            ? columnParams.aggregate
+            : previousColumn && isColumnOfType<T>(type, previousColumn)
+            ? previousColumn.params?.aggregate
+            : field?.indices.every((index) => index.time_series_metric)
+            ? 'Sum'
+            : undefined,
           emptyAsNull:
             hideZeroOption && previousColumn && isColumnOfType<T>(type, previousColumn)
               ? previousColumn.params?.emptyAsNull
@@ -180,15 +189,78 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         },
       ];
     },
+    paramEditor: ({ layer, currentColumn, layerId, indexPattern, columnId, updateLayer }) => {
+      const field = indexPattern.getFieldByName(currentColumn.sourceField);
+      if (!field?.indices.every((index) => index.time_series_metric)) {
+        return null;
+      }
+      return (
+        <EuiFormRow label={<>Collapse by </>} display="rowCompressed" fullWidth>
+          <EuiSelect
+            compressed
+            data-test-subj="indexPattern-terms-orderBy"
+            options={[
+              { text: 'sum', value: 'Sum' },
+              { text: 'min', value: 'Min' },
+              { text: 'max', value: 'Max' },
+              { text: 'avg', value: 'Avg' },
+            ]}
+            value={currentColumn.params?.aggregate || 'sum'}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+              updateLayer(
+                updateColumnParam({
+                  layer,
+                  columnId,
+                  paramName: 'aggregate',
+                  value: e.target.value,
+                })
+              );
+            }}
+          />
+        </EuiFormRow>
+      );
+    },
     toEsAggsFn: (column, columnId, _indexPattern) => {
-      return buildExpressionFunction(typeToFn[type], {
+      if (!column.params!.aggregate) {
+        return buildExpressionFunction(typeToFn[type], {
+          id: columnId,
+          enabled: true,
+          schema: 'metric',
+          field: column.sourceField,
+          // time shift is added to wrapping aggFilteredMetric if filter is set
+          timeShift: column.filter ? undefined : column.timeShift,
+          emptyAsNull: hideZeroOption ? column.params?.emptyAsNull : undefined,
+        }).toAst();
+      }
+      return buildExpressionFunction(`aggBucket${column.params!.aggregate}`, {
         id: columnId,
         enabled: true,
         schema: 'metric',
-        field: column.sourceField,
         // time shift is added to wrapping aggFilteredMetric if filter is set
         timeShift: column.filter ? undefined : column.timeShift,
-        emptyAsNull: hideZeroOption ? column.params?.emptyAsNull : undefined,
+        customMetric: buildExpression([
+          buildExpressionFunction(typeToFn[type], {
+            id: `${columnId}-metric`,
+            enabled: true,
+            schema: 'metric',
+            field: column.sourceField,
+            emptyAsNull: hideZeroOption ? column.params?.emptyAsNull : undefined,
+          }),
+        ]).toAst(),
+        emptyAsNull:
+          column.params?.aggregate === 'Sum' && column.params?.emptyAsNull !== false
+            ? true
+            : undefined,
+        customBucket: buildExpression([
+          buildExpressionFunction('aggMultiTerms', {
+            id: `${columnId}-bucket`,
+            enabled: true,
+            schema: 'bucket',
+            fields: _indexPattern.fields
+              .filter((f) => f.indices && f.indices.every((i) => i.time_series_dimension))
+              .map((i) => i.name),
+          }),
+        ]).toAst(),
       }).toAst();
     },
     getErrorMessage: (layer, columnId, indexPattern) =>

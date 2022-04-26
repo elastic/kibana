@@ -95,7 +95,8 @@ import { AggParamsDiversifiedSampler } from './buckets/diversified_sampler';
 import { AggParamsSignificantText } from './buckets/significant_text';
 import { AggParamsTopMetrics } from './metrics/top_metrics';
 import { aggTopMetrics } from './metrics/top_metrics_fn';
-import { AggParamsCount } from './metrics';
+import { AggParamsCount, aggRate } from './metrics';
+import { AggParamsRate } from './metrics/rate';
 
 export type { IAggConfig, AggConfigSerialized } from './agg_config';
 export type { CreateAggConfigParams, IAggConfigs } from './agg_configs';
@@ -178,6 +179,7 @@ export interface AggParamsMapping {
   [METRIC_TYPES.MIN]: AggParamsMin;
   [METRIC_TYPES.STD_DEV]: AggParamsStdDeviation;
   [METRIC_TYPES.SUM]: AggParamsSum;
+  [METRIC_TYPES.RATE]: AggParamsRate;
   [METRIC_TYPES.AVG_BUCKET]: AggParamsBucketAvg;
   [METRIC_TYPES.MAX_BUCKET]: AggParamsBucketMax;
   [METRIC_TYPES.MIN_BUCKET]: AggParamsBucketMin;
@@ -232,6 +234,7 @@ export interface AggFunctionsMapping {
   aggSerialDiff: ReturnType<typeof aggSerialDiff>;
   aggStdDeviation: ReturnType<typeof aggStdDeviation>;
   aggSum: ReturnType<typeof aggSum>;
+  aggRate: ReturnType<typeof aggRate>;
   aggTopHit: ReturnType<typeof aggTopHit>;
   aggTopMetrics: ReturnType<typeof aggTopMetrics>;
 }

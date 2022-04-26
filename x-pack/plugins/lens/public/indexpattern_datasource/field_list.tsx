@@ -78,13 +78,15 @@ export const FieldList = React.memo(function FieldList({
 }) {
   const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
   const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
-  const [accordionState, setAccordionState] = useState<Partial<Record<string, boolean>>>(() =>
-    Object.fromEntries(
+  const [accordionState, setAccordionState] = useState<Partial<Record<string, boolean>>>(() => ({
+    ...Object.fromEntries(
       Object.entries(fieldGroups)
         .filter(([, { showInAccordion }]) => showInAccordion)
         .map(([key, { isInitiallyOpen }]) => [key, isInitiallyOpen])
-    )
-  );
+    ),
+    Metrics: true,
+    Dimensions: true,
+  }));
 
   useEffect(() => {
     // Reset the scroll if we have made material changes to the field list

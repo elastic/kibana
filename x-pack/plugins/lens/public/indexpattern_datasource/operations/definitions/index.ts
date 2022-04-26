@@ -439,6 +439,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
       lucene?: string;
       shift?: string;
       usedInMath?: boolean;
+      aggregate?: string;
     }
   ) => C;
   /**

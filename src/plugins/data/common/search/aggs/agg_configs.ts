@@ -50,6 +50,14 @@ function parseParentAggs(dslLvlCursor: any, dsl: any) {
       parseParentAggs(dslLvlCursor, agg);
     });
   }
+  if (dsl.aggs) {
+    _.each(dsl.aggs, (agg, key) => {
+      if (agg.parentAggs) {
+        dsl.aggs = { ...dsl.aggs, ...agg.parentAggs };
+        delete agg.parentAggs;
+      }
+    });
+  }
 }
 
 export interface AggConfigsOptions {

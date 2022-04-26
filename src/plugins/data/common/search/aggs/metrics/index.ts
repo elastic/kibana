@@ -54,6 +54,8 @@ export * from './std_deviation_fn';
 export * from './std_deviation';
 export * from './sum_fn';
 export * from './sum';
+export * from './rate_fn';
+export * from './rate';
 export * from './top_hit_fn';
 export * from './top_hit';
 export * from './top_metrics';

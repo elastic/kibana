@@ -20,7 +20,9 @@ export const siblingPipelineAggWriter = (agg: IMetricAggConfig, output: Record<s
   // if a bucket is selected, we must add this agg as a sibling to it, and add a metric to that bucket (or select one of its)
   if (metricAgg.type.name !== METRIC_TYPES.COUNT) {
     bucketAgg.subAggs = (output.subAggs || []).concat(metricAgg);
-    output.params.buckets_path = `${bucketAgg.id}>${metricAgg.id}`;
+    output.params.buckets_path = `${bucketAgg.id}>${
+      metricAgg.getValueBucketPath?.() || metricAgg.id
+    }`;
   } else {
     output.params.buckets_path = bucketAgg.id + '>_count';
   }
