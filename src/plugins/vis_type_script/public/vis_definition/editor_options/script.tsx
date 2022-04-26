@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { EuiPanel, EuiTitle, EuiLink, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -66,7 +66,8 @@ const provideSuggestions = (
         value: 'Runs an Elasticsearch query',
         isTrusted: true,
       },
-      insertText: 'searchEs(',
+      insertText: 'searchEs({\n\tquery: {\n\t\t$0\n\t}\n})',
+      insertTextRules: monacoEditor.languages.CompletionItemInsertTextRule.InsertAsSnippet,
       range: wordRange,
     });
   }
@@ -118,6 +119,7 @@ function ScriptOptions({ stateParams, setValue }: VisEditorOptionsProps<VisParam
               triggerCharacters: ['K', '.'],
               provideCompletionItems: provideSuggestions,
             }}
+            editorDidMount={(editor) => editor.focus()}
             fullWidth={true}
             data-test-subj="scriptTextarea"
           />

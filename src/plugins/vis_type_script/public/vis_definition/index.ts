@@ -37,19 +37,19 @@ export const scriptVisDefinition: VisTypeDefinition<VisParams> = {
   editorConfig: {
     optionTabs: [
       {
-        name: 'advanced',
-        title: i18n.translate('visTypeMarkdown.tabs.dataText', {
-          defaultMessage: 'Data',
+        name: 'script',
+        title: i18n.translate('visTypeScript.tabs.script', {
+          defaultMessage: 'Script',
         }),
         editor: ScriptOptions,
       },
-      {
-        name: 'options',
-        title: i18n.translate('visTypeMarkdown.tabs.optionsText', {
-          defaultMessage: 'Options',
-        }),
-        editor: SettingsOptions,
-      },
+      // {
+      //   name: 'options',
+      //   title: i18n.translate('visTypeMarkdown.tabs.optionsText', {
+      //     defaultMessage: 'Options',
+      //   }),
+      //   editor: SettingsOptions,
+      // },
     ],
     enableAutoApply: true,
     defaultSize: DefaultEditorSize.LARGE,
