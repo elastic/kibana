@@ -83,6 +83,7 @@ test('successfully executes', async () => {
     name: actionSavedObject.id,
     ...pick(actionSavedObject.attributes, 'actionTypeId', 'config'),
     isPreconfigured: false,
+    isDeprecated: false,
   };
   actionsClient.get.mockResolvedValueOnce(actionResult);
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
@@ -206,6 +207,7 @@ test('successfully executes as a task', async () => {
     name: actionSavedObject.id,
     ...pick(actionSavedObject.attributes, 'actionTypeId', 'config'),
     isPreconfigured: false,
+    isDeprecated: false,
   };
   actionsClient.get.mockResolvedValueOnce(actionResult);
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
@@ -249,6 +251,7 @@ test('provides empty config when config and / or secrets is empty', async () => 
     name: actionSavedObject.id,
     actionTypeId: actionSavedObject.attributes.actionTypeId,
     isPreconfigured: false,
+    isDeprecated: false,
   };
   actionsClient.get.mockResolvedValueOnce(actionResult);
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
@@ -285,6 +288,7 @@ test('throws an error when config is invalid', async () => {
     name: actionSavedObject.id,
     actionTypeId: actionSavedObject.attributes.actionTypeId,
     isPreconfigured: false,
+    isDeprecated: false,
   };
   actionsClient.get.mockResolvedValueOnce(actionResult);
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
@@ -324,6 +328,7 @@ test('throws an error when connector is invalid', async () => {
     name: actionSavedObject.id,
     actionTypeId: actionSavedObject.attributes.actionTypeId,
     isPreconfigured: false,
+    isDeprecated: false,
   };
   actionsClient.get.mockResolvedValueOnce(actionResult);
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
@@ -363,6 +368,7 @@ test('throws an error when params is invalid', async () => {
     name: actionSavedObject.id,
     actionTypeId: actionSavedObject.attributes.actionTypeId,
     isPreconfigured: false,
+    isDeprecated: false,
   };
   actionsClient.get.mockResolvedValueOnce(actionResult);
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
@@ -404,6 +410,7 @@ test('throws an error if actionType is not enabled', async () => {
     name: actionSavedObject.id,
     actionTypeId: actionSavedObject.attributes.actionTypeId,
     isPreconfigured: false,
+    isDeprecated: false,
   };
   actionsClient.get.mockResolvedValueOnce(actionResult);
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
@@ -444,6 +451,7 @@ test('should not throws an error if actionType is preconfigured', async () => {
     name: actionSavedObject.id,
     ...pick(actionSavedObject.attributes, 'actionTypeId', 'config', 'secrets'),
     isPreconfigured: false,
+    isDeprecated: false,
   };
   actionsClient.get.mockResolvedValueOnce(actionResult);
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
@@ -789,6 +797,7 @@ function setupActionExecutorMock() {
     name: actionSavedObject.name,
     ...pick(actionSavedObject.attributes, 'actionTypeId', 'config'),
     isPreconfigured: false,
+    isDeprecated: false,
   };
   actionsClient.get.mockResolvedValueOnce(actionResult);
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
