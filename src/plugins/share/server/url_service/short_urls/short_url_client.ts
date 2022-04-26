@@ -7,7 +7,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { SavedObjectReference } from 'kibana/server';
+import { SavedObjectReference } from '@kbn/core/server';
 import { generateSlug } from 'random-word-slugs';
 import { ShortUrlRecord } from '.';
 import type {

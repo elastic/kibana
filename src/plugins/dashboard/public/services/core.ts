@@ -13,5 +13,5 @@ export type {
   PluginInitializerContext,
   NotificationsStart,
   ApplicationStart,
-} from '../../../../core/public';
-export { ScopedHistory } from '../../../../core/public';
+} from '@kbn/core/public';
+export { ScopedHistory } from '@kbn/core/public';

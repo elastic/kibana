@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { UsageCollectionSetup, UsageCounter } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import {
   PluginInitializerContext,
   Plugin,
@@ -18,18 +18,23 @@ import {
   ElasticsearchServiceStart,
   SavedObjectsClientContract,
   SavedObjectsBulkGetObject,
-} from '../../../../src/core/server';
+} from '@kbn/core/server';
 
 import {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
-} from '../../encrypted_saved_objects/server';
-import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
-import { SpacesPluginStart, SpacesPluginSetup } from '../../spaces/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { SecurityPluginSetup } from '../../security/server';
+} from '@kbn/encrypted-saved-objects-plugin/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { IEventLogger, IEventLogService } from '@kbn/event-log-plugin/server';
+import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import {
   ensureCleanupFailedExecutionsTaskScheduled,
   registerCleanupFailedExecutionsTaskDefinition,
@@ -65,7 +70,6 @@ import {
 import { getActionsConfigurationUtilities } from './actions_config';
 
 import { defineRoutes } from './routes';
-import { IEventLogger, IEventLogService } from '../../event_log/server';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import {
   ACTION_SAVED_OBJECT_TYPE,
@@ -89,7 +93,10 @@ import { ACTIONS_FEATURE_ID, AlertHistoryEsIndexConnectorId } from '../common';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
 import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
 import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
-import { MonitoringCollectionSetup } from '../../monitoring_collection/server';
+import {
+  isConnectorDeprecated,
+  ConnectorWithOptionalDeprecation,
+} from './lib/is_conector_deprecated';
 
 export interface PluginSetupContract {
   registerType<
@@ -218,10 +225,14 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
     for (const preconfiguredId of Object.keys(this.actionsConfig.preconfigured)) {
       if (preconfiguredId !== AlertHistoryEsIndexConnectorId) {
-        this.preconfiguredActions.push({
+        const rawPreconfiguredConnector: ConnectorWithOptionalDeprecation = {
           ...this.actionsConfig.preconfigured[preconfiguredId],
           id: preconfiguredId,
           isPreconfigured: true,
+        };
+        this.preconfiguredActions.push({
+          ...rawPreconfiguredConnector,
+          isDeprecated: isConnectorDeprecated(rawPreconfiguredConnector),
         });
       } else {
         this.logger.warn(
@@ -303,6 +314,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     defineRoutes(
       core.http.createRouter<ActionsRequestHandlerContext>(),
       this.licenseState,
+      actionsConfigUtils,
       this.usageCounter
     );
 
@@ -551,6 +563,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     return async function actionsRouteHandlerContext(context, request) {
       const [{ savedObjects }, { taskManager, encryptedSavedObjects }] =
         await core.getStartServices();
+      const coreContext = await context.core;
+
       return {
         getActionsClient: () => {
           if (isESOCanEncrypt !== true) {
@@ -566,7 +580,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             unsecuredSavedObjectsClient,
             actionTypeRegistry: actionTypeRegistry!,
             defaultKibanaIndex,
-            scopedClusterClient: context.core.elasticsearch.client,
+            scopedClusterClient: coreContext.elasticsearch.client,
             preconfiguredActions,
             request,
             authorization: instantiateAuthorization(request),

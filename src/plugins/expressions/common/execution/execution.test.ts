@@ -12,7 +12,7 @@ import { TestScheduler } from 'rxjs/testing';
 import { Execution } from './execution';
 import { parseExpression, ExpressionAstExpression } from '../ast';
 import { createUnitTestExecutor } from '../test_helpers';
-import { ExpressionFunctionDefinition } from '../../common';
+import { ExpressionFunctionDefinition } from '..';
 import { ExecutionContract } from './execution_contract';
 
 beforeAll(() => {

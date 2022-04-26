@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IAnonymousPaths, IBasePath } from 'src/core/public';
+import { IAnonymousPaths, IBasePath } from '..';
 import { CoreService } from '../../types';
 
 interface Deps {

@@ -7,10 +7,10 @@
  */
 
 import { countBy, groupBy, mapValues, max, min, values } from 'lodash';
+import type { SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
 import { getPastDays } from './get_past_days';
 
-import type { SavedObjectsClientContract, SavedObjectsFindResult } from '../../../../core/server';
-import type { SavedVisState } from '../../../visualizations/common';
+import type { SavedVisState } from '../../common';
 
 interface VisSummary {
   type: string;

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Logger, CoreStart, IScopedClusterClient } from 'kibana/server';
+import { Logger, CoreStart, IScopedClusterClient } from '@kbn/core/server';
 import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
   TaskInstance,
-} from '../../../task_manager/server';
-import type { SecurityPluginSetup } from '../../../security/server';
+} from '@kbn/task-manager-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { savedObjectClientsFactory } from './util';
 import { mlSavedObjectServiceFactory } from './service';
 import { syncSavedObjectsFactory } from './sync';

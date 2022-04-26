@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { showSaveModal } from '../../../../../../saved_objects/public';
-jest.mock('../../../../../../saved_objects/public');
+import { showSaveModal } from '@kbn/saved-objects-plugin/public';
+jest.mock('@kbn/saved-objects-plugin/public');
 
 import { onSaveSearch } from './on_save_search';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { DiscoverServices } from '../../../../build_services';
 import { GetStateReturn } from '../../services/discover_state';
-import { i18nServiceMock } from '../../../../../../../core/public/mocks';
+import { i18nServiceMock } from '@kbn/core/public/mocks';
 
 test('onSaveSearch', async () => {
   const serviceMock = {

@@ -10,7 +10,7 @@ import {
   KibanaRequest,
   Logger,
   SavedObjectsClientContract,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import { LogView, LogViewAttributes } from '../../../common/log_views';
 import { LogViewsClient } from './log_views_client';
 import { LogViewsServiceSetup, LogViewsServiceStart, LogViewsServiceStartDeps } from './types';

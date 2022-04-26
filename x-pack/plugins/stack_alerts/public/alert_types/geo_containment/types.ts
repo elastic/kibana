@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RuleTypeParams } from '../../../../alerting/common';
-import { Query } from '../../../../../../src/plugins/data/common';
+import { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { Query } from '@kbn/data-plugin/common';
 
 export interface GeoContainmentAlertParams extends RuleTypeParams {
   index: string;

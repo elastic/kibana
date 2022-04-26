@@ -9,9 +9,9 @@
 import { History } from 'history';
 import React, { useEffect, useMemo } from 'react';
 
+import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { useDashboardSelector } from './state';
 import { useDashboardAppState } from './hooks';
-import { useKibana, useExecutionContext } from '../../../kibana_react/public';
 import {
   getDashboardBreadcrumb,
   getDashboardTitle,

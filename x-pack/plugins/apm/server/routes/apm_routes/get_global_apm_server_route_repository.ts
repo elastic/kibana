@@ -39,7 +39,7 @@ import { suggestionsRouteRepository } from '../suggestions/route';
 import { agentKeysRouteRepository } from '../agent_keys/route';
 import { storageExplorerRouteRepository } from '../settings/storage_explorer/route';
 
-const getTypedGlobalApmServerRouteRepository = () => {
+function getTypedGlobalApmServerRouteRepository() {
   const repository = {
     ...dataViewRouteRepository,
     ...environmentsRouteRepository,
@@ -72,7 +72,7 @@ const getTypedGlobalApmServerRouteRepository = () => {
   };
 
   return repository;
-};
+}
 
 const getGlobalApmServerRouteRepository = (): ServerRouteRepository => {
   return getTypedGlobalApmServerRouteRepository();

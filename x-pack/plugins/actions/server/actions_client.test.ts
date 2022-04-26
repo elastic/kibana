@@ -13,19 +13,16 @@ import { ActionTypeRegistry, ActionTypeRegistryOpts } from './action_type_regist
 import { ActionsClient } from './actions_client';
 import { ExecutorType, ActionType } from './types';
 import { ActionExecutor, TaskRunnerFactory, ILicenseState } from './lib';
-import { taskManagerMock } from '../../task_manager/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { actionsConfigMock } from './actions_config.mock';
 import { getActionsConfigurationUtilities } from './actions_config';
 import { licenseStateMock } from './lib/license_state.mock';
-import { licensingMock } from '../../licensing/server/mocks';
-import { httpServerMock, loggingSystemMock } from '../../../../src/core/server/mocks';
-import { auditLoggerMock } from '../../security/server/audit/mocks';
-import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 
-import {
-  elasticsearchServiceMock,
-  savedObjectsClientMock,
-} from '../../../../src/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { actionExecutorMock } from './lib/action_executor.mock';
 import uuid from 'uuid';
 import { ActionsAuthorization } from './authorization/actions_authorization';
@@ -36,12 +33,12 @@ import {
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
 import { trackLegacyRBACExemption } from './lib/track_legacy_rbac_exemption';
 import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
-import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
-import { Logger } from 'kibana/server';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { Logger } from '@kbn/core/server';
 import { connectorTokenClientMock } from './builtin_action_types/lib/connector_token_client.mock';
 import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
 
-jest.mock('../../../../src/core/server/saved_objects/service/lib/utils', () => ({
+jest.mock('@kbn/core/server/saved_objects/service/lib/utils', () => ({
   SavedObjectsUtils: {
     generateId: () => 'mock-saved-object-id',
   },
@@ -314,6 +311,7 @@ describe('create()', () => {
     expect(result).toEqual({
       id: '1',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'my name',
       actionTypeId: 'my-action-type',
       isMissingSecrets: false,
@@ -446,6 +444,7 @@ describe('create()', () => {
     expect(result).toEqual({
       id: '1',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'my name',
       actionTypeId: 'my-action-type',
       isMissingSecrets: false,
@@ -635,6 +634,7 @@ describe('get()', () => {
               test: 'test1',
             },
             isPreconfigured: true,
+            isDeprecated: false,
             name: 'test',
             config: {
               foo: 'bar',
@@ -692,6 +692,7 @@ describe('get()', () => {
               test: 'test1',
             },
             isPreconfigured: true,
+            isDeprecated: false,
             name: 'test',
             config: {
               foo: 'bar',
@@ -781,6 +782,7 @@ describe('get()', () => {
     expect(result).toEqual({
       id: '1',
       isPreconfigured: false,
+      isDeprecated: false,
     });
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
@@ -810,6 +812,7 @@ describe('get()', () => {
             test: 'test1',
           },
           isPreconfigured: true,
+          isDeprecated: false,
           name: 'test',
           config: {
             foo: 'bar',
@@ -824,6 +827,7 @@ describe('get()', () => {
       id: 'testPreconfigured',
       actionTypeId: '.slack',
       isPreconfigured: true,
+      isDeprecated: false,
       name: 'test',
     });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
@@ -879,6 +883,7 @@ describe('getAll()', () => {
             actionTypeId: '.slack',
             secrets: {},
             isPreconfigured: true,
+            isDeprecated: false,
             name: 'test',
             config: {
               foo: 'bar',
@@ -1018,6 +1023,7 @@ describe('getAll()', () => {
           actionTypeId: '.slack',
           secrets: {},
           isPreconfigured: true,
+          isDeprecated: false,
           name: 'test',
           config: {
             foo: 'bar',
@@ -1031,6 +1037,7 @@ describe('getAll()', () => {
       {
         id: '1',
         isPreconfigured: false,
+        isDeprecated: false,
         name: 'test',
         config: {
           foo: 'bar',
@@ -1042,6 +1049,7 @@ describe('getAll()', () => {
         id: 'testPreconfigured',
         actionTypeId: '.slack',
         isPreconfigured: true,
+        isDeprecated: false,
         name: 'test',
         referencedByCount: 2,
       },
@@ -1095,6 +1103,7 @@ describe('getBulk()', () => {
             actionTypeId: '.slack',
             secrets: {},
             isPreconfigured: true,
+            isDeprecated: false,
             name: 'test',
             config: {
               foo: 'bar',
@@ -1228,6 +1237,7 @@ describe('getBulk()', () => {
           actionTypeId: '.slack',
           secrets: {},
           isPreconfigured: true,
+          isDeprecated: false,
           name: 'test',
           config: {
             foo: 'bar',
@@ -1245,6 +1255,7 @@ describe('getBulk()', () => {
         },
         id: 'testPreconfigured',
         isPreconfigured: true,
+        isDeprecated: false,
         name: 'test',
         secrets: {},
       },
@@ -1256,6 +1267,7 @@ describe('getBulk()', () => {
         id: '1',
         isMissingSecrets: false,
         isPreconfigured: false,
+        isDeprecated: false,
         name: 'test',
       },
     ]);
@@ -1461,6 +1473,7 @@ describe('update()', () => {
     expect(result).toEqual({
       id: 'my-action',
       isPreconfigured: false,
+      isDeprecated: false,
       actionTypeId: 'my-action-type',
       isMissingSecrets: false,
       name: 'my name',
@@ -1532,6 +1545,7 @@ describe('update()', () => {
     expect(result).toEqual({
       id: 'my-action',
       isPreconfigured: false,
+      isDeprecated: false,
       actionTypeId: 'my-action-type',
       isMissingSecrets: true,
       name: 'my name',
@@ -1671,6 +1685,7 @@ describe('update()', () => {
     expect(result).toEqual({
       id: 'my-action',
       isPreconfigured: false,
+      isDeprecated: false,
       actionTypeId: 'my-action-type',
       isMissingSecrets: true,
       name: 'my name',
@@ -2003,6 +2018,7 @@ describe('isPreconfigured()', () => {
             test: 'test1',
           },
           isPreconfigured: true,
+          isDeprecated: false,
           name: 'test',
           config: {
             foo: 'bar',
@@ -2038,6 +2054,7 @@ describe('isPreconfigured()', () => {
             test: 'test1',
           },
           isPreconfigured: true,
+          isDeprecated: false,
           name: 'test',
           config: {
             foo: 'bar',
