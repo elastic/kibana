@@ -8,6 +8,7 @@
 import { get, getOr, isEmpty } from 'lodash/fp';
 import { set } from '@elastic/safer-lodash-set/fp';
 import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
+import { sourceFieldsMap, hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
 import {
   AuthenticationsEdges,
   AuthenticationHit,
@@ -16,13 +17,22 @@ import {
   StrategyResponseType,
 } from '../../../../../../common/search_strategy/security_solution';
 
-export const authenticationsLastSuccessFields = ['timestamp', 'source.ip', 'host.id', 'host.name'];
-export const authenticationsLastFailureFields = ['timestamp', 'source.ip', 'host.id', 'host.name'];
+export const authenticationsFields = ['timestamp', 'source.ip', 'host.id', 'host.name'];
+export const authenticationsFieldsMap: Readonly<Record<string, unknown>> = {
+  latest: '@timestamp',
+  lastSuccess: {
+    timestamp: '@timestamp',
+    ...sourceFieldsMap,
+    ...hostFieldsMap,
+  },
+  lastFailure: {
+    timestamp: '@timestamp',
+    ...sourceFieldsMap,
+    ...hostFieldsMap,
+  },
+};
 
-export const formatAuthenticationData = (
-  hit: AuthenticationHit,
-  fieldMap: Readonly<Record<string, unknown>>
-): AuthenticationsEdges => {
+export const formatAuthenticationData = (hit: AuthenticationHit): AuthenticationsEdges => {
   let flattenedFields = {
     node: {
       _id: hit._id,
@@ -36,33 +46,26 @@ export const formatAuthenticationData = (
     },
   };
 
-  const lastSuccessFields = getFormattedFields(authenticationsLastSuccessFields, hit, fieldMap, 'lastSuccess');
+  const lastSuccessFields = getAuthenticationFields(authenticationsFields, hit, 'lastSuccess');
   if (lastSuccessFields) {
-    console.log('jj')
-    flattenedFields = set('lastSuccess.node', lastSuccessFields, flattenedFields);
+    flattenedFields = set('node.lastSuccess', lastSuccessFields, flattenedFields);
   }
 
-  const lastFailureFields = getFormattedFields(authenticationsLastFailureFields, hit, fieldMap, 'lasFailure');
+  const lastFailureFields = getAuthenticationFields(authenticationsFields, hit, 'lasFailure');
   if (lastSuccessFields) {
-    flattenedFields = set('lastFailure.node', lastFailureFields, flattenedFields);
+    flattenedFields = set('node.lastFailure', lastFailureFields, flattenedFields);
   }
+
   return flattenedFields;
 };
 
-const getFormattedFields = (
-  fields: string[],
-  hit: AuthenticationHit,
-  fieldMap: Readonly<Record<string, unknown>>,
-  parentField: string
-) => {
+const getAuthenticationFields = (fields: string[], hit: AuthenticationHit, parentField: string) => {
   return fields.reduce((flattenedFields, fieldName) => {
     const fieldPath = `${fieldName}`;
-    const esField = get(`${parentField}['${fieldName}']`, fieldMap);
+    const esField = get(`${parentField}['${fieldName}']`, authenticationsFieldsMap);
 
     if (!isEmpty(esField)) {
-
       const fieldValue = get(`${parentField}['${esField}']`, hit.fields);
-
       if (!isEmpty(fieldValue)) {
         flattenedFields = set(
           fieldPath,
@@ -71,7 +74,6 @@ const getFormattedFields = (
         );
       }
     }
-    console.log(flattenedFields)
 
     return flattenedFields;
   }, {});

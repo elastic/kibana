@@ -5,26 +5,10 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UserAuthenticationsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/users/authentications';
-import { sourceFieldsMap, hostFieldsMap } from '../../../../../../../common/ecs/ecs_fields';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
-import { authenticationsLastSuccessFields } from '../helpers';
-
-export const auditdFieldsMap: Readonly<Record<string, unknown>> = {
-  latest: '@timestamp',
-  lastSuccess: {
-    timestamp: '@timestamp',
-    ...sourceFieldsMap,
-    ...hostFieldsMap,
-  },
-  lastFailure: {
-    timestamp: '@timestamp',
-    ...sourceFieldsMap,
-    ...hostFieldsMap,
-  },
-};
+import { authenticationsFields } from '../helpers';
 
 export const buildQuery = ({
   filterQuery,
@@ -32,10 +16,7 @@ export const buildQuery = ({
   timerange: { from, to },
   pagination: { querySize },
   defaultIndex,
-  dateFields,
 }: UserAuthenticationsRequestOptions) => {
-  const esFields = authenticationsLastSuccessFields;
-
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     { term: { 'event.category': 'authentication' } },
@@ -49,6 +30,7 @@ export const buildQuery = ({
       },
     },
   ];
+  const queryFields = authenticationsFields.filter((field) => field !== 'timestamp');
 
   const dslQuery = {
     allow_no_indices: true,
@@ -114,13 +96,10 @@ export const buildQuery = ({
       size: 0,
       _source: false,
       fields: [
-        ...esFields,
-        ...(dateFields && !isEmpty(dateFields) ? dateFields : []),
-        'host*',
-        'source*',
+        ...queryFields,
         {
-          "field": "@timestamp",
-          "format": "strict_date_optional_time"
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
         },
       ],
     },

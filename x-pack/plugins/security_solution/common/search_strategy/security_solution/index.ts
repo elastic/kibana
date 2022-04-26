@@ -114,7 +114,6 @@ export interface RequestBasicOptions extends IEsSearchRequest {
   defaultIndex: string[];
   docValueFields?: estypes.QueryDslFieldAndFormat[];
   factoryQueryType?: FactoryQueryTypes;
-  dateFields: QueryDslFieldAndFormat[];
 }
 
 /** A mapping of semantic fields to their document counterparts */

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
@@ -16,7 +15,6 @@ export const buildQueryEntities = ({
   timerange: { from, to },
   pagination: { querySize },
   defaultIndex,
-  docValueFields,
   stackByField,
 }: UserAuthenticationsRequestOptions) => {
   const filter = [
@@ -72,8 +70,14 @@ export const buildQueryEntities = ({
         },
       },
       size: 0,
-      _source: false,
-      fields: [...(docValueFields && !isEmpty(docValueFields) ? docValueFields : [])],
+      fields: [
+        'metrics.event.authentication.success.value_count',
+        'metrics.event.authentication.failure.value_count',
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
     },
     track_total_hits: false,
   };

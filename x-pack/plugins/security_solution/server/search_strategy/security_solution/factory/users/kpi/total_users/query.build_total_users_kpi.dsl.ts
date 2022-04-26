@@ -57,7 +57,6 @@ export const buildTotalUsersKpiQuery = ({
           filter,
         },
       },
-      _source: false,
       size: 0,
     },
   };

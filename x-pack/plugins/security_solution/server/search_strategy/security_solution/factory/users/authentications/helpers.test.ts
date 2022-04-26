@@ -6,14 +6,12 @@
  */
 
 import { AuthenticationsEdges } from '../../../../../../common/search_strategy';
-import { auditdFieldsMap } from './dsl/query.dsl';
-
 import { formatAuthenticationData } from './helpers';
 import { mockHit } from './__mocks__';
 
 describe('#formatAuthenticationsData', () => {
   test('it formats a authentication with an empty set', () => {
-    const data = formatAuthenticationData(mockHit, auditdFieldsMap);
+    const data = formatAuthenticationData(mockHit);
     const expected: AuthenticationsEdges = {
       cursor: {
         tiebreaker: null,
@@ -31,7 +29,7 @@ describe('#formatAuthenticationsData', () => {
   });
 
   test('it formats a authentications with a source ip correctly', () => {
-    const data = formatAuthenticationData(mockHit, auditdFieldsMap);
+    const data = formatAuthenticationData(mockHit);
     const expected: AuthenticationsEdges = {
       cursor: {
         tiebreaker: null,
@@ -49,7 +47,7 @@ describe('#formatAuthenticationsData', () => {
   });
 
   test('it formats a authentications with a host name only', () => {
-    const data = formatAuthenticationData(mockHit, auditdFieldsMap);
+    const data = formatAuthenticationData(mockHit);
     const expected: AuthenticationsEdges = {
       cursor: {
         tiebreaker: null,
@@ -67,7 +65,7 @@ describe('#formatAuthenticationsData', () => {
   });
 
   test('it formats a authentications with a host id only', () => {
-    const data = formatAuthenticationData(mockHit, auditdFieldsMap);
+    const data = formatAuthenticationData(mockHit);
     const expected: AuthenticationsEdges = {
       cursor: {
         tiebreaker: null,
@@ -85,7 +83,7 @@ describe('#formatAuthenticationsData', () => {
   });
 
   test('it formats a authentications with a host name and id correctly', () => {
-    const data = formatAuthenticationData(mockHit, auditdFieldsMap);
+    const data = formatAuthenticationData(mockHit);
     const expected: AuthenticationsEdges = {
       cursor: {
         tiebreaker: null,

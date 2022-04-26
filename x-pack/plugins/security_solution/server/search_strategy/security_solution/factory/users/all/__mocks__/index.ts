@@ -13,12 +13,6 @@ import { UsersFields } from '../../../../../../../common/search_strategy/securit
 
 export const mockOptions: UsersRequestOptions = {
   defaultIndex: ['test_indices*'],
-  docValueFields: [
-    {
-      field: '@timestamp',
-      format: 'date_time',
-    },
-  ],
   factoryQueryType: UsersQueries.users,
   filterQuery:
     '{"bool":{"must":[],"filter":[{"match_all":{}},{"match_phrase":{"user.name":{"query":"test_user"}}}],"should":[],"must_not":[]}}',
