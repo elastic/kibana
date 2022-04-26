@@ -45,10 +45,10 @@ export async function getCategories(options: GetCategoriesRequest['query']) {
 export async function getPackages(
   options: {
     savedObjectsClient: SavedObjectsClientContract;
-    includeInstallStatus?: boolean;
+    excludeInstallStatus?: boolean;
   } & Registry.SearchParams
 ) {
-  const { savedObjectsClient, experimental, category, includeInstallStatus = false } = options;
+  const { savedObjectsClient, experimental, category, excludeInstallStatus = false } = options;
   const registryItems = await Registry.fetchList({ category, experimental }).then((items) => {
     return items.map((item) =>
       Object.assign({}, item, { title: item.title || nameAsTitle(item.name) }, { id: item.name })
@@ -65,11 +65,11 @@ export async function getPackages(
     )
     .sort(sortByName);
 
-  if (includeInstallStatus) {
+  if (!excludeInstallStatus) {
     return packageList;
   }
 
-  // Exclude the `installStatus` value unless the `includeInstallStatus` query parameter is set to true
+  // Exclude the `installStatus` value if the `excludeInstallStatus` query parameter is set to true
   // to better facilitate response caching
   const packageListWithoutStatus = packageList.map((pkg) => {
     const newPkg = {
@@ -91,7 +91,6 @@ export async function getLimitedPackages(options: {
   const allPackages = await getPackages({
     savedObjectsClient,
     experimental: true,
-    includeInstallStatus: true,
   });
   const installedPackages = allPackages.filter(
     (pkg) => pkg.status === installationStatuses.Installed

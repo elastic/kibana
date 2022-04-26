@@ -100,7 +100,7 @@ export const getListHandler: FleetRequestHandler<
       body,
       // Only cache responses where the installation status is excluded, otherwise the request
       // needs up-to-date information on whether the package is installed so we can't cache it
-      headers: request.query.includeInstallStatus ? {} : { ...CACHE_CONTROL_10_MINUTES_HEADER },
+      headers: request.query.excludeInstallStatus ? { ...CACHE_CONTROL_10_MINUTES_HEADER } : {},
     });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });

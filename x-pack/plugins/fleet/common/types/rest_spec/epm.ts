@@ -32,7 +32,7 @@ export interface GetPackagesRequest {
   query: {
     category?: string;
     experimental?: boolean;
-    includeInstallStatus?: boolean;
+    excludeInstallStatus?: boolean;
   };
 }
 

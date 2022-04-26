@@ -63,7 +63,6 @@ export const InstalledPackages: React.FC = memo(() => {
 
   const { data: allPackages, isLoading } = useGetPackages({
     experimental: true,
-    includeInstallStatus: true,
   });
 
   const { getHref, getAbsolutePath } = useLink();
