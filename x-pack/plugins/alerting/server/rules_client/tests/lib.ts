@@ -91,11 +91,6 @@ export function getBeforeSetup(
     isExportable: true,
     async executor() {},
     producer: 'alerts',
-    config: {
-      run: {
-        actions: { max: 1000 },
-      },
-    },
   }));
   rulesClientParams.getEventLogClient.mockResolvedValue(
     eventLogClient ?? eventLogClientMock.create()

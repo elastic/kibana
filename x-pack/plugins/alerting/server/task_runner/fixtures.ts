@@ -108,11 +108,6 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   recoveryActionGroup: RecoveredActionGroup,
   executor: jest.fn(),
   producer: 'alerts',
-  config: {
-    run: {
-      actions: { max: 1000 },
-    },
-  },
 };
 
 export const mockRunNowResponse = {

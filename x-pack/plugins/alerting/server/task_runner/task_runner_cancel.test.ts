@@ -57,11 +57,6 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   producer: 'alerts',
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
-  config: {
-    run: {
-      actions: { max: 1000 },
-    },
-  },
 };
 
 let fakeTimer: sinon.SinonFakeTimers;
@@ -134,6 +129,11 @@ describe('Task Runner Cancel', () => {
     maxEphemeralActionsPerRule: 10,
     cancelAlertsOnRuleTimeout: true,
     usageCounter: mockUsageCounter,
+    actionsConfigMap: {
+      default: {
+        max: 1000,
+      },
+    },
   };
 
   const mockDate = new Date('2019-02-12T21:01:22.479Z');

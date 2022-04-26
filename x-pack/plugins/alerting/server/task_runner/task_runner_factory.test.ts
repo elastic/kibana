@@ -101,6 +101,11 @@ describe('Task Runner Factory', () => {
     cancelAlertsOnRuleTimeout: true,
     executionContext,
     usageCounter: mockUsageCounter,
+    actionsConfigMap: {
+      default: {
+        max: 1000,
+      },
+    },
   };
 
   beforeEach(() => {
