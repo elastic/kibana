@@ -32,7 +32,6 @@ import {
   useUrlParams,
   useLink,
   useBreadcrumbs,
-  useLicense,
   useKibanaVersion,
   useStartServices,
 } from '../../../hooks';
@@ -153,7 +152,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const { getHref } = useLink();
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
   const hasFleetAllPrivileges = useAuthz().fleet.all;
-  const isGoldPlus = useLicense().isGoldPlus();
   const kibanaVersion = useKibanaVersion();
 
   // Agent data states
@@ -667,27 +665,23 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           pageSizeOptions,
         }}
         isSelectable={true}
-        selection={
-          isGoldPlus
-            ? {
-                onSelectionChange: (newAgents: Agent[]) => {
-                  setSelectedAgents(newAgents);
-                  setSelectionMode('manual');
-                },
-                selectable: isAgentSelectable,
-                selectableMessage: (selectable, agent) => {
-                  if (selectable) return '';
-                  if (!agent.active) {
-                    return 'This agent is not active';
-                  }
-                  if (agent.policy_id && agentPoliciesIndexedById[agent.policy_id].is_managed) {
-                    return 'This action is not available for agents enrolled in an externally managed agent policy';
-                  }
-                  return '';
-                },
-              }
-            : undefined
-        }
+        selection={{
+          onSelectionChange: (newAgents: Agent[]) => {
+            setSelectedAgents(newAgents);
+            setSelectionMode('manual');
+          },
+          selectable: isAgentSelectable,
+          selectableMessage: (selectable, agent) => {
+            if (selectable) return '';
+            if (!agent.active) {
+              return 'This agent is not active';
+            }
+            if (agent.policy_id && agentPoliciesIndexedById[agent.policy_id].is_managed) {
+              return 'This action is not available for agents enrolled in an externally managed agent policy';
+            }
+            return '';
+          },
+        }}
         onChange={({ page }: { page: { index: number; size: number } }) => {
           const newPagination = {
             ...pagination,
