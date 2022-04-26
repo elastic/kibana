@@ -197,4 +197,30 @@ Access *Cases* in *Stack Management* under *Alerts and Insights*.
 For more information, check {kibana-ref}/cases.html[Cases].
 
 
+[float]
+=== Machine learning
+
+[float]
+==== Testing trained models in {kib}
+
+From 8.2, users are able to test certain trained models in {kib}. The new action 
+is introduced under *Machine learning > Trained Models* and it accepts 
+user-specified input to test models. Initially supported models are `lang_ident` 
+(language identification) and `bert_base_ner` (named entity recognition).
+
+[role="screenshot"]
+image::images/test-trained-model.gif[Testing trained models in the ML UI]
+
+[float]
+==== Machine learning trained models are now space-aware
+
+Machine learning trained models are space-aware starting in 8.2. Spaces enable 
+you to organize your {kib} saved objects into meaningful categories. Once a 
+trained model is limited to a {kib} space, users only see it if they are 
+assigned to the same space. A warning is shown if any trained models are missing 
+their saved objects; automatic synchronization also occurs periodically to 
+address any missing objects.
+
+
+
 // end::notable-highlights[]
