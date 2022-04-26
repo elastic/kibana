@@ -887,7 +887,7 @@ function removeInternalTags(
     attributes: { tags },
   } = doc;
 
-  const filteredTags = tags.filter((tag) => !tag.startsWith('__internal_'));
+  const filteredTags = (tags ?? []).filter((tag) => !tag.startsWith('__internal_'));
 
   return {
     ...doc,
