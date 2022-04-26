@@ -14,7 +14,11 @@ import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useUserInfo } from '../../detections/components/user_info';
 import { HeaderPage } from '../../common/components/header_page';
 import { useKibana, useGetUserCasesPermissions } from '../../common/lib/kibana';
-import { HostAlertsTable, UserAlertsTable } from '../components/detection_response';
+import {
+  HostAlertsTable,
+  RecentlyCreatedCasesTable,
+  UserAlertsTable,
+} from '../components/detection_response';
 
 import { LandingPageComponent } from '../../common/components/landing_page';
 import { RuleAlertsTable } from '../components/detection_response/rule_alerts_table';
@@ -85,7 +89,11 @@ const DetectionResponseComponent = () => {
                   </EuiFlexItem>
                 )}
 
-                {canReadCases && <EuiFlexItem>{'[cases table]'}</EuiFlexItem>}
+                {canReadCases && (
+                  <EuiFlexItem>
+                    <RecentlyCreatedCasesTable />
+                  </EuiFlexItem>
+                )}
 
                 {canReadAlerts && (
                   <EuiFlexItem>

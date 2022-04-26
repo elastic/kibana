@@ -91,6 +91,13 @@ export const USER_ALERTS_SECTION_TITLE = i18n.translate(
   }
 );
 
+export const RECENT_CASES_SECTION_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionResponse.userAlertsSectionTitle',
+  {
+    defaultMessage: 'Recently created cases',
+  }
+);
+
 export const NO_ALERTS_FOUND = i18n.translate(
   'xpack.securitySolution.detectionResponse.noRuleAlerts',
   {
@@ -148,6 +155,13 @@ export const VIEW_ALL_USER_ALERTS = i18n.translate(
   }
 );
 
+export const VIEW_RECENT_CASES = i18n.translate(
+  'xpack.securitySolution.detectionResponse.viewRecentCases',
+  {
+    defaultMessage: 'View recent cases',
+  }
+);
+
 export const VIEW_ALL_HOST_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionResponse.viewAllHostAlerts',
   {
@@ -166,5 +180,40 @@ export const USER_ALERTS_USERNAME_COLUMN = i18n.translate(
   'xpack.securitySolution.detectionResponse.userAlertsUserName',
   {
     defaultMessage: 'User name',
+  }
+);
+
+export const RECENTLY_CREATED_CASE_COLUMN_NAME = i18n.translate(
+  'xpack.securitySolution.detectionResponse.caseColumnName',
+  {
+    defaultMessage: 'Name',
+  }
+);
+
+export const RECENTLY_CREATED_CASE_COLUMN_NOTE = i18n.translate(
+  'xpack.securitySolution.detectionResponse.caseColumnNote',
+  {
+    defaultMessage: 'Note',
+  }
+);
+
+export const RECENTLY_CREATED_CASE_COLUMN_TIME = i18n.translate(
+  'xpack.securitySolution.detectionResponse.caseColumnTime',
+  {
+    defaultMessage: 'Time',
+  }
+);
+
+export const RECENTLY_CREATED_CASE_COLUMN_CREATED_BY = i18n.translate(
+  'xpack.securitySolution.detectionResponse.caseColumnCreatedBy',
+  {
+    defaultMessage: 'Created by',
+  }
+);
+
+export const RECENTLY_CREATED_CASE_COLUMN_STATUS = i18n.translate(
+  'xpack.securitySolution.detectionResponse.caseColumnStatus',
+  {
+    defaultMessage: 'Status',
   }
 );
