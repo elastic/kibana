@@ -7,6 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { getDataLayers } from '../helpers';
 import { LayeredXyVisFn } from '../types';
 import {
   XY_VIS_RENDERER,
@@ -19,6 +20,14 @@ import { logDatatables } from '../utils';
 import { commonXYArgs } from './common_xy_args';
 import { strings } from '../i18n';
 import { appendLayerIds } from '../helpers';
+import {
+  hasAreaLayer,
+  hasBarLayer,
+  hasHistogramBarLayer,
+  validateExtent,
+  validateFillOpacity,
+  validateValueLabels,
+} from './validate';
 
 export const layeredXyVisFunction: LayeredXyVisFn = {
   name: LAYERED_XY_VIS,
@@ -39,6 +48,19 @@ export const layeredXyVisFunction: LayeredXyVisFn = {
     const layers = appendLayerIds(args.layers ?? [], 'layers');
 
     logDatatables(layers, handlers);
+
+    const dataLayers = getDataLayers(layers);
+
+    const hasBar = hasBarLayer(dataLayers);
+    const hasArea = hasAreaLayer(dataLayers);
+
+    validateExtent(args.yLeftExtent, hasBar || hasArea, dataLayers);
+    validateExtent(args.yRightExtent, hasBar || hasArea, dataLayers);
+    validateFillOpacity(args.fillOpacity, hasArea);
+
+    const hasNotHistogramBars = !hasHistogramBarLayer(dataLayers);
+
+    validateValueLabels(args.valueLabels, hasBar, hasNotHistogramBars);
 
     return {
       type: 'render',
