@@ -5,31 +5,27 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { prefixIndexPatternWithCcs } from '../../../../../common/ccs_utils';
-import { getMetrics } from '../../../../lib/details/get_metrics';
-import { getLatestStats, getStats } from '../../../../lib/beats';
-import { handleError } from '../../../../lib/errors';
-import { metricSet } from './metric_set_overview';
 import { INDEX_PATTERN_BEATS } from '../../../../../common/constants';
+import {
+  postBeatsOverviewRequestParamsRT,
+  postBeatsOverviewRequestPayloadRT,
+  postBeatsOverviewResponsePayloadRT,
+} from '../../../../../common/http_api/beats';
+import { getLatestStats, getStats } from '../../../../lib/beats';
+import { createValidationFunction } from '../../../../lib/create_route_validation_function';
+import { getMetrics } from '../../../../lib/details/get_metrics';
+import { handleError } from '../../../../lib/errors';
+import { MonitoringCore } from '../../../../types';
+import { metricSet } from './metric_set_overview';
 
-export function beatsOverviewRoute(server) {
+export function beatsOverviewRoute(server: MonitoringCore) {
   server.route({
-    method: 'POST',
+    method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/beats',
-    config: {
-      validate: {
-        params: schema.object({
-          clusterUuid: schema.string(),
-        }),
-        body: schema.object({
-          ccs: schema.maybe(schema.string()),
-          timeRange: schema.object({
-            min: schema.string(),
-            max: schema.string(),
-          }),
-        }),
-      },
+    validate: {
+      params: createValidationFunction(postBeatsOverviewRequestParamsRT),
+      body: createValidationFunction(postBeatsOverviewRequestPayloadRT),
     },
     async handler(req) {
       const config = server.config;
@@ -44,11 +40,11 @@ export function beatsOverviewRoute(server) {
           getMetrics(req, 'beats', metricSet),
         ]);
 
-        return {
+        return postBeatsOverviewResponsePayloadRT.encode({
           ...latest,
           stats,
           metrics,
-        };
+        });
       } catch (err) {
         throw handleError(err, req);
       }
