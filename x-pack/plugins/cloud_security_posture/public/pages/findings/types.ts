@@ -62,16 +62,16 @@ interface CspFindingResult {
   };
 }
 
-interface CspFindingResource {
+type CspFindingResource = {
   uid: string;
   filename: string;
   // gid: string;
   mode: string;
   path: string;
   type: string;
-}
+} & Record<string, unknown>;
 
-interface CspFindingHost {
+type CspFindingHost = {
   id: string;
   containerized: boolean;
   ip: string[];
@@ -88,7 +88,7 @@ interface CspFindingHost {
     family: string;
     name: string;
   };
-}
+} & Record<string, unknown>;
 
 interface CspFindingAgent {
   version: string;

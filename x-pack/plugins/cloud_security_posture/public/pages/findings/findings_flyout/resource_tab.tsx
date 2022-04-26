@@ -20,8 +20,9 @@ import { getFlattenedObject } from '@kbn/std';
 import { CspFinding } from '../types';
 import * as TEXT from '../translations';
 
-const getDescriptionDisplay = (value: any) => {
-  if (typeof value === 'boolean' || value === undefined || value === null) {
+const getDescriptionDisplay = (value: unknown) => {
+  if (value === undefined) return 'undefined';
+  if (typeof value === 'boolean' || value === null) {
     return <EuiCode>{JSON.stringify(value)}</EuiCode>;
   }
 
@@ -33,10 +34,10 @@ const getDescriptionDisplay = (value: any) => {
     );
   }
 
-  return <EuiText size="s">{value}</EuiText>;
+  return <EuiText size="s">{value as string}</EuiText>;
 };
 
-const prepareDescriptionList = (data: Record<string, any>) =>
+const prepareDescriptionList = (data: Record<string, unknown>) =>
   Object.entries(getFlattenedObject(data))
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([key, value]) => ({
@@ -70,7 +71,7 @@ export const ResourceTab = ({ data }: { data: CspFinding }) => {
   return (
     <>
       {accordions.map((accordion) => (
-        <>
+        <React.Fragment key={accordion.id}>
           <EuiPanel hasShadow={false} hasBorder>
             <EuiAccordion
               id={accordion.id}
@@ -94,7 +95,7 @@ export const ResourceTab = ({ data }: { data: CspFinding }) => {
             </EuiAccordion>
           </EuiPanel>
           <EuiSpacer size="m" />
-        </>
+        </React.Fragment>
       ))}
     </>
   );
