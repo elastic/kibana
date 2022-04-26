@@ -188,6 +188,7 @@ kibana_vars=(
     vis_type_vega.enableExternalUrls
     xpack.actions.allowedHosts
     xpack.actions.customHostSettings
+    xpack.actions.email.domain_allowlist
     xpack.actions.enabledActionTypes
     xpack.actions.maxResponseContentLength
     xpack.actions.preconfigured
