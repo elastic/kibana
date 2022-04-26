@@ -23,6 +23,7 @@ import {
   Datum,
   Settings,
 } from '@elastic/charts';
+import { useChartTheme } from '@kbn/observability-plugin/public';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 
@@ -31,7 +32,6 @@ import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values
 import { StorageExplorerItem } from '../../../../../common/storage_explorer_types';
 import { asDynamicBytes } from '../../../../../common/utils/formatters';
 import { asPercent } from '../../../../../common/utils/formatters';
-import { useChartTheme } from '../../../../../../observability/public';
 
 export function StorageExplorer() {
   const rangeFrom = 'now-15d';
