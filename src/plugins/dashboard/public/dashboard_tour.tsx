@@ -19,11 +19,11 @@ import {
 } from '@elastic/eui';
 import React, { useEffect } from 'react';
 
-export const DASHBOARD_TOUR_STORAGE_KEY = 'controlsTourState';
+export const DASHBOARD_TOUR_STORAGE_KEY = 'dashboardTourState';
 
 const dashboardTourConfig = {
   currentTourStep: 1,
-  isTourActive: false,
+  isTourActive: true,
   tourPopoverWidth: 360,
   tourSubtitle: 'Demo tour',
 };
@@ -33,26 +33,53 @@ const dashboardTourSteps = [
     anchor: '[data-test-subj="dashboardEditMode"]',
     step: 1,
     title: 'Step 1',
-    content: 'Click edit',
-    anchorPosition: 'rightUp',
+    content: <p>Click edit.</p>,
+    anchorPosition: 'downCenter',
   } as EuiStatelessTourStep,
   {
-    anchor: '[data-test-subj="controls-create-button"]',
+    anchor: '[data-test-subj="dashboardAddNewPanelButton"]',
     step: 2,
     title: 'Step 2',
     content: <p>Save your changes.</p>,
     anchorPosition: 'rightCenter',
   } as EuiStatelessTourStep,
   {
-    anchor: '#control-editor-types',
+    anchor: '.kbnQueryBar__datePickerWrapper',
     step: 3,
     title: 'Step 3',
+    content: <p>Date picker</p>,
+    anchorPosition: 'downCenter',
+  } as EuiStatelessTourStep,
+  {
+    anchor: '[data-test-subj="dashboardPanelTitle__wrapper"]',
+    step: 4,
+    title: 'Step 4',
+    content: <p>First lens panel</p>,
+    anchorPosition: 'upCenter',
+  } as EuiStatelessTourStep,
+  {
+    anchor: '[data-test-subj="dashboard-controls-menu-button"]',
+    step: 5,
+    title: 'Step 5',
     content: <p>Final.</p>,
     anchorPosition: 'upCenter',
   } as EuiStatelessTourStep,
 ];
 
-export const DashboardTour = ({ isEditMode }: { isEditMode: boolean }) => {
+export const DashboardTour = ({
+  isEditMode,
+  panelCount,
+  firstLensPanelTitle,
+}: {
+  isEditMode: boolean;
+  panelCount: number;
+  firstLensPanelTitle?: string;
+}) => {
+  console.log('ID:', firstLensPanelTitle);
+  dashboardTourSteps[3].anchor = `[data-test-subj="embeddablePanelHeading-${(
+    firstLensPanelTitle || ''
+  ).replace(/\s/g, '')}"]`;
+
   const initialState = localStorage.getItem(DASHBOARD_TOUR_STORAGE_KEY);
   let tourState: EuiTourState;
   if (initialState) {
@@ -60,22 +87,30 @@ export const DashboardTour = ({ isEditMode }: { isEditMode: boolean }) => {
   } else {
     tourState = dashboardTourConfig;
   }
-  tourState = { ...tourState, isTourActive: true, currentTourStep: isEditMode ? 2 : 1 };
+  if (isEditMode && tourState.currentTourStep < 2) {
+    tourState.currentTourStep = 2;
+  }
 
-  console.log('tourState:', tourState);
-  const [[euiTourStepOne, euiTourStepTwo, euiTourStepThree], actions, reducerState] = useEuiTour(
-    dashboardTourSteps,
-    tourState
-  );
-  console.log('Reducer state:', reducerState);
+  const [
+    [euiTourStepOne, euiTourStepTwo, euiTourStepThree, euiTourStepFour, euiTourStepFive],
+    actions,
+    reducerState,
+  ] = useEuiTour(dashboardTourSteps, tourState);
+
+  if (isEditMode && reducerState.currentTourStep < 2) {
+    actions.goToStep(2);
+  }
+
+  // console.log('tourState:', tourState);
+  // console.log('Reducer state:', reducerState);
 
   useEffect(() => {
     localStorage.setItem(DASHBOARD_TOUR_STORAGE_KEY, JSON.stringify(reducerState));
   }, [reducerState]);
 
-  const clickButtonByTestSubject = (testSubject: string) => {
-    $(`[data-test-subj="${testSubject}"]`).trigger('click');
-  };
+  // const clickButtonByTestSubject = (testSubject: string) => {
+  //   $(`[data-test-subj="${testSubject}"]`).trigger('click');
+  // };
 
   const CustomFooter = ({ customNext }: { customNext?: () => void }) => {
     return (
@@ -105,13 +140,10 @@ export const DashboardTour = ({ isEditMode }: { isEditMode: boolean }) => {
     return (
       <>
         <EuiTourStep {...euiTourStepOne} />
-        <EuiTourStep
-          {...euiTourStepTwo}
-          footerAction={
-            <CustomFooter customNext={() => clickButtonByTestSubject('controls-create-button')} />
-          }
-        />
-        <EuiTourStep {...euiTourStepThree} />
+        <EuiTourStep {...euiTourStepTwo} footerAction={<CustomFooter />} />
+        <EuiTourStep {...euiTourStepThree} footerAction={<CustomFooter />} />
+        <EuiTourStep {...euiTourStepFour} footerAction={<CustomFooter />} />
+        <EuiTourStep {...euiTourStepFive} />
       </>
     );
   };

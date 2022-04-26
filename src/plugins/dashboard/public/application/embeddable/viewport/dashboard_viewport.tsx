@@ -67,6 +67,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   public componentDidMount() {
     this.mounted = true;
     this.subscription = this.props.container.getInput$().subscribe(() => {
+      // console.log('subscription fired');
       const { isFullScreenMode, useMargins, title, description, isEmbeddedExternally, panels } =
         this.props.container.getInput();
       if (this.mounted) {
@@ -109,7 +110,6 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
 
     return (
       <>
-        <DashboardTour isEditMode={isEditMode} />
         {controlsEnabled ? (
           <>
             {isEditMode && panelCount !== 0 && controlGroup?.getPanelCount() === 0 ? (
