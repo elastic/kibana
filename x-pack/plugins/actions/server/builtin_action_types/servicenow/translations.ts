@@ -31,6 +31,13 @@ export const ALLOWED_HOSTS_ERROR = (message: string) =>
     },
   });
 
+export const CREDENTIALS_ERROR = i18n.translate(
+  'xpack.actions.builtin.configuration.apiCredentialsError',
+  {
+    defaultMessage: 'Either basic auth or OAuth credentials must be specified',
+  }
+);
+
 export const BASIC_AUTH_CREDENTIALS_ERROR = i18n.translate(
   'xpack.actions.builtin.configuration.apiBasicAuthCredentialsError',
   {

@@ -140,6 +140,18 @@ describe('validateCommonConfig', () => {
 });
 
 describe('validateCommonSecrets', () => {
+  test('secrets validation fails when no credentials are defined', () => {
+    expect(
+      validateCommonSecrets(configurationUtilities, {
+        password: null,
+        username: null,
+        clientSecret: null,
+        privateKey: null,
+        privateKeyPassword: null,
+      })
+    ).toEqual(`Either basic auth or OAuth credentials must be specified`);
+  });
+
   test('secrets validation fails when username is defined and password is not', () => {
     expect(
       validateCommonSecrets(configurationUtilities, {

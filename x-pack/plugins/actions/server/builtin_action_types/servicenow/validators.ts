@@ -47,6 +47,10 @@ export const validateCommonSecrets = (
 ) => {
   const { username, password, clientSecret, privateKey } = secrets;
 
+  if (!username && !password && !clientSecret && !privateKey) {
+    return i18n.CREDENTIALS_ERROR;
+  }
+
   if (username || password) {
     // Username and password must be set and set together
     if (!username || !password) {

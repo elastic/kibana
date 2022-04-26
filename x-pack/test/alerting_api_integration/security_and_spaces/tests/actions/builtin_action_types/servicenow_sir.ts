@@ -222,7 +222,7 @@ export default function serviceNowSIRTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type secrets: [password]: expected value of type [string] but got [undefined]',
+                'error validating action type secrets: Either basic auth or OAuth credentials must be specified',
             });
           });
       });
