@@ -7,8 +7,8 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { KibanaExecutionContext } from 'src/core/public';
-import { PersistableStateService, PersistableState } from '../../kibana_utils/common';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import { PersistableStateService, PersistableState } from '@kbn/kibana-utils-plugin/common';
 
 export enum ViewMode {
   EDIT = 'edit',

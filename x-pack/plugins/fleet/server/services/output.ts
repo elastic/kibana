@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest, SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import type { KibanaRequest, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import uuid from 'uuid/v5';
 import { omit } from 'lodash';
 

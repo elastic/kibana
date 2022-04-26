@@ -9,9 +9,9 @@
 // import moment from 'moment';
 import querystring from 'querystring';
 import { encode, RisonValue } from 'rison-node';
+import { LogPositionUrlState } from '@kbn/infra-plugin/public/containers/logs/log_position/with_log_position_url_state';
+import { FlyoutOptionsUrlState } from '@kbn/infra-plugin/public/containers/logs/log_flyout';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { LogPositionUrlState } from '../../../../x-pack/plugins/infra/public/containers/logs/log_position/with_log_position_url_state';
-import { FlyoutOptionsUrlState } from '../../../../x-pack/plugins/infra/public/containers/logs/log_flyout';
 
 export interface TabsParams {
   stream: {

@@ -7,6 +7,7 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 
+import type { RouteConfig, RequestHandler, Logger } from '@kbn/core/server';
 import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import {
@@ -14,7 +15,6 @@ import {
   QueryRulesBulkSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request/query_rules_bulk_schema';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
-import type { RouteConfig, RequestHandler, Logger } from '../../../../../../../../src/core/server';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
@@ -40,11 +40,7 @@ type Handler = RequestHandler<
 /**
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
  */
-export const deleteRulesBulkRoute = (
-  router: SecuritySolutionPluginRouter,
-  isRuleRegistryEnabled: boolean,
-  logger: Logger
-) => {
+export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   const config: Config = {
     validate: {
       body: buildRouteValidation<typeof queryRulesBulkSchema, QueryRulesBulkSchemaDecoded>(
@@ -60,9 +56,12 @@ export const deleteRulesBulkRoute = (
     logDeprecatedBulkEndpoint(logger, DETECTION_ENGINE_RULES_BULK_DELETE);
 
     const siemResponse = buildSiemResponse(response);
-    const rulesClient = context.alerting.getRulesClient();
-    const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
-    const savedObjectsClient = context.core.savedObjects.client;
+
+    const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
+
+    const rulesClient = ctx.alerting.getRulesClient();
+    const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
+    const savedObjectsClient = ctx.core.savedObjects.client;
 
     const rules = await Promise.all(
       request.body.map(async (payloadRule) => {
@@ -78,7 +77,7 @@ export const deleteRulesBulkRoute = (
         }
 
         try {
-          const rule = await readRules({ rulesClient, id, ruleId, isRuleRegistryEnabled });
+          const rule = await readRules({ rulesClient, id, ruleId });
           const migratedRule = await legacyMigrate({
             rulesClient,
             savedObjectsClient,
@@ -99,8 +98,7 @@ export const deleteRulesBulkRoute = (
           return transformValidateBulkError(
             idOrRuleIdOrUnknown,
             migratedRule,
-            ruleExecutionSummary,
-            isRuleRegistryEnabled
+            ruleExecutionSummary
           );
         } catch (err) {
           return transformBulkError(idOrRuleIdOrUnknown, err);

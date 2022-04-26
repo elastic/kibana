@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
 import { AlertSummaryRow } from '../helpers';
-import { defaultToEmptyTag } from '../../../components/empty_value';
+import { defaultToEmptyTag } from '../../empty_value';
 import { useAlertPrevalence } from '../../../containers/alerts/use_alert_prevalence';
 
 const PrevalenceCell = React.memo<AlertSummaryRow['description']>(

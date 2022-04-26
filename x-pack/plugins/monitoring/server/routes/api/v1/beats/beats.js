@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { prefixIndexPattern } from '../../../../../common/ccs_utils';
+import { prefixIndexPatternWithCcs } from '../../../../../common/ccs_utils';
 import { getStats, getBeats } from '../../../../lib/beats';
 import { handleError } from '../../../../lib/errors';
 import { INDEX_PATTERN_BEATS } from '../../../../../common/constants';
@@ -20,7 +20,7 @@ export function beatsListingRoute(server) {
         params: schema.object({
           clusterUuid: schema.string(),
         }),
-        payload: schema.object({
+        body: schema.object({
           ccs: schema.maybe(schema.string()),
           timeRange: schema.object({
             min: schema.string(),
@@ -33,7 +33,7 @@ export function beatsListingRoute(server) {
       const config = server.config;
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
-      const beatsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
+      const beatsIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_BEATS, ccs);
 
       try {
         const [stats, listing] = await Promise.all([

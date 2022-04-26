@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger } from 'src/core/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
 
-import { SecurityPluginSetup } from '../../../security/server';
-import { SpacesPluginStart } from '../../../spaces/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+
+import { ConfigType } from '..';
 import { ProductAccess } from '../../common/types';
-import { ConfigType } from '../index';
 
 import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';
 

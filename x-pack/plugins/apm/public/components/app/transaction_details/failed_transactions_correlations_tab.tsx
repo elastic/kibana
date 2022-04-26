@@ -9,10 +9,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  METRIC_TYPE,
-  useTrackMetric,
-} from '../../../../../observability/public';
+import { METRIC_TYPE, useTrackMetric } from '@kbn/observability-plugin/public';
 
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 

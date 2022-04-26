@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { createSearchSourceMock } from '../../../../data/common/search/search_source/mocks';
+import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { updateSearchSource } from './update_search_source';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
 import type { SortOrder } from '../../services/saved_searches';

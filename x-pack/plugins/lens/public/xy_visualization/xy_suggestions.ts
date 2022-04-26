@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
 import type { PaletteOutput } from '@kbn/coloring';
+import type { SeriesType } from '@kbn/expression-xy-plugin/common';
 import {
   SuggestionRequest,
   VisualizationSuggestion,
@@ -17,7 +18,6 @@ import {
   TableChangeType,
 } from '../types';
 import { State, XYState, visualizationTypes, XYLayerConfig, XYDataLayerConfig } from './types';
-import type { SeriesType } from '../../../../../src/plugins/chart_expressions/expression_xy/common';
 import { layerTypes } from '../../common';
 import { getIconForSeries } from './state_helpers';
 import { getDataLayers, isDataLayer } from './visualization_helpers';
@@ -32,6 +32,7 @@ const columnSortOrder = {
   histogram: 6,
   geo_point: 7,
   geo_shape: 8,
+  murmur3: 9,
 };
 
 /**

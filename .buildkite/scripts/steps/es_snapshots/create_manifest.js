@@ -8,7 +8,7 @@
 
 const fs = require('fs');
 const { execSync } = require('child_process');
-const { BASE_BUCKET_DAILY } = require('./bucket_config.js');
+const { BASE_BUCKET_DAILY } = require('./bucket_config');
 
 (async () => {
   console.log('--- Create ES Snapshot Manifest');

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { ILicenseState } from '../lib';
 import { BASE_ACTION_API_PATH, RewriteResponseCase } from '../../common';
 import { ActionsRequestHandlerContext, FindActionResult } from '../types';
@@ -34,7 +34,7 @@ export const getAllActionRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const actionsClient = context.actions.getActionsClient();
+        const actionsClient = (await context.actions).getActionsClient();
         const result = await actionsClient.getAll();
         return res.ok({
           body: rewriteBodyRes(result),

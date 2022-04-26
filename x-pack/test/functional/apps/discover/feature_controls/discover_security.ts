@@ -31,8 +31,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/106631
-  describe.skip('discover feature controls security', () => {
+  describe('discover feature controls security', () => {
     before(async () => {
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/security'
