@@ -11,6 +11,7 @@ import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 import {
   postElasticsearchCcrRequestParamsRT,
   postElasticsearchCcrRequestPayloadRT,
+  postElasticsearchCcrResponsePayloadRT,
 } from '../../../../../common/http_api/elasticsearch';
 import { TimeRange } from '../../../../../common/http_api/shared';
 import {
@@ -320,7 +321,7 @@ export function ccrRoute(server: MonitoringCore) {
           return accum;
         }, []);
 
-        return { data };
+        return postElasticsearchCcrResponsePayloadRT.encode({ data });
       } catch (err) {
         return handleError(err, req);
       }
