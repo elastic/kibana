@@ -6,7 +6,7 @@
  */
 
 import { FindResult } from '@kbn/alerting-plugin/server';
-import { enrichFilterWithAlertTypes } from './enrich_filter_with_alert_types';
+import { enrichFilterWithRuleTypeMapping } from './enrich_filter_with_rule_type_mappings';
 
 import { RuleParams } from '../schemas/rule_schemas';
 import { FindRuleOptions } from './types';
@@ -19,14 +19,13 @@ export const findRules = ({
   filter,
   sortField,
   sortOrder,
-  isRuleRegistryEnabled,
 }: FindRuleOptions): Promise<FindResult<RuleParams>> => {
   return rulesClient.find({
     options: {
       fields,
       page,
       perPage,
-      filter: enrichFilterWithAlertTypes(filter, isRuleRegistryEnabled),
+      filter: enrichFilterWithRuleTypeMapping(filter),
       sortOrder,
       sortField,
     },

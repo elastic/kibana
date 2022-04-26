@@ -7,7 +7,7 @@
 
 import { RulesClient } from '@kbn/alerting-plugin/server';
 import { BulkActionEditPayload } from '../../../../common/detection_engine/schemas/common';
-import { enrichFilterWithAlertTypes } from './enrich_filter_with_alert_types';
+import { enrichFilterWithRuleTypeMapping } from './enrich_filter_with_rule_type_mappings';
 import { MlAuthz } from '../../machine_learning/authz';
 import { throwAuthzError } from '../../machine_learning/validation';
 
@@ -19,10 +19,9 @@ import { RuleAlertType } from './types';
 
 export interface BulkEditRulesArguments {
   rulesClient: RulesClient;
-  ids?: string[];
   actions: BulkActionEditPayload[];
   filter?: string;
-  isRuleRegistryEnabled: boolean;
+  ids?: string[];
   mlAuthz?: MlAuthz;
 }
 
@@ -38,7 +37,6 @@ export const bulkEditRules = ({
   ids,
   actions,
   filter,
-  isRuleRegistryEnabled,
   mlAuthz,
 }: BulkEditRulesArguments) => {
   const { attributesActions, paramsActions } = splitBulkEditActions(actions);
@@ -53,6 +51,6 @@ export const bulkEditRules = ({
 
       return ruleParamsModifier(ruleParams, paramsActions);
     },
-    ...(filter ? { filter: enrichFilterWithAlertTypes(filter, isRuleRegistryEnabled) } : {}),
+    ...(filter ? { filter: enrichFilterWithRuleTypeMapping(filter) } : {}),
   });
 };

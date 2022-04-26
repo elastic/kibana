@@ -27,24 +27,21 @@ import { readRules } from '../../rules/read_rules';
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 jest.mock('../../rules/read_rules', () => ({ readRules: jest.fn() }));
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('perform_bulk_action - %s', (_, isRuleRegistryEnabled) => {
+describe('perform_bulk_action', () => {
   const readRulesMock = readRules as jest.Mock;
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  const mockRule = getFindResultWithSingleHit(isRuleRegistryEnabled).data[0];
+  const mockRule = getFindResultWithSingleHit().data[0];
 
   beforeEach(() => {
     server = serverMock.create();
     logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
-    performBulkActionRoute(server.router, ml, logger, isRuleRegistryEnabled);
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    performBulkActionRoute(server.router, ml, logger);
   });
 
   describe('status codes', () => {
