@@ -16,13 +16,6 @@ export function inferTimeZone(
   isDefaultTimezone: () => boolean,
   getConfig: <T = any>(key: string) => T
 ) {
-  const shouldForceUTC = indexPattern
-    .getFieldByName(params.field as string)
-    ?.indices.some((index) => index.fixed_interval);
-  if (shouldForceUTC) {
-    return 'UTC';
-  }
-
   let tz = params.time_zone;
   if (!tz && params.field) {
     // If a field has been configured check the index pattern's typeMeta if a date_histogram on that

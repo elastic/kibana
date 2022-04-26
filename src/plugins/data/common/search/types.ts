@@ -141,6 +141,8 @@ export interface ISearchOptions {
   inspector?: IInspectorInfo;
 
   executionContext?: KibanaExecutionContext;
+
+  skipHandlingShardFailiures?: boolean;
 }
 
 /**

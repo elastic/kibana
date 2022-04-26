@@ -218,10 +218,9 @@ export const getDateHistogramBucketAgg = ({
             return;
           }
 
-          const shouldForceFixedInterval = agg
-            .getIndexPattern()
-            ?.getFieldByName(agg.params.field)
-            ?.indices.some((index) => index.fixed_interval);
+          const shouldForceFixedInterval = agg.params.field?.indices.some(
+            (index) => index.fixed_interval
+          );
           if (shouldForceFixedInterval) {
             output.params.fixed_interval = interval.expression;
           } else {
@@ -285,20 +284,6 @@ export const getDateHistogramBucketAgg = ({
         serialize(val, agg) {
           if (!agg) return undefined;
           return inferTimeZone(agg.params, agg.getIndexPattern(), isDefaultTimezone, getConfig);
-        },
-        toExpressionAst: () => undefined,
-      },
-      {
-        name: 'forced_timezone',
-        shouldShow() {
-          return false;
-        },
-        default: false,
-        write: () => {},
-        serialize(val, agg) {
-          if (!agg) return undefined;
-          const shouldForceUTC = agg.params.field.indices.some((index) => index.fixed_interval);
-          return shouldForceUTC;
         },
         toExpressionAst: () => undefined,
       },

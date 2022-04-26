@@ -54,14 +54,6 @@ function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmb
   ));
 }
 
-function renderForcedUTCBadge() {
-  return (
-    <EuiBadge key="utc_badge" className="embPanel__headerBadge">
-      Forced UTC Timezone
-    </EuiBadge>
-  );
-}
-
 function renderNotifications(
   notifications: Array<Action<EmbeddableContext>>,
   embeddable: IEmbeddable
@@ -221,8 +213,6 @@ export function PanelHeader({
     );
   };
 
-  const { forcedUTCTimezone } = embeddable.getOutput();
-
   return (
     <span data-test-subj="dashboardPanelTitle__wrapper">
       <figcaption
@@ -233,7 +223,6 @@ export function PanelHeader({
           <EuiScreenReaderOnly>{getAriaLabel()}</EuiScreenReaderOnly>
           {renderTitle()}
           {renderBadges(badges, embeddable)}
-          {forcedUTCTimezone && renderForcedUTCBadge()}
         </h2>
         {renderNotifications(notifications, embeddable)}
         <PanelOptionsMenu

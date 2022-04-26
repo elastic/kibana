@@ -120,6 +120,11 @@ export interface DatatableMeta {
    */
   source?: string;
 
+  /**
+   * list of shard failures and other warnings as returned from the data source
+   */
+  warnings?: unknown[];
+
   [key: string]: unknown;
 }
 

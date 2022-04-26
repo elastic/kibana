@@ -158,6 +158,7 @@ export function tabifyAggResponse(
     meta: {
       type: 'esaggs',
       source: aggConfigs.indexPattern.id,
+      warnings: esResponse._shards.failures,
       statistics: {
         totalCount: esResponse.hits?.total,
       },

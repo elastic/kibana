@@ -55,6 +55,7 @@ export const handleRequest = ({
 
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 0);
+    searchSource.setField('skipHandlingShardFailiures', true);
 
     // Create a new search source that inherits the original search source
     // but has the appropriate timeRange applied via a filter.

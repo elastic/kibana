@@ -31,7 +31,7 @@ export function handleResponse(
     });
   }
 
-  if (rawResponse._shards && rawResponse._shards.failed) {
+  if (!request.skipHandlingShardFailiures && rawResponse._shards && rawResponse._shards.failed) {
     const title = i18n.translate('data.search.searchSource.fetch.shardsFailedNotificationMessage', {
       defaultMessage: '{shardsFailed} of {shardsTotal} shards failed',
       values: {
