@@ -55,6 +55,7 @@ The API returns a JSON object describing the connectors and their settings:
     "projectKey":"ES"
   },
   "isPreconfigured":false,
+  "isDeprecated": false,
   "referencedByCount":0
 }]
 --------------------------------------------------

@@ -685,6 +685,7 @@ describe('broken connector indicator', () => {
       name: 'Test connector',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     },
     {
       secrets: {},
@@ -694,6 +695,7 @@ describe('broken connector indicator', () => {
       name: 'Test connector 2',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     },
   ]);
 

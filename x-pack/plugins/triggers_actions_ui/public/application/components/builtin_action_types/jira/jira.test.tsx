@@ -39,6 +39,7 @@ describe('jira connector validation', () => {
       actionTypeId: '.jira',
       name: 'jira',
       isPreconfigured: false,
+      isDeprecated: false,
       config: {
         apiUrl: 'https://siem-kibana.atlassian.net',
         projectKey: 'CK',

@@ -188,7 +188,7 @@ export default function createActionsTelemetryTests({ getService }: FtrProviderC
       const telemetry = JSON.parse(taskState!);
 
       // total number of connectors
-      expect(telemetry.count_total).to.equal(17);
+      expect(telemetry.count_total).to.equal(18);
 
       // total number of active connectors (used by a rule)
       expect(telemetry.count_active_total).to.equal(7);

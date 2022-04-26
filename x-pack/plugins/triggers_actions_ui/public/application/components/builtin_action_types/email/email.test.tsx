@@ -54,6 +54,7 @@ describe('connector validation', () => {
       actionTypeId: '.email',
       name: 'email',
       isPreconfigured: false,
+      isDeprecated: false,
       config: {
         from: 'test@test.com',
         port: 2323,
@@ -95,6 +96,7 @@ describe('connector validation', () => {
       id: 'test',
       actionTypeId: '.email',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'email',
       config: {
         from: 'test@test.com',
@@ -172,6 +174,7 @@ describe('connector validation', () => {
       id: 'test',
       actionTypeId: '.email',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'email',
       config: {
         from: 'test@test.com',
@@ -213,6 +216,7 @@ describe('connector validation', () => {
       id: 'test',
       actionTypeId: '.email',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'email',
       config: {
         from: 'test@test.com',
@@ -253,6 +257,7 @@ describe('connector validation', () => {
       id: 'test',
       actionTypeId: '.email',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'email',
       config: {
         from: 'test@test.com',
@@ -296,6 +301,7 @@ describe('connector validation', () => {
       actionTypeId: '.email',
       name: 'email',
       isPreconfigured: false,
+      isDeprecated: false,
       config: {
         from: 'test@test.com',
         hasAuth: true,

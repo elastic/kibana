@@ -28,6 +28,7 @@ const actionConnector = {
   actionTypeId: '.servicenow',
   name: 'ServiceNow ITSM',
   isPreconfigured: false,
+  isDeprecated: false,
   config: {
     apiUrl: 'https://dev94428.service-now.com/',
   },

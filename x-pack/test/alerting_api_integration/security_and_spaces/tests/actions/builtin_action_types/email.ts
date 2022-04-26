@@ -45,6 +45,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
       expect(createdAction).to.eql({
         id: createdActionId,
         is_preconfigured: false,
+        is_deprecated: false,
         name: 'An email action',
         connector_type_id: '.email',
         is_missing_secrets: false,
@@ -70,6 +71,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
         is_preconfigured: false,
+        is_deprecated: false,
         name: 'An email action',
         connector_type_id: '.email',
         is_missing_secrets: false,
@@ -354,6 +356,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
       expect(createdAction).to.eql({
         id: createdAction.id,
         is_preconfigured: false,
+        is_deprecated: false,
         name: 'An email action',
         connector_type_id: '.email',
         is_missing_secrets: false,
@@ -379,6 +382,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
         is_preconfigured: false,
+        is_deprecated: false,
         name: 'An email action',
         connector_type_id: '.email',
         is_missing_secrets: false,
@@ -418,6 +422,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
       expect(createdAction).to.eql({
         id: createdAction.id,
         is_preconfigured: false,
+        is_deprecated: false,
         name: 'An email action',
         connector_type_id: '.email',
         is_missing_secrets: false,
@@ -443,6 +448,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
         is_preconfigured: false,
+        is_deprecated: false,
         name: 'An email action',
         connector_type_id: '.email',
         is_missing_secrets: false,
@@ -487,6 +493,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
       expect(createdAction).to.eql({
         id: createdMSExchangeActionId,
         is_preconfigured: false,
+        is_deprecated: false,
         name: 'An email action',
         connector_type_id: '.email',
         is_missing_secrets: false,
@@ -514,6 +521,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
         is_preconfigured: false,
+        is_deprecated: false,
         name: 'An email action',
         connector_type_id: '.email',
         is_missing_secrets: false,

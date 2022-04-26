@@ -64,6 +64,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
                 id: createdAction.id,
                 is_preconfigured: false,
                 connector_type_id: 'test.index-record',
+                is_deprecated: false,
                 is_missing_secrets: false,
                 name: 'My action',
                 config: {
@@ -150,6 +151,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
                 connector_type_id: '.slack',
                 name: 'Slack#xyz',
                 is_preconfigured: true,
+                is_deprecated: false,
               });
               break;
             default:

@@ -30,6 +30,7 @@ export default function serverLogTest({ getService }: FtrProviderContext) {
       expect(createdAction).to.eql({
         id: createdAction.id,
         is_preconfigured: false,
+        is_deprecated: false,
         is_missing_secrets: false,
         name: 'A server.log action',
         connector_type_id: '.server-log',
@@ -45,6 +46,7 @@ export default function serverLogTest({ getService }: FtrProviderContext) {
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
         is_preconfigured: false,
+        is_deprecated: false,
         name: 'A server.log action',
         connector_type_id: '.server-log',
         is_missing_secrets: false,

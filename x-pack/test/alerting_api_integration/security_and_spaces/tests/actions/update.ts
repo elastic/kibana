@@ -73,6 +73,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 id: createdAction.id,
                 is_preconfigured: false,
+                is_deprecated: false,
                 connector_type_id: 'test.index-record',
                 is_missing_secrets: false,
                 name: 'My action updated',

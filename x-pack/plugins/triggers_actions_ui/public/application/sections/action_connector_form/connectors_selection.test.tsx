@@ -66,6 +66,7 @@ describe('connectors_selection', () => {
       },
       id: 'testId',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'test pagerduty',
       secrets: {},
     },

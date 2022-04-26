@@ -133,6 +133,7 @@ describe('action_form', () => {
       name: 'Test connector',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     },
     {
       secrets: {},
@@ -142,6 +143,7 @@ describe('action_form', () => {
       name: 'Test connector 2',
       config: {},
       isPreconfigured: true,
+      isDeprecated: false,
     },
     {
       secrets: {},
@@ -151,6 +153,7 @@ describe('action_form', () => {
       name: 'Preconfigured Only',
       config: {},
       isPreconfigured: true,
+      isDeprecated: false,
     },
     {
       secrets: {},
@@ -160,6 +163,7 @@ describe('action_form', () => {
       name: 'Regular connector',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     },
     {
       secrets: {},
@@ -169,6 +173,7 @@ describe('action_form', () => {
       name: 'Non consumer connector',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     },
     {
       secrets: {},
@@ -178,6 +183,7 @@ describe('action_form', () => {
       name: 'Connector with disabled action group',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     },
     {
       secrets: null,
@@ -187,6 +193,7 @@ describe('action_form', () => {
       name: 'Connector with disabled action group',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     },
   ];
 

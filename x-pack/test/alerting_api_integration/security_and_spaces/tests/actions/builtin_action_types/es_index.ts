@@ -41,6 +41,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
       expect(createdAction).to.eql({
         id: createdAction.id,
         is_preconfigured: false,
+        is_deprecated: false,
         name: 'An index action',
         connector_type_id: '.index',
         is_missing_secrets: false,
@@ -60,6 +61,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
         is_preconfigured: false,
+        is_deprecated: false,
         is_missing_secrets: false,
         name: 'An index action',
         connector_type_id: '.index',
@@ -84,6 +86,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
       expect(createdActionWithIndex).to.eql({
         id: createdActionWithIndex.id,
         is_preconfigured: false,
+        is_deprecated: false,
         name: 'An index action with index config',
         connector_type_id: '.index',
         is_missing_secrets: false,
@@ -103,6 +106,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
       expect(fetchedActionWithIndex).to.eql({
         id: fetchedActionWithIndex.id,
         is_preconfigured: false,
+        is_deprecated: false,
         name: 'An index action with index config',
         connector_type_id: '.index',
         is_missing_secrets: false,

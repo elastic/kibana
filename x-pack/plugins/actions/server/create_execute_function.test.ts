@@ -247,6 +247,7 @@ describe('execute()', () => {
           actionTypeId: 'mock-action-preconfigured',
           config: {},
           isPreconfigured: true,
+          isDeprecated: false,
           name: 'x',
           secrets: {},
         },
@@ -324,6 +325,7 @@ describe('execute()', () => {
           actionTypeId: 'mock-action-preconfigured',
           config: {},
           isPreconfigured: true,
+          isDeprecated: false,
           name: 'x',
           secrets: {},
         },
@@ -506,6 +508,7 @@ describe('execute()', () => {
           name: 'Slack #xyz',
           secrets: {},
           isPreconfigured: true,
+          isDeprecated: false,
         },
       ],
     });

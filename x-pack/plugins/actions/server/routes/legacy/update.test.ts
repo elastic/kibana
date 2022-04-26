@@ -46,6 +46,7 @@ describe('updateActionRoute', () => {
       name: 'My name',
       config: { foo: true },
       isPreconfigured: false,
+      isDeprecated: false,
     };
 
     const actionsClient = actionsClientMock.create();
@@ -103,6 +104,7 @@ describe('updateActionRoute', () => {
       name: 'My name',
       config: { foo: true },
       isPreconfigured: false,
+      isDeprecated: false,
     };
 
     const actionsClient = actionsClientMock.create();
@@ -146,6 +148,7 @@ describe('updateActionRoute', () => {
       name: 'My name',
       config: { foo: true },
       isPreconfigured: false,
+      isDeprecated: false,
     };
 
     const actionsClient = actionsClientMock.create();

@@ -21,6 +21,7 @@ describe('connector reducer', () => {
       name: 'action-connector',
       referencedByCount: 0,
       isPreconfigured: false,
+      isDeprecated: false,
       config: {},
     };
   });

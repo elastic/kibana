@@ -195,6 +195,7 @@ export interface ActionConnectorProps<Config, Secrets> {
   referencedByCount?: number;
   config: Config;
   isPreconfigured: boolean;
+  isDeprecated: boolean;
   isMissingSecrets?: boolean;
 }
 

@@ -76,6 +76,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
         expect(createdAction).to.eql({
           id: createdAction.id,
           is_preconfigured: false,
+          is_deprecated: false,
           name: 'A jira action',
           connector_type_id: '.jira',
           is_missing_secrets: false,
@@ -92,6 +93,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
         expect(fetchedAction).to.eql({
           id: fetchedAction.id,
           is_preconfigured: false,
+          is_deprecated: false,
           name: 'A jira action',
           connector_type_id: '.jira',
           is_missing_secrets: false,

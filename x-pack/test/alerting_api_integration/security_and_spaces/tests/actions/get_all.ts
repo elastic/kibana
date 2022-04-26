@@ -70,6 +70,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 {
                   id: createdAction.id,
                   is_preconfigured: false,
+                  is_deprecated: false,
                   name: 'My action',
                   connector_type_id: 'test.index-record',
                   is_missing_secrets: false,
@@ -81,13 +82,23 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 {
                   id: 'preconfigured-es-index-action',
                   is_preconfigured: true,
+                  is_deprecated: false,
                   connector_type_id: '.index',
                   name: 'preconfigured_es_index_action',
                   referenced_by_count: 0,
                 },
                 {
+                  connector_type_id: '.servicenow',
+                  id: 'my-deprecated-servicenow',
+                  is_preconfigured: true,
+                  is_deprecated: true,
+                  name: 'ServiceNow#xyz',
+                  referenced_by_count: 0,
+                },
+                {
                   id: 'my-slack1',
                   is_preconfigured: true,
+                  is_deprecated: false,
                   connector_type_id: '.slack',
                   name: 'Slack#xyz',
                   referenced_by_count: 0,
@@ -95,6 +106,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 {
                   id: 'custom-system-abc-connector',
                   is_preconfigured: true,
+                  is_deprecated: false,
                   connector_type_id: 'system-abc-action-type',
                   name: 'SystemABC',
                   referenced_by_count: 0,
@@ -102,6 +114,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 {
                   id: 'preconfigured.test.index-record',
                   is_preconfigured: true,
+                  is_deprecated: false,
                   connector_type_id: 'test.index-record',
                   name: 'Test:_Preconfigured_Index_Record',
                   referenced_by_count: 0,
@@ -184,6 +197,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 {
                   id: createdAction.id,
                   is_preconfigured: false,
+                  is_deprecated: false,
                   name: 'My action',
                   connector_type_id: 'test.index-record',
                   is_missing_secrets: false,
@@ -195,13 +209,23 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 {
                   id: 'preconfigured-es-index-action',
                   is_preconfigured: true,
+                  is_deprecated: false,
                   connector_type_id: '.index',
                   name: 'preconfigured_es_index_action',
                   referenced_by_count: 0,
                 },
                 {
+                  connector_type_id: '.servicenow',
+                  id: 'my-deprecated-servicenow',
+                  is_deprecated: true,
+                  is_preconfigured: true,
+                  name: 'ServiceNow#xyz',
+                  referenced_by_count: 0,
+                },
+                {
                   id: 'my-slack1',
                   is_preconfigured: true,
+                  is_deprecated: false,
                   connector_type_id: '.slack',
                   name: 'Slack#xyz',
                   referenced_by_count: 0,
@@ -209,6 +233,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 {
                   id: 'custom-system-abc-connector',
                   is_preconfigured: true,
+                  is_deprecated: false,
                   connector_type_id: 'system-abc-action-type',
                   name: 'SystemABC',
                   referenced_by_count: 0,
@@ -216,6 +241,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 {
                   id: 'preconfigured.test.index-record',
                   is_preconfigured: true,
+                  is_deprecated: false,
                   connector_type_id: 'test.index-record',
                   name: 'Test:_Preconfigured_Index_Record',
                   referenced_by_count: 0,
@@ -274,13 +300,23 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 {
                   id: 'preconfigured-es-index-action',
                   is_preconfigured: true,
+                  is_deprecated: false,
                   connector_type_id: '.index',
                   name: 'preconfigured_es_index_action',
                   referenced_by_count: 0,
                 },
                 {
+                  connector_type_id: '.servicenow',
+                  id: 'my-deprecated-servicenow',
+                  is_preconfigured: true,
+                  is_deprecated: true,
+                  name: 'ServiceNow#xyz',
+                  referenced_by_count: 0,
+                },
+                {
                   id: 'my-slack1',
                   is_preconfigured: true,
+                  is_deprecated: false,
                   connector_type_id: '.slack',
                   name: 'Slack#xyz',
                   referenced_by_count: 0,
@@ -288,6 +324,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 {
                   id: 'custom-system-abc-connector',
                   is_preconfigured: true,
+                  is_deprecated: false,
                   connector_type_id: 'system-abc-action-type',
                   name: 'SystemABC',
                   referenced_by_count: 0,
@@ -295,6 +332,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                 {
                   id: 'preconfigured.test.index-record',
                   is_preconfigured: true,
+                  is_deprecated: false,
                   connector_type_id: 'test.index-record',
                   name: 'Test:_Preconfigured_Index_Record',
                   referenced_by_count: 0,

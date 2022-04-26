@@ -20,6 +20,7 @@ describe('XmattersActionConnectorFields renders', () => {
       id: 'test',
       actionTypeId: '.xmatters',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'xmatters',
       config: {
         configUrl: 'http:\\test',
@@ -51,6 +52,7 @@ describe('XmattersActionConnectorFields renders', () => {
       id: 'test',
       actionTypeId: '.xmatters',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'xmatters',
       config: {
         configUrl: 'http:\\test',
@@ -81,6 +83,7 @@ describe('XmattersActionConnectorFields renders', () => {
       id: 'test',
       actionTypeId: '.xmatters',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'xmatters',
       config: {
         usesBasic: false,
@@ -107,6 +110,7 @@ describe('XmattersActionConnectorFields renders', () => {
       secrets: {},
       actionTypeId: '.xmatters',
       isPreconfigured: false,
+      isDeprecated: false,
       config: {
         usesBasic: true,
       },
@@ -135,6 +139,7 @@ describe('XmattersActionConnectorFields renders', () => {
       id: 'test',
       actionTypeId: '.xmatters',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'xmatters',
       config: {
         configUrl: 'http:\\test',
@@ -165,6 +170,7 @@ describe('XmattersActionConnectorFields renders', () => {
       id: 'test',
       actionTypeId: '.xmatters',
       isPreconfigured: false,
+      isDeprecated: false,
       isMissingSecrets: true,
       name: 'xmatters',
       config: {
@@ -194,6 +200,7 @@ describe('XmattersActionConnectorFields renders', () => {
       id: 'test',
       actionTypeId: '.xmatters',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'xmatters',
       config: {
         usesBasic: false,

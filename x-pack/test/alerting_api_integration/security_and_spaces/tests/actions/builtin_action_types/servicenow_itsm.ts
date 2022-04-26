@@ -100,6 +100,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
         expect(createdAction).to.eql({
           id: createdAction.id,
           is_preconfigured: false,
+          is_deprecated: false,
           name: 'A servicenow action',
           connector_type_id: '.servicenow',
           is_missing_secrets: false,
@@ -116,6 +117,7 @@ export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
         expect(fetchedAction).to.eql({
           id: fetchedAction.id,
           is_preconfigured: false,
+          is_deprecated: false,
           name: 'A servicenow action',
           connector_type_id: '.servicenow',
           is_missing_secrets: false,

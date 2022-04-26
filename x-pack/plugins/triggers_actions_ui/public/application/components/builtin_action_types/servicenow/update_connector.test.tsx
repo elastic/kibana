@@ -19,6 +19,7 @@ const actionConnector: ServiceNowActionConnector = {
   id: 'test',
   actionTypeId: '.servicenow',
   isPreconfigured: false,
+  isDeprecated: false,
   name: 'servicenow',
   config: {
     apiUrl: 'https://test/',
