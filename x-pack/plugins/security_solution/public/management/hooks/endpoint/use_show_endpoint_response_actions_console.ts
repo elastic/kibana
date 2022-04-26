@@ -8,26 +8,28 @@
 import { useCallback } from 'react';
 import { EndpointConsoleCommandService } from '../../components/endpoint_console/endpoint_console_command_service';
 import { useConsoleManager } from '../../components/console';
-import { HostInfo } from '../../../../common/endpoint/types';
+import { HostMetadata } from '../../../../common/endpoint/types';
 
-export const useShowEndpointResponseActionsConsole = (): ((endpointHostInfo: HostInfo) => void) => {
+type ShowEndpointResponseActionsConsole = (endpointMetadata: HostMetadata) => void;
+
+export const useShowEndpointResponseActionsConsole = (): ShowEndpointResponseActionsConsole => {
   const consoleManager = useConsoleManager();
 
   return useCallback(
-    (endpointHostInfo: HostInfo) => {
-      const endpointRunningConsole = consoleManager.getOne(endpointHostInfo.metadata.agent.id);
+    (endpointMetadata: HostMetadata) => {
+      const endpointRunningConsole = consoleManager.getOne(endpointMetadata.agent.id);
 
       if (endpointRunningConsole) {
         endpointRunningConsole.show();
       } else {
         consoleManager
           .register({
-            id: endpointHostInfo.metadata.agent.id,
-            title: `${endpointHostInfo.metadata.host.name} - Endpoint v${endpointHostInfo.metadata.agent.version}`,
+            id: endpointMetadata.agent.id,
+            title: `${endpointMetadata.host.name} - Endpoint v${endpointMetadata.agent.version}`,
             consoleProps: {
               'data-test-subj': 'endpointResponseActionsConsole',
-              prompt: `endpoint-${endpointHostInfo.metadata.agent.version}`,
-              commandService: new EndpointConsoleCommandService(endpointHostInfo),
+              prompt: `endpoint-${endpointMetadata.agent.version}`,
+              commandService: new EndpointConsoleCommandService(endpointMetadata),
             },
           })
           .show();
