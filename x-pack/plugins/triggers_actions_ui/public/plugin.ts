@@ -16,6 +16,7 @@ import { ManagementAppMountParams, ManagementSetup } from '@kbn/management-plugi
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
+import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -84,6 +85,7 @@ interface PluginsSetup {
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
   cloud?: { isCloudEnabled: boolean };
+  actions: ActionsPublicPluginSetup;
 }
 
 interface PluginsStart {
@@ -196,6 +198,9 @@ export class Plugin
 
     registerBuiltInActionTypes({
       actionTypeRegistry: this.actionTypeRegistry,
+      services: {
+        validateEmailAddresses: plugins.actions.validateEmailAddresses,
+      },
     });
 
     if (this.experimentalFeatures.internalAlertsTable) {
