@@ -110,10 +110,7 @@ export class VegaBaseView {
         return;
       }
 
-      this._$container = $('<div class="vgaVis__view">')
-        // Force a height here because css is not loaded in mocha test
-        .css('height', '100%')
-        .appendTo(this._$parentEl);
+      this._$container = $('<div class="vgaVis__view">').appendTo(this._$parentEl);
       this._$controls = $(
         `<div class="vgaVis__controls vgaVis__controls--${this._parser.controlsDir}">`
       ).appendTo(this._$parentEl);
@@ -262,9 +259,16 @@ export class VegaBaseView {
     }
   }
 
-  async resize(dimensions) {
+  async resize() {
+    if (this._$parentEl) {
+      if (this._parser.useResize) {
+        this._$parentEl.addClass('vgaVis--autoresize');
+      } else {
+        this._$parentEl.removeClass('vgaVis--autoresize');
+      }
+    }
     if (this._parser.useResize && this._view) {
-      this.updateVegaSize(this._view, dimensions);
+      this.updateVegaSize(this._view);
       await this._view.runAsync();
 
       // The derived class should create this method
