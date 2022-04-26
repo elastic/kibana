@@ -8,6 +8,12 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const MANAGEMENT_BREADCRUMB_NO_HREF = {
+  text: i18n.translate('management.breadcrumb', {
+    defaultMessage: 'Stack Management',
+  }),
+};
+
 export const MANAGEMENT_BREADCRUMB = {
   text: i18n.translate('management.breadcrumb', {
     defaultMessage: 'Stack Management',

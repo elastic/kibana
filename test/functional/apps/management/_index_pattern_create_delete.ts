@@ -119,13 +119,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('edit index pattern', () => {
-      it('edit index pattern details on edit click', async () => {
+      it('on edit click', async () => {
         await PageObjects.settings.editIndexPattern('logstash-*', '@timestamp', 'Logstash Star');
 
         await retry.try(async () => {
           expect(await testSubjects.getVisibleText('indexPatternTitle')).to.contain(
             `Logstash Star`
           );
+        });
+      });
+
+      it('shows edit confirm message when editing index-pattern', async () => {
+        await PageObjects.settings.editIndexPattern('index-*', '@timestamp', 'Index Star', true);
+
+        await retry.try(async () => {
+          expect(await testSubjects.getVisibleText('indexPatternTitle')).to.contain(`Index Star`);
         });
       });
     });

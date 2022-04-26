@@ -8,7 +8,6 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { withRouter, RouteComponentProps, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,9 +28,9 @@ import { IndexHeader } from './index_header';
 import { getTags } from '../utils';
 import { removeDataView, RemoveDataViewProps } from './remove_data_view';
 
-const Code = styled(EuiCode)`
-  margin-left: 8px;
-`;
+const codeStyle = {
+  marginLeft: '8px',
+};
 
 export interface EditIndexPatternProps extends RouteComponentProps {
   indexPattern: DataView;
@@ -93,9 +92,7 @@ export const EditIndexPattern = withRouter(
     const isRollup = new URLSearchParams(useLocation().search).get('type') === 'rollup';
     const displayIndexPatternEditor = showEditDialog ? (
       <IndexPatternEditor
-        onSave={(iPattern) => {
-          history.push(`patterns/${iPattern.id}`);
-        }}
+        onSave={() => setShowEditDialog(false)}
         onCancel={() => setShowEditDialog(false)}
         defaultTypeIsRollup={isRollup}
         editData={indexPattern}
@@ -145,7 +142,7 @@ export const EditIndexPattern = withRouter(
           id="indexPatternManagement.editDataView.deleteWarningWithNamespaces"
           defaultMessage="Delete the data view {dataViewName} from every space it is shared in. You can't undo this action."
           values={{
-            dataViewName: <EuiCode>{indexPattern.title}</EuiCode>,
+            dataViewName: <EuiCode>{indexPattern.getName()}</EuiCode>,
           }}
         />
       ) : (
@@ -153,7 +150,7 @@ export const EditIndexPattern = withRouter(
           id="indexPatternManagement.editDataView.deleteWarning"
           defaultMessage="The data view {dataViewName} will be deleted. You can't undo this action."
           values={{
-            dataViewName: <EuiCode>{indexPattern.title}</EuiCode>,
+            dataViewName: <EuiCode>{indexPattern.getName()}</EuiCode>,
           }}
         />
       );
@@ -177,7 +174,7 @@ export const EditIndexPattern = withRouter(
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="none" alignItems="center">
                   <EuiText size="s">{indexPatternHeading}</EuiText>
-                  <Code>{indexPattern.title}</Code>
+                  <EuiCode style={codeStyle}>{indexPattern.title}</EuiCode>
                 </EuiFlexGroup>
               </EuiFlexItem>
             )}
@@ -185,7 +182,7 @@ export const EditIndexPattern = withRouter(
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="none" alignItems="center">
                   <EuiText size="s">{timeFilterHeading}</EuiText>
-                  <Code>{indexPattern.timeFieldName}</Code>
+                  <EuiCode style={codeStyle}>{indexPattern.timeFieldName}</EuiCode>
                 </EuiFlexGroup>
               </EuiFlexItem>
             )}

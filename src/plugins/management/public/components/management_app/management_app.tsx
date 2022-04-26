@@ -18,7 +18,11 @@ import {
   reactRouterNavigate,
   KibanaThemeProvider,
 } from '@kbn/kibana-react-plugin/public';
-import { ManagementSection, MANAGEMENT_BREADCRUMB } from '../../utils';
+import {
+  ManagementSection,
+  MANAGEMENT_BREADCRUMB,
+  MANAGEMENT_BREADCRUMB_NO_HREF,
+} from '../../utils';
 import { ManagementRouter } from './management_router';
 import { managementSidebarNav } from '../management_sidebar_nav/management_sidebar_nav';
 import { SectionsServiceStart } from '../../types';
@@ -53,8 +57,11 @@ export const ManagementApp = ({ dependencies, history, theme$ }: ManagementAppPr
         ...(item.href ? reactRouterNavigate(scopedHistory, item.href) : {}),
       });
 
+      const managementBreadcrumb = crumbs.length
+        ? MANAGEMENT_BREADCRUMB
+        : MANAGEMENT_BREADCRUMB_NO_HREF;
       setBreadcrumbs([
-        wrapBreadcrumb(MANAGEMENT_BREADCRUMB, history),
+        wrapBreadcrumb(managementBreadcrumb, history),
         ...crumbs.map((item) => wrapBreadcrumb(item, appHistory || history)),
       ]);
     },

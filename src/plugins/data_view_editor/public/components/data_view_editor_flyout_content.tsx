@@ -24,7 +24,6 @@ import {
 
 import { ensureMinimumTime, getIndices, extractTimeFields, getMatchedIndices } from '../lib';
 import { FlyoutPanels } from './flyout_panels';
-import { EditDataViewChangedModal } from './confirm_modals/edit_data_view_changed_modal';
 
 import {
   MatchedItem,
@@ -49,6 +48,7 @@ import {
   PreviewPanel,
   RollupBetaWarning,
 } from '.';
+import { editDataViewModal } from './confirm_modals/edit_data_view_changed_modal';
 
 export interface Props {
   /**
@@ -80,7 +80,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   editData,
 }: Props) => {
   const {
-    services: { http, dataViews, uiSettings, searchClient },
+    services: { http, dataViews, uiSettings, searchClient, overlays },
   } = useKibana<DataViewEditorContext>();
 
   const { form } = useForm<IndexPatternConfig, FormInternal>({
@@ -123,12 +123,14 @@ const IndexPatternEditorFlyoutContentComponent = ({
         };
       }
 
-      if (
-        editData &&
-        editData.title !== form.getFields().title.value &&
-        !editDataViewChangedModal
-      ) {
-        setEditDataViewChangedModal(true);
+      if (editData && editData.title !== formData.title) {
+        editDataViewModal({
+          dataViewName: formData.name || formData.title,
+          overlays,
+          onEdit: async () => {
+            await onSave(indexPatternStub);
+          },
+        });
       } else {
         await onSave(indexPatternStub);
       }
@@ -166,7 +168,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
     partialMatchedIndices: [],
     visibleIndices: [],
   });
-  const [editDataViewChangedModal, setEditDataViewChangedModal] = useState(false);
 
   // load all data sources and set initial matchedIndices
   const loadSources = useCallback(() => {
@@ -187,7 +188,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   useEffect(() => {
     loadSources();
     const getTitles = async () => {
-      const indexPatternTitles = await dataViews.getTitles();
+      const indexPatternTitles = await dataViews.getTitles(editData ? true : false);
 
       setExistingIndexPatterns(
         editData ? indexPatternTitles.filter((v) => v !== editData.title) : indexPatternTitles
@@ -304,17 +305,16 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   // If editData exists, loadSources so that MatchedIndices can be loaded for the Timestampfields
   useEffect(() => {
-    if (editData) loadSources();
-  }, [editData, loadSources]);
-
-  useEffect(() => {
-    if (editData) reloadMatchedIndices(editData.title);
-  }, [editData, allSources, reloadMatchedIndices]);
+    if (editData) {
+      loadSources();
+      reloadMatchedIndices(editData.title);
+    }
+  }, [editData]);
 
   useEffect(() => {
     loadTimestampFieldOptions(editData ? editData.title : title);
     if (!editData) getFields().timestampField?.setValue('');
-  }, [loadTimestampFieldOptions, title, getFields, editData]);
+  }, [loadTimestampFieldOptions, title, getFields]);
 
   const onTypeChange = useCallback(
     (newType) => {
@@ -358,24 +358,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
   ) : (
     <></>
   );
-
-  const renderModal = () => {
-    if (editDataViewChangedModal) {
-      return (
-        <EditDataViewChangedModal
-          dataViewName={form.getFields().name.value as string}
-          onConfirm={() => {
-            form.submit();
-          }}
-          onCancel={() => {
-            setEditDataViewChangedModal(false);
-          }}
-        />
-      );
-    }
-
-    return null;
-  };
 
   return (
     <EmptyPrompts onCancel={onCancel} allSources={allSources} loadSources={loadSources}>
@@ -438,7 +420,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
           )}
         </FlyoutPanels.Item>
       </FlyoutPanels.Group>
-      {renderModal()}
     </EmptyPrompts>
   );
 };

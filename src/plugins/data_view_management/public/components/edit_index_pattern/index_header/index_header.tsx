@@ -59,7 +59,6 @@ export const IndexHeader: React.FC<IndexHeaderProps> = ({
       rightSideItems={[
         canSave && (
           <EuiButton
-            fill
             onClick={editIndexPatternClick}
             iconType="pencil"
             aria-label={editAriaLabel}

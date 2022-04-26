@@ -166,8 +166,8 @@ export class SettingsPageObject extends FtrService {
 
   async setNameField(dataViewName: string) {
     const field = await this.getNameField();
-    field.clearValue();
-    field.type(dataViewName);
+    await field.clearValue();
+    await field.type(dataViewName);
   }
 
   async getSaveIndexPatternButton() {
@@ -479,29 +479,37 @@ export class SettingsPageObject extends FtrService {
     indexPatternName: string,
     // null to bypass default value
     timefield: string | null = '@timestamp',
-    dataViewName?: string
+    dataViewName?: string,
+    errorCheck?: boolean
   ) {
     if (!indexPatternName) {
       throw new Error('No Data View name provided for edit');
     }
 
-    const exists = await this.hasIndexPattern(indexPatternName);
-    if (!exists) {
-      throw new Error('Data view for edit does not exist');
-    }
-
     this.clickEditIndexButton();
     await this.header.waitUntilLoadingHasFinished();
-    if (timefield) {
-      await this.selectTimeFieldOption(timefield);
-    }
+
+    await this.retry.try(async () => {
+      await this.setIndexPatternField(indexPatternName);
+    });
     if (dataViewName) {
       await this.setNameField(dataViewName);
     }
+    if (timefield) {
+      await this.selectTimeFieldOption(timefield);
+    }
     await (await this.getSaveIndexPatternButton()).click();
 
-    await this.testSubjects.find('editDataViewWarning');
-    await this.confirmSave();
+    if (errorCheck) {
+      await this.retry.try(async () => {
+        this.log.debug('getAlertText');
+        await this.testSubjects.getVisibleText('confirmModalTitleText');
+      });
+      await this.retry.try(async () => {
+        this.log.debug('acceptConfirmation');
+        await this.testSubjects.click('confirmModalConfirmButton');
+      });
+    }
 
     await this.header.waitUntilLoadingHasFinished();
     return await this.getIndexPatternIdFromUrl();
