@@ -8,10 +8,7 @@
   "version": "WzE5MjksMV0=",
   "attributes": {
     "name": "Test-rule",
-    "tags": [
-      "__internal_rule_id:22308402-5e0e-421b-8d22-a47ddc4b0188",
-      "__internal_immutable:false"
-    ],
+    "tags": [],
     "alertTypeId": "siem.queryRule",
     "consumer": "siem",
     "params": {

@@ -6,7 +6,6 @@
  */
 
 import uuid from 'uuid';
-import { INTERNAL_IMMUTABLE_KEY } from '../../../../common/constants';
 import { duplicateRule } from './duplicate_rule';
 
 jest.mock('uuid', () => ({
@@ -22,7 +21,7 @@ describe('duplicateRule', () => {
         id: 'oldTestRuleId',
         notifyWhen: 'onActiveAlert',
         name: 'test',
-        tags: ['test', '__internal_rule_id:oldTestRuleId', `${INTERNAL_IMMUTABLE_KEY}:false`],
+        tags: ['test'],
         alertTypeId: 'siem.signals',
         consumer: 'siem',
         params: {
@@ -125,8 +124,6 @@ describe('duplicateRule', () => {
         },
         "tags": Array [
           "test",
-          "__internal_rule_id:newId",
-          "__internal_immutable:false",
         ],
         "throttle": null,
       }

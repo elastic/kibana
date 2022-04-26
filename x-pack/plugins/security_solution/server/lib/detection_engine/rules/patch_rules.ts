@@ -14,7 +14,6 @@ import {
   normalizeThresholdObject,
 } from '../../../../common/detection_engine/utils';
 import { internalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
-import { addTags } from './add_tags';
 import { PatchRulesOptions } from './types';
 import {
   calculateInterval,
@@ -190,7 +189,7 @@ export const patchRules = async ({
   );
 
   const newRule = {
-    tags: addTags(tags ?? rule.tags, rule.params.ruleId, rule.params.immutable),
+    tags: tags ?? rule.tags,
     name: calculateName({ updatedName: name, originalName: rule.name }),
     schedule: {
       interval: calculateInterval(interval, rule.schedule.interval),

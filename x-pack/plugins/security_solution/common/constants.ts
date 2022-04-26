@@ -207,15 +207,6 @@ export const IP_REPUTATION_LINKS_SETTING_DEFAULT = `[
 export const LEGACY_NOTIFICATIONS_ID = `siem.notifications` as const;
 
 /**
- * Special internal structure for tags for signals. This is used
- * to filter out tags that have internal structures within them.
- */
-export const INTERNAL_IDENTIFIER = '__internal' as const;
-export const INTERNAL_RULE_ID_KEY = `${INTERNAL_IDENTIFIER}_rule_id` as const;
-export const INTERNAL_RULE_ALERT_ID_KEY = `${INTERNAL_IDENTIFIER}_rule_alert_id` as const;
-export const INTERNAL_IMMUTABLE_KEY = `${INTERNAL_IDENTIFIER}_immutable` as const;
-
-/**
  * Internal actions route
  */
 export const UPDATE_OR_CREATE_LEGACY_ACTIONS = '/internal/api/detection/legacy/notifications';

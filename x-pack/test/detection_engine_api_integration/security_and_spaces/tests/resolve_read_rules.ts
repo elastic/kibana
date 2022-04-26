@@ -65,10 +65,7 @@ export default ({ getService }: FtrProviderContext) => {
           body: {
             alert: {
               name: 'test 7.14',
-              tags: [
-                '__internal_rule_id:82747bb8-bae0-4b59-8119-7f65ac564e14',
-                '__internal_immutable:false',
-              ],
+              tags: [],
               alertTypeId: 'siem.queryRule',
               consumer: 'siem',
               params: {

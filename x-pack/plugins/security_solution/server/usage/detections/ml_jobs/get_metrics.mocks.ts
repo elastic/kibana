@@ -291,7 +291,7 @@ export const getMockMlDatafeedStatsResponse = () => ({
 });
 
 export const getMockRuleSearchResponse = (
-  immutableTag: string = '__internal_immutable:true'
+  immutable: boolean = true
 ): SavedObjectsFindResponse<RuleSearchResult, never> =>
   ({
     page: 1,
@@ -304,16 +304,7 @@ export const getMockRuleSearchResponse = (
         namespaces: ['default'],
         attributes: {
           name: 'Azure Diagnostic Settings Deletion',
-          tags: [
-            'Elastic',
-            'Cloud',
-            'Azure',
-            'Continuous Monitoring',
-            'SecOps',
-            'Monitoring',
-            '__internal_rule_id:5370d4cd-2bb3-4d71-abf5-1e1d0ff5a2de',
-            `${immutableTag}`,
-          ],
+          tags: ['Elastic', 'Cloud', 'Azure', 'Continuous Monitoring', 'SecOps', 'Monitoring'],
           alertTypeId: 'siem.queryRule',
           consumer: 'siem',
           params: {
@@ -326,7 +317,7 @@ export const getMockRuleSearchResponse = (
               'Deletion of diagnostic settings may be done by a system or network administrator. Verify whether the username, hostname, and/or resource name should be making changes in your environment. Diagnostic settings deletion from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule.',
             ],
             from: 'now-25m',
-            immutable: true,
+            immutable,
             query:
               'event.dataset:azure.activitylogs and azure.activitylogs.operation_name:"MICROSOFT.INSIGHTS/DIAGNOSTICSETTINGS/DELETE" and event.outcome:(Success or success)',
             language: 'kuery',
