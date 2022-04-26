@@ -1,0 +1,14 @@
+{
+  "id": "userContent",
+  "owner": {
+    "name": "Kibana Core",
+    "githubTeam": "kibana-core"
+  },
+  "version": "kibana",
+  "server": true,
+  "ui": false,
+  "requiredPlugins": [],
+  "optionalPlugins": [],
+  "extraPublicDirs": [],
+  "requiredBundles": []
+}
