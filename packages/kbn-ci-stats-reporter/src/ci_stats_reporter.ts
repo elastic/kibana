@@ -17,6 +17,7 @@ import Axios, { AxiosRequestConfig } from 'axios';
 // @ts-expect-error not "public", but necessary to prevent Jest shimming from breaking things
 import httpAdapter from 'axios/lib/adapters/http';
 import { ToolingLog } from '@kbn/tooling-log';
+import { asyncForEachWithLimit } from '@kbn/std';
 
 import { parseConfig, Config, CiStatsMetadata } from '@kbn/ci-stats-core';
 import type { CiStatsTestGroupInfo, CiStatsTestRun } from './ci_stats_test_group_types';
@@ -84,10 +85,8 @@ export interface CiStatsReportTestsOptions {
 }
 
 /* @internal */
-interface ReportTestsResponse {
-  buildId: string;
+interface ReportTestGroupResponse {
   groupId: string;
-  testRunCount: number;
 }
 
 /* @internal */
@@ -238,17 +237,43 @@ export class CiStatsReporter {
       );
     }
 
-    return await this.req<ReportTestsResponse>({
+    const groupResp = await this.req<ReportTestGroupResponse>({
       auth: true,
-      path: '/v1/test_group',
+      path: '/v2/test_group',
       query: {
         buildId: this.config?.buildId,
       },
-      bodyDesc: `[${group.name}/${group.type}] test groups with ${testRuns.length} tests`,
-      body: [
-        JSON.stringify({ group }),
-        ...testRuns.map((testRun) => JSON.stringify({ testRun })),
-      ].join('\n'),
+      bodyDesc: `[${group.name}/${group.type}] test group`,
+      body: group,
+    });
+
+    if (!groupResp) {
+      return;
+    }
+
+    const chunks: CiStatsTestRun[][] = [];
+    for (const testRun of testRuns) {
+      const chunk = chunks.at(-1);
+      if (!chunk || chunk.length >= 20) {
+        chunks.push([testRun]);
+      } else {
+        chunk.push(testRun);
+      }
+    }
+
+    // send test runs in chunks of 20, 10 chunks at a time
+    await asyncForEachWithLimit(chunks, 10, async (chunk) => {
+      await this.req<{ testRunCount: number }>({
+        auth: true,
+        path: '/v2/test_runs',
+        query: {
+          buildId: this.config?.buildId,
+          groupId: groupResp.groupId,
+          groupType: group.type,
+        },
+        bodyDesc: `[${group.name}/${group.type}] Chunk of ${chunk.length} tests`,
+        body: chunk.map((test) => JSON.stringify(test)).join('\n'),
+      });
     });
   }
 
