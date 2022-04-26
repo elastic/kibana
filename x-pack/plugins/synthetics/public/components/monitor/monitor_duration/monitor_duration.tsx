@@ -41,13 +41,13 @@ export const MonitorDurationComponent = ({
             <h3>
               {hasMLJob ? (
                 <FormattedMessage
-                  id="xpack.uptime.monitorCharts.monitorDuration.titleLabelWithAnomaly"
+                  id="xpack.synthetics.monitorCharts.monitorDuration.titleLabelWithAnomaly"
                   defaultMessage="Monitor duration (Anomalies: {noOfAnomalies})"
                   values={{ noOfAnomalies: anomalies?.anomalies?.length ?? 0 }}
                 />
               ) : (
                 <FormattedMessage
-                  id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
+                  id="xpack.synthetics.monitorCharts.monitorDuration.titleLabel"
                   defaultMessage="Monitor duration"
                 />
               )}
@@ -59,7 +59,7 @@ export const MonitorDurationComponent = ({
         </EuiFlexItem>
         {/* <EuiFlexItem grow={false}>*/}
         {/*  <EuiButton size="s" isDisabled={loading} href={exploratoryViewLink}>*/}
-        {/*    <FormattedMessage id="xpack.uptime.monitorDuration.analyze" defaultMessage="Analyze" />*/}
+        {/*    <FormattedMessage id="xpack.synthetics.monitorDuration.analyze" defaultMessage="Analyze" />*/}
         {/*  </EuiButton>*/}
         {/* </EuiFlexItem>*/}
       </EuiFlexGroup>
