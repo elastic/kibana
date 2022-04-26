@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { transformError, getIndexExists } from '@kbn/securitysolution-es-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import {
   DETECTION_ENGINE_RULES_URL,
@@ -25,8 +25,7 @@ import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters'
 
 export const createRulesRoute = (
   router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml'],
-  isRuleRegistryEnabled: boolean
+  ml: SetupPlugins['ml']
 ): void => {
   router.post(
     {
@@ -56,13 +55,11 @@ export const createRulesRoute = (
 
         const rulesClient = ctx.alerting.getRulesClient();
         const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
-        const esClient = ctx.core.elasticsearch.client;
         const savedObjectsClient = ctx.core.savedObjects.client;
         const siemClient = ctx.securitySolution.getAppClient();
 
         if (request.body.rule_id != null) {
           const rule = await readRules({
-            isRuleRegistryEnabled,
             rulesClient,
             ruleId: request.body.rule_id,
             id: undefined,
@@ -75,11 +72,7 @@ export const createRulesRoute = (
           }
         }
 
-        const internalRule = convertCreateAPIToInternalSchema(
-          request.body,
-          siemClient,
-          isRuleRegistryEnabled
-        );
+        const internalRule = convertCreateAPIToInternalSchema(request.body, siemClient);
 
         const mlAuthz = buildMlAuthz({
           license: ctx.licensing.license,
@@ -88,17 +81,6 @@ export const createRulesRoute = (
           savedObjectsClient,
         });
         throwAuthzError(await mlAuthz.validateRuleType(internalRule.params.type));
-
-        const indexExists = await getIndexExists(
-          esClient.asCurrentUser,
-          internalRule.params.outputIndex
-        );
-        if (!isRuleRegistryEnabled && !indexExists) {
-          return siemResponse.error({
-            statusCode: 400,
-            body: `To create a rule, the index must exist first. Index ${internalRule.params.outputIndex} does not exist`,
-          });
-        }
 
         // This will create the endpoint list if it does not exist yet
         await ctx.lists?.getExceptionListClient().createEndpointList();
@@ -114,11 +96,7 @@ export const createRulesRoute = (
 
         const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(createdRule.id);
 
-        const [validated, errors] = newTransformValidate(
-          createdRule,
-          ruleExecutionSummary,
-          isRuleRegistryEnabled
-        );
+        const [validated, errors] = newTransformValidate(createdRule, ruleExecutionSummary);
         if (errors != null) {
           return siemResponse.error({ statusCode: 500, body: errors });
         } else {
