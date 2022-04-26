@@ -6,18 +6,15 @@
  */
 
 import { bulkUpdateSessions, updateSessionStatus } from './update_session_status';
-import {
-  SearchSessionStatus,
-  SearchSessionSavedObjectAttributes,
-} from '../../../../../../src/plugins/data/common';
-import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { SearchSessionStatus, SearchSessionSavedObjectAttributes } from '@kbn/data-plugin/common';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SearchStatus } from './types';
 import moment from 'moment';
 import {
   SavedObjectsBulkUpdateObject,
   SavedObjectsClientContract,
   SavedObjectsFindResult,
-} from '../../../../../../src/core/server';
+} from '@kbn/core/server';
 
 describe('bulkUpdateSessions', () => {
   let mockClient: any;
@@ -186,7 +183,7 @@ describe('bulkUpdateSessions', () => {
 
       expect(updated).toBeTruthy();
 
-      expect(mockClient.asyncSearch.status).toBeCalledWith({ id: 'search-id' });
+      expect(mockClient.asyncSearch.status).toBeCalledWith({ id: 'search-id' }, { meta: true });
       expect(so.attributes.status).toBe(SearchSessionStatus.COMPLETE);
       expect(so.attributes.status).toBe(SearchSessionStatus.COMPLETE);
       expect(so.attributes.touched).not.toBe('123');

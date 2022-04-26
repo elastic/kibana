@@ -87,7 +87,7 @@ export const useInvalidateRules = () => {
 /**
  * We should use this hook to update the rules cache when modifying rules
  * without changing the rules collection size. Use it with the new rules data
- * after operations like bulk or single rule edit or rule activation, but not
+ * after operations like bulk or single rule edit or rule enabling, but not
  * when adding or removing rules. When adding/removing rules, we should
  * invalidate the cache instead.
  *

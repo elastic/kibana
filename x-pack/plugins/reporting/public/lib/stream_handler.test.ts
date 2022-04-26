@@ -6,8 +6,8 @@
  */
 
 import sinon, { stub } from 'sinon';
-import { NotificationsStart } from 'src/core/public';
-import { coreMock, themeServiceMock } from '../../../../../src/core/public/mocks';
+import { NotificationsStart } from '@kbn/core/public';
+import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { JobSummary, ReportApiJSON } from '../../common/types';
 import { Job } from './job';
 import { ReportingAPIClient } from './reporting_api_client';
@@ -24,6 +24,7 @@ const mockJobsFound: Job[] = [
   { id: 'job-source-mock1', status: 'completed', output: { csv_contains_formulas: false, max_size_reached: false }, payload: { title: 'specimen' } },
   { id: 'job-source-mock2', status: 'failed', output: { csv_contains_formulas: false, max_size_reached: false }, payload: { title: 'specimen' } },
   { id: 'job-source-mock3', status: 'pending', output: { csv_contains_formulas: false, max_size_reached: false }, payload: { title: 'specimen' } },
+  { id: 'job-source-mock4', status: 'completed', output: { csv_contains_formulas: true, max_size_reached: false }, payload: { title: 'specimen' } },
 ].map((j) => new Job(j as ReportApiJSON)); // prettier-ignore
 
 const coreSetup = coreMock.createSetup();
@@ -74,6 +75,7 @@ describe('stream handler', () => {
         'job-source-mock1',
         'job-source-mock2',
         'job-source-mock3',
+        'job-source-mock4',
       ]);
 
       findJobs.subscribe((data) => {

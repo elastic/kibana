@@ -74,7 +74,7 @@ const getUnknownSavedObjects = async ({
   });
   const query = getUnknownTypesQuery(knownTypes);
 
-  const { body } = await esClient.asInternalUser.search<SavedObjectsRawDocSource>({
+  const body = await esClient.asInternalUser.search<SavedObjectsRawDocSource>({
     index: targetIndices,
     body: {
       size: 10000,

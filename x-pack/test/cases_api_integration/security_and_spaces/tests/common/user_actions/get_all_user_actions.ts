@@ -6,15 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
   CaseResponse,
   CaseStatuses,
   CommentType,
   ConnectorTypes,
-} from '../../../../../../plugins/cases/common/api';
-import { CreateCaseUserAction } from '../../../../../../plugins/cases/common/api/cases/user_actions/create_case';
+  getCaseUserActionUrl,
+} from '@kbn/cases-plugin/common/api';
+import { CreateCaseUserAction } from '@kbn/cases-plugin/common/api/cases/user_actions/create_case';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { postCaseReq, postCommentUserReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -26,6 +27,7 @@ import {
   createComment,
   updateComment,
   deleteComment,
+  extractWarningValueFromWarningHeader,
 } from '../../../../common/lib/utils';
 import {
   globalRead,
@@ -36,6 +38,7 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
+import { assertWarningHeader } from '../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -353,6 +356,19 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
       }
+    });
+
+    describe('deprecations', () => {
+      it('should return a warning header', async () => {
+        const theCase = await createCase(supertest, postCaseReq);
+        const res = await supertest.get(getCaseUserActionUrl(theCase.id)).expect(200);
+        const warningHeader = res.header.warning;
+
+        assertWarningHeader(warningHeader);
+
+        const warningValue = extractWarningValueFromWarningHeader(warningHeader);
+        expect(warningValue).to.be('Deprecated endpoint');
+      });
     });
   });
 };

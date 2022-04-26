@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import type { KibanaLocation } from 'src/plugins/share/public';
+import type { KibanaLocation } from '@kbn/share-plugin/public';
 import React from 'react';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { DashboardStart } from 'src/plugins/dashboard/public';
-import { DrilldownConfig } from '../../../../common/drilldowns/dashboard_drilldown/types';
-import { reactToUiComponent } from '../../../../../../../src/plugins/kibana_react/public';
-import { CollectConfigContainer } from './components';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { reactToUiComponent } from '@kbn/kibana-react-plugin/public';
 import {
   AdvancedUiActionsStart,
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
   UiActionsEnhancedDrilldownDefinition as Drilldown,
-} from '../../../../../ui_actions_enhanced/public';
-import { txtGoToDashboard } from './i18n';
+} from '@kbn/ui-actions-enhanced-plugin/public';
 import {
   CollectConfigProps,
   StartServicesGetter,
   UiComponent,
-} from '../../../../../../../src/plugins/kibana_utils/public';
+} from '@kbn/kibana-utils-plugin/public';
+import { DrilldownConfig } from '../../../../common/drilldowns/dashboard_drilldown/types';
+import { CollectConfigContainer } from './components';
+import { txtGoToDashboard } from './i18n';
 import { Config } from './types';
 
 export interface Params {
@@ -45,7 +45,11 @@ export abstract class AbstractDashboardDrilldown<Context extends object = object
 
   public abstract readonly supportedTriggers: () => string[];
 
-  protected abstract getLocation(config: Config, context: Context): Promise<KibanaLocation>;
+  protected abstract getLocation(
+    config: Config,
+    context: Context,
+    useUrlForState: boolean
+  ): Promise<KibanaLocation>;
 
   public readonly order = 100;
 
@@ -65,6 +69,7 @@ export abstract class AbstractDashboardDrilldown<Context extends object = object
     dashboardId: '',
     useCurrentFilters: true,
     useCurrentDateRange: true,
+    openInNewTab: false,
   });
 
   public readonly isConfigValid = (config: Config): config is Config => {
@@ -73,7 +78,7 @@ export abstract class AbstractDashboardDrilldown<Context extends object = object
   };
 
   public readonly getHref = async (config: Config, context: Context): Promise<string> => {
-    const { app, path } = await this.getLocation(config, context);
+    const { app, path } = await this.getLocation(config, context, true);
     const url = await this.params.start().core.application.getUrlForApp(app, {
       path,
       absolute: true,
@@ -82,11 +87,12 @@ export abstract class AbstractDashboardDrilldown<Context extends object = object
   };
 
   public readonly execute = async (config: Config, context: Context) => {
-    const { app, path, state } = await this.getLocation(config, context);
-    await this.params.start().core.application.navigateToApp(app, {
-      path,
-      state,
-    });
+    if (config.openInNewTab) {
+      window.open(await this.getHref(config, context), '_blank');
+    } else {
+      const { app, path, state } = await this.getLocation(config, context, false);
+      await this.params.start().core.application.navigateToApp(app, { path, state });
+    }
   };
 
   protected get locator() {

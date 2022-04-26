@@ -28,7 +28,7 @@ export interface PutOutputRequest {
     outputId: string;
   };
   body: {
-    type?: 'elasticsearch';
+    type?: 'elasticsearch' | 'logstash';
     name?: string;
     hosts?: string[];
     ca_sha256?: string;
@@ -36,13 +36,18 @@ export interface PutOutputRequest {
     config_yaml?: string;
     is_default?: boolean;
     is_default_monitoring?: boolean;
+    ssl?: {
+      certificate_authorities?: string[];
+      certificate?: string;
+      key?: string;
+    };
   };
 }
 
 export interface PostOutputRequest {
   body: {
     id?: string;
-    type: 'elasticsearch';
+    type: 'elasticsearch' | 'logstash';
     name: string;
     hosts?: string[];
     ca_sha256?: string;
@@ -50,6 +55,11 @@ export interface PostOutputRequest {
     is_default?: boolean;
     is_default_monitoring?: boolean;
     config_yaml?: string;
+    ssl?: {
+      certificate_authorities?: string[];
+      certificate?: string;
+      key?: string;
+    };
   };
 }
 
@@ -58,3 +68,7 @@ export interface PutOutputResponse {
 }
 
 export type GetOutputsResponse = ListResult<Output>;
+
+export interface PostLogstashApiKeyResponse {
+  api_key: string;
+}

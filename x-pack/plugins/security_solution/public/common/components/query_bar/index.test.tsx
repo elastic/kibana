@@ -8,11 +8,14 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../../common/constants';
 import { TestProviders, mockIndexPattern } from '../../mock';
-import { FilterManager, SearchBar } from '../../../../../../../src/plugins/data/public';
+import { FilterManager } from '@kbn/data-plugin/public';
+import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { QueryBar, QueryBarComponentProps } from '.';
+import { setAutocomplete } from '@kbn/unified-search-plugin/public/services';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
@@ -266,6 +269,11 @@ describe('QueryBar ', () => {
   });
 
   describe('#onSavedQueryUpdated', () => {
+    beforeEach(() => {
+      const autocompleteStart = unifiedSearchPluginMock.createStartContract();
+      setAutocomplete(autocompleteStart.autocomplete);
+    });
+
     test('is only reference that changed when dataProviders props get updated', async () => {
       const wrapper = await getWrapper(
         <Proxy

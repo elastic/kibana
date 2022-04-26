@@ -7,20 +7,10 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { useRouteMatch, Switch, Route, useLocation } from 'react-router-dom';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiText,
-  EuiLink,
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiText, EuiSpacer } from '@elastic/eui';
 import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiIconTip } from '@elastic/eui';
 
 import type { Agent, AgentPolicy, AgentDetailsReassignPolicyAction } from '../../../types';
 import { FLEET_ROUTING_PATHS } from '../../../constants';
@@ -31,22 +21,23 @@ import {
   useLink,
   useBreadcrumbs,
   useStartServices,
-  useKibanaVersion,
   useIntraAppState,
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
-import { AgentHealth } from '../components';
-import { isAgentUpgradeable } from '../../../services';
 
 import { AgentRefreshContext } from './hooks';
-import { AgentLogs, AgentDetailsActionMenu, AgentDetailsContent } from './components';
+import {
+  AgentLogs,
+  AgentDetailsActionMenu,
+  AgentDetailsContent,
+  AgentDashboardLink,
+} from './components';
 
 export const AgentDetailsPage: React.FunctionComponent = () => {
   const {
     params: { agentId, tabId = '' },
   } = useRouteMatch<{ agentId: string; tabId?: string }>();
   const { getHref } = useLink();
-  const kibanaVersion = useKibanaVersion();
   const {
     isLoading,
     isInitialRequest,
@@ -115,107 +106,28 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
   const headerRightContent = useMemo(
     () =>
       agentData && agentData.item ? (
-        <EuiFlexGroup justifyContent={'spaceBetween'} direction="row">
-          {[
-            {
-              label: i18n.translate('xpack.fleet.agentDetails.statusLabel', {
-                defaultMessage: 'Status',
-              }),
-              content: <AgentHealth agent={agentData.item} />,
-            },
-            {
-              label: i18n.translate('xpack.fleet.agentDetails.lastActivityLabel', {
-                defaultMessage: 'Last activity',
-              }),
-              content: agentData.item.last_checkin ? (
-                <FormattedRelative value={new Date(agentData.item.last_checkin)} />
-              ) : (
-                '-'
-              ),
-            },
-            {
-              label: i18n.translate('xpack.fleet.agentDetails.policyLabel', {
-                defaultMessage: 'Policy',
-              }),
-              content: isAgentPolicyLoading ? (
-                <Loading size="m" />
-              ) : agentPolicyData?.item ? (
-                <EuiLink
-                  href={getHref('policy_details', { policyId: agentData.item.policy_id! })}
-                  className="eui-textBreakWord"
-                >
-                  {agentPolicyData.item.name || agentData.item.policy_id}
-                </EuiLink>
-              ) : (
-                agentData.item.policy_id || '-'
-              ),
-            },
-            {
-              label: i18n.translate('xpack.fleet.agentDetails.agentVersionLabel', {
-                defaultMessage: 'Agent version',
-              }),
-              content:
-                typeof agentData.item.local_metadata.elastic === 'object' &&
-                typeof agentData.item.local_metadata.elastic.agent === 'object' &&
-                typeof agentData.item.local_metadata.elastic.agent.version === 'string' ? (
-                  <EuiFlexGroup gutterSize="s">
-                    <EuiFlexItem grow={false} className="eui-textNoWrap">
-                      {agentData.item.local_metadata.elastic.agent.version}
-                    </EuiFlexItem>
-                    {isAgentUpgradeable(agentData.item, kibanaVersion) ? (
-                      <EuiFlexItem grow={false}>
-                        <EuiIconTip
-                          aria-label={i18n.translate(
-                            'xpack.fleet.agentDetails.upgradeAvailableTooltip',
-                            {
-                              defaultMessage: 'Upgrade available',
-                            }
-                          )}
-                          size="m"
-                          type="alert"
-                          color="warning"
-                          content={i18n.translate(
-                            'xpack.fleet.agentDetails.upgradeAvailableTooltip',
-                            {
-                              defaultMessage: 'Upgrade available',
-                            }
-                          )}
-                        />
-                      </EuiFlexItem>
-                    ) : null}
-                  </EuiFlexGroup>
-                ) : (
-                  '-'
-                ),
-            },
-            {
-              content:
-                isAgentPolicyLoading || agentPolicyData?.item?.is_managed ? undefined : (
-                  <AgentDetailsActionMenu
-                    agent={agentData.item}
-                    agentPolicy={agentPolicyData?.item}
-                    assignFlyoutOpenByDefault={openReassignFlyoutOpenByDefault}
-                    onCancelReassign={
-                      routeState && routeState.onDoneNavigateTo
-                        ? reassignCancelClickHandler
-                        : undefined
-                    }
-                  />
-                ),
-            },
-          ].map((item, index) => (
-            <EuiFlexItem grow={false} key={index}>
-              {item.label ? (
-                <EuiDescriptionList compressed>
-                  <EuiDescriptionListTitle>{item.label}</EuiDescriptionListTitle>
-                  <EuiDescriptionListDescription>{item.content}</EuiDescriptionListDescription>
-                </EuiDescriptionList>
-              ) : (
-                item.content
-              )}
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s" direction="row">
+            {!isAgentPolicyLoading && !agentPolicyData?.item?.is_managed && (
+              <EuiFlexItem grow={false}>
+                <AgentDetailsActionMenu
+                  agent={agentData.item}
+                  agentPolicy={agentPolicyData?.item}
+                  assignFlyoutOpenByDefault={openReassignFlyoutOpenByDefault}
+                  onCancelReassign={
+                    routeState && routeState.onDoneNavigateTo
+                      ? reassignCancelClickHandler
+                      : undefined
+                  }
+                />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <AgentDashboardLink agent={agentData?.item} agentPolicy={agentPolicyData?.item} />
             </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
+          </EuiFlexGroup>
+        </>
       ) : undefined,
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [agentPolicyData, agentData, getHref, isAgentPolicyLoading]

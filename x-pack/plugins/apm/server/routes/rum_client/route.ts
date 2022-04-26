@@ -5,7 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { Logger } from 'kibana/server';
+import { Logger } from '@kbn/core/server';
 import { isoToEpochRt } from '@kbn/io-ts-utils';
 import { setupRequest, Setup } from '../../lib/helpers/setup_request';
 import { getClientMetrics } from './get_client_metrics';
@@ -407,6 +407,7 @@ function decodeUiFilters(
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 async function setupUXRequest<TParams extends SetupUXRequestParams>(
   resources: APMRouteHandlerResources & { params: TParams }
 ) {

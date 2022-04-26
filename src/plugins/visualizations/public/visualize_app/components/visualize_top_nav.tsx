@@ -8,9 +8,11 @@
 
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 
-import { AppMountParameters, OverlayRef } from 'kibana/public';
+import { AppMountParameters, OverlayRef } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../../kibana_react/public';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   VisualizeServices,
   VisualizeAppState,
@@ -19,7 +21,9 @@ import {
 } from '../types';
 import { VISUALIZE_APP_NAME } from '../../../common/constants';
 import { getTopNavConfig } from '../utils';
-import type { IndexPattern } from '../../../../data/public';
+import type { NavigateToLensContext } from '../..';
+
+const LOCAL_STORAGE_EDIT_IN_LENS_BADGE = 'EDIT_IN_LENS_BADGE_VISIBLE';
 
 interface VisualizeTopNavProps {
   currentAppState: VisualizeAppState;
@@ -59,6 +63,18 @@ const TopNav = ({
   const { setHeaderActionMenu, visualizeCapabilities } = services;
   const { embeddableHandler, vis } = visInstance;
   const [inspectorSession, setInspectorSession] = useState<OverlayRef>();
+  const [editInLensConfig, setEditInLensConfig] = useState<NavigateToLensContext | null>();
+  const [navigateToLens, setNavigateToLens] = useState(false);
+  // If the user has clicked the edit in lens button, we want to hide the badge.
+  // The information is stored in local storage to persist across reloads.
+  const [hideTryInLensBadge, setHideTryInLensBadge] = useLocalStorage(
+    LOCAL_STORAGE_EDIT_IN_LENS_BADGE,
+    false
+  );
+  const hideLensBadge = useCallback(() => {
+    setHideTryInLensBadge(true);
+  }, [setHideTryInLensBadge]);
+
   const openInspector = useCallback(() => {
     const session = embeddableHandler.openInspector();
     setInspectorSession(session);
@@ -80,6 +96,17 @@ const TopNav = ({
     [doReload]
   );
 
+  useEffect(() => {
+    const asyncGetTriggerContext = async () => {
+      if (vis.type.navigateToLens) {
+        const triggerConfig = await vis.type.navigateToLens(vis.params);
+        setEditInLensConfig(triggerConfig);
+      }
+    };
+    asyncGetTriggerContext();
+  }, [vis.params, vis.type]);
+
+  const displayEditInLensItem = Boolean(vis.type.navigateToLens && editInLensConfig);
   const config = useMemo(() => {
     if (isEmbeddableRendered) {
       return getTopNavConfig(
@@ -96,6 +123,11 @@ const TopNav = ({
           visualizationIdFromUrl,
           stateTransfer: services.stateTransferService,
           embeddableId,
+          editInLensConfig,
+          displayEditInLensItem,
+          hideLensBadge,
+          setNavigateToLens,
+          showBadge: !hideTryInLensBadge && displayEditInLensItem,
         },
         services
       );
@@ -107,15 +139,19 @@ const TopNav = ({
     hasUnappliedChanges,
     openInspector,
     originatingApp,
+    setOriginatingApp,
     originatingPath,
     visInstance,
-    setOriginatingApp,
     stateContainer,
     visualizationIdFromUrl,
     services,
     embeddableId,
+    editInLensConfig,
+    displayEditInLensItem,
+    hideLensBadge,
+    hideTryInLensBadge,
   ]);
-  const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>(
+  const [indexPatterns, setIndexPatterns] = useState<DataView[]>(
     vis.data.indexPattern ? [vis.data.indexPattern] : []
   );
   const showDatePicker = () => {
@@ -140,10 +176,12 @@ const TopNav = ({
     onAppLeave((actions) => {
       // Confirm when the user has made any changes to an existing visualizations
       // or when the user has configured something without saving
+      // the warning won't appear if you navigate from the Viz editor to Lens
       if (
         originatingApp &&
         (hasUnappliedChanges || hasUnsavedChanges) &&
-        !services.stateTransferService.isTransferInProgress
+        !services.stateTransferService.isTransferInProgress &&
+        !navigateToLens
       ) {
         return actions.confirm(
           i18n.translate('visualizations.confirmModal.confirmTextDescription', {
@@ -167,17 +205,18 @@ const TopNav = ({
     hasUnappliedChanges,
     visualizeCapabilities.save,
     services.stateTransferService.isTransferInProgress,
+    navigateToLens,
   ]);
 
   useEffect(() => {
     const asyncSetIndexPattern = async () => {
-      let indexes: IndexPattern[] | undefined;
+      let indexes: DataView[] | undefined;
 
       if (vis.type.getUsedIndexPattern) {
         indexes = await vis.type.getUsedIndexPattern(vis.params);
       }
       if (!indexes || !indexes.length) {
-        const defaultIndex = await services.data.indexPatterns.getDefault();
+        const defaultIndex = await services.dataViews.getDefault();
         if (defaultIndex) {
           indexes = [defaultIndex];
         }
@@ -190,7 +229,7 @@ const TopNav = ({
     if (!vis.data.indexPattern) {
       asyncSetIndexPattern();
     }
-  }, [vis.params, vis.type, services.data.indexPatterns, vis.data.indexPattern]);
+  }, [vis.params, vis.type, vis.data.indexPattern, services.dataViews]);
 
   useEffect(() => {
     const autoRefreshFetchSub = services.data.query.timefilter.timefilter

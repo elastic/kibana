@@ -9,7 +9,7 @@ import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { LogStream } from '../../../../../../infra/public';
+import { LogStream } from '@kbn/infra-plugin/public';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import type { ApmUrlParams } from '../../../../context/url_params_context/types';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';

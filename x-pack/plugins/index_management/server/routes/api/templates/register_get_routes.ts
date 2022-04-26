@@ -15,26 +15,26 @@ import {
 } from '../../../../common/lib';
 import { getCloudManagedTemplatePrefix } from '../../../lib/get_managed_templates';
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     { path: addBasePath('/index_templates'), validate: false },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
 
       try {
         const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(client);
 
-        const { body: legacyTemplatesEs } = await client.asCurrentUser.indices.getTemplate();
-        const {
-          body: { index_templates: templatesEs },
-        } = await client.asCurrentUser.indices.getIndexTemplate();
+        const legacyTemplatesEs = await client.asCurrentUser.indices.getTemplate();
+        const { index_templates: templatesEs } =
+          await client.asCurrentUser.indices.getIndexTemplate();
 
         const legacyTemplates = deserializeLegacyTemplateList(
           legacyTemplatesEs,
           cloudManagedTemplatePrefix
         );
+        // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
         const templates = deserializeTemplateList(templatesEs, cloudManagedTemplatePrefix);
 
         const body = {
@@ -66,7 +66,7 @@ export function registerGetOneRoute({ router, lib: { handleEsError } }: RouteDep
       validate: { params: paramsSchema, query: querySchema },
     },
     async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
       const { name } = request.params as TypeOf<typeof paramsSchema>;
       const isLegacy = (request.query as TypeOf<typeof querySchema>).legacy === 'true';
 
@@ -74,7 +74,7 @@ export function registerGetOneRoute({ router, lib: { handleEsError } }: RouteDep
         const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(client);
 
         if (isLegacy) {
-          const { body: indexTemplateByName } = await client.asCurrentUser.indices.getTemplate({
+          const indexTemplateByName = await client.asCurrentUser.indices.getTemplate({
             name,
           });
 
@@ -87,13 +87,13 @@ export function registerGetOneRoute({ router, lib: { handleEsError } }: RouteDep
             });
           }
         } else {
-          const {
-            body: { index_templates: indexTemplates },
-          } = await client.asCurrentUser.indices.getIndexTemplate({ name });
+          const { index_templates: indexTemplates } =
+            await client.asCurrentUser.indices.getIndexTemplate({ name });
 
           if (indexTemplates.length > 0) {
             return response.ok({
               body: deserializeTemplate(
+                // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
                 { ...indexTemplates[0].index_template, name },
                 cloudManagedTemplatePrefix
               ),

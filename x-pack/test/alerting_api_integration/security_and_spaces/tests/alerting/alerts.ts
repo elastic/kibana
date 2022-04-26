@@ -8,25 +8,22 @@
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import { TaskRunning, TaskRunningStage } from '@kbn/task-manager-plugin/server/task_running';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { UserAtSpaceScenarios, Superuser } from '../../scenarios';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   ESTestIndexTool,
   ES_TEST_INDEX_NAME,
   getUrlPrefix,
-  getTestAlertData,
+  getTestRuleData,
   ObjectRemover,
   AlertUtils,
   getConsumerUnauthorizedErrorMessage,
   TaskManagerUtils,
   getEventLog,
 } from '../../../common/lib';
-import { IValidatedEvent } from '../../../../../plugins/event_log/server';
-import {
-  TaskRunning,
-  TaskRunningStage,
-} from '../../../../../plugins/task_manager/server/task_running';
-import { ConcreteTaskInstance } from '../../../../../plugins/task_manager/server';
 
 const NANOS_IN_MILLIS = 1000 * 1000;
 
@@ -494,7 +491,7 @@ instanceStateValue: true
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.always-firing',
                 params: {
                   index: ES_TEST_INDEX_NAME,
@@ -603,7 +600,7 @@ instanceStateValue: true
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.authorization',
                 params: {
                   callClusterAuthorizationIndex: authorizationIndex,
@@ -711,7 +708,7 @@ instanceStateValue: true
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 rule_type_id: 'test.always-firing',
                 params: {
                   index: ES_TEST_INDEX_NAME,
@@ -1332,6 +1329,9 @@ instanceStateValue: true
     ]);
 
     expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_triggered_actions).to.be(1);
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_searches).to.be(0);
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.es_search_duration_ms).to.be(0);
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.total_search_duration_ms).to.be(0);
 
     expect(event?.rule).to.eql({
       id: alertId,

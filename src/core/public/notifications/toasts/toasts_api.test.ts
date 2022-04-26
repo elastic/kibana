@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { take } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 
 import { ToastsApi } from './toasts_api';
 
@@ -14,18 +14,18 @@ import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.moc
 import { i18nServiceMock } from '../../i18n/i18n_service.mock';
 
 async function getCurrentToasts(toasts: ToastsApi) {
-  return await toasts.get$().pipe(take(1)).toPromise();
+  return await firstValueFrom(toasts.get$());
 }
 
 function uiSettingsMock() {
   const mock = uiSettingsServiceMock.createSetupContract();
-  mock.get.mockImplementation(() => (config: string) => {
+  mock.get.mockImplementation((config: string) => {
     switch (config) {
       case 'notifications:lifetime:info':
         return 5000;
       case 'notifications:lifetime:warning':
         return 10000;
-      case 'notification:lifetime:error':
+      case 'notifications:lifetime:error':
         return 30000;
       default:
         throw new Error(`Accessing ${config} is not supported in the mock.`);
@@ -113,6 +113,12 @@ describe('#add()', () => {
     const toasts = new ToastsApi(toastDeps());
     expect(toasts.add('foo')).toHaveProperty('title', 'foo');
   });
+
+  it('fallbacks to default values for undefined properties', async () => {
+    const toasts = new ToastsApi(toastDeps());
+    const toast = toasts.add({ title: 'foo', toastLifeTimeMs: undefined });
+    expect(toast.toastLifeTimeMs).toEqual(5000);
+  });
 });
 
 describe('#remove()', () => {
@@ -145,6 +151,12 @@ describe('#addInfo()', () => {
     expect(currentToasts[0].toastLifeTimeMs).toBe(1);
     expect(currentToasts[0]).toBe(toast);
   });
+
+  it('fallbacks to default values for undefined properties', async () => {
+    const toasts = new ToastsApi(toastDeps());
+    const toast = toasts.addInfo({ title: 'foo', toastLifeTimeMs: undefined });
+    expect(toast.toastLifeTimeMs).toEqual(5000);
+  });
 });
 
 describe('#addSuccess()', () => {
@@ -158,6 +170,12 @@ describe('#addSuccess()', () => {
     const toast = toasts.addSuccess({});
     const currentToasts = await getCurrentToasts(toasts);
     expect(currentToasts[0]).toBe(toast);
+  });
+
+  it('fallbacks to default values for undefined properties', async () => {
+    const toasts = new ToastsApi(toastDeps());
+    const toast = toasts.addSuccess({ title: 'foo', toastLifeTimeMs: undefined });
+    expect(toast.toastLifeTimeMs).toEqual(5000);
   });
 });
 
@@ -173,6 +191,12 @@ describe('#addWarning()', () => {
     const currentToasts = await getCurrentToasts(toasts);
     expect(currentToasts[0]).toBe(toast);
   });
+
+  it('fallbacks to default values for undefined properties', async () => {
+    const toasts = new ToastsApi(toastDeps());
+    const toast = toasts.addWarning({ title: 'foo', toastLifeTimeMs: undefined });
+    expect(toast.toastLifeTimeMs).toEqual(10000);
+  });
 });
 
 describe('#addDanger()', () => {
@@ -186,6 +210,12 @@ describe('#addDanger()', () => {
     const toast = toasts.addDanger({});
     const currentToasts = await getCurrentToasts(toasts);
     expect(currentToasts[0]).toBe(toast);
+  });
+
+  it('fallbacks to default values for undefined properties', async () => {
+    const toasts = new ToastsApi(toastDeps());
+    const toast = toasts.addDanger({ title: 'foo', toastLifeTimeMs: undefined });
+    expect(toast.toastLifeTimeMs).toEqual(10000);
   });
 });
 

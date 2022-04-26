@@ -685,10 +685,6 @@
               {
                 "plugin": "embeddable",
                 "path": "src/plugins/embeddable/public/tests/explicit_input.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/target/types/public/embeddable/search_embeddable_factory.d.ts"
               }
             ],
             "children": [
@@ -1986,6 +1982,19 @@
             "description": [],
             "signature": [
               "string[] | undefined"
+            ],
+            "path": "src/plugins/ui_actions/public/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "uiActions",
+            "id": "def-public.VisualizeFieldContext.originatingApp",
+            "type": "string",
+            "tags": [],
+            "label": "originatingApp",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/ui_actions/public/types.ts",
             "deprecated": false

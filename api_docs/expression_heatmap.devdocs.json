@@ -580,6 +580,19 @@
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionHeatmap",
+            "id": "def-common.HeatmapArguments.ariaLabel",
+            "type": "string",
+            "tags": [],
+            "label": "ariaLabel",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_functions.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -807,7 +820,7 @@
             "section": "def-public.PersistedState",
             "text": "PersistedState"
           },
-          "; }"
+          "; interactive: boolean; }"
         ],
         "path": "src/plugins/chart_expressions/expression_heatmap/common/types/expression_renderers.ts",
         "deprecated": false,
@@ -1523,6 +1536,19 @@
                   },
                   {
                     "parentPluginId": "expressionHeatmap",
+                    "id": "def-common.heatmapLegendConfig.args.position.default",
+                    "type": "string",
+                    "tags": [],
+                    "label": "default",
+                    "description": [],
+                    "signature": [
+                      "\"right\""
+                    ],
+                    "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressionHeatmap",
                     "id": "def-common.heatmapLegendConfig.args.position.options",
                     "type": "Array",
                     "tags": [],
@@ -1541,6 +1567,19 @@
                     "tags": [],
                     "label": "help",
                     "description": [],
+                    "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressionHeatmap",
+                    "id": "def-common.heatmapLegendConfig.args.position.strict",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "strict",
+                    "description": [],
+                    "signature": [
+                      "true"
+                    ],
                     "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
                     "deprecated": false
                   }
@@ -1628,6 +1667,41 @@
                     "deprecated": false
                   }
                 ]
+              },
+              {
+                "parentPluginId": "expressionHeatmap",
+                "id": "def-common.heatmapLegendConfig.args.legendSize",
+                "type": "Object",
+                "tags": [],
+                "label": "legendSize",
+                "description": [],
+                "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
+                "deprecated": false,
+                "children": [
+                  {
+                    "parentPluginId": "expressionHeatmap",
+                    "id": "def-common.heatmapLegendConfig.args.legendSize.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"number\"[]"
+                    ],
+                    "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "expressionHeatmap",
+                    "id": "def-common.heatmapLegendConfig.args.legendSize.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
+                    "deprecated": false
+                  }
+                ]
               }
             ]
           },
@@ -1643,7 +1717,7 @@
               "HeatmapLegendConfig",
               ") => { isVisible: boolean; position: ",
               "Position",
-              "; maxLines?: number | undefined; shouldTruncate?: boolean | undefined; type: \"heatmap_legend\"; }"
+              "; maxLines?: number | undefined; shouldTruncate?: boolean | undefined; legendSize?: number | undefined; type: \"heatmap_legend\"; }"
             ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
             "deprecated": false,

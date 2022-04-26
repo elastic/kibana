@@ -18,16 +18,16 @@ import { FormattedRelativePreferenceDate } from '../../../common/components/form
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 import { DefaultDraggable } from '../../../common/components/draggables';
-import { HostsTableColumns } from './';
+import { HostsTableColumns } from '.';
 
 import * as i18n from './translations';
-import { HostRiskSeverity, Maybe } from '../../../../common/search_strategy';
-import { HostRiskScore } from '../common/host_risk_score';
+import { Maybe, RiskSeverity } from '../../../../common/search_strategy';
 import { VIEW_HOSTS_BY_SEVERITY } from '../host_risk_score_table/translations';
+import { RiskScore } from '../../../common/components/severity/common';
 
 export const getHostsColumns = (
   showRiskColumn: boolean,
-  dispatchSeverityUpdate: (s: HostRiskSeverity) => void
+  dispatchSeverityUpdate: (s: RiskSeverity) => void
 ): HostsTableColumns => {
   const columns: HostsTableColumns = [
     {
@@ -155,10 +155,10 @@ export const getHostsColumns = (
       truncateText: false,
       mobileOptions: { show: true },
       sortable: false,
-      render: (riskScore: HostRiskSeverity) => {
+      render: (riskScore: RiskSeverity) => {
         if (riskScore != null) {
           return (
-            <HostRiskScore
+            <RiskScore
               toolTipContent={
                 <EuiLink onClick={() => dispatchSeverityUpdate(riskScore)}>
                   <EuiText size="xs">{VIEW_HOSTS_BY_SEVERITY(riskScore.toLowerCase())}</EuiText>

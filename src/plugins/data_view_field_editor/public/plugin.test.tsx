@@ -8,8 +8,8 @@
 import React from 'react';
 import { registerTestBed } from '@kbn/test-jest-helpers';
 
-jest.mock('../../kibana_react/public', () => {
-  const original = jest.requireActual('../../kibana_react/public');
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
 
   return {
     ...original,
@@ -17,10 +17,11 @@ jest.mock('../../kibana_react/public', () => {
   };
 });
 
-import { CoreStart } from 'src/core/public';
-import { coreMock } from 'src/core/public/mocks';
-import { dataPluginMock } from '../../data/public/mocks';
-import { usageCollectionPluginMock } from '../../usage_collection/public/mocks';
+import { CoreStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 
 import { FieldEditorLoader } from './components/field_editor_loader';
 import { IndexPatternFieldEditorPlugin } from './plugin';
@@ -35,7 +36,7 @@ describe('DataViewFieldEditorPlugin', () => {
     data: dataPluginMock.createStartContract(),
     usageCollection: usageCollectionPluginMock.createSetupContract(),
     dataViews: dataPluginMock.createStartContract().dataViews,
-    fieldFormats: dataPluginMock.createStartContract().fieldFormats,
+    fieldFormats: fieldFormatsServiceMock.createStartContract(),
   };
 
   let plugin: IndexPatternFieldEditorPlugin;

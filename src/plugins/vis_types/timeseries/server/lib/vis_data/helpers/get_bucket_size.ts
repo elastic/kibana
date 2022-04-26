@@ -5,8 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Unit } from '@elastic/datemath';
+import type { Unit } from '@kbn/datemath';
 
+import { search } from '@kbn/data-plugin/server';
 import {
   getUnitValue,
   parseInterval,
@@ -15,7 +16,6 @@ import {
 } from './unit_to_seconds';
 import { getTimerange } from './get_timerange';
 import { INTERVAL_STRING_RE, GTE_INTERVAL_RE } from '../../../../common/interval_regexp';
-import { search } from '../../../../../../data/server';
 import type { SearchCapabilities } from '../../search_strategies';
 import type { VisTypeTimeseriesVisDataRequest } from '../../../types';
 

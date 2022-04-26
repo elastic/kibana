@@ -14,5 +14,5 @@
     "static/forms/components",
     "static/forms/helpers/field_validators/types"
   ],
-  "requiredBundles": ["data"]
+  "requiredBundles": ["data", "kibanaReact"]
 }

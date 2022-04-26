@@ -9,19 +9,19 @@ import React, { Fragment, FunctionComponent, useEffect, useRef } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { HttpSetup } from 'kibana/public';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { HttpSetup } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   IErrorObject,
   RuleTypeParamsExpressionProps,
-} from '../../../../../../triggers_actions_ui/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
+import { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { ES_GEO_FIELD_TYPES } from '../../types';
 import { GeoIndexPatternSelect } from '../util_components/geo_index_pattern_select';
 import { SingleFieldSelect } from '../util_components/single_field_select';
 import { ExpressionWithPopover } from '../util_components/expression_with_popover';
-import { IFieldType } from '../../../../../../../../src/plugins/data/common';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 
 interface Props {
   dateField: string;
@@ -30,10 +30,11 @@ interface Props {
   setAlertParamsDate: (date: string) => void;
   setAlertParamsGeoField: (geoField: string) => void;
   setRuleProperty: RuleTypeParamsExpressionProps['setRuleProperty'];
-  setIndexPattern: (indexPattern: IIndexPattern) => void;
-  indexPattern: IIndexPattern;
+  setIndexPattern: (indexPattern: DataView) => void;
+  indexPattern: DataView;
   isInvalid: boolean;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 interface KibanaDeps {
@@ -50,9 +51,10 @@ export const EntityIndexExpression: FunctionComponent<Props> = ({
   dateField: timeField,
   geoField,
   data,
+  unifiedSearch,
 }) => {
   const { http } = useKibana<KibanaDeps>().services;
-  const IndexPatternSelect = (data.ui && data.ui.IndexPatternSelect) || null;
+  const IndexPatternSelect = (unifiedSearch.ui && unifiedSearch.ui.IndexPatternSelect) || null;
 
   const usePrevious = <T extends unknown>(value: T): T | undefined => {
     const ref = useRef<T>();
@@ -64,8 +66,8 @@ export const EntityIndexExpression: FunctionComponent<Props> = ({
 
   const oldIndexPattern = usePrevious(indexPattern);
   const fields = useRef<{
-    dateFields: IFieldType[];
-    geoFields: IFieldType[];
+    dateFields: DataViewField[];
+    geoFields: DataViewField[];
   }>({
     dateFields: [],
     geoFields: [],
@@ -73,8 +75,9 @@ export const EntityIndexExpression: FunctionComponent<Props> = ({
   useEffect(() => {
     if (oldIndexPattern !== indexPattern) {
       fields.current.geoFields =
-        (indexPattern.fields.length &&
-          indexPattern.fields.filter((field: IFieldType) =>
+        (indexPattern.fields &&
+          indexPattern.fields.length &&
+          indexPattern.fields.filter((field: DataViewField) =>
             ES_GEO_FIELD_TYPES.includes(field.type)
           )) ||
         [];
@@ -83,8 +86,9 @@ export const EntityIndexExpression: FunctionComponent<Props> = ({
       }
 
       fields.current.dateFields =
-        (indexPattern.fields.length &&
-          indexPattern.fields.filter((field: IFieldType) => field.type === 'date')) ||
+        (indexPattern.fields &&
+          indexPattern.fields.length &&
+          indexPattern.fields.filter((field: DataViewField) => field.type === 'date')) ||
         [];
       if (fields.current.dateFields.length) {
         setAlertParamsDate(fields.current.dateFields[0].name);

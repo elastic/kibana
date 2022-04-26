@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { RouteDependencies } from '../../../types';
 
 const paramsSchema = schema.object({
@@ -14,11 +14,9 @@ const paramsSchema = schema.object({
 });
 
 function deleteWatch(dataClient: IScopedClusterClient, watchId: string) {
-  return dataClient.asCurrentUser.watcher
-    .deleteWatch({
-      id: watchId,
-    })
-    .then(({ body }) => body);
+  return dataClient.asCurrentUser.watcher.deleteWatch({
+    id: watchId,
+  });
 }
 
 export function registerDeleteRoute({
@@ -37,8 +35,9 @@ export function registerDeleteRoute({
       const { watchId } = request.params;
 
       try {
+        const esClient = (await ctx.core).elasticsearch.client;
         return response.ok({
-          body: await deleteWatch(ctx.core.elasticsearch.client, watchId),
+          body: await deleteWatch(esClient, watchId),
         });
       } catch (e) {
         if (e?.statusCode === 404 && e.meta?.body?.error) {

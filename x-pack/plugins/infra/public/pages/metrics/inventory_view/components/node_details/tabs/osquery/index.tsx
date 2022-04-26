@@ -48,7 +48,7 @@ const TabComponent = (props: TabProps) => {
 
     return (
       <TabContent>
-        <OsqueryAction metadata={metadata} />
+        <OsqueryAction agentId={metadata?.info?.agent?.id} />
       </TabContent>
     );
   }, [OsqueryAction, loading, metadata]);

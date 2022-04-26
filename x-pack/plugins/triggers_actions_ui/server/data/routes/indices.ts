@@ -18,8 +18,8 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
   ElasticsearchClient,
-} from 'kibana/server';
-import { Logger } from '../../../../../../src/core/server';
+} from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 
 const bodySchema = schema.object({
   pattern: schema.string(),
@@ -45,6 +45,7 @@ export function createIndicesRoute(logger: Logger, router: IRouter, baseRoute: s
     res: KibanaResponseFactory
   ): Promise<IKibanaResponse> {
     const pattern = req.body.pattern;
+    const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
     logger.debug(`route ${path} request: ${JSON.stringify(req.body)}`);
 
     if (pattern.trim() === '') {
@@ -53,14 +54,14 @@ export function createIndicesRoute(logger: Logger, router: IRouter, baseRoute: s
 
     let aliases: string[] = [];
     try {
-      aliases = await getAliasesFromPattern(ctx.core.elasticsearch.client.asCurrentUser, pattern);
+      aliases = await getAliasesFromPattern(esClient, pattern);
     } catch (err) {
       logger.warn(`route ${path} error getting aliases from pattern "${pattern}": ${err.message}`);
     }
 
     let indices: string[] = [];
     try {
-      indices = await getIndicesFromPattern(ctx.core.elasticsearch.client.asCurrentUser, pattern);
+      indices = await getIndicesFromPattern(esClient, pattern);
     } catch (err) {
       logger.warn(`route ${path} error getting indices from pattern "${pattern}": ${err.message}`);
     }
@@ -98,7 +99,7 @@ async function getIndicesFromPattern(
       },
     },
   };
-  const { body: response } = await esClient.search(params);
+  const response = await esClient.search(params);
   // TODO: Investigate when the status field might appear here, type suggests it shouldn't ever happen
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if ((response as any).status === 404 || !response.aggregations) {
@@ -120,7 +121,7 @@ async function getAliasesFromPattern(
   };
   const result: string[] = [];
 
-  const response = await esClient.indices.getAlias(params);
+  const response = await esClient.indices.getAlias(params, { meta: true });
   const responseBody = response.body;
 
   if (response.statusCode === 404) {

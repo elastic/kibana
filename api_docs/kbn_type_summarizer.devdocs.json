@@ -1,0 +1,512 @@
+{
+  "id": "@kbn/type-summarizer",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/type-summarizer",
+        "id": "def-server.summarizePackage",
+        "type": "Function",
+        "tags": [],
+        "label": "summarizePackage",
+        "description": [
+          "\nProduce summary .d.ts files for a package"
+        ],
+        "signature": [
+          "(log: ",
+          {
+            "pluginId": "@kbn/type-summarizer",
+            "scope": "server",
+            "docId": "kibKbnTypeSummarizerPluginApi",
+            "section": "def-server.Logger",
+            "text": "Logger"
+          },
+          ", options: ",
+          {
+            "pluginId": "@kbn/type-summarizer",
+            "scope": "server",
+            "docId": "kibKbnTypeSummarizerPluginApi",
+            "section": "def-server.SummarizePacakgeOptions",
+            "text": "SummarizePacakgeOptions"
+          },
+          ") => Promise<void>"
+        ],
+        "path": "packages/kbn-type-summarizer/src/summarize_package.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/type-summarizer",
+            "id": "def-server.summarizePackage.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/type-summarizer",
+                "scope": "server",
+                "docId": "kibKbnTypeSummarizerPluginApi",
+                "section": "def-server.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "packages/kbn-type-summarizer/src/summarize_package.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/type-summarizer",
+            "id": "def-server.summarizePackage.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/type-summarizer",
+                "scope": "server",
+                "docId": "kibKbnTypeSummarizerPluginApi",
+                "section": "def-server.SummarizePacakgeOptions",
+                "text": "SummarizePacakgeOptions"
+              }
+            ],
+            "path": "packages/kbn-type-summarizer/src/summarize_package.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/type-summarizer",
+        "id": "def-server.Logger",
+        "type": "Interface",
+        "tags": [],
+        "label": "Logger",
+        "description": [
+          "\nLogger interface used by @kbn/type-summarizer"
+        ],
+        "path": "packages/kbn-type-summarizer/src/lib/log/logger.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/type-summarizer",
+            "id": "def-server.Logger.info",
+            "type": "Function",
+            "tags": [],
+            "label": "info",
+            "description": [
+              "\nWrite a message to the log with the level \"info\""
+            ],
+            "signature": [
+              "(msg: string, ...args: any[]) => void"
+            ],
+            "path": "packages/kbn-type-summarizer/src/lib/log/logger.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/type-summarizer",
+                "id": "def-server.Logger.info.$1",
+                "type": "string",
+                "tags": [],
+                "label": "msg",
+                "description": [
+                  "any message"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-type-summarizer/src/lib/log/logger.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/type-summarizer",
+                "id": "def-server.Logger.info.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "any serializeable values you would like to be appended to the log message"
+                ],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "packages/kbn-type-summarizer/src/lib/log/logger.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/type-summarizer",
+            "id": "def-server.Logger.warn",
+            "type": "Function",
+            "tags": [],
+            "label": "warn",
+            "description": [
+              "\nWrite a message to the log with the level \"warn\""
+            ],
+            "signature": [
+              "(msg: string, ...args: any[]) => void"
+            ],
+            "path": "packages/kbn-type-summarizer/src/lib/log/logger.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/type-summarizer",
+                "id": "def-server.Logger.warn.$1",
+                "type": "string",
+                "tags": [],
+                "label": "msg",
+                "description": [
+                  "any message"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-type-summarizer/src/lib/log/logger.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/type-summarizer",
+                "id": "def-server.Logger.warn.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "any serializeable values you would like to be appended to the log message"
+                ],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "packages/kbn-type-summarizer/src/lib/log/logger.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/type-summarizer",
+            "id": "def-server.Logger.error",
+            "type": "Function",
+            "tags": [],
+            "label": "error",
+            "description": [
+              "\nWrite a message to the log with the level \"error\""
+            ],
+            "signature": [
+              "(msg: string, ...args: any[]) => void"
+            ],
+            "path": "packages/kbn-type-summarizer/src/lib/log/logger.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/type-summarizer",
+                "id": "def-server.Logger.error.$1",
+                "type": "string",
+                "tags": [],
+                "label": "msg",
+                "description": [
+                  "any message"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-type-summarizer/src/lib/log/logger.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/type-summarizer",
+                "id": "def-server.Logger.error.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "any serializeable values you would like to be appended to the log message"
+                ],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "packages/kbn-type-summarizer/src/lib/log/logger.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/type-summarizer",
+            "id": "def-server.Logger.debug",
+            "type": "Function",
+            "tags": [],
+            "label": "debug",
+            "description": [
+              "\nWrite a message to the log with the level \"debug\""
+            ],
+            "signature": [
+              "(msg: string, ...args: any[]) => void"
+            ],
+            "path": "packages/kbn-type-summarizer/src/lib/log/logger.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/type-summarizer",
+                "id": "def-server.Logger.debug.$1",
+                "type": "string",
+                "tags": [],
+                "label": "msg",
+                "description": [
+                  "any message"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-type-summarizer/src/lib/log/logger.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/type-summarizer",
+                "id": "def-server.Logger.debug.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "any serializeable values you would like to be appended to the log message"
+                ],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "packages/kbn-type-summarizer/src/lib/log/logger.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/type-summarizer",
+            "id": "def-server.Logger.verbose",
+            "type": "Function",
+            "tags": [],
+            "label": "verbose",
+            "description": [
+              "\nWrite a message to the log with the level \"verbose\""
+            ],
+            "signature": [
+              "(msg: string, ...args: any[]) => void"
+            ],
+            "path": "packages/kbn-type-summarizer/src/lib/log/logger.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/type-summarizer",
+                "id": "def-server.Logger.verbose.$1",
+                "type": "string",
+                "tags": [],
+                "label": "msg",
+                "description": [
+                  "any message"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-type-summarizer/src/lib/log/logger.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/type-summarizer",
+                "id": "def-server.Logger.verbose.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "any serializeable values you would like to be appended to the log message"
+                ],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "packages/kbn-type-summarizer/src/lib/log/logger.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/type-summarizer",
+            "id": "def-server.Logger.success",
+            "type": "Function",
+            "tags": [],
+            "label": "success",
+            "description": [
+              "\nWrite a message to the log, only excluded in silent mode"
+            ],
+            "signature": [
+              "(msg: string, ...args: any[]) => void"
+            ],
+            "path": "packages/kbn-type-summarizer/src/lib/log/logger.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/type-summarizer",
+                "id": "def-server.Logger.success.$1",
+                "type": "string",
+                "tags": [],
+                "label": "msg",
+                "description": [
+                  "any message"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-type-summarizer/src/lib/log/logger.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/type-summarizer",
+                "id": "def-server.Logger.success.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "any serializeable values you would like to be appended to the log message"
+                ],
+                "signature": [
+                  "any[]"
+                ],
+                "path": "packages/kbn-type-summarizer/src/lib/log/logger.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/type-summarizer",
+        "id": "def-server.SummarizePacakgeOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SummarizePacakgeOptions",
+        "description": [
+          "\nOptions used to customize the summarizePackage function"
+        ],
+        "path": "packages/kbn-type-summarizer/src/summarize_package.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/type-summarizer",
+            "id": "def-server.SummarizePacakgeOptions.dtsDir",
+            "type": "string",
+            "tags": [],
+            "label": "dtsDir",
+            "description": [
+              "\nAbsolute path to the directory containing the .d.ts files produced by `tsc`. Maps to the\n`declarationDir` compiler option."
+            ],
+            "path": "packages/kbn-type-summarizer/src/summarize_package.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/type-summarizer",
+            "id": "def-server.SummarizePacakgeOptions.tsconfigPath",
+            "type": "string",
+            "tags": [],
+            "label": "tsconfigPath",
+            "description": [
+              "\nAbsolute path to the tsconfig.json file for the project we are summarizing"
+            ],
+            "path": "packages/kbn-type-summarizer/src/summarize_package.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/type-summarizer",
+            "id": "def-server.SummarizePacakgeOptions.inputPaths",
+            "type": "Array",
+            "tags": [],
+            "label": "inputPaths",
+            "description": [
+              "\nArray of absolute paths to the .d.ts files which will be summarized. Each file in this\narray will cause an output .d.ts summary file to be created containing all the AST nodes\nwhich are exported or referenced by those exports."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-type-summarizer/src/summarize_package.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/type-summarizer",
+            "id": "def-server.SummarizePacakgeOptions.outputDir",
+            "type": "string",
+            "tags": [],
+            "label": "outputDir",
+            "description": [
+              "\nAbsolute path to the output directory where the summary .d.ts files should be written"
+            ],
+            "path": "packages/kbn-type-summarizer/src/summarize_package.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/type-summarizer",
+            "id": "def-server.SummarizePacakgeOptions.repoRelativePackageDir",
+            "type": "string",
+            "tags": [],
+            "label": "repoRelativePackageDir",
+            "description": [
+              "\nRepo-relative path to the package source, for example `packages/kbn-type-summarizer` for\nthis package. This is used to provide the correct `sourceRoot` path in the resulting source\nmap files."
+            ],
+            "path": "packages/kbn-type-summarizer/src/summarize_package.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/type-summarizer",
+            "id": "def-server.SummarizePacakgeOptions.strictPrinting",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "strictPrinting",
+            "description": [
+              "\nShould the printer throw an error if it doesn't know how to print an AST node? Primarily\nused for testing"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-type-summarizer/src/summarize_package.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

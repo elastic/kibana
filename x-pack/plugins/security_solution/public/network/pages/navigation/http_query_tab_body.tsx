@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { getOr } from 'lodash/fp';
 
 import { NetworkHttpTable } from '../../components/network_http_table';
-import { useNetworkHttp } from '../../containers/network_http';
+import { ID, useNetworkHttp } from '../../containers/network_http';
 import { networkModel } from '../../store';
 import { manageQuery } from '../../../common/components/page/manage_query';
 
 import { HttpQueryTabBodyProps } from './types';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const NetworkHttpTableManage = manageQuery(NetworkHttpTable);
 
@@ -25,6 +26,11 @@ export const HttpQueryTabBody = ({
   startDate,
   setQuery,
 }: HttpQueryTabBodyProps) => {
+  const { toggleStatus } = useQueryToggle(ID);
+  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(skip || !toggleStatus);
+  }, [skip, toggleStatus]);
   const [
     loading,
     { id, inspect, isInspected, loadPage, networkHttp, pageInfo, refetch, totalCount },
@@ -32,7 +38,7 @@ export const HttpQueryTabBody = ({
     endDate,
     filterQuery,
     indexNames,
-    skip,
+    skip: querySkip,
     startDate,
     type: networkModel.NetworkType.page,
   });
@@ -48,6 +54,7 @@ export const HttpQueryTabBody = ({
       loadPage={loadPage}
       refetch={refetch}
       setQuery={setQuery}
+      setQuerySkip={setQuerySkip}
       showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       totalCount={totalCount}
       type={networkModel.NetworkType.page}

@@ -12,9 +12,10 @@ import { getNodeSummary } from '../../../../lib/elasticsearch/nodes';
 import { getShardStats, getShardAllocation } from '../../../../lib/elasticsearch/shards';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors/handle_error';
-import { prefixIndexPattern } from '../../../../../common/ccs_utils';
+import { prefixIndexPatternWithCcs } from '../../../../../common/ccs_utils';
 import { metricSets } from './metric_set_node_detail';
 import { getLogs } from '../../../../lib/logs/get_logs';
+import { CCS_REMOTE_PATTERN } from '../../../../../common/constants';
 
 const { advanced: metricSetAdvanced, overview: metricSetOverview } = metricSets;
 
@@ -28,7 +29,7 @@ export function esNodeRoute(server) {
           clusterUuid: schema.string(),
           nodeUuid: schema.string(),
         }),
-        payload: schema.object({
+        body: schema.object({
           ccs: schema.maybe(schema.string()),
           showSystemIndices: schema.boolean({ defaultValue: false }), // show/hide system indices in shard allocation table
           timeRange: schema.object({
@@ -40,18 +41,17 @@ export function esNodeRoute(server) {
       },
     },
     async handler(req) {
-      const config = server.config();
+      const config = server.config;
       const ccs = req.payload.ccs;
       const showSystemIndices = req.payload.showSystemIndices;
       const clusterUuid = req.params.clusterUuid;
       const nodeUuid = req.params.nodeUuid;
       const start = req.payload.timeRange.min;
       const end = req.payload.timeRange.max;
-      const filebeatIndexPattern = prefixIndexPattern(
+      const filebeatIndexPattern = prefixIndexPatternWithCcs(
         config,
-        config.get('monitoring.ui.logs.index'),
-        '*',
-        true
+        config.ui.logs.index,
+        CCS_REMOTE_PATTERN
       );
       const isAdvanced = req.payload.is_advanced;
 
@@ -61,9 +61,7 @@ export function esNodeRoute(server) {
       } else {
         metricSet = metricSetOverview;
         // set the cgroup option if needed
-        const showCgroupMetricsElasticsearch = config.get(
-          'monitoring.ui.container.elasticsearch.enabled'
-        );
+        const showCgroupMetricsElasticsearch = config.ui.container.elasticsearch.enabled;
         const metricCpu = metricSet.find((m) => m.name === 'node_cpu_metric');
         if (showCgroupMetricsElasticsearch) {
           metricCpu.keys = ['node_cgroup_quota_as_cpu_utilization'];

@@ -6,15 +6,28 @@
  * Side Public License, v 1.
  */
 
-import { ControlInput } from '../../types';
+import { BoolQuery } from '@kbn/es-query';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
+import { DataControlInput } from '../../types';
 
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
 
-export interface OptionsListEmbeddableInput extends ControlInput {
-  fieldName: string;
-  dataViewId: string;
-
+export interface OptionsListEmbeddableInput extends DataControlInput {
   selectedOptions?: string[];
   singleSelect?: boolean;
   loading?: boolean;
+}
+
+export interface OptionsListResponse {
+  suggestions: string[];
+  totalCardinality: number;
+  invalidSelections?: string[];
+}
+
+export interface OptionsListRequestBody {
+  filters?: Array<{ bool: BoolQuery }>;
+  selectedOptions?: string[];
+  searchString?: string;
+  fieldSpec?: FieldSpec;
+  fieldName: string;
 }

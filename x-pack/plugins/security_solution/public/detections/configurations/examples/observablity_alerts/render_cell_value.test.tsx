@@ -21,7 +21,7 @@ import { ColumnHeaderOptions } from '../../../../../common/types';
 
 import { RenderCellValue } from '.';
 
-jest.mock('../../../../common/lib/kibana/');
+jest.mock('../../../../common/lib/kibana');
 
 describe('RenderCellValue', () => {
   const columnId = '@timestamp';
@@ -48,6 +48,7 @@ describe('RenderCellValue', () => {
       isExpanded: false,
       linkValues,
       rowIndex,
+      colIndex: 0,
       setCellProps: jest.fn(),
       timelineId,
     };

@@ -19,17 +19,17 @@ jest.mock('./common', () => {
 });
 
 import { errors } from '@elastic/elasticsearch';
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { ElasticsearchAssetType } from '../../../../types';
-import type { Installation, RegistryPackage } from '../../../../types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { savedObjectsClientMock } from '@kbn/core/server/saved_objects/service/saved_objects_client.mock';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+
 import { getInstallation, getInstallationObject } from '../../packages';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { savedObjectsClientMock } from '../../../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../../../../../src/core/server/elasticsearch/client/mocks';
+import type { Installation, RegistryPackage } from '../../../../types';
+import { ElasticsearchAssetType } from '../../../../types';
 import { appContextService } from '../../../app_context';
 
 import { getESAssetMetadata } from '../meta';
@@ -38,7 +38,7 @@ import { installTransform } from './install';
 import { getAsset } from './common';
 
 describe('test transform install', () => {
-  let esClient: DeeplyMockedKeys<ElasticsearchClient>;
+  let esClient: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
@@ -104,18 +104,17 @@ describe('test transform install', () => {
       } as unknown as SavedObject<Installation>)
     );
 
-    esClient.transform.getTransform.mockReturnValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        count: 1,
-        transforms: [
-          {
-            dest: {
-              index: 'index',
-            },
+    esClient.transform.getTransform.mockResponseOnce({
+      count: 1,
+      transforms: [
+        // @ts-expect-error incomplete data
+        {
+          dest: {
+            index: 'index',
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     await installTransform(
       {
@@ -394,18 +393,17 @@ describe('test transform install', () => {
       } as unknown as SavedObject<Installation>)
     );
 
-    esClient.transform.getTransform.mockReturnValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        count: 1,
-        transforms: [
-          {
-            dest: {
-              index: 'index',
-            },
+    esClient.transform.getTransform.mockResponseOnce({
+      count: 1,
+      transforms: [
+        // @ts-expect-error incomplete data
+        {
+          dest: {
+            index: 'index',
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     await installTransform(
       {

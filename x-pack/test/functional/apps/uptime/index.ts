@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   settingsObjectId,
   settingsObjectType,
-} from '../../../../plugins/uptime/server/lib/saved_objects/uptime_settings';
+} from '@kbn/synthetics-plugin/server/lib/saved_objects/uptime_settings';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 const ARCHIVE = 'x-pack/test/functional/es_archives/uptime/full_heartbeat';
 
@@ -56,13 +56,8 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
         await esArchiver.unload('x-pack/test/functional/es_archives/uptime/blank');
       });
 
-      loadTestFile(require.resolve('./locations'));
       loadTestFile(require.resolve('./settings'));
       loadTestFile(require.resolve('./certificates'));
-    });
-
-    describe('with generated data but no data reset', () => {
-      loadTestFile(require.resolve('./ping_redirects'));
     });
 
     describe('with real-world data', () => {
@@ -75,7 +70,6 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
       after(async () => await esArchiver.unload(ARCHIVE));
 
       loadTestFile(require.resolve('./overview'));
-      loadTestFile(require.resolve('./monitor'));
       loadTestFile(require.resolve('./ml_anomaly'));
       loadTestFile(require.resolve('./feature_controls'));
     });

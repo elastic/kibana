@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 import {
   getState,
   GetStateReturn,
   createSearchSessionRestorationDataProvider,
 } from './discover_state';
 import { createBrowserHistory, History } from 'history';
-import { dataPluginMock } from '../../../../../data/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { SavedSearch } from '../../../services/saved_searches';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
 

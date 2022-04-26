@@ -24,7 +24,7 @@ export function clusterRoute(server: LegacyServer) {
         params: schema.object({
           clusterUuid: schema.string(),
         }),
-        payload: schema.object({
+        body: schema.object({
           ccs: schema.maybe(schema.string()),
           timeRange: schema.object({
             min: schema.string(),
@@ -35,10 +35,10 @@ export function clusterRoute(server: LegacyServer) {
       },
     },
     handler: async (req: LegacyRequest) => {
-      const config = server.config();
+      const config = server.config;
 
       const indexPatterns = getIndexPatterns(server, {
-        filebeatIndexPattern: config.get('monitoring.ui.logs.index')!,
+        filebeatIndexPattern: config.ui.logs.index,
       });
       const options = {
         clusterUuid: req.params.clusterUuid,

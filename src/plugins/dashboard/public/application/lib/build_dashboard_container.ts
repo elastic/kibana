@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import type { KibanaExecutionContext } from 'src/core/public';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { DashboardContainer, DASHBOARD_CONTAINER_TYPE } from '../embeddable';
 import {
@@ -122,7 +122,9 @@ export const buildDashboardContainer = async ({
         gridData: originalPanelState.gridData,
         type: incomingEmbeddable.type,
         explicitInput: {
-          ...originalPanelState.explicitInput,
+          ...(incomingEmbeddable.type === originalPanelState.type && {
+            ...originalPanelState.explicitInput,
+          }),
           ...incomingEmbeddable.input,
           id: incomingEmbeddable.embeddableId,
         },

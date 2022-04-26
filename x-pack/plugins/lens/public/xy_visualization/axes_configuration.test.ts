@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { LayerArgs } from '../../common/expressions';
+import { DataLayerConfigResult } from '@kbn/expression-xy-plugin/common';
 import { layerTypes } from '../../common';
-import { Datatable } from '../../../../../src/plugins/expressions/public';
+import { Datatable } from '@kbn/expressions-plugin/public';
 import { getAxesConfiguration } from './axes_configuration';
 
 describe('axes_configuration', () => {
@@ -219,7 +219,8 @@ describe('axes_configuration', () => {
     },
   };
 
-  const sampleLayer: LayerArgs = {
+  const sampleLayer: DataLayerConfigResult = {
+    type: 'dataLayer',
     layerId: 'first',
     layerType: layerTypes.DATA,
     seriesType: 'line',
@@ -271,7 +272,12 @@ describe('axes_configuration', () => {
   it('should map right series to right axis', () => {
     const formatFactory = jest.fn();
     const groups = getAxesConfiguration(
-      [{ ...sampleLayer, yConfig: [{ forAccessor: 'yAccessorId', axisMode: 'right' }] }],
+      [
+        {
+          ...sampleLayer,
+          yConfig: [{ forAccessor: 'yAccessorId', axisMode: 'right' }],
+        },
+      ],
       false,
       tables,
       formatFactory

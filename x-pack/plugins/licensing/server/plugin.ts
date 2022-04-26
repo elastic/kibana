@@ -19,7 +19,7 @@ import {
   Plugin,
   PluginInitializerContext,
   IClusterClient,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
 import {
   ILicense,
@@ -177,7 +177,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
   private fetchLicense = async (clusterClient: MaybePromise<IClusterClient>): Promise<ILicense> => {
     const client = isPromise(clusterClient) ? await clusterClient : clusterClient;
     try {
-      const { body: response } = await client.asInternalUser.xpack.info();
+      const response = await client.asInternalUser.xpack.info();
       const normalizedLicense =
         response.license && response.license.type !== 'missing'
           ? normalizeServerLicense(response.license)

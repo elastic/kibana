@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { isPopulatedObject } from '../common/utils';
@@ -22,9 +22,7 @@ export async function getTimeFieldRange(
 }> {
   const obj = { success: true, start: { epoch: 0, string: '' }, end: { epoch: 0, string: '' } };
 
-  const {
-    body: { aggregations },
-  } = await client.asCurrentUser.search({
+  const { aggregations } = await client.asCurrentUser.search({
     index,
     size: 0,
     body: {

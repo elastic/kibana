@@ -7,25 +7,7 @@
 
 import { Query } from '@elastic/eui';
 import { ExportRulesDetails } from '../../../../../../common/detection_engine/schemas/response/export_rules_details_schema';
-import {
-  BulkRuleResponse,
-  RuleResponseBuckets,
-} from '../../../../containers/detection_engine/rules';
-
-/**
- * Separates rules/errors from bulk rules API response (create/update/delete)
- *
- * @param response BulkRuleResponse from bulk rules API
- */
-export const bucketRulesResponse = (response: BulkRuleResponse) =>
-  response.reduce<RuleResponseBuckets>(
-    (acc, cv): RuleResponseBuckets => {
-      return 'error' in cv
-        ? { rules: [...acc.rules], errors: [...acc.errors, cv] }
-        : { rules: [...acc.rules, cv], errors: [...acc.errors] };
-    },
-    { rules: [], errors: [] }
-  );
+import { BulkActionSummary } from '../../../../containers/detection_engine/rules';
 
 export const showRulesTable = ({
   rulesCustomInstalled,
@@ -93,12 +75,12 @@ export const getExportedRulesDetails = async (blob: Blob): Promise<ExportRulesDe
  * @param blob a Blob received from an _export endpoint
  * @returns Object of exported rules counts
  */
-export const getExportedRulesCounts = async (blob: Blob) => {
+export const getExportedRulesCounts = async (blob: Blob): Promise<BulkActionSummary> => {
   const details = await getExportedRulesDetails(blob);
 
   return {
-    exported: details.exported_rules_count,
-    missing: details.missing_rules_count,
+    succeeded: details.exported_rules_count,
+    failed: details.missing_rules_count,
     total: details.exported_rules_count + details.missing_rules_count,
   };
 };

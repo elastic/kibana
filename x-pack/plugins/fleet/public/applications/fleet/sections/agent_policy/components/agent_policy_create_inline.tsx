@@ -23,11 +23,12 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
 import { dataTypes } from '../../../../../../common';
-import { agentPolicyFormValidation } from '../components';
 
 import type { AgentPolicy, NewAgentPolicy } from '../../../types';
 
 import { sendCreateAgentPolicy } from '../../../hooks';
+
+import { agentPolicyFormValidation } from '.';
 
 import { AgentPolicyAdvancedOptionsContent } from './agent_policy_advanced_fields';
 import { AgentPolicyFormSystemMonitoringCheckbox } from './agent_policy_system_monitoring_field';
@@ -39,7 +40,7 @@ const StyledEuiAccordion = styled(EuiAccordion)`
 `;
 
 interface Props {
-  updateAgentPolicy: (u: AgentPolicy | null) => void;
+  updateAgentPolicy: (u: AgentPolicy | null, errorMessage?: JSX.Element) => void;
   isFleetServerPolicy?: boolean;
   agentPolicyName: string;
 }
@@ -84,11 +85,23 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
         updateAgentPolicy(resp.data.item);
       }
     } catch (e) {
-      updateAgentPolicy(null);
+      updateAgentPolicy(null, mapError(e));
     } finally {
       setIsLoading(false);
     }
   }, [newAgentPolicy, withSysMonitoring, updateAgentPolicy]);
+
+  function mapError(e: { statusCode: number }): JSX.Element | undefined {
+    switch (e.statusCode) {
+      case 409:
+        return (
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyCreation.errorMessage"
+            defaultMessage="An agent policy already exists with this name."
+          />
+        );
+    }
+  }
 
   return (
     <EuiForm>

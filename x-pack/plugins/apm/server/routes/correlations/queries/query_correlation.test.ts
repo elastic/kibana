@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { ElasticsearchClient } from 'src/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
 import {
@@ -72,24 +72,18 @@ describe('query_correlation', () => {
       const KsTestLess = 0.01;
 
       const esClientSearchMock = jest.fn(
-        (
-          req: estypes.SearchRequest
-        ): {
-          body: estypes.SearchResponse;
-        } => {
+        (req: estypes.SearchRequest): estypes.SearchResponse => {
           return {
-            body: {
-              aggregations: {
-                latency_ranges: {
-                  buckets: latencyRangesBuckets,
-                },
-                transaction_duration_correlation: {
-                  value: transactionDurationCorrelationValue,
-                },
-                ks_test: { less: KsTestLess },
+            aggregations: {
+              latency_ranges: {
+                buckets: latencyRangesBuckets,
               },
-            } as unknown as estypes.SearchResponse,
-          };
+              transaction_duration_correlation: {
+                value: transactionDurationCorrelationValue,
+              },
+              ks_test: { less: KsTestLess },
+            },
+          } as unknown as estypes.SearchResponse;
         }
       );
 

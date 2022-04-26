@@ -8,7 +8,6 @@
 import type { RouteDefinitionParams } from '../..';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
-import type { ElasticsearchRole } from './model';
 import { transformElasticsearchRoleToRole } from './model';
 
 export function defineGetAllRolesRoutes({ router, authz, getFeatures }: RouteDefinitionParams) {
@@ -16,11 +15,10 @@ export function defineGetAllRolesRoutes({ router, authz, getFeatures }: RouteDef
     { path: '/api/security/role', validate: false },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        const [features, { body: elasticsearchRoles }] = await Promise.all([
+        const esClient = (await context.core).elasticsearch.client;
+        const [features, elasticsearchRoles] = await Promise.all([
           getFeatures(),
-          await context.core.elasticsearch.client.asCurrentUser.security.getRole<
-            Record<string, ElasticsearchRole>
-          >(),
+          await esClient.asCurrentUser.security.getRole(),
         ]);
 
         // Transform elasticsearch roles into Kibana roles and return in a list sorted by the role name.

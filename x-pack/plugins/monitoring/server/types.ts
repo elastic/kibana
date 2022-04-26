@@ -10,31 +10,34 @@ import type {
   IRouter,
   Logger,
   ICustomClusterClient,
-  RequestHandlerContext,
+  CustomRequestHandlerContext,
   ElasticsearchClient,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import type Boom from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { LicenseFeature, ILicense } from '../../licensing/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { TypeOf } from '@kbn/config-schema';
+import { LicenseFeature, ILicense } from '@kbn/licensing-plugin/server';
 import type {
   PluginStartContract as ActionsPluginsStartContact,
   ActionsApiRequestHandlerContext,
-} from '../../actions/server';
-import type { AlertingApiRequestHandlerContext } from '../../alerting/server';
-import type { RacApiRequestHandlerContext } from '../../rule_registry/server';
+} from '@kbn/actions-plugin/server';
+import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
+import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
 import {
   PluginStartContract as AlertingPluginStartContract,
   PluginSetupContract as AlertingPluginSetupContract,
-} from '../../alerting/server';
-import { InfraPluginSetup, InfraRequestHandlerContext } from '../../infra/server';
-import { PluginSetupContract as AlertingPluginSetup } from '../../alerting/server';
-import { LicensingPluginStart } from '../../licensing/server';
-import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
-import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
-import { CloudSetup } from '../../cloud/server';
+} from '@kbn/alerting-plugin/server';
+import { InfraPluginSetup, InfraRequestHandlerContext } from '@kbn/infra-plugin/server';
+import { PluginSetupContract as AlertingPluginSetup } from '@kbn/alerting-plugin/server';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetupContract } from '@kbn/features-plugin/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
+import { RouteConfig, RouteMethod } from '@kbn/core/server';
 import { ElasticsearchModifiedSource } from '../common/types/es';
 import { RulesByType } from '../common/types/alerts';
+import { configSchema, MonitoringConfig } from './config';
 
 export interface MonitoringLicenseService {
   refresh: () => Promise<any>;
@@ -46,10 +49,6 @@ export interface MonitoringLicenseService {
   stop: () => void;
 }
 
-export interface MonitoringElasticsearchConfig {
-  hosts: string[];
-}
-
 export interface PluginsSetup {
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
   usageCollection?: UsageCollectionSetup;
@@ -59,21 +58,17 @@ export interface PluginsSetup {
   cloud?: CloudSetup;
 }
 
-export interface RequestHandlerContextMonitoringPlugin extends RequestHandlerContext {
+export type RequestHandlerContextMonitoringPlugin = CustomRequestHandlerContext<{
   actions?: ActionsApiRequestHandlerContext;
   alerting?: AlertingApiRequestHandlerContext;
   infra: InfraRequestHandlerContext;
   ruleRegistry?: RacApiRequestHandlerContext;
-}
+}>;
 
 export interface PluginsStart {
   alerting: AlertingPluginStartContract;
   actions: ActionsPluginsStartContact;
   licensing: LicensingPluginStart;
-}
-
-export interface MonitoringCoreConfig {
-  get: (key: string) => string | undefined;
 }
 
 export interface RouteDependencies {
@@ -85,10 +80,18 @@ export interface RouteDependencies {
   logger: Logger;
 }
 
+export type MonitoringRouteConfig<Params, Query, Body, Method extends RouteMethod> = {
+  method: RouteMethod;
+} & RouteConfig<Params, Query, Body, Method> & {
+    handler: (request: LegacyRequest) => any;
+  };
+
 export interface MonitoringCore {
-  config: () => MonitoringCoreConfig;
+  config: MonitoringConfig;
   log: Logger;
-  route: (options: any) => void;
+  route: <Params = any, Query = any, Body = any, Method extends RouteMethod = any>(
+    options: MonitoringRouteConfig<Params, Query, Body, Method>
+  ) => void;
 }
 
 export interface LegacyShimDependencies {
@@ -127,11 +130,10 @@ export interface LegacyRequest {
 }
 
 export interface LegacyServer {
+  instanceUuid: string;
   log: Logger;
   route: (params: any) => void;
-  config: () => {
-    get: (key: string) => string | undefined;
-  };
+  config: MonitoringConfig;
   newPlatform: {
     setup: {
       plugins: PluginsSetup;
@@ -151,7 +153,8 @@ export interface LegacyServer {
   };
 }
 
-export type Cluster = ElasticsearchModifiedSource & {
+export type Cluster = Omit<ElasticsearchModifiedSource, 'timestamp'> & {
+  timestamp?: string;
   ml?: { jobs: any };
   logs?: any;
   alerts?: AlertsOnCluster;
@@ -174,6 +177,7 @@ export interface Bucket {
 export interface Aggregation {
   buckets: Bucket[];
 }
+
 export interface ClusterSettingsReasonResponse {
   found: boolean;
   reason?: {
@@ -224,10 +228,12 @@ export interface PipelineResponse {
     throughput?: PipelineMetricsProcessed;
   };
 }
+
 export interface PipelinesResponse {
   pipelines: PipelineResponse[];
   totalPipelineCount: number;
 }
+
 export interface PipelineMetrics {
   bucket_size: string;
   timeRange: {
@@ -245,6 +251,7 @@ export interface PipelineMetrics {
     isDerivative: boolean;
   };
 }
+
 export type PipelineMetricsRes = PipelineMetrics & {
   data: Array<[number, { [key: string]: number }]>;
 };
@@ -257,3 +264,5 @@ export interface PipelineVersion {
   lastSeen: number;
   hash: string;
 }
+
+export type MonitoringConfigSchema = TypeOf<typeof configSchema>;

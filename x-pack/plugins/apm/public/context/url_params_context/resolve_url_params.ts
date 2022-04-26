@@ -6,7 +6,6 @@
  */
 
 import { Location } from 'history';
-import { TimeRangeComparisonType } from '../../../common/runtime_types/comparison_type_rt';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { toQuery } from '../../components/shared/links/url_helpers';
@@ -19,10 +18,7 @@ import {
 } from './helpers';
 import { UrlParams } from './types';
 
-type TimeUrlParams = Pick<
-  UrlParams,
-  'start' | 'end' | 'rangeFrom' | 'rangeTo' | 'exactStart' | 'exactEnd'
->;
+type TimeUrlParams = Pick<UrlParams, 'start' | 'end' | 'rangeFrom' | 'rangeTo'>;
 
 export function resolveUrlParams(location: Location, state: TimeUrlParams) {
   const query = toQuery(location.search);
@@ -52,7 +48,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     percentile,
     latencyAggregationType = LatencyAggregationType.avg,
     comparisonEnabled,
-    comparisonType,
+    offset,
   } = query;
 
   return removeUndefinedProps({
@@ -86,6 +82,6 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     comparisonEnabled: comparisonEnabled
       ? toBoolean(comparisonEnabled)
       : undefined,
-    comparisonType: comparisonType as TimeRangeComparisonType | undefined,
+    offset,
   });
 }

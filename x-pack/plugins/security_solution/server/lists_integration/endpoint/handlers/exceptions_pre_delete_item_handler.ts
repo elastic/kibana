@@ -6,12 +6,13 @@
  */
 
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionsListPreDeleteItemServerExtension } from '@kbn/lists-plugin/server';
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { ExceptionsListPreDeleteItemServerExtension } from '../../../../../lists/server';
 import {
   TrustedAppValidator,
   HostIsolationExceptionsValidator,
   EventFilterValidator,
+  BlocklistValidator,
 } from '../validators';
 
 type ValidatorCallback = ExceptionsListPreDeleteItemServerExtension['callback'];
@@ -54,6 +55,12 @@ export const getExceptionsPreDeleteItemHandler = (
     // Event Filter validation
     if (EventFilterValidator.isEventFilter({ listId })) {
       await new EventFilterValidator(endpointAppContextService, request).validatePreDeleteItem();
+      return data;
+    }
+
+    // Validate Blocklists
+    if (BlocklistValidator.isBlocklist({ listId })) {
+      await new BlocklistValidator(endpointAppContextService, request).validatePreDeleteItem();
       return data;
     }
 

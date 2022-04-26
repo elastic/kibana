@@ -11,7 +11,7 @@ import { WebElement, WebDriver, By, Key } from 'selenium-webdriver';
 import { PNG } from 'pngjs';
 import cheerio from 'cheerio';
 import testSubjSelector from '@kbn/test-subj-selector';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { CustomCheerio, CustomCheerioStatic } from './custom_cheerio_api';
 // @ts-ignore not supported yet
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
@@ -200,6 +200,18 @@ export class WebElementWrapper {
       await wrapper.scrollIntoViewIfNecessary();
       await wrapper.driver.executeScript(`arguments[0].focus()`, wrapper._webElement);
     });
+  }
+
+  /**
+   * If possible, opens 'href' of this element directly through the URL
+   *
+   * @return {Promise<void>}
+   */
+  public async openHref() {
+    const href = await this.getAttribute('href');
+    if (href) {
+      await this.driver.get(href);
+    }
   }
 
   /**

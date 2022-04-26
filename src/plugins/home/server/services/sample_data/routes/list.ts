@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { IRouter, Logger, RequestHandlerContext } from 'src/core/server';
+import type { IRouter, Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { AppLinkData, SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';
 import type { FindSampleObjectsResponseObject } from '../lib/find_sample_objects';
@@ -68,6 +68,7 @@ export const createListRoute = (
 };
 
 type ExistingSampleObjects = Map<string, FindSampleObjectsResponseObject[]>;
+
 async function findExistingSampleObjects(
   context: RequestHandlerContext,
   logger: Logger,
@@ -77,7 +78,7 @@ async function findExistingSampleObjects(
     .map(({ savedObjects }) => savedObjects.map(({ type, id }) => ({ type, id })))
     .flat();
   const objectTypes = getUniqueObjectTypes(objects);
-  const client = getSavedObjectsClient(context, objectTypes);
+  const client = await getSavedObjectsClient(context, objectTypes);
   const findSampleObjectsResult = await findSampleObjects({ client, logger, objects });
 
   let objectCounter = 0;
@@ -100,19 +101,20 @@ async function getSampleDatasetStatus(
     return { status: NOT_INSTALLED };
   }
 
+  const { elasticsearch } = await context.core;
+
   for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
     const dataIndexConfig = sampleDataset.dataIndices[i];
     const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
     try {
-      const { body: indexExists } =
-        await context.core.elasticsearch.client.asCurrentUser.indices.exists({
-          index,
-        });
+      const indexExists = await elasticsearch.client.asCurrentUser.indices.exists({
+        index,
+      });
       if (!indexExists) {
         return { status: NOT_INSTALLED };
       }
 
-      const { body: count } = await context.core.elasticsearch.client.asCurrentUser.count({
+      const count = await elasticsearch.client.asCurrentUser.count({
         index,
       });
       if (count.count === 0) {

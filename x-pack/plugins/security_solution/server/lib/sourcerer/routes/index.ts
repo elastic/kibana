@@ -6,12 +6,9 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { ElasticsearchClient, StartServicesAccessor } from 'kibana/server';
+import type { ElasticsearchClient, StartServicesAccessor } from '@kbn/core/server';
 
-import type {
-  DataView,
-  DataViewListItem,
-} from '../../../../../../../src/plugins/data_views/common';
+import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import { DEFAULT_TIME_FIELD, SOURCERER_API_URL } from '../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
@@ -37,7 +34,8 @@ export const createSourcererDataViewRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const siemClient = context.securitySolution?.getAppClient();
+      const coreContext = await context.core;
+      const siemClient = (await context.securitySolution)?.getAppClient();
       const dataViewId = siemClient.getSourcererDataViewId();
 
       try {
@@ -49,8 +47,8 @@ export const createSourcererDataViewRoute = (
         ] = await getStartServices();
 
         const dataViewService = await indexPatterns.dataViewsServiceFactory(
-          context.core.savedObjects.client,
-          context.core.elasticsearch.client.asCurrentUser,
+          coreContext.savedObjects.client,
+          coreContext.elasticsearch.client.asCurrentUser,
           request,
           true
         );
@@ -72,12 +70,17 @@ export const createSourcererDataViewRoute = (
         const siemDataViewTitle = siemDataView ? siemDataView.title.split(',').sort().join() : '';
         if (siemDataView == null) {
           try {
-            siemDataView = await dataViewService.createAndSave({
-              allowNoIndex: true,
-              id: dataViewId,
-              title: patternListAsTitle,
-              timeFieldName: DEFAULT_TIME_FIELD,
-            });
+            siemDataView = await dataViewService.createAndSave(
+              {
+                allowNoIndex: true,
+                id: dataViewId,
+                title: patternListAsTitle,
+                timeFieldName: DEFAULT_TIME_FIELD,
+              },
+              // Override property - if a data view exists with the security solution pattern
+              // delete it and replace it with our data view
+              true
+            );
           } catch (err) {
             const error = transformError(err);
             if (err.name === 'DuplicateDataViewError' || error.statusCode === 409) {
@@ -101,7 +104,7 @@ export const createSourcererDataViewRoute = (
 
         const defaultDataView = await buildSourcererDataView(
           siemDataView,
-          context.core.elasticsearch.client.asCurrentUser
+          coreContext.elasticsearch.client.asCurrentUser
         );
         return response.ok({
           body: {
@@ -141,6 +144,7 @@ export const getSourcererDataViewRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
+      const coreContext = await context.core;
       const { dataViewId } = request.query;
       try {
         const [
@@ -151,8 +155,8 @@ export const getSourcererDataViewRoute = (
         ] = await getStartServices();
 
         const dataViewService = await indexPatterns.dataViewsServiceFactory(
-          context.core.savedObjects.client,
-          context.core.elasticsearch.client.asCurrentUser,
+          coreContext.savedObjects.client,
+          coreContext.elasticsearch.client.asCurrentUser,
           request,
           true
         );
@@ -161,7 +165,7 @@ export const getSourcererDataViewRoute = (
         const kibanaDataView = siemDataView
           ? await buildSourcererDataView(
               siemDataView,
-              context.core.elasticsearch.client.asCurrentUser
+              coreContext.elasticsearch.client.asCurrentUser
             )
           : {};
 

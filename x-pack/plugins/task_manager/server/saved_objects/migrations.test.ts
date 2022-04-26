@@ -7,8 +7,8 @@
 
 import uuid from 'uuid';
 import { getMigrations } from './migrations';
-import { SavedObjectUnsanitizedDoc } from 'kibana/server';
-import { migrationMocks } from 'src/core/server/mocks';
+import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { migrationMocks } from '@kbn/core/server/mocks';
 import { TaskInstanceWithDeprecatedFields } from '../task';
 
 const migrationContext = migrationMocks.createContext();
@@ -165,6 +165,62 @@ describe('successful migrations', () => {
         status: 'idle',
         attempts: 3,
         schedule: { interval: '1000' },
+      });
+
+      expect(migration820(taskInstance, migrationContext)).toEqual(taskInstance);
+    });
+
+    test('resets "unrecognized" status to "idle" when task type is not in REMOVED_TYPES list', () => {
+      const migration820 = getMigrations()['8.2.0'];
+      const taskInstance = getMockData({
+        taskType: 'someValidTask',
+        status: 'unrecognized',
+      });
+
+      expect(migration820(taskInstance, migrationContext)).toEqual({
+        ...taskInstance,
+        attributes: {
+          ...taskInstance.attributes,
+          status: 'idle',
+        },
+      });
+    });
+
+    test('does not modify "unrecognized" status when task type is in REMOVED_TYPES list', () => {
+      const migration820 = getMigrations()['8.2.0'];
+      const taskInstance = getMockData({
+        taskType: 'sampleTaskRemovedType',
+        status: 'unrecognized',
+      });
+
+      expect(migration820(taskInstance, migrationContext)).toEqual(taskInstance);
+    });
+
+    test('does not modify document when status is "running"', () => {
+      const migration820 = getMigrations()['8.2.0'];
+      const taskInstance = getMockData({
+        taskType: 'someTask',
+        status: 'running',
+      });
+
+      expect(migration820(taskInstance, migrationContext)).toEqual(taskInstance);
+    });
+
+    test('does not modify document when status is "idle"', () => {
+      const migration820 = getMigrations()['8.2.0'];
+      const taskInstance = getMockData({
+        taskType: 'someTask',
+        status: 'idle',
+      });
+
+      expect(migration820(taskInstance, migrationContext)).toEqual(taskInstance);
+    });
+
+    test('does not modify document when status is "failed"', () => {
+      const migration820 = getMigrations()['8.2.0'];
+      const taskInstance = getMockData({
+        taskType: 'someTask',
+        status: 'failed',
       });
 
       expect(migration820(taskInstance, migrationContext)).toEqual(taskInstance);

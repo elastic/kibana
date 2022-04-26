@@ -8,7 +8,6 @@
 
 const execSync = require('child_process').execSync;
 const fs = require('fs');
-// eslint-disable-next-line import/no-unresolved
 const { areChangesSkippable, doAnyChangesMatch } = require('kibana-buildkite-library');
 
 const SKIPPABLE_PATHS = [
@@ -68,7 +67,6 @@ const uploadPipeline = (pipelineContent) => {
         /^src\/plugins\/data/,
         /^x-pack\/plugins\/actions/,
         /^x-pack\/plugins\/alerting/,
-        /^x-pack\/plugins\/cases/,
         /^x-pack\/plugins\/event_log/,
         /^x-pack\/plugins\/lists/,
         /^x-pack\/plugins\/rule_registry/,
@@ -82,6 +80,13 @@ const uploadPipeline = (pipelineContent) => {
       process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution.yml'));
+    }
+
+    if (
+      (await doAnyChangesMatch([/^x-pack\/plugins\/cases/])) ||
+      process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/response_ops.yml'));
     }
 
     if (

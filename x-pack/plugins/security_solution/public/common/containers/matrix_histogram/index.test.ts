@@ -6,13 +6,12 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana } from '../../lib/kibana';
 import { useMatrixHistogram, useMatrixHistogramCombined } from '.';
 import { MatrixHistogramType } from '../../../../common/search_strategy';
 import { TestProviders } from '../../mock/test_providers';
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../lib/kibana');
 
 const basicResponse = {
   isPartial: false,
@@ -39,6 +38,7 @@ describe('useMatrixHistogram', () => {
     indexNames: [],
     stackByField: 'event.module',
     startDate: new Date(Date.now()).toISOString(),
+    skip: false,
   };
 
   afterEach(() => {
@@ -144,6 +144,17 @@ describe('useMatrixHistogram', () => {
     expect(current[1].buckets).toBe(
       mockDnsSearchStrategyResponse.rawResponse.aggregations?.dns_name_query_count.buckets
     );
+  });
+
+  it('skip = true will cancel any running request', () => {
+    const abortSpy = jest.spyOn(AbortController.prototype, 'abort');
+    const localProps = { ...props };
+    const { rerender } = renderHook(() => useMatrixHistogram(localProps), {
+      wrapper: TestProviders,
+    });
+    localProps.skip = true;
+    act(() => rerender());
+    expect(abortSpy).toHaveBeenCalledTimes(3);
   });
 });
 

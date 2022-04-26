@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
+import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 import { CollectedUsage, ReportedUsage } from './register';
 
 interface SearchTelemetry {
@@ -15,7 +15,7 @@ interface SearchTelemetry {
 
 export function fetchProvider(kibanaIndex: string) {
   return async ({ esClient }: CollectorFetchContext): Promise<ReportedUsage> => {
-    const { body: esResponse } = await esClient.search<SearchTelemetry>(
+    const esResponse = await esClient.search<SearchTelemetry>(
       {
         index: kibanaIndex,
         body: {

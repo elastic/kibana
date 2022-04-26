@@ -5,16 +5,30 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { TopHostScoreContributors } from '.';
 import { TestProviders } from '../../../common/mock';
-import { useHostRiskScore } from '../../containers/host_risk_score';
+import { useHostRiskScore } from '../../../risk_score/containers';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
-jest.mock('../../containers/host_risk_score');
+jest.mock('../../../common/containers/query_toggle');
+jest.mock('../../../risk_score/containers');
 const useHostRiskScoreMock = useHostRiskScore as jest.Mock;
-
+const testProps = {
+  setQuery: jest.fn(),
+  deleteQuery: jest.fn(),
+  hostName: 'test-host-name',
+  from: '2020-07-07T08:20:18.966Z',
+  to: '2020-07-08T08:20:18.966Z',
+};
 describe('Host Risk Flyout', () => {
+  const mockUseQueryToggle = useQueryToggle as jest.Mock;
+  const mockSetToggle = jest.fn();
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
+  });
   it('renders', () => {
     useHostRiskScoreMock.mockReturnValueOnce([
       true,
@@ -26,13 +40,7 @@ describe('Host Risk Flyout', () => {
 
     const { queryByTestId } = render(
       <TestProviders>
-        <TopHostScoreContributors
-          setQuery={jest.fn()}
-          deleteQuery={jest.fn()}
-          hostName={'test-host-name'}
-          from={'2020-07-07T08:20:18.966Z'}
-          to={'2020-07-08T08:20:18.966Z'}
-        />
+        <TopHostScoreContributors {...testProps} />
       </TestProviders>
     );
 
@@ -69,18 +77,74 @@ describe('Host Risk Flyout', () => {
 
     const { queryAllByRole } = render(
       <TestProviders>
-        <TopHostScoreContributors
-          setQuery={jest.fn()}
-          deleteQuery={jest.fn()}
-          hostName={'test-host-name'}
-          from={'2020-07-07T08:20:18.966Z'}
-          to={'2020-07-08T08:20:18.966Z'}
-        />
+        <TopHostScoreContributors {...testProps} />
       </TestProviders>
     );
 
     expect(queryAllByRole('row')[1]).toHaveTextContent('first');
     expect(queryAllByRole('row')[2]).toHaveTextContent('second');
     expect(queryAllByRole('row')[3]).toHaveTextContent('third');
+  });
+
+  describe('toggleQuery', () => {
+    beforeEach(() => {
+      useHostRiskScoreMock.mockReturnValue([
+        true,
+        {
+          data: [],
+          isModuleEnabled: true,
+        },
+      ]);
+    });
+
+    test('toggleQuery updates toggleStatus', () => {
+      const { getByTestId } = render(
+        <TestProviders>
+          <TopHostScoreContributors {...testProps} />
+        </TestProviders>
+      );
+      expect(useHostRiskScoreMock.mock.calls[0][0].skip).toEqual(false);
+      fireEvent.click(getByTestId('query-toggle-header'));
+      expect(mockSetToggle).toBeCalledWith(false);
+      expect(useHostRiskScoreMock.mock.calls[1][0].skip).toEqual(true);
+    });
+
+    test('toggleStatus=true, do not skip', () => {
+      render(
+        <TestProviders>
+          <TopHostScoreContributors {...testProps} />
+        </TestProviders>
+      );
+      expect(useHostRiskScoreMock.mock.calls[0][0].skip).toEqual(false);
+    });
+
+    test('toggleStatus=true, render components', () => {
+      const { queryByTestId } = render(
+        <TestProviders>
+          <TopHostScoreContributors {...testProps} />
+        </TestProviders>
+      );
+      expect(queryByTestId('topHostScoreContributors-table')).toBeTruthy();
+    });
+
+    test('toggleStatus=false, do not render components', () => {
+      mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: mockSetToggle });
+      const { queryByTestId } = render(
+        <TestProviders>
+          <TopHostScoreContributors {...testProps} />
+        </TestProviders>
+      );
+      expect(queryByTestId('topHostScoreContributors-table')).toBeFalsy();
+    });
+
+    test('toggleStatus=false, skip', () => {
+      mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: mockSetToggle });
+      render(
+        <TestProviders>
+          <TopHostScoreContributors {...testProps} />
+        </TestProviders>
+      );
+      expect(useHostRiskScoreMock.mock.calls[0][0].skip).toEqual(true);
+    });
   });
 });

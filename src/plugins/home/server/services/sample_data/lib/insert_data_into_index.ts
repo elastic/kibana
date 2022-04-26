@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IScopedClusterClient, Logger } from 'kibana/server';
+import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { DataIndexSchema } from './sample_dataset_registry_types';
 import {
   translateTimeRelativeToDifference,
@@ -54,7 +54,7 @@ export const insertDataIntoIndex = ({
       bulk.push(updateTimestamps(doc));
     });
 
-    const { body: resp } = await esClient.asCurrentUser.bulk({
+    const resp = await esClient.asCurrentUser.bulk({
       body: bulk,
     });
 

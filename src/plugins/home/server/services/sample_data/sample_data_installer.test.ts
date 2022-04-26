@@ -8,13 +8,13 @@
 
 import { Readable } from 'stream';
 import { insertDataIntoIndexMock, findSampleObjectsMock } from './sample_data_installer.test.mocks';
-import type { SavedObjectsImportFailure } from 'kibana/server';
+import type { SavedObjectsImportFailure } from '@kbn/core/server';
 import {
   savedObjectsClientMock,
   savedObjectsServiceMock,
   elasticsearchServiceMock,
   loggingSystemMock,
-} from '../../../../../core/server/mocks';
+} from '@kbn/core/server/mocks';
 import type { SampleDatasetSchema } from './lib/sample_dataset_registry_types';
 import { SampleDataInstaller } from './sample_data_installer';
 import { SampleDataInstallError } from './errors';
@@ -206,17 +206,13 @@ describe('SampleDataInstaller', () => {
       it('deletes the alias and the index', async () => {
         const indexName = 'target_index';
 
-        esClient.asCurrentUser.indices.getAlias.mockResolvedValue(
-          elasticsearchServiceMock.createApiResponse({
-            body: {
-              [indexName]: {
-                aliases: {
-                  kibana_sample_data_test_single_data_index: {},
-                },
-              },
+        esClient.asCurrentUser.indices.getAlias.mockResponse({
+          [indexName]: {
+            aliases: {
+              kibana_sample_data_test_single_data_index: {},
             },
-          })
-        );
+          },
+        });
 
         await installer.install('test_single_data_index');
 
@@ -301,17 +297,13 @@ describe('SampleDataInstaller', () => {
       it('deletes the alias and the index', async () => {
         const indexName = 'target_index';
 
-        esClient.asCurrentUser.indices.getAlias.mockResolvedValue(
-          elasticsearchServiceMock.createApiResponse({
-            body: {
-              [indexName]: {
-                aliases: {
-                  kibana_sample_data_test_single_data_index: {},
-                },
-              },
+        esClient.asCurrentUser.indices.getAlias.mockResponse({
+          [indexName]: {
+            aliases: {
+              kibana_sample_data_test_single_data_index: {},
             },
-          })
-        );
+          },
+        });
 
         await installer.uninstall('test_single_data_index');
 

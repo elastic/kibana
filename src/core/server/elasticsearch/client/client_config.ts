@@ -22,6 +22,7 @@ import { DEFAULT_HEADERS } from '../default_headers';
 export type ElasticsearchClientConfig = Pick<
   ElasticsearchConfig,
   | 'customHeaders'
+  | 'maxSockets'
   | 'compression'
   | 'sniffOnStart'
   | 'sniffOnConnectionFault'
@@ -61,7 +62,7 @@ export function parseClientOptions(
     // fixes https://github.com/elastic/kibana/issues/101944
     disablePrototypePoisoningProtection: true,
     agent: {
-      maxSockets: Infinity,
+      maxSockets: config.maxSockets,
       keepAlive: config.keepAlive ?? true,
     },
     compression: config.compression,
@@ -87,8 +88,9 @@ export function parseClientOptions(
         password: config.password,
       };
     } else if (config.serviceAccountToken) {
-      // TODO: change once ES client has native support for service account tokens: https://github.com/elastic/elasticsearch-js/issues/1477
-      clientOptions.headers!.authorization = `Bearer ${config.serviceAccountToken}`;
+      clientOptions.auth = {
+        bearer: config.serviceAccountToken,
+      };
     }
   }
 

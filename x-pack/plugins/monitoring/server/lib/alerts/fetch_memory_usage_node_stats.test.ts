@@ -6,7 +6,7 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
 import { fetchMemoryUsageNodeStats } from './fetch_memory_usage_node_stats';
 
 jest.mock('../../static_globals', () => ({
@@ -93,9 +93,9 @@ describe('fetchMemoryUsageNodeStats', () => {
   };
 
   it('fetch stats', async () => {
-    esClient.search.mockReturnValue(
+    esClient.search.mockResponse(
       // @ts-expect-error not full response interface
-      elasticsearchClientMock.createSuccessTransportRequestPromise(esRes)
+      esRes
     );
     const result = await fetchMemoryUsageNodeStats(esClient, clusters, startMs, endMs, size);
     expect(result).toEqual([
@@ -113,7 +113,7 @@ describe('fetchMemoryUsageNodeStats', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise(esRes as any);
+      return Promise.resolve(esRes as any);
     });
     await fetchMemoryUsageNodeStats(esClient, clusters, startMs, endMs, size);
     expect(params).toStrictEqual({
@@ -130,6 +130,7 @@ describe('fetchMemoryUsageNodeStats', () => {
                 bool: {
                   should: [
                     { term: { type: 'node_stats' } },
+                    { term: { 'metricset.name': 'node_stats' } },
                     { term: { 'data_stream.dataset': 'elasticsearch.node_stats' } },
                   ],
                   minimum_should_match: 1,
@@ -164,7 +165,7 @@ describe('fetchMemoryUsageNodeStats', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise(esRes as any);
+      return Promise.resolve(esRes as any);
     });
     await fetchMemoryUsageNodeStats(esClient, clusters, startMs, endMs, size);
     // @ts-ignore

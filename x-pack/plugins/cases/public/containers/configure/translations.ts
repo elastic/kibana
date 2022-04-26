@@ -12,11 +12,3 @@ export * from '../translations';
 export const SUCCESS_CONFIGURE = i18n.translate('xpack.cases.configure.successSaveToast', {
   defaultMessage: 'Saved external connection settings',
 });
-
-export const READ_PERMISSIONS_ERROR_MSG = i18n.translate(
-  'xpack.cases.configure.readPermissionsErrorDescription',
-  {
-    defaultMessage:
-      'You do not have permissions to view connectors. If you would like to view the connectors associated with this case, contact your Kibana administrator.',
-  }
-);

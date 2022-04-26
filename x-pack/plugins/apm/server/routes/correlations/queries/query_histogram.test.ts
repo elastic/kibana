@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { ElasticsearchClient } from 'src/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 
 import {
@@ -79,20 +79,14 @@ describe('query_histogram', () => {
       ];
 
       const esClientSearchMock = jest.fn(
-        (
-          req: estypes.SearchRequest
-        ): {
-          body: estypes.SearchResponse;
-        } => {
+        (req: estypes.SearchRequest): estypes.SearchResponse => {
           return {
-            body: {
-              aggregations: {
-                transaction_duration_histogram: {
-                  buckets: histogramBucket,
-                },
+            aggregations: {
+              transaction_duration_histogram: {
+                buckets: histogramBucket,
               },
-            } as unknown as estypes.SearchResponse,
-          };
+            },
+          } as unknown as estypes.SearchResponse;
         }
       );
 

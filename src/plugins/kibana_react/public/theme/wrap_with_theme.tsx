@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { Observable } from 'rxjs';
-import type { CoreTheme } from '../../../../core/public';
+import type { CoreTheme } from '@kbn/core/public';
 import { KibanaThemeProvider } from './kibana_theme_provider';
 
 export const wrapWithTheme = (

@@ -329,7 +329,7 @@ This content has moved. Refer to <<kuery-query>>.
 [role="exclude",id="discover-document-context"]
 == View surrounding documents
 
-This content has moved. Refer to <<discover-view-surrounding-documents>>.
+This content has moved. Refer to <<document-explorer>>.
 
 [role="exclude",id="field-formatters-string"]
 == String field formatters
@@ -386,15 +386,15 @@ This content has moved. Refer to <<managing-data-views>>.
 
 This content has moved. Refer to <<kibana-role-management>>.
 
-[role="exclude",id="logging-configuration-changes"]
-== Logging configuration changes
-
-This content has moved. Refer to <<logging-config-changes>>.
-
 [role="exclude",id="upgrade-migrations"]
 == Upgrade migrations
 
 This content has moved. Refer to <<saved-object-migrations>>.
+
+[role="exclude",id="upgrade-standard"]
+== Standard Upgrade
+
+This content has moved. Refer to {stack-ref}/upgrading-kibana.html[Upgrade Kibana].
 
 [role="exclude",id="upgrade-assistant"]
 == Upgrade Assistant
@@ -405,3 +405,8 @@ This content has moved. Refer to {kibana-ref-all}/7.17/upgrade-assistant.html[Up
 == Install {kib} on macOS with Homebrew
 
 This page has been deleted. Refer to <<install>>.
+
+[role="exclude",id="discover-view-document"]
+== View a document
+
+This page has been deleted. Refer to <<document-explorer>>.

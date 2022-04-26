@@ -21,6 +21,7 @@ import {
   getOutputsHandler,
   postOuputHandler,
   putOuputHandler,
+  postLogstashApiKeyHandler,
 } from './handler';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -75,5 +76,16 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
     },
     deleteOutputHandler
+  );
+
+  router.post(
+    {
+      path: OUTPUT_API_ROUTES.LOGSTASH_API_KEY_PATTERN,
+      validate: false,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    postLogstashApiKeyHandler
   );
 };

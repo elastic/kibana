@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 import {
   EqlCreateSchema,
   ThresholdCreateSchema,
-} from '../../../../../plugins/security_solution/common/detection_engine/schemas/request';
-import { ALERT_THRESHOLD_RESULT } from '../../../../../plugins/security_solution/common/field_maps/field_names';
+} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { ALERT_THRESHOLD_RESULT } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
@@ -137,7 +137,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(hits).to.eql([
           {
             count: 4,
-            from: '1900-01-01T00:00:00.000Z',
+            from: '2020-10-27T05:00:53.000Z',
             terms: [
               {
                 field: 'event.dataset',

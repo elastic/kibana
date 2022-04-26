@@ -7,6 +7,8 @@
 
 export const BULK_ACTIONS_BTN = '[data-test-subj="bulkActions"] span';
 
+export const BULK_ACTIONS_PROGRESS_BTN = '[data-test-subj="bulkActions-progress"]';
+
 export const CREATE_NEW_RULE_BTN = '[data-test-subj="create-new-rule"]';
 
 export const COLLAPSED_ACTION_BTN = '[data-test-subj="euiCollapsedItemActionsButton"]';
@@ -21,9 +23,9 @@ export const DUPLICATE_RULE_ACTION_BTN = '[data-test-subj="duplicateRuleAction"]
 
 export const DUPLICATE_RULE_MENU_PANEL_BTN = '[data-test-subj="rules-details-duplicate-rule"]';
 
-export const ACTIVATE_RULE_BULK_BTN = '[data-test-subj="activateRuleBulk"]';
+export const ENABLE_RULE_BULK_BTN = '[data-test-subj="enableRuleBulk"]';
 
-export const DEACTIVATE_RULE_BULK_BTN = '[data-test-subj="deactivateRuleBulk"]';
+export const DISABLE_RULE_BULK_BTN = '[data-test-subj="disableRuleBulk"]';
 
 export const DELETE_RULE_BULK_BTN = '[data-test-subj="deleteRuleBulk"]';
 
@@ -38,6 +40,8 @@ export const FIRST_RULE = 0;
 export const FOURTH_RULE = 3;
 
 export const LOAD_PREBUILT_RULES_BTN = '[data-test-subj="load-prebuilt-rules"]';
+
+export const LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN = '[data-test-subj="loadPrebuiltRulesBtn"]';
 
 export const RULES_TABLE_INITIAL_LOADING_INDICATOR =
   '[data-test-subj="initialLoadingPanelAllRulesTable"]';
@@ -88,6 +92,10 @@ export const RULES_DELETE_CONFIRMATION_MODAL = '[data-test-subj="allRulesDeleteC
 
 export const MODAL_CONFIRMATION_BTN = '[data-test-subj="confirmModalConfirmButton"]';
 
+export const MODAL_CONFIRMATION_TITLE = '[data-test-subj="confirmModalTitleText"]';
+
+export const MODAL_CONFIRMATION_BODY = '[data-test-subj="confirmModalBodyText"]';
+
 export const RULE_DETAILS_DELETE_BTN = '[data-test-subj="rules-details-delete-rule"]';
 
 export const ALERT_DETAILS_CELLS = '[data-test-subj="dataGridRowCell"]';
@@ -104,7 +112,15 @@ export const INPUT_FILE = 'input[type=file]';
 
 export const TOASTER = '[data-test-subj="euiToastHeader"]';
 
+export const TOASTER_BODY = '[data-test-subj="globalToastList"] .euiToastBody';
+
 export const RULE_IMPORT_OVERWRITE_CHECKBOX = '[id="import-data-modal-checkbox-label"]';
 
 export const RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX =
   '[id="import-data-modal-exceptions-checkbox-label"]';
+
+export const RULES_TAGS_POPOVER_BTN = '[data-test-subj="tagsDisplayPopoverButton"]';
+
+export const RULES_TAGS_POPOVER_WRAPPER = '[data-test-subj="tagsDisplayPopoverWrapper"]';
+
+export const RULES_TAGS_FILTER_BTN = '[data-test-subj="tags-filter-popover-button"]';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient, KibanaResponseFactory, Logger } from 'kibana/server';
+import { IScopedClusterClient, KibanaResponseFactory, Logger } from '@kbn/core/server';
 
 export async function getMatchingIndexes(
   indexPattern: string,
@@ -14,7 +14,7 @@ export async function getMatchingIndexes(
   logger: Logger
 ) {
   try {
-    const { body: indexResults } = await asCurrentUser.cat.indices({
+    const indexResults = await asCurrentUser.cat.indices({
       index: indexPattern,
       format: 'JSON',
     });

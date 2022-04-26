@@ -7,16 +7,13 @@
 
 import { get, getOr, isEmpty, uniqBy } from 'lodash/fp';
 
-import styled from 'styled-components';
-import React from 'react';
-import { EuiBasicTableColumn, EuiTitle } from '@elastic/eui';
 import {
   elementOrChildrenHasFocus,
   getFocusedDataColindexCell,
   getTableSkipFocus,
   handleSkipFocus,
   stopPropagationAndPreventDefault,
-} from '../../../../../timelines/public';
+} from '@kbn/timelines-plugin/public';
 import { BrowserField, BrowserFields } from '../../containers/source';
 import {
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
@@ -59,18 +56,9 @@ export interface AlertSummaryRow {
   title: string;
   description: EnrichedFieldInfo & {
     isDraggable?: boolean;
+    isReadOnly?: boolean;
   };
 }
-
-export interface ThreatDetailsRow {
-  title: string;
-  description: {
-    fieldName: string;
-    value: string;
-  };
-}
-
-export type SummaryRow = AlertSummaryRow | ThreatDetailsRow;
 
 export const getColumnHeaderFromBrowserField = ({
   browserField,
@@ -192,40 +180,6 @@ export const onEventDetailsTabKeyPressed = ({
       skipFocus: eventFieldsTableSkipFocus,
     });
   }
-};
-
-const StyledH5 = styled.h5`
-  line-height: 1.7rem;
-`;
-
-const getTitle = (title: string) => (
-  <EuiTitle size="xxxs">
-    <StyledH5>{title}</StyledH5>
-  </EuiTitle>
-);
-getTitle.displayName = 'getTitle';
-
-export const getSummaryColumns = (
-  DescriptionComponent:
-    | React.FC<AlertSummaryRow['description']>
-    | React.FC<ThreatDetailsRow['description']>
-): Array<EuiBasicTableColumn<SummaryRow>> => {
-  return [
-    {
-      field: 'title',
-      truncateText: false,
-      render: getTitle,
-      width: '220px',
-      name: '',
-    },
-    {
-      className: 'flyoutOverviewDescription',
-      field: 'description',
-      truncateText: false,
-      render: DescriptionComponent,
-      name: '',
-    },
-  ];
 };
 
 export function getEnrichedFieldInfo({

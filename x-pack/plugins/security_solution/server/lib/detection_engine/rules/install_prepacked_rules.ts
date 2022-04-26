@@ -5,19 +5,18 @@
  * 2.0.
  */
 
+import { SanitizedRule, RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { RulesClient } from '@kbn/alerting-plugin/server';
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
-import { SanitizedAlert, AlertTypeParams } from '../../../../../alerting/common';
-import { RulesClient } from '../../../../../alerting/server';
 import { createRules } from './create_rules';
 import { PartialFilter } from '../types';
 
 export const installPrepackagedRules = (
   rulesClient: RulesClient,
   rules: AddPrepackagedRulesSchemaDecoded[],
-  outputIndex: string,
-  isRuleRegistryEnabled: boolean
-): Array<Promise<SanitizedAlert<AlertTypeParams>>> =>
-  rules.reduce<Array<Promise<SanitizedAlert<AlertTypeParams>>>>((acc, rule) => {
+  outputIndex: string
+): Array<Promise<SanitizedRule<RuleTypeParams>>> =>
+  rules.reduce<Array<Promise<SanitizedRule<RuleTypeParams>>>>((acc, rule) => {
     const {
       anomaly_threshold: anomalyThreshold,
       author,
@@ -72,7 +71,6 @@ export const installPrepackagedRules = (
     return [
       ...acc,
       createRules({
-        isRuleRegistryEnabled,
         rulesClient,
         anomalyThreshold,
         author,

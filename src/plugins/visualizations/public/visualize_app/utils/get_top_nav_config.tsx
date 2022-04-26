@@ -10,27 +10,30 @@ import React from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { EuiBetaBadgeProps } from '@elastic/eui';
 import { parse } from 'query-string';
 
-import { Capabilities } from 'src/core/public';
-import { TopNavMenuData } from 'src/plugins/navigation/public';
-import { saveVisualization } from '../../utils/saved_visualize_utils';
-import {
-  VISUALIZE_EMBEDDABLE_TYPE,
-  VisualizeInput,
-  getFullPath,
-} from '../../../../visualizations/public';
+import { Capabilities } from '@kbn/core/public';
+import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import {
   showSaveModal,
   SavedObjectSaveModalOrigin,
   SavedObjectSaveOpts,
   OnSaveProps,
-} from '../../../../saved_objects/public';
+} from '@kbn/saved-objects-plugin/public';
 import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
-} from '../../../../presentation_util/public';
-import { unhashUrl } from '../../../../kibana_utils/public';
+} from '@kbn/presentation-util-plugin/public';
+import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
+import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import { saveVisualization } from '../../utils/saved_visualize_utils';
+import {
+  VISUALIZE_EMBEDDABLE_TYPE,
+  VisualizeInput,
+  getFullPath,
+  NavigateToLensContext,
+} from '../..';
 
 import {
   VisualizeServices,
@@ -39,8 +42,12 @@ import {
 } from '../types';
 import { VISUALIZE_APP_NAME, VisualizeConstants } from '../../../common/constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
-import { EmbeddableStateTransfer } from '../../../../embeddable/public';
 import { VISUALIZE_APP_LOCATOR, VisualizeLocatorParams } from '../../../common/locator';
+import { getUiActions } from '../../services';
+import { VISUALIZE_EDITOR_TRIGGER } from '../../triggers';
+import { getVizEditorOriginatingAppUrl } from './utils';
+
+import './visualize_navigation.scss';
 
 interface VisualizeCapabilities {
   createShortUrl: boolean;
@@ -63,6 +70,11 @@ export interface TopNavConfigParams {
   visualizationIdFromUrl?: string;
   stateTransfer: EmbeddableStateTransfer;
   embeddableId?: string;
+  editInLensConfig?: NavigateToLensContext | null;
+  displayEditInLensItem: boolean;
+  hideLensBadge: () => void;
+  setNavigateToLens: (flag: boolean) => void;
+  showBadge: boolean;
 }
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
@@ -89,6 +101,11 @@ export const getTopNavConfig = (
     visualizationIdFromUrl,
     stateTransfer,
     embeddableId,
+    editInLensConfig,
+    displayEditInLensItem,
+    hideLensBadge,
+    setNavigateToLens,
+    showBadge,
   }: TopNavConfigParams,
   {
     data,
@@ -272,6 +289,45 @@ export const getTopNavConfig = (
     visualizeCapabilities.save || (!originatingApp && dashboardCapabilities.showWriteControls);
 
   const topNavMenu: TopNavMenuData[] = [
+    ...(displayEditInLensItem
+      ? [
+          {
+            id: 'goToLens',
+            label: i18n.translate('visualizations.topNavMenu.goToLensButtonLabel', {
+              defaultMessage: 'Edit visualization in Lens',
+            }),
+            emphasize: false,
+            description: i18n.translate('visualizations.topNavMenu.goToLensButtonAriaLabel', {
+              defaultMessage: 'Go to Lens with your current configuration',
+            }),
+            className: 'visNavItem__goToLens',
+            disableButton: !editInLensConfig,
+            testId: 'visualizeEditInLensButton',
+            ...(showBadge && {
+              badge: {
+                label: i18n.translate('visualizations.tonNavMenu.tryItBadgeText', {
+                  defaultMessage: 'Try it',
+                }),
+                color: 'accent' as EuiBetaBadgeProps['color'],
+              },
+            }),
+            run: async () => {
+              const updatedWithMeta = {
+                ...editInLensConfig,
+                savedObjectId: visInstance.vis.id,
+                embeddableId,
+                vizEditorOriginatingAppUrl: getVizEditorOriginatingAppUrl(history),
+                originatingApp,
+              };
+              if (editInLensConfig) {
+                hideLensBadge();
+                setNavigateToLens(true);
+                getUiActions().getTrigger(VISUALIZE_EDITOR_TRIGGER).exec(updatedWithMeta);
+              }
+            },
+          },
+        ]
+      : []),
     {
       id: 'inspector',
       label: i18n.translate('visualizations.topNavMenu.openInspectorButtonLabel', {
@@ -571,7 +627,7 @@ export const getTopNavConfig = (
               }
             ),
             testId: 'visualizesaveAndReturnButton',
-            disableButton: hasUnappliedChanges || !dashboardCapabilities.showWriteControls,
+            disableButton: hasUnappliedChanges,
             tooltip() {
               if (hasUnappliedChanges) {
                 return i18n.translate(

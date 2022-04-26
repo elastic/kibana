@@ -11,9 +11,9 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { DiscoverField } from './discover_field';
-import { DataViewField } from '../../../../../../data/common';
-import { stubIndexPattern } from '../../../../../../data/common/stubs';
-import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 
 jest.mock('../../../../kibana_services', () => ({
   getUiActions: jest.fn(() => {
@@ -46,7 +46,7 @@ function getComponent({
     });
 
   const props = {
-    indexPattern: stubIndexPattern,
+    indexPattern: stubDataView,
     field: finalField,
     getDetails: jest.fn(() => ({ buckets: [], error: '', exists: 1, total: 2, columns: [] })),
     onAddFilter: jest.fn(),

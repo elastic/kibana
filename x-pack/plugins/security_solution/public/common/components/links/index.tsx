@@ -39,8 +39,8 @@ import { isUrlInvalid } from '../../utils/validators';
 
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../app/types';
-import { getUebaDetailsUrl } from '../link_to/redirect_to_ueba';
-import { LinkButton, LinkAnchor, GenericLinkButton, PortContainer, Comma } from './helpers';
+import { getUsersDetailsUrl } from '../link_to/redirect_to_users';
+import { LinkAnchor, GenericLinkButton, PortContainer, Comma } from './helpers';
 import { HostsTableType } from '../../../hosts/store/model';
 
 export { LinkButton, LinkAnchor } from './helpers';
@@ -48,44 +48,52 @@ export { LinkButton, LinkAnchor } from './helpers';
 export const DEFAULT_NUMBER_OF_LINK = 5;
 
 // Internal Links
-const UebaDetailsLinkComponent: React.FC<{
+const UserDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
-  hostName: string;
+  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+  userName: string;
+  title?: string;
   isButton?: boolean;
-}> = ({ children, hostName, isButton }) => {
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.ueba);
+  onClick?: (e: SyntheticEvent) => void;
+}> = ({ children, Component, userName, isButton, onClick, title }) => {
+  const encodedUserName = encodeURIComponent(userName);
+
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.users);
   const { navigateToApp } = useKibana().services.application;
-  const goToUebaDetails = useCallback(
+  const goToUsersDetails = useCallback(
     (ev) => {
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.ueba,
-        path: getUebaDetailsUrl(encodeURIComponent(hostName), search),
+        deepLinkId: SecurityPageName.users,
+        path: getUsersDetailsUrl(encodedUserName, search),
       });
     },
-    [hostName, navigateToApp, search]
+    [encodedUserName, navigateToApp, search]
   );
 
   return isButton ? (
-    <LinkButton
-      data-test-subj={'ueba-link-button'}
-      onClick={goToUebaDetails}
-      href={formatUrl(getUebaDetailsUrl(encodeURIComponent(hostName)))}
+    <GenericLinkButton
+      Component={Component}
+      dataTestSubj="data-grid-user-details"
+      href={formatUrl(getUsersDetailsUrl(encodedUserName))}
+      onClick={onClick ?? goToUsersDetails}
+      title={title ?? userName}
     >
-      {children ? children : hostName}
-    </LinkButton>
+      {children ? children : userName}
+    </GenericLinkButton>
   ) : (
     <LinkAnchor
-      data-test-subj={'ueba-link-anchor'}
-      onClick={goToUebaDetails}
-      href={formatUrl(getUebaDetailsUrl(encodeURIComponent(hostName)))}
+      data-test-subj="users-link-anchor"
+      onClick={onClick ?? goToUsersDetails}
+      href={formatUrl(getUsersDetailsUrl(encodedUserName))}
     >
-      {children ? children : hostName}
+      {children ? children : userName}
     </LinkAnchor>
   );
 };
 
-export const UebaDetailsLink = React.memo(UebaDetailsLinkComponent);
+export const UserDetailsLink = React.memo(UserDetailsLinkComponent);
 
 const HostDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;

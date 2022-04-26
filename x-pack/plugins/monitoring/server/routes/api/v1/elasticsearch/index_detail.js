@@ -12,9 +12,10 @@ import { getIndexSummary } from '../../../../lib/elasticsearch/indices';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { getShardAllocation, getShardStats } from '../../../../lib/elasticsearch/shards';
 import { handleError } from '../../../../lib/errors/handle_error';
-import { prefixIndexPattern } from '../../../../../common/ccs_utils';
+import { prefixIndexPatternWithCcs } from '../../../../../common/ccs_utils';
 import { metricSet } from './metric_set_index_detail';
 import { getLogs } from '../../../../lib/logs/get_logs';
+import { CCS_REMOTE_PATTERN } from '../../../../../common/constants';
 
 const { advanced: metricSetAdvanced, overview: metricSetOverview } = metricSet;
 
@@ -28,7 +29,7 @@ export function esIndexRoute(server) {
           clusterUuid: schema.string(),
           id: schema.string(),
         }),
-        payload: schema.object({
+        body: schema.object({
           ccs: schema.maybe(schema.string()),
           timeRange: schema.object({
             min: schema.string(),
@@ -40,16 +41,15 @@ export function esIndexRoute(server) {
     },
     handler: async (req) => {
       try {
-        const config = server.config();
+        const config = server.config;
         const clusterUuid = req.params.clusterUuid;
         const indexUuid = req.params.id;
         const start = req.payload.timeRange.min;
         const end = req.payload.timeRange.max;
-        const filebeatIndexPattern = prefixIndexPattern(
+        const filebeatIndexPattern = prefixIndexPatternWithCcs(
           config,
-          config.get('monitoring.ui.logs.index'),
-          '*',
-          true
+          config.ui.logs.index,
+          CCS_REMOTE_PATTERN
         );
         const isAdvanced = req.payload.is_advanced;
         const metricSet = isAdvanced ? metricSetAdvanced : metricSetOverview;

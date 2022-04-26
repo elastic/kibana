@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   CoreSetup,
   CoreStart,
@@ -18,19 +18,15 @@ import {
   Plugin,
   PluginInitializerContext,
   ThemeServiceStart,
-} from 'src/core/public';
-import type { ScreenshottingSetup } from '../../screenshotting/public';
-import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-  HomePublicPluginStart,
-} from '../../../../src/plugins/home/public';
-import { ManagementSetup, ManagementStart } from '../../../../src/plugins/management/public';
-import { LicensingPluginStart } from '../../licensing/public';
+} from '@kbn/core/public';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
+import { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { durationToNumber } from '../common/schema_utils';
 import { JobId, JobSummarySet } from '../common/types';
-import { ReportingSetup, ReportingStart } from './';
+import { ReportingSetup, ReportingStart } from '.';
 import { ReportingAPIClient } from './lib/reporting_api_client';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
 import { getGeneralErrorToast } from './notifier';
@@ -79,7 +75,7 @@ export interface ReportingPublicPluginSetupDendencies {
   home: HomePublicPluginSetup;
   management: ManagementSetup;
   uiActions: UiActionsSetup;
-  screenshotting: ScreenshottingSetup;
+  screenshotMode: ScreenshotModePluginSetup;
   share: SharePluginSetup;
 }
 
@@ -107,7 +103,7 @@ export class ReportingPublicPlugin
 {
   private kibanaVersion: string;
   private apiClient?: ReportingAPIClient;
-  private readonly stop$ = new Rx.ReplaySubject(1);
+  private readonly stop$ = new Rx.ReplaySubject<void>(1);
   private readonly title = i18n.translate('xpack.reporting.management.reportingTitle', {
     defaultMessage: 'Reporting',
   });
@@ -152,7 +148,7 @@ export class ReportingPublicPlugin
     setupDeps: ReportingPublicPluginSetupDendencies
   ) {
     const { getStartServices, uiSettings } = core;
-    const { home, management, screenshotting, share, uiActions } = setupDeps;
+    const { home, management, screenshotMode, share, uiActions } = setupDeps;
 
     const startServices$ = Rx.from(getStartServices());
     const usesUiCapabilities = !this.config.roles.enabled;
@@ -170,7 +166,7 @@ export class ReportingPublicPlugin
       icon: 'reportingApp',
       path: '/app/management/insightsAndAlerting/reporting',
       showOnHomePage: false,
-      category: FeatureCatalogueCategory.ADMIN,
+      category: 'admin',
     });
 
     management.sections.section.insightsAndAlerting.registerApp({
@@ -209,7 +205,7 @@ export class ReportingPublicPlugin
       id: 'reportingRedirect',
       mount: async (params) => {
         const { mountRedirectApp } = await import('./redirect');
-        return mountRedirectApp({ ...params, apiClient, screenshotting, share });
+        return mountRedirectApp({ ...params, apiClient, screenshotMode, share });
       },
       title: 'Reporting redirect app',
       searchable: false,

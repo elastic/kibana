@@ -9,9 +9,9 @@ import React, { useContext, useMemo } from 'react';
 import { EuiFormRow, EuiIcon, EuiSelect, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { CreateTransformWizardContext } from '../../../../wizard/wizard';
 import { commonFilterAggs, filterAggsFieldSupport } from '../constants';
-import { IndexPattern } from '../../../../../../../../../../../../src/plugins/data/public';
 import { getFilterAggTypeConfig } from '../config';
 import type { FilterAggType, PivotAggsConfigFilter } from '../types';
 import type { RuntimeMappings } from '../../types';
@@ -23,13 +23,13 @@ import { isPopulatedObject } from '../../../../../../../../../common/shared_impo
  */
 export function getSupportedFilterAggs(
   fieldName: string,
-  indexPattern: IndexPattern,
+  dataView: DataView,
   runtimeMappings?: RuntimeMappings
 ): FilterAggType[] {
-  const indexPatternField = indexPattern.fields.getByName(fieldName);
+  const dataViewField = dataView.fields.getByName(fieldName);
 
-  if (indexPatternField !== undefined) {
-    return [...commonFilterAggs, ...filterAggsFieldSupport[indexPatternField.type]];
+  if (dataViewField !== undefined) {
+    return [...commonFilterAggs, ...filterAggsFieldSupport[dataViewField.type]];
   }
   if (isPopulatedObject(runtimeMappings) && runtimeMappings.hasOwnProperty(fieldName)) {
     const runtimeField = runtimeMappings[fieldName];
@@ -53,11 +53,11 @@ export const FilterAggForm: PivotAggsConfigFilter['AggFormComponent'] = ({
   onChange,
   selectedField,
 }) => {
-  const { indexPattern, runtimeMappings } = useContext(CreateTransformWizardContext);
+  const { dataView, runtimeMappings } = useContext(CreateTransformWizardContext);
 
   const filterAggsOptions = useMemo(
-    () => getSupportedFilterAggs(selectedField, indexPattern!, runtimeMappings),
-    [indexPattern, selectedField, runtimeMappings]
+    () => getSupportedFilterAggs(selectedField, dataView!, runtimeMappings),
+    [dataView, selectedField, runtimeMappings]
   );
 
   useUpdateEffect(() => {

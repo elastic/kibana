@@ -240,10 +240,10 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async useLegacyTable() {
-    return (await this.kibanaServer.uiSettings.get('doc_table:legacy')) !== false;
+    return (await this.kibanaServer.uiSettings.get('doc_table:legacy')) === true;
   }
 
-  public async getDocTableIndex(index: number) {
+  public async getDocTableIndex(index: number, visibleText = false) {
     const isLegacyDefault = await this.useLegacyTable();
     if (isLegacyDefault) {
       const row = await this.find.byCssSelector(`tr.kbnDocTable__row:nth-child(${index})`);
@@ -251,7 +251,16 @@ export class DiscoverPageObject extends FtrService {
     }
 
     const row = await this.dataGrid.getRow({ rowIndex: index - 1 });
-    const result = await Promise.all(row.map(async (cell) => await cell.getVisibleText()));
+    const result = await Promise.all(
+      row.map(async (cell) => {
+        if (visibleText) {
+          return await cell.getVisibleText();
+        } else {
+          const textContent = await cell.getAttribute('textContent');
+          return textContent.trim();
+        }
+      })
+    );
     // Remove control columns
     return result.slice(2).join(' ');
   }
@@ -274,6 +283,11 @@ export class DiscoverPageObject extends FtrService {
     const row = await this.dataGrid.getRow({ rowIndex: index - 1 });
     const result = await Promise.all(row.map(async (cell) => await cell.getVisibleText()));
     return result[usedCellIdx];
+  }
+
+  public async clickDocTableRowToggle(rowIndex: number = 0) {
+    const docTable = await this.getDocTable();
+    await docTable.clickRowToggle({ rowIndex });
   }
 
   public async skipToEndOfDocTable() {
@@ -364,10 +378,18 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickCreateNewDataView() {
-    await this.retry.try(async () => {
-      await this.testSubjects.click('dataview-create-new');
-      await this.find.byClassName('indexPatternEditor__form');
+    await this.retry.waitForWithTimeout('data create new to be visible', 15000, async () => {
+      return await this.testSubjects.isDisplayed('dataview-create-new');
     });
+    await this.testSubjects.click('dataview-create-new');
+    await this.retry.waitForWithTimeout(
+      'index pattern editor form to be visible',
+      15000,
+      async () => {
+        return await (await this.find.byClassName('indexPatternEditor__form')).isDisplayed();
+      }
+    );
+    await (await this.find.byClassName('indexPatternEditor__form')).click();
   }
 
   public async hasNoResults() {

@@ -8,7 +8,7 @@
 import { createAction } from 'redux-actions';
 import { i18n } from '@kbn/i18n';
 import { unfreezeIndices as request } from '../../services';
-import { clearRowStatus, reloadIndices } from '../actions';
+import { clearRowStatus, reloadIndices } from '.';
 import { notificationService } from '../../services/notification';
 
 export const unfreezeIndicesStart = createAction('INDEX_MANAGEMENT_UNFREEZE_INDICES_START');

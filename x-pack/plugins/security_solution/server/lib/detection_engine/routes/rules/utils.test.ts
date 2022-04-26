@@ -10,7 +10,6 @@ import { createPromiseFromStreams } from '@kbn/utils';
 import { Action, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import {
-  transformAlertToRule,
   getIdError,
   transformFindAlerts,
   transform,
@@ -23,12 +22,12 @@ import {
   swapActionIds,
   migrateLegacyActionsIds,
 } from './utils';
-import { getAlertMock } from '../__mocks__/request_responses';
+import { getRuleMock } from '../__mocks__/request_responses';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import { PartialFilter } from '../../types';
 import { BulkError, createBulkErrorObject } from '../utils';
 import { getOutputRuleAlertForRest } from '../__mocks__/utils';
-import { PartialAlert } from '../../../../../../alerting/server';
+import { PartialRule } from '@kbn/alerting-plugin/server';
 import { createRulesAndExceptionsStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { RuleAlertType } from '../../rules/types';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
@@ -39,6 +38,7 @@ import {
   getQueryRuleParams,
   getThreatRuleParams,
 } from '../../schemas/rule_schemas.mock';
+import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 import { requestContextMock } from '../__mocks__';
 
 // eslint-disable-next-line no-restricted-imports
@@ -64,60 +64,57 @@ const createMockImportRule = async (rule: ReturnType<typeof getCreateRulesSchema
   return rules;
 };
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('utils - %s', (_, isRuleRegistryEnabled) => {
+describe('utils', () => {
   const { clients } = requestContextMock.createTools();
 
-  describe('transformAlertToRule', () => {
+  describe('internalRuleToAPIResponse', () => {
     test('should work with a full data set', () => {
-      const fullRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
-      const rule = transformAlertToRule(fullRule);
+      const fullRule = getRuleMock(getQueryRuleParams());
+      const rule = internalRuleToAPIResponse(fullRule);
       expect(rule).toEqual(getOutputRuleAlertForRest());
     });
 
     test('should omit note if note is undefined', () => {
-      const fullRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const fullRule = getRuleMock(getQueryRuleParams());
       fullRule.params.note = undefined;
-      const rule = transformAlertToRule(fullRule);
+      const rule = internalRuleToAPIResponse(fullRule);
       const { note, ...expectedWithoutNote } = getOutputRuleAlertForRest();
       expect(rule).toEqual(expectedWithoutNote);
     });
 
     test('should return enabled is equal to false', () => {
-      const fullRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const fullRule = getRuleMock(getQueryRuleParams());
       fullRule.enabled = false;
-      const ruleWithEnabledFalse = transformAlertToRule(fullRule);
+      const ruleWithEnabledFalse = internalRuleToAPIResponse(fullRule);
       const expected = getOutputRuleAlertForRest();
       expected.enabled = false;
       expect(ruleWithEnabledFalse).toEqual(expected);
     });
 
     test('should return immutable is equal to false', () => {
-      const fullRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const fullRule = getRuleMock(getQueryRuleParams());
       fullRule.params.immutable = false;
-      const ruleWithEnabledFalse = transformAlertToRule(fullRule);
+      const ruleWithEnabledFalse = internalRuleToAPIResponse(fullRule);
       const expected = getOutputRuleAlertForRest();
       expect(ruleWithEnabledFalse).toEqual(expected);
     });
 
     test('should work with tags but filter out any internal tags', () => {
-      const fullRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const fullRule = getRuleMock(getQueryRuleParams());
       fullRule.tags = ['tag 1', 'tag 2', `${INTERNAL_IDENTIFIER}_some_other_value`];
-      const rule = transformAlertToRule(fullRule);
+      const rule = internalRuleToAPIResponse(fullRule);
       const expected = getOutputRuleAlertForRest();
       expected.tags = ['tag 1', 'tag 2'];
       expect(rule).toEqual(expected);
     });
 
     test('transforms ML Rule fields', () => {
-      const mlRule = getAlertMock(isRuleRegistryEnabled, getMlRuleParams());
+      const mlRule = getRuleMock(getMlRuleParams());
       mlRule.params.anomalyThreshold = 55;
       mlRule.params.machineLearningJobId = ['some_job_id'];
       mlRule.params.type = 'machine_learning';
 
-      const rule = transformAlertToRule(mlRule);
+      const rule = internalRuleToAPIResponse(mlRule);
       expect(rule).toEqual(
         expect.objectContaining({
           anomaly_threshold: 55,
@@ -128,7 +125,7 @@ describe.each([
     });
 
     test('transforms threat_matching fields', () => {
-      const threatRule = getAlertMock(isRuleRegistryEnabled, getThreatRuleParams());
+      const threatRule = getRuleMock(getThreatRuleParams());
       const threatFilters: PartialFilter[] = [
         {
           query: {
@@ -165,7 +162,7 @@ describe.each([
       threatRule.params.threatMapping = threatMapping;
       threatRule.params.threatQuery = '*:*';
 
-      const rule = transformAlertToRule(threatRule);
+      const rule = internalRuleToAPIResponse(threatRule);
       expect(rule).toEqual(
         expect.objectContaining({
           threat_index: ['index-123'],
@@ -181,9 +178,9 @@ describe.each([
     test('does not leak a lists structure in the transform which would cause validation issues', () => {
       const result: RuleAlertType & { lists: [] } = {
         lists: [],
-        ...getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
+        ...getRuleMock(getQueryRuleParams()),
       };
-      const rule = transformAlertToRule(result);
+      const rule = internalRuleToAPIResponse(result);
       expect(rule).toEqual(
         expect.not.objectContaining({
           lists: [],
@@ -196,9 +193,9 @@ describe.each([
     test('does not leak an exceptions_list structure in the transform which would cause validation issues', () => {
       const result: RuleAlertType & { exceptions_list: [] } = {
         exceptions_list: [],
-        ...getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
+        ...getRuleMock(getQueryRuleParams()),
       };
-      const rule = transformAlertToRule(result);
+      const rule = internalRuleToAPIResponse(result);
       expect(rule).toEqual(
         expect.not.objectContaining({
           exceptions_list: [],
@@ -293,7 +290,7 @@ describe.each([
           page: 1,
           perPage: 0,
           total: 0,
-          data: [getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())],
+          data: [getRuleMock(getQueryRuleParams())],
         },
         {},
         {}
@@ -313,7 +310,7 @@ describe.each([
           page: 1,
           perPage: 0,
           total: 0,
-          data: [getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())],
+          data: [getRuleMock(getQueryRuleParams())],
         },
         {},
         {
@@ -340,7 +337,7 @@ describe.each([
       ];
 
       const legacyRuleActions: Record<string, LegacyRulesActionsSavedObject | undefined> = {
-        [getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()).id]: {
+        [getRuleMock(getQueryRuleParams()).id]: {
           id: '123',
           actions,
           alertThrottle: '1h',
@@ -352,7 +349,7 @@ describe.each([
           page: 1,
           perPage: 0,
           total: 0,
-          data: [getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())],
+          data: [getRuleMock(getQueryRuleParams())],
         },
         {},
         legacyRuleActions
@@ -373,18 +370,14 @@ describe.each([
 
   describe('transform', () => {
     test('outputs 200 if the data is of type siem alert', () => {
-      const output = transform(
-        getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
-        undefined,
-        isRuleRegistryEnabled
-      );
+      const output = transform(getRuleMock(getQueryRuleParams()), undefined);
       const expected = getOutputRuleAlertForRest();
       expect(output).toEqual(expected);
     });
 
     test('returns 500 if the data is not of type siem alert', () => {
-      const unsafeCast = { data: [{ random: 1 }] } as unknown as PartialAlert;
-      const output = transform(unsafeCast, undefined, isRuleRegistryEnabled);
+      const unsafeCast = { data: [{ random: 1 }] } as unknown as PartialRule;
+      const output = transform(unsafeCast, undefined);
       expect(output).toBeNull();
     });
   });
@@ -496,15 +489,15 @@ describe.each([
     });
 
     test('given single alert will return the alert transformed', () => {
-      const result1 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const result1 = getRuleMock(getQueryRuleParams());
       const transformed = transformAlertsToRules([result1], {});
       const expected = getOutputRuleAlertForRest();
       expect(transformed).toEqual([expected]);
     });
 
     test('given two alerts will return the two alerts transformed', () => {
-      const result1 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
-      const result2 = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const result1 = getRuleMock(getQueryRuleParams());
+      const result2 = getRuleMock(getQueryRuleParams());
       result2.id = 'some other id';
       result2.params.ruleId = 'some other id';
 

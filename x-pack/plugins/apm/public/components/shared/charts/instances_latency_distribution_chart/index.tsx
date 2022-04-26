@@ -22,7 +22,7 @@ import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useChartTheme } from '../../../../../../observability/public';
+import { useChartTheme } from '@kbn/observability-plugin/public';
 import { SERVICE_NODE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import {
   asTransactionRate,
@@ -114,8 +114,13 @@ export function InstancesLatencyDistributionChart({
           })}
         </h2>
       </EuiTitle>
-      <ChartContainer hasData={hasData} height={height} status={status}>
-        <Chart id="instances-latency-distribution">
+      <ChartContainer
+        hasData={hasData}
+        height={height}
+        status={status}
+        id="instancesLatencyDistribution"
+      >
+        <Chart>
           <Settings
             legendPosition={Position.Bottom}
             onElementClick={handleElementClick}

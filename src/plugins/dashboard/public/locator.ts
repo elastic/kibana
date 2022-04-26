@@ -9,12 +9,12 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import { flow } from 'lodash';
 import { type Filter } from '@kbn/es-query';
-import type { TimeRange, Query, QueryState, RefreshInterval } from '../../data/public';
-import type { LocatorDefinition, LocatorPublic } from '../../share/public';
+import type { TimeRange, Query, QueryState, RefreshInterval } from '@kbn/data-plugin/public';
+import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { SavedDashboardPanel } from '../common/types';
 import type { RawDashboardState } from './types';
-import { setStateToKbnUrl } from '../../kibana_utils/public';
-import { ViewMode } from '../../embeddable/public';
 import { DashboardConstants } from './dashboard_constants';
 
 /**
@@ -22,7 +22,7 @@ import { DashboardConstants } from './dashboard_constants';
  */
 const getSerializableRecord: <O>(o: O) => O & SerializableRecord = flow(JSON.stringify, JSON.parse);
 
-const cleanEmptyKeys = (stateObj: Record<string, unknown>) => {
+export const cleanEmptyKeys = (stateObj: Record<string, unknown>) => {
   Object.keys(stateObj).forEach((key) => {
     if (stateObj[key] === undefined) {
       delete stateObj[key];

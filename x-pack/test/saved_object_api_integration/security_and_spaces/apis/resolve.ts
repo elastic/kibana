@@ -16,7 +16,7 @@ import {
 } from '../../common/suites/resolve';
 
 const {
-  SPACE_1: { spaceId: SPACE_1_ID },
+  SPACE_2: { spaceId: SPACE_2_ID },
 } = SPACES;
 const { fail400, fail404 } = testCaseFailures;
 
@@ -25,10 +25,12 @@ const createTestCases = (spaceId: string) => {
   // to receive an error; otherwise, we expect to receive a success result
   const normalTypes = [
     CASES.EXACT_MATCH,
-    { ...CASES.ALIAS_MATCH, ...fail404(spaceId !== SPACE_1_ID) },
+    { ...CASES.ALIAS_MATCH, ...fail404(spaceId === SPACE_2_ID) }, // the alias exists in the default space and space_1, but not space_2
     {
       ...CASES.CONFLICT,
-      ...(spaceId !== SPACE_1_ID && { expectedOutcome: 'exactMatch' as const }),
+      // the default expectedOutcome for this case is 'conflict'; the alias exists in the default space and space_1, but not space_2
+      // if we are testing in space_2, the expectedOutcome should be 'exactMatch' instead
+      ...(spaceId === SPACE_2_ID && { expectedOutcome: 'exactMatch' as const }),
     },
     { ...CASES.DISABLED, ...fail404() },
     { ...CASES.DOES_NOT_EXIST, ...fail404() },

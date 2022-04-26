@@ -10,7 +10,6 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
-import { useTransforms } from '../../../../transforms/containers/use_transforms';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
@@ -26,7 +25,7 @@ import * as i18n from './translations';
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
-const ID = 'hostsKpiUniqueIpsQuery';
+export const ID = 'hostsKpiUniqueIpsQuery';
 
 export interface HostsKpiUniqueIpsArgs
   extends Omit<HostsKpiUniqueIpsStrategyResponse, 'rawResponse'> {
@@ -56,7 +55,6 @@ export const useHostsKpiUniqueIps = ({
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const { getTransformChangesIfTheyExist } = useTransforms();
 
   const [hostsKpiUniqueIpsRequest, setHostsKpiUniqueIpsRequest] =
     useState<HostsKpiUniqueIpsRequestOptions | null>(null);
@@ -130,30 +128,24 @@ export const useHostsKpiUniqueIps = ({
   );
 
   useEffect(() => {
-    const { indices, factoryQueryType, timerange } = getTransformChangesIfTheyExist({
-      factoryQueryType: HostsKpiQueries.kpiUniqueIps,
-      indices: indexNames,
-      filterQuery,
-      timerange: {
-        interval: '12h',
-        from: startDate,
-        to: endDate,
-      },
-    });
     setHostsKpiUniqueIpsRequest((prevRequest) => {
       const myRequest = {
         ...(prevRequest ?? {}),
-        defaultIndex: indices,
-        factoryQueryType,
+        defaultIndex: indexNames,
+        factoryQueryType: HostsKpiQueries.kpiUniqueIps,
         filterQuery: createFilter(filterQuery),
-        timerange,
+        timerange: {
+          interval: '12h',
+          from: startDate,
+          to: endDate,
+        },
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, skip, startDate, getTransformChangesIfTheyExist]);
+  }, [indexNames, endDate, filterQuery, skip, startDate]);
 
   useEffect(() => {
     hostsKpiUniqueIpsSearch(hostsKpiUniqueIpsRequest);
@@ -162,6 +154,14 @@ export const useHostsKpiUniqueIps = ({
       abortCtrl.current.abort();
     };
   }, [hostsKpiUniqueIpsRequest, hostsKpiUniqueIpsSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   return [loading, hostsKpiUniqueIpsResponse];
 };

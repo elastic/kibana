@@ -55,7 +55,7 @@ interface Kibana {
  *  - response times
  */
 export async function getKibanas(req: LegacyRequest, { clusterUuid }: { clusterUuid: string }) {
-  const config = req.server.config();
+  const config = req.server.config;
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
   const moduleType = 'kibana';
@@ -69,7 +69,7 @@ export async function getKibanas(req: LegacyRequest, { clusterUuid }: { clusterU
   });
   const params = {
     index: indexPatterns,
-    size: config.get('monitoring.ui.max_bucket_size'),
+    size: config.ui.max_bucket_size,
     ignore_unavailable: true,
     body: {
       query: createQuery({

@@ -98,9 +98,12 @@ export const UserActions = React.memo(
     const [initLoading, setInitLoading] = useState(true);
     const currentUser = useCurrentUser();
 
-    const [loadingAlertData, manualAlertsData] = useFetchAlertData(
-      getManualAlertIdsWithNoRuleId(caseData.comments)
+    const alertIdsWithoutRuleInfo = useMemo(
+      () => getManualAlertIdsWithNoRuleId(caseData.comments),
+      [caseData.comments]
     );
+
+    const [loadingAlertData, manualAlertsData] = useFetchAlertData(alertIdsWithoutRuleInfo);
 
     const {
       loadingCommentIds,
@@ -111,6 +114,7 @@ export const UserActions = React.memo(
       handleOutlineComment,
       handleSaveComment,
       handleManageQuote,
+      handleDeleteComment,
       handleUpdate,
     } = useUserActionsHandler({ fetchUserActions, updateCase });
 
@@ -199,6 +203,7 @@ export const UserActions = React.memo(
               alertData: manualAlertsData,
               handleOutlineComment,
               handleManageMarkdownEditId,
+              handleDeleteComment,
               handleSaveComment,
               handleManageQuote,
               onShowAlertDetails,
@@ -224,6 +229,7 @@ export const UserActions = React.memo(
         manualAlertsData,
         handleOutlineComment,
         handleManageMarkdownEditId,
+        handleDeleteComment,
         handleSaveComment,
         handleManageQuote,
         onShowAlertDetails,

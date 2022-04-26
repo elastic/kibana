@@ -5,13 +5,12 @@
  * 2.0.
  */
 
+import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
-import type { DataFrameAnalyticsConfig } from '../../../../../plugins/ml/public/application/data_frame_analytics/common';
 
 const testADJobs: Array<{ job: Job; datafeed: Datafeed }> = [
   {
-    // @ts-expect-error not full interface
     job: {
       job_id: 'fq_single_1_smv',
       groups: ['farequote', 'automated', 'single-metric'],
@@ -64,7 +63,6 @@ const testADJobs: Array<{ job: Job; datafeed: Datafeed }> = [
     },
   },
   {
-    // @ts-expect-error not full interface
     job: {
       job_id: 'fq_single_2_smv',
       groups: ['farequote', 'automated', 'single-metric'],
@@ -117,7 +115,6 @@ const testADJobs: Array<{ job: Job; datafeed: Datafeed }> = [
     },
   },
   {
-    // @ts-expect-error not full interface
     job: {
       job_id: 'fq_single_3_smv',
       groups: ['farequote', 'automated', 'single-metric'],

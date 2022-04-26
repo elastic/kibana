@@ -12,9 +12,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'snapshotRestore']);
   const log = getService('log');
   const es = getService('es');
+  const security = getService('security');
 
   describe('Home page', function () {
     before(async () => {
+      await security.testUser.setRoles(['snapshot_restore_user'], { skipBrowserRefresh: true });
       await pageObjects.common.navigateToApp('snapshotRestore');
     });
 
@@ -46,9 +48,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('cleanup repository', async () => {
         await pageObjects.snapshotRestore.viewRepositoryDetails('my-repository');
-        await pageObjects.common.sleep(25000);
         const cleanupResponse = await pageObjects.snapshotRestore.performRepositoryCleanup();
-        await pageObjects.common.sleep(25000);
         expect(cleanupResponse).to.contain('results');
         expect(cleanupResponse).to.contain('deleted_bytes');
         expect(cleanupResponse).to.contain('deleted_blobs');
@@ -57,6 +57,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await es.snapshot.deleteRepository({
           name: 'my-repository',
         });
+        await security.testUser.restoreDefaults();
       });
     });
   });

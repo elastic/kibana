@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
-import { useHostsKpiUniqueIps } from '../../../containers/kpi_hosts/unique_ips';
-import { HostsKpiBaseComponentManage } from '../common';
+import { kpiUniqueIpsAreaLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_unique_ips_area';
+import { kpiUniqueIpsBarLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_unique_ips_bar';
+import { kpiUniqueIpsDestinationMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_unique_ips_destination_metric';
+import { kpiUniqueIpsSourceMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_unique_ips_source_metric';
+import { useHostsKpiUniqueIps, ID } from '../../../containers/kpi_hosts/unique_ips';
+import { KpiBaseComponentManage } from '../common';
 import { HostsKpiProps, HostsKpiChartColors } from '../types';
 import * as i18n from './translations';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 export const fieldsMapping: Readonly<StatItems[]> = [
   {
@@ -24,6 +29,7 @@ export const fieldsMapping: Readonly<StatItems[]> = [
         value: null,
         color: HostsKpiChartColors.uniqueSourceIps,
         icon: 'visMapCoordinate',
+        lensAttributes: kpiUniqueIpsSourceMetricLensAttributes,
       },
       {
         key: 'uniqueDestinationIps',
@@ -32,11 +38,14 @@ export const fieldsMapping: Readonly<StatItems[]> = [
         value: null,
         color: HostsKpiChartColors.uniqueDestinationIps,
         icon: 'visMapCoordinate',
+        lensAttributes: kpiUniqueIpsDestinationMetricLensAttributes,
       },
     ],
     enableAreaChart: true,
     enableBarChart: true,
     description: i18n.UNIQUE_IPS,
+    areaChartLensAttributes: kpiUniqueIpsAreaLensAttributes,
+    barChartLensAttributes: kpiUniqueIpsBarLensAttributes,
   },
 ];
 
@@ -49,16 +58,21 @@ const HostsKpiUniqueIpsComponent: React.FC<HostsKpiProps> = ({
   setQuery,
   skip,
 }) => {
+  const { toggleStatus } = useQueryToggle(ID);
+  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(skip || !toggleStatus);
+  }, [skip, toggleStatus]);
   const [loading, { refetch, id, inspect, ...data }] = useHostsKpiUniqueIps({
     filterQuery,
     endDate: to,
     indexNames,
     startDate: from,
-    skip,
+    skip: querySkip,
   });
 
   return (
-    <HostsKpiBaseComponentManage
+    <KpiBaseComponentManage
       data={data}
       id={id}
       inspect={inspect}
@@ -69,6 +83,7 @@ const HostsKpiUniqueIpsComponent: React.FC<HostsKpiProps> = ({
       narrowDateRange={narrowDateRange}
       refetch={refetch}
       setQuery={setQuery}
+      setQuerySkip={setQuerySkip}
     />
   );
 };

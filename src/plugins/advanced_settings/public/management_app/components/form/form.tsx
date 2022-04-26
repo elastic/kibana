@@ -26,8 +26,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
-import { KibanaThemeProvider, toMountPoint } from '../../../../../kibana_react/public';
-import { DocLinksStart, ThemeServiceStart, ToastsStart } from '../../../../../../core/public';
+import { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { DocLinksStart, ThemeServiceStart, ToastsStart } from '@kbn/core/public';
 
 import { getCategoryName } from '../../lib';
 import { Field, getEditableValue } from '../field';
@@ -44,7 +44,7 @@ interface FormProps {
   save: (changes: SettingsChanges) => Promise<boolean[]>;
   showNoResultsMessage: boolean;
   enableSaving: boolean;
-  dockLinks: DocLinksStart['links'];
+  docLinks: DocLinksStart['links'];
   toasts: ToastsStart;
   theme: ThemeServiceStart['theme$'];
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
@@ -264,7 +264,7 @@ export class Form extends PureComponent<FormProps> {
                   unsavedChanges={this.state.unsavedChanges[setting.name]}
                   clearChange={this.clearChange}
                   enableSaving={this.props.enableSaving}
-                  dockLinks={this.props.dockLinks}
+                  docLinks={this.props.docLinks}
                   toasts={this.props.toasts}
                 />
               );

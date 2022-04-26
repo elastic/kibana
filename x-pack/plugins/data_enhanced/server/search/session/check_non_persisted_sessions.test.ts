@@ -11,15 +11,15 @@ import {
   SearchSessionSavedObjectAttributes,
   ENHANCED_ES_SEARCH_STRATEGY,
   EQL_SEARCH_STRATEGY,
-} from '../../../../../../src/plugins/data/common';
-import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+} from '@kbn/data-plugin/common';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SearchSessionsConfig, CheckSearchSessionsDeps, SearchStatus } from './types';
 import moment from 'moment';
 import {
   SavedObjectsBulkUpdateObject,
   SavedObjectsDeleteOptions,
   SavedObjectsClientContract,
-} from '../../../../../../src/core/server';
+} from '@kbn/core/server';
 
 jest.useFakeTimers();
 
@@ -488,7 +488,7 @@ describe('checkNonPersistedSessions', () => {
         config
       );
 
-      expect(mockClient.asyncSearch.status).toBeCalledWith({ id: 'search-id' });
+      expect(mockClient.asyncSearch.status).toBeCalledWith({ id: 'search-id' }, { meta: true });
       const [updateInput] = savedObjectsClient.bulkUpdate.mock.calls[0];
       const updatedAttributes = updateInput[0] as SavedObjectsBulkUpdateObject;
       expect(updatedAttributes.namespace).toBe('awesome');
@@ -532,7 +532,7 @@ describe('checkNonPersistedSessions', () => {
         config
       );
 
-      expect(mockClient.asyncSearch.status).toBeCalledWith({ id: 'search-id' });
+      expect(mockClient.asyncSearch.status).toBeCalledWith({ id: 'search-id' }, { meta: true });
       const [updateInput] = savedObjectsClient.bulkUpdate.mock.calls[0];
       const updatedAttributes = updateInput[0].attributes as SearchSessionSavedObjectAttributes;
       expect(updatedAttributes.status).toBe(SearchSessionStatus.COMPLETE);

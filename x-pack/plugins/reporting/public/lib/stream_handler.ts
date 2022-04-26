@@ -8,15 +8,16 @@
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { NotificationsSetup, ThemeServiceStart } from 'src/core/public';
+import { NotificationsSetup, ThemeServiceStart } from '@kbn/core/public';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JOB_STATUSES } from '../../common/constants';
 import { JobId, JobSummary, JobSummarySet } from '../../common/types';
 import {
   getFailureToast,
-  getGeneralErrorToast,
+  getWarningToast,
   getSuccessToast,
-  getWarningFormulasToast,
+  getGeneralErrorToast,
   getWarningMaxSizeToast,
+  getWarningFormulasToast,
 } from '../notifier';
 import { Job } from './job';
 import { ReportingAPIClient } from './reporting_api_client';
@@ -65,6 +66,15 @@ export class ReportingNotifierStreamHandler {
         } else if (job.maxSizeReached) {
           this.notifications.toasts.addWarning(
             getWarningMaxSizeToast(
+              job,
+              this.apiClient.getManagementLink,
+              this.apiClient.getDownloadLink,
+              this.theme
+            )
+          );
+        } else if (job.status === JOB_STATUSES.WARNINGS) {
+          this.notifications.toasts.addWarning(
+            getWarningToast(
               job,
               this.apiClient.getManagementLink,
               this.apiClient.getDownloadLink,
