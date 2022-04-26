@@ -386,7 +386,7 @@ export type LayeredXyVisFn = ExpressionFunctionDefinition<
   typeof LAYERED_XY_VIS,
   Datatable,
   LayeredXYArgs,
-  XYRender
+  Promise<XYRender>
 >;
 
 export type DataLayerFn = ExpressionFunctionDefinition<
