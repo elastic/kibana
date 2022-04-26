@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import sinon from 'sinon';
 import uuid from 'uuid';
 import { getMigrations, isAnyActionSupportIncidents } from './migrations';
 import { RawRule } from '../types';
@@ -2254,6 +2255,38 @@ describe('successful migrations', () => {
     });
 
     describe('8.3.0', () => {
+      test('migrates muted rules to the new data model', () => {
+        const migration830 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.3.0'];
+        const mutedAlert = getMockData(
+          {
+            muteAll: true,
+          },
+          true
+        );
+        const migratedMutedAlert830 = migration830(mutedAlert, migrationContext);
+
+        expect(migratedMutedAlert830.attributes.snoozeIndefinitely).toEqual(true);
+      });
+
+      test('migrates snoozed rules to the new data model', () => {
+        const fakeTimer = sinon.useFakeTimers();
+        const migration830 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.3.0'];
+        const mutedAlert = getMockData(
+          {
+            snoozeEndTime: '1970-01-02T00:00:00.000Z',
+          },
+          true
+        );
+        const migratedMutedAlert830 = migration830(mutedAlert, migrationContext);
+
+        expect(migratedMutedAlert830.attributes.snoozeSchedule.length).toEqual(1);
+        expect(migratedMutedAlert830.attributes.snoozeSchedule[0].startTime).toEqual(
+          '1970-01-01T00:00:00.000Z'
+        );
+        expect(migratedMutedAlert830.attributes.snoozeSchedule[0].duration).toEqual(86400000);
+        fakeTimer.restore();
+      });
+
       test('removes internal tags', () => {
         const migration830 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.3.0'];
         const alert = getMockData(
