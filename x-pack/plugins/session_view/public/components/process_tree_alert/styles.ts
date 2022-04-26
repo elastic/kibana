@@ -68,15 +68,11 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
 
     const alertRuleName: CSSObject = {
       ...alertRowItem,
-      maxWidth: '70%',
     };
 
     const alertStatus: CSSObject = {
       ...alertRowItem,
       textTransform: 'capitalize',
-      '&, span': {
-        cursor: 'pointer !important',
-      },
     };
 
     return {

@@ -29,12 +29,12 @@ Object {
           data-euiicon-type="alert"
         />
         <div
-          class="euiText euiText--small css-1by8n1o-EuiText"
+          class="euiText euiText--small css-11t812t-EuiText"
         >
           cmd test alert
         </div>
         <span
-          class="euiBadge euiBadge--iconLeft css-1mjg6jf-EuiInnerText"
+          class="euiBadge euiBadge--iconLeft css-up33xs-EuiInnerText"
           style="background-color: rgb(121, 170, 217); color: rgb(0, 0, 0);"
           title="open"
         >
@@ -76,12 +76,12 @@ Object {
         data-euiicon-type="alert"
       />
       <div
-        class="euiText euiText--small css-1by8n1o-EuiText"
+        class="euiText euiText--small css-11t812t-EuiText"
       >
         cmd test alert
       </div>
       <span
-        class="euiBadge euiBadge--iconLeft css-1mjg6jf-EuiInnerText"
+        class="euiBadge euiBadge--iconLeft css-up33xs-EuiInnerText"
         style="background-color: rgb(121, 170, 217); color: rgb(0, 0, 0);"
         title="open"
       >
