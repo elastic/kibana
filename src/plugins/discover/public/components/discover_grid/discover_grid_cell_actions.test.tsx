@@ -49,7 +49,11 @@ describe('Discover cell actions ', function () {
     );
     const button = findTestSubject(component, 'filterForButton');
     await button.simulate('click');
-    expect(contextMock.onFilter).toHaveBeenCalledWith('extension', 'jpg', '+');
+    expect(contextMock.onFilter).toHaveBeenCalledWith(
+      indexPatternMock.fields.getByName('extension'),
+      'jpg',
+      '+'
+    );
   });
   it('triggers filter function when FilterOutBtn is clicked', async () => {
     const contextMock = {
@@ -78,6 +82,10 @@ describe('Discover cell actions ', function () {
     );
     const button = findTestSubject(component, 'filterOutButton');
     await button.simulate('click');
-    expect(contextMock.onFilter).toHaveBeenCalledWith('extension', 'jpg', '-');
+    expect(contextMock.onFilter).toHaveBeenCalledWith(
+      indexPatternMock.fields.getByName('extension'),
+      'jpg',
+      '-'
+    );
   });
 });
