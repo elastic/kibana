@@ -204,6 +204,7 @@ kibana_vars=(
     xpack.actions.allowedHosts
     xpack.actions.customHostSettings
     xpack.actions.enabled
+    xpack.actions.email.domain_allowlist
     xpack.actions.enabledActionTypes
     xpack.actions.maxResponseContentLength
     xpack.actions.preconfigured
