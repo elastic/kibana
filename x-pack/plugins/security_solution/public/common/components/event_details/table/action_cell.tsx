@@ -74,6 +74,7 @@ export const ActionCell: React.FC<Props> = React.memo(
         dataProvider={actionCellConfig?.dataProvider}
         enableOverflowButton={true}
         field={data.field}
+        fieldFromBrowserField={fieldFromBrowserField}
         hideAddToTimeline={hideAddToTimeline}
         isObjectArray={data.isObjectArray}
         onFilterAdded={onFilterAdded}

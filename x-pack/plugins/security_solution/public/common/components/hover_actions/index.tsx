@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 
 import { stopPropagationAndPreventDefault } from '@kbn/timelines-plugin/public';
 import { ColumnHeaderOptions, DataProvider, TimelineId } from '../../../../common/types/timeline';
+import { BrowserField } from '../../containers/source';
 import { SHOW_TOP_N_KEYBOARD_SHORTCUT } from './keyboard_shortcut_constants';
 import { useHoverActionItems } from './use_hover_action_items';
 
@@ -96,6 +97,7 @@ interface Props {
   draggableId?: DraggableId;
   enableOverflowButton?: boolean;
   field: string;
+  fieldFromBrowserField?: BrowserField;
   goGetTimelineId?: (args: boolean) => void;
   hideAddToTimeline?: boolean;
   hideTopN?: boolean;
@@ -136,6 +138,7 @@ export const HoverActions: React.FC<Props> = React.memo(
     enableOverflowButton = false,
     applyWidthAndPadding = true,
     field,
+    fieldFromBrowserField,
     goGetTimelineId,
     isObjectArray,
     hideAddToTimeline = false,
@@ -219,6 +222,7 @@ export const HoverActions: React.FC<Props> = React.memo(
       draggableId,
       enableOverflowButton: enableOverflowButton && !isCaseView,
       field,
+      fieldFromBrowserField,
       handleHoverActionClicked,
       hideAddToTimeline,
       hideTopN,
