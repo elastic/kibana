@@ -13,7 +13,7 @@ import { FieldValueSuggestions, useInspectorContext } from '@kbn/observability-p
 import { useFilterUpdate } from '../../../hooks/use_filter_update';
 import { useSelectedFilters } from '../../../hooks/use_selected_filters';
 import { SelectedFilters } from './selected_filters';
-import { useIndexPattern } from '../../../contexts/uptime_index_pattern_context';
+import { useUptimeDataView } from '../../../contexts/uptime_data_view_context';
 import { useGetUrlParams } from '../../../hooks';
 import { EXCLUDE_RUN_ONCE_FILTER } from '../../../../common/constants/client_defaults';
 
@@ -40,7 +40,7 @@ export const FilterGroup = () => {
 
   const { filtersList } = useSelectedFilters();
 
-  const indexPattern = useIndexPattern();
+  const dataView = useUptimeDataView();
 
   const onFilterFieldChange = useCallback(
     (fieldName: string, values: string[], notValues: string[]) => {
@@ -52,12 +52,12 @@ export const FilterGroup = () => {
   return (
     <>
       <Container>
-        {indexPattern &&
+        {dataView &&
           filtersList.map(({ field, label, selectedItems, excludedItems }) => (
             <FieldValueSuggestions
               key={field}
               compressed={false}
-              dataViewTitle={indexPattern.title}
+              dataViewTitle={dataView.title}
               sourceField={field}
               label={label}
               selectedValue={selectedItems}
