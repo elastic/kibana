@@ -20,7 +20,7 @@ interface Props {
 
 export const Template: FunctionComponent<Props> = ({
   metadata: {
-    uiPublicUrl,
+    uiStaticUrl,
     locale,
     darkMode,
     stylesheetPaths,
@@ -37,10 +37,10 @@ export const Template: FunctionComponent<Props> = ({
         <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
         <meta name="viewport" content="width=device-width" />
         <title>Elastic</title>
-        <Fonts url={uiPublicUrl} />
+        <Fonts url={uiStaticUrl} />
         {/* The alternate icon is a fallback for Safari which does not yet support SVG favicons */}
-        <link rel="alternate icon" type="image/png" href={`${uiPublicUrl}/favicons/favicon.png`} />
-        <link rel="icon" type="image/svg+xml" href={`${uiPublicUrl}/favicons/favicon.svg`} />
+        <link rel="alternate icon" type="image/png" href={`${uiStaticUrl}/favicons/favicon.png`} />
+        <link rel="icon" type="image/svg+xml" href={`${uiStaticUrl}/favicons/favicon.svg`} />
         <meta name="theme-color" content="#ffffff" />
         <meta name="color-scheme" content="light dark" />
         {/* Inject EUI reset and global styles before all other component styles */}

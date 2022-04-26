@@ -13,7 +13,7 @@ import React, { FunctionComponent } from 'react';
 import { RenderingMetadata } from '../types';
 
 interface Props {
-  url: RenderingMetadata['uiPublicUrl'];
+  url: RenderingMetadata['uiStaticUrl'];
 }
 
 interface FontFace {

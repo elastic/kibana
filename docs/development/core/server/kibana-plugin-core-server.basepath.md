@@ -26,5 +26,5 @@ The constructor for this class is marked as internal. Third-party code should no
 |  [remove](./kibana-plugin-core-server.basepath.remove.md) |  | (path: string) =&gt; string | Removes the prepended basePath from the <code>path</code>. |
 |  [serverBasePath](./kibana-plugin-core-server.basepath.serverbasepath.md) |  | string | returns the server's basePath<!-- -->See [BasePath.get](./kibana-plugin-core-server.basepath.get.md) for getting the basePath value for a specific request |
 |  [set](./kibana-plugin-core-server.basepath.set.md) |  | (request: KibanaRequest, requestSpecificBasePath: string) =&gt; void | sets <code>basePath</code> value, specific for an incoming request. |
-|  [staticBaseUrl?](./kibana-plugin-core-server.basepath.staticbaseurl.md) |  | string | <i>(Optional)</i> An optional URL to load static assets from. If configured, bundles and other static files will be loaded from |
+|  [staticBaseUrl](./kibana-plugin-core-server.basepath.staticbaseurl.md) |  | string | An optional URL to load static assets from. If configured, bundles and other static files will be loaded from |
 

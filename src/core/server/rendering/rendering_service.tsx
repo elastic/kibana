@@ -40,12 +40,11 @@ export class RenderingService {
     uiPlugins,
   }: RenderingPrebootDeps): Promise<InternalRenderingServicePreboot> {
     http.registerRoutes('', (router) => {
-      const { serverBasePath, staticBaseUrl } = http.basePath;
+      const { staticBaseUrl } = http.basePath;
       registerBootstrapRoute({
         router,
         renderer: bootstrapRendererFactory({
           uiPlugins,
-          serverBasePath,
           staticBaseUrl,
           packageInfo: this.coreContext.env.packageInfo,
           auth: http.auth,
@@ -63,12 +62,11 @@ export class RenderingService {
     status,
     uiPlugins,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
-    const { serverBasePath, staticBaseUrl } = http.basePath;
+    const { staticBaseUrl } = http.basePath;
     registerBootstrapRoute({
       router: http.createRouter(''),
       renderer: bootstrapRendererFactory({
         uiPlugins,
-        serverBasePath,
         staticBaseUrl,
         packageInfo: this.coreContext.env.packageInfo,
         auth: http.auth,
@@ -92,7 +90,7 @@ export class RenderingService {
     };
     const buildNum = env.packageInfo.buildNum;
     const basePath = http.basePath.get(request);
-    const { serverBasePath, publicBaseUrl } = http.basePath;
+    const { serverBasePath, publicBaseUrl, staticBaseUrl } = http.basePath;
     const settings = {
       defaults: uiSettings.getRegistered() ?? {},
       user: isAnonymousPage ? {} : await uiSettings.getUserProvided(),
@@ -104,7 +102,7 @@ export class RenderingService {
     const stylesheetPaths = getStylesheetPaths({
       darkMode,
       themeVersion,
-      basePath: serverBasePath,
+      basePath: staticBaseUrl,
       buildNum,
     });
 
@@ -112,7 +110,7 @@ export class RenderingService {
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,
-      uiPublicUrl: `${basePath}/ui`,
+      uiStaticUrl: `${staticBaseUrl}/ui`,
       bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
       i18n: i18n.translate,
       locale: i18n.getLocale(),
@@ -129,7 +127,7 @@ export class RenderingService {
         env,
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
-          translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
+          translationsUrl: `${staticBaseUrl}/translations/${i18n.getLocale()}.json`,
         },
         theme: {
           darkMode,

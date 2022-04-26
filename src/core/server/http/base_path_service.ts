@@ -36,13 +36,13 @@ export class BasePath {
   /**
    * An optional URL to load static assets from. If configured, bundles and other static files will be loaded from
    */
-  public readonly staticBaseUrl?: string;
+  public readonly staticBaseUrl: string;
 
   /** @internal */
   constructor(serverBasePath: string = '', publicBaseUrl?: string, staticBaseUrl?: string) {
     this.serverBasePath = serverBasePath;
     this.publicBaseUrl = publicBaseUrl;
-    this.staticBaseUrl = staticBaseUrl;
+    this.staticBaseUrl = staticBaseUrl || serverBasePath;
   }
 
   /**
