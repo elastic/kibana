@@ -70,15 +70,29 @@ const invalidateAgentKeyRoute = createApmServerRoute({
     body: t.type({ id: t.string }),
   }),
   handler: async (resources): Promise<{ invalidatedAgentKeys: string[] }> => {
-    const { context, params } = resources;
-
+    const {
+      context,
+      params,
+      plugins: { security },
+    } = resources;
     const {
       body: { id },
     } = params;
 
+    if (!security) {
+      throw Boom.internal(SECURITY_REQUIRED_MESSAGE);
+    }
+
+    const securityPluginStart = await security.start();
+    const { isAdmin } = await getAgentKeysPrivileges({
+      context,
+      securityPluginStart,
+    });
+
     const invalidatedKeys = await invalidateAgentKey({
       context,
       id,
+      isAdmin,
     });
 
     return invalidatedKeys;

@@ -20,7 +20,8 @@ import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { connect } from 'react-redux';
-import { IDataPluginServices } from 'src/plugins/data/public';
+import { IDataPluginServices } from '@kbn/data-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   GraphState,
   hasDatasourceSelector,
@@ -30,8 +31,6 @@ import {
 } from '../../state_management';
 import { IndexPatternSavedObject } from '../../types';
 import { openSourceModal } from '../../services/source_modal';
-
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 export interface GuidancePanelProps {
   onFillWorkspace: () => void;
@@ -53,7 +52,6 @@ function ListItem({
     // eslint-disable-next-line jsx-a11y/role-supports-aria-props
     <li
       className={classNames('gphGuidancePanel__item', {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'gphGuidancePanel__item--disabled': state === 'disabled',
       })}
       aria-disabled={state === 'disabled'}
@@ -62,7 +60,6 @@ function ListItem({
       {state !== 'disabled' && (
         <span
           className={classNames('gphGuidancePanel__itemIcon', {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'gphGuidancePanel__itemIcon--done': state === 'done',
           })}
           aria-hidden={true}

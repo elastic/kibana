@@ -113,8 +113,8 @@ describe('unsupported_cluster_routing_allocation', () => {
     await root.preboot();
     await root.setup();
 
-    await expect(root.start()).rejects.toMatchInlineSnapshot(
-      `[Error: Unable to complete saved object migrations for the [.kibana] index: The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {"transient": {"cluster.routing.allocation.enable": null}, "persistent": {"cluster.routing.allocation.enable": null}}]`
+    await expect(root.start()).rejects.toThrowError(
+      /Unable to complete saved object migrations for the \[\.kibana.*\] index: The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue\. To proceed, please remove the cluster routing allocation settings with PUT \/_cluster\/settings {"transient": {"cluster\.routing\.allocation\.enable": null}, "persistent": {"cluster\.routing\.allocation\.enable": null}}/
     );
 
     await retryAsync(
@@ -126,8 +126,8 @@ describe('unsupported_cluster_routing_allocation', () => {
           .map((str) => JSON5.parse(str)) as LogRecord[];
         expect(
           records.find((rec) =>
-            rec.message.startsWith(
-              `Unable to complete saved object migrations for the [.kibana] index: The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue.`
+            /^Unable to complete saved object migrations for the \[\.kibana.*\] index: The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue\./.test(
+              rec.message
             )
           )
         ).toBeDefined();
@@ -148,8 +148,8 @@ describe('unsupported_cluster_routing_allocation', () => {
     await root.preboot();
     await root.setup();
 
-    await expect(root.start()).rejects.toMatchInlineSnapshot(
-      `[Error: Unable to complete saved object migrations for the [.kibana] index: The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue. To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {"transient": {"cluster.routing.allocation.enable": null}, "persistent": {"cluster.routing.allocation.enable": null}}]`
+    await expect(root.start()).rejects.toThrowError(
+      /Unable to complete saved object migrations for the \[\.kibana.*\] index: The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue\. To proceed, please remove the cluster routing allocation settings with PUT \/_cluster\/settings {"transient": {"cluster\.routing\.allocation\.enable": null}, "persistent": {"cluster\.routing\.allocation\.enable": null}}/
     );
   });
 });

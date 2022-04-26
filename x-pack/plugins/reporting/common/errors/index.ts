@@ -9,6 +9,12 @@
 
 import { i18n } from '@kbn/i18n';
 export abstract class ReportingError extends Error {
+  /**
+   * A string that uniquely brands an error type. This is used to power telemetry
+   * about reporting failures.
+   *
+   * @note Convention for codes: lower-case, snake-case and end in `_error`.
+   */
   public abstract code: string;
 
   constructor(public details?: string) {
@@ -32,7 +38,7 @@ export abstract class ReportingError extends Error {
  * access token expired.
  */
 export class AuthenticationExpiredError extends ReportingError {
-  code = 'authentication_expired';
+  code = 'authentication_expired_error';
 }
 
 export class QueueTimeoutError extends ReportingError {
@@ -54,12 +60,39 @@ export class PdfWorkerOutOfMemoryError extends ReportingError {
       'Cannot generate PDF due to low memory. Consider making a smaller PDF before retrying this report.',
   });
 
+  /**
+   * No need to provide extra details, we know exactly what happened and can provide
+   * a nicely formatted message
+   */
   public override get message(): string {
     return this.details;
   }
 }
 
-// TODO: Add ReportingError for Kibana stopping unexpectedly
-// TODO: Add ReportingError for missing Chromium dependencies
-// TODO: Add ReportingError for missing Chromium dependencies
-// TODO: Add ReportingError for Chromium not starting for an unknown reason
+export class BrowserCouldNotLaunchError extends ReportingError {
+  code = 'browser_could_not_launch_error';
+
+  details = i18n.translate('xpack.reporting.common.browserCouldNotLaunchErrorMessage', {
+    defaultMessage: 'Cannot generate screenshots because the browser did not launch.',
+  });
+
+  /**
+   * For this error message we expect that users will use the diagnostics
+   * functionality in reporting to debug further.
+   */
+  public override get message() {
+    return this.details;
+  }
+}
+
+export class BrowserUnexpectedlyClosedError extends ReportingError {
+  code = 'browser_unexpectedly_closed_error';
+}
+
+export class BrowserScreenshotError extends ReportingError {
+  code = 'browser_screenshot_error';
+}
+
+export class KibanaShuttingDownError extends ReportingError {
+  code = 'kibana_shutting_down_error';
+}

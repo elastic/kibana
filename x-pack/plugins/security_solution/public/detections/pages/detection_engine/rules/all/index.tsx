@@ -8,6 +8,7 @@
 import { EuiSpacer } from '@elastic/eui';
 import React, { useState } from 'react';
 import { CreatePreBuiltRules } from '../../../../containers/detection_engine/rules';
+import { RulesFeatureTour } from './feature_tour/rules_feature_tour';
 import { RulesTables } from './rules_tables';
 import { AllRulesTabs, RulesTableToolbar } from './rules_table_toolbar';
 
@@ -45,7 +46,8 @@ export const AllRules = React.memo<AllRulesProps>(
 
     return (
       <>
-        <RulesTableToolbar activeTab={activeTab} onTabChange={setActiveTab} loading={loading} />
+        <RulesFeatureTour />
+        <RulesTableToolbar activeTab={activeTab} onTabChange={setActiveTab} />
         <EuiSpacer />
         <RulesTables
           createPrePackagedRules={createPrePackagedRules}

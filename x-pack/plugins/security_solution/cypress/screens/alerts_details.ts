@@ -33,22 +33,19 @@ export const JSON_TEXT = '[data-test-subj="jsonView"]';
 export const OVERVIEW_HOST_NAME =
   '[data-test-subj="eventDetails"] [data-test-subj="host-details-button"]';
 
-export const OVERVIEW_RISK_SCORE =
-  '[data-test-subj="eventDetails"] [data-test-subj^=formatted][data-test-subj$=risk_score]';
+export const OVERVIEW_RISK_SCORE = '[data-test-subj="eventDetails"] [data-test-subj="riskScore"]';
 
-export const OVERVIEW_RULE =
-  '[data-test-subj="eventDetails"] [data-test-subj^=formatted][data-test-subj$=rule\\.name]';
+export const OVERVIEW_RULE = '[data-test-subj="eventDetails"] [data-test-subj="ruleName"]';
 
-export const OVERVIEW_SEVERITY =
-  '[data-test-subj="eventDetails"] [data-test-subj^=formatted][data-test-subj$=rule\\.severity]';
+export const OVERVIEW_SEVERITY = '[data-test-subj="eventDetails"] [data-test-subj="severity"]';
 
-export const OVERVIEW_STATUS = '[data-test-subj="eventDetails"] [data-test-subj$=status]';
+export const OVERVIEW_STATUS = '[data-test-subj="eventDetails"] [data-test-subj="alertStatus"]';
 
 export const OVERVIEW_THRESHOLD_COUNT =
   '[data-test-subj="eventDetails"] [data-test-subj^=formatted][data-test-subj$=threshold_result\\.count]';
 
 export const OVERVIEW_THRESHOLD_VALUE =
-  '[data-test-subj="eventDetails"] [data-test-subj$=threshold_result\\.terms]';
+  '[data-test-subj="eventDetails"] [data-test-subj="formatted-field-kibana.alert.threshold_result.terms.field"]';
 
 export const SUMMARY_VIEW = '[data-test-subj="summary-view"]';
 

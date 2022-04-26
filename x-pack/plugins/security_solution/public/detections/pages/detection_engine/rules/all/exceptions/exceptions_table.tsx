@@ -40,6 +40,7 @@ import { userHasPermissions } from '../../helpers';
 import { useListsConfig } from '../../../../../containers/detection_engine/lists/use_lists_config';
 import { ExceptionsTableItem } from './types';
 import { MissingPrivilegesCallOut } from '../../../../../components/callouts/missing_privileges_callout';
+import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../../../../common/endpoint/service/artifacts/constants';
 
 export type Func = () => Promise<void>;
 
@@ -84,9 +85,7 @@ export const ExceptionListsTable = React.memo(() => {
       http,
       namespaceTypes: ['single', 'agnostic'],
       notifications,
-      showTrustedApps: false,
-      showEventFilters: false,
-      showHostIsolationExceptions: false,
+      hideLists: ALL_ENDPOINT_ARTIFACT_LIST_IDS,
     });
   const [loadingTableInfo, exceptionListsWithRuleRefs, exceptionsListsRef] = useAllExceptionLists({
     exceptionLists: exceptions ?? [],

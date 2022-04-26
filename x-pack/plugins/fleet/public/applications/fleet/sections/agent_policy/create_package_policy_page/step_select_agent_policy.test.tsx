@@ -19,6 +19,13 @@ jest.mock('../../../hooks', () => {
   return {
     ...jest.requireActual('../../../hooks'),
     useGetAgentPolicies: jest.fn(),
+    useGetOutputs: jest.fn().mockResolvedValue({
+      data: [],
+      isLoading: false,
+    }),
+    sendGetOneAgentPolicy: jest.fn().mockResolvedValue({
+      data: { item: { id: 'policy-1' } },
+    }),
     useFleetStatus: jest.fn().mockReturnValue({ isReady: true } as any),
     sendGetFleetStatus: jest
       .fn()
@@ -34,12 +41,13 @@ describe('step select agent policy', () => {
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
   const mockSetHasAgentPolicyError = jest.fn();
+  const updateAgentPolicyMock = jest.fn();
   const render = () =>
     (renderResult = testRenderer.render(
       <StepSelectAgentPolicy
         packageInfo={{ name: 'apache' } as any}
         agentPolicy={undefined}
-        updateAgentPolicy={jest.fn()}
+        updateAgentPolicy={updateAgentPolicyMock}
         setHasAgentPolicyError={mockSetHasAgentPolicyError}
         selectedAgentPolicyId={undefined}
       />
@@ -47,6 +55,7 @@ describe('step select agent policy', () => {
 
   beforeEach(() => {
     testRenderer = createFleetTestRendererMock();
+    updateAgentPolicyMock.mockReset();
   });
 
   test('should not select agent policy by default if multiple exists', async () => {
@@ -68,7 +77,6 @@ describe('step select agent policy', () => {
       const select = renderResult.container.querySelector('[data-test-subj="agentPolicySelect"]');
       expect((select as any)?.value).toEqual('');
 
-      expect(renderResult.getAllByRole('option').length).toBe(2);
       expect(renderResult.getByText('An agent policy is required.')).toBeVisible();
     });
   });
@@ -82,10 +90,10 @@ describe('step select agent policy', () => {
     } as any);
 
     render();
-
+    await act(async () => {}); // Needed as updateAgentPolicy is called after multiple useEffect
     await act(async () => {
-      const select = renderResult.container.querySelector('[data-test-subj="agentPolicySelect"]');
-      expect((select as any)?.value).toEqual('policy-1');
+      expect(updateAgentPolicyMock).toBeCalled();
+      expect(updateAgentPolicyMock).toBeCalledWith({ id: 'policy-1' });
     });
   });
 });

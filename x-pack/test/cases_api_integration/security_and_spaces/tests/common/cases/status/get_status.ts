@@ -6,9 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { CaseStatuses } from '@kbn/cases-plugin/common/api';
+import { CASE_STATUS_URL } from '@kbn/cases-plugin/common/constants';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-import { CaseStatuses } from '../../../../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCaseReq } from '../../../../../common/lib/mock';
 import {
   createCase,
@@ -27,19 +28,15 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../../common/lib/authentication/users';
-import { CASE_STATUS_URL } from '../../../../../../../plugins/cases/common/constants';
 import { assertWarningHeader } from '../../../../../common/lib/validation';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
+  const kibanaServer = getService('kibanaServer');
 
   describe('get_status', () => {
-    afterEach(async () => {
-      await deleteAllCaseItems(es);
-    });
-
     it('should return case statuses', async () => {
       const [, inProgressCase, postedCase] = await Promise.all([
         createCase(supertest, postCaseReq),
@@ -74,7 +71,58 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
+    describe('range queries', () => {
+      before(async () => {
+        await deleteAllCaseItems(es);
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_various_dates.json'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_various_dates.json'
+        );
+        await deleteAllCaseItems(es);
+      });
+
+      it('returns all cases without a range filter', async () => {
+        const statuses = await getAllCasesStatuses({ supertest });
+
+        expect(statuses).to.eql({
+          count_open_cases: 3,
+          count_closed_cases: 0,
+          count_in_progress_cases: 0,
+        });
+      });
+
+      it('respects the range parameters', async () => {
+        const queries = [
+          { expectedCases: 2, query: { from: '2022-03-16' } },
+          { expectedCases: 2, query: { to: '2022-03-21' } },
+          { expectedCases: 2, query: { from: '2022-03-15', to: '2022-03-21' } },
+        ];
+
+        for (const query of queries) {
+          const statuses = await getAllCasesStatuses({ supertest, query: query.query });
+          expect(statuses).to.eql({
+            count_open_cases: query.expectedCases,
+            count_closed_cases: 0,
+            count_in_progress_cases: 0,
+          });
+        }
+      });
+
+      it('returns a bad request on malformed parameter', async () => {
+        await getAllCasesStatuses({ supertest, query: { from: '<' }, expectedHttpCode: 400 });
+      });
+    });
+
     describe('rbac', () => {
+      afterEach(async () => {
+        await deleteAllCaseItems(es);
+      });
+
       const supertestWithoutAuth = getService('supertestWithoutAuth');
 
       it('should return the correct status stats', async () => {
@@ -183,6 +231,43 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
       }
+
+      describe('range queries', () => {
+        before(async () => {
+          await kibanaServer.importExport.load(
+            'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_various_dates.json',
+            { space: 'space1' }
+          );
+        });
+
+        after(async () => {
+          await kibanaServer.importExport.unload(
+            'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_various_dates.json',
+            { space: 'space1' }
+          );
+          await deleteAllCaseItems(es);
+        });
+
+        it('should respect the owner filter when using range queries', async () => {
+          const res = await getAllCasesStatuses({
+            supertest: supertestWithoutAuth,
+            query: {
+              from: '2022-03-15',
+              to: '2022-03-21',
+            },
+            auth: {
+              user: secOnly,
+              space: 'space1',
+            },
+          });
+
+          expect(res).to.eql({
+            count_open_cases: 1,
+            count_closed_cases: 0,
+            count_in_progress_cases: 0,
+          });
+        });
+      });
     });
 
     describe('deprecations', () => {

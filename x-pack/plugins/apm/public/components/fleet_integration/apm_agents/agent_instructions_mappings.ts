@@ -20,7 +20,7 @@ import {
 } from '../../../../common/tutorial/instructions/apm_agent_instructions';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 // TODO: Uncomment once https://github.com/elastic/beats/issues/29631 has been closed
-// import { JavaRuntimeAttachment } from './runtime_attachment/supported_agents/java_runtime_attachment';
+import { JavaRuntimeAttachment } from './runtime_attachment/supported_agents/java_runtime_attachment';
 import {
   NewPackagePolicy,
   PackagePolicy,
@@ -56,8 +56,7 @@ export const ApmAgentInstructionsMappings: Array<{
     title: 'Java',
     variantId: 'java',
     createAgentInstructions: createJavaAgentInstructions,
-    // TODO: Uncomment once https://github.com/elastic/beats/issues/29631 has been closed
-    // AgentRuntimeAttachment: JavaRuntimeAttachment,
+    AgentRuntimeAttachment: JavaRuntimeAttachment,
   },
   {
     agentName: 'rum-js',

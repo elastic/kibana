@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import { dynamicActionsCollector } from './dynamic_actions_collector';
 import { DynamicActionsState } from '../../common';
 

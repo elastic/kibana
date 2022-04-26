@@ -13,12 +13,14 @@ import { matrixHistogramFactory } from './matrix_histogram';
 import { networkFactory } from './network';
 import { ctiFactoryTypes } from './cti';
 import { riskScoreFactory } from './risk_score';
+import { usersFactory } from './users';
 
 export const securitySolutionFactory: Record<
   FactoryQueryTypes,
   SecuritySolutionFactory<FactoryQueryTypes>
 > = {
   ...hostsFactory,
+  ...usersFactory,
   ...matrixHistogramFactory,
   ...networkFactory,
   ...ctiFactoryTypes,

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 export default function ({ getPageObjects, getService, updateBaselines }) {
   const PageObjects = getPageObjects(['common', 'maps', 'header', 'home', 'timePicker']);
@@ -91,9 +91,12 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: SAMPLE_DATA_RANGE,
       });
       //running the rest of the tests with limited roles
-      await security.testUser.setRoles(['global_maps_all', 'kibana_sample_read'], {
-        skipBrowserRefresh: true,
-      });
+      await security.testUser.setRoles(
+        ['global_maps_all', 'geoall_data_writer', 'kibana_sample_read'],
+        {
+          skipBrowserRefresh: true,
+        }
+      );
     });
 
     after(async () => {

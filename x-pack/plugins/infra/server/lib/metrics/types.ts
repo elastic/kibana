@@ -99,3 +99,7 @@ export type HistogramResponse = rt.TypeOf<typeof HistogramResponseRT>;
 export type GroupingResponse = rt.TypeOf<typeof GroupingResponseRT>;
 
 export type MetricsESResponse = HistogramResponse | GroupingResponse;
+
+export interface LogQueryFields {
+  indexPattern: string;
+}

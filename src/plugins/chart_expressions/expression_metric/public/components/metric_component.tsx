@@ -7,15 +7,19 @@
  */
 
 import React, { Component } from 'react';
-import { MetricVisValue } from './metric_value';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import {
+  getColumnByAccessor,
+  getAccessor,
+  getFormatByAccessor,
+} from '@kbn/visualizations-plugin/common/utils';
+import { Datatable } from '@kbn/expressions-plugin/public';
+import { CustomPaletteState } from '@kbn/charts-plugin/public';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
+import { getFormatService, getPaletteService } from '../services';
 import { VisParams, MetricOptions } from '../../common/types';
-import type { IFieldFormat } from '../../../../field_formats/common';
-import { Datatable } from '../../../../expressions/public';
-import { CustomPaletteState } from '../../../../charts/public';
-import { getFormatService, getPaletteService } from '../../../expression_metric/public/services';
-import { ExpressionValueVisDimension } from '../../../../visualizations/public';
+import { MetricVisValue } from './metric_value';
 import { formatValue, shouldApplyColor } from '../utils';
-import { getColumnByAccessor } from '../utils/accessor';
 import { needsLightText } from '../utils/palette';
 import { withAutoScale } from './with_auto_scale';
 
@@ -49,17 +53,22 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     let bucketFormatter: IFieldFormat;
 
     if (dimensions.bucket) {
-      bucketColumnId = getColumnByAccessor(dimensions.bucket.accessor, table.columns).id;
-      bucketFormatter = getFormatService().deserialize(dimensions.bucket.format);
+      const bucketColumn = getColumnByAccessor(dimensions.bucket!, table.columns);
+      bucketColumnId = bucketColumn?.id!;
+      bucketFormatter = getFormatService().deserialize(
+        getFormatByAccessor(dimensions.bucket, table.columns)
+      );
     }
 
     return dimensions.metrics.reduce(
-      (acc: MetricOptions[], metric: ExpressionValueVisDimension) => {
-        const column = getColumnByAccessor(metric.accessor, table?.columns);
-        const formatter = getFormatService().deserialize(metric.format);
+      (acc: MetricOptions[], metric: string | ExpressionValueVisDimension) => {
+        const column = getColumnByAccessor(metric, table?.columns);
+        const formatter = getFormatService().deserialize(
+          getFormatByAccessor(metric, table.columns)
+        );
         const metrics = table.rows.map((row, rowIndex) => {
-          let title = column.name;
-          let value: number = row[column.id];
+          let title = column!.name;
+          let value: number = row[column!.id];
           const color = palette ? this.getColor(value, palette) : undefined;
 
           if (isPercentageMode && stops.length) {
@@ -102,7 +111,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
         data: [
           {
             table,
-            column: dimensions.bucket.accessor,
+            column: getAccessor(dimensions.bucket),
             row,
           },
         ],

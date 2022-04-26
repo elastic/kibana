@@ -14,6 +14,7 @@ import {
   buildEnrichments,
   enrichSignalThreatMatches,
   groupAndMergeSignalMatches,
+  getSignalMatchesFromThreatList,
 } from './enrich_signal_threat_matches';
 import {
   getNamedQueryMock,
@@ -789,6 +790,110 @@ describe('enrichSignalThreatMatches', () => {
           field: 'event.other',
           type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
+      },
+    ]);
+  });
+});
+
+describe('getSignalMatchesFromThreatList', () => {
+  it('return empty array if there no threat indicators', () => {
+    const signalMatches = getSignalMatchesFromThreatList();
+    expect(signalMatches).toEqual([]);
+  });
+
+  it("return empty array if threat indicators doesn't have matched query", () => {
+    const signalMatches = getSignalMatchesFromThreatList([getThreatListItemMock()]);
+    expect(signalMatches).toEqual([]);
+  });
+
+  it('return signal mathces from threat indicators', () => {
+    const signalMatches = getSignalMatchesFromThreatList([
+      getThreatListItemMock({
+        _id: 'threatId',
+        matched_queries: [
+          encodeThreatMatchNamedQuery(
+            getNamedQueryMock({
+              id: 'signalId1',
+              index: 'source_index',
+              value: 'threat.indicator.domain',
+              field: 'event.domain',
+            })
+          ),
+          encodeThreatMatchNamedQuery(
+            getNamedQueryMock({
+              id: 'signalId2',
+              index: 'source_index',
+              value: 'threat.indicator.domain',
+              field: 'event.domain',
+            })
+          ),
+        ],
+      }),
+    ]);
+
+    const queries = [
+      {
+        field: 'event.domain',
+        value: 'threat.indicator.domain',
+        index: 'threat_index',
+        id: 'threatId',
+      },
+    ];
+
+    expect(signalMatches).toEqual([
+      {
+        signalId: 'signalId1',
+        queries,
+      },
+      {
+        signalId: 'signalId2',
+        queries,
+      },
+    ]);
+  });
+
+  it('merge signal mathces if different threat indicators matched the same signal', () => {
+    const matchedQuery = [
+      encodeThreatMatchNamedQuery(
+        getNamedQueryMock({
+          id: 'signalId',
+          index: 'source_index',
+          value: 'threat.indicator.domain',
+          field: 'event.domain',
+        })
+      ),
+    ];
+    const signalMatches = getSignalMatchesFromThreatList([
+      getThreatListItemMock({
+        _id: 'threatId1',
+        matched_queries: matchedQuery,
+      }),
+      getThreatListItemMock({
+        _id: 'threatId2',
+        matched_queries: matchedQuery,
+      }),
+    ]);
+
+    const query = {
+      field: 'event.domain',
+      value: 'threat.indicator.domain',
+      index: 'threat_index',
+      id: 'threatId',
+    };
+
+    expect(signalMatches).toEqual([
+      {
+        signalId: 'signalId',
+        queries: [
+          {
+            ...query,
+            id: 'threatId1',
+          },
+          {
+            ...query,
+            id: 'threatId2',
+          },
+        ],
       },
     ]);
   });

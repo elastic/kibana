@@ -129,6 +129,8 @@ describe('Transaction error rate alert', () => {
       threshold: 10,
       triggerValue: '10',
       interval: '5m',
+      viewInAppUrl:
+        'http://localhost:5601/eyr/app/apm/services/foo?transactionType=type-foo&environment=env-foo',
     });
   });
 });

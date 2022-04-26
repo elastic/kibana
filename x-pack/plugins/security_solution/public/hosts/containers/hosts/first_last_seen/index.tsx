@@ -9,6 +9,7 @@ import deepEqual from 'fast-deep-equal';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
@@ -19,10 +20,6 @@ import {
 
 import * as i18n from './translations';
 import { Direction, DocValueFields } from '../../../../../common/search_strategy';
-import {
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../../src/plugins/data/common';
 
 const ID = 'firstLastSeenHostQuery';
 

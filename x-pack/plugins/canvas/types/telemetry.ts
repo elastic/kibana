@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ElasticsearchClient } from '@kbn/core/server';
 
 /**
   Function for collecting information about canvas usage

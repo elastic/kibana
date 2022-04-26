@@ -7,9 +7,8 @@
  */
 
 import { Position } from '@elastic/charts';
+import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { LegendDisplay, PartitionVisParams } from '../types/expression_renderers';
-import { prepareLogTable } from '../../../../visualizations/common/utils';
-import { validateOptions } from '../../../../charts/common';
 import { ChartTypes, MosaicVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
@@ -26,22 +25,22 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
   help: strings.getPieVisFunctionName(),
   args: {
     metric: {
-      types: ['vis_dimension'],
+      types: ['string', 'vis_dimension'],
       help: strings.getMetricArgHelp(),
       required: true,
     },
     buckets: {
-      types: ['vis_dimension'],
+      types: ['string', 'vis_dimension'],
       help: strings.getBucketsArgHelp(),
       multi: true,
     },
     splitColumn: {
-      types: ['vis_dimension'],
+      types: ['string', 'vis_dimension'],
       help: strings.getSplitColumnArgHelp(),
       multi: true,
     },
     splitRow: {
-      types: ['vis_dimension'],
+      types: ['string', 'vis_dimension'],
       help: strings.getSplitRowArgHelp(),
       multi: true,
     },
@@ -55,12 +54,18 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
       help: strings.getLegendDisplayArgHelp(),
       options: [LegendDisplay.SHOW, LegendDisplay.HIDE, LegendDisplay.DEFAULT],
       default: LegendDisplay.HIDE,
+      strict: true,
     },
     legendPosition: {
       types: ['string'],
       default: Position.Right,
       help: strings.getLegendPositionArgHelp(),
       options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
+      strict: true,
+    },
+    legendSize: {
+      types: ['number'],
+      help: strings.getLegendSizeArgHelp(),
     },
     nestedLegend: {
       types: ['boolean'],
@@ -102,8 +107,16 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
       throw new Error(errors.splitRowAndSplitColumnAreSpecifiedError());
     }
 
-    validateOptions(args.legendDisplay, LegendDisplay, errors.invalidLegendDisplayError);
-    validateOptions(args.legendPosition, Position, errors.invalidLegendPositionError);
+    validateAccessor(args.metric, context.columns);
+    if (args.buckets) {
+      args.buckets.forEach((bucket) => validateAccessor(bucket, context.columns));
+    }
+    if (args.splitColumn) {
+      args.splitColumn.forEach((splitColumn) => validateAccessor(splitColumn, context.columns));
+    }
+    if (args.splitRow) {
+      args.splitRow.forEach((splitRow) => validateAccessor(splitRow, context.columns));
+    }
 
     const visConfig: PartitionVisParams = {
       ...args,
@@ -121,12 +134,16 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
     };
 
     if (handlers?.inspectorAdapters?.tables) {
-      const logTable = prepareLogTable(context, [
-        [[args.metric], strings.getSliceSizeHelp()],
-        [args.buckets, strings.getSliceHelp()],
-        [args.splitColumn, strings.getColumnSplitHelp()],
-        [args.splitRow, strings.getRowSplitHelp()],
-      ]);
+      const logTable = prepareLogTable(
+        context,
+        [
+          [[args.metric], strings.getSliceSizeHelp()],
+          [args.buckets, strings.getSliceHelp()],
+          [args.splitColumn, strings.getColumnSplitHelp()],
+          [args.splitRow, strings.getRowSplitHelp()],
+        ],
+        true
+      );
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
 

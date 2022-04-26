@@ -14,6 +14,7 @@ import { AutocompleteFieldWildcardComponent } from '.';
 import { useFieldValueAutocomplete } from '../hooks/use_field_value_autocomplete';
 import { fields, getField } from '../fields/index.mock';
 import { autocompleteStartMock } from '../autocomplete/index.mock';
+import { FILENAME_WILDCARD_WARNING, FILEPATH_WARNING } from '@kbn/securitysolution-utils';
 
 jest.mock('../hooks/use_field_value_autocomplete');
 
@@ -275,5 +276,117 @@ describe('AutocompleteFieldWildcardComponent', () => {
       query: 'A:\\Some Folder\\inc*.exe',
       selectedField: getField('file.path.text'),
     });
+  });
+
+  test('it does not invoke "onWarning" when no warning exists', () => {
+    const mockOnWarning = jest.fn();
+    wrapper = mount(
+      <AutocompleteFieldWildcardComponent
+        autocompleteService={autocompleteStartMock}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logs-endpoint.events.*',
+        }}
+        isClearable={false}
+        isDisabled={false}
+        isLoading={false}
+        onChange={jest.fn()}
+        onError={jest.fn()}
+        onWarning={mockOnWarning}
+        placeholder="Placeholder text"
+        selectedField={getField('file.path.text')}
+        selectedValue="invalid path"
+      />
+    );
+
+    act(() => {
+      (
+        wrapper.find(EuiComboBox).props() as unknown as {
+          onBlur: () => void;
+        }
+      ).onBlur();
+    });
+
+    expect(mockOnWarning).not.toHaveBeenCalledWith(true);
+  });
+
+  test('it invokes "onWarning" when warning exists', () => {
+    const mockOnWarning = jest.fn();
+    wrapper = mount(
+      <AutocompleteFieldWildcardComponent
+        autocompleteService={autocompleteStartMock}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logs-endpoint.events.*',
+        }}
+        isClearable={false}
+        isDisabled={false}
+        isLoading={false}
+        onChange={jest.fn()}
+        onError={jest.fn()}
+        onWarning={mockOnWarning}
+        placeholder="Placeholder text"
+        selectedField={getField('file.path.text')}
+        selectedValue="invalid path"
+        warning={FILEPATH_WARNING}
+      />
+    );
+
+    act(() => {
+      (
+        wrapper.find(EuiComboBox).props() as unknown as {
+          onBlur: () => void;
+        }
+      ).onBlur();
+    });
+
+    expect(mockOnWarning).toHaveBeenCalledWith(true);
+    expect(
+      wrapper
+        .find('[data-test-subj="valuesAutocompleteWildcardLabel"] div.euiFormHelpText')
+        .at(0)
+        .text()
+    ).toEqual(FILEPATH_WARNING);
+  });
+
+  test('it invokes "onWarning" when warning exists and is wildcard warning', () => {
+    const mockOnWarning = jest.fn();
+    wrapper = mount(
+      <AutocompleteFieldWildcardComponent
+        autocompleteService={autocompleteStartMock}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logs-endpoint.events.*',
+        }}
+        isClearable={false}
+        isDisabled={false}
+        isLoading={false}
+        onChange={jest.fn()}
+        onError={jest.fn()}
+        onWarning={mockOnWarning}
+        placeholder="Placeholder text"
+        selectedField={getField('file.path.text')}
+        selectedValue="invalid path"
+        warning={FILENAME_WILDCARD_WARNING}
+      />
+    );
+
+    act(() => {
+      (
+        wrapper.find(EuiComboBox).props() as unknown as {
+          onBlur: () => void;
+        }
+      ).onBlur();
+    });
+
+    expect(mockOnWarning).toHaveBeenCalledWith(true);
+    const helpText = wrapper
+      .find('[data-test-subj="valuesAutocompleteWildcardLabel"] div.euiFormHelpText')
+      .at(0);
+    expect(helpText.text()).toEqual(FILENAME_WILDCARD_WARNING);
+    expect(helpText.find('.euiToolTipAnchor')).toBeTruthy();
   });
 });

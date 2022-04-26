@@ -8,8 +8,8 @@
 import React, { ChangeEvent, Component } from 'react';
 import { EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { GeoFilePicker, OnFileSelectParameters } from './geo_file_picker';
-import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 import { IndexNameForm } from './index_name_form';
 import { validateIndexName } from '../../validate_index_name';
 

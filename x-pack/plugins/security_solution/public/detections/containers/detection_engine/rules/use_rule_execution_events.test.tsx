@@ -12,7 +12,6 @@ import React from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { renderHook, cleanup } from '@testing-library/react-hooks';
 
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common';
 import { useRuleExecutionEvents } from './use_rule_execution_events';
 
 import * as api from './api';
@@ -45,9 +44,19 @@ describe('useRuleExecutionEvents', () => {
   };
 
   const render = () =>
-    renderHook(() => useRuleExecutionEvents(SOME_RULE_ID), {
-      wrapper: createReactQueryWrapper(),
-    });
+    renderHook(
+      () =>
+        useRuleExecutionEvents({
+          ruleId: SOME_RULE_ID,
+          start: 'now-30',
+          end: 'now',
+          queryText: '',
+          statusFilters: '',
+        }),
+      {
+        wrapper: createReactQueryWrapper(),
+      }
+    );
 
   it('calls the API via fetchRuleExecutionEvents', async () => {
     const fetchRuleExecutionEvents = jest.spyOn(api, 'fetchRuleExecutionEvents');
@@ -77,13 +86,34 @@ describe('useRuleExecutionEvents', () => {
     expect(result.current.isLoading).toEqual(false);
     expect(result.current.isSuccess).toEqual(true);
     expect(result.current.isError).toEqual(false);
-    expect(result.current.data).toEqual([
-      {
-        date: '2021-12-29T10:42:59.996Z',
-        status: RuleExecutionStatus.succeeded,
-        message: 'Rule executed successfully',
-      },
-    ]);
+    expect(result.current.data).toEqual({
+      events: [
+        {
+          duration_ms: 3866,
+          es_search_duration_ms: 1236,
+          execution_uuid: '88d15095-7937-462c-8f21-9763e1387cad',
+          gap_duration_ms: 0,
+          indexing_duration_ms: 95,
+          message:
+            "rule executed: siem.queryRule:fb1fc150-a292-11ec-a2cf-c1b28b0392b0: 'Lots of Execution Events'",
+          num_active_alerts: 0,
+          num_errored_actions: 0,
+          num_new_alerts: 0,
+          num_recovered_alerts: 0,
+          num_succeeded_actions: 1,
+          num_triggered_actions: 1,
+          schedule_delay_ms: -127535,
+          search_duration_ms: 1255,
+          security_message: 'succeeded',
+          security_status: 'succeeded',
+          status: 'success',
+          timed_out: false,
+          timestamp: '2022-03-13T06:04:05.838Z',
+          total_search_duration_ms: 0,
+        },
+      ],
+      total: 1,
+    });
   });
 
   it('handles exceptions from the API', async () => {

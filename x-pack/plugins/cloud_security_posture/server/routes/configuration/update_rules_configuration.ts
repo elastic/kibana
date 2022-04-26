@@ -6,10 +6,9 @@
  */
 import type {
   ElasticsearchClient,
-  IRouter,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import { schema as rt } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
@@ -17,13 +16,14 @@ import { produce } from 'immer';
 import { unset } from 'lodash';
 import yaml from 'js-yaml';
 
-import { PackagePolicy, PackagePolicyConfigRecord } from '../../../../fleet/common';
+import { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
+import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import { CspAppContext } from '../../plugin';
 import { CspRulesConfigSchema } from '../../../common/schemas/csp_configuration';
 import { CspRuleSchema, cspRuleAssetSavedObjectType } from '../../../common/schemas/csp_rule';
 import { UPDATE_RULES_CONFIG_ROUTE_PATH } from '../../../common/constants';
 import { CIS_KUBERNETES_PACKAGE_NAME } from '../../../common/constants';
-import { PackagePolicyServiceInterface } from '../../../../fleet/server';
+import { CspRouter } from '../../types';
 
 export const getPackagePolicy = async (
   soClient: SavedObjectsClientContract,
@@ -44,10 +44,13 @@ export const getPackagePolicy = async (
   return packagePolicies![0];
 };
 
-export const getCspRules = async (soClient: SavedObjectsClientContract) => {
+export const getCspRules = async (
+  soClient: SavedObjectsClientContract,
+  packagePolicy: PackagePolicy
+) => {
   const cspRules = await soClient.find<CspRuleSchema>({
     type: cspRuleAssetSavedObjectType,
-    search: '',
+    filter: `${cspRuleAssetSavedObjectType}.attributes.package_policy_id: ${packagePolicy.id} AND ${cspRuleAssetSavedObjectType}.attributes.policy_id: ${packagePolicy.policy_id}`,
     searchFields: ['name'],
     // TODO: research how to get all rules
     perPage: 10000,
@@ -59,10 +62,9 @@ export const createRulesConfig = (
   cspRules: SavedObjectsFindResponse<CspRuleSchema>
 ): CspRulesConfigSchema => {
   const activatedRules = cspRules.saved_objects.filter((cspRule) => cspRule.attributes.enabled);
-
   const config = {
     activated_rules: {
-      cis_k8s: activatedRules.map((activatedRule) => activatedRule.id),
+      cis_k8s: activatedRules.map((activatedRule) => activatedRule.attributes.rego_rule_id),
     },
   };
   return config;
@@ -99,16 +101,21 @@ export const updatePackagePolicy = (
   return packagePolicyService.update(soClient, esClient, packagePolicy.id, updatedPackagePolicy);
 };
 
-export const defineUpdateRulesConfigRoute = (router: IRouter, cspContext: CspAppContext): void =>
+export const defineUpdateRulesConfigRoute = (router: CspRouter, cspContext: CspAppContext): void =>
   router.post(
     {
       path: UPDATE_RULES_CONFIG_ROUTE_PATH,
       validate: { query: configurationUpdateInputSchema },
     },
     async (context, request, response) => {
+      if (!(await context.fleet).authz.fleet.all) {
+        return response.forbidden();
+      }
+
       try {
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
-        const soClient = context.core.savedObjects.client;
+        const coreContext = await context.core;
+        const esClient = coreContext.elasticsearch.client.asCurrentUser;
+        const soClient = coreContext.savedObjects.client;
         const packagePolicyService = cspContext.service.packagePolicyService;
         const packagePolicyId = request.query.package_policy_id;
 
@@ -121,7 +128,7 @@ export const defineUpdateRulesConfigRoute = (router: IRouter, cspContext: CspApp
           packagePolicyId
         );
 
-        const cspRules = await getCspRules(soClient);
+        const cspRules = await getCspRules(soClient, packagePolicy);
         const rulesConfig = createRulesConfig(cspRules);
         const dataYaml = convertRulesConfigToYaml(rulesConfig);
 

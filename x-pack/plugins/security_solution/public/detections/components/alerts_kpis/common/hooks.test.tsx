@@ -7,13 +7,22 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
-import { useInspectButton, UseInspectButtonParams, useStackByFields } from './hooks';
+import {
+  getAggregatableFields,
+  useInspectButton,
+  UseInspectButtonParams,
+  useStackByFields,
+} from './hooks';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { TestProviders } from '../../../../common/mock';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+});
+
+test('getAggregatableFields', () => {
+  expect(getAggregatableFields(mockBrowserFields)).toMatchSnapshot();
 });
 
 describe('hooks', () => {

@@ -18,6 +18,7 @@ import {
   getCustomDropTarget,
   getAdditionalClassesOnDroppable,
   getAdditionalClassesOnEnter,
+  getDropProps,
 } from './drop_targets_utils';
 
 export function DraggableDimensionButton({
@@ -59,8 +60,8 @@ export function DraggableDimensionButton({
 }) {
   const { dragging } = useContext(DragContext);
 
-  const dropProps = layerDatasource.getDropProps({
-    ...layerDatasourceDropProps,
+  const dropProps = getDropProps(layerDatasource, {
+    ...(layerDatasourceDropProps || {}),
     dragging,
     columnId,
     filterOperations: group.filterOperations,

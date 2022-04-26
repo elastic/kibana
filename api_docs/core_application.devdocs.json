@@ -1172,10 +1172,18 @@
             "tags": [],
             "label": "navigateToUrl",
             "description": [
-              "\nNavigate to given URL in a SPA friendly way when possible (when the URL will redirect to a valid application\nwithin the current basePath).\n\nThe method resolves pathnames the same way browsers do when resolving a `<a href>` value. The provided `url` can be:\n- an absolute URL\n- an absolute path\n- a path relative to the current URL (window.location.href)\n\nIf all these criteria are true for the given URL:\n- (only for absolute URLs) The origin of the URL matches the origin of the browser's current location\n- The resolved pathname of the provided URL/path starts with the current basePath (eg. /mybasepath/s/my-space)\n- The pathname segment after the basePath matches any known application route (eg. /app/<id>/ or any application's `appRoute` configuration)\n\nThen a SPA navigation will be performed using `navigateToApp` using the corresponding application and path.\nOtherwise, fallback to a full page reload to navigate to the url using `window.location.assign`\n"
+              "\nNavigate to given URL in a SPA friendly way when possible (when the URL will redirect to a valid application\nwithin the current basePath).\n\nThe method resolves pathnames the same way browsers do when resolving a `<a href>` value. The provided `url` can be:\n- an absolute URL\n- an absolute path\n- a path relative to the current URL (window.location.href)\n\nIf all these criteria are true for the given URL:\n- (only for absolute URLs) The origin of the URL matches the origin of the browser's current location\n- The resolved pathname of the provided URL/path starts with the current basePath (eg. /mybasepath/s/my-space)\n- The pathname segment after the basePath matches any known application route (eg. /app/<id>/ or any application's `appRoute` configuration)\n\nThen a SPA navigation will be performed using `navigateToApp` using the corresponding application and path.\nOtherwise, fallback to a full page reload to navigate to the url using `window.location.assign`.\n"
             ],
             "signature": [
-              "(url: string) => Promise<void>"
+              "(url: string, options?: ",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCoreApplicationPluginApi",
+                "section": "def-public.NavigateToUrlOptions",
+                "text": "NavigateToUrlOptions"
+              },
+              " | undefined) => Promise<void>"
             ],
             "path": "src/core/public/application/types.ts",
             "deprecated": false,
@@ -1195,6 +1203,27 @@
                 "path": "src/core/public/application/types.ts",
                 "deprecated": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-public.ApplicationStart.navigateToUrl.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreApplicationPluginApi",
+                    "section": "def-public.NavigateToUrlOptions",
+                    "text": "NavigateToUrlOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/core/public/application/types.ts",
+                "deprecated": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -1371,6 +1400,7 @@
             ],
             "path": "src/core/public/application/types.ts",
             "deprecated": true,
+            "removeBy": "8.8.0",
             "references": [
               {
                 "plugin": "management",
@@ -1385,20 +1415,8 @@
                 "path": "x-pack/plugins/security/public/authentication/logout/logout_app.test.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/target/types/public/applications/fleet/index.d.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/target/types/public/applications/integrations/index.d.ts"
-              },
-              {
                 "plugin": "kibanaOverview",
                 "path": "src/plugins/kibana_overview/public/application.tsx"
-              },
-              {
-                "plugin": "management",
-                "path": "src/plugins/management/target/types/public/application.d.ts"
               }
             ]
           },
@@ -1426,6 +1444,7 @@
             ],
             "path": "src/core/public/application/types.ts",
             "deprecated": true,
+            "removeBy": "8.8.0",
             "references": [
               {
                 "plugin": "visualizations",
@@ -1488,40 +1507,8 @@
                 "path": "x-pack/plugins/security_solution/public/app/index.tsx"
               },
               {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/target/types/public/render_app.d.ts"
-              },
-              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/public/authentication/logout/logout_app.test.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_page.d.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/target/types/public/types.d.ts"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/target/types/public/visualize_app/app.d.ts"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/target/types/public/visualize_app/index.d.ts"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/target/types/public/visualize_app/components/visualize_editor_common.d.ts"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/plugins/visualizations/target/types/public/visualize_app/components/visualize_top_nav.d.ts"
               }
             ],
             "children": [
@@ -1783,6 +1770,66 @@
             ],
             "path": "src/core/public/application/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.NavigateToAppOptions.skipAppLeave",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "skipAppLeave",
+            "description": [
+              "\nif true, will bypass the default onAppLeave behavior"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.NavigateToUrlOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "NavigateToUrlOptions",
+        "description": [
+          "\nOptions for the {@link ApplicationStart.navigateToUrl | navigateToUrl API}"
+        ],
+        "path": "src/core/public/application/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.NavigateToUrlOptions.skipAppLeave",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "skipAppLeave",
+            "description": [
+              "\nif true, will bypass the default onAppLeave behavior"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.NavigateToUrlOptions.forceRedirect",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "forceRedirect",
+            "description": [
+              "\nif true will force a full page reload/refresh/assign, overriding the outcome of other url checks against current the location (effectively using `window.location.assign` instead of `push`)"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/core/public/application/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1933,6 +1980,7 @@
         ],
         "path": "src/core/public/application/types.ts",
         "deprecated": true,
+        "removeBy": "8.8.0",
         "references": [
           {
             "plugin": "securitySolution",

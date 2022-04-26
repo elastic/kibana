@@ -8,10 +8,10 @@
 import { EuiPageTemplate } from '@elastic/eui';
 import React, { ComponentType } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { CoreStart } from '../../../../../../src/core/public';
-import { createKibanaReactContext } from '../../../../../../src/plugins/kibana_react/public';
+import { CoreStart } from '@kbn/core/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { PluginContext, PluginContextValue } from '../../context/plugin_context';
-import { LandingPage } from './';
+import { LandingPage } from '.';
 
 export default {
   title: 'app/Landing',
@@ -23,24 +23,22 @@ export default {
         chrome: { docTitle: { change: () => {} }, setBreadcrumbs: () => {} },
         uiSettings: { get: () => true },
         observability: { ObservabilityPageTemplate: EuiPageTemplate },
+        http: {
+          basePath: {
+            prepend: () => '',
+          },
+        },
+        docLinks: {
+          links: {
+            observability: {
+              guide: 'alink',
+            },
+          },
+        },
       } as unknown as Partial<CoreStart>);
 
       const pluginContextValue = {
         appMountParameters: { setHeaderActionMenu: () => {} },
-        core: {
-          http: {
-            basePath: {
-              prepend: () => '',
-            },
-          },
-          docLinks: {
-            links: {
-              observability: {
-                guide: 'alink',
-              },
-            },
-          },
-        },
         ObservabilityPageTemplate: EuiPageTemplate,
       } as unknown as PluginContextValue;
 

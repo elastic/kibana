@@ -15,8 +15,9 @@
 
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ISearchSource } from 'src/plugins/data/public';
-import type { RequestStatistics } from 'src/plugins/inspector/common';
+import type { RequestStatistics } from '@kbn/inspector-plugin/common';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { ISearchSource } from '../../../../public';
 
 /** @public */
 export function getRequestInspectorStats(searchSource: ISearchSource) {

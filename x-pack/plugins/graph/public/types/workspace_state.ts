@@ -146,6 +146,11 @@ export interface Workspace {
 
   runLayout(): void;
   stopLayout(): void;
+
+  addEdgeToSelection(edge: WorkspaceEdge): void;
+  removeEdgeFromSelection(edge: WorkspaceEdge): void;
+  clearEdgeSelection(): void;
+  getEdgeSelection(): WorkspaceEdge[];
 }
 
 export type ExploreRequest = any;
@@ -173,4 +178,10 @@ export type WorkspaceOptions = Partial<{
   exploreControls: AdvancedSettings;
 }>;
 
-export type ControlType = 'style' | 'drillDowns' | 'editLabel' | 'mergeTerms' | 'none';
+export type ControlType =
+  | 'style'
+  | 'drillDowns'
+  | 'editLabel'
+  | 'mergeTerms'
+  | 'none'
+  | 'edgeSelection';

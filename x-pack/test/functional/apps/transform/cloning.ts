@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   isLatestTransform,
   isPivotTransform,
   TransformPivotConfig,
-} from '../../../../plugins/transform/common/types/transform';
-import { getLatestTransformConfig } from './index';
+} from '@kbn/transform-plugin/common/types/transform';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { getLatestTransformConfig } from '.';
 
 interface TestData {
   type: 'pivot' | 'latest';
@@ -333,8 +333,8 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.setDestinationIndex(testData.destinationIndex);
 
           await transform.testExecution.logTestStep('should display the create data view switch');
-          await transform.wizard.assertCreateIndexPatternSwitchExists();
-          await transform.wizard.assertCreateIndexPatternSwitchCheckState(true);
+          await transform.wizard.assertCreateDataViewSwitchExists();
+          await transform.wizard.assertCreateDataViewSwitchCheckState(true);
 
           await transform.testExecution.logTestStep('should display the continuous mode switch');
           await transform.wizard.assertContinuousModeSwitchExists();

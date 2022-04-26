@@ -26,7 +26,16 @@ export const defaultConfig: StorybookConfig = {
   // @ts-expect-error StorybookConfig type is incomplete
   // https://storybook.js.org/docs/react/configure/babel#custom-configuration
   babel: async (options) => {
-    options.presets.push('@emotion/babel-preset-css-prop');
+    options.presets.push([
+      require.resolve('@emotion/babel-preset-css-prop'),
+      {
+        // There's an issue where emotion classnames may be duplicated,
+        // (e.g. `[hash]-[filename]--[local]_[filename]--[local]`)
+        // https://github.com/emotion-js/emotion/issues/2417
+        autoLabel: 'always',
+        labelFormat: '[filename]--[local]',
+      },
+    ]);
     return options;
   },
   webpackFinal: (config, options) => {

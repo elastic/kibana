@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { notificationServiceMock } from '../../../../../../../../src/core/public/mocks';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 import {
   createKibanaContextProviderMock,
   createStartServicesMock,
@@ -17,6 +17,7 @@ export const KibanaServices = {
   getKibanaVersion: jest.fn(() => '8.0.0'),
   getConfig: jest.fn(() => null),
 };
+
 export const useKibana = jest.fn().mockReturnValue({
   services: createStartServicesMock(),
 });
@@ -44,4 +45,11 @@ export const useNavigateTo = jest.fn().mockReturnValue({
 export const useNavigation = jest.fn().mockReturnValue({
   getAppUrl: jest.fn(),
   navigateTo: jest.fn(),
+});
+
+export const useApplicationCapabilities = jest.fn().mockReturnValue({
+  actions: { crud: true, read: true },
+  generalCases: { crud: true, read: true },
+  visualize: { crud: true, read: true },
+  dashboard: { crud: true, read: true },
 });

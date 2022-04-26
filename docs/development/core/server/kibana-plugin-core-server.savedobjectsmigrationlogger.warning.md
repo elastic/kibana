@@ -6,7 +6,7 @@
 
 > Warning: This API is now obsolete.
 > 
-> Use `warn` instead.
+> Use `warn` instead.  8.8.0
 > 
 
 <b>Signature:</b>

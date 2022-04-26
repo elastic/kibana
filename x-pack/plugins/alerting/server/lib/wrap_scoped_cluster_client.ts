@@ -20,15 +20,16 @@ import type {
   SearchRequest as SearchRequestWithBody,
   AggregationsAggregate,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IScopedClusterClient, ElasticsearchClient, Logger } from 'src/core/server';
+import { IScopedClusterClient, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { RuleExecutionMetrics } from '../types';
-import { Alert as Rule } from '../types';
+import { Rule } from '../types';
 
 type RuleInfo = Pick<Rule, 'name' | 'alertTypeId' | 'id'> & { spaceId: string };
 interface WrapScopedClusterClientFactoryOpts {
   scopedClusterClient: IScopedClusterClient;
   rule: RuleInfo;
   logger: Logger;
+  abortController: AbortController;
 }
 
 type WrapScopedClusterClientOpts = WrapScopedClusterClientFactoryOpts & {
@@ -140,6 +141,7 @@ function getWrappedSearchFn(opts: WrapEsClientOpts) {
       );
       const result = (await originalSearch.call(opts.esClient, params, {
         ...searchOptions,
+        signal: opts.abortController.signal,
       })) as
         | TransportResult<SearchResponse<TDocument, TAggregations>, unknown>
         | SearchResponse<TDocument, TAggregations>;
@@ -160,6 +162,9 @@ function getWrappedSearchFn(opts: WrapEsClientOpts) {
       opts.logMetricsFn({ esSearchDuration: took ?? 0, totalSearchDuration: durationMs });
       return result;
     } catch (e) {
+      if (opts.abortController.signal.aborted) {
+        throw new Error('Search has been aborted due to cancelled execution');
+      }
       throw e;
     }
   }

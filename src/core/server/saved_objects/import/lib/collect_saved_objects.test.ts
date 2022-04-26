@@ -157,7 +157,7 @@ describe('collectSavedObjects()', () => {
 
       const error = { type: 'unsupported_type' };
       const { title } = obj1.attributes;
-      const errors = [{ error, type: obj1.type, id: obj1.id, title, meta: { title } }];
+      const errors = [{ error, type: obj1.type, id: obj1.id, meta: { title } }];
       expect(result).toEqual({ collectedObjects: [], errors, importStateMap: new Map() });
     });
 
@@ -174,7 +174,7 @@ describe('collectSavedObjects()', () => {
       ]);
       const error = { type: 'unsupported_type' };
       const { title } = obj2.attributes;
-      const errors = [{ error, type: obj2.type, id: obj2.id, title, meta: { title } }];
+      const errors = [{ error, type: obj2.type, id: obj2.id, meta: { title } }];
       expect(result).toEqual({ collectedObjects, errors, importStateMap });
     });
 
@@ -192,7 +192,7 @@ describe('collectSavedObjects()', () => {
 
         const error = { type: 'unsupported_type' };
         const { title } = obj1.attributes;
-        const errors = [{ error, type: obj1.type, id: obj1.id, title, meta: { title } }];
+        const errors = [{ error, type: obj1.type, id: obj1.id, meta: { title } }];
         expect(result).toEqual({ collectedObjects: [], errors, importStateMap: new Map() });
       });
 
@@ -215,7 +215,7 @@ describe('collectSavedObjects()', () => {
         ]);
         const error = { type: 'unsupported_type' };
         const { title } = obj1.attributes;
-        const errors = [{ error, type: obj1.type, id: obj1.id, title, meta: { title } }];
+        const errors = [{ error, type: obj1.type, id: obj1.id, meta: { title } }];
         expect(result).toEqual({ collectedObjects, errors, importStateMap });
       });
     });

@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IIndexPatternFieldList } from '../../../data/common';
-import { DataView } from '../../../data/common';
+import { DataView } from '@kbn/data-views-plugin/public';
 
 const fields = [
   {
@@ -63,7 +62,7 @@ const fields = [
     filterable: true,
     aggregatable: true,
   },
-] as IIndexPatternFieldList;
+] as DataView['fields'];
 
 fields.getByName = (name: string) => {
   return fields.find((field) => field.name === name);

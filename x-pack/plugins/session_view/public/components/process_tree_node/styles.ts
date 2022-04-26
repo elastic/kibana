@@ -12,25 +12,25 @@ import { CSSObject } from '@emotion/react';
 interface StylesDeps {
   depth: number;
   hasAlerts: boolean;
+  hasInvestigatedAlert: boolean;
+  isSelected: boolean;
 }
 
-export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
+export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }: StylesDeps) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { colors, border, size } = euiTheme;
+    const { colors, border, size, font } = euiTheme;
 
-    const TREE_INDENT = euiTheme.base * 2;
+    const TREE_INDENT = `calc(${size.l} + ${size.xxs})`;
+    const PROCESS_TREE_LEFT_PADDING = size.s;
 
     const darkText: CSSObject = {
       color: colors.text,
+      fontFamily: font.familyCode,
+      paddingLeft: size.xxs,
+      paddingRight: size.xs,
     };
-
-    const searchHighlight = `
-      background-color: ${colors.highlight};
-      color: ${colors.fullShade};
-      border-radius: ${border.radius.medium};
-    `;
 
     const children: CSSObject = {
       position: 'relative',
@@ -38,7 +38,6 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
       marginLeft: size.base,
       paddingLeft: size.s,
       borderLeft: border.editable,
-      marginTop: size.s,
     };
 
     /**
@@ -48,40 +47,53 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
       let bgColor = 'none';
       const hoverColor = transparentize(colors.primary, 0.04);
       let borderColor = 'transparent';
+      let searchResColor = transparentize(colors.warning, 0.32);
 
-      // TODO: alerts highlight colors
       if (hasAlerts) {
-        bgColor = transparentize(colors.danger, 0.04);
-        borderColor = transparentize(colors.danger, 0.48);
+        borderColor = colors.danger;
       }
 
-      return { bgColor, borderColor, hoverColor };
+      if (isSelected) {
+        searchResColor = colors.warning;
+        bgColor = `${transparentize(colors.primary, 0.1)}!important`;
+      }
+
+      if (hasInvestigatedAlert) {
+        bgColor = `${transparentize(colors.danger, 0.04)}!important`;
+      }
+
+      return { bgColor, borderColor, hoverColor, searchResColor };
     };
 
-    const { bgColor, borderColor, hoverColor } = getHighlightColors();
+    const { bgColor, borderColor, hoverColor, searchResColor } = getHighlightColors();
 
     const processNode: CSSObject = {
       display: 'block',
       cursor: 'pointer',
       position: 'relative',
-      margin: `${size.s} 0px`,
-      '&:not(:first-child)': {
-        marginTop: size.s,
-      },
+      padding: `${size.xs} 0px`,
       '&:hover:before': {
         backgroundColor: hoverColor,
+        transform: `translateY(-${size.xs})`,
       },
       '&:before': {
         position: 'absolute',
         height: '100%',
         pointerEvents: 'none',
         content: `''`,
-        marginLeft: `-${depth * TREE_INDENT}px`,
+        marginLeft: `calc(-${depth} * ${TREE_INDENT} - ${PROCESS_TREE_LEFT_PADDING})`,
         borderLeft: `${size.xs} solid ${borderColor}`,
         backgroundColor: bgColor,
-        width: `calc(100% + ${depth * TREE_INDENT}px)`,
+        width: `calc(100% + ${depth} * ${TREE_INDENT} + ${PROCESS_TREE_LEFT_PADDING})`,
+        transform: `translateY(-${size.xs})`,
       },
     };
+
+    const searchHighlight = `
+      color: ${colors.fullShade};
+      border-radius: '0px';
+      background-color: ${searchResColor};
+    `;
 
     const wrapper: CSSObject = {
       paddingLeft: size.s,
@@ -89,12 +101,26 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
       verticalAlign: 'middle',
       color: colors.mediumShade,
       wordBreak: 'break-all',
-      minHeight: size.l,
-      lineHeight: size.l,
+      minHeight: `calc(${size.l} - ${size.xxs})`,
+      lineHeight: `calc(${size.l} - ${size.xxs})`,
     };
 
     const workingDir: CSSObject = {
       color: colors.successText,
+      fontFamily: font.familyCode,
+      fontWeight: font.weight.medium,
+      paddingLeft: size.s,
+      paddingRight: size.xxs,
+    };
+
+    const timeStamp: CSSObject = {
+      float: 'right',
+      fontFamily: font.familyCode,
+      fontSize: size.m,
+      fontWeight: font.weight.regular,
+      paddingRight: size.base,
+      paddingLeft: size.xxl,
+      position: 'relative',
     };
 
     const alertDetails: CSSObject = {
@@ -110,9 +136,10 @@ export const useStyles = ({ depth, hasAlerts }: StylesDeps) => {
       processNode,
       wrapper,
       workingDir,
+      timeStamp,
       alertDetails,
     };
-  }, [depth, euiTheme, hasAlerts]);
+  }, [depth, euiTheme, hasAlerts, hasInvestigatedAlert, isSelected]);
 
   return cached;
 };

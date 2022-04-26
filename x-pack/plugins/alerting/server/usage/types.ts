@@ -25,8 +25,22 @@ export interface AlertingUsage {
     string,
     Record<string, number>
   >;
+  percentile_num_generated_actions_per_day: {
+    p50: number;
+    p90: number;
+    p99: number;
+  };
+  percentile_num_generated_actions_by_type_per_day: {
+    p50: Record<string, number>;
+    p90: Record<string, number>;
+    p99: Record<string, number>;
+  };
   avg_execution_time_per_day: number;
   avg_execution_time_by_type_per_day: Record<string, number>;
+  avg_es_search_duration_per_day: number;
+  avg_es_search_duration_by_type_per_day: Record<string, number>;
+  avg_total_search_duration_per_day: number;
+  avg_total_search_duration_by_type_per_day: Record<string, number>;
   throttle_time: {
     min: string;
     avg: string;

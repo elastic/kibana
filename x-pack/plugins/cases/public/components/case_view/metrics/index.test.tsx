@@ -12,7 +12,7 @@ import {
   basicCaseNumericValueFeatures,
   basicCaseStatusFeatures,
 } from '../../../containers/mock';
-import { CaseViewMetrics } from './index';
+import { CaseViewMetrics } from '.';
 import { CaseMetrics, CaseMetricsFeature } from '../../../../common/ui';
 import { TestProviders } from '../../../common/mock';
 

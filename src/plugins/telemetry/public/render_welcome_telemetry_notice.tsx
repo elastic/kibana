@@ -10,11 +10,12 @@ import React from 'react';
 import { EuiLink, EuiSpacer, EuiTextColor } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { TelemetryService } from './services';
-import { PRIVACY_STATEMENT_URL } from '../common/constants';
+import { TelemetryConstants } from './plugin';
 
 export function renderWelcomeTelemetryNotice(
   telemetryService: TelemetryService,
-  addBasePath: (url: string) => string
+  addBasePath: (url: string) => string,
+  telemetryConstants: TelemetryConstants
 ) {
   return (
     <>
@@ -23,7 +24,7 @@ export function renderWelcomeTelemetryNotice(
           id="telemetry.dataManagementDisclaimerPrivacy"
           defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our "
         />
-        <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank" rel="noopener">
+        <EuiLink href={telemetryConstants.getPrivacyStatementUrl()} target="_blank" rel="noopener">
           <FormattedMessage
             id="telemetry.dataManagementDisclaimerPrivacyLink"
             defaultMessage="Privacy Statement."

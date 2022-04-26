@@ -53,15 +53,13 @@ import {
 import { getDetails } from '../../tasks/rule_details';
 import { goToManageAlertsDetectionRules } from '../../tasks/alerts';
 import {
-  changeRowsPerPageTo100,
-  filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
   waitForRulesTableToBeLoaded,
 } from '../../tasks/alerts_detection_rules';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { createTimeline } from '../../tasks/api_calls/timelines';
-import { cleanKibana } from '../../tasks/common';
+import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import {
   createAndEnableRule,
   fillAboutRuleAndContinue,
@@ -73,24 +71,29 @@ import {
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
 } from '../../tasks/create_new_rule';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { RULE_CREATION } from '../../urls/navigation';
 
-describe.skip('Detection rules, threshold', () => {
+describe('Detection rules, threshold', () => {
   let rule = getNewThresholdRule();
   const expectedUrls = getNewThresholdRule().referenceUrls.join('');
   const expectedFalsePositives = getNewThresholdRule().falsePositivesExamples.join('');
   const expectedTags = getNewThresholdRule().tags.join('');
   const expectedMitre = formatMitreAttackDescription(getNewThresholdRule().mitre);
 
+  before(() => {
+    cleanKibana();
+    login();
+  });
+
   beforeEach(() => {
     rule = getNewThresholdRule();
-    cleanKibana();
+    deleteAlertsAndRules();
     createTimeline(getNewThresholdRule().timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
     });
-    loginAndWaitForPageWithoutDateRange(RULE_CREATION);
+    visitWithoutDateRange(RULE_CREATION);
   });
 
   it('Creates and enables a new threshold rule', () => {
@@ -102,18 +105,11 @@ describe.skip('Detection rules, threshold', () => {
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-    changeRowsPerPageTo100();
-
     const expectedNumberOfRules = 1;
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
     });
 
-    filterByCustomRules();
-
-    cy.get(RULES_TABLE).then(($table) => {
-      cy.wrap($table.find(RULES_ROW).length).should('eql', 1);
-    });
     cy.get(RULE_NAME).should('have.text', rule.name);
     cy.get(RISK_SCORE).should('have.text', rule.riskScore);
     cy.get(SEVERITY).should('have.text', rule.severity);

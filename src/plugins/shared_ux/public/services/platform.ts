@@ -6,18 +6,21 @@
  * Side Public License, v 1.
  */
 
+import { SharedUxPlatformService } from '@kbn/shared-ux-services';
+import { SharedUXPluginStartDeps } from '../types';
+import { KibanaPluginServiceFactory } from './types';
+
 /**
- * A services providing methods to interact with the Platform in which this plugin is
- * running, (almost always Kibana).
- *
- * Rather than provide the entire `CoreStart` contract to components, we provide simplified
- * abstractions around a use case specific to Shared UX.  This way, we know exactly how the
- * `CoreStart` and other plugins are used, like specifically which methods.  This makes
- * mocking and refactoring easier when upstream dependencies change.
+ * A factory function for creating a Kibana-based implementation of `SharedUXPlatformService`.
  */
-export interface SharedUXPlatformService {
-  /**
-   * Sets the fullscreen state of the chrome.
-   */
-  setIsFullscreen: (isFullscreen: boolean) => void;
-}
+export type PlatformServiceFactory = KibanaPluginServiceFactory<
+  SharedUxPlatformService,
+  SharedUXPluginStartDeps
+>;
+
+/**
+ * A factory function for creating a Kibana-based implementation of `SharedUXPlatformService`.
+ */
+export const platformServiceFactory: PlatformServiceFactory = ({ coreStart }) => ({
+  setIsFullscreen: (isVisible: boolean) => coreStart.chrome.setIsVisible(isVisible),
+});

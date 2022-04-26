@@ -27,6 +27,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { FieldSelect } from '../aggs/field_select';
 // @ts-expect-error not typed yet
 import { SeriesEditor } from '../series_editor';
@@ -41,7 +42,6 @@ import { BUCKET_TYPES } from '../../../../common/enums';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
 import { TimeseriesVisParams } from '../../../types';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
-import { KBN_FIELD_TYPES } from '../../../../../../data/public';
 
 export class TablePanelConfig extends Component<
   PanelConfigProps,

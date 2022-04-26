@@ -15,7 +15,7 @@ import { EuiSelect } from '@elastic/eui';
 
 import { ApiTokenTypes, TOKEN_TYPE_INFO } from '../../constants';
 
-import { FormKeyType } from './';
+import { FormKeyType } from '.';
 
 describe('FormKeyType', () => {
   const values = {

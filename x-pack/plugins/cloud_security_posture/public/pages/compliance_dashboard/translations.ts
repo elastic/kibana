@@ -15,8 +15,8 @@ export const CLOUD_POSTURE_SCORE = i18n.translate('xpack.csp.cloud_posture_score
   defaultMessage: 'Cloud Posture Score',
 });
 
-export const RISKS = i18n.translate('xpack.csp.risks', {
-  defaultMessage: 'Risks',
+export const RISKS = i18n.translate('xpack.csp.complianceDashboard.failedFindingsChartLabel', {
+  defaultMessage: 'Failed Findings',
 });
 
 export const OPEN_CASES = i18n.translate('xpack.csp.open_cases', {
@@ -82,3 +82,18 @@ export const RESOURCE_TYPE = i18n.translate('xpack.csp.resource_type', {
 export const FINDINGS = i18n.translate('xpack.csp.findings', {
   defaultMessage: 'Findings',
 });
+
+export const NO_DATA_CONFIG_TEXT = {
+  PAGE_TITLE: i18n.translate('xpack.csp.complianceDashboard.noDataConfig.pageTitle', {
+    defaultMessage: 'Cloud Security Compliance Dashboard',
+  }),
+  SOLUTION: i18n.translate('xpack.csp.complianceDashboard.noDataConfig.solutionNameLabel', {
+    defaultMessage: 'Cloud Security Posture',
+  }),
+  BUTTON_TITLE: i18n.translate('xpack.csp.complianceDashboard.noDataConfig.actionTitle', {
+    defaultMessage: 'Try Again',
+  }),
+  DESCRIPTION: i18n.translate('xpack.csp.complianceDashboard.noDataConfig.actionDescription', {
+    defaultMessage: 'You can try to refetch your data',
+  }),
+};

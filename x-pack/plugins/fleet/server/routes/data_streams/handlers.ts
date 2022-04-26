@@ -6,7 +6,7 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { keyBy, keys, merge } from 'lodash';
-import type { RequestHandler } from 'src/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 
 import type { DataStream } from '../../types';
 import { KibanaSavedObjectType } from '../../../common';
@@ -37,16 +37,10 @@ interface ESDataStreamInfo {
   hidden: boolean;
 }
 
-interface ESDataStreamStats {
-  data_stream: string;
-  backing_indices: number;
-  store_size_bytes: number;
-  maximum_timestamp: number;
-}
-
 export const getListHandler: RequestHandler = async (context, request, response) => {
   // Query datastreams as the current user as the Kibana internal user may not have all the required permission
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const { savedObjects, elasticsearch } = await context.core;
+  const esClient = elasticsearch.client.asCurrentUser;
 
   const body: GetDataStreamsResponse = {
     data_streams: [],
@@ -60,12 +54,12 @@ export const getListHandler: RequestHandler = async (context, request, response)
       packageSavedObjects,
     ] = await Promise.all([
       esClient.indices.getDataStream({ name: DATA_STREAM_INDEX_PATTERN }),
-      esClient.indices.dataStreamsStats({ name: DATA_STREAM_INDEX_PATTERN }),
-      getPackageSavedObjects(context.core.savedObjects.client),
+      esClient.indices.dataStreamsStats({ name: DATA_STREAM_INDEX_PATTERN, human: true }),
+      getPackageSavedObjects(savedObjects.client),
     ]);
 
     const dataStreamsInfoByName = keyBy<ESDataStreamInfo>(dataStreamsInfo, 'name');
-    const dataStreamsStatsByName = keyBy<ESDataStreamStats>(dataStreamStats, 'data_stream');
+    const dataStreamsStatsByName = keyBy(dataStreamStats, 'data_stream');
 
     // Combine data stream info
     const dataStreams = merge(dataStreamsInfoByName, dataStreamsStatsByName);
@@ -88,7 +82,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
       allDashboards[pkgSavedObject.id] = dashboards;
       return allDashboards;
     }, {});
-    const allDashboardSavedObjectsResponse = await context.core.savedObjects.client.bulkGet<{
+    const allDashboardSavedObjectsResponse = await savedObjects.client.bulkGet<{
       title?: string;
     }>(
       Object.values(dashboardIdsByPackageName).flatMap((dashboardIds) =>
@@ -127,6 +121,9 @@ export const getListHandler: RequestHandler = async (context, request, response)
         package_version: '',
         last_activity_ms: dataStream.maximum_timestamp, // overridden below if maxIngestedTimestamp agg returns a result
         size_in_bytes: dataStream.store_size_bytes,
+        // `store_size` should be available from ES due to ?human=true flag
+        // but fallback to bytes just in case
+        size_in_bytes_formatted: dataStream.store_size || `${dataStream.store_size_bytes}b`,
         dashboards: [],
       };
 

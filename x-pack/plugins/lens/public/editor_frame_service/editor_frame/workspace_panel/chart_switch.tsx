@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
 import {
   Visualization,
   FramePublicAPI,
@@ -30,7 +31,6 @@ import {
 } from '../../../types';
 import { getSuggestions, switchToSuggestion } from '../suggestion_helpers';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
-import { ToolbarButton } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   insertLayer,
   removeLayers,
@@ -92,7 +92,7 @@ function VisualizationSummary({
       {description.icon && (
         <EuiIcon size="l" className="lnsChartSwitch__summaryIcon" type={description.icon} />
       )}
-      {description.label}
+      <span className="lnsChartSwitch__summaryText">{description.label}</span>
     </>
   );
 }
@@ -438,10 +438,9 @@ export const ChartSwitch = memo(function ChartSwitch(props: Props) {
           isPreFiltered
           data-test-subj="lnsChartSwitchList"
           searchProps={{
-            incremental: true,
             className: 'lnsChartSwitch__search',
             'data-test-subj': 'lnsChartSwitchSearch',
-            onSearch: (value) => setSearchTerm(value),
+            onChange: (value) => setSearchTerm(value),
           }}
           options={visualizationTypes}
           onChange={(newOptions) => {

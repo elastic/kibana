@@ -7,10 +7,11 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
-import { RuleExecutionStatus } from '../../../../plugins/security_solution/common/detection_engine/schemas/common';
-import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
+import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/schemas/common';
+import { CreateRulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 
+import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -30,12 +31,7 @@ import {
   waitForAlertToComplete,
   waitForSignalsToBePresent,
 } from '../../utils';
-import { ROLES } from '../../../../plugins/security_solution/common/test';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
-
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -44,8 +40,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
-  describe.skip('create_rules', () => {
+  describe('create_rules', () => {
     describe('creating rules', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
@@ -106,8 +101,7 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccessOrStatus(supertest, log, body.id);
         });
 
-        // TODO: does the below test work?
-        it.skip('should create a single rule with a rule_id and an index pattern that does not match anything available and partial failure for the rule', async () => {
+        it('should create a single rule with a rule_id and an index pattern that does not match anything available and partial failure for the rule', async () => {
           const simpleRule = getRuleForSignalTesting(['does-not-exist-*']);
           const { body } = await supertest
             .post(DETECTION_ENGINE_RULES_URL)
@@ -313,7 +307,6 @@ export default ({ getService }: FtrProviderContext) => {
           bodyId,
           RuleExecutionStatus['partial failure']
         );
-        await sleep(5000);
 
         const { body: rule } = await supertest
           .get(DETECTION_ENGINE_RULES_URL)
@@ -346,7 +339,6 @@ export default ({ getService }: FtrProviderContext) => {
           bodyId,
           RuleExecutionStatus['partial failure']
         );
-        await sleep(5000);
         await waitForSignalsToBePresent(supertest, log, 2, [bodyId]);
 
         const { body: rule } = await supertest

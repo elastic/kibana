@@ -10,21 +10,21 @@ import { ReactWrapper, shallow, mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiDataGrid } from '@elastic/eui';
-import { IAggType } from 'src/plugins/data/public';
+import { IAggType } from '@kbn/data-plugin/public';
 import {
   FieldFormatParams,
   IFieldFormat,
   SerializedFieldFormat,
-} from 'src/plugins/field_formats/common';
+} from '@kbn/field-formats-plugin/common';
 import { VisualizationContainer } from '../../visualization_container';
-import { EmptyPlaceholder } from '../../../../../../src/plugins/charts/public';
+import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
 import { DataContext, DatatableComponent } from './table_basic';
 import { LensMultiTable } from '../../../common';
 import { DatatableProps } from '../../../common/expressions';
-import { chartPluginMock } from 'src/plugins/charts/public/mocks';
-import { IUiSettingsClient } from 'kibana/public';
-import { RenderMode } from 'src/plugins/expressions';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { RenderMode } from '@kbn/expressions-plugin';
 
 import { LENS_EDIT_PAGESIZE_ACTION } from './constants';
 
@@ -84,6 +84,7 @@ function sampleArgs() {
     ],
     sortingColumnId: '',
     sortingDirection: 'none',
+    rowHeightLines: 1,
   };
 
   return { data, args };
@@ -299,6 +300,7 @@ describe('DatatableComponent', () => {
       ],
       sortingColumnId: '',
       sortingDirection: 'none',
+      rowHeightLines: 1,
     };
 
     const wrapper = mountWithIntl(
@@ -615,7 +617,9 @@ describe('DatatableComponent', () => {
     wrapper.setProps({ data: newData });
     wrapper.update();
 
-    expect(wrapper.find('[data-test-subj="dataGridHeader"]').children().first().text()).toEqual(
+    // Using .toContain over .toEqual because this element includes text from <EuiScreenReaderOnly>
+    // which can't be seen, but shows in the text content
+    expect(wrapper.find('[data-test-subj="dataGridHeader"]').children().first().text()).toContain(
       'new a'
     );
   });

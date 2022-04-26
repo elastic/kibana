@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import type { SavedObject } from 'src/core/public';
+import type { SavedObject } from '@kbn/core/public';
 
 import type { Installation } from '../../../../../../common';
 

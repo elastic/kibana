@@ -16,6 +16,8 @@ import {
   PinnedEvent,
 } from './pinned_event';
 import {
+  alias_purpose as savedObjectResolveAliasPurpose,
+  outcome as savedObjectResolveOutcome,
   success,
   success_count as successCount,
 } from '../../detection_engine/schemas/common/schemas';
@@ -312,8 +314,11 @@ export type TimelineWithoutExternalRefs = Omit<SavedTimeline, 'dataViewId' | 'sa
  */
 
 export enum TimelineId {
+  usersPageEvents = 'users-page-events',
+  usersPageExternalAlerts = 'users-page-external-alerts',
   hostsPageEvents = 'hosts-page-events',
   hostsPageExternalAlerts = 'hosts-page-external-alerts',
+  hostsPageSessions = 'hosts-page-sessions',
   detectionsRulesDetailsPage = 'detections-rules-details-page',
   detectionsPage = 'detections-page',
   networkPageExternalAlerts = 'network-page-external-alerts',
@@ -321,16 +326,21 @@ export enum TimelineId {
   casePage = 'timeline-case',
   test = 'test', // Reserved for testing purposes
   alternateTest = 'alternateTest',
+  rulePreview = 'rule-preview',
 }
 
 export const TimelineIdLiteralRt = runtimeTypes.union([
+  runtimeTypes.literal(TimelineId.usersPageEvents),
+  runtimeTypes.literal(TimelineId.usersPageExternalAlerts),
   runtimeTypes.literal(TimelineId.hostsPageEvents),
   runtimeTypes.literal(TimelineId.hostsPageExternalAlerts),
+  runtimeTypes.literal(TimelineId.hostsPageSessions),
   runtimeTypes.literal(TimelineId.detectionsRulesDetailsPage),
   runtimeTypes.literal(TimelineId.detectionsPage),
   runtimeTypes.literal(TimelineId.networkPageExternalAlerts),
   runtimeTypes.literal(TimelineId.active),
   runtimeTypes.literal(TimelineId.test),
+  runtimeTypes.literal(TimelineId.rulePreview),
 ]);
 
 export type TimelineIdLiteral = runtimeTypes.TypeOf<typeof TimelineIdLiteralRt>;
@@ -366,14 +376,11 @@ export type SingleTimelineResponse = runtimeTypes.TypeOf<typeof SingleTimelineRe
 export const ResolvedTimelineSavedObjectToReturnObjectRuntimeType = runtimeTypes.intersection([
   runtimeTypes.type({
     timeline: TimelineSavedToReturnObjectRuntimeType,
-    outcome: runtimeTypes.union([
-      runtimeTypes.literal('exactMatch'),
-      runtimeTypes.literal('aliasMatch'),
-      runtimeTypes.literal('conflict'),
-    ]),
+    outcome: savedObjectResolveOutcome,
   }),
   runtimeTypes.partial({
     alias_target_id: runtimeTypes.string,
+    alias_purpose: savedObjectResolveAliasPurpose,
   }),
 ]);
 
@@ -477,6 +484,7 @@ export enum TimelineTabs {
   notes = 'notes',
   pinned = 'pinned',
   eql = 'eql',
+  session = 'session',
 }
 
 /**

@@ -133,8 +133,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`index pattern listing doesn't show create button`, async () => {
         await PageObjects.settings.clickKibanaIndexPatterns();
-        await testSubjects.existOrFail('emptyIndexPatternPrompt');
-        await testSubjects.missingOrFail('createIndexPatternButtonFlyout');
+        await testSubjects.existOrFail('noDataViewsPrompt');
+        await testSubjects.missingOrFail('createDataViewButtonFlyout');
       });
 
       it(`shows read-only badge`, async () => {

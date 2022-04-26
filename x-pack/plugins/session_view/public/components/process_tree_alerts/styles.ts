@@ -16,24 +16,16 @@ export const useStyles = () => {
     const { size, colors, border } = euiTheme;
 
     const container: CSSObject = {
-      marginTop: size.s,
-      marginRight: size.s,
+      margin: `${size.xs} ${size.base} 0 ${size.xs}`,
       color: colors.text,
-      padding: size.m,
+      padding: `${size.s} 0`,
       borderStyle: 'solid',
       borderColor: colors.lightShade,
       borderWidth: border.width.thin,
       borderRadius: border.radius.medium,
-      maxWidth: 800,
-      backgroundColor: 'white',
-      '&>div': {
-        borderTop: border.thin,
-        marginTop: size.m,
-        paddingTop: size.m,
-        '&:first-child': {
-          borderTop: 'none',
-        },
-      },
+      maxHeight: 378,
+      overflowY: 'auto',
+      backgroundColor: colors.emptyShade,
     };
 
     return {

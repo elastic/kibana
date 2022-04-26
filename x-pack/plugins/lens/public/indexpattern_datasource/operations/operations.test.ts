@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getOperationTypesForField, getAvailableOperationsByMetadata } from './index';
+import { getOperationTypesForField, getAvailableOperationsByMetadata } from '.';
 import { getFieldByNameFactory } from '../pure_helpers';
 
 jest.mock('../loader');
@@ -333,6 +333,10 @@ describe('getOperationTypesForField', () => {
               },
               Object {
                 "operationType": "overall_average",
+                "type": "fullReference",
+              },
+              Object {
+                "operationType": "normalize_by_unit",
                 "type": "fullReference",
               },
               Object {

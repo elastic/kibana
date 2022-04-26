@@ -7,8 +7,8 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useActionTypes, UseActionTypesResponse } from './use_action_types';
-import { actionTypesMock } from './mock';
 import * as api from './api';
+import { actionTypesMock } from '../../common/mock/connectors';
 
 jest.mock('./api');
 jest.mock('../../common/lib/kibana');

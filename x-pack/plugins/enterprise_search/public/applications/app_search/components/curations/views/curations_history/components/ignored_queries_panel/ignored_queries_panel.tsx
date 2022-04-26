@@ -9,7 +9,13 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -67,14 +73,26 @@ export const IgnoredQueriesPanel: React.FC = () => {
     <DataPanel
       isLoading={dataLoading}
       title={
-        <h2>
-          {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.curations.ignoredSuggestionsPanel.title',
-            {
-              defaultMessage: 'Ignored queries',
-            }
-          )}
-        </h2>
+        <EuiFlexGroup>
+          <EuiFlexItem component="h2">
+            {i18n.translate(
+              'xpack.enterpriseSearch.appSearch.curations.ignoredSuggestionsPanel.title',
+              {
+                defaultMessage: 'Ignored queries',
+              }
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem component="span" grow={false}>
+            <EuiButtonEmpty iconType="refresh" size="xs" onClick={() => loadIgnoredQueries()}>
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.curations.ignoredSuggestionsPanel.refresh',
+                {
+                  defaultMessage: 'Refresh',
+                }
+              )}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
       subtitle={
         <span>
@@ -96,7 +114,7 @@ export const IgnoredQueriesPanel: React.FC = () => {
         hasActions
         pagination={{
           ...convertMetaToPagination(meta),
-          hidePerPageOptions: true,
+          showPerPageOptions: false,
         }}
         onChange={handlePageChange(onPaginate)}
       />

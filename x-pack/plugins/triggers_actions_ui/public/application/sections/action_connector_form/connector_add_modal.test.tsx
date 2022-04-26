@@ -12,7 +12,7 @@ import ConnectorAddModal from './connector_add_modal';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ActionType, ConnectorValidationResult, GenericValidationResult } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();

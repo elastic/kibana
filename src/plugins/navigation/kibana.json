@@ -7,6 +7,6 @@
   "version": "kibana",
   "server": false,
   "ui": true,
-  "requiredPlugins": ["data"],
+  "requiredPlugins": ["unifiedSearch"],
   "requiredBundles": ["kibanaReact"]
 }

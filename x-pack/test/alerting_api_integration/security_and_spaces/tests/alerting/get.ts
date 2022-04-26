@@ -81,7 +81,12 @@ const getTestUtils = (
                 mute_all: false,
                 muted_alert_ids: [],
                 execution_status: response.body.execution_status,
-                ...(describeType === 'internal' ? { monitoring: response.body.monitoring } : {}),
+                ...(describeType === 'internal'
+                  ? {
+                      monitoring: response.body.monitoring,
+                      snooze_end_time: response.body.snooze_end_time,
+                    }
+                  : {}),
               });
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);

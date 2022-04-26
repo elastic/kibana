@@ -14,7 +14,7 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "PowerShell Suspicious Payload Encoded and Compressed",
-  "query": "event.category:process and \n  powershell.file.script_block_text : (\n    (System.IO.Compression.DeflateStream or System.IO.Compression.GzipStream or IO.Compression.DeflateStream or IO.Compression.GzipStream) and\n    FromBase64String\n  )\n",
+  "query": "event.category:process and \n  powershell.file.script_block_text : (\n    (\n      \"System.IO.Compression.DeflateStream\" or\n      \"System.IO.Compression.GzipStream\" or\n      \"IO.Compression.DeflateStream\" or\n      \"IO.Compression.GzipStream\"\n    ) and\n    FromBase64String\n  )\n",
   "risk_score": 47,
   "rule_id": "81fe9dc6-a2d7-4192-a2d8-eed98afc766a",
   "severity": "medium",
@@ -71,5 +71,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 3
 }

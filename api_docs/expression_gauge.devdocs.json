@@ -102,7 +102,15 @@
             "section": "def-common.Accessors",
             "text": "Accessors"
           },
-          " | undefined) => number"
+          " | undefined, paletteParams?: ",
+          {
+            "pluginId": "expressionGauge",
+            "scope": "common",
+            "docId": "kibExpressionGaugePluginApi",
+            "section": "def-common.CustomPaletteParams",
+            "text": "CustomPaletteParams"
+          },
+          " | undefined, isRespectRanges?: boolean | undefined) => number"
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
         "deprecated": false,
@@ -148,6 +156,41 @@
             "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
             "isRequired": false
+          },
+          {
+            "parentPluginId": "expressionGauge",
+            "id": "def-public.getMaxValue.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "paletteParams",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionGauge",
+                "scope": "common",
+                "docId": "kibExpressionGaugePluginApi",
+                "section": "def-common.CustomPaletteParams",
+                "text": "CustomPaletteParams"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "deprecated": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "expressionGauge",
+            "id": "def-public.getMaxValue.$4",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isRespectRanges",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "deprecated": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -177,7 +220,15 @@
             "section": "def-common.Accessors",
             "text": "Accessors"
           },
-          " | undefined) => any"
+          " | undefined, paletteParams?: ",
+          {
+            "pluginId": "expressionGauge",
+            "scope": "common",
+            "docId": "kibExpressionGaugePluginApi",
+            "section": "def-common.CustomPaletteParams",
+            "text": "CustomPaletteParams"
+          },
+          " | undefined, isRespectRanges?: boolean | undefined) => any"
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
         "deprecated": false,
@@ -219,6 +270,41 @@
                 "text": "Accessors"
               },
               " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "deprecated": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "expressionGauge",
+            "id": "def-public.getMinValue.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "paletteParams",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionGauge",
+                "scope": "common",
+                "docId": "kibExpressionGaugePluginApi",
+                "section": "def-common.CustomPaletteParams",
+                "text": "CustomPaletteParams"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
+            "deprecated": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "expressionGauge",
+            "id": "def-public.getMinValue.$4",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isRespectRanges",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
@@ -384,7 +470,13 @@
         "description": [],
         "signature": [
           "() => ",
-          "GaugeExpressionFunctionDefinition"
+          {
+            "pluginId": "expressionGauge",
+            "scope": "common",
+            "docId": "kibExpressionGaugePluginApi",
+            "section": "def-common.GaugeExpressionFunctionDefinition",
+            "text": "GaugeExpressionFunctionDefinition"
+          }
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/expression_functions/gauge_function.ts",
         "deprecated": false,
@@ -954,6 +1046,53 @@
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionGauge",
+            "id": "def-common.GaugeState.percentageMode",
+            "type": "CompoundType",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "percentageMode",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "deprecated": true,
+            "references": [
+              {
+                "plugin": "visTypeGauge",
+                "path": "src/plugins/vis_types/gauge/public/to_ast.ts"
+              }
+            ]
+          },
+          {
+            "parentPluginId": "expressionGauge",
+            "id": "def-common.GaugeState.respectRanges",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "respectRanges",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "expressionGauge",
+            "id": "def-common.GaugeState.commonLabel",
+            "type": "string",
+            "tags": [],
+            "label": "commonLabel",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1092,6 +1231,77 @@
       },
       {
         "parentPluginId": "expressionGauge",
+        "id": "def-common.GaugeExpressionFunctionDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "GaugeExpressionFunctionDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"gauge\", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          ", ",
+          {
+            "pluginId": "expressionGauge",
+            "scope": "common",
+            "docId": "kibExpressionGaugePluginApi",
+            "section": "def-common.GaugeArguments",
+            "text": "GaugeArguments"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionValueRender",
+            "text": "ExpressionValueRender"
+          },
+          "<",
+          {
+            "pluginId": "expressionGauge",
+            "scope": "common",
+            "docId": "kibExpressionGaugePluginApi",
+            "section": "def-common.GaugeExpressionProps",
+            "text": "GaugeExpressionProps"
+          },
+          ">, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          "SerializableRecord",
+          ">>"
+        ],
+        "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionGauge",
         "id": "def-common.GaugeLabelMajorMode",
         "type": "Type",
         "tags": [],
@@ -1129,6 +1339,22 @@
           },
           "; chartsThemeService: ",
           "Theme",
+          "; paletteService: ",
+          {
+            "pluginId": "charts",
+            "scope": "public",
+            "docId": "kibChartsPluginApi",
+            "section": "def-public.PaletteRegistry",
+            "text": "PaletteRegistry"
+          },
+          "; uiState: ",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.PersistedState",
+            "text": "PersistedState"
+          },
           "; }"
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_renderers.ts",

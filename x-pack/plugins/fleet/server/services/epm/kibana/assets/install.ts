@@ -13,8 +13,8 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsImporter,
   Logger,
-} from 'src/core/server';
-import type { SavedObjectsImportSuccess, SavedObjectsImportFailure } from 'src/core/server/types';
+} from '@kbn/core/server';
+import type { SavedObjectsImportSuccess, SavedObjectsImportFailure } from '@kbn/core/server/types';
 import { createListStream } from '@kbn/utils';
 import { partition } from 'lodash';
 
@@ -52,7 +52,10 @@ const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedObjectTyp
   [KibanaAssetType.lens]: KibanaSavedObjectType.lens,
   [KibanaAssetType.mlModule]: KibanaSavedObjectType.mlModule,
   [KibanaAssetType.securityRule]: KibanaSavedObjectType.securityRule,
+  [KibanaAssetType.cloudSecurityPostureRuleTemplate]:
+    KibanaSavedObjectType.cloudSecurityPostureRuleTemplate,
   [KibanaAssetType.tag]: KibanaSavedObjectType.tag,
+  [KibanaAssetType.osqueryPackAsset]: KibanaSavedObjectType.osqueryPackAsset,
 };
 
 const AssetFilters: Record<string, (kibanaAssets: ArchiveAsset[]) => ArchiveAsset[]> = {
@@ -213,25 +216,32 @@ export async function installKibanaSavedObjects({
     kibanaAssets.map((asset) => createSavedObjectKibanaAsset(asset))
   );
 
-  let allSuccessResults = [];
+  let allSuccessResults: SavedObjectsImportSuccess[] = [];
 
   if (toBeSavedObjects.length === 0) {
     return [];
   } else {
-    const { successResults: importSuccessResults = [], errors: importErrors = [] } =
-      await retryImportOnConflictError(() =>
-        savedObjectsImporter.import({
-          overwrite: true,
-          readStream: createListStream(toBeSavedObjects),
-          createNewCopies: false,
-        })
-      );
+    const {
+      successResults: importSuccessResults = [],
+      errors: importErrors = [],
+      success,
+    } = await retryImportOnConflictError(() =>
+      savedObjectsImporter.import({
+        overwrite: true,
+        readStream: createListStream(toBeSavedObjects),
+        createNewCopies: false,
+      })
+    );
 
-    allSuccessResults = importSuccessResults;
+    if (success) {
+      allSuccessResults = importSuccessResults;
+    }
+
     const [referenceErrors, otherErrors] = partition(
       importErrors,
       (e) => e?.error?.type === 'missing_references'
     );
+
     if (otherErrors?.length) {
       throw new Error(
         `Encountered ${
@@ -239,10 +249,11 @@ export async function installKibanaSavedObjects({
         } errors creating saved objects: ${formatImportErrorsForLog(otherErrors)}`
       );
     }
+
     /*
     A reference error here means that a saved object reference in the references
     array cannot be found. This is an error in the package its-self but not a fatal
-    one. For example a dashboard may still refer to the legacy `metricbeat-*` index 
+    one. For example a dashboard may still refer to the legacy `metricbeat-*` index
     pattern. We ignore reference errors here so that legacy version of a package
     can still be installed, but if a warning is logged it should be reported to
     the integrations team. */
@@ -253,20 +264,22 @@ export async function installKibanaSavedObjects({
         } reference errors creating saved objects: ${formatImportErrorsForLog(referenceErrors)}`
       );
 
-      const idsToResolve = new Set(referenceErrors.map(({ id }) => id));
-
-      const resolveSavedObjects = toBeSavedObjects.filter(({ id }) => idsToResolve.has(id));
-      const retries = referenceErrors.map(({ id, type }) => ({
-        id,
-        type,
-        ignoreMissingReferences: true,
-        replaceReferences: [],
-        overwrite: true,
-      }));
+      const retries = toBeSavedObjects.map(({ id, type }) => {
+        if (referenceErrors.find(({ id: idToSearch }) => idToSearch === id)) {
+          return {
+            id,
+            type,
+            ignoreMissingReferences: true,
+            replaceReferences: [],
+            overwrite: true,
+          };
+        }
+        return { id, type, overwrite: true, replaceReferences: [] };
+      });
 
       const { successResults: resolveSuccessResults = [], errors: resolveErrors = [] } =
         await savedObjectsImporter.resolveImportErrors({
-          readStream: createListStream(resolveSavedObjects),
+          readStream: createListStream(toBeSavedObjects),
           createNewCopies: false,
           retries,
         });
@@ -279,7 +292,7 @@ export async function installKibanaSavedObjects({
         );
       }
 
-      allSuccessResults = [...allSuccessResults, ...resolveSuccessResults];
+      allSuccessResults = allSuccessResults.concat(resolveSuccessResults);
     }
 
     return allSuccessResults;
