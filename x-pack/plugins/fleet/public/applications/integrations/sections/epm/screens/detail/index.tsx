@@ -275,13 +275,13 @@ export function Detail() {
     },
     [
       history,
+      hash,
       pathname,
       search,
-      hash,
-      integration,
-      agentPolicyIdFromContext,
       pkgkey,
+      integration,
       services.application,
+      agentPolicyIdFromContext,
     ]
   );
 
@@ -363,9 +363,9 @@ export function Detail() {
       pkgkey,
       integration,
       agentPolicyIdFromContext,
+      handleAddIntegrationPolicyClick,
       missingSecurityConfiguration,
       integrationInfo?.title,
-      handleAddIntegrationPolicyClick,
     ]
   );
 
