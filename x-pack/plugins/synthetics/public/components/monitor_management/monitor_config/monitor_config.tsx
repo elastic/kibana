@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
-import { defaultConfig, usePolicyConfigContext } from '../../fleet_package/contexts';
+import { usePolicyConfigContext } from '../../fleet_package/contexts';
 
 import { usePolicy } from '../../fleet_package/hooks/use_policy';
 import { validate } from '../validation';
@@ -26,6 +26,7 @@ import { useFormatMonitor } from '../hooks/use_format_monitor';
 import { MonitorFields } from './monitor_fields';
 import { TestNowMode, TestRun } from '../test_now_mode/test_now_mode';
 import { MonitorFields as MonitorFieldsType } from '../../../../common/runtime_types';
+import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 
 export const MonitorConfig = ({ isEdit = false }: { isEdit: boolean }) => {
   const { monitorType } = usePolicyConfigContext();
@@ -41,7 +42,7 @@ export const MonitorConfig = ({ isEdit = false }: { isEdit: boolean }) => {
     monitorType,
     validate,
     config: policyConfig[monitorType],
-    defaultConfig: defaultConfig[monitorType],
+    defaultConfig: DEFAULT_FIELDS[monitorType],
   });
 
   const [hasBeenSubmitted, setHasBeenSubmitted] = useState(false);

@@ -10,40 +10,14 @@ import { PackagePolicyCreateExtensionComponentProps } from '@kbn/fleet-plugin/pu
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { DataStream } from './types';
 import { PolicyConfig } from './types';
-import {
-  usePolicyConfigContext,
-  defaultHTTPSimpleFields,
-  defaultHTTPAdvancedFields,
-  defaultTCPSimpleFields,
-  defaultTCPAdvancedFields,
-  defaultICMPSimpleFields,
-  defaultBrowserSimpleFields,
-  defaultBrowserAdvancedFields,
-  defaultTLSFields,
-} from './contexts';
+import { usePolicyConfigContext } from './contexts';
+import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 import { CustomFields } from './custom_fields';
 import { useUpdatePolicy } from './hooks/use_update_policy';
 import { usePolicy } from './hooks/use_policy';
 import { validate } from './validation';
 
-export const defaultConfig: PolicyConfig = {
-  [DataStream.HTTP]: {
-    ...defaultHTTPSimpleFields,
-    ...defaultHTTPAdvancedFields,
-    ...defaultTLSFields,
-  },
-  [DataStream.TCP]: {
-    ...defaultTCPSimpleFields,
-    ...defaultTCPAdvancedFields,
-    ...defaultTLSFields,
-  },
-  [DataStream.ICMP]: defaultICMPSimpleFields,
-  [DataStream.BROWSER]: {
-    ...defaultBrowserSimpleFields,
-    ...defaultBrowserAdvancedFields,
-    ...defaultTLSFields,
-  },
-};
+export const defaultConfig: PolicyConfig = DEFAULT_FIELDS;
 
 /**
  * Exports Synthetics-specific package policy instructions
