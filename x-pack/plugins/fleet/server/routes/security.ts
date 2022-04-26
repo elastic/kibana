@@ -13,6 +13,7 @@ import type {
   RequestHandler,
   RequestHandlerContext,
   OnPostAuthHandler,
+  KibanaResponseFactory,
 } from '@kbn/core/server';
 
 import type { HasPrivilegesResponse } from '@kbn/security-plugin/server';
@@ -21,7 +22,7 @@ import type { FleetAuthz, FleetPackageAuthz } from '../../common';
 import { calculateAuthz, INTEGRATIONS_PLUGIN_ID } from '../../common';
 
 import { appContextService } from '../services';
-import type { FleetRequestHandlerContext } from '../types';
+import type { FleetRequestHandler, FleetRequestHandlerContext } from '../types';
 import { PLUGIN_ID } from '../constants';
 
 function checkSecurityEnabled() {
@@ -304,21 +305,23 @@ export const hasRoutePrivileges = async (
     : fleetAuthzConfig.fleetPackageAuthz;
 
   const packagePrivileges = [];
-  if (packageAuthz?.executePackageAction) {
-    packagePrivileges.push('feature_integrations.execute_package_action');
-  }
   if (packageAuthz?.managePackagePolicy) {
     packagePrivileges.push('feature_integrations.manage_package_policy');
   }
   if (packageAuthz?.manageAgentPolicy) {
     packagePrivileges.push('feature_integrations.manage_agent_policy');
   }
-  if (packageAuthz?.readPackageActionResult) {
-    packagePrivileges.push('feature_integrations.read_package_action_result');
+  const actionPrivileges = [];
+  if (packageAuthz?.executePackageAction) {
+    actionPrivileges.push('feature_integrations.execute_package_action');
   }
+  // if (packageAuthz?.readPackageActionResult) {
+  //   actionPrivileges.push('feature_integrations.read_package_action_result');
+  // }
 
   const spaceResource = 'space:' + spaceId;
 
+  // legacy privilege check
   const hasPrivilegesResponse: HasPrivilegesResponse = await appContextService
     .getClusterClient()
     .asScoped(req)
@@ -339,8 +342,11 @@ export const hasRoutePrivileges = async (
     });
   appContextService.getLogger().warn(JSON.stringify(hasPrivilegesResponse, null, 2));
 
-  // TODO add action
   const packageResource = 'package:' + packageAuthz?.packageName; //  + ':*',
+
+  const actionResources = (packageAuthz?.packageActions ?? []).map(
+    (action) => `${packageResource}:${action}`
+  );
 
   const hasPackagePrivilegesResponse: HasPrivilegesResponse = await appContextService
     .getClusterClient()
@@ -352,8 +358,17 @@ export const hasRoutePrivileges = async (
             ? [
                 {
                   application: 'kibana-.kibana',
-                  resources: [packageResource, spaceResource],
+                  resources: [spaceResource, packageResource],
                   privileges: packagePrivileges,
+                },
+              ]
+            : []),
+          ...(actionResources.length > 0
+            ? [
+                {
+                  application: 'kibana-.kibana',
+                  resources: [spaceResource, ...actionResources],
+                  privileges: actionPrivileges,
                 },
               ]
             : []),
@@ -367,10 +382,10 @@ export const hasRoutePrivileges = async (
 
 async function authHandler(
   fleetAuthzConfig: FleetAuthzRouteConfig,
-  nextHandler,
-  context,
-  request,
-  response
+  nextHandler: FleetRequestHandler<any, any, any>,
+  context: FleetRequestHandlerContext,
+  request: KibanaRequest,
+  response: KibanaResponseFactory
 ) {
   if (!(await hasRoutePrivileges(request, fleetAuthzConfig, context.fleet.spaceId))) {
     return response.forbidden();
@@ -382,5 +397,7 @@ async function authHandler(
   return nextHandler(context, request, response);
 }
 
-export const authzHandlerWrapper = (fleetAuthzConfig, nextHandler) =>
-  authHandler.bind(null, fleetAuthzConfig, nextHandler);
+export const authzHandlerWrapper = (
+  fleetAuthzConfig: FleetAuthzRouteConfig,
+  nextHandler: FleetRequestHandler<any, any, any>
+) => authHandler.bind(null, fleetAuthzConfig, nextHandler);

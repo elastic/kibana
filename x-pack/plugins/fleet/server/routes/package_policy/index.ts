@@ -74,8 +74,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           getPackageFromRequest: (req: any) => {
             return (req as CreatePackagePolicyRequest).body.package?.name;
           },
-          // executePackageAction: true,
-          // packageActions: ['isolate_host'],
+          executePackageAction: true,
+          packageActions: ['isolate_host'],
         },
       },
       createPackagePolicyHandler

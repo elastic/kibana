@@ -101,7 +101,8 @@ export function Detail() {
   const permissionCheck = usePermissionCheck();
   const missingSecurityConfiguration =
     !permissionCheck.data?.success && permissionCheck.data?.error === 'MISSING_SECURITY';
-  const userCanInstallPackages = canInstallPackages && permissionCheck.data?.success;
+  // TODO temporarily disabling ui check to test API package check
+  const userCanInstallPackages = true; // canInstallPackages && permissionCheck.data?.success;
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
