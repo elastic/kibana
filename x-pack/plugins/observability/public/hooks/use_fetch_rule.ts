@@ -6,13 +6,14 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
-import { loadRule } from '@kbn/triggers-actions-ui-plugin/public';
+import { loadRule, loadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
 import { FetchRuleProps, FetchRule } from '../pages/rule_details/types';
 
 export function useFetchRule({ ruleId, http }: FetchRuleProps) {
   const [ruleSummary, setRuleSummary] = useState<FetchRule>({
     isLoadingRule: false,
-    rule: null,
+    rule: undefined,
+    ruleType: undefined,
     errorRule: false,
   });
 
@@ -20,19 +21,22 @@ export function useFetchRule({ ruleId, http }: FetchRuleProps) {
     setRuleSummary((oldState: FetchRule) => ({ ...oldState, isLoading: true }));
 
     try {
-      const response = await loadRule({
-        http,
-        ruleId,
-      });
-      setRuleSummary({
-        isLoadingRule: false,
-        rule: response,
-        errorRule: false,
-      });
+      const [rule, ruleTypes] = await Promise.all([
+        loadRule({
+          http,
+          ruleId,
+        }),
+        loadRuleTypes({ http }),
+      ]);
+
+      const ruleType = ruleTypes.find((type) => type.id === rule.ruleTypeId);
+
+      setRuleSummary({ isLoadingRule: false, rule, ruleType, errorRule: false });
     } catch (_e) {
       setRuleSummary({
         isLoadingRule: false,
-        rule: null,
+        rule: undefined,
+        ruleType: undefined,
         errorRule: true,
       });
     }

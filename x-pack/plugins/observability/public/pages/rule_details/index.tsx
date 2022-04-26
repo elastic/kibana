@@ -25,13 +25,14 @@ import {
 } from '@elastic/eui';
 import { ActionGroup } from '@kbn/alerting-plugin/common';
 import { AlertStatusValues } from '@kbn/alerting-plugin/common';
-import { RuleType, AlertStatus } from '@kbn/triggers-actions-ui-plugin/public';
+import { AlertStatus } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   enableRule,
   disableRule,
   snoozeRule,
   unsnoozeRule,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { RuleType } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   AlertListItem,
   RuleDetailsPathParams,
@@ -47,6 +48,7 @@ import { PageTitle, ItemTitleRuleSummary, ItemValueRuleSummary, Actions } from '
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchRuleSummary } from '../../hooks/use_fetch_rule_summary';
 import { getColorStatusBased } from './utils';
+import { hasExecuteActionsCapability, hasAllPrivilege } from './config';
 
 export function RuleDetailsPage() {
   const {
@@ -59,11 +61,12 @@ export function RuleDetailsPage() {
 
   const { ruleId } = useParams<RuleDetailsPathParams>();
   const { ObservabilityPageTemplate } = usePluginContext();
-  const { isLoadingRule, rule, errorRule, reloadRule } = useFetchRule({ ruleId, http });
+  const { isLoadingRule, rule, ruleType, errorRule, reloadRule } = useFetchRule({ ruleId, http });
   const { isLoadingRuleSummary, ruleSummary, errorRuleSummary, reloadRuleSummary } =
     useFetchRuleSummary({ ruleId, http });
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
   const [isRuleEditPopoverOpen, setIsRuleEditPopoverOpen] = useState(false);
+
   const [alerts, setAlerts] = useState<AlertListItem[]>([]);
 
   useEffect(() => {
@@ -74,7 +77,7 @@ export function RuleDetailsPage() {
         .sort((leftAlert, rightAlert) => leftAlert.sortPriority - rightAlert.sortPriority);
       setAlerts(sortedAlerts);
     }
-  }, [ruleSummary, errorRuleSummary]);
+  }, [ruleSummary, errorRuleSummary, http, rule]);
 
   useBreadcrumbs([
     {
@@ -134,9 +137,20 @@ export function RuleDetailsPage() {
         }),
       []
     );
-  // TODO:Is this check enough from permissions stand point?
-  const isRuleTypeEditableInContext = (ruleTypeId: string) =>
-    ruleTypeRegistry.has(ruleTypeId) ? !ruleTypeRegistry.get(ruleTypeId).requiresAppContext : false;
+
+  const canExecuteActions = hasExecuteActionsCapability(capabilities);
+  const canSaveRule =
+    hasAllPrivilege(rule, ruleType) &&
+    // if the rule has actions, can the user save the rule's action params
+    (canExecuteActions || (!canExecuteActions && rule.actions.length === 0));
+
+  const hasEditButton =
+    // can the user save the rule
+    canSaveRule &&
+    // is this rule type editable from within Rules Management
+    (ruleTypeRegistry.has(rule.ruleTypeId)
+      ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
+      : false);
 
   const {
     executionStatus: { status, lastExecutionDate },
@@ -152,12 +166,22 @@ export function RuleDetailsPage() {
   console.log('rule', rule);
   console.log('ruleSummary', ruleSummary);
 
+  const getRuleConditionsWording = () => (
+    <>
+      {params.criteria ? String((params.criteria as any[]).length) : 0}{' '}
+      {/* TODO:  Add [s] to the conditions word based on how many conditions */}
+      {i18n.translate('xpack.observability.ruleDetails.conditions', {
+        defaultMessage: 'conditions',
+      })}
+    </>
+  );
+
   return (
     <ObservabilityPageTemplate
       pageHeader={{
         pageTitle: <PageTitle rule={rule} />,
         bottomBorder: false,
-        rightSideItems: isRuleTypeEditableInContext(ruleTypeId)
+        rightSideItems: hasEditButton
           ? [
               <EuiFlexGroup direction="rowReverse" alignItems="center">
                 <EuiFlexItem>
@@ -206,7 +230,7 @@ export function RuleDetailsPage() {
                     enableRule: async () => await enableRule({ http, id: rule.id }),
                     disableRule: async () => await disableRule({ http, id: rule.id }),
                     onRuleChanged: () => reloadRule(),
-                    isEditable: isRuleTypeEditableInContext(rule.ruleTypeId),
+                    isEditable: hasEditButton,
                     snoozeRule: async (snoozeEndTime: string | -1) => {
                       await snoozeRule({ http, id: rule.id, snoozeEndTime });
                     },
@@ -218,7 +242,7 @@ export function RuleDetailsPage() {
           : [],
       }}
     >
-      <EuiFlexGroup>
+      <EuiFlexGroup wrap={true}>
         {/* Left side of Rule Summary */}
         <EuiFlexItem grow={1}>
           <EuiPanel color={getColorStatusBased(status)} hasBorder={false} paddingSize={'l'}>
@@ -251,6 +275,7 @@ export function RuleDetailsPage() {
                   translationKey="xpack.observability.ruleDetails.last24hAlerts"
                   defaultMessage="Alerts (last 24 h)"
                 />
+                {/* TODO: Get all the Alerts not only the Active ones */}
                 <ItemValueRuleSummary extraSpace={false} itemValue={String(alerts.length)} />
               </EuiFlexGroup>
               <EuiSpacer size="l" />
@@ -302,13 +327,13 @@ export function RuleDetailsPage() {
                   />
                   <EuiFlexItem grow={3}>
                     <EuiText size="m">
-                      <EuiButtonEmpty onClick={() => setEditFlyoutVisible(true)}>
-                        {params.criteria ? String((params.criteria as any[]).length) : 0}{' '}
-                        {/* TODO:  Add [s] to the conditions word based on how many conditions */}
-                        {i18n.translate('xpack.observability.ruleDetails.conditions', {
-                          defaultMessage: 'conditions',
-                        })}
-                      </EuiButtonEmpty>
+                      {hasEditButton ? (
+                        <EuiButtonEmpty onClick={() => setEditFlyoutVisible(true)}>
+                          {getRuleConditionsWording()}
+                        </EuiButtonEmpty>
+                      ) : (
+                        <EuiText>{getRuleConditionsWording()}</EuiText>
+                      )}
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>

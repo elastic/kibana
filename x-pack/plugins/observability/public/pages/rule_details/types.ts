@@ -6,7 +6,7 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import { Rule, RuleSummary } from '@kbn/triggers-actions-ui-plugin/public';
+import { Rule, RuleSummary, RuleType } from '@kbn/triggers-actions-ui-plugin/public';
 
 export interface RuleDetailsPathParams {
   ruleId: string;
@@ -22,7 +22,8 @@ export interface FetchRuleProps {
 
 export interface FetchRule {
   isLoadingRule: boolean;
-  rule: Rule | null;
+  rule: Rule | undefined;
+  ruleType: RuleType | undefined;
   errorRule: boolean;
 }
 
