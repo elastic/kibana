@@ -92,7 +92,7 @@ import { CenterJustifiedSpinner } from '../../../components/center_justified_spi
 import { ManageLicenseModal } from './manage_license_modal';
 import { checkRuleTypeEnabled } from '../../../lib/check_rule_type_enabled';
 import { RuleStatusDropdown } from './rule_status_dropdown';
-import { RuleTagsBadge } from './rule_tags_badge';
+import { RuleTagBadge } from './rule_tag_badge';
 import { PercentileSelectablePopover } from './percentile_selectable_popover';
 import { RuleDurationFormat } from './rule_duration_format';
 import { shouldShowDurationWarning } from '../../../lib/execution_duration_utils';
@@ -588,7 +588,7 @@ export const RulesList: React.FunctionComponent = () => {
         'data-test-subj': 'rulesTableCell-tagsPopover',
         render: (tags: string[], item: RuleTableItem) => {
           return tags.length > 0 ? (
-            <RuleTagsBadge
+            <RuleTagBadge
               isOpen={tagPopoverOpenIndex === item.index}
               tags={tags}
               onClick={() => setTagPopoverOpenIndex(item.index)}
