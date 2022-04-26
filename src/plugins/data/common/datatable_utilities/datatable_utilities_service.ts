@@ -77,18 +77,6 @@ export class DatatableUtilitiesService {
     return params?.interval;
   }
 
-  getUsedTimezone(column: DatatableColumn): string | undefined {
-    const params = column.meta.sourceParams?.params as { used_timezone: string } | undefined;
-
-    return params?.used_timezone;
-  }
-
-  hasForcedTimezone(column: DatatableColumn): boolean {
-    const params = column.meta.sourceParams?.params as { forced_timezone: boolean } | undefined;
-
-    return !!params?.forced_timezone;
-  }
-
   getTotalCount(table: Datatable): number | undefined {
     return table.meta?.statistics?.totalCount;
   }
