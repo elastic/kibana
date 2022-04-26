@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import nodemailerGetService from 'nodemailer/lib/well-known';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
-import { Logger } from '@kbn/core/server';
+import { Logger } from '../../../../../src/core/server';
 import { withoutMustacheTemplate } from '../../common';
 
 import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './lib/send_email';

@@ -20,8 +20,7 @@ import { InstallationCallout } from './installation_callout';
 import { UpdateConnector } from './update_connector';
 import { updateActionConnector } from '../../../lib/action_connector_api';
 import { Credentials } from './credentials';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { snExternalServiceConfig } from '../../../../../../actions/server/builtin_action_types/servicenow/config';
+import { snExternalServiceConfig } from '../../../../../../actions/common';
 
 const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps<ServiceNowActionConnector>> =
   ({

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Plugin as CorePlugin, PluginInitializerContext } from '@kbn/core/public';
+import { Plugin as CorePlugin, PluginInitializerContext } from 'src/core/public';
+
 import {
   ValidatedEmail,
   validateEmailAddresses as validateEmails,
