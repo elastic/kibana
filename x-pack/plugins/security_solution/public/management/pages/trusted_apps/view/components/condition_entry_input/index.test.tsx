@@ -144,7 +144,7 @@ describe('Condition entry input', () => {
     expect(inputField.contains('is'));
   });
 
-  it('should show operator dorpdown with two values when field is PATH', () => {
+  it('should show operator dropdown with two values when field is PATH', () => {
     const element = shallow(
       getElement('testOperatorOptions', undefined, undefined, {
         ...baseEntry,

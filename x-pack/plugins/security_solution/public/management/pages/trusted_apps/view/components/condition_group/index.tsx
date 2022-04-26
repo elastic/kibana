@@ -107,7 +107,7 @@ export const ConditionGroup = memo<ConditionGroupProps>(
               className="and-button"
             >
               <FormattedMessage
-                id="xpack.securitySolution.trustedapps.logicalConditionBuilder.group.andOperator"
+                id="xpack.securitySolution.trustedApps.logicalConditionBuilder.group.andOperator"
                 defaultMessage="AND"
               />
             </EuiButton>

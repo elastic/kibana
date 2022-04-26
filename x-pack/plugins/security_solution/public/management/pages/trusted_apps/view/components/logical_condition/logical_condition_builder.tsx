@@ -56,7 +56,7 @@ const NoEntries = memo(() => {
     <EuiPanel paddingSize="l">
       <EuiText textAlign="center" size="s" color="subdued">
         <FormattedMessage
-          id="xpack.securitySolution.trustedapps.logicalConditionBuilder.noEntries"
+          id="xpack.securitySolution.trustedApps.logicalConditionBuilder.noEntries"
           defaultMessage="No conditions defined"
         />
       </EuiText>
