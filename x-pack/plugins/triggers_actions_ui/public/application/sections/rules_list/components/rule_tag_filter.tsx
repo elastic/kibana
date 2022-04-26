@@ -112,7 +112,7 @@ export const RuleTagFilter = (props: RuleTagFilterProps) => {
           {(list, search) => (
             <>
               {search}
-              <EuiSpacer size="xs"/>
+              <EuiSpacer size="xs" />
               {list}
             </>
           )}
