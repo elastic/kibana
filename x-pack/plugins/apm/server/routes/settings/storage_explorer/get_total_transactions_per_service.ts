@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { rangeQuery } from '@kbn/observability-plugin/server';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
-import { rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 
 export async function getTotalTransactionsPerService({
