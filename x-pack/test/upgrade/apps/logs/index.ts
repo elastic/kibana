@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-import { pageObjects } from '../functional/page_objects';
-import { services } from './services';
-
-export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('upgrade', function () {
+    loadTestFile(require.resolve('./logs_smoke_tests'));
+  });
+}

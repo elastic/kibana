@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { services as functionalServices } from '../functional/services';
-import { services as reportingServices } from './reporting_services';
+import { services as functionalServices } from '../../functional/services';
+import { services as reportingServices } from './reporting_upgrade_services';
 import { services as mapsUpgradeServices } from './maps_upgrade_services';
 
 export const services = {

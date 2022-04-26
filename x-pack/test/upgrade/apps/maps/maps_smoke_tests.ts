@@ -82,7 +82,7 @@ export default function ({
   // Only update the baseline images from Jenkins session images after comparing them
   // These tests might fail locally because of scaling factors and resolution.
 
-  describe('maps smoke tests', function describeIndexTests() {
+  describe('upgrade maps smoke tests', function describeIndexTests() {
     const spaces = [
       { space: 'default', basePath: '' },
       { space: 'automation', basePath: 's/automation' },
@@ -101,7 +101,7 @@ export default function ({
     });
 
     spaces.forEach(({ space, basePath }) => {
-      describe('space ' + space + ' ecommerce', () => {
+      describe('space: ' + space + ', name: ecommerce', () => {
         before(async () => {
           await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
             basePath,
@@ -129,7 +129,7 @@ export default function ({
           expect(percentDifference.toFixed(3)).to.be.lessThan(0.031);
         });
       });
-      describe('space ' + space + ' flights', () => {
+      describe('space: ' + space + ', name: flights', () => {
         before(async () => {
           await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
             basePath,
@@ -153,7 +153,7 @@ export default function ({
           expect(percentDifference.toFixed(3)).to.be.lessThan(0.031);
         });
       });
-      describe('space ' + space + ' web logs', () => {
+      describe('space: ' + space + ', name: web logs', () => {
         before(async () => {
           await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
             basePath,
