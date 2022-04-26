@@ -106,7 +106,7 @@ describe('Cloud Plugin', () => {
         );
       });
 
-      it('user hash includes org id', async () => {
+      it('user hash includes the org id when not authenticated via Cloud SAML', async () => {
         await setupPlugin({
           config: { full_story: { enabled: true, org_id: 'foo' }, id: 'esOrg1' },
           currentUserProps: {
@@ -114,6 +114,7 @@ describe('Cloud Plugin', () => {
           },
         });
 
+        expect(fullStoryApiMock.identify).toHaveBeenCalledTimes(1);
         const hashId1 = fullStoryApiMock.identify.mock.calls[0][0];
 
         await setupPlugin({
@@ -123,9 +124,56 @@ describe('Cloud Plugin', () => {
           },
         });
 
+        expect(fullStoryApiMock.identify).toHaveBeenCalledTimes(2);
         const hashId2 = fullStoryApiMock.identify.mock.calls[1][0];
 
         expect(hashId1).not.toEqual(hashId2);
+      });
+
+      it('user hash does not include the org id when there is none', async () => {
+        await setupPlugin({
+          config: { full_story: { enabled: true, org_id: 'foo' }, id: undefined },
+          currentUserProps: {
+            username: '1234',
+          },
+        });
+
+        const hashId1 = fullStoryApiMock.identify.mock.calls[0][0];
+
+        await setupPlugin({
+          config: { full_story: { enabled: true, org_id: 'foo' }, id: undefined },
+          currentUserProps: {
+            username: '1234',
+          },
+        });
+
+        const hashId2 = fullStoryApiMock.identify.mock.calls[1][0];
+
+        expect(hashId1).toEqual(hashId2);
+      });
+
+      it('user hash does not include org id when authenticated via Cloud SAML', async () => {
+        await setupPlugin({
+          config: { full_story: { enabled: true, org_id: 'foo' }, id: 'esOrg1' },
+          currentUserProps: {
+            username: '1234',
+            authentication_realm: { name: 'cloud-saml-kibana' },
+          },
+        });
+
+        const hashId1 = fullStoryApiMock.identify.mock.calls[0][0];
+
+        await setupPlugin({
+          config: { full_story: { enabled: true, org_id: 'foo' }, id: 'esOrg2' },
+          currentUserProps: {
+            username: '1234',
+            authentication_realm: { name: 'cloud-saml-kibana' },
+          },
+        });
+
+        const hashId2 = fullStoryApiMock.identify.mock.calls[1][0];
+
+        expect(hashId1).toEqual(hashId2);
       });
 
       it('calls FS.setVars everytime an app changes', async () => {
@@ -251,6 +299,7 @@ describe('Cloud Plugin', () => {
         fullStoryApiMock.identify.mockImplementationOnce(() => {
           throw new Error(`identify failed!`);
         });
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementationOnce(() => {});
         const { initContext } = await setupPlugin({
           config: { full_story: { enabled: true, org_id: 'foo' } },
           currentUserProps: {
@@ -261,6 +310,10 @@ describe('Cloud Plugin', () => {
         expect(fullStoryApiMock.event).toHaveBeenCalledWith('Loaded Kibana', {
           kibana_version_str: initContext.env.packageInfo.version,
         });
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          '[cloud.full_story] Could not call FS.identify due to error: Error: identify failed!',
+          expect.any(Error)
+        );
       });
 
       it('does not call initializeFullStory when enabled=false', async () => {
