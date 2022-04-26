@@ -9,14 +9,14 @@ import { i18n } from '@kbn/i18n';
 import { CommandExecutionResponse } from '../console/types';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import { handleIsolateAction } from './action_handlers';
-import { HostInfo } from '../../../../common/endpoint/types';
+import { HostMetadata } from '../../../../common/endpoint/types';
 import { CommandServiceInterface, CommandDefinition, Command } from '../console';
 
 /**
  * Endpoint specific Response Actions (commands) for use with Console.
  */
 export class EndpointConsoleCommandService implements CommandServiceInterface {
-  constructor(private readonly endpointHostInfo: HostInfo) {}
+  constructor(private readonly endpointMetadata: HostMetadata) {}
 
   getCommandList(): CommandDefinition[] {
     return [
@@ -37,7 +37,7 @@ export class EndpointConsoleCommandService implements CommandServiceInterface {
   async executeCommand(command: Command): Promise<CommandExecutionResponse> {
     switch (command.args.name) {
       case 'isolate':
-        return handleIsolateAction(this.endpointHostInfo, command);
+        return handleIsolateAction(this.endpointMetadata, command);
       default:
         throw new EndpointError(
           i18n.translate('xpack.securitySolution.endpointResponseActions.unknownAction', {

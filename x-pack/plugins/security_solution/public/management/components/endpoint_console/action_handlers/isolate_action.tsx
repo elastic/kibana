@@ -11,12 +11,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut } from '@elastic/eui';
 import { fetchActionDetails } from '../../../services/actions';
 import { EndpointError } from '../../../../../common/endpoint/errors';
-import { HostInfo } from '../../../../../common/endpoint/types';
+import { HostMetadata } from '../../../../../common/endpoint/types';
 import { Command, CommandExecutionResponse } from '../../console/types';
 import { isolateHost } from '../../../../common/lib/endpoint_isolation';
 
 export const handleIsolateAction = async (
-  endpointHostInfo: HostInfo,
+  endpointMetadata: HostMetadata,
   command: Command
 ): Promise<CommandExecutionResponse> => {
   let isolateActionId: string;
@@ -25,7 +25,7 @@ export const handleIsolateAction = async (
   try {
     isolateActionId = (
       await isolateHost({
-        endpoint_ids: [endpointHostInfo.metadata.agent.id],
+        endpoint_ids: [endpointMetadata.agent.id],
         ...(command.args.hasArg('comment') ? { comment: command.args.args?.comment.value } : {}),
       })
     ).action;

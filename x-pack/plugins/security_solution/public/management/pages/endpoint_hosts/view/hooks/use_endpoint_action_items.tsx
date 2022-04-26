@@ -8,6 +8,8 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { useShowEndpointResponseActionsConsole } from '../../../../hooks';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import { getEndpointDetailsPath } from '../../../../common/routing';
 import { HostMetadata, MaybeImmutable } from '../../../../../../common/endpoint/types';
@@ -30,6 +32,13 @@ export const useEndpointActionItems = (
   const { getAppUrl } = useAppUrl();
   const fleetAgentPolicies = useEndpointSelector(agentPolicies);
   const allCurrentUrlParams = useEndpointSelector(uiQueryParams);
+
+  const isResponseActionsConsoleEnabled = useIsExperimentalFeatureEnabled(
+    'responseActionsConsoleEnabled'
+  );
+
+  // FIXME:PT DO NOT COMMIT THIS. Will cause errors if feature is not enabled
+  const showEndpointResponseActionsConsole = useShowEndpointResponseActionsConsole();
 
   return useMemo<ContextMenuItemNavByRouterProps[]>(() => {
     if (endpointMetadata) {
@@ -101,6 +110,25 @@ export const useEndpointActionItems = (
 
       return [
         ...isolationActions,
+        ...(isResponseActionsConsoleEnabled
+          ? [
+              {
+                'data-test-subj': 'console',
+                icon: 'console',
+                key: 'consoleLink',
+                onClick: (ev) => {
+                  ev.preventDefault();
+                  showEndpointResponseActionsConsole(endpointMetadata);
+                },
+                children: (
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.actions.hostDetails"
+                    defaultMessage="Response actions"
+                  />
+                ),
+              },
+            ]
+          : []),
         {
           'data-test-subj': 'hostLink',
           icon: 'logoSecurity',
@@ -192,5 +220,13 @@ export const useEndpointActionItems = (
     }
 
     return [];
-  }, [allCurrentUrlParams, endpointMetadata, fleetAgentPolicies, getAppUrl, isPlatinumPlus]);
+  }, [
+    allCurrentUrlParams,
+    endpointMetadata,
+    fleetAgentPolicies,
+    getAppUrl,
+    isPlatinumPlus,
+    isResponseActionsConsoleEnabled,
+    showEndpointResponseActionsConsole,
+  ]);
 };
