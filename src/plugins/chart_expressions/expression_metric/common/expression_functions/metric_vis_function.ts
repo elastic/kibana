@@ -159,7 +159,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       }),
     },
     iconSize: {
-      default: 'm',
+      default: 'l',
       types: ['string'],
       options: ['m', 'l', 'xl', 'xxl'],
       help: i18n.translate('expressionMetricVis.function.icon.iconSize.help', {

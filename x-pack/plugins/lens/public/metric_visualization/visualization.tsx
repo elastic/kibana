@@ -122,9 +122,7 @@ const toExpression = (
   };
   const isReducedMode = attributes?.mode === 'reduced';
 
-  const metricFontSize = !isReducedMode
-    ? labelToMetricFontSizeMap[state?.size || DEFAULT_TITLE_SIZE]
-    : labelToMetricFontSizeMap.xs;
+  const metricFontSize = labelToMetricFontSizeMap[state?.size || DEFAULT_TITLE_SIZE];
 
   const iconAlignment = getIconAlignment(state?.textAlign, state?.iconPosition);
 

@@ -107,6 +107,34 @@ const metricIconSet = [
       defaultMessage: 'quote',
     }),
   },
+
+  {
+    value: 'cheer',
+    label: i18n.translate('xpack.lens.xyChart.iconSelect.cheerIconLabel', {
+      defaultMessage: 'cheer',
+    }),
+  },
+
+  {
+    value: 'faceSad',
+    label: i18n.translate('xpack.lens.xyChart.iconSelect.faceSadIconLabel', {
+      defaultMessage: 'faceSad',
+    }),
+  },
+
+  {
+    value: 'faceNeutral',
+    label: i18n.translate('xpack.lens.xyChart.iconSelect.faceNeutralIconLabel', {
+      defaultMessage: 'faceNeutral',
+    }),
+  },
+
+  {
+    value: 'faceHappy',
+    label: i18n.translate('xpack.lens.xyChart.iconSelect.faceHappyIconLabel', {
+      defaultMessage: 'faceHappy',
+    }),
+  },
 ];
 
 // export const defualtEuiIconSet = [
