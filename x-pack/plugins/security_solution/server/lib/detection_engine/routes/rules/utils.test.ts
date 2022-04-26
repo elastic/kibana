@@ -980,6 +980,7 @@ describe('utils', () => {
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
       ]);
       const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
@@ -1023,6 +1024,7 @@ describe('utils', () => {
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
         {
           id: '789',
@@ -1030,6 +1032,7 @@ describe('utils', () => {
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
       ]);
       const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
@@ -1079,6 +1082,7 @@ describe('utils', () => {
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
         {
           id: '789',
@@ -1086,6 +1090,7 @@ describe('utils', () => {
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
       ]);
       const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
@@ -1142,6 +1147,7 @@ describe('utils', () => {
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
         {
           id: '789',
@@ -1149,6 +1155,7 @@ describe('utils', () => {
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
       ]);
       const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
@@ -1207,6 +1214,7 @@ describe('utils', () => {
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
         {
           id: '789',
@@ -1214,6 +1222,7 @@ describe('utils', () => {
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
       ]);
       const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
@@ -1313,6 +1322,7 @@ describe('utils', () => {
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
         {
           id: '789',
@@ -1320,6 +1330,7 @@ describe('utils', () => {
           actionTypeId: 'default',
           name: 'name',
           isPreconfigured: false,
+          isDeprecated: false,
         },
       ]);
       const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);

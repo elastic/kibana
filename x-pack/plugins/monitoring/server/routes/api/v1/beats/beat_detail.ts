@@ -5,32 +5,27 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { prefixIndexPatternWithCcs } from '../../../../../common/ccs_utils';
+import { INDEX_PATTERN_BEATS } from '../../../../../common/constants';
+import {
+  postBeatDetailRequestParamsRT,
+  postBeatDetailRequestPayloadRT,
+  postBeatDetailResponsePayloadRT,
+} from '../../../../../common/http_api/beats';
 import { getBeatSummary } from '../../../../lib/beats';
+import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors';
+import { MonitoringCore } from '../../../../types';
 import { metricSet } from './metric_set_detail';
-import { INDEX_PATTERN_BEATS } from '../../../../../common/constants';
 
-export function beatsDetailRoute(server) {
+export function beatsDetailRoute(server: MonitoringCore) {
   server.route({
-    method: 'POST',
+    method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/beats/beat/{beatUuid}',
-    config: {
-      validate: {
-        params: schema.object({
-          clusterUuid: schema.string(),
-          beatUuid: schema.string(),
-        }),
-        body: schema.object({
-          ccs: schema.maybe(schema.string()),
-          timeRange: schema.object({
-            min: schema.string(),
-            max: schema.string(),
-          }),
-        }),
-      },
+    validate: {
+      params: createValidationFunction(postBeatDetailRequestParamsRT),
+      body: createValidationFunction(postBeatDetailRequestPayloadRT),
     },
     async handler(req) {
       const clusterUuid = req.params.clusterUuid;
@@ -52,10 +47,10 @@ export function beatsDetailRoute(server) {
           getMetrics(req, 'beats', metricSet, [{ term: { 'beats_stats.beat.uuid': beatUuid } }]),
         ]);
 
-        return {
+        return postBeatDetailResponsePayloadRT.encode({
           summary,
           metrics,
-        };
+        });
       } catch (err) {
         throw handleError(err, req);
       }
