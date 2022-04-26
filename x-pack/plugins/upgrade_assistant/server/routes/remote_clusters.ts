@@ -15,26 +15,19 @@ export function registerRemoteClustersRoute({ router, lib: { handleEsError } }: 
       path: `${API_BASE_PATH}/remote_clusters`,
       validate: false,
     },
-    versionCheckHandlerWrapper(
-      async (
-        {
-          core: {
-            elasticsearch: { client },
-          },
-        },
-        request,
-        response
-      ) => {
-        try {
-          const clustersByName = await client.asCurrentUser.cluster.remoteInfo();
+    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+      try {
+        const {
+          elasticsearch: { client },
+        } = await core;
+        const clustersByName = await client.asCurrentUser.cluster.remoteInfo();
 
-          const remoteClusters = Object.keys(clustersByName);
+        const remoteClusters = Object.keys(clustersByName);
 
-          return response.ok({ body: remoteClusters });
-        } catch (error) {
-          return handleEsError({ error, response });
-        }
+        return response.ok({ body: remoteClusters });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
-    )
+    })
   );
 }

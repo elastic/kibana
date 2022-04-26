@@ -92,7 +92,7 @@ export const registerResolveImportErrorsRoute = (
         });
       }
 
-      const { getClient, getImporter, typeRegistry } = context.core.savedObjects;
+      const { getClient, getImporter, typeRegistry } = (await context.core).savedObjects;
 
       const includedHiddenTypes = chain(req.body.retries)
         .map('type')
