@@ -10,6 +10,7 @@ SOURCE_FILES = glob([
   "istanbul_preset.js",
   "node_preset.js",
   "styled_components_files.js",
+  "web_preset.js",
   "webpack_preset.js",
 ])
 

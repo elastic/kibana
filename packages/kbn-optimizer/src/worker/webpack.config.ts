@@ -219,8 +219,8 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
               babelrc: false,
               envName: worker.dist ? 'production' : 'development',
               presets: IS_CODE_COVERAGE
-                ? [ISTANBUL_PRESET_PATH, [BABEL_PRESET_PATH, { esmodules: false }]]
-                : [[BABEL_PRESET_PATH, { esmodules: false }]],
+                ? [ISTANBUL_PRESET_PATH, [BABEL_PRESET_PATH]]
+                : [[BABEL_PRESET_PATH]],
             },
           },
         },

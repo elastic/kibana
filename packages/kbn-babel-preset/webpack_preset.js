@@ -8,21 +8,18 @@
 
 const { USES_STYLED_COMPONENTS } = require('./styled_components_files');
 
-module.exports = (_, options = {}) => {
+module.exports = (_, { esmodules, ...options } = {}) => {
   return {
     presets: [
       [
         require.resolve('@babel/preset-env'),
         {
-          ...(options.esmodules === false
-            ? {}
-            : {
-                targets: {
-                  esmodules: true,
-                },
-                modules: false,
-              }),
+          // When building the @kbn web packages, we want to emit the ES modules only.
+          // However, when generating the final bundles in webpack, we want `.browserslistrc` to be applied (specifying no targets gets this effect).
+          // This optimization has proven to generate a smaller bundle sizes overall. \o/
+          ...(esmodules === true ? { targets: { esmodules: true } } : {}),
           useBuiltIns: 'entry',
+          modules: false,
           // Please read the explanation for this
           // in node_preset.js
           corejs: '3.21.1',
