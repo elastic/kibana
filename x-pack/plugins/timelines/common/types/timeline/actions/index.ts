@@ -53,6 +53,9 @@ export type OnUpdateAlertStatusSuccess = (
 ) => void;
 export type OnUpdateAlertStatusError = (status: AlertStatus, error: Error) => void;
 
+export type OnCasesAttachToNewCase = (eventIds: string[]) => void;
+export type OnCasesAttachToExistingCase = (eventIds: string[]) => void;
+
 export interface StatusBulkActionsProps {
   eventIds: string[];
   currentStatus?: AlertStatus;
@@ -62,6 +65,8 @@ export interface StatusBulkActionsProps {
   setEventsDeleted: SetEventsDeleted;
   onUpdateSuccess?: OnUpdateAlertStatusSuccess;
   onUpdateFailure?: OnUpdateAlertStatusError;
+  onCasesAttachToNewCase?: OnCasesAttachToNewCase;
+  onCasesAttachToExistingCase?: OnCasesAttachToExistingCase;
   timelineId?: string;
 }
 export interface HeaderActionProps {

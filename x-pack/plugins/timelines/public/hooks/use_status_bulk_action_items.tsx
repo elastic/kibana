@@ -28,6 +28,8 @@ export const useStatusBulkActionItems = ({
   onUpdateSuccess,
   onUpdateFailure,
   timelineId,
+  onCasesAttachToNewCase,
+  onCasesAttachToExistingCase,
 }: StatusBulkActionsProps) => {
   const { updateAlertStatus } = useUpdateAlertsStatus(timelineId !== STANDALONE_ID);
   const { addSuccess, addError, addWarning } = useAppToasts();
@@ -156,8 +158,31 @@ export const useStatusBulkActionItems = ({
         </EuiContextMenuItem>
       );
     }
+
+    if (onCasesAttachToNewCase) {
+      actionItems.push(
+        <EuiContextMenuItem
+          key="close"
+          data-test-subj="attach-alerts-new-case"
+          onClick={() => onCasesAttachToNewCase(eventIds)}
+        >
+          {i18n.BULK_ACTION_ATTACH_NEW_CASE}
+        </EuiContextMenuItem>
+      );
+    }
+    if (onCasesAttachToExistingCase) {
+      actionItems.push(
+        <EuiContextMenuItem
+          key="close"
+          data-test-subj="attach-alerts-existing-case"
+          onClick={() => onCasesAttachToExistingCase(eventIds)}
+        >
+          {i18n.BULK_ACTION_ATTACH_EXISTING_CASE}
+        </EuiContextMenuItem>
+      );
+    }
     return actionItems;
-  }, [currentStatus, onClickUpdate]);
+  }, [currentStatus, eventIds, onCasesAttachToExistingCase, onCasesAttachToNewCase, onClickUpdate]);
 
   return items;
 };
