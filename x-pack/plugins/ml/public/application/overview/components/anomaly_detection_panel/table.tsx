@@ -46,7 +46,7 @@ interface Props {
   statsBarData: JobStatsBarStats;
 }
 
-export const AnomalyDetectionTable: FC<Props> = ({ items, statsBarData }) => {
+export const AnomalyDetectionTable: FC<Props> = ({ items, statsBarData, chartsService }) => {
   const groupsList = Object.values(items);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -117,6 +117,7 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, statsBarData }) => {
             showYAxis={false}
             showLegend={false}
             noDataWarning={noDatWarning}
+            chartsService={chartsService}
           />
         );
       },
