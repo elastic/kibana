@@ -6,44 +6,43 @@
  */
 
 import { get } from 'lodash';
-import { schema } from '@kbn/config-schema';
-import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
-import { getNodeSummary } from '../../../../lib/elasticsearch/nodes';
-import { getShardStats, getShardAllocation } from '../../../../lib/elasticsearch/shards';
-import { getMetrics } from '../../../../lib/details/get_metrics';
-import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPatternWithCcs } from '../../../../../common/ccs_utils';
-import { metricSets } from './metric_set_node_detail';
-import { getLogs } from '../../../../lib/logs/get_logs';
 import { CCS_REMOTE_PATTERN } from '../../../../../common/constants';
+import {
+  postElasticsearchNodeDetailRequestParamsRT,
+  postElasticsearchNodeDetailRequestPayloadRT,
+  postElasticsearchNodeDetailResponsePayloadRT,
+} from '../../../../../common/http_api/elasticsearch';
+import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
+import { createValidationFunction } from '../../../../lib/create_route_validation_function';
+import {
+  getMetrics,
+  MetricDescriptor,
+  NamedMetricDescriptor,
+} from '../../../../lib/details/get_metrics';
+import { getNodeSummary } from '../../../../lib/elasticsearch/nodes';
+import { getShardAllocation, getShardStats } from '../../../../lib/elasticsearch/shards';
+import { handleError } from '../../../../lib/errors/handle_error';
+import { getLogs } from '../../../../lib/logs/get_logs';
+import { MonitoringCore } from '../../../../types';
+import { metricSets } from './metric_set_node_detail';
 
 const { advanced: metricSetAdvanced, overview: metricSetOverview } = metricSets;
 
-export function esNodeRoute(server) {
+export function esNodeRoute(server: MonitoringCore) {
+  const validateParams = createValidationFunction(postElasticsearchNodeDetailRequestParamsRT);
+  const validateBody = createValidationFunction(postElasticsearchNodeDetailRequestPayloadRT);
+
   server.route({
-    method: 'POST',
+    method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/elasticsearch/nodes/{nodeUuid}',
-    config: {
-      validate: {
-        params: schema.object({
-          clusterUuid: schema.string(),
-          nodeUuid: schema.string(),
-        }),
-        body: schema.object({
-          ccs: schema.maybe(schema.string()),
-          showSystemIndices: schema.boolean({ defaultValue: false }), // show/hide system indices in shard allocation table
-          timeRange: schema.object({
-            min: schema.string(),
-            max: schema.string(),
-          }),
-          is_advanced: schema.boolean(),
-        }),
-      },
+    validate: {
+      params: validateParams,
+      body: validateBody,
     },
     async handler(req) {
       const config = server.config;
-      const ccs = req.payload.ccs;
-      const showSystemIndices = req.payload.showSystemIndices;
+      const showSystemIndices = req.payload.showSystemIndices ?? false;
       const clusterUuid = req.params.clusterUuid;
       const nodeUuid = req.params.nodeUuid;
       const start = req.payload.timeRange.min;
@@ -55,23 +54,27 @@ export function esNodeRoute(server) {
       );
       const isAdvanced = req.payload.is_advanced;
 
-      let metricSet;
+      let metricSet: MetricDescriptor[];
       if (isAdvanced) {
         metricSet = metricSetAdvanced;
       } else {
         metricSet = metricSetOverview;
         // set the cgroup option if needed
         const showCgroupMetricsElasticsearch = config.ui.container.elasticsearch.enabled;
-        const metricCpu = metricSet.find((m) => m.name === 'node_cpu_metric');
-        if (showCgroupMetricsElasticsearch) {
-          metricCpu.keys = ['node_cgroup_quota_as_cpu_utilization'];
-        } else {
-          metricCpu.keys = ['node_cpu_utilization'];
+        const metricCpu = metricSet.find(
+          (m): m is NamedMetricDescriptor => typeof m === 'object' && m.name === 'node_cpu_metric'
+        );
+        if (metricCpu) {
+          if (showCgroupMetricsElasticsearch) {
+            metricCpu.keys = ['node_cgroup_quota_as_cpu_utilization'];
+          } else {
+            metricCpu.keys = ['node_cpu_utilization'];
+          }
         }
       }
 
       try {
-        const cluster = await getClusterStats(req, clusterUuid, ccs);
+        const cluster = await getClusterStats(req, clusterUuid);
 
         const clusterState = get(
           cluster,
@@ -132,12 +135,12 @@ export function esNodeRoute(server) {
           });
         }
 
-        return {
+        return postElasticsearchNodeDetailResponsePayloadRT.encode({
           nodeSummary,
           metrics,
           logs,
           ...shardAllocation,
-        };
+        });
       } catch (err) {
         throw handleError(err, req);
       }
