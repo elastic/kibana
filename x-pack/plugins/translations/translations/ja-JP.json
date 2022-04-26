@@ -7603,7 +7603,6 @@
     "xpack.apm.propertiesTable.tabs.metadataLabel": "メタデータ",
     "xpack.apm.propertiesTable.tabs.timelineLabel": "Timeline",
     "xpack.apm.searchInput.filter": "フィルター...",
-    "xpack.apm.selectCustomOptionText": "\\{searchValue\\}を新しいオプションとして追加",
     "xpack.apm.selectPlaceholder": "オプションを選択：",
     "xpack.apm.serviceDependencies.breakdownChartTitle": "依存関係にかかった時間",
     "xpack.apm.serviceDetails.dependenciesTabLabel": "依存関係",

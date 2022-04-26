@@ -7622,7 +7622,6 @@
     "xpack.apm.propertiesTable.tabs.metadataLabel": "元数据",
     "xpack.apm.propertiesTable.tabs.timelineLabel": "时间线",
     "xpack.apm.searchInput.filter": "筛选...",
-    "xpack.apm.selectCustomOptionText": "将 \\{searchValue\\} 添加为新选项",
     "xpack.apm.selectPlaceholder": "选择选项：",
     "xpack.apm.serviceDependencies.breakdownChartTitle": "依赖项花费的时间",
     "xpack.apm.serviceDetails.dependenciesTabLabel": "依赖项",

@@ -7505,7 +7505,6 @@
     "xpack.apm.propertiesTable.tabs.metadataLabel": "Métadonnées",
     "xpack.apm.propertiesTable.tabs.timelineLabel": "Chronologie",
     "xpack.apm.searchInput.filter": "Filtrer…",
-    "xpack.apm.selectCustomOptionText": "Ajouter \\{searchValue\\} en tant que nouvelle option",
     "xpack.apm.selectPlaceholder": "Sélectionner une option :",
     "xpack.apm.serviceDependencies.breakdownChartTitle": "Temps consacré par dépendance",
     "xpack.apm.serviceDetails.dependenciesTabLabel": "Dépendances",
