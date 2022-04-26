@@ -7,10 +7,17 @@
 import React, { useState } from 'react';
 import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useUptimeSettingsContext } from '../../contexts/uptime_settings_context';
 import { GetApiKeyBtn } from './get_api_key_btn';
 
 export const ManagementSettings = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const { isDev } = useUptimeSettingsContext();
+
+  if (!isDev) {
+    return null;
+  }
 
   return (
     <EuiPopover

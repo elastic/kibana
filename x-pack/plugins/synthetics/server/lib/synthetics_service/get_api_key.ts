@@ -85,6 +85,8 @@ export const generateAPIKey = async ({
   const apiKeyPrivileges: Record<string, any> = { ...serviceApiKeyPrivileges };
 
   if (uptimePrivileges) {
+    apiKeyPrivileges.index = [];
+    apiKeyPrivileges.cluster = [];
     apiKeyPrivileges.applications = [
       {
         privileges: ['feature_uptime.all'],
