@@ -8,11 +8,11 @@
 import * as rt from 'io-ts';
 import { ccsRT, clusterUuidRT, timeRangeRT } from '../shared';
 
-export const postApmOverviewRequestParamsRT = rt.type({
+export const postBeatsListingRequestParamsRT = rt.type({
   clusterUuid: clusterUuidRT,
 });
 
-export const postApmOverviewRequestPayloadRT = rt.intersection([
+export const postBeatsListingRequestPayloadRT = rt.intersection([
   rt.partial({
     ccs: ccsRT,
   }),
@@ -21,8 +21,8 @@ export const postApmOverviewRequestPayloadRT = rt.intersection([
   }),
 ]);
 
-export type PostApmOverviewRequestPayload = rt.TypeOf<typeof postApmOverviewRequestPayloadRT>;
+export type PostBeatsListingRequestPayload = rt.TypeOf<typeof postBeatsListingRequestPayloadRT>;
 
-export const postApmOverviewResponsePayloadRT = rt.type({
+export const postBeatsListingResponsePayloadRT = rt.type({
   // TODO: add payload entries
 });
