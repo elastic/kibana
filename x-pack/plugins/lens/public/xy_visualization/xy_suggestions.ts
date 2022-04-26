@@ -89,7 +89,8 @@ export function getSuggestions({
     keptLayerIds,
     state,
     subVisualizationId as SeriesType | undefined,
-    mainPalette
+    mainPalette,
+    table.timeseries
   );
 
   if (suggestions && suggestions instanceof Array) {
@@ -104,7 +105,8 @@ function getSuggestionForColumns(
   keptLayerIds: string[],
   currentState?: State,
   seriesType?: SeriesType,
-  mainPalette?: PaletteOutput
+  mainPalette?: PaletteOutput,
+  timeseries?: boolean
 ): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> | undefined {
   const [buckets, values] = partition(table.columns, (col) => col.operation.isBucketed);
 
@@ -121,6 +123,7 @@ function getSuggestionForColumns(
       keptLayerIds,
       requestedSeriesType: seriesType,
       mainPalette,
+      timeseries,
     });
   } else if (buckets.length === 0) {
     const [yValues, [xValue, splitBy]] = partition(
@@ -138,6 +141,7 @@ function getSuggestionForColumns(
       keptLayerIds,
       requestedSeriesType: seriesType,
       mainPalette,
+      timeseries,
     });
   }
 }
@@ -224,6 +228,7 @@ function getSuggestionsForLayer({
   keptLayerIds,
   requestedSeriesType,
   mainPalette,
+  timeseries,
 }: {
   layerId: string;
   changeType: TableChangeType;
@@ -235,6 +240,7 @@ function getSuggestionsForLayer({
   keptLayerIds: string[];
   requestedSeriesType?: SeriesType;
   mainPalette?: PaletteOutput;
+  timeseries?: boolean;
 }): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> {
   const title = getSuggestionTitle(yValues, xValue, tableLabel);
   const seriesType: SeriesType =
@@ -252,6 +258,7 @@ function getSuggestionsForLayer({
     keptLayerIds,
     // only use palette if there is a breakdown by dimension
     mainPalette: splitBy ? mainPalette : undefined,
+    timeseries,
   };
 
   // handles the simplest cases, acting as a chart switcher
@@ -264,7 +271,13 @@ function getSuggestionsForLayer({
             ...options,
             seriesType: visType.id as SeriesType,
             // explicitly hide everything besides stacked bars, use default hiding logic for stacked bars
-            hide: visType.id === 'bar_stacked' ? undefined : true,
+            hide: timeseries
+              ? visType.id !== 'line'
+                ? undefined
+                : true
+              : visType.id === 'bar_stacked'
+              ? undefined
+              : true,
           }),
           title: visType.label,
         };
@@ -483,6 +496,7 @@ function buildSuggestion({
   keptLayerIds,
   hide,
   mainPalette,
+  timeseries,
 }: {
   currentState: XYState | undefined;
   seriesType: SeriesType;
@@ -495,10 +509,14 @@ function buildSuggestion({
   keptLayerIds: string[];
   hide?: boolean;
   mainPalette?: PaletteOutput;
+  timeseries?: boolean;
 }) {
   if (seriesType.includes('percentage') && xValue?.operation.scale === 'ordinal' && !splitBy) {
     splitBy = xValue;
     xValue = undefined;
+  }
+  if (changeType === 'initial' && timeseries) {
+    seriesType = 'line';
   }
   const existingLayer = getExistingLayer(currentState, layerId) || null;
   const accessors = yValues.map((col) => col.columnId);
@@ -541,7 +559,7 @@ function buildSuggestion({
   const state: State = {
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
     valueLabels: currentState?.valueLabels || 'hide',
-    fittingFunction: currentState?.fittingFunction || 'None',
+    fittingFunction: currentState?.fittingFunction || timeseries ? 'Carry' : 'None',
     curveType: currentState?.curveType,
     fillOpacity: currentState?.fillOpacity,
     xTitle: currentState?.xTitle,

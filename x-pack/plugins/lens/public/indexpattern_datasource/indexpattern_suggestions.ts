@@ -90,6 +90,13 @@ function buildSuggestion({
       layerId,
       changeType,
       label,
+      timeseries: Object.values(columnMap).some(
+        (column) =>
+          'sourceField' in column &&
+          state.indexPatterns[layers[layerId].indexPatternId]
+            .getFieldByName(column.sourceField!)
+            ?.indices.every((i) => i.time_series_metric)
+      ),
     },
 
     keptLayerIds: Object.keys(state.layers),

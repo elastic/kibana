@@ -15,6 +15,7 @@ import {
   EuiFormLabel,
   EuiToolTip,
   EuiText,
+  EuiIconTip,
 } from '@elastic/eui';
 import type { IndexPatternDimensionEditorProps } from './dimension_panel';
 import type { OperationSupportMatrix } from './operation_support';
@@ -264,7 +265,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     [selectedColumn, currentIndexPattern]
   );
 
-  const sideNavItems: EuiListGroupItemProps[] = operationsWithCompatibility.map(
+  let sideNavItems: EuiListGroupItemProps[] = operationsWithCompatibility.map(
     ({ operationType, compatibleWithCurrentField, disabledStatus }) => {
       const isActive = Boolean(
         incompleteOperation === operationType ||
@@ -403,6 +404,24 @@ export function DimensionEditor(props: DimensionEditorProps) {
     }
   );
 
+  let specialSideNavItems = [];
+  if (
+    [...currentIndexPattern.fields].some(
+      (f) =>
+        f.indices?.every((i) => i.time_series_metric) &&
+        f.indices?.some((i) => i.allowed_metrics && i.allowed_metrics.length > 0)
+    )
+  ) {
+    specialSideNavItems = sideNavItems.filter(
+      ({ id }) =>
+        id === 'percentile' || id === 'median' || id === 'unique_count' || id === 'last_value'
+    );
+    sideNavItems = sideNavItems.filter(
+      ({ id }) =>
+        !(id === 'percentile' || id === 'median' || id === 'unique_count' || id === 'last_value')
+    );
+  }
+
   const shouldDisplayExtraOptions =
     !currentFieldIsInvalid &&
     !incompleteInfo &&
@@ -450,9 +469,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     <>
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
         <EuiFormLabel>
-          {i18n.translate('xpack.lens.indexPattern.functionsLabel', {
-            defaultMessage: 'Functions',
-          })}
+          {specialSideNavItems.length !== 0 ? 'Regular functions' : 'Functions'}
         </EuiFormLabel>
         <EuiSpacer size="s" />
         <EuiListGroup
@@ -465,6 +482,40 @@ export function DimensionEditor(props: DimensionEditorProps) {
           }
           maxWidth={false}
         />
+        {specialSideNavItems.length !== 0 && (
+          <>
+            <EuiFormLabel>
+              {i18n.translate('xpack.lens.indexPattern.functionsLabel', {
+                defaultMessage: 'Hot tier only functions',
+              })}
+              <EuiIconTip
+                color="subdued"
+                content="These functions are only available for non-rolled up data. If you are extending your time range to include rolled up data, you won't see results in the chart."
+                iconProps={{
+                  className: 'eui-alignTop',
+                }}
+                position="top"
+                size="s"
+                type="questionInCircle"
+              />
+            </EuiFormLabel>
+            <EuiSpacer size="s" />
+            <EuiListGroup
+              className={
+                specialSideNavItems.length > 3 ? 'lnsIndexPatternDimensionEditor__columns' : ''
+              }
+              gutterSize="none"
+              listItems={
+                // add a padding item containing a non breakable space if the number of operations is not even
+                // otherwise the column layout will break within an element
+                specialSideNavItems.length % 2 === 1
+                  ? [...specialSideNavItems, { label: '\u00a0' }]
+                  : specialSideNavItems
+              }
+              maxWidth={false}
+            />
+          </>
+        )}
       </div>
 
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
