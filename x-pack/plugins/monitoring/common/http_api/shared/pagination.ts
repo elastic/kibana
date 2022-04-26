@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-export * from './ccs';
-export * from './cluster';
-export * from './pagination';
-export * from './sorting';
-export * from './time_range';
+import * as rt from 'io-ts';
+
+export const paginationRT = rt.type({
+  index: rt.number,
+  size: rt.number,
+});

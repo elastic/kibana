@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-export * from './ccs';
-export * from './cluster';
-export * from './pagination';
-export * from './sorting';
-export * from './time_range';
+import * as rt from 'io-ts';
+
+const sortingDirectionRT = rt.keyof({
+  asc: null,
+  desc: null,
+});
+
+export const sortingRT = rt.partial({
+  field: rt.string,
+  direction: sortingDirectionRT,
+});
