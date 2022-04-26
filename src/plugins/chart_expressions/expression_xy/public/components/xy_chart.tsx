@@ -39,7 +39,7 @@ import {
   getAnnotationsLayers,
   getDataLayers,
   Series,
-  getAreAlreadyFormattedLayersInfo,
+  getFormattedTablesByLayers,
 } from '../helpers';
 import {
   getFilteredLayers,
@@ -166,11 +166,11 @@ export function XYChart({
   const xAxisColumn = dataLayers[0]?.table.columns.find(({ id }) => id === dataLayers[0].xAccessor);
 
   const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.meta?.params);
-  const areLayersAlreadyFormatted = getAreAlreadyFormattedLayersInfo(dataLayers, formatFactory);
+  const formattedDatatables = getFormattedTablesByLayers(dataLayers, formatFactory);
 
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
   const safeXAccessorLabelRenderer = (value: unknown): string =>
-    xAxisColumn && areLayersAlreadyFormatted[dataLayers[0]?.layerId]?.[xAxisColumn.id]
+    xAxisColumn && formattedDatatables[dataLayers[0]?.layerId]?.formattedColumns[xAxisColumn.id]
       ? String(value)
       : String(xAxisFormatter.convert(value));
 
@@ -354,13 +354,15 @@ export function XYChart({
 
     const xColumn = table.columns.find((col) => col.id === layer.xAccessor);
     const currentXFormatter =
-      layer.xAccessor && areLayersAlreadyFormatted[layer.layerId]?.[layer.xAccessor] && xColumn
+      layer.xAccessor &&
+      formattedDatatables[layer.layerId]?.formattedColumns[layer.xAccessor] &&
+      xColumn
         ? formatFactory(xColumn.meta.params)
         : xAxisFormatter;
 
     const rowIndex = table.rows.findIndex((row) => {
       if (layer.xAccessor) {
-        if (areLayersAlreadyFormatted[layer.layerId]?.[layer.xAccessor]) {
+        if (formattedDatatables[layer.layerId]?.formattedColumns[layer.xAccessor]) {
           // stringify the value to compare with the chart value
           return currentXFormatter.convert(row[layer.xAccessor]) === xyGeometry.x;
         }
@@ -385,7 +387,7 @@ export function XYChart({
       points.push({
         row: table.rows.findIndex((row) => {
           if (layer.splitAccessor) {
-            if (areLayersAlreadyFormatted[layer.layerId]?.[layer.splitAccessor]) {
+            if (formattedDatatables[layer.layerId]?.formattedColumns[layer.splitAccessor]) {
               return splitFormatter.convert(row[layer.splitAccessor]) === pointValue;
             }
             return row[layer.splitAccessor] === pointValue;
@@ -518,7 +520,7 @@ export function XYChart({
         onElementClick={interactive ? clickHandler : undefined}
         legendAction={
           interactive
-            ? getLegendAction(dataLayers, onClickValue, formatFactory, areLayersAlreadyFormatted)
+            ? getLegendAction(dataLayers, onClickValue, formatFactory, formattedDatatables)
             : undefined
         }
         showLegendExtra={isHistogramViz && valuesInLegend}
@@ -591,7 +593,7 @@ export function XYChart({
           emphasizeFitting={emphasizeFitting}
           yAxesConfiguration={yAxesConfiguration}
           shouldShowValueLabels={shouldShowValueLabels}
-          areLayersAlreadyFormatted={areLayersAlreadyFormatted}
+          formattedDatatables={formattedDatatables}
           chartHasMoreThanOneBarSeries={chartHasMoreThanOneBarSeries}
         />
       )}

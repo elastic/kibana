@@ -16,7 +16,6 @@ import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { PaletteRegistry } from '@kbn/coloring';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
-import { Datatable } from '@kbn/expressions-plugin';
 import {
   CommonXYDataLayerConfig,
   EndValue,
@@ -28,9 +27,9 @@ import { SeriesTypes, ValueLabelModes } from '../../common/constants';
 import {
   getColorAssignments,
   getFitOptions,
-  getFormattedTable,
   GroupsConfiguration,
   getSeriesProps,
+  DatatablesWithFormatInfo,
 } from '../helpers';
 
 interface Props {
@@ -42,7 +41,7 @@ interface Props {
   fittingFunction?: FittingFunction;
   endValue?: EndValue | undefined;
   paletteService: PaletteRegistry;
-  areLayersAlreadyFormatted: Record<string, Record<string, boolean>>;
+  formattedDatatables: DatatablesWithFormatInfo;
   syncColors?: boolean;
   timeZone?: string;
   emphasizeFitting?: boolean;
@@ -65,7 +64,7 @@ export const DataLayers: FC<Props> = ({
   emphasizeFitting,
   yAxesConfiguration,
   shouldShowValueLabels,
-  areLayersAlreadyFormatted,
+  formattedDatatables,
   chartHasMoreThanOneBarSeries,
 }) => {
   const colorAssignments = getColorAssignments(layers, formatFactory);
@@ -73,7 +72,7 @@ export const DataLayers: FC<Props> = ({
     <>
       {layers.flatMap((layer) =>
         layer.accessors.map((accessor, accessorIndex) => {
-          const { splitAccessor, seriesType, xAccessor, table, columnToLabel, xScaleType } = layer;
+          const { splitAccessor, seriesType, xAccessor, columnToLabel, layerId } = layer;
           const columnToLabelMap: Record<string, string> = columnToLabel
             ? JSON.parse(columnToLabel)
             : {};
@@ -81,18 +80,13 @@ export const DataLayers: FC<Props> = ({
           // what if row values are not primitive? That is the case of, for instance, Ranges
           // remaps them to their serialized version with the formatHint metadata
           // In order to do it we need to make a copy of the table as the raw one is required for more features (filters, etc...) later on
-          const formattedTable: Datatable = getFormattedTable(
-            table,
-            formatFactory,
-            xAccessor,
-            xScaleType
-          );
+          const formattedDatatableInfo = formattedDatatables[layerId];
 
           const isPercentage = seriesType.includes('percentage');
 
           // For date histogram chart type, we're getting the rows that represent intervals without data.
           // To not display them in the legend, they need to be filtered out.
-          const rows = formattedTable.rows.filter(
+          const rows = formattedDatatableInfo.table.rows.filter(
             (row) =>
               !(xAccessor && typeof row[xAccessor] === 'undefined') &&
               !(
@@ -122,7 +116,7 @@ export const DataLayers: FC<Props> = ({
             formatFactory,
             columnToLabelMap,
             paletteService,
-            alreadyFormattedColumns: areLayersAlreadyFormatted[layer.layerId] ?? {},
+            formattedDatatableInfo,
             syncColors,
             yAxis,
             timeZone,
