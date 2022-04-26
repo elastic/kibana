@@ -7,11 +7,10 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { BarChart, BarChartComponentProps } from '../../../../common/components/charts/barchart';
+import { BarChartComponentProps } from '../../../../common/components/charts/barchart';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { TestProviders } from '../../../../common/mock';
-import { CasesByStatus, emptyChartSettings } from './cases_by_status';
-import { useCasesByStatus } from './use_cases_by_status';
+import { CasesByStatus } from './cases_by_status';
 jest.mock('../../../../common/components/link_to');
 jest.mock('../../../../common/containers/query_toggle');
 jest.mock('./use_cases_by_status', () => ({
@@ -77,25 +76,6 @@ describe('CasesByStatus', () => {
     );
     expect(screen.getByTestId('chart-wrapper')).toBeInTheDocument();
     expect(screen.queryByTestId('bar-chart-mask')).not.toBeInTheDocument();
-  });
-
-  test('renders BarChartMask when all values returned 0', () => {
-    (useCasesByStatus as jest.Mock).mockReturnValue({
-      closed: 0,
-      inProgress: 0,
-      isLoading: false,
-      open: 0,
-      totalCounts: 0,
-    });
-    render(
-      <TestProviders>
-        <CasesByStatus />
-      </TestProviders>
-    );
-    expect((BarChart as unknown as jest.Mock).mock.calls[0][0].barChart).toEqual(
-      emptyChartSettings
-    );
-    expect(screen.getByTestId('bar-chart-mask')).toBeInTheDocument();
   });
 
   test('collapses content', () => {
