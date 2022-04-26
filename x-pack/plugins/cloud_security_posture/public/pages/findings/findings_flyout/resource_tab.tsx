@@ -21,9 +21,10 @@ import * as TEXT from '@kbn/cloud-security-posture-plugin/public/pages/findings/
 import { getFlattenedObject } from '@kbn/std';
 
 const getDescriptionDisplay = (value: any) => {
-  if (typeof value === 'boolean') return <EuiCode>{value ? 'true' : 'false'}</EuiCode>;
-  if (value === undefined) return <EuiCode>{'undefined'}</EuiCode>;
-  if (value === null) return <EuiCode>{'null'}</EuiCode>;
+  if (typeof value === 'boolean' || value === undefined || value === null) {
+    return <EuiCode>{JSON.stringify(value)}</EuiCode>;
+  }
+
   if (typeof value === 'object') {
     return (
       <EuiCodeBlock isCopyable={true} overflowHeight={300}>
