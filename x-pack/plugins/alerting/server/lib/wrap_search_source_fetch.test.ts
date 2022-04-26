@@ -98,7 +98,7 @@ describe('wrapSearchSourceFetch', () => {
     expect(searchSourceInstanceMock.fetch).toHaveBeenCalledTimes(3);
 
     const stats = getMetrics();
-    expect(stats.numSearches).toEqual(3);
+    expect(stats.numSearchSourceSearches).toEqual(3);
     expect(stats.esSearchDurationMs).toEqual(999);
 
     expect(logger.debug).toHaveBeenCalledWith(

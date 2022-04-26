@@ -18,6 +18,7 @@ export const ruleStateSchema = t.partial({
 
 const ruleExecutionMetricsSchema = t.partial({
   numSearches: t.number,
+  numSearchSourceSearches: t.number,
   totalSearchDurationMs: t.number,
   esSearchDurationMs: t.number,
 });

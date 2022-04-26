@@ -7,8 +7,13 @@
 
 import { Logger } from '@kbn/core/server';
 import { ISearchSource } from '@kbn/data-plugin/common';
-import { RuleExecutionMetrics } from '../types';
 import { LogSearchMetricsOpts, RuleInfo } from './types';
+
+export interface SearchSourceClientMetrics {
+  esSearchDurationMs: number;
+  totalSearchDurationMs: number;
+  numSearchSourceSearches: number;
+}
 
 export function wrapSearchSourceFetch({
   logger,
@@ -19,12 +24,12 @@ export function wrapSearchSourceFetch({
   rule: RuleInfo;
   abortController: AbortController;
 }) {
-  let numSearches: number = 0;
+  let numSearchSourceSearches: number = 0;
   let esSearchDurationMs: number = 0;
   let totalSearchDurationMs: number = 0;
 
   function logMetrics(metrics: LogSearchMetricsOpts) {
-    numSearches++;
+    numSearchSourceSearches++;
     esSearchDurationMs += metrics.esSearchDuration;
     totalSearchDurationMs += metrics.totalSearchDuration;
   }
@@ -48,10 +53,10 @@ export function wrapSearchSourceFetch({
         throw e;
       }
     },
-    getMetrics: (): RuleExecutionMetrics => ({
+    getMetrics: (): SearchSourceClientMetrics => ({
       esSearchDurationMs,
       totalSearchDurationMs,
-      numSearches,
+      numSearchSourceSearches,
     }),
   };
 }

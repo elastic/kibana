@@ -21,7 +21,6 @@ import type {
   AggregationsAggregate,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient, ElasticsearchClient, Logger } from '@kbn/core/server';
-import { RuleExecutionMetrics } from '../types';
 import { LogSearchMetricsOpts, RuleInfo } from './types';
 
 export type LogSearchMetricsFn = (metrics: LogSearchMetricsOpts) => void;
@@ -41,6 +40,12 @@ type WrapScopedClusterClientOpts = WrapScopedClusterClientFactoryOpts & {
   logMetricsFn: LogSearchMetricsFn;
 };
 
+export interface ScopedClusterClientMetrics {
+  esSearchDurationMs: number;
+  totalSearchDurationMs: number;
+  numSearches: number;
+}
+
 export function createWrappedScopedClusterClientFactory(opts: WrapScopedClusterClientFactoryOpts) {
   let numSearches: number = 0;
   let esSearchDurationMs: number = 0;
@@ -56,7 +61,7 @@ export function createWrappedScopedClusterClientFactory(opts: WrapScopedClusterC
 
   return {
     client: () => wrappedClient,
-    getMetrics: (): RuleExecutionMetrics => {
+    getMetrics: (): ScopedClusterClientMetrics => {
       return {
         esSearchDurationMs,
         totalSearchDurationMs,

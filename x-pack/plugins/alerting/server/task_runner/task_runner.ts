@@ -74,6 +74,7 @@ import {
 import { createWrappedScopedClusterClientFactory } from '../lib/wrap_scoped_cluster_client';
 import { wrapSearchSourceFetch } from '../lib/wrap_search_source_fetch';
 import { AlertExecutionStore } from '../lib/alert_execution_store';
+import { mergeSearchMetrics } from '../lib/merge_search_metrics';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -461,12 +462,10 @@ export class TaskRunner<
       name: rule.name,
     };
 
-    const scopedClusterClientMetrics = wrappedScopedClusterClient.getMetrics();
-    const searchSourceMetrics = wrappedSearchSourceFetch.getMetrics();
-
-    const searchMetrics = !!scopedClusterClientMetrics.numSearches
-      ? scopedClusterClientMetrics
-      : searchSourceMetrics;
+    const searchMetrics = mergeSearchMetrics(
+      wrappedScopedClusterClient.getMetrics(),
+      wrappedSearchSourceFetch.getMetrics()
+    );
 
     // Cleanup alerts that are no longer scheduling actions to avoid over populating the alertInstances object
     const alertsWithScheduledActions = pickBy(
