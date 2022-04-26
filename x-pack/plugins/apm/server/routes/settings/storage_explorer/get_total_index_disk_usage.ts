@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { sumBy, uniq } from 'lodash';
+import { uniq } from 'lodash';
 import { ApmPluginRequestHandlerContext } from '../../typings';
 import { Setup } from '../../../lib/helpers/setup_request';
 
@@ -19,18 +19,9 @@ export async function getTotalIndexDiskUsage({
     indices: { transaction, span, metric, error },
   } = setup;
 
-  const index = uniq([transaction, span, metric, error])
-    .join()
-    .replaceAll(',apm-*', '');
-
+  const index = uniq([transaction, span, metric, error]).join();
   const esClient = (await context.core).elasticsearch.client;
-  const diskUsage = await esClient.asCurrentUser.indices.diskUsage({
-    index,
-    // ignore_unavailable=true
-    run_expensive_tasks: true,
-  });
+  const diskUsage = await esClient.asCurrentUser.indices.stats({ index });
 
-  const totalSize = sumBy(Object.values(diskUsage), 'store_size_in_bytes');
-
-  return totalSize;
+  return diskUsage._all.total?.store?.size_in_bytes;
 }
