@@ -86,7 +86,6 @@ export const stepDefineDefaultValue: DefineStepRule = {
   machineLearningJobId: [],
   ruleType: 'query',
   threatIndex: [],
-  dataViewId: 'security-solution-default',
   queryBar: {
     query: { query: '', language: 'kuery' },
     filters: [],
@@ -187,7 +186,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ...stepDefineDefaultValue,
     index: indicesConfig,
     threatIndex: threatIndicesConfig,
-    dataViewId: selectedDataViewId,
   };
   // console.error('initial state', JSON.stringify(initialState, null, 2));
   const { form } = useForm<DefineStepRule>({
@@ -231,7 +229,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
   const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
   const index = formIndex || initialState.index;
-  const dataViewId = formDataViewId || initialState.dataViewId;
+  const dataViewId = formDataViewId;
   const threatIndex = formThreatIndex || initialState.threatIndex;
   const machineLearningJobId = formMachineLearningJobId ?? initialState.machineLearningJobId;
   const anomalyThreshold = formAnomalyThreshold ?? initialState.anomalyThreshold;
@@ -409,7 +407,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     } else {
       return (
         <EuiAccordion
-          data-test-subj="indexPatternsAccordion"
+          data-test-subj="detectionEngineStepDefineRuleIndexPatternsAccordion"
           id="indexPatternsAccoridion"
           buttonContent={i18n.INDEX_PATTERNS}
         >
@@ -486,6 +484,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     idSelected={radioIdSelected}
                     onChange={onChangeRadioButton}
                     name="radio group"
+                    data-test-subj="stepDefineRuleDataViewSelectedRadioGroup"
                   />
                 </EuiFlexItem>
 
@@ -500,6 +499,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     idSelected={radioIdSelected}
                     onChange={onChangeRadioButton}
                     name="radio group"
+                    data-test-subj="stepDefineRuleIndexPatternsSelectedRadioGroup"
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

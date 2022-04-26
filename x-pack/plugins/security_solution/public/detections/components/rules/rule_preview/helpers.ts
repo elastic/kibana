@@ -216,7 +216,7 @@ export const getIsRulePreviewDisabled = ({
   isQueryBarValid: boolean;
   isThreatQueryBarValid: boolean;
   index: string[] | null | undefined;
-  dataViewId: string | null | undefined;
+  dataViewId?: string | null | undefined;
   threatIndex: string[];
   threatMapping: ThreatMapping;
   machineLearningJobId: string[];

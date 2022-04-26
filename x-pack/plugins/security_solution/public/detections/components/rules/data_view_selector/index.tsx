@@ -16,7 +16,7 @@ import { sourcererModel } from '../../../../common/store/sourcerer';
 interface DataViewSelectorProps {
   kibanaDataViews: sourcererModel.SourcererDataView[];
   field: FieldHook;
-  dataViewId: string;
+  dataViewId?: string;
 }
 
 export const DataViewSelector = ({
@@ -25,7 +25,7 @@ export const DataViewSelector = ({
   dataViewId,
 }: DataViewSelectorProps) => {
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
-    dataViewId != null ? [{ label: dataViewId }] : []
+    dataViewId != null && dataViewId.length > 0 ? [{ label: dataViewId }] : []
   );
   const onChangeIndexPatterns = useCallback(
     (options: Array<EuiComboBoxOptionOption<string>>) => {
@@ -43,7 +43,7 @@ export const DataViewSelector = ({
   // this makes sure we update the dropdown to display the data view id
   // stored in the rule params when editing the rule.
   useEffect(() => {
-    setSelectedOptions([{ label: dataViewId }]);
+    if (dataViewId != null && dataViewId.length > 0) setSelectedOptions([{ label: dataViewId }]);
   }, [dataViewId]);
 
   // const onChangeIndexPatterns = (options: Array<EuiComboBoxOptionOption<string>>) => {

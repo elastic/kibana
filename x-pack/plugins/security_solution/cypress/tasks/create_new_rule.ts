@@ -442,7 +442,11 @@ export const getAboutContinueButton = () => cy.get(ABOUT_CONTINUE_BTN);
 export const getDefineContinueButton = () => cy.get(DEFINE_CONTINUE_BUTTON);
 
 /** Returns the indicator index pattern */
-export const getIndicatorIndex = () => cy.get(THREAT_MATCH_INDICATOR_INDEX).eq(0);
+export const getIndicatorIndex = () => {
+  cy.get('[data-test-subj="stepDefineRuleIndexPatternsSelectedRadioGroup"]').first().check();
+  cy.get('[data-test-subj="detectionEngineStepDefineRuleIndexPatternsAccordion"]').click();
+  return cy.get(THREAT_MATCH_INDICATOR_INDEX).eq(0);
+};
 
 /** Returns the indicator's indicator index */
 export const getIndicatorIndicatorIndex = () =>

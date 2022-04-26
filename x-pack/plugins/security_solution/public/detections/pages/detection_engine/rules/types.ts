@@ -133,7 +133,7 @@ export interface DefineStepRule {
   index: string[];
   machineLearningJobId: string[];
   queryBar: FieldValueQueryBar;
-  dataViewId: string | null | undefined;
+  dataViewId?: string | null;
   ruleType: Type;
   timeline: FieldValueTimeline;
   threshold: FieldValueThreshold;

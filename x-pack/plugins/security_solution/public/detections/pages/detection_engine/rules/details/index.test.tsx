@@ -64,7 +64,15 @@ jest.mock('../../../../containers/detection_engine/rules/use_rule_with_fallback'
     useRuleWithFallback: jest.fn(),
   };
 });
-jest.mock('../../../../../common/containers/sourcerer');
+jest.mock('../../../../../common/containers/sourcerer', () => {
+  const actual = jest.requireActual('../../../../../common/containers/sourcerer');
+  return {
+    ...actual,
+    useSourcererDataView: jest
+      .fn()
+      .mockReturnValue({ indexPattern: ['fakeindex'], loading: false }),
+  };
+});
 jest.mock('../../../../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
     from: '2020-07-07T08:20:18.966Z',
@@ -80,6 +88,7 @@ jest.mock('react-router-dom', () => {
     ...originalModule,
     useParams: jest.fn(),
     useHistory: jest.fn(),
+    useLocation: jest.fn().mockReturnValue({ pathname: '/alerts' }),
   };
 });
 
