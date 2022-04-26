@@ -6,9 +6,13 @@
  */
 import { Ast } from '@kbn/interpreter';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
-import type { CoreSetup, SavedObjectReference, SavedObjectsResolveResponse } from 'kibana/public';
+import type {
+  CoreSetup,
+  SavedObjectReference,
+  SavedObjectsResolveResponse,
+} from '@kbn/core/public';
 import type { PaletteOutput } from '@kbn/coloring';
-import type { TopNavMenuData } from 'src/plugins/navigation/public';
+import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { MutableRefObject } from 'react';
 import { Filter } from '@kbn/es-query';
 import type {
@@ -16,26 +20,23 @@ import type {
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
   Datatable,
-} from '../../../../src/plugins/expressions/public';
-import type { VisualizeEditorLayersContext } from '../../../../src/plugins/visualizations/public';
+} from '@kbn/expressions-plugin/public';
+import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
+import type { Query } from '@kbn/data-plugin/public';
+import type { RangeSelectContext, ValueClickContext } from '@kbn/embeddable-plugin/public';
+import type {
+  UiActionsStart,
+  RowClickContext,
+  VisualizeFieldContext,
+} from '@kbn/ui-actions-plugin/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
-import type { Query } from '../../../../src/plugins/data/public';
-import type {
-  RangeSelectContext,
-  ValueClickContext,
-} from '../../../../src/plugins/embeddable/public';
 import type {
   LensSortActionData,
   LensResizeActionData,
   LensToggleActionData,
   LensPagesizeActionData,
 } from './datatable_visualization/components/types';
-import type {
-  UiActionsStart,
-  RowClickContext,
-  VisualizeFieldContext,
-} from '../../../../src/plugins/ui_actions/public';
 
 import {
   LENS_EDIT_SORT_ACTION,

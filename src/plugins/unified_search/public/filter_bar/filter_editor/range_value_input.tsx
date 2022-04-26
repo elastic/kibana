@@ -11,8 +11,8 @@ import { EuiFormControlLayoutDelimited } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { get } from 'lodash';
 import React from 'react';
-import { useKibana } from '../../../../kibana_react/public';
-import { IFieldType } from '../../../../data/common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { IFieldType } from '@kbn/data-plugin/common';
 import { ValueInputType } from './value_input_type';
 
 interface RangeParams {

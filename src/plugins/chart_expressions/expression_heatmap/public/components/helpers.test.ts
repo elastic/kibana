@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { chartPluginMock } from 'src/plugins/charts/public/mocks';
-import type { DatatableColumn } from 'src/plugins/expressions/public';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import {
   applyPaletteParams,
   getDataMinMax,

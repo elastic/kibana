@@ -6,10 +6,10 @@
  */
 
 import { CasesClientArgs } from '../types';
-import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { getConnectors } from './client';
-import { actionsClientMock } from '../../../../actions/server/mocks';
-import { ActionType } from '../../../../actions/common/types';
+import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
+import { ActionType } from '@kbn/actions-plugin/common/types';
 
 describe('client', () => {
   describe('getConnectors', () => {
@@ -40,6 +40,7 @@ describe('client', () => {
           actionTypeId: '.jira',
           name: '1',
           isPreconfigured: false,
+          isDeprecated: false,
           referencedByCount: 1,
         },
       ]);
@@ -57,6 +58,7 @@ describe('client', () => {
           name: '1',
           config: {},
           isPreconfigured: true,
+          isDeprecated: false,
           referencedByCount: 1,
         },
       ]);
@@ -84,6 +86,7 @@ describe('client', () => {
           name: '1',
           config: {},
           isPreconfigured: false,
+          isDeprecated: false,
           referencedByCount: 1,
         },
         {
@@ -92,6 +95,7 @@ describe('client', () => {
           name: '2',
           config: {},
           isPreconfigured: false,
+          isDeprecated: false,
           referencedByCount: 1,
         },
       ];

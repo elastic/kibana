@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { ExpressionValueVisDimension } from '../expression_functions/vis_dimension';
 import { ExpressionValueXYDimension } from '../expression_functions/xy_dimension';
-import { Datatable, DatatableColumn } from '../../../expressions/common/expression_types/specs';
 
 type DimensionColumn = ExpressionValueVisDimension | ExpressionValueXYDimension | string;
 

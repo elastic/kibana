@@ -12,7 +12,7 @@ import {
   mergeMigrationFunctionMaps,
   MigrateFunction,
   MigrateFunctionsObject,
-} from '../../../../../src/plugins/kibana_utils/common';
+} from '@kbn/kibana-utils-plugin/common';
 import {
   LensDocShapePre712,
   OperationTypePre712,

@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import type { UiComponent, CollectConfigProps } from 'src/plugins/kibana_utils/public';
+import type { UiComponent, CollectConfigProps } from '@kbn/kibana-utils-plugin/public';
 import type {
   MigrateFunctionsObject,
   GetMigrationFunctionObjectFn,
-} from 'src/plugins/kibana_utils/common';
-import { uiToReactComponent } from '../../../../../src/plugins/kibana_react/public';
+} from '@kbn/kibana-utils-plugin/common';
+import { uiToReactComponent } from '@kbn/kibana-react-plugin/public';
 import type {
   UiActionsPresentable as Presentable,
   ActionMenuItemProps,
-} from '../../../../../src/plugins/ui_actions/public';
-import type { ActionFactoryDefinition } from './action_factory_definition';
-import type { Configurable } from '../../../../../src/plugins/kibana_utils/public';
+} from '@kbn/ui-actions-plugin/public';
+import type { Configurable } from '@kbn/kibana-utils-plugin/public';
+import type { ILicense, LicensingPluginStart, LicenseType } from '@kbn/licensing-plugin/public';
+import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { SavedObjectReference } from '@kbn/core/types';
+import type { PersistableState } from '@kbn/kibana-utils-plugin/common';
 import type {
   BaseActionConfig,
   BaseActionFactoryContext,
   SerializedAction,
   SerializedEvent,
 } from './types';
-import type { ILicense, LicensingPluginStart, LicenseType } from '../../../licensing/public';
-import type { UiActionsActionDefinition as ActionDefinition } from '../../../../../src/plugins/ui_actions/public';
-import type { SavedObjectReference } from '../../../../../src/core/types';
-import type { PersistableState } from '../../../../../src/plugins/kibana_utils/common';
+import type { ActionFactoryDefinition } from './action_factory_definition';
 
 export interface ActionFactoryDeps {
   readonly getLicense?: () => ILicense;

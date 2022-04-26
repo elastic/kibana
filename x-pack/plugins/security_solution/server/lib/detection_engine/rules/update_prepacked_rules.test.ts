@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { rulesClientMock } from '../../../../../alerting/server/mocks';
-import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
+import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { getFindResultWithSingleHit } from '../routes/__mocks__/request_responses';
 import { updatePrepackagedRules } from './update_prepacked_rules';
 import { patchRules } from './patch_rules';
@@ -15,10 +15,7 @@ import { ruleExecutionLogMock } from '../rule_execution_log/__mocks__';
 
 jest.mock('./patch_rules');
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('updatePrepackagedRules - %s', (_, isRuleRegistryEnabled) => {
+describe('updatePrepackagedRules', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let ruleExecutionLog: ReturnType<typeof ruleExecutionLogMock.forRoutes.create>;
@@ -40,14 +37,13 @@ describe.each([
     ];
     const outputIndex = 'outputIndex';
     const prepackagedRule = getAddPrepackagedRulesSchemaDecodedMock();
-    rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+    rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     await updatePrepackagedRules(
       rulesClient,
       savedObjectsClient,
       [{ ...prepackagedRule, actions }],
       outputIndex,
-      isRuleRegistryEnabled,
       ruleExecutionLog
     );
 
@@ -71,14 +67,13 @@ describe.each([
       threat_query: 'threat:*',
     };
     const prepackagedRule = getAddPrepackagedRulesSchemaDecodedMock();
-    rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+    rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     await updatePrepackagedRules(
       rulesClient,
       savedObjectsClient,
       [{ ...prepackagedRule, ...updatedThreatParams }],
       'output-index',
-      isRuleRegistryEnabled,
       ruleExecutionLog
     );
 

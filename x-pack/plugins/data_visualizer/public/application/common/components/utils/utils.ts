@@ -6,7 +6,7 @@
  */
 
 import { isEqual } from 'lodash';
-import type { AnalysisResult, InputOverrides } from '../../../../../../file_upload/common';
+import type { AnalysisResult, InputOverrides } from '@kbn/file-upload-plugin/common';
 import { MB, FILE_FORMATS } from '../../../../../common/constants';
 
 export const DEFAULT_LINES_TO_SAMPLE = 1000;

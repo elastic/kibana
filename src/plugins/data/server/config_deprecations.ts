@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ConfigDeprecationProvider } from 'src/core/server';
+import type { ConfigDeprecationProvider } from '@kbn/core/server';
 
 export const autocompleteConfigDeprecationProvider: ConfigDeprecationProvider = ({
   renameFromRoot,

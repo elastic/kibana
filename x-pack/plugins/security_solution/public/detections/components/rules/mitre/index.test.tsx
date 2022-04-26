@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { AddMitreAttackThreat } from './index';
+import { AddMitreAttackThreat } from '.';
 import { useFormFieldMock } from '../../../../common/mock';
 
 describe('AddMitreThreat', () => {
