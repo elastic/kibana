@@ -70,7 +70,7 @@ ctx._source.BUILD_ID = buildNum(ctx._source.ciRunUrl)
 The only difference between the request submitted against  
 the production cluster and the copy is the regex: 
   - prod: `"value": "[a-z0-9]{8}"`
-  - copy: `"value": "[a-z0-9]*"`
+  - copy: `"value": "[a-z]*"`
 ```
 POST kibana_code_coverage/_update_by_query?wait_for_completion=false
 {
