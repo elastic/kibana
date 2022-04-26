@@ -15,10 +15,10 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import { CspFinding } from '@kbn/cloud-security-posture-plugin/public/pages/findings/types';
 import React, { useMemo } from 'react';
-import * as TEXT from '@kbn/cloud-security-posture-plugin/public/pages/findings/translations';
 import { getFlattenedObject } from '@kbn/std';
+import { CspFinding } from '../types';
+import * as TEXT from '../translations';
 
 const getDescriptionDisplay = (value: any) => {
   if (typeof value === 'boolean' || value === undefined || value === null) {
