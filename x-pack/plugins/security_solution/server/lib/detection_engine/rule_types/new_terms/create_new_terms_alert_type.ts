@@ -6,7 +6,6 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Moment } from 'moment';
 import dateMath from '@elastic/datemath';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { NEW_TERMS_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
@@ -17,12 +16,16 @@ import { CreateRuleOptions, SecurityAlertType } from '../types';
 import { getInputIndex } from '../../signals/get_input_output_index';
 import { singleSearchAfter } from '../../signals/single_search_after';
 import { getFilter } from '../../signals/get_filter';
-import { ESSearchResponse } from '../../../../../../../../src/core/types/elasticsearch';
 import { SignalSource } from '../../signals/types';
 import { buildReasonMessageForNewTermsAlert } from '../../signals/reason_formatters';
 import { GenericBulkCreateResponse } from '../factories';
 import { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas/alerts';
 import { wrapNewTermsAlerts } from '../factories/utils/wrap_new_terms_alerts';
+import { buildNewTermsAggregation, NewTermsAggregationResult } from './build_new_terms_aggregation';
+import {
+  buildTimestampRuntimeMapping,
+  TIMESTAMP_RUNTIME_FIELD,
+} from './build_timestamp_runtime_mapping';
 
 interface BulkCreateResults {
   bulkCreateTimes: string[];
@@ -124,16 +127,26 @@ export const createNewTermsAlertType = (
         throw Error(`Failed to parse 'historyWindowStart'`);
       }
 
+      // If we have a timestampOverride, we'll compute a runtime field that emits the override for each document if it exists,
+      // otherwise it emits @timestamp. If we don't have a timestamp override we don't want to pay the cost of using a
+      // runtime field, so we just use @timestamp directly.
+      const { timestampField, runtimeMappings } = params.timestampOverride
+        ? {
+            timestampField: TIMESTAMP_RUNTIME_FIELD,
+            runtimeMappings: buildTimestampRuntimeMapping({
+              timestampOverride: params.timestampOverride,
+            }),
+          }
+        : { timestampField: '@timestamp', runtimeMappings: undefined };
+
       const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
-        aggregations: buildAggregation({
+        aggregations: buildNewTermsAggregation({
           newValueWindowStart: tuple.from,
           field: params.newTermsFields[0],
           maxSignals: params.maxSignals,
-          timestampOverride: params.timestampOverride,
+          timestampField,
         }),
-        runtimeMappings: buildRuntimeMappings({
-          timestampOverride: params.timestampOverride,
-        }),
+        runtimeMappings,
         searchAfterSortIds: undefined,
         index: inputIndex,
         from: parsedHistoryWindowSize.toISOString(),
@@ -145,7 +158,7 @@ export const createNewTermsAlertType = (
         timestampOverride: params.timestampOverride,
         buildRuleMessage,
       });
-      const searchResultWithAggs = searchResult as AggregationsResult;
+      const searchResultWithAggs = searchResult as NewTermsAggregationResult;
       if (!searchResultWithAggs.aggregations) {
         throw new Error('expected to find aggregations on search result');
       }
@@ -201,94 +214,4 @@ export const createNewTermsAlertType = (
       };
     },
   };
-};
-
-type AggregationsResult = ESSearchResponse<
-  SignalSource,
-  { body: { aggregations: ReturnType<typeof buildAggregation> } }
->;
-
-const buildAggregation = ({
-  newValueWindowStart,
-  field,
-  maxSignals,
-  timestampOverride,
-}: {
-  newValueWindowStart: Moment;
-  field: string;
-  maxSignals: number;
-  timestampOverride: string | undefined;
-}) => {
-  // If we have a timestampOverride, compute a runtime field that emits the override for each document if it exists,
-  // otherwise it emits @timestamp. If we don't have a timestamp override we don't want to pay the cost of using a
-  // runtime field, so we just use @timestamp directly.
-  const timestampField = timestampOverride ? 'kibana.combined_timestamp' : '@timestamp';
-  return {
-    new_terms: {
-      terms: {
-        field,
-        // TODO: configure size based on max_signals
-        size: maxSignals,
-        order: {
-          first_seen: 'desc' as const,
-        },
-      },
-      aggs: {
-        docs: {
-          top_hits: {
-            size: 1,
-            sort: [
-              {
-                [timestampField]: 'asc' as const,
-              },
-            ],
-          },
-        },
-        first_seen: {
-          min: {
-            field: timestampField,
-          },
-        },
-        filtering_agg: {
-          bucket_selector: {
-            buckets_path: {
-              first_seen_value: 'first_seen',
-            },
-            script: {
-              params: {
-                start_time: newValueWindowStart.valueOf(),
-              },
-              source: 'params.first_seen_value > params.start_time',
-            },
-          },
-        },
-      },
-    },
-  };
-};
-
-const buildRuntimeMappings = ({
-  timestampOverride,
-}: {
-  timestampOverride: string | undefined;
-}): estypes.MappingRuntimeFields | undefined => {
-  return timestampOverride
-    ? {
-        'kibana.combined_timestamp': {
-          type: 'date',
-          script: {
-            source: `
-              if (doc.containsKey(params.timestampOverride) && doc[params.timestampOverride].size()!=0) {
-                emit(doc[params.timestampOverride].value.millis);
-              } else {
-                emit(doc['@timestamp'].value.millis);
-              }
-            `,
-            params: {
-              timestampOverride,
-            },
-          },
-        },
-      }
-    : undefined;
 };

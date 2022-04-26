@@ -19,7 +19,9 @@ import {
   deleteAllAlerts,
   deleteSignalsIndex,
   getOpenSignals,
+  getSignalsByIds,
   waitForRuleSuccessOrStatus,
+  waitForSignalsToBePresent,
 } from '../../utils';
 
 import { getCreateNewTermsRulesSchemaMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas.mock';
@@ -302,33 +304,37 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.load(
           'x-pack/test/functional/es_archives/security_solution/timestamp_fallback'
         );
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/timestamp_override_3'
+        );
       });
       after(async () => {
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/timestamp_fallback'
+        );
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/timestamp_override_3'
         );
       });
 
       it('should generate the correct alerts', async () => {
         const rule: NewTermsCreateSchema = {
           ...getCreateNewTermsRulesSchemaMock('rule-1', true),
-          index: ['timestamp-fallback-test'],
+          // myfakeindex-3 does not have event.ingested mapped so we can test if the runtime field
+          // 'kibana.combined_timestamp' handles unmapped fields properly
+          index: ['timestamp-fallback-test', 'myfakeindex-3'],
           new_terms_fields: ['host.name'],
           from: '2020-12-16T16:00:00.000Z',
           // Set the history_window_start equal to 'from' so we should alert on all terms in the time range
           history_window_start: '2020-12-16T16:00:00.000Z',
+          timestamp_override: 'event.ingested',
         };
 
         const createdRule = await createRule(supertest, log, rule);
 
-        await waitForRuleSuccessOrStatus(
-          supertest,
-          log,
-          createdRule.id,
-          RuleExecutionStatus.succeeded
-        );
+        await waitForSignalsToBePresent(supertest, log, 2, [createdRule.id]);
 
-        const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
+        const signalsOpen = await getSignalsByIds(supertest, log, [createdRule.id]);
         expect(signalsOpen.hits.hits.length).eql(2);
         const hostNames = signalsOpen.hits.hits
           .map((signal) => signal._source?.['kibana.alert.new_terms'])

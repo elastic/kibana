@@ -1,0 +1,89 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildNewTermsAggregation builds a correct aggregation with @timestamp 1`] = `
+Object {
+  "new_terms": Object {
+    "aggs": Object {
+      "docs": Object {
+        "top_hits": Object {
+          "size": 1,
+          "sort": Array [
+            Object {
+              "@timestamp": "asc",
+            },
+          ],
+        },
+      },
+      "filtering_agg": Object {
+        "bucket_selector": Object {
+          "buckets_path": Object {
+            "first_seen_value": "first_seen",
+          },
+          "script": Object {
+            "params": Object {
+              "start_time": 1650000000,
+            },
+            "source": "params.first_seen_value > params.start_time",
+          },
+        },
+      },
+      "first_seen": Object {
+        "min": Object {
+          "field": "@timestamp",
+        },
+      },
+    },
+    "terms": Object {
+      "field": "host.ip",
+      "order": Object {
+        "first_seen": "desc",
+      },
+      "size": 200,
+    },
+  },
+}
+`;
+
+exports[`buildNewTermsAggregation builds a correct aggregation with event.ingested 1`] = `
+Object {
+  "new_terms": Object {
+    "aggs": Object {
+      "docs": Object {
+        "top_hits": Object {
+          "size": 1,
+          "sort": Array [
+            Object {
+              "event.ingested": "asc",
+            },
+          ],
+        },
+      },
+      "filtering_agg": Object {
+        "bucket_selector": Object {
+          "buckets_path": Object {
+            "first_seen_value": "first_seen",
+          },
+          "script": Object {
+            "params": Object {
+              "start_time": 1650935705,
+            },
+            "source": "params.first_seen_value > params.start_time",
+          },
+        },
+      },
+      "first_seen": Object {
+        "min": Object {
+          "field": "event.ingested",
+        },
+      },
+    },
+    "terms": Object {
+      "field": "host.name",
+      "order": Object {
+        "first_seen": "desc",
+      },
+      "size": 50,
+    },
+  },
+}
+`;
