@@ -32,8 +32,7 @@ import {
 export const getPrepackagedRulesStatusRoute = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
-  security: SetupPlugins['security'],
-  isRuleRegistryEnabled: boolean
+  security: SetupPlugins['security']
 ) => {
   router.get(
     {
@@ -45,8 +44,9 @@ export const getPrepackagedRulesStatusRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const savedObjectsClient = context.core.savedObjects.client;
-      const rulesClient = context.alerting.getRulesClient();
+      const ctx = await context.resolve(['core', 'alerting']);
+      const savedObjectsClient = ctx.core.savedObjects.client;
+      const rulesClient = ctx.alerting.getRulesClient();
       const ruleAssetsClient = ruleAssetSavedObjectsClientFactory(savedObjectsClient);
 
       try {
@@ -56,7 +56,6 @@ export const getPrepackagedRulesStatusRoute = (
           config.prebuiltRulesFromSavedObjects
         );
         const customRules = await findRules({
-          isRuleRegistryEnabled,
           rulesClient,
           perPage: 1,
           page: 1,
@@ -68,7 +67,6 @@ export const getPrepackagedRulesStatusRoute = (
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
         const prepackagedRules = await getExistingPrepackagedRules({
           rulesClient,
-          isRuleRegistryEnabled,
         });
 
         const rulesToInstall = getRulesToInstall(latestPrepackagedRules, prepackagedRules);
