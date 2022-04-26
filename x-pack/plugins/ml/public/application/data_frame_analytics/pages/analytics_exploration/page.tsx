@@ -108,7 +108,7 @@ export const Page: FC<{
         />
       ) : null}
       {jobIdToUse !== undefined && (
-        <MlPageHeader>
+        <MlPageHeader key={`${jobIdToUse}-id`}>
           <FormattedMessage
             id="xpack.ml.dataframe.analyticsExploration.titleWithId"
             defaultMessage="Explore results for job ID {id}"
