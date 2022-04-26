@@ -122,7 +122,7 @@ export const mockedRuleTypeSavedObject: Rule<RuleTypeParams> = {
   createdAt: mockDate,
   updatedAt: mockDate,
   throttle: null,
-  muteAll: false,
+  snoozeIndefinitely: false,
   notifyWhen: 'onActiveAlert',
   enabled: true,
   alertTypeId: ruleType.id,

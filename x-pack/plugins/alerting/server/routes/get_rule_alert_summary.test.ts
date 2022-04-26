@@ -30,7 +30,7 @@ describe('getRuleAlertSummaryRoute', () => {
     tags: [],
     ruleTypeId: '',
     consumer: '',
-    muteAll: false,
+    snoozeIndefinitely: false,
     throttle: null,
     enabled: false,
     statusStartDate: dateString,
