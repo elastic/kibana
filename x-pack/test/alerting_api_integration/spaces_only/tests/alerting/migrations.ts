@@ -419,7 +419,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
     });
 
-    it('8.3.0 removes internal tags', async () => {
+    it('8.3.0 removes internal tags in Security Solution rule', async () => {
       const response = await es.get<{ alert: RawRule }>(
         {
           index: '.kibana',

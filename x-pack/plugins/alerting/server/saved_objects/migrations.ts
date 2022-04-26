@@ -871,10 +871,18 @@ function getCorrespondingAction(
     ) as RawRuleAction;
   }
 }
-
+/**
+ * removes internal tags(starts with '__internal') from Security Solution rules
+ * @param doc rule to be migrated
+ * @returns migrated rule if it's Security Solution rule or unchanged if not
+ */
 function removeInternalTags(
   doc: SavedObjectUnsanitizedDoc<RawRule>
 ): SavedObjectUnsanitizedDoc<RawRule> {
+  if (!isDetectionEngineAADRuleType(doc)) {
+    return doc;
+  }
+
   const {
     attributes: { tags },
   } = doc;
