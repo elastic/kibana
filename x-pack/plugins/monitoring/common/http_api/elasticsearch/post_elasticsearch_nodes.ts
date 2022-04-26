@@ -16,11 +16,11 @@ export const postElasticsearchNodesRequestPayloadRT = rt.intersection([
   rt.partial({
     ccs: ccsRT,
     queryText: rt.string,
+    sort: sortingRT,
   }),
   rt.type({
     timeRange: timeRangeRT,
     pagination: paginationRT,
-    sort: sortingRT,
   }),
 ]);
 

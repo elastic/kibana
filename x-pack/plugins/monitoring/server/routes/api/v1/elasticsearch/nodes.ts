@@ -35,7 +35,7 @@ export function esNodesRoute(server: MonitoringCore) {
     async handler(req) {
       const {
         pagination,
-        sort: { field = '', direction = 'asc' },
+        sort: { field = '', direction = 'asc' } = {},
         queryText = '',
       } = req.payload;
       const clusterUuid = req.params.clusterUuid;
