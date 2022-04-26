@@ -25,7 +25,6 @@ const moduleSchema = partialObject({
   reasons: schema.arrayOf(
     partialObject({
       userRequest: schema.string(),
-      moduleIdentifier: schema.oneOf([schema.string(), schema.literal(null)]),
     })
   ),
 });
