@@ -6,6 +6,7 @@
  */
 
 export * from './post_elasticsearch_ccr';
+export * from './post_elasticsearch_ccr_shard';
 export * from './post_elasticsearch_index_detail';
 export * from './post_elasticsearch_indices';
 export * from './post_elasticsearch_ml_jobs';
