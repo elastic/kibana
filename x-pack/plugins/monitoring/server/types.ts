@@ -10,7 +10,7 @@ import type {
   IRouter,
   Logger,
   ICustomClusterClient,
-  RequestHandlerContext,
+  CustomRequestHandlerContext,
   ElasticsearchClient,
 } from '@kbn/core/server';
 import type Boom from '@hapi/boom';
@@ -34,6 +34,7 @@ import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '@kbn/features-plugin/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
+import { RouteConfig, RouteMethod } from '@kbn/core/server';
 import { ElasticsearchModifiedSource } from '../common/types/es';
 import { RulesByType } from '../common/types/alerts';
 import { configSchema, MonitoringConfig } from './config';
@@ -57,12 +58,12 @@ export interface PluginsSetup {
   cloud?: CloudSetup;
 }
 
-export interface RequestHandlerContextMonitoringPlugin extends RequestHandlerContext {
+export type RequestHandlerContextMonitoringPlugin = CustomRequestHandlerContext<{
   actions?: ActionsApiRequestHandlerContext;
   alerting?: AlertingApiRequestHandlerContext;
   infra: InfraRequestHandlerContext;
   ruleRegistry?: RacApiRequestHandlerContext;
-}
+}>;
 
 export interface PluginsStart {
   alerting: AlertingPluginStartContract;
@@ -79,10 +80,18 @@ export interface RouteDependencies {
   logger: Logger;
 }
 
+export type MonitoringRouteConfig<Params, Query, Body, Method extends RouteMethod> = {
+  method: RouteMethod;
+} & RouteConfig<Params, Query, Body, Method> & {
+    handler: (request: LegacyRequest) => any;
+  };
+
 export interface MonitoringCore {
   config: MonitoringConfig;
   log: Logger;
-  route: (options: any) => void;
+  route: <Params = any, Query = any, Body = any, Method extends RouteMethod = any>(
+    options: MonitoringRouteConfig<Params, Query, Body, Method>
+  ) => void;
 }
 
 export interface LegacyShimDependencies {
@@ -144,7 +153,8 @@ export interface LegacyServer {
   };
 }
 
-export type Cluster = ElasticsearchModifiedSource & {
+export type Cluster = Omit<ElasticsearchModifiedSource, 'timestamp'> & {
+  timestamp?: string;
   ml?: { jobs: any };
   logs?: any;
   alerts?: AlertsOnCluster;
@@ -167,6 +177,7 @@ export interface Bucket {
 export interface Aggregation {
   buckets: Bucket[];
 }
+
 export interface ClusterSettingsReasonResponse {
   found: boolean;
   reason?: {
@@ -217,10 +228,12 @@ export interface PipelineResponse {
     throughput?: PipelineMetricsProcessed;
   };
 }
+
 export interface PipelinesResponse {
   pipelines: PipelineResponse[];
   totalPipelineCount: number;
 }
+
 export interface PipelineMetrics {
   bucket_size: string;
   timeRange: {
@@ -238,6 +251,7 @@ export interface PipelineMetrics {
     isDerivative: boolean;
   };
 }
+
 export type PipelineMetricsRes = PipelineMetrics & {
   data: Array<[number, { [key: string]: number }]>;
 };

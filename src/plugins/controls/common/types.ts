@@ -27,3 +27,8 @@ export type ControlInput = EmbeddableInput & {
   controlStyle?: ControlStyle;
   ignoreParentSettings?: ParentIgnoreSettings;
 };
+
+export type DataControlInput = ControlInput & {
+  fieldName: string;
+  dataViewId: string;
+};
