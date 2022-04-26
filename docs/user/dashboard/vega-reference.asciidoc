@@ -248,7 +248,7 @@ url: {
 // The result is a geojson file, get its features to use
 // this data source with the "shape" marks
 // https://vega.github.io/vega/docs/marks/shape/
-format: {property: "features"}
+format: {type: "topojson", feature: "data"}
 ----
 
 [float]
@@ -310,16 +310,28 @@ experimental[] You can use the *Vega* https://vega.github.io/vega/docs/data/[dat
 
 [source,yaml]
 ----
-url: {
-  // "type" defaults to "elasticsearch" otherwise
-  %type%: emsfile
-  // Name of the file, exactly as in the Region map visualization
-  name: World Countries
-}
-// The result is a geojson file, get its features to use
-// this data source with the "shape" marks
-// https://vega.github.io/vega/docs/marks/shape/
-format: {property: "features"}
+  "data": [
+    {
+      "name": "countries",
+      "url": {
+        // "type" defaults to "elasticsearch" otherwise
+        %type%: emsfile
+        // Name of the file, exactly as in the Region map visualization
+        name: World Countries
+      },
+      // The result is a geojson file, get its features to use
+      // this data source with the "shape" marks
+      // https://vega.github.io/vega/docs/marks/shape/
+      "format": {"type": "topojson", "feature": "data"},
+    }
+  ],
+  "marks": [
+    {
+      "type": "shape",
+      "from": {"data": "countries"},
+      "transform": [{"type": "geoshape", "projection": "projection"}]
+    }
+  ]
 ----
 
 [float]
