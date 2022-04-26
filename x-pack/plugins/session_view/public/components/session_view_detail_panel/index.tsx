@@ -17,7 +17,7 @@ import { DetailPanelAlertTab } from '../detail_panel_alert_tab';
 import { ALERT_COUNT_THRESHOLD } from '../../../common/constants';
 
 interface SessionViewDetailPanelDeps {
-  selectedProcess: Process | undefined;
+  selectedProcess: Process | null;
   alerts?: ProcessEvent[];
   investigatedAlertId?: string;
   onJumpToEvent: (event: ProcessEvent) => void;
