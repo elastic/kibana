@@ -66,6 +66,7 @@ export function SpanLinks({ spanLinks }: Props) {
         defaultMessage: 'Incoming links ({incomingLinksSize})',
         values: { incomingLinksSize: spanLinks.incoming?.length || 0 },
       }),
+      disabled: !spanLinks.incoming?.length,
     },
     {
       value: 'outgoing',
@@ -73,6 +74,7 @@ export function SpanLinks({ spanLinks }: Props) {
         defaultMessage: 'Outgoing links ({outgoingLinksSize})',
         values: { outgoingLinksSize: spanLinks.outgoing?.length || 0 },
       }),
+      disabled: !spanLinks.outgoing?.length,
     },
   ];
 
