@@ -60,7 +60,7 @@ describe('createAlertRoute', () => {
   const createResult: Rule<{ bar: boolean }> = {
     ...mockedAlert,
     enabled: true,
-    muteAll: false,
+    snoozeIndefinitely: false,
     createdBy: '',
     updatedBy: '',
     apiKey: '',

@@ -54,7 +54,7 @@ describe('getAlertRoute', () => {
     name: 'abc',
     tags: ['foo'],
     enabled: true,
-    muteAll: false,
+    snoozeIndefinitely: false,
     notifyWhen: 'onActionGroupChange',
     createdBy: '',
     updatedBy: '',

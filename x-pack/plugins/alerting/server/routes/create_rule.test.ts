@@ -54,7 +54,7 @@ describe('createRuleRoute', () => {
       },
     ],
     enabled: true,
-    muteAll: false,
+    snoozeIndefinitely: false,
     createdBy: '',
     updatedBy: '',
     apiKeyOwner: '',
@@ -84,7 +84,7 @@ describe('createRuleRoute', () => {
 
   const createResult: AsApiContract<SanitizedRule<{ bar: boolean }>> = {
     ...ruleToCreate,
-    mute_all: mockedAlert.muteAll,
+    snooze_indefinitely: mockedAlert.snoozeIndefinitely,
     created_by: mockedAlert.createdBy,
     updated_by: mockedAlert.updatedBy,
     api_key_owner: mockedAlert.apiKeyOwner,

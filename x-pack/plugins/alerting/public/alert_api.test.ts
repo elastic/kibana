@@ -124,7 +124,7 @@ describe('loadRule', () => {
           "status": "ok",
         },
         "id": "3d534c70-582b-11ec-8995-2b1578a3bc5d",
-        "muteAll": false,
+        "snoozeIndefinitely": false,
         "mutedInstanceIds": Array [],
         "name": "stressing index-threshold 37/200",
         "notifyWhen": "onActiveAlert",
@@ -306,7 +306,7 @@ function getRule(): Rule<{ x: number }> {
     apiKeyOwner: '2889684073',
     createdBy: 'elastic',
     updatedBy: '2889684073',
-    muteAll: false,
+    snoozeIndefinitely: false,
     mutedInstanceIds: [],
     schedule: {
       interval: '1s',

@@ -65,7 +65,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   updatedAt,
   apiKeyOwner,
   notifyWhen,
-  muteAll,
+  snoozeIndefinitely,
   mutedInstanceIds,
   executionStatus: { lastExecutionDate, lastDuration, ...executionStatus },
   ...rest
@@ -79,7 +79,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   updated_at: updatedAt,
   api_key_owner: apiKeyOwner,
   notify_when: notifyWhen,
-  mute_all: muteAll,
+  snooze_indefinitely: snoozeIndefinitely,
   muted_alert_ids: mutedInstanceIds,
   execution_status: {
     ...executionStatus,

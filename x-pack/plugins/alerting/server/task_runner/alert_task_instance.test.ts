@@ -31,7 +31,7 @@ const alert: SanitizedRule<{
   apiKeyOwner: null,
   throttle: null,
   notifyWhen: null,
-  muteAll: false,
+  snoozeIndefinitely: false,
   mutedInstanceIds: [],
   executionStatus: {
     status: 'unknown',
