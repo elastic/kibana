@@ -10,7 +10,7 @@ import { EuiButtonIcon, EuiExpression, EuiFlexGroup, EuiFlexItem, EuiSpacer } fr
 import { FieldValueSuggestions } from '@kbn/observability-plugin/public';
 import { filterLabels } from '../../filter_group/translations';
 import { alertFilterLabels, filterAriaLabels } from './translations';
-import { useIndexPattern } from '../../../../contexts/uptime_index_pattern_context';
+import { useUptimeDataView } from '../../../../contexts/uptime_data_view_context';
 import { FILTER_FIELDS } from '../../../../../common/constants';
 import { useGetUrlParams } from '../../../../hooks';
 
@@ -122,7 +122,7 @@ export const FiltersExpressionsSelect: React.FC<FilterExpressionsSelectProps> = 
     (curr) => curr.selectedItems.length > 0 || newFilters?.includes(curr.fieldName)
   );
 
-  const indexPattern = useIndexPattern();
+  const dataView = useUptimeDataView();
 
   return (
     <>
@@ -130,11 +130,11 @@ export const FiltersExpressionsSelect: React.FC<FilterExpressionsSelectProps> = 
         ({ description, id, title, value, fieldName, ariaLabel, selectedItems }) => (
           <EuiFlexGroup key={id}>
             <EuiFlexItem>
-              {indexPattern && (
+              {dataView && (
                 <FieldValueSuggestions
                   filters={[]}
                   key={fieldName}
-                  dataViewTitle={indexPattern.title}
+                  dataViewTitle={dataView.title}
                   sourceField={fieldName}
                   label={title}
                   onChange={(vals) => {

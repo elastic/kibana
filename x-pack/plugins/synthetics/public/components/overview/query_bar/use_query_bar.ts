@@ -12,7 +12,7 @@ import { Query } from '@kbn/data-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   useGetUrlParams,
-  useIndexPattern,
+  useUptimeDataView,
   generateUpdatedKueryString,
   useUrlParams,
 } from '../../../hooks';
@@ -70,12 +70,12 @@ export const useQueryBar = (): UseQueryBarUtils => {
         }
   );
 
-  const indexPattern = useIndexPattern();
+  const dataView = useUptimeDataView();
 
   const [, updateUrlParams] = useUrlParams();
 
   const [esFilters, error] = generateUpdatedKueryString(
-    indexPattern,
+    dataView,
     query.language === SyntaxType.kuery ? (query.query as string) : undefined,
     paramFilters,
     excludedFilters
