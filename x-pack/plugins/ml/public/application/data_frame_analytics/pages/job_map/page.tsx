@@ -102,7 +102,7 @@ export const Page: FC = () => {
     <>
       <AnalyticsIdSelectorControls
         setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
-        selectedId={jobId || modelId}
+        selectedId={jobId ?? modelId}
       />
       {isIdSelectorFlyoutVisible ? (
         <AnalyticsIdSelector
@@ -145,9 +145,9 @@ export const Page: FC = () => {
       <SavedObjectsWarning onCloseFlyout={refresh} />
       <UpgradeWarning />
 
-      {jobId || modelId ? (
+      {jobId ?? modelId ? (
         <JobMap
-          key={`${jobId || modelId}-id`}
+          key={`${jobId ?? modelId}-id`}
           analyticsId={jobId}
           modelId={modelId}
           forceRefresh={isLoading}
