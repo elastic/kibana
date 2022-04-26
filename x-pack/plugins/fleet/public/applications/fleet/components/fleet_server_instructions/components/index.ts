@@ -4,6 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export { CloudInstructions } from './fleet_server_cloud_instructions';
-export { EnrollmentRecommendation } from './enrollment_recommendation';
+export * from './fleet_server_host_combobox';
