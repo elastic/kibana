@@ -156,7 +156,7 @@ export function getMigrations(
   const migrationRules830 = createEsoMigration(
     encryptedSavedObjects,
     (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
-    pipeMigrations(convertMutesAndSnoozes)
+    pipeMigrations(removeInternalTags, convertMutesAndSnoozes)
   );
 
   return {
@@ -895,6 +895,32 @@ function getCorrespondingAction(
       (action) => (action as RawRuleAction)?.actionRef === connectorRef
     ) as RawRuleAction;
   }
+}
+/**
+ * removes internal tags(starts with '__internal') from Security Solution rules
+ * @param doc rule to be migrated
+ * @returns migrated rule if it's Security Solution rule or unchanged if not
+ */
+function removeInternalTags(
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
+  if (!isDetectionEngineAADRuleType(doc)) {
+    return doc;
+  }
+
+  const {
+    attributes: { tags },
+  } = doc;
+
+  const filteredTags = (tags ?? []).filter((tag) => !tag.startsWith('__internal_'));
+
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      tags: filteredTags,
+    },
+  };
 }
 
 function pipeMigrations(...migrations: AlertMigration[]): AlertMigration {

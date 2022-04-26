@@ -42,7 +42,6 @@ import {
   MappedParams,
   RuleSnooze,
 } from '../common';
-import { RuleTypeConfig } from './config';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
@@ -171,7 +170,6 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
-  config?: RuleTypeConfig;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,
