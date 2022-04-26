@@ -95,7 +95,7 @@ export const DurationChartComponent = ({
 
   return (
     <ChartWrapper
-      aria-label={i18n.translate('xpack.uptime.monitorCharts.durationChart.wrapper.label', {
+      aria-label={i18n.translate('xpack.synthetics.monitorCharts.durationChart.wrapper.label', {
         defaultMessage: `A chart displaying the monitor's ping duration, grouped by location.`,
       })}
       height={MONITOR_CHART_HEIGHT}
@@ -123,7 +123,7 @@ export const DurationChartComponent = ({
             id="left"
             position={Position.Left}
             tickFormat={(d) => getTickFormat(d)}
-            title={i18n.translate('xpack.uptime.monitorCharts.durationChart.leftAxis.title', {
+            title={i18n.translate('xpack.synthetics.monitorCharts.durationChart.leftAxis.title', {
               defaultMessage: 'Duration in {unit}',
               values: { unit: monitor.monitor.type === 'browser' ? SECONDS_LABEL : MS_LABEL },
             })}
@@ -141,12 +141,12 @@ export const DurationChartComponent = ({
         <ChartEmptyState
           body={
             <FormattedMessage
-              id="xpack.uptime.durationChart.emptyPrompt.description"
+              id="xpack.synthetics.durationChart.emptyPrompt.description"
               defaultMessage="This monitor has never been {emphasizedText} during the selected time range."
               values={{ emphasizedText: <strong>up</strong> }}
             />
           }
-          title={i18n.translate('xpack.uptime.durationChart.emptyPrompt.title', {
+          title={i18n.translate('xpack.synthetics.durationChart.emptyPrompt.title', {
             defaultMessage: 'No duration data available',
           })}
         />
