@@ -17,4 +17,4 @@ tar -xzf "$STATIC_ASSETS" -C "$STATIC_ASSETS_FOLDER" --strip=1
 cd "$STATIC_ASSETS_FOLDER"
 
 echo "--- Publish"
-gsutil -m cp -r *.* gs://kibana-staging-static-assets/$BUILDKITE_COMMIT
+gsutil -m cp -r . gs://kibana-staging-static-assets/$BUILDKITE_COMMIT
