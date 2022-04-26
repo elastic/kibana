@@ -28,9 +28,14 @@ import { useCreateSavedQuery } from './use_create_saved_query';
 interface AddQueryFlyoutProps {
   defaultValue: unknown;
   onClose: () => void;
+  isExternal?: true;
 }
 
-const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ defaultValue, onClose }) => {
+const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
+  defaultValue,
+  onClose,
+  isExternal,
+}) => {
   const savedQueryFormRef = useRef<SavedQueryFormRefObject>(null);
   const createSavedQueryMutation = useCreateSavedQuery({ withRedirect: false });
 
@@ -54,7 +59,7 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ defaultValue
         onClose={onClose}
         aria-labelledby="flyoutTitle"
         // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-        maskProps={{ style: 'z-index: 6000' }} // For an edge case to display above the alerts flyout
+        maskProps={isExternal && { style: 'z-index: 6000' }} // For an edge case to display above the alerts flyout
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
