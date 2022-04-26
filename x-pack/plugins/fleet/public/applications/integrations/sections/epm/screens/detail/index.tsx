@@ -35,24 +35,17 @@ import {
   useAuthz,
   usePermissionCheck,
 } from '../../../../hooks';
-import {
-  PLUGIN_ID,
-  INTEGRATIONS_PLUGIN_ID,
-  INTEGRATIONS_ROUTING_PATHS,
-  pagePathGetters,
-} from '../../../../constants';
+import { PLUGIN_ID, INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { useGetPackageInfoByKey, useLink, useAgentPolicyContext } from '../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../services';
-import type {
-  CreatePackagePolicyRouteState,
-  DetailViewPanelName,
-  PackageInfo,
-} from '../../../../types';
+import type { DetailViewPanelName, PackageInfo } from '../../../../types';
 import { InstallStatus } from '../../../../types';
 import { Error, Loading } from '../../../../components';
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
 import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from '../../components/release_badge';
+
+import { getInstallRouteOptions } from './utils';
 
 import {
   IntegrationAgentPolicyCount,
@@ -263,7 +256,6 @@ export function Detail() {
   const handleAddIntegrationPolicyClick = useCallback<ReactEventHandler>(
     (ev) => {
       ev.preventDefault();
-
       // The object below, given to `createHref` is explicitly accessing keys of `location` in order
       // to ensure that dependencies to this `useCallback` is set correctly (because `location` is mutable)
       const currentPath = history.createHref({
@@ -272,75 +264,24 @@ export function Detail() {
         hash,
       });
 
-      const path = pagePathGetters.add_integration_to_policy({
+      const navigateOptions = getInstallRouteOptions({
+        currentPath,
+        integration,
+        agentPolicyId: agentPolicyIdFromContext,
         pkgkey,
-        ...(integration ? { integration } : {}),
-        ...(agentPolicyIdFromContext ? { agentPolicyId: agentPolicyIdFromContext } : {}),
-      })[1];
-
-      let redirectToPath: CreatePackagePolicyRouteState['onSaveNavigateTo'] &
-        CreatePackagePolicyRouteState['onCancelNavigateTo'];
-      let onSaveQueryParams: CreatePackagePolicyRouteState['onSaveQueryParams'];
-      if (agentPolicyIdFromContext) {
-        redirectToPath = [
-          PLUGIN_ID,
-          {
-            path: pagePathGetters.policy_details({
-              policyId: agentPolicyIdFromContext,
-            })[1],
-          },
-        ];
-
-        onSaveQueryParams = {
-          showAddAgentHelp: true,
-          openEnrollmentFlyout: true,
-        };
-      } else {
-        redirectToPath = [
-          INTEGRATIONS_PLUGIN_ID,
-          {
-            path: pagePathGetters.integration_details_policies({
-              pkgkey,
-              ...(integration ? { integration } : {}),
-            })[1],
-          },
-        ];
-
-        onSaveQueryParams = {
-          showAddAgentHelp: { renameKey: 'showAddAgentHelpForPolicyId', policyIdAsValue: true },
-          openEnrollmentFlyout: { renameKey: 'addAgentToPolicyId', policyIdAsValue: true },
-        };
-      }
-
-      const redirectBackRouteState: CreatePackagePolicyRouteState = {
-        onSaveNavigateTo: redirectToPath,
-        onSaveQueryParams,
-        onCancelNavigateTo: [
-          INTEGRATIONS_PLUGIN_ID,
-          {
-            path: pagePathGetters.integration_details_overview({
-              pkgkey,
-              ...(integration ? { integration } : {}),
-            })[1],
-          },
-        ],
-        onCancelUrl: currentPath,
-      };
-
-      services.application.navigateToApp(PLUGIN_ID, {
-        path,
-        state: redirectBackRouteState,
       });
+
+      services.application.navigateToApp(PLUGIN_ID, navigateOptions);
     },
     [
       history,
-      hash,
       pathname,
       search,
-      pkgkey,
+      hash,
       integration,
-      services.application,
       agentPolicyIdFromContext,
+      pkgkey,
+      services.application,
     ]
   );
 
