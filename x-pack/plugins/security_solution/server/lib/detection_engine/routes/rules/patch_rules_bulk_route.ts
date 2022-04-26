@@ -34,7 +34,6 @@ import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from './ut
 export const patchRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  isRuleRegistryEnabled: boolean,
   logger: Logger
 ) => {
   router.patch(
@@ -131,7 +130,6 @@ export const patchRulesBulkRoute = (
             }
 
             const existingRule = await readRules({
-              isRuleRegistryEnabled,
               rulesClient,
               ruleId,
               id,
@@ -200,12 +198,7 @@ export const patchRulesBulkRoute = (
             });
             if (rule != null && rule.enabled != null && rule.name != null) {
               const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
-              return transformValidateBulkError(
-                rule.id,
-                rule,
-                ruleExecutionSummary,
-                isRuleRegistryEnabled
-              );
+              return transformValidateBulkError(rule.id, rule, ruleExecutionSummary);
             } else {
               return getIdBulkError({ id, ruleId });
             }

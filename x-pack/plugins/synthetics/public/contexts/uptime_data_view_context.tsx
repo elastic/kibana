@@ -7,27 +7,26 @@
 
 import React, { createContext, useContext } from 'react';
 import { useFetcher } from '@kbn/observability-plugin/public';
-import { DataPublicPluginStart, IndexPattern } from '@kbn/data-plugin/public';
+import { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import { useHasData } from '../components/overview/empty_state/use_has_data';
 
-export const UptimeIndexPatternContext = createContext({} as IndexPattern);
+export const UptimeDataViewContext = createContext({} as DataView);
 
-export const UptimeIndexPatternContextProvider: React.FC<{ data: DataPublicPluginStart }> = ({
-  children,
-  data: { indexPatterns },
-}) => {
+export const UptimeDataViewContextProvider: React.FC<{
+  dataViews: DataViewsPublicPluginStart;
+}> = ({ children, dataViews }) => {
   const { settings, data: indexStatus } = useHasData();
 
   const heartbeatIndices = settings?.heartbeatIndices || '';
 
-  const { data } = useFetcher<Promise<IndexPattern | undefined>>(async () => {
+  const { data } = useFetcher<Promise<DataView | undefined>>(async () => {
     if (heartbeatIndices && indexStatus?.indexExists) {
-      // this only creates an index pattern in memory, not as saved object
-      return indexPatterns.create({ title: heartbeatIndices });
+      // this only creates an dateView in memory, not as saved object
+      return dataViews.create({ title: heartbeatIndices });
     }
   }, [heartbeatIndices, indexStatus?.indexExists]);
 
-  return <UptimeIndexPatternContext.Provider value={data!} children={children} />;
+  return <UptimeDataViewContext.Provider value={data!} children={children} />;
 };
 
-export const useIndexPattern = () => useContext(UptimeIndexPatternContext);
+export const useUptimeDataView = () => useContext(UptimeDataViewContext);
