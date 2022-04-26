@@ -62,7 +62,7 @@ export const ScriptRenderer: React.FunctionComponent<{
   React.useEffect(() => {
     if (!iframeRef.current) throw new Error('Iframe init error');
     const iframeEl = iframeRef.current;
-    const endpoint = createEndpoint(fromIframe(iframeEl));
+    const endpoint = createEndpoint(fromIframe(iframeEl, { terminate: false }));
 
     endpoint.expose({
       esSearch: (payload, options) => {
