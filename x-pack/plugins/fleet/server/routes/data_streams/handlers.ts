@@ -126,75 +126,42 @@ export const getListHandler: RequestHandler = async (context, request, response)
         dashboards: [],
       };
 
-      // Query backing indices to extract data stream dataset, namespace, and type values
-      const { aggregations: dataStreamAggs } = await esClient.search({
-        index: dataStream.name,
-        body: {
-          size: 0,
-          query: {
-            bool: {
-              filter: [
-                {
-                  exists: {
-                    field: 'data_stream.namespace',
-                  },
-                },
-                {
-                  exists: {
-                    field: 'data_stream.dataset',
-                  },
-                },
-              ],
+      const [maxEventIngestedResponse, namespaceResponse, datasetResponse, typeResponse] =
+        await Promise.all([
+          esClient.search({
+            size: 1,
+            sort: {
+              'event.ingested': 'desc',
             },
-          },
-          aggs: {
-            maxIngestedTimestamp: {
-              max: {
-                field: 'event.ingested',
-              },
-            },
-            dataset: {
-              terms: {
-                field: 'data_stream.dataset',
-                size: 1,
-              },
-            },
-            namespace: {
-              terms: {
-                field: 'data_stream.namespace',
-                size: 1,
-              },
-            },
-            type: {
-              terms: {
-                field: 'data_stream.type',
-                size: 1,
-              },
-            },
-          },
-        },
-      });
+          }),
+          esClient.termsEnum({
+            index: dataStream.name,
+            field: 'data_stream.namespace',
+          }),
+          esClient.termsEnum({
+            index: dataStream.name,
+            field: 'data_stream.dataset',
+          }),
+          esClient.termsEnum({
+            index: dataStream.name,
+            field: 'data_stream.type',
+          }),
+        ]);
 
-      const { maxIngestedTimestamp } = dataStreamAggs as Record<
-        string,
-        estypes.AggregationsRateAggregate
-      >;
-      const { dataset, namespace, type } = dataStreamAggs as Record<
-        string,
-        estypes.AggregationsMultiBucketAggregateBase<{ key?: string; value?: number }>
-      >;
+      const maxIngestedTimestamp = maxEventIngestedResponse.hits.hits[0]?._source['event.ingested'];
+
+      const namespace = namespaceResponse.terms[0] ?? '';
+      const dataset = datasetResponse.terms[0] ?? '';
+      const type = typeResponse.terms[0] ?? '';
 
       // some integrations e.g custom logs don't have event.ingested
       if (maxIngestedTimestamp?.value) {
         dataStreamResponse.last_activity_ms = maxIngestedTimestamp?.value;
       }
 
-      dataStreamResponse.dataset =
-        (dataset.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '';
-      dataStreamResponse.namespace =
-        (namespace.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '';
-      dataStreamResponse.type =
-        (type.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '';
+      dataStreamResponse.dataset = dataset;
+      dataStreamResponse.namespace = namespace;
+      dataStreamResponse.type = type;
 
       // Find package saved object
       const pkgName = dataStreamResponse.package;
