@@ -41,6 +41,8 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+
 import {
   PLUGIN_ID,
   INTEGRATIONS_PLUGIN_ID,
@@ -92,6 +94,7 @@ export interface FleetSetupDeps {
 export interface FleetStartDeps {
   licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   navigation: NavigationPublicPluginStart;
   customIntegrations: CustomIntegrationsStart;
   share: SharePluginStart;
