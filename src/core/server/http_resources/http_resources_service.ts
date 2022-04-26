@@ -93,6 +93,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
     return {
       async renderCoreApp(options: HttpResourcesRenderOptions = {}) {
         const apmConfig = getApmConfig(request.url.pathname);
+        const nonce = String(Math.random());
         const { uiSettings } = await context.core;
         const body = await deps.rendering.render(request, uiSettings.client, {
           isAnonymousPage: false,
@@ -100,11 +101,15 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
             apmConfig,
           },
           includeExposedConfigKeys: options.includeExposedConfigKeys,
+          nonce,
         });
 
         return response.ok({
           body,
-          headers: { ...options.headers, 'content-security-policy': cspHeader },
+          headers: {
+            ...options.headers,
+            'content-security-policy': `${cspHeader}; script-src '${nonce}';`,
+          },
         });
       },
       async renderAnonymousCoreApp(options: HttpResourcesRenderOptions = {}) {
@@ -124,6 +129,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
         });
       },
       renderHtml(options: HttpResourcesResponseOptions) {
+        // TODO do nonce to csp header
         return response.ok({
           body: options.body,
           headers: {
