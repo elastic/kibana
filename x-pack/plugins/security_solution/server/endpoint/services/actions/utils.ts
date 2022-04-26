@@ -170,6 +170,15 @@ const mapActionResponsesByAgentId = (
 
       if (response[agentId].isCompleted) {
         response[agentId].completedAt = response[agentId].endpointResponse?.item.data['@timestamp'];
+      } else {
+        // Check if perhaps the Fleet action response returned an error, in which case, the Fleet Agent
+        // failed to deliver the Action to the Endpoint. If that's the case, we are not going to get
+        // a Response from endpoint, thus mark the Action as completed and use the Fleet Messsage's
+        // timestamp for the complete data/time.
+        if (response[agentId].fleetResponse && response[agentId].fleetResponse?.item.data.error) {
+          response[agentId].isCompleted = true;
+          response[agentId].completedAt = response[agentId].fleetResponse?.item.data['@timestamp'];
+        }
       }
     }
   }
