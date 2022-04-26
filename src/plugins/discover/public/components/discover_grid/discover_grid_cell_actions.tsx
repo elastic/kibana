@@ -11,7 +11,22 @@ import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { flattenHit } from '@kbn/data-plugin/public';
-import { DiscoverGridContext } from './discover_grid_context';
+import { DiscoverGridContext, GridContext } from './discover_grid_context';
+
+function onFilterCell(
+  context: GridContext,
+  rowIndex: EuiDataGridColumnCellActionProps['rowIndex'],
+  columnId: EuiDataGridColumnCellActionProps['columnId'],
+  mode: '+' | '-'
+) {
+  const row = context.rows[rowIndex];
+  const flattened = flattenHit(row, context.indexPattern);
+  const field = context.indexPattern.fields.getByName(columnId);
+
+  if (flattened && field) {
+    context.onFilter(field, flattened[columnId], mode);
+  }
+}
 
 export const FilterInBtn = ({
   Component,
@@ -27,12 +42,7 @@ export const FilterInBtn = ({
   return (
     <Component
       onClick={() => {
-        const row = context.rows[rowIndex];
-        const flattened = flattenHit(row, context.indexPattern);
-
-        if (flattened) {
-          context.onFilter(columnId, flattened[columnId], '+');
-        }
+        onFilterCell(context, rowIndex, columnId, '+');
       }}
       iconType="plusInCircle"
       aria-label={buttonTitle}
@@ -60,12 +70,7 @@ export const FilterOutBtn = ({
   return (
     <Component
       onClick={() => {
-        const row = context.rows[rowIndex];
-        const flattened = flattenHit(row, context.indexPattern);
-
-        if (flattened) {
-          context.onFilter(columnId, flattened[columnId], '-');
-        }
+        onFilterCell(context, rowIndex, columnId, '-');
       }}
       iconType="minusInCircle"
       aria-label={buttonTitle}
