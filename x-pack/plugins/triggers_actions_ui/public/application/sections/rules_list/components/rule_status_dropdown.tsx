@@ -8,6 +8,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import { isRuleSnoozed, getRuleSnoozeEndTime } from '@kbn/alerting-plugin/common';
 import {
   useGeneratedHtmlId,
   EuiLoadingSpinner,
@@ -36,7 +37,7 @@ import { Rule } from '../../../../types';
 type SnoozeUnit = 'm' | 'h' | 'd' | 'w' | 'M';
 const SNOOZE_END_TIME_FORMAT = 'LL @ LT';
 
-type DropdownRuleRecord = Pick<Rule, 'enabled' | 'snoozeEndTime' | 'muteAll'>;
+type DropdownRuleRecord = Pick<Rule, 'enabled' | 'snoozeIndefinitely' | 'snoozeSchedule'>;
 
 export interface ComponentOpts {
   rule: DropdownRuleRecord;
@@ -158,11 +159,15 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
     isEnabled && isSnoozed ? (
       <EuiToolTip
         content={
-          rule.muteAll ? INDEFINITELY : moment(rule.snoozeEndTime).format(SNOOZE_END_TIME_FORMAT)
+          rule.snoozeSchedule
+            ? INDEFINITELY
+            : moment(getRuleSnoozeEndTime(rule) as Date).format(SNOOZE_END_TIME_FORMAT)
         }
       >
         <EuiText color="subdued" size="xs">
-          {rule.muteAll ? INDEFINITELY : moment(rule.snoozeEndTime).fromNow(true)}
+          {rule.snoozeSchedule
+            ? INDEFINITELY
+            : moment(getRuleSnoozeEndTime(rule) as Date).fromNow(true)}
         </EuiText>
       </EuiToolTip>
     ) : null;
@@ -215,7 +220,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
               onChangeSnooze={onChangeSnooze}
               isEnabled={isEnabled}
               isSnoozed={isSnoozed}
-              snoozeEndTime={rule.snoozeEndTime}
+              snoozeEndTime={getRuleSnoozeEndTime(rule)}
               previousSnoozeInterval={previousSnoozeInterval}
             />
           </EuiPopover>
@@ -472,15 +477,6 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
       <EuiSpacer size="s" />
     </EuiPanel>
   );
-};
-
-const isRuleSnoozed = (rule: DropdownRuleRecord) => {
-  const { snoozeEndTime, muteAll } = rule;
-  if (muteAll) return true;
-  if (!snoozeEndTime) {
-    return false;
-  }
-  return moment(Date.now()).isBefore(snoozeEndTime);
 };
 
 const futureTimeToInterval = (time?: Date | null) => {

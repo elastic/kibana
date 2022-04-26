@@ -40,6 +40,7 @@ import {
   SanitizedRuleConfig,
   RuleMonitoring,
   MappedParams,
+  RuleSnooze,
 } from '../common';
 import { RuleTypeConfig } from './config';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
@@ -245,12 +246,12 @@ export interface RawRule extends SavedObjectAttributes {
   apiKeyOwner: string | null;
   throttle: string | null;
   notifyWhen: RuleNotifyWhenType | null;
-  muteAll: boolean;
   mutedInstanceIds: string[];
   meta?: RuleMeta;
   executionStatus: RawRuleExecutionStatus;
   monitoring?: RuleMonitoring;
-  snoozeEndTime?: string | null; // Remove ? when this parameter is made available in the public API
+  snoozeIndefinitely?: boolean; // Remove ? when this parameter is made available in the public API
+  snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
 }
 
 export interface AlertingPlugin {

@@ -90,9 +90,6 @@
       "notifyWhen": {
         "type": "keyword"
       },
-      "muteAll": {
-        "type": "boolean"
-      },
       "mutedInstanceIds": {
         "type": "keyword"
       },
@@ -176,9 +173,32 @@
           }
         }
       },
-      "snoozeEndTime": {
-        "type": "date",
-        "format": "strict_date_time"
+      "snoozeIndefinitely": {
+        "type": "boolean"
+      },
+      "snoozeSchedule": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "startTime": {
+            "type": "date",
+            "format": "strict_date_time"
+          },
+          "duration": {
+            "type": "long"
+          },
+          "repeatInterval": {
+            "type": "keyword"
+          },
+          "occurrences": {
+            "type": "long"
+          },
+          "repeatEndTime": {
+            "type": "date",
+            "format": "strict_date_time"
+          }
+        }
       }
     }
   }

@@ -7,6 +7,7 @@
 
 import { isRuleType, ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { isString } from 'lodash/fp';
+import { omit } from 'lodash';
 import {
   LogMeta,
   SavedObjectMigrationMap,
@@ -152,6 +153,12 @@ export function getMigrations(
     pipeMigrations(addMappedParams)
   );
 
+  const migrationRules830 = createEsoMigration(
+    encryptedSavedObjects,
+    (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
+    pipeMigrations(convertMutesAndSnoozes)
+  );
+
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
     '7.11.0': executeMigrationWithErrorHandling(migrationAlertUpdatedAtAndNotifyWhen, '7.11.0'),
@@ -163,6 +170,7 @@ export function getMigrations(
     '8.0.0': executeMigrationWithErrorHandling(migrationRules800, '8.0.0'),
     '8.0.1': executeMigrationWithErrorHandling(migrationRules801, '8.0.1'),
     '8.2.0': executeMigrationWithErrorHandling(migrationRules820, '8.2.0'),
+    '8.3.0': executeMigrationWithErrorHandling(migrationRules830, '8.3.0'),
   };
 }
 
@@ -850,6 +858,30 @@ function addMappedParams(
   }
 
   return doc;
+}
+
+function convertMutesAndSnoozes(
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
+  const {
+    attributes: { muteAll, snoozeEndTime },
+  } = doc;
+
+  return {
+    ...doc,
+    attributes: {
+      ...(omit(doc.attributes, ['snoozeEndTime', 'muteAll']) as RawRule),
+      snoozeIndefinitely: Boolean(muteAll),
+      snoozeSchedule: snoozeEndTime
+        ? [
+            {
+              startTime: new Date().toISOString(),
+              duration: Date.parse(snoozeEndTime as string) - Date.now(),
+            },
+          ]
+        : [],
+    },
+  };
 }
 
 function getCorrespondingAction(

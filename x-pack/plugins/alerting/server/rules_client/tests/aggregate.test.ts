@@ -178,7 +178,7 @@ describe('aggregate()', () => {
             terms: { field: 'alert.attributes.enabled' },
           },
           muted: {
-            terms: { field: 'alert.attributes.muteAll' },
+            terms: { field: 'alert.attributes.snoozeIndefinitely' },
           },
           snoozed: {
             date_range: {

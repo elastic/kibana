@@ -38,12 +38,12 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   updated_at: updatedAt,
   api_key_owner: apiKeyOwner,
   notify_when: notifyWhen,
-  mute_all: muteAll,
   muted_alert_ids: mutedInstanceIds,
   scheduled_task_id: scheduledTaskId,
   execution_status: executionStatus,
   actions: actions,
-  snooze_end_time: snoozeEndTime,
+  snooze_indefinitely: snoozeIndefinitely,
+  snooze_schedule: snoozeSchedule,
   ...rest
 }: any) => ({
   ruleTypeId,
@@ -53,9 +53,9 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   updatedAt,
   apiKeyOwner,
   notifyWhen,
-  muteAll,
   mutedInstanceIds,
-  snoozeEndTime,
+  snoozeIndefinitely,
+  snoozeSchedule,
   executionStatus: executionStatus ? transformExecutionStatus(executionStatus) : undefined,
   actions: actions
     ? actions.map((action: AsApiContract<RuleAction>) => transformAction(action))

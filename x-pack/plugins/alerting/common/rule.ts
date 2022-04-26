@@ -13,6 +13,7 @@ import {
 } from '@kbn/core/server';
 import { RuleExecutionMetrics } from '.';
 import { RuleNotifyWhenType } from './rule_notify_when_type';
+import { RuleSnooze } from './rule_snooze_type';
 
 export type RuleTypeState = Record<string, unknown>;
 export type RuleTypeParams = Record<string, unknown>;
@@ -108,11 +109,11 @@ export interface Rule<Params extends RuleTypeParams = never> {
   apiKeyOwner: string | null;
   throttle: string | null;
   notifyWhen: RuleNotifyWhenType | null;
-  muteAll: boolean;
   mutedInstanceIds: string[];
   executionStatus: RuleExecutionStatus;
   monitoring?: RuleMonitoring;
-  snoozeEndTime?: Date | null; // Remove ? when this parameter is made available in the public API
+  snoozeIndefinitely?: boolean;
+  snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
 }
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<Rule<Params>, 'apiKey'>;

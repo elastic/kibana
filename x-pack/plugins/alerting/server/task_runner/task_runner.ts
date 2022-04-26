@@ -56,6 +56,7 @@ import {
   MONITORING_HISTORY_LIMIT,
   parseDuration,
   WithoutReservedActionGroups,
+  isRuleSnoozed,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -250,18 +251,6 @@ export class TaskRunner<
     } catch (err) {
       this.logger.error(`error updating rule for ${this.ruleType.id}:${ruleId} ${err.message}`);
     }
-  }
-
-  private isRuleSnoozed(rule: SanitizedRule<Params>): boolean {
-    if (rule.muteAll) {
-      return true;
-    }
-
-    if (rule.snoozeEndTime == null) {
-      return false;
-    }
-
-    return Date.now() < rule.snoozeEndTime.getTime();
   }
 
   private shouldLogAndScheduleActionsForAlerts() {
@@ -497,7 +486,7 @@ export class TaskRunner<
       triggeredActionsStatus: ActionsCompletion.COMPLETE,
     };
 
-    const ruleIsSnoozed = this.isRuleSnoozed(rule);
+    const ruleIsSnoozed = isRuleSnoozed(rule);
     if (!ruleIsSnoozed && this.shouldLogAndScheduleActionsForAlerts()) {
       const mutedAlertIdsSet = new Set(mutedInstanceIds);
 
