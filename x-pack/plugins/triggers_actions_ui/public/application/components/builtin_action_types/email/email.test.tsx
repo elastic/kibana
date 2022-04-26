@@ -10,7 +10,12 @@ import { registerBuiltInActionTypes } from '..';
 import { ActionTypeModel } from '../../../../types';
 import { EmailActionConnector } from '../types';
 import { getEmailServices } from './email';
-import { ValidatedEmail, InvalidEmailReason } from '@kbn/actions-plugin/common';
+import {
+  ValidatedEmail,
+  InvalidEmailReason,
+  ValidateEmailAddressesOptions,
+  MustacheInEmailRegExp,
+} from '@kbn/actions-plugin/common';
 
 const ACTION_TYPE_ID = '.email';
 let actionTypeModel: ActionTypeModel;
@@ -19,12 +24,19 @@ const RegistrationServices = {
   validateEmailAddresses: validateEmails,
 };
 
-function validateEmails(addresses: string[]): ValidatedEmail[] {
+// stub for the real validator
+function validateEmails(
+  addresses: string[],
+  options?: ValidateEmailAddressesOptions
+): ValidatedEmail[] {
   return addresses.map((address) => {
     if (address.includes('invalid'))
       return { address, valid: false, reason: InvalidEmailReason.invalid };
     else if (address.includes('notallowed'))
       return { address, valid: false, reason: InvalidEmailReason.notAllowed };
+    else if (options?.treatMustacheTemplatesAsValid) return { address, valid: true };
+    else if (address.match(MustacheInEmailRegExp))
+      return { address, valid: false, reason: InvalidEmailReason.invalid };
     else return { address, valid: true };
   });
 }
@@ -180,7 +192,13 @@ describe('connector validation', () => {
         },
       },
     });
+
+    // also check that mustache is not valid
+    actionConnector.config.from = '{{mustached}}';
+    const validation = await actionTypeModel.validateConnector(actionConnector);
+    expect(validation?.config?.errors?.from).toEqual(['Email address {{mustached}} is not valid.']);
   });
+
   test('connector validation fails when user specified but not password', async () => {
     const actionConnector = {
       secrets: {
@@ -349,6 +367,7 @@ describe('action params validation', () => {
     const actionParams = {
       to: [],
       cc: ['test1@test.com'],
+      bcc: ['mustache {{\n}} template'],
       message: 'message {test}',
       subject: 'test',
     };

@@ -8,7 +8,7 @@
 import { hasMustacheTemplate, withoutMustacheTemplate } from './mustache_template';
 
 const nonMustacheEmails = ['', 'zero@a.b.c', '}}{{'];
-const mustacheEmails = ['{{}}', '"bob" {{}}@elastic.co'];
+const mustacheEmails = ['{{}}', '"bob" {{}}@elastic.co', 'sneaky{{\n}}pete'];
 
 describe('mustache_template', () => {
   it('hasMustacheTemplate', () => {

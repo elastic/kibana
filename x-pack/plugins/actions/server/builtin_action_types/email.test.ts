@@ -270,6 +270,26 @@ describe('config validation', () => {
       `"error validating action type config: [host] value 'smtp.gmail.com' is not in the allowedHosts configuration"`
     );
   });
+
+  test('config validation for emails calls validateEmailAddresses', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    configurationUtilities.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
+
+    const basicActionType = getActionType({
+      logger: mockedLogger,
+      configurationUtilities,
+    });
+
+    expect(() => {
+      validateConfig(basicActionType, {
+        from: 'badmail',
+        service: 'gmail',
+      });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [from]: stub for actual message"`
+    );
+    expect(configurationUtilities.validateEmailAddresses).toHaveBeenNthCalledWith(1, ['badmail']);
+  });
 });
 
 describe('secrets validation', () => {
@@ -424,12 +444,12 @@ describe('params validation', () => {
         message: 'this is the message',
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: stub for actual message"`
+      `"error validating action params: [to/cc/bcc]: stub for actual message"`
     );
 
     const allEmails = ['to@example.com', 'cc@example.com', 'bcc@example.com'];
     expect(configurationUtilities.validateEmailAddresses).toHaveBeenNthCalledWith(1, allEmails, {
-      allowMustache: true,
+      treatMustacheTemplatesAsValid: true,
     });
   });
 });
@@ -758,7 +778,7 @@ describe('execute()', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "actionId": "some-id",
-        "message": "stub for actual message",
+        "message": "[to/cc/bcc]: stub for actual message",
         "status": "error",
       }
     `);
@@ -769,7 +789,6 @@ describe('execute()', () => {
             "jim@example.com",
             "james@example.com",
             "jimmy@example.com",
-            "bob@example.com",
           ],
         ],
       ]

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ValidatedEmail } from '@kbn/actions-plugin/common';
+import { ValidatedEmail, ValidateEmailAddressesOptions } from '@kbn/actions-plugin/common';
 import { getServerLogActionType } from './server_log';
 import { getSlackActionType } from './slack';
 import { getEmailActionType } from './email';
@@ -26,7 +26,10 @@ import { getResilientActionType } from './resilient';
 import { getTeamsActionType } from './teams';
 
 export interface RegistrationServices {
-  validateEmailAddresses: (addresses: string[]) => ValidatedEmail[];
+  validateEmailAddresses: (
+    addresses: string[],
+    options?: ValidateEmailAddressesOptions
+  ) => ValidatedEmail[];
 }
 
 export function registerBuiltInActionTypes({

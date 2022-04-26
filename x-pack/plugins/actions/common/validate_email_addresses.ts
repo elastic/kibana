@@ -9,17 +9,16 @@ import { parseAddressList } from 'email-addresses';
 import { ValidatedEmail, InvalidEmailReason } from './types';
 import { hasMustacheTemplate } from './mustache_template';
 
+/** Options that can be used when validating email addresses */
 export interface ValidateEmailAddressesOptions {
-  allowMustache?: boolean;
+  /** treat any address which contains a mustache template as valid */
+  treatMustacheTemplatesAsValid?: boolean;
 }
 
 // this can be useful for cases where a plugin needs this function,
 // but the actions plugin may not be available.  This could be used
 // as a stub for the real implementation.
-export function validateEmailAddressesAsAlwaysValid(
-  addresses: string[],
-  options?: ValidateEmailAddressesOptions
-): ValidatedEmail[] {
+export function validateEmailAddressesAsAlwaysValid(addresses: string[]): ValidatedEmail[] {
   return addresses.map((address) => ({ address, valid: true }));
 }
 
@@ -65,7 +64,12 @@ function validateEmailAddress(
   address: string,
   options: ValidateEmailAddressesOptions
 ): ValidatedEmail {
-  if (options.allowMustache && hasMustacheTemplate(address)) {
+  // The reason we bypass the validation in this case, is that email addresses
+  // used in an alerting action could contain mustache templates which render
+  // as the actual values. So we can't really validate them.  Fear not!
+  // We always do a final validation in the executor where we do NOT
+  // have this flag on.
+  if (options.treatMustacheTemplatesAsValid && hasMustacheTemplate(address)) {
     return { address, valid: true };
   }
 

@@ -69,7 +69,7 @@ function validateConfig(
   const emails = [config.from];
   const invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails);
   if (!!invalidEmailsMessage) {
-    return invalidEmailsMessage;
+    return `[from]: ${invalidEmailsMessage}`;
   }
 
   // If service is set as JSON_TRANSPORT_SERVICE or EXCHANGE, host/port are ignored, when the email is sent.
@@ -171,10 +171,10 @@ function validateParams(
 
   const emails = withoutMustacheTemplate(to.concat(cc).concat(bcc));
   const invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails, {
-    allowMustache: true,
+    treatMustacheTemplatesAsValid: true,
   });
   if (invalidEmailsMessage) {
-    return invalidEmailsMessage;
+    return `[to/cc/bcc]: ${invalidEmailsMessage}`;
   }
 }
 
@@ -260,10 +260,15 @@ async function executor(
   const params = execOptions.params;
   const connectorTokenClient = execOptions.services.connectorTokenClient;
 
-  const emails = params.to.concat(params.cc).concat(params.bcc).concat(config.from);
-  const invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails);
+  const emails = params.to.concat(params.cc).concat(params.bcc);
+  let invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails);
   if (invalidEmailsMessage) {
-    return { status: 'error', actionId, message: invalidEmailsMessage };
+    return { status: 'error', actionId, message: `[to/cc/bcc]: ${invalidEmailsMessage}` };
+  }
+
+  invalidEmailsMessage = configurationUtilities.validateEmailAddresses([config.from]);
+  if (invalidEmailsMessage) {
+    return { status: 'error', actionId, message: `[from]: ${invalidEmailsMessage}` };
   }
 
   const transport: Transport = {};

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+export const MustacheInEmailRegExp = /\{\{((.|\n)*)\}\}/;
+
 /** does the string contain `{{.*}}`? */
 export function hasMustacheTemplate(string: string): boolean {
-  return !!string.match(/.*\{\{.*\}\}.*/);
+  return !!string.match(MustacheInEmailRegExp);
 }
 
 /** filter strings that do not contain `{{.*}}` */

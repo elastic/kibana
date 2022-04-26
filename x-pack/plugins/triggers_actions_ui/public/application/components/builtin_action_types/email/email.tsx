@@ -209,7 +209,9 @@ export function getActionType(
       }
 
       const allEmails = uniq(toEmails.concat(ccEmails).concat(bccEmails));
-      const validatedEmails = services.validateEmailAddresses(allEmails);
+      const validatedEmails = services.validateEmailAddresses(allEmails, {
+        treatMustacheTemplatesAsValid: true,
+      });
 
       const toEmailSet = new Set(toEmails);
       const ccEmailSet = new Set(ccEmails);

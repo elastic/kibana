@@ -99,7 +99,9 @@ describe('validate_email_address', () => {
     });
 
     test('with configured allowlist and mustache filtering', () => {
-      const result = validateEmailAddresses(AllowedDomains, Emails, { allowMustache: true });
+      const result = validateEmailAddresses(AllowedDomains, Emails, {
+        treatMustacheTemplatesAsValid: true,
+      });
       expect(result).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -191,7 +193,7 @@ describe('validate_email_address', () => {
     });
 
     test('with no configured allowlist and mustache filtering', () => {
-      const result = validateEmailAddresses(null, Emails, { allowMustache: true });
+      const result = validateEmailAddresses(null, Emails, { treatMustacheTemplatesAsValid: true });
       expect(result).toMatchInlineSnapshot(`
         Array [
           Object {
