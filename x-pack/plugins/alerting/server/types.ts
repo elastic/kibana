@@ -248,7 +248,7 @@ export interface RawRule extends SavedObjectAttributes {
   meta?: RuleMeta;
   executionStatus: RawRuleExecutionStatus;
   monitoring?: RuleMonitoring;
-  snoozeIndefinitely?: boolean; // Remove ? when this parameter is made available in the public API
+  snoozeIndefinitely: boolean;
   snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
 }
 

@@ -301,7 +301,6 @@ export class RulesClient {
   private readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule> = [
     'monitoring',
     'mapped_params',
-    'snoozeIndefinitely',
     'snoozeSchedule',
   ];
 

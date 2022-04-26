@@ -108,7 +108,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   mutedInstanceIds: string[];
   executionStatus: RuleExecutionStatus;
   monitoring?: RuleMonitoring;
-  snoozeIndefinitely?: boolean;
+  snoozeIndefinitely: boolean;
   snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
 }
 
