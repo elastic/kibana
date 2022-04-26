@@ -6,13 +6,13 @@
  */
 
 import { get, groupBy } from 'lodash';
-import moment from 'moment';
 import { prefixIndexPatternWithCcs } from '../../../../../common/ccs_utils';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 import {
   postElasticsearchCcrRequestParamsRT,
   postElasticsearchCcrRequestPayloadRT,
 } from '../../../../../common/http_api/elasticsearch';
+import { TimeRange } from '../../../../../common/http_api/shared';
 import {
   ElasticsearchLegacySource,
   ElasticsearchMetricbeatSource,
@@ -35,9 +35,12 @@ function getBucketScript(max: string, min: string) {
   };
 }
 
-function buildRequest(req: LegacyRequest, config: MonitoringConfig, esIndexPattern: string) {
-  const min = moment.utc(req.payload.timeRange.min).valueOf();
-  const max = moment.utc(req.payload.timeRange.max).valueOf();
+function buildRequest(
+  req: LegacyRequest<unknown, unknown, { timeRange: TimeRange }>,
+  config: MonitoringConfig,
+  esIndexPattern: string
+) {
+  const { min, max } = req.payload.timeRange;
   const maxBucketSize = config.ui.max_bucket_size;
   const aggs = {
     ops_synced_max: {
@@ -208,7 +211,7 @@ export function ccrRoute(server: MonitoringCore) {
       params: validateParams,
       body: validateBody,
     },
-    async handler(req: LegacyRequest) {
+    async handler(req) {
       const config = server.config;
       const ccs = req.payload.ccs;
       const esIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_ELASTICSEARCH, ccs);

@@ -10,6 +10,7 @@ import {
   postElasticsearchCcrShardRequestPayloadRT,
   postElasticsearchCcrShardResponsePayloadRT,
 } from '../../../../../common/http_api/elasticsearch';
+import { TimeRange } from '../../../../../common/http_api/shared';
 import { ElasticsearchResponse } from '../../../../../common/types/es';
 import { getNewIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
@@ -27,10 +28,12 @@ function getFormattedLeaderIndex(leaderIndex: string) {
   return leader;
 }
 
-async function getCcrStat(req: LegacyRequest, esIndexPattern: string, filters: unknown[]) {
-  const min = moment.utc(req.payload.timeRange.min).valueOf();
-  const max = moment.utc(req.payload.timeRange.max).valueOf();
-
+async function getCcrStat(
+  req: LegacyRequest<unknown, unknown, { timeRange: TimeRange }>,
+  esIndexPattern: string,
+  filters: unknown[]
+) {
+  const { min, max } = req.payload.timeRange;
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
 
   const params = {

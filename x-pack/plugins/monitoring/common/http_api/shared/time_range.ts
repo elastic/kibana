@@ -30,3 +30,5 @@ export const timeRangeRT = rt.type({
   min: timestampFromStringRT,
   max: timestampFromStringRT,
 });
+
+export type TimeRange = rt.TypeOf<typeof timeRangeRT>;
