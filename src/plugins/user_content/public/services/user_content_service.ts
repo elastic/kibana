@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ContentType } from '../types';
+import { UserContentType } from '../types';
 
 interface InitOptions<T> {
   /** Handler to fetch the saved object */
@@ -18,21 +18,21 @@ interface Content<T> {
 }
 
 export class UserContentService {
-  private contents: Map<ContentType, Content<unknown>>;
+  private contents: Map<UserContentType, Content<unknown>>;
 
   constructor() {
-    this.contents = new Map<ContentType, Content<unknown>>();
+    this.contents = new Map<UserContentType, Content<unknown>>();
   }
 
   init() {}
 
-  register<T>(contentType: ContentType, { get }: InitOptions<T>) {
+  register<T>(contentType: UserContentType, { get }: InitOptions<T>) {
     this.contents.set(contentType, {
       get,
     });
   }
 
-  get<T = unknown>(contentType: ContentType, contentId: string) {
+  get<T = unknown>(contentType: UserContentType, contentId: string) {
     if (!this.contents.has(contentType)) {
       throw new Error(`Can't fetch content [${contentId}]. Unknown content type [${contentType}].`);
     }
