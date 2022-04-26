@@ -648,6 +648,40 @@ describe('AlertSummaryView', () => {
     );
   });
 
+  test('New terms events have special fields', () => {
+    const enhancedData = [
+      ...mockAlertDetailsData.map((item) => {
+        if (item.category === 'kibana' && item.field === 'kibana.alert.rule.type') {
+          return {
+            ...item,
+            values: ['new_terms'],
+            originalValue: ['new_terms'],
+          };
+        }
+        return item;
+      }),
+      {
+        category: 'kibana',
+        field: 'kibana.alert.new_terms',
+        values: ['127.0.0.1'],
+        originalValue: ['127.0.0.1'],
+      },
+    ] as TimelineEventsDetailsItem[];
+    const renderProps = {
+      ...props,
+      data: enhancedData,
+    };
+    const { getByText } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+
+    ['New Terms'].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
+  });
+
   test("doesn't render empty fields", () => {
     const renderProps = {
       ...props,
