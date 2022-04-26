@@ -10,7 +10,7 @@ import { ScaleType } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
 
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import type { ExtendedYConfig, YConfig } from '@kbn/expression-xy-plugin/common';
+import type { AxisExtentConfig, ExtendedYConfig, YConfig } from '@kbn/expression-xy-plugin/common';
 import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import {
   State,
@@ -252,50 +252,8 @@ export const buildExpression = (
           emphasizeFitting: [state.emphasizeFitting || false],
           curveType: [state.curveType || 'LINEAR'],
           fillOpacity: [state.fillOpacity || 0.3],
-          yLeftExtent: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'axisExtentConfig',
-                  arguments: {
-                    mode: [state?.yLeftExtent?.mode || 'full'],
-                    lowerBound:
-                      state?.yLeftExtent?.lowerBound !== undefined
-                        ? [state?.yLeftExtent?.lowerBound]
-                        : [],
-                    upperBound:
-                      state?.yLeftExtent?.upperBound !== undefined
-                        ? [state?.yLeftExtent?.upperBound]
-                        : [],
-                  },
-                },
-              ],
-            },
-          ],
-          yRightExtent: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'axisExtentConfig',
-                  arguments: {
-                    mode: [state?.yRightExtent?.mode || 'full'],
-                    lowerBound:
-                      state?.yRightExtent?.lowerBound !== undefined
-                        ? [state?.yRightExtent?.lowerBound]
-                        : [],
-                    upperBound:
-                      state?.yRightExtent?.upperBound !== undefined
-                        ? [state?.yRightExtent?.upperBound]
-                        : [],
-                  },
-                },
-              ],
-            },
-          ],
+          yLeftExtent: [axisExtentConfigToExpression(state.yLeftExtent, validDataLayers)],
+          yRightExtent: [axisExtentConfigToExpression(state.yRightExtent, validDataLayers)],
           axisTitlesVisibilitySettings: [
             {
               type: 'expression',
@@ -565,6 +523,28 @@ const extendedYConfigToExpression = (yConfig: ExtendedYConfig, defaultColor?: st
               ? [yConfig.iconPosition || 'auto']
               : ['auto'],
           textVisibility: [yConfig.textVisibility || false],
+        },
+      },
+    ],
+  };
+};
+
+const axisExtentConfigToExpression = (
+  extent: AxisExtentConfig | undefined,
+  layers: ValidXYDataLayerConfig[]
+): Ast => {
+  const hasLine = layers.filter(({ seriesType }) => seriesType.includes('line')).length > 0;
+  const mode = !extent?.mode || (!hasLine && extent?.mode === 'dataBounds') ? 'full' : extent.mode;
+  return {
+    type: 'expression',
+    chain: [
+      {
+        type: 'function',
+        function: 'axisExtentConfig',
+        arguments: {
+          mode: [mode],
+          lowerBound: extent?.lowerBound !== undefined ? [extent?.lowerBound] : [],
+          upperBound: extent?.upperBound !== undefined ? [extent?.upperBound] : [],
         },
       },
     ],

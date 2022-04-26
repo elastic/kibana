@@ -13,7 +13,6 @@ import {
   LineSeries,
 } from '@elastic/charts';
 import React, { FC } from 'react';
-import { i18n } from '@kbn/i18n';
 import { PaletteRegistry } from '@kbn/coloring';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import {
@@ -72,7 +71,7 @@ export const DataLayers: FC<Props> = ({
     <>
       {layers.flatMap((layer) =>
         layer.accessors.map((accessor, accessorIndex) => {
-          const { splitAccessor, seriesType, xAccessor, columnToLabel, layerId } = layer;
+          const { seriesType, columnToLabel, layerId } = layer;
           const columnToLabelMap: Record<string, string> = columnToLabel
             ? JSON.parse(columnToLabel)
             : {};
@@ -83,26 +82,6 @@ export const DataLayers: FC<Props> = ({
           const formattedDatatableInfo = formattedDatatables[layerId];
 
           const isPercentage = seriesType.includes('percentage');
-
-          // For date histogram chart type, we're getting the rows that represent intervals without data.
-          // To not display them in the legend, they need to be filtered out.
-          const rows = formattedDatatableInfo.table.rows.filter(
-            (row) =>
-              !(xAccessor && typeof row[xAccessor] === 'undefined') &&
-              !(
-                splitAccessor &&
-                typeof row[splitAccessor] === 'undefined' &&
-                typeof row[accessor] === 'undefined'
-              )
-          );
-
-          if (!xAccessor) {
-            rows.forEach((row) => {
-              row.unifiedX = i18n.translate('expressionXY.xyChart.emptyXLabel', {
-                defaultMessage: '(empty)',
-              });
-            });
-          }
 
           const yAxis = yAxesConfiguration.find((axisConfiguration) =>
             axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)

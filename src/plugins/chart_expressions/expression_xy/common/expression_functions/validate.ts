@@ -51,26 +51,39 @@ export const hasHistogramBarLayer = (
   layers.filter(({ seriesType, isHistogram }) => seriesType.includes('bar') && isHistogram).length >
   0;
 
-export const validateExtent = (
-  extent: AxisExtentConfigResult,
-  hasBarOrArea: boolean,
-  dataLayers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>
-) => {
+export const isValidExtentWithCustomMode = (extent: AxisExtentConfigResult) => {
   const isValidLowerBound =
     extent.lowerBound === undefined || (extent.lowerBound !== undefined && extent.lowerBound <= 0);
   const isValidUpperBound =
     extent.upperBound === undefined || (extent.upperBound !== undefined && extent.upperBound >= 0);
 
-  const areValidBounds = isValidLowerBound && isValidUpperBound;
+  return isValidLowerBound && isValidUpperBound;
+};
 
-  if (hasBarOrArea && extent.mode === AxisExtentModes.CUSTOM && !areValidBounds) {
-    throw new Error(errors.extendBoundsAreInvalidError());
-  }
-
-  const lineSeries = dataLayers.filter(({ seriesType }) => seriesType.includes('line'));
+export const validateExtentForDataBounds = (
+  extent: AxisExtentConfigResult,
+  layers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>
+) => {
+  const lineSeries = layers.filter(({ seriesType }) => seriesType.includes('line'));
   if (!lineSeries.length && extent.mode === AxisExtentModes.DATA_BOUNDS) {
     throw new Error(errors.dataBoundsForNotLineChartError());
   }
+};
+
+export const validateExtent = (
+  extent: AxisExtentConfigResult,
+  hasBarOrArea: boolean,
+  dataLayers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>
+) => {
+  if (
+    extent.mode === AxisExtentModes.CUSTOM &&
+    hasBarOrArea &&
+    !isValidExtentWithCustomMode(extent)
+  ) {
+    throw new Error(errors.extendBoundsAreInvalidError());
+  }
+
+  validateExtentForDataBounds(extent, dataLayers);
 };
 
 export const validateFillOpacity = (fillOpacity: number | undefined, hasArea: boolean) => {

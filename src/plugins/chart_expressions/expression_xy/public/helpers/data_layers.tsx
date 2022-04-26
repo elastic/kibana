@@ -258,7 +258,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
 
   // For date histogram chart type, we're getting the rows that represent intervals without data.
   // To not display them in the legend, they need to be filtered out.
-  const rows = formattedTable.rows.filter(
+  let rows = formattedTable.rows.filter(
     (row) =>
       !(layer.xAccessor && typeof row[layer.xAccessor] === 'undefined') &&
       !(
@@ -269,12 +269,14 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   );
 
   if (!layer.xAccessor) {
-    rows.forEach((row) => {
-      row.unifiedX = i18n.translate('expressionXY.xyChart.emptyXLabel', {
+    rows = rows.map((row) => ({
+      ...row,
+      unifiedX: i18n.translate('expressionXY.xyChart.emptyXLabel', {
         defaultMessage: '(empty)',
-      });
-    });
+      }),
+    }));
   }
+
   return {
     splitSeriesAccessors: layer.splitAccessor ? [layer.splitAccessor] : [],
     stackAccessors: isStacked ? [layer.xAccessor as string] : [],
