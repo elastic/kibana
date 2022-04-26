@@ -248,7 +248,7 @@ js-yaml@^4.1.0:
   dependencies:
     argparse "^2.0.1"
 
-kibana-buildkite-library@elastic/kibana-buildkite-library:
+kibana-buildkite-library@elastic/kibana-buildkite-library#0c02e8e8461f3bd5b6d686efe401d579d622395d:
   version "1.0.0"
   resolved "https://codeload.github.com/elastic/kibana-buildkite-library/tar.gz/0c02e8e8461f3bd5b6d686efe401d579d622395d"
   dependencies:
