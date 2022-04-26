@@ -145,7 +145,7 @@ export function setupSavedObjects({
             const encryptedSavedObjects = await pMap(
               res.saved_objects,
               async (savedObject) => {
-                if (service.isRegistered(savedObject.type) === false) {
+                if (!service.isRegistered(savedObject.type)) {
                   return savedObject;
                 }
 
