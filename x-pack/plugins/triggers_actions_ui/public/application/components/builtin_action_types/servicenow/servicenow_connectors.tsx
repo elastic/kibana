@@ -8,8 +8,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { snExternalServiceConfig } from '@kbn/actions-plugin/server/builtin_action_types/servicenow/config';
+import { snExternalServiceConfig } from '@kbn/actions-plugin/common';
 import { ActionConnectorFieldsProps } from '../../../../types';
 
 import * as i18n from './translations';

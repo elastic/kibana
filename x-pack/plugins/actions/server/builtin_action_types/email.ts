@@ -10,8 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import nodemailerGetService from 'nodemailer/lib/well-known';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
-
 import { Logger } from '@kbn/core/server';
+import { withoutMustacheTemplate } from '../../common';
+
 import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './lib/send_email';
 import { portSchema } from './lib/schemas';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
@@ -64,6 +65,12 @@ function validateConfig(
   configObject: ActionTypeConfigType
 ): string | void {
   const config = configObject;
+
+  const emails = [config.from];
+  const invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails);
+  if (!!invalidEmailsMessage) {
+    return `[from]: ${invalidEmailsMessage}`;
+  }
 
   // If service is set as JSON_TRANSPORT_SERVICE or EXCHANGE, host/port are ignored, when the email is sent.
   // Note, not currently making these message translated, as will be
@@ -128,30 +135,30 @@ const SecretsSchema = schema.object(SecretsSchemaProps);
 
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 
-const ParamsSchema = schema.object(
-  {
-    to: schema.arrayOf(schema.string(), { defaultValue: [] }),
-    cc: schema.arrayOf(schema.string(), { defaultValue: [] }),
-    bcc: schema.arrayOf(schema.string(), { defaultValue: [] }),
-    subject: schema.string(),
-    message: schema.string(),
-    // kibanaFooterLink isn't inteded for users to set, this is here to be able to programatically
-    // provide a more contextual URL in the footer (ex: URL to the alert details page)
-    kibanaFooterLink: schema.object({
-      path: schema.string({ defaultValue: '/' }),
-      text: schema.string({
-        defaultValue: i18n.translate('xpack.actions.builtin.email.kibanaFooterLinkText', {
-          defaultMessage: 'Go to Kibana',
-        }),
+const ParamsSchemaProps = {
+  to: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  cc: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  bcc: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  subject: schema.string(),
+  message: schema.string(),
+  // kibanaFooterLink isn't inteded for users to set, this is here to be able to programatically
+  // provide a more contextual URL in the footer (ex: URL to the alert details page)
+  kibanaFooterLink: schema.object({
+    path: schema.string({ defaultValue: '/' }),
+    text: schema.string({
+      defaultValue: i18n.translate('xpack.actions.builtin.email.kibanaFooterLinkText', {
+        defaultMessage: 'Go to Kibana',
       }),
     }),
-  },
-  {
-    validate: validateParams,
-  }
-);
+  }),
+};
 
-function validateParams(paramsObject: unknown): string | void {
+const ParamsSchema = schema.object(ParamsSchemaProps);
+
+function validateParams(
+  configurationUtilities: ActionsConfigurationUtilities,
+  paramsObject: unknown
+): string | void {
   // avoids circular reference ...
   const params = paramsObject as ActionParamsType;
 
@@ -160,6 +167,14 @@ function validateParams(paramsObject: unknown): string | void {
 
   if (addrs === 0) {
     return 'no [to], [cc], or [bcc] entries';
+  }
+
+  const emails = withoutMustacheTemplate(to.concat(cc).concat(bcc));
+  const invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails, {
+    treatMustacheTemplatesAsValid: true,
+  });
+  if (invalidEmailsMessage) {
+    return `[to/cc/bcc]: ${invalidEmailsMessage}`;
   }
 }
 
@@ -203,7 +218,9 @@ export function getActionType(params: GetActionTypeParams): EmailActionType {
         validate: curry(validateConfig)(configurationUtilities),
       }),
       secrets: SecretsSchema,
-      params: ParamsSchema,
+      params: schema.object(ParamsSchemaProps, {
+        validate: curry(validateParams)(configurationUtilities),
+      }),
       connector: validateConnector,
     },
     renderParameterTemplates,
@@ -242,6 +259,17 @@ async function executor(
   const secrets = execOptions.secrets;
   const params = execOptions.params;
   const connectorTokenClient = execOptions.services.connectorTokenClient;
+
+  const emails = params.to.concat(params.cc).concat(params.bcc);
+  let invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails);
+  if (invalidEmailsMessage) {
+    return { status: 'error', actionId, message: `[to/cc/bcc]: ${invalidEmailsMessage}` };
+  }
+
+  invalidEmailsMessage = configurationUtilities.validateEmailAddresses([config.from]);
+  if (invalidEmailsMessage) {
+    return { status: 'error', actionId, message: `[from]: ${invalidEmailsMessage}` };
+  }
 
   const transport: Transport = {};
 

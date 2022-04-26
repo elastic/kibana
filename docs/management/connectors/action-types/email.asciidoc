@@ -9,6 +9,8 @@ The email connector uses the SMTP protocol to send mail messages, using an integ
 
 NOTE: For emails to have a footer with a link back to {kib}, set the <<server-publicBaseUrl, `server.publicBaseUrl`>> configuration setting.
 
+NOTE: When the <<action-config-email-domain-allowlist, `xpack.actions.email.domain_allowlist`>> configuration setting is used, the email addresses used for all of the Sender (from), To, CC, and BCC properties must have email domains specified in the configuration setting.
+
 [float]
 [[email-connector-configuration]]
 ==== Connector configuration
