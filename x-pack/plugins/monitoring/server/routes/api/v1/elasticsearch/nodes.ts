@@ -5,45 +5,39 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import {
+  postElasticsearchNodesRequestParamsRT,
+  postElasticsearchNodesRequestPayloadRT,
+  postElasticsearchNodesResponsePayloadRT,
+} from '../../../../../common/http_api/elasticsearch';
 import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
 import { getClusterStatus } from '../../../../lib/cluster/get_cluster_status';
+import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getNodes } from '../../../../lib/elasticsearch/nodes';
-import { getNodesShardCount } from '../../../../lib/elasticsearch/shards/get_nodes_shard_count';
-import { handleError } from '../../../../lib/errors/handle_error';
 import { getPaginatedNodes } from '../../../../lib/elasticsearch/nodes/get_nodes/get_paginated_nodes';
 import { LISTING_METRICS_NAMES } from '../../../../lib/elasticsearch/nodes/get_nodes/nodes_listing_metrics';
 import { getIndicesUnassignedShardStats } from '../../../../lib/elasticsearch/shards/get_indices_unassigned_shard_stats';
+import { getNodesShardCount } from '../../../../lib/elasticsearch/shards/get_nodes_shard_count';
+import { handleError } from '../../../../lib/errors/handle_error';
+import { MonitoringCore } from '../../../../types';
 
-export function esNodesRoute(server) {
+export function esNodesRoute(server: MonitoringCore) {
+  const validateParams = createValidationFunction(postElasticsearchNodesRequestParamsRT);
+  const validateBody = createValidationFunction(postElasticsearchNodesRequestPayloadRT);
+
   server.route({
-    method: 'POST',
+    method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/elasticsearch/nodes',
-    config: {
-      validate: {
-        params: schema.object({
-          clusterUuid: schema.string(),
-        }),
-        body: schema.object({
-          ccs: schema.maybe(schema.string()),
-          timeRange: schema.object({
-            min: schema.string(),
-            max: schema.string(),
-          }),
-          pagination: schema.object({
-            index: schema.number(),
-            size: schema.number(),
-          }),
-          sort: schema.object({
-            field: schema.string({ defaultValue: '' }),
-            direction: schema.string({ defaultValue: '' }),
-          }),
-          queryText: schema.string({ defaultValue: '' }),
-        }),
-      },
+    validate: {
+      params: validateParams,
+      body: validateBody,
     },
     async handler(req) {
-      const { ccs, pagination, sort, queryText } = req.payload;
+      const {
+        pagination,
+        sort: { field = '', direction = 'asc' },
+        queryText = '',
+      } = req.payload;
       const clusterUuid = req.params.clusterUuid;
 
       try {
@@ -58,17 +52,23 @@ export function esNodesRoute(server) {
           { clusterUuid },
           metricSet,
           pagination,
-          sort,
+          {
+            field,
+            direction,
+          },
           queryText,
           {
             clusterStats,
             nodesShardCount,
-          },
-          ccs
+          }
         );
 
         const nodes = await getNodes(req, pageOfNodes, clusterStats, nodesShardCount);
-        return { clusterStatus, nodes, totalNodeCount };
+        return postElasticsearchNodesResponsePayloadRT.encode({
+          clusterStatus,
+          nodes,
+          totalNodeCount,
+        });
       } catch (err) {
         throw handleError(err, req);
       }

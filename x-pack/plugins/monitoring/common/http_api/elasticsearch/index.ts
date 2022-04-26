@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export * from './post_elasticsearch_nodes';
 export * from './post_elasticsearch_overview';
