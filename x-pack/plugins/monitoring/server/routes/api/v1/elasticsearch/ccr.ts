@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import moment from 'moment';
 import { get, groupBy } from 'lodash';
-// @ts-ignore
-import { handleError } from '../../../../lib/errors/handle_error';
-// @ts-ignore
+import moment from 'moment';
 import { prefixIndexPatternWithCcs } from '../../../../../common/ccs_utils';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 import {
-  ElasticsearchResponse,
+  postElasticsearchCcrRequestParamsRT,
+  postElasticsearchCcrRequestPayloadRT,
+} from '../../../../../common/http_api/elasticsearch';
+import {
   ElasticsearchLegacySource,
   ElasticsearchMetricbeatSource,
+  ElasticsearchResponse,
 } from '../../../../../common/types/es';
-import { LegacyRequest } from '../../../../types';
 import { MonitoringConfig } from '../../../../config';
+import { createValidationFunction } from '../../../../lib/create_route_validation_function';
+import { handleError } from '../../../../lib/errors/handle_error';
+import { LegacyRequest, MonitoringCore } from '../../../../types';
 
 function getBucketScript(max: string, min: string) {
   return {
@@ -195,23 +197,16 @@ function buildRequest(req: LegacyRequest, config: MonitoringConfig, esIndexPatte
   };
 }
 
-export function ccrRoute(server: { route: (p: any) => void; config: MonitoringConfig }) {
+export function ccrRoute(server: MonitoringCore) {
+  const validateParams = createValidationFunction(postElasticsearchCcrRequestParamsRT);
+  const validateBody = createValidationFunction(postElasticsearchCcrRequestPayloadRT);
+
   server.route({
-    method: 'POST',
+    method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/elasticsearch/ccr',
-    config: {
-      validate: {
-        params: schema.object({
-          clusterUuid: schema.string(),
-        }),
-        body: schema.object({
-          ccs: schema.maybe(schema.string()),
-          timeRange: schema.object({
-            min: schema.string(),
-            max: schema.string(),
-          }),
-        }),
-      },
+    validate: {
+      params: validateParams,
+      body: validateBody,
     },
     async handler(req: LegacyRequest) {
       const config = server.config;
