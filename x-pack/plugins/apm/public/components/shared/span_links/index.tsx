@@ -55,10 +55,6 @@ export function SpanLinks({ spanLinks }: Props) {
     [currentLinks, kuery]
   );
 
-  if (!currentLinks) {
-    // TODO: caue return not found copy.
-  }
-
   const selectOptions: EuiSelectOption[] = [
     {
       value: 'incoming',

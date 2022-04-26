@@ -97,9 +97,8 @@ const tracesByIdRoute = createApmServerRoute({
       getOutgoingSpanLinks({
         traceId,
         setup,
-        // Only fetch items within a limited time range
-        start: moment(end).subtract(4, 'days').valueOf(),
-        end,
+        start: moment(start).subtract(4, 'days').valueOf(),
+        end: moment(end).add(4, 'days').valueOf(),
       }),
     ]);
 

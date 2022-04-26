@@ -19,8 +19,8 @@ function generateExternalSpanLinks() {
 }
 function generateIncomeEventsSpanLinks() {
   const range = timerange(
-    new Date('2022-04-12T19:00:00.000Z'),
-    new Date('2022-04-12T19:05:00.000Z')
+    new Date('2022-04-25T19:00:00.000Z'),
+    new Date('2022-04-25T19:05:00.000Z')
   );
   const instanceGo = apm.service('synth-go', 'production', 'go').instance('instance-a');
   const events = range
