@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export * from './post_elasticsearch_ml_jobs';
 export * from './post_elasticsearch_node_detail';
 export * from './post_elasticsearch_nodes';
 export * from './post_elasticsearch_overview';
