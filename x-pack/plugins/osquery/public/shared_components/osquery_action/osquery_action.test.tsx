@@ -124,11 +124,23 @@ describe('Osquery Action', () => {
     );
     expect(getByText(agentStatusError)).toBeInTheDocument();
   });
-  it('should run permission denied if just one permission is available', async () => {
+  it('should run permission denied if just one permission (runSavedQueries) is available', async () => {
     spyOsquery({ agentData: {} });
     mockKibana({
       osquery: {
         runSavedQueries: true,
+      },
+    });
+    const { getByText } = renderWithContext(
+      <OsqueryAction agentId={'test'} formType={'steps'} isExternal={true} />
+    );
+    expect(getByText(permissionDenied)).toBeInTheDocument();
+  });
+  it('should run permission denied if just one permission (readSavedQueries) is available', async () => {
+    spyOsquery({ agentData: {} });
+    mockKibana({
+      osquery: {
+        readSavedQueries: true,
       },
     });
     const { getByText } = renderWithContext(
@@ -160,7 +172,7 @@ describe('Osquery Action', () => {
     );
     expect(getByText(osqueryNotAvailable)).toBeInTheDocument();
   });
-  it('should return agent status is wrong', async () => {
+  it('should not return any errors when all data is ok', async () => {
     spyOsquery({ agentData: { status: 'online' } });
     mockKibana(properPermissions);
 
