@@ -58,7 +58,13 @@ const storageExplorerRoute = createApmServerRoute({
       }),
       getNumberOfApmDocs({ context, setup }),
       getTotalIndexDiskUsage({ context, setup }),
-      getTotalTransactionsPerService({ setup, start, end, environment }),
+      getTotalTransactionsPerService({
+        setup,
+        start,
+        end,
+        environment,
+        searchAggregatedTransactions,
+      }),
     ]);
 
     const mergedServiceStats = mergeServiceStats({

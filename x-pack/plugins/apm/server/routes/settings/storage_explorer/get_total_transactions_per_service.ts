@@ -7,7 +7,10 @@
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { Setup } from '../../../lib/helpers/setup_request';
-import { ProcessorEvent } from '../../../../common/processor_event';
+import {
+  getProcessorEventForTransactions,
+  getDocumentTypeFilterForTransactions,
+} from '../../../lib/helpers/transactions';
 import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 
@@ -16,17 +19,19 @@ export async function getTotalTransactionsPerService({
   start,
   end,
   environment,
+  searchAggregatedTransactions,
 }: {
   setup: Setup;
   start: number;
   end: number;
   environment: string;
+  searchAggregatedTransactions: boolean;
 }) {
   const { apmEventClient } = setup;
 
   const response = await apmEventClient.search('get_total_transactions', {
     apm: {
-      events: [ProcessorEvent.metric],
+      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
       size: 0,
@@ -35,6 +40,9 @@ export async function getTotalTransactionsPerService({
           filter: [
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
+            ...getDocumentTypeFilterForTransactions(
+              searchAggregatedTransactions
+            ),
           ] as QueryDslQueryContainer[],
         },
       },
