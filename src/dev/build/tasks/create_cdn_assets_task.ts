@@ -50,6 +50,11 @@ export const CreateCdnAssets: Task = {
       resolve(buildSource, 'node_modules/@kbn/ui-shared-deps-src/shared_built_assets'),
       resolve(bundles, 'kbn-ui-shared-deps-src')
     );
+    await copyAll(
+      resolve(buildSource, 'node_modules/@kbn/ui-framework/dist'),
+      resolve(assets, 'node_modules/@kbn/ui-framework/dist')
+    );
+    await copyAll(resolve(buildSource, 'src/core/server/core_app/assets'), resolve(assets, 'ui'));
 
     await compressTar({
       source: assets,
