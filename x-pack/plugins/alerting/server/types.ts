@@ -7,18 +7,16 @@
 
 import type {
   IRouter,
-  RequestHandlerContext,
+  CustomRequestHandlerContext,
   SavedObjectReference,
   IUiSettingsClient,
-} from '@kbn/core/server';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
-import { LicenseType } from '@kbn/licensing-plugin/server';
-import {
   IScopedClusterClient,
   SavedObjectAttributes,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { LicenseType } from '@kbn/licensing-plugin/server';
 import { AlertFactoryDoneUtils, PublicAlert } from './alert';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
@@ -43,7 +41,6 @@ import {
   RuleMonitoring,
   MappedParams,
 } from '../common';
-import { RuleTypeConfig } from './config';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
@@ -60,9 +57,9 @@ export interface AlertingApiRequestHandlerContext {
 /**
  * @internal
  */
-export interface AlertingRequestHandlerContext extends RequestHandlerContext {
+export type AlertingRequestHandlerContext = CustomRequestHandlerContext<{
   alerting: AlertingApiRequestHandlerContext;
-}
+}>;
 
 /**
  * @internal
@@ -172,7 +169,6 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
-  config?: RuleTypeConfig;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,
