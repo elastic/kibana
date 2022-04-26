@@ -23,12 +23,12 @@ export async function getTotalIndexDiskUsage({
     .join()
     .replaceAll(',apm-*', '');
 
-  const diskUsage =
-    await context.core.elasticsearch.client.asCurrentUser.indices.diskUsage({
-      index,
-      // ignore_unavailable=true
-      run_expensive_tasks: true,
-    });
+  const esClient = (await context.core).elasticsearch.client;
+  const diskUsage = await esClient.asCurrentUser.indices.diskUsage({
+    index,
+    // ignore_unavailable=true
+    run_expensive_tasks: true,
+  });
 
   const totalSize = sumBy(Object.values(diskUsage), 'store_size_in_bytes');
 

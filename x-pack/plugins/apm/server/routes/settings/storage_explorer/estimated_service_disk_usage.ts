@@ -54,9 +54,11 @@ export async function getNumberOfApmDocs({
   } = setup;
 
   const index = uniq([transaction, span, metric, error]).join();
+  const esClient = (await context.core).elasticsearch.client;
 
-  const { count: numberOfApmDocs } =
-    await context.core.elasticsearch.client.asCurrentUser.count({ index });
+  const { count: numberOfApmDocs } = await esClient.asCurrentUser.count({
+    index,
+  });
 
   return numberOfApmDocs;
 }
