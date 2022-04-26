@@ -154,8 +154,6 @@ describe('useRuleWithFallback', () => {
             "tags": Array [
               "host.name exists",
               "for testing",
-              "__internal_rule_id:82b2b065-a2ee-49fc-9d6d-781a75c3d280",
-              "__internal_immutable:false",
             ],
             "threat": Array [
               Object {
