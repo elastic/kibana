@@ -174,11 +174,7 @@ export function setupSavedObjects({
                     descriptor,
                     savedObject.attributes as Record<string, unknown>
                   );
-                  return {
-                    ...savedObject,
-                    attributes: strippedAttrs as T,
-                    error: { ...error, message: `Decryption error: "${error.message}"` },
-                  };
+                  return { ...savedObject, attributes: strippedAttrs as T, error };
                 }
               },
               { concurrency: 50 }
