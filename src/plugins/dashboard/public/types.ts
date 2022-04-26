@@ -23,6 +23,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import { UserContentPluginStart } from '@kbn/user-content-plugin/public';
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { DataView } from './services/data_views';
@@ -132,6 +133,7 @@ export type DashboardBuildContext = Pick<
   | 'initializerContext'
   | 'savedObjectsTagging'
   | 'dashboardCapabilities'
+  | 'userContent'
 > & {
   query: DashboardAppServices['data']['query'];
   search: DashboardAppServices['data']['search'];
@@ -220,4 +222,5 @@ export interface DashboardAppServices {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedQueryService: DataPublicPluginStart['query']['savedQueries'];
   spacesService?: SpacesPluginStart;
+  userContent: UserContentPluginStart['userContentService'];
 }

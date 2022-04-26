@@ -26,6 +26,7 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core/public';
 import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import { UserContentPluginStart } from '@kbn/user-content-plugin/public';
 
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
@@ -57,6 +58,7 @@ import {
   ExitFullScreenButton as ExitFullScreenButtonUi,
   ExitFullScreenButtonProps,
 } from './services/kibana_react';
+import { DashboardSavedObject } from './saved_dashboards';
 
 import {
   ClonePanelAction,
@@ -111,6 +113,7 @@ export interface DashboardStartDependencies {
   visualizations: VisualizationsStart;
   screenshotMode: ScreenshotModePluginStart;
   dataViewEditor: DataViewEditorStart;
+  userContent: UserContentPluginStart;
 }
 
 export interface DashboardSetup {
@@ -402,6 +405,15 @@ export class DashboardPlugin
       savedObjectsClient: core.savedObjects.client,
       savedObjects: plugins.savedObjects,
       embeddableStart: plugins.embeddable,
+    });
+
+    plugins.userContent.userContentService.register<DashboardSavedObject>('dashboard', {
+      get(contentId: string) {
+        return savedDashboardLoader.get({
+          id: contentId,
+          useResolve: true,
+        });
+      },
     });
 
     return {
