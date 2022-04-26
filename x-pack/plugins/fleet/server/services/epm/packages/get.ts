@@ -20,8 +20,6 @@ import type {
   RegistryPackage,
   EpmPackageAdditions,
   GetCategoriesRequest,
-  Installable,
-  RegistrySearchResult,
 } from '../../../../common/types';
 import type { Installation, PackageInfo } from '../../../types';
 import { IngestManagerError, PackageNotFoundError } from '../../../errors';

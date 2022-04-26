@@ -68,7 +68,7 @@ export default function (providerContext: FtrProviderContext) {
       await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
 
       const { body: apiResponse } = await supertest
-        .get(`/api/fleet/epm/packages?experimental=true`)
+        .get(`/api/fleet/epm/packages?experimental=true&includeInstallStatus=true`)
         .expect(200);
       const installedPackages = apiResponse.response
         .filter((p: any) => p.status === 'installed')
