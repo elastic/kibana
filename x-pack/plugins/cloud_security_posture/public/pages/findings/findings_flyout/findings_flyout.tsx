@@ -31,8 +31,9 @@ import * as TEXT from '../translations';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
 import k8sLogoIcon from '../../../assets/icons/k8s_logo.svg';
 import { ResourceTab } from './resource_tab';
+import { JsonTab } from './json_tab';
 
-const tabs = ['remediation', 'resource', 'general'] as const;
+const tabs = ['remediation', 'resource', 'general', 'json'] as const;
 
 const CodeBlock: React.FC<PropsOf<typeof EuiCodeBlock>> = (props) => (
   <EuiCodeBlock {...props} isCopyable paddingSize="s" />
@@ -80,6 +81,8 @@ const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab
       return <ResourceTab data={findings} />;
     case 'general':
       return <Cards data={getGeneralCards(findings)} />;
+    case 'json':
+      return <JsonTab data={findings} />;
     default:
       assertNever(tab);
   }
