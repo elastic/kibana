@@ -18,6 +18,7 @@ exports[`ElasticAgentCard renders 1`] = `
   docLinks={
     Object {
       "dataViewsDocLink": "dummy link",
+      "kibanaGuideDocLink": "Kibana guide",
     }
   }
   editors={
