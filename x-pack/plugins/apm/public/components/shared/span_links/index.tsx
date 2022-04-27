@@ -108,6 +108,7 @@ export function SpanLinks({ spanLinks }: Props) {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiSelect
+              data-test-subj="spanLinkTypeSelect"
               options={selectOptions}
               value={selectedLinkType}
               onChange={(e) => {

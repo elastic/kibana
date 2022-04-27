@@ -47,7 +47,7 @@ export function SpanLinksBadge({
         </EuiFlexGroup>
       }
     >
-      <EuiBadge>
+      <EuiBadge data-test-subj="spanLinksBadge">
         {i18n.translate('xpack.apm.waterfall.spanLinks.badge', {
           defaultMessage:
             '{totalSize} {totalSize, plural, one {Span link} other {Span links}}',
