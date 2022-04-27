@@ -119,8 +119,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('change chart type', async () => {
-      await PageObjects.lens.switchToVisualization('line');
+      await PageObjects.lens.openChartSwitchPopover();
+      await PageObjects.lens.waitForSearchInputValue('line');
       await a11y.testAppSnapshot();
+      await testSubjects.click('lnsChartSwitchPopover_line');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
     it('change chart type via suggestions', async () => {
