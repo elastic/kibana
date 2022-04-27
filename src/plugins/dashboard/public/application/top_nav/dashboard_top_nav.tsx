@@ -8,7 +8,7 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { Required } from '@kbn/utility-types';
-import { EuiHorizontalRule, EuiTourState, EuiTourStep, useEuiTour } from '@elastic/eui';
+import { EuiHorizontalRule } from '@elastic/eui';
 import UseUnmount from 'react-use/lib/useUnmount';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -53,11 +53,7 @@ import {
   useDashboardDispatch,
   useDashboardSelector,
 } from '../state';
-import {
-  dashboardViewTourConfig,
-  dashboardViewTourSteps,
-  DASHBOARD_VIEW_TOUR_STORAGE_KEY,
-} from '../../tour';
+import { DashboardViewTour, DASHBOARD_VIEW_TOUR_STORAGE_KEY } from '../../tour';
 
 export interface DashboardTopNavState {
   chromeIsVisible: boolean;
@@ -135,32 +131,6 @@ export function DashboardTopNav({
     usageCollection,
     DashboardConstants.DASHBOARD_ID
   );
-
-  const initialState = localStorage.getItem(DASHBOARD_VIEW_TOUR_STORAGE_KEY);
-  let tourState: EuiTourState;
-  if (initialState) {
-    tourState = JSON.parse(initialState);
-  } else {
-    tourState = dashboardViewTourConfig;
-  }
-
-  const [[euiTourStepOne], tourActions, reducerState] = useEuiTour(
-    dashboardViewTourSteps,
-    tourState
-  );
-
-  useEffect(() => {
-    localStorage.setItem(DASHBOARD_VIEW_TOUR_STORAGE_KEY, JSON.stringify(reducerState));
-
-    // return () => {
-    //   if (isEditMode) {
-    //     localStorage.setItem(
-    //       DASHBOARD_VIEW_TOUR_STORAGE_KEY,
-    //       JSON.stringify({ ...reducerState, isTourActive: false })
-    //     );
-    //   }
-    // };
-  }, [reducerState]);
 
   useEffect(() => {
     const visibleSubscription = chrome.getIsVisible$().subscribe((chromeIsVisible) => {
@@ -250,7 +220,19 @@ export function DashboardTopNav({
 
   const onChangeViewMode = useCallback(
     async (newMode: ViewMode) => {
-      if (newMode === ViewMode.EDIT) tourActions.finishTour();
+      if (newMode === ViewMode.EDIT) {
+        // if the initial state is in the local storage, that means the user has seen the tour at least once -
+        // therefore, on switch to edit mode, the tour should be disabled to prevent them from seeing it again
+        const initialTourState = JSON.parse(
+          localStorage.getItem(DASHBOARD_VIEW_TOUR_STORAGE_KEY) ?? 'null'
+        );
+        if (initialTourState && initialTourState.isTourActive) {
+          localStorage.setItem(
+            DASHBOARD_VIEW_TOUR_STORAGE_KEY,
+            JSON.stringify({ ...initialTourState, isTourActive: false })
+          );
+        }
+      }
       closeAllFlyouts();
       const willLoseChanges = newMode === ViewMode.VIEW && dashboardAppState.hasUnsavedChanges;
 
@@ -263,7 +245,7 @@ export function DashboardTopNav({
         dashboardAppState.resetToLastSavedState?.()
       );
     },
-    [closeAllFlyouts, core.overlays, dashboardAppState, dispatchDashboardStateChange, tourActions]
+    [closeAllFlyouts, core.overlays, dashboardAppState, dispatchDashboardStateChange]
   );
 
   const runSaveAs = useCallback(async () => {
@@ -611,7 +593,7 @@ export function DashboardTopNav({
 
   return (
     <>
-      {dashboardState.viewMode === ViewMode.VIEW && <EuiTourStep {...euiTourStepOne} />}
+      {dashboardState.viewMode === ViewMode.VIEW && <DashboardViewTour />}
       <TopNavMenu {...getNavBarProps()} />
       {isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />

@@ -107,15 +107,13 @@ export function DashboardApp({
     };
   }, [data.search.session]);
 
-  const printMode = useMemo(
-    () => dashboardAppState.getLatestDashboardState?.().viewMode === ViewMode.PRINT,
-    [dashboardAppState]
-  );
-
-  const editMode = useMemo(
-    () => dashboardAppState.getLatestDashboardState?.().viewMode === ViewMode.EDIT,
-    [dashboardAppState]
-  );
+  const [printMode, editMode] = useMemo(() => {
+    const latestDashboardState = dashboardAppState.getLatestDashboardState?.();
+    return [
+      latestDashboardState?.viewMode === ViewMode.PRINT,
+      latestDashboardState?.viewMode === ViewMode.EDIT,
+    ];
+  }, [dashboardAppState]);
 
   useEffect(() => {
     if (!embedSettings) chrome.setIsVisible(!printMode);

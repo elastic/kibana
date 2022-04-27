@@ -33,11 +33,11 @@ export const dashboardViewTourSteps = [
   } as EuiStatelessTourStep,
 ];
 
-export const DashboardViewTour = ({ isEditMode }: { isEditMode: boolean }) => {
+export const DashboardViewTour = () => {
   const initialState = localStorage.getItem(DASHBOARD_VIEW_TOUR_STORAGE_KEY);
   let tourState: EuiTourState;
   if (initialState) {
-    tourState = JSON.parse(initialState);
+    tourState = { ...JSON.parse(initialState) };
   } else {
     tourState = dashboardViewTourConfig;
   }
@@ -46,16 +46,7 @@ export const DashboardViewTour = ({ isEditMode }: { isEditMode: boolean }) => {
 
   useEffect(() => {
     localStorage.setItem(DASHBOARD_VIEW_TOUR_STORAGE_KEY, JSON.stringify(reducerState));
-
-    // return () => {
-    //   if (isEditMode) {
-    //     localStorage.setItem(
-    //       DASHBOARD_VIEW_TOUR_STORAGE_KEY,
-    //       JSON.stringify({ ...reducerState, isTourActive: false })
-    //     );
-    //   }
-    // };
   }, [reducerState]);
 
-  return isEditMode ? null : <EuiTourStep {...euiTourStepOne} />;
+  return <EuiTourStep {...euiTourStepOne} />;
 };
