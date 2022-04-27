@@ -57,10 +57,11 @@ export const DataViewSelector = ({
       isClearable
       singleSelection={{ asPlainText: true }}
       onChange={onChangeIndexPatterns}
-      options={kibanaDataViews.map((dataView) => ({ label: dataView.id }))}
+      options={kibanaDataViews.map((dataView) => ({ label: dataView.id, id: dataView.id }))}
       selectedOptions={selectedOptions}
       aria-label={i18n.PICK_INDEX_PATTERNS}
       placeholder={i18n.PICK_INDEX_PATTERNS}
+      data-test-subj="detectionsDataViewSelectorDropdown"
     />
   );
 };

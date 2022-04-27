@@ -88,6 +88,7 @@ export interface RuleFields {
   machineLearningJobId: unknown;
   queryBar: unknown;
   index: unknown;
+  dataViewId?: unknown;
   ruleType: unknown;
   threshold?: unknown;
   threatIndex?: unknown;

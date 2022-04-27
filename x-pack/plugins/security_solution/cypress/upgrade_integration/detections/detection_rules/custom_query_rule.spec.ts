@@ -65,6 +65,7 @@ const rule = {
   name: 'Custom query rule for upgrade',
   description: 'My description',
   index: ['auditbeat-custom*'],
+  // dataViewId: 'logs-*',
   severity: 'Low',
   riskScore: '7',
   timelineTemplate: 'none',
@@ -95,6 +96,7 @@ describe('After an upgrade, the custom query rule', () => {
     });
     cy.get(DEFINITION_DETAILS).within(() => {
       getDetails(INDEX_PATTERNS_DETAILS).should('have.text', rule.index.join(''));
+      // getDetails('Data Views').should('have.text', rule.dataViewId);
       getDetails(CUSTOM_QUERY_DETAILS).should('have.text', rule.customQuery);
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Query');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', rule.timeline);

@@ -168,10 +168,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   // console.log('RUNTIME MAPPINGS', JSON.stringify(runtimeMappings, null, 2));
   // // console.log('DATA VIEW ID', selectedDataViewId);
   const sourcererScopeSelector = useMemo(() => sourcererSelectors.getSourcererScopeSelector(), []);
-  const {
-    kibanaDataViews,
-    sourcererScope: { selectedDataViewId },
-  } = useDeepEqualSelector((state) => sourcererScopeSelector(state, sourcererPathName));
+  const { kibanaDataViews } = useDeepEqualSelector((state) =>
+    sourcererScopeSelector(state, sourcererPathName)
+  );
 
   // console.log('ALL OPTIONS', kibanaDataViews);
   const mlCapabilities = useMlCapabilities();
