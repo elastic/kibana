@@ -21,6 +21,7 @@ describe('JiraActionConnectorFields renders', () => {
       id: 'test',
       actionTypeId: '.jira',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'jira',
       config: {
         apiUrl: 'https://test/',
@@ -62,6 +63,7 @@ describe('JiraActionConnectorFields renders', () => {
       id: 'test',
       actionTypeId: '.jira',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'jira',
       config: {
         apiUrl: 'https://test/',
@@ -98,6 +100,7 @@ describe('JiraActionConnectorFields renders', () => {
     const actionConnector = {
       actionTypeId: '.jira',
       isPreconfigured: false,
+      isDeprecated: false,
       secrets: {},
       config: {},
     } as JiraActionConnector;
@@ -120,6 +123,7 @@ describe('JiraActionConnectorFields renders', () => {
     const actionConnector = {
       actionTypeId: '.jira',
       isPreconfigured: false,
+      isDeprecated: false,
       isMissingSecrets: true,
       secrets: {},
       config: {},
@@ -147,6 +151,7 @@ describe('JiraActionConnectorFields renders', () => {
       id: 'test',
       actionTypeId: '.jira',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'jira',
       config: {
         apiUrl: 'https://test/',

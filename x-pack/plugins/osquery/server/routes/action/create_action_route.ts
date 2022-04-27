@@ -35,8 +35,9 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
       },
     },
     async (context, request, response) => {
-      const esClient = context.core.elasticsearch.client.asInternalUser;
-      const soClient = context.core.savedObjects.client;
+      const coreContext = await context.core;
+      const esClient = coreContext.elasticsearch.client.asInternalUser;
+      const soClient = coreContext.savedObjects.client;
       const internalSavedObjectsClient = await getInternalSavedObjectsClient(
         osqueryContext.getStartServices
       );
@@ -75,6 +76,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
       incrementCount(internalSavedObjectsClient, 'live_query');
       if (!selectedAgents.length) {
         incrementCount(internalSavedObjectsClient, 'live_query', 'errors');
+
         return response.badRequest({ body: new Error('No agents found for selection') });
       }
 
@@ -111,6 +113,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
         });
       } catch (error) {
         incrementCount(internalSavedObjectsClient, 'live_query', 'errors');
+
         return response.customError({
           statusCode: 500,
           body: new Error(`Error occurred while processing ${error}`),
