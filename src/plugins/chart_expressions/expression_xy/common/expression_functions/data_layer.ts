@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Datatable, PointSeriesColumnNames } from '@kbn/expressions-plugin';
+import { Datatable, PointSeriesColumnNames } from '@kbn/expressions-plugin/common';
 import { DataLayerFn, DataLayerArgs } from '../types';
 import { DATA_LAYER, LayerTypes } from '../constants';
 import { strings } from '../i18n';
