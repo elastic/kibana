@@ -7,6 +7,13 @@
 import type { CreatePackagePolicyRouteState } from '../../../../../types';
 import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, pagePathGetters } from '../../../../../constants';
 
+interface GetInstallPkgRouteOptionsParams {
+  currentPath: string;
+  integration: string | null;
+  agentPolicyId?: string;
+  pkgkey: string;
+  isCloud: boolean;
+}
 /*
  * When the install package button is pressed, this fn decides which page to navigate to
  * by generating the options to be passed to `services.application.navigateToApp`.
@@ -16,12 +23,8 @@ export const getInstallPkgRouteOptions = ({
   integration,
   agentPolicyId,
   pkgkey,
-}: {
-  currentPath: string;
-  integration: string | null;
-  agentPolicyId?: string;
-  pkgkey: string;
-}): [string, { path: string; state: unknown }] => {
+  isCloud,
+}: GetInstallPkgRouteOptionsParams): [string, { path: string; state: unknown }] => {
   const integrationOpts: { integration?: string } = integration ? { integration } : {};
   const path = pagePathGetters.add_integration_to_policy({
     pkgkey,

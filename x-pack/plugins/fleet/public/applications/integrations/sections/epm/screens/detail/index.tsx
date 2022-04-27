@@ -106,6 +106,7 @@ export function Detail() {
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
   const services = useStartServices();
+  const isCloud = !!services?.cloud?.cloudId;
   const agentPolicyIdFromContext = getAgentPolicyId();
 
   // Package info state
@@ -265,23 +266,25 @@ export function Detail() {
       });
 
       const navigateOptions = getInstallPkgRouteOptions({
+        agentPolicyId: agentPolicyIdFromContext,
         currentPath,
         integration,
-        agentPolicyId: agentPolicyIdFromContext,
+        isCloud,
         pkgkey,
       });
 
       services.application.navigateToApp(...navigateOptions);
     },
     [
-      history,
-      hash,
-      pathname,
-      search,
-      pkgkey,
-      integration,
-      services.application,
       agentPolicyIdFromContext,
+      hash,
+      history,
+      integration,
+      isCloud,
+      pathname,
+      pkgkey,
+      search,
+      services.application,
     ]
   );
 
