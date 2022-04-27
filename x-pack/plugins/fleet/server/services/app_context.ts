@@ -26,7 +26,7 @@ import type { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plu
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
-import type { FleetConfigType } from '../../common';
+import type { FleetConfigType, ExperimentalFeatures } from '../../common';
 import type {
   ExternalCallback,
   ExternalCallbacksStorage,
@@ -43,6 +43,7 @@ class AppContextService {
   private encryptedSavedObjectsSetup: EncryptedSavedObjectsPluginSetup | undefined;
   private data: DataPluginStart | undefined;
   private esClient: ElasticsearchClient | undefined;
+  private experimentalFeatures?: ExperimentalFeatures;
   private securitySetup: SecurityPluginSetup | undefined;
   private securityStart: SecurityPluginStart | undefined;
   private config$?: Observable<FleetConfigType>;
@@ -65,6 +66,7 @@ class AppContextService {
     this.securitySetup = appContext.securitySetup;
     this.securityStart = appContext.securityStart;
     this.savedObjects = appContext.savedObjects;
+    this.experimentalFeatures = appContext.experimentalFeatures;
     this.isProductionMode = appContext.isProductionMode;
     this.cloud = appContext.cloud;
     this.logger = appContext.logger;
@@ -124,6 +126,13 @@ class AppContextService {
 
   public getConfig$() {
     return this.config$;
+  }
+
+  public getExperimentalFeatures() {
+    if (!this.experimentalFeatures) {
+      throw new Error('experimentalFeatures not set.');
+    }
+    return this.experimentalFeatures;
   }
 
   public getSavedObjects() {
