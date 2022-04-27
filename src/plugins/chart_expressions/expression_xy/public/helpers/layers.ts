@@ -8,12 +8,12 @@
 
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import {
-  ExpressionValueVisDimension,
   getAccessorByDimension,
   getColumnByAccessor,
   getFormatByAccessor,
-} from '@kbn/visualizations-plugin/common';
+} from '@kbn/visualizations-plugin/common/utils';
 import {
   CommonXYDataLayerConfig,
   CommonXYLayerConfig,
@@ -199,10 +199,7 @@ export const getLayerTitles = (
   return {
     xTitles: xTitle && xAccessor ? { [xAccessor]: xTitle } : mapTitle(xAccessor),
     yTitles: accessors.reduce(
-      (titles, yAccessor) => ({
-        ...titles,
-        ...(yAccessor ? { [yAccessor]: getYTitle(yAccessor) } : {}),
-      }),
+      (titles, yAccessor) => ({ ...titles, ...(yAccessor ? getYTitle(yAccessor) : {}) }),
       {}
     ),
     splitSeriesTitles: mapTitle(splitAccessor),
