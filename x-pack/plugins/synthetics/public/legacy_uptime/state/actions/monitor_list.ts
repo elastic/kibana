@@ -6,7 +6,10 @@
  */
 
 import { createAction } from 'redux-actions';
-import { FetchMonitorStatesQueryArgs, MonitorSummariesResult } from '../../../../common/runtime_types';
+import {
+  FetchMonitorStatesQueryArgs,
+  MonitorSummariesResult,
+} from '../../../../common/runtime_types';
 import { createAsyncAction } from './utils';
 import { TestNowResponse } from '../api';
 

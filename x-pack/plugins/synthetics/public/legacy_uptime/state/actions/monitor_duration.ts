@@ -6,7 +6,7 @@
  */
 
 import { createAction } from 'redux-actions';
-import { IHttpFetchError } from 'kibana/public';
+import { IHttpFetchError } from '@kbn/core/public';
 import { QueryParams } from './types';
 import { MonitorDurationResult } from '../../../../common/types';
 

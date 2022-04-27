@@ -14,7 +14,7 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { createAsyncAction } from '../actions/utils';
 import { asyncInitState, handleAsyncAction } from '../reducers/utils';
-import type { AppState } from '../index';
+import type { AppState } from '..';
 import { AsyncInitState } from '../reducers/types';
 import { fetchEffectFactory } from '../effects/fetch_effect';
 import {

@@ -12,7 +12,7 @@ import {
   BrowserAdvancedFieldsContextProvider,
   defaultBrowserSimpleFields,
   defaultBrowserAdvancedFields,
-} from './index';
+} from '.';
 import { formatDefaultValues } from '../helpers/context_helpers';
 
 interface BrowserContextProviderProps {

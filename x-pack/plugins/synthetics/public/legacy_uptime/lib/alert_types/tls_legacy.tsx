@@ -9,7 +9,7 @@ import React from 'react';
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { CLIENT_ALERT_TYPES } from '../../../../common/constants/alerts';
 import { TlsTranslationsLegacy } from '../../../../common/translations';
-import { AlertTypeInitializer } from './index';
+import { AlertTypeInitializer } from '.';
 
 const { defaultActionMessage, description } = TlsTranslationsLegacy;
 const TLSAlert = React.lazy(() => import('./lazy_wrapper/tls_alert'));

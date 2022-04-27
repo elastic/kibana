@@ -14,7 +14,7 @@ import {
   HTTPContextProvider,
   BrowserContextProvider,
   TLSFieldsContextProvider,
-} from './index';
+} from '.';
 import { IPolicyConfigContextProvider } from './policy_config_context';
 interface Props {
   children: React.ReactNode;

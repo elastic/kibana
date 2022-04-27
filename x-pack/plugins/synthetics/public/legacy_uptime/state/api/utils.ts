@@ -7,7 +7,7 @@
 
 import { isRight } from 'fp-ts/lib/Either';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
-import { HttpFetchQuery, HttpSetup } from 'kibana/public';
+import { HttpFetchQuery, HttpSetup } from '@kbn/core/public';
 import { FETCH_STATUS, AddInspectorRequest } from '@kbn/observability-plugin/public';
 
 class ApiService {
