@@ -95,7 +95,7 @@ export interface RuleFields {
   threatMapping?: unknown;
   threatLanguage?: unknown;
   newTermsFields?: unknown;
-  historyWindowStart?: unknown;
+  historyWindowSize?: unknown;
 }
 
 type QueryRuleFields<T> = Omit<
@@ -107,7 +107,7 @@ type QueryRuleFields<T> = Omit<
   | 'threatQueryBar'
   | 'threatMapping'
   | 'newTermsFields'
-  | 'historyWindowStart'
+  | 'historyWindowSize'
 >;
 type ThresholdRuleFields<T> = Omit<
   T,
@@ -117,7 +117,7 @@ type ThresholdRuleFields<T> = Omit<
   | 'threatQueryBar'
   | 'threatMapping'
   | 'newTermsFields'
-  | 'historyWindowStart'
+  | 'historyWindowSize'
 >;
 type MlRuleFields<T> = Omit<
   T,
@@ -128,15 +128,11 @@ type MlRuleFields<T> = Omit<
   | 'threatQueryBar'
   | 'threatMapping'
   | 'newTermsFields'
-  | 'historyWindowStart'
+  | 'historyWindowSize'
 >;
 type ThreatMatchRuleFields<T> = Omit<
   T,
-  | 'anomalyThreshold'
-  | 'machineLearningJobId'
-  | 'threshold'
-  | 'newTermsFields'
-  | 'historyWindowStart'
+  'anomalyThreshold' | 'machineLearningJobId' | 'threshold' | 'newTermsFields' | 'historyWindowSize'
 >;
 type NewTermsRuleFields<T> = Omit<
   T,
@@ -203,7 +199,7 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         threatQueryBar,
         threatMapping,
         newTermsFields,
-        historyWindowStart,
+        historyWindowSize,
         ...mlRuleFields
       } = fields;
       return mlRuleFields;
@@ -215,7 +211,7 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         threatQueryBar: _removedThreatQueryBar,
         threatMapping: _removedThreatMapping,
         newTermsFields: removedNewTermsFields,
-        historyWindowStart: removedHistoryWindowSize,
+        historyWindowSize: removedHistoryWindowSize,
         ...thresholdRuleFields
       } = fields;
       return thresholdRuleFields;
@@ -225,7 +221,7 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         machineLearningJobId: _removedMachineLearningJobId,
         threshold: _removedThreshold,
         newTermsFields: _removedNewTermsFields,
-        historyWindowStart: _removedHistoryWindowSize,
+        historyWindowSize: _removedHistoryWindowSize,
         ...threatMatchRuleFields
       } = fields;
       return threatMatchRuleFields;
@@ -240,7 +236,7 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         threatQueryBar: __removedThreatQueryBar,
         threatMapping: __removedThreatMapping,
         newTermsFields: __removedNewTermsFields,
-        historyWindowStart: __removedHistoryWindowSize,
+        historyWindowSize: __removedHistoryWindowSize,
         ...queryRuleFields
       } = fields;
       return queryRuleFields;
@@ -346,7 +342,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         language: ruleFields.queryBar?.query?.language,
         query: ruleFields.queryBar?.query?.query as string,
         new_terms_fields: ruleFields.newTermsFields,
-        history_window_start: `now-${ruleFields.historyWindowStart}`,
+        history_window_start: `now-${ruleFields.historyWindowSize}`,
       }
     : {
         index: ruleFields.index,
@@ -496,7 +492,7 @@ export const formatPreviewRule = ({
   machineLearningJobId,
   anomalyThreshold,
   newTermsFields,
-  historyWindowStart,
+  historyWindowSize,
 }: {
   index: string[];
   threatIndex: string[];
@@ -509,7 +505,7 @@ export const formatPreviewRule = ({
   machineLearningJobId: string[];
   anomalyThreshold: number;
   newTermsFields: string[];
-  historyWindowStart: string;
+  historyWindowSize: string;
 }): CreateRulesSchema => {
   const defineStepData = {
     ...stepDefineDefaultValue,
@@ -523,7 +519,7 @@ export const formatPreviewRule = ({
     machineLearningJobId,
     anomalyThreshold,
     newTermsFields,
-    historyWindowStart,
+    historyWindowSize,
   };
   const aboutStepData = {
     ...stepAboutDefaultValue,

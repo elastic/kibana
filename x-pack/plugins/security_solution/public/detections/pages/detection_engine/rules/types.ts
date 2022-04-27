@@ -135,7 +135,7 @@ export interface DefineStepRule {
   threatQueryBar: FieldValueQueryBar;
   threatMapping: ThreatMapping;
   newTermsFields: string[];
-  historyWindowStart: string;
+  historyWindowSize: string;
 }
 
 export interface ScheduleStepRule {

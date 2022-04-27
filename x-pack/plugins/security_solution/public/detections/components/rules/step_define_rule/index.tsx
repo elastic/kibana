@@ -97,7 +97,7 @@ export const stepDefineDefaultValue: DefineStepRule = {
     title: DEFAULT_TIMELINE_TITLE,
   },
   newTermsFields: [],
-  historyWindowStart: '7d',
+  historyWindowSize: '7d',
 };
 
 /**
@@ -170,7 +170,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       machineLearningJobId: formMachineLearningJobId,
       anomalyThreshold: formAnomalyThreshold,
       newTermsFields: formNewTermsFields,
-      historyWindowStart: formHistoryWindowSize,
+      historyWindowSize: formHistoryWindowSize,
     },
   ] = useFormData<DefineStepRule>({
     form,
@@ -188,7 +188,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       'machineLearningJobId',
       'anomalyThreshold',
       'newTermsFields',
-      'historyWindowStart',
+      'historyWindowSize',
     ],
   });
 
@@ -199,7 +199,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const machineLearningJobId = formMachineLearningJobId ?? initialState.machineLearningJobId;
   const anomalyThreshold = formAnomalyThreshold ?? initialState.anomalyThreshold;
   const newTermsFields = formNewTermsFields ?? initialState.newTermsFields;
-  const historyWindowStart = formHistoryWindowSize ?? initialState.historyWindowStart;
+  const historyWindowSize = formHistoryWindowSize ?? initialState.historyWindowSize;
   const ruleType = formRuleType || initialState.ruleType;
   const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(index);
   const fields: Readonly<BrowserFields> = aggregatableFields(browserFields);
@@ -501,7 +501,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 }}
               />
               <UseField
-                path="historyWindowStart"
+                path="historyWindowSize"
                 component={ScheduleItem}
                 componentProps={{
                   idAria: 'detectionEngineStepDefineRuleHistoryWindowSize',
@@ -543,7 +543,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           machineLearningJobId={machineLearningJobId}
           anomalyThreshold={anomalyThreshold}
           newTermsFields={newTermsFields}
-          historyWindowStart={historyWindowStart}
+          historyWindowSize={historyWindowSize}
         />
       </StepContentWrapper>
 

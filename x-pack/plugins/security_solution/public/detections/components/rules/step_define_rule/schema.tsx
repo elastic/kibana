@@ -539,15 +539,15 @@ export const schema: FormSchema<DefineStepRule> = {
       },
     ],
   },
-  historyWindowStart: {
+  historyWindowSize: {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.historyWindowStartLabel',
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.historyWindowSizeLabel',
       {
         defaultMessage: 'History Window Size',
       }
     ),
     helpText: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepScheduleRule.historyWindowStartHelpText',
+      'xpack.securitySolution.detectionEngine.createRule.stepScheduleRule.historyWindowSizeHelpText',
       {
         defaultMessage: "New terms rules only alert if terms don't appear in historical data.",
       }

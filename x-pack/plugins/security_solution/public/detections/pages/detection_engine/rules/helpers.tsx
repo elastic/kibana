@@ -112,7 +112,7 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
       : {}),
   },
   newTermsFields: rule.new_terms_fields ?? [],
-  historyWindowStart: rule.history_window_start
+  historyWindowSize: rule.history_window_start
     ? convertHistoryStartToSize(rule.history_window_start)
     : '7d',
 });

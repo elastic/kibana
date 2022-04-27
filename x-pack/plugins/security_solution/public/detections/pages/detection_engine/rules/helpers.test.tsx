@@ -232,6 +232,8 @@ describe('rule helpers', () => {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
           title: 'Untitled timeline',
         },
+        new_terms_fields: [],
+        historyWindowSize: '7d',
       };
 
       expect(result).toEqual(expected);
