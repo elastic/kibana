@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo } from 'react';
 
 import {
-  EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiButton,
@@ -17,6 +16,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { CaseStatuses } from '@kbn/cases-plugin/common';
 
 import { SecurityPageName } from '../../../../app/types';
 import { FormattedDate } from '../../../../common/components/formatted_date';
@@ -28,29 +28,26 @@ import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { useNavigation, NavigateTo, GetAppUrl } from '../../../../common/lib/kibana';
 import * as i18n from '../translations';
 import { LastUpdatedAt } from '../util';
-import { RecentCaseItem, useRecentlyOpenedCases } from './use_recent_cases_items';
-
-export interface UserAlertsTableProps {
-  signalIndexName: string | null;
-}
+import { StatusBadge } from './status_badge';
+import { RecentCaseItem, useRecentlyCreatedCases } from './use_recent_cases_items';
 
 type GetTableColumns = (params: {
   getAppUrl: GetAppUrl;
   navigateTo: NavigateTo;
 }) => Array<EuiBasicTableColumn<RecentCaseItem>>;
 
-const DETECTION_RESPONSE_RECENT_CASES_QUERY_ID = 'recentlyOpenedCasesQuery';
+const DETECTION_RESPONSE_RECENT_CASES_QUERY_ID = 'recentlyCreatedCasesQuery';
 
 export const RecentlyCreatedCasesTable = React.memo(() => {
   const { getAppUrl, navigateTo } = useNavigation();
   const { toggleStatus, setToggleStatus } = useQueryToggle(
     DETECTION_RESPONSE_RECENT_CASES_QUERY_ID
   );
-  const { items, isLoading, updatedAt } = useRecentlyOpenedCases({
+  const { items, isLoading, updatedAt } = useRecentlyCreatedCases({
     skip: !toggleStatus,
   });
 
-  const navigateToAlerts = useCallback(() => {
+  const navigateToCases = useCallback(() => {
     navigateTo({ deepLinkId: SecurityPageName.case });
   }, [navigateTo]);
 
@@ -61,7 +58,7 @@ export const RecentlyCreatedCasesTable = React.memo(() => {
 
   return (
     <HoverVisibilityContainer show={true} targetClassNames={[INPECT_BUTTON_CLASS]}>
-      <EuiPanel hasBorder data-test-subj="recentlyOpenedCasesPanel">
+      <EuiPanel hasBorder data-test-subj="recentlyCreatedCasesPanel">
         <HeaderSection
           id={DETECTION_RESPONSE_RECENT_CASES_QUERY_ID}
           title={i18n.RECENT_CASES_SECTION_TITLE}
@@ -74,16 +71,16 @@ export const RecentlyCreatedCasesTable = React.memo(() => {
         {toggleStatus && (
           <>
             <EuiBasicTable
-              data-test-subj="recentlyOpenedCasesTable"
+              data-test-subj="recentlyCreatedCasesTable"
               columns={columns}
               items={items}
               loading={isLoading}
               noItemsMessage={
-                <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
+                <EuiEmptyPrompt title={<h3>{i18n.NO_CASES_FOUND}</h3>} titleSize="xs" />
               }
             />
             <EuiSpacer size="m" />
-            <EuiButton data-test-subj="allCasesButton" onClick={navigateToAlerts}>
+            <EuiButton data-test-subj="allCasesButton" onClick={navigateToCases}>
               {i18n.VIEW_RECENT_CASES}
             </EuiButton>
           </>
@@ -141,7 +138,7 @@ const getTableColumns: GetTableColumns = () => [
   {
     field: 'status',
     name: i18n.RECENTLY_CREATED_CASE_COLUMN_STATUS,
-    render: (status: number) => <EuiBadge>{status}</EuiBadge>,
+    render: (status: CaseStatuses) => <StatusBadge status={status} />,
     'data-test-subj': 'recentlyCreatedCaseStatus',
   },
 ];

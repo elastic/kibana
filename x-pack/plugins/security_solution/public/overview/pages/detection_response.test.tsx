@@ -11,9 +11,14 @@ import { render } from '@testing-library/react';
 import { DetectionResponse } from './detection_response';
 import { TestProviders } from '../../common/mock';
 
-jest.mock('../components/detection_response/rule_alerts_table', () => ({
+jest.mock('../components/detection_response', () => ({
+  AlertsByStatus: () => <div data-test-subj="mock_AlertsByStatus" />,
+  HostAlertsTable: () => <div data-test-subj="mock_HostAlertsTable" />,
+  RecentlyCreatedCasesTable: () => <div data-test-subj="mock_RecentlyCreatedCasesTable" />,
   RuleAlertsTable: () => <div data-test-subj="mock_RuleAlertsTable" />,
+  UserAlertsTable: () => <div data-test-subj="mock_UserAlertsTable" />,
 }));
+
 // TODO: add all sections mocks
 
 jest.mock('../../common/components/search_bar', () => ({
@@ -128,8 +133,13 @@ describe('DetectionResponse', () => {
     );
 
     expect(result.queryByTestId('detectionResponsePage')).toBeInTheDocument();
+    expect(result.queryByTestId('mock_RecentlyCreatedCasesTable')).toBeInTheDocument();
+
     expect(result.queryByTestId('mock_RuleAlertsTable')).not.toBeInTheDocument();
-    // TODO: assert other alert sections are not in the document
+    expect(result.queryByTestId('mock_HostAlertsTable')).not.toBeInTheDocument();
+    expect(result.queryByTestId('mock_UserAlertsTable')).not.toBeInTheDocument();
+    expect(result.queryByTestId('mock_AlertsByStatus')).not.toBeInTheDocument();
+
     // TODO: assert cases sections are in the document
   });
 
@@ -148,8 +158,12 @@ describe('DetectionResponse', () => {
     );
 
     expect(result.queryByTestId('detectionResponsePage')).toBeInTheDocument();
+    expect(result.queryByTestId('mock_RecentlyCreatedCasesTable')).toBeInTheDocument();
+
     expect(result.queryByTestId('mock_RuleAlertsTable')).not.toBeInTheDocument();
-    // TODO: assert all alert sections are not in the document
+    expect(result.queryByTestId('mock_HostAlertsTable')).not.toBeInTheDocument();
+    expect(result.queryByTestId('mock_UserAlertsTable')).not.toBeInTheDocument();
+    expect(result.queryByTestId('mock_AlertsByStatus')).not.toBeInTheDocument();
     // TODO: assert all cases sections are in the document
   });
 
@@ -164,8 +178,13 @@ describe('DetectionResponse', () => {
       </TestProviders>
     );
 
+    expect(result.queryByTestId('mock_RecentlyCreatedCasesTable')).not.toBeInTheDocument();
+
     expect(result.queryByTestId('detectionResponsePage')).toBeInTheDocument();
     expect(result.queryByTestId('mock_RuleAlertsTable')).toBeInTheDocument();
+    expect(result.queryByTestId('mock_HostAlertsTable')).toBeInTheDocument();
+    expect(result.queryByTestId('mock_UserAlertsTable')).toBeInTheDocument();
+    expect(result.queryByTestId('mock_AlertsByStatus')).toBeInTheDocument();
     // TODO: assert all alert sections are in the document
     // TODO: assert all cases sections are not in the document
   });

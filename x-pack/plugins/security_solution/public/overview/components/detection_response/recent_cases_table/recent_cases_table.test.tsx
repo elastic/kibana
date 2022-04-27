@@ -10,9 +10,9 @@ import React from 'react';
 import { render } from '@testing-library/react';
 
 import { TestProviders } from '../../../../common/mock';
-import { parsedVulnerableUserAlertsResult } from './mock_data';
-import { UseUserAlertsItems } from './use_recent_cases_items';
-import { UserAlertsTable } from './user_alerts_table';
+import { parsedRecentCases } from './mock_data';
+import { RecentlyCreatedCasesTable } from './recent_cases_table';
+import type { UseRecentlyCreatedCases } from './use_recent_cases_items';
 
 const mockGetAppUrl = jest.fn();
 jest.mock('../../../../common/lib/kibana/hooks', () => {
@@ -25,29 +25,32 @@ jest.mock('../../../../common/lib/kibana/hooks', () => {
   };
 });
 
-type UseUserAlertsItemsReturn = ReturnType<UseUserAlertsItems>;
-const defaultUseUserAlertsItemsReturn: UseUserAlertsItemsReturn = {
+type UseRecentlyCreatedCasesReturn = ReturnType<UseRecentlyCreatedCases>;
+const defaultRecentCaseItemsReturn: UseRecentlyCreatedCasesReturn = {
   items: [],
   isLoading: false,
   updatedAt: Date.now(),
 };
-const mockUseUserAlertsItems = jest.fn(() => defaultUseUserAlertsItemsReturn);
-const mockUseUserAlertsItemsReturn = (overrides: Partial<UseUserAlertsItemsReturn>) => {
-  mockUseUserAlertsItems.mockReturnValueOnce({ ...defaultUseUserAlertsItemsReturn, ...overrides });
+const mockUseRecentlyCreatedCases = jest.fn(() => defaultRecentCaseItemsReturn);
+const mockUseRecentlyCreatedCasesReturn = (overrides: Partial<UseRecentlyCreatedCasesReturn>) => {
+  mockUseRecentlyCreatedCases.mockReturnValueOnce({
+    ...defaultRecentCaseItemsReturn,
+    ...overrides,
+  });
 };
 
-jest.mock('./use_user_alerts_items', () => ({
-  useUserAlertsItems: () => mockUseUserAlertsItems(),
+jest.mock('./use_recent_cases_items', () => ({
+  useRecentlyCreatedCases: () => mockUseRecentlyCreatedCases(),
 }));
 
 const renderComponent = () =>
   render(
     <TestProviders>
-      <UserAlertsTable signalIndexName="some signal index" />
+      <RecentlyCreatedCasesTable />
     </TestProviders>
   );
 
-describe('UserAlertsTable', () => {
+describe('RecentlyCreatedCasesTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -55,49 +58,47 @@ describe('UserAlertsTable', () => {
   it('should render empty table', () => {
     const { getByText, getByTestId } = renderComponent();
 
-    expect(getByTestId('severityUserAlertsPanel')).toBeInTheDocument();
-    expect(getByText('No alerts to display')).toBeInTheDocument();
-    expect(getByTestId('severityUserAlertsButton')).toBeInTheDocument();
+    expect(getByTestId('recentlyCreatedCasesPanel')).toBeInTheDocument();
+    expect(getByText('No cases to display')).toBeInTheDocument();
+    expect(getByTestId('allCasesButton')).toBeInTheDocument();
   });
 
   it('should render a loading table', () => {
-    mockUseUserAlertsItemsReturn({ isLoading: true });
+    mockUseRecentlyCreatedCasesReturn({ isLoading: true });
     const { getByText, getByTestId } = renderComponent();
 
     expect(getByText('Updating...')).toBeInTheDocument();
-    expect(getByTestId('severityUserAlertsButton')).toBeInTheDocument();
-    expect(getByTestId('severityUserAlertsTable')).toHaveClass('euiBasicTable-loading');
+    expect(getByTestId('allCasesButton')).toBeInTheDocument();
+    expect(getByTestId('recentlyCreatedCasesTable')).toHaveClass('euiBasicTable-loading');
   });
 
   it('should render the updated at subtitle', () => {
-    mockUseUserAlertsItemsReturn({ isLoading: false });
+    mockUseRecentlyCreatedCasesReturn({ isLoading: false });
     const { getByText } = renderComponent();
 
     expect(getByText('Updated now')).toBeInTheDocument();
   });
 
   it('should render the table columns', () => {
-    mockUseUserAlertsItemsReturn({ items: parsedVulnerableUserAlertsResult });
+    mockUseRecentlyCreatedCasesReturn({ items: parsedRecentCases });
     const { getAllByRole } = renderComponent();
 
     const columnHeaders = getAllByRole('columnheader');
-    expect(columnHeaders.at(0)).toHaveTextContent('User name');
-    expect(columnHeaders.at(1)).toHaveTextContent('Alerts');
-    expect(columnHeaders.at(2)).toHaveTextContent('Critical');
-    expect(columnHeaders.at(3)).toHaveTextContent('High');
-    expect(columnHeaders.at(4)).toHaveTextContent('Medium');
-    expect(columnHeaders.at(5)).toHaveTextContent('Low');
+    expect(columnHeaders.at(0)).toHaveTextContent('Name');
+    expect(columnHeaders.at(1)).toHaveTextContent('Note');
+    expect(columnHeaders.at(2)).toHaveTextContent('Time');
+    expect(columnHeaders.at(3)).toHaveTextContent('Created by');
+    expect(columnHeaders.at(4)).toHaveTextContent('Status');
   });
 
   it('should render the table items', () => {
-    mockUseUserAlertsItemsReturn({ items: [parsedVulnerableUserAlertsResult[0]] });
+    mockUseRecentlyCreatedCasesReturn({ items: [parsedRecentCases[0]] });
     const { getByTestId } = renderComponent();
 
-    expect(getByTestId('userSeverityAlertsTable-userName')).toHaveTextContent('crffn20qcs');
-    expect(getByTestId('userSeverityAlertsTable-totalAlerts')).toHaveTextContent('4');
-    expect(getByTestId('userSeverityAlertsTable-critical')).toHaveTextContent('4');
-    expect(getByTestId('userSeverityAlertsTable-high')).toHaveTextContent('1');
-    expect(getByTestId('userSeverityAlertsTable-medium')).toHaveTextContent('1');
-    expect(getByTestId('userSeverityAlertsTable-low')).toHaveTextContent('1');
+    expect(getByTestId('recentlyCreatedCaseName')).toHaveTextContent('sdcsd');
+    expect(getByTestId('recentlyCreatedCaseNote')).toHaveTextContent('klklk');
+    expect(getByTestId('recentlyCreatedCaseTime')).toHaveTextContent('April 25, 2022');
+    expect(getByTestId('recentlyCreatedCaseCreatedBy')).toHaveTextContent('elastic');
+    expect(getByTestId('recentlyCreatedCaseStatus')).toHaveTextContent('Open');
   });
 });

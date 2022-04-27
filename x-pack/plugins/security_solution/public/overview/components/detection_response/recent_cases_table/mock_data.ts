@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { CaseStatuses } from '@kbn/cases-plugin/common';
+
 export const mockRecentCasesResult = {
   cases: [
     {
@@ -135,18 +137,24 @@ export const parsedRecentCases = [
     name: 'sdcsd',
     note: 'klklk',
     createdBy: 'elastic',
-    status: 'open',
+    status: CaseStatuses.open,
+    createdAt: '2022-04-25T01:50:14.499Z',
+    id: '0ce2a510-c43a-11ec-98b5-3109bd2a1901',
   },
   {
     name: 'zzzz',
     note: 'sssss',
+    status: CaseStatuses['in-progress'],
+    createdAt: '2022-04-21T13:42:17.414Z',
     createdBy: 'elastic',
-    status: 'in-progress',
+    id: 'dc12f930-c178-11ec-98b5-3109bd2a1901',
   },
   {
     name: 'asxa',
     note: 'dsdd',
     createdBy: 'elastic',
-    status: 'closed',
+    status: CaseStatuses.closed,
+    createdAt: '2022-04-21T13:41:59.025Z',
+    id: 'd11cbac0-c178-11ec-98b5-3109bd2a1901',
   },
 ];

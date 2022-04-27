@@ -104,6 +104,13 @@ export const NO_ALERTS_FOUND = i18n.translate(
     defaultMessage: 'No alerts to display',
   }
 );
+
+export const NO_CASES_FOUND = i18n.translate(
+  'xpack.securitySolution.detectionResponse.noRecentCases',
+  {
+    defaultMessage: 'No cases to display',
+  }
+);
 export const RULE_ALERTS_COLUMN_RULE_NAME = i18n.translate(
   'xpack.securitySolution.detectionResponse.ruleAlertsColumnRuleName',
   {
@@ -215,5 +222,12 @@ export const RECENTLY_CREATED_CASE_COLUMN_STATUS = i18n.translate(
   'xpack.securitySolution.detectionResponse.caseColumnStatus',
   {
     defaultMessage: 'Status',
+  }
+);
+
+export const ERROR_MESSAGE_CASES = i18n.translate(
+  'xpack.securitySolution.detectionResponse.errorMessage',
+  {
+    defaultMessage: 'Error fetching case data',
   }
 );
