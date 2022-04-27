@@ -24,11 +24,9 @@ export const ExternalConnectorFormFields: React.FC = () => {
   } = useValues(ExternalConnectorLogic);
   const { fetchExternalSource, validateUrl, setExternalConnectorApiKey, setExternalConnectorUrl } =
     useActions(ExternalConnectorLogic);
-
   useEffect(() => {
     fetchExternalSource();
   }, []);
-
   return (
     <>
       {showInsecureUrlCallout && (

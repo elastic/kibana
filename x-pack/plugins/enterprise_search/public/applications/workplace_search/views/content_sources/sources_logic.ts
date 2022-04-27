@@ -322,22 +322,14 @@ export const mergeServerAndStaticData = (
   contentSources: ContentSourceDetails[]
 ): CombinedDataItem[] => {
   const unsortedData = staticData.map((staticItem) => {
-    const serverItem =
-      staticItem.serviceType === 'custom'
-        ? undefined
-        : serverData.find(
-            ({ serviceType, baseServiceType }) =>
-              serviceType === staticItem.serviceType &&
-              baseServiceType === staticItem.baseServiceType
-          );
-    const connectedSource =
-      staticItem.serviceType === 'custom'
-        ? contentSources.find(
-            ({ baseServiceType, serviceType }) =>
-              serviceType === staticItem.serviceType &&
-              baseServiceType === staticItem.baseServiceType
-          )
-        : contentSources.find(({ serviceType }) => serviceType === staticItem.serviceType);
+    const serverItem = serverData.find(
+      ({ serviceType, baseServiceType }) =>
+        serviceType === staticItem.serviceType && baseServiceType === staticItem.baseServiceType
+    );
+    const connectedSource = contentSources.find(
+      ({ baseServiceType, serviceType }) =>
+        serviceType === staticItem.serviceType && baseServiceType === staticItem.baseServiceType
+    );
 
     return {
       ...staticItem,

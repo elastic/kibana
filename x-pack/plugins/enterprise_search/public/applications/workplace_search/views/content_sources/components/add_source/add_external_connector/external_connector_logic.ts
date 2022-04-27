@@ -143,17 +143,17 @@ export const ExternalConnectorLogic = kea<
         actions.setUrlValidation(false);
       } else {
         clearFlashMessages();
+        const route = '/internal/workplace_search/org/settings/connectors';
+        const http = HttpLogic.values.http.post;
+        const params = {
+          external_connector_url: url,
+          external_connector_api_key: apiKey,
+          service_type: 'external',
+        };
         try {
-          await HttpLogic.values.http.post<SourceConfigData>(
-            '/internal/workplace_search/org/settings/connectors',
-            {
-              body: JSON.stringify({
-                external_connector_url: url,
-                external_connector_api_key: apiKey,
-                service_type: 'external',
-              }),
-            }
-          );
+          await http<SourceConfigData>(route, {
+            body: JSON.stringify(params),
+          });
 
           flashSuccessToast(
             i18n.translate(
@@ -163,9 +163,8 @@ export const ExternalConnectorLogic = kea<
               }
             )
           );
-
+          // TODO: Once we have multiple external connector types, use response data instead
           actions.saveExternalConnectorConfigSuccess('external');
-          // TODO: Once we have multi-config support for external connectors, navigate user to add path for w/ ID from response
           KibanaLogic.values.navigateToUrl(
             getSourcesPath(`${getAddPath('external')}`, AppLogic.values.isOrganization)
           );

@@ -57,6 +57,7 @@ export const SourceConfig: React.FC<SourceConfigProps> = ({ sourceData }) => {
       isLoading={dataLoading}
     >
       <SaveConfig
+        name={name}
         configuration={configuration}
         advanceStep={saveUpdatedConfig}
         onDeleteConfig={showConfirmModal}

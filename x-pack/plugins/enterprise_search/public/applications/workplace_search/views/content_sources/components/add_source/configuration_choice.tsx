@@ -19,6 +19,8 @@ import { SourceDataItem } from '../../../../types';
 
 import { hasCustomConnectorOption, hasExternalConnectorOption } from '../../source_data';
 
+import { SourcesLogic } from '../../sources_logic';
+
 import { AddSourceHeader } from './add_source_header';
 
 interface ConfigurationChoiceProps {
@@ -31,6 +33,7 @@ interface CardProps {
   buttonText: string;
   onClick: () => void;
   badgeLabel?: string;
+  disabledMessage?: string;
 }
 
 export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
@@ -40,6 +43,8 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
   const customConnectorAvailable = hasCustomConnectorOption(serviceType);
 
   const { isOrganization } = useValues(AppLogic);
+
+  const { externalConfigured } = useValues(SourcesLogic);
 
   const goToInternal = () =>
     KibanaLogic.values.navigateToUrl(`${getSourcesPath(getAddPath(serviceType), isOrganization)}/`);
@@ -62,15 +67,17 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
     buttonText,
     onClick,
     badgeLabel,
+    disabledMessage,
   }: CardProps) => (
     <EuiFlexItem grow>
       <EuiCard
+        isDisabled={!!disabledMessage}
         hasBorder
         title={title}
-        description={description}
+        description={disabledMessage || description}
         betaBadgeProps={{ label: badgeLabel }}
         footer={
-          <EuiButton color="primary" onClick={onClick}>
+          <EuiButton color="primary" onClick={onClick} disabled={!!disabledMessage}>
             {buttonText}
           </EuiButton>
         }
@@ -164,7 +171,14 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
       <EuiSpacer size="l" />
       <EuiFlexGroup justifyContent="flexStart" direction="row" responsive={false}>
         <ConnectorCard {...internalConnectorProps} />
-        {externalConnectorAvailable && <ConnectorCard {...externalConnectorProps} />}
+        {externalConnectorAvailable && (
+          <ConnectorCard
+            {...externalConnectorProps}
+            disabledMessage={
+              externalConfigured ? "You've already configured an external connector" : undefined
+            }
+          />
+        )}
         {customConnectorAvailable && <ConnectorCard {...customConnectorProps} />}
       </EuiFlexGroup>
     </>

@@ -107,7 +107,6 @@ describe('ExternalConnectorLogic', () => {
           sourceConfigData: newSourceConfigData,
         });
       });
-
       it('sets undefined api key to empty string', () => {
         const newSourceConfigData = {
           ...sourceConfigData,
@@ -171,7 +170,6 @@ describe('ExternalConnectorLogic', () => {
         });
       });
     });
-
     describe('setUrlValidation', () => {
       it('updates the url validation', () => {
         ExternalConnectorLogic.actions.setUrlValidation(false);
@@ -179,7 +177,6 @@ describe('ExternalConnectorLogic', () => {
         expect(ExternalConnectorLogic.values).toEqual({ ...DEFAULT_VALUES, urlValid: false });
       });
     });
-
     describe('setShowInsecureUrlCallout', () => {
       it('updates the url validation', () => {
         ExternalConnectorLogic.actions.setShowInsecureUrlCallout(true);
@@ -205,11 +202,10 @@ describe('ExternalConnectorLogic', () => {
       });
 
       itShowsServerErrorAsFlashMessage(http.get, () => {
-        mount({});
+        mount();
         ExternalConnectorLogic.actions.fetchExternalSource();
       });
     });
-
     describe('fetchExternalSourceSuccess', () => {
       it('should show insecure URL callout if url is insecure', () => {
         const setSpy = jest.spyOn(ExternalConnectorLogic.actions, 'setShowInsecureUrlCallout');
@@ -307,14 +303,13 @@ describe('ExternalConnectorLogic', () => {
         expect(navigateToUrl).not.toHaveBeenCalled();
       });
       itShowsServerErrorAsFlashMessage(http.post, () => {
-        mount({});
+        mount();
         ExternalConnectorLogic.actions.saveExternalConnectorConfig({
           url: 'http://url',
           apiKey: 'apiKey',
         });
       });
     });
-
     describe('validateUrl', () => {
       it('should correctly validate a valid URL', () => {
         ExternalConnectorLogic.actions.setExternalConnectorUrl('https://validUrl');
