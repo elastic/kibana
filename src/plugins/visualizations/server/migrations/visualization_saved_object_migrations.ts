@@ -7,12 +7,12 @@
  */
 
 import { cloneDeep, get, omit, has, flow, forOwn, mapValues } from 'lodash';
-import type { SavedObjectMigrationFn, SavedObjectMigrationMap } from 'kibana/server';
-import { mergeSavedObjectMigrationMaps } from '../../../../core/server';
-import { MigrateFunctionsObject, MigrateFunction } from '../../../kibana_utils/common';
+import type { SavedObjectMigrationFn, SavedObjectMigrationMap } from '@kbn/core/server';
+import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
+import { MigrateFunctionsObject, MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 
-import { DEFAULT_QUERY_LANGUAGE, SerializedSearchSourceFields } from '../../../data/common';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../data_views/common';
+import { DEFAULT_QUERY_LANGUAGE, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import {
   commonAddSupportOfDualIndexSelectionModeInTSVB,
   commonHideTSVBLastValueIndicator,

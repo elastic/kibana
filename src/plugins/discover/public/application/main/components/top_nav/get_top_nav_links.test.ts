@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ISearchSource } from 'src/plugins/data/public';
+import { ISearchSource } from '@kbn/data-plugin/public';
 import { getTopNavLinks } from './get_top_nav_links';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';

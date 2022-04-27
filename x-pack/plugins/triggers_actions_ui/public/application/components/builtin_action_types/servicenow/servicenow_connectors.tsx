@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
+import { snExternalServiceConfig } from '@kbn/actions-plugin/common';
 import { ActionConnectorFieldsProps } from '../../../../types';
 
 import * as i18n from './translations';
@@ -21,13 +22,9 @@ import { InstallationCallout } from './installation_callout';
 import { UpdateConnector } from './update_connector';
 import { updateActionConnector } from '../../../lib/action_connector_api';
 import { Credentials } from './credentials';
-import { checkConnectorIsDeprecated } from '../../../../common/connectors_selection';
 
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowConnectorFields as default };
-
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { snExternalServiceConfig } from '../../../../../../actions/server/builtin_action_types/servicenow/config';
 
 const ServiceNowConnectorFields: React.FC<
   ActionConnectorFieldsProps<ServiceNowActionConnector>
@@ -47,7 +44,7 @@ const ServiceNowConnectorFields: React.FC<
   } = useKibana().services;
   const { apiUrl, usesTableApi } = action.config;
   const { username, password } = action.secrets;
-  const requiresNewApplication = !checkConnectorIsDeprecated(action);
+  const requiresNewApplication = !action.isDeprecated;
 
   const [showUpdateConnector, setShowUpdateConnector] = useState(false);
 

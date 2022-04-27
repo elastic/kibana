@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import type from 'type-detect';
 
-import type { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,

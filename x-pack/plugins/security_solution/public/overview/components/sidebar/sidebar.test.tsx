@@ -11,7 +11,7 @@ import { waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { Sidebar } from './sidebar';
 import { useGetUserCasesPermissions, useKibana } from '../../../common/lib/kibana';
-import { casesPluginMock, CaseUiClientMock } from '../../../../../cases/public/mocks';
+import { casesPluginMock, CaseUiClientMock } from '@kbn/cases-plugin/public/mocks';
 
 jest.mock('../../../common/lib/kibana');
 

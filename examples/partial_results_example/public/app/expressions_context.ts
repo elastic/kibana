@@ -7,6 +7,6 @@
  */
 
 import { createContext } from 'react';
-import type { ExpressionsServiceStart } from 'src/plugins/expressions';
+import type { ExpressionsServiceStart } from '@kbn/expressions-plugin';
 
 export const ExpressionsContext = createContext<ExpressionsServiceStart | undefined>(undefined);

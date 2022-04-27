@@ -16,22 +16,20 @@ import {
   EuiBasicTableProps,
 } from '@elastic/eui';
 import moment from 'moment';
+import { SortDirection } from '@kbn/data-plugin/common';
 import { extractErrorMessage } from '../../../common/utils/helpers';
 import * as TEST_SUBJECTS from './test_subjects';
 import * as TEXT from './translations';
 import type { CspFinding } from './types';
 import { CspEvaluationBadge } from '../../components/csp_evaluation_badge';
-import type { CspFindingsRequest, CspFindingsResponse } from './use_findings';
-import { SortDirection } from '../../../../../../src/plugins/data/common';
+import type { FindingsGroupByNoneQuery, CspFindingsResult } from './use_findings';
 import { FindingsRuleFlyout } from './findings_flyout';
 
-type TableQueryProps = Pick<CspFindingsRequest, 'sort' | 'from' | 'size'>;
-
-interface BaseFindingsTableProps extends TableQueryProps {
-  setQuery(query: Partial<TableQueryProps>): void;
+interface BaseFindingsTableProps extends FindingsGroupByNoneQuery {
+  setQuery(query: Partial<FindingsGroupByNoneQuery>): void;
 }
 
-type FindingsTableProps = CspFindingsResponse & BaseFindingsTableProps;
+type FindingsTableProps = CspFindingsResult & BaseFindingsTableProps;
 
 const FindingsTableComponent = ({
   setQuery,
@@ -39,7 +37,8 @@ const FindingsTableComponent = ({
   size,
   sort = [],
   error,
-  ...props
+  data,
+  loading,
 }: FindingsTableProps) => {
   const [selectedFinding, setSelectedFinding] = useState<CspFinding>();
 
@@ -48,9 +47,9 @@ const FindingsTableComponent = ({
       getEuiPaginationFromEsSearchSource({
         from,
         size,
-        total: props.status === 'success' ? props.data.total : 0,
+        total: data?.total,
       }),
-    [from, size, props]
+    [from, size, data]
   );
 
   const sorting = useMemo(() => getEuiSortFromEsSearchSource(sort), [sort]);
@@ -70,7 +69,7 @@ const FindingsTableComponent = ({
   );
 
   // Show "zero state"
-  if (props.status === 'success' && !props.data.data.length)
+  if (!loading && !data?.page.length)
     // TODO: use our own logo
     return (
       <EuiEmptyPrompt
@@ -84,9 +83,9 @@ const FindingsTableComponent = ({
     <>
       <EuiBasicTable
         data-test-subj={TEST_SUBJECTS.FINDINGS_TABLE}
-        loading={props.status === 'loading'}
+        loading={loading}
         error={error ? extractErrorMessage(error) : undefined}
-        items={props.data?.data || []}
+        items={data?.page || []}
         columns={columns}
         pagination={pagination}
         sorting={sorting}
@@ -108,17 +107,17 @@ const getEuiPaginationFromEsSearchSource = ({
   size: pageSize,
   total,
 }: Pick<FindingsTableProps, 'from' | 'size'> & {
-  total: number;
+  total: number | undefined;
 }): EuiBasicTableProps<CspFinding>['pagination'] => ({
   pageSize,
   pageIndex: Math.ceil(pageIndex / pageSize),
-  totalItemCount: total,
+  totalItemCount: total || 0,
   pageSizeOptions: [10, 25, 100],
   showPerPageOptions: true,
 });
 
 const getEuiSortFromEsSearchSource = (
-  sort: TableQueryProps['sort']
+  sort: FindingsGroupByNoneQuery['sort']
 ): EuiBasicTableProps<CspFinding>['sorting'] => {
   if (!sort.length) return;
 
@@ -132,7 +131,7 @@ const getEuiSortFromEsSearchSource = (
 const getEsSearchQueryFromEuiTableParams = ({
   page,
   sort,
-}: Criteria<CspFinding>): Partial<TableQueryProps> => ({
+}: Criteria<CspFinding>): Partial<FindingsGroupByNoneQuery> => ({
   ...(!!page && { from: page.index * page.size, size: page.size }),
   sort: sort ? [{ [sort.field]: SortDirection[sort.direction] }] : undefined,
 });

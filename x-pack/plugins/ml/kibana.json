@@ -19,7 +19,8 @@
     "share",
     "taskManager",
     "triggersActionsUi",
-    "uiActions"
+    "uiActions",
+    "unifiedSearch"
   ],
   "optionalPlugins": [
     "alerting",
@@ -40,7 +41,6 @@
     "dashboard",
     "esUiShared",
     "fieldFormats",
-    "home",
     "kibanaReact",
     "kibanaUtils",
     "maps",

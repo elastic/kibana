@@ -7,7 +7,7 @@
 
 import { cloneDeep, merge } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import {
   EventHit,
   TimelineEventsQueries,
@@ -15,7 +15,7 @@ import {
   TimelineEventsDetailsRequestOptions,
   TimelineEventsDetailsItem,
 } from '../../../../../../common/search_strategy';
-import { inspectStringifyObject } from '../../../../../../server/utils/build_query';
+import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { TimelineFactory } from '../../types';
 import { buildTimelineDetailsQuery } from './query.events_details.dsl';
 import {

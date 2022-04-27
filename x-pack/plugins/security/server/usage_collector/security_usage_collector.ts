@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import type { SecurityLicense } from '../../common/licensing';
 import type { ConfigType } from '../config';

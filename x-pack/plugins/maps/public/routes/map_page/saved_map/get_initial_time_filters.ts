@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryState } from 'src/plugins/data/public';
+import { QueryState } from '@kbn/data-plugin/public';
 import { getUiSettings } from '../../../kibana_services';
 import { SerializedMapState } from './types';
 

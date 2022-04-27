@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { RequestHandler } from 'kibana/server';
-import { RouteDependencies } from '../../../';
+import { RequestHandler } from '@kbn/core/server';
+import { RouteDependencies } from '../../..';
 
 interface SpecDefinitionsRouteResponse {
   es: {

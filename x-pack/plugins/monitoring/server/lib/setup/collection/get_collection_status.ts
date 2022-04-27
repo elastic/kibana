@@ -6,7 +6,7 @@
  */
 
 import { get, uniq } from 'lodash';
-import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { CollectorFetchContext, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import {
   METRICBEAT_INDEX_NAME_UNIQUE_TOKEN,
   ELASTICSEARCH_SYSTEM_ID,
