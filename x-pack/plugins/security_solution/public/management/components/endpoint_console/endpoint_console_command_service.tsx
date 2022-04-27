@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { CommandExecutionResponse } from '../console/types';
 import { EndpointError } from '../../../../common/endpoint/errors';
-import { handleIsolateAction } from './action_handlers';
+import { handleIsolateAction, handleStatusAction } from './action_handlers';
 import { HostMetadata } from '../../../../common/endpoint/types';
 import { CommandServiceInterface, CommandDefinition, Command } from '../console';
 
@@ -31,6 +31,10 @@ export class EndpointConsoleCommandService implements CommandServiceInterface {
           },
         },
       },
+      {
+        name: 'status',
+        about: 'Display the latest status information for the Endpoint',
+      },
     ];
   }
 
@@ -38,6 +42,8 @@ export class EndpointConsoleCommandService implements CommandServiceInterface {
     switch (command.args.name) {
       case 'isolate':
         return handleIsolateAction(this.endpointMetadata, command);
+      case 'status':
+        return handleStatusAction(this.endpointMetadata, command);
       default:
         throw new EndpointError(
           i18n.translate('xpack.securitySolution.endpointResponseActions.unknownAction', {
