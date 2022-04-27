@@ -33,7 +33,7 @@ export const parseExperimentalConfigValue = (configValue: string[]): Experimenta
 
   for (const value of configValue) {
     if (!isValidExperimentalValue(value)) {
-      throw new FleetInvalidExperimentalValue(`[${value}] is not valid.`);
+      throw new FleetInvalidExperimentalValue(`[${value}] is not a supported experimental feature`);
     }
 
     enabledFeatures[value as keyof ExperimentalFeatures] = true;
@@ -45,7 +45,7 @@ export const parseExperimentalConfigValue = (configValue: string[]): Experimenta
   };
 };
 
-export const isValidExperimentalValue = (value: string): boolean => {
+export const isValidExperimentalValue = (value: string) => {
   return allowedKeys.includes(value as keyof ExperimentalFeatures);
 };
 
