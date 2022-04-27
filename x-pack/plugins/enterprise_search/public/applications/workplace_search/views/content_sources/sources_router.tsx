@@ -29,15 +29,12 @@ import {
 import { AddSource, AddSourceList, GitHubViaApp } from './components/add_source';
 import { AddCustomSource } from './components/add_source/add_custom_source';
 import { ExternalConnectorConfig } from './components/add_source/add_external_connector';
+import { AddSourceBYOIntro } from './components/add_source/add_source_byo_intro';
 import { AddSourceChoice } from './components/add_source/add_source_choice';
 import { AddSourceIntro } from './components/add_source/add_source_intro';
 import { OrganizationSources } from './organization_sources';
 import { PrivateSources } from './private_sources';
-import {
-  staticCustomSourceData,
-  staticGenericExternalSourceData,
-  staticSourceData as sources,
-} from './source_data';
+import { staticCustomSourceData, staticSourceData as sources } from './source_data';
 import { SourceRouter } from './source_router';
 import { SourcesLogic } from './sources_logic';
 
@@ -137,12 +134,7 @@ export const SourcesRouter: React.FC = () => {
         path={`${getSourcesPath(getAddPath('external'), isOrganization)}/intro`}
         data-test-subj="ConnectorIntroRoute"
       >
-        {!hasPlatinumLicense && staticGenericExternalSourceData.accountContextOnly ? (
-          <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
-        ) : (
-          // TODO: Make a bespoke component for this
-          <AddSourceIntro sourceData={staticGenericExternalSourceData} />
-        )}
+        <AddSourceBYOIntro />
       </Route>
       {internalAndExternalSources.map((sourceData, i) => {
         const { baseServiceType, serviceType, accountContextOnly } = sourceData;
