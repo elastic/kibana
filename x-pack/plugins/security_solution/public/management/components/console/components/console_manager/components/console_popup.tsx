@@ -24,7 +24,7 @@ const ConsolePopupWrapper = styled.div`
   position: fixed;
   bottom: 60px;
   left: 20px;
-  height: 70vh;
+  height: 50vh;
   width: 48vw;
   max-width: 90vw;
 

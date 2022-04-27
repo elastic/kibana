@@ -6,3 +6,4 @@
  */
 
 export { handleIsolateAction } from './isolate_action';
+export { handleStatusAction } from './status_action';
