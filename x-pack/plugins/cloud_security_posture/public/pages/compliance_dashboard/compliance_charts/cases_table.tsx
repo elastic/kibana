@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-cases;
-
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
