@@ -7,7 +7,7 @@
 
 /**
  * Note: This exists only temporarily as we refactor to remove the sandboxes
- * to its own plugin. Ideally we do not want to use an internal page within 
+ * to its own plugin. Ideally we do not want to use an internal page within
  * the triggers_actions_ui plugin
  */
 
