@@ -50,6 +50,7 @@ import type {
   AnalyticsServiceSetup,
   AnalyticsServiceStart,
 } from './analytics';
+import type { InternalUiServiceSetup } from './ui';
 
 /** @internal */
 export interface InternalCorePreboot {
@@ -83,6 +84,7 @@ export interface InternalCoreSetup {
   metrics: InternalMetricsServiceSetup;
   deprecations: InternalDeprecationsServiceSetup;
   coreUsageData: InternalCoreUsageDataSetup;
+  ui: InternalUiServiceSetup;
 }
 
 /**

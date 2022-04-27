@@ -59,6 +59,7 @@ import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logg
 import { CoreUsageDataStart, CoreUsageDataSetup } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
 import { DeprecationsServiceSetup, DeprecationsClient } from './deprecations';
+import { UiServiceSetup } from './ui';
 // Because of #79265 we need to explicitly import, then export these types for
 // scripts/telemetry_check.js to work as expected
 import {
@@ -395,6 +396,8 @@ export type {
   DeprecationSettings,
 } from './ui_settings';
 
+export type { UiServiceSetup } from './ui';
+
 export type {
   OpsMetrics,
   OpsOsMetrics,
@@ -584,6 +587,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   status: StatusServiceSetup;
   /** {@link UiSettingsServiceSetup} */
   uiSettings: UiSettingsServiceSetup;
+  /** {@link UiSettingsServiceSetup} */
+  ui: UiServiceSetup;
   /** {@link DeprecationsServiceSetup} */
   deprecations: DeprecationsServiceSetup;
   /** {@link StartServicesAccessor} */

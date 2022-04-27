@@ -30,6 +30,7 @@ import { createBrowserConfig } from './create_browser_config';
 import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from '../internal_types';
 import { IConfigService } from '../config';
 import { InternalEnvironmentServicePreboot } from '../environment';
+import { registerCorePluginRoutes } from './routes';
 
 /** @internal */
 export type DiscoveredPlugins = {
@@ -171,6 +172,10 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     if (config.initialize) {
       contracts = await this.standardPluginsSystem.setupPlugins(deps);
       this.registerPluginStaticDirs(deps, this.standardUiPluginInternalInfo);
+
+      // register the routes the client-side will use to retrieve meta info on an app/plugin
+      const router = deps.http.createRouter('');
+      registerCorePluginRoutes({ router });
     } else {
       this.log.info(
         'Skipping `setup` for `standard` plugins since plugin initialization is disabled.'

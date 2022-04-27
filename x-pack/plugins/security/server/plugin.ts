@@ -223,6 +223,14 @@ export class SecurityPlugin
       this.config = config;
     });
 
+    // flag the security plugin as being required for all applications
+    core.ui.markAsRequired();
+
+    // flag the `home` app as being owned by the `home` plugin
+    core.ui.registerApp('security_login');
+    core.ui.registerApp('security_logout');
+    core.ui.registerApp('security_logged_out');
+
     const config = this.getConfig();
     const kibanaIndexName = this.getKibanaIndexName();
 

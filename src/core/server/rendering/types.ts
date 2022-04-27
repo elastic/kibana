@@ -15,6 +15,7 @@ import { InternalHttpServicePreboot, InternalHttpServiceSetup, KibanaRequest } f
 import { UiPlugins, DiscoveredPlugin } from '../plugins';
 import { IUiSettingsClient, UserProvidedValues } from '../ui_settings';
 import type { InternalStatusServiceSetup } from '../status';
+import { InternalUiServiceStart } from '../ui';
 import { IExternalUrlPolicy } from '../external_url';
 
 /** @internal */
@@ -50,6 +51,10 @@ export interface InjectedMetadata {
     darkMode: boolean;
     version: ThemeVersion;
   };
+  initialApp: {
+    appId: string;
+    pluginId: string;
+  };
   csp: Pick<ICspConfig, 'warnLegacyBrowsers'>;
   externalUrl: { policy: IExternalUrlPolicy[] };
   vars: Record<string, any>;
@@ -77,6 +82,11 @@ export interface RenderingSetupDeps {
   http: InternalHttpServiceSetup;
   status: InternalStatusServiceSetup;
   uiPlugins: UiPlugins;
+}
+
+/** @internal */
+export interface RenderingStartDeps {
+  ui: InternalUiServiceStart;
 }
 
 /** @public */
@@ -109,10 +119,11 @@ export interface InternalRenderingServiceSetup {
    *
    * @example
    * ```ts
-   * const html = await rendering.render(request, uiSettings);
+   * const html = await rendering.render('myApp', request, uiSettings);
    * ```
    */
   render(
+    appId: string,
     request: KibanaRequest,
     uiSettings: IUiSettingsClient,
     options?: IRenderOptions

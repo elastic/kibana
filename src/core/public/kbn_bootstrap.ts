@@ -16,6 +16,9 @@ export async function __kbnBootstrap__() {
     document.querySelector('kbn-injected-metadata')!.getAttribute('data')!
   );
 
+  // TODO: remove
+  console.log('__kbnBootstrap__: metadata', injectedMetadata);
+
   let i18nError: Error | undefined;
   const apmSystem = new ApmSystem(injectedMetadata.vars.apmConfig, injectedMetadata.basePath);
 

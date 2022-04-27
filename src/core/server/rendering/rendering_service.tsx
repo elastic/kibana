@@ -19,6 +19,7 @@ import {
   IRenderOptions,
   RenderingPrebootDeps,
   RenderingSetupDeps,
+  RenderingStartDeps,
   InternalRenderingServicePreboot,
   InternalRenderingServiceSetup,
   RenderingMetadata,
@@ -27,12 +28,16 @@ import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
 import { getSettingValue, getStylesheetPaths } from './render_utils';
 import { KibanaRequest } from '../http';
 import { IUiSettingsClient } from '../ui_settings';
+import { InternalUiServiceStart } from '../ui';
 import { filterUiPlugins } from './filter_ui_plugins';
 
 type RenderOptions = (RenderingPrebootDeps & { status?: never }) | RenderingSetupDeps;
 
 /** @internal */
 export class RenderingService {
+  private started: boolean = false;
+  private uiStart?: InternalUiServiceStart;
+
   constructor(private readonly coreContext: CoreContext) {}
 
   public async preboot({
@@ -76,12 +81,22 @@ export class RenderingService {
     };
   }
 
+  public start({ ui }: RenderingStartDeps) {
+    this.started = true;
+    this.uiStart = ui;
+  }
+
   private async render(
     { http, uiPlugins, status }: RenderOptions,
+    appId: string,
     request: KibanaRequest,
     uiSettings: IUiSettingsClient,
     { isAnonymousPage = false, vars, includeExposedConfigKeys }: IRenderOptions = {}
   ) {
+    if (!this.started) {
+      throw new Error('render cannot be called before the service has started');
+    }
+
     const env = {
       mode: this.coreContext.env.mode,
       packageInfo: this.coreContext.env.packageInfo,
@@ -104,6 +119,8 @@ export class RenderingService {
       buildNum,
     });
 
+    // TODO: use appId to filter plugins
+
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
     const metadata: RenderingMetadata = {
@@ -123,6 +140,10 @@ export class RenderingService {
         serverBasePath,
         publicBaseUrl,
         env,
+        initialApp: {
+          appId,
+          pluginId: this.uiStart!.getPluginForApp(appId),
+        },
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
           translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,

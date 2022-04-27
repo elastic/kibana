@@ -47,9 +47,12 @@ export type HttpResourcesResponseOptions = HttpResponseOptions;
  */
 export interface HttpResourcesServiceToolkit {
   /** To respond with HTML page bootstrapping Kibana application. */
-  renderCoreApp: (options?: HttpResourcesRenderOptions) => Promise<IKibanaResponse>;
+  renderCoreApp: (appId: string, options?: HttpResourcesRenderOptions) => Promise<IKibanaResponse>;
   /** To respond with HTML page bootstrapping Kibana application without retrieving user-specific information. */
-  renderAnonymousCoreApp: (options?: HttpResourcesRenderOptions) => Promise<IKibanaResponse>;
+  renderAnonymousCoreApp: (
+    appId: string,
+    options?: HttpResourcesRenderOptions
+  ) => Promise<IKibanaResponse>;
   /** To respond with a custom HTML page. */
   renderHtml: (options: HttpResourcesResponseOptions) => IKibanaResponse;
   /** To respond with a custom JS script file. */

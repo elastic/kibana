@@ -52,7 +52,7 @@ export function defineLoginRoutes({
         });
       }
 
-      return response.renderAnonymousCoreApp();
+      return response.renderAnonymousCoreApp('security_login');
     }
   );
 

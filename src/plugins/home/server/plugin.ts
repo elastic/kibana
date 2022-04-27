@@ -42,6 +42,9 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
     core.capabilities.registerProvider(capabilitiesProvider);
     core.savedObjects.registerType(sampleDataTelemetry);
 
+    // flag the `home` app as being owned by the `home` plugin
+    core.ui.registerApp('home');
+
     const router = core.http.createRouter();
     registerRoutes(router);
 

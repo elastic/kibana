@@ -44,6 +44,9 @@ export class DashboardPlugin
     );
     core.capabilities.registerProvider(capabilitiesProvider);
 
+    // flag the `dashboards` app to be owned by the dashboard plugin
+    core.ui.registerApp('dashboards');
+
     registerDashboardUsageCollector(plugins.usageCollection, plugins.embeddable);
 
     plugins.embeddable.registerEmbeddableFactory(

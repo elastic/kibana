@@ -50,6 +50,10 @@ export interface InjectedMetadataParams {
       darkMode: boolean;
       version: ThemeVersion;
     };
+    initialApp: {
+      appId: string;
+      pluginId: string;
+    };
     env: {
       mode: Readonly<EnvironmentMode>;
       packageInfo: Readonly<PackageInfo>;
