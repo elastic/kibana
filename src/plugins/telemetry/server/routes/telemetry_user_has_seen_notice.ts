@@ -21,7 +21,7 @@ export function registerTelemetryUserHasSeenNotice(router: IRouter) {
       validate: false,
     },
     async (context, req, res) => {
-      const internalRepository = context.core.savedObjects.client;
+      const internalRepository = (await context.core).savedObjects.client;
       const telemetrySavedObject: TelemetrySavedObject = await getTelemetrySavedObject(
         internalRepository
       );

@@ -8,10 +8,10 @@
 import _ from 'lodash';
 import type {
   FeatureIdentifier,
+  FilterSpecification,
   Map as MbMap,
-  AnyLayer as MbLayer,
-  GeoJSONSource as MbGeoJSONSource,
-  VectorSource as MbVectorSource,
+  LayerSpecification,
+  VectorTileSource,
 } from '@kbn/mapbox-gl';
 import { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
@@ -303,7 +303,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     return this.makeMbLayerId('toomanyfeatures');
   }
 
-  _getJoinFilterExpression(): unknown | undefined {
+  _getJoinFilterExpression(): FilterSpecification | undefined {
     const { join, joinPropertiesMap } = this._getJoinResults();
     if (!join) {
       return undefined;
@@ -322,13 +322,13 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     return joinKeys.length
       ? // Unable to check FEATURE_VISIBLE_PROPERTY_NAME flag since filter expressions do not support feature-state
         // Instead, remove unjoined source features by filtering out features without matching join keys
-        [
+        ([
           'match',
           ['get', join.getLeftField().getName()],
           joinKeys,
           true, // match value
           false, // fallback - value with no match
-        ]
+        ] as FilterSpecification)
       : hideAllFilter;
   }
 
@@ -409,7 +409,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     const tooManyFeaturesLayerId = this._getMbTooManyFeaturesLayerId();
 
     if (!mbMap.getLayer(tooManyFeaturesLayerId)) {
-      const mbTooManyFeaturesLayer: MbLayer = {
+      const mbTooManyFeaturesLayer: LayerSpecification = {
         id: tooManyFeaturesLayerId,
         type: 'line',
         source: this.getId(),
@@ -449,7 +449,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   // Must remove/add vector source to update source attributes.
   // _requiresPrevSourceCleanup returns true when vector source needs to be removed so it can be re-added with updated attributes
   _requiresPrevSourceCleanup(mbMap: MbMap): boolean {
-    const mbSource = mbMap.getSource(this.getMbSourceId()) as MbVectorSource | MbGeoJSONSource;
+    const mbSource = mbMap.getSource(this.getMbSourceId());
     if (!mbSource) {
       return false;
     }
@@ -457,7 +457,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       // Expected source is not compatible, so remove.
       return true;
     }
-    const mbTileSource = mbSource as MbVectorSource;
+    const mbTileSource = mbSource as VectorTileSource;
 
     const sourceDataRequest = this.getSourceDataRequest();
     if (!sourceDataRequest) {
@@ -485,9 +485,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       // but the programmable JS-object uses camelcase `sourceLayer`
       if (
         mbLayer &&
-        // @ts-expect-error
         mbLayer.sourceLayer !== sourceData.tileSourceLayer &&
-        // @ts-expect-error
         mbLayer.sourceLayer !== ES_MVT_META_LAYER_NAME
       ) {
         // If the source-pointer of one of the layers is stale, they will all be stale.
