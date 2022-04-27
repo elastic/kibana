@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import './search_source_expression.scss';
 import { EuiSpacer, EuiLoadingSpinner, EuiEmptyPrompt, EuiCallOut } from '@elastic/eui';
 import { ISearchSource } from '@kbn/data-plugin/common';
@@ -36,7 +36,7 @@ export const SearchSourceExpression = ({
   } = ruleParams;
   const { data } = useTriggersAndActionsUiDeps();
 
-  const searchSourceRef = useRef<ISearchSource>();
+  const [searchSource, setSearchSource] = useState<ISearchSource>();
   const [savedQuery, setSavedQuery] = useState<SavedQuery>();
   const [paramsError, setParamsError] = useState<Error>();
 
@@ -49,8 +49,8 @@ export const SearchSourceExpression = ({
     const initSearchSource = () =>
       data.search.searchSource
         .create(searchConfiguration)
-        .then((searchSource) => {
-          searchSourceRef.current = searchSource;
+        .then((fetchedSearchSource) => {
+          setSearchSource(fetchedSearchSource);
           setRuleProperty('params', {
             searchConfiguration,
             searchType: SearchType.searchSource,
@@ -65,7 +65,7 @@ export const SearchSourceExpression = ({
 
     initSearchSource();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.search.searchSource, data.dataViews, searchConfiguration]);
+  }, [data.search.searchSource, data.dataViews]);
 
   useEffect(() => {
     if (ruleParams.savedQueryId) {
@@ -84,13 +84,13 @@ export const SearchSourceExpression = ({
     );
   }
 
-  if (!searchSourceRef.current) {
+  if (!searchSource) {
     return <EuiEmptyPrompt title={<EuiLoadingSpinner size="xl" />} />;
   }
 
   return (
     <SearchSourceExpressionForm
-      searchSource={searchSourceRef.current}
+      searchSource={searchSource}
       errors={errors}
       ruleParams={ruleParams}
       initialSavedQuery={savedQuery}

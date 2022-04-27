@@ -7,6 +7,7 @@
 
 import React, { Fragment, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import './search_source_expression.scss';
+import { debounce } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -25,21 +26,26 @@ import { DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
 import { useTriggersAndActionsUiDeps } from '../util';
 
-interface SearchSourceParamsState {
+interface LocalState {
   index: DataView;
   filter: Filter[];
   query: Query;
+  threshold: number[];
+  timeWindowSize: number;
+  size: number;
 }
 
-interface SearchSourceAction {
+interface LocalStateAction {
+  type: SearchSourceParamsAction['type'] | ('threshold' | 'timeWindowSize' | 'size');
+  payload: SearchSourceParamsAction['payload'] | (number[] | number);
+}
+
+type LocalStateReducer = (prevState: LocalState, action: LocalStateAction) => LocalState;
+
+interface SearchSourceParamsAction {
   type: 'index' | 'filter' | 'query';
   payload: DataView | Filter[] | Query;
 }
-
-type SearchSourceStateReducer = (
-  prevState: SearchSourceParamsState,
-  action: SearchSourceAction
-) => SearchSourceParamsState;
 
 interface SearchSourceExpressionFormProps {
   searchSource: ISearchSource;
@@ -49,30 +55,46 @@ interface SearchSourceExpressionFormProps {
   setParam: (paramField: string, paramValue: unknown) => void;
 }
 
+const isSearchSourceParam = (action: LocalStateAction): action is SearchSourceParamsAction => {
+  return action.type === 'filter' || action.type === 'index' || action.type === 'query';
+};
+
+const withDebounce = debounce((execute: () => void) => execute(), 500, {
+  leading: false,
+  trailing: true,
+});
+
 export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProps) => {
   const { data } = useTriggersAndActionsUiDeps();
   const { searchSource, ruleParams, errors, initialSavedQuery, setParam } = props;
-  const { thresholdComparator, threshold, timeWindowSize, timeWindowUnit, size } = ruleParams;
+  const { thresholdComparator, timeWindowUnit } = ruleParams;
   const [savedQuery, setSavedQuery] = useState<SavedQuery>();
 
-  const timeHistory = useMemo(() => {
-    return new TimeHistory(new Storage(localStorage));
-  }, []);
+  const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
 
   useEffect(() => setSavedQuery(initialSavedQuery), [initialSavedQuery]);
 
-  // part of alert search source rule params
-  const [{ index: dataView, query, filter: filters }, dispatch] =
-    useReducer<SearchSourceStateReducer>(
+  /**
+   *  Local state needed to optimize user inputs responsiveness
+   */
+  const [{ index: dataView, query, filter: filters, threshold, timeWindowSize, size }, dispatch] =
+    useReducer<LocalStateReducer>(
       (currentState, action) => {
-        searchSource.setParent(undefined).setField(action.type, action.payload);
-        setParam('searchConfiguration', searchSource.getSerializedFields());
+        if (isSearchSourceParam(action)) {
+          searchSource.setParent(undefined).setField(action.type, action.payload);
+          setParam('searchConfiguration', searchSource.getSerializedFields());
+        } else {
+          withDebounce(() => setParam(action.type, action.payload));
+        }
         return { ...currentState, [action.type]: action.payload };
       },
       {
         index: searchSource.getField('index')!,
         query: searchSource.getField('query')!,
         filter: searchSource.getField('filter') as Filter[],
+        threshold: ruleParams.threshold,
+        timeWindowSize: ruleParams.timeWindowSize,
+        size: ruleParams.size,
       }
     );
   const dataViews = useMemo(() => [dataView], [dataView]);
@@ -90,8 +112,9 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     dispatch({ type: 'filter', payload: mapAndFlattenFilters(newFilters) });
   }, []);
 
-  const onChangeQuery = ({ query: newQuery }: { query?: Query }) =>
-    dispatch({ type: 'query', payload: newQuery || { ...query, query: '' } });
+  const onChangeQuery = ({ query: newQuery }: { query?: Query }) => {
+    withDebounce(() => dispatch({ type: 'query', payload: newQuery || { ...query, query: '' } }));
+  };
 
   const onSavedQueryUpdated = (newSavedQuery: SavedQuery) => {
     setSavedQuery(newSavedQuery);
@@ -105,6 +128,21 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     setSavedQuery(undefined);
     dispatch({ type: 'query', payload: { ...query, query: '' } });
   };
+
+  const onChangeWindowUnit = (selectedWindowUnit: string) =>
+    setParam('timeWindowUnit', selectedWindowUnit);
+
+  const onChangeWindowSize = (selectedWindowSize?: number) =>
+    selectedWindowSize && dispatch({ type: 'timeWindowSize', payload: selectedWindowSize });
+
+  const onChangeSelectedThresholdComparator = (selectedThresholdComparator?: string) =>
+    setParam('thresholdComparator', selectedThresholdComparator);
+
+  const onChangeSelectedThreshold = (selectedThresholds?: number[]) =>
+    selectedThresholds && dispatch({ type: 'threshold', payload: selectedThresholds });
+
+  const onChangeSizeValue = (updatedValue: number) =>
+    dispatch({ type: 'size', payload: updatedValue });
 
   return (
     <Fragment>
@@ -168,12 +206,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         errors={errors}
         display="fullWidth"
         popupPosition={'upLeft'}
-        onChangeSelectedThreshold={(selectedThresholds) =>
-          setParam('threshold', selectedThresholds)
-        }
-        onChangeSelectedThresholdComparator={(selectedThresholdComparator) =>
-          setParam('thresholdComparator', selectedThresholdComparator)
-        }
+        onChangeSelectedThreshold={onChangeSelectedThreshold}
+        onChangeSelectedThresholdComparator={onChangeSelectedThresholdComparator}
       />
       <ForLastExpression
         data-test-subj="forLastExpression"
@@ -182,12 +216,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         timeWindowUnit={timeWindowUnit}
         display="fullWidth"
         errors={errors}
-        onChangeWindowSize={(selectedWindowSize: number | undefined) =>
-          setParam('timeWindowSize', selectedWindowSize)
-        }
-        onChangeWindowUnit={(selectedWindowUnit: string) =>
-          setParam('timeWindowUnit', selectedWindowUnit)
-        }
+        onChangeWindowSize={onChangeWindowSize}
+        onChangeWindowUnit={onChangeWindowUnit}
       />
       <EuiSpacer size="s" />
       <EuiTitle size="xs">
@@ -208,9 +238,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         errors={errors.size}
         display="fullWidth"
         popupPosition={'upLeft'}
-        onChangeSelectedValue={(updatedValue) => {
-          setParam('size', updatedValue);
-        }}
+        onChangeSelectedValue={onChangeSizeValue}
       />
       <EuiSpacer size="s" />
     </Fragment>
