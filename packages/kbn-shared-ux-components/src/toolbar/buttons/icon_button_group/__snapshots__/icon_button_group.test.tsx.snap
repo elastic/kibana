@@ -18,6 +18,7 @@ exports[`<IconButtonGroup /> is rendered 1`] = `
   docLinks={
     Object {
       "dataViewsDocLink": "dummy link",
+      "kibanaGuideDocLink": "Kibana guide",
     }
   }
   editors={
