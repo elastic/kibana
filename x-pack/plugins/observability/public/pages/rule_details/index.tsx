@@ -121,25 +121,9 @@ export function RuleDetailsPage() {
     },
   ];
 
-  if (!rule || errorRule) {
-    return <EuiFlexItem>Error | No data</EuiFlexItem>;
-  }
-
-  const EditAlertFlyout = () =>
-    useMemo(
-      () =>
-        triggersActionsUi.getEditAlertFlyout({
-          initialRule: rule,
-          onClose: () => {
-            setEditFlyoutVisible(false);
-          },
-          onSave: reloadRule,
-        }),
-      []
-    );
-
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const canSaveRule =
+    rule &&
     hasAllPrivilege(rule, ruleType) &&
     // if the rule has actions, can the user save the rule's action params
     (canExecuteActions || (!canExecuteActions && rule.actions.length === 0));
@@ -152,23 +136,13 @@ export function RuleDetailsPage() {
       ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
       : false);
 
-  const {
-    executionStatus: { status, lastExecutionDate },
-    ruleTypeId,
-    params,
-    schedule: { interval },
-    notifyWhen,
-    actions,
-  } = rule;
-
-  const { description } = ruleTypeRegistry.get(rule?.ruleTypeId);
-
   console.log('rule', rule);
   console.log('ruleSummary', ruleSummary);
+  console.log('errorRule', errorRule);
 
   const getRuleConditionsWording = () => (
     <>
-      {params.criteria ? String((params.criteria as any[]).length) : 0}{' '}
+      {rule?.params.criteria ? String((rule?.params.criteria as any[]).length) : 0}{' '}
       {/* TODO:  Add [s] to the conditions word based on how many conditions */}
       {i18n.translate('xpack.observability.ruleDetails.conditions', {
         defaultMessage: 'conditions',
@@ -176,215 +150,233 @@ export function RuleDetailsPage() {
     </>
   );
 
+  if (isLoadingRule && !errorRule) return <EuiText>Loading</EuiText>;
+  if (errorRule) return toasts.addDanger({ title: errorRule });
   return (
-    <ObservabilityPageTemplate
-      pageHeader={{
-        pageTitle: <PageTitle rule={rule} />,
-        bottomBorder: false,
-        rightSideItems: hasEditButton
-          ? [
-              <EuiFlexGroup direction="rowReverse" alignItems="center">
-                <EuiFlexItem>
-                  <EuiPopover
-                    id="contextRuleEditMenu"
-                    isOpen={isRuleEditPopoverOpen}
-                    closePopover={() => setIsRuleEditPopoverOpen(false)}
-                    button={
-                      <EuiButtonIcon
-                        display="base"
-                        size="m"
-                        iconType="boxesHorizontal"
-                        aria-label="More"
-                        onClick={() => setIsRuleEditPopoverOpen(true)}
-                      />
-                    }
-                  >
-                    <EuiButtonEmpty
-                      size="m"
-                      iconType="pencil"
-                      onClick={() => {
-                        setIsRuleEditPopoverOpen(false);
-                        setEditFlyoutVisible(true);
-                      }}
+    rule && (
+      <ObservabilityPageTemplate
+        pageHeader={{
+          pageTitle: <PageTitle rule={rule} />,
+          bottomBorder: false,
+          rightSideItems: hasEditButton
+            ? [
+                <EuiFlexGroup direction="rowReverse" alignItems="center">
+                  <EuiFlexItem>
+                    <EuiPopover
+                      id="contextRuleEditMenu"
+                      isOpen={isRuleEditPopoverOpen}
+                      closePopover={() => setIsRuleEditPopoverOpen(false)}
+                      button={
+                        <EuiButtonIcon
+                          display="base"
+                          size="m"
+                          iconType="boxesHorizontal"
+                          aria-label="More"
+                          onClick={() => setIsRuleEditPopoverOpen(true)}
+                        />
+                      }
                     >
-                      <EuiText size="m">
-                        {i18n.translate('xpack.observability.ruleDetails.editRule', {
-                          defaultMessage: 'Edit rule',
+                      <EuiButtonEmpty
+                        size="m"
+                        iconType="pencil"
+                        onClick={() => {
+                          setIsRuleEditPopoverOpen(false);
+                          setEditFlyoutVisible(true);
+                        }}
+                      >
+                        <EuiText size="m">
+                          {i18n.translate('xpack.observability.ruleDetails.editRule', {
+                            defaultMessage: 'Edit rule',
+                          })}
+                        </EuiText>
+                      </EuiButtonEmpty>
+                    </EuiPopover>
+                  </EuiFlexItem>
+                  <EuiSpacer size="s" />
+                  <EuiFlexItem>
+                    <EuiTitle size="xxs">
+                      <EuiFlexItem>
+                        {i18n.translate('xpack.observability.ruleDetails.triggreAction.status', {
+                          defaultMessage: 'Status',
                         })}
-                      </EuiText>
-                    </EuiButtonEmpty>
-                  </EuiPopover>
-                </EuiFlexItem>
-                <EuiSpacer size="s" />
-                <EuiFlexItem>
-                  <EuiTitle size="xxs">
-                    <EuiFlexItem>
-                      {i18n.translate('xpack.observability.ruleDetails.triggreAction.status', {
-                        defaultMessage: 'Status',
-                      })}
-                    </EuiFlexItem>
-                  </EuiTitle>
+                      </EuiFlexItem>
+                    </EuiTitle>
 
-                  {triggersActionsUi.getRuleStatusDropdown({
-                    rule,
-                    enableRule: async () => await enableRule({ http, id: rule.id }),
-                    disableRule: async () => await disableRule({ http, id: rule.id }),
-                    onRuleChanged: () => reloadRule(),
-                    isEditable: hasEditButton,
-                    snoozeRule: async (snoozeEndTime: string | -1) => {
-                      await snoozeRule({ http, id: rule.id, snoozeEndTime });
-                    },
-                    unsnoozeRule: async () => await unsnoozeRule({ http, id: rule.id }),
+                    {triggersActionsUi.getRuleStatusDropdown({
+                      rule,
+                      enableRule: async () => await enableRule({ http, id: rule.id }),
+                      disableRule: async () => await disableRule({ http, id: rule.id }),
+                      onRuleChanged: () => reloadRule(),
+                      isEditable: hasEditButton,
+                      snoozeRule: async (snoozeEndTime: string | -1) => {
+                        await snoozeRule({ http, id: rule.id, snoozeEndTime });
+                      },
+                      unsnoozeRule: async () => await unsnoozeRule({ http, id: rule.id }),
+                    })}
+                  </EuiFlexItem>
+                </EuiFlexGroup>,
+              ]
+            : [],
+        }}
+      >
+        <EuiFlexGroup wrap={true}>
+          {/* Left side of Rule Summary */}
+          <EuiFlexItem grow={1}>
+            <EuiPanel
+              color={getColorStatusBased(rule.executionStatus.status)}
+              hasBorder={false}
+              paddingSize={'l'}
+            >
+              <EuiFlexGroup direction="column">
+                <EuiFlexItem>
+                  <EuiTitle size="m">
+                    <EuiHealth
+                      textSize="inherit"
+                      color={getColorStatusBased(rule.executionStatus.status)}
+                    >
+                      {rule.executionStatus.status.charAt(0).toUpperCase() +
+                        rule.executionStatus.status.slice(1)}
+                    </EuiHealth>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiSpacer size="l" />
+                <EuiFlexGroup>
+                  <ItemTitleRuleSummary
+                    translationKey="xpack.observability.ruleDetails.lastRun"
+                    defaultMessage="Last Run"
+                  />
+                  <ItemValueRuleSummary
+                    extraSpace={false}
+                    itemValue={moment(rule.executionStatus.lastExecutionDate).fromNow()}
+                  />
+                </EuiFlexGroup>
+                <EuiSpacer size="xl" />
+
+                <EuiHorizontalRule margin="none" />
+                <EuiSpacer size="s" />
+
+                <EuiFlexGroup>
+                  <ItemTitleRuleSummary
+                    translationKey="xpack.observability.ruleDetails.last24hAlerts"
+                    defaultMessage="Alerts (last 24 h)"
+                  />
+                  {/* TODO: Get all the Alerts not only the Active ones */}
+                  <ItemValueRuleSummary extraSpace={false} itemValue={String(alerts.length)} />
+                </EuiFlexGroup>
+                <EuiSpacer size="l" />
+                <EuiSpacer size="l" />
+              </EuiFlexGroup>
+            </EuiPanel>
+          </EuiFlexItem>
+
+          {/* Right side of Rule Summary */}
+
+          <EuiFlexItem grow={3}>
+            <EuiPanel color="subdued" hasBorder={false} paddingSize={'l'}>
+              <EuiTitle>
+                <EuiFlexItem>
+                  {i18n.translate('xpack.observability.ruleDetails.definition', {
+                    defaultMessage: 'Definition',
                   })}
                 </EuiFlexItem>
-              </EuiFlexGroup>,
-            ]
-          : [],
-      }}
-    >
-      <EuiFlexGroup wrap={true}>
-        {/* Left side of Rule Summary */}
-        <EuiFlexItem grow={1}>
-          <EuiPanel color={getColorStatusBased(status)} hasBorder={false} paddingSize={'l'}>
-            <EuiFlexGroup direction="column">
-              <EuiFlexItem>
-                <EuiTitle size="m">
-                  <EuiHealth textSize="inherit" color={getColorStatusBased(status)}>
-                    {status.charAt(0).toUpperCase() + status.slice(1)}
-                  </EuiHealth>
-                </EuiTitle>
-              </EuiFlexItem>
+              </EuiTitle>
+
               <EuiSpacer size="l" />
-              <EuiFlexGroup>
-                <ItemTitleRuleSummary
-                  translationKey="xpack.observability.ruleDetails.lastRun"
-                  defaultMessage="Last Run"
-                />
-                <ItemValueRuleSummary
-                  extraSpace={false}
-                  itemValue={moment(lastExecutionDate).fromNow()}
-                />
+
+              <EuiFlexGroup alignItems="baseline">
+                <EuiFlexItem>
+                  <EuiFlexGroup>
+                    <ItemTitleRuleSummary
+                      translationKey="xpack.observability.ruleDetails.ruleType"
+                      defaultMessage="Rule type"
+                    />
+                    <ItemValueRuleSummary itemValue={rule.ruleTypeId} />
+                  </EuiFlexGroup>
+
+                  <EuiSpacer size="l" />
+
+                  <EuiFlexGroup alignItems="flexStart">
+                    <ItemTitleRuleSummary
+                      translationKey="xpack.observability.ruleDetails.description"
+                      defaultMessage="Description"
+                    />
+                    <ItemValueRuleSummary
+                      itemValue={ruleTypeRegistry.get(rule.ruleTypeId).description}
+                    />
+                  </EuiFlexGroup>
+
+                  <EuiSpacer size="l" />
+
+                  <EuiFlexGroup justifyContent="flexStart">
+                    <ItemTitleRuleSummary
+                      translationKey="xpack.observability.ruleDetails.conditions"
+                      defaultMessage="Conditions"
+                    />
+                    <EuiFlexItem grow={3}>
+                      <EuiText size="m">
+                        {hasEditButton ? (
+                          <EuiButtonEmpty onClick={() => setEditFlyoutVisible(true)}>
+                            {getRuleConditionsWording()}
+                          </EuiButtonEmpty>
+                        ) : (
+                          <EuiText>{getRuleConditionsWording()}</EuiText>
+                        )}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+
+                  <EuiSpacer size="l" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFlexGroup>
+                    <ItemTitleRuleSummary
+                      translationKey="xpack.observability.ruleDetails.runsEvery"
+                      defaultMessage="Runs every"
+                    />
+
+                    {/* TODO:  format interval*/}
+                    <ItemValueRuleSummary itemValue={rule.schedule.interval} />
+                  </EuiFlexGroup>
+
+                  <EuiSpacer size="l" />
+
+                  <EuiFlexGroup>
+                    <ItemTitleRuleSummary
+                      translationKey="xpack.observability.ruleDetails.notifyWhen"
+                      defaultMessage="Notify"
+                    />
+
+                    <ItemValueRuleSummary itemValue={String(rule.notifyWhen)} />
+                  </EuiFlexGroup>
+
+                  <EuiSpacer size="l" />
+                  <EuiFlexGroup alignItems="baseline">
+                    <ItemTitleRuleSummary
+                      translationKey="xpack.observability.ruleDetails.actions"
+                      defaultMessage="Actions"
+                    />
+                    <EuiFlexItem grow={3}>
+                      <Actions actions={rule.actions} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
               </EuiFlexGroup>
-              <EuiSpacer size="xl" />
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-              <EuiHorizontalRule margin="none" />
-              <EuiSpacer size="s" />
-
-              <EuiFlexGroup>
-                <ItemTitleRuleSummary
-                  translationKey="xpack.observability.ruleDetails.last24hAlerts"
-                  defaultMessage="Alerts (last 24 h)"
-                />
-                {/* TODO: Get all the Alerts not only the Active ones */}
-                <ItemValueRuleSummary extraSpace={false} itemValue={String(alerts.length)} />
-              </EuiFlexGroup>
-              <EuiSpacer size="l" />
-              <EuiSpacer size="l" />
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-
-        {/* Right side of Rule Summary */}
-
-        <EuiFlexItem grow={3}>
-          <EuiPanel color="subdued" hasBorder={false} paddingSize={'l'}>
-            <EuiTitle>
-              <EuiFlexItem>
-                {i18n.translate('xpack.observability.ruleDetails.definition', {
-                  defaultMessage: 'Definition',
-                })}
-              </EuiFlexItem>
-            </EuiTitle>
-
-            <EuiSpacer size="l" />
-
-            <EuiFlexGroup alignItems="baseline">
-              <EuiFlexItem>
-                <EuiFlexGroup>
-                  <ItemTitleRuleSummary
-                    translationKey="xpack.observability.ruleDetails.ruleType"
-                    defaultMessage="Rule type"
-                  />
-                  <ItemValueRuleSummary itemValue={ruleTypeId} />
-                </EuiFlexGroup>
-
-                <EuiSpacer size="l" />
-
-                <EuiFlexGroup alignItems="flexStart">
-                  <ItemTitleRuleSummary
-                    translationKey="xpack.observability.ruleDetails.description"
-                    defaultMessage="Description"
-                  />
-                  <ItemValueRuleSummary itemValue={description} />
-                </EuiFlexGroup>
-
-                <EuiSpacer size="l" />
-
-                <EuiFlexGroup justifyContent="flexStart">
-                  <ItemTitleRuleSummary
-                    translationKey="xpack.observability.ruleDetails.conditions"
-                    defaultMessage="Conditions"
-                  />
-                  <EuiFlexItem grow={3}>
-                    <EuiText size="m">
-                      {hasEditButton ? (
-                        <EuiButtonEmpty onClick={() => setEditFlyoutVisible(true)}>
-                          {getRuleConditionsWording()}
-                        </EuiButtonEmpty>
-                      ) : (
-                        <EuiText>{getRuleConditionsWording()}</EuiText>
-                      )}
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-
-                <EuiSpacer size="l" />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup>
-                  <ItemTitleRuleSummary
-                    translationKey="xpack.observability.ruleDetails.runsEvery"
-                    defaultMessage="Runs every"
-                  />
-
-                  {/* TODO:  format interval*/}
-                  <ItemValueRuleSummary itemValue={interval} />
-                </EuiFlexGroup>
-
-                <EuiSpacer size="l" />
-
-                <EuiFlexGroup>
-                  <ItemTitleRuleSummary
-                    translationKey="xpack.observability.ruleDetails.notifyWhen"
-                    defaultMessage="Notify"
-                  />
-
-                  <ItemValueRuleSummary itemValue={String(notifyWhen)} />
-                </EuiFlexGroup>
-
-                <EuiSpacer size="l" />
-                <EuiFlexGroup alignItems="baseline">
-                  <ItemTitleRuleSummary
-                    translationKey="xpack.observability.ruleDetails.actions"
-                    defaultMessage="Actions"
-                  />
-                  <EuiFlexItem grow={3}>
-                    <Actions actions={actions} />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {editFlyoutVisible && <EditAlertFlyout />}
-      {errorRule &&
-        toasts.addDanger({
-          title: errorRule,
-        })}
-      <EuiSpacer size="l" />
-      <EuiTabbedContent data-test-subj="ruleDetailsTabbedContent" tabs={tabs} />
-    </ObservabilityPageTemplate>
+        <EuiSpacer size="l" />
+        <EuiTabbedContent data-test-subj="ruleDetailsTabbedContent" tabs={tabs} />
+        {editFlyoutVisible &&
+          triggersActionsUi.getEditAlertFlyout({
+            initialRule: rule,
+            onClose: () => {
+              setEditFlyoutVisible(false);
+            },
+            onSave: reloadRule,
+          })}
+      </ObservabilityPageTemplate>
+    )
   );
 }
 

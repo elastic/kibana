@@ -8,12 +8,13 @@
 import { useEffect, useState, useCallback } from 'react';
 import { loadRuleSummary } from '@kbn/triggers-actions-ui-plugin/public';
 import { FetchRuleSummaryProps, FetchRuleSummary } from '../pages/rule_details/types';
+import { RULE_LOAD_ERROR } from '../pages/rule_details/translations';
 
 export function useFetchRuleSummary({ ruleId, http }: FetchRuleSummaryProps) {
   const [ruleSummary, setRuleSummary] = useState<FetchRuleSummary>({
-    isLoadingRuleSummary: false,
-    ruleSummary: null,
-    errorRuleSummary: false,
+    isLoadingRuleSummary: true,
+    ruleSummary: undefined,
+    errorRuleSummary: undefined,
   });
 
   const fetchRuleSummary = useCallback(async () => {
@@ -24,17 +25,19 @@ export function useFetchRuleSummary({ ruleId, http }: FetchRuleSummaryProps) {
         http,
         ruleId,
       });
-      setRuleSummary({
-        isLoadingRuleSummary: false,
+      setRuleSummary((oldState: FetchRuleSummary) => ({
+        ...oldState,
+        isLoading: false,
         ruleSummary: response,
-        errorRuleSummary: false,
-      });
+      }));
     } catch (error) {
-      setRuleSummary({
-        isLoadingRuleSummary: false,
-        ruleSummary: null,
-        errorRuleSummary: error,
-      });
+      setRuleSummary((oldState: FetchRuleSummary) => ({
+        ...oldState,
+        isLoading: false,
+        errorRuleSummary: RULE_LOAD_ERROR(
+          error instanceof Error ? error.message : typeof error === 'string' ? error : ''
+        ),
+      }));
     }
   }, [ruleId, http]);
   useEffect(() => {
