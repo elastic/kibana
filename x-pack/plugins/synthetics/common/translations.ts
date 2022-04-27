@@ -22,17 +22,32 @@ export const VALUE_MUST_BE_AN_INTEGER = i18n.translate(
 );
 
 export const MonitorStatusTranslations = {
-  defaultActionMessage: i18n.translate('xpack.uptime.alerts.monitorStatus.defaultActionMessage', {
-    defaultMessage:
-      'Monitor {monitorName} with url {monitorUrl} from {observerLocation} {statusMessage} The latest error message is {latestErrorMessage}',
-    values: {
-      monitorName: '{{context.monitorName}}',
-      monitorUrl: '{{{context.monitorUrl}}}',
-      statusMessage: '{{{context.statusMessage}}}',
-      latestErrorMessage: '{{{context.latestErrorMessage}}}',
-      observerLocation: '{{context.observerLocation}}',
-    },
-  }),
+  defaultActionMessage: i18n.translate(
+    'xpack.synthetics.alerts.monitorStatus.defaultActionMessage',
+    {
+      defaultMessage:
+        'Monitor {monitorName} with url {monitorUrl} from {observerLocation} {statusMessage} The latest error message is {latestErrorMessage}',
+      values: {
+        monitorName: '{{context.monitorName}}',
+        monitorUrl: '{{{context.monitorUrl}}}',
+        statusMessage: '{{{context.statusMessage}}}',
+        latestErrorMessage: '{{{context.latestErrorMessage}}}',
+        observerLocation: '{{context.observerLocation}}',
+      },
+    }
+  ),
+  defaultRecoveryMessage: i18n.translate(
+    'xpack.synthetics.alerts.monitorStatus.defaultRecoveryMessage',
+    {
+      defaultMessage:
+        'Alert for monitor {monitorName} with url {monitorUrl} from {observerLocation} has recovered',
+      values: {
+        monitorName: '{{context.monitorName}}',
+        monitorUrl: '{{{context.monitorUrl}}}',
+        observerLocation: '{{context.observerLocation}}',
+      },
+    }
+  ),
   name: i18n.translate('xpack.synthetics.alerts.monitorStatus.clientName', {
     defaultMessage: 'Uptime monitor status',
   }),
@@ -43,13 +58,19 @@ export const MonitorStatusTranslations = {
 
 export const TlsTranslations = {
   defaultActionMessage: i18n.translate('xpack.synthetics.alerts.tls.defaultActionMessage', {
-    defaultMessage: `Detected TLS certificate {commonName} from issuer {issuer} is {status}. Certificate {summary}
-`,
+    defaultMessage: `Detected TLS certificate {commonName} from issuer {issuer} is {status}. Certificate {summary}`,
     values: {
       commonName: '{{context.commonName}}',
       issuer: '{{context.issuer}}',
       summary: '{{context.summary}}',
       status: '{{context.status}}',
+    },
+  }),
+  defaultRecoveryMessage: i18n.translate('xpack.synthetics.alerts.tls.defaultRecoveryMessage', {
+    defaultMessage: `Alert for TLS certificate {commonName} from issuer {issuer} has recovered`,
+    values: {
+      commonName: '{{context.commonName}}',
+      issuer: '{{context.issuer}}',
     },
   }),
   name: i18n.translate('xpack.synthetics.alerts.tls.clientName', {
@@ -107,6 +128,19 @@ Response times as high as {slowestAnomalyResponse} have been detected from locat
         slowestAnomalyResponse: '{{context.slowestAnomalyResponse}}',
         expectedResponseTime: '{{context.expectedResponseTime}}',
         severityScore: '{{context.severityScore}}',
+        observerLocation: '{{context.observerLocation}}',
+      },
+    }
+  ),
+  defaultRecoveryMessage: i18n.translate(
+    'xpack.synthetics.alerts.durationAnomaly.defaultRecoveryMessage',
+    {
+      defaultMessage: `Alert for abnormal ({severity} level) response time detected on monitor {monitor} with url {monitorUrl} from location {observerLocation} at {anomalyStartTimestamp} has recovered`,
+      values: {
+        severity: '{{context.severity}}',
+        anomalyStartTimestamp: '{{context.anomalyStartTimestamp}}',
+        monitor: '{{context.monitor}}',
+        monitorUrl: '{{{context.monitorUrl}}}',
         observerLocation: '{{context.observerLocation}}',
       },
     }
