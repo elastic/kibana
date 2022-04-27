@@ -13,19 +13,8 @@ import { useApmRouter } from '../../hooks/use_apm_router';
 import { truncate } from '../../utils/style';
 import { ApmRoutes } from '../routing/apm_route_config';
 import { SpanIcon } from './span_icon';
-import { TruncateWithoutTooltip } from './truncate_without_tooltip';
 
 const StyledLink = euiStyled(EuiLink)`min-width: 0`;
-
-const truncateAnchorClassname = '_apm_truncate_anchor_';
-
-const TruncationWrapper = euiStyled.div`
-  width: 50px;
-  .${truncateAnchorClassname} {
-    width: 100% !important;
-    display: block !important;
-  }
-`;
 
 interface BackendLinkProps {
   query: TypeOf<ApmRoutes, '/backends/overview'>['query'];
@@ -53,13 +42,8 @@ export function BackendLink({
         <EuiFlexItem grow={false}>
           <SpanIcon type={type} subtype={subtype} />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <TruncationWrapper>
-            <TruncateWithoutTooltip
-              text={query.backendName}
-              content={query.backendName}
-            />
-          </TruncationWrapper>
+        <EuiFlexItem className="eui-textTruncate">
+          <span className="eui-textTruncate">{query.backendName}</span>
         </EuiFlexItem>
       </EuiFlexGroup>
     </StyledLink>

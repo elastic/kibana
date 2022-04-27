@@ -14,19 +14,8 @@ import { useApmRouter } from '../../hooks/use_apm_router';
 import { AgentIcon } from './agent_icon';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { ApmRoutes } from '../routing/apm_route_config';
-import { TruncateWithoutTooltip } from './truncate_without_tooltip';
 
 const StyledLink = euiStyled(EuiLink)`min-width: 0;`;
-
-const truncateAnchorClassname = '_apm_truncate_anchor_';
-
-const TruncationWrapper = euiStyled.div`
-  width: 175px;
-  .${truncateAnchorClassname} {
-    width: 100% !important;
-    display: block !important;
-  }
-`;
 
 interface ServiceLinkProps {
   agentName?: AgentName;
@@ -53,10 +42,8 @@ export function ServiceLink({
         <EuiFlexItem grow={false}>
           <AgentIcon agentName={agentName} />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <TruncationWrapper>
-            <TruncateWithoutTooltip text={serviceName} content={serviceName} />
-          </TruncationWrapper>
+        <EuiFlexItem className="eui-textTruncate">
+          <span className="eui-textTruncate">{serviceName}</span>
         </EuiFlexItem>
       </EuiFlexGroup>
     </StyledLink>
