@@ -24,6 +24,7 @@ import {
   Settings,
 } from '@elastic/charts';
 import { useChartTheme } from '@kbn/observability-plugin/public';
+import { isEmpty } from 'lodash';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
@@ -186,13 +187,31 @@ export function StorageExplorer() {
   if (requestFailed) {
     return (
       <EuiEmptyPrompt
+        iconType="gear"
+        title={
+          <h2>
+            {i18n.translate(
+              'xpack.apm.settings.storageExplorer.loadingPromptTitle',
+              {
+                defaultMessage: 'Could not load storage explorer',
+              }
+            )}
+          </h2>
+        }
+      />
+    );
+  }
+
+  if (items && isEmpty(items)) {
+    return (
+      <EuiEmptyPrompt
         iconType="alert"
         title={
           <h2>
             {i18n.translate(
-              'xpack.apm.settings.storageExplorer.errorPromptTitle',
+              'xpack.apm.settings.storageExplorer.emptyPromptTitle',
               {
-                defaultMessage: 'Could not load storage explorer.',
+                defaultMessage: 'There are no data for storage explorer',
               }
             )}
           </h2>
