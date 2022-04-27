@@ -8,12 +8,8 @@
 
 import moment from 'moment';
 import type { Logger } from '@kbn/logging';
-import {
-  ISavedObjectsRepository,
-  SavedObject,
-  SavedObjectsErrorHelpers,
-} from '../../../../../../core/server';
-import { getDailyId } from '../../../../../usage_collection/common/application_usage';
+import { ISavedObjectsRepository, SavedObject, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { getDailyId } from '@kbn/usage-collection-plugin/common/application_usage';
 import {
   ApplicationUsageDaily,
   ApplicationUsageTransactional,

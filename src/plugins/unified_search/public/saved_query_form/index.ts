@@ -7,5 +7,5 @@
  */
 
 // @internal
-export type { SavedQueryMeta } from '../saved_query_form/save_query_form';
-export { SaveQueryForm } from '../saved_query_form/save_query_form';
+export type { SavedQueryMeta } from './save_query_form';
+export { SaveQueryForm } from './save_query_form';

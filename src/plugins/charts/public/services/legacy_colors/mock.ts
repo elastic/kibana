@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { coreMock } from '@kbn/core/public/mocks';
 import { LegacyColorsService } from './colors';
-import { coreMock } from '../../../../../core/public/mocks';
 
 const colors = new LegacyColorsService();
 colors.init(coreMock.createSetup().uiSettings);

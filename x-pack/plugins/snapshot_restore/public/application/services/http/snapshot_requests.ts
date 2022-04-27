@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpFetchQuery } from 'kibana/public';
+import { HttpFetchQuery } from '@kbn/core/public';
 import { API_BASE_PATH } from '../../../../common';
 import { UIM_SNAPSHOT_DELETE, UIM_SNAPSHOT_DELETE_MANY } from '../../constants';
 import { SnapshotListParams } from '../../lib';

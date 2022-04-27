@@ -6,7 +6,10 @@
  */
 
 import { Dictionary } from 'lodash';
-import { KibanaRequest, Logger } from 'kibana/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { IEventLogger } from '@kbn/event-log-plugin/server';
+import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import {
   ActionGroup,
   RuleAction,
@@ -15,30 +18,31 @@ import {
   RuleTypeParams,
   RuleTypeState,
   IntervalSchedule,
-  RuleExecutionState,
   RuleMonitoring,
   RuleTaskState,
   SanitizedRule,
 } from '../../common';
-import { ConcreteTaskInstance } from '../../../task_manager/server';
 import { Alert } from '../alert';
-import { IEventLogger } from '../../../event_log/server';
 import { NormalizedRuleType } from '../rule_type_registry';
 import { ExecutionHandler } from './create_execution_handler';
-import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
 import { RawRule } from '../types';
-
-export interface RuleTaskRunResultWithActions {
-  state: RuleExecutionState;
-  monitoring: RuleMonitoring | undefined;
-  schedule: IntervalSchedule | undefined;
-}
+import { ActionsConfigMap } from '../lib/get_actions_config_map';
+import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 
 export interface RuleTaskRunResult {
   state: RuleTaskState;
   monitoring: RuleMonitoring | undefined;
   schedule: IntervalSchedule | undefined;
 }
+
+// This is the state of the alerting task after rule execution, which includes run metrics plus the task state
+export type RuleTaskStateAndMetrics = RuleTaskState & {
+  metrics: RuleRunMetrics;
+};
+
+export type RuleRunResult = Pick<RuleTaskRunResult, 'monitoring' | 'schedule'> & {
+  stateWithMetrics: RuleTaskStateAndMetrics;
+};
 
 export interface RuleTaskInstance extends ConcreteTaskInstance {
   state: RuleTaskState;
@@ -80,6 +84,7 @@ export interface GenerateNewAndRecoveredAlertEventsParams<
   >;
   rule: SanitizedRule<RuleTypeParams>;
   spaceId: string;
+  ruleRunMetricsStore: RuleRunMetricsStore;
 }
 
 export interface ScheduleActionsForRecoveredAlertsParams<
@@ -93,7 +98,7 @@ export interface ScheduleActionsForRecoveredAlertsParams<
   executionHandler: ExecutionHandler<RecoveryActionGroupId | RecoveryActionGroupId>;
   mutedAlertIdsSet: Set<string>;
   ruleLabel: string;
-  alertExecutionStore: AlertExecutionStore;
+  ruleRunMetricsStore: RuleRunMetricsStore;
 }
 
 export interface LogActiveAndRecoveredAlertsParams<
@@ -145,6 +150,7 @@ export interface CreateExecutionHandlerOptions<
   ruleParams: RuleTypeParams;
   supportsEphemeralTasks: boolean;
   maxEphemeralActionsPerRule: number;
+  actionsConfigMap: ActionsConfigMap;
 }
 
 export interface ExecutionHandlerOptions<ActionGroupIds extends string> {
@@ -153,16 +159,5 @@ export interface ExecutionHandlerOptions<ActionGroupIds extends string> {
   alertId: string;
   context: AlertInstanceContext;
   state: AlertInstanceState;
-  alertExecutionStore: AlertExecutionStore;
-}
-
-export enum ActionsCompletion {
-  COMPLETE = 'complete',
-  PARTIAL = 'partial',
-}
-
-export interface AlertExecutionStore {
-  numberOfTriggeredActions: number;
-  numberOfScheduledActions: number;
-  triggeredActionsStatus: ActionsCompletion;
+  ruleRunMetricsStore: RuleRunMetricsStore;
 }

@@ -12,14 +12,15 @@ import './jest.mocks';
 import React, { FunctionComponent } from 'react';
 import { merge } from 'lodash';
 
-import { notificationServiceMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
-import { dataPluginMock } from '../../../../data/public/mocks';
+import { defer } from 'rxjs';
+import { notificationServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { fieldFormatsMock as fieldFormats } from '@kbn/field-formats-plugin/common/mocks';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { FieldEditorProvider, Context } from '../../../public/components/field_editor_context';
 import { FieldPreviewProvider } from '../../../public/components/preview';
 import { initApi, ApiService } from '../../../public/lib';
 import { init as initHttpRequests } from './http_requests';
-import { fieldFormatsMock as fieldFormats } from '../../../../field_formats/common/mocks';
-import { FieldFormat } from '../../../../field_formats/common';
 
 const dataStart = dataPluginMock.createStartContract();
 const { search } = dataStart;
@@ -36,22 +37,20 @@ export const setSearchResponseLatency = (ms: number) => {
 };
 
 spySearchQuery.mockImplementation(() => {
-  return {
-    toPromise: () => {
-      if (searchResponseDelay === 0) {
-        // no delay, it is synchronous
-        return spySearchQueryResponse();
-      }
+  return defer(() => {
+    if (searchResponseDelay === 0) {
+      // no delay, it is synchronous
+      return spySearchQueryResponse();
+    }
 
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve(undefined);
-        }, searchResponseDelay);
-      }).then(() => {
-        return spySearchQueryResponse();
-      });
-    },
-  };
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(undefined);
+      }, searchResponseDelay);
+    }).then(() => {
+      return spySearchQueryResponse();
+    });
+  });
 });
 search.search = spySearchQuery;
 

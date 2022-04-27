@@ -27,27 +27,22 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { compact, debounce, isEqual, isFunction } from 'lodash';
-import { Toast } from '../../../../core/public';
-import {
-  IDataPluginServices,
-  Query,
-  QuerySuggestion,
-  QuerySuggestionTypes,
-  getQueryLog,
-} from '../../../data/public';
-import { DataView } from '../../../data_views/public';
+import { Toast } from '@kbn/core/public';
+import { IDataPluginServices, Query, getQueryLog } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import type { PersistedLog } from '@kbn/data-plugin/public';
+import { getFieldSubtypeNested, KIBANA_USER_QUERY_LANGUAGE_KEY } from '@kbn/data-plugin/common';
+import { KibanaReactContextValue, toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { matchPairs } from './match_pairs';
 import { toUser } from './to_user';
 import { fromUser } from './from_user';
-import type { PersistedLog } from '../../../data/public';
-import { getFieldSubtypeNested, KIBANA_USER_QUERY_LANGUAGE_KEY } from '../../../data/common';
-import { KibanaReactContextValue, toMountPoint } from '../../../kibana_react/public';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
 import type { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '../typeahead';
 import { onRaf } from '../utils';
-import { getTheme } from '../services';
+import { QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
+import { getTheme, getAutocomplete } from '../services';
 
 export interface QueryStringInputProps {
   indexPatterns: Array<DataView | string>;
@@ -201,7 +196,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
     const queryString = this.getQueryString();
 
     const recentSearchSuggestions = this.getRecentSearchSuggestions(queryString);
-    const hasQuerySuggestions = this.services.data.autocomplete.hasQuerySuggestions(language);
+    const hasQuerySuggestions = getAutocomplete().hasQuerySuggestions(language);
 
     if (
       !hasQuerySuggestions ||
@@ -222,7 +217,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
       if (this.abortController) this.abortController.abort();
       this.abortController = new AbortController();
       const suggestions =
-        (await this.services.data.autocomplete.getQuerySuggestions({
+        (await getAutocomplete().getQuerySuggestions({
           language,
           indexPatterns,
           query: queryString,

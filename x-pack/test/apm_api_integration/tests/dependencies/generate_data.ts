@@ -37,7 +37,7 @@ export async function generateData({
     timerange(start, end)
       .interval('1m')
       .rate(rate)
-      .spans((timestamp) =>
+      .generator((timestamp) =>
         instance
           .transaction(transaction.name)
           .timestamp(timestamp)
@@ -51,7 +51,6 @@ export async function generateData({
               .destination(span.destination)
               .timestamp(timestamp)
           )
-          .serialize()
       )
   );
 }

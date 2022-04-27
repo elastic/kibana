@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObject, Logger } from 'src/core/server';
+import { ElasticsearchClient, SavedObject, Logger } from '@kbn/core/server';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
-import { Alert } from '../../../../../alerting/server';
+import { Alert } from '@kbn/alerting-plugin/server';
 import { RuleParams } from '../schemas/rule_schemas';
-import { deconflictSignalsAndResults, getNotificationResultsLink } from '../notifications/utils';
+import { deconflictSignalsAndResults, getNotificationResultsLink } from './utils';
 import { DEFAULT_RULE_NOTIFICATION_QUERY_SIZE } from '../../../../common/constants';
-import { getSignals } from '../notifications/get_signals';
+import { getSignals } from './get_signals';
 import {
   NotificationRuleTypeParams,
   scheduleNotificationActions,

@@ -15,7 +15,7 @@
 
 import { CaseAttributes, CaseConnector, CaseFullExternalService } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
-import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import {
   SavedObject,
   SavedObjectReference,
@@ -23,8 +23,8 @@ import {
   SavedObjectsFindResult,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
-} from 'kibana/server';
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
+} from '@kbn/core/server';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
@@ -160,6 +160,7 @@ describe('CasesService', () => {
               "username": "elastic",
             },
             "description": "This is a brand new case of a bad meanie defacing data",
+            "duration": null,
             "owner": "securitySolution",
             "settings": Object {
               "syncAlerts": true,
@@ -500,6 +501,7 @@ describe('CasesService', () => {
               "username": "elastic",
             },
             "description": "This is a brand new case of a bad meanie defacing data",
+            "duration": null,
             "external_service": Object {
               "connector_name": ".jira",
               "external_id": "100",

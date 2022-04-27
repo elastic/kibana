@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import apmClusterFixture from './fixtures/cluster';
+import apmClusterFixture from './fixtures/cluster.json';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');

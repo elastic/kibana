@@ -9,7 +9,7 @@
 import _ from 'lodash';
 import expect from '@kbn/expect';
 
-import '../../plugins/core_provider_plugin/types';
+import '@kbn/core-provider-plugin/types';
 import { PluginFunctionalProviderContext } from '../../services';
 
 declare global {
@@ -85,11 +85,11 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // Ensure that your change does not unintentionally expose any sensitive values!
         'console.ui.enabled (boolean)',
         'dashboard.allowByValueEmbeddables (boolean)',
-        'data.autocomplete.querySuggestions.enabled (boolean)',
-        'data.autocomplete.valueSuggestions.enabled (boolean)',
-        'data.autocomplete.valueSuggestions.terminateAfter (duration)',
-        'data.autocomplete.valueSuggestions.tiers (array)',
-        'data.autocomplete.valueSuggestions.timeout (duration)',
+        'unifiedSearch.autocomplete.querySuggestions.enabled (boolean)',
+        'unifiedSearch.autocomplete.valueSuggestions.enabled (boolean)',
+        'unifiedSearch.autocomplete.valueSuggestions.terminateAfter (duration)',
+        'unifiedSearch.autocomplete.valueSuggestions.tiers (array)',
+        'unifiedSearch.autocomplete.valueSuggestions.timeout (duration)',
         'data.search.aggs.shardDelay.enabled (boolean)',
         'enterpriseSearch.host (string)',
         'home.disableWelcomeScreen (boolean)',
@@ -129,12 +129,14 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.allowChangingOptInStatus (boolean)',
         'telemetry.banner (boolean)',
         'telemetry.enabled (boolean)',
+        'telemetry.hidePrivacyStatement (boolean)',
         'telemetry.optIn (any)',
         'telemetry.sendUsageFrom (alternatives)',
         'telemetry.sendUsageTo (any)',
         'usageCollection.uiCounters.debug (boolean)',
         'usageCollection.uiCounters.enabled (boolean)',
         'vis_type_vega.enableExternalUrls (boolean)',
+        'xpack.actions.email.domain_allowlist (array)',
         'xpack.apm.profilingEnabled (boolean)',
         'xpack.apm.serviceMapEnabled (boolean)',
         'xpack.apm.ui.enabled (boolean)',

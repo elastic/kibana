@@ -106,7 +106,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('can discard unsaved changes using the discard link', async () => {
-      await PageObjects.dashboard.clickUnsavedChangesDiscard(dashboardTitle);
+      await PageObjects.dashboard.clickUnsavedChangesDiscard(
+        `discard-unsaved-${dashboardTitle.split(' ').join('-')}`
+      );
       await PageObjects.dashboard.expectUnsavedChangesDoesNotExist(dashboardTitle);
       await PageObjects.dashboard.loadSavedDashboard(dashboardTitle);
       await PageObjects.dashboard.switchToEditMode();
