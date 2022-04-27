@@ -103,6 +103,8 @@ describe('rule helpers', () => {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
           title: 'Titled timeline',
         },
+        newTermsFields: ['host.name'],
+        historyWindowSize: '7d',
       };
 
       const aboutRuleStepData: AboutStepRule = {
@@ -232,7 +234,7 @@ describe('rule helpers', () => {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
           title: 'Untitled timeline',
         },
-        new_terms_fields: [],
+        newTermsFields: [],
         historyWindowSize: '7d',
       };
 
@@ -276,6 +278,8 @@ describe('rule helpers', () => {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
           title: 'Untitled timeline',
         },
+        newTermsFields: [],
+        historyWindowSize: '7d',
       };
 
       expect(result).toEqual(expected);
