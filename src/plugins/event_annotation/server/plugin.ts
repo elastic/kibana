@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from 'kibana/server';
+import { CoreSetup, Plugin } from '@kbn/core/server';
+import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { manualEventAnnotation, eventAnnotationGroup } from '../common';
-import { ExpressionsServerSetup } from '../../expressions/server';
 
 interface SetupDependencies {
   expressions: ExpressionsServerSetup;

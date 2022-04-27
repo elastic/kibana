@@ -95,8 +95,8 @@
                 "pluginId": "alerting",
                 "scope": "common",
                 "docId": "kibAlertingPluginApi",
-                "section": "def-common.AlertTypeParams",
-                "text": "AlertTypeParams"
+                "section": "def-common.RuleTypeParams",
+                "text": "RuleTypeParams"
               },
               " = never>({ id, status, _version, index, }: ",
               "UpdateOptions",
@@ -142,8 +142,8 @@
                 "pluginId": "alerting",
                 "scope": "common",
                 "docId": "kibAlertingPluginApi",
-                "section": "def-common.AlertTypeParams",
-                "text": "AlertTypeParams"
+                "section": "def-common.RuleTypeParams",
+                "text": "RuleTypeParams"
               },
               " = never>({ ids, query, index, status, }: ",
               "BulkUpdateOptions",
@@ -187,8 +187,8 @@
                 "pluginId": "alerting",
                 "scope": "common",
                 "docId": "kibAlertingPluginApi",
-                "section": "def-common.AlertTypeParams",
-                "text": "AlertTypeParams"
+                "section": "def-common.RuleTypeParams",
+                "text": "RuleTypeParams"
               },
               " = never>({ query, aggs, _source, track_total_hits: trackTotalHits, size, index, }: { query?: object | undefined; aggs?: object | undefined; index: string | undefined; track_total_hits?: boolean | undefined; _source?: string[] | undefined; size?: number | undefined; }) => Promise<",
               "SearchResponse",
@@ -1136,16 +1136,16 @@
             "pluginId": "alerting",
             "scope": "common",
             "docId": "kibAlertingPluginApi",
-            "section": "def-common.AlertTypeParams",
-            "text": "AlertTypeParams"
+            "section": "def-common.RuleTypeParams",
+            "text": "RuleTypeParams"
           },
           " = never, State extends ",
           {
             "pluginId": "alerting",
             "scope": "common",
             "docId": "kibAlertingPluginApi",
-            "section": "def-common.AlertTypeState",
-            "text": "AlertTypeState"
+            "section": "def-common.RuleTypeState",
+            "text": "RuleTypeState"
           },
           " = never, InstanceState extends { [x: string]: unknown; } = never, InstanceContext extends { [x: string]: unknown; } = never, ActionGroupIds extends string = never>(wrappedExecutor: ",
           {
@@ -1160,8 +1160,8 @@
             "pluginId": "alerting",
             "scope": "server",
             "docId": "kibAlertingPluginApi",
-            "section": "def-server.AlertExecutorOptions",
-            "text": "AlertExecutorOptions"
+            "section": "def-server.RuleExecutorOptions",
+            "text": "RuleExecutorOptions"
           },
           "<Params, ",
           "WrappedLifecycleRuleState",
@@ -1236,8 +1236,8 @@
             "pluginId": "alerting",
             "scope": "common",
             "docId": "kibAlertingPluginApi",
-            "section": "def-common.AlertTypeParams",
-            "text": "AlertTypeParams"
+            "section": "def-common.RuleTypeParams",
+            "text": "RuleTypeParams"
           },
           ", TAlertInstanceContext extends { [x: string]: unknown; }, TServices extends { alertWithLifecycle: ",
           {
@@ -1339,16 +1339,16 @@
             "pluginId": "alerting",
             "scope": "common",
             "docId": "kibAlertingPluginApi",
-            "section": "def-common.AlertTypeParams",
-            "text": "AlertTypeParams"
+            "section": "def-common.RuleTypeParams",
+            "text": "RuleTypeParams"
           },
           ", TState extends ",
           {
             "pluginId": "alerting",
             "scope": "common",
             "docId": "kibAlertingPluginApi",
-            "section": "def-common.AlertTypeState",
-            "text": "AlertTypeState"
+            "section": "def-common.RuleTypeState",
+            "text": "RuleTypeState"
           },
           ", TInstanceContext extends { [x: string]: unknown; } = {}, TActionGroupIds extends string = never>(type: ",
           {
@@ -1363,8 +1363,8 @@
             "pluginId": "alerting",
             "scope": "server",
             "docId": "kibAlertingPluginApi",
-            "section": "def-server.AlertExecutorOptions",
-            "text": "AlertExecutorOptions"
+            "section": "def-server.RuleExecutorOptions",
+            "text": "RuleExecutorOptions"
           },
           "<TParams, TState, { [x: string]: unknown; }, TInstanceContext, ",
           {
@@ -1375,7 +1375,7 @@
             "text": "WithoutReservedActionGroups"
           },
           "<TActionGroupIds, never>>) => Promise<void | TState>; id: string; name: string; validate?: { params?: ",
-          "AlertTypeParamsValidator",
+          "RuleTypeParamsValidator",
           "<TParams> | undefined; } | undefined; cancelAlertsOnRuleTimeout?: boolean | undefined; config?: ",
           "RuleTypeConfig",
           " | undefined; actionGroups: ",
@@ -2548,7 +2548,9 @@
             "label": "createdAlerts",
             "description": [],
             "signature": [
-              "(T & { _id: string; _index: string; })[]"
+              "(T & ",
+              "CommonAlertFields800",
+              " & { _id: string; _index: string; })[]"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false
@@ -2861,16 +2863,16 @@
             "pluginId": "alerting",
             "scope": "common",
             "docId": "kibAlertingPluginApi",
-            "section": "def-common.AlertTypeParams",
-            "text": "AlertTypeParams"
+            "section": "def-common.RuleTypeParams",
+            "text": "RuleTypeParams"
           },
           ", TState extends ",
           {
             "pluginId": "alerting",
             "scope": "common",
             "docId": "kibAlertingPluginApi",
-            "section": "def-common.AlertTypeState",
-            "text": "AlertTypeState"
+            "section": "def-common.RuleTypeState",
+            "text": "RuleTypeState"
           },
           ", TInstanceContext extends { [x: string]: unknown; } = {}, TActionGroupIds extends string = never>(type: ",
           {
@@ -3027,16 +3029,16 @@
                 "pluginId": "alerting",
                 "scope": "server",
                 "docId": "kibAlertingPluginApi",
-                "section": "def-server.AlertExecutorOptions",
-                "text": "AlertExecutorOptions"
+                "section": "def-server.RuleExecutorOptions",
+                "text": "RuleExecutorOptions"
               },
               "<Params, State, InstanceState, InstanceContext, ActionGroupIds>, \"services\"> & { services: ",
               {
                 "pluginId": "alerting",
                 "scope": "server",
                 "docId": "kibAlertingPluginApi",
-                "section": "def-server.AlertServices",
-                "text": "AlertServices"
+                "section": "def-server.RuleExecutorServices",
+                "text": "RuleExecutorServices"
               },
               "<InstanceState, InstanceContext, ActionGroupIds> & ",
               {
@@ -3154,8 +3156,8 @@
             "pluginId": "alerting",
             "scope": "server",
             "docId": "kibAlertingPluginApi",
-            "section": "def-server.AlertExecutorOptions",
-            "text": "AlertExecutorOptions"
+            "section": "def-server.RuleExecutorOptions",
+            "text": "RuleExecutorOptions"
           },
           "<TParams, TState, { [x: string]: unknown; }, TInstanceContext, ",
           {
@@ -3508,7 +3510,41 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "ruleRegistry",
+        "id": "def-common.RuleRegistrySearchRequestPagination",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleRegistrySearchRequestPagination",
+        "description": [],
+        "path": "x-pack/plugins/rule_registry/common/search_strategy/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-common.RuleRegistrySearchRequestPagination.pageIndex",
+            "type": "number",
+            "tags": [],
+            "label": "pageIndex",
+            "description": [],
+            "path": "x-pack/plugins/rule_registry/common/search_strategy/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-common.RuleRegistrySearchRequestPagination.pageSize",
+            "type": "number",
+            "tags": [],
+            "label": "pageSize",
+            "description": [],
+            "path": "x-pack/plugins/rule_registry/common/search_strategy/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {
@@ -3561,7 +3597,13 @@
           "; } | undefined; sort?: ",
           "SortCombinations",
           "[] | undefined; pagination?: ",
-          "RuleRegistrySearchRequestPagination",
+          {
+            "pluginId": "ruleRegistry",
+            "scope": "common",
+            "docId": "kibRuleRegistryPluginApi",
+            "section": "def-common.RuleRegistrySearchRequestPagination",
+            "text": "RuleRegistrySearchRequestPagination"
+          },
           " | undefined; }"
         ],
         "path": "x-pack/plugins/rule_registry/common/search_strategy/index.ts",

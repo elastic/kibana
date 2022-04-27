@@ -22,8 +22,8 @@ describe('RuleStatusDropdown', () => {
     enableRule,
     snoozeRule,
     unsnoozeRule,
-    previousSnoozeInterval: null,
-    item: {
+    isEditable: true,
+    rule: {
       id: '1',
       name: 'test rule',
       tags: ['tag1'],
@@ -52,7 +52,7 @@ describe('RuleStatusDropdown', () => {
       index: 0,
       updatedAt: new Date('2020-08-20T19:23:38Z'),
       snoozeEndTime: null,
-    },
+    } as ComponentOpts['rule'],
     onRuleChanged: jest.fn(),
   };
 
@@ -74,7 +74,7 @@ describe('RuleStatusDropdown', () => {
 
   test('renders status control as disabled when rule is disabled', () => {
     const wrapper = mountWithIntl(
-      <RuleStatusDropdown {...{ ...props, item: { ...props.item, enabled: false } }} />
+      <RuleStatusDropdown {...{ ...props, rule: { ...props.rule, enabled: false } }} />
     );
     expect(wrapper.find('[data-test-subj="statusDropdown"]').first().props().title).toBe(
       'Disabled'
@@ -86,7 +86,7 @@ describe('RuleStatusDropdown', () => {
 
     const wrapper = mountWithIntl(
       <RuleStatusDropdown
-        {...{ ...props, item: { ...props.item, snoozeEndTime: SNOOZE_END_TIME } }}
+        {...{ ...props, rule: { ...props.rule, snoozeEndTime: SNOOZE_END_TIME } }}
       />
     );
     expect(wrapper.find('[data-test-subj="statusDropdown"]').first().props().title).toBe('Snoozed');
@@ -97,7 +97,7 @@ describe('RuleStatusDropdown', () => {
     jest.spyOn(global.Date, 'now').mockImplementation(() => new Date(NOW_STRING).valueOf());
 
     const wrapper = mountWithIntl(
-      <RuleStatusDropdown {...{ ...props, item: { ...props.item, muteAll: true } }} />
+      <RuleStatusDropdown {...{ ...props, rule: { ...props.rule, muteAll: true } }} />
     );
     expect(wrapper.find('[data-test-subj="statusDropdown"]').first().props().title).toBe('Snoozed');
     expect(wrapper.find('[data-test-subj="remainingSnoozeTime"]').first().text()).toBe(
@@ -108,11 +108,26 @@ describe('RuleStatusDropdown', () => {
   test('renders status control as disabled when rule is snoozed but also disabled', () => {
     const wrapper = mountWithIntl(
       <RuleStatusDropdown
-        {...{ ...props, item: { ...props.item, enabled: false, snoozeEndTime: SNOOZE_END_TIME } }}
+        {...{ ...props, rule: { ...props.rule, enabled: false, snoozeEndTime: SNOOZE_END_TIME } }}
       />
     );
     expect(wrapper.find('[data-test-subj="statusDropdown"]').first().props().title).toBe(
       'Disabled'
+    );
+  });
+
+  test('renders read-only status control when isEditable is false', () => {
+    const wrapper = mountWithIntl(
+      <RuleStatusDropdown
+        {...{
+          ...props,
+          rule: { ...props.rule, snoozeEndTime: SNOOZE_END_TIME },
+        }}
+        isEditable={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="statusDropdownReadonly"]').first().props().children).toBe(
+      'Enabled'
     );
   });
 });

@@ -44,6 +44,7 @@ export const SpaceListInternal = ({
   displayLimit = DEFAULT_DISPLAY_LIMIT,
   behaviorContext,
   listOnClick = () => {},
+  cursorStyle,
 }: SpaceListProps) => {
   const { spacesDataPromise } = useSpaces();
 
@@ -148,6 +149,9 @@ export const SpaceListInternal = ({
         </EuiToolTip>
       </EuiFlexItem>
     ) : null;
+  const styleProps = {
+    style: cursorStyle ? { cursor: cursorStyle } : undefined,
+  };
 
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
@@ -162,7 +166,7 @@ export const SpaceListInternal = ({
                 size={'s'}
                 onClick={listOnClick}
                 onKeyPress={listOnClick}
-                style={{ cursor: 'pointer' }}
+                {...styleProps}
               />
             </EuiFlexItem>
           );

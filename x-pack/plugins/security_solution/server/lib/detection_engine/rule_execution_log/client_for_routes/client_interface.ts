@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
+  ExecutionLogTableSortColumns,
   RuleExecutionEvent,
+  RuleExecutionStatusType,
   RuleExecutionSummary,
 } from '../../../../../common/detection_engine/schemas/common';
 import { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
@@ -16,11 +19,11 @@ export interface GetAggregateExecutionEventsArgs {
   start: string;
   end: string;
   queryText: string;
-  statusFilters: string[];
+  statusFilters: RuleExecutionStatusType[];
   page: number;
   perPage: number;
-  sortField: string;
-  sortOrder: string;
+  sortField: ExecutionLogTableSortColumns;
+  sortOrder: estypes.SortOrder;
 }
 
 /**

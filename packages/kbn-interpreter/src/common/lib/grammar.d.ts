@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-declare module '*/grammar' {
+declare module '*/grammar/built_grammar.js' {
   export const parse: import('./parse').Parse;
 }

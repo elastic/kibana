@@ -321,7 +321,7 @@ export const mockGlobalState: State = {
           end: '2020-07-08T08:20:18.966Z',
         },
         selectedEventIds: {},
-        sessionViewId: null,
+        sessionViewConfig: null,
         show: false,
         showCheckboxes: false,
         pinnedEventIds: {},

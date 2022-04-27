@@ -10,7 +10,7 @@ import {
   createStateContainer,
   IKbnUrlStateStorage,
   syncState,
-} from '../../../../kibana_utils/public';
+} from '@kbn/kibana-utils-plugin/public';
 import { QuerySetup, QueryStart } from '../query_service';
 import { connectToQueryState } from './connect_to_query_state';
 import { QueryState } from './types';

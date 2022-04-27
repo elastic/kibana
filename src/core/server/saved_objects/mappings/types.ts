@@ -107,6 +107,11 @@ export type SavedObjectsFieldMapping = estypes.MappingProperty & {
    * *never* use `dynamic: true`.
    */
   dynamic?: false | 'strict';
+  /**
+   * Some mapping types do not accept the `properties` attributes. Explicitly adding it as optional to our type
+   * to avoid type failures on all code using accessing them via `SavedObjectsFieldMapping.properties`.
+   */
+  properties?: Record<estypes.PropertyName, estypes.MappingProperty>;
 };
 
 /** @internal */

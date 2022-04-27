@@ -15,12 +15,16 @@ import { pluginServices } from '../../services';
 import { ControlEditorProps } from '../../types';
 import { OptionsListEmbeddableInput } from './types';
 import { OptionsListStrings } from './options_list_strings';
-import { DataViewListItem, DataView, DataViewField } from '../../../../data_views/common';
+import { DataViewListItem, DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import {
   LazyDataViewPicker,
   LazyFieldPicker,
   withSuspense,
-} from '../../../../presentation_util/public';
+} from '@kbn/presentation-util-plugin/public';
+import { pluginServices } from '../../services';
+import { ControlEditorProps } from '../../types';
+import { OptionsListEmbeddableInput } from './types';
+import { OptionsListStrings } from './options_list_strings';
 
 interface OptionsListEditorState {
   singleSelect?: boolean;
@@ -130,10 +134,13 @@ export const OptionsListEditor = ({
           selectedDataViewId={dataView?.id}
           onChangeDataViewId={(dataViewId) => {
             setLastUsedDataViewId?.(dataViewId);
+            if (dataViewId === dataView?.id) return;
+
             onChange({ dataViewId });
-            get(dataViewId).then((newDataView) =>
-              setState((s) => ({ ...s, dataView: newDataView }))
-            );
+            setState((s) => ({ ...s, fieldName: undefined }));
+            get(dataViewId).then((newDataView) => {
+              setState((s) => ({ ...s, dataView: newDataView }));
+            });
           }}
           trigger={{
             label: state.dataView?.title ?? OptionsListStrings.editor.getNoDataViewTitle(),

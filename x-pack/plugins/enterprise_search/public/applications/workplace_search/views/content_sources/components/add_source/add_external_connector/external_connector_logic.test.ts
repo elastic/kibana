@@ -21,7 +21,7 @@ jest.mock('../../../../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
 }));
 
-import { AddSourceLogic, SourceConfigData } from '../add_source_logic';
+import { SourceConfigData } from '../add_source_logic';
 
 import { ExternalConnectorLogic, ExternalConnectorValues } from './external_connector_logic';
 
@@ -190,16 +190,6 @@ describe('ExternalConnectorLogic', () => {
   });
 
   describe('listeners', () => {
-    describe('AddSourceLogic.actions.setSourceConfigData', () => {
-      it('dispatches success action', () => {
-        const fetchExternalSourceSuccess = jest.spyOn(
-          ExternalConnectorLogic.actions,
-          'fetchExternalSourceSuccess'
-        );
-        AddSourceLogic.actions.setSourceConfigData(sourceConfigData);
-        expect(fetchExternalSourceSuccess).toHaveBeenCalledWith(sourceConfigData);
-      });
-    });
     describe('fetchExternalSource', () => {
       it('retrieves config info on the "external" connector', () => {
         const promise = Promise.resolve();

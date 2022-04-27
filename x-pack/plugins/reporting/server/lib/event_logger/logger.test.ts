@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { ConcreteTaskInstance } from '../../../../task_manager/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { BasePayload } from '../../types';
 import { Report } from '../store';
 import { ReportingEventLogger, reportingEventLoggerFactory } from './logger';
@@ -175,7 +175,7 @@ describe('Event Logger', () => {
     expect([result.event, result.kibana.reporting, result.message]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "duration": 5500,
+          "duration": 5500000000,
           "timezone": "UTC",
         },
         Object {

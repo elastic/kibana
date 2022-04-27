@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertAction } from '../../../alerting/common';
+import { RuleAction } from '@kbn/alerting-plugin/common';
 import { RuleAlertAction } from './types';
 
 export const transformRuleToAlertAction = ({
@@ -13,7 +13,7 @@ export const transformRuleToAlertAction = ({
   id,
   action_type_id, // eslint-disable-line @typescript-eslint/naming-convention
   params,
-}: RuleAlertAction): AlertAction => ({
+}: RuleAlertAction): RuleAction => ({
   group,
   id,
   params,
@@ -25,7 +25,7 @@ export const transformAlertToRuleAction = ({
   id,
   actionTypeId,
   params,
-}: AlertAction): RuleAlertAction => ({
+}: RuleAction): RuleAlertAction => ({
   group,
   id,
   params,

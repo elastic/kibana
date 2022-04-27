@@ -31,19 +31,23 @@ import {
 } from '@elastic/eui';
 import { parseInterval } from '../../../../../common';
 
-import { RuleTableItem } from '../../../../types';
+import { Rule } from '../../../../types';
 
 type SnoozeUnit = 'm' | 'h' | 'd' | 'w' | 'M';
 const SNOOZE_END_TIME_FORMAT = 'LL @ LT';
 
+type DropdownRuleRecord = Pick<Rule, 'enabled' | 'snoozeEndTime' | 'muteAll'>;
+
 export interface ComponentOpts {
-  item: RuleTableItem;
+  rule: DropdownRuleRecord;
   onRuleChanged: () => void;
   enableRule: () => Promise<void>;
   disableRule: () => Promise<void>;
   snoozeRule: (snoozeEndTime: string | -1, interval: string | null) => Promise<void>;
   unsnoozeRule: () => Promise<void>;
-  previousSnoozeInterval: string | null;
+  isEditable: boolean;
+  previousSnoozeInterval?: string | null;
+  direction?: 'column' | 'row';
 }
 
 const COMMON_SNOOZE_TIMES: Array<[number, SnoozeUnit]> = [
@@ -53,31 +57,66 @@ const COMMON_SNOOZE_TIMES: Array<[number, SnoozeUnit]> = [
   [1, 'd'],
 ];
 
+const PREV_SNOOZE_INTERVAL_KEY = 'triggersActionsUi_previousSnoozeInterval';
+const usePreviousSnoozeInterval: (p?: string | null) => [string | null, (n: string) => void] = (
+  propsInterval
+) => {
+  const intervalFromStorage = localStorage.getItem(PREV_SNOOZE_INTERVAL_KEY);
+  const usePropsInterval = typeof propsInterval !== 'undefined';
+  const interval = usePropsInterval ? propsInterval : intervalFromStorage;
+  const [previousSnoozeInterval, setPreviousSnoozeInterval] = useState<string | null>(interval);
+  const storeAndSetPreviousSnoozeInterval = (newInterval: string) => {
+    if (!usePropsInterval) {
+      localStorage.setItem(PREV_SNOOZE_INTERVAL_KEY, newInterval);
+    }
+    setPreviousSnoozeInterval(newInterval);
+  };
+  return [previousSnoozeInterval, storeAndSetPreviousSnoozeInterval];
+};
+
 export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
-  item,
+  rule,
   onRuleChanged,
   disableRule,
   enableRule,
   snoozeRule,
   unsnoozeRule,
-  previousSnoozeInterval,
+  isEditable,
+  previousSnoozeInterval: propsPreviousSnoozeInterval,
+  direction = 'column',
 }: ComponentOpts) => {
-  const [isEnabled, setIsEnabled] = useState<boolean>(item.enabled);
-  const [isSnoozed, setIsSnoozed] = useState<boolean>(isItemSnoozed(item));
+  const [isEnabled, setIsEnabled] = useState<boolean>(rule.enabled);
+  const [isSnoozed, setIsSnoozed] = useState<boolean>(isRuleSnoozed(rule));
+  const [previousSnoozeInterval, setPreviousSnoozeInterval] = usePreviousSnoozeInterval(
+    propsPreviousSnoozeInterval
+  );
+
   useEffect(() => {
-    setIsEnabled(item.enabled);
-  }, [item.enabled]);
+    setIsEnabled(rule.enabled);
+  }, [rule.enabled]);
   useEffect(() => {
-    setIsSnoozed(isItemSnoozed(item));
-  }, [item]);
+    setIsSnoozed(isRuleSnoozed(rule));
+  }, [rule]);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const onClickBadge = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), [setIsPopoverOpen]);
   const onClosePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
+  const snoozeRuleAndStoreInterval = useCallback(
+    (snoozeEndTime: string | -1, interval: string | null) => {
+      if (interval) {
+        setPreviousSnoozeInterval(interval);
+      }
+      return snoozeRule(snoozeEndTime, interval);
+    },
+    [setPreviousSnoozeInterval, snoozeRule]
+  );
 
   const onChangeEnabledStatus = useCallback(
     async (enable: boolean) => {
+      if (rule.enabled === enable) {
+        return;
+      }
       setIsUpdating(true);
       try {
         if (enable) {
@@ -91,17 +130,17 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
         setIsUpdating(false);
       }
     },
-    [setIsUpdating, isEnabled, setIsEnabled, onRuleChanged, enableRule, disableRule]
+    [rule.enabled, isEnabled, onRuleChanged, enableRule, disableRule]
   );
   const onChangeSnooze = useCallback(
     async (value: number, unit?: SnoozeUnit) => {
       setIsUpdating(true);
       try {
         if (value === -1) {
-          await snoozeRule(-1, null);
+          await snoozeRuleAndStoreInterval(-1, null);
         } else if (value !== 0) {
           const snoozeEndTime = moment().add(value, unit).toISOString();
-          await snoozeRule(snoozeEndTime, `${value}${unit}`);
+          await snoozeRuleAndStoreInterval(snoozeEndTime, `${value}${unit}`);
         } else await unsnoozeRule();
         setIsSnoozed(value !== 0);
         onRuleChanged();
@@ -109,7 +148,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
         setIsUpdating(false);
       }
     },
-    [setIsUpdating, setIsSnoozed, onRuleChanged, snoozeRule, unsnoozeRule]
+    [setIsUpdating, setIsSnoozed, onRuleChanged, snoozeRuleAndStoreInterval, unsnoozeRule]
   );
 
   const badgeColor = !isEnabled ? 'default' : isSnoozed ? 'warning' : 'primary';
@@ -117,18 +156,28 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
 
   const remainingSnoozeTime =
     isEnabled && isSnoozed ? (
-      <EuiToolTip content={moment(item.snoozeEndTime).format(SNOOZE_END_TIME_FORMAT)}>
+      <EuiToolTip
+        content={
+          rule.muteAll ? INDEFINITELY : moment(rule.snoozeEndTime).format(SNOOZE_END_TIME_FORMAT)
+        }
+      >
         <EuiText color="subdued" size="xs">
-          {item.muteAll ? INDEFINITELY : moment(item.snoozeEndTime).fromNow(true)}
+          {rule.muteAll ? INDEFINITELY : moment(rule.snoozeEndTime).fromNow(true)}
         </EuiText>
       </EuiToolTip>
     ) : null;
 
-  const badge = (
+  const nonEditableBadge = (
+    <EuiBadge color={badgeColor} data-test-subj="statusDropdownReadonly">
+      {badgeMessage}
+    </EuiBadge>
+  );
+
+  const editableBadge = (
     <EuiBadge
       color={badgeColor}
       iconSide="right"
-      iconType={!isUpdating ? 'arrowDown' : undefined}
+      iconType={!isUpdating && isEditable ? 'arrowDown' : undefined}
       onClick={onClickBadge}
       iconOnClick={onClickBadge}
       onClickAriaLabel={OPEN_MENU_ARIA_LABEL}
@@ -144,30 +193,35 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
 
   return (
     <EuiFlexGroup
-      direction="column"
-      alignItems="flexStart"
+      direction={direction}
+      alignItems={direction === 'row' ? 'center' : 'flexStart'}
       justifyContent="flexStart"
-      gutterSize="s"
+      gutterSize={direction === 'row' ? 's' : 'xs'}
+      responsive={false}
     >
       <EuiFlexItem grow={false}>
-        <EuiPopover
-          button={badge}
-          isOpen={isPopoverOpen}
-          closePopover={onClosePopover}
-          panelPaddingSize="s"
-          data-test-subj="statusDropdown"
-          title={badgeMessage}
-        >
-          <RuleStatusMenu
-            onClosePopover={onClosePopover}
-            onChangeEnabledStatus={onChangeEnabledStatus}
-            onChangeSnooze={onChangeSnooze}
-            isEnabled={isEnabled}
-            isSnoozed={isSnoozed}
-            snoozeEndTime={item.snoozeEndTime}
-            previousSnoozeInterval={previousSnoozeInterval}
-          />
-        </EuiPopover>
+        {isEditable ? (
+          <EuiPopover
+            button={editableBadge}
+            isOpen={isPopoverOpen && isEditable}
+            closePopover={onClosePopover}
+            panelPaddingSize="s"
+            data-test-subj="statusDropdown"
+            title={badgeMessage}
+          >
+            <RuleStatusMenu
+              onClosePopover={onClosePopover}
+              onChangeEnabledStatus={onChangeEnabledStatus}
+              onChangeSnooze={onChangeSnooze}
+              isEnabled={isEnabled}
+              isSnoozed={isSnoozed}
+              snoozeEndTime={rule.snoozeEndTime}
+              previousSnoozeInterval={previousSnoozeInterval}
+            />
+          </EuiPopover>
+        ) : (
+          nonEditableBadge
+        )}
       </EuiFlexItem>
       <EuiFlexItem data-test-subj="remainingSnoozeTime" grow={false}>
         {remainingSnoozeTime}
@@ -249,6 +303,7 @@ const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
           icon: isEnabled && isSnoozed ? 'check' : 'empty',
           panel: 1,
           disabled: !isEnabled,
+          'data-test-subj': 'statusDropdownSnoozeItem',
         },
       ],
     },
@@ -267,7 +322,7 @@ const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
     },
   ];
 
-  return <EuiContextMenu initialPanelId={0} panels={panels} />;
+  return <EuiContextMenu data-test-subj="ruleStatusMenu" initialPanelId={0} panels={panels} />;
 };
 
 interface SnoozePanelProps {
@@ -312,6 +367,7 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
           <EuiButtonEmpty
             style={{ height: '1em' }}
             iconType="refresh"
+            data-test-subj="ruleSnoozePreviousButton"
             onClick={() => applySnooze(parsedPrevSnooze.value, parsedPrevSnooze.unit as SnoozeUnit)}
           >
             {i18n.translate('xpack.triggersActionsUI.sections.rulesList.previousSnooze', {
@@ -320,7 +376,7 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText color="subdued" size="s">
+          <EuiText color="subdued" size="s" data-test-subj="ruleSnoozePreviousText">
             {durationToTextString(parsedPrevSnooze.value, parsedPrevSnooze.unit as SnoozeUnit)}
           </EuiText>
         </EuiFlexItem>
@@ -328,7 +384,6 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
       <EuiHorizontalRule margin="s" />
     </>
   );
-
   return (
     <EuiPanel paddingSize="none">
       <EuiSpacer size="s" />
@@ -341,6 +396,7 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
               'xpack.triggersActionsUI.sections.rulesList.snoozePanelIntervalValueLabel',
               { defaultMessage: 'Snooze interval value' }
             )}
+            data-test-subj="ruleSnoozeIntervalValue"
           />
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
@@ -359,10 +415,11 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
               { value: 'w', text: WEEKS },
               { value: 'M', text: MONTHS },
             ]}
+            data-test-subj="ruleSnoozeIntervalUnit"
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={onClickApplyButton}>
+          <EuiButton onClick={onClickApplyButton} data-test-subj="ruleSnoozeApply">
             {i18n.translate('xpack.triggersActionsUI.sections.rulesList.applySnooze', {
               defaultMessage: 'Apply',
             })}
@@ -393,7 +450,7 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
       <EuiHorizontalRule margin="s" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiLink onClick={onApplyIndefinite}>
+          <EuiLink onClick={onApplyIndefinite} data-test-subj="ruleSnoozeIndefiniteApply">
             {i18n.translate('xpack.triggersActionsUI.sections.rulesList.snoozeIndefinitely', {
               defaultMessage: 'Snooze indefinitely',
             })}
@@ -405,7 +462,7 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
           <EuiHorizontalRule margin="s" />
           <EuiFlexGroup>
             <EuiFlexItem grow>
-              <EuiButton color="danger" onClick={onCancelSnooze}>
+              <EuiButton color="danger" onClick={onCancelSnooze} data-test-subj="ruleSnoozeCancel">
                 Cancel snooze
               </EuiButton>
             </EuiFlexItem>
@@ -417,8 +474,8 @@ const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
   );
 };
 
-const isItemSnoozed = (item: { snoozeEndTime?: Date | null; muteAll: boolean }) => {
-  const { snoozeEndTime, muteAll } = item;
+const isRuleSnoozed = (rule: DropdownRuleRecord) => {
+  const { snoozeEndTime, muteAll } = rule;
   if (muteAll) return true;
   if (!snoozeEndTime) {
     return false;
@@ -531,3 +588,6 @@ const ONE: Record<SnoozeUnit, string> = {
     defaultMessage: '1 month',
   }),
 };
+
+// eslint-disable-next-line import/no-default-export
+export { RuleStatusDropdown as default };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect, useContext } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
@@ -32,7 +32,6 @@ import {
   useUrlParams,
   useLink,
   useBreadcrumbs,
-  useLicense,
   useKibanaVersion,
   useStartServices,
 } from '../../../hooks';
@@ -52,6 +51,8 @@ import {
   FleetServerOnPremUnhealthyCallout,
 } from '../components';
 import { useFleetServerUnhealthy } from '../hooks/use_fleet_server_unhealthy';
+
+import { agentFlyoutContext } from '..';
 
 import { AgentTableHeader } from './components/table_header';
 import type { SelectionMode } from './components/bulk_actions';
@@ -153,7 +154,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const { getHref } = useLink();
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
   const hasFleetAllPrivileges = useAuthz().fleet.all;
-  const isGoldPlus = useLicense().isGoldPlus();
   const kibanaVersion = useKibanaVersion();
 
   // Agent data states
@@ -202,6 +202,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   }>({
     isOpen: false,
   });
+
+  const flyoutContext = useContext(agentFlyoutContext);
 
   // Agent actions states
   const [agentToReassign, setAgentToReassign] = useState<Agent | undefined>(undefined);
@@ -380,11 +382,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   // Fleet server unhealthy status
   const { isUnhealthy: isFleetServerUnhealthy } = useFleetServerUnhealthy();
   const onClickAddFleetServer = useCallback(() => {
-    setEnrollmentFlyoutState({
-      isOpen: true,
-      selectedPolicyId: agentPolicies.length > 0 ? agentPolicies[0].id : undefined,
-    });
-  }, [agentPolicies]);
+    flyoutContext?.openFleetServerFlyout();
+  }, [flyoutContext]);
 
   const columns = [
     {
@@ -667,27 +666,23 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           pageSizeOptions,
         }}
         isSelectable={true}
-        selection={
-          isGoldPlus
-            ? {
-                onSelectionChange: (newAgents: Agent[]) => {
-                  setSelectedAgents(newAgents);
-                  setSelectionMode('manual');
-                },
-                selectable: isAgentSelectable,
-                selectableMessage: (selectable, agent) => {
-                  if (selectable) return '';
-                  if (!agent.active) {
-                    return 'This agent is not active';
-                  }
-                  if (agent.policy_id && agentPoliciesIndexedById[agent.policy_id].is_managed) {
-                    return 'This action is not available for agents enrolled in an externally managed agent policy';
-                  }
-                  return '';
-                },
-              }
-            : undefined
-        }
+        selection={{
+          onSelectionChange: (newAgents: Agent[]) => {
+            setSelectedAgents(newAgents);
+            setSelectionMode('manual');
+          },
+          selectable: isAgentSelectable,
+          selectableMessage: (selectable, agent) => {
+            if (selectable) return '';
+            if (!agent.active) {
+              return 'This agent is not active';
+            }
+            if (agent.policy_id && agentPoliciesIndexedById[agent.policy_id].is_managed) {
+              return 'This action is not available for agents enrolled in an externally managed agent policy';
+            }
+            return '';
+          },
+        }}
         onChange={({ page }: { page: { index: number; size: number } }) => {
           const newPagination = {
             ...pagination,

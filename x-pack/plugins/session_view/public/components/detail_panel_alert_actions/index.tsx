@@ -8,8 +8,7 @@ import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPopover, EuiContextMenuPanel, EuiButtonIcon, EuiContextMenuItem } from '@elastic/eui';
-import { Process, ProcessEvent } from '../../../common/types/process_tree';
-import { ProcessImpl } from '../process_tree/hooks';
+import { ProcessEvent } from '../../../common/types/process_tree';
 
 export const BUTTON_TEST_ID = 'sessionView:detailPanelAlertActionsBtn';
 export const SHOW_DETAILS_TEST_ID = 'sessionView:detailPanelAlertActionShowDetails';
@@ -18,7 +17,7 @@ export const JUMP_TO_PROCESS_TEST_ID = 'sessionView:detailPanelAlertActionJumpTo
 interface DetailPanelAlertActionsDeps {
   event: ProcessEvent;
   onShowAlertDetails: (alertId: string) => void;
-  onProcessSelected: (process: Process) => void;
+  onJumpToEvent: (event: ProcessEvent) => void;
 }
 
 /**
@@ -27,7 +26,7 @@ interface DetailPanelAlertActionsDeps {
 export const DetailPanelAlertActions = ({
   event,
   onShowAlertDetails,
-  onProcessSelected,
+  onJumpToEvent,
 }: DetailPanelAlertActionsDeps) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -40,15 +39,12 @@ export const DetailPanelAlertActions = ({
   }, [isPopoverOpen]);
 
   const onJumpToAlert = useCallback(() => {
-    const process = new ProcessImpl(event.process.entity_id);
-    process.addEvent(event);
-
-    onProcessSelected(process);
+    onJumpToEvent(event);
     setPopover(false);
-  }, [event, onProcessSelected]);
+  }, [event, onJumpToEvent]);
 
   const onShowDetails = useCallback(() => {
-    if (event.kibana) {
+    if (event.kibana?.alert?.uuid) {
       onShowAlertDetails(event.kibana.alert.uuid);
       setPopover(false);
     }
@@ -58,7 +54,7 @@ export const DetailPanelAlertActions = ({
     return null;
   }
 
-  const { uuid } = event.kibana.alert;
+  const uuid = event.kibana?.alert?.uuid ?? '';
 
   const menuItems = [
     <EuiContextMenuItem key="details" data-test-subj={SHOW_DETAILS_TEST_ID} onClick={onShowDetails}>

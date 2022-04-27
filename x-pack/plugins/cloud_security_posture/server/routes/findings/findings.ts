@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/core/server';
 import { SearchRequest, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -111,12 +111,12 @@ export const defineFindingsIndexRoute = (router: CspRouter, cspContext: CspAppCo
       validate: { query: findingsInputSchema },
     },
     async (context, request, response) => {
-      if (!context.fleet.authz.fleet.all) {
+      if (!(await context.fleet).authz.fleet.all) {
         return response.forbidden();
       }
 
       try {
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
         const options = buildOptionsRequest(request.query);
 
         const latestCycleIds =

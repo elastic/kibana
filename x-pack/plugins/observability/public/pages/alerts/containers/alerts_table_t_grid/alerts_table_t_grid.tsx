@@ -34,26 +34,30 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+
 import styled from 'styled-components';
 import React, { Suspense, useMemo, useState, useCallback, useEffect } from 'react';
 
 import { pick } from 'lodash';
-import { getAlertsPermissions } from '../../../../hooks/use_alert_permission';
 import type {
   TGridType,
   TGridState,
   TGridModel,
   SortDirection,
-} from '../../../../../../timelines/public';
-
-import type { TopAlert } from '../alerts_page/alerts_page';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+} from '@kbn/timelines-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   ActionProps,
   ColumnHeaderOptions,
   ControlColumnProps,
   RowRenderer,
-} from '../../../../../../timelines/common';
+} from '@kbn/timelines-plugin/common';
+import { CaseAttachments } from '@kbn/cases-plugin/public';
+import { CommentType } from '@kbn/cases-plugin/common';
+import { getAlertsPermissions } from '../../../../hooks/use_alert_permission';
+
+import type { TopAlert } from '../alerts_page/alerts_page';
 
 import { getRenderCellValue } from '../../components/render_cell_value';
 import { observabilityAppId, observabilityFeatureId } from '../../../../../common';
@@ -63,18 +67,16 @@ import { LazyAlertsFlyout } from '../../../..';
 import { parseAlert } from '../../components/parse_alert';
 import { translations, paths } from '../../../../config';
 import { addDisplayNames } from './add_display_names';
-import { CaseAttachments } from '../../../../../../cases/public';
-import { CommentType } from '../../../../../../cases/common';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from './translations';
 import { ObservabilityAppServices } from '../../../../application/types';
-
-const ALERT_TABLE_STATE_STORAGE_KEY = 'xpack.observability.alert.tableState';
 
 interface AlertsTableTGridProps {
   indexNames: string[];
   rangeFrom: string;
   rangeTo: string;
   kuery?: string;
+  stateStorageKey: string;
+  storage: IStorageWrapper;
   setRefetch: (ref: () => void) => void;
 }
 
@@ -302,7 +304,7 @@ const FIELDS_WITHOUT_CELL_ACTIONS = [
 ];
 
 export function AlertsTableTGrid(props: AlertsTableTGridProps) {
-  const { indexNames, rangeFrom, rangeTo, kuery, setRefetch } = props;
+  const { indexNames, rangeFrom, rangeTo, kuery, setRefetch, stateStorageKey, storage } = props;
 
   const {
     timelines,
@@ -311,7 +313,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
 
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
   const [tGridState, setTGridState] = useState<Partial<TGridModel> | null>(
-    JSON.parse(localStorage.getItem(ALERT_TABLE_STATE_STORAGE_KEY) ?? 'null')
+    storage.get(stateStorageKey)
   );
 
   const casePermissions = useGetUserCasesPermissions();
@@ -330,17 +332,17 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
 
   useEffect(() => {
     if (tGridState) {
-      const newState = JSON.stringify({
+      const newState = {
         ...tGridState,
         columns: tGridState.columns?.map((c) =>
           pick(c, ['columnHeaderType', 'displayAsText', 'id', 'initialWidth', 'linkField'])
         ),
-      });
-      if (newState !== localStorage.getItem(ALERT_TABLE_STATE_STORAGE_KEY)) {
-        localStorage.setItem(ALERT_TABLE_STATE_STORAGE_KEY, newState);
+      };
+      if (newState !== storage.get(stateStorageKey)) {
+        storage.set(stateStorageKey, newState);
       }
     }
-  }, [tGridState]);
+  }, [tGridState, stateStorageKey, storage]);
 
   const setEventsDeleted = useCallback<ObservabilityActionsProps['setEventsDeleted']>((action) => {
     if (action.isDeleted) {

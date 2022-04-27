@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import datemath from '@elastic/datemath';
+import datemath from '@kbn/datemath';
 import { pickBy } from 'lodash';
 import { UrlParams } from './types';
 

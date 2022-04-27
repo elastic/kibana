@@ -34,7 +34,7 @@ export type LoadingCountStart = LoadingCountSetup;
 
 /** @internal */
 export class LoadingCountService implements CoreService<LoadingCountSetup, LoadingCountStart> {
-  private readonly stop$ = new Subject();
+  private readonly stop$ = new Subject<void>();
   private readonly loadingCount$ = new BehaviorSubject(0);
 
   public setup({ fatalErrors }: { fatalErrors: FatalErrorsSetup }) {

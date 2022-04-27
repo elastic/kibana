@@ -12,15 +12,15 @@ import deepMerge from 'deepmerge';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 
-import { NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS } from '../../../../../common/constants';
-import { FieldHook, useFormContext } from '../../../../shared_imports';
 import {
   ActionForm,
   ActionType,
   loadActionTypes,
   ActionVariables,
-} from '../../../../../../triggers_actions_ui/public';
-import { AlertAction } from '../../../../../../alerting/common';
+} from '@kbn/triggers-actions-ui-plugin/public';
+import { RuleAction } from '@kbn/alerting-plugin/common';
+import { NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS } from '../../../../../common/constants';
+import { FieldHook, useFormContext } from '../../../../shared_imports';
 import { convertArrayToCamelCase, useKibana } from '../../../../common/lib/kibana';
 import { FORM_ERRORS_TITLE } from './translations';
 
@@ -87,8 +87,8 @@ export const RuleActionsField: React.FC<Props> = ({
     triggersActionsUi: { actionTypeRegistry },
   } = useKibana().services;
 
-  const actions: AlertAction[] = useMemo(
-    () => (!isEmpty(field.value) ? (field.value as AlertAction[]) : []),
+  const actions: RuleAction[] = useMemo(
+    () => (!isEmpty(field.value) ? (field.value as RuleAction[]) : []),
     [field.value]
   );
 
@@ -105,7 +105,7 @@ export const RuleActionsField: React.FC<Props> = ({
 
   const setActionIdByIndex = useCallback(
     (id: string, index: number) => {
-      const updatedActions = [...(actions as Array<Partial<AlertAction>>)];
+      const updatedActions = [...(actions as Array<Partial<RuleAction>>)];
       updatedActions[index] = deepMerge(updatedActions[index], { id });
       field.setValue(updatedActions);
     },
@@ -114,7 +114,7 @@ export const RuleActionsField: React.FC<Props> = ({
   );
 
   const setAlertActionsProperty = useCallback(
-    (updatedActions: AlertAction[]) => field.setValue(updatedActions),
+    (updatedActions: RuleAction[]) => field.setValue(updatedActions),
     [field]
   );
 

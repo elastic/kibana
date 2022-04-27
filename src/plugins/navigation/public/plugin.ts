@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import {
   NavigationPublicPluginSetup,
   NavigationPublicPluginStart,
@@ -31,14 +31,14 @@ export class NavigationPublicPlugin
   }
 
   public start(
-    { i18n }: CoreStart,
-    { data }: NavigationPluginStartDependencies
+    core: CoreStart,
+    { unifiedSearch }: NavigationPluginStartDependencies
   ): NavigationPublicPluginStart {
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
 
     return {
       ui: {
-        TopNavMenu: createTopNav(data, extensions, i18n),
+        TopNavMenu: createTopNav(unifiedSearch, extensions),
       },
     };
   }

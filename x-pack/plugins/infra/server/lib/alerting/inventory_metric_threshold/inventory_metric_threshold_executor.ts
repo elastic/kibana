@@ -8,15 +8,14 @@
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { first, get } from 'lodash';
-import moment from 'moment';
 import {
   ActionGroup,
   ActionGroupIdsOf,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
   RecoveredActionGroup,
-} from '../../../../../alerting/common';
-import { Alert, AlertTypeState as RuleTypeState } from '../../../../../alerting/server';
+} from '@kbn/alerting-plugin/common';
+import { Alert, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { AlertStates, InventoryMetricThresholdParams } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
@@ -98,8 +97,8 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           group: '*',
           alertState: stateToAlertMessage[AlertStates.ERROR],
           reason,
+          timestamp: startedAt.toISOString(),
           viewInAppUrl,
-          timestamp: moment().toISOString(),
           value: null,
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
         });
@@ -128,6 +127,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           esClient: services.scopedClusterClient.asCurrentUser,
           compositeSize,
           filterQuery,
+          executionTimestamp: startedAt,
           logger,
         })
       )
@@ -218,8 +218,8 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
             group,
             alertState: stateToAlertMessage[nextState],
             reason,
+            timestamp: startedAt.toISOString(),
             viewInAppUrl,
-            timestamp: moment().toISOString(),
             value: mapToConditionsLookup(results, (result) =>
               formatMetric(result[group].metric, result[group].currentValue)
             ),

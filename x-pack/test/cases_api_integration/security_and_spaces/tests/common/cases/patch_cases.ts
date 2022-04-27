@@ -8,15 +8,14 @@
 import expect from '@kbn/expect';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-
-import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../../plugins/security_solution/common/constants';
+import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
   CasesResponse,
   CaseStatuses,
   CommentType,
   ConnectorTypes,
-} from '../../../../../../plugins/cases/common/api';
+} from '@kbn/cases-plugin/common/api';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
   getPostCaseRequest,
@@ -35,6 +34,8 @@ import {
   removeServerGeneratedPropertiesFromUserAction,
   findCases,
   superUserSpace1Auth,
+  delay,
+  calculateDuration,
 } from '../../../../common/lib/utils';
 import {
   createSignalsIndex,
@@ -112,9 +113,11 @@ export default ({ getService }: FtrProviderContext): void => {
         const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
         const statusUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
         const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
+        const { duration, ...dataWithoutDuration } = data;
+        const { duration: resDuration, ...resWithoutDuration } = postCaseResp();
 
-        expect(data).to.eql({
-          ...postCaseResp(),
+        expect(dataWithoutDuration).to.eql({
+          ...resWithoutDuration,
           status: CaseStatuses.closed,
           closed_by: defaultUser,
           updated_by: defaultUser,
@@ -198,6 +201,65 @@ export default ({ getService }: FtrProviderContext): void => {
           },
           updated_by: defaultUser,
         });
+      });
+
+      describe('duration', () => {
+        it('updates the duration correctly when the case closes', async () => {
+          const postedCase = await createCase(supertest, postCaseReq);
+          await delay(1000);
+
+          const patchedCases = await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  status: CaseStatuses.closed,
+                },
+              ],
+            },
+          });
+
+          const duration = calculateDuration(patchedCases[0].closed_at, postedCase.created_at);
+          expect(duration).to.be(patchedCases[0].duration);
+        });
+
+        for (const status of [CaseStatuses.open, CaseStatuses['in-progress']]) {
+          it(`sets the duration to null when the case status changes to ${status}`, async () => {
+            const postedCase = await createCase(supertest, postCaseReq);
+
+            const closedCases = await updateCase({
+              supertest,
+              params: {
+                cases: [
+                  {
+                    id: postedCase.id,
+                    version: postedCase.version,
+                    status: CaseStatuses.closed,
+                  },
+                ],
+              },
+            });
+
+            expect(closedCases[0].duration).to.not.be(null);
+
+            const openCases = await updateCase({
+              supertest,
+              params: {
+                cases: [
+                  {
+                    id: postedCase.id,
+                    version: closedCases[0].version,
+                    status,
+                  },
+                ],
+              },
+            });
+
+            expect(openCases[0].duration).to.be(null);
+          });
+        }
       });
     });
 

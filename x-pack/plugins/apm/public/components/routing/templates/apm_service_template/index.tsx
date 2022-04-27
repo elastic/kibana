@@ -15,7 +15,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import React from 'react';
-import { enableInfrastructureView } from '../../../../../../observability/public';
+import { enableInfrastructureView } from '@kbn/observability-plugin/public';
 import {
   isIosAgentName,
   isJavaAgentName,
