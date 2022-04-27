@@ -365,13 +365,13 @@ export class Server {
     this.uiSettings.stop();
     this.rendering.stop();
     this.metrics.stop();
-    this.status.stop();
-    this.logging.stop();
     this.prebootService.stop();
     this.executionContext.stop();
     this.coreUsageData.stop();
     this.httpResources.stop();
     this.deprecations.stop();
+    this.status.stop();
+    this.logging.stop();
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup) {
