@@ -6,36 +6,8 @@
  * Side Public License, v 1.
  */
 
-// Source: https://bl.ocks.org/mbostock/99049112373e12709381
-export const DEFAULT_VIS = `var width = 700,
-    height = 500;
-
-var sampler = poissonDiscSampler(width, height, 30),
-    samples = [],
-    sample;
-
-while (sample = sampler()) samples.push(sample);
-
-var voronoi = d3.geom.voronoi()
-    .clipExtent([[-1, -1], [width + 1, height + 1]]);
-
-var svg = d3.select("body").append("svg")
-    .attr("width", width)
-    .attr("height", height);
-
-svg.selectAll("path")
-    .data(voronoi(samples))
-  .enter().append("path")
-    .attr("d", function(d) { return "M" + d.join("L") + "Z"; })
-    .style("fill", function(d) { return color(d.point); })
-    .style("stroke", function(d) { return color(d.point); });
-
-function color(d) {
-  var dx = d[0] - width / 2,
-      dy = d[1] - height / 2;
-  return d3.lab(100 - (dx * dx + dy * dy) / 5000, dx / 10, dy / 10);
-}
-
+// Based on https://bl.ocks.org/mbostock/99049112373e12709381
+export const DEFAULT_VIS = `
 // Based on https://www.jasondavies.com/poisson-disc/
 function poissonDiscSampler(width, height, radius) {
   var k = 30, // maximum number of samples before rejection
@@ -105,4 +77,43 @@ function poissonDiscSampler(width, height, radius) {
     ++queueSize;
     return s;
   }
-}`;
+}
+
+const drawVis = (width, height, svg) => {
+  var sampler = poissonDiscSampler(width, height, 40),
+    samples = [],
+    sample;
+  
+  while (sample = sampler()) samples.push(sample);
+
+  var voronoi = d3.geom.voronoi()
+      .clipExtent([[-1, -1], [width + 1, height + 1]]);
+
+  svg
+      .attr("width", width)
+      .attr("height", height);
+
+  function color(d) {
+    var dx = d[0] - width / 2,
+        dy = d[1] - height / 2;
+    return d3.lab(100 - (dx * dx + dy * dy) / 5000, dx / 10, dy / 10);
+  }
+  
+  svg.selectAll("path")
+      .data(voronoi(samples))
+    .enter().append("path")
+      .attr("d", function(d) { return "M" + d.join("L") + "Z"; })
+      .style("fill", function(d) { return color(d.point); })
+      .style("stroke", function(d) { return color(d.point); });
+}
+
+var svg = d3.select("body").append("svg")
+
+const { width, height } = KIBANA.getWindowDimensions();
+
+drawVis(width, height, svg);
+
+KIBANA.subscribeToResize((width, height) => {
+  svg.html(null)
+  drawVis(width, height, svg)
+});`;

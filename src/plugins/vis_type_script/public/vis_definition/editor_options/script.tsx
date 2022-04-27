@@ -78,7 +78,7 @@ const provideSuggestions = (
           value: 'Registers a function to be called when vis gets resized',
           isTrusted: true,
         },
-        insertText: 'subscribeToResize(() => {$0})',
+        insertText: 'subscribeToResize((width, height) => {$0})',
         insertTextRules: monacoEditor.languages.CompletionItemInsertTextRule.InsertAsSnippet,
         range: wordRange,
       },

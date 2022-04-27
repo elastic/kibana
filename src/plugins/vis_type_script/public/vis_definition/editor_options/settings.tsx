@@ -51,7 +51,12 @@ const DependencyUrl = ({
         onChange={(event) => update(event.target.value)}
         isInvalid={showErrors}
         append={
-          <EuiButtonIcon iconType="crossInACircleFilled" color="text" onClick={() => remove()} />
+          <EuiButtonIcon
+            aria-label="Remove"
+            iconType="crossInACircleFilled"
+            color="text"
+            onClick={() => remove()}
+          />
         }
       />
     </EuiFormRow>
