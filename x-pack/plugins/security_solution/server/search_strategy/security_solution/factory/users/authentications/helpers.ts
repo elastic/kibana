@@ -67,7 +67,7 @@ const getAuthenticationFields = (fields: string[], hit: AuthenticationHit, paren
     if (!isEmpty(esField)) {
       const fieldValue = get(`${parentField}['${esField}']`, hit.fields);
       if (!isEmpty(fieldValue)) {
-        flattenedFields = set(
+        return set(
           fieldPath,
           toObjectArrayOfStrings(fieldValue).map(({ str }) => str),
           flattenedFields

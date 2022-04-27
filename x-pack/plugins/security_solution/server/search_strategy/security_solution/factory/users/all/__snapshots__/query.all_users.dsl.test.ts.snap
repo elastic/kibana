@@ -41,14 +41,13 @@ Object {
         },
       },
     },
-    "docvalue_fields": Array [
+    "fields": Array [
+      "user.name",
+      "user.domain",
       Object {
         "field": "@timestamp",
-        "format": "date_time",
+        "format": "strict_date_optional_time",
       },
-    ],
-    "fields": Array [
-      "user.*", "@timestamp"
     ],
     "query": Object {
       "bool": Object {
