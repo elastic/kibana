@@ -18,9 +18,9 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import {
   CASES,
   CASES_BY_STATUS_SECTION_TITLE,
-  CLOSED,
-  IN_PROGRESS,
-  OPEN,
+  STATUS_CLOSED,
+  STATUS_IN_PROGRESS,
+  STATUS_OPEN,
   VIEW_CASES,
 } from '../translations';
 import { LinkButton } from '../../../../common/components/links';
@@ -88,17 +88,17 @@ const barColors = {
 export const emptyChartSettings = [
   {
     key: 'open',
-    value: [{ y: 20, x: OPEN, g: OPEN }],
+    value: [{ y: 20, x: STATUS_OPEN, g: STATUS_OPEN }],
     color: barColors.empty,
   },
   {
     key: 'in-progress',
-    value: [{ y: 20, x: IN_PROGRESS, g: IN_PROGRESS }],
+    value: [{ y: 20, x: STATUS_IN_PROGRESS, g: STATUS_IN_PROGRESS }],
     color: barColors.empty,
   },
   {
     key: 'closed',
-    value: [{ y: 20, x: CLOSED, g: CLOSED }],
+    value: [{ y: 20, x: STATUS_CLOSED, g: STATUS_CLOSED }],
     color: barColors.empty,
   },
 ];
@@ -133,17 +133,17 @@ const CasesByStatusComponent: React.FC = () => {
     () => [
       {
         key: 'open',
-        value: [{ y: open, x: OPEN, g: OPEN }],
+        value: [{ y: open, x: STATUS_OPEN, g: STATUS_OPEN }],
         color: barColors.open,
       },
       {
         key: 'in-progress',
-        value: [{ y: inProgress, x: IN_PROGRESS, g: IN_PROGRESS }],
+        value: [{ y: inProgress, x: STATUS_IN_PROGRESS, g: STATUS_IN_PROGRESS }],
         color: barColors['in-progress'],
       },
       {
         key: 'closed',
-        value: [{ y: closed, x: CLOSED, g: CLOSED }],
+        value: [{ y: closed, x: STATUS_CLOSED, g: STATUS_CLOSED }],
         color: barColors.closed,
       },
     ],
