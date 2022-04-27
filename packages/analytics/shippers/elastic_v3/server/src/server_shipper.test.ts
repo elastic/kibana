@@ -37,7 +37,7 @@ describe('ElasticV3ServerShipper', () => {
   let shipper: ElasticV3ServerShipper;
 
   // eslint-disable-next-line dot-notation
-  const setLastBatchSent = (ms: number) => shipper['lastBatchSent$'].next(ms);
+  const setLastBatchSent = (ms: number) => (shipper['lastBatchSent'] = ms);
 
   beforeEach(() => {
     jest.useFakeTimers();

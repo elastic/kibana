@@ -209,7 +209,13 @@ export class AnalyticsClient implements IAnalyticsClient {
   };
 
   public shutdown = () => {
-    this.shippersRegistry.allShippers.forEach((shipper) => shipper.shutdown());
+    this.shippersRegistry.allShippers.forEach((shipper, shipperName) => {
+      try {
+        shipper.shutdown();
+      } catch (err) {
+        this.initContext.logger.warn(`Failed to shutdown shipper "${shipperName}"`, err);
+      }
+    });
     this.internalEventQueue$.complete();
     this.internalTelemetryCounter$.complete();
     this.shipperRegistered$.complete();

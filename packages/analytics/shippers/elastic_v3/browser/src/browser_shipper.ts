@@ -6,15 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  BehaviorSubject,
-  interval,
-  Subject,
-  bufferWhen,
-  exhaustMap,
-  filter,
-  skipWhile,
-} from 'rxjs';
+import { BehaviorSubject, interval, Subject, bufferWhen, concatMap, filter, skipWhile } from 'rxjs';
 import type {
   AnalyticsClientInitContext,
   Event,
@@ -22,8 +14,9 @@ import type {
   IShipper,
   TelemetryCounter,
 } from '@kbn/analytics-client';
-import type { ElasticV3ShipperOptions } from '@kbn/analytics-shippers-elastic-v3-common';
+import { ElasticV3ShipperOptions, ErrorWithCode } from '@kbn/analytics-shippers-elastic-v3-common';
 import {
+  buildHeaders,
   buildUrl,
   createTelemetryCounterHelper,
   eventsToNDJSON,
@@ -84,7 +77,7 @@ export class ElasticV3BrowserShipper implements IShipper {
         // Skip empty buffers
         filter((events) => events.length > 0),
         // Send events
-        exhaustMap(async (events) => this.sendEvents(events))
+        concatMap(async (events) => this.sendEvents(events))
       )
       .subscribe();
   }
@@ -104,12 +97,7 @@ export class ElasticV3BrowserShipper implements IShipper {
       {
         method: 'POST',
         body: eventsToNDJSON(events),
-        headers: {
-          'content-type': 'application/x-njson',
-          'x-elastic-cluster-id': this.clusterUuid,
-          'x-elastic-stack-version': this.options.version,
-          ...(this.licenseId && { 'x-elastic-license-id': this.licenseId }),
-        },
+        headers: buildHeaders(this.clusterUuid, this.options.version, this.licenseId),
         ...(this.options.debug && { query: { debug: true } }),
         // Allow the request to outlive the page in case the tab is closed
         keepalive: true,
@@ -123,9 +111,7 @@ export class ElasticV3BrowserShipper implements IShipper {
     }
 
     if (!ok) {
-      const error: Error & { code?: string } = new Error(`${status} - ${await text()}`);
-      error.code = `${status}`;
-      throw error;
+      throw new ErrorWithCode(`${status} - ${await text()}`, `${status}`);
     }
 
     return `${status}`;

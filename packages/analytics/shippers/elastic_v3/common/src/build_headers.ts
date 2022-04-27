@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { buildHeaders } from './build_headers';
-export { buildUrl } from './build_url';
-export { ErrorWithCode } from './error_with_code';
-export { eventsToNDJSON } from './events_to_ndjson';
-export { createTelemetryCounterHelper } from './report_telemetry_counters';
-export type { ElasticV3ShipperOptions } from './types';
+export function buildHeaders(clusterUuid: string, version: string, licenseId?: string) {
+  return {
+    'content-type': 'application/x-njson',
+    'x-elastic-cluster-id': clusterUuid,
+    'x-elastic-stack-version': version,
+    ...(licenseId && { 'x-elastic-license-id': licenseId }),
+  };
+}

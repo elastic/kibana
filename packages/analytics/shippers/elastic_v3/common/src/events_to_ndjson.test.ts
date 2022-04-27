@@ -18,9 +18,11 @@ describe('eventsToNDJSON', () => {
       properties: {},
     };
 
-    expect(eventsToNDJSON([event])).toEqual(
-      '{"timestamp":"2020-01-01T00:00:00.000Z","event_type":"event_type","context":{},"properties":{}}\n'
-    );
+    // Mind the extra line at the bottom
+    expect(eventsToNDJSON([event])).toMatchInlineSnapshot(`
+      "{\\"timestamp\\":\\"2020-01-01T00:00:00.000Z\\",\\"event_type\\":\\"event_type\\",\\"context\\":{},\\"properties\\":{}}
+      "
+    `);
   });
 
   test('works with many events', () => {
@@ -39,8 +41,10 @@ describe('eventsToNDJSON', () => {
       },
     ];
 
-    expect(eventsToNDJSON(events)).toEqual(
-      '{"timestamp":"2020-01-01T00:00:00.000Z","event_type":"event_type","context":{},"properties":{}}\n{"timestamp":"2020-01-02T00:00:00.000Z","event_type":"event_type","context":{},"properties":{}}\n'
-    );
+    expect(eventsToNDJSON(events)).toMatchInlineSnapshot(`
+      "{\\"timestamp\\":\\"2020-01-01T00:00:00.000Z\\",\\"event_type\\":\\"event_type\\",\\"context\\":{},\\"properties\\":{}}
+      {\\"timestamp\\":\\"2020-01-02T00:00:00.000Z\\",\\"event_type\\":\\"event_type\\",\\"context\\":{},\\"properties\\":{}}
+      "
+    `);
   });
 });

@@ -8,11 +8,10 @@
 
 import fetch from 'node-fetch';
 import {
-  BehaviorSubject,
   filter,
   Subject,
   interval,
-  exhaustMap,
+  concatMap,
   merge,
   from,
   firstValueFrom,
@@ -32,9 +31,11 @@ import type {
 import { TelemetryCounterType } from '@kbn/analytics-client';
 import type { ElasticV3ShipperOptions } from '@kbn/analytics-shippers-elastic-v3-common';
 import {
+  buildHeaders,
   buildUrl,
   createTelemetryCounterHelper,
   eventsToNDJSON,
+  ErrorWithCode,
 } from '@kbn/analytics-shippers-elastic-v3-common';
 
 const SECOND = 1000;
@@ -54,7 +55,7 @@ export class ElasticV3ServerShipper implements IShipper {
   private readonly internalQueue: Event[] = [];
   private readonly shutdown$ = new Subject<void>();
 
-  private readonly lastBatchSent$ = new BehaviorSubject<number>(Date.now());
+  private lastBatchSent = Date.now();
 
   private clusterUuid: string = 'UNKNOWN';
   private licenseId?: string;
@@ -135,7 +136,7 @@ export class ElasticV3ServerShipper implements IShipper {
       .pipe(
         takeWhile(() => this.shutdown$.isStopped === false),
         filter(() => this.isOptedIn === true && this.firstTimeOffline !== null),
-        exhaustMap(async () => {
+        concatMap(async () => {
           const { ok } = await fetch(buildUrl(this.initContext.sendTo, this.options.channelName), {
             method: 'OPTIONS',
           });
@@ -170,7 +171,7 @@ export class ElasticV3ServerShipper implements IShipper {
 
   private setInternalSubscriber() {
     // Check the status of the queues every 1 second.
-    const subscription = merge(
+    merge(
       interval(1000),
       // Using a promise because complete does not emit through the pipe.
       from(firstValueFrom(this.shutdown$, { defaultValue: true }))
@@ -188,39 +189,49 @@ export class ElasticV3ServerShipper implements IShipper {
         filter(
           () =>
             (this.internalQueue.length > 0 &&
-              (this.shutdown$.isStopped ||
-                Date.now() - this.lastBatchSent$.value >= 10 * MINUTE)) ||
-            (Date.now() - this.lastBatchSent$.value >= 10 * SECOND &&
+              (this.shutdown$.isStopped || Date.now() - this.lastBatchSent >= 10 * MINUTE)) ||
+            (Date.now() - this.lastBatchSent >= 10 * SECOND &&
               (this.internalQueue.length === 1000 ||
                 this.getQueueByteSize(this.internalQueue) >= 10 * KIB))
         ),
 
         // Send the events
-        exhaustMap(async () => {
-          this.lastBatchSent$.next(Date.now());
+        concatMap(async () => {
+          this.lastBatchSent = Date.now();
           const eventsToSend = this.getEventsToSend();
           await this.sendEvents(eventsToSend);
-        })
+        }),
+
+        // Stop the subscriber if we are shutting down.
+        takeWhile(() => !this.shutdown$.isStopped)
       )
-      .subscribe(() => {
-        if (this.shutdown$.isStopped) {
-          subscription.unsubscribe();
-        }
-      });
+      .subscribe();
   }
 
   /**
    * Calculates the size of the queue in bytes.
    * @returns The number of bytes held in the queue.
+   * @private
    */
   private getQueueByteSize(queue: Event[]) {
     return queue.reduce((acc, event) => {
-      return acc + Buffer.from(JSON.stringify(event)).length;
+      return acc + this.getEventSize(event);
     }, 0);
   }
 
   /**
+   * Calculates the size of the event in bytes.
+   * @param event The event to calculate the size of.
+   * @returns The number of bytes held in the event.
+   * @private
+   */
+  private getEventSize(event: Event) {
+    return Buffer.from(JSON.stringify(event)).length;
+  }
+
+  /**
    * Returns a queue of events of up-to 10kB.
+   * @remarks It mutates the internal queue by removing from it the events returned by this method.
    * @private
    */
   private getEventsToSend(): Event[] {
@@ -230,8 +241,11 @@ export class ElasticV3ServerShipper implements IShipper {
     }
     // Otherwise, we'll feed the events to the leaky bucket queue until we reach 10kB.
     const queue: Event[] = [];
-    while (this.getQueueByteSize(queue) < 10 * KIB) {
-      queue.push(this.internalQueue.shift()!);
+    let queueByteSize = 0;
+    while (queueByteSize < 10 * KIB) {
+      const event = this.internalQueue.shift()!;
+      queueByteSize += this.getEventSize(event);
+      queue.push(event);
     }
     return queue;
   }
@@ -252,12 +266,7 @@ export class ElasticV3ServerShipper implements IShipper {
       {
         method: 'POST',
         body: eventsToNDJSON(events),
-        headers: {
-          'content-type': 'application/x-njson',
-          'x-elastic-cluster-id': this.clusterUuid,
-          'x-elastic-stack-version': this.options.version,
-          ...(this.licenseId && { 'x-elastic-license-id': this.licenseId }),
-        },
+        headers: buildHeaders(this.clusterUuid, this.options.version, this.licenseId),
         ...(this.options.debug && { query: { debug: true } }),
       }
     );
@@ -269,9 +278,7 @@ export class ElasticV3ServerShipper implements IShipper {
     }
 
     if (!ok) {
-      const error: Error & { code?: string } = new Error(`${status} - ${await text()}`);
-      error.code = `${status}`;
-      throw error;
+      throw new ErrorWithCode(`${status} - ${await text()}`, `${status}`);
     }
 
     return `${status}`;
