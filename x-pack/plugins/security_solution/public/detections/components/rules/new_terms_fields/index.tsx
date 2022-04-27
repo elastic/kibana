@@ -13,15 +13,15 @@ import { getCategorizedFieldNames } from '../../../../timelines/components/edit_
 import { NEW_TERMS_FIELD_PLACEHOLDER } from './translations';
 
 interface NewTermsFieldsProps {
-  describedByIds: string[];
   browserFields: BrowserFields;
   field: FieldHook;
 }
 
 const FIELD_COMBO_BOX_WIDTH = 410;
 
+const fieldDescribedByIds = 'detectionEngineStepDefineRuleNewTermsField';
+
 export const NewTermsFieldsComponent: React.FC<NewTermsFieldsProps> = ({
-  describedByIds = [],
   browserFields,
   field,
 }: NewTermsFieldsProps) => {
@@ -36,15 +36,7 @@ export const NewTermsFieldsComponent: React.FC<NewTermsFieldsProps> = ({
     }),
     [browserFields]
   );
-  return (
-    <Field
-      field={field}
-      idAria={describedByIds[0]}
-      data-test-subj={describedByIds[0]}
-      describedByIds={describedByIds}
-      euiFieldProps={fieldEuiFieldProps}
-    />
-  );
+  return <Field field={field} idAria={fieldDescribedByIds} euiFieldProps={fieldEuiFieldProps} />;
 };
 
 export const NewTermsFields = React.memo(NewTermsFieldsComponent);
