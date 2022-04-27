@@ -5,28 +5,26 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiProgress, EuiTitle } from '@elastic/eui';
 
-import type { FillMaskInference } from '.';
+import type { FillMaskInference } from './fill_mask_inference';
 
-const MASK = '[MASK]';
-
-export const getFillMaskOutputComponent = (inferrer: FillMaskInference) => () =>
-  <FillMaskOutput inferrer={inferrer} />;
+export const getFillMaskOutputComponent = (inferrer: FillMaskInference) => (
+  <FillMaskOutput inferrer={inferrer} />
+);
 
 const FillMaskOutput: FC<{
   inferrer: FillMaskInference;
 }> = ({ inferrer }) => {
   const result = useObservable(inferrer.inferenceResult$);
+  const title = useMemo(() => inferrer.predictedValue(), []);
+
   if (!result) {
     return null;
   }
 
-  const title = result.response[0]?.value
-    ? result.inputText.replace(MASK, result.response[0].value)
-    : result.inputText;
   return (
     <>
       <EuiTitle size="xs">

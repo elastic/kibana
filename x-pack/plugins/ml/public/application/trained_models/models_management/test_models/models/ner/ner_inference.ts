@@ -8,6 +8,8 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { InferenceBase, InferResponse } from '../inference_base';
+import { getGeneralInputComponent } from '../text_input';
+import { getNerOutputComponent } from './ner_output';
 
 export type FormattedNerResponse = Array<{
   value: string;
@@ -43,6 +45,14 @@ export class NerInference extends InferenceBase<NerResponse> {
       this.setFinishedWithErrors(error);
       throw error;
     }
+  }
+
+  public getInputComponent(): JSX.Element {
+    return getGeneralInputComponent(this);
+  }
+
+  public getOutputComponent(): JSX.Element {
+    return getNerOutputComponent(this);
   }
 }
 

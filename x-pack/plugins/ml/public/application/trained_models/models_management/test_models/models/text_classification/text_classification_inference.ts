@@ -8,6 +8,8 @@
 import { InferenceBase } from '../inference_base';
 import { processResponse } from './common';
 import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
+import { getGeneralInputComponent } from '../text_input';
+import { getTextClassificationOutputComponent } from './text_classification_output';
 
 export class TextClassificationInference extends InferenceBase<TextClassificationResponse> {
   public async infer() {
@@ -36,5 +38,13 @@ export class TextClassificationInference extends InferenceBase<TextClassificatio
       this.setFinishedWithErrors(error);
       throw error;
     }
+  }
+
+  public getInputComponent(): JSX.Element {
+    return getGeneralInputComponent(this);
+  }
+
+  public getOutputComponent(): JSX.Element {
+    return getTextClassificationOutputComponent(this);
   }
 }

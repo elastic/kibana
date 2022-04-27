@@ -15,8 +15,9 @@ import { getLanguage } from './lang_codes';
 
 const PROBABILITY_SIG_FIGS = 3;
 
-export const getLangIdentOutputComponent = (inferrer: LangIdentInference) => () =>
-  <LangIdentOutput inferrer={inferrer} />;
+export const getLangIdentOutputComponent = (inferrer: LangIdentInference) => (
+  <LangIdentOutput inferrer={inferrer} />
+);
 
 const LangIdentOutput: FC<{ inferrer: LangIdentInference }> = ({ inferrer }) => {
   const result = useObservable(inferrer.inferenceResult$);

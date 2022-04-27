@@ -46,12 +46,13 @@ const ClassNameInput: FC<{
   );
 };
 
-export const getZeroShotClassificationInput =
-  (inferrer: ZeroShotClassificationInference, placeholder?: string) => () =>
-    (
-      <>
-        <TextInput placeholder={placeholder} inferrer={inferrer} />
-        <EuiSpacer />
-        <ClassNameInput inferrer={inferrer} />
-      </>
-    );
+export const getZeroShotClassificationInput = (
+  inferrer: ZeroShotClassificationInference,
+  placeholder?: string
+) => (
+  <>
+    <TextInput placeholder={placeholder} inferrer={inferrer} />
+    <EuiSpacer />
+    <ClassNameInput inferrer={inferrer} />
+  </>
+);

@@ -8,6 +8,8 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { InferenceBase, InferResponse } from '../inference_base';
+import { getGeneralInputComponent } from '../text_input';
+import { getTextEmbeddingOutputComponent } from './text_embedding_output';
 
 export interface RawTextEmbeddingResponse {
   predicted_value: number[];
@@ -46,6 +48,14 @@ export class TextEmbeddingInference extends InferenceBase<TextEmbeddingResponse>
       this.setFinishedWithErrors(error);
       throw error;
     }
+  }
+
+  public getInputComponent(): JSX.Element {
+    return getGeneralInputComponent(this);
+  }
+
+  public getOutputComponent(): JSX.Element {
+    return getTextEmbeddingOutputComponent(this);
   }
 }
 

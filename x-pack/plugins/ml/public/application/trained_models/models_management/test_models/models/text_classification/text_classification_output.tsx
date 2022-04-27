@@ -11,9 +11,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiProgress } from '@elastic/eui'
 
 import type { TextClassificationInference, ZeroShotClassificationInference } from '.';
 
-export const getTextClassificationOutputComponent =
-  (inferrer: TextClassificationInference | ZeroShotClassificationInference) => () =>
-    <TextClassificationOutput inferrer={inferrer} />;
+export const getTextClassificationOutputComponent = (
+  inferrer: TextClassificationInference | ZeroShotClassificationInference
+) => <TextClassificationOutput inferrer={inferrer} />;
 
 const TextClassificationOutput: FC<{
   inferrer: TextClassificationInference | ZeroShotClassificationInference;

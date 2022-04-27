@@ -18,8 +18,6 @@ import { RawOutput } from './raw_output';
 import type { InferrerType } from '.';
 
 interface Props {
-  getOutputComponent(): JSX.Element;
-  getInputComponent: () => JSX.Element;
   inferrer: InferrerType;
 }
 
@@ -28,18 +26,14 @@ enum TAB {
   RAW,
 }
 
-export const InferenceInputForm: FC<Props> = ({
-  getOutputComponent,
-  getInputComponent,
-  inferrer,
-}) => {
+export const InferenceInputForm: FC<Props> = ({ inferrer }) => {
   const [selectedTab, setSelectedTab] = useState(TAB.TEXT);
   const [errorText, setErrorText] = useState<string | null>(null);
 
   const runningState = useObservable(inferrer.runningState$);
   const inputText = useObservable(inferrer.inputText$);
-  const inputComponent = useMemo(() => getInputComponent(), []);
-  const outputComponent = useMemo(() => getOutputComponent(), []);
+  const inputComponent = useMemo(() => inferrer.getInputComponent(), []);
+  const outputComponent = useMemo(() => inferrer.getOutputComponent(), []);
 
   async function run() {
     setErrorText(null);

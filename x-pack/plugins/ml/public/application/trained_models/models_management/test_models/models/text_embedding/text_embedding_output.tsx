@@ -12,8 +12,9 @@ import { EuiTextArea, EuiCopy, EuiButton } from '@elastic/eui';
 
 import type { TextEmbeddingInference } from './text_embedding_inference';
 
-export const getTextEmbeddingOutputComponent = (inferrer: TextEmbeddingInference) => () =>
-  <TextEmbeddingOutput inferrer={inferrer} />;
+export const getTextEmbeddingOutputComponent = (inferrer: TextEmbeddingInference) => (
+  <TextEmbeddingOutput inferrer={inferrer} />
+);
 
 const TextEmbeddingOutput: FC<{
   inferrer: TextEmbeddingInference;

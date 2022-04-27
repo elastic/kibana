@@ -10,6 +10,9 @@ import { InferenceBase } from '../inference_base';
 import { processResponse } from './common';
 import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
 
+import { getZeroShotClassificationInput } from './zero_shot_classification_input';
+import { getTextClassificationOutputComponent } from './text_classification_output';
+
 export class ZeroShotClassificationInference extends InferenceBase<TextClassificationResponse> {
   public labelsText$ = new BehaviorSubject<string>('');
 
@@ -47,5 +50,13 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
       this.setFinishedWithErrors(error);
       throw error;
     }
+  }
+
+  public getInputComponent(): JSX.Element {
+    return getZeroShotClassificationInput(this);
+  }
+
+  public getOutputComponent(): JSX.Element {
+    return getTextClassificationOutputComponent(this);
   }
 }

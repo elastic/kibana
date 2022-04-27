@@ -61,8 +61,7 @@ const UNKNOWN_ENTITY_TYPE = {
   borderColor: 'euiColorVis5',
 };
 
-export const getNerOutputComponent = (inferrer: NerInference) => () =>
-  <NerOutput inferrer={inferrer} />;
+export const getNerOutputComponent = (inferrer: NerInference) => <NerOutput inferrer={inferrer} />;
 
 const NerOutput: FC<{ inferrer: NerInference }> = ({ inferrer }) => {
   const { euiTheme } = useCurrentEuiTheme();

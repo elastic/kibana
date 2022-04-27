@@ -18,7 +18,6 @@ export type FormattedNerResponse = Array<{
 }>;
 
 export interface InferResponse<T, U> {
-  error?: any;
   inputText: string;
   response: T;
   rawResponse: U;
@@ -38,6 +37,13 @@ export abstract class InferenceBase<TInferResponse> {
   public inferenceError$ = new BehaviorSubject<any | null>(null);
   public runningState$ = new BehaviorSubject<RUNNING_STATE>(RUNNING_STATE.STOPPED);
 
+  constructor(
+    protected trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
+    protected model: estypes.MlTrainedModelConfig
+  ) {
+    this.inputField = model.input?.field_names[0] ?? DEFAULT_INPUT_FIELD;
+  }
+
   public setStopped() {
     this.inferenceError$.next(null);
     this.runningState$.next(RUNNING_STATE.STOPPED);
@@ -51,17 +57,13 @@ export abstract class InferenceBase<TInferResponse> {
     this.runningState$.next(RUNNING_STATE.FINISHED);
   }
 
-  public setFinishedWithErrors(error: any) {
+  public setFinishedWithErrors(error: Error) {
     this.inferenceError$.next(error);
     this.runningState$.next(RUNNING_STATE.FINISHED_WITH_ERRORS);
   }
 
-  constructor(
-    protected trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
-    protected model: estypes.MlTrainedModelConfig
-  ) {
-    this.inputField = model.input?.field_names[0] ?? DEFAULT_INPUT_FIELD;
-  }
+  protected abstract getInputComponent(): JSX.Element;
+  protected abstract getOutputComponent(): JSX.Element;
 
   protected abstract infer(): Promise<TInferResponse>;
 }

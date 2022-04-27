@@ -42,5 +42,6 @@ export const TextInput: FC<{
   );
 };
 
-export const getGeneralInputComponent = (inferrer: InferrerType, placeholder?: string) => () =>
-  <TextInput placeholder={placeholder} inferrer={inferrer} />;
+export const getGeneralInputComponent = (inferrer: InferrerType, placeholder?: string) => (
+  <TextInput placeholder={placeholder} inferrer={inferrer} />
+);

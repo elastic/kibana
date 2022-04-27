@@ -8,6 +8,8 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { InferenceBase, InferResponse } from '../inference_base';
+import { getGeneralInputComponent } from '../text_input';
+import { getLangIdentOutputComponent } from './lang_ident_output';
 
 export type FormattedLangIdentResponse = Array<{
   className: string;
@@ -77,5 +79,13 @@ export class LangIdentInference extends InferenceBase<LangIdentResponse> {
       this.setFinishedWithErrors(error);
       throw error;
     }
+  }
+
+  public getInputComponent() {
+    return getGeneralInputComponent(this);
+  }
+
+  public getOutputComponent() {
+    return getLangIdentOutputComponent(this);
   }
 }
