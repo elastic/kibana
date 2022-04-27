@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { RecentlyCreatedCasesTable } from './recent_cases_table';
+export { CasesTable } from './cases_table';

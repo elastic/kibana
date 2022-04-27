@@ -18,7 +18,7 @@ import { addError } from '../../../../common/store/app/actions';
 
 import * as i18n from '../translations';
 
-export interface RecentCaseItem {
+export interface CaseItem {
   name: string;
   note: string;
   createdAt: string;
@@ -27,24 +27,24 @@ export interface RecentCaseItem {
   id: string;
 }
 
-export interface UseRecentlyCreatedCasesProps {
+export interface UseCaseItemsProps {
   skip: boolean;
 }
 
-export type UseRecentlyCreatedCases = (props: UseRecentlyCreatedCasesProps) => {
-  items: RecentCaseItem[];
+export type UseCaseItems = (props: UseCaseItemsProps) => {
+  items: CaseItem[];
   isLoading: boolean;
   updatedAt: number;
 };
 
-export const useRecentlyCreatedCases: UseRecentlyCreatedCases = ({ skip }) => {
+export const useCaseItems: UseCaseItems = ({ skip }) => {
   const {
     services: { cases },
   } = useKibana();
   const { to, from } = useGlobalTime();
   const [isLoading, setIsLoading] = useState(true);
   const [updatedAt, setUpdatedAt] = useState(Date.now());
-  const [items, setItems] = useState<RecentCaseItem[]>([]);
+  const [items, setItems] = useState<CaseItem[]>([]);
 
   // This is a known issue of cases api, it doesn't accept date time format atm
   // Once they fix this problem we can remove this two lines
@@ -69,7 +69,7 @@ export const useRecentlyCreatedCases: UseRecentlyCreatedCases = ({ skip }) => {
         });
 
         if (isSubscribed) {
-          setItems(parseRecentCases(casesResponse as unknown as AllCases));
+          setItems(parseCases(casesResponse as unknown as AllCases));
           setUpdatedAt(Date.now());
         }
       } catch (error) {
@@ -99,11 +99,11 @@ export const useRecentlyCreatedCases: UseRecentlyCreatedCases = ({ skip }) => {
   return { items, isLoading, updatedAt };
 };
 
-function parseRecentCases(casesResponse: AllCases): RecentCaseItem[] {
+function parseCases(casesResponse: AllCases): CaseItem[] {
   const allCases = casesResponse.cases || [];
 
-  return allCases.reduce<RecentCaseItem[]>((accumalatedCases, currentCase) => {
-    accumalatedCases.push({
+  return allCases.reduce<CaseItem[]>((accumulated, currentCase) => {
+    accumulated.push({
       id: currentCase.id,
       name: currentCase.title,
       note: currentCase.description,
@@ -114,6 +114,6 @@ function parseRecentCases(casesResponse: AllCases): RecentCaseItem[] {
       status: currentCase.status,
     });
 
-    return accumalatedCases;
+    return accumulated;
   }, []);
 }

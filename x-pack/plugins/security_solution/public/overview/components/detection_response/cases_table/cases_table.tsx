@@ -29,21 +29,21 @@ import { useNavigation, NavigateTo, GetAppUrl } from '../../../../common/lib/kib
 import * as i18n from '../translations';
 import { LastUpdatedAt } from '../util';
 import { StatusBadge } from './status_badge';
-import { RecentCaseItem, useRecentlyCreatedCases } from './use_recent_cases_items';
+import { CaseItem, useCaseItems } from './use_case_items';
 
 type GetTableColumns = (params: {
   getAppUrl: GetAppUrl;
   navigateTo: NavigateTo;
-}) => Array<EuiBasicTableColumn<RecentCaseItem>>;
+}) => Array<EuiBasicTableColumn<CaseItem>>;
 
 const DETECTION_RESPONSE_RECENT_CASES_QUERY_ID = 'recentlyCreatedCasesQuery';
 
-export const RecentlyCreatedCasesTable = React.memo(() => {
+export const CasesTable = React.memo(() => {
   const { getAppUrl, navigateTo } = useNavigation();
   const { toggleStatus, setToggleStatus } = useQueryToggle(
     DETECTION_RESPONSE_RECENT_CASES_QUERY_ID
   );
-  const { items, isLoading, updatedAt } = useRecentlyCreatedCases({
+  const { items, isLoading, updatedAt } = useCaseItems({
     skip: !toggleStatus,
   });
 
@@ -61,11 +61,12 @@ export const RecentlyCreatedCasesTable = React.memo(() => {
       <EuiPanel hasBorder data-test-subj="recentlyCreatedCasesPanel">
         <HeaderSection
           id={DETECTION_RESPONSE_RECENT_CASES_QUERY_ID}
-          title={i18n.RECENT_CASES_SECTION_TITLE}
+          title={i18n.CASES_TABLE_SECTION_TITLE}
           titleSize="s"
           toggleStatus={toggleStatus}
           toggleQuery={setToggleStatus}
           subtitle={<LastUpdatedAt updatedAt={updatedAt} isUpdating={isLoading} />}
+          showInspectButton={false}
         />
 
         {toggleStatus && (
@@ -81,7 +82,7 @@ export const RecentlyCreatedCasesTable = React.memo(() => {
             />
             <EuiSpacer size="m" />
             <EuiButton data-test-subj="allCasesButton" onClick={navigateToCases}>
-              {i18n.VIEW_RECENT_CASES}
+              {i18n.VIEW_CASES}
             </EuiButton>
           </>
         )}
@@ -90,12 +91,12 @@ export const RecentlyCreatedCasesTable = React.memo(() => {
   );
 });
 
-RecentlyCreatedCasesTable.displayName = 'RecentlyCreatedCasesTable';
+CasesTable.displayName = 'CasesTable';
 
 const getTableColumns: GetTableColumns = () => [
   {
     field: 'id',
-    name: i18n.RECENTLY_CREATED_CASE_COLUMN_NAME,
+    name: i18n.CASES_TABLE_COLUMN_NAME,
     truncateText: true,
     textOnly: true,
     'data-test-subj': 'recentlyCreatedCaseName',
@@ -104,7 +105,7 @@ const getTableColumns: GetTableColumns = () => [
   },
   {
     field: 'note',
-    name: i18n.RECENTLY_CREATED_CASE_COLUMN_NOTE,
+    name: i18n.CASES_TABLE_COLUMN_NOTE,
     truncateText: true,
     textOnly: true,
     render: (note: string) => (
@@ -115,10 +116,10 @@ const getTableColumns: GetTableColumns = () => [
   },
   {
     field: 'createdAt',
-    name: i18n.RECENTLY_CREATED_CASE_COLUMN_TIME,
+    name: i18n.CASES_TABLE_COLUMN_TIME,
     render: (createdAt: string) => (
       <FormattedDate
-        fieldName={i18n.RECENTLY_CREATED_CASE_COLUMN_TIME}
+        fieldName={i18n.CASES_TABLE_COLUMN_TIME}
         value={createdAt}
         className="eui-textTruncate"
         dateFormat="MMMM D, YYYY"
@@ -128,7 +129,7 @@ const getTableColumns: GetTableColumns = () => [
   },
   {
     field: 'createdBy',
-    name: i18n.RECENTLY_CREATED_CASE_COLUMN_CREATED_BY,
+    name: i18n.CASES_TABLE_COLUMN_CREATED_BY,
     render: (createdBy: string) => (
       <EuiText data-test-subj="recentlyCreatedCaseCreatedBy" size="s">
         {createdBy}
@@ -137,7 +138,7 @@ const getTableColumns: GetTableColumns = () => [
   },
   {
     field: 'status',
-    name: i18n.RECENTLY_CREATED_CASE_COLUMN_STATUS,
+    name: i18n.CASES_TABLE_COLUMN_STATUS,
     render: (status: CaseStatuses) => <StatusBadge status={status} />,
     'data-test-subj': 'recentlyCreatedCaseStatus',
   },

@@ -16,16 +16,6 @@ interface Props {
   status: CaseStatuses;
 }
 
-export const StatusBadge: React.FC<Props> = ({ status }) => {
-  return (
-    <EuiBadge color={statuses[status].color} data-test-subj="case-status-badge">
-      {statuses[status].label}
-    </EuiBadge>
-  );
-};
-
-StatusBadge.displayName = 'StatusBadge';
-
 const statuses = {
   [CaseStatuses.open]: {
     color: 'primary',
@@ -39,4 +29,14 @@ const statuses = {
     color: 'default',
     label: i18n.STATUS_CLOSED,
   },
+} as const;
+
+export const StatusBadge: React.FC<Props> = ({ status }) => {
+  return (
+    <EuiBadge color={statuses[status].color} data-test-subj="case-status-badge">
+      {statuses[status].label}
+    </EuiBadge>
+  );
 };
+
+StatusBadge.displayName = 'StatusBadge';

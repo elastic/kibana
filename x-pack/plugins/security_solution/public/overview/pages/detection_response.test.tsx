@@ -11,11 +11,23 @@ import { render } from '@testing-library/react';
 import { DetectionResponse } from './detection_response';
 import { TestProviders } from '../../common/mock';
 
-jest.mock('../components/detection_response', () => ({
+jest.mock('../components/detection_response/alerts_by_status', () => ({
   AlertsByStatus: () => <div data-test-subj="mock_AlertsByStatus" />,
+}));
+
+jest.mock('../components/detection_response/cases_table', () => ({
+  CasesTable: () => <div data-test-subj="mock_CasesTable" />,
+}));
+
+jest.mock('../components/detection_response/host_alerts_table', () => ({
   HostAlertsTable: () => <div data-test-subj="mock_HostAlertsTable" />,
-  RecentlyCreatedCasesTable: () => <div data-test-subj="mock_RecentlyCreatedCasesTable" />,
+}));
+
+jest.mock('../components/detection_response/rule_alerts_table', () => ({
   RuleAlertsTable: () => <div data-test-subj="mock_RuleAlertsTable" />,
+}));
+
+jest.mock('../components/detection_response/user_alerts_table', () => ({
   UserAlertsTable: () => <div data-test-subj="mock_UserAlertsTable" />,
 }));
 
@@ -133,7 +145,7 @@ describe('DetectionResponse', () => {
     );
 
     expect(result.queryByTestId('detectionResponsePage')).toBeInTheDocument();
-    expect(result.queryByTestId('mock_RecentlyCreatedCasesTable')).toBeInTheDocument();
+    expect(result.queryByTestId('mock_CasesTable')).toBeInTheDocument();
 
     expect(result.queryByTestId('mock_RuleAlertsTable')).not.toBeInTheDocument();
     expect(result.queryByTestId('mock_HostAlertsTable')).not.toBeInTheDocument();
@@ -158,7 +170,7 @@ describe('DetectionResponse', () => {
     );
 
     expect(result.queryByTestId('detectionResponsePage')).toBeInTheDocument();
-    expect(result.queryByTestId('mock_RecentlyCreatedCasesTable')).toBeInTheDocument();
+    expect(result.queryByTestId('mock_CasesTable')).toBeInTheDocument();
 
     expect(result.queryByTestId('mock_RuleAlertsTable')).not.toBeInTheDocument();
     expect(result.queryByTestId('mock_HostAlertsTable')).not.toBeInTheDocument();
@@ -178,7 +190,7 @@ describe('DetectionResponse', () => {
       </TestProviders>
     );
 
-    expect(result.queryByTestId('mock_RecentlyCreatedCasesTable')).not.toBeInTheDocument();
+    expect(result.queryByTestId('mock_CasesTable')).not.toBeInTheDocument();
 
     expect(result.queryByTestId('detectionResponsePage')).toBeInTheDocument();
     expect(result.queryByTestId('mock_RuleAlertsTable')).toBeInTheDocument();

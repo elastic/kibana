@@ -10,9 +10,9 @@ import React from 'react';
 import { render } from '@testing-library/react';
 
 import { TestProviders } from '../../../../common/mock';
-import { parsedRecentCases } from './mock_data';
-import { RecentlyCreatedCasesTable } from './recent_cases_table';
-import type { UseRecentlyCreatedCases } from './use_recent_cases_items';
+import { parsedCasesItems } from './mock_data';
+import { CasesTable } from './cases_table';
+import type { UseCaseItems } from './use_case_items';
 
 const mockGetAppUrl = jest.fn();
 jest.mock('../../../../common/lib/kibana/hooks', () => {
@@ -25,32 +25,32 @@ jest.mock('../../../../common/lib/kibana/hooks', () => {
   };
 });
 
-type UseRecentlyCreatedCasesReturn = ReturnType<UseRecentlyCreatedCases>;
-const defaultRecentCaseItemsReturn: UseRecentlyCreatedCasesReturn = {
+type UseCaseItemsReturn = ReturnType<UseCaseItems>;
+const defaultCaseItemsReturn: UseCaseItemsReturn = {
   items: [],
   isLoading: false,
   updatedAt: Date.now(),
 };
-const mockUseRecentlyCreatedCases = jest.fn(() => defaultRecentCaseItemsReturn);
-const mockUseRecentlyCreatedCasesReturn = (overrides: Partial<UseRecentlyCreatedCasesReturn>) => {
-  mockUseRecentlyCreatedCases.mockReturnValueOnce({
-    ...defaultRecentCaseItemsReturn,
+const mockUseCaseItems = jest.fn(() => defaultCaseItemsReturn);
+const mockUseCaseItemsReturn = (overrides: Partial<UseCaseItemsReturn>) => {
+  mockUseCaseItems.mockReturnValueOnce({
+    ...defaultCaseItemsReturn,
     ...overrides,
   });
 };
 
-jest.mock('./use_recent_cases_items', () => ({
-  useRecentlyCreatedCases: () => mockUseRecentlyCreatedCases(),
+jest.mock('./use_case_items', () => ({
+  useCaseItems: () => mockUseCaseItems(),
 }));
 
 const renderComponent = () =>
   render(
     <TestProviders>
-      <RecentlyCreatedCasesTable />
+      <CasesTable />
     </TestProviders>
   );
 
-describe('RecentlyCreatedCasesTable', () => {
+describe('CasesTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -64,7 +64,7 @@ describe('RecentlyCreatedCasesTable', () => {
   });
 
   it('should render a loading table', () => {
-    mockUseRecentlyCreatedCasesReturn({ isLoading: true });
+    mockUseCaseItemsReturn({ isLoading: true });
     const { getByText, getByTestId } = renderComponent();
 
     expect(getByText('Updating...')).toBeInTheDocument();
@@ -73,14 +73,14 @@ describe('RecentlyCreatedCasesTable', () => {
   });
 
   it('should render the updated at subtitle', () => {
-    mockUseRecentlyCreatedCasesReturn({ isLoading: false });
+    mockUseCaseItemsReturn({ isLoading: false });
     const { getByText } = renderComponent();
 
     expect(getByText('Updated now')).toBeInTheDocument();
   });
 
   it('should render the table columns', () => {
-    mockUseRecentlyCreatedCasesReturn({ items: parsedRecentCases });
+    mockUseCaseItemsReturn({ items: parsedCasesItems });
     const { getAllByRole } = renderComponent();
 
     const columnHeaders = getAllByRole('columnheader');
@@ -92,7 +92,7 @@ describe('RecentlyCreatedCasesTable', () => {
   });
 
   it('should render the table items', () => {
-    mockUseRecentlyCreatedCasesReturn({ items: [parsedRecentCases[0]] });
+    mockUseCaseItemsReturn({ items: [parsedCasesItems[0]] });
     const { getByTestId } = renderComponent();
 
     expect(getByTestId('recentlyCreatedCaseName')).toHaveTextContent('sdcsd');

@@ -7,10 +7,10 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 
-import { mockRecentCasesResult, parsedRecentCases } from './mock_data';
-import { useRecentlyCreatedCases, UseRecentlyCreatedCasesProps } from './use_recent_cases_items';
+import { mockCasesResult, parsedCasesItems } from './mock_data';
+import { useCaseItems, UseCaseItemsProps } from './use_case_items';
 
-import type { UseRecentlyCreatedCases } from './use_recent_cases_items';
+import type { UseCaseItems } from './use_case_items';
 
 const dateNow = new Date('2022-04-08T12:00:00.000Z').valueOf();
 const mockDateNow = jest.fn().mockReturnValue(dateNow);
@@ -46,12 +46,12 @@ jest.mock('../../../../common/containers/use_global_time', () => {
   };
 });
 
-const renderUseRecentCasesItems = (overrides: Partial<UseRecentlyCreatedCasesProps> = {}) =>
-  renderHook<UseRecentlyCreatedCases, ReturnType<UseRecentlyCreatedCases>>(() =>
-    useRecentlyCreatedCases({ skip: false, ...overrides })
+const renderUseCaseItems = (overrides: Partial<UseCaseItemsProps> = {}) =>
+  renderHook<UseCaseItems, ReturnType<UseCaseItems>>(() =>
+    useCaseItems({ skip: false, ...overrides })
   );
 
-describe('useRecentCasesItems', () => {
+describe('useCaseItems', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockDateNow.mockReturnValue(dateNow);
@@ -60,7 +60,7 @@ describe('useRecentCasesItems', () => {
 
   it('should return default values', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderUseRecentCasesItems();
+      const { result, waitForNextUpdate } = renderUseCaseItems();
 
       await waitForNextUpdate();
       await waitForNextUpdate();
@@ -84,16 +84,16 @@ describe('useRecentCasesItems', () => {
   });
 
   it('should return parsed items', async () => {
-    mockCasesApi.mockReturnValue(mockRecentCasesResult);
+    mockCasesApi.mockReturnValue(mockCasesResult);
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderUseRecentCasesItems();
+      const { result, waitForNextUpdate } = renderUseCaseItems();
 
       await waitForNextUpdate();
       await waitForNextUpdate();
 
       expect(result.current).toEqual({
-        items: parsedRecentCases,
+        items: parsedCasesItems,
         isLoading: false,
         updatedAt: dateNow,
       });
@@ -104,17 +104,17 @@ describe('useRecentCasesItems', () => {
     const newDateNow = new Date('2022-04-08T14:00:00.000Z').valueOf();
     mockDateNow.mockReturnValue(newDateNow);
     mockDateNow.mockReturnValueOnce(dateNow);
-    mockCasesApi.mockReturnValue(mockRecentCasesResult);
+    mockCasesApi.mockReturnValue(mockCasesResult);
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderUseRecentCasesItems();
+      const { result, waitForNextUpdate } = renderUseCaseItems();
 
       await waitForNextUpdate();
       await waitForNextUpdate();
 
       expect(mockDateNow).toHaveBeenCalled();
       expect(result.current).toEqual({
-        items: parsedRecentCases,
+        items: parsedCasesItems,
         isLoading: false,
         updatedAt: newDateNow,
       });
@@ -122,7 +122,7 @@ describe('useRecentCasesItems', () => {
   });
 
   it('should skip the query', () => {
-    const { result } = renderUseRecentCasesItems({ skip: true });
+    const { result } = renderUseCaseItems({ skip: true });
 
     expect(result.current).toEqual({
       items: [],

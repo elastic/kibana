@@ -7,7 +7,7 @@
 
 import { CaseStatuses } from '@kbn/cases-plugin/common';
 
-export const mockRecentCasesResult = {
+export const mockCasesResult = {
   cases: [
     {
       id: '0ce2a510-c43a-11ec-98b5-3109bd2a1901',
@@ -132,7 +132,7 @@ export const mockRecentCasesResult = {
   ],
 };
 
-export const parsedRecentCases = [
+export const parsedCasesItems = [
   {
     name: 'sdcsd',
     note: 'klklk',
