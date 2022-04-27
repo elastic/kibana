@@ -23,6 +23,18 @@ import type { CiStatsTestGroupInfo, CiStatsTestRun } from './ci_stats_test_group
 
 const BASE_URL = 'https://ci-stats.kibana.dev';
 
+function limitMetaStrings(meta: CiStatsMetadata) {
+  return Object.fromEntries(
+    Object.entries(meta).map(([key, value]) => {
+      if (typeof value === 'string' && value.length > 2000) {
+        return [key, value.slice(0, 2000)];
+      }
+
+      return [key, value];
+    })
+  );
+}
+
 /** A ci-stats metric record */
 export interface CiStatsMetric {
   /** Top-level categorization for the metric, e.g. "page load bundle size" */
@@ -138,7 +150,14 @@ export class CiStatsReporter {
     }
 
     const buildId = this.config?.buildId;
-    const timings = options.timings;
+    const timings = options.timings.map((timing) =>
+      timing.meta
+        ? {
+            ...timing,
+            meta: limitMetaStrings(timing.meta),
+          }
+        : timing
+    );
     const upstreamBranch = options.upstreamBranch ?? this.getUpstreamBranch();
     const kibanaUuid = options.kibanaUuid === undefined ? this.getKibanaUuid() : options.kibanaUuid;
     let email;
