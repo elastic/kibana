@@ -558,4 +558,24 @@ describe('Executable filenames with wildcard PATHS', () => {
       })
     ).toEqual(false);
   });
+
+  it('should return FALSE when WINDOWS wildcards paths do not have a file name', () => {
+    expect(
+      hasSimpleExecutableName({
+        os: OperatingSystem.WINDOWS,
+        type: 'wildcard',
+        value: 'c:\\folder\\',
+      })
+    ).toEqual(false);
+  });
+
+  it('should TRUE when WINDOWS wildcards paths `type` is not `wildcard`', () => {
+    expect(
+      hasSimpleExecutableName({
+        os: OperatingSystem.WINDOWS,
+        type: 'match',
+        value: 'c:\\folder\\one.exe',
+      })
+    ).toEqual(true);
+  });
 });
