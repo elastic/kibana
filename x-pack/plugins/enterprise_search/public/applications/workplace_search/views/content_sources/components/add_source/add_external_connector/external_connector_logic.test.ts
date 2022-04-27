@@ -284,7 +284,6 @@ describe('ExternalConnectorLogic', () => {
         expect(saveExternalConnectorConfigSuccess).toHaveBeenCalled();
         expect(navigateToUrl).toHaveBeenCalledWith('/sources/add/share_point/external');
       });
-
       it('does not save the external connector config if url is invalid', async () => {
         const validSpy = jest.spyOn(ExternalConnectorLogic.actions, 'setUrlValidation');
         const saveExternalConnectorConfigSuccess = jest.spyOn(

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
-import { useValues } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import { EuiButton, EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -37,14 +37,21 @@ interface CardProps {
 }
 
 export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
-  sourceData: { name, categories, serviceType },
+  sourceData: { name, categories = [], serviceType },
 }) => {
   const externalConnectorAvailable = hasExternalConnectorOption(serviceType);
   const customConnectorAvailable = hasCustomConnectorOption(serviceType);
 
   const { isOrganization } = useValues(AppLogic);
 
+  const { initializeSources, resetSourcesState } = useActions(SourcesLogic);
+
   const { externalConfigured } = useValues(SourcesLogic);
+
+  useEffect(() => {
+    initializeSources();
+    return resetSourcesState;
+  }, []);
 
   const goToInternal = () =>
     KibanaLogic.values.navigateToUrl(`${getSourcesPath(getAddPath(serviceType), isOrganization)}/`);
@@ -167,7 +174,7 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
 
   return (
     <>
-      <AddSourceHeader name={name} serviceType={serviceType} categories={categories || []} />
+      <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />
       <EuiSpacer size="l" />
       <EuiFlexGroup justifyContent="flexStart" direction="row" responsive={false}>
         <ConnectorCard {...internalConnectorProps} />

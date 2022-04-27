@@ -29,7 +29,6 @@ import { AddCustomSourceLogic, AddCustomSourceSteps } from './add_custom_source_
 
 const CUSTOM_SOURCE_DATA_ITEM: SourceDataItem = {
   name: SOURCE_NAMES.CUSTOM,
-  iconName: SOURCE_NAMES.CUSTOM,
   serviceType: 'custom',
   configuration: {
     isPublicKey: false,

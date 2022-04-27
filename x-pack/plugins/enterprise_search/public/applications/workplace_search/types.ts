@@ -74,7 +74,6 @@ export interface Configuration {
 
 export interface SourceDataItem {
   name: string;
-  iconName: string;
   categories?: string[];
   serviceType: string;
   baseServiceType?: string;
@@ -242,7 +241,6 @@ export interface ContentSourceStatus {
 
 export interface Connector {
   serviceType: string;
-  baseServiceType?: string;
   name: string;
   configured: boolean;
   supportedByLicense: boolean;

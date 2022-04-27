@@ -60,7 +60,7 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({
 
   const {
     name,
-    categories,
+    categories = [],
     serviceType,
     baseServiceType,
     configuration: { applicationLinkTitle, applicationPortalUrl, documentationUrl },
@@ -126,7 +126,7 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({
     <AddSourceHeader
       name={name}
       serviceType={baseServiceType || serviceType}
-      categories={categories || []}
+      categories={categories}
     />
   );
   const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
