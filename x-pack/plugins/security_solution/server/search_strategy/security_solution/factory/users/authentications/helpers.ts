@@ -47,12 +47,12 @@ export const formatAuthenticationData = (hit: AuthenticationHit): Authentication
   };
 
   const lastSuccessFields = getAuthenticationFields(authenticationsFields, hit, 'lastSuccess');
-  if (lastSuccessFields) {
+  if (Object.keys(lastSuccessFields).length > 0) {
     flattenedFields = set('node.lastSuccess', lastSuccessFields, flattenedFields);
   }
 
   const lastFailureFields = getAuthenticationFields(authenticationsFields, hit, 'lasFailure');
-  if (lastSuccessFields) {
+  if (Object.keys(lastSuccessFields).length > 0) {
     flattenedFields = set('node.lastFailure', lastFailureFields, flattenedFields);
   }
 
