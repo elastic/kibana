@@ -176,7 +176,6 @@ steps:
     label: 'Checks'
     agents:
       queue: n2-2-spot
-    key: checks
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -187,7 +186,6 @@ steps:
     label: 'Check Types'
     agents:
       queue: n2-4-spot
-    key: checks
     timeout_in_minutes: 60
     retry:
       automatic:
