@@ -31,7 +31,6 @@ export class TextEmbeddingInference extends InferenceBase<TextEmbeddingResponse>
       const inputText = this.inputText$.value;
       const payload = {
         docs: { [this.inputField]: inputText },
-        // inference_config: { text_embedding: { num_top_classes: 5 } },
       };
       const resp = (await this.trainedModelsApi.inferTrainedModel(
         this.model.model_id,

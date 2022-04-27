@@ -81,11 +81,11 @@ export class LangIdentInference extends InferenceBase<LangIdentResponse> {
     }
   }
 
-  public getInputComponent() {
+  public getInputComponent(): JSX.Element {
     return getGeneralInputComponent(this);
   }
 
-  public getOutputComponent() {
+  public getOutputComponent(): JSX.Element {
     return getLangIdentOutputComponent(this);
   }
 }
