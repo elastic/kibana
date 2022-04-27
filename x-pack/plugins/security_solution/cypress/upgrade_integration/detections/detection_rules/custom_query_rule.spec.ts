@@ -116,7 +116,7 @@ describe('After an upgrade, the custom query rule', () => {
     cy.get(RULE_NAME).should('have.text', alert.rule);
     cy.get(SEVERITY).should('have.text', alert.severity);
     cy.get(RISK_SCORE).should('have.text', alert.riskScore);
-    cy.get(REASON).contains(expectedReason);
+    cy.get(REASON).should('have.text', expectedReason);
     cy.get(HOST_NAME).should('have.text', alert.hostName);
     cy.get(USER_NAME).should('have.text', alert.username);
     cy.get(PROCESS_NAME_COLUMN).eq(0).scrollIntoView();
