@@ -191,7 +191,10 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     },
     paramEditor: ({ layer, currentColumn, layerId, indexPattern, columnId, updateLayer }) => {
       const field = indexPattern.getFieldByName(currentColumn.sourceField);
-      if (!field?.indices.every((index) => index.time_series_metric)) {
+      if (
+        !currentColumn?.params?.aggregate &&
+        !field?.indices.every((index) => index.time_series_metric)
+      ) {
         return null;
       }
       const isShowAllDimensions = Object.values(layer.columns).some((c) => c.params?.allDimensions);

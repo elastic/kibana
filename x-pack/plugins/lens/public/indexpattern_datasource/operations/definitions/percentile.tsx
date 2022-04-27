@@ -244,7 +244,8 @@ export const percentileOperation: OperationDefinition<
 
     const field = indexPattern.getFieldByName(currentColumn.sourceField);
     const isShowAllDimensions = Object.values(layer.columns).some((c) => c.params?.allDimensions);
-    const isTSDB = field?.indices.every((index) => index.time_series_metric);
+    const isTSDB =
+      currentColumn?.params.aggregate || field?.indices.every((index) => index.time_series_metric);
 
     return (
       <>

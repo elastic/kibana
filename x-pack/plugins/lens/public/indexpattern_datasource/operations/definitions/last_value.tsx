@@ -318,7 +318,8 @@ export const lastValueOperation: OperationDefinition<
       updateLayer(updatedLayer);
     };
     const field = indexPattern.getFieldByName(currentColumn.sourceField);
-    const isTSDB = field?.indices.every((index) => index.time_series_metric);
+    const isTSDB =
+      currentColumn?.params.aggregate || field?.indices.every((index) => index.time_series_metric);
     const isShowAllDimensions = Object.values(layer.columns).some((c) => c.params?.allDimensions);
 
     return (
