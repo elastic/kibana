@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SimpleSavedObject } from 'src/core/public';
+import type { SimpleSavedObject } from '@kbn/core/public';
 
 import type { KibanaAssetType } from '../../../../../types';
 

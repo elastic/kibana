@@ -26,6 +26,10 @@ export interface InternalFieldConfig<T> {
   isIncludedInOutput?: boolean;
 }
 
+const errorsToString = (errors: ValidationError[]): string[] | null => {
+  return errors.length ? errors.map((error) => error.message) : null;
+};
+
 export const useField = <T, FormType = FormData, I = T>(
   form: FormHook<FormType>,
   path: string,
@@ -81,14 +85,13 @@ export const useField = <T, FormType = FormData, I = T>(
   const isMounted = useRef<boolean>(false);
   const validateCounter = useRef(0);
   const changeCounter = useRef(0);
-  const hasBeenReset = useRef<boolean>(false);
   const inflightValidation = useRef<ValidationCancelablePromise | null>(null);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
   // Keep a ref of the last state (value and errors) notified to the consumer so they don't get
   // loads of updates whenever they don't wrap the "onChange()" and "onError()" handlers with a useCallback
   // e.g. <UseField onChange={() => { // inline code }}
   const lastNotifiedState = useRef<{ value?: I; errors: string[] | null }>({
-    value: undefined,
+    value: initialValueDeserialized,
     errors: null,
   });
 
@@ -99,6 +102,9 @@ export const useField = <T, FormType = FormData, I = T>(
         : validations.some((validation) => validation.isAsync === true),
     [validations]
   );
+
+  const valueHasChanged = value !== lastNotifiedState.current.value;
+  const errorsHaveChanged = lastNotifiedState.current.errors !== errorsToString(errors);
 
   // ----------------------------------
   // -- HELPERS
@@ -519,8 +525,8 @@ export const useField = <T, FormType = FormData, I = T>(
         setStateErrors([]);
 
         if (resetValue) {
-          hasBeenReset.current = true;
           const newValue = deserializeValue(updatedDefaultValue ?? defaultValue);
+          lastNotifiedState.current.value = newValue;
           setValue(newValue);
           return newValue;
         }
@@ -604,36 +610,29 @@ export const useField = <T, FormType = FormData, I = T>(
   // might not be wrapped inside a "useCallback" and that would trigger a possible infinite
   // amount of effect executions.
   useEffect(() => {
-    if (!isMounted.current) {
+    if (!isMounted.current || value === undefined) {
       return;
     }
 
-    if (valueChangeListener && value !== lastNotifiedState.current.value) {
+    if (valueChangeListener && valueHasChanged) {
       valueChangeListener(value);
-      lastNotifiedState.current.value = value;
     }
-  }, [value, valueChangeListener]);
+  }, [value, valueHasChanged, valueChangeListener]);
 
   // Value change: update state and run validations
   useEffect(() => {
-    if (!isMounted.current) {
+    if (!isMounted.current || !valueHasChanged) {
       return;
     }
 
-    if (hasBeenReset.current) {
-      // If the field value has just been reset (triggering this useEffect)
-      // we don't want to set the "isPristine" state to true and validate the field
-      hasBeenReset.current = false;
-    } else {
-      setPristine(false);
-      setIsChangingValue(true);
+    setPristine(false);
+    setIsChangingValue(true);
 
-      runValidationsOnValueChange(() => {
-        if (isMounted.current) {
-          setIsChangingValue(false);
-        }
-      });
-    }
+    runValidationsOnValueChange(() => {
+      if (isMounted.current) {
+        setIsChangingValue(false);
+      }
+    });
 
     return () => {
       if (debounceTimeout.current) {
@@ -641,7 +640,7 @@ export const useField = <T, FormType = FormData, I = T>(
         debounceTimeout.current = null;
       }
     };
-  }, [value, runValidationsOnValueChange]);
+  }, [valueHasChanged, runValidationsOnValueChange]);
 
   // Value change: set "isModified" state
   useEffect(() => {
@@ -659,13 +658,18 @@ export const useField = <T, FormType = FormData, I = T>(
       return;
     }
 
-    const errorMessages = errors.length ? errors.map((error) => error.message) : null;
-
-    if (errorChangeListener && lastNotifiedState.current.errors !== errorMessages) {
-      errorChangeListener(errorMessages);
-      lastNotifiedState.current.errors = errorMessages;
+    if (errorChangeListener && errorsHaveChanged) {
+      errorChangeListener(errorsToString(errors));
     }
-  }, [errors, errorChangeListener]);
+  }, [errors, errorsHaveChanged, errorChangeListener]);
+
+  useEffect(() => {
+    lastNotifiedState.current.value = value;
+  }, [value]);
+
+  useEffect(() => {
+    lastNotifiedState.current.errors = errorsToString(errors);
+  }, [errors]);
 
   useEffect(() => {
     isMounted.current = true;

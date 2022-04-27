@@ -1,17 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ElasticAgentCard renders 1`] = `
-.emotion-0 {
-  max-width: 400px;
-  margin-inline: auto;
-}
-
 <SharedUxServicesProvider
   application={
     Object {
-      "currentAppId$": Observable {
-        "_isScalar": false,
-      },
+      "currentAppId$": Observable {},
       "navigateToUrl": [Function],
     }
   }
@@ -147,20 +140,12 @@ exports[`ElasticAgentCard renders 1`] = `
   <ElasticAgentCard>
     <ElasticAgentCardComponent
       canAccessFleet={true}
-      currentAppId$={
-        Observable {
-          "_isScalar": false,
-        }
-      }
+      currentAppId$={Observable {}}
       href="/app/integrations/browse"
       navigateToUrl={[Function]}
     >
       <RedirectAppLinks
-        currentAppId$={
-          Observable {
-            "_isScalar": false,
-          }
-        }
+        currentAppId$={Observable {}}
         navigateToUrl={[Function]}
       >
         <div>
@@ -197,15 +182,73 @@ exports[`ElasticAgentCard renders 1`] = `
                 onClick={[Function]}
                 paddingSize="l"
               >
+                <Insertion
+                  cache={
+                    Object {
+                      "insert": [Function],
+                      "inserted": Object {
+                        "1hu4pg0-EuiCard": true,
+                      },
+                      "key": "css",
+                      "nonce": undefined,
+                      "registered": Object {
+                        "css-1hu4pg0-EuiCard": "max-width:400px;margin-inline:auto;;label:EuiCard;",
+                      },
+                      "sheet": StyleSheet {
+                        "_alreadyInsertedOrderInsensitiveRule": true,
+                        "_insertTag": [Function],
+                        "before": null,
+                        "container": <head>
+                          <style
+                            data-emotion="css"
+                            data-s=""
+                          >
+                            
+                            .css-1hu4pg0-EuiCard{max-width:400px;margin-inline:auto;}
+                          </style>
+                          <style
+                            data-styled="active"
+                            data-styled-version="5.1.0"
+                          />
+                        </head>,
+                        "ctr": 1,
+                        "insertionPoint": undefined,
+                        "isSpeedy": false,
+                        "key": "css",
+                        "nonce": undefined,
+                        "prepend": undefined,
+                        "tags": Array [
+                          <style
+                            data-emotion="css"
+                            data-s=""
+                          >
+                            
+                            .css-1hu4pg0-EuiCard{max-width:400px;margin-inline:auto;}
+                          </style>,
+                        ],
+                      },
+                    }
+                  }
+                  isStringTag={false}
+                  serialized={
+                    Object {
+                      "map": undefined,
+                      "name": "1hu4pg0-EuiCard",
+                      "next": undefined,
+                      "styles": "max-width:400px;margin-inline:auto;;label:EuiCard;",
+                      "toString": [Function],
+                    }
+                  }
+                />
                 <EuiPanel
-                  className="euiCard euiCard--centerAligned euiCard--isClickable emotion-0"
+                  className="euiCard euiCard--centerAligned euiCard--isClickable css-1hu4pg0-EuiCard"
                   element="div"
                   hasShadow={true}
                   onClick={[Function]}
                   paddingSize="l"
                 >
                   <div
-                    className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable emotion-0"
+                    className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable css-1hu4pg0-EuiCard"
                     onClick={[Function]}
                   >
                     <div

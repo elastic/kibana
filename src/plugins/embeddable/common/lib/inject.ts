@@ -7,8 +7,8 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
+import { SavedObjectReference } from '@kbn/core/types';
 import { CommonEmbeddableStartContract, EmbeddableStateWithType } from '../types';
-import { SavedObjectReference } from '../../../../core/types';
 import { injectBaseEmbeddableInput } from './migrate_base_input';
 
 export const getInjectFunction = (embeddables: CommonEmbeddableStartContract) => {

@@ -6,11 +6,11 @@
  */
 
 import { OnlySearchSourceAlertParams } from '../types';
-import { createSearchSourceMock } from 'src/plugins/data/common/search/search_source/mocks';
+import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { updateSearchSource } from './fetch_search_source_query';
-import { stubbedSavedObjectIndexPattern } from '../../../../../../../src/plugins/data_views/common/data_view.stub';
-import { DataView } from '../../../../../../../src/plugins/data_views/common';
-import { fieldFormatsMock } from '../../../../../../../src/plugins/field_formats/common/mocks';
+import { stubbedSavedObjectIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { Comparator } from '../../../../common/comparator_types';
 
 const createDataView = () => {

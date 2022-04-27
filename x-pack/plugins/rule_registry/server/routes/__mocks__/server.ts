@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RequestHandler, RouteConfig, KibanaRequest } from 'src/core/server';
-import { httpServerMock, httpServiceMock } from 'src/core/server/mocks';
+import { RequestHandler, RouteConfig, KibanaRequest } from '@kbn/core/server';
+import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { RacRequestHandlerContext } from '../../types';
 import { requestContextMock } from './request_context';
 import { responseAdapter } from './response_adapters';

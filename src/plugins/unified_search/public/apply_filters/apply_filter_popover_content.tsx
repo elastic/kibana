@@ -19,13 +19,14 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
-import { getDisplayValueFromFilter, mapAndFlattenFilters } from '../../../data/public';
+import { getDisplayValueFromFilter, mapAndFlattenFilters } from '@kbn/data-plugin/public';
+import { Filter } from '@kbn/data-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { FilterLabel } from '../filter_bar';
-import { Filter, IIndexPattern } from '../../../data/common';
 
 interface Props {
   filters: Filter[];
-  indexPatterns: IIndexPattern[];
+  indexPatterns: DataView[];
   onCancel: () => void;
   onSubmit: (filters: Filter[]) => void;
 }

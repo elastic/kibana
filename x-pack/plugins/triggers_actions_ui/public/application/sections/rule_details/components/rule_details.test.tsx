@@ -18,7 +18,7 @@ import {
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
   ALERTS_FEATURE_ID,
-} from '../../../../../../alerting/common';
+} from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 
@@ -685,6 +685,7 @@ describe('broken connector indicator', () => {
       name: 'Test connector',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     },
     {
       secrets: {},
@@ -694,6 +695,7 @@ describe('broken connector indicator', () => {
       name: 'Test connector 2',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     },
   ]);
 

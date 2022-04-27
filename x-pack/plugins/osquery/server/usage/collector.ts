@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup, SavedObjectsClient } from '../../../../../src/core/server';
-import { CollectorFetchContext } from '../../../../../src/plugins/usage_collection/server';
+import { CoreSetup, SavedObjectsClient } from '@kbn/core/server';
+import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 import { getBeatUsage, getLiveQueryUsage, getPolicyLevelUsage } from './fetchers';
 import { CollectorDependencies, usageSchema, UsageData } from './types';
 
@@ -15,6 +15,7 @@ export const getInternalSavedObjectsClient = async (
   getStartServices: CoreSetup['getStartServices']
 ) => {
   const [coreStart] = await getStartServices();
+
   return new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
 };
 
@@ -22,6 +23,7 @@ export const registerCollector: RegisterCollector = ({ core, osqueryContext, usa
   if (!usageCollection) {
     return;
   }
+
   const collector = usageCollection.makeUsageCollector<UsageData>({
     type: 'osquery',
     schema: usageSchema,
