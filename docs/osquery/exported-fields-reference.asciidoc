@@ -8,6 +8,10 @@ The following fields can be returned in osquery results. Note the following abou
 
 For more information about osquery tables, see the https://osquery.io/schema[osquery schema documentation].
 
+[float]
+[[osquery-fields]]
+=== Fields
+
 *UUID* - keyword, text.text
 
 * _system_extensions.UUID_ - Extension unique id
