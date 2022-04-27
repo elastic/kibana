@@ -39,32 +39,16 @@ interface Props {
 
 export const SelectedModel: FC<Props> = ({ model }) => {
   const { trainedModels } = useMlApiContext();
-  // const [inputText, setInputText] = useState('');
-  // const [inputText2, setInputText2] = useState('');
-  // const [isRunning, setIsRunning] = useState(false);
 
   if (model === null) {
     return null;
   }
-
-  // const getComp = (getOutputComponent: any, getInputComponent: any) => {
-  //   return (
-  //     <InferenceInputForm
-  //       getOutputComponent={getOutputComponent}
-  //       getInputComponent={getInputComponent}
-  //       // infer={infer}
-  //       // isRunning={isRunning}
-  //       // setIsRunning={setIsRunning}
-  //     />
-  //   );
-  // };
 
   if (model.model_type === TRAINED_MODEL_TYPE.PYTORCH) {
     if (Object.keys(model.inference_config)[0] === SUPPORTED_PYTORCH_TASKS.NER) {
       const inferrer = new NerInference(trainedModels, model);
       // eslint-disable-next-line no-console
       console.log(222222);
-      // return <>{getComp(() => getNerOutputComponent, getGeneralInputComponent(inferrer))}</>;
       return (
         <InferenceInputForm
           inferrer={inferrer}

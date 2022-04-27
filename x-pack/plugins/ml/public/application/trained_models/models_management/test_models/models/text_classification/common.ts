@@ -5,10 +5,11 @@
  * 2.0.
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { InferResponse } from '../inference_base';
 
 const PROBABILITY_SIG_FIGS = 3;
 
-export interface TextClassificationResponse {
+export interface RawTextClassificationResponse {
   predicted_value: string;
   prediction_probability: number;
   top_classes?: Array<{
@@ -23,17 +24,16 @@ export type FormattedTextClassificationResponse = Array<{
   predictionProbability: number;
 }>;
 
-export interface InferResponse {
-  inputText: string;
-  response: FormattedTextClassificationResponse;
-  rawResponse: TextClassificationResponse;
-}
+export type TextClassificationResponse = InferResponse<
+  FormattedTextClassificationResponse,
+  RawTextClassificationResponse
+>;
 
 export function processResponse(
-  resp: TextClassificationResponse,
+  resp: RawTextClassificationResponse,
   model: estypes.MlTrainedModelConfig,
   inputText: string
-): InferResponse {
+): TextClassificationResponse {
   const labels: string[] =
     // @ts-expect-error inference config is wrong
     model.inference_config.text_classification?.classification_labels ?? [];

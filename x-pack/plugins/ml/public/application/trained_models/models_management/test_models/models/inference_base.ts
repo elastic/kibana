@@ -17,10 +17,44 @@ export type FormattedNerResponse = Array<{
   entity: estypes.MlTrainedModelEntities | null;
 }>;
 
+export interface InferResponse<T, U> {
+  error?: any;
+  inputText: string;
+  response: T;
+  rawResponse: U;
+}
+
+export enum RUNNING_STATE {
+  STOPPED,
+  RUNNING,
+  FINISHED,
+  FINISHED_WITH_ERRORS,
+}
+
 export abstract class InferenceBase<TInferResponse> {
   protected readonly inputField: string;
+  public inputText$ = new BehaviorSubject<string>('');
   public inferenceResult$ = new BehaviorSubject<TInferResponse | null>(null);
-  public isRunning$ = new BehaviorSubject<boolean>(false);
+  public inferenceError$ = new BehaviorSubject<any | null>(null);
+  public runningState$ = new BehaviorSubject<RUNNING_STATE>(RUNNING_STATE.STOPPED);
+
+  public setStopped() {
+    this.inferenceError$.next(null);
+    this.runningState$.next(RUNNING_STATE.STOPPED);
+  }
+  public setRunning() {
+    this.inferenceError$.next(null);
+    this.runningState$.next(RUNNING_STATE.RUNNING);
+  }
+
+  public setFinished() {
+    this.runningState$.next(RUNNING_STATE.FINISHED);
+  }
+
+  public setFinishedWithErrors(error: any) {
+    this.inferenceError$.next(error);
+    this.runningState$.next(RUNNING_STATE.FINISHED_WITH_ERRORS);
+  }
 
   constructor(
     protected trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
@@ -29,5 +63,5 @@ export abstract class InferenceBase<TInferResponse> {
     this.inputField = model.input?.field_names[0] ?? DEFAULT_INPUT_FIELD;
   }
 
-  protected abstract infer(inputText: string, inputText2?: string): Promise<TInferResponse>;
+  protected abstract infer(): Promise<TInferResponse>;
 }

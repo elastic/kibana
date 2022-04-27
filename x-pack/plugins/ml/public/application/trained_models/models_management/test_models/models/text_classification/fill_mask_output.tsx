@@ -13,21 +13,20 @@ import type { FillMaskInference } from '.';
 
 const MASK = '[MASK]';
 
-export const getFillMaskOutputComponent = (inferrer: FillMaskInference) => (inputText: string) =>
-  <FillMaskOutput inputText={inputText} inferrer={inferrer} />;
+export const getFillMaskOutputComponent = (inferrer: FillMaskInference) => () =>
+  <FillMaskOutput inferrer={inferrer} />;
 
 const FillMaskOutput: FC<{
-  inputText: string;
   inferrer: FillMaskInference;
-}> = ({ inferrer, inputText }) => {
+}> = ({ inferrer }) => {
   const result = useObservable(inferrer.inferenceResult$);
   if (!result) {
     return null;
   }
 
   const title = result.response[0]?.value
-    ? inputText.replace(MASK, result.response[0].value)
-    : inputText;
+    ? result.inputText.replace(MASK, result.response[0].value)
+    : result.inputText;
   return (
     <>
       <EuiTitle size="xs">

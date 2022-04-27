@@ -5,33 +5,47 @@
  * 2.0.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { InferenceBase } from '../inference_base';
 import { processResponse } from './common';
-import type { InferResponse, TextClassificationResponse } from './common';
+import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
 
-export class ZeroShotClassificationInference extends InferenceBase<InferResponse> {
-  public async infer(inputText: string, labelsText?: string) {
-    this.isRunning$.next(true);
-    const inputLabels = labelsText?.split(',').map((l) => l.trim());
-    const payload = {
-      docs: { [this.inputField]: inputText },
-      inference_config: {
-        zero_shot_classification: {
-          labels: inputLabels,
-          multi_label: false,
+export class ZeroShotClassificationInference extends InferenceBase<TextClassificationResponse> {
+  public labelsText$ = new BehaviorSubject<string>('');
+
+  public async infer() {
+    try {
+      this.setRunning();
+      const inputText = this.inputText$.value;
+      const labelsText = this.labelsText$.value;
+      const inputLabels = labelsText?.split(',').map((l) => l.trim());
+      const payload = {
+        docs: { [this.inputField]: inputText },
+        inference_config: {
+          zero_shot_classification: {
+            labels: inputLabels,
+            multi_label: false,
+          },
         },
-      },
-    };
-    const resp = (await this.trainedModelsApi.inferTrainedModel(
-      this.model.model_id,
-      payload,
-      '30s'
-    )) as unknown as TextClassificationResponse;
+      };
+      const resp = (await this.trainedModelsApi.inferTrainedModel(
+        this.model.model_id,
+        payload,
+        '30s'
+      )) as unknown as RawTextClassificationResponse;
 
-    const processedResponse = processResponse(resp, this.model, inputText);
-    this.inferenceResult$.next(processedResponse);
-    this.isRunning$.next(false);
+      const processedResponse: TextClassificationResponse = processResponse(
+        resp,
+        this.model,
+        inputText
+      );
+      this.inferenceResult$.next(processedResponse);
+      this.setFinished();
 
-    return processedResponse;
+      return processedResponse;
+    } catch (error) {
+      this.setFinishedWithErrors(error);
+      throw error;
+    }
   }
 }

@@ -7,30 +7,42 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { InferenceBase } from '../inference_base';
+import { InferenceBase, InferResponse } from '../inference_base';
 
 export type FormattedNerResponse = Array<{
   value: string;
   entity: estypes.MlTrainedModelEntities | null;
 }>;
 
-interface InferResponse {
-  response: FormattedNerResponse;
-  rawResponse: estypes.MlInferTrainedModelDeploymentResponse;
-  inputText: string;
-}
+export type NerResponse = InferResponse<
+  FormattedNerResponse,
+  estypes.MlInferTrainedModelDeploymentResponse
+>;
 
-export class NerInference extends InferenceBase<InferResponse> {
-  public async infer(inputText: string) {
-    this.isRunning$.next(true);
-    const payload = { docs: { [this.inputField]: inputText } };
-    const resp = await this.trainedModelsApi.inferTrainedModel(this.model.model_id, payload, '30s');
+export class NerInference extends InferenceBase<NerResponse> {
+  public async infer() {
+    try {
+      this.setRunning();
+      const inputText = this.inputText$.value;
+      const payload = { docs: { [this.inputField]: inputText } };
+      const resp = await this.trainedModelsApi.inferTrainedModel(
+        this.model.model_id,
+        payload,
+        '30s'
+      );
 
-    const processedResponse = { response: parseResponse(resp), rawResponse: resp, inputText };
-    this.inferenceResult$.next(processedResponse);
-    this.isRunning$.next(false);
-
-    return processedResponse;
+      const processedResponse: NerResponse = {
+        response: parseResponse(resp),
+        rawResponse: resp,
+        inputText,
+      };
+      this.inferenceResult$.next(processedResponse);
+      this.setFinished();
+      return processedResponse;
+    } catch (error) {
+      this.setFinishedWithErrors(error);
+      throw error;
+    }
   }
 }
 

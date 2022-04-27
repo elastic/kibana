@@ -7,9 +7,9 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { InferenceBase } from '../inference_base';
+import { InferenceBase, InferResponse } from '../inference_base';
 
-export interface TextEmbeddingResponse {
+export interface RawTextEmbeddingResponse {
   predicted_value: number[];
 }
 
@@ -17,35 +17,40 @@ export interface FormattedTextEmbeddingResponse {
   predictedValue: number[];
 }
 
-export interface InferResponse {
-  inputText: string;
-  response: FormattedTextEmbeddingResponse;
-  rawResponse: TextEmbeddingResponse;
-}
+export type TextEmbeddingResponse = InferResponse<
+  FormattedTextEmbeddingResponse,
+  RawTextEmbeddingResponse
+>;
 
-export class TextEmbeddingInference extends InferenceBase<InferResponse> {
-  public async infer(inputText: string) {
-    this.isRunning$.next(true);
-    const payload = {
-      docs: { [this.inputField]: inputText },
-      // inference_config: { text_embedding: { num_top_classes: 5 } },
-    };
-    const resp = (await this.trainedModelsApi.inferTrainedModel(
-      this.model.model_id,
-      payload,
-      '30s'
-    )) as unknown as TextEmbeddingResponse;
+export class TextEmbeddingInference extends InferenceBase<TextEmbeddingResponse> {
+  public async infer() {
+    try {
+      this.setRunning();
+      const inputText = this.inputText$.value;
+      const payload = {
+        docs: { [this.inputField]: inputText },
+        // inference_config: { text_embedding: { num_top_classes: 5 } },
+      };
+      const resp = (await this.trainedModelsApi.inferTrainedModel(
+        this.model.model_id,
+        payload,
+        '30s'
+      )) as unknown as RawTextEmbeddingResponse;
 
-    const processedResponse = processResponse(resp, this.model, inputText);
-    this.inferenceResult$.next(processedResponse);
-    this.isRunning$.next(false);
+      const processedResponse: TextEmbeddingResponse = processResponse(resp, this.model, inputText);
+      this.inferenceResult$.next(processedResponse);
+      this.setFinished();
 
-    return processedResponse;
+      return processedResponse;
+    } catch (error) {
+      this.setFinishedWithErrors(error);
+      throw error;
+    }
   }
 }
 
 function processResponse(
-  resp: TextEmbeddingResponse,
+  resp: RawTextEmbeddingResponse,
   model: estypes.MlTrainedModelConfig,
   inputText: string
 ) {

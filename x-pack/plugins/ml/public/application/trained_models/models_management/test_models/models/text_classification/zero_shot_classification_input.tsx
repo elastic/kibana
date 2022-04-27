@@ -13,18 +13,18 @@ import { EuiSpacer, EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 import { TextInput } from '../text_input';
 import { ZeroShotClassificationInference } from './zero_shot_classification_inference';
+import { RUNNING_STATE } from '../inference_base';
 
 const ClassNameInput: FC<{
-  setExternalInputText: (inputText: string) => void;
   inferrer: ZeroShotClassificationInference;
-}> = ({ setExternalInputText, inferrer }) => {
-  const [inputText, setInputText] = useState('');
+}> = ({ inferrer }) => {
+  const [labelsText, setLabelsText] = useState('');
 
   useEffect(() => {
-    setExternalInputText(inputText);
-  }, [inputText]);
+    inferrer.labelsText$.next(labelsText);
+  }, [labelsText]);
 
-  const isRunning = useObservable(inferrer.isRunning$);
+  const runningState = useObservable(inferrer.runningState$);
   return (
     <EuiFormRow
       label={i18n.translate(
@@ -35,11 +35,11 @@ const ClassNameInput: FC<{
       )}
     >
       <EuiFieldText
-        value={inputText}
-        disabled={isRunning === true}
+        value={labelsText}
+        disabled={runningState === RUNNING_STATE.RUNNING}
         fullWidth
         onChange={(e) => {
-          setInputText(e.target.value);
+          setLabelsText(e.target.value);
         }}
       />
     </EuiFormRow>
@@ -47,25 +47,11 @@ const ClassNameInput: FC<{
 };
 
 export const getZeroShotClassificationInput =
-  (inferrer: ZeroShotClassificationInference, placeholder?: string) => () => {
-    let inputText = '';
-    let inputText2 = '';
-
-    return {
-      inputComponent: (
-        <>
-          <TextInput
-            placeholder={placeholder}
-            setExternalInputText={(txt: string) => (inputText = txt)}
-            inferrer={inferrer}
-          />
-          <EuiSpacer />
-          <ClassNameInput
-            setExternalInputText={(txt: string) => (inputText2 = txt)}
-            inferrer={inferrer}
-          />
-        </>
-      ),
-      infer: () => inferrer.infer(inputText, inputText2),
-    };
-  };
+  (inferrer: ZeroShotClassificationInference, placeholder?: string) => () =>
+    (
+      <>
+        <TextInput placeholder={placeholder} inferrer={inferrer} />
+        <EuiSpacer />
+        <ClassNameInput inferrer={inferrer} />
+      </>
+    );

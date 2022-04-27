@@ -7,24 +7,34 @@
 
 import { InferenceBase } from '../inference_base';
 import { processResponse } from './common';
-import type { InferResponse, TextClassificationResponse } from './common';
+import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
 
-export class TextClassificationInference extends InferenceBase<InferResponse> {
-  public async infer(inputText: string) {
-    this.isRunning$.next(true);
-    const payload = {
-      docs: { [this.inputField]: inputText },
-    };
-    const resp = (await this.trainedModelsApi.inferTrainedModel(
-      this.model.model_id,
-      payload,
-      '30s'
-    )) as unknown as TextClassificationResponse;
+export class TextClassificationInference extends InferenceBase<TextClassificationResponse> {
+  public async infer() {
+    try {
+      this.setRunning();
+      const inputText = this.inputText$.value;
+      const payload = {
+        docs: { [this.inputField]: inputText },
+      };
+      const resp = (await this.trainedModelsApi.inferTrainedModel(
+        this.model.model_id,
+        payload,
+        '30s'
+      )) as unknown as RawTextClassificationResponse;
 
-    const processedResponse = processResponse(resp, this.model, inputText);
-    this.inferenceResult$.next(processedResponse);
-    this.isRunning$.next(false);
+      const processedResponse: TextClassificationResponse = processResponse(
+        resp,
+        this.model,
+        inputText
+      );
+      this.inferenceResult$.next(processedResponse);
+      this.setFinished();
 
-    return processedResponse;
+      return processedResponse;
+    } catch (error) {
+      this.setFinishedWithErrors(error);
+      throw error;
+    }
   }
 }

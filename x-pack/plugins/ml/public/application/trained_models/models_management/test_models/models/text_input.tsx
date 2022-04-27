@@ -9,33 +9,20 @@ import React, { FC, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiTextArea } from '@elastic/eui';
-import { NerInference } from './ner';
-import {
-  TextClassificationInference,
-  ZeroShotClassificationInference,
-  FillMaskInference,
-} from './text_classification';
-import { TextEmbeddingInference } from './text_embedding';
-import { LangIdentInference } from './lang_ident';
+import { RUNNING_STATE } from './inference_base';
+import type { InferrerType } from '.';
 
 export const TextInput: FC<{
   placeholder?: string;
-  setExternalInputText: (inputText: string) => void;
-  inferrer:
-    | NerInference
-    | TextClassificationInference
-    | TextEmbeddingInference
-    | ZeroShotClassificationInference
-    | FillMaskInference
-    | LangIdentInference;
-}> = ({ placeholder, setExternalInputText, inferrer }) => {
+  inferrer: InferrerType;
+}> = ({ placeholder, inferrer }) => {
   const [inputText, setInputText] = useState('');
 
   useEffect(() => {
-    setExternalInputText(inputText);
+    inferrer.inputText$.next(inputText);
   }, [inputText]);
 
-  const isRunning = useObservable(inferrer.isRunning$);
+  const runningState = useObservable(inferrer.runningState$);
 
   return (
     <EuiTextArea
@@ -46,7 +33,7 @@ export const TextInput: FC<{
         })
       }
       value={inputText}
-      disabled={isRunning}
+      disabled={runningState === RUNNING_STATE.RUNNING}
       fullWidth
       onChange={(e) => {
         setInputText(e.target.value);
@@ -55,28 +42,5 @@ export const TextInput: FC<{
   );
 };
 
-export const getGeneralInputComponent =
-  (
-    inferrer:
-      | NerInference
-      | TextClassificationInference
-      | TextEmbeddingInference
-      | ZeroShotClassificationInference
-      | FillMaskInference
-      | LangIdentInference,
-    placeholder?: string
-  ) =>
-  () => {
-    let inputText = '';
-
-    return {
-      inputComponent: (
-        <TextInput
-          placeholder={placeholder}
-          setExternalInputText={(txt: string) => (inputText = txt)}
-          inferrer={inferrer}
-        />
-      ),
-      infer: () => inferrer.infer(inputText),
-    };
-  };
+export const getGeneralInputComponent = (inferrer: InferrerType, placeholder?: string) => () =>
+  <TextInput placeholder={placeholder} inferrer={inferrer} />;
