@@ -141,6 +141,8 @@ exports[`#start() returns \`Context\` component 1`] = `
           "euiImage.openImage": [Function],
           "euiLink.external.ariaLabel": "External link",
           "euiLink.newTarget.screenReaderOnlyText": "(opens in a new tab or window)",
+          "euiMark.highlightEnd": "highlight end",
+          "euiMark.highlightStart": "highlight start",
           "euiMarkdownEditorFooter.closeButton": "Close",
           "euiMarkdownEditorFooter.errorsTitle": "Errors",
           "euiMarkdownEditorFooter.mdSyntaxLink": "GitHub flavored markdown",

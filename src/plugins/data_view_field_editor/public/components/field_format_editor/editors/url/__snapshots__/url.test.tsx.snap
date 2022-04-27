@@ -3,7 +3,7 @@
 exports[`UrlFormatEditor should render normally 1`] = `
 <div>
   <div
-    class="euiFormRow"
+    class="euiFormRow euiFormRow--hasLabel"
     id="generated-id-row"
   >
     <div
@@ -67,7 +67,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     </div>
   </div>
   <div
-    class="euiFormRow"
+    class="euiFormRow euiFormRow--hasLabel"
     id="generated-id-row"
   >
     <div
@@ -129,7 +129,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     </div>
   </div>
   <div
-    class="euiFormRow"
+    class="euiFormRow euiFormRow--hasLabel"
     id="generated-id-row"
   >
     <div
@@ -194,7 +194,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     </div>
   </div>
   <div
-    class="euiFormRow"
+    class="euiFormRow euiFormRow--hasLabel"
     id="generated-id-row"
   >
     <div
@@ -259,7 +259,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     </div>
   </div>
   <div
-    class="euiFormRow"
+    class="euiFormRow euiFormRow--hasLabel"
     id="generated-id-row"
   >
     <div

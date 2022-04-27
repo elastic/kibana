@@ -40,7 +40,6 @@ describe('AddFilterButton component', () => {
         panelPaddingSize="none"
       >
         <EuiContextMenuPanel
-          hasFocus={true}
           items={
             Array [
               <EuiContextMenuItem
@@ -107,7 +106,6 @@ describe('AddFilterButton component', () => {
         panelPaddingSize="none"
       >
         <EuiContextMenuPanel
-          hasFocus={true}
           items={
             Array [
               <EuiContextMenuItem
@@ -161,7 +159,6 @@ describe('AddFilterButton component', () => {
         panelPaddingSize="none"
       >
         <EuiContextMenuPanel
-          hasFocus={true}
           items={Array []}
         />
       </EuiPopover>

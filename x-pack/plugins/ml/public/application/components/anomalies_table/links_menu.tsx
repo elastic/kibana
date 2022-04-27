@@ -639,8 +639,8 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
   return (
     <EuiContextMenuPanel
-      hasFocus={discoverUrlError !== undefined || !!openInDiscoverUrl}
       items={contextMenuItems}
+      watchedItemProps={['disabled', 'href']} // Ensures the 'View in Discover' link rerenders when loading completes
       data-test-subj="mlAnomaliesListRowActionsMenu"
     />
   );
