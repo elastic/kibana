@@ -82,6 +82,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           new EntityArrayIterable(kiwiEventsAsArray).merge(appleEvents)
         );
       });
+
+      after(() => synthtraceEsClient.clean());
+
       describe('should span links details', async () => {
         let spanLinksDetails: Awaited<ReturnType<typeof getSpanDetails>>['body'];
         before(async () => {

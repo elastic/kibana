@@ -4718,6 +4718,7 @@ export const traceWithErrors = {
       },
     },
   ],
+  outgoingSpanLinks: {},
 } as unknown as TraceAPIResponse;
 
 export const traceChildStartBeforeParent = {

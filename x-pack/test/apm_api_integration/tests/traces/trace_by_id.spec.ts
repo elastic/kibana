@@ -87,6 +87,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await synthtraceEsClient.index(new EntityArrayIterable(entities));
     });
 
+    after(() => synthtraceEsClient.clean());
+
     describe('return trace', () => {
       let traces: Awaited<ReturnType<typeof fetchTraces>>['body'];
       before(async () => {
