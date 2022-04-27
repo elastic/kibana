@@ -49,7 +49,7 @@ describe('sendRequest', () => {
     expect(mockedSendRequest).toHaveBeenCalledTimes(1);
   });
 
-  describe('with multiple requests', function () {
+  describe('with multiple requests', () => {
     it('should return results with exceptions', async () => {
       mockedSendRequest.mockResolvedValue([
         {
