@@ -5,68 +5,68 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { getSearch } from '../components/navigation/helpers';
-import { useKibana, useNavigation } from '../lib/kibana';
-import { CASES_FEATURE_ID, SERVER_APP_ID } from '../../../common/constants';
-import { NavTab } from './types';
-import { useRouteSpy } from '../utils/route/use_route_spy';
-import { makeMapStateToProps } from '../components/url_state/helpers';
-import { useDeepEqualSelector } from '../hooks/use_selector';
+import { AppDeepLink, AppNavLinkStatus, Capabilities } from '@kbn/core/public';
+import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import { get } from 'lodash';
+import { ExperimentalFeatures } from '../../../common/experimental_features';
+import { appLinks } from './structure';
+import { LinkItem, Feature } from './types';
+interface LinkProps {
+  enableExperimental: ExperimentalFeatures;
+  isBasic: boolean;
+  capabilities?: Capabilities;
+}
 
-export const useNavLinks = () => {
-  const [routeProps] = useRouteSpy();
-  const urlMapState = makeMapStateToProps();
-  const { urlState } = useDeepEqualSelector(urlMapState);
-  const {
-    chrome,
-    application: { getUrlForApp, navigateToUrl },
-  } = useKibana().services;
+const createDeepLink = (link: LinkItem, linkProps?: LinkProps): AppDeepLink => ({
+  ...(link.items && link.items.length ? { deepLinks: reduceDeepLinks(link.items, linkProps) } : {}),
+  ...(link.icon != null ? { euiIconType: link.icon } : {}),
+  ...(link.image != null ? { icon: link.image } : {}),
+  id: link.id,
+  ...(link.globalSearchKeywords != null ? { keywords: link.globalSearchKeywords } : {}),
+  ...(link.globalNavEnabled != null
+    ? { navLinkStatus: link.globalNavEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden }
+    : {}),
+  ...(link.globalNavOrder != null ? { order: link.globalNavOrder } : {}),
+  path: link.url,
+  ...(link.globalSearchEnabled != null ? { searchable: link.globalSearchEnabled } : {}),
+  title: link.label,
+});
 
-  const { detailName, flowTarget, pageName, pathName, search, state, tabName } = routeProps;
-  const uiCapabilities = useKibana().services.application.capabilities;
-  const { navigateTo, getAppUrl } = useNavigation();
-  const getSideNav = useCallback(
-    (tab: NavTab) => {
-      const { id, name, disabled } = tab;
-      const isSelected = selectedTabId === id;
-      const urlSearch = getSearch(tab, urlStateProps);
-
-      const handleClick = (ev: React.MouseEvent) => {
-        ev.preventDefault();
-        navigateTo({ deepLinkId: id, path: urlSearch });
-      };
-
-      const appHref = getAppUrl({ deepLinkId: id, path: urlSearch });
-
-      return {
-        'data-href': appHref,
-        'data-test-subj': `navigation-${id}`,
-        disabled,
-        href: appHref,
-        id,
-        isSelected,
-        name,
-        onClick: handleClick,
-      };
-    },
-    [getAppUrl, navigateTo, selectedTabId, urlStateProps]
-  );
-  const navTabs = useMemo(() => (uiCapabilities.siem.show ? [] : []), [uiCapabilities.siem.show]);
-  const primaryNavigationItems = useMemo(
-    () =>
-      navTabs.map((item) => ({
-        ...item,
-        items: item.items.map((t: NavTab) => getSideNav(t)),
-      })),
-    [getSideNav, navTabs]
-  );
-
-  return { navTabs };
+const hasFeaturesCapability = (
+  features: Feature[] | undefined,
+  capabilities: Capabilities
+): boolean => {
+  if (!features) {
+    return true;
+  }
+  return features.some((featureKey) => get(capabilities, featureKey, false));
 };
 
-export const FEATURE = {
-  general: `${SERVER_APP_ID}.show`,
-  casesRead: `${CASES_FEATURE_ID}.read_cases`,
-  casesCrud: `${CASES_FEATURE_ID}.crud_cases`,
-} as const;
+const reduceDeepLinks = (links: LinkItem[], linkProps?: LinkProps): AppDeepLink[] =>
+  links.reduce((deepLinks: AppDeepLink[], link: LinkItem) => {
+    if (
+      linkProps != null &&
+      ((linkProps.isBasic && link.isPremium) ||
+        (link.hideWhenExperimentalKey != null &&
+          linkProps.enableExperimental[link.hideWhenExperimentalKey]) ||
+        (link.experimentalKey != null && !linkProps.enableExperimental[link.experimentalKey]) ||
+        (linkProps.capabilities != null &&
+          !hasFeaturesCapability(link.features, linkProps.capabilities)))
+    ) {
+      return deepLinks;
+    }
+    return [...deepLinks, createDeepLink(link, linkProps)];
+  }, []);
+
+export const getInitialDeepLinks = (): AppDeepLink[] => {
+  return appLinks.map((link) => createDeepLink(link));
+};
+
+export const getDeepLinks = (
+  enableExperimental: ExperimentalFeatures,
+  licenseType?: LicenseType,
+  capabilities?: Capabilities
+): AppDeepLink[] => {
+  const isBasic = licenseType === 'basic';
+  return reduceDeepLinks(appLinks, { enableExperimental, isBasic, capabilities });
+};

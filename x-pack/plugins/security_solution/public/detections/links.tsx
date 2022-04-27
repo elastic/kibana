@@ -5,64 +5,58 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { AppNavLinkStatus } from '@kbn/core/public';
-import { SecurityPageName } from '../../common/constants';
-import { FEATURE } from '../common/links';
+import { ALERTS_PATH, RULES_PATH, EXCEPTIONS_PATH, SecurityPageName } from '../../common/constants';
 import { ALERTS, DETECT, EXCEPTIONS, RULES } from '../app/translations';
+import { LinkItem, FEATURE } from '../common/links/types';
 
-export const DETECTIONS_PATH = '/detections' as const;
-export const ALERTS_PATH = '/alerts' as const;
-export const RULES_PATH = '/rules' as const;
-export const EXCEPTIONS_PATH = '/exceptions' as const;
-
-export const linksConfig = {
+export const links: LinkItem = {
   id: SecurityPageName.detections,
-  title: DETECT,
-  path: ALERTS_PATH,
-  navLinkStatus: AppNavLinkStatus.hidden,
+  label: DETECT,
+  url: ALERTS_PATH,
+  globalNavEnabled: false,
   features: [FEATURE.general],
-  keywords: [
+  globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.search.detect', {
       defaultMessage: 'Detect',
     }),
   ],
-  deepLinks: [
+  items: [
     {
       id: SecurityPageName.alerts,
-      title: ALERTS,
-      path: ALERTS_PATH,
-      navLinkStatus: AppNavLinkStatus.visible,
-      keywords: [
+      label: ALERTS,
+      url: ALERTS_PATH,
+      globalNavEnabled: true,
+      globalSearchKeywords: [
         i18n.translate('xpack.securitySolution.search.alerts', {
           defaultMessage: 'Alerts',
         }),
       ],
-      searchable: true,
-      order: 9001,
+      globalSearchEnabled: true,
+      globalNavOrder: 9001,
     },
     {
       id: SecurityPageName.rules,
-      title: RULES,
-      path: RULES_PATH,
-      navLinkStatus: AppNavLinkStatus.hidden,
-      keywords: [
+      label: RULES,
+      url: RULES_PATH,
+      globalNavEnabled: false,
+      globalSearchKeywords: [
         i18n.translate('xpack.securitySolution.search.rules', {
           defaultMessage: 'Rules',
         }),
       ],
-      searchable: true,
+      globalSearchEnabled: true,
     },
     {
       id: SecurityPageName.exceptions,
-      title: EXCEPTIONS,
-      path: EXCEPTIONS_PATH,
-      navLinkStatus: AppNavLinkStatus.hidden,
-      keywords: [
+      label: EXCEPTIONS,
+      url: EXCEPTIONS_PATH,
+      globalNavEnabled: false,
+      globalSearchKeywords: [
         i18n.translate('xpack.securitySolution.search.exceptions', {
           defaultMessage: 'Exception lists',
         }),
       ],
-      searchable: true,
+      globalSearchEnabled: true,
     },
   ],
 };
