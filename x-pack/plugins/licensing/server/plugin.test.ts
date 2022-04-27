@@ -11,12 +11,8 @@ import moment from 'moment';
 import { LicenseType } from '../common/types';
 import { ElasticsearchError } from './types';
 import { LicensingPlugin } from './plugin';
-import {
-  coreMock,
-  elasticsearchServiceMock,
-  loggingSystemMock,
-} from '../../../../src/core/server/mocks';
-import { IClusterClient } from '../../../../src/core/server';
+import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { IClusterClient } from '@kbn/core/server';
 import { firstValueFrom } from 'rxjs';
 
 function buildRawLicense(

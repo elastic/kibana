@@ -7,7 +7,7 @@
  */
 
 import ace from 'brace';
-import { XJsonHighlightRules } from '../index';
+import { XJsonHighlightRules } from '..';
 import { workerModule } from './worker';
 
 const { WorkerClient } = ace.acequire('ace/worker/worker_client');

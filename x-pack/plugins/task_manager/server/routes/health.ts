@@ -11,13 +11,13 @@ import {
   KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
-} from 'kibana/server';
-import { IClusterClient } from 'src/core/server';
+} from '@kbn/core/server';
+import { IClusterClient } from '@kbn/core/server';
 import { Observable, Subject } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { throttleTime } from 'rxjs/operators';
-import { UsageCounter } from 'src/plugins/usage_collection/server';
-import { Logger, ServiceStatus, ServiceStatusLevels } from '../../../../../src/core/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { Logger, ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
 import {
   MonitoringStats,
   summarizeMonitoringStats,

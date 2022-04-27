@@ -7,11 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 
+import type { ExternalRouteDeps } from '.';
 import { ALL_SPACES_ID } from '../../../../common/constants';
 import { wrapError } from '../../../lib/errors';
 import { SPACE_ID_REGEX } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';
-import type { ExternalRouteDeps } from './';
 
 export function initUpdateObjectsSpacesApi(deps: ExternalRouteDeps) {
   const { externalRouter, getStartServices } = deps;

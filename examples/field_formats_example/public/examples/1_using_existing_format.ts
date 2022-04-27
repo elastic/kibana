@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SerializedFieldFormat } from '../../../../src/plugins/field_formats/common';
-import { FieldFormatsStart } from '../../../../src/plugins/field_formats/public';
+import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 // 1. Assume we have an existing field format configuration serialized and saved somewhere
 // In this case it is `bytes` field formatter with a configured `'0.00b'` pattern

@@ -13,7 +13,7 @@ import {
   RouteValidationFunction,
   RouteValidationResultFactory,
   RouteValidationError,
-} from '../../../../../../src/core/server';
+} from '@kbn/core/server';
 import { excess, GenericIntersectionC } from '../runtime_types';
 
 type RequestValidationResult<T> =

@@ -11,7 +11,7 @@ const webpack = require('webpack');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-const UiSharedDepsNpm = require('./src/index');
+const UiSharedDepsNpm = require('./src');
 
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 const WEBPACK_SRC = require.resolve('webpack');
@@ -37,6 +37,10 @@ module.exports = (_, argv) => {
         'regenerator-runtime/runtime',
         'whatwg-fetch',
         'symbol-observable',
+        // Parts of node-libs-browser that are used in many places across Kibana
+        'buffer',
+        'punycode',
+        'util',
 
         /**
          * babel runtime helpers referenced from entry chunks

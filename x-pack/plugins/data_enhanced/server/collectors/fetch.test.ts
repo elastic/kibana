@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectsErrorHelpers, Logger } from '../../../../../src/core/server';
+import { SavedObjectsErrorHelpers, Logger } from '@kbn/core/server';
 import { fetchProvider } from './fetch';
-import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 describe('fetchProvider', () => {
   let fetchFn: any;

@@ -9,7 +9,7 @@ import path from 'path';
 
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
-import type { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 
 import { getExperimentalAllowedValues, isValidExperimentalValue } from '../common';
 const allowedExperimentalValues = getExperimentalAllowedValues();
@@ -42,6 +42,7 @@ export type {
   PostPackagePolicyDeleteCallback,
   PostPackagePolicyCreateCallback,
   FleetRequestHandlerContext,
+  PostPackagePolicyPostCreateCallback,
 } from './types';
 export { AgentNotFoundError, FleetUnauthorizedError } from './errors';
 

@@ -10,6 +10,11 @@ import rison from 'rison-node';
 import { Duration } from 'moment/moment';
 import { memoize } from 'lodash';
 import type { MlDatafeed } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  FIELD_FORMAT_IDS,
+  IFieldFormat,
+  SerializedFieldFormat,
+} from '@kbn/field-formats-plugin/common';
 import { MlClient } from '../ml_client';
 import {
   MlAnomalyDetectionAlertParams,
@@ -32,11 +37,6 @@ import { getTopNBuckets, resolveLookbackInterval } from '../../../common/util/al
 import type { DatafeedsService } from '../../models/job_service/datafeeds';
 import { getEntityFieldName, getEntityFieldValue } from '../../../common/util/anomaly_utils';
 import { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
-import {
-  FIELD_FORMAT_IDS,
-  IFieldFormat,
-  SerializedFieldFormat,
-} from '../../../../../../src/plugins/field_formats/common';
 import type { AwaitReturnType } from '../../../common/types/common';
 import { getTypicalAndActualValues } from '../../models/results_service/results_service';
 import type { GetDataViewsService } from '../data_views_utils';

@@ -6,8 +6,8 @@
  */
 
 import * as t from 'io-ts';
-import { maxSuggestions } from '../../../../observability/common';
-import { getSuggestions } from '../suggestions/get_suggestions';
+import { maxSuggestions } from '@kbn/observability-plugin/common';
+import { getSuggestions } from './get_suggestions';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
@@ -27,7 +27,8 @@ const suggestionsRoute = createApmServerRoute({
       config: setup.config,
       kuery: '',
     });
-    const size = await context.core.uiSettings.client.get<number>(
+    const coreContext = await context.core;
+    const size = await coreContext.uiSettings.client.get<number>(
       maxSuggestions
     );
     const suggestions = await getSuggestions({

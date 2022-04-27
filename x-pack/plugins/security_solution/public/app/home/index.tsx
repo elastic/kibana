@@ -8,8 +8,8 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 
+import { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
-import { AppLeaveHandler, AppMountParameters } from '../../../../../../src/core/public';
 import { SecuritySolutionAppWrapper } from '../../common/components/page';
 import { HelpMenu } from '../../common/components/help_menu';
 import { UseUrlState } from '../../common/components/url_state';
