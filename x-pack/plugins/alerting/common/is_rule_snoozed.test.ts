@@ -35,7 +35,7 @@ describe('isRuleSnoozed', () => {
         duration: 100000000,
       },
     ];
-    expect(isRuleSnoozed({ snoozeSchedule, snoozeIndefinitely: false })).toBe(false);
+    expect(isRuleSnoozed({ snoozeSchedule, muteAll: false })).toBe(false);
   });
 
   test('returns true when snooze has started', () => {
@@ -45,7 +45,7 @@ describe('isRuleSnoozed', () => {
         duration: 100000000,
       },
     ];
-    expect(isRuleSnoozed({ snoozeSchedule, snoozeIndefinitely: false })).toBe(true);
+    expect(isRuleSnoozed({ snoozeSchedule, muteAll: false })).toBe(true);
   });
 
   test('returns false when snooze has ended', () => {
@@ -55,7 +55,7 @@ describe('isRuleSnoozed', () => {
         duration: 100000000,
       },
     ];
-    expect(isRuleSnoozed({ snoozeSchedule, snoozeIndefinitely: false })).toBe(false);
+    expect(isRuleSnoozed({ snoozeSchedule, muteAll: false })).toBe(false);
   });
 
   test('returns true when snooze is indefinite', () => {
@@ -65,7 +65,7 @@ describe('isRuleSnoozed', () => {
         duration: 100000000,
       },
     ];
-    expect(isRuleSnoozed({ snoozeSchedule, snoozeIndefinitely: true })).toBe(true);
+    expect(isRuleSnoozed({ snoozeSchedule, muteAll: true })).toBe(true);
   });
 
   test('returns as expected for an indefinitely recurring snooze', () => {
@@ -76,9 +76,7 @@ describe('isRuleSnoozed', () => {
         repeatInterval: '1d',
       },
     ];
-    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleA, snoozeIndefinitely: false })).toBe(
-      true
-    );
+    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleA, muteAll: false })).toBe(true);
     const snoozeScheduleB = [
       {
         startTime: DATE_1970_PLUS_6_HOURS,
@@ -86,9 +84,7 @@ describe('isRuleSnoozed', () => {
         repeatInterval: '1d',
       },
     ];
-    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleB, snoozeIndefinitely: false })).toBe(
-      false
-    );
+    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleB, muteAll: false })).toBe(false);
     const snoozeScheduleC = [
       {
         startTime: DATE_2020_MINUS_1_HOUR,
@@ -96,9 +92,7 @@ describe('isRuleSnoozed', () => {
         repeatInterval: '1h',
       },
     ];
-    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleC, snoozeIndefinitely: false })).toBe(
-      true
-    );
+    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleC, muteAll: false })).toBe(true);
   });
 
   test('returns as expected for a recurring snooze with limited occurrences', () => {
@@ -110,9 +104,7 @@ describe('isRuleSnoozed', () => {
         occurrences: 600000,
       },
     ];
-    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleA, snoozeIndefinitely: false })).toBe(
-      true
-    );
+    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleA, muteAll: false })).toBe(true);
     const snoozeScheduleB = [
       {
         startTime: DATE_1970,
@@ -121,9 +113,7 @@ describe('isRuleSnoozed', () => {
         occurrences: 25,
       },
     ];
-    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleB, snoozeIndefinitely: false })).toBe(
-      false
-    );
+    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleB, muteAll: false })).toBe(false);
 
     // FIXME: THIS FAILS due to not compensating for leap years. Also 1M intervals exhibit confusing behavior
     // Either we should add something to compensate for this, or disable the use of M and y, and only allow for explicit day lengths
@@ -147,9 +137,7 @@ describe('isRuleSnoozed', () => {
         repeatEndTime: DATE_9999,
       },
     ];
-    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleA, snoozeIndefinitely: false })).toBe(
-      true
-    );
+    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleA, muteAll: false })).toBe(true);
     const snoozeScheduleB = [
       {
         startTime: DATE_1970,
@@ -158,9 +146,7 @@ describe('isRuleSnoozed', () => {
         repeatEndTime: DATE_2020_MINUS_1_HOUR,
       },
     ];
-    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleB, snoozeIndefinitely: false })).toBe(
-      false
-    );
+    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleB, muteAll: false })).toBe(false);
   });
 
   test('returns as expected for a recurring snooze on a day of the week', () => {
@@ -171,9 +157,7 @@ describe('isRuleSnoozed', () => {
         repeatInterval: 'DOW:135', // Monday Wednesday Friday; Jan 1 2020 was a Wednesday
       },
     ];
-    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleA, snoozeIndefinitely: false })).toBe(
-      true
-    );
+    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleA, muteAll: false })).toBe(true);
     const snoozeScheduleB = [
       {
         startTime: DATE_1970,
@@ -181,9 +165,7 @@ describe('isRuleSnoozed', () => {
         repeatInterval: 'DOW:2467', // Tue, Thu, Sat, Sun
       },
     ];
-    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleB, snoozeIndefinitely: false })).toBe(
-      false
-    );
+    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleB, muteAll: false })).toBe(false);
     const snoozeScheduleC = [
       {
         startTime: DATE_2020_MINUS_1_MONTH,
@@ -192,9 +174,7 @@ describe('isRuleSnoozed', () => {
         occurrences: 12,
       },
     ];
-    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleC, snoozeIndefinitely: false })).toBe(
-      false
-    );
+    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleC, muteAll: false })).toBe(false);
     const snoozeScheduleD = [
       {
         startTime: DATE_2020_MINUS_1_MONTH,
@@ -203,8 +183,6 @@ describe('isRuleSnoozed', () => {
         occurrences: 15,
       },
     ];
-    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleD, snoozeIndefinitely: false })).toBe(
-      true
-    );
+    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleD, muteAll: false })).toBe(true);
   });
 });
