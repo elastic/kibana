@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { useState, useEffect } from 'react';
 import { APP_ID } from '../../../../../common/constants';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -40,19 +39,14 @@ export const useCasesByStatus = ({ skip = false }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [casesCounts, setCasesCounts] = useState<CasesCounts | null>(null);
 
-  // This is a known issue of cases api, it doesn't accept date time format atm
-  // Once they fix this problem we can remove this two lines
-  const fromDate = moment(from).format('YYYY-MM-DD');
-  const toDate = moment(to).format('YYYY-MM-DD');
-
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
     const fetchCases = async () => {
       try {
         const casesResponse = await cases.api.cases.getAllCasesMetrics({
-          from: fromDate,
-          to: toDate,
+          from,
+          to,
           owner: APP_ID,
         });
         if (isSubscribed) {
@@ -83,7 +77,7 @@ export const useCasesByStatus = ({ skip = false }) => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [cases.api.cases, from, fromDate, skip, to, toDate]);
+  }, [cases.api.cases, from, skip, to]);
 
   return {
     closed: casesCounts?.count_closed_cases ?? 0,
