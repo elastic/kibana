@@ -22,7 +22,7 @@ import { EmbeddableRenderer, ViewMode } from '../services/embeddable';
 import { DashboardTopNav, isCompleteDashboardAppState } from './top_nav/dashboard_top_nav';
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../types';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
-import { DashboardTour } from '../dashboard_tour';
+import { DashboardEditTour, DashboardViewTour } from '../tour';
 export interface DashboardAppProps {
   history: History;
   savedDashboardId?: string;
@@ -112,36 +112,34 @@ export function DashboardApp({
     [dashboardAppState]
   );
 
+  const editMode = useMemo(
+    () => dashboardAppState.getLatestDashboardState?.().viewMode === ViewMode.EDIT,
+    [dashboardAppState]
+  );
+
   useEffect(() => {
     if (!embedSettings) chrome.setIsVisible(!printMode);
   }, [chrome, printMode, embedSettings]);
 
-  let firstLensPanelTitle: string | undefined = '';
-  const panels = dashboardAppState.dashboardContainer?.getInput().panels ?? {};
-  for (const panelKey of Object.keys(panels)) {
-    if (panels[panelKey].type === 'lens') {
-      firstLensPanelTitle = panels[panelKey].explicitInput.title;
-      break;
-    }
-  }
-
   return (
     <>
-      {
-        <DashboardTour
-          isEditMode={dashboardState.viewMode === 'edit'}
-          panelCount={Object.keys(panels).length}
-          firstLensPanelTitle={firstLensPanelTitle}
-        />
-      }
       {isCompleteDashboardAppState(dashboardAppState) && (
         <>
-          {!printMode && (
-            <DashboardTopNav
-              redirectTo={redirectTo}
-              embedSettings={embedSettings}
-              dashboardAppState={dashboardAppState}
+          {editMode && (
+            <DashboardEditTour
+              panelCount={
+                Object.keys(dashboardAppState.dashboardContainer?.getInput().panels ?? {}).length
+              }
             />
+          )}
+          {!printMode && (
+            <>
+              <DashboardTopNav
+                redirectTo={redirectTo}
+                embedSettings={embedSettings}
+                dashboardAppState={dashboardAppState}
+              />
+            </>
           )}
 
           {dashboardAppState.savedDashboard.outcome === 'conflict' &&

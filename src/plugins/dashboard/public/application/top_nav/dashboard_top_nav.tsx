@@ -8,7 +8,7 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { Required } from '@kbn/utility-types';
-import { EuiHorizontalRule } from '@elastic/eui';
+import { EuiHorizontalRule, EuiTourState, EuiTourStep, useEuiTour } from '@elastic/eui';
 import UseUnmount from 'react-use/lib/useUnmount';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -53,6 +53,11 @@ import {
   useDashboardDispatch,
   useDashboardSelector,
 } from '../state';
+import {
+  dashboardViewTourConfig,
+  dashboardViewTourSteps,
+  DASHBOARD_VIEW_TOUR_STORAGE_KEY,
+} from '../../tour';
 
 export interface DashboardTopNavState {
   chromeIsVisible: boolean;
@@ -130,6 +135,32 @@ export function DashboardTopNav({
     usageCollection,
     DashboardConstants.DASHBOARD_ID
   );
+
+  const initialState = localStorage.getItem(DASHBOARD_VIEW_TOUR_STORAGE_KEY);
+  let tourState: EuiTourState;
+  if (initialState) {
+    tourState = JSON.parse(initialState);
+  } else {
+    tourState = dashboardViewTourConfig;
+  }
+
+  const [[euiTourStepOne], tourActions, reducerState] = useEuiTour(
+    dashboardViewTourSteps,
+    tourState
+  );
+
+  useEffect(() => {
+    localStorage.setItem(DASHBOARD_VIEW_TOUR_STORAGE_KEY, JSON.stringify(reducerState));
+
+    // return () => {
+    //   if (isEditMode) {
+    //     localStorage.setItem(
+    //       DASHBOARD_VIEW_TOUR_STORAGE_KEY,
+    //       JSON.stringify({ ...reducerState, isTourActive: false })
+    //     );
+    //   }
+    // };
+  }, [reducerState]);
 
   useEffect(() => {
     const visibleSubscription = chrome.getIsVisible$().subscribe((chromeIsVisible) => {
@@ -218,7 +249,8 @@ export function DashboardTopNav({
   }, [state.addPanelOverlay, dashboardAppState.dashboardContainer.controlGroup]);
 
   const onChangeViewMode = useCallback(
-    (newMode: ViewMode) => {
+    async (newMode: ViewMode) => {
+      if (newMode === ViewMode.EDIT) tourActions.finishTour();
       closeAllFlyouts();
       const willLoseChanges = newMode === ViewMode.VIEW && dashboardAppState.hasUnsavedChanges;
 
@@ -231,7 +263,7 @@ export function DashboardTopNav({
         dashboardAppState.resetToLastSavedState?.()
       );
     },
-    [closeAllFlyouts, core.overlays, dashboardAppState, dispatchDashboardStateChange]
+    [closeAllFlyouts, core.overlays, dashboardAppState, dispatchDashboardStateChange, tourActions]
   );
 
   const runSaveAs = useCallback(async () => {
@@ -579,6 +611,7 @@ export function DashboardTopNav({
 
   return (
     <>
+      {dashboardState.viewMode === ViewMode.VIEW && <EuiTourStep {...euiTourStepOne} />}
       <TopNavMenu {...getNavBarProps()} />
       {isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
