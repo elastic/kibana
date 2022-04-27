@@ -391,6 +391,44 @@ export function useChangePointDetection(
       });
       setResponse.flush();
 
+      const stream = await fetch('/api/ml/data_visualizer/spike_analysis', {
+        headers: {
+          'kbn-xsrf': 'stream',
+        },
+        method: 'POST',
+      });
+
+      if (stream.body !== null) {
+        const reader = stream.body.pipeThrough(new TextDecoderStream()).getReader();
+
+        let partial = '';
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+
+          // console.log('Received', value);
+
+          const full = `${partial}${value}`;
+          const parts = full.split('\n');
+          const last = parts.pop();
+
+          partial = last ?? '';
+
+          const parsed = parts.map((p) => {
+            try {
+              return JSON.parse(p);
+            } catch (e) {
+              console.error('failed JSON parsing', p, e);
+            }
+          });
+
+          console.log('parsed', parsed);
+        }
+
+        console.log('Response fully received');
+      }
+
       const { frequentItems, totalDocCount } = await http.post<{
         frequentItems: FrequentItems;
         totalDocCount: number;

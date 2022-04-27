@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Readable } from 'stream';
+
 import { IScopedClusterClient } from '@kbn/core/server';
 import { wrapError } from '../client/error_wrapper';
 import { DataVisualizer } from '../models/data_visualizer';
@@ -15,6 +17,10 @@ import {
 } from './schemas/data_visualizer_schema';
 import { RouteInitialization } from '../types';
 import { RuntimeMappings } from '../../common/types/fields';
+
+class ResponseStream extends Readable {
+  _read(): void {}
+}
 
 function getHistogramsForFields(
   client: IScopedClusterClient,
@@ -74,6 +80,47 @@ export function dataVisualizerRoutes({ router, routeGuard }: RouteInitialization
         return response.ok({
           body: results,
         });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  router.post(
+    {
+      path: '/api/ml/data_visualizer/spike_analysis',
+      validate: {},
+      options: {
+        tags: ['access:ml:canAccessML'],
+      },
+    },
+    routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
+      try {
+        const stream = new ResponseStream();
+        stream.push(JSON.stringify({ type: 'message', value: 'hey' }) + '\n');
+
+        let count = 0;
+
+        function doStream() {
+          setTimeout((): void => {
+            stream.push(JSON.stringify({ type: 'progress', value: count }) + '\n');
+            stream.push(
+              JSON.stringify({ type: 'number', value: Math.round(Math.random() * 100) }) + '\n'
+            );
+
+            count++;
+
+            if (count < 100) {
+              doStream();
+            } else {
+              stream.push(null);
+            }
+          }, 1000);
+        }
+
+        doStream();
+
+        return response.ok({ body: stream });
       } catch (e) {
         return response.customError(wrapError(e));
       }
