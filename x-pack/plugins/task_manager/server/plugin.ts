@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { combineLatest, Observable, Subject } from 'rxjs';
+import { combineLatest, Observable, Subject, Subscription } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs/operators';
 import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import {
@@ -68,6 +68,7 @@ export class TaskManagerPlugin
   private elasticsearchAndSOAvailability$?: Observable<boolean>;
   private monitoringStats$ = new Subject<MonitoringStats>();
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  private subscriptions: Subscription[];
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -75,6 +76,7 @@ export class TaskManagerPlugin
     this.config = initContext.config.get<TaskManagerConfig>();
     this.definitions = new TaskTypeDictionary(this.logger);
     this.kibanaVersion = initContext.env.packageInfo.version;
+    this.subscriptions = [];
   }
 
   public setup(
@@ -116,11 +118,15 @@ export class TaskManagerPlugin
         startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
     });
 
-    core.status.derivedStatus$.subscribe((status) =>
-      this.logger.debug(`status core.status.derivedStatus now set to ${status.level}`)
+    this.subscriptions.push(
+      core.status.derivedStatus$.subscribe((status) =>
+        this.logger.debug(`status core.status.derivedStatus now set to ${status.level}`)
+      )
     );
-    serviceStatus$.subscribe((status) =>
-      this.logger.debug(`status serviceStatus now set to ${status.level}`)
+    this.subscriptions.push(
+      serviceStatus$.subscribe((status) =>
+        this.logger.debug(`status serviceStatus now set to ${status.level}`)
+      )
     );
 
     // here is where the system status is updated
@@ -210,15 +216,17 @@ export class TaskManagerPlugin
       lifecycleEvent: this.taskPollingLifecycle.events,
     });
 
-    createMonitoringStats(
-      this.taskPollingLifecycle,
-      this.ephemeralTaskLifecycle,
-      taskStore,
-      this.elasticsearchAndSOAvailability$!,
-      this.config!,
-      managedConfiguration,
-      this.logger
-    ).subscribe((stat) => this.monitoringStats$.next(stat));
+    this.subscriptions.push(
+      createMonitoringStats(
+        this.taskPollingLifecycle,
+        this.ephemeralTaskLifecycle,
+        taskStore,
+        this.elasticsearchAndSOAvailability$!,
+        this.config!,
+        managedConfiguration,
+        this.logger
+      ).subscribe((stat) => this.monitoringStats$.next(stat))
+    );
 
     const taskScheduling = new TaskScheduling({
       logger: this.logger,
@@ -241,6 +249,10 @@ export class TaskManagerPlugin
       ephemeralRunNow: (task: EphemeralTask) => taskScheduling.ephemeralRunNow(task),
       supportsEphemeralTasks: () => this.config.ephemeral_tasks.enabled,
     };
+  }
+
+  public stop() {
+    this.subscriptions.forEach((subscription) => subscription.unsubscribe());
   }
 
   /**
