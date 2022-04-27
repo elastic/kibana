@@ -509,7 +509,7 @@ export const schema: FormSchema<DefineStepRule> = {
 
           return fieldValidators.emptyField(
             i18n.translate(
-              'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.newTermsFieldsRequired',
+              'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.newTermsFieldsMin',
               {
                 defaultMessage: 'Number of fields must be 1.',
               }
@@ -529,7 +529,7 @@ export const schema: FormSchema<DefineStepRule> = {
           return fieldValidators.maxLengthField({
             length: 1,
             message: i18n.translate(
-              'xpack.securitySolution.detectionEngine.validations.thresholdFieldFieldData.arrayLengthGreaterThanMaxErrorMessage',
+              'xpack.securitySolution.detectionEngine.validations.stepDefineRule.newTermsFieldsMax',
               {
                 defaultMessage: 'Number of fields must be 1.',
               }
