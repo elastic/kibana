@@ -12,6 +12,7 @@ import { createEndpoint, fromIframe } from '@remote-ui/rpc';
 import './index.scss';
 import type { SearchResponse, AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 import type { SearchRequest } from 'src/plugins/data/common';
+import { IExternalUrl } from 'kibana/public';
 import { SearchOptions, VisTypeScriptKibanaApi } from '../kibana_api';
 
 export const KIBANA_API_CONSTANT_NAME = 'KIBANA';
@@ -98,14 +99,17 @@ export const ScriptRenderer: React.FunctionComponent<{
   script: string;
   dependencyUrls: string[];
   kibanaApi: VisTypeScriptKibanaApi;
+  validateUrl: IExternalUrl['validateUrl'];
 }> = ({
   script: visualizationScript,
   dependencyUrls,
   kibanaApi,
+  validateUrl,
 }: {
   script: string;
   dependencyUrls: string[];
   kibanaApi: VisTypeScriptKibanaApi;
+  validateUrl: IExternalUrl['validateUrl'];
 }) => {
   const iframeRef = React.useRef<HTMLIFrameElement | null>(null);
 
@@ -134,8 +138,10 @@ export const ScriptRenderer: React.FunctionComponent<{
   const [dependencies, setDependencies] = useState<string[]>([]);
 
   useEffect(() => {
-    loadDependencies(dependencyUrls).then((deps: string[]) => setDependencies(deps));
-  }, [dependencyUrls]);
+    loadDependencies(dependencyUrls.filter((url) => validateUrl(url) !== null)).then(
+      (deps: string[]) => setDependencies(deps)
+    );
+  }, [dependencyUrls, validateUrl]);
 
   const sandboxDocument = useMemo(
     () => getSandboxDocument(visualizationScript, dependencies),

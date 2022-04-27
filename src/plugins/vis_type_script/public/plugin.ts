@@ -44,7 +44,10 @@ export class ScriptVisPlugin
     visualizations.createBaseVisualization(scriptVisDefinition);
     expressions.registerRenderer(
       scriptVisRenderer(() =>
-        core.getStartServices().then(([coreStart, plugins]) => ({ data: plugins.data }))
+        core.getStartServices().then(([coreStart, plugins]) => ({
+          data: plugins.data,
+          validateUrl: core.http.externalUrl.validateUrl,
+        }))
       )
     );
     expressions.registerFunction(createScriptVisFn);

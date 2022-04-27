@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { IExternalUrl } from 'kibana/public';
 import type { ExpressionRenderDefinition } from '../../../expressions';
 import { VisualizationContainer } from '../../../visualizations/public';
 import { VisParams, VisSearchContext } from '../types';
@@ -22,7 +23,7 @@ export interface RenderValue {
 }
 
 export const scriptVisRenderer: (
-  getDeps: () => Promise<{ data: DataPublicPluginStart }> // TODO: not sure if this is correct way of passing deps to vis renderer
+  getDeps: () => Promise<{ data: DataPublicPluginStart; validateUrl: IExternalUrl['validateUrl'] }> // TODO: not sure if this is correct way of passing deps to vis renderer
 ) => ExpressionRenderDefinition<RenderValue> = (getDeps) => ({
   name: 'script_vis',
   displayName: 'script-based visualization',
@@ -41,6 +42,7 @@ export const scriptVisRenderer: (
           script={visParams.script}
           dependencyUrls={visParams.dependencyUrls}
           kibanaApi={visTypeScriptKibanaApi}
+          validateUrl={deps.validateUrl}
         />
       </VisualizationContainer>,
       domNode
