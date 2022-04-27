@@ -307,7 +307,7 @@ export function RuleDetailsPage() {
 
                   <EuiSpacer size="l" />
 
-                  <EuiFlexGroup justifyContent="flexStart">
+                  <EuiFlexGroup alignItems="center">
                     <ItemTitleRuleSummary
                       translationKey="xpack.observability.ruleDetails.conditions"
                       defaultMessage="Conditions"
@@ -316,7 +316,7 @@ export function RuleDetailsPage() {
                       <EuiText size="m">
                         {hasEditButton ? (
                           <EuiButtonEmpty onClick={() => setEditFlyoutVisible(true)}>
-                            {getRuleConditionsWording()}
+                            <EuiText>{getRuleConditionsWording()}</EuiText>
                           </EuiButtonEmpty>
                         ) : (
                           <EuiText>{getRuleConditionsWording()}</EuiText>
