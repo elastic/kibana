@@ -11,7 +11,6 @@ import { render } from '@testing-library/react';
 import { DetectionResponse } from './detection_response';
 import { TestProviders } from '../../common/mock';
 
-// TODO: add all sections mocks
 jest.mock('../components/detection_response/rule_alerts_table', () => ({
   RuleAlertsTable: () => <div data-test-subj="mock_RuleAlertsTable" />,
 }));
