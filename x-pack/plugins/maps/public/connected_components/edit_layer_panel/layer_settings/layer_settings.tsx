@@ -143,43 +143,6 @@ export function LayerSettings(props: Props) {
     );
   };
 
-  const renderShowLocaleSelector = () => {
-    if (!props.layer.supportsLabelLocales()) {
-      return null;
-    }
-
-    const languages = [
-      {
-        key: 'en',
-        label: 'English',
-      },
-      {
-        key: 'fr',
-        label: 'French',
-      },
-      {
-        key: 'jp',
-        label: 'Japanese',
-      },
-    ];
-
-    return (
-      <EuiFormRow
-        display="columnCompressed"
-        // TODO i18n
-        label="Label language"
-        helpText="Display labels in a different language"
-      >
-        <EuiComboBox
-          options={languages}
-          singleSelection={{ asPlainText: true }}
-          selectedOptions={languages.filter(({ key }) => key === props.layer.getLocale())}
-          onChange={onLocaleChange}
-        />
-      </EuiFormRow>
-    );
-  };
-
   const renderShowLabelsOnTop = () => {
     if (!props.layer.supportsLabelsOnTop()) {
       return null;
@@ -219,7 +182,6 @@ export function LayerSettings(props: Props) {
         {renderShowLabelsOnTop()}
         <AttributionFormRow layer={props.layer} onChange={onAttributionChange} />
         {renderIncludeInFitToBounds()}
-        {renderShowLocaleSelector()}
       </EuiPanel>
 
       <EuiSpacer size="s" />

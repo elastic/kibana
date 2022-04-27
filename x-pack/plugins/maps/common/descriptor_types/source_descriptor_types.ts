@@ -29,6 +29,7 @@ export type EMSTMSSourceDescriptor = AbstractSourceDescriptor & {
   // id: EMS TMS layer id. Used when !isAutoSelect
   isAutoSelect: boolean;
   lightModeDefault: string;
+  locale?: string;
 };
 
 export type EMSFileSourceDescriptor = AbstractSourceDescriptor & {

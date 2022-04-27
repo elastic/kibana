@@ -52,6 +52,7 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
         typeof descriptor.lightModeDefault !== 'undefined'
           ? descriptor.lightModeDefault
           : getEmsTileLayerId().desaturated,
+      locale: typeof descriptor.locale !== 'undefined' ? descriptor.locale : 'en',
     };
   }
 
@@ -151,6 +152,10 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
       vectorStyleSheet: styleSheet,
       spriteMeta,
     };
+  }
+
+  getLocale() {
+    return this._descriptor.locale;
   }
 
   getTileLayerId() {

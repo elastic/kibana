@@ -15,7 +15,7 @@ import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_me
 
 const AUTO_SELECT = 'auto_select';
 
-export type EmsTmsSourceConfig = Pick<EMSTMSSourceDescriptor, 'id' | 'isAutoSelect'>;
+export type EmsTmsSourceConfig = Pick<EMSTMSSourceDescriptor, 'id' | 'isAutoSelect' | 'locale'>;
 
 interface Props {
   config?: EmsTmsSourceConfig;

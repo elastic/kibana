@@ -20,6 +20,7 @@ import { TileStyle } from '../../styles/tile/tile_style';
 
 interface SourceRequestMeta {
   tileLayerId: string;
+  locale?: string;
 }
 
 // TODO remove once ems_client exports EmsSpriteSheet and EmsSprite type
@@ -50,6 +51,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
     const tileLayerDescriptor = super.createDescriptor(options);
     tileLayerDescriptor.type = LAYER_TYPE.EMS_VECTOR_TILE;
     tileLayerDescriptor.alpha = _.get(options, 'alpha', 1);
+    tileLayerDescriptor.locale = _.get(options, 'locale', 'en');
     tileLayerDescriptor.style = { type: LAYER_STYLE_TYPE.TILE };
     return tileLayerDescriptor;
   }
@@ -94,15 +96,16 @@ export class EmsVectorTileLayer extends AbstractLayer {
       return false;
     }
     const prevMeta = prevDataRequest.getMeta() as SourceRequestMeta;
-    if (!prevMeta) {
+    if (!prevMeta || !('locale' in prevMeta)) {
       return false;
     }
 
-    return prevMeta.tileLayerId === nextMeta.tileLayerId;
+    return prevMeta.tileLayerId === nextMeta.tileLayerId && prevMeta.locale === nextMeta.locale;
   }
 
   async syncData({ startLoading, stopLoading, onLoadError }: DataRequestContext) {
-    const nextMeta = { tileLayerId: this.getSource().getTileLayerId() };
+    const locale = this.getSource().getLocale();
+    const nextMeta = { tileLayerId: this.getSource().getTileLayerId(), locale };
     const canSkipSync = this._canSkipSync({
       prevDataRequest: this.getSourceDataRequest(),
       nextMeta,
@@ -114,7 +117,10 @@ export class EmsVectorTileLayer extends AbstractLayer {
     const requestToken = Symbol(`layer-source-refresh:${this.getId()} - source`);
     try {
       startLoading(SOURCE_DATA_REQUEST_ID, requestToken, nextMeta);
-      const styleAndSprites = await this.getSource().getVectorStyleSheetAndSpriteMeta(isRetina(), this.getLocale());
+      const styleAndSprites = await this.getSource().getVectorStyleSheetAndSpriteMeta(
+        isRetina(),
+        locale
+      );
       const spriteSheetImageData = styleAndSprites.spriteMeta
         ? await this._loadSpriteSheetImageData(styleAndSprites.spriteMeta.png)
         : undefined;
@@ -305,48 +311,47 @@ export class EmsVectorTileLayer extends AbstractLayer {
         return;
       }
       this._addSpriteSheetToMapFromImageData(newJson, imageData, mbMap);
-
-      // sync layers
-      const layers = vectorStyle.layers ? vectorStyle.layers : [];
-      layers.forEach((layer) => {
-        const mbLayerId = this._generateMbId(layer.id);
-        const mbLayer = mbMap.getLayer(mbLayerId);
-        if (mbLayer) {
-          return;
-        }
-        const newLayerObject = {
-          ...layer,
-          source: this._generateMbSourceId(
-            'source' in layer && typeof layer.source === 'string'
-              ? (layer.source as string)
-              : undefined
-          ),
-          id: mbLayerId,
-        };
-
-        if (
-          newLayerObject.type === 'symbol' &&
-          newLayerObject.layout &&
-          typeof newLayerObject.layout['icon-image'] === 'string'
-        ) {
-          newLayerObject.layout['icon-image'] = this._makeNamespacedImageId(
-            newLayerObject.layout['icon-image']
-          );
-        }
-
-        if (
-          newLayerObject.type === 'fill' &&
-          newLayerObject.paint &&
-          typeof newLayerObject.paint['fill-pattern'] === 'string'
-        ) {
-          newLayerObject.paint['fill-pattern'] = this._makeNamespacedImageId(
-            newLayerObject.paint['fill-pattern']
-          );
-        }
-
-        mbMap.addLayer(newLayerObject);
-      });
     }
+    // sync layers
+    const layers = vectorStyle.layers ? vectorStyle.layers : [];
+    layers.forEach((layer) => {
+      const mbLayerId = this._generateMbId(layer.id);
+      const mbLayer = mbMap.getLayer(mbLayerId);
+      if (mbLayer) {
+        mbMap.removeLayer(mbLayerId);
+      }
+      const newLayerObject = {
+        ...layer,
+        source: this._generateMbSourceId(
+          'source' in layer && typeof layer.source === 'string'
+            ? (layer.source as string)
+            : undefined
+        ),
+        id: mbLayerId,
+      };
+
+      if (
+        newLayerObject.type === 'symbol' &&
+        newLayerObject.layout &&
+        typeof newLayerObject.layout['icon-image'] === 'string'
+      ) {
+        newLayerObject.layout['icon-image'] = this._makeNamespacedImageId(
+          newLayerObject.layout['icon-image']
+        );
+      }
+
+      if (
+        newLayerObject.type === 'fill' &&
+        newLayerObject.paint &&
+        typeof newLayerObject.paint['fill-pattern'] === 'string'
+      ) {
+        newLayerObject.paint['fill-pattern'] = this._makeNamespacedImageId(
+          newLayerObject.paint['fill-pattern']
+        );
+      }
+
+      mbMap.addLayer(newLayerObject);
+    });
 
     this._setTileLayerProperties(mbMap);
   }
@@ -399,6 +404,10 @@ export class EmsVectorTileLayer extends AbstractLayer {
     mbMap.setLayerZoomRange(mbLayerId, minZoom, maxZoom);
   }
 
+  // _setLanguageLocale(mbLayer: LayerSpecification, mbLayerId: string) {
+  //   const locale = this.getLocale();
+  // }
+
   _setTileLayerProperties(mbMap: MbMap) {
     const vectorStyle = this._getVectorStyle();
     if (!vectorStyle || !vectorStyle.layers) {
@@ -410,6 +419,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
       this.syncVisibilityWithMb(mbMap, mbLayerId);
       this._setLayerZoomRange(mbMap, mbLayer, mbLayerId);
       this._setOpacityForType(mbMap, mbLayer, mbLayerId);
+      // this._setLanguageLocale()
     });
   }
 
@@ -422,7 +432,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
   }
 
   supportsLabelLocales(): boolean {
-      return true;
+    return true;
   }
 
   async getLicensedFeatures() {
