@@ -37,7 +37,7 @@ const getDetailPanelProcessLeader = (leader: ProcessFields | undefined) => ({
   entryMetaSourceIp: leader?.entry_meta?.source?.ip ?? DEFAULT_PROCESS_DATA.entryMetaSourceIp,
 });
 
-export const getDetailPanelProcess = (process: Process | undefined) => {
+export const getDetailPanelProcess = (process: Process | null) => {
   const processData = {} as DetailPanelProcess;
   if (!process) {
     return {
