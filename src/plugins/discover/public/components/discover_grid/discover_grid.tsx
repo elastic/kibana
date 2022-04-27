@@ -354,20 +354,23 @@ export const DiscoverGrid = ({
   );
 
   const additionalControls = useMemo(
-    () => (
-      <>
-        <DocumentExplorerTourStepSorting />
-        {usedSelectedDocs.length ? (
-          <DiscoverGridDocumentToolbarBtn
-            isFilterActive={isFilterActive}
-            rows={rows!}
-            selectedDocs={usedSelectedDocs}
-            setSelectedDocs={setSelectedDocs}
-            setIsFilterActive={setIsFilterActive}
-          />
-        ) : null}
-      </>
-    ),
+    () => ({
+      left: (
+        <>
+          <DocumentExplorerTourStepSorting />
+          {usedSelectedDocs.length ? (
+            <DiscoverGridDocumentToolbarBtn
+              isFilterActive={isFilterActive}
+              rows={rows!}
+              selectedDocs={usedSelectedDocs}
+              setSelectedDocs={setSelectedDocs}
+              setIsFilterActive={setIsFilterActive}
+            />
+          ) : null}
+        </>
+      ),
+      right: <DocumentExplorerTourStepRowHeight />,
+    }),
     [usedSelectedDocs, isFilterActive, rows, setIsFilterActive]
   );
 
@@ -465,7 +468,6 @@ export const DiscoverGrid = ({
         className={className}
       >
         <DocumentExplorerTourStepColumns anchorSelector={`#${GRID_ID}`} />
-        <DocumentExplorerTourStepRowHeight anchorSelector={`#${GRID_ID}`} />
         <EuiDataGridMemoized
           id={GRID_ID}
           aria-describedby={randomId}

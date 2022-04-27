@@ -31,9 +31,12 @@ const STEP_SORTING = 2;
 const STEP_ROW_HEIGHT = 3;
 const STEP_EXPAND = 4;
 
+const MAX_WIDTH = 350;
+
 const tourSteps = [
   {
     step: STEP_COLUMNS,
+    maxWidth: MAX_WIDTH,
     anchorPosition: 'upCenter',
     title: i18n.translate('discover.docExplorerTour.stepAddFieldsTitle', {
       defaultMessage: 'Add fields to the table',
@@ -49,6 +52,8 @@ const tourSteps = [
   },
   {
     step: STEP_SORTING,
+    maxWidth: MAX_WIDTH,
+    anchorPosition: 'rightUp',
     title: i18n.translate('discover.docExplorerTour.stepSortFieldsTitle', {
       defaultMessage: 'Sort on multiple fields',
     }),
@@ -63,7 +68,8 @@ const tourSteps = [
   },
   {
     step: STEP_ROW_HEIGHT,
-    anchorPosition: 'upRight',
+    maxWidth: MAX_WIDTH,
+    anchorPosition: 'leftUp',
     title: i18n.translate('discover.docExplorerTour.stepChangeRowHeightTitle', {
       defaultMessage: 'Change the row height',
     }),
@@ -78,6 +84,8 @@ const tourSteps = [
   },
   {
     step: STEP_EXPAND,
+    maxWidth: MAX_WIDTH,
+    anchorPosition: 'upCenter',
     title: i18n.translate('discover.docExplorerTour.stepExpandTitle', {
       defaultMessage: 'Expand and compare',
     }),
@@ -98,15 +106,14 @@ const LAST_STEP = tourSteps[tourSteps.length - 1].step;
 const tourConfig: EuiTourState = {
   currentTourStep: FIRST_STEP,
   isTourActive: false,
-  tourPopoverWidth: 350,
+  tourPopoverWidth: MAX_WIDTH,
   tourSubtitle: i18n.translate('discover.docExplorerTour.tourTitle', {
     defaultMessage: 'Document Explorer',
   }),
 };
 
 export const DocumentExplorerTourProvider: React.FC = ({ children }) => {
-  const [steps, actions, reducerState] = useEuiTour(tourSteps, tourConfig);
-  const currentTourStep = reducerState.currentTourStep;
+  const [steps, actions] = useEuiTour(tourSteps, tourConfig);
 
   const onStartTour = useCallback(() => {
     actions.resetTour();
@@ -114,12 +121,8 @@ export const DocumentExplorerTourProvider: React.FC = ({ children }) => {
   }, [actions]);
 
   const onNextTourStep = useCallback(() => {
-    if (currentTourStep === LAST_STEP) {
-      actions.finishTour();
-    } else {
-      actions.incrementStep();
-    }
-  }, [actions, currentTourStep]);
+    actions.incrementStep();
+  }, [actions]);
 
   const onFinishTour = useCallback(() => {
     actions.finishTour();
@@ -169,12 +172,14 @@ export const DocumentExplorerTourStepSorting: React.FC = () => {
   );
 };
 
-export const DocumentExplorerTourStepRowHeight: React.FC<{ anchorSelector: string }> = ({
-  anchorSelector,
-}) => {
+export const DocumentExplorerTourStepRowHeight: React.FC = () => {
   const tourContext = useDocumentExplorerTourContext();
 
-  return <EuiTourStep {...tourContext.getStepProps(STEP_ROW_HEIGHT)} anchor={anchorSelector} />;
+  return (
+    <EuiTourStep {...tourContext.getStepProps(STEP_ROW_HEIGHT)}>
+      <div />
+    </EuiTourStep>
+  );
 };
 
 export const DocumentExplorerTourStepExpand: React.FC = ({ children }) => {
