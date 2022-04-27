@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import {
   Chart,
   Settings,
@@ -39,7 +39,7 @@ import {
   getAnnotationsLayers,
   getDataLayers,
   Series,
-  getAreAlreadyFormattedLayersInfo,
+  getFormattedTablesByLayers,
 } from '../helpers';
 import {
   getFilteredLayers,
@@ -156,6 +156,12 @@ export function XYChart({
     datatables: filteredLayers.map(({ table }) => table),
   });
 
+  const dataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
+  const formattedDatatables = useMemo(
+    () => getFormattedTablesByLayers(dataLayers, formatFactory),
+    [dataLayers, formatFactory]
+  );
+
   if (filteredLayers.length === 0) {
     const icon: IconType = getIconForSeriesType(
       getDataLayers(layers)?.[0]?.seriesType || SeriesTypes.BAR
@@ -163,17 +169,14 @@ export function XYChart({
     return <EmptyPlaceholder className="xyChart__empty" icon={icon} />;
   }
 
-  const dataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
-
   // use formatting hint of first x axis column to format ticks
   const xAxisColumn = dataLayers[0]?.table.columns.find(({ id }) => id === dataLayers[0].xAccessor);
 
   const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.meta?.params);
-  const areLayersAlreadyFormatted = getAreAlreadyFormattedLayersInfo(dataLayers, formatFactory);
 
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
   const safeXAccessorLabelRenderer = (value: unknown): string =>
-    xAxisColumn && areLayersAlreadyFormatted[dataLayers[0]?.layerId]?.[xAxisColumn.id]
+    xAxisColumn && formattedDatatables[dataLayers[0]?.layerId]?.formattedColumns[xAxisColumn.id]
       ? String(value)
       : String(xAxisFormatter.convert(value));
 
@@ -183,7 +186,7 @@ export function XYChart({
     filteredLayers.some((layer) => isDataLayer(layer) && layer.splitAccessor);
   const shouldRotate = isHorizontalChart(dataLayers);
 
-  const yAxesConfiguration = getAxesConfiguration(filteredLayers, shouldRotate, formatFactory);
+  const yAxesConfiguration = getAxesConfiguration(dataLayers, shouldRotate, formatFactory);
 
   const xTitle = args.xTitle || (xAxisColumn && xAxisColumn.name);
   const axisTitlesVisibilitySettings = args.axisTitlesVisibilitySettings || {
@@ -206,8 +209,8 @@ export function XYChart({
     filteredBarLayers.some((layer) => layer.accessors.length > 1) ||
     filteredBarLayers.some((layer) => isDataLayer(layer) && layer.splitAccessor);
 
-  const isTimeViz = Boolean(filteredLayers.every((l) => isDataLayer(l) && l.xScaleType === 'time'));
-  const isHistogramViz = filteredLayers.every((l) => isDataLayer(l) && l.isHistogram);
+  const isTimeViz = Boolean(dataLayers.every((l) => l.xScaleType === 'time'));
+  const isHistogramViz = dataLayers.every((l) => l.isHistogram);
 
   const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
     dataLayers,
@@ -357,13 +360,15 @@ export function XYChart({
 
     const xColumn = table.columns.find((col) => col.id === layer.xAccessor);
     const currentXFormatter =
-      layer.xAccessor && areLayersAlreadyFormatted[layer.layerId]?.[layer.xAccessor] && xColumn
+      layer.xAccessor &&
+      formattedDatatables[layer.layerId]?.formattedColumns[layer.xAccessor] &&
+      xColumn
         ? formatFactory(xColumn.meta.params)
         : xAxisFormatter;
 
     const rowIndex = table.rows.findIndex((row) => {
       if (layer.xAccessor) {
-        if (areLayersAlreadyFormatted[layer.layerId]?.[layer.xAccessor]) {
+        if (formattedDatatables[layer.layerId]?.formattedColumns[layer.xAccessor]) {
           // stringify the value to compare with the chart value
           return currentXFormatter.convert(row[layer.xAccessor]) === xyGeometry.x;
         }
@@ -388,7 +393,7 @@ export function XYChart({
       points.push({
         row: table.rows.findIndex((row) => {
           if (layer.splitAccessor) {
-            if (areLayersAlreadyFormatted[layer.layerId]?.[layer.splitAccessor]) {
+            if (formattedDatatables[layer.layerId]?.formattedColumns[layer.splitAccessor]) {
               return splitFormatter.convert(row[layer.splitAccessor]) === pointValue;
             }
             return row[layer.splitAccessor] === pointValue;
@@ -421,13 +426,13 @@ export function XYChart({
     onSelectRange(context);
   };
 
-  const legendInsideParams = {
+  const legendInsideParams: LegendPositionConfig = {
     vAlign: legend.verticalAlignment ?? VerticalAlignment.Top,
     hAlign: legend?.horizontalAlignment ?? HorizontalAlignment.Right,
     direction: LayoutDirection.Vertical,
     floating: true,
     floatingColumns: legend?.floatingColumns ?? 1,
-  } as LegendPositionConfig;
+  };
 
   const isHistogramModeEnabled = dataLayers.some(
     ({ isHistogram, seriesType }) =>
@@ -524,7 +529,7 @@ export function XYChart({
         onElementClick={interactive ? clickHandler : undefined}
         legendAction={
           interactive
-            ? getLegendAction(dataLayers, onClickValue, formatFactory, areLayersAlreadyFormatted)
+            ? getLegendAction(dataLayers, onClickValue, formatFactory, formattedDatatables)
             : undefined
         }
         showLegendExtra={isHistogramViz && valuesInLegend}
@@ -566,7 +571,7 @@ export function XYChart({
             }}
             hide={dataLayers[0]?.hide}
             tickFormat={(d) => axis.formatter?.convert(d) || ''}
-            style={getYAxesStyle(axis.groupId as 'left' | 'right')}
+            style={getYAxesStyle(axis.groupId)}
             domain={getYAxisDomain(axis)}
             ticks={5}
           />
@@ -604,7 +609,7 @@ export function XYChart({
           emphasizeFitting={emphasizeFitting}
           yAxesConfiguration={yAxesConfiguration}
           shouldShowValueLabels={shouldShowValueLabels}
-          areLayersAlreadyFormatted={areLayersAlreadyFormatted}
+          formattedDatatables={formattedDatatables}
           chartHasMoreThanOneBarSeries={chartHasMoreThanOneBarSeries}
         />
       )}

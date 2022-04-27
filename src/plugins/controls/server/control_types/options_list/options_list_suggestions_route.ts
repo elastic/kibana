@@ -53,7 +53,7 @@ export const setupOptionsListSuggestionsRoute = (
       try {
         const suggestionRequest: OptionsListRequestBody = request.body;
         const { index } = request.params;
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
         const suggestionsResponse = await getOptionsListSuggestions({
           abortedEvent$: request.events.aborted$,
           request: suggestionRequest,
