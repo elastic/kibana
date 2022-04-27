@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-import { CASE_CONFIGURE_CONNECTORS_URL } from '../../../../../../plugins/cases/common/constants';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
   getServiceNowConnector,
