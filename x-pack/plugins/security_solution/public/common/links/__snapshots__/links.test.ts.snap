@@ -1,0 +1,299 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`security app link helpers getInitialDeepLinks should return all deep links 1`] = `
+Array [
+  Object {
+    "id": "overview",
+    "keywords": Array [
+      "Overview",
+    ],
+    "navLinkStatus": 1,
+    "order": 9000,
+    "path": "/overview",
+    "title": "Overview",
+  },
+  Object {
+    "id": "get_started",
+    "keywords": Array [
+      "Getting started",
+    ],
+    "navLinkStatus": 3,
+    "path": "/get_started",
+    "title": "Getting started",
+  },
+  Object {
+    "id": "detection_response",
+    "keywords": Array [
+      "Detection & Response",
+    ],
+    "navLinkStatus": 3,
+    "path": "/detection_response",
+    "title": "Detection & Response",
+  },
+  Object {
+    "deepLinks": Array [
+      Object {
+        "id": "alerts",
+        "keywords": Array [
+          "Alerts",
+        ],
+        "navLinkStatus": 1,
+        "order": 9001,
+        "path": "/alerts",
+        "searchable": true,
+        "title": "Alerts",
+      },
+      Object {
+        "id": "rules",
+        "keywords": Array [
+          "Rules",
+        ],
+        "navLinkStatus": 3,
+        "path": "/rules",
+        "searchable": true,
+        "title": "Rules",
+      },
+      Object {
+        "id": "exceptions",
+        "keywords": Array [
+          "Exception lists",
+        ],
+        "navLinkStatus": 3,
+        "path": "/exceptions",
+        "searchable": true,
+        "title": "Exception lists",
+      },
+    ],
+    "id": "detections",
+    "keywords": Array [
+      "Detect",
+    ],
+    "navLinkStatus": 3,
+    "path": "/alerts",
+    "title": "Detect",
+  },
+  Object {
+    "deepLinks": Array [
+      Object {
+        "deepLinks": Array [
+          Object {
+            "id": "hosts-authentications",
+            "path": "/hosts/authentications",
+            "title": "Authentications",
+          },
+          Object {
+            "id": "uncommon_processes",
+            "path": "/hosts/uncommonProcesses",
+            "title": "Uncommon Processes",
+          },
+          Object {
+            "id": "hosts-anomalies",
+            "path": "/hosts/anomalies",
+            "title": "Anomalies",
+          },
+          Object {
+            "id": "hosts-events",
+            "path": "/hosts/events",
+            "title": "Events",
+          },
+          Object {
+            "id": "hosts-external_alerts",
+            "path": "/hosts/externalAlerts",
+            "title": "External Alerts",
+          },
+          Object {
+            "id": "users-risk",
+            "path": "/hosts/hostRisk",
+            "title": "Hosts by risk",
+          },
+          Object {
+            "id": "sessions",
+            "path": "/hosts/sessions",
+            "title": "Sessions",
+          },
+        ],
+        "id": "hosts",
+        "keywords": Array [
+          "Hosts",
+        ],
+        "navLinkStatus": 1,
+        "order": 9002,
+        "path": "/hosts",
+        "searchable": true,
+        "title": "Hosts",
+      },
+      Object {
+        "deepLinks": Array [
+          Object {
+            "id": "network-dns",
+            "path": "/network/dns",
+            "title": "DNS",
+          },
+          Object {
+            "id": "network-http",
+            "path": "/network/http",
+            "title": "HTTP",
+          },
+          Object {
+            "id": "network-tls",
+            "path": "/network/tls",
+            "title": "TLS",
+          },
+          Object {
+            "id": "network-external_alerts",
+            "path": "/network/external-alerts",
+            "title": "External Alerts",
+          },
+          Object {
+            "id": "network-anomalies",
+            "path": "/network/anomalies",
+            "title": "Anomalies",
+          },
+        ],
+        "id": "network",
+        "keywords": Array [
+          "Network",
+        ],
+        "navLinkStatus": 1,
+        "order": 9003,
+        "path": "/network",
+        "title": "Network",
+      },
+      Object {
+        "deepLinks": Array [
+          Object {
+            "id": "users-authentications",
+            "path": "/users/authentications",
+            "title": "Authentications",
+          },
+          Object {
+            "id": "users-anomalies",
+            "path": "/users/anomalies",
+            "title": "Anomalies",
+          },
+          Object {
+            "id": "users-risk",
+            "path": "/users/userRisk",
+            "title": "Users by risk",
+          },
+          Object {
+            "id": "users-events",
+            "path": "/users/events",
+            "title": "Events",
+          },
+          Object {
+            "id": "users-external_alerts",
+            "path": "/users/externalAlerts",
+            "title": "External Alerts",
+          },
+        ],
+        "id": "users",
+        "keywords": Array [
+          "Users",
+        ],
+        "navLinkStatus": 1,
+        "order": 9004,
+        "path": "/users",
+        "title": "Users",
+      },
+    ],
+    "id": "explore",
+    "keywords": Array [
+      "Threat hunting",
+    ],
+    "navLinkStatus": 3,
+    "path": "to do",
+    "title": "Explore",
+  },
+  Object {
+    "deepLinks": Array [
+      Object {
+        "deepLinks": Array [
+          Object {
+            "id": "timelines-templates",
+            "path": "/timelines/template",
+            "title": "Templates",
+          },
+        ],
+        "id": "timelines",
+        "keywords": Array [
+          "Timelines",
+        ],
+        "navLinkStatus": 1,
+        "order": 9005,
+        "path": "/timelines",
+        "title": "Timelines",
+      },
+      Object {
+        "deepLinks": Array [
+          Object {
+            "id": "cases_create",
+            "path": "/cases/create",
+            "title": "Create New Case",
+          },
+          Object {
+            "id": "cases_configure",
+            "path": "/cases/configure",
+            "title": "Configure Cases",
+          },
+        ],
+        "id": "cases",
+        "navLinkStatus": 1,
+        "order": 9006,
+        "path": "/cases",
+        "title": "Cases",
+      },
+    ],
+    "id": "investigate",
+    "keywords": Array [
+      "Investigate",
+    ],
+    "navLinkStatus": 3,
+    "path": "to do",
+    "title": "Investigate",
+  },
+  Object {
+    "deepLinks": Array [
+      Object {
+        "id": "endpoints",
+        "navLinkStatus": 1,
+        "order": 9006,
+        "path": "/administration/endpoints",
+        "title": "Endpoints",
+      },
+      Object {
+        "id": "policy",
+        "path": "/administration/policy",
+        "title": "Policies",
+      },
+      Object {
+        "id": "trusted_apps",
+        "path": "/administration/trusted_apps",
+        "title": "Trusted applications",
+      },
+      Object {
+        "id": "event_filters",
+        "path": "/administration/event_filters",
+        "title": "Event filters",
+      },
+      Object {
+        "id": "host_isolation_exceptions",
+        "path": "/administration/host_isolation_exceptions",
+        "title": "Host isolation exceptions",
+      },
+      Object {
+        "id": "blocklist",
+        "path": "/administration/blocklist",
+        "title": "Blocklist",
+      },
+    ],
+    "id": "administration",
+    "keywords": Array [
+      "Manage",
+    ],
+    "navLinkStatus": 3,
+    "path": "/administration/endpoints",
+    "title": "Manage",
+  },
+]
+`;

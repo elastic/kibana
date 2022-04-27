@@ -26,6 +26,7 @@ export type { CaseAttachments, SupportedCaseAttachment } from './types';
 export type { ICasesDeepLinkId } from './common/navigation';
 export {
   getCasesDeepLinks,
+  getCasesLinkItems,
   CasesDeepLinkId,
   generateCaseViewPath,
   getCreateCasePath,
