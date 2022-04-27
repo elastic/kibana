@@ -394,6 +394,6 @@ export function FilterItem(props: FilterItemProps) {
     </EuiPopover>
   );
 }
-
+// Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
 export default FilterItem;
