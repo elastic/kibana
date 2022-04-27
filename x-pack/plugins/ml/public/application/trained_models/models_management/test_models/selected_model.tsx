@@ -47,8 +47,6 @@ export const SelectedModel: FC<Props> = ({ model }) => {
   if (model.model_type === TRAINED_MODEL_TYPE.PYTORCH) {
     if (Object.keys(model.inference_config)[0] === SUPPORTED_PYTORCH_TASKS.NER) {
       const inferrer = new NerInference(trainedModels, model);
-      // eslint-disable-next-line no-console
-      console.log(222222);
       return (
         <InferenceInputForm
           inferrer={inferrer}
