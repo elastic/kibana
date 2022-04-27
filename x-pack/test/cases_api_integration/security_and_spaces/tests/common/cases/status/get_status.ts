@@ -113,8 +113,17 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       });
 
-      it('returns a bad request on malformed parameter', async () => {
-        await getAllCasesStatuses({ supertest, query: { from: '<' }, expectedHttpCode: 400 });
+      it('escapes correctly', async () => {
+        const statuses = await getAllCasesStatuses({
+          supertest,
+          query: { from: '2022-03-15T10:16:56.252Z', to: '2022-03-20T10:16:56.252' },
+        });
+
+        expect(statuses).to.eql({
+          count_open_cases: 2,
+          count_closed_cases: 0,
+          count_in_progress_cases: 0,
+        });
       });
     });
 
