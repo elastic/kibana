@@ -14,15 +14,10 @@ import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useUserInfo } from '../../detections/components/user_info';
 import { HeaderPage } from '../../common/components/header_page';
 import { useKibana, useGetUserCasesPermissions } from '../../common/lib/kibana';
-import {
-  AlertsByStatus,
-  HostAlertsTable,
-  RecentlyCreatedCasesTable,
-  RuleAlertsTable,
-  UserAlertsTable,
-} from '../components/detection_response';
+import { HostAlertsTable, UserAlertsTable } from '../components/detection_response';
 
 import { LandingPageComponent } from '../../common/components/landing_page';
+import { RuleAlertsTable } from '../components/detection_response/rule_alerts_table';
 import * as i18n from './translations';
 import { EmptyPage } from '../../common/components/empty_page';
 

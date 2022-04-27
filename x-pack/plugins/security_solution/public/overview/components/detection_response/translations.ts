@@ -92,7 +92,7 @@ export const USER_ALERTS_SECTION_TITLE = i18n.translate(
 );
 
 export const RECENT_CASES_SECTION_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionResponse.userAlertsSectionTitle',
+  'xpack.securitySolution.detectionResponse.caseSectionTitle',
   {
     defaultMessage: 'Recently created cases',
   }
