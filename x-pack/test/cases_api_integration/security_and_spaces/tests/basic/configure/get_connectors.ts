@@ -15,13 +15,18 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
 
   describe('get_connectors', () => {
-    it('should return an empty find body correctly if no connectors are loaded', async () => {
+    /**
+     * A ServiceNow preconfigured connector is registered here
+     * x-pack/test/cases_api_integration/common/config.ts
+     *
+     * The license for this test is set to basic. ServiceNow connectors
+     * needs license >= platinum. The test below ensures
+     * that connectors without valid license are being filtered correctly
+     */
+    it('should return an empty list of connectors', async () => {
       const connectors = await getCaseConnectors({ supertest });
-      expect(connectors).to.eql([]);
-    });
 
-    it.skip('filters out connectors that are not enabled in license', async () => {
-      // TODO: Should find a way to downgrade license to gold and upgrade back to trial
+      expect(connectors).to.eql([]);
     });
   });
 };

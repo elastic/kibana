@@ -223,9 +223,7 @@ function isConnectorSupported(
 ): boolean {
   return (
     SUPPORTED_CONNECTORS.includes(action.actionTypeId) &&
-    actionTypes[action.actionTypeId]?.enabledInLicense &&
-    action.config != null &&
-    !action.isPreconfigured
+    actionTypes[action.actionTypeId]?.enabledInLicense
   );
 }
 
