@@ -10,8 +10,8 @@ import React, { useCallback } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 
-import type { FilterManager } from '../../../../../../../../src/plugins/data/public';
-import { KqlMode } from '../../../../timelines/store/timeline/model';
+import type { FilterManager } from '@kbn/data-plugin/public';
+import { KqlMode } from '../../../store/timeline/model';
 import { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { KueryFilterQuery } from '../../../../../common/types/timeline';
 import { DataProvider } from '../data_providers/data_provider';

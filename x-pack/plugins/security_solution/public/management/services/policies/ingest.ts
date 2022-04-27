@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpFetchOptions, HttpStart } from 'kibana/public';
+import { HttpFetchOptions, HttpStart } from '@kbn/core/public';
 import {
   GetAgentStatusResponse,
   GetAgentsResponse,
@@ -14,7 +14,7 @@ import {
   GetPackagesResponse,
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
-} from '../../../../../fleet/common';
+} from '@kbn/fleet-plugin/common';
 import { NewPolicyData } from '../../../../common/endpoint/types';
 import { GetPolicyResponse, UpdatePolicyResponse } from '../../pages/policy/types';
 

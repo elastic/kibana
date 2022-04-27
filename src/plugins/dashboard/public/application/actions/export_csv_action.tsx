@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { Datatable } from 'src/plugins/expressions/public';
-import { CoreStart } from '../../../../../core/public';
-import { FormatFactory } from '../../../../field_formats/common';
+import { Datatable } from '@kbn/expressions-plugin/public';
+import { CoreStart } from '@kbn/core/public';
+import { FormatFactory } from '@kbn/field-formats-plugin/common';
 
 import { DataPublicPluginStart, exporters } from '../../services/data';
 import { downloadMultipleAs } from '../../services/share';

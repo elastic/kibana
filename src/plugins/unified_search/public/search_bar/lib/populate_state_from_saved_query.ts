@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { QueryStart, SavedQuery } from '../../../../data/public';
+import { QueryStart, SavedQuery } from '@kbn/data-plugin/public';
 
 export const populateStateFromSavedQuery = (queryService: QueryStart, savedQuery: SavedQuery) => {
   const {

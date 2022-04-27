@@ -10,7 +10,7 @@ import { get } from 'lodash';
 import { defer } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest, StartServicesAccessor } from 'src/core/server';
+import { KibanaRequest, StartServicesAccessor } from '@kbn/core/server';
 import {
   EsaggsExpressionFunctionDefinition,
   EsaggsStartDependencies,

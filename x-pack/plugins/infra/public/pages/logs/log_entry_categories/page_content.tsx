@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect } from 'react';
-import type { LazyObservabilityPageTemplateProps } from '../../../../../observability/public';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
 import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {

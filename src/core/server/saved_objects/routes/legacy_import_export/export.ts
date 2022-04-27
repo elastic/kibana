@@ -8,7 +8,7 @@
 
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
-import { InternalCoreUsageDataSetup } from 'src/core/server/core_usage_data';
+import { InternalCoreUsageDataSetup } from '../../../core_usage_data';
 import { IRouter, Logger } from '../../..';
 import { exportDashboards } from './lib';
 
@@ -38,7 +38,7 @@ export const registerLegacyExportRoute = (
       );
 
       const ids = Array.isArray(req.query.dashboard) ? req.query.dashboard : [req.query.dashboard];
-      const { client } = ctx.core.savedObjects;
+      const { client } = (await ctx.core).savedObjects;
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementLegacyDashboardsExport({ request: req }).catch(() => {});

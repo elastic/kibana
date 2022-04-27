@@ -11,7 +11,7 @@ import {
   sessionViewBasicProcessMock,
 } from '../../../common/mocks/constants/session_view_process.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { SessionViewDetailPanel } from './index';
+import { SessionViewDetailPanel } from '.';
 
 describe('SessionView component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -38,10 +38,10 @@ describe('SessionView component', () => {
       expect(renderResult.queryByText('8e4daeb2-4a4e-56c4-980e-f0dcfdbc3726')).toBeVisible();
     });
 
-    it('should should default state with selectedProcess undefined', async () => {
+    it('should should default state with selectedProcess null', async () => {
       renderResult = mockedContext.render(
         <SessionViewDetailPanel
-          selectedProcess={undefined}
+          selectedProcess={null}
           onJumpToEvent={mockOnJumpToEvent}
           onShowAlertDetails={mockShowAlertDetails}
         />

@@ -11,7 +11,7 @@ import {
   getComplexAccessor,
   isPercentileIdEqualToSeriesId,
 } from './accessors';
-import { BUCKET_TYPES } from '../../../../data/common';
+import { BUCKET_TYPES } from '@kbn/data-plugin/common';
 import { AccessorFn, Datum } from '@elastic/charts';
 
 describe('XY chart datum accessors', () => {

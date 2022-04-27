@@ -7,8 +7,8 @@
  */
 
 import { Observable } from 'rxjs';
-import { DataPublicPluginStart } from '../../../data/public';
-import { DataView } from '../../../data_views/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { ControlInput } from '../types';
 
 export interface ControlsDataService {
@@ -24,7 +24,6 @@ export interface ControlsDataService {
   ) => Observable<{ min?: number; max?: number }>;
   getDataView: DataPublicPluginStart['dataViews']['get'];
   getDataView$: (id: string) => Observable<DataView>;
-  autocomplete: DataPublicPluginStart['autocomplete'];
   query: DataPublicPluginStart['query'];
   searchSource: DataPublicPluginStart['search']['searchSource'];
   timefilter: DataPublicPluginStart['query']['timefilter']['timefilter'];

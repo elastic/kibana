@@ -11,7 +11,7 @@ import type {
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsImporter,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
 import {
   MAX_TIME_COMPLETE_INSTALL,
@@ -23,17 +23,18 @@ import type { InstallablePackage, InstallSource, PackageAssetReference } from '.
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type { AssetReference, Installation, InstallType } from '../../../types';
 import { installTemplates } from '../elasticsearch/template/install';
+import { removeLegacyTemplates } from '../elasticsearch/template/remove_legacy';
 import {
   installPipelines,
   isTopLevelPipeline,
   deletePreviousPipelines,
-} from '../elasticsearch/ingest_pipeline/';
+} from '../elasticsearch/ingest_pipeline';
 import { getAllTemplateRefs } from '../elasticsearch/template/install';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
 import { installKibanaAssets, getKibanaAssets } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 import { installTransform } from '../elasticsearch/transform/install';
-import { installMlModel } from '../elasticsearch/ml_model/';
+import { installMlModel } from '../elasticsearch/ml_model';
 import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
 import { saveArchiveEntries } from '../archive/storage';
 import { ConcurrentInstallOperationError } from '../../../errors';
@@ -160,6 +161,12 @@ export async function _installPackage({
       paths,
       savedObjectsClient
     );
+
+    try {
+      await removeLegacyTemplates({ packageInfo, esClient, logger });
+    } catch (e) {
+      logger.warn(`Error removing legacy templates: ${e.message}`);
+    }
 
     // update current backing indices of each data stream
     await updateCurrentWriteIndices(esClient, logger, installedTemplates);

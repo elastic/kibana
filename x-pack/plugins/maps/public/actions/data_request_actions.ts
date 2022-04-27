@@ -220,7 +220,7 @@ export function syncDataForLayerId(layerId: string | null, isForceRefresh: boole
   };
 }
 
-function setLayerDataLoadErrorStatus(layerId: string, errorMessage: string | null) {
+export function setLayerDataLoadErrorStatus(layerId: string, errorMessage: string | null) {
   return {
     type: SET_LAYER_ERROR_STATUS,
     isInErrorState: errorMessage !== null,
