@@ -49,6 +49,8 @@ import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/c
 import { TypeRegistry } from './application/type_registry';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
+import type { RuleTagBadgeProps } from './application/sections/rules_list/components/rule_tag_badge';
+
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
 type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
@@ -81,6 +83,7 @@ export type {
   SanitizedRule,
   RuleStatusDropdownProps,
   RuleTagFilterProps,
+  RuleTagBadgeProps,
 };
 export type { ActionType, AsApiContract };
 export {
@@ -305,6 +308,7 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
     | React.LazyExoticComponent<ComponentType<RuleTypeParamsExpressionProps<Params>>>;
   requiresAppContext: boolean;
   defaultActionMessage?: string;
+  defaultRecoveryMessage?: string;
 }
 
 export interface IErrorObject {
