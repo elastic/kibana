@@ -7,12 +7,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AxisExtentModes, ValueLabelModes } from '../constants';
+import { AxisExtentModes, ValueLabelModes, SeriesTypes } from '../constants';
 import {
   AxisExtentConfigResult,
   DataLayerConfigResult,
   ValueLabelMode,
   CommonXYDataLayerConfig,
+  YAxisConfigResult,
 } from '../types';
 
 const errors = {
@@ -40,10 +41,10 @@ const errors = {
 };
 
 export const hasBarLayer = (layers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>) =>
-  layers.filter(({ seriesType }) => seriesType.includes('bar')).length > 0;
+  layers.filter(({ seriesType }) => seriesType === SeriesTypes.BAR).length > 0;
 
 export const hasAreaLayer = (layers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>) =>
-  layers.filter(({ seriesType }) => seriesType.includes('area')).length > 0;
+  layers.filter(({ seriesType }) => seriesType === SeriesTypes.AREA).length > 0;
 
 export const hasHistogramBarLayer = (
   layers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>
@@ -70,20 +71,25 @@ export const validateExtentForDataBounds = (
   }
 };
 
-export const validateExtent = (
-  extent: AxisExtentConfigResult,
+export const validateExtents = (
+  dataLayers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>,
   hasBarOrArea: boolean,
-  dataLayers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>
+  axes?: YAxisConfigResult[]
 ) => {
-  if (
-    extent.mode === AxisExtentModes.CUSTOM &&
-    hasBarOrArea &&
-    !isValidExtentWithCustomMode(extent)
-  ) {
-    throw new Error(errors.extendBoundsAreInvalidError());
-  }
+  axes?.forEach((axis) => {
+    if (!axis.extent) {
+      return;
+    }
+    if (
+      hasBarOrArea &&
+      axis.extent?.mode === AxisExtentModes.CUSTOM &&
+      !isValidExtentWithCustomMode(axis.extent)
+    ) {
+      throw new Error(errors.extendBoundsAreInvalidError());
+    }
 
-  validateExtentForDataBounds(extent, dataLayers);
+    validateExtentForDataBounds(axis.extent, dataLayers);
+  });
 };
 
 export const validateFillOpacity = (fillOpacity: number | undefined, hasArea: boolean) => {

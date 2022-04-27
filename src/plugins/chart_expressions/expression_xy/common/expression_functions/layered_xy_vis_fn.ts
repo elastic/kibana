@@ -38,10 +38,12 @@ export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers)
   const hasBar = hasBarLayer(dataLayers);
   const hasArea = hasAreaLayer(dataLayers);
 
-  const { yLeftExtent, yRightExtent } = args;
-
-  validateExtentForDataBounds(yLeftExtent, dataLayers);
-  validateExtentForDataBounds(yRightExtent, dataLayers);
+  args.axes?.forEach((axis) => {
+    if (axis.extent) {
+      validateExtentForDataBounds(axis.extent, dataLayers);
+      axis.extent = getCorrectExtent(axis.extent, hasBar || hasArea);
+    }
+  });
 
   return {
     type: 'render',
@@ -50,8 +52,6 @@ export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers)
       args: {
         ...args,
         layers,
-        yLeftExtent: getCorrectExtent(yLeftExtent, hasBar || hasArea),
-        yRightExtent: getCorrectExtent(yRightExtent, hasBar || hasArea),
         ariaLabel:
           args.ariaLabel ??
           (handlers.variables?.embeddableTitle as string) ??
