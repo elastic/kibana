@@ -205,7 +205,6 @@ export const useHoverActionItems = ({
           </div>
         ) : null,
         allowTopN({
-          // evil here
           browserField: fieldFromBrowserField,
           fieldName: field,
           hideTopN,
