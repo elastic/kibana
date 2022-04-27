@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { EuiContextMenuPanelDescriptor, EuiPanel, htmlIdGenerator } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButtonIcon,
+  EuiContextMenuPanelDescriptor,
+  EuiPanel,
+  EuiPopover,
+  EuiToolTip,
+  htmlIdGenerator,
+} from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
 import { Subscription } from 'rxjs';
@@ -105,6 +113,8 @@ interface State {
   loading?: boolean;
   error?: EmbeddableError;
   errorEmbeddable?: ErrorEmbeddable;
+  warnings?: React.ReactNode[];
+  warningsOpen?: boolean;
 }
 
 interface InspectorPanelAction {
@@ -302,6 +312,29 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         )}
         <EmbeddableErrorLabel error={this.state.error} />
         <div className="embPanel__content" ref={this.embeddableRoot} {...contentAttrs} />
+        {this.state.warnings && (
+          <EuiPopover
+            isOpen={this.state.warningsOpen}
+            anchorClassName="embPanel__warnings"
+            closePopover={() => this.setState({ warningsOpen: false })}
+            button={
+              <EuiButtonIcon
+                onClick={() => this.setState({ warningsOpen: !this.state.warningsOpen })}
+                color="warning"
+                iconType="alert"
+              />
+            }
+          >
+            <div style={{ maxWidth: 512 }}>
+              {this.state.warnings.flatMap((w, i) => (
+                <React.Fragment key={i}>
+                  {w}
+                  <br />
+                </React.Fragment>
+              ))}
+            </div>
+          </EuiPopover>
+        )}
       </EuiPanel>
     );
   }
@@ -314,6 +347,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
             this.setState({
               error: output.error,
               loading: output.loading,
+              warnings: output.warnings,
             });
           },
           (error) => {

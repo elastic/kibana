@@ -30,6 +30,7 @@ export interface EmbeddableOutput {
   title?: string;
   editable?: boolean;
   savedObjectId?: string;
+  warnings?: React.ReactNode[];
 }
 
 export interface IEmbeddable<

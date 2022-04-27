@@ -27,6 +27,13 @@
   }
 }
 
+.embPanel__warnings {
+  position: absolute;
+  z-index: 2;
+  right: 12px;
+  bottom: 12px;
+}
+
 // HEADER
 
 .embPanel__header {

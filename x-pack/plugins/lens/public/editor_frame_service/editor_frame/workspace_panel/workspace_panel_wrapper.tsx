@@ -100,6 +100,25 @@ export function WorkspacePanelWrapper({
       );
     }
   });
+  if (framePublicAPI.activeData) {
+    Object.values(framePublicAPI.activeData).forEach((table) => {
+      if (table.meta?.type === 'esaggs' && table.meta.warnings) {
+        warningMessages.push(
+          ...table.meta.warnings.map((w) => (
+            <FormattedMessage
+              key={JSON.stringify(w)}
+              id="xpack.lens.pie.arrayValues"
+              defaultMessage="Index {index}: {message}"
+              values={{
+                index: <strong>{w.index}</strong>,
+                message: w.reason.reason,
+              }}
+            />
+          ))
+        );
+      }
+    });
+  }
   return (
     <>
       {!(isFullscreen && (autoApplyEnabled || warningMessages?.length)) && (

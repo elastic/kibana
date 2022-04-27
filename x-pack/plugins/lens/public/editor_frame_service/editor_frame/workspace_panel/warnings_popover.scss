@@ -7,7 +7,7 @@
 .lnsWorkspaceWarningList {
   @include euiYScroll;
   max-height: $euiSize * 20;
-  width: $euiSize * 16;
+  width: $euiSize * 24;
 }
 
 .lnsWorkspaceWarningList__item {

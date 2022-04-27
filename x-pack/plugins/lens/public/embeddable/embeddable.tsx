@@ -51,6 +51,7 @@ import type {
   ThemeServiceStart,
 } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
 import {
@@ -466,6 +467,22 @@ export class Embeddable
     if (this.input.onLoad) {
       // once onData$ is get's called from expression renderer, loading becomes false
       this.input.onLoad(false);
+    }
+    const warnings = Object.values(this.activeDataInfo.activeData || {})
+      .flatMap((t) => t.meta?.warnings || [])
+      .map((w) => (
+        <FormattedMessage
+          key={JSON.stringify(w)}
+          id="xpack.lens.pie.arrayValues"
+          defaultMessage="Index {index}: {message}"
+          values={{
+            index: <strong>{w.index}</strong>,
+            message: w.reason.reason,
+          }}
+        />
+      ));
+    if (warnings.length > 0) {
+      this.updateOutput({ warnings });
     }
   };
 
