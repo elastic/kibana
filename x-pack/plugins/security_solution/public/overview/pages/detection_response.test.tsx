@@ -31,6 +31,10 @@ jest.mock('../components/detection_response/user_alerts_table', () => ({
   UserAlertsTable: () => <div data-test-subj="mock_UserAlertsTable" />,
 }));
 
+jest.mock('../components/detection_response/cases_by_status', () => ({
+  CasesByStatus: () => <div data-test-subj="mock_CasesByStatus" />,
+}));
+
 jest.mock('../../common/components/search_bar', () => ({
   SiemSearchBar: () => <div data-test-subj="mock_globalDatePicker" />,
 }));
@@ -144,6 +148,7 @@ describe('DetectionResponse', () => {
 
     expect(result.queryByTestId('detectionResponsePage')).toBeInTheDocument();
     expect(result.queryByTestId('mock_CasesTable')).toBeInTheDocument();
+    expect(result.queryByTestId('mock_CasesByStatus')).toBeInTheDocument();
 
     expect(result.queryByTestId('mock_RuleAlertsTable')).not.toBeInTheDocument();
     expect(result.queryByTestId('mock_HostAlertsTable')).not.toBeInTheDocument();
@@ -167,6 +172,7 @@ describe('DetectionResponse', () => {
 
     expect(result.queryByTestId('detectionResponsePage')).toBeInTheDocument();
     expect(result.queryByTestId('mock_CasesTable')).toBeInTheDocument();
+    expect(result.queryByTestId('mock_CasesByStatus')).toBeInTheDocument();
 
     expect(result.queryByTestId('mock_RuleAlertsTable')).not.toBeInTheDocument();
     expect(result.queryByTestId('mock_HostAlertsTable')).not.toBeInTheDocument();
@@ -186,6 +192,7 @@ describe('DetectionResponse', () => {
     );
 
     expect(result.queryByTestId('mock_CasesTable')).not.toBeInTheDocument();
+    expect(result.queryByTestId('mock_CasesByStatus')).not.toBeInTheDocument();
 
     expect(result.queryByTestId('detectionResponsePage')).toBeInTheDocument();
     expect(result.queryByTestId('mock_RuleAlertsTable')).toBeInTheDocument();

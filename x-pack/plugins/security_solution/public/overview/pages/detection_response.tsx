@@ -23,6 +23,7 @@ import { RuleAlertsTable } from '../components/detection_response/rule_alerts_ta
 import { UserAlertsTable } from '../components/detection_response/user_alerts_table';
 import * as i18n from './translations';
 import { CasesTable } from '../components/detection_response/cases_table';
+import { CasesByStatus } from '../components/detection_response/cases_by_status';
 
 const NoPrivilegePage: React.FC = () => {
   const { docLinks } = useKibana().services;
@@ -77,7 +78,11 @@ const DetectionResponseComponent = () => {
                         <AlertsByStatus signalIndexName={signalIndexName} />
                       </EuiFlexItem>
                     )}
-                    {canReadCases && <EuiFlexItem>{'[cases chart]'}</EuiFlexItem>}
+                    {canReadCases && (
+                      <EuiFlexItem>
+                        <CasesByStatus />
+                      </EuiFlexItem>
+                    )}
                   </EuiFlexGroup>
                 </EuiFlexItem>
 
