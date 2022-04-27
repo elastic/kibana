@@ -37,7 +37,7 @@ const getDescriptionDisplay = (value: unknown) => {
   return <EuiText size="s">{value as string}</EuiText>;
 };
 
-const prepareDescriptionList = (data: Record<string, unknown>) =>
+export const prepareDescriptionList = (data: Record<string, unknown>) =>
   Object.entries(getFlattenedObject(data))
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([key, value]) => ({

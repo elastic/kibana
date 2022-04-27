@@ -87,6 +87,7 @@ const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab
 
 export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) => {
   const [tab, setTab] = useState<FindingsTab>('remediation');
+
   return (
     <EuiFlyout onClose={onClose}>
       <EuiFlyoutHeader>
