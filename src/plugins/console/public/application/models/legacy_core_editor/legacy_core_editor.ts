@@ -297,6 +297,11 @@ export class LegacyCoreEditor implements CoreEditor {
     });
   }
 
+  unregisterKeyboardShortcut(command: string) {
+    // @ts-ignore
+    this.editor.commands.removeCommand(command);
+  }
+
   legacyUpdateUI(range: Range) {
     if (!this.$actions) {
       return;

@@ -58,7 +58,7 @@ describe('Table Helpers', () => {
       });
       const wrapper = mount(<TestProviders>{rowItem}</TestProviders>);
       expect(wrapper.find('[data-test-subj="render-content-attrName"]').first().text()).toBe(
-        '(Empty String)'
+        '(Empty string)'
       );
     });
 
@@ -119,7 +119,7 @@ describe('Table Helpers', () => {
       });
       const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
       expect(wrapper.find('[data-test-subj="render-content-attrName"]').first().text()).toBe(
-        '(Empty String)'
+        '(Empty string)'
       );
     });
 

@@ -13,28 +13,26 @@ import {
   LineSeries,
 } from '@elastic/charts';
 import React, { FC } from 'react';
-import { i18n } from '@kbn/i18n';
-import { PaletteRegistry } from '../../../../charts/public';
-import { FormatFactory } from '../../../../field_formats/common';
-import { Datatable } from '../../../../expressions';
+import { PaletteRegistry } from '@kbn/coloring';
+import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import {
-  CommonXYDataLayerConfigResult,
+  CommonXYDataLayerConfig,
   EndValue,
   FittingFunction,
   ValueLabelMode,
   XYCurveType,
 } from '../../common';
-import { SeriesTypes } from '../../common/constants';
+import { SeriesTypes, ValueLabelModes } from '../../common/constants';
 import {
   getColorAssignments,
   getFitOptions,
-  getFormattedTable,
   GroupsConfiguration,
   getSeriesProps,
+  DatatablesWithFormatInfo,
 } from '../helpers';
 
 interface Props {
-  layers: CommonXYDataLayerConfigResult[];
+  layers: CommonXYDataLayerConfig[];
   formatFactory: FormatFactory;
   chartHasMoreThanOneBarSeries?: boolean;
   yAxesConfiguration: GroupsConfiguration;
@@ -42,7 +40,7 @@ interface Props {
   fittingFunction?: FittingFunction;
   endValue?: EndValue | undefined;
   paletteService: PaletteRegistry;
-  areLayersAlreadyFormatted: Record<number, Record<string, boolean>>;
+  formattedDatatables: DatatablesWithFormatInfo;
   syncColors?: boolean;
   timeZone?: string;
   emphasizeFitting?: boolean;
@@ -65,15 +63,15 @@ export const DataLayers: FC<Props> = ({
   emphasizeFitting,
   yAxesConfiguration,
   shouldShowValueLabels,
-  areLayersAlreadyFormatted,
+  formattedDatatables,
   chartHasMoreThanOneBarSeries,
 }) => {
   const colorAssignments = getColorAssignments(layers, formatFactory);
   return (
     <>
-      {layers.flatMap((layer, layerIndex) =>
+      {layers.flatMap((layer) =>
         layer.accessors.map((accessor, accessorIndex) => {
-          const { splitAccessor, seriesType, xAccessor, table, columnToLabel, xScaleType } = layer;
+          const { seriesType, columnToLabel, layerId } = layer;
           const columnToLabelMap: Record<string, string> = columnToLabel
             ? JSON.parse(columnToLabel)
             : {};
@@ -81,34 +79,9 @@ export const DataLayers: FC<Props> = ({
           // what if row values are not primitive? That is the case of, for instance, Ranges
           // remaps them to their serialized version with the formatHint metadata
           // In order to do it we need to make a copy of the table as the raw one is required for more features (filters, etc...) later on
-          const formattedTable: Datatable = getFormattedTable(
-            table,
-            formatFactory,
-            xAccessor,
-            xScaleType
-          );
+          const formattedDatatableInfo = formattedDatatables[layerId];
 
           const isPercentage = seriesType.includes('percentage');
-
-          // For date histogram chart type, we're getting the rows that represent intervals without data.
-          // To not display them in the legend, they need to be filtered out.
-          const rows = formattedTable.rows.filter(
-            (row) =>
-              !(xAccessor && typeof row[xAccessor] === 'undefined') &&
-              !(
-                splitAccessor &&
-                typeof row[splitAccessor] === 'undefined' &&
-                typeof row[accessor] === 'undefined'
-              )
-          );
-
-          if (!xAccessor) {
-            rows.forEach((row) => {
-              row.unifiedX = i18n.translate('expressionXY.xyChart.emptyXLabel', {
-                defaultMessage: '(empty)',
-              });
-            });
-          }
 
           const yAxis = yAxesConfiguration.find((axisConfiguration) =>
             axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
@@ -116,14 +89,13 @@ export const DataLayers: FC<Props> = ({
 
           const seriesProps = getSeriesProps({
             layer,
-            layerId: layerIndex,
             accessor,
             chartHasMoreThanOneBarSeries,
             colorAssignments,
             formatFactory,
             columnToLabelMap,
             paletteService,
-            alreadyFormattedColumns: areLayersAlreadyFormatted[layerIndex] ?? {},
+            formattedDatatableInfo,
             syncColors,
             yAxis,
             timeZone,
@@ -131,7 +103,7 @@ export const DataLayers: FC<Props> = ({
             fillOpacity,
           });
 
-          const index = `${layerIndex}-${accessorIndex}`;
+          const index = `${layer.layerId}-${accessorIndex}`;
 
           const curve = curveType ? CurveType[curveType] : undefined;
 
@@ -157,7 +129,7 @@ export const DataLayers: FC<Props> = ({
                   // * when rotating the chart, the formatter is not correctly picked
                   // * in some scenarios value labels are not strings, and this breaks the elastic-chart lib
                   valueFormatter: (d: unknown) => yAxis?.formatter?.convert(d) || '',
-                  showValueLabel: shouldShowValueLabels && valueLabels !== 'hide',
+                  showValueLabel: shouldShowValueLabels && valueLabels !== ValueLabelModes.HIDE,
                   isValueContainedInElement: false,
                   isAlternatingValueLabel: false,
                   overflowConstraints: [

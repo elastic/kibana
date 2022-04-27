@@ -15,7 +15,7 @@ import { FramePublicAPI } from '../../types';
 import { State, XYState, XYDataLayerConfig } from '../types';
 import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../../mocks';
-import { chartPluginMock } from 'src/plugins/charts/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { EuiColorPicker } from '@elastic/eui';
 import { layerTypes } from '../../../common';
 
@@ -128,7 +128,7 @@ describe('XY Config panels', () => {
     it('should pass in information about current data bounds', () => {
       const state = testState();
       frame.activeData = {
-        0: {
+        first: {
           type: 'datatable',
           rows: [{ bar: -5 }, { bar: 50 }],
           columns: [

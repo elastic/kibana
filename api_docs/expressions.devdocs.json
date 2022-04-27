@@ -6931,7 +6931,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"result\" | \"not-started\" | \"pending\""
+              "\"error\" | \"not-started\" | \"pending\" | \"result\""
             ],
             "path": "src/plugins/expressions/common/execution/container.ts",
             "deprecated": false
@@ -10465,7 +10465,7 @@
             "label": "padding",
             "description": [],
             "signature": [
-              "\"m\" | \"s\" | \"l\" | \"xs\" | \"xl\" | undefined"
+              "\"m\" | \"s\" | \"xs\" | \"l\" | \"xl\" | undefined"
             ],
             "path": "src/plugins/expressions/public/react_expression_renderer/react_expression_renderer.tsx",
             "deprecated": false
@@ -17079,7 +17079,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"result\" | \"not-started\" | \"pending\""
+              "\"error\" | \"not-started\" | \"pending\" | \"result\""
             ],
             "path": "src/plugins/expressions/common/execution/container.ts",
             "deprecated": false
@@ -28341,7 +28341,7 @@
               "\nTracks state of execution.\n\n- `not-started` - before .start() method was called.\n- `pending` - immediately after .start() method is called.\n- `result` - when expression execution completed.\n- `error` - when execution failed with error."
             ],
             "signature": [
-              "\"error\" | \"result\" | \"not-started\" | \"pending\""
+              "\"error\" | \"not-started\" | \"pending\" | \"result\""
             ],
             "path": "src/plugins/expressions/common/execution/container.ts",
             "deprecated": false
@@ -32719,7 +32719,7 @@
             "label": "metric",
             "description": [],
             "signature": [
-              "\"max\" | \"min\" | \"sum\" | \"average\""
+              "\"sum\" | \"max\" | \"min\" | \"average\""
             ],
             "path": "src/plugins/expressions/common/expression_functions/specs/overall_metric.ts",
             "deprecated": false

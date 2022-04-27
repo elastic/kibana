@@ -7,15 +7,15 @@
 
 import { Ast, fromExpression } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
-import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { getXyVisualization } from './xy_visualization';
 import { OperationDescriptor } from '../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { layerTypes } from '../../common';
-import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
-import { eventAnnotationServiceMock } from '../../../../../src/plugins/event_annotation/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import { defaultReferenceLineColor } from './color_assignment';
-import { themeServiceMock } from '../../../../../src/core/public/mocks';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 
 describe('#toExpression', () => {
   const xyVisualization = getXyVisualization({
@@ -347,7 +347,7 @@ describe('#toExpression', () => {
     const expression = xyVisualization.toExpression(
       {
         legend: { position: Position.Bottom, isVisible: true },
-        valueLabels: 'inside',
+        valueLabels: 'show',
         preferredSeriesType: 'bar',
         layers: [
           {
@@ -364,14 +364,14 @@ describe('#toExpression', () => {
       undefined,
       datasourceExpressionsByLayers
     ) as Ast;
-    expect(expression.chain[0].arguments.valueLabels[0] as Ast).toEqual('inside');
+    expect(expression.chain[0].arguments.valueLabels[0] as Ast).toEqual('show');
   });
 
   it('should compute the correct series color fallback based on the layer type', () => {
     const expression = xyVisualization.toExpression(
       {
         legend: { position: Position.Bottom, isVisible: true },
-        valueLabels: 'inside',
+        valueLabels: 'show',
         preferredSeriesType: 'bar',
         layers: [
           {

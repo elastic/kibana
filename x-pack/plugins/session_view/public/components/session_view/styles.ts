@@ -8,25 +8,31 @@
 import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
-import { euiLightVars as theme } from '@kbn/ui-theme';
+import { euiLightVars } from '@kbn/ui-theme'; // using this temporarily until the euiTheme hook is updated to include proper hex values
 
 interface StylesDeps {
-  height: string | undefined;
+  height?: number;
+  isFullScreen?: boolean;
 }
 
-export const useStyles = ({ height = '500px' }: StylesDeps) => {
+export const useStyles = ({ height = 500, isFullScreen }: StylesDeps) => {
   const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { border } = euiTheme;
+    const { border, colors, size } = euiTheme;
+
+    // 118px = Session View Toolbar height + Close Session button height + spacing margin at the bottom
+    const sessionView: CSSObject = {
+      height: `${isFullScreen ? 'calc(100vh - 118px)' : height + 'px'}`,
+    };
 
     const processTree: CSSObject = {
-      height: `${height}`,
+      ...sessionView,
       position: 'relative',
     };
 
     const detailPanel: CSSObject = {
-      height: `${height}px`,
+      ...sessionView,
       borderRightWidth: '0px',
     };
 
@@ -41,11 +47,9 @@ export const useStyles = ({ height = '500px' }: StylesDeps) => {
     };
     const searchBar: CSSObject = {
       position: 'relative',
-      margin: `${euiTheme.size.m} ${euiTheme.size.xs} !important`,
-    };
-
-    const buttonsEyeDetail: CSSObject = {
-      margin: `${euiTheme.size.m} ${euiTheme.size.xs} !important`,
+      input: {
+        backgroundColor: colors.emptyShade,
+      },
     };
 
     const sessionViewerComponent: CSSObject = {
@@ -54,7 +58,12 @@ export const useStyles = ({ height = '500px' }: StylesDeps) => {
     };
 
     const toolBar: CSSObject = {
-      backgroundColor: `${theme.euiFormBackgroundDisabledColor} !important`,
+      backgroundColor: `${euiLightVars.euiFormBackgroundDisabledColor} !important`, // important used since euipanel overrides this
+      padding: `${size.m} ${size.base}`,
+    };
+
+    const betaBadge: CSSObject = {
+      backgroundColor: `${colors.emptyShade}`,
     };
 
     return {
@@ -63,11 +72,11 @@ export const useStyles = ({ height = '500px' }: StylesDeps) => {
       nonGrowGroup,
       resizeHandle,
       searchBar,
-      buttonsEyeDetail,
       sessionViewerComponent,
       toolBar,
+      betaBadge,
     };
-  }, [height, euiTheme]);
+  }, [euiTheme, isFullScreen, height]);
 
   return cached;
 };

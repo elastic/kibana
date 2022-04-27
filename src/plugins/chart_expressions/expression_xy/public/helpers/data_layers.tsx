@@ -21,11 +21,11 @@ import {
   FieldFormat,
   FieldFormatParams,
   SerializedFieldFormat,
-} from 'src/plugins/field_formats/common';
-import { Datatable, DatatableRow } from '../../../../expressions';
-import { CommonXYDataLayerConfigResult, XScaleType } from '../../common';
+} from '@kbn/field-formats-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin';
+import { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
+import { CommonXYDataLayerConfig, XScaleType } from '../../common';
 import { FormatFactory } from '../types';
-import { PaletteRegistry, SeriesLayer } from '../../../../charts/public';
 import { getSeriesColor } from './state';
 import { ColorAssignments } from './color_assignment';
 import { GroupsConfiguration } from './axes_configuration';
@@ -33,88 +33,126 @@ import { GroupsConfiguration } from './axes_configuration';
 type SeriesSpec = LineSeriesProps & BarSeriesProps & AreaSeriesProps;
 
 type GetSeriesPropsFn = (config: {
-  layer: CommonXYDataLayerConfigResult;
-  layerId: number;
+  layer: CommonXYDataLayerConfig;
   accessor: string;
   chartHasMoreThanOneBarSeries?: boolean;
   formatFactory: FormatFactory;
   colorAssignments: ColorAssignments;
   columnToLabelMap: Record<string, string>;
   paletteService: PaletteRegistry;
-  alreadyFormattedColumns: Record<string, boolean>;
   syncColors?: boolean;
   yAxis?: GroupsConfiguration[number];
   timeZone?: string;
   emphasizeFitting?: boolean;
   fillOpacity?: number;
+  formattedDatatableInfo: DatatableWithFormatInfo;
 }) => SeriesSpec;
-
-const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
-
-export const getFormattedTable = (
-  table: Datatable,
-  formatFactory: FormatFactory,
-  xAccessor: string | undefined,
-  xScaleType: XScaleType
-): Datatable => ({
-  ...table,
-  rows: table.rows.map((row: DatatableRow) => {
-    const newRow = { ...row };
-    for (const column of table.columns) {
-      const record = newRow[column.id];
-      if (
-        record != null &&
-        // pre-format values for ordinal x axes because there can only be a single x axis formatter on chart level
-        (!isPrimitive(record) || (column.id === xAccessor && xScaleType === 'ordinal'))
-      ) {
-        newRow[column.id] = formatFactory(column.meta.params)!.convert(record);
-      }
-    }
-    return newRow;
-  }),
-});
-
-export const getIsAlreadyFormattedLayerInfo = (
-  { table, xAccessor, xScaleType }: CommonXYDataLayerConfigResult,
-  formatFactory: FormatFactory
-): Record<string, boolean> => {
-  const formattedTable = getFormattedTable(table, formatFactory, xAccessor, xScaleType);
-  return table.columns.reduce<Record<string, boolean>>(
-    (alreadyFormatted: Record<string, boolean>, { id }) => {
-      if (alreadyFormatted[id]) {
-        return alreadyFormatted;
-      }
-      return {
-        ...alreadyFormatted,
-        [id]: table.rows.some((row, i) => row[id] !== formattedTable.rows[i][id]),
-      };
-    },
-    {}
-  );
-};
-
-export const getAreAlreadyFormattedLayersInfo = (
-  layers: CommonXYDataLayerConfigResult[],
-  formatFactory: FormatFactory
-): Record<number, Record<string, boolean>> =>
-  layers.reduce<Record<number, Record<string, boolean>>>(
-    (areAlreadyFormatted, layer, index) => ({
-      ...areAlreadyFormatted,
-      [index]: getIsAlreadyFormattedLayerInfo(layer, formatFactory),
-    }),
-    {}
-  );
 
 type GetSeriesNameFn = (
   data: XYChartSeriesIdentifier,
   config: {
-    layer: CommonXYDataLayerConfigResult;
+    layer: CommonXYDataLayerConfig;
     splitHint: SerializedFieldFormat<FieldFormatParams> | undefined;
     splitFormatter: FieldFormat;
     alreadyFormattedColumns: Record<string, boolean>;
     columnToLabelMap: Record<string, string>;
   }
 ) => SeriesName;
+
+type GetColorFn = (
+  seriesIdentifier: XYChartSeriesIdentifier,
+  config: {
+    layer: CommonXYDataLayerConfig;
+    accessor: string;
+    colorAssignments: ColorAssignments;
+    columnToLabelMap: Record<string, string>;
+    paletteService: PaletteRegistry;
+    syncColors?: boolean;
+  }
+) => string | null;
+
+export interface DatatableWithFormatInfo {
+  table: Datatable;
+  formattedColumns: Record<string, true>;
+}
+
+export type DatatablesWithFormatInfo = Record<string, DatatableWithFormatInfo>;
+
+export type FormattedDatatables = Record<string, Datatable>;
+
+const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
+
+export const getFormattedRow = (
+  row: Datatable['rows'][number],
+  columns: Datatable['columns'],
+  formatFactory: FormatFactory,
+  xAccessor: string | undefined,
+  xScaleType: XScaleType
+): { row: Datatable['rows'][number]; formattedColumns: Record<string, true> } =>
+  columns.reduce(
+    (formattedInfo, { id, meta }) => {
+      const record = formattedInfo.row[id];
+      if (
+        record != null &&
+        // pre-format values for ordinal x axes because there can only be a single x axis formatter on chart level
+        (!isPrimitive(record) || (id === xAccessor && xScaleType === 'ordinal'))
+      ) {
+        return {
+          row: { ...formattedInfo.row, [id]: formatFactory(meta.params)!.convert(record) },
+          formattedColumns: { ...formattedInfo.formattedColumns, [id]: true },
+        };
+      }
+      return formattedInfo;
+    },
+    { row, formattedColumns: {} }
+  );
+
+export const getFormattedTable = (
+  table: Datatable,
+  formatFactory: FormatFactory,
+  xAccessor: string | undefined,
+  xScaleType: XScaleType
+): { table: Datatable; formattedColumns: Record<string, true> } => {
+  const formattedTableInfo = table.rows.reduce<{
+    rows: Datatable['rows'];
+    formattedColumns: Record<string, true>;
+  }>(
+    ({ rows: formattedRows, formattedColumns }, row) => {
+      const formattedRowInfo = getFormattedRow(
+        row,
+        table.columns,
+        formatFactory,
+        xAccessor,
+        xScaleType
+      );
+      return {
+        rows: [...formattedRows, formattedRowInfo.row],
+        formattedColumns: { ...formattedColumns, ...formattedRowInfo.formattedColumns },
+      };
+    },
+    {
+      rows: [],
+      formattedColumns: {},
+    }
+  );
+
+  return {
+    table: { ...table, rows: formattedTableInfo.rows },
+    formattedColumns: formattedTableInfo.formattedColumns,
+  };
+};
+
+export const getFormattedTablesByLayers = (
+  layers: CommonXYDataLayerConfig[],
+  formatFactory: FormatFactory
+): DatatablesWithFormatInfo =>
+  layers.reduce(
+    (formattedDatatables, { layerId, table, xAccessor, xScaleType }) => ({
+      ...formattedDatatables,
+      [layerId]: getFormattedTable(table, formatFactory, xAccessor, xScaleType),
+    }),
+    {}
+  );
 
 const getSeriesName: GetSeriesNameFn = (
   data,
@@ -157,22 +195,9 @@ const getPointConfig = (xAccessor?: string, emphasizeFitting?: boolean) => ({
 
 const getLineConfig = () => ({ visible: true, stroke: ColorVariant.Series, opacity: 1, dash: [] });
 
-type GetColorFn = (
-  seriesIdentifier: XYChartSeriesIdentifier,
-  config: {
-    layer: CommonXYDataLayerConfigResult;
-    layerId: number;
-    accessor: string;
-    colorAssignments: ColorAssignments;
-    columnToLabelMap: Record<string, string>;
-    paletteService: PaletteRegistry;
-    syncColors?: boolean;
-  }
-) => string | null;
-
 const getColor: GetColorFn = (
   { yAccessor, seriesKeys },
-  { layer, layerId, accessor, colorAssignments, columnToLabelMap, paletteService, syncColors }
+  { layer, accessor, colorAssignments, columnToLabelMap, paletteService, syncColors }
 ) => {
   const overwriteColor = getSeriesColor(layer, accessor);
   if (overwriteColor !== null) {
@@ -183,12 +208,7 @@ const getColor: GetColorFn = (
     {
       name: layer.splitAccessor ? String(seriesKeys[0]) : columnToLabelMap[seriesKeys[0]],
       totalSeriesAtDepth: colorAssignment.totalSeriesCount,
-      rankAtDepth: colorAssignment.getRank(
-        layer,
-        layerId,
-        String(seriesKeys[0]),
-        String(yAccessor)
-      ),
+      rankAtDepth: colorAssignment.getRank(layer, String(seriesKeys[0]), String(yAccessor)),
     },
   ];
   return paletteService.get(layer.palette.name).getCategoricalColor(
@@ -205,19 +225,18 @@ const getColor: GetColorFn = (
 
 export const getSeriesProps: GetSeriesPropsFn = ({
   layer,
-  layerId,
   accessor,
   chartHasMoreThanOneBarSeries,
   colorAssignments,
   formatFactory,
   columnToLabelMap,
   paletteService,
-  alreadyFormattedColumns,
   syncColors,
   yAxis,
   timeZone,
   emphasizeFitting,
   fillOpacity,
+  formattedDatatableInfo,
 }): SeriesSpec => {
   const { table } = layer;
   const isStacked = layer.seriesType.includes('stacked');
@@ -235,16 +254,11 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   // what if row values are not primitive? That is the case of, for instance, Ranges
   // remaps them to their serialized version with the formatHint metadata
   // In order to do it we need to make a copy of the table as the raw one is required for more features (filters, etc...) later on
-  const formattedTable: Datatable = getFormattedTable(
-    table,
-    formatFactory,
-    layer.xAccessor,
-    layer.xScaleType
-  );
+  const { table: formattedTable, formattedColumns } = formattedDatatableInfo;
 
   // For date histogram chart type, we're getting the rows that represent intervals without data.
   // To not display them in the legend, they need to be filtered out.
-  const rows = formattedTable.rows.filter(
+  let rows = formattedTable.rows.filter(
     (row) =>
       !(layer.xAccessor && typeof row[layer.xAccessor] === 'undefined') &&
       !(
@@ -255,16 +269,18 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   );
 
   if (!layer.xAccessor) {
-    rows.forEach((row) => {
-      row.unifiedX = i18n.translate('expressionXY.xyChart.emptyXLabel', {
+    rows = rows.map((row) => ({
+      ...row,
+      unifiedX: i18n.translate('expressionXY.xyChart.emptyXLabel', {
         defaultMessage: '(empty)',
-      });
-    });
+      }),
+    }));
   }
+
   return {
     splitSeriesAccessors: layer.splitAccessor ? [layer.splitAccessor] : [],
-    stackAccessors: isStacked ? [layer.xAccessor as string] : [],
-    id: `${layer.splitAccessor}-${accessor}`,
+    stackAccessors: isStacked && layer.xAccessor ? [layer.xAccessor] : [],
+    id: layer.splitAccessor ? `${layer.splitAccessor}-${accessor}` : `${accessor}`,
     xAccessor: layer.xAccessor || 'unifiedX',
     yAccessors: [accessor],
     data: rows,
@@ -276,7 +292,6 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     color: (series) =>
       getColor(series, {
         layer,
-        layerId,
         accessor,
         colorAssignments,
         columnToLabelMap,
@@ -303,7 +318,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
         layer,
         splitHint,
         splitFormatter,
-        alreadyFormattedColumns,
+        alreadyFormattedColumns: formattedColumns,
         columnToLabelMap,
       });
     },

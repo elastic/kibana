@@ -5,24 +5,18 @@
  * 2.0.
  */
 import React from 'react';
-import type { EuiPageHeaderProps } from '@elastic/eui';
 import { useKubebeatDataView } from '../../common/api/use_kubebeat_data_view';
 import { allNavigationItems } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
 import { FindingsContainer } from './findings_container';
 import { CspPageTemplate } from '../../components/csp_page_template';
-import { FINDINGS } from './translations';
-
-const pageHeader: EuiPageHeaderProps = {
-  pageTitle: FINDINGS,
-};
 
 export const Findings = () => {
   const dataViewQuery = useKubebeatDataView();
   useCspBreadcrumbs([allNavigationItems.findings]);
 
   return (
-    <CspPageTemplate pageHeader={pageHeader} query={dataViewQuery}>
+    <CspPageTemplate paddingSize="none" query={dataViewQuery}>
       {dataViewQuery.data && <FindingsContainer dataView={dataViewQuery.data} />}
     </CspPageTemplate>
   );

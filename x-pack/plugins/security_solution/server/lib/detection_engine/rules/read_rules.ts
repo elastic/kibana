@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ResolvedSanitizedRule, SanitizedAlert } from '../../../../../alerting/common';
+import { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
 import { RuleParams } from '../schemas/rule_schemas';
 import { findRules } from './find_rules';
@@ -20,17 +20,16 @@ import { isAlertType, ReadRuleOptions } from './types';
  * a filter query against the tags using `alert.attributes.tags: "__internal:${ruleId}"]`
  */
 export const readRules = async ({
-  isRuleRegistryEnabled,
   rulesClient,
   id,
   ruleId,
 }: ReadRuleOptions): Promise<
-  SanitizedAlert<RuleParams> | ResolvedSanitizedRule<RuleParams> | null
+  SanitizedRule<RuleParams> | ResolvedSanitizedRule<RuleParams> | null
 > => {
   if (id != null) {
     try {
       const rule = await rulesClient.resolve({ id });
-      if (isAlertType(isRuleRegistryEnabled, rule)) {
+      if (isAlertType(rule)) {
         if (rule?.outcome === 'exactMatch') {
           const { outcome, ...restOfRule } = rule;
           return restOfRule;
@@ -49,7 +48,6 @@ export const readRules = async ({
     }
   } else if (ruleId != null) {
     const ruleFromFind = await findRules({
-      isRuleRegistryEnabled,
       rulesClient,
       filter: `alert.attributes.tags: "${INTERNAL_RULE_ID_KEY}:${ruleId}"`,
       page: 1,
@@ -58,10 +56,7 @@ export const readRules = async ({
       sortField: undefined,
       sortOrder: undefined,
     });
-    if (
-      ruleFromFind.data.length === 0 ||
-      !isAlertType(isRuleRegistryEnabled, ruleFromFind.data[0])
-    ) {
+    if (ruleFromFind.data.length === 0 || !isAlertType(ruleFromFind.data[0])) {
       return null;
     } else {
       return ruleFromFind.data[0];

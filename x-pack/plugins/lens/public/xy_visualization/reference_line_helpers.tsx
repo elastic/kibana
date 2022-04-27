@@ -7,13 +7,10 @@
 
 import { groupBy, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import type { YAxisMode, ExtendedYConfig } from '@kbn/expression-xy-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/public';
 import { layerTypes } from '../../common';
-import type {
-  YAxisMode,
-  YConfig,
-} from '../../../../../src/plugins/chart_expressions/expression_xy/common';
-import { Datatable } from '../../../../../src/plugins/expressions/public';
-import type { DatasourcePublicAPI, FramePublicAPI, Visualization } from '../types';
+import type { DatasourceLayers, FramePublicAPI, Visualization } from '../types';
 import { groupAxesByType } from './axes_configuration';
 import { isHorizontalChart, isPercentageSeries, isStackedChart } from './state_helpers';
 import type { XYState, XYDataLayerConfig, XYReferenceLineLayerConfig } from './types';
@@ -37,10 +34,10 @@ export interface ReferenceLineBase {
  * * what groups are current defined in data layers
  * * what existing reference line are currently defined in reference layers
  */
-export function getGroupsToShow<T extends ReferenceLineBase & { config?: YConfig[] }>(
+export function getGroupsToShow<T extends ReferenceLineBase & { config?: ExtendedYConfig[] }>(
   referenceLayers: T[],
   state: XYState | undefined,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   tables: Record<string, Datatable> | undefined
 ): Array<T & { valid: boolean }> {
   if (!state) {
@@ -60,7 +57,7 @@ export function getGroupsToShow<T extends ReferenceLineBase & { config?: YConfig
 export function getGroupsRelatedToData<T extends ReferenceLineBase>(
   referenceLayers: T[],
   state: XYState | undefined,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   tables: Record<string, Datatable> | undefined
 ): T[] {
   if (!state) {
@@ -75,7 +72,7 @@ export function getGroupsRelatedToData<T extends ReferenceLineBase>(
  */
 export function getGroupsAvailableInData(
   dataLayers: XYDataLayerConfig[],
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   tables: Record<string, Datatable> | undefined
 ) {
   const hasNumberHistogram = dataLayers.some(
@@ -257,45 +254,6 @@ function computeStaticValueForGroup(
   }
 }
 
-/**
- * Converts hashmap of tables, stored by layers' indexes
- * (created at `layeredXyVis` expression function), to hashmap of tables, stored by layers' ids. Before,
- * layers, passed to `xy` expression function contained layerIds. But it is impossible to continue using
- * this approach any more, as far as the idea of multitable is going to be deprecated.
- * @param activeData hashmap of tables, containing requested data.
- * @param layers array of data visualization configuration. Each layer has its own table at the `activeData`.
- * @returns new hashmap of tables, where all the tables are mapped by layerId.
- */
-export const convertActiveDataFromIndexesToLayers = (
-  activeData: Record<string, Datatable> | undefined,
-  layers: XYState['layers'] = []
-): Record<string, Datatable> | undefined => {
-  if (!activeData) {
-    return activeData;
-  }
-
-  const indexesToLayerIds = layers.reduce<Record<number, string>>(
-    (layersWithIndexes, { layerId }, index) =>
-      layerId ? { ...layersWithIndexes, [index]: layerId } : layersWithIndexes,
-    {}
-  );
-
-  const convertedActiveData = Object.entries<Datatable>(activeData).reduce<
-    Record<string | number, Datatable>
-  >((dataByLayerIds, [layerIndex, dataPerLayer]) => {
-    // if layer index doesn't exist at the map of layer index, it means, that is
-    // a layerId and should be mapped without conveting from index to layerId.
-    const index = Number(layerIndex);
-    const layerId = isNaN(index) ? layerIndex : indexesToLayerIds[index] ?? layerIndex;
-    return {
-      ...dataByLayerIds,
-      [layerId]: dataPerLayer,
-    };
-  }, {});
-
-  return Object.keys(convertedActiveData).length ? convertedActiveData : undefined;
-};
-
 export const getReferenceSupportedLayer = (
   state?: XYState,
   frame?: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>
@@ -315,8 +273,6 @@ export const getReferenceSupportedLayer = (
     },
   ];
 
-  const layers = state?.layers || [];
-
   const referenceLineGroups = getGroupsRelatedToData(
     referenceLineGroupIds,
     state,
@@ -324,6 +280,7 @@ export const getReferenceSupportedLayer = (
     frame?.activeData
   );
 
+  const layers = state?.layers || [];
   const dataLayers = getDataLayers(layers);
 
   const filledDataLayers = dataLayers.filter(
@@ -340,7 +297,7 @@ export const getReferenceSupportedLayer = (
         groupId: id,
         columnId: generateId(),
         dataType: 'number',
-        label: getAxisName(label, { isHorizontal: isHorizontalChart(state?.layers || []) }),
+        label: getAxisName(label, { isHorizontal: isHorizontalChart(layers) }),
         staticValue: getStaticValue(
           dataLayers,
           label,
@@ -433,7 +390,7 @@ export const getReferenceConfiguration = ({
   sortedAccessors,
 }: {
   state: XYState;
-  frame: FramePublicAPI;
+  frame: Pick<FramePublicAPI, 'activeData' | 'datasourceLayers'>;
   layer: XYReferenceLineLayerConfig;
   sortedAccessors: string[];
 }) => {

@@ -15,10 +15,10 @@ import { Rule, ActionType, RuleTypeModel, RuleType } from '../../../../types';
 import { EuiBadge, EuiFlexItem, EuiButtonEmpty, EuiPageHeaderProps } from '@elastic/eui';
 import {
   ActionGroup,
-  AlertExecutionStatusErrorReasons,
-  AlertExecutionStatusWarningReasons,
+  RuleExecutionStatusErrorReasons,
+  RuleExecutionStatusWarningReasons,
   ALERTS_FEATURE_ID,
-} from '../../../../../../alerting/common';
+} from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 
@@ -107,7 +107,7 @@ describe('rule_details', () => {
         status: 'error',
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         error: {
-          reason: AlertExecutionStatusErrorReasons.License,
+          reason: RuleExecutionStatusErrorReasons.License,
           message: 'test',
         },
       },
@@ -127,7 +127,7 @@ describe('rule_details', () => {
         status: 'warning',
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         warning: {
-          reason: AlertExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+          reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
           message: 'warning message',
         },
       },
@@ -685,6 +685,7 @@ describe('broken connector indicator', () => {
       name: 'Test connector',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     },
     {
       secrets: {},
@@ -694,6 +695,7 @@ describe('broken connector indicator', () => {
       name: 'Test connector 2',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     },
   ]);
 

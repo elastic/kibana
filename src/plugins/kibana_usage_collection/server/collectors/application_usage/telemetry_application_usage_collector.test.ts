@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { savedObjectsRepositoryMock, loggingSystemMock } from '../../../../../core/server/mocks';
+import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   Collector,
   createUsageCollectionSetupMock,
-} from '../../../../usage_collection/server/mocks';
-import { MAIN_APP_DEFAULT_VIEW_ID } from '../../../../usage_collection/common/constants';
-import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
+} from '@kbn/usage-collection-plugin/server/mocks';
+import { MAIN_APP_DEFAULT_VIEW_ID } from '@kbn/usage-collection-plugin/common/constants';
+import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
 import {
   registerApplicationUsageCollector,
   transformByApplicationViews,

@@ -24,14 +24,15 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { KBN_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/common';
-import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import {
   isEsIndices,
   isEsIngestPipelines,
   isPostTransformsPreviewResponseSchema,
 } from '../../../../../../common/api_schemas/type_guards';
+import { DEFAULT_TRANSFORM_FREQUENCY } from '../../../../../../common/constants';
 import { TransformId } from '../../../../../../common/types/transform';
 import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
@@ -783,7 +784,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                   'xpack.transform.stepDetailsForm.editFlyoutFormFrequencyPlaceholderText',
                   {
                     defaultMessage: 'Default: {defaultValue}',
-                    values: { defaultValue: '1m' },
+                    values: { defaultValue: DEFAULT_TRANSFORM_FREQUENCY },
                   }
                 )}
                 value={transformFrequency}

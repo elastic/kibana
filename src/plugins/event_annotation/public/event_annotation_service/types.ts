@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionAstExpression } from '../../../expressions/common/ast';
+import { ExpressionAstExpression } from '@kbn/expressions-plugin/common/ast';
 import { EventAnnotationArgs } from '../../common';
 
 export interface EventAnnotationServiceType {

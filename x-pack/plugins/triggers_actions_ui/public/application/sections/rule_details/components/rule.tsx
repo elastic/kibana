@@ -24,9 +24,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import {
   ActionGroup,
-  AlertExecutionStatusErrorReasons,
+  RuleExecutionStatusErrorReasons,
   AlertStatusValues,
-} from '../../../../../../alerting/common';
+} from '@kbn/alerting-plugin/common';
 import { Rule, RuleSummary, AlertStatus, RuleType } from '../../../../types';
 import {
   ComponentOpts as RuleApis,
@@ -102,7 +102,7 @@ export function RuleComponent({
 
   const healthColor = getHealthColor(rule.executionStatus.status);
   const isLicenseError =
-    rule.executionStatus.error?.reason === AlertExecutionStatusErrorReasons.License;
+    rule.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License;
   const statusMessage = isLicenseError
     ? ALERT_STATUS_LICENSE_ERROR
     : rulesStatusesTranslationsMapping[rule.executionStatus.status];

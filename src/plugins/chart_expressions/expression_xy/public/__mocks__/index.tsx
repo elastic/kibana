@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Datatable } from '../../../../expressions';
-import { chartPluginMock } from '../../../../charts/public/mocks';
-import { DataLayerConfigResult, LensMultiTable } from '../../common';
+import { Datatable } from '@kbn/expressions-plugin/common';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { LensMultiTable } from '../../common';
 import { LayerTypes } from '../../common/constants';
-import { XYProps } from '../../common/types';
+import { DataLayerConfig, XYProps } from '../../common/types';
 import { mockPaletteOutput, sampleArgs } from '../../common/__mocks__';
 
 const chartSetupContract = chartPluginMock.createSetupContract();
@@ -168,7 +168,8 @@ export const dateHistogramData: LensMultiTable = {
   },
 };
 
-export const dateHistogramLayer: DataLayerConfigResult = {
+export const dateHistogramLayer: DataLayerConfig = {
+  layerId: 'dateHistogramLayer',
   type: 'dataLayer',
   layerType: LayerTypes.DATA,
   hide: false,
@@ -202,10 +203,11 @@ export function sampleArgsWithReferenceLine(value: number = 150) {
     layers: [
       ...sArgs.layers,
       {
+        layerId: 'referenceLine-a',
         type: 'referenceLineLayer',
         layerType: LayerTypes.REFERENCELINE,
         accessors: ['referenceLine-a'],
-        yConfig: [{ axisMode: 'left', forAccessor: 'referenceLine-a', type: 'yConfig' }],
+        yConfig: [{ axisMode: 'left', forAccessor: 'referenceLine-a', type: 'extendedYConfig' }],
         table: data,
       },
     ],

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimelineModel } from '../../../timelines/store/timeline/model';
+import { TimelineModel } from '../../store/timeline/model';
 import { TimelineIdLiteral } from '../../../../common/types/timeline';
 
 export interface TimelinesStorage {

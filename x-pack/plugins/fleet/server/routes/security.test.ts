@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandler, RouteConfig } from '../../../../../src/core/server';
-import { coreMock } from '../../../../../src/core/server/mocks';
-import type { AuthenticatedUser, CheckPrivilegesPayload } from '../../../security/server';
-import type { CheckPrivilegesResponse } from '../../../security/server/authorization/types';
-import type { CheckPrivilegesDynamically } from '../../../security/server/authorization/check_privileges_dynamically';
+import type { IRouter, RequestHandler, RouteConfig } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
+import type { AuthenticatedUser, CheckPrivilegesPayload } from '@kbn/security-plugin/server';
+import type { CheckPrivilegesResponse } from '@kbn/security-plugin/server/authorization/types';
+import type { CheckPrivilegesDynamically } from '@kbn/security-plugin/server/authorization/check_privileges_dynamically';
+
 import { createAppContextStartContractMock } from '../mocks';
 import { appContextService } from '../services';
 import type { FleetRequestHandlerContext } from '../types';

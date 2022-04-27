@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* es-lint-disable import/no-extraneous-dependencies */
 import { applyMiddleware, Dispatch, Store } from 'redux';
 import thunkMiddleware from 'redux-thunk';
 import addons from '@storybook/addons';
@@ -14,8 +13,6 @@ import { isFunction } from 'lodash';
 
 import { EVENTS } from './constants';
 
-// @ts-expect-error untyped local
-import { appReady } from '../../../public/state/middleware/app_ready';
 // @ts-expect-error untyped local
 import { resolvedArgs } from '../../../public/state/middleware/resolved_args';
 

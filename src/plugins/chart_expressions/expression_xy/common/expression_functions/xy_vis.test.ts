@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { xyVisFunction } from '../expression_functions';
-import { createMockExecutionContext } from '../../../../../plugins/expressions/common/mocks';
+import { xyVisFunction } from '.';
+import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
 import { sampleArgs, sampleLayer } from '../__mocks__';
 import { XY_VIS } from '../constants';
 
 describe('xyVis', () => {
-  test('it renders with the specified data and args', () => {
+  test('it renders with the specified data and args', async () => {
     const { data, args } = sampleArgs();
     const { layers, ...rest } = args;
-    const result = xyVisFunction.fn(
+    const result = await xyVisFunction.fn(
       data,
       { ...rest, dataLayers: [sampleLayer], referenceLineLayers: [], annotationLayers: [] },
       createMockExecutionContext()

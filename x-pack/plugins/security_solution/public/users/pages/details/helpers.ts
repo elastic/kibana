@@ -31,7 +31,7 @@ export const getUsersDetailsPageFilters = (userName: string): Filter[] => [
   },
 ];
 
-export const filterUserExternalAlertData: Filter[] = [
+export const userNameExistsFilter: Filter[] = [
   {
     query: {
       bool: {

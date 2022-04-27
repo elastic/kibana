@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '../../../../core/server';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 
 import { ExpressionXyPluginSetup, ExpressionXyPluginStart } from './types';
 import {
   xyVisFunction,
   yAxisConfigFunction,
+  extendedYAxisConfigFunction,
   legendConfigFunction,
   gridlinesConfigFunction,
   dataLayerFunction,
@@ -25,7 +26,7 @@ import {
   extendedReferenceLineLayerFunction,
   layeredXyVisFunction,
   extendedAnnotationLayerFunction,
-} from '../common';
+} from '../common/expression_functions';
 import { SetupDeps } from './types';
 
 export class ExpressionXyPlugin
@@ -33,6 +34,7 @@ export class ExpressionXyPlugin
 {
   public setup(core: CoreSetup, { expressions }: SetupDeps) {
     expressions.registerFunction(yAxisConfigFunction);
+    expressions.registerFunction(extendedYAxisConfigFunction);
     expressions.registerFunction(legendConfigFunction);
     expressions.registerFunction(gridlinesConfigFunction);
     expressions.registerFunction(dataLayerFunction);

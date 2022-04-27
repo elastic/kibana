@@ -39,7 +39,7 @@ peggy(
   output_dir = True,
   args = [
     "-o",
-    "$(@D)/index.js",
+    "$(@D)/built_grammar.js",
     "./%s/grammar/grammar.peggy" % package_name()
   ],
 )

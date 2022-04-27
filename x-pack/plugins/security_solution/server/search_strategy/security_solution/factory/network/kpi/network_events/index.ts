@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import {
   NetworkKpiQueries,
   NetworkKpiNetworkEventsStrategyResponse,
@@ -14,7 +14,6 @@ import {
 import { inspectStringifyObject } from '../../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../../types';
 import { buildNetworkEventsQuery } from './query.network_kpi_network_events.dsl';
-import { buildNetworkEventsQueryEntities } from './query.network_kpi_network_events_entities.dsl';
 
 export const networkKpiNetworkEvents: SecuritySolutionFactory<NetworkKpiQueries.networkEvents> = {
   buildDsl: (options: NetworkKpiNetworkEventsRequestOptions) => buildNetworkEventsQuery(options),
@@ -34,24 +33,3 @@ export const networkKpiNetworkEvents: SecuritySolutionFactory<NetworkKpiQueries.
     };
   },
 };
-
-export const networkKpiNetworkEventsEntities: SecuritySolutionFactory<NetworkKpiQueries.networkEvents> =
-  {
-    buildDsl: (options: NetworkKpiNetworkEventsRequestOptions) =>
-      buildNetworkEventsQueryEntities(options),
-    parse: async (
-      options: NetworkKpiNetworkEventsRequestOptions,
-      response: IEsSearchResponse<unknown>
-    ): Promise<NetworkKpiNetworkEventsStrategyResponse> => {
-      const inspect = {
-        dsl: [inspectStringifyObject(buildNetworkEventsQueryEntities(options))],
-      };
-
-      return {
-        ...response,
-        inspect,
-        // @ts-expect-error code doesn't handle TotalHits
-        networkEvents: response.rawResponse.aggregations?.events?.value ?? null,
-      };
-    },
-  };

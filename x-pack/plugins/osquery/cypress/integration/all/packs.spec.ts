@@ -18,6 +18,7 @@ import { preparePack } from '../../tasks/packs';
 import { addIntegration, closeModalIfVisible } from '../../tasks/integrations';
 import { DEFAULT_POLICY } from '../../screens/fleet';
 import { getSavedQueriesDropdown } from '../../screens/live_query';
+import { ROLES } from '../../test';
 
 describe('ALL - Packs', () => {
   const integration = 'Osquery Manager';
@@ -32,8 +33,9 @@ describe('ALL - Packs', () => {
       runKbnArchiverScript(ArchiverMethod.LOAD, 'ecs_mapping_2');
       runKbnArchiverScript(ArchiverMethod.LOAD, 'ecs_mapping_3');
     });
+
     beforeEach(() => {
-      login();
+      login(ROLES.soc_manager);
       navigateTo('/app/osquery');
     });
 
@@ -202,6 +204,7 @@ describe('ALL - Packs', () => {
       deleteAndConfirm('pack');
     });
   });
+
   describe('Validate that agent is getting removed from pack if we remove agent', () => {
     beforeEach(() => {
       login();
@@ -247,6 +250,20 @@ describe('ALL - Packs', () => {
       cy.wait(1000);
       findAndClickButton('Edit');
       cy.react('EuiComboBoxInput', { props: { value: '' } }).should('exist');
+    });
+  });
+
+  describe('Load prebuilt packs', () => {
+    beforeEach(() => {
+      login(ROLES.soc_manager);
+      navigateTo('/app/osquery/packs');
+    });
+
+    it('should load prebuilt packs', () => {
+      cy.contains('Load Elastic prebuilt packs').click();
+      cy.contains('Load Elastic prebuilt packs').should('not.exist');
+      cy.wait(1000);
+      cy.react('EuiTableRow').should('have.length.above', 5);
     });
   });
 });

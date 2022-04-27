@@ -7,8 +7,8 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../src/core/public';
-import { DeveloperExamplesSetup } from '../../developer_examples/public';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;

@@ -21,7 +21,7 @@ jest.mock('./multi_input_rows_logic', () => ({
 }));
 import { MultiInputRowsLogic } from './multi_input_rows_logic';
 
-import { MultiInputRows } from './';
+import { MultiInputRows } from '.';
 
 describe('MultiInputRows', () => {
   const props = {

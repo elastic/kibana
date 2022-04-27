@@ -6,20 +6,13 @@
  * Side Public License, v 1.
  */
 
+import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { FormatFactory } from '../types';
-import {
-  AxisExtentConfig,
-  CommonXYDataLayerConfigResult,
-  CommonXYReferenceLineLayerConfigResult,
-} from '../../common';
-import type {
-  IFieldFormat,
-  SerializedFieldFormat,
-} from '../../../../../plugins/field_formats/common';
+import { CommonXYDataLayerConfig, ExtendedYConfig, YConfig } from '../../common';
 import { isDataLayer } from './visualization';
 
 export interface Series {
-  layer: number;
+  layer: string;
   accessor: string;
 }
 
@@ -41,9 +34,7 @@ export function isFormatterCompatible(
   return formatter1.id === formatter2.id;
 }
 
-export function groupAxesByType(
-  layers: Array<CommonXYDataLayerConfigResult | CommonXYReferenceLineLayerConfigResult>
-) {
+export function groupAxesByType(layers: CommonXYDataLayerConfig[]) {
   const series: {
     auto: FormattedMetric[];
     left: FormattedMetric[];
@@ -56,12 +47,12 @@ export function groupAxesByType(
     bottom: [],
   };
 
-  layers.forEach((layer, index) => {
+  layers.forEach((layer) => {
     const { table } = layer;
     layer.accessors.forEach((accessor) => {
+      const yConfig: Array<YConfig | ExtendedYConfig> | undefined = layer.yConfig;
       const mode =
-        layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode ||
-        'auto';
+        yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode || 'auto';
       let formatter: SerializedFieldFormat = table.columns?.find((column) => column.id === accessor)
         ?.meta?.params || { id: 'number' };
       if (
@@ -77,7 +68,7 @@ export function groupAxesByType(
         };
       }
       series[mode].push({
-        layer: index,
+        layer: layer.layerId,
         accessor,
         fieldFormat: formatter,
       });
@@ -113,7 +104,7 @@ export function groupAxesByType(
 }
 
 export function getAxesConfiguration(
-  layers: Array<CommonXYDataLayerConfigResult | CommonXYReferenceLineLayerConfigResult>,
+  layers: CommonXYDataLayerConfig[],
   shouldRotate: boolean,
   formatFactory?: FormatFactory
 ): GroupsConfiguration {
@@ -140,18 +131,4 @@ export function getAxesConfiguration(
   }
 
   return axisGroups;
-}
-
-export function validateExtent(hasBarOrArea: boolean, extent?: AxisExtentConfig) {
-  const inclusiveZeroError =
-    extent &&
-    hasBarOrArea &&
-    ((extent.lowerBound !== undefined && extent.lowerBound > 0) ||
-      (extent.upperBound !== undefined && extent.upperBound) < 0);
-  const boundaryError =
-    extent &&
-    extent.lowerBound !== undefined &&
-    extent.upperBound !== undefined &&
-    extent.upperBound <= extent.lowerBound;
-  return { inclusiveZeroError, boundaryError };
 }

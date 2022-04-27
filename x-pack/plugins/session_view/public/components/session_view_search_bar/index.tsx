@@ -24,6 +24,10 @@ const translatePlaceholder = {
   }),
 };
 
+const NO_RESULTS = i18n.translate('xpack.sessionView.searchBar.searchBarNoResults', {
+  defaultMessage: 'No results',
+});
+
 /**
  * The main wrapper component for the session view.
  */
@@ -33,7 +37,8 @@ export const SessionViewSearchBar = ({
   onProcessSelected,
   searchResults,
 }: SessionViewSearchBarDeps) => {
-  const showPagination = !!searchResults?.length;
+  const showPagination = !!searchQuery && searchResults?.length !== 0;
+  const noResults = !!searchQuery && searchResults?.length === 0;
 
   const styles = useStyles({ hasSearchResults: showPagination });
 
@@ -62,11 +67,12 @@ export const SessionViewSearchBar = ({
   return (
     <div data-test-subj="sessionView:searchInput" css={styles.searchBarWithResult}>
       <EuiSearchBar query={searchQuery} onChange={onSearch} box={translatePlaceholder} />
+      {noResults && <span css={styles.noResults}>{NO_RESULTS}</span>}
       {showPagination && (
         <EuiPagination
           data-test-subj="sessionView:searchPagination"
           css={styles.pagination}
-          pageCount={searchResults.length}
+          pageCount={searchResults?.length}
           activePage={selectedResult}
           onPageClick={setSelectedResult}
           compressed
