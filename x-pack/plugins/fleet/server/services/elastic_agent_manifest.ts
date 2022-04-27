@@ -424,6 +424,7 @@ rules:
       - pods
       - services
       - configmaps
+      - serviceaccounts
     verbs: ["get", "list", "watch"]
   # Enable this rule only if planing to use kubernetes_secrets provider
   #- apiGroups: [""]
@@ -456,6 +457,22 @@ rules:
       - "/metrics"
     verbs:
       - get
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources:
+      - clusterrolebindings
+      - clusterroles
+      - rolebindings
+      - roles
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources:
+      - ingressclasses
+      - ingresses
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["policy"]
+    resources:
+      - podsecuritypolicies
+    verbs: ["get", "list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
