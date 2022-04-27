@@ -31,8 +31,6 @@ jest.mock('../components/detection_response/user_alerts_table', () => ({
   UserAlertsTable: () => <div data-test-subj="mock_UserAlertsTable" />,
 }));
 
-// TODO: add all sections mocks
-
 jest.mock('../../common/components/search_bar', () => ({
   SiemSearchBar: () => <div data-test-subj="mock_globalDatePicker" />,
 }));
@@ -151,8 +149,6 @@ describe('DetectionResponse', () => {
     expect(result.queryByTestId('mock_HostAlertsTable')).not.toBeInTheDocument();
     expect(result.queryByTestId('mock_UserAlertsTable')).not.toBeInTheDocument();
     expect(result.queryByTestId('mock_AlertsByStatus')).not.toBeInTheDocument();
-
-    // TODO: assert cases sections are in the document
   });
 
   it('should not render alerts data sections if user has not kibana read permission', () => {
@@ -176,7 +172,6 @@ describe('DetectionResponse', () => {
     expect(result.queryByTestId('mock_HostAlertsTable')).not.toBeInTheDocument();
     expect(result.queryByTestId('mock_UserAlertsTable')).not.toBeInTheDocument();
     expect(result.queryByTestId('mock_AlertsByStatus')).not.toBeInTheDocument();
-    // TODO: assert all cases sections are in the document
   });
 
   it('should not render cases data sections if user has not cases read permission', () => {
@@ -197,8 +192,6 @@ describe('DetectionResponse', () => {
     expect(result.queryByTestId('mock_HostAlertsTable')).toBeInTheDocument();
     expect(result.queryByTestId('mock_UserAlertsTable')).toBeInTheDocument();
     expect(result.queryByTestId('mock_AlertsByStatus')).toBeInTheDocument();
-    // TODO: assert all alert sections are in the document
-    // TODO: assert all cases sections are not in the document
   });
 
   it('should render page permissions message if user has any read permission', () => {
