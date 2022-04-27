@@ -38,6 +38,7 @@ import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { PLUGIN } from '../../common/constants/plugin';
 import {
   LazySyntheticsPolicyCreateExtension,
@@ -67,6 +68,7 @@ export interface ClientPluginsStart {
   share: SharePluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesUiStart;
+  dataViews: DataViewsPublicPluginStart;
 }
 
 export interface UptimePluginServices extends Partial<CoreStart> {
@@ -128,7 +130,7 @@ export class UptimePlugin
                 sortKey: 500,
                 entries: [
                   {
-                    label: i18n.translate('xpack.uptime.overview.heading', {
+                    label: i18n.translate('xpack.synthetics.overview.heading', {
                       defaultMessage: 'Monitors',
                     }),
                     app: 'uptime',
@@ -137,7 +139,7 @@ export class UptimePlugin
                     ignoreTrailingSlash: true,
                   },
                   {
-                    label: i18n.translate('xpack.uptime.certificatesPage.heading', {
+                    label: i18n.translate('xpack.synthetics.certificatesPage.heading', {
                       defaultMessage: 'TLS Certificates',
                     }),
                     app: 'uptime',
