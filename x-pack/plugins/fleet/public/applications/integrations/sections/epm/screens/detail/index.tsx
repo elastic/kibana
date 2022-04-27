@@ -35,26 +35,25 @@ import {
   useAuthz,
   usePermissionCheck,
 } from '../../../../hooks';
-import {
-  PLUGIN_ID,
-  INTEGRATIONS_PLUGIN_ID,
-  INTEGRATIONS_ROUTING_PATHS,
-  pagePathGetters,
-} from '../../../../constants';
+import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { useGetPackageInfoByKey, useLink, useAgentPolicyContext } from '../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../services';
-import type {
-  CreatePackagePolicyRouteState,
-  DetailViewPanelName,
-  PackageInfo,
-} from '../../../../types';
+import type { DetailViewPanelName, PackageInfo } from '../../../../types';
 import { InstallStatus } from '../../../../types';
-import { Error, EuiButtonWithTooltip, Loading } from '../../../../components';
+import { Error, Loading } from '../../../../components';
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
 import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from '../../components/release_badge';
 
-import { IntegrationAgentPolicyCount, UpdateIcon, IconPanel, LoadingIconPanel } from './components';
+import { getInstallPkgRouteOptions } from './utils';
+
+import {
+  IntegrationAgentPolicyCount,
+  UpdateIcon,
+  IconPanel,
+  LoadingIconPanel,
+  AddIntegrationButton,
+} from './components';
 import { AssetsPage } from './assets';
 import { OverviewPage } from './overview';
 import { PackagePoliciesPage } from './policies';
@@ -257,7 +256,6 @@ export function Detail() {
   const handleAddIntegrationPolicyClick = useCallback<ReactEventHandler>(
     (ev) => {
       ev.preventDefault();
-
       // The object below, given to `createHref` is explicitly accessing keys of `location` in order
       // to ensure that dependencies to this `useCallback` is set correctly (because `location` is mutable)
       const currentPath = history.createHref({
@@ -266,65 +264,14 @@ export function Detail() {
         hash,
       });
 
-      const path = pagePathGetters.add_integration_to_policy({
+      const navigateOptions = getInstallPkgRouteOptions({
+        currentPath,
+        integration,
+        agentPolicyId: agentPolicyIdFromContext,
         pkgkey,
-        ...(integration ? { integration } : {}),
-        ...(agentPolicyIdFromContext ? { agentPolicyId: agentPolicyIdFromContext } : {}),
-      })[1];
-
-      let redirectToPath: CreatePackagePolicyRouteState['onSaveNavigateTo'] &
-        CreatePackagePolicyRouteState['onCancelNavigateTo'];
-      let onSaveQueryParams: CreatePackagePolicyRouteState['onSaveQueryParams'];
-      if (agentPolicyIdFromContext) {
-        redirectToPath = [
-          PLUGIN_ID,
-          {
-            path: pagePathGetters.policy_details({
-              policyId: agentPolicyIdFromContext,
-            })[1],
-          },
-        ];
-
-        onSaveQueryParams = {
-          showAddAgentHelp: true,
-          openEnrollmentFlyout: true,
-        };
-      } else {
-        redirectToPath = [
-          INTEGRATIONS_PLUGIN_ID,
-          {
-            path: pagePathGetters.integration_details_policies({
-              pkgkey,
-              ...(integration ? { integration } : {}),
-            })[1],
-          },
-        ];
-
-        onSaveQueryParams = {
-          showAddAgentHelp: { renameKey: 'showAddAgentHelpForPolicyId', policyIdAsValue: true },
-          openEnrollmentFlyout: { renameKey: 'addAgentToPolicyId', policyIdAsValue: true },
-        };
-      }
-
-      const redirectBackRouteState: CreatePackagePolicyRouteState = {
-        onSaveNavigateTo: redirectToPath,
-        onSaveQueryParams,
-        onCancelNavigateTo: [
-          INTEGRATIONS_PLUGIN_ID,
-          {
-            path: pagePathGetters.integration_details_overview({
-              pkgkey,
-              ...(integration ? { integration } : {}),
-            })[1],
-          },
-        ],
-        onCancelUrl: currentPath,
-      };
-
-      services.application.navigateToApp(PLUGIN_ID, {
-        path,
-        state: redirectBackRouteState,
       });
+
+      services.application.navigateToApp(...navigateOptions);
     },
     [
       history,
@@ -375,10 +322,8 @@ export function Detail() {
               { isDivider: true },
               {
                 content: (
-                  <EuiButtonWithTooltip
-                    fill
-                    isDisabled={!userCanInstallPackages}
-                    iconType="plusInCircle"
+                  <AddIntegrationButton
+                    userCanInstallPackages={userCanInstallPackages}
                     href={getHref('add_integration_to_policy', {
                       pkgkey,
                       ...(integration ? { integration } : {}),
@@ -386,34 +331,10 @@ export function Detail() {
                         ? { agentPolicyId: agentPolicyIdFromContext }
                         : {}),
                     })}
+                    missingSecurityConfiguration={missingSecurityConfiguration}
+                    packageName={integrationInfo?.title || packageInfo.title}
                     onClick={handleAddIntegrationPolicyClick}
-                    data-test-subj="addIntegrationPolicyButton"
-                    tooltip={
-                      !userCanInstallPackages
-                        ? {
-                            content: missingSecurityConfiguration ? (
-                              <FormattedMessage
-                                id="xpack.fleet.epm.addPackagePolicyButtonSecurityRequiredTooltip"
-                                defaultMessage="To add Elastic Agent Integrations, you must have security enabled and have the All privilege for Fleet. Contact your administrator."
-                              />
-                            ) : (
-                              <FormattedMessage
-                                id="xpack.fleet.epm.addPackagePolicyButtonPrivilegesRequiredTooltip"
-                                defaultMessage="Elastic Agent Integrations require the All privilege for Fleet and All privilege for Integrations. Contact your administrator."
-                              />
-                            ),
-                          }
-                        : undefined
-                    }
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.epm.addPackagePolicyButtonText"
-                      defaultMessage="Add {packageName}"
-                      values={{
-                        packageName: integrationInfo?.title || packageInfo.title,
-                      }}
-                    />
-                  </EuiButtonWithTooltip>
+                  />
                 ),
               },
             ].map((item, index) => (
