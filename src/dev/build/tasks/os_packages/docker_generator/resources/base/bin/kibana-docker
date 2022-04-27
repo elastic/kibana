@@ -188,6 +188,7 @@ kibana_vars=(
     vis_type_vega.enableExternalUrls
     xpack.actions.allowedHosts
     xpack.actions.customHostSettings
+    xpack.actions.email.domain_allowlist
     xpack.actions.enabledActionTypes
     xpack.actions.maxResponseContentLength
     xpack.actions.preconfigured
@@ -211,6 +212,7 @@ kibana_vars=(
     xpack.alerting.rules.minimumScheduleInterval.value
     xpack.alerting.rules.minimumScheduleInterval.enforce
     xpack.alerting.rules.run.actions.max
+    xpack.alerting.rules.run.actions.connectorTypeOverrides
     xpack.alerts.healthCheck.interval
     xpack.alerts.invalidateApiKeysTask.interval
     xpack.alerts.invalidateApiKeysTask.removalDelay
