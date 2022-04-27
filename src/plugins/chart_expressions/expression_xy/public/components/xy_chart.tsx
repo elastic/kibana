@@ -187,7 +187,12 @@ export function XYChart({
     filteredLayers.some((layer) => isDataLayer(layer) && layer.splitAccessor);
   const shouldRotate = isHorizontalChart(dataLayers);
 
-  const yAxesConfiguration = getAxesConfiguration(dataLayers, shouldRotate, axes, formatFactory);
+  const yAxesConfiguration = getAxesConfiguration(
+    filteredLayers,
+    shouldRotate,
+    axes,
+    formatFactory
+  );
 
   const xTitle = xAxisConfig?.title || (xAxisColumn && xAxisColumn.name);
 
