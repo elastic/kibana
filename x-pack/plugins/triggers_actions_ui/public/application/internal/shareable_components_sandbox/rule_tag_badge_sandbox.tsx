@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+/**
+ * Note: This exists only temporarily as we refactor to remove the sandboxes
+ * to its own plugin. Ideally we do not want to use an internal page within 
+ * the triggers_actions_ui plugin
+ */
+
 import React, { useState } from 'react';
 import { getRuleTagBadgeLazy } from '../../../common/get_rule_tag_badge';
 
