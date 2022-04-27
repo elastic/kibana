@@ -94,7 +94,7 @@ export function groupAxesByType(
 }
 
 export function getAxesConfiguration(
-  layers: Array<CommonXYDataLayerConfig | CommonXYReferenceLineLayerConfig>,
+  layers: CommonXYDataLayerConfig[],
   shouldRotate: boolean,
   formatFactory: FormatFactory | undefined,
   fieldFormats: LayersFieldFormats
