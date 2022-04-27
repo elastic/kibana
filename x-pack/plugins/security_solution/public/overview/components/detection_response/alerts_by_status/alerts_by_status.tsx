@@ -20,7 +20,7 @@ import { LegendItem } from '../../../../common/components/charts/legend_item';
 import { useAlertsByStatus } from './use_alerts_by_status';
 import {
   ALERTS,
-  ALERTS_TITLE,
+  ALERTS_TEXT,
   STATUS_ACKNOWLEDGED,
   STATUS_CLOSED,
   STATUS_CRITICAL_LABEL,
@@ -130,7 +130,7 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
           )}
           <HeaderSection
             id={DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}
-            title={ALERTS_TITLE}
+            title={ALERTS_TEXT}
             subtitle={<LastUpdatedAt isUpdating={loading} updatedAt={updatedAt} />}
             inspectMultiple
             toggleStatus={toggleStatus}

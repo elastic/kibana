@@ -30,6 +30,7 @@ import { SecurityPageName } from '../../../../../common/constants';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
 import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
+import { FormattedCount } from '../../../../common/components/formatted_number';
 
 export interface RuleAlertsTableProps {
   signalIndexName: string | null;
@@ -78,6 +79,7 @@ export const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo }) => [
     field: 'alert_count',
     name: i18n.RULE_ALERTS_COLUMN_ALERT_COUNT,
     'data-test-subj': 'severityRuleAlertsTable-alertCount',
+    render: (alertCount: number) => <FormattedCount count={alertCount} />,
   },
   {
     field: 'severity',
