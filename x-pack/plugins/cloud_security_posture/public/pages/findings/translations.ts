@@ -144,7 +144,7 @@ export const ID = i18n.translate('xpack.csp.findings.idLabel', {
 });
 
 export const HOST = i18n.translate('xpack.csp.findings.hostLabel', {
-  defaultMessage: 'HOST',
+  defaultMessage: 'Host',
 });
 
 export const ARCHITECTURE = i18n.translate('xpack.csp.findings.architectureLabel', {

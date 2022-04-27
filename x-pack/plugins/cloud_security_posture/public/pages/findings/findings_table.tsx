@@ -23,7 +23,7 @@ import * as TEXT from './translations';
 import type { CspFinding } from './types';
 import { CspEvaluationBadge } from '../../components/csp_evaluation_badge';
 import type { FindingsGroupByNoneQuery, CspFindingsResult } from './use_findings';
-import { FindingsRuleFlyout } from './findings_flyout';
+import { FindingsRuleFlyout } from './findings_flyout/findings_flyout';
 
 interface BaseFindingsTableProps extends FindingsGroupByNoneQuery {
   setQuery(query: Partial<FindingsGroupByNoneQuery>): void;
