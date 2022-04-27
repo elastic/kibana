@@ -100,9 +100,19 @@ export function dataVisualizerRoutes({ router, routeGuard }: RouteInitialization
         stream.push(JSON.stringify({ type: 'message', value: 'hey' }) + '\n');
 
         let count = 0;
+        let aborted = false;
+
+        request.events.aborted$.subscribe(() => {
+          aborted = true;
+        });
 
         function doStream() {
           setTimeout((): void => {
+            if (aborted) {
+              stream.push(null);
+              return;
+            }
+
             stream.push(JSON.stringify({ type: 'progress', value: count }) + '\n');
             stream.push(
               JSON.stringify({ type: 'number', value: Math.round(Math.random() * 100) }) + '\n'

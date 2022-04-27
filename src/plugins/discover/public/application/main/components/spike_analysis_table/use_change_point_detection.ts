@@ -392,6 +392,7 @@ export function useChangePointDetection(
       setResponse.flush();
 
       const stream = await fetch('/api/ml/data_visualizer/spike_analysis', {
+        signal: abortCtrl.current.signal,
         headers: {
           'kbn-xsrf': 'stream',
         },
