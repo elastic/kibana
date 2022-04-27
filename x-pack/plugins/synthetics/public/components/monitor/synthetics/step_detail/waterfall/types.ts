@@ -33,31 +33,31 @@ export enum Metadata {
 
 export const FriendlyTimingLabels = {
   [Timings.Blocked]: i18n.translate(
-    'xpack.uptime.synthetics.waterfallChart.labels.timings.blocked',
+    'xpack.synthetics.synthetics.waterfallChart.labels.timings.blocked',
     {
       defaultMessage: 'Queued / Blocked',
     }
   ),
-  [Timings.Dns]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.timings.dns', {
+  [Timings.Dns]: i18n.translate('xpack.synthetics.synthetics.waterfallChart.labels.timings.dns', {
     defaultMessage: 'DNS',
   }),
   [Timings.Connect]: i18n.translate(
-    'xpack.uptime.synthetics.waterfallChart.labels.timings.connect',
+    'xpack.synthetics.synthetics.waterfallChart.labels.timings.connect',
     {
       defaultMessage: 'Connecting',
     }
   ),
-  [Timings.Ssl]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.timings.ssl', {
+  [Timings.Ssl]: i18n.translate('xpack.synthetics.synthetics.waterfallChart.labels.timings.ssl', {
     defaultMessage: 'TLS',
   }),
-  [Timings.Send]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.timings.send', {
+  [Timings.Send]: i18n.translate('xpack.synthetics.synthetics.waterfallChart.labels.timings.send', {
     defaultMessage: 'Sending request',
   }),
-  [Timings.Wait]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.timings.wait', {
+  [Timings.Wait]: i18n.translate('xpack.synthetics.synthetics.waterfallChart.labels.timings.wait', {
     defaultMessage: 'Waiting (TTFB)',
   }),
   [Timings.Receive]: i18n.translate(
-    'xpack.uptime.synthetics.waterfallChart.labels.timings.receive',
+    'xpack.synthetics.synthetics.waterfallChart.labels.timings.receive',
     {
       defaultMessage: 'Content downloading',
     }
@@ -66,60 +66,60 @@ export const FriendlyTimingLabels = {
 
 export const FriendlyFlyoutLabels = {
   [Metadata.Status]: i18n.translate(
-    'xpack.uptime.synthetics.waterfallChart.labels.metadata.status',
+    'xpack.synthetics.synthetics.waterfallChart.labels.metadata.status',
     {
       defaultMessage: 'Status',
     }
   ),
   [Metadata.MimeType]: i18n.translate(
-    'xpack.uptime.synthetics.waterfallChart.labels.metadata.contentType',
+    'xpack.synthetics.synthetics.waterfallChart.labels.metadata.contentType',
     {
       defaultMessage: 'Content type',
     }
   ),
   [Metadata.RequestStart]: i18n.translate(
-    'xpack.uptime.synthetics.waterfallChart.labels.metadata.requestStart',
+    'xpack.synthetics.synthetics.waterfallChart.labels.metadata.requestStart',
     {
       defaultMessage: 'Request start',
     }
   ),
   [Metadata.ResourceSize]: i18n.translate(
-    'xpack.uptime.synthetics.waterfallChart.labels.metadata.resourceSize',
+    'xpack.synthetics.synthetics.waterfallChart.labels.metadata.resourceSize',
     {
       defaultMessage: 'Resource size',
     }
   ),
   [Metadata.TransferSize]: i18n.translate(
-    'xpack.uptime.synthetics.waterfallChart.labels.metadata.transferSize',
+    'xpack.synthetics.synthetics.waterfallChart.labels.metadata.transferSize',
     {
       defaultMessage: 'Transfer size',
     }
   ),
   [Metadata.CertificateIssuer]: i18n.translate(
-    'xpack.uptime.synthetics.waterfallChart.labels.metadata.certificateIssuer',
+    'xpack.synthetics.synthetics.waterfallChart.labels.metadata.certificateIssuer',
     {
       defaultMessage: 'Issuer',
     }
   ),
   [Metadata.CertificateIssueDate]: i18n.translate(
-    'xpack.uptime.synthetics.waterfallChart.labels.metadata.certificateIssueDate',
+    'xpack.synthetics.synthetics.waterfallChart.labels.metadata.certificateIssueDate',
     {
       defaultMessage: 'Valid from',
     }
   ),
   [Metadata.CertificateExpiryDate]: i18n.translate(
-    'xpack.uptime.synthetics.waterfallChart.labels.metadata.certificateExpiryDate',
+    'xpack.synthetics.synthetics.waterfallChart.labels.metadata.certificateExpiryDate',
     {
       defaultMessage: 'Valid until',
     }
   ),
   [Metadata.CertificateSubject]: i18n.translate(
-    'xpack.uptime.synthetics.waterfallChart.labels.metadata.certificateSubject',
+    'xpack.synthetics.synthetics.waterfallChart.labels.metadata.certificateSubject',
     {
       defaultMessage: 'Common name',
     }
   ),
-  [Metadata.IP]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.metadata.ip', {
+  [Metadata.IP]: i18n.translate('xpack.synthetics.synthetics.waterfallChart.labels.metadata.ip', {
     defaultMessage: 'IP',
   }),
 };
@@ -158,35 +158,44 @@ export enum MimeType {
 }
 
 export const FriendlyMimetypeLabels = {
-  [MimeType.Html]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.mimeTypes.html', {
-    defaultMessage: 'HTML',
-  }),
+  [MimeType.Html]: i18n.translate(
+    'xpack.synthetics.synthetics.waterfallChart.labels.mimeTypes.html',
+    {
+      defaultMessage: 'HTML',
+    }
+  ),
   [MimeType.Script]: i18n.translate(
-    'xpack.uptime.synthetics.waterfallChart.labels.mimeTypes.script',
+    'xpack.synthetics.synthetics.waterfallChart.labels.mimeTypes.script',
     {
       defaultMessage: 'JS',
     }
   ),
   [MimeType.Stylesheet]: i18n.translate(
-    'xpack.uptime.synthetics.waterfallChart.labels.mimeTypes.stylesheet',
+    'xpack.synthetics.synthetics.waterfallChart.labels.mimeTypes.stylesheet',
     {
       defaultMessage: 'CSS',
     }
   ),
   [MimeType.Media]: i18n.translate(
-    'xpack.uptime.synthetics.waterfallChart.labels.mimeTypes.media',
+    'xpack.synthetics.synthetics.waterfallChart.labels.mimeTypes.media',
     {
       defaultMessage: 'Media',
     }
   ),
-  [MimeType.Font]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.mimeTypes.font', {
-    defaultMessage: 'Font',
-  }),
-  [MimeType.XHR]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.mimeTypes.xhr', {
-    defaultMessage: 'XHR',
-  }),
+  [MimeType.Font]: i18n.translate(
+    'xpack.synthetics.synthetics.waterfallChart.labels.mimeTypes.font',
+    {
+      defaultMessage: 'Font',
+    }
+  ),
+  [MimeType.XHR]: i18n.translate(
+    'xpack.synthetics.synthetics.waterfallChart.labels.mimeTypes.xhr',
+    {
+      defaultMessage: 'XHR',
+    }
+  ),
   [MimeType.Other]: i18n.translate(
-    'xpack.uptime.synthetics.waterfallChart.labels.mimeTypes.other',
+    'xpack.synthetics.synthetics.waterfallChart.labels.mimeTypes.other',
     {
       defaultMessage: 'Other',
     }

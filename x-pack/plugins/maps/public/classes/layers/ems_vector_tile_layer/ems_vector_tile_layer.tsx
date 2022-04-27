@@ -404,10 +404,6 @@ export class EmsVectorTileLayer extends AbstractLayer {
     mbMap.setLayerZoomRange(mbLayerId, minZoom, maxZoom);
   }
 
-  // _setLanguageLocale(mbLayer: LayerSpecification, mbLayerId: string) {
-  //   const locale = this.getLocale();
-  // }
-
   _setTileLayerProperties(mbMap: MbMap) {
     const vectorStyle = this._getVectorStyle();
     if (!vectorStyle || !vectorStyle.layers) {
@@ -419,7 +415,6 @@ export class EmsVectorTileLayer extends AbstractLayer {
       this.syncVisibilityWithMb(mbMap, mbLayerId);
       this._setLayerZoomRange(mbMap, mbLayer, mbLayerId);
       this._setOpacityForType(mbMap, mbLayer, mbLayerId);
-      // this._setLanguageLocale()
     });
   }
 
