@@ -1244,5 +1244,9 @@ export const calculateDuration = (closedAt: string | null, createdAt: string | n
     throw new Error('Dates are invalid');
   }
 
+  if (closedAtMillis < createdAtMillis) {
+    throw new Error('Closed date is earlier than created date');
+  }
+
   return Math.floor(Math.abs((closedAtMillis - createdAtMillis) / 1000));
 };

@@ -109,7 +109,7 @@ export const addDuration = (
 
   /**
    * Duration is the time from the creation of the case to the close of the case in seconds
-   * If an error occurs or the case has not been close then the duration is set to null
+   * If an error occurs or the case has not been closed then the duration is set to null
    */
   return { ...doc, attributes: { ...doc.attributes, duration }, references: doc.references ?? [] };
 };
