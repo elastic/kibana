@@ -7,7 +7,7 @@
 
 import uuid from 'uuid';
 
-import { SIGNALS_ID, ruleTypeMappings } from '@kbn/securitysolution-rules';
+import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
 import { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
 import {
@@ -29,10 +29,8 @@ import {
   ResponseTypeSpecific,
 } from '../../../../common/detection_engine/schemas/request';
 import { AppClient } from '../../../types';
-import { addTags } from '../rules/add_tags';
 import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { transformTags } from '../routes/rules/utils';
 import {
   transformFromAlertThrottle,
   transformToAlertThrottle,
@@ -127,15 +125,14 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
 
 export const convertCreateAPIToInternalSchema = (
   input: CreateRulesSchema,
-  siemClient: AppClient,
-  isRuleRegistryEnabled: boolean
+  siemClient: AppClient
 ): InternalRuleCreate => {
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
   const newRuleId = input.rule_id ?? uuid.v4();
   return {
     name: input.name,
-    tags: addTags(input.tags ?? [], newRuleId, false),
-    alertTypeId: isRuleRegistryEnabled ? ruleTypeMappings[input.type] : SIGNALS_ID,
+    tags: input.tags ?? [],
+    alertTypeId: ruleTypeMappings[input.type],
     consumer: SERVER_APP_ID,
     params: {
       author: input.author ?? [],
@@ -302,7 +299,7 @@ export const internalRuleToAPIResponse = (
     created_at: rule.createdAt.toISOString(),
     created_by: rule.createdBy ?? 'elastic',
     name: rule.name,
-    tags: transformTags(rule.tags),
+    tags: rule.tags,
     interval: rule.schedule.interval,
     enabled: rule.enabled,
     // Security solution shared rule params
