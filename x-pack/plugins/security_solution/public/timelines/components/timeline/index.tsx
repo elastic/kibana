@@ -11,9 +11,9 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { isTab, TimelineContext } from '../../../../../timelines/public';
+import { isTab, TimelineContext } from '@kbn/timelines-plugin/public';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { timelineDefaults } from '../../store/timeline/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import { CellValueElementProps } from './cell_rendering';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';

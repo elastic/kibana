@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 import {
   EqlCreateSchema,
   ThresholdCreateSchema,
-} from '../../../../../plugins/security_solution/common/detection_engine/schemas/request';
-import { ALERT_THRESHOLD_RESULT } from '../../../../../plugins/security_solution/common/field_maps/field_names';
+} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { ALERT_THRESHOLD_RESULT } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {

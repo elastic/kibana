@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 
 import { SECURITY_TELEMETRY_URL } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';

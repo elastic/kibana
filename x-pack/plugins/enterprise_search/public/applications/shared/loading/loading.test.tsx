@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { EuiLoadingLogo, EuiLoadingSpinner } from '@elastic/eui';
 
-import { Loading, LoadingOverlay } from './';
+import { Loading, LoadingOverlay } from '.';
 
 describe('Loading', () => {
   it('renders', () => {

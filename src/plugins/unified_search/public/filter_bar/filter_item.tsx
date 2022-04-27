@@ -17,11 +17,11 @@ import {
 } from '@kbn/es-query';
 import classNames from 'classnames';
 import React, { MouseEvent, useState, useEffect, HTMLAttributes } from 'react';
-import { IUiSettingsClient } from 'src/core/public';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '@kbn/data-plugin/public';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
-import { DataView } from '../../../data_views/public';
-import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '../../../data/public';
 import { getIndexPatterns } from '../services';
 
 type PanelOptions = 'pinFilter' | 'editFilter' | 'negateFilter' | 'disableFilter' | 'deleteFilter';

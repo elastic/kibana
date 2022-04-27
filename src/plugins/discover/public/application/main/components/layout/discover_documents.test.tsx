@@ -18,8 +18,8 @@ import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocuments } from './discover_documents';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
-import { ElasticSearchHit } from 'src/plugins/discover/public/types';
-import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+import { ElasticSearchHit } from '../../../../types';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 setHeaderActionMenuMounter(jest.fn());
 

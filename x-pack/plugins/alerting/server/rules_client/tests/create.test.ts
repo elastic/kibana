@@ -7,21 +7,21 @@
 
 import { schema } from '@kbn/config-schema';
 import { RulesClient, ConstructorOptions, CreateOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
+import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
-import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
-import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
-import { ActionsAuthorization, ActionsClient } from '../../../../actions/server';
-import { TaskStatus } from '../../../../task_manager/server';
-import { auditLoggerMock } from '../../../../security/server/audit/mocks';
+import { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
 import { getDefaultRuleMonitoring } from '../../task_runner/task_runner';
 
-jest.mock('../../../../../../src/core/server/saved_objects/service/lib/utils', () => ({
+jest.mock('@kbn/core/server/saved_objects/service/lib/utils', () => ({
   SavedObjectsUtils: {
     generateId: () => 'mock-saved-object-id',
   },
@@ -113,6 +113,7 @@ describe('create()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
     ]);
     taskManager.schedule.mockResolvedValue({
@@ -687,6 +688,7 @@ describe('create()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: '2',
@@ -702,6 +704,7 @@ describe('create()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -857,6 +860,7 @@ describe('create()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: '2',
@@ -872,6 +876,7 @@ describe('create()', () => {
         isMissingSecrets: false,
         name: 'another email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: 'preconfigured',
@@ -887,6 +892,7 @@ describe('create()', () => {
         isMissingSecrets: false,
         name: 'preconfigured email connector',
         isPreconfigured: true,
+        isDeprecated: false,
       },
     ]);
     actionsClient.isPreconfigured.mockReset();
@@ -1166,11 +1172,6 @@ describe('create()', () => {
         extractReferences: extractReferencesFn,
         injectReferences: injectReferencesFn,
       },
-      config: {
-        execution: {
-          actions: { max: 1000 },
-        },
-      },
     }));
     const data = getMockData({
       params: ruleParams,
@@ -1338,11 +1339,6 @@ describe('create()', () => {
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
         injectReferences: injectReferencesFn,
-      },
-      config: {
-        execution: {
-          actions: { max: 1000 },
-        },
       },
     }));
     const data = getMockData({
@@ -2098,11 +2094,6 @@ describe('create()', () => {
       isExportable: true,
       async executor() {},
       producer: 'alerts',
-      config: {
-        execution: {
-          actions: { max: 1000 },
-        },
-      },
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"params invalid: [param1]: expected value of type [string] but got [undefined]"`
@@ -2538,6 +2529,7 @@ describe('create()', () => {
         isMissingSecrets: true,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
     ]);
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -2627,11 +2619,6 @@ describe('create()', () => {
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
-      },
-      config: {
-        execution: {
-          actions: { max: 1000 },
-        },
       },
     }));
 

@@ -12,7 +12,6 @@ import {
   QUERY_RULE_TYPE_ID,
   SAVED_QUERY_RULE_TYPE_ID,
   THRESHOLD_RULE_TYPE_ID,
-  SIGNALS_ID,
   NEW_TERMS_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
 
@@ -27,26 +26,13 @@ const allAlertTypeIds = `(alert.attributes.alertTypeId: ${EQL_RULE_TYPE_ID}
  OR alert.attributes.alertTypeId: ${NEW_TERMS_RULE_TYPE_ID})`.replace(/[\n\r]/g, '');
 
 describe('find_rules', () => {
-  const fullFilterTestCases: Array<[boolean, string]> = [
-    [false, `alert.attributes.alertTypeId: ${SIGNALS_ID} AND alert.attributes.enabled: true`],
-    [true, `${allAlertTypeIds} AND alert.attributes.enabled: true`],
-  ];
-  const nullFilterTestCases: Array<[boolean, string]> = [
-    [false, `alert.attributes.alertTypeId: ${SIGNALS_ID}`],
-    [true, allAlertTypeIds],
-  ];
+  test('it returns a full filter with an AND if sent down', () => {
+    expect(getFilter('alert.attributes.enabled: true')).toEqual(
+      `${allAlertTypeIds} AND alert.attributes.enabled: true`
+    );
+  });
 
-  test.each(fullFilterTestCases)(
-    'it returns a full filter with an AND if sent down [rule registry enabled: %p]',
-    (isRuleRegistryEnabled, expected) => {
-      expect(getFilter('alert.attributes.enabled: true', isRuleRegistryEnabled)).toEqual(expected);
-    }
-  );
-
-  test.each(nullFilterTestCases)(
-    'it returns existing filter with no AND when not set [rule registry enabled: %p]',
-    (isRuleRegistryEnabled, expected) => {
-      expect(getFilter(null, isRuleRegistryEnabled)).toEqual(expected);
-    }
-  );
+  test('it returns existing filter with no AND when not set [rule registry enabled: %p]', () => {
+    expect(getFilter(null)).toEqual(allAlertTypeIds);
+  });
 });

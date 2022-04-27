@@ -10,13 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import React, { useMemo, useState } from 'react';
-import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
-import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
-import { getNodeDetailUrl, getNodeLogsUrl } from '../../../../link_to';
-import { findInventoryModel, findInventoryFields } from '../../../../../../common/inventory_models';
-import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { InventoryItemType } from '../../../../../../common/inventory_models/types';
-import { withTheme, EuiTheme } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
 import {
   Section,
   SectionLinkProps,
@@ -25,8 +20,13 @@ import {
   SectionLinks,
   SectionLink,
   ActionMenuDivider,
-} from '../../../../../../../observability/public';
-import { useLinkProps } from '../../../../../../../observability/public';
+} from '@kbn/observability-plugin/public';
+import { useLinkProps } from '@kbn/observability-plugin/public';
+import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
+import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
+import { getNodeDetailUrl, getNodeLogsUrl } from '../../../../link_to';
+import { findInventoryModel, findInventoryFields } from '../../../../../../common/inventory_models';
+import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { navigateToUptime } from '../../lib/navigate_to_uptime';
 import { InfraClientCoreStart, InfraClientStartDeps } from '../../../../../types';
 

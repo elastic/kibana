@@ -7,8 +7,8 @@
 
 import { EuiSuperDatePicker, OnRefreshChangeProps, OnTimeChangeProps } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { MetricsTimeInput } from '../hooks/use_metrics_time';
 import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
 import { mapKibanaQuickRangesToDatePickerRanges } from '../../../../utils/map_timepicker_quickranges_to_datepicker_ranges';

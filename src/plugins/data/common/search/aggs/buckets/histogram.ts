@@ -8,9 +8,9 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from '@kbn/core/public';
 
-import { KBN_FIELD_TYPES, UI_SETTINGS } from '../../../../common';
+import { KBN_FIELD_TYPES, UI_SETTINGS } from '../../..';
 
 import { ExtendedBounds, extendedBoundsToAst } from '../../expressions';
 import { AggTypesDependencies } from '../agg_types';

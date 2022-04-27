@@ -7,7 +7,7 @@
  */
 
 import { extractTimeFields } from './extract_time_fields';
-import type { IndexPatternField } from 'src/plugins/data/public';
+import type { IndexPatternField } from '@kbn/data-plugin/public';
 
 describe('extractTimeFields', () => {
   it('should handle no date fields', () => {

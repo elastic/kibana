@@ -7,7 +7,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ExpressionValue } from 'src/plugins/expressions';
+import { ExpressionValue } from '@kbn/expressions-plugin';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
 declare global {
