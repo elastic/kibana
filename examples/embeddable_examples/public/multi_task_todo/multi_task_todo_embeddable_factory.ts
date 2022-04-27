@@ -11,7 +11,7 @@ import {
   IContainer,
   EmbeddableFactoryDefinition,
   EmbeddableFactory,
-} from '../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
 import {
   MultiTaskTodoEmbeddable,
   MULTI_TASK_TODO_EMBEDDABLE,

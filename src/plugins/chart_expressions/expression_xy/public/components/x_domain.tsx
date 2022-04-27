@@ -9,13 +9,13 @@
 import { uniq } from 'lodash';
 import React from 'react';
 import moment from 'moment';
+import { Endzones } from '@kbn/charts-plugin/public';
+import { search } from '@kbn/data-plugin/public';
 import {
   getColumnByAccessor,
   getAccessorByDimension,
 } from '../../../../../plugins/visualizations/common/utils';
-import { Endzones } from '../../../../../plugins/charts/public';
-import type { CommonXYDataLayerConfigResult } from '../../common';
-import { search } from '../../../../../plugins/data/public';
+import type { CommonXYDataLayerConfig } from '../../common';
 
 export interface XDomain {
   min?: number;
@@ -23,7 +23,7 @@ export interface XDomain {
   minInterval?: number;
 }
 
-export const getAppliedTimeRange = (layers: CommonXYDataLayerConfigResult[]) => {
+export const getAppliedTimeRange = (layers: CommonXYDataLayerConfig[]) => {
   return layers
     .map(({ xAccessor, table }) => {
       const xColumn = xAccessor ? getColumnByAccessor(xAccessor, table.columns) : null;
@@ -32,7 +32,7 @@ export const getAppliedTimeRange = (layers: CommonXYDataLayerConfigResult[]) => 
       if (timeRange) {
         return {
           timeRange,
-          field: xColumn.meta.field,
+          field: xColumn?.meta.field,
         };
       }
     })
@@ -40,7 +40,7 @@ export const getAppliedTimeRange = (layers: CommonXYDataLayerConfigResult[]) => 
 };
 
 export const getXDomain = (
-  layers: CommonXYDataLayerConfigResult[],
+  layers: CommonXYDataLayerConfig[],
   minInterval: number | undefined,
   isTimeViz: boolean,
   isHistogram: boolean

@@ -13,15 +13,16 @@ import {
   getFormatByAccessor,
 } from '../../../../../plugins/visualizations/common/utils';
 import type { FilterEvent } from '../types';
-import type { CommonXYDataLayerConfigResult } from '../../common';
+import type { CommonXYDataLayerConfig } from '../../common';
 import type { FormatFactory } from '../types';
 import { LegendActionPopover } from './legend_action_popover';
+import { DatatablesWithFormatInfo } from '../helpers';
 
 export const getLegendAction = (
-  dataLayers: CommonXYDataLayerConfigResult[],
+  dataLayers: CommonXYDataLayerConfig[],
   onFilter: (data: FilterEvent['data']) => void,
   formatFactory: FormatFactory,
-  layersAlreadyFormatted: Record<number, Record<string, boolean>>
+  formattedDatatables: DatatablesWithFormatInfo
 ): LegendAction =>
   React.memo(({ series: [xySeries] }) => {
     const series = xySeries as XYChartSeriesIdentifier;
@@ -49,7 +50,7 @@ export const getLegendAction = (
     const formatter = formatFactory(getFormatByAccessor(layer.splitAccessor, table.columns));
 
     const rowIndex = table.rows.findIndex((row) => {
-      if (layersAlreadyFormatted[layerIndex]?.[accessor]) {
+      if (formattedDatatables[layer.layerId]?.formattedColumns[accessor]) {
         // stringify the value to compare with the chart value
         return formatter.convert(row[accessor]) === splitLabel;
       }
@@ -74,7 +75,7 @@ export const getLegendAction = (
     return (
       <LegendActionPopover
         label={
-          !layersAlreadyFormatted[layerIndex]?.[accessor] && formatter
+          !formattedDatatables[layer.layerId]?.formattedColumns[accessor] && formatter
             ? formatter.convert(splitLabel)
             : splitLabel
         }

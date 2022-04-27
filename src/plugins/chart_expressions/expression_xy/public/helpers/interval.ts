@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { search } from '@kbn/data-plugin/public';
 import { getColumnByAccessor } from '../../../../../plugins/visualizations/common/utils';
-import { search } from '../../../../data/public';
 import { XYChartProps } from '../../common';
 import { getFilteredLayers } from './layers';
 import { isDataLayer } from './visualization';

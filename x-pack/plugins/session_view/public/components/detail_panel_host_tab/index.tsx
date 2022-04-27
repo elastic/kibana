@@ -15,7 +15,7 @@ import { dataOrDash } from '../../utils/data_or_dash';
 import { useStyles } from '../detail_panel_process_tab/styles';
 
 interface DetailPanelHostTabDeps {
-  processHost: ProcessEventHost;
+  processHost?: ProcessEventHost;
 }
 
 /**
@@ -31,9 +31,9 @@ export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
           {
             title: <DetailPanelListItem>hostname</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={processHost.hostname}>
+              <DetailPanelCopy textToCopy={processHost?.hostname}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {dataOrDash(processHost.hostname)}
+                  {dataOrDash(processHost?.hostname)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
@@ -41,9 +41,9 @@ export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
           {
             title: <DetailPanelListItem>id</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={processHost.id}>
+              <DetailPanelCopy textToCopy={processHost?.id}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {dataOrDash(processHost.id)}
+                  {dataOrDash(processHost?.id)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
@@ -51,9 +51,9 @@ export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
           {
             title: <DetailPanelListItem>ip</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={processHost.ip}>
+              <DetailPanelCopy textToCopy={processHost?.ip}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {dataOrDash(processHost.ip)}
+                  {dataOrDash(processHost?.ip)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
@@ -61,9 +61,9 @@ export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
           {
             title: <DetailPanelListItem>mac</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={processHost.mac}>
+              <DetailPanelCopy textToCopy={processHost?.mac}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {dataOrDash(processHost.mac)}
+                  {dataOrDash(processHost?.mac)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
@@ -71,9 +71,9 @@ export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
           {
             title: <DetailPanelListItem>name</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={processHost.name}>
+              <DetailPanelCopy textToCopy={processHost?.name}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {dataOrDash(processHost.name)}
+                  {dataOrDash(processHost?.name)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
@@ -87,9 +87,9 @@ export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
           {
             title: <DetailPanelListItem>architecture</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={processHost.architecture}>
+              <DetailPanelCopy textToCopy={processHost?.architecture}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {dataOrDash(processHost.architecture)}
+                  {dataOrDash(processHost?.architecture)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
@@ -97,9 +97,9 @@ export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
           {
             title: <DetailPanelListItem>os.family</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={processHost.os.family}>
+              <DetailPanelCopy textToCopy={processHost?.os?.family}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {dataOrDash(processHost.os.family)}
+                  {dataOrDash(processHost?.os?.family)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
@@ -107,9 +107,9 @@ export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
           {
             title: <DetailPanelListItem>os.full</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={processHost.os.full}>
+              <DetailPanelCopy textToCopy={processHost?.os?.full}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {dataOrDash(processHost.os.full)}
+                  {dataOrDash(processHost?.os?.full)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
@@ -117,9 +117,9 @@ export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
           {
             title: <DetailPanelListItem>os.kernel</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={processHost.os.kernel}>
+              <DetailPanelCopy textToCopy={processHost?.os?.kernel}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {dataOrDash(processHost.os.kernel)}
+                  {dataOrDash(processHost?.os?.kernel)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
@@ -127,9 +127,9 @@ export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
           {
             title: <DetailPanelListItem>os.name</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={processHost.os.name}>
+              <DetailPanelCopy textToCopy={processHost?.os?.name}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {dataOrDash(processHost.os.name)}
+                  {dataOrDash(processHost?.os?.name)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
@@ -137,9 +137,9 @@ export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
           {
             title: <DetailPanelListItem>os.platform</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={processHost.os.platform}>
+              <DetailPanelCopy textToCopy={processHost?.os?.platform}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {dataOrDash(processHost.os.platform)}
+                  {dataOrDash(processHost?.os?.platform)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),
@@ -147,9 +147,9 @@ export const DetailPanelHostTab = ({ processHost }: DetailPanelHostTabDeps) => {
           {
             title: <DetailPanelListItem>os.version</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={processHost.os.version}>
+              <DetailPanelCopy textToCopy={processHost?.os?.version}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {dataOrDash(processHost.os.version)}
+                  {dataOrDash(processHost?.os?.version)}
                 </EuiTextColor>
               </DetailPanelCopy>
             ),

@@ -6,7 +6,7 @@
  */
 
 import { has } from 'lodash/fp';
-import { SavedObjectsBulkUpdateObject, SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsBulkUpdateObject, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { ExceptionListSoSchema } from '../../../../schemas/saved_objects/exceptions_list_so_schema';
 import { ImportResponse } from '../../import_exception_list_and_items';

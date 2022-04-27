@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { EventAnnotationArgs, EventAnnotationOutput } from './types';
+import { AvailableAnnotationIcons } from '../constants';
+
 export const manualEventAnnotation: ExpressionFunctionDefinition<
   'manual_event_annotation',
   null,
@@ -59,6 +61,8 @@ export const manualEventAnnotation: ExpressionFunctionDefinition<
       help: i18n.translate('eventAnnotation.manualAnnotation.args.icon', {
         defaultMessage: 'An optional icon used for annotation lines',
       }),
+      options: [...Object.values(AvailableAnnotationIcons)],
+      strict: true,
     },
     textVisibility: {
       types: ['boolean'],
@@ -73,7 +77,7 @@ export const manualEventAnnotation: ExpressionFunctionDefinition<
       }),
     },
   },
-  fn: function fn(input: unknown, args: EventAnnotationArgs) {
+  fn(input: unknown, args: EventAnnotationArgs) {
     return {
       type: 'manual_event_annotation',
       ...args,

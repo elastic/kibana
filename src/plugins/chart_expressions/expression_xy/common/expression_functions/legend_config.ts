@@ -8,16 +8,10 @@
 
 import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition } from '../../../../../../src/plugins/expressions/common';
 import { LEGEND_CONFIG } from '../constants';
-import { LegendConfig, LegendConfigResult } from '../types';
+import { LegendConfigFn } from '../types';
 
-export const legendConfigFunction: ExpressionFunctionDefinition<
-  typeof LEGEND_CONFIG,
-  null,
-  LegendConfig,
-  LegendConfigResult
-> = {
+export const legendConfigFunction: LegendConfigFn = {
   name: LEGEND_CONFIG,
   aliases: [],
   type: LEGEND_CONFIG,
@@ -31,6 +25,7 @@ export const legendConfigFunction: ExpressionFunctionDefinition<
       help: i18n.translate('expressionXY.legendConfig.isVisible.help', {
         defaultMessage: 'Specifies whether or not the legend is visible.',
       }),
+      default: true,
     },
     position: {
       types: ['string'],
@@ -96,10 +91,8 @@ export const legendConfigFunction: ExpressionFunctionDefinition<
       }),
     },
   },
-  fn(input, args) {
-    return {
-      type: LEGEND_CONFIG,
-      ...args,
-    };
+  async fn(input, args, handlers) {
+    const { legendConfigFn } = await import('./legend_config_fn');
+    return await legendConfigFn(input, args, handlers);
   },
 };

@@ -19,6 +19,12 @@ export const navTabsUsersDetails = (
   hasMlUserPermissions: boolean
 ): UsersDetailsNavTab => {
   const userDetailsNavTabs = {
+    [UsersTableType.authentications]: {
+      id: UsersTableType.authentications,
+      name: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
+      href: getTabsOnUsersDetailsUrl(userName, UsersTableType.authentications),
+      disabled: false,
+    },
     [UsersTableType.anomalies]: {
       id: UsersTableType.anomalies,
       name: i18n.NAVIGATION_ANOMALIES_TITLE,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertTypeParams, SanitizedAlert } from '../../../../../alerting/common';
+import { RuleTypeParams, SanitizedRule } from '@kbn/alerting-plugin/common';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyReadNotificationParams, legacyIsAlertType } from './legacy_types';
 // eslint-disable-next-line no-restricted-imports
@@ -19,7 +19,7 @@ export const legacyReadNotifications = async ({
   rulesClient,
   id,
   ruleAlertId,
-}: LegacyReadNotificationParams): Promise<SanitizedAlert<AlertTypeParams> | null> => {
+}: LegacyReadNotificationParams): Promise<SanitizedRule<RuleTypeParams> | null> => {
   if (id != null) {
     try {
       const notification = await rulesClient.get({ id });

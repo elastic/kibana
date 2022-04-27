@@ -19,14 +19,14 @@ import {
 } from '@elastic/charts';
 import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { EventAnnotationArgs } from '../../../../event_annotation/common';
-import type { FieldFormat } from '../../../../field_formats/common';
-import { defaultAnnotationColor } from '../../../../../../src/plugins/event_annotation/public';
+import type { EventAnnotationArgs } from '@kbn/event-annotation-plugin/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { defaultAnnotationColor } from '@kbn/event-annotation-plugin/public';
 import type {
   AnnotationLayerArgs,
-  ExtendedAnnotationLayerArgs,
-  CommonXYAnnotationLayerConfigResult,
-} from '../../common/types';
+  CommonXYAnnotationLayerConfig,
+  CollectiveConfig,
+} from '../../common';
 import { AnnotationIcon, hasIcon, Marker, MarkerBody } from '../helpers';
 import { mapVerticalToHorizontalPlacement, LINES_MARKER_SIZE } from '../helpers';
 
@@ -47,14 +47,8 @@ export interface AnnotationsProps {
   isBarChart?: boolean;
 }
 
-interface CollectiveConfig extends EventAnnotationArgs {
-  roundedTimestamp: number;
-  axisMode: 'bottom';
-  customTooltipDetails?: AnnotationTooltipFormatter | undefined;
-}
-
 const groupVisibleConfigsByInterval = (
-  layers: Array<AnnotationLayerArgs | ExtendedAnnotationLayerArgs>,
+  layers: AnnotationLayerArgs[],
   minInterval?: number,
   firstTimestamp?: number
 ) => {
@@ -125,7 +119,7 @@ const getCommonStyles = (configArr: EventAnnotationArgs[]) => {
 };
 
 export const getAnnotationsGroupedByInterval = (
-  layers: CommonXYAnnotationLayerConfigResult[],
+  layers: CommonXYAnnotationLayerConfig[],
   minInterval?: number,
   firstTimestamp?: number,
   formatter?: FieldFormat
@@ -174,7 +168,12 @@ export const Annotations = ({
         const header =
           formatter?.convert(isGrouped ? roundedTimestamp : exactTimestamp) ||
           moment(isGrouped ? roundedTimestamp : exactTimestamp).toISOString();
-        const strokeWidth = annotation.lineWidth || 1;
+        const strokeWidth = hide ? 1 : annotation.lineWidth || 1;
+        const dataValue = isGrouped
+          ? moment(
+              isBarChart && minInterval ? roundedTimestamp + minInterval / 2 : roundedTimestamp
+            ).valueOf()
+          : moment(exactTimestamp).valueOf();
         return (
           <LineAnnotation
             id={id}
@@ -206,9 +205,7 @@ export const Annotations = ({
             markerPosition={markerPosition}
             dataValues={[
               {
-                dataValue: moment(
-                  isBarChart && minInterval ? roundedTimestamp + minInterval / 2 : roundedTimestamp
-                ).valueOf(),
+                dataValue,
                 header,
                 details: annotation.label,
               },

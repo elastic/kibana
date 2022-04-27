@@ -7,12 +7,12 @@
  */
 import { createContext, useContext } from 'react';
 
+import type { ContainerInput, EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import type {
   GenericEmbeddableReducers,
   ReduxContainerContextServices,
   ReduxEmbeddableContextServices,
 } from './types';
-import type { ContainerInput, EmbeddableInput } from '../../../../embeddable/public';
 
 /**
  * When creating the context, a generic EmbeddableInput as placeholder is used. This will later be cast to

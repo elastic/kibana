@@ -7,9 +7,9 @@
 
 import * as Rx from 'rxjs';
 
-import type { HttpServiceSetup, KibanaRequest, SavedObjectsRepository } from 'src/core/server';
-import { SavedObjectsErrorHelpers } from 'src/core/server';
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import type { HttpServiceSetup, KibanaRequest, SavedObjectsRepository } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { getSpaceIdFromPath } from '../../common/lib/spaces_url_parser';

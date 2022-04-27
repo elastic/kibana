@@ -1929,6 +1929,21 @@
             "deprecated": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpaceListProps.cursorStyle",
+            "type": "string",
+            "tags": [],
+            "label": "cursorStyle",
+            "description": [
+              "\nStyle for the cursor when mousing over space avatars."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/spaces/public/space_list/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false

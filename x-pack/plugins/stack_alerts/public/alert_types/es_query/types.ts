@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AlertTypeParams } from '../../../../alerting/common';
-import { SerializedSearchSourceFields } from '../../../../../../src/plugins/data/common';
+import { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 
 export interface Comparator {
   text: string;
@@ -19,7 +19,7 @@ export enum SearchType {
   searchSource = 'searchSource',
 }
 
-export interface CommonAlertParams<T extends SearchType> extends AlertTypeParams {
+export interface CommonAlertParams<T extends SearchType> extends RuleTypeParams {
   size: number;
   thresholdComparator?: string;
   threshold: number[];

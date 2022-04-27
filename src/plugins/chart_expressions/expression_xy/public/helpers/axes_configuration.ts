@@ -6,24 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { FormatFactory } from '../types';
+import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import {
   getAccessorByDimension,
   getFormatByAccessor,
 } from '../../../../../plugins/visualizations/common/utils';
-import {
-  AxisExtentConfig,
-  CommonXYDataLayerConfigResult,
-  CommonXYReferenceLineLayerConfigResult,
-} from '../../common';
-import type {
-  IFieldFormat,
-  SerializedFieldFormat,
-} from '../../../../../plugins/field_formats/common';
+import { FormatFactory } from '../types';
+import { AxisExtentConfig, CommonXYDataLayerConfig, ExtendedYConfig, YConfig } from '../../common';
 import { isDataLayer } from './visualization';
 
 export interface Series {
-  layer: number;
+  layer: string;
   accessor: string;
 }
 
@@ -45,9 +38,7 @@ export function isFormatterCompatible(
   return formatter1.id === formatter2.id;
 }
 
-export function groupAxesByType(
-  layers: Array<CommonXYDataLayerConfigResult | CommonXYReferenceLineLayerConfigResult>
-) {
+export function groupAxesByType(layers: CommonXYDataLayerConfig[]) {
   const series: {
     auto: FormattedMetric[];
     left: FormattedMetric[];
@@ -60,13 +51,13 @@ export function groupAxesByType(
     bottom: [],
   };
 
-  layers.forEach((layer, index) => {
+  layers.forEach((layer) => {
     const { table } = layer;
     layer.accessors.forEach((accessor) => {
+      const yConfig: Array<YConfig | ExtendedYConfig> | undefined = layer.yConfig;
       const yAccessor = getAccessorByDimension(accessor, table?.columns || []);
       const mode =
-        layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === yAccessor)?.axisMode ||
-        'auto';
+        yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === yAccessor)?.axisMode || 'auto';
       let formatter: SerializedFieldFormat = getFormatByAccessor(
         accessor,
         table?.columns || []
@@ -86,7 +77,7 @@ export function groupAxesByType(
         };
       }
       series[mode].push({
-        layer: index,
+        layer: layer.layerId,
         accessor: yAccessor,
         fieldFormat: formatter,
       });
@@ -122,7 +113,7 @@ export function groupAxesByType(
 }
 
 export function getAxesConfiguration(
-  layers: Array<CommonXYDataLayerConfigResult | CommonXYReferenceLineLayerConfigResult>,
+  layers: CommonXYDataLayerConfig[],
   shouldRotate: boolean,
   formatFactory?: FormatFactory
 ): GroupsConfiguration {

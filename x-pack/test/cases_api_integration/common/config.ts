@@ -94,7 +94,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     );
 
     return {
-      testFiles: testFiles ? testFiles : [require.resolve('../tests/common')],
+      testFiles,
       servers,
       services,
       junit: {
@@ -148,7 +148,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             : []),
           '--xpack.ruleRegistry.write.enabled=true',
           '--xpack.ruleRegistry.write.cache.enabled=false',
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['ruleRegistryEnabled'])}`,
         ],
       },
     };

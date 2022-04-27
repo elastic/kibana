@@ -6,7 +6,7 @@
  */
 
 import { layerTypes } from '../../common';
-import { Datatable } from '../../../../../src/plugins/expressions/public';
+import { Datatable } from '@kbn/expressions-plugin/public';
 import { getAxesConfiguration } from './axes_configuration';
 import { XYDataLayerConfig } from './types';
 

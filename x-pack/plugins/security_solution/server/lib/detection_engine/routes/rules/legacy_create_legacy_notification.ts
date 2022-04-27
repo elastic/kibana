@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 // eslint-disable-next-line no-restricted-imports
@@ -56,8 +56,8 @@ export const legacyCreateLegacyNotificationRoute = (
       },
     },
     async (context, request, response) => {
-      const rulesClient = context.alerting.getRulesClient();
-      const savedObjectsClient = context.core.savedObjects.client;
+      const rulesClient = (await context.alerting).getRulesClient();
+      const savedObjectsClient = (await context.core).savedObjects.client;
       const { alert_id: ruleAlertId } = request.query;
       const { actions, interval, name } = request.body;
       try {

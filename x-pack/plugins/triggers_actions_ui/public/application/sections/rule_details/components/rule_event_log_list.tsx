@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import datemath from '@elastic/datemath';
+import datemath from '@kbn/datemath';
 import {
   EuiDataGrid,
   EuiFlexItem,
@@ -20,18 +20,19 @@ import {
   EuiDataGridCellValueElementProps,
   OnTimeChangeProps,
 } from '@elastic/eui';
+import {
+  IExecutionLog,
+  executionLogSortableColumns,
+  ExecutionLogSortFields,
+} from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS } from '../../../constants';
 import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filter';
 import { RuleEventLogListCellRenderer, ColumnId } from './rule_event_log_list_cell_renderer';
 
+import { RefineSearchPrompt } from '../refine_search_prompt';
 import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
 import { Rule } from '../../../../types';
-import {
-  IExecutionLog,
-  executionLogSortableColumns,
-  ExecutionLogSortFields,
-} from '../../../../../../alerting/common';
 import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
@@ -143,14 +144,14 @@ const columns = [
     isSortable: getIsColumnSortable('num_triggered_actions'),
   },
   {
-    id: 'num_scheduled_actions',
+    id: 'num_generated_actions',
     displayAsText: i18n.translate(
       'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.scheduledActions',
       {
-        defaultMessage: 'Scheduled actions',
+        defaultMessage: 'Generated actions',
       }
     ),
-    isSortable: getIsColumnSortable('num_scheduled_actions'),
+    isSortable: getIsColumnSortable('num_generated_actions'),
   },
   {
     id: 'num_succeeded_actions',
@@ -458,6 +459,10 @@ export const RuleEventLogList = (props: RuleEventLogListProps) => {
         columnVisibility={columnVisibilityProps}
         sorting={sortingProps}
         pagination={paginationProps}
+      />
+      <RefineSearchPrompt
+        documentSize={pagination.totalItemCount}
+        backToTopAnchor="rule_event_log_list"
       />
     </div>
   );

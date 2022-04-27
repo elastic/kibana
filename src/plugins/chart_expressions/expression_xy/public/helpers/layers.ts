@@ -6,19 +6,20 @@
  * Side Public License, v 1.
  */
 
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { getAccessorByDimension } from '../../../../../plugins/visualizations/common/utils';
 import type { ExpressionValueVisDimension } from '../../../../../plugins/visualizations/common';
 import {
-  CommonXYDataLayerConfigResult,
-  CommonXYLayerConfigResult,
-  CommonXYReferenceLineLayerConfigResult,
-} from '../../common';
+  CommonXYDataLayerConfig,
+  CommonXYLayerConfig,
+  CommonXYReferenceLineLayerConfig,
+} from '../../common/types';
 import { isDataLayer, isReferenceLayer } from './visualization';
 
-export function getFilteredLayers(layers: CommonXYLayerConfigResult[]) {
-  return layers.filter<CommonXYReferenceLineLayerConfigResult | CommonXYDataLayerConfigResult>(
-    (layer): layer is CommonXYReferenceLineLayerConfigResult | CommonXYDataLayerConfigResult => {
-      const { table } = layer;
+export function getFilteredLayers(layers: CommonXYLayerConfig[]) {
+  return layers.filter<CommonXYReferenceLineLayerConfig | CommonXYDataLayerConfig>(
+    (layer): layer is CommonXYReferenceLineLayerConfig | CommonXYDataLayerConfig => {
+      let table: Datatable | undefined;
       let accessors: Array<ExpressionValueVisDimension | string> = [];
       let xAccessor: undefined | string | number;
       let splitAccessor: undefined | string | number;
@@ -33,6 +34,7 @@ export function getFilteredLayers(layers: CommonXYLayerConfigResult[]) {
       }
 
       if (isDataLayer(layer) || isReferenceLayer(layer)) {
+        table = layer.table;
         accessors = layer.accessors;
       }
 
