@@ -6,4 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { DocumentExplorerTour } from './document_explorer_tour';
+export {
+  DocumentExplorerTourProvider,
+  DocumentExplorerTourStepColumns,
+} from './document_explorer_tour';

@@ -51,6 +51,7 @@ import { getFieldsToShow } from '../../utils/get_fields_to_show';
 import { ElasticSearchHit } from '../../types';
 import { useRowHeightsOptions } from '../../utils/use_row_heights_options';
 import { useDiscoverServices } from '../../utils/use_discover_services';
+import { DocumentExplorerTourStepColumns } from '../../application/main/components/document_explorer_tour';
 
 interface SortObj {
   id: string;
@@ -347,16 +348,20 @@ export const DiscoverGrid = ({
   );
 
   const additionalControls = useMemo(
-    () =>
-      usedSelectedDocs.length ? (
-        <DiscoverGridDocumentToolbarBtn
-          isFilterActive={isFilterActive}
-          rows={rows!}
-          selectedDocs={usedSelectedDocs}
-          setSelectedDocs={setSelectedDocs}
-          setIsFilterActive={setIsFilterActive}
-        />
-      ) : null,
+    () => (
+      <>
+        <DocumentExplorerTourStepColumns />
+        {usedSelectedDocs.length ? (
+          <DiscoverGridDocumentToolbarBtn
+            isFilterActive={isFilterActive}
+            rows={rows!}
+            selectedDocs={usedSelectedDocs}
+            setSelectedDocs={setSelectedDocs}
+            setIsFilterActive={setIsFilterActive}
+          />
+        ) : null}
+      </>
+    ),
     [usedSelectedDocs, isFilterActive, rows, setIsFilterActive]
   );
 
