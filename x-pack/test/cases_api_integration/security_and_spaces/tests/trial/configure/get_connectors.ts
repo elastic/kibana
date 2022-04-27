@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
   getServiceNowConnector,
+  getServiceNowOAuthConnector,
   getJiraConnector,
   getResilientConnector,
   createConnector,
@@ -33,6 +34,12 @@ export default ({ getService }: FtrProviderContext): void => {
         .post('/api/actions/connector')
         .set('kbn-xsrf', 'true')
         .send(getServiceNowConnector())
+        .expect(200);
+
+      const { body: snOAuthConnector } = await supertest
+        .post('/api/actions/connector')
+        .set('kbn-xsrf', 'true')
+        .send(getServiceNowOAuthConnector())
         .expect(200);
 
       const { body: emailConnector } = await supertest
@@ -68,6 +75,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       actionsRemover.add('default', sir.id, 'action', 'actions');
       actionsRemover.add('default', snConnector.id, 'action', 'actions');
+      actionsRemover.add('default', snOAuthConnector.id, 'action', 'actions');
       actionsRemover.add('default', emailConnector.id, 'action', 'actions');
       actionsRemover.add('default', jiraConnector.id, 'action', 'actions');
       actionsRemover.add('default', resilientConnector.id, 'action', 'actions');
@@ -116,6 +124,23 @@ export default ({ getService }: FtrProviderContext): void => {
             clientId: null,
             jwtKeyId: null,
             userIdentifierValue: null,
+          },
+          isPreconfigured: false,
+          isDeprecated: false,
+          isMissingSecrets: false,
+          referencedByCount: 0,
+        },
+        {
+          id: snOAuthConnector.id,
+          actionTypeId: '.servicenow',
+          name: 'ServiceNow Connector',
+          config: {
+            apiUrl: 'http://some.non.existent.com',
+            usesTableApi: false,
+            isOAuth: true,
+            clientId: 'abc',
+            userIdentifierValue: 'elastic',
+            jwtKeyId: 'def',
           },
           isPreconfigured: false,
           isDeprecated: false,

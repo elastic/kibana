@@ -214,7 +214,23 @@ export const getServiceNowConnector = () => ({
   config: {
     apiUrl: 'http://some.non.existent.com',
     usesTableApi: false,
-    isOAuth: false,
+  },
+});
+
+export const getServiceNowOAuthConnector = () => ({
+  name: 'ServiceNow Connector',
+  connector_type_id: '.servicenow',
+  secrets: {
+    clientSecret: 'xyz',
+    privateKey: '-----BEGIN RSA PRIVATE KEY-----\nddddddd\n-----END RSA PRIVATE KEY-----',
+  },
+  config: {
+    apiUrl: 'http://some.non.existent.com',
+    usesTableApi: false,
+    isOAuth: true,
+    clientId: 'abc',
+    userIdentifierValue: 'elastic',
+    jwtKeyId: 'def',
   },
 });
 
