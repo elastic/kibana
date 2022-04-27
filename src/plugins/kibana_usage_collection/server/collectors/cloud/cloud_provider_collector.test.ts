@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Subject } from 'rxjs';
 import { cloudDetailsMock, detectCloudServiceMock } from './cloud_provider_collector.test.mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
@@ -29,7 +30,7 @@ describe('registerCloudProviderUsageCollector', () => {
       collector = new Collector(logger, config);
       return createUsageCollectionSetupMock().makeUsageCollector(config);
     });
-    registerCloudProviderUsageCollector(usageCollectionMock);
+    registerCloudProviderUsageCollector(usageCollectionMock, new Subject<void>());
   });
 
   test('registered collector is set', () => {

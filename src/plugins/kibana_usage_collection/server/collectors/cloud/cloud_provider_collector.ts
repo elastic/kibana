@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { AbortController } from 'abort-controller';
+import { firstValueFrom, Observable } from 'rxjs';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { CloudDetector } from './detector';
 
@@ -16,10 +18,19 @@ interface Usage {
   zone?: string;
 }
 
-export function registerCloudProviderUsageCollector(usageCollection: UsageCollectionSetup) {
+export function registerCloudProviderUsageCollector(
+  usageCollection: UsageCollectionSetup,
+  stop$: Observable<void>
+) {
+  const ac = new AbortController();
+  firstValueFrom(stop$).then(() => {
+    // we are stopping, we need to cancel async requests
+    ac.abort();
+  });
+
   const cloudDetector = new CloudDetector();
   // determine the cloud service in the background
-  cloudDetector.detectCloudService();
+  cloudDetector.detectCloudService(ac.signal);
 
   const collector = usageCollection.makeUsageCollector<Usage | undefined>({
     type: 'cloud_provider',

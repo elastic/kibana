@@ -78,13 +78,14 @@ export class AzureCloudService extends CloudService {
     return null;
   };
 
-  protected _checkIfService = async () => {
+  protected _checkIfService = async (signal?: AbortSignal) => {
     const response = await fetch(SERVICE_ENDPOINT, {
       method: 'GET',
       headers: {
         // Azure requires this header
         Metadata: 'true',
       },
+      signal,
     });
 
     if (!response.ok || response.status === 404) {

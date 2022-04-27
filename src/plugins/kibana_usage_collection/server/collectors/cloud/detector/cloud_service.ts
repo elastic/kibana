@@ -31,15 +31,15 @@ export abstract class CloudService {
    * Using whatever mechanism is required by the current Cloud Service,
    * determine if Kibana is running in it and return relevant metadata.
    */
-  public checkIfService = async () => {
+  public checkIfService = async (signal?: AbortSignal) => {
     try {
-      return await this._checkIfService();
+      return await this._checkIfService(signal);
     } catch (e) {
       return this._createUnconfirmedResponse();
     }
   };
 
-  protected _checkIfService = async (): Promise<CloudServiceResponse> => {
+  protected _checkIfService = async (signal?: AbortSignal): Promise<CloudServiceResponse> => {
     // should always be overridden by a subclass
     return Promise.reject(new Error('not implemented'));
   };

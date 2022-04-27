@@ -95,10 +95,11 @@ export class AWSCloudService extends CloudService {
     return process.platform.startsWith('win');
   };
 
-  protected _checkIfService = async () => {
+  protected _checkIfService = async (signal?: AbortSignal) => {
     try {
       const response = await fetch(SERVICE_ENDPOINT, {
         method: 'GET',
+        signal,
       });
 
       if (!response.ok || response.status === 404) {

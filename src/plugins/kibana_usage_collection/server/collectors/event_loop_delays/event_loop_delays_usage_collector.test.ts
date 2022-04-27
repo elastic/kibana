@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Subject } from 'rxjs';
 import {
   Collector,
   createUsageCollectionSetupMock,
@@ -14,8 +15,17 @@ import {
 import { registerEventLoopDelaysCollector } from './event_loop_delays_usage_collector';
 import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
+import { ROLL_DAILY_INDICES_INTERVAL, ROLL_INDICES_START } from './constants';
+import * as daily from './rollups/daily';
+jest.mock('./rollups/daily');
+jest.mock('./constants', () => ({
+  ROLL_DAILY_INDICES_INTERVAL: 10,
+  ROLL_INDICES_START: 5,
+}));
 
 const logger = loggingSystemMock.createLogger();
+const stop$ = new Subject<void>();
+const timeout = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
 describe('registerEventLoopDelaysCollector', () => {
   let collector: Collector<unknown>;
@@ -36,7 +46,8 @@ describe('registerEventLoopDelaysCollector', () => {
       logger,
       usageCollectionMock,
       mockRegisterType,
-      mockGetSavedObjectsClient
+      mockGetSavedObjectsClient,
+      stop$.asObservable()
     );
   });
 
@@ -80,5 +91,20 @@ describe('registerEventLoopDelaysCollector', () => {
         },
       ]
     `);
+  });
+
+  describe('graceful shutdown', () => {
+    it('stops collection when the stopMonitoringEventLoop$ observable emits', async () => {
+      expect(daily.rollDailyData).not.toHaveBeenCalled();
+      await timeout(ROLL_INDICES_START);
+      expect(daily.rollDailyData).toHaveBeenCalledTimes(1);
+      await timeout(ROLL_DAILY_INDICES_INTERVAL);
+      expect(daily.rollDailyData).toHaveBeenCalledTimes(2);
+      await timeout(ROLL_DAILY_INDICES_INTERVAL);
+      expect(daily.rollDailyData).toHaveBeenCalledTimes(3);
+      stop$.next();
+      await timeout(2 * ROLL_DAILY_INDICES_INTERVAL);
+      expect(daily.rollDailyData).toHaveBeenCalledTimes(3);
+    });
   });
 });

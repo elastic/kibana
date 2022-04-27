@@ -120,6 +120,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     pluginStop$: Subject<void>,
     registerType: SavedObjectsRegisterType
   ) {
+    const stop$ = pluginStop$.asObservable();
     const kibanaIndex = coreSetup.savedObjects.getKibanaIndex();
     const getSavedObjectsClient = () => this.savedObjectsClient;
     const getUiSettingsClient = () => this.uiSettingsClient;
@@ -129,7 +130,11 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     registerUiCountersRollups(this.logger.get('ui-counters'), pluginStop$, getSavedObjectsClient);
     registerUiCountersUsageCollector(usageCollection, pluginStop$);
 
-    registerUsageCountersRollups(this.logger.get('usage-counters-rollup'), getSavedObjectsClient);
+    registerUsageCountersRollups(
+      this.logger.get('usage-counters-rollup'),
+      getSavedObjectsClient,
+      stop$
+    );
     registerUsageCountersUsageCollector(usageCollection);
 
     registerOpsStatsCollector(usageCollection, metric$);
@@ -141,9 +146,10 @@ export class KibanaUsageCollectionPlugin implements Plugin {
       this.logger.get('application-usage'),
       usageCollection,
       registerType,
-      getSavedObjectsClient
+      getSavedObjectsClient,
+      stop$
     );
-    registerCloudProviderUsageCollector(usageCollection);
+    registerCloudProviderUsageCollector(usageCollection, stop$);
     registerCspCollector(usageCollection, coreSetup.http);
     registerCoreUsageCollector(usageCollection, getCoreUsageDataService);
     registerConfigUsageCollector(usageCollection, getCoreUsageDataService);
@@ -152,7 +158,8 @@ export class KibanaUsageCollectionPlugin implements Plugin {
       this.logger.get('event-loop-delays'),
       usageCollection,
       registerType,
-      getSavedObjectsClient
+      getSavedObjectsClient,
+      stop$
     );
   }
 }

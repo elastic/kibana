@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { AbortSignal } from 'abort-controller';
 import type { CloudService } from './cloud_service';
 import type { CloudServiceResponseJson } from './cloud_response';
 
@@ -48,21 +49,25 @@ export class CloudDetector {
    * caller to trigger the lookup and then simply use it whenever we
    * determine it.
    */
-  public detectCloudService = async () => {
-    this.cloudDetails = await this.getCloudService();
+  public detectCloudService = async (abortSignal?: AbortSignal) => {
+    this.cloudDetails = await this.getCloudService(abortSignal);
   };
 
   /**
    * Check every cloud service until the first one reports success from detection.
    */
-  private async getCloudService() {
+  private async getCloudService(abortSignal?: AbortSignal) {
     // check each service until we find one that is confirmed to match;
     // order is assumed to matter
-    for (const service of this.cloudServices) {
-      try {
-        const serviceResponse = await service.checkIfService();
 
-        if (serviceResponse.isConfirmed()) {
+    let stopping: boolean = false;
+    abortSignal?.addEventListener('abort', () => (stopping = true));
+
+    for (const service of this.cloudServices) {
+      if (stopping) break;
+      try {
+        const serviceResponse = await service.checkIfService(abortSignal);
+        if (serviceResponse?.isConfirmed()) {
           return serviceResponse.toJSON();
         }
       } catch (ignoredError) {
