@@ -43,26 +43,9 @@ const mockSetToggle = jest.fn();
   setToggleStatus: mockSetToggle,
 });
 
-(useQueryToggle as jest.Mock).mockReturnValueOnce({
-  toggleStatus: false,
-  setToggleStatus: mockSetToggle,
-});
-
 describe('CasesByStatus', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  // First call of useQueryToggle, toggleStatus returns false.
-  // useQueryToggle always returns true after this case
-  test('collapses content', () => {
-    render(
-      <TestProviders>
-        <CasesByStatus />
-      </TestProviders>
-    );
-
-    expect(screen.queryByTestId('chart-wrapper')).not.toBeInTheDocument();
   });
 
   test('renders title', () => {
@@ -91,5 +74,19 @@ describe('CasesByStatus', () => {
     );
     expect(screen.getByTestId('chart-wrapper')).toBeInTheDocument();
     expect(screen.queryByTestId('bar-chart-mask')).not.toBeInTheDocument();
+  });
+
+  test('collapses content', () => {
+    (useQueryToggle as jest.Mock).mockReturnValueOnce({
+      toggleStatus: false,
+      setToggleStatus: mockSetToggle,
+    });
+    render(
+      <TestProviders>
+        <CasesByStatus />
+      </TestProviders>
+    );
+
+    expect(screen.queryByTestId('chart-wrapper')).not.toBeInTheDocument();
   });
 });
