@@ -289,6 +289,19 @@ export const getWebhookConnector = () => ({
   },
 });
 
+export const getEmailConnector = () => ({
+  name: 'An email action',
+  connector_type_id: '.email',
+  config: {
+    service: '__json',
+    from: 'bob@example.com',
+  },
+  secrets: {
+    user: 'bob',
+    password: 'supersecret',
+  },
+});
+
 interface CommonSavedObjectAttributes {
   id?: string | null;
   created_at?: string | null;
@@ -1215,4 +1228,25 @@ export const createCaseAndBulkCreateAttachments = async ({
   });
 
   return { theCase: patchedCase, attachments };
+};
+
+export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+export const calculateDuration = (closedAt: string | null, createdAt: string | null): number => {
+  if (closedAt == null || createdAt == null) {
+    throw new Error('Dates are null');
+  }
+
+  const createdAtMillis = new Date(createdAt).getTime();
+  const closedAtMillis = new Date(closedAt).getTime();
+
+  if (isNaN(createdAtMillis) || isNaN(closedAtMillis)) {
+    throw new Error('Dates are invalid');
+  }
+
+  if (closedAtMillis < createdAtMillis) {
+    throw new Error('Closed date is earlier than created date');
+  }
+
+  return Math.floor(Math.abs((closedAtMillis - createdAtMillis) / 1000));
 };
