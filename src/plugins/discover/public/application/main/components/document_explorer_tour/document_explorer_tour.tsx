@@ -34,7 +34,7 @@ const STEP_EXPAND = 4;
 const tourSteps = [
   {
     step: STEP_COLUMNS,
-    anchorPosition: 'upLeft',
+    anchorPosition: 'upCenter',
     title: i18n.translate('discover.docExplorerTour.stepAddFieldsTitle', {
       defaultMessage: 'Add fields to the table',
     }),
@@ -63,6 +63,7 @@ const tourSteps = [
   },
   {
     step: STEP_ROW_HEIGHT,
+    anchorPosition: 'upRight',
     title: i18n.translate('discover.docExplorerTour.stepChangeRowHeightTitle', {
       defaultMessage: 'Change the row height',
     }),
@@ -150,12 +151,38 @@ export const DocumentExplorerTourProvider: React.FC = ({ children }) => {
   );
 };
 
-export const DocumentExplorerTourStepColumns: React.FC = ({ children }) => {
+export const DocumentExplorerTourStepColumns: React.FC<{ anchorSelector: string }> = ({
+  anchorSelector,
+}) => {
+  const tourContext = useDocumentExplorerTourContext();
+
+  return <EuiTourStep {...tourContext.getStepProps(STEP_COLUMNS)} anchor={anchorSelector} />;
+};
+
+export const DocumentExplorerTourStepSorting: React.FC = () => {
   const tourContext = useDocumentExplorerTourContext();
 
   return (
-    <EuiTourStep {...tourContext.getStepProps(STEP_COLUMNS)}>
+    <EuiTourStep {...tourContext.getStepProps(STEP_SORTING)}>
       <div />
+    </EuiTourStep>
+  );
+};
+
+export const DocumentExplorerTourStepRowHeight: React.FC<{ anchorSelector: string }> = ({
+  anchorSelector,
+}) => {
+  const tourContext = useDocumentExplorerTourContext();
+
+  return <EuiTourStep {...tourContext.getStepProps(STEP_ROW_HEIGHT)} anchor={anchorSelector} />;
+};
+
+export const DocumentExplorerTourStepExpand: React.FC = ({ children }) => {
+  const tourContext = useDocumentExplorerTourContext();
+
+  return (
+    <EuiTourStep {...tourContext.getStepProps(STEP_EXPAND)}>
+      <>{children}</>
     </EuiTourStep>
   );
 };

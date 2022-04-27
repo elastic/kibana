@@ -9,4 +9,7 @@
 export {
   DocumentExplorerTourProvider,
   DocumentExplorerTourStepColumns,
+  DocumentExplorerTourStepSorting,
+  DocumentExplorerTourStepRowHeight,
+  DocumentExplorerTourStepExpand,
 } from './document_explorer_tour';

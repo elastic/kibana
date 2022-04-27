@@ -57,10 +57,7 @@ export const DocumentExplorerUpdateCallout = () => {
   }, [storage]);
 
   const onTakeTour = useCallback(() => {
-    // TODO: uncomment
-    // onCloseCallout();
     onStartTour();
-    // }, [onCloseCallout, onStartTour]);
   }, [onStartTour]);
 
   if (calloutClosed || !capabilities.advancedSettings.save) {
@@ -120,6 +117,7 @@ export const DocumentExplorerUpdateCallout = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
+            size="xs"
             onClick={onCloseCallout}
             data-test-subj="document-explorer-update-callout-dismiss-button"
           >
