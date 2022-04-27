@@ -20,13 +20,8 @@ const { collapseLiteralStrings } = XJson;
 
 describe('Editor', () => {
   let input;
-  global.URL = URL;
-  global.window = Object.create(window);
-  Object.defineProperty(window, 'location', {
-    value: {
-      origin: 'http://localhost:5620',
-    },
-  });
+  let oldUrl;
+  let olldWindow;
 
   beforeEach(function () {
     // Set up our document body
@@ -39,8 +34,19 @@ describe('Editor', () => {
     input = create(document.querySelector('#ConAppEditor'));
     $(input.getCoreEditor().getContainer()).show();
     input.autocomplete._test.removeChangeListener();
+    oldUrl = global.URL;
+    olldWindow = { ...global.window };
+    global.URL = URL;
+    global.window = Object.create(window);
+    Object.defineProperty(window, 'location', {
+      value: {
+        origin: 'http://localhost:5620',
+      },
+    });
   });
   afterEach(function () {
+    global.URL = oldUrl;
+    global.window = olldWindow;
     $(input.getCoreEditor().getContainer()).hide();
     input.autocomplete._test.addChangeListener();
   });
