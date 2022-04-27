@@ -106,6 +106,7 @@ export interface SourceConfigData {
   baseServiceType?: string;
   name: string;
   configured: boolean;
+  externalConnectorServiceDescribed?: boolean;
   categories: string[];
   needsPermissions?: boolean;
   privateSourcesEnabled: boolean;
@@ -598,22 +599,11 @@ const getFirstStep = (
   props: AddSourceProps,
   sourceConfigData: SourceConfigData
 ): AddSourceSteps => {
-  const {
-    connect,
-    configure,
-    reAuthenticate,
-    sourceData: { serviceType },
-  } = props;
-  // We can land on this page from a choice page for multiple types of connectors
-  // If that's the case we want to skip the intro and configuration, if the external & internal connector have already been configured
-  const { configuredFields, configured } = sourceConfigData;
+  const { connect, configure, reAuthenticate } = props;
+  const { configured } = sourceConfigData;
   if (connect) return AddSourceSteps.ConnectInstanceStep;
   if (configure) return AddSourceSteps.ConfigureOauthStep;
   if (reAuthenticate) return AddSourceSteps.ReauthenticateStep;
-  if (
-    (serviceType === 'external' && configuredFields?.clientId && configuredFields?.clientSecret) ||
-    (serviceType !== 'external' && configured)
-  )
-    return AddSourceSteps.ConnectInstanceStep;
+  if (configured) return AddSourceSteps.ConnectInstanceStep;
   return AddSourceSteps.SaveConfigStep;
 };

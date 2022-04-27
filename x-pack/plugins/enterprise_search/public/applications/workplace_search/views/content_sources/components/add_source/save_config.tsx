@@ -42,8 +42,8 @@ import { ConfigDocsLinks } from './config_docs_links';
 import { OAUTH_SAVE_CONFIG_BUTTON, OAUTH_BACK_BUTTON, OAUTH_STEP_2 } from './constants';
 
 interface SaveConfigProps {
-  header: React.ReactNode;
   name: string;
+  header: React.ReactNode;
   configuration: Configuration;
   advanceStep(): void;
   goBackStep?(): void;
@@ -51,7 +51,6 @@ interface SaveConfigProps {
 }
 
 export const SaveConfig: React.FC<SaveConfigProps> = ({
-  name,
   configuration: {
     isPublicKey,
     needsBaseUrl,
@@ -64,6 +63,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
   goBackStep,
   onDeleteConfig,
   header,
+  name,
 }) => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 

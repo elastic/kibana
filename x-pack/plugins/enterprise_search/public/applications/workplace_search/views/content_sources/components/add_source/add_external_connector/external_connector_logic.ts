@@ -143,17 +143,17 @@ export const ExternalConnectorLogic = kea<
         actions.setUrlValidation(false);
       } else {
         clearFlashMessages();
-        const route = '/internal/workplace_search/org/settings/connectors';
-        const http = HttpLogic.values.http.post;
-        const params = {
-          external_connector_url: url,
-          external_connector_api_key: apiKey,
-          service_type: 'external',
-        };
         try {
-          await http<SourceConfigData>(route, {
-            body: JSON.stringify(params),
-          });
+          await HttpLogic.values.http.post<SourceConfigData>(
+            '/internal/workplace_search/org/settings/connectors',
+            {
+              body: JSON.stringify({
+                external_connector_url: url,
+                external_connector_api_key: apiKey,
+                service_type: 'external',
+              }),
+            }
+          );
 
           flashSuccessToast(
             i18n.translate(

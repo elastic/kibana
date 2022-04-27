@@ -30,6 +30,8 @@ import { SourceDataItem } from '../../../../types';
 
 import { staticCustomSourceData, staticGenericExternalSourceData } from '../../source_data';
 
+import { SourcesLogic } from '../../sources_logic';
+
 import {
   AVAILABLE_SOURCE_EMPTY_STATE,
   AVAILABLE_SOURCE_TITLE,
@@ -43,6 +45,7 @@ interface AvailableSourcesListProps {
 
 export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sources }) => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
+  const { externalConfigured } = useValues(SourcesLogic);
 
   const getSourceCard = ({
     accountContextOnly,
@@ -114,15 +117,17 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
             </EuiFlexGroup>
           </EuiFlexItem>
         ))}
-        <EuiFlexItem grow={false} data-test-subj="AvailableSourceListItem">
-          <EuiFlexGroup
-            justifyContent="center"
-            alignItems="stretch"
-            data-test-subj="AvailableSourceCard"
-          >
-            <EuiFlexItem>{getSourceCard(staticGenericExternalSourceData)}</EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        {!externalConfigured && (
+          <EuiFlexItem grow={false} data-test-subj="AvailableSourceListItem">
+            <EuiFlexGroup
+              justifyContent="center"
+              alignItems="stretch"
+              data-test-subj="AvailableSourceCard"
+            >
+              <EuiFlexItem>{getSourceCard(staticGenericExternalSourceData)}</EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false} data-test-subj="AvailableSourceListItem">
           <EuiFlexGroup
             justifyContent="center"

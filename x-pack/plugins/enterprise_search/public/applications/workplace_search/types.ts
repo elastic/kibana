@@ -80,6 +80,7 @@ export interface SourceDataItem {
   baseServiceType?: string;
   configuration: Configuration;
   configured?: boolean;
+  externalConnectorServiceDescribed?: boolean;
   connected?: boolean;
   features?: Features;
   objTypes?: string[];
