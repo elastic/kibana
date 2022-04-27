@@ -65,7 +65,6 @@ export default ({ getService }: FtrProviderContext): void => {
           actionTypeId: '.servicenow',
           id: 'preconfigured-servicenow',
           isPreconfigured: true,
-          isDeprecated: false,
           name: 'preconfigured-servicenow',
           referencedByCount: 0,
         },
