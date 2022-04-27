@@ -16,6 +16,10 @@ jest.mock('../components/detection_response/rule_alerts_table', () => ({
   RuleAlertsTable: () => <div data-test-subj="mock_RuleAlertsTable" />,
 }));
 
+jest.mock('../components/detection_response/alerts_by_status', () => ({
+  AlertsByStatus: () => <div data-test-subj="mock_AlertsByStatus" />,
+}));
+
 jest.mock('../components/detection_response/cases_by_status', () => ({
   CasesByStatus: () => <div data-test-subj="mock_CasesByStatus" />,
 }));
