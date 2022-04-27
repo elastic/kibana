@@ -153,13 +153,15 @@ To modify queries in prebuilt packs, you must first make a copy of the pack.
 
 . Go to *Stack Management* -> *Saved Objects*.
 
-. Search for the Osquery packs you want to modify.
+. Search for the Osquery packs you want to modify by name.
 
 . Select the checkboxes of the packs to export.
 
 . Click *Export x objects*.
 
-. Then click *Import* to import the exported pack. This creates a copy that you can edit.
+. Click *Import*.
+
+. Select the import option *Create new objects with random IDs*, then click *Import* to import the pack. This creates a copy of the pack that you can edit.
 
 
 [float]
