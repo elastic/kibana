@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { EuiCallOut, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
 import { useFetchEndpointPendingActionsSummary } from '../../../hooks/endpoint/use_fetch_endpoint_pending_actions_summary';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { EndpointPolicyStatus } from '../../endpoint_policy_status';
@@ -28,9 +29,22 @@ export const EndpointStatusActionResult = memo<EndpointStatusActionResultProps>(
     const { isFetching, error, data: endpointInfo } = useGetEndpointHostInfo(endpointId);
     const { data: endpointPendingActions } = useFetchEndpointPendingActionsSummary([endpointId]);
 
-    const pendingActions = useMemo(() => {
-      // TODO: implement
-    }, []);
+    const pendingIsolationActions = useMemo<
+      Pick<Required<EndpointHostIsolationStatusProps>, 'pendingIsolate' | 'pendingUnIsolate'>
+    >(() => {
+      if (endpointPendingActions?.data.length) {
+        const pendingActions = endpointPendingActions.data[0].pending_actions;
+
+        return {
+          pendingIsolate: pendingActions.isolate ?? 0,
+          pendingUnIsolate: pendingActions.unisolate ?? 0,
+        };
+      }
+      return {
+        pendingIsolate: 0,
+        pendingUnIsolate: 0,
+      };
+    }, [endpointPendingActions?.data]);
 
     if (isFetching) {
       return null;
@@ -52,16 +66,20 @@ export const EndpointStatusActionResult = memo<EndpointStatusActionResultProps>(
 
     return (
       <EuiFlexGroup wrap={false} responsive={false}>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiText size="s">
             <FormattedMessage
               id="xpack.securitySolution.endpointResponseActions.status.agentStatus"
               defaultMessage="Agent status"
             />
           </EuiText>
-          <EndpointAgentAndIsolationStatus status={endpointInfo.host_status} />
+          <EndpointAgentAndIsolationStatus
+            status={endpointInfo.host_status}
+            isIsolated={Boolean(endpointInfo.metadata.Endpoint.state?.isolation)}
+            {...pendingIsolationActions}
+          />
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiText size="s">
             <FormattedMessage
               id="xpack.securitySolution.endpointResponseActions.status.policyStatus"
