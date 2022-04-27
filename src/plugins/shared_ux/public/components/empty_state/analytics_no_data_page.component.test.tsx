@@ -7,20 +7,21 @@
  */
 
 import React from 'react';
-import { AnalyticsNoDataPage } from './analytics_no_data_page';
-import { KibanaNoDataPage } from '@kbn/shared-ux-components';
-
-import { mockServicesFactory } from '@kbn/shared-ux-services';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { KibanaNoDataPage } from '@kbn/shared-ux-components';
+import { mockServicesFactory } from '@kbn/shared-ux-services';
+import { AnalyticsNoDataPageComponent } from './analytics_no_data_page.component';
 
-jest.mock('../../plugin', () => ({
-  getSharedUXServices: () => mockServicesFactory(),
-}));
-
-describe('AnalyticsNoDataPage', () => {
+describe('AnalyticsNoDataPageComponent', () => {
   const onDataViewCreated = jest.fn();
+
   it('renders correctly', () => {
-    const component = mountWithIntl(<AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />);
+    const component = mountWithIntl(
+      <AnalyticsNoDataPageComponent
+        onDataViewCreated={onDataViewCreated}
+        kibanaGuideDocLink={'http://www.test.com'}
+      />
+    );
     expect(component).toMatchSnapshot();
 
     expect(component.find(KibanaNoDataPage).length).toBe(1);

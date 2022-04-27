@@ -6,50 +6,26 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { i18n } from '@kbn/i18n';
+
 import { SharedUxServicesProvider } from '@kbn/shared-ux-services';
-import { KibanaNoDataPage } from '@kbn/shared-ux-components';
+
 import { getSharedUXServices } from '../../plugin';
+import { AnalyticsNoDataPageComponent } from './analytics_no_data_page.component';
 
 interface Props {
   onDataViewCreated: (dataView: unknown) => void;
 }
 
-const solution = i18n.translate('sharedUXComponents.noDataConfig.analytics', {
-  defaultMessage: 'Analytics',
-});
-const pageTitle = i18n.translate('sharedUX.noDataConfig.analyticsPageTitle', {
-  defaultMessage: 'Welcome to Analytics!',
-});
-const addIntegrationsTitle = i18n.translate('sharedUX.noDataConfig.addIntegrationsTitle', {
-  defaultMessage: 'Add integrations',
-});
-const addIntegrationsDescription = i18n.translate(
-  'sharedUX.noDataConfig.addIntegrationsDescription',
-  {
-    defaultMessage: 'Use Elastic Agent to collect data and build out Analytics solutions.',
-  }
-);
-
 export const AnalyticsNoDataPage = ({ onDataViewCreated }: Props) => {
   const services = getSharedUXServices();
   const { kibanaGuideDocLink } = services.docLinks;
-  const noDataConfig = {
-    solution,
-    pageTitle,
-    logo: 'logoKibana',
-    action: {
-      elasticAgent: {
-        title: addIntegrationsTitle,
-        description: addIntegrationsDescription,
-        'data-test-subj': 'kbnOverviewAddIntegrations',
-      },
-    },
-    docsLink: kibanaGuideDocLink,
-  };
   return (
     <SharedUxServicesProvider {...services}>
-      <KibanaNoDataPage noDataConfig={noDataConfig} onDataViewCreated={onDataViewCreated} />;
+      <AnalyticsNoDataPageComponent
+        kibanaGuideDocLink={kibanaGuideDocLink}
+        onDataViewCreated={onDataViewCreated}
+      />
+      ;
     </SharedUxServicesProvider>
   );
 };
