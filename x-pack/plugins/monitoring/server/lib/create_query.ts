@@ -137,9 +137,6 @@ export function createQuery(options: CreateQueryOptions) {
     ...filters,
   ];
 
-  // console.log({ clusterUuidFilter })
-  // console.log(JSON.stringify(filters))
-
   if (isFromStandaloneCluster) {
     combinedFilters.push(standaloneClusterFilter);
   }
