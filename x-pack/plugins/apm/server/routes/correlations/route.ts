@@ -397,12 +397,14 @@ const changePointPValuesRoute = createApmServerRoute({
     >;
   }> => {
     const { context } = resources;
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+    const { license } = await context.licensing;
+    if (!isActivePlatinumLicense(license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
     const { indices } = await setupRequest(resources);
-    const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
+    const esClient = (await resources.context.core).elasticsearch.client
+      .asCurrentUser;
 
     const {
       fieldCandidates,
@@ -463,12 +465,14 @@ const changePointFrequentItemsRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<{ frequentItems: FrequentItems }> => {
     const { context } = resources;
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+    const { license } = await context.licensing;
+    if (!isActivePlatinumLicense(license)) {
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
     const { indices } = await setupRequest(resources);
-    const esClient = resources.context.core.elasticsearch.client.asCurrentUser;
+    const esClient = (await resources.context.core).elasticsearch.client
+      .asCurrentUser;
 
     const {
       fieldCandidates,
