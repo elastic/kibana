@@ -165,10 +165,6 @@ export async function indexEndpointHostDocs({
       // Update the Host metadata record with the ID of the "real" policy along with the enrolled agent id
       hostMetadata = {
         ...hostMetadata,
-        agent: {
-          ...hostMetadata.agent,
-          id: enrolledAgent?.id ?? hostMetadata.agent.id,
-        },
         elastic: {
           ...hostMetadata.elastic,
           agent: {
