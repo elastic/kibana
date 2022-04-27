@@ -252,7 +252,8 @@ Each alert type should be defined as `RuleTypeModel` object with the these prope
 |iconClass|Icon of the alert type that will be displayed on the select card in the UI.|
 |validate|Validation function for the alert params.|
 |ruleParamsExpression| A lazy loaded React component for building UI of the current alert type params.|
-|defaultActionMessage|Optional property for providing default message for all added actions with `message` property.|
+|defaultActionMessage|Optional property for providing default messages for all added actions, excluding the Recovery action group, with `message` property. |
+|defaultRecoveryMessage|Optional property for providing a default message for all added actions with `message` property for the Recovery action group.|
 |requiresAppContext|Define if alert type is enabled for create and edit in the alerting management UI.|
 
 IMPORTANT: The current UI supports a single action group only. 
