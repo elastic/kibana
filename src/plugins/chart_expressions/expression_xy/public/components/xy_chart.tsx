@@ -556,6 +556,7 @@ export function XYChart({
               titles={titles}
               fieldFormats={fieldFormats}
               formatFactory={formatFactory}
+              formattedDatatables={formattedDatatables}
             />
           ),
         }}

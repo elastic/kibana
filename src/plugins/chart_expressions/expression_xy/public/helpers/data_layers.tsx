@@ -229,6 +229,27 @@ const getColor: GetColorFn = (
   );
 };
 
+const EMPTY_ACCESSOR = '-';
+const SPLIT_CHAR = '.';
+
+const generateSeriesId = (
+  { layerId, xAccessor, splitAccessor }: CommonXYDataLayerConfig,
+  accessor: string
+) =>
+  [layerId, xAccessor ?? EMPTY_ACCESSOR, accessor, splitAccessor ?? EMPTY_ACCESSOR].join(
+    SPLIT_CHAR
+  );
+
+export const getMetaFromSeriesId = (seriesId: string) => {
+  const [layerId, xAccessor, yAccessor, splitAccessor] = seriesId.split(SPLIT_CHAR);
+  return {
+    layerId,
+    xAccessor: xAccessor === EMPTY_ACCESSOR ? undefined : xAccessor,
+    yAccessor,
+    splitAccessor: splitAccessor === EMPTY_ACCESSOR ? undefined : splitAccessor,
+  };
+};
+
 export const getSeriesProps: GetSeriesPropsFn = ({
   layer,
   accessor,
@@ -286,7 +307,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   return {
     splitSeriesAccessors: layer.splitAccessor ? [layer.splitAccessor] : [],
     stackAccessors: isStacked ? [layer.xAccessor as string] : [],
-    id: layer.splitAccessor ? `${layer.splitAccessor}-${accessor}` : `${accessor}`,
+    id: generateSeriesId(layer, accessor),
     xAccessor: layer.xAccessor || 'unifiedX',
     yAccessors: [accessor],
     data: rows,

@@ -9,14 +9,51 @@
 import { TooltipInfo } from '@elastic/charts';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import React, { FC } from 'react';
-import { LayersAccessorsTitles, LayersFieldFormats } from '../helpers';
+import {
+  DatatablesWithFormatInfo,
+  getMetaFromSeriesId,
+  LayersAccessorsTitles,
+  LayersFieldFormats,
+} from '../helpers';
 
 type Props = TooltipInfo & {
   fieldFormats: LayersFieldFormats;
   titles: LayersAccessorsTitles;
   formatFactory: FormatFactory;
+  formattedDatatables: DatatablesWithFormatInfo;
 };
 
-export const Tooltip: FC<Props> = ({ header, values, fieldFormats, titles, formatFactory }) => {
+interface TooltipData {
+  label: string;
+  value: string;
+}
+
+export const Tooltip: FC<Props> = ({
+  header,
+  values,
+  fieldFormats,
+  titles,
+  formatFactory,
+  formattedDatatables,
+}) => {
+  const pickedValue = values.find(({ isHighlighted }) => isHighlighted);
+
+  if (!pickedValue) {
+    return null;
+  }
+
+  const data: TooltipData[] = [];
+  const { layerId, xAccessor } = getMetaFromSeriesId(pickedValue.seriesIdentifier.specId);
+  const { formattedColumns } = formattedDatatables[layerId];
+
+  if (header && xAccessor) {
+    const possibleXFormatter = formatFactory(fieldFormats[layerId].xAccessors[xAccessor]);
+    const xFormatter = formattedColumns[xAccessor] ? null : possibleXFormatter;
+    data.push({
+      label: titles[layerId].xTitles[xAccessor],
+      value: xFormatter ? xFormatter.convert(header.value) : `${header.value}`,
+    });
+  }
+
   return <div>123</div>;
 };
