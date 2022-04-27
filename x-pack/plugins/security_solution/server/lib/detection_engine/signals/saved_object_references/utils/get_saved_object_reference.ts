@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectReference } from 'src/core/server';
+import { Logger, SavedObjectReference } from '@kbn/core/server';
 import { getSavedObjectNamePattern } from './get_saved_object_name_pattern';
 
 /**

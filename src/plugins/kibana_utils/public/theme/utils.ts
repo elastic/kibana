@@ -9,7 +9,7 @@
 import { COLOR_MODES_STANDARD } from '@elastic/eui';
 import type { EuiThemeColorModeStandard } from '@elastic/eui';
 
-import type { CoreTheme } from '../../../../core/public';
+import type { CoreTheme } from '@kbn/core/public';
 
 /**
  * Copied from the `kibana_react` plugin, to avoid cyclical dependency

@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { EPM_API_ROUTES } from '@kbn/fleet-plugin/common';
 import { KibanaServices } from '../../../common/lib/kibana';
-import { EPM_API_ROUTES } from '../../../../../fleet/common';
 
 export interface IntegrationResponse {
   id: string;

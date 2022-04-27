@@ -7,8 +7,17 @@
 import moment from 'moment';
 import uuid from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { StartServicesAccessor } from 'kibana/server';
-import { IRuleDataClient } from '../../../../../../rule_registry/server';
+import type { StartServicesAccessor } from '@kbn/core/server';
+import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  RuleTypeState,
+  parseDuration,
+} from '@kbn/alerting-plugin/common';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ExecutorType } from '@kbn/alerting-plugin/server/types';
+import { Alert } from '@kbn/alerting-plugin/server';
 import type { StartPlugins } from '../../../../plugin';
 import { buildSiemResponse } from '../utils';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
@@ -32,15 +41,6 @@ import {
 } from '../../../../../common/detection_engine/schemas/request';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common';
 
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleTypeState,
-  parseDuration,
-} from '../../../../../../alerting/common';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ExecutorType } from '../../../../../../alerting/server/types';
-import { Alert } from '../../../../../../alerting/server';
 import { ConfigType } from '../../../../config';
 import { alertInstanceFactoryStub } from '../../signals/preview/alert_instance_factory_stub';
 import { CreateRuleOptions, CreateSecurityRuleTypeWrapperProps } from '../../rule_types/types';
@@ -80,14 +80,15 @@ export const previewRulesRoute = async (
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       const validationErrors = createRuleValidateTypeDependents(request.body);
+      const coreContext = await context.core;
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
       try {
         const [, { data, security: securityService }] = await getStartServices();
         const searchSourceClient = data.search.searchSource.asScoped(request);
-        const savedObjectsClient = context.core.savedObjects.client;
-        const siemClient = context.securitySolution.getAppClient();
+        const savedObjectsClient = coreContext.savedObjects.client;
+        const siemClient = (await context.securitySolution).getAppClient();
 
         let invocationCount = request.body.invocationCount;
         if (
@@ -103,17 +104,19 @@ export const previewRulesRoute = async (
           });
         }
 
-        const internalRule = convertCreateAPIToInternalSchema(request.body, siemClient, false);
+        const internalRule = convertCreateAPIToInternalSchema(request.body, siemClient);
         const previewRuleParams = internalRule.params;
 
         const mlAuthz = buildMlAuthz({
-          license: context.licensing.license,
+          license: (await context.licensing).license,
           ml,
           request,
           savedObjectsClient,
         });
         throwAuthzError(await mlAuthz.validateRuleType(internalRule.params.type));
-        await context.lists?.getExceptionListClient().createEndpointList();
+
+        const listsContext = await context.lists;
+        await listsContext?.getExceptionListClient().createEndpointList();
 
         const spaceId = siemClient.getSpaceId();
         const previewId = uuid.v4();
@@ -234,13 +237,13 @@ export const previewRulesRoute = async (
                 shouldWriteAlerts,
                 shouldStopExecution: () => false,
                 alertFactory,
-                savedObjectsClient: context.core.savedObjects.client,
+                savedObjectsClient: coreContext.savedObjects.client,
                 scopedClusterClient: wrapScopedClusterClient({
                   abortController,
-                  scopedClusterClient: context.core.elasticsearch.client,
+                  scopedClusterClient: coreContext.elasticsearch.client,
                 }),
                 searchSourceClient,
-                uiSettingsClient: context.core.uiSettings.client,
+                uiSettingsClient: coreContext.uiSettings.client,
               },
               spaceId,
               startedAt: startedAt.toDate(),
@@ -339,7 +342,7 @@ export const previewRulesRoute = async (
         }
 
         // Refreshes alias to ensure index is able to be read before returning
-        await context.core.elasticsearch.client.asInternalUser.indices.refresh(
+        await coreContext.elasticsearch.client.asInternalUser.indices.refresh(
           {
             index: previewRuleDataClient.indexNameWithNamespace(spaceId),
           },

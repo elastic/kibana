@@ -7,7 +7,7 @@
 
 import type { KbnClient } from '@kbn/test';
 
-import { signalsMigrationType } from '../../../plugins/security_solution/server/lib/detection_engine/migrations/saved_objects';
+import { signalsMigrationType } from '@kbn/security-solution-plugin/server/lib/detection_engine/migrations/saved_objects';
 
 export const deleteMigrations = async ({
   ids,

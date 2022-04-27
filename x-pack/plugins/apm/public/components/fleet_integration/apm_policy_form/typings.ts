@@ -6,18 +6,18 @@
  */
 import * as t from 'io-ts';
 import { ReactNode } from 'react';
-import { PackagePolicyConfigRecordEntry } from '../../../../../fleet/common';
+import { PackagePolicyConfigRecordEntry } from '@kbn/fleet-plugin/common';
 
 export type {
   PackagePolicyCreateExtensionComponentProps,
   PackagePolicyEditExtensionComponentProps,
-} from '../../../../../fleet/public';
+} from '@kbn/fleet-plugin/public';
 
 export type {
   NewPackagePolicy,
   PackagePolicy,
   PackagePolicyConfigRecordEntry,
-} from '../../../../../fleet/common';
+} from '@kbn/fleet-plugin/common';
 
 export type PackagePolicyVars = Record<string, PackagePolicyConfigRecordEntry>;
 

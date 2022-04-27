@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 import '../../../common/mock/match_media';
 import { TimelineId } from '../../../../common/types/timeline';
 import { TestProviders } from '../../../common/mock';
-import { AlertsTableComponent } from './index';
+import { AlertsTableComponent } from '.';
 
 describe('AlertsTableComponent', () => {
   it('renders correctly', () => {

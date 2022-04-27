@@ -6,8 +6,8 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { createWrappedScopedClusterClientFactory } from './wrap_scoped_cluster_client';
 
 const esQuery = {

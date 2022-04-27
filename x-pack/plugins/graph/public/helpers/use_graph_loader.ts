@@ -6,8 +6,8 @@
  */
 
 import { useCallback, useState } from 'react';
-import { ToastsStart } from 'kibana/public';
-import { IHttpFetchError, ResponseErrorBody, CoreStart } from 'kibana/public';
+import { ToastsStart } from '@kbn/core/public';
+import { IHttpFetchError, ResponseErrorBody, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { ExploreRequest, GraphExploreCallback, GraphSearchCallback, SearchRequest } from '../types';
 import { formatHttpError } from './format_http_error';

@@ -19,6 +19,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
+import { AgentPolicy } from '@kbn/fleet-plugin/common';
+import { CreatePackagePolicyRouteState, pagePathGetters } from '@kbn/fleet-plugin/public';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
@@ -29,10 +31,8 @@ import {
   useGetEndpointSecurityPackage,
   useGetEndpointSpecificPolicies,
 } from '../../../services/policies/hooks';
-import { AgentPolicy } from '../../../../../../fleet/common';
 import { PolicyEmptyState } from '../../../components/management_empty_state';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
-import { CreatePackagePolicyRouteState, pagePathGetters } from '../../../../../../fleet/public';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { getPoliciesPath } from '../../../common/routing';
 import { useAppUrl, useToasts } from '../../../../common/lib/kibana';

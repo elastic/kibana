@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IndexPatternDimensionEditorProps } from '../dimension_panel';
 import { onDrop } from './on_drop_handler';
 import { getDropProps } from './get_drop_props';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup, CoreSetup } from 'kibana/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import {
+  IUiSettingsClient,
+  SavedObjectsClientContract,
+  HttpSetup,
+  CoreSetup,
+} from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { IndexPatternLayer, IndexPatternPrivateState } from '../../types';
 import { documentField } from '../../document_field';
 import { OperationMetadata, DropType } from '../../../types';
@@ -317,6 +323,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           }),
         } as unknown as DataPublicPluginStart['fieldFormats'],
       } as unknown as DataPublicPluginStart,
+      unifiedSearch: {} as UnifiedSearchPublicPluginStart,
       core: {} as CoreSetup,
       dimensionGroups: [],
       isFullscreen: false,

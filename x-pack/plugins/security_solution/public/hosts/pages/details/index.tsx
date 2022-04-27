@@ -11,6 +11,7 @@ import React, { useEffect, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { Filter } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { HostItem, LastEventIndexKey } from '../../../../common/search_strategy';
 import { SecurityPageName } from '../../../app/types';
 import { UpdateDateRange } from '../../../common/components/charts/common';
@@ -34,7 +35,6 @@ import { inputsSelectors } from '../../../common/store';
 import { setHostDetailsTablesActivePageToZero } from '../../store/actions';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 
 import { HostDetailsTabs } from './details_tabs';
 import { navTabsHostDetails } from './nav_tabs';
