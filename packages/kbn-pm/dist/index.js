@@ -1580,7 +1580,18 @@ var _ciStatsCore = __webpack_require__("../../node_modules/@kbn/ci-stats-core/ta
  */
 // @ts-expect-error not "public", but necessary to prevent Jest shimming from breaking things
 const BASE_URL = 'https://ci-stats.kibana.dev';
+
+function limitMetaStrings(meta) {
+  return Object.fromEntries(Object.entries(meta).map(([key, value]) => {
+    if (typeof value === 'string' && value.length > 2000) {
+      return [key, value.slice(0, 2000)];
+    }
+
+    return [key, value];
+  }));
+}
 /** A ci-stats metric record */
+
 
 /** Object that helps report data to the ci-stats service */
 class CiStatsReporter {
@@ -1631,7 +1642,9 @@ class CiStatsReporter {
     }
 
     const buildId = (_this$config3 = this.config) === null || _this$config3 === void 0 ? void 0 : _this$config3.buildId;
-    const timings = options.timings;
+    const timings = options.timings.map(timing => timing.meta ? { ...timing,
+      meta: limitMetaStrings(timing.meta)
+    } : timing);
     const upstreamBranch = (_options$upstreamBran = options.upstreamBranch) !== null && _options$upstreamBran !== void 0 ? _options$upstreamBran : this.getUpstreamBranch();
     const kibanaUuid = options.kibanaUuid === undefined ? this.getKibanaUuid() : options.kibanaUuid;
     let email;
