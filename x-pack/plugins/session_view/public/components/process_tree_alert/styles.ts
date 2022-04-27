@@ -43,6 +43,7 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
     const alert: CSSObject = {
       fontFamily: font.family,
       display: 'flex',
+      gap: size.s,
       alignItems: 'center',
       minHeight: '20px',
       padding: `${size.xs} ${size.base}`,
@@ -55,34 +56,18 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
       '&:hover': {
         background: hoverBgColor,
       },
-    };
-
-    const alertRowItem: CSSObject = {
-      '&:first-of-type': {
-        marginRight: size.m,
-      },
-      '&:not(:first-of-type)': {
+      button: {
+        flexShrink: 0,
         marginRight: size.s,
       },
     };
 
-    const alertRuleName: CSSObject = {
-      ...alertRowItem,
-      maxWidth: '70%',
-    };
-
     const alertStatus: CSSObject = {
-      ...alertRowItem,
       textTransform: 'capitalize',
-      '&, span': {
-        cursor: 'pointer !important',
-      },
     };
 
     return {
       alert,
-      alertRowItem,
-      alertRuleName,
       alertStatus,
     };
   }, [euiTheme, isInvestigated, isSelected]);

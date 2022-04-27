@@ -200,15 +200,12 @@ export const SessionView = ({
   return (
     <>
       <div css={styles.sessionViewerComponent}>
-        <EuiPanel css={styles.toolBar} hasShadow={false} borderRadius="none">
+        <EuiPanel hasShadow={false} borderRadius="none" className="sessionViewerToolbar">
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiBetaBadge label={BETA} size="s" css={styles.betaBadge} />
             </EuiFlexItem>
-            <EuiFlexItem
-              data-test-subj="sessionView:sessionViewProcessEventsSearch"
-              css={styles.searchBar}
-            >
+            <EuiFlexItem data-test-subj="sessionView:sessionViewProcessEventsSearch">
               <SessionViewSearchBar
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}

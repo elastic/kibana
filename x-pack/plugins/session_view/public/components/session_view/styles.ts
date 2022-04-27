@@ -6,9 +6,8 @@
  */
 
 import { useMemo } from 'react';
-import { useEuiTheme } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
-import { euiLightVars } from '@kbn/ui-theme'; // using this temporarily until the euiTheme hook is updated to include proper hex values
+import { useEuiTheme } from '../../hooks';
 
 interface StylesDeps {
   height?: number;
@@ -16,7 +15,7 @@ interface StylesDeps {
 }
 
 export const useStyles = ({ height = 500, isFullScreen }: StylesDeps) => {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, euiVars } = useEuiTheme();
 
   const cached = useMemo(() => {
     const { border, colors, size } = euiTheme;
@@ -45,21 +44,14 @@ export const useStyles = ({ height = 500, isFullScreen }: StylesDeps) => {
       flexGrow: 0,
       alignItems: 'stretch',
     };
-    const searchBar: CSSObject = {
-      position: 'relative',
-      input: {
-        backgroundColor: colors.emptyShade,
-      },
-    };
 
     const sessionViewerComponent: CSSObject = {
       border: border.thin,
       borderRadius: border.radius.medium,
-    };
-
-    const toolBar: CSSObject = {
-      backgroundColor: `${euiLightVars.euiFormBackgroundDisabledColor} !important`, // important used since euipanel overrides this
-      padding: `${size.m} ${size.base}`,
+      '.sessionViewerToolbar': {
+        backgroundColor: `${euiVars.euiFormBackgroundDisabledColor}`,
+        padding: `${size.m} ${size.base}`,
+      },
     };
 
     const betaBadge: CSSObject = {
@@ -71,12 +63,10 @@ export const useStyles = ({ height = 500, isFullScreen }: StylesDeps) => {
       detailPanel,
       nonGrowGroup,
       resizeHandle,
-      searchBar,
       sessionViewerComponent,
-      toolBar,
       betaBadge,
     };
-  }, [euiTheme, isFullScreen, height]);
+  }, [euiTheme, isFullScreen, height, euiVars]);
 
   return cached;
 };

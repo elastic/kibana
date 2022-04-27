@@ -65,7 +65,7 @@ export const SessionViewSearchBar = ({
   }, [searchResults, onProcessSelected, selectedResult]);
 
   return (
-    <div data-test-subj="sessionView:searchInput" css={styles.searchBarWithResult}>
+    <div data-test-subj="sessionView:searchBar" css={styles.searchBar}>
       <EuiSearchBar query={searchQuery} onChange={onSearch} box={translatePlaceholder} />
       {noResults && <span css={styles.noResults}>{NO_RESULTS}</span>}
       {showPagination && (
