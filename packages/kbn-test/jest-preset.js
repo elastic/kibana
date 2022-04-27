@@ -63,16 +63,12 @@ module.exports = {
         rootDirectory: '.',
       },
     ],
-    ...(process.env.TEST_GROUP_TYPE_UNIT
-      ? [
-          [
-            '@kbn/test/target_node/jest/ci_stats_jest_reporter',
-            {
-              testGroupType: process.env.TEST_GROUP_TYPE_UNIT,
-            },
-          ],
-        ]
-      : []),
+    [
+      '@kbn/test/target_node/jest/ci_stats_jest_reporter',
+      {
+        testGroupType: 'Jest Unit Tests',
+      },
+    ],
   ],
 
   // The paths to modules that run some code to configure or set up the testing environment before each test

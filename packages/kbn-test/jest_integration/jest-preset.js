@@ -28,16 +28,12 @@ module.exports = {
         reportName: 'Jest Integration Tests',
       },
     ],
-    ...(process.env.TEST_GROUP_TYPE_INTEGRATION
-      ? [
-          [
-            '@kbn/test/target_node/jest/ci_stats_jest_reporter',
-            {
-              testGroupType: process.env.TEST_GROUP_TYPE_INTEGRATION,
-            },
-          ],
-        ]
-      : []),
+    [
+      '@kbn/test/target_node/jest/ci_stats_jest_reporter',
+      {
+        testGroupType: 'Jest Integration Tests',
+      },
+    ],
   ],
   coverageReporters: !!process.env.CI
     ? [['json', { file: 'jest-integration.json' }]]
