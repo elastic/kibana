@@ -17,7 +17,7 @@ import {
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { FeatureCatalogueCategory, HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 
@@ -34,6 +34,7 @@ import { docLinks } from './applications/shared/doc_links';
 export interface ClientConfigType {
   host?: string;
 }
+
 export interface ClientData extends InitialAppData {
   publicUrl?: string;
   errorConnectingMessage?: string;
@@ -44,6 +45,7 @@ interface PluginsSetup {
   home?: HomePublicPluginSetup;
   security: SecurityPluginSetup;
 }
+
 export interface PluginsStart {
   cloud?: CloudSetup & CloudStart;
   licensing: LicensingPluginStart;
@@ -171,7 +173,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         icon: 'appSearchApp',
         description: APP_SEARCH_PLUGIN.DESCRIPTION,
         path: APP_SEARCH_PLUGIN.URL,
-        category: FeatureCatalogueCategory.DATA,
+        category: 'data',
         showOnHomePage: false,
       });
 
@@ -181,7 +183,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         icon: 'workplaceSearchApp',
         description: WORKPLACE_SEARCH_PLUGIN.DESCRIPTION,
         path: WORKPLACE_SEARCH_PLUGIN.URL,
-        category: FeatureCatalogueCategory.DATA,
+        category: 'data',
         showOnHomePage: false,
       });
     }

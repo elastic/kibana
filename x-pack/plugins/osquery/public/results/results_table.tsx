@@ -46,7 +46,7 @@ interface ResultsTableComponentProps {
   agentIds?: string[];
   endDate?: string;
   startDate?: string;
-  hideFullscreen?: true;
+  isExternal?: true;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
@@ -54,7 +54,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   agentIds,
   startDate,
   endDate,
-  hideFullscreen,
+  isExternal,
 }) => {
   const [isLive, setIsLive] = useState(true);
   const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
@@ -195,6 +195,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
           // @ts-expect-error update types
           acc[value?.field] = [...(acc[value?.field] ?? []), key];
         }
+
         return acc;
       },
       {},
@@ -274,6 +275,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             });
             seen.add(fieldName);
           }
+
           return acc;
         }
 
@@ -291,6 +293,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             });
             seen.add(displayAsText);
           }
+
           return acc;
         }
 
@@ -309,7 +312,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   const toolbarVisibility = useMemo(
     () => ({
       showDisplaySelector: false,
-      showFullScreenSelector: !hideFullscreen,
+      showFullScreenSelector: !isExternal,
       additionalControls: (
         <>
           <ViewResultsInDiscoverAction
@@ -327,7 +330,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         </>
       ),
     }),
-    [actionId, endDate, startDate, hideFullscreen]
+    [actionId, endDate, startDate, isExternal]
   );
 
   useEffect(

@@ -15,7 +15,7 @@ import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import type { IndexNotFound, AcknowledgeResponse } from '.';
+import type { IndexNotFound, AcknowledgeResponse, IndexNotYellowTimeout } from '.';
 import { waitForIndexStatusYellow } from './wait_for_index_status_yellow';
 import {
   DEFAULT_TIMEOUT,
@@ -49,7 +49,7 @@ export const cloneIndex = ({
   target,
   timeout = DEFAULT_TIMEOUT,
 }: CloneIndexParams): TaskEither.TaskEither<
-  RetryableEsClientError | IndexNotFound,
+  RetryableEsClientError | IndexNotFound | IndexNotYellowTimeout,
   CloneIndexResponse
 > => {
   const cloneTask: TaskEither.TaskEither<
@@ -122,7 +122,7 @@ export const cloneIndex = ({
 
   return pipe(
     cloneTask,
-    TaskEither.chain((res) => {
+    TaskEither.chainW((res) => {
       if (res.acknowledged && res.shardsAcknowledged) {
         // If the cluster state was updated and all shards ackd we're done
         return TaskEither.right(res);

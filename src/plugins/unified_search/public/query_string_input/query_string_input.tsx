@@ -34,7 +34,6 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import type { PersistedLog } from '@kbn/data-plugin/public';
 import { getFieldSubtypeNested, KIBANA_USER_QUERY_LANGUAGE_KEY } from '@kbn/data-plugin/common';
 import { KibanaReactContextValue, toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
 import { matchPairs } from './match_pairs';
 import { toUser } from './to_user';
 import { fromUser } from './from_user';
@@ -43,6 +42,7 @@ import { QueryLanguageSwitcher } from './language_switcher';
 import type { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '../typeahead';
 import { onRaf } from '../utils';
+import { QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
 import { getTheme, getAutocomplete } from '../services';
 
 export interface QueryStringInputProps {

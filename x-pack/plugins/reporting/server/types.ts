@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter, Logger, RequestHandlerContext } from '@kbn/core/server';
+import type { IRouter, Logger, CustomRequestHandlerContext } from '@kbn/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
@@ -51,7 +51,6 @@ export interface ReportingSetup {
 export type ReportingStart = ReportingSetup;
 export type ReportingUser = { username: AuthenticatedUser['username'] } | false;
 
-export type CaptureConfig = ReportingConfigType['capture'];
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
 /**
@@ -114,10 +113,9 @@ export interface ReportingStartDeps {
   taskManager: TaskManagerStartContract;
 }
 
-export interface ReportingRequestHandlerContext {
+export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{
   reporting: ReportingStart | null;
-  core: RequestHandlerContext['core'];
-}
+}>;
 
 export type ReportingPluginRouter = IRouter<ReportingRequestHandlerContext>;
 

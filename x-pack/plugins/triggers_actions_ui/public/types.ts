@@ -47,6 +47,7 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { TypeRegistry } from './application/type_registry';
+import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
@@ -78,6 +79,7 @@ export type {
   RuleTypeParams,
   ResolvedRule,
   SanitizedRule,
+  RuleStatusDropdownProps,
 };
 export type { ActionType, AsApiContract };
 export {
@@ -94,6 +96,9 @@ export type ActionTypeRegistryContract<
   ActionParams = unknown
 > = PublicMethodsOf<TypeRegistry<ActionTypeModel<ActionConnector, ActionParams>>>;
 export type RuleTypeRegistryContract = PublicMethodsOf<TypeRegistry<RuleTypeModel>>;
+export type AlertsTableConfigurationRegistryContract = PublicMethodsOf<
+  TypeRegistry<AlertsTableConfigurationRegistry>
+>;
 
 export type ActionConnectorFieldsCallbacks = {
   beforeActionConnectorSave?: () => Promise<void>;
@@ -190,6 +195,7 @@ export interface ActionConnectorProps<Config, Secrets> {
   referencedByCount?: number;
   config: Config;
   isPreconfigured: boolean;
+  isDeprecated: boolean;
   isMissingSecrets?: boolean;
 }
 
@@ -298,6 +304,7 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
     | React.LazyExoticComponent<ComponentType<RuleTypeParamsExpressionProps<Params>>>;
   requiresAppContext: boolean;
   defaultActionMessage?: string;
+  defaultRecoveryMessage?: string;
 }
 
 export interface IErrorObject {
@@ -389,9 +396,9 @@ export interface BulkActionsObjectProp {
 }
 
 export interface AlertsTableProps {
+  configurationId: string;
   consumers: AlertConsumers[];
   bulkActions: BulkActionsObjectProp;
-  columns: EuiDataGridColumn[];
   // defaultCellActions: TGridCellAction[];
   deletedEventIds: string[];
   disabledCellActions: string[];
@@ -403,4 +410,9 @@ export interface AlertsTableProps {
   trailingControlColumns: EuiDataGridControlColumn[];
   useFetchAlertsData: () => FetchAlertData;
   'data-test-subj': string;
+}
+
+export interface AlertsTableConfigurationRegistry {
+  id: string;
+  columns: EuiDataGridColumn[];
 }
