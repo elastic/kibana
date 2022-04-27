@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import React from 'react';
+
 import { render } from '@testing-library/react';
+
+import { SecurityPageName } from '../../../../../common/constants';
 import { TestProviders } from '../../../../common/mock';
 import { RuleAlertsTable, RuleAlertsTableProps } from './rule_alerts_table';
 import { RuleAlertsItem, UseRuleAlertsItems } from './use_rule_alerts_items';
-import moment from 'moment';
-import { SecurityPageName } from '../../../../../common/constants';
 
 const mockGetAppUrl = jest.fn();
 jest.mock('../../../../common/lib/kibana/hooks', () => {
