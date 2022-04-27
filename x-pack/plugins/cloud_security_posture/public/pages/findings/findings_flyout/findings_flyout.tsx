@@ -25,13 +25,15 @@ import {
   type PropsOf,
 } from '@elastic/eui';
 import { assertNever } from '@kbn/std';
-import type { CspFinding } from './types';
-import { CspEvaluationBadge } from '../../components/csp_evaluation_badge';
-import * as TEXT from './translations';
-import cisLogoIcon from '../../assets/icons/cis_logo.svg';
-import k8sLogoIcon from '../../assets/icons/k8s_logo.svg';
+import type { CspFinding } from '../types';
+import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
+import * as TEXT from '../translations';
+import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
+import k8sLogoIcon from '../../../assets/icons/k8s_logo.svg';
+import { ResourceTab } from './resource_tab';
+import { JsonTab } from './json_tab';
 
-const tabs = ['remediation', 'resource', 'general'] as const;
+const tabs = ['remediation', 'resource', 'general', 'json'] as const;
 
 const CodeBlock: React.FC<PropsOf<typeof EuiCodeBlock>> = (props) => (
   <EuiCodeBlock {...props} isCopyable paddingSize="s" />
@@ -51,8 +53,44 @@ interface FindingFlyoutProps {
   findings: CspFinding;
 }
 
+const Cards = ({ data }: { data: Card[] }) => (
+  <EuiFlexGrid direction="column" gutterSize={'l'}>
+    {data.map((card) => (
+      <EuiFlexItem key={card.title} style={{ display: 'block' }}>
+        <EuiCard textAlign="left" title={card.title} hasBorder>
+          <EuiDescriptionList
+            compressed={false}
+            type="column"
+            listItems={card.listItems.map((v) => ({ title: v[0], description: v[1] }))}
+            style={{ flexFlow: 'column' }}
+            descriptionProps={{
+              style: { width: '100%' },
+            }}
+          />
+        </EuiCard>
+      </EuiFlexItem>
+    ))}
+  </EuiFlexGrid>
+);
+
+const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab }) => {
+  switch (tab) {
+    case 'remediation':
+      return <Cards data={getRemediationCards(findings)} />;
+    case 'resource':
+      return <ResourceTab data={findings} />;
+    case 'general':
+      return <Cards data={getGeneralCards(findings)} />;
+    case 'json':
+      return <JsonTab data={findings} />;
+    default:
+      assertNever(tab);
+  }
+};
+
 export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) => {
   const [tab, setTab] = useState<FindingsTab>('remediation');
+
   return (
     <EuiFlyout onClose={onClose}>
       <EuiFlyoutHeader>
@@ -88,76 +126,6 @@ export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) =>
     </EuiFlyout>
   );
 };
-
-const Cards = ({ data }: { data: Card[] }) => (
-  <EuiFlexGrid direction="column" gutterSize={'l'}>
-    {data.map((card) => (
-      <EuiFlexItem key={card.title} style={{ display: 'block' }}>
-        <EuiCard textAlign="left" title={card.title} hasBorder>
-          <EuiDescriptionList
-            compressed={false}
-            type="column"
-            listItems={card.listItems.map((v) => ({ title: v[0], description: v[1] }))}
-            style={{ flexFlow: 'column' }}
-            descriptionProps={{
-              style: { width: '100%' },
-            }}
-          />
-        </EuiCard>
-      </EuiFlexItem>
-    ))}
-  </EuiFlexGrid>
-);
-
-const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab }) => {
-  switch (tab) {
-    case 'remediation':
-      return <Cards data={getRemediationCards(findings)} />;
-    case 'resource':
-      return <Cards data={getResourceCards(findings)} />;
-    case 'general':
-      return <Cards data={getGeneralCards(findings)} />;
-    default:
-      assertNever(tab);
-  }
-};
-
-const getResourceCards = ({ resource, host }: CspFinding): Card[] => [
-  {
-    title: TEXT.RESOURCE,
-    listItems: [
-      [TEXT.FILENAME, <CodeBlock>{resource.filename}</CodeBlock>],
-      [TEXT.MODE, resource.mode],
-      [TEXT.PATH, <CodeBlock>{resource.path}</CodeBlock>],
-      [TEXT.TYPE, resource.type],
-      [TEXT.UID, resource.uid],
-    ],
-  },
-  {
-    title: TEXT.HOST,
-    listItems: [
-      [TEXT.ARCHITECTURE, host.architecture],
-      [TEXT.CONTAINERIZED, host.containerized ? 'true' : 'false'],
-      [TEXT.HOSTNAME, host.hostname],
-      [TEXT.ID, <CodeBlock>{host.id}</CodeBlock>],
-      [TEXT.IP, <CodeBlock>{host.ip.join(', ')}</CodeBlock>],
-      [TEXT.MAC, <CodeBlock>{host.mac.join(', ')}</CodeBlock>],
-      [TEXT.NAME, host.name],
-    ],
-  },
-  {
-    title: TEXT.OS,
-    listItems: [
-      [TEXT.CODENAME, host.os.codename],
-      [TEXT.FAMILY, host.os.family],
-      [TEXT.KERNEL, host.os.kernel],
-      [TEXT.NAME, host.os.name],
-      [TEXT.PLATFORM, host.os.platform],
-      [TEXT.TYPE, host.os.type],
-      [TEXT.VERSION, host.os.version],
-    ],
-  },
-];
 
 const getGeneralCards = ({ rule }: CspFinding): Card[] => [
   {
