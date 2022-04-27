@@ -14,7 +14,7 @@ import { truncate } from '../../utils/style';
 import { ApmRoutes } from '../routing/apm_route_config';
 import { SpanIcon } from './span_icon';
 
-const StyledLink = euiStyled(EuiLink)`min-width: 0`;
+const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
 
 interface BackendLinkProps {
   query: TypeOf<ApmRoutes, '/backends/overview'>['query'];

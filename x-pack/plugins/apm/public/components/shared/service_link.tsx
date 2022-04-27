@@ -15,7 +15,7 @@ import { AgentIcon } from './agent_icon';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { ApmRoutes } from '../routing/apm_route_config';
 
-const StyledLink = euiStyled(EuiLink)`min-width: 0;`;
+const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
 
 interface ServiceLinkProps {
   agentName?: AgentName;
