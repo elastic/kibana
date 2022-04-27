@@ -8,7 +8,7 @@
 
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { IExternalUrl } from 'kibana/public';
+import type { IExternalUrl } from '@kbn/core/public';
 
 // @ts-ignore
 const SettingsOptionsComponent = lazy(() => import('./settings'));

@@ -161,6 +161,7 @@ export interface InjectedMetadataSetup {
   getKibanaVersion: () => string;
   getCspConfig: () => {
     warnLegacyBrowsers: boolean;
+    nonce: string;
   };
   getExternalUrlConfig: () => {
     policy: IExternalUrlPolicy[];

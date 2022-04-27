@@ -18,8 +18,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import type { IExternalUrl } from 'kibana/public';
-import type { VisEditorOptionsProps } from '../../../../visualizations/public';
+import type { IExternalUrl } from '@kbn/core/public';
+import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import type { VisParams } from '../../types';
 
 const DependencyUrl = ({

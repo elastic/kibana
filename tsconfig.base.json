@@ -163,6 +163,8 @@
       "@kbn/vis-default-editor-plugin/*": ["src/plugins/vis_default_editor/*"],
       "@kbn/vis-type-markdown-plugin": ["src/plugins/vis_type_markdown"],
       "@kbn/vis-type-markdown-plugin/*": ["src/plugins/vis_type_markdown/*"],
+      "@kbn/vis-type-script-plugin": ["src/plugins/vis_type_script"],
+      "@kbn/vis-type-script-plugin/*": ["src/plugins/vis_type_script/*"],
       "@kbn/vis-type-gauge-plugin": ["src/plugins/vis_types/gauge"],
       "@kbn/vis-type-gauge-plugin/*": ["src/plugins/vis_types/gauge/*"],
       "@kbn/vis-type-heatmap-plugin": ["src/plugins/vis_types/heatmap"],

@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
-import { VisualizationsSetup } from '../../visualizations/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
+import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getScriptVisDefinition } from './vis_definition';
 import { ConfigSchema } from '../config';
 import { scriptVisRenderer } from './expression/renderer';
 import { createScriptVisFn } from './expression/fn';
-import { DataPublicPluginStart } from '../../data/public';
 
 /** @internal */
 export interface ScriptVisPluginSetupDependencies {
@@ -48,6 +48,7 @@ export class ScriptVisPlugin
         core.getStartServices().then(([coreStart, plugins]) => ({
           data: plugins.data,
           validateUrl,
+          nonce: core.injectedMetadata.getCsp().nonce,
         }))
       )
     );

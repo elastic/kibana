@@ -7,7 +7,7 @@
  */
 
 import { Filter, Query } from '@kbn/es-query';
-import { TimeRange } from '../../data/common';
+import { TimeRange } from '@kbn/data-plugin/common';
 
 export interface Arguments {
   script: string;

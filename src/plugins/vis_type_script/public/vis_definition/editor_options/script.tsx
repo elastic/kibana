@@ -11,8 +11,8 @@ import { EuiPanel, EuiTitle, EuiLink, EuiFlexGroup, EuiFlexItem, EuiText } from 
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { monaco as monacoEditor } from '@kbn/monaco';
-import { CodeEditor } from '../../../../kibana_react/public';
-import type { VisEditorOptionsProps } from '../../../../visualizations/public';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import type { VisParams } from '../../types';
 
 import './script.scss';

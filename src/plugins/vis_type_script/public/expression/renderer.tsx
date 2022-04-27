@@ -8,13 +8,13 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { IExternalUrl } from 'kibana/public';
-import type { ExpressionRenderDefinition } from '../../../expressions';
-import { VisualizationContainer } from '../../../visualizations/public';
+import { IExternalUrl } from '@kbn/core/public';
+import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin';
+import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { VisParams, VisSearchContext } from '../types';
 import { ScriptRenderer } from '../renderer';
 import { VisTypeScriptKibanaApi } from '../kibana_api';
-import { DataPublicPluginStart } from '../../../data/public';
 
 export interface RenderValue {
   visType: 'script';
@@ -23,7 +23,12 @@ export interface RenderValue {
 }
 
 export const scriptVisRenderer: (
-  getDeps: () => Promise<{ data: DataPublicPluginStart; validateUrl: IExternalUrl['validateUrl'] }> // TODO: not sure if this is correct way of passing deps to vis renderer
+  // TODO: not sure if this is correct way of passing deps to vis renderer
+  getDeps: () => Promise<{
+    data: DataPublicPluginStart;
+    validateUrl: IExternalUrl['validateUrl'];
+    nonce: string;
+  }>
 ) => ExpressionRenderDefinition<RenderValue> = (getDeps) => ({
   name: 'script_vis',
   displayName: 'script-based visualization',
@@ -43,6 +48,7 @@ export const scriptVisRenderer: (
           dependencyUrls={visParams.dependencyUrls}
           kibanaApi={visTypeScriptKibanaApi}
           validateUrl={deps.validateUrl}
+          nonce={deps.nonce}
         />
       </VisualizationContainer>,
       domNode

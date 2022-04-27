@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { VisToExpressionAst } from '../../../visualizations/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
-import type { ExpressionFunctionDefinition, Render } from '../../../expressions/public';
+import { VisToExpressionAst } from '@kbn/visualizations-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import type { ExpressionFunctionDefinition, Render } from '@kbn/expressions-plugin/public';
 import type { RenderValue } from './renderer';
 import { VisParams } from '../types';
 

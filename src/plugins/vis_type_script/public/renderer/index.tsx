@@ -11,23 +11,18 @@ import { createEndpoint, fromIframe } from '@remote-ui/rpc';
 
 import './index.scss';
 import type { SearchResponse, AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
-import type { SearchRequest } from 'src/plugins/data/common';
-import { IExternalUrl } from 'kibana/public';
+import type { SearchRequest } from '@kbn/data-plugin/common';
+import { IExternalUrl } from '@kbn/core/public';
 import { SearchOptions, VisTypeScriptKibanaApi } from '../kibana_api';
 
 export const KIBANA_API_CONSTANT_NAME = 'KIBANA';
 
-const getSandboxDocument = (script: string, dependencies: string[]) => {
-  // may be possible to remove this iframe-level nonce once we can use the top-level CSP
-  // see https://github.com/elastic/kibana/issues/101579 for status tracking
-  const nonce = crypto.randomUUID();
-  const d3Url = 'https://unpkg.com/d3@3.4.0/d3.min.js';
-
+const getSandboxDocument = (script: string, dependencies: string[], nonce: string) => {
   return `
     <!DOCTYPE html>
     <html>
       <head>
-        <meta http-equiv="content-security-policy" content="default-src none; script-src 'nonce-${nonce}' ${d3Url}">
+        <meta http-equiv="content-security-policy" content="default-src none; script-src 'nonce-${nonce}'">
         ${dependencies
           .map((dependency) => `<script nonce="${nonce}">${dependency}</script>`)
           .join('')}
@@ -100,16 +95,19 @@ export const ScriptRenderer: React.FunctionComponent<{
   dependencyUrls: string[];
   kibanaApi: VisTypeScriptKibanaApi;
   validateUrl: IExternalUrl['validateUrl'];
+  nonce: string;
 }> = ({
   script: visualizationScript,
   dependencyUrls,
   kibanaApi,
   validateUrl,
+  nonce,
 }: {
   script: string;
   dependencyUrls: string[];
   kibanaApi: VisTypeScriptKibanaApi;
   validateUrl: IExternalUrl['validateUrl'];
+  nonce: string;
 }) => {
   const iframeRef = React.useRef<HTMLIFrameElement | null>(null);
 
@@ -144,8 +142,8 @@ export const ScriptRenderer: React.FunctionComponent<{
   }, [dependencyUrls, validateUrl]);
 
   const sandboxDocument = useMemo(
-    () => getSandboxDocument(visualizationScript, dependencies),
-    [visualizationScript, dependencies]
+    () => getSandboxDocument(visualizationScript, dependencies, nonce),
+    [visualizationScript, dependencies, nonce]
   );
 
   return (

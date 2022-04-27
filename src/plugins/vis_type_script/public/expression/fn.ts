@@ -7,10 +7,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition, Render } from '../../../expressions/public';
+import type { ExpressionFunctionDefinition, Render } from '@kbn/expressions-plugin/public';
+import { ExpressionValueSearchContext } from '@kbn/data-plugin/common';
 import type { Arguments } from '../types';
 import type { RenderValue } from './renderer';
-import { ExpressionValueSearchContext } from '../../../data/common';
 
 type ScriptVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
   'scriptVis',

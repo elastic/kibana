@@ -61,6 +61,7 @@ import { DeprecationsServiceStart } from './deprecations';
 import type { ThemeServiceSetup, ThemeServiceStart } from './theme';
 import { ExecutionContextSetup, ExecutionContextStart } from './execution_context';
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from './analytics';
+import type { InjectedMetadataSetup } from './injected_metadata';
 
 export type {
   PackageInfo,
@@ -251,6 +252,7 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
    * */
   injectedMetadata: {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
+    getCsp: () => ReturnType<InjectedMetadataSetup['getCspConfig']>;
   };
   /** {@link ThemeServiceSetup} */
   theme: ThemeServiceSetup;

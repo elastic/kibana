@@ -8,7 +8,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { lastValueFrom } from 'rxjs';
-import { DataPublicPluginStart } from '../../../data/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { VisSearchContext } from '../types';
 
 export interface VisTypeScriptKibanaApiDeps {

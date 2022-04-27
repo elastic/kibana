@@ -8,9 +8,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { IExternalUrl } from 'kibana/public';
-import { DefaultEditorSize } from '../../../vis_default_editor/public';
-import { VisGroups, VisTypeDefinition } from '../../../visualizations/public';
+import type { IExternalUrl } from '@kbn/core/public';
+import { DefaultEditorSize } from '@kbn/vis-default-editor-plugin/public';
+import { VisGroups, VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import { ScriptOptions } from './editor_options/script';
 import { getSettingsOptions } from './editor_options/settings_lazy';
 import { toExpressionAst } from '../expression/to_ast';

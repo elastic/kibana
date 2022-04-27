@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { randomBytes } from 'crypto';
 import { RequestHandlerContext } from '..';
 
 import { CoreContext } from '../core_context';
@@ -93,7 +94,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
     return {
       async renderCoreApp(options: HttpResourcesRenderOptions = {}) {
         const apmConfig = getApmConfig(request.url.pathname);
-        const nonce = String(Math.random());
+        const nonce = randomBytes(16).toString('hex');
         const { uiSettings } = await context.core;
         const body = await deps.rendering.render(request, uiSettings.client, {
           isAnonymousPage: false,
