@@ -10,7 +10,7 @@ steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution and Plugins
     agents:
-      queue: n2-20-16g
+      queue: t2d-16
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 60
