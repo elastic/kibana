@@ -279,7 +279,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
 
   return {
     splitSeriesAccessors: layer.splitAccessor ? [layer.splitAccessor] : [],
-    stackAccessors: isStacked && layer.xAccessor ? [layer.xAccessor] : [],
+    stackAccessors: isStacked ? [layer.xAccessor as string] : [],
     id: layer.splitAccessor ? `${layer.splitAccessor}-${accessor}` : `${accessor}`,
     xAccessor: layer.xAccessor || 'unifiedX',
     yAccessors: [accessor],
