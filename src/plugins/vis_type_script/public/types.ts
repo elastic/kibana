@@ -11,10 +11,12 @@ import { TimeRange } from '../../data/common';
 
 export interface Arguments {
   script: string;
+  dependencyUrls: string[];
 }
 
 export interface VisParams {
   script: Arguments['script'];
+  dependencyUrls: Arguments['dependencyUrls'];
 }
 
 export interface VisSearchContext {

@@ -32,6 +32,7 @@ export const scriptVisDefinition: VisTypeDefinition<VisParams> = {
   visConfig: {
     defaults: {
       script: DEFAULT_VIS,
+      dependencyUrls: ['https://unpkg.com/d3@3.4.0/d3.min.js'],
     },
   },
   editorConfig: {
@@ -43,13 +44,13 @@ export const scriptVisDefinition: VisTypeDefinition<VisParams> = {
         }),
         editor: ScriptOptions,
       },
-      // {
-      //   name: 'options',
-      //   title: i18n.translate('visTypeMarkdown.tabs.optionsText', {
-      //     defaultMessage: 'Options',
-      //   }),
-      //   editor: SettingsOptions,
-      // },
+      {
+        name: 'dependencies',
+        title: i18n.translate('visTypeMarkdown.tabs.dependencies', {
+          defaultMessage: 'Dependencies',
+        }),
+        editor: SettingsOptions,
+      },
     ],
     enableAutoApply: true,
     defaultSize: DefaultEditorSize.LARGE,

@@ -29,10 +29,17 @@ export const createScriptVisFn = (): ScriptVisExpressionFunctionDefinition => ({
   args: {
     script: {
       types: ['string'],
-      aliases: ['_'],
       required: true,
-      help: i18n.translate('visTypeMarkdown.function.markdown.help', {
+      help: i18n.translate('visTypeScript.function.markdown.help', {
         defaultMessage: 'Visualization script',
+      }),
+    },
+    dependencyUrls: {
+      types: ['string'],
+      multi: true,
+      required: true,
+      help: i18n.translate('visTypeScript.function.markdown.help', {
+        defaultMessage: 'List of script dependencies',
       }),
     },
   },
@@ -44,6 +51,7 @@ export const createScriptVisFn = (): ScriptVisExpressionFunctionDefinition => ({
         visType: 'script',
         visParams: {
           script: args.script,
+          dependencyUrls: args.dependencyUrls,
         },
         visSearchContext: {
           timeRange: input?.timeRange,

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createEndpoint, fromIframe } from '@remote-ui/rpc';
 
 import './index.scss';
@@ -81,7 +81,7 @@ const getSandboxDocument = (script: string) => {
           window.addEventListener('resize', () => onResize(window.innerWidth, window.innerHeight));
         </script>
 
-        <script nonce="${nonce}">window.addEventListener('load', async () => {${script}})</script>
+        <script type="module" nonce="${nonce}">window.addEventListener('load', async () => {${script}})</script>
       </head>
       <body></body>
     <html>
@@ -90,17 +90,20 @@ const getSandboxDocument = (script: string) => {
 
 export const ScriptRenderer: React.FunctionComponent<{
   script: string;
+  dependencyUrls: string[];
   kibanaApi: VisTypeScriptKibanaApi;
 }> = ({
   script: visualizationScript,
+  dependencyUrls,
   kibanaApi,
 }: {
   script: string;
+  dependencyUrls: string[];
   kibanaApi: VisTypeScriptKibanaApi;
 }) => {
   const iframeRef = React.useRef<HTMLIFrameElement | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!iframeRef.current) throw new Error('Iframe init error');
     const iframeEl = iframeRef.current;
     const endpoint = createEndpoint<{

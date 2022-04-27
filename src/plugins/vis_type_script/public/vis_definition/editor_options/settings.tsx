@@ -7,13 +7,70 @@
  */
 
 import React from 'react';
-import { EuiPanel } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 
 import type { VisEditorOptionsProps } from '../../../../visualizations/public';
 import type { VisParams } from '../../types';
 
-function SettingsOptions({ stateParams, setValue }: VisEditorOptionsProps<VisParams>) {
-  return <EuiPanel paddingSize="s">Foo Options</EuiPanel>;
+function SettingsOptions({
+  stateParams: { dependencyUrls },
+  setValue,
+}: VisEditorOptionsProps<VisParams>) {
+  const setDependencyUrls = (newDependencyUrls: string[]) =>
+    setValue('dependencyUrls', newDependencyUrls);
+
+  const updateNthDependency = (n: number, newValue: string) => {
+    const newDependencies = [...dependencyUrls];
+    newDependencies[n] = newValue;
+    setDependencyUrls(newDependencies);
+  };
+
+  const removeNthDependency = (n: number) => {
+    setDependencyUrls(dependencyUrls.filter((_, index) => index !== n));
+  };
+
+  const addDependency = () => {
+    setDependencyUrls([...dependencyUrls, '']);
+  };
+
+  return (
+    <EuiPanel paddingSize="s">
+      <EuiTitle size="xs">
+        <h2>Dependencies</h2>
+      </EuiTitle>
+      <EuiForm component="form">
+        {dependencyUrls.map((url: string, index: number) => (
+          <EuiFormRow key={index} fullWidth>
+            <EuiFieldText
+              fullWidth
+              value={url}
+              onChange={(event) => updateNthDependency(index, event.target.value)}
+              append={
+                <EuiButtonIcon
+                  iconType="crossInACircleFilled"
+                  color="text"
+                  onClick={() => removeNthDependency(index)}
+                />
+              }
+            />
+          </EuiFormRow>
+        ))}
+      </EuiForm>
+      <EuiSpacer size="m" />
+      <EuiButton size="s" fullWidth iconType="listAdd" onClick={addDependency}>
+        Add dependency
+      </EuiButton>
+    </EuiPanel>
+  );
 }
 
 // default export required for React.Lazy

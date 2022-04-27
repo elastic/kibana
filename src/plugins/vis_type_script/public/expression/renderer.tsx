@@ -37,7 +37,11 @@ export const scriptVisRenderer: (
 
     render(
       <VisualizationContainer className="scriptVis" handlers={handlers}>
-        <ScriptRenderer script={visParams.script} kibanaApi={visTypeScriptKibanaApi} />
+        <ScriptRenderer
+          script={visParams.script}
+          dependencyUrls={visParams.dependencyUrls}
+          kibanaApi={visTypeScriptKibanaApi}
+        />
       </VisualizationContainer>,
       domNode
     );
