@@ -120,7 +120,6 @@ export interface DataLayerArgs {
   isPercentage: boolean;
   isStacked: boolean;
   isHorizontal: boolean;
-  // palette will always be set on the expression
   palette: PaletteOutput;
   yConfig?: YConfigResult[];
 }
@@ -143,9 +142,7 @@ export interface ExtendedDataLayerArgs {
   isPercentage: boolean;
   isStacked: boolean;
   isHorizontal: boolean;
-  // palette will always be set on the expression
   palette: PaletteOutput;
-  // palette will always be set on the expression
   yConfig?: YConfigResult[];
   table?: Datatable;
 }
@@ -375,7 +372,7 @@ export type LayeredXyVisFn = ExpressionFunctionDefinition<
   typeof LAYERED_XY_VIS,
   Datatable,
   LayeredXYArgs,
-  XYRender
+  Promise<XYRender>
 >;
 
 export type DataLayerFn = ExpressionFunctionDefinition<

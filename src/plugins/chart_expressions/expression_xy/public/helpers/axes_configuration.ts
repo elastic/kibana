@@ -11,7 +11,6 @@ import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plu
 import { FormatFactory } from '../types';
 import {
   CommonXYDataLayerConfig,
-  CommonXYReferenceLineLayerConfig,
   ExtendedYConfigResult,
   ExtendedYConfig,
   YAxisConfig,
@@ -50,10 +49,7 @@ export function isFormatterCompatible(
   return formatter1.id === formatter2.id;
 }
 
-export function groupAxesByType(
-  layers: Array<CommonXYDataLayerConfig | CommonXYReferenceLineLayerConfig>,
-  axes?: YAxisConfig[]
-) {
+export function groupAxesByType(layers: CommonXYDataLayerConfig[], axes?: YAxisConfig[]) {
   const series: AxesSeries = {
     auto: [],
     left: [],
@@ -161,7 +157,7 @@ function axisGlobalConfig(position: Position, axes?: YAxisConfig[]) {
 }
 
 export function getAxesConfiguration(
-  layers: Array<CommonXYDataLayerConfig | CommonXYReferenceLineLayerConfig>,
+  layers: CommonXYDataLayerConfig[],
   shouldRotate: boolean,
   axes?: YAxisConfig[],
   formatFactory?: FormatFactory

@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { WithLayerId } from '../types';
+import { LayerTypes } from '../constants';
+import { CommonXYDataLayerConfig, CommonXYLayerConfig, WithLayerId } from '../types';
 
 function isWithLayerId<T>(layer: T): layer is T & WithLayerId {
   return (layer as T & WithLayerId).layerId ? true : false;
@@ -24,3 +25,9 @@ export function appendLayerIds<T>(
       layerId: isWithLayerId(l) ? l.layerId : generateLayerId(keyword, index),
     }));
 }
+
+export const isDataLayer = (layer: CommonXYLayerConfig): layer is CommonXYDataLayerConfig =>
+  layer.layerType === LayerTypes.DATA || !layer.layerType;
+
+export const getDataLayers = (layers: CommonXYLayerConfig[]) =>
+  (layers || []).filter((layer): layer is CommonXYDataLayerConfig => isDataLayer(layer));

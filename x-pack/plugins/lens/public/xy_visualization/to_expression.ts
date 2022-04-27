@@ -10,7 +10,7 @@ import { ScaleType } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
 
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import type { YAxisConfig } from '@kbn/expression-xy-plugin/common';
+import type { YAxisConfig, AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import {
   State,
@@ -299,7 +299,7 @@ export const buildExpression = (
           valueLabels: [state?.valueLabels || 'hide'],
           hideEndzones: [state?.hideEndzones || false],
           valuesInLegend: [state?.valuesInLegend || false],
-          axes: [...axesToExpression(axes)],
+          axes: [...axesToExpression(axes, validDataLayers)],
           xAxisConfig: [
             {
               type: 'expression',
@@ -354,7 +354,10 @@ const buildTableExpression = (datasourceExpression: Ast): ExpressionAstExpressio
   chain: [{ type: 'function', function: 'kibana', arguments: {} }, ...datasourceExpression.chain],
 });
 
-const axesToExpression = (axes: YAxisConfig[]): Ast[] => {
+const axesToExpression = (
+  axes: YAxisConfig[],
+  validDataLayers: ValidXYDataLayerConfig[]
+): Ast[] => {
   return axes.map((axis) => ({
     type: 'expression',
     chain: [
@@ -364,26 +367,7 @@ const axesToExpression = (axes: YAxisConfig[]): Ast[] => {
         arguments: {
           id: axis.id ? [axis.id] : [],
           position: axis.position ? [axis.position] : [],
-          extent: axis.extent
-            ? [
-                {
-                  type: 'expression',
-                  chain: [
-                    {
-                      type: 'function',
-                      function: 'axisExtentConfig',
-                      arguments: {
-                        mode: [axis.extent?.mode || 'full'],
-                        lowerBound:
-                          axis.extent?.lowerBound !== undefined ? [axis.extent?.lowerBound] : [],
-                        upperBound:
-                          axis.extent?.upperBound !== undefined ? [axis.extent?.upperBound] : [],
-                      },
-                    },
-                  ],
-                },
-              ]
-            : [],
+          extent: axis.extent ? [axisExtentConfigToExpression(axis.extent, validDataLayers)] : [],
           showTitle: axis.showTitle ? [axis.showTitle] : [],
           title: axis.title ? [axis.title] : [],
           showLabels: axis.showLabels ? [axis.showLabels] : [],
@@ -582,6 +566,28 @@ const extendedYConfigToExpression = (
               ? [yConfig.iconPosition || 'auto']
               : ['auto'],
           textVisibility: [yConfig.textVisibility || false],
+        },
+      },
+    ],
+  };
+};
+
+const axisExtentConfigToExpression = (
+  extent: AxisExtentConfig | undefined,
+  layers: ValidXYDataLayerConfig[]
+): Ast => {
+  const hasLine = layers.filter(({ seriesType }) => seriesType.includes('line')).length > 0;
+  const mode = !extent?.mode || (!hasLine && extent?.mode === 'dataBounds') ? 'full' : extent.mode;
+  return {
+    type: 'expression',
+    chain: [
+      {
+        type: 'function',
+        function: 'axisExtentConfig',
+        arguments: {
+          mode: [mode],
+          lowerBound: extent?.lowerBound !== undefined ? [extent?.lowerBound] : [],
+          upperBound: extent?.upperBound !== undefined ? [extent?.upperBound] : [],
         },
       },
     ],

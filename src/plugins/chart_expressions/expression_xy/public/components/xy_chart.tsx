@@ -40,7 +40,9 @@ import {
   getDataLayers,
   AxisConfiguration,
   getAxisPosition,
-  getAreAlreadyFormattedLayersInfo,
+  getFormattedTablesByLayers,
+} from '../helpers';
+import {
   getFilteredLayers,
   getReferenceLayers,
   isDataLayer,
@@ -171,11 +173,11 @@ export function XYChart({
   const xAxisColumn = dataLayers[0]?.table.columns.find(({ id }) => id === dataLayers[0].xAccessor);
 
   const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.meta?.params);
-  const areLayersAlreadyFormatted = getAreAlreadyFormattedLayersInfo(dataLayers, formatFactory);
+  const formattedDatatables = getFormattedTablesByLayers(dataLayers, formatFactory);
 
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
   const safeXAccessorLabelRenderer = (value: unknown): string =>
-    xAxisColumn && areLayersAlreadyFormatted[dataLayers[0]?.layerId]?.[xAxisColumn.id]
+    xAxisColumn && formattedDatatables[dataLayers[0]?.layerId]?.formattedColumns[xAxisColumn.id]
       ? String(value)
       : String(xAxisFormatter.convert(value));
 
@@ -185,12 +187,7 @@ export function XYChart({
     filteredLayers.some((layer) => isDataLayer(layer) && layer.splitAccessor);
   const shouldRotate = isHorizontalChart(dataLayers);
 
-  const yAxesConfiguration = getAxesConfiguration(
-    filteredLayers,
-    shouldRotate,
-    axes,
-    formatFactory
-  );
+  const yAxesConfiguration = getAxesConfiguration(dataLayers, shouldRotate, axes, formatFactory);
 
   const xTitle = xAxisConfig?.title || (xAxisColumn && xAxisColumn.name);
 
@@ -201,8 +198,8 @@ export function XYChart({
     filteredBarLayers.some((layer) => layer.accessors.length > 1) ||
     filteredBarLayers.some((layer) => isDataLayer(layer) && layer.splitAccessor);
 
-  const isTimeViz = Boolean(filteredLayers.every((l) => isDataLayer(l) && l.xScaleType === 'time'));
-  const isHistogramViz = filteredLayers.every((l) => isDataLayer(l) && l.isHistogram);
+  const isTimeViz = Boolean(dataLayers.every((l) => l.xScaleType === 'time'));
+  const isHistogramViz = dataLayers.every((l) => l.isHistogram);
 
   const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
     dataLayers,
@@ -361,13 +358,15 @@ export function XYChart({
 
     const xColumn = table.columns.find((col) => col.id === layer.xAccessor);
     const currentXFormatter =
-      layer.xAccessor && areLayersAlreadyFormatted[layer.layerId]?.[layer.xAccessor] && xColumn
+      layer.xAccessor &&
+      formattedDatatables[layer.layerId]?.formattedColumns[layer.xAccessor] &&
+      xColumn
         ? formatFactory(xColumn.meta.params)
         : xAxisFormatter;
 
     const rowIndex = table.rows.findIndex((row) => {
       if (layer.xAccessor) {
-        if (areLayersAlreadyFormatted[layer.layerId]?.[layer.xAccessor]) {
+        if (formattedDatatables[layer.layerId]?.formattedColumns[layer.xAccessor]) {
           // stringify the value to compare with the chart value
           return currentXFormatter.convert(row[layer.xAccessor]) === xyGeometry.x;
         }
@@ -392,7 +391,7 @@ export function XYChart({
       points.push({
         row: table.rows.findIndex((row) => {
           if (layer.splitAccessor) {
-            if (areLayersAlreadyFormatted[layer.layerId]?.[layer.splitAccessor]) {
+            if (formattedDatatables[layer.layerId]?.formattedColumns[layer.splitAccessor]) {
               return splitFormatter.convert(row[layer.splitAccessor]) === pointValue;
             }
             return row[layer.splitAccessor] === pointValue;
@@ -526,7 +525,7 @@ export function XYChart({
         onElementClick={interactive ? clickHandler : undefined}
         legendAction={
           interactive
-            ? getLegendAction(dataLayers, onClickValue, formatFactory, areLayersAlreadyFormatted)
+            ? getLegendAction(dataLayers, onClickValue, formatFactory, formattedDatatables)
             : undefined
         }
         showLegendExtra={isHistogramViz && valuesInLegend}
@@ -616,7 +615,7 @@ export function XYChart({
           emphasizeFitting={emphasizeFitting}
           yAxesConfiguration={yAxesConfiguration}
           shouldShowValueLabels={shouldShowValueLabels}
-          areLayersAlreadyFormatted={areLayersAlreadyFormatted}
+          formattedDatatables={formattedDatatables}
           chartHasMoreThanOneBarSeries={chartHasMoreThanOneBarSeries}
         />
       )}
