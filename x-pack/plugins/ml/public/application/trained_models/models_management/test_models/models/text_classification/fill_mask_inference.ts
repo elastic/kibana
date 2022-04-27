@@ -15,12 +15,16 @@ import { getFillMaskOutputComponent } from './fill_mask_output';
 const MASK = '[MASK]';
 
 export class FillMaskInference extends InferenceBase<TextClassificationResponse> {
+  // @ts-expect-error model type is wrong
+  private numTopClasses = this.model.inference_config?.fill_mask?.num_top_classes || 5;
+
   public async infer() {
     try {
       this.setRunning();
       const inputText = this.inputText$.value;
       const payload = {
         docs: { [this.inputField]: inputText },
+        inference_config: { fill_mask: { num_top_classes: this.numTopClasses } },
       };
       const resp = (await this.trainedModelsApi.inferTrainedModel(
         this.model.model_id,
