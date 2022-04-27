@@ -30,6 +30,7 @@ interface ConstructorOptions {
   logger: Logger;
   isWriteEnabled: boolean;
   disabledRegistrationContexts: string[];
+  abortSignal?: AbortSignal;
 }
 
 export type IResourceInstaller = PublicMethodsOf<ResourceInstaller>;
@@ -55,17 +56,22 @@ export class ResourceInstaller {
 
       const throwTimeoutException = (): Promise<void> => {
         return new Promise((resolve, reject) => {
-          setTimeout(() => {
+          const timeoutId = setTimeout(() => {
             const msg = `Timeout: it took more than ${INSTALLATION_TIMEOUT}ms`;
             reject(new Error(msg));
           }, INSTALLATION_TIMEOUT);
+
+          this.options.abortSignal?.addEventListener('abort', () => {
+            clearTimeout(timeoutId);
+            const msg = 'Server is stopping; must stop all async operations';
+            reject(new Error(msg));
+          });
         });
       };
 
       await Promise.race([installResources(), throwTimeoutException()]);
     } catch (e) {
       this.options.logger.error(e);
-
       const reason = e?.message || 'Unknown reason';
       throw new Error(`Failure installing ${resources}. ${reason}`);
     }
@@ -386,7 +392,6 @@ export class ResourceInstaller {
   private async createOrUpdateLifecyclePolicy(policy: estypes.IlmPutLifecycleRequest) {
     const { logger, getClusterClient } = this.options;
     const clusterClient = await getClusterClient();
-
     logger.debug(`Installing lifecycle policy ${policy.name}`);
     return clusterClient.ilm.putLifecycle(policy);
   }

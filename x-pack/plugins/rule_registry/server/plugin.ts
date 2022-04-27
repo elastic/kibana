@@ -81,13 +81,6 @@ export class RuleRegistryPlugin
   ): RuleRegistryPluginSetupContract {
     const { logger, kibanaVersion } = this;
 
-    const startDependencies = core.getStartServices().then(([coreStart, pluginStart]) => {
-      return {
-        core: coreStart,
-        ...pluginStart,
-      };
-    });
-
     this.security = plugins.security;
 
     this.ruleDataService = new RuleDataService({
@@ -97,13 +90,17 @@ export class RuleRegistryPlugin
       isWriteEnabled: this.config.write.enabled,
       isWriterCacheEnabled: this.config.write.cache.enabled,
       getClusterClient: async () => {
-        const deps = await startDependencies;
-        return deps.core.elasticsearch.client.asInternalUser;
+        // FIXME if we stop kibana server right after setup() (aka without starting it)
+        // then this promise will never resolve, and it will leave some async code waiting for core start services
+        // ideally, we should NOT require startServices at setup() time
+        const [coreStart] = await core.getStartServices();
+        return coreStart.elasticsearch.client.asInternalUser;
       },
     });
 
     this.ruleDataService.initializeService();
 
+    // TODO could we move this inside start() ???
     core.getStartServices().then(([_, depsStart]) => {
       const ruleRegistrySearchStrategy = ruleRegistrySearchStrategyProvider(
         depsStart.data,
@@ -171,5 +168,7 @@ export class RuleRegistryPlugin
     };
   };
 
-  public stop() {}
+  public stop() {
+    this.ruleDataService?.stop();
+  }
 }

@@ -7,7 +7,7 @@
 
 import { Either, isLeft, left, right } from 'fp-ts/lib/Either';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
-
+import { AbortController } from 'abort-controller';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { INDEX_PREFIX } from '../config';
@@ -72,6 +72,11 @@ export interface IRuleDataService {
    * Note: features are used in RBAC.
    */
   findIndicesByFeature(featureId: ValidFeatureId, dataset?: Dataset): IndexInfo[];
+
+  /**
+   * Stops any async operations
+   */
+  stop(): void;
 }
 
 // TODO: This is a leftover. Remove its usage from the "observability" plugin and delete it.
@@ -92,16 +97,19 @@ export class RuleDataService implements IRuleDataService {
   private readonly resourceInstaller: IResourceInstaller;
   private installCommonResources: Promise<Either<Error, 'ok'>>;
   private isInitialized: boolean;
+  private abortController: AbortController;
 
   constructor(private readonly options: ConstructorOptions) {
     this.indicesByBaseName = new Map();
     this.indicesByFeatureId = new Map();
+    this.abortController = new AbortController();
     this.resourceInstaller = new ResourceInstaller({
       getResourceName: (name) => this.getResourceName(name),
       getClusterClient: options.getClusterClient,
       logger: options.logger,
       disabledRegistrationContexts: options.disabledRegistrationContexts,
       isWriteEnabled: options.isWriteEnabled,
+      abortSignal: this.abortController.signal,
     });
 
     this.installCommonResources = Promise.resolve(right('ok'));
@@ -217,5 +225,9 @@ export class RuleDataService implements IRuleDataService {
   public findIndicesByFeature(featureId: ValidFeatureId, dataset?: Dataset): IndexInfo[] {
     const foundIndices = this.indicesByFeatureId.get(featureId) ?? [];
     return dataset ? foundIndices.filter((i) => i.indexOptions.dataset === dataset) : foundIndices;
+  }
+
+  public stop() {
+    this.abortController.abort();
   }
 }

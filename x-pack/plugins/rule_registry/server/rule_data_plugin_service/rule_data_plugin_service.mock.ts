@@ -17,6 +17,7 @@ export const ruleDataServiceMock = {
     initializeIndex: jest.fn(),
     findIndexByName: jest.fn(),
     findIndicesByFeature: jest.fn(),
+    stop: jest.fn(),
   }),
 };
 
