@@ -55,8 +55,10 @@ export const getXyChartRenderer = ({
     };
     const deps = await getStartDeps();
 
-    const { XYChartReportable } = await import('../components/xy_chart');
-    const { calculateMinInterval } = await import('../helpers/interval');
+    const [{ XYChartReportable }, { calculateMinInterval }] = await Promise.all([
+      import('../components/xy_chart'),
+      import('../helpers/interval'),
+    ]);
 
     ReactDOM.render(
       <KibanaThemeProvider theme$={deps.kibanaTheme.theme$}>

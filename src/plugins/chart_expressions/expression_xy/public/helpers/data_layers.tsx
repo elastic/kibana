@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import {
   FieldFormat,
   FieldFormatParams,
+  IFieldFormat,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin';
@@ -85,12 +86,12 @@ const isPrimitive = (value: unknown): boolean => value != null && typeof value !
 export const getFormattedRow = (
   row: Datatable['rows'][number],
   columns: Datatable['columns'],
-  formatFactory: FormatFactory,
+  columnsFormatters: Record<string, IFieldFormat>,
   xAccessor: string | undefined,
   xScaleType: XScaleType
 ): { row: Datatable['rows'][number]; formattedColumns: Record<string, true> } =>
   columns.reduce(
-    (formattedInfo, { id, meta }) => {
+    (formattedInfo, { id }) => {
       const record = formattedInfo.row[id];
       if (
         record != null &&
@@ -98,7 +99,7 @@ export const getFormattedRow = (
         (!isPrimitive(record) || (id === xAccessor && xScaleType === 'ordinal'))
       ) {
         return {
-          row: { ...formattedInfo.row, [id]: formatFactory(meta.params)!.convert(record) },
+          row: { ...formattedInfo.row, [id]: columnsFormatters[id]!.convert(record) },
           formattedColumns: { ...formattedInfo.formattedColumns, [id]: true },
         };
       }
@@ -113,6 +114,11 @@ export const getFormattedTable = (
   xAccessor: string | undefined,
   xScaleType: XScaleType
 ): { table: Datatable; formattedColumns: Record<string, true> } => {
+  const columnsFormatters = table.columns.reduce<Record<string, IFieldFormat>>(
+    (formatters, { id, meta }) => ({ ...formatters, [id]: formatFactory(meta.params) }),
+    {}
+  );
+
   const formattedTableInfo = table.rows.reduce<{
     rows: Datatable['rows'];
     formattedColumns: Record<string, true>;
@@ -121,7 +127,7 @@ export const getFormattedTable = (
       const formattedRowInfo = getFormattedRow(
         row,
         table.columns,
-        formatFactory,
+        columnsFormatters,
         xAccessor,
         xScaleType
       );
@@ -279,7 +285,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
 
   return {
     splitSeriesAccessors: layer.splitAccessor ? [layer.splitAccessor] : [],
-    stackAccessors: isStacked && layer.xAccessor ? [layer.xAccessor] : [],
+    stackAccessors: isStacked ? [layer.xAccessor as string] : [],
     id: layer.splitAccessor ? `${layer.splitAccessor}-${accessor}` : `${accessor}`,
     xAccessor: layer.xAccessor || 'unifiedX',
     yAccessors: [accessor],
