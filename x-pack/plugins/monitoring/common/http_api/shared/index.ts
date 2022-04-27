@@ -7,6 +7,8 @@
 
 export * from './ccs';
 export * from './cluster';
+export * from './literal_value';
 export * from './pagination';
+export * from './query_string_boolean';
 export * from './sorting';
 export * from './time_range';

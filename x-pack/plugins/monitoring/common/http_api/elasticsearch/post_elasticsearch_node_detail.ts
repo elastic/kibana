@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { ccsRT, clusterUuidRT, timeRangeRT } from '../shared';
+import { ccsRT, clusterUuidRT, createLiteralValueFromUndefinedRT, timeRangeRT } from '../shared';
 
 export const postElasticsearchNodeDetailRequestParamsRT = rt.type({
   clusterUuid: clusterUuidRT,
@@ -19,7 +19,7 @@ export const postElasticsearchNodeDetailRequestPayloadRT = rt.intersection([
     showSystemIndices: rt.boolean, // show/hide system indices in shard allocation table
   }),
   rt.type({
-    is_advanced: rt.boolean,
+    is_advanced: rt.union([rt.boolean, createLiteralValueFromUndefinedRT(false)]),
     timeRange: timeRangeRT,
   }),
 ]);

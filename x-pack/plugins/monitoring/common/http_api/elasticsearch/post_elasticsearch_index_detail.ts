@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { ccsRT, clusterUuidRT, timeRangeRT } from '../shared';
+import { ccsRT, clusterUuidRT, createLiteralValueFromUndefinedRT, timeRangeRT } from '../shared';
 
 export const postElasticsearchIndexDetailRequestParamsRT = rt.type({
   clusterUuid: clusterUuidRT,
@@ -18,7 +18,7 @@ export const postElasticsearchIndexDetailRequestPayloadRT = rt.intersection([
     ccs: ccsRT,
   }),
   rt.type({
-    is_advanced: rt.boolean,
+    is_advanced: rt.union([rt.boolean, createLiteralValueFromUndefinedRT(false)]),
     timeRange: timeRangeRT,
   }),
 ]);
