@@ -592,19 +592,23 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         onSelectedStatusChange={setSelectedStatus}
         showUpgradeable={showUpgradeable}
         onShowUpgradeableChange={setShowUpgradeable}
+        totalAgents={totalAgents}
+        totalInactiveAgents={totalInactiveAgents}
+        selectionMode={selectionMode}
+        currentQuery={kuery}
+        selectedAgents={selectedAgents}
+        refreshAgents={() => fetchData()}
       />
       <EuiSpacer size="m" />
 
       {/* Agent total, bulk actions and status bar */}
       <AgentTableHeader
         showInactive={showInactive}
-        totalAgents={totalAgents}
-        totalInactiveAgents={totalInactiveAgents}
         agentStatus={agentsStatus}
+        totalAgents={totalAgents}
         selectableAgents={agents?.filter(isAgentSelectable).length || 0}
         selectionMode={selectionMode}
         setSelectionMode={setSelectionMode}
-        currentQuery={kuery}
         selectedAgents={selectedAgents}
         setSelectedAgents={(newAgents: Agent[]) => {
           if (tableRef?.current) {
@@ -612,7 +616,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             setSelectionMode('manual');
           }
         }}
-        refreshAgents={() => fetchData()}
       />
       <EuiSpacer size="s" />
 
