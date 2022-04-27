@@ -27,11 +27,12 @@ export const registerResolveRoute = (router: IRouter, { coreUsageData }: RouteDe
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { type, id } = req.params;
+      const { savedObjects } = await context.core;
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsResolve({ request: req }).catch(() => {});
 
-      const result = await context.core.savedObjects.client.resolve(type, id);
+      const result = await savedObjects.client.resolve(type, id);
       return res.ok({ body: result });
     })
   );
