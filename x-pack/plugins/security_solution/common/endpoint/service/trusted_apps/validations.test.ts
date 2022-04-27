@@ -574,7 +574,9 @@ describe('Executable filenames with wildcard PATHS', () => {
       hasSimpleExecutableName({
         os: OperatingSystem.WINDOWS,
         type: 'match',
-        value: 'c:\\folder\\one.exe',
+        // Long path below is on purpose due to an issue found in the field
+        value:
+          'C:\\ProgramData\\Package Cache\\sdjfhwojvmlowhnknblkm\\658945C6D1 992AD 576CCC0F43728A9 E60A8908A2\\658945C6D1992AD576CCC0F43728A9E60A8908A2\\Installers\\WimMountAdkSetupAmd64.exe',
       })
     ).toEqual(true);
   });
