@@ -218,7 +218,7 @@ export const getServiceNowConnector = () => ({
 });
 
 export const getServiceNowOAuthConnector = () => ({
-  name: 'ServiceNow Connector',
+  name: 'ServiceNow OAuth Connector',
   connector_type_id: '.servicenow',
   secrets: {
     clientSecret: 'xyz',
@@ -279,7 +279,7 @@ export const getResilientConnector = () => ({
 });
 
 export const getServiceNowSIRConnector = () => ({
-  name: 'ServiceNow Connector',
+  name: 'ServiceNow SIR Connector',
   connector_type_id: '.servicenow-sir',
   secrets: {
     username: 'admin',

@@ -49,8 +49,9 @@ export default ({ getService }: FtrProviderContext): void => {
       actionsRemover.add('default', resilientConnector.id, 'action', 'actions');
 
       const connectors = await getCaseConnectors({ supertest });
+      const sortedConnectors = connectors.sort((a, b) => a.name.localeCompare(b.name));
 
-      expect(connectors).to.eql([
+      expect(sortedConnectors).to.eql([
         {
           id: jiraConnector.id,
           actionTypeId: '.jira',
@@ -109,7 +110,7 @@ export default ({ getService }: FtrProviderContext): void => {
         {
           id: snOAuthConnector.id,
           actionTypeId: '.servicenow',
-          name: 'ServiceNow Connector',
+          name: 'ServiceNow OAuth Connector',
           config: {
             apiUrl: 'http://some.non.existent.com',
             usesTableApi: false,
@@ -126,7 +127,7 @@ export default ({ getService }: FtrProviderContext): void => {
         {
           id: sir.id,
           actionTypeId: '.servicenow-sir',
-          name: 'ServiceNow Connector',
+          name: 'ServiceNow SIR Connector',
           config: {
             apiUrl: 'http://some.non.existent.com',
             usesTableApi: false,
