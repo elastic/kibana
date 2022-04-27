@@ -109,8 +109,6 @@ export function Detail() {
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
   const services = useStartServices();
   const isCloud = !!services?.cloud?.cloudId;
-  const { createPackagePolicyMultiPageLayout: isExperimentalAddIntegrationPageEnabled } =
-    ExperimentalFeaturesService.get();
   const agentPolicyIdFromContext = getAgentPolicyId();
 
   // Package info state
@@ -280,8 +278,6 @@ export function Detail() {
         currentPath,
         integration,
         isCloud,
-        isExperimentalAddIntegrationPageEnabled,
-        isFirstTimeAgentUser,
         pkgkey,
       });
 
@@ -293,8 +289,6 @@ export function Detail() {
       history,
       integration,
       isCloud,
-      isExperimentalAddIntegrationPageEnabled,
-      isFirstTimeAgentUser,
       pathname,
       pkgkey,
       search,
