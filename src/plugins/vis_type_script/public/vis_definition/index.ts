@@ -8,15 +8,18 @@
 
 import { i18n } from '@kbn/i18n';
 
+import type { IExternalUrl } from 'kibana/public';
 import { DefaultEditorSize } from '../../../vis_default_editor/public';
 import { VisGroups, VisTypeDefinition } from '../../../visualizations/public';
 import { ScriptOptions } from './editor_options/script';
-import { SettingsOptions } from './editor_options/settings_lazy';
+import { getSettingsOptions } from './editor_options/settings_lazy';
 import { toExpressionAst } from '../expression/to_ast';
 import { VisParams } from '../types';
 import { DEFAULT_VIS } from './default_vis';
 
-export const scriptVisDefinition: VisTypeDefinition<VisParams> = {
+export const getScriptVisDefinition: (
+  validateUrl: IExternalUrl['validateUrl']
+) => VisTypeDefinition<VisParams> = (validateUrl: IExternalUrl['validateUrl']) => ({
   name: 'script',
   title: 'Script-based',
   isAccessible: true,
@@ -49,7 +52,7 @@ export const scriptVisDefinition: VisTypeDefinition<VisParams> = {
         title: i18n.translate('visTypeMarkdown.tabs.dependencies', {
           defaultMessage: 'Dependencies',
         }),
-        editor: SettingsOptions,
+        editor: getSettingsOptions(validateUrl),
       },
     ],
     enableAutoApply: true,
@@ -60,4 +63,4 @@ export const scriptVisDefinition: VisTypeDefinition<VisParams> = {
     showFilterBar: false,
   },
   inspectorAdapters: {},
-};
+});

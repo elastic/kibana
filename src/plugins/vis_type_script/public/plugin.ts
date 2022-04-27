@@ -10,7 +10,7 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../..
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 
-import { scriptVisDefinition } from './vis_definition';
+import { getScriptVisDefinition } from './vis_definition';
 import { ConfigSchema } from '../config';
 import { scriptVisRenderer } from './expression/renderer';
 import { createScriptVisFn } from './expression/fn';
@@ -41,12 +41,13 @@ export class ScriptVisPlugin
     core: CoreSetup<ScriptVisPluginStartDependencies>,
     { expressions, visualizations }: ScriptVisPluginSetupDependencies
   ) {
-    visualizations.createBaseVisualization(scriptVisDefinition);
+    const validateUrl = core.http.externalUrl.validateUrl;
+    visualizations.createBaseVisualization(getScriptVisDefinition(validateUrl));
     expressions.registerRenderer(
       scriptVisRenderer(() =>
         core.getStartServices().then(([coreStart, plugins]) => ({
           data: plugins.data,
-          validateUrl: core.http.externalUrl.validateUrl,
+          validateUrl,
         }))
       )
     );

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -18,13 +18,51 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import type { IExternalUrl } from 'kibana/public';
 import type { VisEditorOptionsProps } from '../../../../visualizations/public';
 import type { VisParams } from '../../types';
+
+const DependencyUrl = ({
+  url,
+  allowed,
+  update,
+  remove,
+}: {
+  url: string;
+  allowed: (url: string) => boolean;
+  update: (newVal: string) => void;
+  remove: () => void;
+}) => {
+  const [isFocused, setIsFocused] = useState(false);
+
+  const showErrors = !allowed(url) && !isFocused;
+  // TODO add URL format validation
+  const errors = showErrors
+    ? ['Your Kibana administrator does not allow this URL. This dependency will be ignored.']
+    : [];
+
+  return (
+    <EuiFormRow isInvalid={showErrors} error={errors} fullWidth>
+      <EuiFieldText
+        onBlur={() => setIsFocused(false)}
+        onFocus={() => setIsFocused(true)}
+        fullWidth
+        value={url}
+        onChange={(event) => update(event.target.value)}
+        isInvalid={showErrors}
+        append={
+          <EuiButtonIcon iconType="crossInACircleFilled" color="text" onClick={() => remove()} />
+        }
+      />
+    </EuiFormRow>
+  );
+};
 
 function SettingsOptions({
   stateParams: { dependencyUrls },
   setValue,
-}: VisEditorOptionsProps<VisParams>) {
+  validateUrl,
+}: VisEditorOptionsProps<VisParams> & { validateUrl: IExternalUrl['validateUrl'] }) {
   const setDependencyUrls = (newDependencyUrls: string[]) =>
     setValue('dependencyUrls', newDependencyUrls);
 
@@ -42,6 +80,14 @@ function SettingsOptions({
     setDependencyUrls([...dependencyUrls, '']);
   };
 
+  const allowed = (url: string) => {
+    try {
+      return validateUrl(url) !== null;
+    } catch {
+      return true;
+    }
+  };
+
   return (
     <EuiPanel paddingSize="s">
       <EuiTitle size="xs">
@@ -49,20 +95,12 @@ function SettingsOptions({
       </EuiTitle>
       <EuiForm component="form">
         {dependencyUrls.map((url: string, index: number) => (
-          <EuiFormRow key={index} fullWidth>
-            <EuiFieldText
-              fullWidth
-              value={url}
-              onChange={(event) => updateNthDependency(index, event.target.value)}
-              append={
-                <EuiButtonIcon
-                  iconType="crossInACircleFilled"
-                  color="text"
-                  onClick={() => removeNthDependency(index)}
-                />
-              }
-            />
-          </EuiFormRow>
+          <DependencyUrl
+            url={url}
+            allowed={allowed}
+            update={(val) => updateNthDependency(index, val)}
+            remove={() => removeNthDependency(index)}
+          />
         ))}
       </EuiForm>
       <EuiSpacer size="m" />

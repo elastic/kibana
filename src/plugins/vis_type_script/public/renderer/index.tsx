@@ -84,7 +84,7 @@ const getSandboxDocument = (script: string, dependencies: string[]) => {
           window.addEventListener('resize', () => onResize(window.innerWidth, window.innerHeight));
         </script>
 
-        <script type="module" nonce="${nonce}">window.addEventListener('load', async () => {${script}})</script>
+        <script nonce="${nonce}">window.addEventListener('load', async () => {${script}})</script>
       </head>
       <body></body>
     <html>

@@ -8,12 +8,14 @@
 
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import type { IExternalUrl } from 'kibana/public';
 
 // @ts-ignore
 const SettingsOptionsComponent = lazy(() => import('./settings'));
 
-export const SettingsOptions = (props: any) => (
-  <Suspense fallback={<EuiLoadingSpinner />}>
-    <SettingsOptionsComponent {...props} />
-  </Suspense>
-);
+export const getSettingsOptions = (validateUrl: IExternalUrl['validateUrl']) => (props: any) =>
+  (
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <SettingsOptionsComponent {...props} validateUrl={validateUrl} />
+    </Suspense>
+  );
