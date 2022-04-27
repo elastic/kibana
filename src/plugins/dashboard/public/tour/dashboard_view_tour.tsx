@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EuiStatelessTourStep, EuiTourState, EuiTourStep, useEuiTour } from '@elastic/eui';
+import { EuiStatelessTourStep, EuiText, EuiTourState, EuiTourStep, useEuiTour } from '@elastic/eui';
 import React, { useEffect } from 'react';
+import { DashboardTourStrings } from './translations';
 
 export const DASHBOARD_VIEW_TOUR_STORAGE_KEY = 'dashboardViewTourState';
 const TOUR_POPOVER_WIDTH = 360;
@@ -22,12 +23,8 @@ export const dashboardViewTourSteps = [
   {
     anchor: '[data-test-subj="dashboardEditMode"]',
     step: 1,
-    title: 'Edit the dashboard',
-    content: (
-      <p>
-        Click the <b>Edit</b> button to start making changes to the dashboard.
-      </p>
-    ),
+    title: DashboardTourStrings.viewModeTour.getTitle(),
+    content: <EuiText>{DashboardTourStrings.viewModeTour.getDescription()}</EuiText>,
     anchorPosition: 'downCenter',
     maxWidth: TOUR_POPOVER_WIDTH,
   } as EuiStatelessTourStep,

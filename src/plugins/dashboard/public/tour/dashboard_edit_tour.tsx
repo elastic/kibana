@@ -6,19 +6,10 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiStatelessTourStep,
-  EuiTourState,
-  EuiTourStep,
-  useEuiTour,
-} from '@elastic/eui';
+import { EuiStatelessTourStep, EuiText, EuiTourState, EuiTourStep, useEuiTour } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { CustomFooter } from './custom_footer';
+import { DashboardTourStrings } from './translations';
 
 export const DASHBOARD_EDIT_TOUR_STORAGE_KEY = 'dashboardEditTourState';
 const TOUR_POPOVER_WIDTH = 360;
@@ -27,53 +18,47 @@ const dashboardEditTourConfig = {
   currentTourStep: 1,
   isTourActive: true,
   tourPopoverWidth: 360,
-  tourSubtitle: 'Dashboard tour',
+  tourSubtitle: DashboardTourStrings.editModeTour.getTitle(),
 };
 
 const dashboardEditTourSteps = [
   {
     anchor: '[data-test-subj="dashboardAddNewPanelButton"]',
     step: 1,
-    title: 'Visualizations',
-    content: (
-      <p>
-        Create and add your own visualizations by clicking <b>Create visualization</b>.
-      </p>
-    ),
+    title: DashboardTourStrings.editModeTour.firstStep.getTitle(),
+    content: <EuiText>{DashboardTourStrings.editModeTour.firstStep.getDescription()}</EuiText>,
     anchorPosition: 'rightCenter',
     maxWidth: TOUR_POPOVER_WIDTH,
   } as EuiStatelessTourStep,
   {
     anchor: '[data-test-subj="embeddablePanelToggleMenuIcon"]',
     step: 2,
-    title: 'Customize visualizations',
-    content: <p>Click the gear icon to customize your visualizations.</p>,
+    title: DashboardTourStrings.editModeTour.secondStep.getTitle(),
+    content: <EuiText>{DashboardTourStrings.editModeTour.secondStep.getDescription()}</EuiText>,
     anchorPosition: 'upCenter',
     maxWidth: TOUR_POPOVER_WIDTH,
   } as EuiStatelessTourStep,
   {
     anchor: '.kbnQueryBar__datePickerWrapper',
     step: 3,
-    title: 'Expand the time range',
-    content: <p>Use the time filter to display the dashboard data you want to analyze.</p>,
+    title: DashboardTourStrings.editModeTour.thirdStep.getTitle(),
+    content: <EuiText>{DashboardTourStrings.editModeTour.thirdStep.getDescription()}</EuiText>,
     anchorPosition: 'downCenter',
     maxWidth: TOUR_POPOVER_WIDTH,
   } as EuiStatelessTourStep,
   {
     anchor: '#addFilterPopover',
     step: 4,
-    title: 'Filter the data',
-    content: (
-      <p>Filter the dashboard data by clicking the visualization data or add a global filter.</p>
-    ),
-    anchorPosition: 'downCenter',
+    title: DashboardTourStrings.editModeTour.fourthStep.getTitle(),
+    content: <EuiText>{DashboardTourStrings.editModeTour.fourthStep.getDescription()}</EuiText>,
+    anchorPosition: 'downLeft',
     maxWidth: TOUR_POPOVER_WIDTH,
   } as EuiStatelessTourStep,
   {
     anchor: '[data-test-subj="dashboard-controls-menu-button"]',
     step: 5,
-    title: 'Controls',
-    content: <p>Interact with your dashboard data by creating and adding Controls.</p>,
+    title: DashboardTourStrings.editModeTour.fifthStep.getTitle(),
+    content: <EuiText>{DashboardTourStrings.editModeTour.fifthStep.getDescription()}</EuiText>,
     anchorPosition: 'upCenter',
     maxWidth: TOUR_POPOVER_WIDTH,
   } as EuiStatelessTourStep,
@@ -102,26 +87,6 @@ export const DashboardEditTour = ({ panelCount }: { panelCount: number }) => {
     onSkip: () => actions.finishTour(),
     onNext: () => actions.incrementStep(),
   };
-
-  // const BlockUntilPanelAddedFooter = () => (
-  //   <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-  //     <EuiFlexItem grow={false}>
-  //       <EuiButtonEmpty color="text" size="xs" onClick={() => actions.finishTour()}>
-  //         Skip tour
-  //       </EuiButtonEmpty>
-  //     </EuiFlexItem>
-  //     <EuiFlexItem grow={false}>
-  //       <EuiButton
-  //         size="s"
-  //         isDisabled={panelCount > 0 ? false : true}
-  //         color="success"
-  //         onClick={() => actions.incrementStep()}
-  //       >
-  //         Next
-  //       </EuiButton>
-  //     </EuiFlexItem>
-  //   </EuiFlexGroup>
-  // );
 
   const skipVisualizationStep = () => {
     if (panelCount > 0) {
