@@ -47,9 +47,9 @@ it is added. This list contains the {dfeed} identifiers and indicates whether
 the synchronization was successful.
 
 `datafeedsRemoved`::
-(array) If saved objects exist for {dfeeds} that no longer exist, they are
-deleted. This list contains the {dfeed} identifiers and indicates whether the
-synchronization was successful.
+(array) If a saved object for an anomaly detection job references a datafeed
+that no longer exists, it is deleted. This list contains the {dfeed} identifiers 
+and indicates whether the synchronization was successful.
 
 `savedObjectsCreated`::
 (array) If saved objects are missing for {ml} jobs or trained models, they are
