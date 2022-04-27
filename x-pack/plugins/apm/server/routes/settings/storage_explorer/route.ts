@@ -10,13 +10,13 @@ import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { getTotalIndexDiskUsage } from './get_total_index_disk_usage';
 import { getSearchAggregatedTransactions } from '../../../lib/helpers/transactions';
 import { setupRequest } from '../../../lib/helpers/setup_request';
-import { getServiceStorageStats } from './get_service_storage_stats';
+import { getDocCountPerProcessorEvent } from './get_doc_count_per_processor_event';
 import { environmentRt, rangeRt } from '../../default_api_types';
 import { StorageExplorerItem } from '../../../../common/storage_explorer_types';
 import {
   getNumberOfApmDocs,
-  mergeServiceStats,
-} from './estimated_service_disk_usage';
+  getServiceStatistics,
+} from './get_service_statistics';
 import { getTotalTransactionsPerService } from './get_total_transactions_per_service';
 
 const storageExplorerRoute = createApmServerRoute({
@@ -28,8 +28,8 @@ const storageExplorerRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    totalIndexDiskUsage: number;
-    serviceStats: StorageExplorerItem[];
+    totalIndexDiskUsage?: number;
+    serviceStatistics: StorageExplorerItem[];
   }> => {
     const setup = await setupRequest(resources);
     const { params, context } = resources;
@@ -44,12 +44,12 @@ const storageExplorerRoute = createApmServerRoute({
     });
 
     const [
-      serviceStats,
-      totalDocs,
+      docCountPerProcessorEvent,
+      totalApmDocs,
       totalIndexDiskUsage,
       totalTransactionsPerService,
     ] = await Promise.all([
-      getServiceStorageStats({
+      getDocCountPerProcessorEvent({
         searchAggregatedTransactions,
         setup,
         start,
@@ -67,16 +67,16 @@ const storageExplorerRoute = createApmServerRoute({
       }),
     ]);
 
-    const mergedServiceStats = mergeServiceStats({
-      serviceStats,
+    const serviceStatistics = getServiceStatistics({
+      docCountPerProcessorEvent,
       totalTransactionsPerService,
-      totalDocs,
+      totalApmDocs,
       totalIndexDiskUsage,
     });
 
     return {
       totalIndexDiskUsage,
-      serviceStats: mergedServiceStats,
+      serviceStatistics,
     };
   },
 });

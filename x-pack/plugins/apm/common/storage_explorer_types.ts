@@ -8,7 +8,7 @@
 export interface StorageExplorerItem {
   service: string;
   environments: string[];
-  size: number;
+  size?: number;
   sampling: number;
   transaction: number;
   span: number;

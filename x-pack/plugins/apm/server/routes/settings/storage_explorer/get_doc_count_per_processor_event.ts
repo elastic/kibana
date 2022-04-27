@@ -16,14 +16,7 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 
-type ProcessorEventType =
-  | ProcessorEvent.transaction
-  | ProcessorEvent.span
-  | ProcessorEvent.error
-  | ProcessorEvent.metric;
-
-export async function getServiceStorageStats({
-  searchAggregatedTransactions,
+export async function getDocCountPerProcessorEvent({
   setup,
   start,
   end,
@@ -37,64 +30,65 @@ export async function getServiceStorageStats({
 }) {
   const { apmEventClient } = setup;
 
-  const response = await apmEventClient.search('get_service_storage_stats', {
-    apm: {
-      events: [
-        // getProcessorEventForTransactions(searchAggregatedTransactions),
-        ProcessorEvent.span,
-        ProcessorEvent.transaction,
-        ProcessorEvent.error,
-        ProcessorEvent.metric,
-      ],
-    },
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-          ] as QueryDslQueryContainer[],
-        },
+  const response = await apmEventClient.search(
+    'get_doc_count_per_processor_event',
+    {
+      apm: {
+        events: [
+          ProcessorEvent.span,
+          ProcessorEvent.transaction,
+          ProcessorEvent.error,
+          ProcessorEvent.metric,
+        ],
       },
-      aggs: {
-        services: {
-          terms: {
-            field: SERVICE_NAME,
-            size: 10,
-          },
-          aggs: {
-            environments: {
-              terms: {
-                field: SERVICE_ENVIRONMENT,
-                size: 10,
-              },
-            },
-            processor_event: {
-              terms: {
-                field: PROCESSOR_EVENT,
-                size: 10,
-              },
-            },
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
+            ] as QueryDslQueryContainer[],
           },
         },
+        aggs: {
+          services: {
+            terms: {
+              field: SERVICE_NAME,
+              size: 10,
+            },
+            aggs: {
+              environments: {
+                terms: {
+                  field: SERVICE_ENVIRONMENT,
+                  size: 10,
+                },
+              },
+              processor_event: {
+                terms: {
+                  field: PROCESSOR_EVENT,
+                  size: 10,
+                },
+              },
+            },
+          },
+        },
       },
-    },
-  });
+    }
+  );
 
   const serviceStats = response.aggregations?.services.buckets.map((bucket) => {
     const service = bucket.key as string;
-    const serviceDocs = bucket.doc_count;
+    const numberOfDocs = bucket.doc_count;
     const environments = bucket.environments.buckets.map(
       ({ key }) => key as string
     );
-    const docsCount = bucket.processor_event.buckets.reduce(
+    const numberOfDocsPerProcessorEvent = bucket.processor_event.buckets.reduce(
       (
-        acc: Record<ProcessorEventType, number>,
+        acc: Record<Exclude<ProcessorEvent, ProcessorEvent.profile>, number>,
         { key, doc_count: docCount }
       ) => {
-        const bucketKey = key as ProcessorEventType;
-        acc[bucketKey] = docCount;
+        acc[key as Exclude<ProcessorEvent, ProcessorEvent.profile>] = docCount;
         return acc;
       },
       {
@@ -107,11 +101,15 @@ export async function getServiceStorageStats({
 
     return {
       service,
-      serviceDocs,
+      numberOfDocs,
       environments,
-      ...docsCount,
+      ...numberOfDocsPerProcessorEvent,
     };
   });
 
   return serviceStats ?? [];
 }
+
+export type DocCountPerProcessorEventResponse = Awaited<
+  ReturnType<typeof getDocCountPerProcessorEvent>
+>;

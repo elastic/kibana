@@ -4,31 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { uniq } from 'lodash';
 import { ApmPluginRequestHandlerContext } from '../../typings';
 import { Setup } from '../../../lib/helpers/setup_request';
-import { StorageExplorerItem } from '../../../../common/storage_explorer_types';
+import { DocCountPerProcessorEventResponse } from './get_doc_count_per_processor_event';
 
-export function mergeServiceStats({
-  serviceStats,
+export function getServiceStatistics({
+  docCountPerProcessorEvent,
   totalTransactionsPerService,
-  totalDocs,
+  totalApmDocs,
   totalIndexDiskUsage,
 }: {
-  serviceStats: Array<
-    Omit<StorageExplorerItem, 'size' | 'sampling'> & { serviceDocs: number }
-  >;
+  docCountPerProcessorEvent: DocCountPerProcessorEventResponse;
   totalTransactionsPerService: Record<string, number>;
-  totalDocs: number;
-  totalIndexDiskUsage: number;
+  totalApmDocs: number;
+  totalIndexDiskUsage?: number;
 }) {
-  const mergedServiceStats = serviceStats.map(
-    ({ serviceDocs, service, transaction, ...rest }) => {
-      const size = (serviceDocs / totalDocs) * totalIndexDiskUsage;
+  const serviceStatistics = docCountPerProcessorEvent.map(
+    ({ numberOfDocs, service, transaction, ...rest }) => {
+      const size = totalIndexDiskUsage
+        ? (numberOfDocs / totalApmDocs) * totalIndexDiskUsage
+        : undefined;
+
       const sampling = totalTransactionsPerService[service]
         ? transaction / totalTransactionsPerService[service]
         : 0;
+
       return {
         ...rest,
         service,
@@ -39,7 +40,7 @@ export function mergeServiceStats({
     }
   );
 
-  return mergedServiceStats;
+  return serviceStatistics;
 }
 
 export async function getNumberOfApmDocs({
@@ -56,9 +57,9 @@ export async function getNumberOfApmDocs({
   const index = uniq([transaction, span, metric, error]).join();
   const esClient = (await context.core).elasticsearch.client;
 
-  const { count: numberOfApmDocs } = await esClient.asCurrentUser.count({
+  const { count } = await esClient.asCurrentUser.count({
     index,
   });
 
-  return numberOfApmDocs;
+  return count;
 }

@@ -26,12 +26,12 @@ import {
 import { useChartTheme } from '@kbn/observability-plugin/public';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-
 import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { StorageExplorerItem } from '../../../../../common/storage_explorer_types';
 import { asDynamicBytes } from '../../../../../common/utils/formatters';
 import { asPercent } from '../../../../../common/utils/formatters';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 
 export function StorageExplorer() {
   const rangeFrom = 'now-15d';
@@ -63,7 +63,7 @@ export function StorageExplorer() {
     [start, end, environment]
   );
 
-  const items: StorageExplorerItem[] = data?.serviceStats ?? [];
+  const items: StorageExplorerItem[] = data?.serviceStatistics ?? [];
 
   const columns: Array<EuiBasicTableColumn<StorageExplorerItem>> = [
     {
@@ -84,7 +84,7 @@ export function StorageExplorer() {
           defaultMessage: 'Environment',
         }
       ),
-      render: (test, { environments }) => (
+      render: (_, { environments }) => (
         <EnvironmentBadge environments={environments ?? []} />
       ),
       sortable: true,
@@ -97,7 +97,7 @@ export function StorageExplorer() {
           defaultMessage: 'Size',
         }
       ),
-      render: asDynamicBytes,
+      render: (_, { size }) => asDynamicBytes(size) || NOT_AVAILABLE_LABEL,
       sortable: true,
     },
     {
@@ -217,7 +217,7 @@ export function StorageExplorer() {
           id="treemap"
           data={items}
           layout={PartitionLayout.treemap}
-          valueAccessor={(d) => d.size}
+          valueAccessor={(d) => d.size ?? 0}
           valueGetter="percent"
           topGroove={0}
           layers={[

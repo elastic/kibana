@@ -29,33 +29,38 @@ export async function getTotalTransactionsPerService({
 }) {
   const { apmEventClient } = setup;
 
-  const response = await apmEventClient.search('get_total_transactions', {
-    apm: {
-      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
-    },
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...getDocumentTypeFilterForTransactions(
-              searchAggregatedTransactions
-            ),
-          ] as QueryDslQueryContainer[],
-        },
+  const response = await apmEventClient.search(
+    'get_total_transactions_per_service',
+    {
+      apm: {
+        events: [
+          getProcessorEventForTransactions(searchAggregatedTransactions),
+        ],
       },
-      aggs: {
-        services: {
-          terms: {
-            field: SERVICE_NAME,
-            size: 10,
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              ...rangeQuery(start, end),
+              ...environmentQuery(environment),
+              ...getDocumentTypeFilterForTransactions(
+                searchAggregatedTransactions
+              ),
+            ] as QueryDslQueryContainer[],
+          },
+        },
+        aggs: {
+          services: {
+            terms: {
+              field: SERVICE_NAME,
+              size: 500,
+            },
           },
         },
       },
-    },
-  });
+    }
+  );
 
   return (
     response.aggregations?.services.buckets.reduce(
