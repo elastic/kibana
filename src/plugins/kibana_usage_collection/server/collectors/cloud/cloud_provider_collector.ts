@@ -23,10 +23,12 @@ export function registerCloudProviderUsageCollector(
   stop$: Observable<void>
 ) {
   const ac = new AbortController();
-  firstValueFrom(stop$).then(() => {
-    // we are stopping, we need to cancel async requests
-    ac.abort();
-  });
+  // we are stopping, we need to cancel async requests
+  firstValueFrom(stop$).then(
+    () => ac.abort(),
+    // if we try to get the first value from a completed Observable, the promise will reject
+    () => ac.abort()
+  );
 
   const cloudDetector = new CloudDetector();
   // determine the cloud service in the background
