@@ -44,7 +44,8 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(({ comma
   useEffect(() => {
     (async () => {
       const timeoutId = setTimeout(() => {
-        setShowRunInTheBackground(true);
+        // TODO:PT Implement (or delete) the "run in the background" functionality
+        // setShowRunInTheBackground(true);
       }, 15000);
 
       try {
