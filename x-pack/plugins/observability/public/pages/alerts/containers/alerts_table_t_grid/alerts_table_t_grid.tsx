@@ -239,7 +239,10 @@ function ObservabilityActions({
         <EuiContextMenuItem
           key="viewAlertDetails"
           data-test-subj="viewAlertDetails"
-          onClick={() => setFlyoutAlert(alert)}
+          onClick={() => {
+            closeActionsPopover();
+            setFlyoutAlert(alert);
+          }}
         >
           {translations.alertsTable.viewAlertDetailsButtonText}
         </EuiContextMenuItem>,
