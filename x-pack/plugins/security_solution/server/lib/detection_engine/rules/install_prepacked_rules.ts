@@ -14,8 +14,7 @@ import { PartialFilter } from '../types';
 export const installPrepackagedRules = (
   rulesClient: RulesClient,
   rules: AddPrepackagedRulesSchemaDecoded[],
-  outputIndex: string,
-  isRuleRegistryEnabled: boolean
+  outputIndex: string
 ): Array<Promise<SanitizedRule<RuleTypeParams>>> =>
   rules.reduce<Array<Promise<SanitizedRule<RuleTypeParams>>>>((acc, rule) => {
     const {
@@ -72,7 +71,6 @@ export const installPrepackagedRules = (
     return [
       ...acc,
       createRules({
-        isRuleRegistryEnabled,
         rulesClient,
         anomalyThreshold,
         author,

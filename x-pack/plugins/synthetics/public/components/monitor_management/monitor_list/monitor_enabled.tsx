@@ -87,28 +87,34 @@ export const MonitorEnabled = ({ id, monitor, onUpdate, isDisabled }: Props) => 
   );
 };
 
-const ENABLE_MONITOR_LABEL = i18n.translate('xpack.uptime.monitorManagement.enableMonitorLabel', {
-  defaultMessage: 'Enable monitor',
-});
+const ENABLE_MONITOR_LABEL = i18n.translate(
+  'xpack.synthetics.monitorManagement.enableMonitorLabel',
+  {
+    defaultMessage: 'Enable monitor',
+  }
+);
 
-const DISABLE_MONITOR_LABEL = i18n.translate('xpack.uptime.monitorManagement.disableMonitorLabel', {
-  defaultMessage: 'Disable monitor',
-});
+const DISABLE_MONITOR_LABEL = i18n.translate(
+  'xpack.synthetics.monitorManagement.disableMonitorLabel',
+  {
+    defaultMessage: 'Disable monitor',
+  }
+);
 
 const getMonitorEnabledSuccessLabel = (name: string) =>
-  i18n.translate('xpack.uptime.monitorManagement.monitorEnabledSuccessMessage', {
+  i18n.translate('xpack.synthetics.monitorManagement.monitorEnabledSuccessMessage', {
     defaultMessage: 'Monitor {name} enabled successfully.',
     values: { name },
   });
 
 const getMonitorDisabledSuccessLabel = (name: string) =>
-  i18n.translate('xpack.uptime.monitorManagement.monitorDisabledSuccessMessage', {
+  i18n.translate('xpack.synthetics.monitorManagement.monitorDisabledSuccessMessage', {
     defaultMessage: 'Monitor {name} disabled successfully.',
     values: { name },
   });
 
 const getMonitorEnabledUpdateFailureMessage = (name: string) =>
-  i18n.translate('xpack.uptime.monitorManagement.monitorEnabledUpdateFailureMessage', {
+  i18n.translate('xpack.synthetics.monitorManagement.monitorEnabledUpdateFailureMessage', {
     defaultMessage: 'Unable to update monitor {name}.',
     values: { name },
   });
