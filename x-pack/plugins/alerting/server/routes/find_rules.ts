@@ -79,11 +79,11 @@ const rewriteBodyRes: RewriteResponseCase<FindResult<RuleTypeParams>> = ({
         updatedAt,
         apiKeyOwner,
         notifyWhen,
+        muteAll,
         mutedInstanceIds,
         executionStatus,
         actions,
         scheduledTaskId,
-        snoozeIndefinitely,
         snoozeSchedule,
         ...rest
       }) => ({
@@ -97,7 +97,7 @@ const rewriteBodyRes: RewriteResponseCase<FindResult<RuleTypeParams>> = ({
         notify_when: notifyWhen,
         muted_alert_ids: mutedInstanceIds,
         scheduled_task_id: scheduledTaskId,
-        snooze_indefinitely: snoozeIndefinitely,
+        mute_all: muteAll,
         // Remove this object spread boolean check after snoozeSchedule is added to the public API
         ...(snoozeSchedule !== undefined ? { snooze_schedule: snoozeSchedule } : {}),
         execution_status: executionStatus && {

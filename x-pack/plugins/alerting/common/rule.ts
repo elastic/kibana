@@ -104,11 +104,11 @@ export interface Rule<Params extends RuleTypeParams = never> {
   apiKey: string | null;
   apiKeyOwner: string | null;
   throttle: string | null;
+  muteAll: boolean;
   notifyWhen: RuleNotifyWhenType | null;
   mutedInstanceIds: string[];
   executionStatus: RuleExecutionStatus;
   monitoring?: RuleMonitoring;
-  snoozeIndefinitely: boolean;
   snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
 }
 

@@ -220,11 +220,11 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'updatedAt'
     | 'apiKey'
     | 'apiKeyOwner'
-    | 'snoozeIndefinitely'
+    | 'muteAll'
     | 'mutedInstanceIds'
     | 'actions'
     | 'executionStatus'
-    | 'snoozeEndTime'
+    | 'snoozeSchedule'
   > & { actions: NormalizedAlertAction[] };
   options?: {
     id?: string;
@@ -416,7 +416,7 @@ export class RulesClient {
       updatedAt: new Date(createTime).toISOString(),
       snoozeSchedule: [],
       params: updatedParams as RawRule['params'],
-      snoozeIndefinitely: false,
+      muteAll: false,
       mutedInstanceIds: [],
       notifyWhen,
       executionStatus: getRuleExecutionStatusPending(new Date().toISOString()),
@@ -920,7 +920,7 @@ export class RulesClient {
           terms: { field: 'alert.attributes.enabled' },
         },
         muted: {
-          terms: { field: 'alert.attributes.snoozeIndefinitely' },
+          terms: { field: 'alert.attributes.muteAll' },
         },
         snoozed: {
           date_range: {
@@ -1702,7 +1702,7 @@ export class RulesClient {
     const newAttrs =
       snoozeEndTime === -1
         ? {
-            snoozeIndefinitely: true,
+            muteAll: true,
             snoozeSchedule: clearUnscheduledSnooze(attributes),
           }
         : {
@@ -1710,7 +1710,7 @@ export class RulesClient {
               startTime: new Date().toISOString(),
               duration: Date.parse(snoozeEndTime) - Date.now(),
             }),
-            snoozeIndefinitely: false,
+            muteAll: false,
           };
 
     const updateAttributes = this.updateMeta({
@@ -1776,7 +1776,7 @@ export class RulesClient {
 
     const updateAttributes = this.updateMeta({
       snoozeSchedule: clearUnscheduledSnooze(attributes),
-      snoozeIndefinitely: false,
+      muteAll: false,
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
@@ -1837,7 +1837,7 @@ export class RulesClient {
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
     const updateAttributes = this.updateMeta({
-      snoozeIndefinitely: true,
+      muteAll: true,
       mutedInstanceIds: [],
       snoozeSchedule: clearUnscheduledSnooze(attributes),
       updatedBy: await this.getUserName(),
@@ -1900,7 +1900,7 @@ export class RulesClient {
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
     const updateAttributes = this.updateMeta({
-      snoozeIndefinitely: false,
+      muteAll: false,
       mutedInstanceIds: [],
       snoozeSchedule: clearUnscheduledSnooze(attributes),
       updatedBy: await this.getUserName(),
@@ -1963,7 +1963,7 @@ export class RulesClient {
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
-    if (!attributes.snoozeIndefinitely && !mutedInstanceIds.includes(alertInstanceId)) {
+    if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
       mutedInstanceIds.push(alertInstanceId);
       await this.unsecuredSavedObjectsClient.update(
         'alert',
@@ -2030,7 +2030,7 @@ export class RulesClient {
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
-    if (!attributes.snoozeIndefinitely && mutedInstanceIds.includes(alertInstanceId)) {
+    if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
       await this.unsecuredSavedObjectsClient.update<RawRule>(
         'alert',
         alertId,

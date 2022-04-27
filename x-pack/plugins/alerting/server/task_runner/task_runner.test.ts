@@ -419,7 +419,7 @@ describe('Task Runner', () => {
     );
     rulesClient.get.mockResolvedValue({
       ...mockedRuleTypeSavedObject,
-      snoozeIndefinitely: true,
+      muteAll: true,
     });
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
     await taskRunner.run();
@@ -496,26 +496,25 @@ describe('Task Runner', () => {
   });
 
   type SnoozeTestParams = [
-    snoozeIndefinitely: boolean,
-    snoozeSchedule: string | undefined | null,
+    muteAll: boolean,
+    snoozeEndTime: string | undefined | null,
     shouldBeSnoozed: boolean
   ];
 
   const snoozeTestParams: SnoozeTestParams[] = [
     [false, null, false],
     [false, undefined, false],
-    // Stringify the snooze schedules for better failure reporting
-    [false, JSON.stringify([{ startTime: DATE_9999, duration: 100000000 }]), false],
-    [false, JSON.stringify([{ startTime: DATE_1970, duration: 100000000 }]), true],
+    [false, DATE_1970, false],
+    [false, DATE_9999, true],
     [true, null, true],
     [true, undefined, true],
-    [true, JSON.stringify([{ startTime: DATE_9999, duration: 100000000 }]), true],
-    [true, JSON.stringify([{ startTime: DATE_1970, duration: 100000000 }]), true],
+    [true, DATE_1970, true],
+    [true, DATE_9999, true],
   ];
 
   test.each(snoozeTestParams)(
-    'snoozing works as expected with snoozeIndefinitely: %s; snoozeSchedule: %s',
-    async (snoozeIndefinitely, snoozeSchedule, shouldBeSnoozed) => {
+    'snoozing works as expected with muteAll: %s; snoozeEndTime: %s',
+    async (muteAll, snoozeEndTime, shouldBeSnoozed) => {
       taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
       taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
       ruleType.executor.mockImplementation(
@@ -539,8 +538,8 @@ describe('Task Runner', () => {
       );
       rulesClient.get.mockResolvedValue({
         ...mockedRuleTypeSavedObject,
-        snoozeIndefinitely,
-        snoozeSchedule: snoozeSchedule != null ? JSON.parse(snoozeSchedule) : [],
+        muteAll,
+        snoozeEndTime: snoozeEndTime != null ? new Date(snoozeEndTime) : snoozeEndTime,
       });
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
       await taskRunner.run();

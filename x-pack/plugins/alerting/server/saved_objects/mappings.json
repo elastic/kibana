@@ -90,6 +90,9 @@
       "notifyWhen": {
         "type": "keyword"
       },
+      "muteAll": {
+        "type": "boolean"
+      },
       "mutedInstanceIds": {
         "type": "keyword"
       },
@@ -172,9 +175,6 @@
             }
           }
         }
-      },
-      "snoozeIndefinitely": {
-        "type": "boolean"
       },
       "snoozeSchedule": {
         "properties": {

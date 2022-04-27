@@ -35,7 +35,7 @@ describe('getAlertInstanceSummaryRoute', () => {
     tags: [],
     ruleTypeId: '',
     consumer: '',
-    snoozeIndefinitely: false,
+    muteAll: false,
     throttle: null,
     enabled: false,
     statusStartDate: dateString,

@@ -30,11 +30,11 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   updatedAt,
   apiKeyOwner,
   notifyWhen,
+  muteAll,
   mutedInstanceIds,
   executionStatus,
   actions,
   scheduledTaskId,
-  snoozeIndefinitely,
   snoozeSchedule,
   ...rest
 }) => ({
@@ -47,7 +47,7 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   api_key_owner: apiKeyOwner,
   notify_when: notifyWhen,
   muted_alert_ids: mutedInstanceIds,
-  snooze_indefinitely: snoozeIndefinitely,
+  mute_all: muteAll,
   // Remove this object spread boolean check after snooze props is added to the public API
   ...(snoozeSchedule !== undefined ? { snooze_schedule: snoozeSchedule } : {}),
   scheduled_task_id: scheduledTaskId,

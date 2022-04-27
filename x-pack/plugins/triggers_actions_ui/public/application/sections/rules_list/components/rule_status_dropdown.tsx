@@ -37,7 +37,7 @@ import { Rule } from '../../../../types';
 type SnoozeUnit = 'm' | 'h' | 'd' | 'w' | 'M';
 const SNOOZE_END_TIME_FORMAT = 'LL @ LT';
 
-type DropdownRuleRecord = Pick<Rule, 'enabled' | 'snoozeIndefinitely' | 'snoozeSchedule'>;
+type DropdownRuleRecord = Pick<Rule, 'enabled' | 'muteAll' | 'snoozeSchedule'>;
 
 export interface ComponentOpts {
   rule: DropdownRuleRecord;

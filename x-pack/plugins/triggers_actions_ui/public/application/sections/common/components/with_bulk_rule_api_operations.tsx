@@ -165,7 +165,7 @@ function isRuleDisabled(rule: Rule) {
 }
 
 function isRuleMuted(rule: Rule) {
-  return rule.muteAll === true;
+  return rule.snoozeIndefinitely === true;
 }
 
 function isAlertInstanceMuted(rule: Rule, instanceId: string) {

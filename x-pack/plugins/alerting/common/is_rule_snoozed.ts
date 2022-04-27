@@ -9,7 +9,7 @@ import moment from 'moment';
 import { parseInterval } from '@kbn/data-plugin/common';
 import { SanitizedRule, RuleTypeParams } from './rule';
 
-type RuleSnoozeProps = Pick<SanitizedRule<RuleTypeParams>, 'snoozeIndefinitely' | 'snoozeSchedule'>;
+type RuleSnoozeProps = Pick<SanitizedRule<RuleTypeParams>, 'muteAll' | 'snoozeSchedule'>;
 
 export function getRuleSnoozeEndTime(rule: RuleSnoozeProps): Date | null {
   if (rule.snoozeSchedule == null) {
@@ -74,7 +74,7 @@ export function getRuleSnoozeEndTime(rule: RuleSnoozeProps): Date | null {
 }
 
 export function isRuleSnoozed(rule: RuleSnoozeProps) {
-  if (rule.snoozeIndefinitely) {
+  if (rule.muteAll) {
     return true;
   }
   return Boolean(getRuleSnoozeEndTime(rule));

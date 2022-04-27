@@ -243,7 +243,7 @@ function isRuleDisabled(alert: RuleTableItem) {
 }
 
 function isRuleMuted(alert: RuleTableItem) {
-  return alert.muteAll === true;
+  return alert.snoozeIndefinitely === true;
 }
 
 function noop() {}

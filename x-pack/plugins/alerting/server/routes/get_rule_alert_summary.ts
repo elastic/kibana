@@ -37,7 +37,7 @@ const rewriteReq: RewriteRequestCase<GetAlertSummaryParams> = ({
 
 const rewriteBodyRes: RewriteResponseCase<AlertSummary> = ({
   ruleTypeId,
-  snoozeIndefinitely,
+  muteAll,
   statusStartDate,
   statusEndDate,
   errorMessages,
@@ -47,7 +47,7 @@ const rewriteBodyRes: RewriteResponseCase<AlertSummary> = ({
 }) => ({
   ...rest,
   rule_type_id: ruleTypeId,
-  snooze_indefinitely: snoozeIndefinitely,
+  mute_all: muteAll,
   status_start_date: statusStartDate,
   status_end_date: statusEndDate,
   error_messages: errorMessages,

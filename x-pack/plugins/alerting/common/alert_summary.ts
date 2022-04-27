@@ -19,7 +19,7 @@ export interface AlertSummary {
   tags: string[];
   ruleTypeId: string;
   consumer: string;
-  snoozeIndefinitely: boolean;
+  muteAll: boolean;
   throttle: string | null;
   enabled: boolean;
   statusStartDate: string;

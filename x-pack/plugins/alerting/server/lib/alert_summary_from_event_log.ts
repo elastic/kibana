@@ -32,7 +32,7 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
     statusStartDate: dateStart,
     statusEndDate: dateEnd,
     status: 'OK',
-    snoozeIndefinitely: rule.snoozeIndefinitely,
+    muteAll: rule.muteAll,
     throttle: rule.throttle,
     enabled: rule.enabled,
     lastRun: undefined,

@@ -86,7 +86,7 @@ const BaseRuleSavedObject: SavedObject<RawRule> = {
     apiKeyOwner: null,
     throttle: null,
     notifyWhen: null,
-    snoozeIndefinitely: false,
+    muteAll: false,
     mutedInstanceIds: [],
     executionStatus: {
       status: 'unknown',

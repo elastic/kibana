@@ -156,7 +156,7 @@ export function getMigrations(
   const migrationRules830 = createEsoMigration(
     encryptedSavedObjects,
     (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
-    pipeMigrations(removeInternalTags, convertMutesAndSnoozes)
+    pipeMigrations(removeInternalTags, convertSnoozes)
   );
 
   return {
@@ -860,18 +860,17 @@ function addMappedParams(
   return doc;
 }
 
-function convertMutesAndSnoozes(
+function convertSnoozes(
   doc: SavedObjectUnsanitizedDoc<RawRule>
 ): SavedObjectUnsanitizedDoc<RawRule> {
   const {
-    attributes: { muteAll, snoozeEndTime },
+    attributes: { snoozeEndTime },
   } = doc;
 
   return {
     ...doc,
     attributes: {
-      ...(omit(doc.attributes, ['snoozeEndTime', 'muteAll']) as RawRule),
-      snoozeIndefinitely: Boolean(muteAll),
+      ...(omit(doc.attributes, ['snoozeEndTime']) as RawRule),
       snoozeSchedule: snoozeEndTime
         ? [
             {

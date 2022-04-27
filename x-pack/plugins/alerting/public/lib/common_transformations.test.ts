@@ -43,7 +43,7 @@ describe('common_transformations', () => {
       api_key_owner: 'api-key-user',
       throttle: '2s',
       notify_when: 'onActiveAlert',
-      snooze_indefinitely: false,
+      mute_all: false,
       muted_alert_ids: ['bob', 'jim'],
       execution_status: {
         last_execution_date: dateExecuted.toISOString(),
@@ -89,7 +89,7 @@ describe('common_transformations', () => {
           "status": "error",
         },
         "id": "some-id",
-        "snoozeIndefinitely": false,
+        "muteAll": false,
         "mutedInstanceIds": Array [
           "bob",
           "jim",
@@ -146,7 +146,7 @@ describe('common_transformations', () => {
       api_key_owner: 'api-key-user',
       throttle: '2s',
       notify_when: 'onActiveAlert',
-      snooze_indefinitely: false,
+      mute_all: false,
       muted_alert_ids: ['bob', 'jim'],
       execution_status: {
         last_execution_date: dateExecuted.toISOString(),
@@ -176,7 +176,7 @@ describe('common_transformations', () => {
           "status": "error",
         },
         "id": "some-id",
-        "snoozeIndefinitely": false,
+        "muteAll": false,
         "mutedInstanceIds": Array [
           "bob",
           "jim",

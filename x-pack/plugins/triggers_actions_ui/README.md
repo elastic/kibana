@@ -1,14 +1,13 @@
 # Kibana Alerts and Actions UI
 
-The Kibana alerts and actions UI plugin provides a user interface for managing alerts and actions. 
+The Kibana alerts and actions UI plugin provides a user interface for managing alerts and actions.
 As a developer you can reuse and extend built-in alerts and actions UI functionality:
 
 - Create and register a new Alert Type.
 - Create and register a new Action Type.
 - Embed the Create Alert flyout within any Kibana plugin.
 
------
-
+---
 
 Table of Contents
 
@@ -46,9 +45,9 @@ Table of Contents
 
 Kibana ships with several built-in alert types:
 
-|Type|Id|Description|
-|---|---|---|
-|[Index Threshold](#index-threshold-alert)|`threshold`|Index Threshold Alert|
+| Type                                      | Id          | Description           |
+| ----------------------------------------- | ----------- | --------------------- |
+| [Index Threshold](#index-threshold-alert) | `threshold` | Index Threshold Alert |
 
 Every alert type must be registered server side, and can optionally be registered client side.
 Only alert types registered on both client and server will be displayed in the Create Alert flyout, as a part of the UI.
@@ -89,13 +88,12 @@ interface IndexThresholdProps {
 }
 ```
 
-|Property|Description|
-|---|---|
-|ruleParams|Set of Alert params relevant for the index threshold alert type.|
-|setRuleParams|Alert reducer method, which is used to create a new copy of alert object with the changed params property any subproperty value.|
-|setRuleProperty|Alert reducer method, which is used to create a new copy of alert object with the changed any direct alert property value.|
-|errors|Alert level errors tracking object.|
-
+| Property        | Description                                                                                                                      |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| ruleParams      | Set of Alert params relevant for the index threshold alert type.                                                                 |
+| setRuleParams   | Alert reducer method, which is used to create a new copy of alert object with the changed params property any subproperty value. |
+| setRuleProperty | Alert reducer method, which is used to create a new copy of alert object with the changed any direct alert property value.       |
+| errors          | Alert level errors tracking object.                                                                                              |
 
 Alert reducer is defined on the AlertAdd functional component level and passed down to the subcomponents to provide a new state of Alert object:
 
@@ -127,6 +125,7 @@ const setRuleProperty = (key: string, value: any) => {
 ```
 
 'x-pack/plugins/triggers_actions_ui/public/application/sections/alert_add/alert_reducer.ts' define the methods for changing different type of alert properties:
+
 ```
 export const alertReducer = (state: any, action: AlertReducerAction) => {
   const { command, payload } = action;
@@ -235,6 +234,7 @@ Index Threshold Alert form with validation:
 ## Alert type model definition
 
 Each alert type should be defined as `RuleTypeModel` object with the these properties:
+
 ```
   id: string;
   name: string;
@@ -245,19 +245,21 @@ Each alert type should be defined as `RuleTypeModel` object with the these prope
       >;
   defaultActionMessage?: string;
 ```
-|Property|Description|
-|---|---|
-|id|Alert type id. Should be the same as on the server side.|
-|name|Name of the alert type that will be displayed on the select card in the UI.|
-|iconClass|Icon of the alert type that will be displayed on the select card in the UI.|
-|validate|Validation function for the alert params.|
-|ruleParamsExpression| A lazy loaded React component for building UI of the current alert type params.|
-|defaultActionMessage|Optional property for providing default message for all added actions with `message` property.|
-|requiresAppContext|Define if alert type is enabled for create and edit in the alerting management UI.|
 
-IMPORTANT: The current UI supports a single action group only. 
+| Property             | Description                                                                                    |
+| -------------------- | ---------------------------------------------------------------------------------------------- |
+| id                   | Alert type id. Should be the same as on the server side.                                       |
+| name                 | Name of the alert type that will be displayed on the select card in the UI.                    |
+| iconClass            | Icon of the alert type that will be displayed on the select card in the UI.                    |
+| validate             | Validation function for the alert params.                                                      |
+| ruleParamsExpression | A lazy loaded React component for building UI of the current alert type params.                |
+| defaultActionMessage | Optional property for providing default message for all added actions with `message` property. |
+| requiresAppContext   | Define if alert type is enabled for create and edit in the alerting management UI.             |
+
+IMPORTANT: The current UI supports a single action group only.
 Action groups are mapped from the server API result for [GET /api/alerts/list_alert_types: List alert types](https://github.com/elastic/kibana/tree/main/x-pack/plugins/alerting#get-apialerttypes-list-alert-types).
 Server side alert type model:
+
 ```
 export interface RuleType {
   id: string;
@@ -270,6 +272,7 @@ export interface RuleType {
   requiresAppContext: boolean;
 }
 ```
+
 Only the default (which means first item of the array) action group is displayed in the current UI.
 Design of user interface and server API for multiple action groups is under discussion and development.
 
@@ -278,11 +281,11 @@ Design of user interface and server API for multiple action groups is under disc
 There are two ways of registering a new alert type:
 
 1. Directly in the `triggers_actions_ui` plugin. In this case, the alert type will be available in the Create Alert flyout of the Alerts and Actions management section.
-Registration code for a new alert type model should be added to the file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_alert_types/index.ts`
-Only registered alert types are available in UI.
+   Registration code for a new alert type model should be added to the file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_alert_types/index.ts`
+   Only registered alert types are available in UI.
 
-2. Register the alert type in another plugin. In this case, the alert type will be available only in the current plugin UI. 
-It should be done by importing dependency `TriggersAndActionsUIPublicPluginSetup` and adding the next code on plugin setup:
+2. Register the alert type in another plugin. In this case, the alert type will be available only in the current plugin UI.
+   It should be done by importing dependency `TriggersAndActionsUIPublicPluginSetup` and adding the next code on plugin setup:
 
 ```
 function getSomeNewAlertType() {
@@ -294,13 +297,14 @@ triggersActionsUi.ruleTypeRegistry.register(getSomeNewAlertType());
 
 ## Create and register new alert type UI example
 
-Before registering a UI for a new Alert Type, you should first register the type on the server-side by following the Alerting guide: https://github.com/elastic/kibana/tree/main/x-pack/plugins/alerting#example 
+Before registering a UI for a new Alert Type, you should first register the type on the server-side by following the Alerting guide: https://github.com/elastic/kibana/tree/main/x-pack/plugins/alerting#example
 
 Alert type UI is expected to be defined as `RuleTypeModel` object.
 
 Below is a list of steps that should be done to build and register a new alert type with the name `Example Alert Type`:
 
 1. At any suitable place in Kibana, create a file, which will expose an object implementing interface [RuleTypeModel](https://github.com/elastic/kibana/blob/55b7905fb5265b73806006e7265739545d7521d0/x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/types.ts#L83). Example:
+
 ```
 import { lazy } from 'react';
 import { RuleTypeModel } from '../../../../types';
@@ -318,9 +322,11 @@ export function getAlertType(): RuleTypeModel {
   };
 }
 ```
+
 Fields of this object `RuleTypeModel` will be mapped properly in the UI below.
 
 2. Define `ruleParamsExpression` as `React.FunctionComponent` - this is the form for filling Alert params based on the current Alert type.
+
 ```
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -373,11 +379,13 @@ export const ExampleExpression: React.FunctionComponent<ExampleProps> = ({
 export {ExampleExpression as default};
 
 ```
+
 This alert type form becomes available, when the card of `Example Alert Type` is selected.
 Each expression word here is `EuiExpression` component and implements the basic aggregation, grouping and comparison methods.
 Expression components, which can be embedded to different alert types, are described here [Common expression components](#common-expression-components).
 
-3. Define alert type params validation using the property of `RuleTypeModel` `validate`: 
+3. Define alert type params validation using the property of `RuleTypeModel` `validate`:
+
 ```
 import { i18n } from '@kbn/i18n';
 import { ValidationResult } from '../../../../types';
@@ -404,6 +412,7 @@ export function validateExampleAlertType({
 ```
 
 4. Extend registration code with the new alert type register in the file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_alert_types/index.ts`
+
 ```
 import { getAlertType as getExampledAlertType } from './example';
 ...
@@ -434,6 +443,7 @@ Click on the select card for `Example Alert Type` to open the expression form th
 ```
 
 Props definition:
+
 ```
 interface WhenExpressionProps {
   aggType: string;
@@ -444,12 +454,12 @@ interface WhenExpressionProps {
 }
 ```
 
-|Property|Description|
-|---|---|
-|aggType|Selected aggregation type that will be set as the alert type property.|
-|customAggTypesOptions|(Optional) List of aggregation types that replaces the default options defined in constants `x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts`.|
-|onChangeSelectedAggType|event handler that will be executed when selected aggregation type is changed.|
-|popupPosition|(Optional) expression popup position. Default is `downLeft`.  Recommend changing it for a small parent window space.|
+| Property                | Description                                                                                                                                                                    |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| aggType                 | Selected aggregation type that will be set as the alert type property.                                                                                                         |
+| customAggTypesOptions   | (Optional) List of aggregation types that replaces the default options defined in constants `x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts`. |
+| onChangeSelectedAggType | event handler that will be executed when selected aggregation type is changed.                                                                                                 |
+| popupPosition           | (Optional) expression popup position. Default is `downLeft`. Recommend changing it for a small parent window space.                                                            |
 
 ### OF expression component
 
@@ -470,6 +480,7 @@ OF expression is available, if aggregation type requires selecting data fields f
 ```
 
 Props definition:
+
 ```
 interface OfExpressionProps {
   aggType: string;
@@ -485,15 +496,15 @@ interface OfExpressionProps {
 }
 ```
 
-|Property|Description|
-|---|---|
-|aggType|Selected aggregation type that will be set as the alert type property.|
-|aggField|Selected aggregation field that will be set as the alert type property.|
-|errors|List of errors with proper messages for the alert params that should be validated. In current component is validated `aggField`.|
-|onChangeSelectedAggField|Event handler that will be excuted if selected aggregation field is changed.|
-|fields|Fields list that will be available in the OF `Select a field` dropdown.|
-|customAggTypesOptions|(Optional) List of aggregation types that replaces the default options defined in constants `x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts`.|
-|popupPosition|(Optional) expression popup position. Default is `downRight`. Recommend changing it for a small parent window space.|
+| Property                 | Description                                                                                                                                                                    |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| aggType                  | Selected aggregation type that will be set as the alert type property.                                                                                                         |
+| aggField                 | Selected aggregation field that will be set as the alert type property.                                                                                                        |
+| errors                   | List of errors with proper messages for the alert params that should be validated. In current component is validated `aggField`.                                               |
+| onChangeSelectedAggField | Event handler that will be excuted if selected aggregation field is changed.                                                                                                   |
+| fields                   | Fields list that will be available in the OF `Select a field` dropdown.                                                                                                        |
+| customAggTypesOptions    | (Optional) List of aggregation types that replaces the default options defined in constants `x-pack/plugins/triggers_actions_ui/public/common/constants/aggregation_types.ts`. |
+| popupPosition            | (Optional) expression popup position. Default is `downRight`. Recommend changing it for a small parent window space.                                                           |
 
 ### GROUPED BY expression component
 
@@ -517,6 +528,7 @@ interface OfExpressionProps {
 ```
 
 Props definition:
+
 ```
 interface GroupByExpressionProps {
   groupBy: string;
@@ -535,18 +547,18 @@ interface GroupByExpressionProps {
 }
 ```
 
-|Property|Description|
-|---|---|
-|groupBy|Selected group by type that will be set as the alert type property.|
-|termSize|Selected term size that will be set as the alert type property.|
-|termField|Selected term field that will be set as the alert type property.|
-|errors|List of errors with proper messages for the alert params that should be validated. In current component is validated `termSize` and `termField`.|
-|onChangeSelectedTermSize|Event handler that will be excuted if selected term size is changed.|
-|onChangeSelectedTermField|Event handler that will be excuted if selected term field is changed.|
-|onChangeSelectedGroupBy|Event handler that will be excuted if selected group by is changed.|
-|fields|Fields list with options for the `termField` dropdown.|
-|customGroupByTypes|(Optional) List of group by types that replaces the default options defined in constants `x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts`.|
-|popupPosition|(Optional) expression popup position. Default is `downLeft`. Recommend changing it for a small parent window space.|
+| Property                  | Description                                                                                                                                                              |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| groupBy                   | Selected group by type that will be set as the alert type property.                                                                                                      |
+| termSize                  | Selected term size that will be set as the alert type property.                                                                                                          |
+| termField                 | Selected term field that will be set as the alert type property.                                                                                                         |
+| errors                    | List of errors with proper messages for the alert params that should be validated. In current component is validated `termSize` and `termField`.                         |
+| onChangeSelectedTermSize  | Event handler that will be excuted if selected term size is changed.                                                                                                     |
+| onChangeSelectedTermField | Event handler that will be excuted if selected term field is changed.                                                                                                    |
+| onChangeSelectedGroupBy   | Event handler that will be excuted if selected group by is changed.                                                                                                      |
+| fields                    | Fields list with options for the `termField` dropdown.                                                                                                                   |
+| customGroupByTypes        | (Optional) List of group by types that replaces the default options defined in constants `x-pack/plugins/triggers_actions_ui/public/common/constants/group_by_types.ts`. |
+| popupPosition             | (Optional) expression popup position. Default is `downLeft`. Recommend changing it for a small parent window space.                                                      |
 
 ### FOR THE LAST expression component
 
@@ -567,6 +579,7 @@ interface GroupByExpressionProps {
 ```
 
 Props definition:
+
 ```
 interface ForLastExpressionProps {
   timeWindowSize?: number;
@@ -579,14 +592,14 @@ interface ForLastExpressionProps {
 }
 ```
 
-|Property|Description|
-|---|---|
-|timeWindowSize|Selected time window size that will be set as the alert type property.|
-|timeWindowUnit|Selected time window unit that will be set as the alert type property.|
-|errors|List of errors with proper messages for the alert params that should be validated. In current component is validated `termWindowSize`.|
-|onChangeWindowSize|Event handler that will be excuted if selected window size is changed.|
-|onChangeWindowUnit|Event handler that will be excuted if selected window unit is changed.|
-|popupPosition|(Optional) expression popup position. Default is `downLeft`. Recommend changing it for a small parent window space.|
+| Property           | Description                                                                                                                            |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| timeWindowSize     | Selected time window size that will be set as the alert type property.                                                                 |
+| timeWindowUnit     | Selected time window unit that will be set as the alert type property.                                                                 |
+| errors             | List of errors with proper messages for the alert params that should be validated. In current component is validated `termWindowSize`. |
+| onChangeWindowSize | Event handler that will be excuted if selected window size is changed.                                                                 |
+| onChangeWindowUnit | Event handler that will be excuted if selected window unit is changed.                                                                 |
+| popupPosition      | (Optional) expression popup position. Default is `downLeft`. Recommend changing it for a small parent window space.                    |
 
 ### THRESHOLD expression component
 
@@ -607,6 +620,7 @@ interface ForLastExpressionProps {
 ```
 
 Props definition:
+
 ```
 interface ThresholdExpressionProps {
   thresholdComparator: string;
@@ -622,18 +636,20 @@ interface ThresholdExpressionProps {
 }
 ```
 
-|Property|Description|
-|---|---|
-|thresholdComparator|Selected time window size that will be set as the alert type property.|
-|threshold|Selected time window size that will be set as the alert type property.|
-|errors|List of errors with proper messages for the alert params that should be validated. In current component is validated `threshold0` and `threshold1`.|
-|onChangeSelectedThresholdComparator|Event handler that will be excuted if selected threshold comparator is changed.|
-|onChangeSelectedThreshold|Event handler that will be excuted if selected threshold is changed.|
-|customComparators|(Optional) List of comparators that replaces the default options defined in constants `x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts`.|
-|popupPosition|(Optional) expression popup position. Default is `downLeft`. Recommend changing it for a small parent window space.|
+| Property                            | Description                                                                                                                                                        |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| thresholdComparator                 | Selected time window size that will be set as the alert type property.                                                                                             |
+| threshold                           | Selected time window size that will be set as the alert type property.                                                                                             |
+| errors                              | List of errors with proper messages for the alert params that should be validated. In current component is validated `threshold0` and `threshold1`.                |
+| onChangeSelectedThresholdComparator | Event handler that will be excuted if selected threshold comparator is changed.                                                                                    |
+| onChangeSelectedThreshold           | Event handler that will be excuted if selected threshold is changed.                                                                                               |
+| customComparators                   | (Optional) List of comparators that replaces the default options defined in constants `x-pack/plugins/triggers_actions_ui/public/common/constants/comparators.ts`. |
+| popupPosition                       | (Optional) expression popup position. Default is `downLeft`. Recommend changing it for a small parent window space.                                                |
 
 ## Alert Conditions Components
+
 To aid in creating a uniform UX across Alert Types, we provide two components for specifying the conditions for detection of a certain alert under within any specific Action Groups:
+
 1. `AlertConditions`: A component that generates a container which renders custom component for each Action Group which has had its _conditions_ specified.
 2. `AlertConditionsGroup`: A component that provides a unified container for the Action Group with its name and a button for resetting its condition.
 
@@ -703,6 +719,7 @@ The `isRequired` field specifies whether this specific action group is _required
 Using this `ThresholdSpecifier` component, we can now use `AlertConditionsGroup` & `AlertConditions` to enable the user to specify these thresholds for each action group in the alert type.
 
 Like so:
+
 ```
 interface ThresholdAlertTypeParams {
   thresholds?: {
@@ -761,37 +778,39 @@ const DEFAULT_THRESHOLDS: ThresholdAlertTypeParams['threshold] = {
 </AlertConditions>
 ```
 
-### The AlertConditions component 
+### The AlertConditions component
 
 This component will render the `Conditions` header & headline, along with the selectors for adding every Action Group you specity.
 Additionally it will clone its `children` for _each_ action group which has a `condition` specified for it, passing in the appropriate `actionGroup` prop for each one.
 
-|Property|Description|
-|---|---|
-|headline|The headline title displayed above the fields |
-|actionGroups|A list of `ActionGroupWithCondition` which includes all the action group you wish to offer the user and what conditions they are already configured to follow|
-|onInitializeConditionsFor|A callback which is called when the user ask for a certain actionGroup to be initialized with an initial default condition. If you have no specific default, that's fine, as the component will render the action group's field even if the condition is empty (using a `null` or an `undefined`) and determines whether to render these fields by _the very presence_ of a `condition` field|
+| Property                  | Description                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| headline                  | The headline title displayed above the fields                                                                                                                                                                                                                                                                                                                                                 |
+| actionGroups              | A list of `ActionGroupWithCondition` which includes all the action group you wish to offer the user and what conditions they are already configured to follow                                                                                                                                                                                                                                 |
+| onInitializeConditionsFor | A callback which is called when the user ask for a certain actionGroup to be initialized with an initial default condition. If you have no specific default, that's fine, as the component will render the action group's field even if the condition is empty (using a `null` or an `undefined`) and determines whether to render these fields by _the very presence_ of a `condition` field |
 
-### The AlertConditionsGroup component 
+### The AlertConditionsGroup component
 
 This component renders a standard EuiTitle foe each action group, wrapping the Alert Type specific component, in addition to a "reset" button which allows the user to reset the condition for that action group. The definition of what a _reset_ actually means is Alert Type specific, and up to the implementor to decide. In some case it might mean removing the condition, in others it might mean to reset it to some default value on the server side. In either case, it should _delete_ the `condition` field from the appropriate `actionGroup` as per the above example.
 
-|Property|Description|
-|---|---|
-|onResetConditionsFor|A callback which is called when the user clicks the _reset_ button besides the action group's title. The implementor should use this to remove the `condition` from the specified actionGroup|
-
+| Property             | Description                                                                                                                                                                                   |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| onResetConditionsFor | A callback which is called when the user clicks the _reset_ button besides the action group's title. The implementor should use this to remove the `condition` from the specified actionGroup |
 
 ## Embed the Create Alert flyout within any Kibana plugin
 
 Follow the instructions bellow to embed the Create Alert flyout within any Kibana plugin:
+
 1. Add TriggersAndActionsUIPublicPluginStart to Kibana plugin setup dependencies:
 
 ```
 triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 ```
+
 Then this dependency will be used to embed Create Alert flyout.
 
 2. Add Create Alert flyout to React component using triggersActionsUi start contract:
+
 ```
 // in the component state definition section
 const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
@@ -825,6 +844,7 @@ const AddAlertFlyout = useMemo(
 ```
 
 getAddAlertFlyout variables definition:
+
 ```
 interface AlertAddProps {
   consumer: string;
@@ -838,39 +858,39 @@ interface AlertAddProps {
 }
 ```
 
-|Property|Description|
-|---|---|
-|consumer|Name of the plugin that creates an alert.|
-|addFlyoutVisible|Visibility state of the Create Alert flyout.|
-|setAddFlyoutVisibility|Function for changing visibility state of the Create Alert flyout.|
-|alertTypeId|Optional property to preselect alert type.|
-|canChangeTrigger|Optional property, that hides change alert type possibility.|
-|onSave|Optional function, which will be executed if alert was saved sucsessfuly.|
-|initialValues|Default values for Alert properties.|
-|metadata|Optional generic property, which allows to define component specific metadata. This metadata can be used for passing down preloaded data for Alert type expression component.|
+| Property               | Description                                                                                                                                                                   |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| consumer               | Name of the plugin that creates an alert.                                                                                                                                     |
+| addFlyoutVisible       | Visibility state of the Create Alert flyout.                                                                                                                                  |
+| setAddFlyoutVisibility | Function for changing visibility state of the Create Alert flyout.                                                                                                            |
+| alertTypeId            | Optional property to preselect alert type.                                                                                                                                    |
+| canChangeTrigger       | Optional property, that hides change alert type possibility.                                                                                                                  |
+| onSave                 | Optional function, which will be executed if alert was saved sucsessfuly.                                                                                                     |
+| initialValues          | Default values for Alert properties.                                                                                                                                          |
+| metadata               | Optional generic property, which allows to define component specific metadata. This metadata can be used for passing down preloaded data for Alert type expression component. |
 
 ## Build and register Action Types
 
 Kibana ships with a set of built-in action types UI:
 
-|Type|Id|Description|
-|---|---|---|
-|[Server log](#server-log)|`.log`|Logs messages to the Kibana log using `server.log()`|
-|[Email](#email)|`.email`|Sends an email using SMTP|
-|[Slack](#slack)|`.slack`|Posts a message to a Slack channel|
-|[Index](#index)|`.index`|Indexes document(s) into Elasticsearch|
-|[Webhook](#webhook)|`.webhook`|Sends a payload to a web service using HTTP POST or PUT|
-|[PagerDuty](#pagerduty)|`.pagerduty`|Triggers, resolves, or acknowledges an incident to a PagerDuty service|
+| Type                      | Id           | Description                                                            |
+| ------------------------- | ------------ | ---------------------------------------------------------------------- |
+| [Server log](#server-log) | `.log`       | Logs messages to the Kibana log using `server.log()`                   |
+| [Email](#email)           | `.email`     | Sends an email using SMTP                                              |
+| [Slack](#slack)           | `.slack`     | Posts a message to a Slack channel                                     |
+| [Index](#index)           | `.index`     | Indexes document(s) into Elasticsearch                                 |
+| [Webhook](#webhook)       | `.webhook`   | Sends a payload to a web service using HTTP POST or PUT                |
+| [PagerDuty](#pagerduty)   | `.pagerduty` | Triggers, resolves, or acknowledges an incident to a PagerDuty service |
 
-Every action type should be registered server side, and can be optionally registered client side. 
+Every action type should be registered server side, and can be optionally registered client side.
 Only action types registered on both client and server will be displayed in the Alerts and Actions UI.
 Built-in action types UI is located under the folder `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types`
 and this is a file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/index.ts` for client side registration.
 
-
 ### Server log
 
 Action type model definition:
+
 ```
 export function getActionType(): ActionTypeModel {
   return {
@@ -899,6 +919,7 @@ export function getActionType(): ActionTypeModel {
   };
 }
 ```
+
 Server log has a connector UI:
 
 ![Server log connector card](https://i.imgur.com/ZIWhV89.png)
@@ -911,6 +932,7 @@ and action params form available in Create Alert form:
 ### Email
 
 Action type model definition:
+
 ```
 export function getActionType(): ActionTypeModel {
   const mailformat = /^[^@\s]+@[^@\s]+$/;
@@ -940,6 +962,7 @@ export function getActionType(): ActionTypeModel {
   };
 }
 ```
+
 ![Email connector card](https://i.imgur.com/d8kCbjQ.png)
 
 ![Email connector form](https://i.imgur.com/Uf6HU7X.png)
@@ -950,6 +973,7 @@ and action params form available in Create Alert form:
 ### Slack
 
 Action type model definition:
+
 ```
 export function getActionType(): ActionTypeModel {
   return {
@@ -971,7 +995,7 @@ export function getActionType(): ActionTypeModel {
       // validation of connector properties implementation
     },
     validateParams: (actionParams: SlackActionParams): Promise<ValidationResult> => {
-      // validation of action params implementation 
+      // validation of action params implementation
     },
     actionConnectorFields: SlackActionFields,
     actionParamsFields: SlackParamsFields,
@@ -989,6 +1013,7 @@ and action params form available in Create Alert form:
 ### Index
 
 Action type model definition:
+
 ```
 export function getActionType(): ActionTypeModel {
   return {
@@ -1029,12 +1054,13 @@ Example of the index document for Index Threshold alert:
     "context_title": "{{context.title}}",
     "context_value": "{{context.value}}",
     "context_message": "{{context.message}}"
-} 
+}
 ```
 
 ### Webhook
 
 Action type model definition:
+
 ```
 export function getActionType(): ActionTypeModel {
   return {
@@ -1065,10 +1091,10 @@ export function getActionType(): ActionTypeModel {
 and action params form available in Create Alert form:
 ![Webhook action form](https://i.imgur.com/mBGfeuC.png)
 
-
 ### PagerDuty
 
 Action type model definition:
+
 ```
 export function getActionType(): ActionTypeModel {
   return {
@@ -1108,6 +1134,7 @@ and action params form available in Create Alert form:
 ## Action type model definition
 
 Each action type should be defined as an `ActionTypeModel` object with the following properties:
+
 ```
   id: string;
   iconClass: IconType;
@@ -1119,16 +1146,17 @@ Each action type should be defined as an `ActionTypeModel` object with the follo
   actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
   customConnectorSelectItem?: CustomConnectorSelectionItem;
 ```
-|Property|Description|
-|---|---|
-|id|Action type id. Should be the same as on server side.|
-|iconClass|Setting for icon to be displayed to the user. EUI supports any known EUI icon, SVG URL, or a lazy loaded React component, ReactElement.|
-|selectMessage|Short description of action type responsibility, that will be displayed on the select card in UI.|
-|validateConnector|Validation function for action connector.|
-|validateParams|Validation function for action params.|
-|actionConnectorFields|A lazy loaded React component for building UI of current action type connector.|
-|actionParamsFields|A lazy loaded React component for building UI of current action type params. Displayed as a part of Create Alert flyout.|
-|customConnectorSelectItem|Optional, an object for customizing the selection row of the action connector form.|
+
+| Property                  | Description                                                                                                                             |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| id                        | Action type id. Should be the same as on server side.                                                                                   |
+| iconClass                 | Setting for icon to be displayed to the user. EUI supports any known EUI icon, SVG URL, or a lazy loaded React component, ReactElement. |
+| selectMessage             | Short description of action type responsibility, that will be displayed on the select card in UI.                                       |
+| validateConnector         | Validation function for action connector.                                                                                               |
+| validateParams            | Validation function for action params.                                                                                                  |
+| actionConnectorFields     | A lazy loaded React component for building UI of current action type connector.                                                         |
+| actionParamsFields        | A lazy loaded React component for building UI of current action type params. Displayed as a part of Create Alert flyout.                |
+| customConnectorSelectItem | Optional, an object for customizing the selection row of the action connector form.                                                     |
 
 ### CustomConnectorSelectionItem Properties
 
@@ -1138,21 +1166,21 @@ Each action type should be defined as an `ActionTypeModel` object with the follo
     LazyExoticComponent<ComponentType<{ actionConnector: ActionConnector }> | undefined;
 ```
 
-|Property|Description|
-|---|---|
-|getText|Function for returning the text to display for the row.|
-|getComponent|Function for returning a lazy loaded React component for customizing the selection row of the action connector form. Or undefined if if no customization is needed.|
+| Property     | Description                                                                                                                                                         |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| getText      | Function for returning the text to display for the row.                                                                                                             |
+| getComponent | Function for returning a lazy loaded React component for customizing the selection row of the action connector form. Or undefined if if no customization is needed. |
 
 ## Register action type model
 
 There are two ways to register a new action type UI:
 
 1. Directly in `triggers_actions_ui` plugin. In this case, the action type will be available in the Alerts and Actions management section.
-Registration code for a new action type model should be added to the file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/index.ts`
-Only registered action types are available in UI.
+   Registration code for a new action type model should be added to the file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/index.ts`
+   Only registered action types are available in UI.
 
 2. Register action type in another plugin. In this case, the action type will be available only in the current plugin UI.
-It should be done by importing dependency `TriggersAndActionsUIPublicPluginSetup` and adding the next code on plugin setup:
+   It should be done by importing dependency `TriggersAndActionsUIPublicPluginSetup` and adding the next code on plugin setup:
 
 ```
 function getSomeNewActionType() {
@@ -1171,6 +1199,7 @@ Action type UI is expected to be defined as `ActionTypeModel` object.
 Below is a list of steps that should be done to build and register a new action type with the name `Example Action Type`:
 
 1. At any suitable place in Kibana, create a file, which will expose an object implementing interface [ActionTypeModel]:
+
 ```
 import React, { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -1244,6 +1273,7 @@ export function getActionType(): ActionTypeModel {
 ```
 
 2. Define `actionConnectorFields` as `React.FunctionComponent` - this is the form for action connector.
+
 ```
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -1290,7 +1320,8 @@ const ExampleConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps
 export {ExampleConnectorFields as default};
 ```
 
-3. Define action type params fields using the property of `ActionTypeModel` `actionParamsFields`: 
+3. Define action type params fields using the property of `ActionTypeModel` `actionParamsFields`:
+
 ```
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -1339,6 +1370,7 @@ export {ExampleParamsFields as default};
 ```
 
 4. Extend registration code with the new action type register in the file `x-pack/plugins/triggers_actions_ui/public/application/components/builtin_action_types/index.ts`
+
 ```
 import { getActionType as getExampledActionType } from './example';
 ...
@@ -1365,6 +1397,7 @@ or create a new connector:
 ## Embed the Alert Actions form within any Kibana plugin
 
 Follow the instructions bellow to embed the Alert Actions form within any Kibana plugin:
+
 1. Add TriggersAndActionsUIPublicPluginSetup and TriggersAndActionsUIPublicPluginStart to Kibana plugin setup dependencies:
 
 ```
@@ -1378,6 +1411,7 @@ triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 
 triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 ```
+
 Then this dependencies will be used to embed Actions form or register your own action type.
 
 2. Add Actions form to React component:
@@ -1415,7 +1449,7 @@ Then this dependencies will be used to embed Actions form or register your own a
           },
         ],
         tags: [],
-        muteAll: false,
+        snoozeIndefinitely: false,
         enabled: false,
         mutedInstanceIds: [],
       } as unknown) as Alert;
@@ -1444,6 +1478,7 @@ Then this dependencies will be used to embed Actions form or register your own a
 ```
 
 ActionForm Props definition:
+
 ```
 interface ActionAccordionFormProps {
   actions: RuleAction[];
@@ -1465,39 +1500,40 @@ interface ActionAccordionFormProps {
 
 ```
 
-|Property|Description|
-|---|---|
-|actions|List of actions comes from alert.actions property.|
-|defaultActionGroupId|Default action group id to which each new action will belong by default.|
-|actionGroups|Optional. List of action groups to which new action can be assigned. The RunWhen field is only displayed when these action groups are specified|
-|setActionIdByIndex|Function for changing action 'id' by the proper index in alert.actions array.|
-|setActionGroupIdByIndex|Function for changing action 'group' by the proper index in alert.actions array.|
-|setRuleProperty|Function for changing alert property 'actions'. Used when deleting action from the array to reset it.|
-|setActionParamsProperty|Function for changing action key/value property by index in alert.actions array.|
-|http|HttpSetup needed for executing API calls.|
-|actionTypeRegistry|Registry for action types.|
-|toastNotifications|Toast messages  Plugin Setup Contract.|
-|docLinks|Documentation links Plugin Start Contract.|
-|actionTypes|Optional property, which allows to define a list of available actions specific for a current plugin.|
-|messageVariables|Optional property, which allows to define a list of variables for action 'message' property. Set `useWithTripleBracesInTemplates` to true if you don't want the variable escaped when rendering.|
-|defaultActionMessage|Optional property, which allows to define a message value for action with 'message' property.|
-|capabilities|Kibana core's Capabilities ApplicationStart['capabilities'].|
+| Property                | Description                                                                                                                                                                                      |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| actions                 | List of actions comes from alert.actions property.                                                                                                                                               |
+| defaultActionGroupId    | Default action group id to which each new action will belong by default.                                                                                                                         |
+| actionGroups            | Optional. List of action groups to which new action can be assigned. The RunWhen field is only displayed when these action groups are specified                                                  |
+| setActionIdByIndex      | Function for changing action 'id' by the proper index in alert.actions array.                                                                                                                    |
+| setActionGroupIdByIndex | Function for changing action 'group' by the proper index in alert.actions array.                                                                                                                 |
+| setRuleProperty         | Function for changing alert property 'actions'. Used when deleting action from the array to reset it.                                                                                            |
+| setActionParamsProperty | Function for changing action key/value property by index in alert.actions array.                                                                                                                 |
+| http                    | HttpSetup needed for executing API calls.                                                                                                                                                        |
+| actionTypeRegistry      | Registry for action types.                                                                                                                                                                       |
+| toastNotifications      | Toast messages Plugin Setup Contract.                                                                                                                                                            |
+| docLinks                | Documentation links Plugin Start Contract.                                                                                                                                                       |
+| actionTypes             | Optional property, which allows to define a list of available actions specific for a current plugin.                                                                                             |
+| messageVariables        | Optional property, which allows to define a list of variables for action 'message' property. Set `useWithTripleBracesInTemplates` to true if you don't want the variable escaped when rendering. |
+| defaultActionMessage    | Optional property, which allows to define a message value for action with 'message' property.                                                                                                    |
+| capabilities            | Kibana core's Capabilities ApplicationStart['capabilities'].                                                                                                                                     |
 
-|Property|Description|
-|---|---|
-|onSave|Optional function, which will be executed if alert was saved sucsessfuly.|
-|http|HttpSetup needed for executing API calls.|
-|ruleTypeRegistry|Registry for alert types.|
-|actionTypeRegistry|Registry for action types.|
-|uiSettings|Optional property, which is needed to display visualization of alert type expression. Will be changed after visualization refactoring.|
-|docLinks|Documentation Links, needed to link to the documentation from informational callouts.|
-|toastNotifications|Toast messages.|
-|charts|Optional property, which is needed to display visualization of alert type expression. Will be changed after visualization refactoring.|
-|dataFieldsFormats|Optional property, which is needed to display visualization of alert type expression. Will be changed after visualization refactoring.|
+| Property           | Description                                                                                                                            |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| onSave             | Optional function, which will be executed if alert was saved sucsessfuly.                                                              |
+| http               | HttpSetup needed for executing API calls.                                                                                              |
+| ruleTypeRegistry   | Registry for alert types.                                                                                                              |
+| actionTypeRegistry | Registry for action types.                                                                                                             |
+| uiSettings         | Optional property, which is needed to display visualization of alert type expression. Will be changed after visualization refactoring. |
+| docLinks           | Documentation Links, needed to link to the documentation from informational callouts.                                                  |
+| toastNotifications | Toast messages.                                                                                                                        |
+| charts             | Optional property, which is needed to display visualization of alert type expression. Will be changed after visualization refactoring. |
+| dataFieldsFormats  | Optional property, which is needed to display visualization of alert type expression. Will be changed after visualization refactoring. |
 
 ## Embed the Create Connector flyout within any Kibana plugin
 
 Follow the instructions bellow to embed the Create Connector flyout within any Kibana plugin:
+
 1. Add TriggersAndActionsUIPublicPluginSetup and TriggersAndActionsUIPublicPluginStart to Kibana plugin setup dependencies:
 
 ```
@@ -1511,9 +1547,11 @@ triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 
 triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 ```
+
 Then this dependency will be used to embed Create Connector flyout or register new action type.
 
 2. Add Create Connector flyout to React component:
+
 ```
 // import section
 import { ActionsConnectorsContextProvider, ConnectorAddFlyout } from '../../../../../../../triggers_actions_ui/public';
@@ -1564,6 +1602,7 @@ const connector = {
 ```
 
 ConnectorAddFlyout Props definition:
+
 ```
 export interface ConnectorAddFlyoutProps {
   addFlyoutVisible: boolean;
@@ -1572,15 +1611,16 @@ export interface ConnectorAddFlyoutProps {
 }
 ```
 
-|Property|Description|
-|---|---|
-|addFlyoutVisible|Visibility state of the Create Connector flyout.|
-|setAddFlyoutVisibility|Function for changing visibility state of the Create Connector flyout.|
-|actionTypes|Optional property, that allows to define only specific action types list which is available for a current plugin.|
+| Property               | Description                                                                                                       |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| addFlyoutVisible       | Visibility state of the Create Connector flyout.                                                                  |
+| setAddFlyoutVisibility | Function for changing visibility state of the Create Connector flyout.                                            |
+| actionTypes            | Optional property, that allows to define only specific action types list which is available for a current plugin. |
 
 ## Embed the Edit Connector flyout within any Kibana plugin
 
 Follow the instructions bellow to embed the Edit Connector flyout within any Kibana plugin:
+
 1. Add TriggersAndActionsUIPublicPluginSetup and TriggersAndActionsUIPublicPluginStart to Kibana plugin setup dependencies:
 
 ```
@@ -1594,9 +1634,11 @@ triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 
 triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 ```
+
 Then this dependency will be used to embed Edit Connector flyout.
 
 2. Add Create Connector flyout to React component:
+
 ```
 // import section
 import { ActionsConnectorsContextProvider, ConnectorEditFlyout } from '../../../../../../../triggers_actions_ui/public';
@@ -1631,6 +1673,7 @@ const { http, triggersActionsUi, notifications, application } = useKibana().serv
 ```
 
 ConnectorEditFlyout Props definition:
+
 ```
 export interface ConnectorEditProps {
   initialConnector: ActionConnector;
@@ -1641,13 +1684,14 @@ export interface ConnectorEditProps {
 }
 ```
 
-|Property|Description|
-|---|---|
-|initialConnector|Property, that allows to define the initial state of edited connector.|
-|editFlyoutVisible|Visibility state of the Edit Connector flyout.|
-|setEditFlyoutVisibility|Function for changing visibility state of the Edit Connector flyout.|
+| Property                | Description                                                            |
+| ----------------------- | ---------------------------------------------------------------------- |
+| initialConnector        | Property, that allows to define the initial state of edited connector. |
+| editFlyoutVisible       | Visibility state of the Edit Connector flyout.                         |
+| setEditFlyoutVisibility | Function for changing visibility state of the Edit Connector flyout.   |
 
 ActionsConnectorsContextValue options:
+
 ```
 export interface ActionsConnectorsContextValue {
   http: HttpSetup;
@@ -1661,10 +1705,10 @@ export interface ActionsConnectorsContextValue {
 }
 ```
 
-|Property|Description|
-|---|---|
-|http|HttpSetup needed for executing API calls.|
-|actionTypeRegistry|Registry for action types.|
-|capabilities|Property, which is defining action current user usage capabilities like canSave or canDelete.|
-|toastNotifications|Toast messages.|
-|reloadConnectors|Optional function, which will be executed if connector was saved sucsessfuly, like reload list of connecotrs.|
+| Property           | Description                                                                                                   |
+| ------------------ | ------------------------------------------------------------------------------------------------------------- |
+| http               | HttpSetup needed for executing API calls.                                                                     |
+| actionTypeRegistry | Registry for action types.                                                                                    |
+| capabilities       | Property, which is defining action current user usage capabilities like canSave or canDelete.                 |
+| toastNotifications | Toast messages.                                                                                               |
+| reloadConnectors   | Optional function, which will be executed if connector was saved sucsessfuly, like reload list of connecotrs. |

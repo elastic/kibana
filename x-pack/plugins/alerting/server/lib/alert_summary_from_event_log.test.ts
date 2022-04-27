@@ -40,7 +40,7 @@ describe('alertSummaryFromEventLog', () => {
         },
         "id": "rule-123",
         "lastRun": undefined,
-        "snoozeIndefinitely": false,
+        "muteAll": false,
         "name": "rule-name",
         "ruleTypeId": "123",
         "status": "OK",
@@ -62,7 +62,7 @@ describe('alertSummaryFromEventLog', () => {
       tags: ['tag-1', 'tag-2'],
       consumer: 'rule-consumer-2',
       throttle: '1h',
-      snoozeIndefinitely: true,
+      muteAll: true,
     });
     const events: IValidatedEvent[] = [];
     const executionEvents: IValidatedEvent[] = [];
@@ -86,7 +86,7 @@ describe('alertSummaryFromEventLog', () => {
         },
         "id": "rule-456",
         "lastRun": undefined,
-        "snoozeIndefinitely": true,
+        "muteAll": true,
         "name": "rule-name-2",
         "ruleTypeId": "456",
         "status": "OK",
@@ -730,7 +730,7 @@ const BaseRule: SanitizedRule<{ bar: boolean }> = {
   consumer: 'rule-consumer',
   throttle: null,
   notifyWhen: null,
-  snoozeIndefinitely: false,
+  muteAll: false,
   mutedInstanceIds: [],
   params: { bar: true },
   actions: [],

@@ -2255,19 +2255,6 @@ describe('successful migrations', () => {
     });
 
     describe('8.3.0', () => {
-      test('migrates muted rules to the new data model', () => {
-        const migration830 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.3.0'];
-        const mutedAlert = getMockData(
-          {
-            muteAll: true,
-          },
-          true
-        );
-        const migratedMutedAlert830 = migration830(mutedAlert, migrationContext);
-
-        expect(migratedMutedAlert830.attributes.snoozeIndefinitely).toEqual(true);
-      });
-
       test('migrates snoozed rules to the new data model', () => {
         const fakeTimer = sinon.useFakeTimers();
         const migration830 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.3.0'];

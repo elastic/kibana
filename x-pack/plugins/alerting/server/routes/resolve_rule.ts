@@ -29,7 +29,7 @@ const rewriteBodyRes: RewriteResponseCase<ResolvedSanitizedRule<RuleTypeParams>>
   updatedAt,
   apiKeyOwner,
   notifyWhen,
-  snoozeIndefinitely,
+  muteAll,
   mutedInstanceIds,
   executionStatus,
   actions,
@@ -44,7 +44,7 @@ const rewriteBodyRes: RewriteResponseCase<ResolvedSanitizedRule<RuleTypeParams>>
   updated_at: updatedAt,
   api_key_owner: apiKeyOwner,
   notify_when: notifyWhen,
-  snooze_indefinitely: snoozeIndefinitely,
+  mute_all: muteAll,
   muted_alert_ids: mutedInstanceIds,
   scheduled_task_id: scheduledTaskId,
   execution_status: executionStatus && {

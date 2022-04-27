@@ -244,11 +244,11 @@ export interface RawRule extends SavedObjectAttributes {
   apiKeyOwner: string | null;
   throttle: string | null;
   notifyWhen: RuleNotifyWhenType | null;
+  muteAll: boolean;
   mutedInstanceIds: string[];
   meta?: RuleMeta;
   executionStatus: RawRuleExecutionStatus;
   monitoring?: RuleMonitoring;
-  snoozeIndefinitely: boolean;
   snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
 }
 

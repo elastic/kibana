@@ -67,7 +67,7 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
   updatedAt,
   apiKeyOwner,
   notifyWhen,
-  snoozeIndefinitely,
+  muteAll,
   mutedInstanceIds,
   executionStatus,
   ...rest
@@ -81,7 +81,7 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
   ...(createdAt ? { created_at: createdAt } : {}),
   ...(updatedAt ? { updated_at: updatedAt } : {}),
   ...(notifyWhen ? { notify_when: notifyWhen } : {}),
-  ...(snoozeIndefinitely !== undefined ? { snooze_indefinitely: snoozeIndefinitely } : {}),
+  ...(muteAll !== undefined ? { mute_all: muteAll } : {}),
   ...(mutedInstanceIds ? { muted_alert_ids: mutedInstanceIds } : {}),
   ...(executionStatus
     ? {
