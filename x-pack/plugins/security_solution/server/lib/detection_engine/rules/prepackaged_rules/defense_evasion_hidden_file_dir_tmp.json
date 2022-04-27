@@ -15,6 +15,7 @@
   "license": "Elastic License v2",
   "max_signals": 33,
   "name": "Creation of Hidden Files and Directories",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  process.working_directory in (\"/tmp\", \"/var/tmp\", \"/dev/shm\") and\n  process.args regex~ \"\"\"\\.[a-z0-9_\\-][a-z0-9_\\-\\.]{1,254}\"\"\" and\n  not process.name in (\"ls\", \"find\")\n",
   "risk_score": 47,
   "rule_id": "b9666521-4742-49ce-9ddc-b8e84c35acae",
@@ -61,5 +62,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 7
+  "version": 8
 }

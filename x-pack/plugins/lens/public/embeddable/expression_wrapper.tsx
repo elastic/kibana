@@ -13,10 +13,10 @@ import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
   ReactExpressionRendererProps,
-} from 'src/plugins/expressions/public';
-import type { KibanaExecutionContext } from 'src/core/public';
-import { ExecutionContextSearch } from 'src/plugins/data/public';
-import { DefaultInspectorAdapters, RenderMode } from 'src/plugins/expressions';
+} from '@kbn/expressions-plugin/public';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import { ExecutionContextSearch } from '@kbn/data-plugin/public';
+import { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin';
 import classNames from 'classnames';
 import { getOriginalRequestErrorMessages } from '../editor_frame_service/error_helper';
 import { ErrorMessage } from '../editor_frame_service/types';

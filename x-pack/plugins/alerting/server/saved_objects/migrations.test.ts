@@ -8,9 +8,9 @@
 import uuid from 'uuid';
 import { getMigrations, isAnyActionSupportIncidents } from './migrations';
 import { RawRule } from '../types';
-import { SavedObjectUnsanitizedDoc } from 'kibana/server';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
-import { migrationMocks } from 'src/core/server/mocks';
+import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { migrationMocks } from '@kbn/core/server/mocks';
 import { RuleType, ruleTypeMappings } from '@kbn/securitysolution-rules';
 
 const migrationContext = migrationMocks.createContext();
@@ -2250,6 +2250,41 @@ describe('successful migrations', () => {
           risk_score: 60,
           severity: '60-high',
         });
+      });
+    });
+
+    describe('8.3.0', () => {
+      test('removes internal tags', () => {
+        const migration830 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.3.0'];
+        const alert = getMockData(
+          {
+            tags: [
+              '__internal_immutable:false',
+              '__internal_rule_id:064e3fed-6328-416b-bb85-c08265088f41',
+              'test-tag',
+            ],
+            alertTypeId: 'siem.queryRule',
+          },
+          true
+        );
+
+        const migratedAlert830 = migration830(alert, migrationContext);
+
+        expect(migratedAlert830.attributes.tags).toEqual(['test-tag']);
+      });
+
+      test('do not remove internal tags if rule is not Security solution rule', () => {
+        const migration830 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.3.0'];
+        const alert = getMockData(
+          {
+            tags: ['__internal_immutable:false', 'tag-1'],
+          },
+          true
+        );
+
+        const migratedAlert830 = migration830(alert, migrationContext);
+
+        expect(migratedAlert830.attributes.tags).toEqual(['__internal_immutable:false', 'tag-1']);
       });
     });
 

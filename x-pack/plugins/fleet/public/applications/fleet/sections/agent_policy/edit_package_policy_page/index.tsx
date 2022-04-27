@@ -47,7 +47,7 @@ import {
   useBreadcrumbs as useIntegrationsBreadcrumbs,
   useGetOnePackagePolicy,
 } from '../../../../integrations/hooks';
-import { Loading, Error, ExtensionWrapper } from '../../../components';
+import { Loading, Error, ExtensionWrapper, EuiButtonWithTooltip } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
 import { CreatePackagePolicyPageLayout } from '../create_package_policy_page/components';
 import type { PackagePolicyValidationResults } from '../create_package_policy_page/services';
@@ -64,7 +64,6 @@ import type {
 } from '../../../../../../common/types/rest_spec';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { pkgKeyFromPackageInfo } from '../../../services';
-import { EuiButtonWithTooltip } from '../../../../integrations/sections/epm/screens/detail';
 
 import { fixApmDurationVars, hasUpgradeAvailable } from './utils';
 

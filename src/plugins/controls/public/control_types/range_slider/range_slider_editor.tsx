@@ -10,16 +10,16 @@ import useMount from 'react-use/lib/useMount';
 import React, { useEffect, useState } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 
-import { pluginServices } from '../../services';
-import { ControlEditorProps } from '../../types';
-import { RangeSliderEmbeddableInput } from './types';
-import { RangeSliderStrings } from './range_slider_strings';
-import { DataViewListItem, DataView } from '../../../../data_views/common';
+import { DataViewListItem, DataView } from '@kbn/data-views-plugin/common';
 import {
   LazyDataViewPicker,
   LazyFieldPicker,
   withSuspense,
-} from '../../../../presentation_util/public';
+} from '@kbn/presentation-util-plugin/public';
+import { pluginServices } from '../../services';
+import { ControlEditorProps } from '../../types';
+import { RangeSliderEmbeddableInput } from './types';
+import { RangeSliderStrings } from './range_slider_strings';
 
 interface RangeSliderEditorState {
   dataViewListItems: DataViewListItem[];
@@ -35,6 +35,8 @@ export const RangeSliderEditor = ({
   initialInput,
   setValidState,
   setDefaultTitle,
+  getRelevantDataViewId,
+  setLastUsedDataViewId,
 }: ControlEditorProps<RangeSliderEmbeddableInput>) => {
   // Controls Services Context
   const { dataViews } = pluginServices.getHooks();
@@ -50,7 +52,8 @@ export const RangeSliderEditor = ({
     if (state.fieldName) setDefaultTitle(state.fieldName);
     (async () => {
       const dataViewListItems = await getIdsWithTitle();
-      const initialId = initialInput?.dataViewId ?? (await getDefaultId());
+      const initialId =
+        initialInput?.dataViewId ?? getRelevantDataViewId?.() ?? (await getDefaultId());
       let dataView: DataView | undefined;
       if (initialId) {
         onChange({ dataViewId: initialId });
@@ -77,10 +80,14 @@ export const RangeSliderEditor = ({
           dataViews={state.dataViewListItems}
           selectedDataViewId={dataView?.id}
           onChangeDataViewId={(dataViewId) => {
+            setLastUsedDataViewId?.(dataViewId);
+            if (dataViewId === dataView?.id) return;
+
             onChange({ dataViewId });
-            get(dataViewId).then((newDataView) =>
-              setState((s) => ({ ...s, dataView: newDataView }))
-            );
+            setState((s) => ({ ...s, fieldName: undefined }));
+            get(dataViewId).then((newDataView) => {
+              setState((s) => ({ ...s, dataView: newDataView }));
+            });
           }}
           trigger={{
             label: state.dataView?.title ?? RangeSliderStrings.editor.getNoDataViewTitle(),

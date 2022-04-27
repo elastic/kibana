@@ -22,10 +22,12 @@
     "licensing",
     "maps",
     "ruleRegistry",
+    "sessionView",
     "taskManager",
     "timelines",
     "triggersActionsUi",
     "uiActions",
+    "unifiedSearch",
     "sessionView"
   ],
   "optionalPlugins": [
@@ -52,6 +54,7 @@
     "kibanaReact",
     "usageCollection",
     "lists",
-    "ml"
+    "ml",
+    "unifiedSearch"
   ]
 }

@@ -45,7 +45,7 @@ export const OsqueryFlyout: React.FC<OsqueryFlyoutProps> = ({ agentId, onClose }
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <OsqueryActionWrapper data-test-subj="flyout-body-osquery">
-          <OsqueryAction agentId={agentId} formType="steps" />
+          <OsqueryAction agentId={agentId} formType="steps" hideFullscreen={true} />
         </OsqueryActionWrapper>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

@@ -8,7 +8,7 @@
 import React from 'react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { DetailPanelProcess, DetailPanelProcessLeader } from '../../types';
-import { DetailPanelProcessTab } from './index';
+import { DetailPanelProcessTab } from '.';
 
 const getLeaderDetail = (leader: string): DetailPanelProcessLeader => ({
   id: `${leader}-id`,
@@ -76,14 +76,14 @@ describe('DetailPanelProcessTab component', () => {
       expect(renderResult.queryByText(TEST_PROCESS_DETAIL.id)).toBeVisible();
       expect(renderResult.queryByText(TEST_PROCESS_DETAIL.start)).toBeVisible();
       expect(renderResult.queryByText(TEST_PROCESS_DETAIL.end)).toBeVisible();
-      expect(renderResult.queryByText(TEST_PROCESS_DETAIL.exit_code)).toBeVisible();
+      expect(renderResult.queryByText(TEST_PROCESS_DETAIL.exit_code!)).toBeVisible();
       expect(renderResult.queryByText(TEST_PROCESS_DETAIL.userName)).toBeVisible();
       expect(renderResult.queryByText(`['vi', 'test.txt']`)).toBeVisible();
       expect(renderResult.queryAllByText('test-executable-cmd')).toHaveLength(3);
       expect(renderResult.queryByText('(fork)')).toBeVisible();
       expect(renderResult.queryByText('(exec)')).toBeVisible();
       expect(renderResult.queryByText('(end)')).toBeVisible();
-      expect(renderResult.queryByText(TEST_PROCESS_DETAIL.pid)).toBeVisible();
+      expect(renderResult.queryByText(TEST_PROCESS_DETAIL.pid!)).toBeVisible();
 
       // Process tab accordions rendered correctly
       // TODO: revert back when we have jump to leaders button working

@@ -1,0 +1,267 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KibanaPageTemplateSolutionNav accepts EuiSideNavProps 1`] = `
+<Fragment>
+  <Component
+    aria-hidden={false}
+    className="kbnPageTemplateSolutionNav"
+    data-test-subj="DTS"
+    heading={
+      <React.Fragment>
+        <strong>
+          Solution
+        </strong>
+      </React.Fragment>
+    }
+    isOpenOnMobile={false}
+    items={
+      Array [
+        Object {
+          "id": "1",
+          "items": Array [
+            Object {
+              "id": "1.1",
+              "items": undefined,
+              "name": "Ingest Node Pipelines",
+              "tabIndex": undefined,
+            },
+            Object {
+              "id": "1.2",
+              "items": undefined,
+              "name": "Logstash Pipelines",
+              "tabIndex": undefined,
+            },
+            Object {
+              "id": "1.3",
+              "items": undefined,
+              "name": "Beats Central Management",
+              "tabIndex": undefined,
+            },
+          ],
+          "name": "Ingest",
+          "tabIndex": undefined,
+        },
+        Object {
+          "id": "2",
+          "items": Array [
+            Object {
+              "id": "2.1",
+              "items": undefined,
+              "name": "Index Management",
+              "tabIndex": undefined,
+            },
+            Object {
+              "id": "2.2",
+              "items": undefined,
+              "name": "Index Lifecycle Policies",
+              "tabIndex": undefined,
+            },
+            Object {
+              "id": "2.3",
+              "items": undefined,
+              "name": "Snapshot and Restore",
+              "tabIndex": undefined,
+            },
+          ],
+          "name": "Data",
+          "tabIndex": undefined,
+        },
+      ]
+    }
+    mobileTitle={
+      <React.Fragment>
+        <FormattedMessage
+          defaultMessage="{solutionName} Menu"
+          id="sharedUXComponents.solutionNav.mobileTitleText"
+          values={
+            Object {
+              "solutionName": "Solution",
+            }
+          }
+        />
+      </React.Fragment>
+    }
+    toggleOpenOnMobile={[Function]}
+  />
+</Fragment>
+`;
+
+exports[`KibanaPageTemplateSolutionNav renders 1`] = `
+<Fragment>
+  <Component
+    aria-hidden={false}
+    className="kbnPageTemplateSolutionNav"
+    heading={
+      <React.Fragment>
+        <strong>
+          Solution
+        </strong>
+      </React.Fragment>
+    }
+    isOpenOnMobile={false}
+    items={
+      Array [
+        Object {
+          "id": "1",
+          "items": Array [
+            Object {
+              "id": "1.1",
+              "items": undefined,
+              "name": "Ingest Node Pipelines",
+              "tabIndex": undefined,
+            },
+            Object {
+              "id": "1.2",
+              "items": undefined,
+              "name": "Logstash Pipelines",
+              "tabIndex": undefined,
+            },
+            Object {
+              "id": "1.3",
+              "items": undefined,
+              "name": "Beats Central Management",
+              "tabIndex": undefined,
+            },
+          ],
+          "name": "Ingest",
+          "tabIndex": undefined,
+        },
+        Object {
+          "id": "2",
+          "items": Array [
+            Object {
+              "id": "2.1",
+              "items": undefined,
+              "name": "Index Management",
+              "tabIndex": undefined,
+            },
+            Object {
+              "id": "2.2",
+              "items": undefined,
+              "name": "Index Lifecycle Policies",
+              "tabIndex": undefined,
+            },
+            Object {
+              "id": "2.3",
+              "items": undefined,
+              "name": "Snapshot and Restore",
+              "tabIndex": undefined,
+            },
+          ],
+          "name": "Data",
+          "tabIndex": undefined,
+        },
+      ]
+    }
+    mobileTitle={
+      <React.Fragment>
+        <FormattedMessage
+          defaultMessage="{solutionName} Menu"
+          id="sharedUXComponents.solutionNav.mobileTitleText"
+          values={
+            Object {
+              "solutionName": "Solution",
+            }
+          }
+        />
+      </React.Fragment>
+    }
+    toggleOpenOnMobile={[Function]}
+  />
+</Fragment>
+`;
+
+exports[`KibanaPageTemplateSolutionNav renders with icon 1`] = `
+<Fragment>
+  <Component
+    aria-hidden={false}
+    className="kbnPageTemplateSolutionNav"
+    heading={
+      <React.Fragment>
+        <KibanaSolutionAvatar
+          className="kbnPageTemplateSolutionNavAvatar"
+          iconType="logoElastic"
+          name="Solution"
+        />
+        <strong>
+          Solution
+        </strong>
+      </React.Fragment>
+    }
+    isOpenOnMobile={false}
+    items={
+      Array [
+        Object {
+          "id": "1",
+          "items": Array [
+            Object {
+              "id": "1.1",
+              "items": undefined,
+              "name": "Ingest Node Pipelines",
+              "tabIndex": undefined,
+            },
+            Object {
+              "id": "1.2",
+              "items": undefined,
+              "name": "Logstash Pipelines",
+              "tabIndex": undefined,
+            },
+            Object {
+              "id": "1.3",
+              "items": undefined,
+              "name": "Beats Central Management",
+              "tabIndex": undefined,
+            },
+          ],
+          "name": "Ingest",
+          "tabIndex": undefined,
+        },
+        Object {
+          "id": "2",
+          "items": Array [
+            Object {
+              "id": "2.1",
+              "items": undefined,
+              "name": "Index Management",
+              "tabIndex": undefined,
+            },
+            Object {
+              "id": "2.2",
+              "items": undefined,
+              "name": "Index Lifecycle Policies",
+              "tabIndex": undefined,
+            },
+            Object {
+              "id": "2.3",
+              "items": undefined,
+              "name": "Snapshot and Restore",
+              "tabIndex": undefined,
+            },
+          ],
+          "name": "Data",
+          "tabIndex": undefined,
+        },
+      ]
+    }
+    mobileTitle={
+      <React.Fragment>
+        <KibanaSolutionAvatar
+          className="kbnPageTemplateSolutionNavAvatar"
+          iconType="logoElastic"
+          name="Solution"
+        />
+        <FormattedMessage
+          defaultMessage="{solutionName} Menu"
+          id="sharedUXComponents.solutionNav.mobileTitleText"
+          values={
+            Object {
+              "solutionName": "Solution",
+            }
+          }
+        />
+      </React.Fragment>
+    }
+    toggleOpenOnMobile={[Function]}
+  />
+</Fragment>
+`;

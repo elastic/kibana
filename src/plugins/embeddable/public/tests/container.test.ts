@@ -36,7 +36,7 @@ import {
   FilterableContainer,
   FilterableContainerInput,
 } from '../lib/test_samples/embeddables/filterable_container';
-import { coreMock } from '../../../../core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { testPlugin } from './test_plugin';
 import { of } from './helpers';
 import { createEmbeddablePanelMock } from '../mocks';

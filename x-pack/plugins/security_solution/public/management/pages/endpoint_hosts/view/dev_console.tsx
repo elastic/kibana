@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import { EuiCode } from '@elastic/eui';
+import React, { memo, useCallback, useMemo } from 'react';
+import {
+  EuiButton,
+  EuiCode,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useUrlParams } from '../../../components/hooks/use_url_params';
 import {
@@ -14,6 +22,8 @@ import {
   CommandDefinition,
   CommandServiceInterface,
   Console,
+  RegisteredConsoleClient,
+  useConsoleManager,
 } from '../../../components/console';
 
 const delay = async (ms: number = 4000) => new Promise((r) => setTimeout(r, ms));
@@ -24,6 +34,17 @@ class DevCommandService implements CommandServiceInterface {
       {
         name: 'cmd1',
         about: 'Runs cmd1',
+      },
+      {
+        name: 'get-file',
+        about: 'retrieve a file from the endpoint',
+        args: {
+          file: {
+            required: true,
+            allowMultiples: false,
+            about: 'the file path for the file to be retrieved',
+          },
+        },
       },
       {
         name: 'cmd2',
@@ -71,25 +92,101 @@ class DevCommandService implements CommandServiceInterface {
   }
 }
 
+const RunningConsole = memo<{ registeredConsole: RegisteredConsoleClient }>(
+  ({ registeredConsole }) => {
+    const handleShowOnClick = useCallback(() => {
+      registeredConsole.show();
+    }, [registeredConsole]);
+
+    const handleTerminateOnClick = useCallback(() => {
+      registeredConsole.terminate();
+    }, [registeredConsole]);
+
+    return (
+      <>
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow>{registeredConsole.title}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem>
+                <EuiButton onClick={handleTerminateOnClick} color="danger">
+                  {'terminate'}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiButton onClick={handleShowOnClick}>{'show'}</EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer />
+      </>
+    );
+  }
+);
+RunningConsole.displayName = 'RunningConsole';
+
 // ------------------------------------------------------------
 // FOR DEV PURPOSES ONLY
 // FIXME:PT Delete once we have support via row actions menu
 // ------------------------------------------------------------
-export const DevConsole = memo(() => {
-  const isConsoleEnabled = useIsExperimentalFeatureEnabled('responseActionsConsoleEnabled');
-
-  const consoleService = useMemo(() => {
+export const ShowDevConsole = memo(() => {
+  const consoleManager = useConsoleManager();
+  const commandService = useMemo(() => {
     return new DevCommandService();
   }, []);
 
+  const handleRegisterOnClick = useCallback(() => {
+    consoleManager
+      .register({
+        id: Math.random().toString(36), // getId(),
+        title: 'Test console here',
+        meta: {
+          foo: 'bar',
+        },
+        consoleProps: {
+          prompt: '>>',
+          commandService,
+          'data-test-subj': 'dev',
+        },
+      })
+      .show();
+  }, [commandService, consoleManager]);
+
+  return (
+    <EuiPanel>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiButton onClick={handleRegisterOnClick}>{'Open a managed console'}</EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow>
+          {consoleManager.getList<{ foo: string }>().map((registeredConsole) => {
+            return (
+              <RunningConsole key={registeredConsole.id} registeredConsole={registeredConsole} />
+            );
+          })}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="xxl" />
+
+      <EuiText>
+        <h3>{'Un-managed console'}</h3>
+      </EuiText>
+      <EuiPanel>
+        <Console prompt="$$>" commandService={commandService} data-test-subj="dev" />
+      </EuiPanel>
+    </EuiPanel>
+  );
+});
+ShowDevConsole.displayName = 'ShowDevConsole';
+
+export const DevConsole = memo(() => {
+  const isConsoleEnabled = useIsExperimentalFeatureEnabled('responseActionsConsoleEnabled');
   const {
     urlParams: { showConsole = false },
   } = useUrlParams();
 
-  return isConsoleEnabled && showConsole ? (
-    <div style={{ height: '400px' }}>
-      <Console prompt="$$>" commandService={consoleService} data-test-subj="dev" />
-    </div>
-  ) : null;
+  return isConsoleEnabled && showConsole ? <ShowDevConsole /> : null;
 });
 DevConsole.displayName = 'DevConsole';

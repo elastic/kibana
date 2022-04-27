@@ -8,8 +8,8 @@
 
 import { get } from 'lodash';
 import moment from 'moment';
-import { SearchResponse } from 'src/core/server';
-import { CollectorFetchContext } from '../../../../../usage_collection/server';
+import { SearchResponse } from '@kbn/core/server';
+import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 
 interface SearchHit {
   _id: string;

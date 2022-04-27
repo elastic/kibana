@@ -66,6 +66,7 @@ export type {
   OverallSumIndexPatternColumn,
   FormulaPublicApi,
   StaticValueIndexPatternColumn,
+  TimeScaleIndexPatternColumn,
 } from './indexpattern_datasource/types';
 export type {
   XYArgs,
@@ -102,7 +103,7 @@ export type {
   LabelsOrientationConfigResult,
   ReferenceLineLayerConfigResult,
   AxisTitlesVisibilityConfigResult,
-} from '../../../../src/plugins/chart_expressions/expression_xy/common';
+} from '@kbn/expression-xy-plugin/common';
 export type { LensEmbeddableInput } from './embeddable';
 export { layerTypes } from '../common';
 

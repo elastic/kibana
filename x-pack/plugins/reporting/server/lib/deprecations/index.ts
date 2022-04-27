@@ -8,7 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { DeprecationsDetails } from 'kibana/server';
+import { DeprecationsDetails } from '@kbn/core/server';
 import { checkIlmMigrationStatus } from './check_ilm_migration_status';
 
 function deprecationError(title: string, error: Error): DeprecationsDetails[] {

@@ -9,12 +9,13 @@
 import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 
-import { toMountPoint } from '../../../../kibana_react/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { OverlayRef } from '@kbn/core/public';
 import { ControlGroupStrings } from '../control_group_strings';
 import { ControlGroupEditor } from './control_group_editor';
-import { OverlayRef } from '../../../../../core/public';
 import { pluginServices } from '../../services';
 import { ControlGroupContainer } from '..';
+import { setFlyoutRef } from '../embeddable/control_group_container';
 
 export interface EditControlGroupButtonProps {
   controlGroupContainer: ControlGroupContainer;
@@ -60,9 +61,13 @@ export const EditControlGroup = ({
       ),
       {
         outsideClickCloses: false,
-        onClose: () => flyoutInstance.close(),
+        onClose: () => {
+          flyoutInstance.close();
+          setFlyoutRef(undefined);
+        },
       }
     );
+    setFlyoutRef(flyoutInstance);
   };
 
   const commonButtonProps = {

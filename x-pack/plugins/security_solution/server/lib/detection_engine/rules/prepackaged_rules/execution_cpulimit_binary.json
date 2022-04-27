@@ -1,0 +1,55 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies Linux binary cpulimit abuse to break out from restricted environments by spawning an interactive system shell. The cpulimit utility is used to restrict the CPU usage of a process in cases of CPU or system load exceeding the defined threshold and the activity of spawning a shell is not a standard use of this binary by a user or system administrator. This can potentially indicate a malicious actor attempting to improve the capabilities or stability of their access.",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Linux Restricted Shell Breakout via cpulimit Shell Evasion",
+  "query": "process where event.type == \"start\" and process.name in (\"bash\", \"sh\", \"dash\") and\n  process.parent.name == \"cpulimit\" and process.parent.args == \"-f\" and\n  process.parent.args in (\"/bin/sh\", \"/bin/bash\", \"/bin/dash\", \"sh\", \"bash\", \"dash\")\n",
+  "references": [
+    "https://gtfobins.github.io/gtfobins/cpulimit/"
+  ],
+  "risk_score": 47,
+  "rule_id": "0968cfbd-40f0-4b1c-b7b1-a60736c7b241",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Execution",
+    "GTFOBins"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/",
+          "subtechnique": [
+            {
+              "id": "T1059.004",
+              "name": "Unix Shell",
+              "reference": "https://attack.mitre.org/techniques/T1059/004/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

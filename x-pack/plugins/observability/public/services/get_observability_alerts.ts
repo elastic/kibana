@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { HttpSetup } from 'kibana/public';
-import { Alert } from '../../../alerting/common';
+import type { HttpSetup } from '@kbn/core/public';
+import { Rule } from '@kbn/alerting-plugin/common';
 
 const allowedConsumers = ['apm', 'uptime', 'logs', 'infrastructure', 'alerts'];
 
 export async function getObservabilityAlerts({ http }: { http: HttpSetup }) {
   try {
-    const { data = [] }: { data: Alert[] } =
+    const { data = [] }: { data: Rule[] } =
       (await http.get('/api/alerts/_find', {
         query: {
           page: 1,

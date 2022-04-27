@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaContext } from 'src/plugins/data/common';
+import { KibanaContext } from '@kbn/data-plugin/common';
 import {
   AnyExpressionFunctionDefinition,
   Datatable,
@@ -15,7 +15,7 @@ import {
   Render,
   Style,
   Range,
-} from 'src/plugins/expressions';
+} from '@kbn/expressions-plugin';
 import { Datasource, Model, Transform, View } from '../public/expression_types';
 import { AssetType } from './assets';
 import { CanvasWorkpad, Sidebar } from './canvas';

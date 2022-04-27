@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import type { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
+import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { Direction } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { UsersRequestOptions } from '../../../../../../common/search_strategy/security_solution/users/all';
@@ -37,8 +37,6 @@ export const buildUsersQuery = ({
     },
   ];
 
-  const agg = { user_count: { cardinality: { field: 'user.name' } } };
-
   const dslQuery = {
     allow_no_indices: true,
     index: defaultIndex,
@@ -47,7 +45,7 @@ export const buildUsersQuery = ({
     body: {
       ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
-        ...agg,
+        user_count: { cardinality: { field: 'user.name' } },
         user_data: {
           terms: { size: querySize, field: 'user.name', order: getQueryOrder(sort) },
           aggs: {

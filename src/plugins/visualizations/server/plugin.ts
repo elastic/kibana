@@ -9,21 +9,21 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
-import { PluginSetup as DataPluginSetup } from 'src/plugins/data/server';
-import { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';
-import { registerVisualizationsCollector } from './usage_collector';
-import { capabilitiesProvider } from './capabilities_provider';
-
-import type { VisualizationsPluginSetup, VisualizationsPluginStart } from './types';
+import { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
 import type {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
   Logger,
-} from '../../../core/server';
-import type { UsageCollectionSetup } from '../../usage_collection/server';
-import type { EmbeddableSetup } from '../../embeddable/server';
+} from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';
+import { registerVisualizationsCollector } from './usage_collector';
+import { capabilitiesProvider } from './capabilities_provider';
+
+import type { VisualizationsPluginSetup, VisualizationsPluginStart } from './types';
 import { makeVisualizeEmbeddableFactory } from './embeddable/make_visualize_embeddable_factory';
 import { getVisualizationSavedObjectType } from './saved_objects';
 

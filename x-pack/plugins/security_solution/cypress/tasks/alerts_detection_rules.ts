@@ -154,7 +154,7 @@ export const goToRuleDetails = () => {
 };
 
 export const goToTheRuleDetailsOf = (ruleName: string) => {
-  cy.get(RULE_NAME).contains(ruleName).click();
+  cy.get(RULE_NAME).should('contain', ruleName).contains(ruleName).click();
 };
 
 export const loadPrebuiltDetectionRules = () => {

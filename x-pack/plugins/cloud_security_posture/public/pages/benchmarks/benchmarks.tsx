@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import React, { useState } from 'react';
 import {
   EuiFieldSearch,
   EuiFieldSearchProps,
@@ -15,15 +17,14 @@ import {
   EuiTextColor,
   EuiText,
 } from '@elastic/eui';
-import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { allNavigationItems } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
 import { useCISIntegrationLink } from '../../common/navigation/use_navigate_to_cis_integration';
-import { CspPageTemplate } from '../../components/page_template';
+import { CspPageTemplate } from '../../components/csp_page_template';
 import { BenchmarksTable } from './benchmarks_table';
-import { ADD_A_CIS_INTEGRATION, BENCHMARK_INTEGRATIONS } from './translations';
+import { BENCHMARK_INTEGRATIONS } from './translations';
 import {
   useCspBenchmarkIntegrations,
   UseCspBenchmarkIntegrationsProps,
@@ -33,14 +34,23 @@ import { SEARCH_PLACEHOLDER } from './translations';
 
 const BENCHMARKS_BREADCRUMBS = [allNavigationItems.benchmarks];
 const SEARCH_DEBOUNCE_MS = 300;
-export const BENCHMARKS_TABLE_DATA_TEST_SUBJ = 'cspBenchmarksTable';
+export const BENCHMARKS_TABLE_DATA_TEST_SUBJ = 'csp_benchmarks_table';
+export const ADD_INTEGRATION_TEST_SUBJ = 'csp_add_integration';
 
 const AddCisIntegrationButton = () => {
   const cisIntegrationLink = useCISIntegrationLink();
 
   return (
-    <EuiButton fill iconType="plusInCircle" href={cisIntegrationLink}>
-      {ADD_A_CIS_INTEGRATION}
+    <EuiButton
+      data-test-subj={ADD_INTEGRATION_TEST_SUBJ}
+      fill
+      iconType="plusInCircle"
+      href={cisIntegrationLink}
+    >
+      <FormattedMessage
+        id="xpack.csp.benchmarks.addCisIntegrationButtonLabel"
+        defaultMessage="Add a CIS integration"
+      />
     </EuiButton>
   );
 };
@@ -70,7 +80,7 @@ const BenchmarkEmptyState = ({ name }: { name: string }) => (
       <EuiTextColor color="subdued">
         <FormattedMessage
           id="xpack.csp.benchmarks.integrationsNotFoundWithFiltersMessage"
-          defaultMessage="We weren’t able to find any benchmark integrations with the above filters."
+          defaultMessage="We weren't able to find any benchmark integrations with the above filters."
         />
       </EuiTextColor>
     </EuiText>
