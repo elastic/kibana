@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { appendLayerIds, getDataLayers } from './layers';
+export { appendLayerIds } from './layers';

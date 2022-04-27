@@ -330,13 +330,27 @@ exports[`XYChart component it renders area 1`] = `
         "calls": Array [
           Array [
             Object {
-              "id": "string",
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
             },
           ],
           Array [
             Object {
               "id": "string",
             },
+          ],
+          Array [
+            undefined,
           ],
           Array [
             Object {
@@ -353,6 +367,56 @@ exports[`XYChart component it renders area 1`] = `
           ],
         ],
         "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
           Object {
             "type": "return",
             "value": Object {
@@ -799,13 +863,27 @@ exports[`XYChart component it renders bar 1`] = `
         "calls": Array [
           Array [
             Object {
-              "id": "string",
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
             },
           ],
           Array [
             Object {
               "id": "string",
             },
+          ],
+          Array [
+            undefined,
           ],
           Array [
             Object {
@@ -822,6 +900,56 @@ exports[`XYChart component it renders bar 1`] = `
           ],
         ],
         "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
           Object {
             "type": "return",
             "value": Object {
@@ -1268,13 +1396,27 @@ exports[`XYChart component it renders horizontal bar 1`] = `
         "calls": Array [
           Array [
             Object {
-              "id": "string",
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
             },
           ],
           Array [
             Object {
               "id": "string",
             },
+          ],
+          Array [
+            undefined,
           ],
           Array [
             Object {
@@ -1291,6 +1433,56 @@ exports[`XYChart component it renders horizontal bar 1`] = `
           ],
         ],
         "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
           Object {
             "type": "return",
             "value": Object {
@@ -1737,13 +1929,27 @@ exports[`XYChart component it renders line 1`] = `
         "calls": Array [
           Array [
             Object {
-              "id": "string",
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
             },
           ],
           Array [
             Object {
               "id": "string",
             },
+          ],
+          Array [
+            undefined,
           ],
           Array [
             Object {
@@ -1760,6 +1966,56 @@ exports[`XYChart component it renders line 1`] = `
           ],
         ],
         "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
           Object {
             "type": "return",
             "value": Object {
@@ -2206,13 +2462,27 @@ exports[`XYChart component it renders stacked area 1`] = `
         "calls": Array [
           Array [
             Object {
-              "id": "string",
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
             },
           ],
           Array [
             Object {
               "id": "string",
             },
+          ],
+          Array [
+            undefined,
           ],
           Array [
             Object {
@@ -2229,6 +2499,56 @@ exports[`XYChart component it renders stacked area 1`] = `
           ],
         ],
         "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
           Object {
             "type": "return",
             "value": Object {
@@ -2675,13 +2995,27 @@ exports[`XYChart component it renders stacked bar 1`] = `
         "calls": Array [
           Array [
             Object {
-              "id": "string",
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
             },
           ],
           Array [
             Object {
               "id": "string",
             },
+          ],
+          Array [
+            undefined,
           ],
           Array [
             Object {
@@ -2698,6 +3032,56 @@ exports[`XYChart component it renders stacked bar 1`] = `
           ],
         ],
         "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
           Object {
             "type": "return",
             "value": Object {
@@ -3144,13 +3528,27 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
         "calls": Array [
           Array [
             Object {
-              "id": "string",
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
             },
           ],
           Array [
             Object {
               "id": "string",
             },
+          ],
+          Array [
+            undefined,
           ],
           Array [
             Object {
@@ -3167,6 +3565,56 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
           ],
         ],
         "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "I",
+                  ],
+                  Array [
+                    "J",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": "I",
+                  },
+                  Object {
+                    "type": "return",
+                    "value": "J",
+                  },
+                ],
+              },
+            },
+          },
           Object {
             "type": "return",
             "value": Object {

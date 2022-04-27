@@ -533,21 +533,17 @@ const extendedYConfigToExpression = (yConfig: ExtendedYConfig, defaultColor?: st
 const axisExtentConfigToExpression = (
   extent: AxisExtentConfig | undefined,
   layers: ValidXYDataLayerConfig[]
-): Ast => {
-  const hasLine = layers.filter(({ seriesType }) => seriesType.includes('line')).length > 0;
-  const mode = !extent?.mode || (!hasLine && extent?.mode === 'dataBounds') ? 'full' : extent.mode;
-  return {
-    type: 'expression',
-    chain: [
-      {
-        type: 'function',
-        function: 'axisExtentConfig',
-        arguments: {
-          mode: [mode],
-          lowerBound: extent?.lowerBound !== undefined ? [extent?.lowerBound] : [],
-          upperBound: extent?.upperBound !== undefined ? [extent?.upperBound] : [],
-        },
+): Ast => ({
+  type: 'expression',
+  chain: [
+    {
+      type: 'function',
+      function: 'axisExtentConfig',
+      arguments: {
+        mode: [extent?.mode ?? 'full'],
+        lowerBound: extent?.lowerBound !== undefined ? [extent?.lowerBound] : [],
+        upperBound: extent?.upperBound !== undefined ? [extent?.upperBound] : [],
       },
-    ],
-  };
-};
+    },
+  ],
+});

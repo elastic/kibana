@@ -42,6 +42,7 @@ import {
   getFormattedTablesByLayers,
   getLayersFormats,
   getLayersTitles,
+  validateExtent,
 } from '../helpers';
 import {
   getFilteredLayers,
@@ -58,7 +59,7 @@ import { visualizationDefinitions } from '../definitions';
 import { CommonXYLayerConfig } from '../../common/types';
 import { SplitChart } from './split_chart';
 import { Annotations, getAnnotationsGroupedByInterval } from './annotations';
-import { SeriesTypes, ValueLabelModes } from '../../common/constants';
+import { AxisExtentModes, SeriesTypes, ValueLabelModes } from '../../common/constants';
 import { DataLayers } from './data_layers';
 import { Tooltip } from './tooltip';
 
@@ -329,12 +330,17 @@ export function XYChart({
         return layer.seriesType.includes('bar') || layer.seriesType.includes('area');
       })
     );
-    const fit = !hasBarOrArea && extent.mode === 'dataBounds';
+
+    const fit = !hasBarOrArea && extent.mode === AxisExtentModes.DATA_BOUNDS;
+
     let min: number = NaN;
     let max: number = NaN;
     if (extent.mode === 'custom') {
-      min = extent.lowerBound ?? NaN;
-      max = extent.upperBound ?? NaN;
+      const { inclusiveZeroError, boundaryError } = validateExtent(hasBarOrArea, extent);
+      if (!inclusiveZeroError && !boundaryError) {
+        min = extent.lowerBound ?? NaN;
+        max = extent.upperBound ?? NaN;
+      }
     }
 
     return {
