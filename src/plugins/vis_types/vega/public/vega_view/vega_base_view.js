@@ -98,6 +98,11 @@ export class VegaBaseView {
     this._initialized = true;
 
     try {
+      if (this._parser.useResize) {
+        this._$parentEl.addClass('vgaVis--autoresize');
+      } else {
+        this._$parentEl.removeClass('vgaVis--autoresize');
+      }
       this._$parentEl.empty().addClass(`vgaVis`).css('flex-direction', this._parser.containerDir);
 
       // bypass the onWarn warning checks - in some cases warnings may still need to be shown despite being disabled
@@ -260,13 +265,6 @@ export class VegaBaseView {
   }
 
   async resize() {
-    if (this._$parentEl) {
-      if (this._parser.useResize) {
-        this._$parentEl.addClass('vgaVis--autoresize');
-      } else {
-        this._$parentEl.removeClass('vgaVis--autoresize');
-      }
-    }
     if (this._parser.useResize && this._view) {
       this.updateVegaSize(this._view);
       await this._view.runAsync();
