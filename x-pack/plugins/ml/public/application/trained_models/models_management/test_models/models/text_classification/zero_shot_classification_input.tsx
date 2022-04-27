@@ -27,6 +27,7 @@ const ClassNameInput: FC<{
   const runningState = useObservable(inferrer.runningState$);
   return (
     <EuiFormRow
+      fullWidth
       label={i18n.translate(
         'xpack.ml.trainedModels.testModelsFlyout.textClassification.classNamesInput',
         {
