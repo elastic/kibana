@@ -26,7 +26,6 @@ export default {
 
 const noDataConfig = {
   solution: 'Analytics',
-  pageTitle: 'Analytics',
   logo: 'logoKibana',
   action: {
     elasticAgent: {
