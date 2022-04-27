@@ -10,7 +10,12 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { RuleStatusDropdown, ComponentOpts } from './rule_status_dropdown';
 
 const NOW_STRING = '2020-03-01T00:00:00.000Z';
-const SNOOZE_END_TIME = new Date('2020-03-04T00:00:00.000Z');
+const SNOOZED_SCHEDULE = [
+  {
+    startTime: NOW_STRING,
+    duration: Date.parse('2020-03-04T00:00:00.000Z') - Date.parse(NOW_STRING),
+  },
+];
 
 describe('RuleStatusDropdown', () => {
   const enableRule = jest.fn();
@@ -51,7 +56,7 @@ describe('RuleStatusDropdown', () => {
       notifyWhen: null,
       index: 0,
       updatedAt: new Date('2020-08-20T19:23:38Z'),
-      snoozeEndTime: null,
+      snoozeSchedule: [],
     } as ComponentOpts['rule'],
     onRuleChanged: jest.fn(),
   };
@@ -86,7 +91,7 @@ describe('RuleStatusDropdown', () => {
 
     const wrapper = mountWithIntl(
       <RuleStatusDropdown
-        {...{ ...props, rule: { ...props.rule, snoozeEndTime: SNOOZE_END_TIME } }}
+        {...{ ...props, rule: { ...props.rule, snoozeSchedule: SNOOZED_SCHEDULE } }}
       />
     );
     expect(wrapper.find('[data-test-subj="statusDropdown"]').first().props().title).toBe('Snoozed');
@@ -108,7 +113,7 @@ describe('RuleStatusDropdown', () => {
   test('renders status control as disabled when rule is snoozed but also disabled', () => {
     const wrapper = mountWithIntl(
       <RuleStatusDropdown
-        {...{ ...props, rule: { ...props.rule, enabled: false, snoozeEndTime: SNOOZE_END_TIME } }}
+        {...{ ...props, rule: { ...props.rule, enabled: false, snoozeSchedule: SNOOZED_SCHEDULE } }}
       />
     );
     expect(wrapper.find('[data-test-subj="statusDropdown"]').first().props().title).toBe(
@@ -121,7 +126,7 @@ describe('RuleStatusDropdown', () => {
       <RuleStatusDropdown
         {...{
           ...props,
-          rule: { ...props.rule, snoozeEndTime: SNOOZE_END_TIME },
+          rule: { ...props.rule, snoozeSchedule: SNOOZED_SCHEDULE },
         }}
         isEditable={false}
       />
