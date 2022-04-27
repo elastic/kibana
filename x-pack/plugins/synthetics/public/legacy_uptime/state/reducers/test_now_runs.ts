@@ -7,7 +7,7 @@
 
 import { createReducer, PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
-import { IHttpFetchError } from 'kibana/public';
+import { IHttpFetchError } from '@kbn/core/public';
 import {
   Locations,
   ScheduleUnit,
@@ -16,7 +16,7 @@ import {
 } from '../../../../common/runtime_types';
 import { clearTestNowMonitorAction, testNowMonitorAction } from '../actions';
 import { TestNowResponse } from '../api';
-import { AppState } from '../index';
+import { AppState } from '..';
 
 export enum TestRunStats {
   LOADING = 'loading',

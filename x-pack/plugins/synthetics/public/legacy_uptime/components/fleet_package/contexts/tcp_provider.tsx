@@ -12,7 +12,7 @@ import {
   TCPAdvancedFieldsContextProvider,
   defaultTCPSimpleFields,
   defaultTCPAdvancedFields,
-} from './index';
+} from '.';
 import { formatDefaultValues } from '../helpers/context_helpers';
 
 interface TCPContextProviderProps {

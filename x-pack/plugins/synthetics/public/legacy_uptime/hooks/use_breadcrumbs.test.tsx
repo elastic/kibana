@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ChromeBreadcrumb } from 'kibana/public';
+import { ChromeBreadcrumb } from '@kbn/core/public';
 import React from 'react';
 import { Route } from 'react-router-dom';
 import { mountWithRouter } from '../lib';

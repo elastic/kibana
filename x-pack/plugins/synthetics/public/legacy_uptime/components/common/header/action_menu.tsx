@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { HeaderMenuPortal } from '@kbn/observability-plugin/public';
-import { AppMountParameters } from 'kibana/public';
+import { AppMountParameters } from '@kbn/core/public';
 import { ActionMenuContent } from './action_menu_content';
 
 export const ActionMenu = ({ appMountParameters }: { appMountParameters: AppMountParameters }) => (

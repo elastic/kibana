@@ -6,7 +6,7 @@
  */
 
 import { Action } from 'redux-actions';
-import { IHttpFetchError } from 'kibana/public';
+import { IHttpFetchError } from '@kbn/core/public';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { UptimeAlertTypeParams } from '../alerts/alerts';
 

@@ -12,7 +12,7 @@ import {
   HTTPAdvancedFieldsContextProvider,
   defaultHTTPSimpleFields,
   defaultHTTPAdvancedFields,
-} from './index';
+} from '.';
 import { formatDefaultValues } from '../helpers/context_helpers';
 
 interface HTTPContextProviderProps {

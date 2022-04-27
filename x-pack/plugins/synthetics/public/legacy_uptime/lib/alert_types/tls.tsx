@@ -10,7 +10,7 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
 import { CLIENT_ALERT_TYPES } from '../../../../common/constants/alerts';
 import { TlsTranslations } from '../../../../common/translations';
-import { AlertTypeInitializer } from './index';
+import { AlertTypeInitializer } from '.';
 
 import { CERTIFICATES_ROUTE } from '../../../../common/constants/ui';
 

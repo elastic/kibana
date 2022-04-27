@@ -18,7 +18,11 @@ import {
 import { useFetcher } from '@kbn/observability-plugin/public';
 import { useRunOnceErrors } from '../hooks/use_run_once_errors';
 import { TestRunResult } from './test_run_results';
-import { Locations, MonitorFields, ServiceLocationErrors } from '../../../../../common/runtime_types';
+import {
+  Locations,
+  MonitorFields,
+  ServiceLocationErrors,
+} from '../../../../../common/runtime_types';
 import { runOnceMonitor } from '../../../state/api';
 import { kibanaService } from '../../../state/kibana_service';
 

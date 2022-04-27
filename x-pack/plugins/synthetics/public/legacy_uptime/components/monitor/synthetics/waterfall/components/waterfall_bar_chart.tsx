@@ -21,7 +21,7 @@ import {
 import { BAR_HEIGHT } from './constants';
 import { useChartTheme } from '../../../../../hooks/use_chart_theme';
 import { WaterfallChartChartContainer, WaterfallChartTooltip } from './styles';
-import { useWaterfallContext, WaterfallData } from '../index';
+import { useWaterfallContext, WaterfallData } from '..';
 import { WaterfallTooltipContent } from './waterfall_tooltip_content';
 import { formatTooltipHeading } from '../../step_detail/waterfall/data_formatting';
 import { WaterfallChartMarkers } from './waterfall_markers';

@@ -9,7 +9,7 @@ import type { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import type { CoreTheme } from 'kibana/public';
+import type { CoreTheme } from '@kbn/core/public';
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { RedirectAppLinks, toMountPoint } from '@kbn/kibana-react-plugin/public';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';

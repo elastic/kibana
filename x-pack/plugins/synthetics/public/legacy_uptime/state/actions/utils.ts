@@ -6,7 +6,7 @@
  */
 
 import { createAction } from 'redux-actions';
-import { IHttpFetchError } from 'kibana/public';
+import { IHttpFetchError } from '@kbn/core/public';
 import { AsyncAction, AsyncActionOptionalPayload } from './types';
 
 export function createAsyncAction<Payload, SuccessPayload>(
