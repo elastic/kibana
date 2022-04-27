@@ -59,17 +59,40 @@ const provideSuggestions = (
       position.column
     );
 
-    suggestions.push({
-      label: 'searchEs',
-      kind: monacoEditor.languages.CompletionItemKind.Method,
-      documentation: {
-        value: 'Runs an Elasticsearch query',
-        isTrusted: true,
+    suggestions.push(
+      {
+        label: 'searchEs',
+        kind: monacoEditor.languages.CompletionItemKind.Method,
+        documentation: {
+          value: 'Runs an Elasticsearch query',
+          isTrusted: true,
+        },
+        insertText: 'searchEs({\n\tquery: {\n\t\t$0\n\t}\n})',
+        insertTextRules: monacoEditor.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        range: wordRange,
       },
-      insertText: 'searchEs({\n\tquery: {\n\t\t$0\n\t}\n})',
-      insertTextRules: monacoEditor.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-      range: wordRange,
-    });
+      {
+        label: 'subscribeToResize',
+        kind: monacoEditor.languages.CompletionItemKind.Method,
+        documentation: {
+          value: 'Registers a function to be called when vis gets resized',
+          isTrusted: true,
+        },
+        insertText: 'subscribeToResize(() => {$0})',
+        insertTextRules: monacoEditor.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        range: wordRange,
+      },
+      {
+        label: 'getWindowDimensions',
+        kind: monacoEditor.languages.CompletionItemKind.Method,
+        documentation: {
+          value: 'Gets the visualization dimentsions',
+          isTrusted: true,
+        },
+        insertText: 'getWindowDimensions()',
+        range: wordRange,
+      }
+    );
   }
 
   return {

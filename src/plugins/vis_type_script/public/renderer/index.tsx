@@ -54,6 +54,8 @@ const getSandboxDocument = (script: string) => {
             }
           });
 
+          let onResize = () => {};
+
           const ${KIBANA_API_CONSTANT_NAME} = {
             searchEs: (payload, options) => {
               const searchId = searchCounter;
@@ -64,10 +66,19 @@ const getSandboxDocument = (script: string) => {
               endpoint.call.esSearch(searchId, payload, options);
 
               return searchDeferrals[searchId].promise;
+            },
+            subscribeToResize: (fn) => {
+              onResize = fn;
+            },
+            getWindowDimensions: () => {
+              return { width: window.innerWidth, height: window.innerHeight };
             }
           }
 
           window.${KIBANA_API_CONSTANT_NAME} = ${KIBANA_API_CONSTANT_NAME};
+
+
+          window.addEventListener('resize', () => onResize(window.innerWidth, window.innerHeight));
         </script>
 
         <script nonce="${nonce}">window.addEventListener('load', async () => {${script}})</script>
