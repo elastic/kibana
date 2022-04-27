@@ -12,21 +12,19 @@ import { getSpanLinksDetails, SpanLinkDetails } from './get_span_links_details';
 import { kueryRt } from '../default_api_types';
 
 const spanLinksRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/span_links/details',
+  endpoint: 'POST /internal/apm/span_links/details',
   params: t.type({
-    query: t.intersection([
-      kueryRt,
-      t.type({
-        spanLinks: jsonRt.pipe(
-          t.array(
-            t.type({
-              trace: t.type({ id: t.string }),
-              span: t.type({ id: t.string }),
-            })
-          )
-        ),
-      }),
-    ]),
+    query: kueryRt,
+    body: t.type({
+      spanLinks: jsonRt.pipe(
+        t.array(
+          t.type({
+            trace: t.type({ id: t.string }),
+            span: t.type({ id: t.string }),
+          })
+        )
+      ),
+    }),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
@@ -39,7 +37,7 @@ const spanLinksRoute = createApmServerRoute({
     return {
       spanLinksDetails: await getSpanLinksDetails({
         setup,
-        spanLinks: params.query.spanLinks,
+        spanLinks: params.body.spanLinks,
         kuery: params.query.kuery,
       }),
     };

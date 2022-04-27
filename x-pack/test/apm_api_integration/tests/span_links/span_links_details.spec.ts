@@ -25,8 +25,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   async function getSpanDetails({ spanLinks, kuery }: { spanLinks: SpanLinks; kuery: string }) {
     return await apmApiClient.readUser({
-      endpoint: 'GET /internal/apm/span_links/details',
-      params: { query: { spanLinks: JSON.stringify(spanLinks), kuery } },
+      endpoint: 'POST /internal/apm/span_links/details',
+      params: { query: { kuery }, body: { spanLinks: JSON.stringify(spanLinks) } },
     });
   }
 

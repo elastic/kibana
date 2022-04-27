@@ -42,12 +42,10 @@ export function SpanLinks({ spanLinks }: Props) {
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (currentLinks && currentLinks.length) {
-        return callApmApi('GET /internal/apm/span_links/details', {
+        return callApmApi('POST /internal/apm/span_links/details', {
           params: {
-            query: {
-              spanLinks: JSON.stringify(currentLinks),
-              kuery,
-            },
+            query: { kuery },
+            body: { spanLinks: JSON.stringify(currentLinks) },
           },
         });
       }

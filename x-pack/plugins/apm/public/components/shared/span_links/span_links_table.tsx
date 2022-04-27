@@ -27,7 +27,7 @@ import { ServiceLink } from '../service_link';
 import { getSpanIcon } from '../span_icon/get_span_icon';
 
 type SpanLinksDetails =
-  APIReturnType<'GET /internal/apm/span_links/details'>['spanLinksDetails'];
+  APIReturnType<'POST /internal/apm/span_links/details'>['spanLinksDetails'];
 
 type SpanLinkDetails = SpanLinksDetails[0];
 
