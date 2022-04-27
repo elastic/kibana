@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import {
   Chart,
   Settings,
@@ -153,6 +153,12 @@ export function XYChart({
     datatables: filteredLayers.map(({ table }) => table),
   });
 
+  const dataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
+  const formattedDatatables = useMemo(
+    () => getFormattedTablesByLayers(dataLayers, formatFactory),
+    [dataLayers, formatFactory]
+  );
+
   if (filteredLayers.length === 0) {
     const icon: IconType = getIconForSeriesType(
       getDataLayers(layers)?.[0]?.seriesType || SeriesTypes.BAR
@@ -160,13 +166,10 @@ export function XYChart({
     return <EmptyPlaceholder className="xyChart__empty" icon={icon} />;
   }
 
-  const dataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
-
   // use formatting hint of first x axis column to format ticks
   const xAxisColumn = dataLayers[0]?.table.columns.find(({ id }) => id === dataLayers[0].xAccessor);
 
   const xAxisFormatter = formatFactory(xAxisColumn && xAxisColumn.meta?.params);
-  const formattedDatatables = getFormattedTablesByLayers(dataLayers, formatFactory);
 
   // This is a safe formatter for the xAccessor that abstracts the knowledge of already formatted layers
   const safeXAccessorLabelRenderer = (value: unknown): string =>
@@ -420,13 +423,13 @@ export function XYChart({
     onSelectRange(context);
   };
 
-  const legendInsideParams = {
+  const legendInsideParams: LegendPositionConfig = {
     vAlign: legend.verticalAlignment ?? VerticalAlignment.Top,
     hAlign: legend?.horizontalAlignment ?? HorizontalAlignment.Right,
     direction: LayoutDirection.Vertical,
     floating: true,
     floatingColumns: legend?.floatingColumns ?? 1,
-  } as LegendPositionConfig;
+  };
 
   const isHistogramModeEnabled = dataLayers.some(
     ({ isHistogram, seriesType }) =>
@@ -555,7 +558,7 @@ export function XYChart({
             }}
             hide={dataLayers[0]?.hide}
             tickFormat={(d) => axis.formatter?.convert(d) || ''}
-            style={getYAxesStyle(axis.groupId as 'left' | 'right')}
+            style={getYAxesStyle(axis.groupId)}
             domain={getYAxisDomain(axis)}
             ticks={5}
           />

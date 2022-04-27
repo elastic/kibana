@@ -147,11 +147,11 @@ export interface LegendConfig {
   /**
    * Horizontal Alignment of the legend when it is set inside chart
    */
-  horizontalAlignment?: HorizontalAlignment;
+  horizontalAlignment?: typeof HorizontalAlignment.Right | typeof HorizontalAlignment.Left;
   /**
    * Vertical Alignment of the legend when it is set inside chart
    */
-  verticalAlignment?: VerticalAlignment;
+  verticalAlignment?: typeof VerticalAlignment.Top | typeof VerticalAlignment.Bottom;
   /**
    * Number of columns when legend is set inside chart
    */
