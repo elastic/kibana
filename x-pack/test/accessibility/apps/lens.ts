@@ -123,7 +123,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.waitForSearchInputValue('line');
       await a11y.testAppSnapshot();
       await testSubjects.click('lnsChartSwitchPopover_line');
-      await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
     it('change chart type via suggestions', async () => {
