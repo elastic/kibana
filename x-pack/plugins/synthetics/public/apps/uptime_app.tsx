@@ -33,7 +33,7 @@ import { UptimeAlertsFlyoutWrapper } from '../components/overview';
 import { store, storage } from '../state';
 import { kibanaService } from '../state/kibana_service';
 import { ActionMenu } from '../components/common/header/action_menu';
-import { UptimeIndexPatternContextProvider } from '../contexts/uptime_index_pattern_context';
+import { UptimeDataViewContextProvider } from '../contexts/uptime_data_view_context';
 
 export interface UptimeAppColors {
   danger: string;
@@ -84,10 +84,10 @@ const Application = (props: UptimeAppProps) => {
     setBadge(
       !canSave
         ? {
-            text: i18n.translate('xpack.uptime.badge.readOnly.text', {
+            text: i18n.translate('xpack.synthetics.badge.readOnly.text', {
               defaultMessage: 'Read only',
             }),
-            tooltip: i18n.translate('xpack.uptime.badge.readOnly.tooltip', {
+            tooltip: i18n.translate('xpack.synthetics.badge.readOnly.tooltip', {
               defaultMessage: 'Unable to save',
             }),
             iconType: 'glasses',
@@ -124,7 +124,7 @@ const Application = (props: UptimeAppProps) => {
                     <UptimeSettingsContextProvider {...props}>
                       <UptimeThemeContextProvider darkMode={darkMode}>
                         <UptimeStartupPluginsContextProvider {...startPlugins}>
-                          <UptimeIndexPatternContextProvider data={startPlugins.data}>
+                          <UptimeDataViewContextProvider dataViews={startPlugins.dataViews}>
                             <div className={APP_WRAPPER_CLASS} data-test-subj="uptimeApp">
                               <RedirectAppLinks
                                 className={APP_WRAPPER_CLASS}
@@ -137,7 +137,7 @@ const Application = (props: UptimeAppProps) => {
                                 </InspectorContextProvider>
                               </RedirectAppLinks>
                             </div>
-                          </UptimeIndexPatternContextProvider>
+                          </UptimeDataViewContextProvider>
                         </UptimeStartupPluginsContextProvider>
                       </UptimeThemeContextProvider>
                     </UptimeSettingsContextProvider>
