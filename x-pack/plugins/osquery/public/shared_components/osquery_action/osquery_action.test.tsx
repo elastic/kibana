@@ -14,6 +14,8 @@ import { OsqueryAction } from '.';
 import { queryClient } from '../../query_client';
 import * as hooks from './use_is_osquery_available';
 import { useKibana } from '../../common/lib/kibana';
+import { AGENT_STATUS_ERROR, EMPTY_PROMPT, NOT_AVAILABLE, PERMISSION_DENIED } from './translations';
+
 jest.mock('../../common/lib/kibana');
 
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
@@ -71,14 +73,6 @@ const renderWithContext = (Element: React.ReactElement) =>
     </IntlProvider>
   );
 
-const emptyPrompt =
-  'An Elastic Agent is not installed on this host. To run queries, install Elastic Agent on the host, and then add the Osquery Manager integration to the agent policy in Fleet.';
-const permissionDenied = 'Permission denied';
-const osqueryNotAvailable =
-  'The Osquery Manager integration is not added to the agent policy. To run queries on the host, add the Osquery Manager integration to the agent policy in Fleet.';
-const agentStatusError =
-  'To run queries on this host, the Elastic Agent must be active. Check the status of this agent in Fleet.';
-
 describe('Osquery Action', () => {
   it('should return empty prompt when agentFetched and no agentData', async () => {
     spyOsquery();
@@ -87,7 +81,7 @@ describe('Osquery Action', () => {
     const { getByText } = renderWithContext(
       <OsqueryAction agentId={'test'} formType={'steps'} isExternal={true} />
     );
-    expect(getByText(emptyPrompt)).toBeInTheDocument();
+    expect(getByText(EMPTY_PROMPT)).toBeInTheDocument();
   });
   it('should return empty prompt when no agentId', async () => {
     spyOsquery();
@@ -96,7 +90,7 @@ describe('Osquery Action', () => {
     const { getByText } = renderWithContext(
       <OsqueryAction agentId={''} formType={'steps'} isExternal={true} />
     );
-    expect(getByText(emptyPrompt)).toBeInTheDocument();
+    expect(getByText(EMPTY_PROMPT)).toBeInTheDocument();
   });
   it('should return permission denied when agentFetched and agentData available', async () => {
     spyOsquery({ agentData: {} });
@@ -105,7 +99,7 @@ describe('Osquery Action', () => {
     const { getByText } = renderWithContext(
       <OsqueryAction agentId={'test'} formType={'steps'} isExternal={true} />
     );
-    expect(getByText(permissionDenied)).toBeInTheDocument();
+    expect(getByText(PERMISSION_DENIED)).toBeInTheDocument();
   });
   it('should run agent status error when permissions are ok and agent status is wrong', async () => {
     spyOsquery({ agentData: {} });
@@ -113,7 +107,7 @@ describe('Osquery Action', () => {
     const { getByText } = renderWithContext(
       <OsqueryAction agentId={'test'} formType={'steps'} isExternal={true} />
     );
-    expect(getByText(agentStatusError)).toBeInTheDocument();
+    expect(getByText(AGENT_STATUS_ERROR)).toBeInTheDocument();
   });
   it('should run permission denied if just one permission (runSavedQueries) is available', async () => {
     spyOsquery({ agentData: {} });
@@ -125,7 +119,7 @@ describe('Osquery Action', () => {
     const { getByText } = renderWithContext(
       <OsqueryAction agentId={'test'} formType={'steps'} isExternal={true} />
     );
-    expect(getByText(permissionDenied)).toBeInTheDocument();
+    expect(getByText(PERMISSION_DENIED)).toBeInTheDocument();
   });
   it('should run permission denied if just one permission (readSavedQueries) is available', async () => {
     spyOsquery({ agentData: {} });
@@ -137,7 +131,7 @@ describe('Osquery Action', () => {
     const { getByText } = renderWithContext(
       <OsqueryAction agentId={'test'} formType={'steps'} isExternal={true} />
     );
-    expect(getByText(permissionDenied)).toBeInTheDocument();
+    expect(getByText(PERMISSION_DENIED)).toBeInTheDocument();
   });
   it('should run permission denied if no writeLiveQueries', async () => {
     spyOsquery({ agentData: {} });
@@ -149,7 +143,7 @@ describe('Osquery Action', () => {
     const { getByText } = renderWithContext(
       <OsqueryAction agentId={'test'} formType={'steps'} isExternal={true} />
     );
-    expect(getByText(agentStatusError)).toBeInTheDocument();
+    expect(getByText(AGENT_STATUS_ERROR)).toBeInTheDocument();
   });
   it('should if osquery is not available', async () => {
     spyOsquery({ agentData: {}, osqueryAvailable: false });
@@ -161,7 +155,7 @@ describe('Osquery Action', () => {
     const { getByText } = renderWithContext(
       <OsqueryAction agentId={'test'} formType={'steps'} isExternal={true} />
     );
-    expect(getByText(osqueryNotAvailable)).toBeInTheDocument();
+    expect(getByText(NOT_AVAILABLE)).toBeInTheDocument();
   });
   it('should not return any errors when all data is ok', async () => {
     spyOsquery({ agentData: { status: 'online' } });
@@ -170,8 +164,8 @@ describe('Osquery Action', () => {
     const { queryByText } = renderWithContext(
       <OsqueryAction agentId={'test'} formType={'steps'} isExternal={true} />
     );
-    expect(queryByText(emptyPrompt)).not.toBeInTheDocument();
-    expect(queryByText(permissionDenied)).not.toBeInTheDocument();
-    expect(queryByText(agentStatusError)).not.toBeInTheDocument();
+    expect(queryByText(EMPTY_PROMPT)).not.toBeInTheDocument();
+    expect(queryByText(PERMISSION_DENIED)).not.toBeInTheDocument();
+    expect(queryByText(AGENT_STATUS_ERROR)).not.toBeInTheDocument();
   });
 });
