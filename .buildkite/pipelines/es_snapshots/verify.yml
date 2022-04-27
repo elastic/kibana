@@ -42,7 +42,7 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/oss_cigroup.sh
     label: 'OSS CI Group'
-    parallelism: 11
+    parallelism: 12
     agents:
       queue: ci-group-4d
     depends_on: build
@@ -79,7 +79,6 @@ steps:
       queue: kibana-default
     depends_on:
       - default-cigroup
-      - default-cigroup-docker
       - oss-cigroup
       - jest-integration
       - api-integration
