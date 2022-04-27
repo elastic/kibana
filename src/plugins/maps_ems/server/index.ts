@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Subscription } from 'rxjs';
 import {
   CoreSetup,
   PluginInitializerContext,
@@ -43,6 +44,7 @@ interface MapsEmsSetupServerDependencies {
 
 export class MapsEmsPlugin implements Plugin<MapsEmsPluginServerSetup> {
   readonly _initializerContext: PluginInitializerContext<MapConfig>;
+  private licenseSubscription?: Subscription;
 
   constructor(initializerContext: PluginInitializerContext<MapConfig>) {
     this._initializerContext = initializerContext;
@@ -59,7 +61,7 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginServerSetup> {
       }
 
       plugins.licensing.refresh().then(updateLicenseState);
-      plugins.licensing.license$.subscribe(updateLicenseState);
+      this.licenseSubscription = plugins.licensing.license$.subscribe(updateLicenseState);
     }
 
     return {
@@ -73,6 +75,10 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginServerSetup> {
   }
 
   public start() {}
+
+  public stop() {
+    this.licenseSubscription?.unsubscribe();
+  }
 }
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
