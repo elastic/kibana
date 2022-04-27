@@ -1,25 +1,29 @@
 {
-	"attributes": {
-	  "closed_at": null,
-    "closed_by": null,
+  "attributes": {
+    "closed_at": "2022-03-25T10:18:00.000Z",
+    "closed_by": {
+      "email": "",
+      "full_name": "",
+      "username": "elastic"
+    },
     "connector": {
       "fields": null,
       "name": "none",
       "type": ".none"
     },
-    "created_at": "2022-03-15T10:16:56.252Z",
+    "created_at": "2022-03-25T10:16:00.000Z",
     "created_by": {
       "email": "",
       "full_name": "",
       "username": "elastic"
     },
-    "description": "test",
+    "description": "test 2",
     "external_service": null,
     "owner": "securitySolutionFixture",
     "settings": {
       "syncAlerts": false
     },
-    "status": "open",
+    "status": "closed",
     "tags": [],
     "title": "stack",
     "updated_at": "2022-03-29T10:33:09.754Z",
@@ -30,7 +34,7 @@
     }
   },
   "coreMigrationVersion": "8.2.0",
-  "id": "1537b380-a512-11ec-b94f-85999e89e434",
+  "id": "4537b380-a512-11ec-b92f-859b9e89e434",
   "migrationVersion": {
     "cases": "8.1.0"
   },
@@ -72,7 +76,7 @@
     }
   },
   "coreMigrationVersion": "8.2.0",
-  "id": "3537b580-a512-11ec-b94f-85979e89e434",
+  "id": "7537b580-a512-11ec-b94f-85979e89e434",
   "migrationVersion": {
     "cases": "8.1.0"
   },
@@ -91,7 +95,7 @@
       "name": "none",
       "type": ".none"
     },
-    "created_at": "2022-03-25T10:16:56.252Z",
+    "created_at": "2022-03-20T10:16:56.252Z",
     "created_by": {
       "email": "",
       "full_name": "",
@@ -99,11 +103,11 @@
     },
     "description": "test 2",
     "external_service": null,
-    "owner": "securitySolutionFixture",
+    "owner": "observabilityFixture",
     "settings": {
       "syncAlerts": false
     },
-    "status": "open",
+    "status": "in-progress",
     "tags": [],
     "title": "stack",
     "updated_at": "2022-03-29T10:33:09.754Z",
@@ -114,7 +118,7 @@
     }
   },
   "coreMigrationVersion": "8.2.0",
-  "id": "4537b380-a512-11ec-b92f-859b9e89e434",
+  "id": "1537b580-a512-11ec-b94f-85979e89e434",
   "migrationVersion": {
     "cases": "8.1.0"
   },

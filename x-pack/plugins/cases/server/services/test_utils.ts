@@ -105,6 +105,7 @@ export const basicCaseFields = {
     email: 'testemail@elastic.co',
     username: 'elastic',
   },
+  duration: null,
   description: 'This is a brand new case of a bad meanie defacing data',
   title: 'Super Bad Security Issue',
   status: CaseStatuses.open,

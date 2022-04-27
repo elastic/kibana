@@ -560,6 +560,7 @@ describe('AllCasesListGeneric', () => {
           username: 'lknope',
         },
         description: 'Security banana Issue',
+        duration: null,
         externalService: {
           connectorId: '123',
           connectorName: 'connector name',

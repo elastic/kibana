@@ -85,6 +85,7 @@ export const postCaseResp = (
   ...req,
   ...(id != null ? { id } : {}),
   comments: [],
+  duration: null,
   totalAlerts: 0,
   totalComment: 0,
   closed_by: null,

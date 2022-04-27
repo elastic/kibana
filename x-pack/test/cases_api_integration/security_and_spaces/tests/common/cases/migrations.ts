@@ -368,5 +368,50 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         expect(caseInfo).not.to.have.property('type');
       });
     });
+
+    describe('8.3.0 adding duration', () => {
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_duration.json'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_duration.json'
+        );
+        await deleteAllCaseItems(es);
+      });
+
+      it('calculates the correct duration for closed cases', async () => {
+        const caseInfo = await getCase({
+          supertest,
+          caseId: '4537b380-a512-11ec-b92f-859b9e89e434',
+        });
+
+        expect(caseInfo).to.have.property('duration');
+        expect(caseInfo.duration).to.be(120);
+      });
+
+      it('sets the duration to null to open cases', async () => {
+        const caseInfo = await getCase({
+          supertest,
+          caseId: '7537b580-a512-11ec-b94f-85979e89e434',
+        });
+
+        expect(caseInfo).to.have.property('duration');
+        expect(caseInfo.duration).to.be(null);
+      });
+
+      it('sets the duration to null to in-progress cases', async () => {
+        const caseInfo = await getCase({
+          supertest,
+          caseId: '1537b580-a512-11ec-b94f-85979e89e434',
+        });
+
+        expect(caseInfo).to.have.property('duration');
+        expect(caseInfo.duration).to.be(null);
+      });
+    });
   });
 }

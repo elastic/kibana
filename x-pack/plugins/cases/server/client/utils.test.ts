@@ -87,6 +87,7 @@ describe('utils', () => {
             "username": "elastic",
           },
           "description": "A description",
+          "duration": null,
           "external_service": null,
           "owner": "securitySolution",
           "settings": Object {
