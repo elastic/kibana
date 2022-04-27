@@ -31,26 +31,23 @@ export const STATUS_LOW_LABEL = i18n.translate(
     defaultMessage: 'Low',
   }
 );
-export const STATUS_OPEN = i18n.translate(
-  'xpack.securitySolution.detectionResponse.alertsByStatus.donut.title.open',
-  {
-    defaultMessage: 'Open',
-  }
-);
 export const STATUS_ACKNOWLEDGED = i18n.translate(
-  'xpack.securitySolution.detectionResponse.alertsByStatus.donut.title.acknowledged',
+  'xpack.securitySolution.detectionResponse.alertsByStatus.status.acknowledged',
   {
     defaultMessage: 'Acknowledged',
   }
 );
+export const STATUS_OPEN = i18n.translate('xpack.securitySolution.detectionResponse.status.open', {
+  defaultMessage: 'Open',
+});
 export const STATUS_CLOSED = i18n.translate(
-  'xpack.securitySolution.detectionResponse.alertsByStatus.donut.title.closed',
+  'xpack.securitySolution.detectionResponse.status.closed',
   {
     defaultMessage: 'Closed',
   }
 );
 export const STATUS_IN_PROGRESS = i18n.translate(
-  'xpack.securitySolution.detectionResponse.alertsByStatus.donut.title.inProgress',
+  'xpack.securitySolution.detectionResponse.status.inProgress',
   {
     defaultMessage: 'In progress',
   }
@@ -68,6 +65,21 @@ export const UPDATING = i18n.translate('xpack.securitySolution.detectionResponse
 });
 export const UPDATED = i18n.translate('xpack.securitySolution.detectionResponse.updated', {
   defaultMessage: 'Updated',
+});
+export const CASES = (totalCases: number) =>
+  i18n.translate('xpack.securitySolution.detectionResponse.casesByStatus.totalCases', {
+    values: { totalCases },
+    defaultMessage: 'total {totalCases, plural, =1 {case} other {cases}}',
+  });
+export const CASES_BY_STATUS_SECTION_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionResponse.casesByStatusSectionTitle',
+  {
+    defaultMessage: 'Cases',
+  }
+);
+
+export const VIEW_CASES = i18n.translate('xpack.securitySolution.detectionResponse.viewCases', {
+  defaultMessage: 'View cases',
 });
 
 export const RULE_ALERTS_SECTION_TITLE = i18n.translate(

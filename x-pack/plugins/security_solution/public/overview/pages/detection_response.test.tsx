@@ -14,7 +14,14 @@ import { TestProviders } from '../../common/mock';
 jest.mock('../components/detection_response/rule_alerts_table', () => ({
   RuleAlertsTable: () => <div data-test-subj="mock_RuleAlertsTable" />,
 }));
-// TODO: add all sections mocks
+
+jest.mock('../components/detection_response/alerts_by_status', () => ({
+  AlertsByStatus: () => <div data-test-subj="mock_AlertsByStatus" />,
+}));
+
+jest.mock('../components/detection_response/cases_by_status', () => ({
+  CasesByStatus: () => <div data-test-subj="mock_CasesByStatus" />,
+}));
 
 jest.mock('../../common/components/search_bar', () => ({
   SiemSearchBar: () => <div data-test-subj="mock_globalDatePicker" />,
@@ -128,9 +135,12 @@ describe('DetectionResponse', () => {
     );
 
     expect(result.queryByTestId('detectionResponsePage')).toBeInTheDocument();
-    expect(result.queryByTestId('mock_RuleAlertsTable')).not.toBeInTheDocument();
     // TODO: assert other alert sections are not in the document
+    expect(result.queryByTestId('mock_RuleAlertsTable')).not.toBeInTheDocument();
+    expect(result.queryByTestId('mock_AlertsByStatus')).not.toBeInTheDocument();
+
     // TODO: assert cases sections are in the document
+    expect(result.queryByTestId('mock_CasesByStatus')).toBeInTheDocument();
   });
 
   it('should not render alerts data sections if user has not kibana read permission', () => {
@@ -148,9 +158,13 @@ describe('DetectionResponse', () => {
     );
 
     expect(result.queryByTestId('detectionResponsePage')).toBeInTheDocument();
-    expect(result.queryByTestId('mock_RuleAlertsTable')).not.toBeInTheDocument();
+
     // TODO: assert all alert sections are not in the document
+    expect(result.queryByTestId('mock_RuleAlertsTable')).not.toBeInTheDocument();
+    expect(result.queryByTestId('mock_AlertsByStatus')).not.toBeInTheDocument();
+
     // TODO: assert all cases sections are in the document
+    expect(result.queryByTestId('mock_CasesByStatus')).toBeInTheDocument();
   });
 
   it('should not render cases data sections if user has not cases read permission', () => {
@@ -165,9 +179,11 @@ describe('DetectionResponse', () => {
     );
 
     expect(result.queryByTestId('detectionResponsePage')).toBeInTheDocument();
-    expect(result.queryByTestId('mock_RuleAlertsTable')).toBeInTheDocument();
     // TODO: assert all alert sections are in the document
+    expect(result.queryByTestId('mock_RuleAlertsTable')).toBeInTheDocument();
+    expect(result.queryByTestId('mock_AlertsByStatus')).toBeInTheDocument();
     // TODO: assert all cases sections are not in the document
+    expect(result.queryByTestId('mock_CasesByStatus')).not.toBeInTheDocument();
   });
 
   it('should render page permissions message if user has any read permission', () => {
