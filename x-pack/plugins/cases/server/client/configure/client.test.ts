@@ -59,6 +59,7 @@ describe('client', () => {
         name: '1',
         config: {},
         isPreconfigured: false,
+        isDeprecated: false,
         referencedByCount: 1,
       },
       {
@@ -67,6 +68,7 @@ describe('client', () => {
         name: '2',
         config: {},
         isPreconfigured: false,
+        isDeprecated: false,
         referencedByCount: 1,
       },
       {
@@ -75,6 +77,7 @@ describe('client', () => {
         name: '3',
         config: {},
         isPreconfigured: false,
+        isDeprecated: false,
         referencedByCount: 1,
       },
     ];
@@ -94,6 +97,7 @@ describe('client', () => {
           name: '1',
           config: {},
           isPreconfigured: false,
+          isDeprecated: false,
           referencedByCount: 1,
         },
         {
@@ -118,6 +122,7 @@ describe('client', () => {
           name: 'sn-preconfigured',
           config: {},
           isPreconfigured: true,
+          isDeprecated: false,
           referencedByCount: 1,
         },
       ]);
@@ -129,6 +134,7 @@ describe('client', () => {
           name: '1',
           config: {},
           isPreconfigured: false,
+          isDeprecated: false,
           referencedByCount: 1,
         },
         {
@@ -137,6 +143,7 @@ describe('client', () => {
           name: '2',
           config: {},
           isPreconfigured: false,
+          isDeprecated: false,
           referencedByCount: 1,
         },
         {
@@ -161,6 +168,7 @@ describe('client', () => {
           name: 'swimlane',
           config: {},
           isPreconfigured: false,
+          isDeprecated: false,
           referencedByCount: 1,
         },
       ]);
