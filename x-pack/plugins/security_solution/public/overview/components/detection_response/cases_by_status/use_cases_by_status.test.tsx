@@ -29,25 +29,35 @@ jest.mock('../../../../common/containers/use_global_time', () => {
 jest.mock('../../../../common/lib/kibana');
 
 describe('useCasesByStatus', () => {
-  const mockGetAllCasesMetrics = jest.fn().mockResolvedValue({
+  const mockGetAllCasesMetrics = jest.fn();
+  mockGetAllCasesMetrics.mockResolvedValue({
     count_open_cases: 1,
     count_in_progress_cases: 2,
     count_closed_cases: 3,
   });
-  beforeEach(() => {
-    jest.clearAllMocks();
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        cases: {
-          ...mockCasesContract(),
-          api: {
-            cases: {
-              getAllCasesMetrics: mockGetAllCasesMetrics,
-            },
+  mockGetAllCasesMetrics.mockResolvedValueOnce({
+    count_open_cases: 0,
+    count_in_progress_cases: 0,
+    count_closed_cases: 0,
+  });
+
+  const mockUseKibana = {
+    services: {
+      cases: {
+        ...mockCasesContract(),
+        api: {
+          cases: {
+            getAllCasesMetrics: mockGetAllCasesMetrics,
           },
         },
       },
-    });
+    },
+  };
+
+  (useKibana as jest.Mock).mockReturnValue(mockUseKibana);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
   test('init', async () => {
     await act(async () => {

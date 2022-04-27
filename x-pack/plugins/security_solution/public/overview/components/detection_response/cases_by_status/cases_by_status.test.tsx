@@ -34,22 +34,37 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 jest.mock('../../../../common/components/charts/barchart', () => ({
-  BarChart: jest.fn((props: BarChartComponentProps) => (
-    <div data-test-subj="barChart" {...props} />
-  )),
+  BarChart: jest.fn((props: BarChartComponentProps) => <div data-test-subj="barChart" />),
 }));
 
-describe('CasesByStatus', () => {
-  const mockSetToggle = jest.fn();
+const mockSetToggle = jest.fn();
+(useQueryToggle as jest.Mock).mockReturnValue({
+  toggleStatus: true,
+  setToggleStatus: mockSetToggle,
+});
 
+(useQueryToggle as jest.Mock).mockReturnValueOnce({
+  toggleStatus: false,
+  setToggleStatus: mockSetToggle,
+});
+
+describe('CasesByStatus', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    (useQueryToggle as jest.Mock).mockReturnValue({
-      toggleStatus: true,
-      setToggleStatus: mockSetToggle,
-    });
   });
+
+  // First call of useQueryToggle, toggleStatus returns false.
+  // useQueryToggle always returns true after this case
+  test('collapses content', () => {
+    render(
+      <TestProviders>
+        <CasesByStatus />
+      </TestProviders>
+    );
+
+    expect(screen.queryByTestId('chart-wrapper')).not.toBeInTheDocument();
+  });
+
   test('renders title', () => {
     render(
       <TestProviders>
@@ -76,18 +91,5 @@ describe('CasesByStatus', () => {
     );
     expect(screen.getByTestId('chart-wrapper')).toBeInTheDocument();
     expect(screen.queryByTestId('bar-chart-mask')).not.toBeInTheDocument();
-  });
-
-  test('collapses content', () => {
-    (useQueryToggle as jest.Mock).mockReturnValue({
-      toggleStatus: false,
-      setToggleStatus: mockSetToggle,
-    });
-    render(
-      <TestProviders>
-        <CasesByStatus />
-      </TestProviders>
-    );
-    expect(screen.queryByTestId('chart-wrapper')).not.toBeInTheDocument();
   });
 });
