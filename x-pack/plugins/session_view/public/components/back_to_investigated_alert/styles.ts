@@ -7,8 +7,8 @@
 
 import { useMemo } from 'react';
 import { CSSObject } from '@emotion/react';
-import { useEuiTheme } from '../../hooks';
 import { euiLightVars } from '@kbn/ui-theme';
+import { useEuiTheme } from '../../hooks';
 
 interface StylesDeps {
   isDisplayedAbove: boolean;
