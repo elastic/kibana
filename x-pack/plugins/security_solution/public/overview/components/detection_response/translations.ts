@@ -174,7 +174,7 @@ export const VIEW_ALL_USER_ALERTS = i18n.translate(
   }
 );
 
-export const VIEW_CASES = i18n.translate(
+export const VIEW_RECENT_CASES = i18n.translate(
   'xpack.securitySolution.detectionResponse.viewRecentCases',
   {
     defaultMessage: 'View recent cases',

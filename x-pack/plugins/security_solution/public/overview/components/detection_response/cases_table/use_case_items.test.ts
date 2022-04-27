@@ -73,8 +73,8 @@ describe('useCaseItems', () => {
     });
 
     expect(mockCasesApi).toBeCalledWith({
-      from: '2020-07-07',
-      to: '2020-07-08',
+      from: '2020-07-07T08:20:18.966Z',
+      to: '2020-07-08T08:20:18.966Z',
       owner: 'securitySolution',
       sortField: 'create_at',
       sortOrder: 'desc',
