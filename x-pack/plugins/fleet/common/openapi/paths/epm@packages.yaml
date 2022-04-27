@@ -11,8 +11,12 @@ get:
   operationId: list-all-packages
 parameters:
   - in: query
-    name: includeInstallStatus
+    name: excludeInstallStatus
     schema:
       type: boolean
       default: false
-    description: Whether to include the install status of each package. Defaults to false to allow for caching of package requests.
+    description: >-
+      Whether to exclude the install status of each package. Enabling this option will opt in to
+      caching for the response via `cache-control` headers. If you don't need up-to-date installation
+      info for a package, and are querying for a list of available packages, providing this flag can
+      improve performance substantially.
