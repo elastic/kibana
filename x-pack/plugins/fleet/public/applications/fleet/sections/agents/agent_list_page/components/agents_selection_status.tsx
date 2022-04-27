@@ -13,6 +13,8 @@ import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 import { SO_SEARCH_LIMIT } from '../../../../constants';
 import type { Agent } from '../../../../types';
 
+import type { SelectionMode } from './types';
+
 const Divider = styled.div`
   width: 0;
   height: ${(props) => props.theme.eui.euiSizeL};
@@ -28,8 +30,6 @@ const Button = styled(EuiButtonEmpty)`
     font-size: ${(props) => props.theme.eui.euiFontSizeXS};
   }
 `;
-
-export type SelectionMode = 'manual' | 'query';
 
 export const AgentsSelectionStatus: React.FunctionComponent<{
   totalAgents: number;
@@ -92,20 +92,19 @@ export const AgentsSelectionStatus: React.FunctionComponent<{
               </EuiText>
             </EuiFlexItem>
             {showSelectEverything ? (
-              <EuiFlexItem grow={false}>
-                <Button
-                  size="xs"
-                  iconType="pagesSelect"
-                  iconSide="left"
-                  flush="left"
-                  onClick={() => setSelectionMode('query')}
-                >
-                  <FormattedMessage
-                    id="xpack.fleet.agentBulkActions.selectAll"
-                    defaultMessage="Select everything on all pages"
-                  />
-                </Button>
-              </EuiFlexItem>
+              <>
+                <FlexItem grow={false}>
+                  <Divider />
+                </FlexItem>
+                <EuiFlexItem grow={false}>
+                  <Button size="xs" flush="left" onClick={() => setSelectionMode('query')}>
+                    <FormattedMessage
+                      id="xpack.fleet.agentBulkActions.selectAll"
+                      defaultMessage="Select everything on all pages"
+                    />
+                  </Button>
+                </EuiFlexItem>
+              </>
             ) : null}
             <FlexItem grow={false}>
               <Divider />

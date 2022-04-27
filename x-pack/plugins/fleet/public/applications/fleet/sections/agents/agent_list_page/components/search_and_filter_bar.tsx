@@ -24,7 +24,7 @@ import { AgentEnrollmentFlyout, SearchBar } from '../../../../components';
 import { AGENTS_INDEX } from '../../../../constants';
 
 import { AgentBulkActions } from './bulk_actions';
-import type { SelectionMode } from './bulk_actions';
+import type { SelectionMode } from './types';
 
 const statusFilters = [
   {

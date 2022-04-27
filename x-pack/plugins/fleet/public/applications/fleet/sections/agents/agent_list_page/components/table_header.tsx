@@ -14,8 +14,7 @@ import { AgentStatusBar } from './status_bar';
 import { AgentsSelectionStatus } from './agents_selection_status';
 import {} from '@elastic/eui';
 import { AgentStatusBadges } from './status_badges';
-
-export type SelectionMode = 'manual' | 'query';
+import type { SelectionMode } from './types';
 
 export const AgentTableHeader: React.FunctionComponent<{
   agentStatus?: { [k in SimplifiedAgentStatus]: number };

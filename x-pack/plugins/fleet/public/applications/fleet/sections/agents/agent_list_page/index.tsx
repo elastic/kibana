@@ -55,7 +55,7 @@ import { useFleetServerUnhealthy } from '../hooks/use_fleet_server_unhealthy';
 import { agentFlyoutContext } from '..';
 
 import { AgentTableHeader } from './components/table_header';
-import type { SelectionMode } from './components/bulk_actions';
+import type { SelectionMode } from './components/types';
 import { SearchAndFilterBar } from './components/search_and_filter_bar';
 
 const REFRESH_INTERVAL_MS = 30000;

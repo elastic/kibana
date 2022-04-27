@@ -26,11 +26,11 @@ import {
 } from '../../components';
 import { useKibanaVersion } from '../../../../hooks';
 
+import type { SelectionMode } from './types';
+
 const FlexItem = styled(EuiFlexItem)`
   height: ${(props) => props.theme.eui.euiSizeL};
 `;
-
-export type SelectionMode = 'manual' | 'query';
 
 export const AgentBulkActions: React.FunctionComponent<{
   totalAgents: number;
