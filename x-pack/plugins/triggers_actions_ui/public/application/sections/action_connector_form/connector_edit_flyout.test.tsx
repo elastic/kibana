@@ -43,6 +43,7 @@ describe('connector_edit_flyout', () => {
       actionType: 'test-action-type-name',
       name: 'action-connector',
       isPreconfigured: false,
+      isDeprecated: false,
       referencedByCount: 0,
       config: {},
     };
@@ -87,6 +88,7 @@ describe('connector_edit_flyout', () => {
       actionType: 'test-action-type-name',
       name: 'preconfigured-connector',
       isPreconfigured: true,
+      isDeprecated: false,
       referencedByCount: 0,
       config: {},
     };

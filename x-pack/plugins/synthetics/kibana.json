@@ -8,6 +8,7 @@
     "cases",
     "embeddable",
     "discover",
+    "dataViews",
     "encryptedSavedObjects",
     "features",
     "inspector",
@@ -18,7 +19,8 @@
     "share",
     "taskManager",
     "triggersActionsUi",
-    "usageCollection"
+    "usageCollection",
+    "unifiedSearch"
   ],
   "server": true,
   "ui": true,
