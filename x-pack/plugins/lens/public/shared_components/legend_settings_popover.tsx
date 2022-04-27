@@ -58,11 +58,11 @@ export interface LegendSettingsPopoverProps {
   /**
    * Sets the vertical alignment for legend inside chart
    */
-  verticalAlignment?: VerticalAlignment;
+  verticalAlignment?: typeof VerticalAlignment.Top | typeof VerticalAlignment.Bottom;
   /**
    * Sets the vertical alignment for legend inside chart
    */
-  horizontalAlignment?: HorizontalAlignment;
+  horizontalAlignment?: typeof HorizontalAlignment.Left | typeof HorizontalAlignment.Right;
   /**
    * Callback on horizontal alignment option change
    */
