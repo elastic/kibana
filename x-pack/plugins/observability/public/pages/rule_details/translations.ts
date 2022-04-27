@@ -11,3 +11,7 @@ export const RULE_LOAD_ERROR = (errorMessage: string) =>
     defaultMessage: 'Unable to load rule. Reason: {message}',
     values: { message: errorMessage },
   });
+
+export const TAGS_TITLE = i18n.translate('xpack.observability.ruleDetails.tagsTitle', {
+  defaultMessage: 'Tags',
+});

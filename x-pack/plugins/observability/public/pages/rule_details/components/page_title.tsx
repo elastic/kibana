@@ -6,9 +6,10 @@
  */
 import React from 'react';
 import moment from 'moment';
-import { EuiText, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
+import { EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ExperimentalBadge } from '../../../components/shared/experimental_badge';
 import { PageHeaderProps } from '../types';
+import { Tags } from '.';
 
 export function PageTitle({ rule }: PageHeaderProps) {
   return (
@@ -21,20 +22,7 @@ export function PageTitle({ rule }: PageHeaderProps) {
             <b>Created</b> by {rule.createdBy} on {moment(rule.createdAt).format('ll')}
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge
-            color="hollow"
-            iconType="tag"
-            iconSide="left"
-            onClick={() => {}}
-            onClickAriaLabel="Rule tags"
-            iconOnClick={() => {}}
-            iconOnClickAriaLabel="Rule tags"
-            data-test-sub="ruleTag"
-          >
-            {rule.tags.length}
-          </EuiBadge>
-        </EuiFlexItem>
+        <Tags tags={rule.tags} />
       </EuiFlexGroup>
     </>
   );
