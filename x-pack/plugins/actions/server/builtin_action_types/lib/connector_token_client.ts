@@ -260,6 +260,7 @@ export class ConnectorTokenClient {
     expiresInSec,
     deleteExisting,
   }: UpdateOrReplaceOptions) {
+    expiresInSec = expiresInSec ?? 3600;
     if (token === null) {
       if (deleteExisting) {
         await this.deleteConnectorTokens({

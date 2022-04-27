@@ -28,7 +28,7 @@ export const validateCommonConfig = (
 
   if (isOAuth) {
     if (userIdentifierValue == null) {
-      return i18n.VALIDATE_OAUTH_MISSING_FIELD_ERROR('userIdentiferValue', true);
+      return i18n.VALIDATE_OAUTH_MISSING_FIELD_ERROR('userIdentifierValue', true);
     }
 
     if (clientId == null) {
@@ -73,7 +73,7 @@ export const validateCommonConnector = (
 
   if (isOAuth) {
     if (userIdentifierValue == null) {
-      return i18n.VALIDATE_OAUTH_MISSING_FIELD_ERROR('userIdentiferValue', true);
+      return i18n.VALIDATE_OAUTH_MISSING_FIELD_ERROR('userIdentifierValue', true);
     }
 
     if (clientId == null) {
@@ -106,7 +106,7 @@ export const validateCommonConnector = (
 
     if (clientSecret || clientId || userIdentifierValue || jwtKeyId || privateKey) {
       return i18n.VALIDATE_OAUTH_POPULATED_FIELD_ERROR(
-        'clientId, clientSecret, userIdentiferValue, jwtKeyId and privateKey',
+        'clientId, clientSecret, userIdentifierValue, jwtKeyId and privateKey',
         false
       );
     }

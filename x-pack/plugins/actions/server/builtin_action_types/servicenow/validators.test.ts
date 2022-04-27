@@ -42,7 +42,7 @@ describe('validateCommonConfig', () => {
           clientId: 'clientId',
           jwtKeyId: 'jwtKeyId',
         })
-      ).toEqual(`userIdentiferValue must be provided when isOAuth = true`);
+      ).toEqual(`userIdentifierValue must be provided when isOAuth = true`);
     });
     test('config validation fails when clientId is null', () => {
       expect(
@@ -50,7 +50,7 @@ describe('validateCommonConfig', () => {
           apiUrl: 'https://url',
           usesTableApi: true,
           isOAuth: true,
-          userIdentifierValue: 'userIdentiferValue',
+          userIdentifierValue: 'userIdentifierValue',
           clientId: null,
           jwtKeyId: 'jwtKeyId',
         })
@@ -62,7 +62,7 @@ describe('validateCommonConfig', () => {
           apiUrl: 'https://url',
           usesTableApi: true,
           isOAuth: true,
-          userIdentifierValue: 'userIdentiferValue',
+          userIdentifierValue: 'userIdentifierValue',
           clientId: 'clientId',
           jwtKeyId: null,
         })
@@ -133,7 +133,7 @@ describe('validateCommonConfig', () => {
           }
         )
       ).toEqual(
-        `clientId, clientSecret, userIdentiferValue, jwtKeyId and privateKey should not be provided with isOAuth = false`
+        `clientId, clientSecret, userIdentifierValue, jwtKeyId and privateKey should not be provided with isOAuth = false`
       );
     });
   });
@@ -222,7 +222,7 @@ describe('validateCommonConnector', () => {
             privateKeyPassword: null,
           }
         )
-      ).toEqual(`userIdentiferValue must be provided when isOAuth = true`);
+      ).toEqual(`userIdentifierValue must be provided when isOAuth = true`);
     });
     test('connector validation fails when clientId is null', () => {
       expect(
@@ -231,7 +231,7 @@ describe('validateCommonConnector', () => {
             apiUrl: 'https://url',
             usesTableApi: true,
             isOAuth: true,
-            userIdentifierValue: 'userIdentiferValue',
+            userIdentifierValue: 'userIdentifierValue',
             clientId: null,
             jwtKeyId: 'jwtKeyId',
           },
@@ -252,7 +252,7 @@ describe('validateCommonConnector', () => {
             apiUrl: 'https://url',
             usesTableApi: true,
             isOAuth: true,
-            userIdentifierValue: 'userIdentiferValue',
+            userIdentifierValue: 'userIdentifierValue',
             clientId: 'clientId',
             jwtKeyId: null,
           },
@@ -273,7 +273,7 @@ describe('validateCommonConnector', () => {
             apiUrl: 'https://url',
             usesTableApi: true,
             isOAuth: true,
-            userIdentifierValue: 'userIdentiferValue',
+            userIdentifierValue: 'userIdentifierValue',
             clientId: 'clientId',
             jwtKeyId: 'jwtKeyId',
           },
@@ -294,7 +294,7 @@ describe('validateCommonConnector', () => {
             apiUrl: 'https://url',
             usesTableApi: true,
             isOAuth: true,
-            userIdentifierValue: 'userIdentiferValue',
+            userIdentifierValue: 'userIdentifierValue',
             clientId: 'clientId',
             jwtKeyId: 'jwtKeyId',
           },
@@ -315,7 +315,7 @@ describe('validateCommonConnector', () => {
             apiUrl: 'https://url',
             usesTableApi: true,
             isOAuth: true,
-            userIdentifierValue: 'userIdentiferValue',
+            userIdentifierValue: 'userIdentifierValue',
             clientId: 'clientId',
             jwtKeyId: 'jwtKeyId',
           },
@@ -394,7 +394,7 @@ describe('validateCommonConnector', () => {
           }
         )
       ).toEqual(
-        `clientId, clientSecret, userIdentiferValue, jwtKeyId and privateKey should not be provided with isOAuth = false`
+        `clientId, clientSecret, userIdentifierValue, jwtKeyId and privateKey should not be provided with isOAuth = false`
       );
     });
   });
