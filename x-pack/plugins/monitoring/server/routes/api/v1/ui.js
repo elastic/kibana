@@ -40,3 +40,4 @@ export {
 } from './logstash';
 export { entSearchOverviewRoute } from './enterprise_search';
 export * from './setup';
+export { health } from './_health';
