@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { useState, useEffect } from 'react';
 
 import { CaseStatuses } from '@kbn/cases-plugin/common';
@@ -46,12 +45,6 @@ export const useCaseItems: UseCaseItems = ({ skip }) => {
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   const [items, setItems] = useState<CaseItem[]>([]);
 
-  // This is a known issue of cases api, it doesn't accept date time format atm
-  // Once they fix this problem we can remove this two lines
-  // [TO-DO] #130979
-  const fromDate = moment(from).format('YYYY-MM-DD');
-  const toDate = moment(to).format('YYYY-MM-DD');
-
   useEffect(() => {
     let isSubscribed = true;
     const abortCtrl = new AbortController();
@@ -59,8 +52,8 @@ export const useCaseItems: UseCaseItems = ({ skip }) => {
     const fetchCases = async () => {
       try {
         const casesResponse = await cases.api.cases.find({
-          from: fromDate,
-          to: toDate,
+          from,
+          to,
           owner: APP_ID,
           sortField: 'create_at',
           sortOrder: 'desc',
@@ -94,7 +87,7 @@ export const useCaseItems: UseCaseItems = ({ skip }) => {
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [cases.api.cases, from, fromDate, skip, to, toDate]);
+  }, [cases.api.cases, from, skip, to]);
 
   return { items, isLoading, updatedAt };
 };
