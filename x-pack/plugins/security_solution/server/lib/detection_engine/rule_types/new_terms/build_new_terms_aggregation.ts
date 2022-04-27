@@ -6,7 +6,7 @@
  */
 
 import { Moment } from 'moment';
-import { ESSearchResponse } from '../../../../../../../../src/core/types/elasticsearch';
+import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
 import { SignalSource } from '../../signals/types';
 
 export type NewTermsAggregationResult = ESSearchResponse<

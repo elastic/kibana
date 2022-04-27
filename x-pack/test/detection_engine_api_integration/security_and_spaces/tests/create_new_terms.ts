@@ -8,9 +8,11 @@
 import { orderBy } from 'lodash';
 import expect from '@kbn/expect';
 
-import { RuleExecutionStatus } from '../../../../plugins/security_solution/common/detection_engine/schemas/common';
-import { NewTermsCreateSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
+import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/schemas/common';
+import { NewTermsCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request/rule_schemas.mock';
+import { DetectionAlert } from '@kbn/security-solution-plugin/common/detection_engine/schemas/alerts';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
@@ -23,9 +25,6 @@ import {
   waitForRuleSuccessOrStatus,
   waitForSignalsToBePresent,
 } from '../../utils';
-
-import { getCreateNewTermsRulesSchemaMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas.mock';
-import { DetectionAlert } from '../../../../plugins/security_solution/common/detection_engine/schemas/alerts';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {

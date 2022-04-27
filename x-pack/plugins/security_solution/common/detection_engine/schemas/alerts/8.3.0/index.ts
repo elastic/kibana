@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { AlertWithCommonFields800 } from '@kbn/rule-registry-plugin/common/schemas/8.0.0';
 import { ALERT_NEW_TERMS } from '../../../../field_maps/field_names';
-import { AlertWithCommonFields800 } from '../../../../../../rule_registry/common/schemas/8.0.0';
 import type {
   Ancestor800,
   BaseFields800,
