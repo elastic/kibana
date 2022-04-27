@@ -18,6 +18,7 @@ import {
   getAuthWithSuperUser,
   getCaseConnectors,
   getActionsSpace,
+  getEmailConnector,
 } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -38,32 +39,25 @@ export default ({ getService }: FtrProviderContext): void => {
         req: getServiceNowConnector(),
         auth: authSpace1,
       });
+
       const emailConnector = await createConnector({
         supertest,
-        req: {
-          name: 'An email action',
-          connector_type_id: '.email',
-          config: {
-            service: '__json',
-            from: 'bob@example.com',
-          },
-          secrets: {
-            user: 'bob',
-            password: 'supersecret',
-          },
-        },
+        req: getEmailConnector(),
         auth: authSpace1,
       });
+
       const jiraConnector = await createConnector({
         supertest,
         req: getJiraConnector(),
         auth: authSpace1,
       });
+
       const resilientConnector = await createConnector({
         supertest,
         req: getResilientConnector(),
         auth: authSpace1,
       });
+
       const sir = await createConnector({
         supertest,
         req: getServiceNowSIRConnector(),
@@ -89,6 +83,17 @@ export default ({ getService }: FtrProviderContext): void => {
           },
           isPreconfigured: false,
           isMissingSecrets: false,
+          referencedByCount: 0,
+        },
+        /**
+         * Preconfigured connectors are being registered here:
+         * x-pack/test/cases_api_integration/common/config.ts
+         */
+        {
+          actionTypeId: '.servicenow',
+          id: 'preconfigured-servicenow',
+          isPreconfigured: true,
+          name: 'preconfigured-servicenow',
           referencedByCount: 0,
         },
         {
@@ -136,32 +141,25 @@ export default ({ getService }: FtrProviderContext): void => {
         req: getServiceNowConnector(),
         auth: authSpace1,
       });
+
       const emailConnector = await createConnector({
         supertest,
-        req: {
-          name: 'An email action',
-          connector_type_id: '.email',
-          config: {
-            service: '__json',
-            from: 'bob@example.com',
-          },
-          secrets: {
-            user: 'bob',
-            password: 'supersecret',
-          },
-        },
+        req: getEmailConnector(),
         auth: authSpace1,
       });
+
       const jiraConnector = await createConnector({
         supertest,
         req: getJiraConnector(),
         auth: authSpace1,
       });
+
       const resilientConnector = await createConnector({
         supertest,
         req: getResilientConnector(),
         auth: authSpace1,
       });
+
       const sir = await createConnector({
         supertest,
         req: getServiceNowSIRConnector(),
@@ -179,7 +177,19 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: getAuthWithSuperUser('space2'),
       });
 
-      expect(connectors).to.eql([]);
+      expect(connectors).to.eql([
+        /**
+         * Preconfigured connectors are being registered here:
+         * x-pack/test/cases_api_integration/common/config.ts
+         */
+        {
+          actionTypeId: '.servicenow',
+          id: 'preconfigured-servicenow',
+          isPreconfigured: true,
+          name: 'preconfigured-servicenow',
+          referencedByCount: 0,
+        },
+      ]);
     });
   });
 };
