@@ -8,6 +8,8 @@
 
 import { IContainer, ErrorEmbeddable, AttributeService } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
+import { withHandlingMissedSavedObject } from './with_handling_missed_saved_object';
 import { Vis } from '../types';
 import type {
   VisualizeInput,
@@ -18,7 +20,7 @@ import type {
 } from './visualize_embeddable';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { getUISettings, getHttp, getTimeFilter, getCapabilities } from '../services';
-import { urlFor } from '../utils/saved_visualize_utils';
+import { SAVED_VIS_TYPE, urlFor } from '../utils/saved_visualize_utils';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 import { createVisualizeEmbeddableAsync } from './visualize_embeddable_async';
@@ -59,23 +61,32 @@ export const createVisEmbeddableFromObject =
         visualizeSave: Boolean(getCapabilities().visualize.save),
         dashboardSave: Boolean(getCapabilities().dashboard?.showWriteControls),
       };
+      const startDeps = await deps.start();
 
-      return createVisualizeEmbeddableAsync(
-        getTimeFilter(),
-        {
-          vis,
-          indexPatterns,
-          editPath,
-          editUrl,
-          deps,
-          capabilities,
+      return await withHandlingMissedSavedObject(
+        startDeps.core,
+        async () => {
+          return await createVisualizeEmbeddableAsync(
+            getTimeFilter(),
+            {
+              vis,
+              indexPatterns,
+              editPath,
+              editUrl,
+              deps,
+              capabilities,
+            },
+            input,
+            attributeService,
+            parent
+          );
         },
         input,
-        attributeService,
-        parent
+        parent,
+        { id: input.id, type: SAVED_VIS_TYPE },
+        { type: DATA_VIEW_SAVED_OBJECT_TYPE }
       );
     } catch (e) {
-      console.error(e); // eslint-disable-line no-console
-      return new ErrorEmbeddable(e, input, parent);
+      return e instanceof ErrorEmbeddable ? e : new ErrorEmbeddable(e, input, parent);
     }
   };

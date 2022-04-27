@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
 import { first } from 'rxjs/operators';
 import type { SavedObjectMetaData, OnSaveProps } from '@kbn/saved-objects-plugin/public';
@@ -27,6 +26,7 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { checkForDuplicateTitle } from '@kbn/saved-objects-plugin/public';
 import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import type { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import type {
   VisualizeByReferenceInput,
@@ -46,6 +46,7 @@ import {
   getSavedVisualization,
   saveVisualization,
   getFullPath,
+  SAVED_VIS_TYPE,
 } from '../utils/saved_visualize_utils';
 import {
   extractControlsReferences,
@@ -56,6 +57,7 @@ import {
 import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 import type { VisualizationsStartDeps } from '../plugin';
+import { withHandlingMissedSavedObject } from './with_handling_missed_saved_object';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -164,42 +166,49 @@ export class VisualizeEmbeddableFactory
     parent?: IContainer
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
     const startDeps = await this.deps.start();
+    const savedObject = await withHandlingMissedSavedObject(
+      startDeps.core,
+      async () =>
+        await getSavedVisualization(
+          {
+            savedObjectsClient: startDeps.core.savedObjects.client,
+            search: startDeps.plugins.data.search,
+            dataViews: startDeps.plugins.data.dataViews,
+            spaces: startDeps.plugins.spaces,
+            savedObjectsTagging: startDeps.plugins.savedObjectsTaggingOss?.getTaggingApi(),
+          },
+          savedObjectId
+        ),
+      input,
+      parent,
+      { id: savedObjectId, type: SAVED_VIS_TYPE },
+      { type: DATA_VIEW_SAVED_OBJECT_TYPE }
+    );
 
-    try {
-      const savedObject = await getSavedVisualization(
-        {
-          savedObjectsClient: startDeps.core.savedObjects.client,
-          search: startDeps.plugins.data.search,
-          dataViews: startDeps.plugins.data.dataViews,
-          spaces: startDeps.plugins.spaces,
-          savedObjectsTagging: startDeps.plugins.savedObjectsTaggingOss?.getTaggingApi(),
-        },
-        savedObjectId
-      );
+    if (savedObject instanceof ErrorEmbeddable) {
+      return savedObject;
+    }
 
-      if (savedObject.sharingSavedObjectProps?.outcome === 'conflict') {
-        return new ErrorEmbeddable(
-          i18n.translate('visualizations.embeddable.legacyURLConflict.errorMessage', {
-            defaultMessage: `This visualization has the same URL as a legacy alias. Disable the alias to resolve this error : {json}`,
-            values: { json: savedObject.sharingSavedObjectProps?.errorJSON },
-          }),
-          input,
-          parent
-        );
-      }
-      const visState = convertToSerializedVis(savedObject);
-      const vis = await createVisAsync(savedObject.visState.type, visState);
-
-      return createVisEmbeddableFromObject(this.deps)(
-        vis,
+    if (savedObject.sharingSavedObjectProps?.outcome === 'conflict') {
+      return new ErrorEmbeddable(
+        i18n.translate('visualizations.embeddable.legacyURLConflict.errorMessage', {
+          defaultMessage: `This visualization has the same URL as a legacy alias. Disable the alias to resolve this error : {json}`,
+          values: { json: savedObject.sharingSavedObjectProps?.errorJSON },
+        }),
         input,
-        await this.getAttributeService(),
         parent
       );
-    } catch (e) {
-      console.error(e); // eslint-disable-line no-console
-      return new ErrorEmbeddable(e, input, parent);
     }
+
+    const visState = convertToSerializedVis(savedObject);
+    const vis = await createVisAsync(savedObject.visState.type, visState);
+
+    return createVisEmbeddableFromObject(this.deps)(
+      vis,
+      input,
+      await this.getAttributeService(),
+      parent
+    );
   }
 
   public async create(input: VisualizeInput & { savedVis?: SerializedVis }, parent?: IContainer) {
@@ -207,12 +216,23 @@ export class VisualizeEmbeddableFactory
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
     if (input.savedVis) {
       const visState = input.savedVis;
-      const vis = await createVisAsync(visState.type, visState);
-      return createVisEmbeddableFromObject(this.deps)(
-        vis,
+      const startDeps = await this.deps.start();
+
+      return await withHandlingMissedSavedObject(
+        startDeps.core,
+        async () => {
+          const vis = await createVisAsync(visState.type, visState);
+          return createVisEmbeddableFromObject(this.deps)(
+            vis,
+            input,
+            await this.getAttributeService(),
+            parent
+          );
+        },
         input,
-        await this.getAttributeService(),
-        parent
+        parent,
+        { id: parent!.id, type: 'dashboard' },
+        { type: DATA_VIEW_SAVED_OBJECT_TYPE }
       );
     } else {
       showNewVisModal({

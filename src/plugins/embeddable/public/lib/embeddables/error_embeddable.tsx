@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiText, EuiIcon, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import { EuiText, EuiEmptyPrompt } from '@elastic/eui';
+import React, { ReactNode } from 'react';
 import ReactDOM from 'react-dom';
 import { KibanaThemeProvider, Markdown } from '@kbn/kibana-react-plugin/public';
 import { Embeddable } from './embeddable';
@@ -27,10 +27,17 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
   public readonly type = ERROR_EMBEDDABLE_TYPE;
   public error: Error | string;
   private dom?: HTMLElement;
+  private actions: ReactNode;
 
-  constructor(error: Error | string, input: EmbeddableInput, parent?: IContainer) {
+  constructor(
+    error: Error | string,
+    input: EmbeddableInput,
+    parent?: IContainer,
+    actions?: ReactNode
+  ) {
     super(input, {}, parent);
     this.error = error;
+    this.actions = actions;
   }
 
   public reload() {}
@@ -45,17 +52,21 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
       theme = {};
     }
     const node = (
-      <div className="embPanel__error embPanel__content" data-test-subj="embeddableStackError">
-        <EuiText color="subdued" size="xs">
-          <EuiIcon type="alert" color="danger" />
-          <EuiSpacer size="s" />
-          <Markdown
-            markdown={title}
-            openLinksInNewTab={true}
-            data-test-subj="errorMessageMarkdown"
-          />
-        </EuiText>
-      </div>
+      <EuiEmptyPrompt
+        iconType="alert"
+        iconColor="danger"
+        data-test-subj="embeddableStackError"
+        body={
+          <EuiText color="subdued" size="xs">
+            <Markdown
+              markdown={title}
+              openLinksInNewTab={true}
+              data-test-subj="errorMessageMarkdown"
+            />
+          </EuiText>
+        }
+        actions={this.actions}
+      />
     );
     const content =
       theme && theme.theme$ ? (
