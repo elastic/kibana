@@ -2968,10 +2968,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ci-stats-client@link:bazel-bin/packages/kbn-ci-stats-client":
-  version "0.0.0"
-  uid ""
-
 "@kbn/ci-stats-core@link:bazel-bin/packages/kbn-ci-stats-core":
   version "0.0.0"
   uid ""
@@ -6061,10 +6057,6 @@
   uid ""
 
 "@types/kbn__bazel-runner@link:bazel-bin/packages/kbn-bazel-runner/npm_module_types":
-  version "0.0.0"
-  uid ""
-
-"@types/kbn__ci-stats-client@link:bazel-bin/packages/kbn-ci-stats-client/npm_module_types":
   version "0.0.0"
   uid ""
 

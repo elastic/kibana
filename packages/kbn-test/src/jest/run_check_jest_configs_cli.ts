@@ -17,14 +17,14 @@ import { getAllRepoRelativeBazelPackageDirs } from '@kbn/bazel-packages';
 import { JestConfigs, CONFIG_NAMES } from './configs';
 
 const unitTestingTemplate: string = `module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/test/jest_node',
   rootDir: '{{{relToRoot}}}',
   roots: ['<rootDir>/{{{modulePath}}}'],
 };
 `;
 
 const integrationTestingTemplate: string = `module.exports = {
-  preset: '@kbn/test/jest_integration',
+  preset: '@kbn/test/jest_integration_node',
   rootDir: '{{{relToRoot}}}',
   roots: ['<rootDir>/{{{modulePath}}}'],
 };
