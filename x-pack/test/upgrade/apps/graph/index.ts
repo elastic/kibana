@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-export default ({ loadTestFile }) => {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
   describe('upgrade', function () {
-    loadTestFile(require.resolve('./reporting_smoke_tests'));
+    loadTestFile(require.resolve('./graph_smoke_tests'));
   });
-};
+}
