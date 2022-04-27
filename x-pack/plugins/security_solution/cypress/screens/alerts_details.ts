@@ -30,8 +30,6 @@ export const JSON_VIEW_TAB = '[data-test-subj="jsonViewTab"]';
 
 export const JSON_TEXT = '[data-test-subj="jsonView"]';
 
-export const OVERVIEW_HIGHLIGHTED_FIELDS = '[data-test-subj="eventDetails"]';
-
 export const OVERVIEW_HOST_NAME = '[data-test-subj="event-field-host.name"]';
 
 export const OVERVIEW_RISK_SCORE = '[data-test-subj="eventDetails"] [data-test-subj="riskScore"]';
