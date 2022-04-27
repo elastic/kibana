@@ -61,7 +61,7 @@ export const hasSimpleExecutableName = ({
     return false;
   }
 
-  return /[\*\?]/.test(lastString) === false;
+  return (lastString.split('*').length || lastString.split('?').length) === 1;
 };
 
 export const isPathValid = ({
