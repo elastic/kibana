@@ -104,6 +104,7 @@ interface AgentBase {
   last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating';
   user_provided_metadata: AgentMetadata;
   local_metadata: AgentMetadata;
+  tags?: string[];
 }
 
 export interface Agent extends AgentBase {
@@ -216,6 +217,10 @@ export interface FleetServerAgent {
    * The last acknowledged action sequence number for the Elastic Agent
    */
   action_seq_no?: number;
+  /**
+   * A list of tags used for organizing/filtering agents
+   */
+  tags?: string[];
 }
 /**
  * An Elastic Agent metadata

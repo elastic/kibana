@@ -22,6 +22,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
+import { sampleSize } from 'lodash';
+
 import type { Agent, AgentPolicy, PackagePolicy, SimplifiedAgentStatus } from '../../../types';
 import {
   usePagination,
@@ -57,6 +59,20 @@ import { agentFlyoutContext } from '..';
 import { AgentTableHeader } from './components/table_header';
 import type { SelectionMode } from './components/bulk_actions';
 import { SearchAndFilterBar } from './components/search_and_filter_bar';
+import { Labels } from './components/labels';
+
+const MOCK_TAGS = [
+  'linux',
+  'windows',
+  'test',
+  'a really long tag title',
+  'fleet server',
+  'production',
+  'staging',
+  'temporary',
+  'debugging',
+  'web servers',
+];
 
 const REFRESH_INTERVAL_MS = 30000;
 
@@ -310,7 +326,13 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           inactive: agentsRequest.data.totalInactive,
         });
 
-        setAgents(agentsRequest.data.items);
+        setAgents(
+          agentsRequest.data.items.map((item) => {
+            // TEMP: Mock tags data for building out label UI
+            item.tags = sampleSize(MOCK_TAGS, Math.floor(Math.random() * MOCK_TAGS.length));
+            return item;
+          })
+        );
         setTotalAgents(agentsRequest.data.total);
         setTotalInactiveAgents(agentsRequest.data.totalInactive);
       } catch (error) {
@@ -404,6 +426,14 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         defaultMessage: 'Status',
       }),
       render: (active: boolean, agent: any) => <AgentHealth agent={agent} />,
+    },
+    {
+      field: 'tags',
+      width: '240px',
+      name: i18n.translate('xpack.fleet.agentList.labelColumnTitle', {
+        defaultMessage: 'Label',
+      }),
+      render: (tags: string[], agent: any) => <Labels tags={tags} />,
     },
     {
       field: 'policy_id',
