@@ -101,7 +101,8 @@ export const AuditLogsModal: React.FC = () => {
               ),
             },
             {
-              type: 'message',
+              type: 'field',
+              field: 'message',
               width: '50%',
             },
           ]}
