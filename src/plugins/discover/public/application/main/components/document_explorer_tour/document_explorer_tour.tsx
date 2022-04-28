@@ -19,12 +19,18 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
+  EuiImage,
+  EuiSpacer,
 } from '@elastic/eui';
 import {
   DocumentExplorerTourContext,
   DocumentExplorerTourContextProps,
   useDocumentExplorerTourContext,
 } from './document_explorer_tour_context';
+
+import reorderColumnsGif from './assets/reorder_columns.gif';
+import rowsPerLineGif from './assets/rows_per_line.gif';
+import expandDocumentGif from './assets/expand_document.gif';
 
 const STEP_COLUMNS = 1;
 const STEP_SORTING = 2;
@@ -42,12 +48,14 @@ const tourSteps = [
       defaultMessage: 'Add fields to the table',
     }),
     content: (
-      <p>
+      <>
         <FormattedMessage
           id="discover.docExplorerTour.stepAddFieldsDescription"
           defaultMessage="Add the fields relevant to you, then drag the columns to your preferred order."
         />
-      </p>
+        <EuiSpacer size="s" />
+        <EuiImage alt="TODO" src={reorderColumnsGif} />
+      </>
     ),
   },
   {
@@ -58,12 +66,10 @@ const tourSteps = [
       defaultMessage: 'Sort on multiple fields',
     }),
     content: (
-      <p>
-        <FormattedMessage
-          id="discover.docExplorerTour.stepSortFieldsDescription"
-          defaultMessage="Find all your sorting needs in the fields sorted pop-up. Reorder the sort using drag and drop."
-        />
-      </p>
+      <FormattedMessage
+        id="discover.docExplorerTour.stepSortFieldsDescription"
+        defaultMessage="Find all your sorting needs in the fields sorted pop-up. Reorder the sort using drag and drop."
+      />
     ),
   },
   {
@@ -74,28 +80,32 @@ const tourSteps = [
       defaultMessage: 'Change the row height',
     }),
     content: (
-      <p>
+      <>
         <FormattedMessage
           id="discover.docExplorerTour.stepChangeRowHeightDescription"
           defaultMessage="Specify the number of lines per row, or automatically adjust the height to fit the contents."
         />
-      </p>
+        <EuiSpacer size="s" />
+        <EuiImage alt="TODO" src={rowsPerLineGif} />
+      </>
     ),
   },
   {
     step: STEP_EXPAND,
     maxWidth: MAX_WIDTH,
-    anchorPosition: 'upCenter',
+    anchorPosition: 'rightUp',
     title: i18n.translate('discover.docExplorerTour.stepExpandTitle', {
       defaultMessage: 'Expand and compare',
     }),
     content: (
-      <p>
+      <>
         <FormattedMessage
           id="discover.docExplorerTour.stepExpandDescription"
           defaultMessage="Expand a document to inspect its fields, set filters, and view the documents before and after. Interested in specific documents only? Select them, and then use the selected documents dropdown."
         />
-      </p>
+        <EuiSpacer size="s" />
+        <EuiImage alt="TODO" src={expandDocumentGif} />
+      </>
     ),
   },
 ] as EuiStatelessTourStep[];
