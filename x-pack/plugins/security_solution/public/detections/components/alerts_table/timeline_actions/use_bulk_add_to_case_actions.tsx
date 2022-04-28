@@ -11,6 +11,7 @@ import { useMemo } from 'react';
 import { APP_ID } from '../../../../../common/constants';
 import type { TimelineItem } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
+import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
 
 export interface UseAddToCaseActions {
   onClose?: () => void;
@@ -46,7 +47,7 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
   return useMemo(() => {
     return [
       {
-        label: 'Attach to new case',
+        label: ADD_TO_NEW_CASE,
         key: 'attach-new-case',
         'data-test-subj': 'attach-new-case',
         onClick: (items?: TimelineItem[]) => {
@@ -55,7 +56,7 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
         },
       },
       {
-        label: 'Attach to existing case',
+        label: ADD_TO_EXISTING_CASE,
         key: 'attach-existing-case',
         'data-test-subj': 'attach-new-case',
         onClick: (items?: TimelineItem[]) => {
