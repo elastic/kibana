@@ -60,7 +60,7 @@ export const links: LinkItem = {
       url: `${HOSTS_PATH}/externalAlerts`,
     },
     {
-      id: SecurityPageName.usersRisk,
+      id: SecurityPageName.hostsRisk,
       label: i18n.translate('xpack.securitySolution.search.hosts.risk', {
         defaultMessage: 'Hosts by risk',
       }),

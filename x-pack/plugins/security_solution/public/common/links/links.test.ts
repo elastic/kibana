@@ -33,20 +33,66 @@ const findDeepLink = (id: string, deepLinks: AppDeepLink[]): AppDeepLink | null 
     return null;
   }, null);
 
+const allPages = Object.values(SecurityPageName);
+const casesPages = [
+  SecurityPageName.case,
+  SecurityPageName.caseConfigure,
+  SecurityPageName.caseCreate,
+];
+const featureFlagPages = [
+  SecurityPageName.detectionAndResponse,
+  SecurityPageName.hostsAuthentications,
+  SecurityPageName.hostsRisk,
+  SecurityPageName.usersRisk,
+];
+const premiumPages = [
+  SecurityPageName.caseConfigure,
+  SecurityPageName.hostsAnomalies,
+  SecurityPageName.networkAnomalies,
+  SecurityPageName.usersAnomalies,
+  SecurityPageName.detectionAndResponse,
+  SecurityPageName.hostsRisk,
+  SecurityPageName.usersRisk,
+];
+const nonCasesPages = allPages.reduce(
+  (acc: SecurityPageName[], p) =>
+    casesPages.includes(p) || featureFlagPages.includes(p) ? acc : [p, ...acc],
+  []
+);
 describe('security app link helpers', () => {
   describe('getInitialDeepLinks', () => {
-    it('should return all deep links', () => {
-      expect(getInitialDeepLinks()).toMatchSnapshot();
+    it('should return all pages in the app', () => {
+      const links = getInitialDeepLinks();
+      allPages.forEach((page) => expect(findDeepLink(page, links)).toBeTruthy());
     });
   });
   describe('getDeepLinks', () => {
     it('basicLicense should return only basic links', () => {
       const links = getDeepLinks(mockExperimentalDefaults, basicLicense, mockCapabilities);
       expect(findDeepLink(SecurityPageName.hostsAnomalies, links)).toBeFalsy();
+      allPages.forEach((page) => {
+        if (premiumPages.includes(page)) {
+          return expect(findDeepLink(page, links)).toBeFalsy();
+        }
+        if (featureFlagPages.includes(page)) {
+          // ignore feature flag pages
+          return;
+        }
+        expect(findDeepLink(page, links)).toBeTruthy();
+      });
     });
     it('platinumLicense should return all links', () => {
       const links = getDeepLinks(mockExperimentalDefaults, platinumLicense, mockCapabilities);
-      expect(findDeepLink(SecurityPageName.hostsAnomalies, links)).toBeTruthy();
+      allPages.forEach((page) => {
+        if (premiumPages.includes(page) && !featureFlagPages.includes(page)) {
+          return expect(findDeepLink(page, links)).toBeTruthy();
+        }
+        if (featureFlagPages.includes(page)) {
+          // ignore feature flag pages
+          return;
+        }
+        expect(findDeepLink(page, links)).toBeTruthy();
+      });
     });
     it('hideWhenExperimentalKey hides entry when key = true', () => {
       const links = getDeepLinks(
@@ -66,57 +112,48 @@ describe('security app link helpers', () => {
     });
     it('experimentalKey shows entry when key = false', () => {
       const links = getDeepLinks(
-        { ...mockExperimentalDefaults, riskyHostsEnabled: false },
+        {
+          ...mockExperimentalDefaults,
+          riskyHostsEnabled: false,
+          riskyUsersEnabled: false,
+          detectionResponseEnabled: false,
+        },
         platinumLicense,
         mockCapabilities
       );
+      expect(findDeepLink(SecurityPageName.hostsRisk, links)).toBeFalsy();
       expect(findDeepLink(SecurityPageName.usersRisk, links)).toBeFalsy();
+      expect(findDeepLink(SecurityPageName.detectionAndResponse, links)).toBeFalsy();
     });
     it('experimentalKey shows entry when key = true', () => {
       const links = getDeepLinks(
-        { ...mockExperimentalDefaults, riskyHostsEnabled: true },
+        {
+          ...mockExperimentalDefaults,
+          riskyHostsEnabled: true,
+          riskyUsersEnabled: true,
+          detectionResponseEnabled: true,
+        },
         platinumLicense,
         mockCapabilities
       );
+      expect(findDeepLink(SecurityPageName.hostsRisk, links)).toBeTruthy();
       expect(findDeepLink(SecurityPageName.usersRisk, links)).toBeTruthy();
+      expect(findDeepLink(SecurityPageName.detectionAndResponse, links)).toBeTruthy();
     });
-    const siemPages = [
-      SecurityPageName.administration,
-      SecurityPageName.blocklist,
-      SecurityPageName.endpoints,
-      SecurityPageName.eventFilters,
-      SecurityPageName.hostIsolationExceptions,
-      SecurityPageName.hosts,
-      SecurityPageName.landing,
-      SecurityPageName.network,
-      SecurityPageName.overview,
-      SecurityPageName.policies,
-      SecurityPageName.timelines,
-      SecurityPageName.trustedApps,
-      SecurityPageName.users,
-      SecurityPageName.uncommonProcesses,
-      SecurityPageName.hostsAnomalies,
-      SecurityPageName.hostsEvents,
-      SecurityPageName.hostsExternalAlerts,
-      SecurityPageName.sessions,
-      SecurityPageName.networkDns,
-      SecurityPageName.networkHttp,
-      SecurityPageName.networkTls,
-      SecurityPageName.networkExternalAlerts,
-      SecurityPageName.networkAnomalies,
-    ];
-    const casesPages = [
-      SecurityPageName.case,
-      SecurityPageName.caseConfigure,
-      SecurityPageName.caseCreate,
-    ];
+
     it('Removes siem features when siem capabilities are false', () => {
       const capabilities = {
         ...mockCapabilities,
         [SERVER_APP_ID]: { show: false },
       } as unknown as Capabilities;
       const links = getDeepLinks(mockExperimentalDefaults, platinumLicense, capabilities);
-      siemPages.forEach((page) => expect(findDeepLink(page, links)).toBeFalsy());
+      nonCasesPages.forEach((page) => {
+        // investigate is active for both Cases and Timelines pages
+        if (page === SecurityPageName.investigate) {
+          return expect(findDeepLink(page, links)).toBeTruthy();
+        }
+        return expect(findDeepLink(page, links)).toBeFalsy();
+      });
       casesPages.forEach((page) => expect(findDeepLink(page, links)).toBeTruthy());
     });
     it('Removes cases features when cases capabilities are false', () => {
@@ -125,7 +162,7 @@ describe('security app link helpers', () => {
         [CASES_FEATURE_ID]: { read_cases: false, crud_cases: false },
       } as unknown as Capabilities;
       const links = getDeepLinks(mockExperimentalDefaults, platinumLicense, capabilities);
-      siemPages.forEach((page) => expect(findDeepLink(page, links)).toBeTruthy());
+      nonCasesPages.forEach((page) => expect(findDeepLink(page, links)).toBeTruthy());
       casesPages.forEach((page) => expect(findDeepLink(page, links)).toBeFalsy());
     });
   });
