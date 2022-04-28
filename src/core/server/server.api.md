@@ -7,8 +7,9 @@
 /// <reference types="node" />
 
 import { AddConfigDeprecation } from '@kbn/config';
-import { AnalyticsClient } from '@elastic/analytics';
+import { AnalyticsClient } from '@kbn/analytics-client';
 import apm from 'elastic-apm-node';
+import { AwaitedProperties } from '@kbn/utility-types';
 import Boom from '@hapi/boom';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { CliArgs } from '@kbn/config';
@@ -21,7 +22,7 @@ import { ConfigDeprecationFactory } from '@kbn/config';
 import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
 import { ConfigService } from '@kbn/config';
-import { ContextProviderOpts } from '@elastic/analytics';
+import { ContextProviderOpts } from '@kbn/analytics-client';
 import { DetailedPeerCertificate } from 'tls';
 import type { DocLinks } from '@kbn/doc-links';
 import { Duration } from 'moment';
@@ -34,12 +35,12 @@ import { EcsEventType } from '@kbn/logging';
 import { EnvironmentMode } from '@kbn/config';
 import { errors } from '@elastic/elasticsearch';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Event as Event_2 } from '@elastic/analytics';
-import { EventContext } from '@elastic/analytics';
-import { EventType } from '@elastic/analytics';
-import { EventTypeOpts } from '@elastic/analytics';
+import { Event as Event_2 } from '@kbn/analytics-client';
+import { EventContext } from '@kbn/analytics-client';
+import { EventType } from '@kbn/analytics-client';
+import { EventTypeOpts } from '@kbn/analytics-client';
 import { IncomingHttpHeaders } from 'http';
-import { IShipper } from '@elastic/analytics';
+import { IShipper } from '@kbn/analytics-client';
 import { Logger } from '@kbn/logging';
 import { LoggerFactory } from '@kbn/logging';
 import { LogLevel as LogLevel_2 } from '@kbn/logging';
@@ -48,7 +49,7 @@ import { LogRecord } from '@kbn/logging';
 import { MaybePromise } from '@kbn/utility-types';
 import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
-import { OptInConfig } from '@elastic/analytics';
+import { OptInConfig } from '@kbn/analytics-client';
 import { PackageInfo } from '@kbn/config';
 import { PathConfigType } from '@kbn/utils';
 import { PeerCertificate } from 'tls';
@@ -60,10 +61,10 @@ import { ResponseObject } from '@hapi/hapi';
 import { ResponseToolkit } from '@hapi/hapi';
 import { SchemaTypeError } from '@kbn/config-schema';
 import { ShallowPromise } from '@kbn/utility-types';
-import { ShipperClassConstructor } from '@elastic/analytics';
+import { ShipperClassConstructor } from '@kbn/analytics-client';
 import { Stream } from 'stream';
-import { TelemetryCounter } from '@elastic/analytics';
-import { TelemetryCounterType } from '@elastic/analytics';
+import { TelemetryCounter } from '@kbn/analytics-client';
+import { TelemetryCounterType } from '@kbn/analytics-client';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -444,6 +445,30 @@ export interface CorePreboot {
     http: HttpServicePreboot;
     // (undocumented)
     preboot: PrebootServicePreboot;
+}
+
+// @public
+export interface CoreRequestHandlerContext {
+    // (undocumented)
+    deprecations: {
+        client: DeprecationsClient;
+    };
+    // (undocumented)
+    elasticsearch: {
+        client: IScopedClusterClient;
+    };
+    // (undocumented)
+    savedObjects: {
+        client: SavedObjectsClientContract;
+        typeRegistry: ISavedObjectTypeRegistry;
+        getClient: (options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
+        getExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
+        getImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
+    };
+    // (undocumented)
+    uiSettings: {
+        client: IUiSettingsClient;
+    };
 }
 
 // @internal
@@ -840,6 +865,11 @@ export interface CustomHttpResponseOptions<T extends HttpResponsePayload | Respo
     statusCode: number;
 }
 
+// @public (undocumented)
+export type CustomRequestHandlerContext<T> = RequestHandlerContext & {
+    [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>;
+};
+
 // @internal (undocumented)
 export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory>;
 
@@ -1189,7 +1219,7 @@ export interface HttpServiceSetup {
     registerOnPreAuth: (handler: OnPreAuthHandler) => void;
     registerOnPreResponse: (handler: OnPreResponseHandler) => void;
     registerOnPreRouting: (handler: OnPreRoutingHandler) => void;
-    registerRouteHandlerContext: <Context extends RequestHandlerContext, ContextName extends keyof Context>(contextName: ContextName, provider: RequestHandlerContextProvider<Context, ContextName>) => RequestHandlerContextContainer;
+    registerRouteHandlerContext: <Context extends RequestHandlerContext, ContextName extends keyof Omit<Context, 'resolve'>>(contextName: ContextName, provider: RequestHandlerContextProvider<Context, ContextName>) => RequestHandlerContextContainer;
 }
 
 // @public (undocumented)
@@ -1221,7 +1251,7 @@ export interface IContextContainer {
 }
 
 // @public
-export type IContextProvider<Context extends RequestHandlerContext, ContextName extends keyof Context> = (context: Omit<Context, ContextName>, ...rest: HandlerParameters<RequestHandler>) => Promise<Context[ContextName]> | Context[ContextName];
+export type IContextProvider<Context extends RequestHandlerContext, ContextName extends keyof Context> = (context: Omit<Context, ContextName>, ...rest: HandlerParameters<RequestHandler>) => MaybePromise<Awaited<Context[ContextName]>>;
 
 // @public
 export interface ICspConfig {
@@ -1840,26 +1870,14 @@ export interface RegisterDeprecationsConfig {
 export type RequestHandler<P = unknown, Q = unknown, B = unknown, Context extends RequestHandlerContext = RequestHandlerContext, Method extends RouteMethod = any, ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory> = (context: Context, request: KibanaRequest<P, Q, B, Method>, response: ResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 
 // @public
-export interface RequestHandlerContext {
+export interface RequestHandlerContext extends RequestHandlerContextBase {
     // (undocumented)
-    core: {
-        savedObjects: {
-            client: SavedObjectsClientContract;
-            typeRegistry: ISavedObjectTypeRegistry;
-            getClient: (options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
-            getExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
-            getImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
-        };
-        elasticsearch: {
-            client: IScopedClusterClient;
-        };
-        uiSettings: {
-            client: IUiSettingsClient;
-        };
-        deprecations: {
-            client: DeprecationsClient;
-        };
-    };
+    core: Promise<CoreRequestHandlerContext>;
+}
+
+// @public (undocumented)
+export interface RequestHandlerContextBase {
+    resolve: <T extends keyof Omit<this, 'resolve'>>(parts: T[]) => Promise<AwaitedProperties<Pick<this, T>>>;
 }
 
 // @public
