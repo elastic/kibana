@@ -15,6 +15,7 @@ import {
   UserContentEventsStream,
 } from './types';
 import { registerRoutes } from './routes';
+import { MetadataEventsService } from './services';
 
 export class UserContentPlugin
   implements
@@ -22,17 +23,26 @@ export class UserContentPlugin
 {
   private readonly logger: Logger;
   private userContentEventStream$ = new Subject<UserContentEventsStream>();
+  private metadataEventsService: MetadataEventsService;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
+    this.metadataEventsService = new MetadataEventsService();
   }
 
   public setup({ http }: CoreSetup) {
     this.logger.debug('Setting up UserContent plugin');
 
+    const userContentEventStreamPromise = firstValueFrom(this.userContentEventStream$);
+
     registerRoutes({
       http,
-      userContentEventStreamPromise: firstValueFrom(this.userContentEventStream$),
+      userContentEventStreamPromise,
+      metadataEventsService: this.metadataEventsService,
+    });
+
+    this.metadataEventsService.init({
+      userContentEventStreamPromise,
     });
 
     return {};
@@ -40,10 +50,10 @@ export class UserContentPlugin
 
   public start(core: CoreStart, { metadataEventsStreams }: UserContentStartDependencies) {
     this.logger.debug('Starting up UserContent plugin');
-    // const managementService = new SavedObjectsManagement(core.savedObjects.getTypeRegistry());
-    // this.managementService$.next(managementService);
+
     const userContentEventStream = metadataEventsStreams.registerEventStream('userContent');
     this.userContentEventStream$.next(userContentEventStream);
+
     return {};
   }
 }

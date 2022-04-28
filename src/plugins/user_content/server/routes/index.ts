@@ -9,15 +9,26 @@
 import { HttpServiceSetup } from '@kbn/core/server';
 
 import type { UserContentEventsStream } from '../types';
+import type { MetadataEventsService } from '../services';
+import type { RouteDependencies } from './types';
 import { registerRegisterEventRoute } from './register_event';
+import { registerUpdateViewsCountRoute } from './update_views_count';
 
 interface RegisterRouteOptions {
   http: HttpServiceSetup;
   userContentEventStreamPromise: Promise<UserContentEventsStream>;
+  metadataEventsService: MetadataEventsService;
 }
 
-export function registerRoutes({ http, userContentEventStreamPromise }: RegisterRouteOptions) {
+export function registerRoutes({
+  http,
+  userContentEventStreamPromise,
+  metadataEventsService,
+}: RegisterRouteOptions) {
   const router = http.createRouter();
 
-  registerRegisterEventRoute(router, { userContentEventStreamPromise });
+  const routeDeps: RouteDependencies = { userContentEventStreamPromise, metadataEventsService };
+
+  registerRegisterEventRoute(router, routeDeps);
+  registerUpdateViewsCountRoute(router, routeDeps);
 }
