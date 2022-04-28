@@ -52,7 +52,11 @@ export const AddSourceIntro: React.FC = () => {
   const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
   const to =
     `${getSourcesPath(getAddPath(serviceType), isOrganization)}/` +
-    (hasMultipleConnectorOptions(sourceData) ? 'choice' : '');
+    (hasMultipleConnectorOptions(sourceData)
+      ? 'choice'
+      : serviceType === 'external'
+      ? 'connector_registration'
+      : 'internal');
   return (
     <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name]}>
       <ConfigurationIntro name={name} advanceStepTo={to} header={header} />

@@ -56,7 +56,10 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
   }, []);
 
   const internalTo = `${getSourcesPath(getAddPath(serviceType), isOrganization)}/internal`;
-  const externalTo = `${getSourcesPath(getAddPath(serviceType), isOrganization)}/external`;
+  const externalTo = `${getSourcesPath(
+    getAddPath('external'), // TODO add serviceType after baseServiceType support
+    isOrganization
+  )}/connector_registration`;
   const customTo = `${getSourcesPath(getAddPath(serviceType), isOrganization)}/custom`;
 
   const ConnectorCard: React.FC<CardProps> = ({

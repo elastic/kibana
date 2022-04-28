@@ -101,7 +101,7 @@ export const SourcesRouter: React.FC = () => {
         const defaultOption = internalConnectorAvailable
           ? 'internal'
           : externalConnectorAvailable
-          ? 'external'
+          ? 'connector_registration'
           : 'custom';
         return (
           <Route key={i} exact path={path}>
@@ -127,25 +127,16 @@ export const SourcesRouter: React.FC = () => {
             </Route>
           );
         })}
-      {sources
-        .filter((sourceData) => sourceData.externalConnectorAvailable)
-        .map((sourceData, i) => {
-          const { serviceType, accountContextOnly } = sourceData;
-
-          return (
-            <Route
-              key={i}
-              exact
-              path={`${getSourcesPath(getAddPath(serviceType), isOrganization)}/external`}
-            >
-              {!hasPlatinumLicense && accountContextOnly ? (
-                <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
-              ) : (
-                <ExternalConnectorConfig sourceData={sourceData} />
-              )}
-            </Route>
-          );
-        })}
+      <Route
+        exact
+        path={`${getSourcesPath(
+          getAddPath(':serviceType'),
+          isOrganization
+        )}/connector_registration`}
+        data-test-subj="ExternalConnectorConfigRoute"
+      >
+        <ExternalConnectorConfig />
+      </Route>
       <Route
         exact
         path={`${getSourcesPath(getAddPath('custom'), isOrganization)}/`}
