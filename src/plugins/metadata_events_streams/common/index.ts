@@ -9,3 +9,5 @@
 export { API_BASE_PATH } from './constants';
 
 export { withApiBaseBath } from './lib';
+
+export type { MetadataEvent, MetadataEventDoc } from './types';

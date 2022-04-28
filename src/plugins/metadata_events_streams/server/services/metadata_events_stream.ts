@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { MetadataEvent } from '../types';
+import type { MetadataEvent } from '../../common';
 import { MetadataEventsStreamsIndex } from './metadata_events_streams_index';
 
 interface Dependencies {

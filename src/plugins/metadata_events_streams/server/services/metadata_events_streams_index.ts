@@ -7,7 +7,7 @@
  */
 import moment from 'moment';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { MetadataEvent, MetadataEventDoc } from '../types';
+import type { MetadataEvent, MetadataEventDoc } from '../../common';
 
 interface Dependencies {
   logger: Logger;
