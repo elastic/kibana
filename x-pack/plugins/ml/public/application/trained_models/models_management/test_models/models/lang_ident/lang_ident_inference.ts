@@ -10,6 +10,7 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { InferenceBase, InferResponse } from '../inference_base';
 import { getGeneralInputComponent } from '../text_input';
 import { getLangIdentOutputComponent } from './lang_ident_output';
+import { TopClass } from '../../../../../../../common/types/feature_importance';
 
 export type FormattedLangIdentResponse = Array<{
   className: string;
@@ -60,7 +61,7 @@ export class LangIdentInference extends InferenceBase<LangIdentResponse> {
         const topClasses = resp.docs[0].doc?._source._ml?.lang_ident?.top_classes ?? [];
 
         const r: LangIdentResponse = {
-          response: topClasses.map((t: any) => ({
+          response: topClasses.map((t: TopClass) => ({
             className: t.class_name,
             classProbability: t.class_probability,
             classScore: t.class_score,
