@@ -142,7 +142,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
       description={
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepSettings.includeGlobalStateDescription"
-          defaultMessage="Stores the global cluster state and system indices as part of the snapshot."
+          defaultMessage="Stores the global cluster state and system indices as part of the snapshot. This will capture all system indices in addition to any specific indices that have been selected for capture."
         />
       }
       fullWidth
