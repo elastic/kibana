@@ -543,10 +543,6 @@ inactive socket. *Default: `"120000"`*
  | Paths to a PEM-encoded X.509 server certificate and its corresponding private key. These
 are used by {kib} to establish trust when receiving inbound SSL/TLS connections from users.
 
-|[[server-uuid]] `server.uuid:`
- | The unique identifier for this {kib} instance.
-
-
 |===
 
 [NOTE]
@@ -626,6 +622,9 @@ all http requests to https over the port configured as <<server-port, `server.po
 | [[server-ssl-supportedProtocols]] `server.ssl.supportedProtocols:`
  | An array of supported protocols with versions.
 Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`, `TLSv1.3`. *Default: TLSv1.1, TLSv1.2, TLSv1.3*
+
+|[[server-uuid]] `server.uuid:`
+ | The unique identifier for this {kib} instance. It must be a valid UUIDv4. It gets automatically generated on the first startup if not specified and persisted in the `data` path.
 
 | [[settings-xsrf-allowlist]] `server.xsrf.allowlist:`
  | It is not recommended to disable protections for
