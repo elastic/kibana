@@ -13,10 +13,10 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiButtonEmpty,
+  EuiTitle,
 } from '@elastic/eui';
 import { useKibana } from '../../../common/lib/kibana';
 import { OsqueryEventDetailsFooter } from './osquery_flyout_footer';
-import { OsqueryEventDetailsHeader } from './osquery_flyout_header';
 import { ACTION_OSQUERY } from './translations';
 import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 
@@ -79,12 +79,10 @@ export const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({ agentId, 
       size="m"
       onClose={onClose}
     >
-      <EuiFlyoutHeader hasBorder>
-        <OsqueryEventDetailsHeader
-          primaryText={<h2>{ACTION_OSQUERY}</h2>}
-          handleClick={onClose}
-          data-test-subj="flyout-header-osquery"
-        />
+      <EuiFlyoutHeader hasBorder data-test-subj="flyout-header-osquery">
+        <EuiTitle>
+          <h2>{ACTION_OSQUERY}</h2>
+        </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <OsqueryActionWrapper data-test-subj="flyout-body-osquery">
