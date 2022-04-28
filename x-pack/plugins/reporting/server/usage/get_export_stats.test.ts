@@ -331,6 +331,7 @@ test('Incorporate error code stats', () => {
           browser_could_not_launch_error: 2,
           browser_unexpectedly_closed_error: 8,
           browser_screenshot_error: 27,
+          visual_reporting_soft_disabled_error: 1,
         },
       },
       printable_pdf_v2: {
@@ -349,6 +350,7 @@ test('Incorporate error code stats', () => {
           browser_could_not_launch_error: 2,
           browser_unexpectedly_closed_error: 8,
           browser_screenshot_error: 27,
+          visual_reporting_soft_disabled_error: 1,
         },
       },
       csv_searchsource_immediate: {
@@ -378,6 +380,7 @@ test('Incorporate error code stats', () => {
       "kibana_shutting_down_error": 1,
       "queue_timeout_error": 1,
       "unknown_error": 0,
+      "visual_reporting_soft_disabled_error": 1,
     }
   `);
   expect(result.printable_pdf_v2.error_codes).toMatchInlineSnapshot(`
@@ -390,6 +393,7 @@ test('Incorporate error code stats', () => {
       "pdf_worker_out_of_memory_error": 99,
       "queue_timeout_error": 1,
       "unknown_error": 0,
+      "visual_reporting_soft_disabled_error": 1,
     }
   `);
 

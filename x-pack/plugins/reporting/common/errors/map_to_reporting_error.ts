@@ -13,6 +13,7 @@ import {
   BrowserUnexpectedlyClosedError,
   BrowserScreenshotError,
   PdfWorkerOutOfMemoryError,
+  VisualReportingSoftDisabledError,
 } from '.';
 
 export function mapToReportingError(error: unknown): ReportingError {
@@ -28,6 +29,8 @@ export function mapToReportingError(error: unknown): ReportingError {
       return new BrowserCouldNotLaunchError();
     case error instanceof errors.PdfWorkerOutOfMemoryError:
       return new PdfWorkerOutOfMemoryError();
+    case error instanceof errors.InsufficientMemoryAvailableOnCloudError:
+      return new VisualReportingSoftDisabledError();
   }
   return new UnknownError();
 }
