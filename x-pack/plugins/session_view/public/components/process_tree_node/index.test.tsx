@@ -216,7 +216,7 @@ describe('ProcessTreeNode component', () => {
 
         expect(renderResult.queryByTestId('processTreeNodeAlertButton')).toBeTruthy();
         expect(renderResult.queryByTestId('processTreeNodeAlertButton')?.textContent).toBe(
-          `Alerts(${sessionViewAlertProcessMock.getAlerts().length})`
+          `Alerts (${sessionViewAlertProcessMock.getAlerts().length})`
         );
       });
       it('renders Alerts button with 99+ when process has more than 99 alerts', async () => {
@@ -234,7 +234,7 @@ describe('ProcessTreeNode component', () => {
 
         expect(renderResult.queryByTestId('processTreeNodeAlertButton')).toBeTruthy();
         expect(renderResult.queryByTestId('processTreeNodeAlertButton')?.textContent).toBe(
-          'Alerts(99+)'
+          'Alerts (99+)'
         );
       });
       it('toggle Alert Details button when Alert button is clicked', async () => {
