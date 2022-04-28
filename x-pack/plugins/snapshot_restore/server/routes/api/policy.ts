@@ -210,6 +210,7 @@ export function registerPolicyRoutes({
         const body: PolicyIndicesResponse = {
           dataStreams: resolvedIndicesResponse.data_streams.map(({ name }) => name).sort(),
           indices: resolvedIndicesResponse.indices
+            .filter(index => !index.attributes.includes('system'))
             .flatMap((index) => (index.data_stream ? [] : index.name))
             .sort(),
         };
