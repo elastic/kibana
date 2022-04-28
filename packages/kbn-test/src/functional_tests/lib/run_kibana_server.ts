@@ -42,7 +42,7 @@ export async function runKibanaServer({
 
   await procs.run('kibana', {
     cmd: getKibanaCmd(installDir),
-    args: filterCliArgs(collectCliArgs(config, options)),
+    args: filterCliArgs(collectCliArgs(config, installDir, options.extraKbnOpts)),
     env: {
       FORCE_COLOR: 1,
       ...process.env,
@@ -70,10 +70,7 @@ function getKibanaCmd(installDir?: string) {
  * passed, we run from source code. We also allow passing in extra
  * Kibana server options, so we tack those on here.
  */
-function collectCliArgs(
-  config: Config,
-  { installDir, extraKbnOpts }: { installDir?: string; extraKbnOpts?: string[] }
-) {
+function collectCliArgs(config: Config, installDir?: string, extraKbnOpts: string[] = []) {
   const buildArgs: string[] = config.get('kbnTestServer.buildArgs') || [];
   const sourceArgs: string[] = config.get('kbnTestServer.sourceArgs') || [];
   const serverArgs: string[] = config.get('kbnTestServer.serverArgs') || [];
@@ -82,7 +79,7 @@ function collectCliArgs(
     serverArgs,
     (args) => (installDir ? args.filter((a: string) => a !== '--oss') : args),
     (args) => (installDir ? [...buildArgs, ...args] : [KIBANA_EXEC_PATH, ...sourceArgs, ...args]),
-    (args) => args.concat(extraKbnOpts || [])
+    (args) => [...args, extraKbnOpts]
   );
 }
 
