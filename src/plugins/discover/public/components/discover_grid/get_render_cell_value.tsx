@@ -14,6 +14,8 @@ import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiToolTip,
+  EuiBadge,
 } from '@elastic/eui';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DiscoverGridContext } from './discover_grid_context';
@@ -117,13 +119,25 @@ export const getRenderCellValueFn =
     }
 
     return (
-      <span
-        // formatFieldValue guarantees sanitized values
-        // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{
-          __html: formatFieldValue(rowFlattened[columnId], row, fieldFormats, dataView, field),
-        }}
-      />
+      <>
+        {row._index && field?.indices.find((i) => i.name === row._index)?.default_metric && (
+          <EuiToolTip
+            position="bottom"
+            content={`This is a rolled up value, showing ${
+              field?.indices.find((i) => i.name === row._index)?.default_metric
+            }`}
+          >
+            <EuiBadge>{field?.indices.find((i) => i.name === row._index)?.default_metric}</EuiBadge>
+          </EuiToolTip>
+        )}
+        <span
+          // formatFieldValue guarantees sanitized values
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{
+            __html: formatFieldValue(rowFlattened[columnId], row, fieldFormats, dataView, field),
+          }}
+        />
+      </>
     );
   };
 
