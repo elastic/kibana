@@ -8,7 +8,29 @@
 import React, { memo, PropsWithChildren, useMemo } from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
-export class SecuritySolutionQueryClient extends QueryClient {}
+type QueryClientOptionsProp = ConstructorParameters<typeof QueryClient>[0];
+
+/**
+ * A security solution specific react-query query client that sets defaults
+ */
+export class SecuritySolutionQueryClient extends QueryClient {
+  constructor(options: QueryClientOptionsProp = {}) {
+    const optionsWithDefaults: QueryClientOptionsProp = {
+      ...options,
+      defaultOptions: {
+        ...(options.defaultOptions ?? {}),
+        queries: {
+          refetchIntervalInBackground: false,
+          refetchOnWindowFocus: false,
+          refetchOnMount: true,
+          keepPreviousData: true,
+          ...(options?.defaultOptions?.queries ?? {}),
+        },
+      },
+    };
+    super(optionsWithDefaults);
+  }
+}
 
 export type ReactQueryClientProviderProps = PropsWithChildren<{
   queryClient?: SecuritySolutionQueryClient;
