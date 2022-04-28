@@ -71,9 +71,22 @@ export class IndexPatternsFetcher {
     if (patternList.length > 1 && !allowNoIndices) {
       patternListActive = await this.validatePatternListActive(patternList);
     }
+    const r = await this.elasticsearchClient.search({
+      index: patternListActive.join(','),
+      size: 0,
+      aggs: {
+        i: {
+          terms: {
+            field: '_index',
+          },
+        },
+      },
+      query: filter,
+    });
+    const indices = r.aggregations.i.buckets.map(b => b.key);
     const fieldCapsResponse = await getFieldCapabilities({
       callCluster: this.elasticsearchClient,
-      indices: patternListActive,
+      indices,
       metaFields,
       fieldCapsOptions: {
         allow_no_indices: allowNoIndices,
@@ -120,7 +133,19 @@ export class IndexPatternsFetcher {
   }) {
     const { pattern, lookBack, metaFields } = options;
     const { matches } = await resolveTimePattern(this.elasticsearchClient, pattern);
-    const indices = matches.slice(0, lookBack);
+    const r = await this.elasticsearchClient.search({
+      index: pattern,
+      size: 0,
+      aggs: {
+        i: {
+          terms: {
+            field: '_index',
+          },
+        },
+      },
+    });
+    const indices = r.aggregations.i.buckets.map(b => b.key).slice(0, lookBack);
+    console.log(indices);
     if (indices.length === 0) {
       throw createNoMatchingIndicesError(pattern);
     }

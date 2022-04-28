@@ -63,7 +63,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
       type,
       rollup_index: rollupIndex,
       allow_no_index: allowNoIndex,
-      filter,
+      filter: filter ? JSON.stringify(filter) : undefined,
     }).then((resp: any) => resp.fields || []);
   }
 

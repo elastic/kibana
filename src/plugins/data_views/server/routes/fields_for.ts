@@ -35,11 +35,13 @@ interface IQuery {
   type?: string;
   rollup_index?: string;
   allow_no_index?: boolean;
+  filter?: string;
 }
 
 const validate: RouteValidatorFullConfig<{}, IQuery, IBody> = {
   query: schema.object({
     pattern: schema.string(),
+    filter: schema.maybe(schema.string()),
     meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
       defaultValue: [],
     }),
@@ -62,7 +64,9 @@ const handler: RequestHandler<{}, IQuery, IBody> = async (context, request, resp
   } = request.query;
 
   // not available to get request
-  const filter = request.body?.index_filter;
+  const filter = request.query.filter
+    ? JSON.parse(request.query.filter)
+    : request.body?.index_filter;
 
   let parsedFields: string[] = [];
   try {

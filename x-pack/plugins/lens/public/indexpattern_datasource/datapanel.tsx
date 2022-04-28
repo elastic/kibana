@@ -44,7 +44,7 @@ import type {
   IndexPatternRef,
 } from './types';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import { loadIndexPatterns, syncExistingFields } from './loader';
+import { loadIndexPatternFieldCaps, loadIndexPatterns, syncExistingFields } from './loader';
 import { fieldExists } from './pure_helpers';
 import { Loader } from '../loader';
 
@@ -182,8 +182,15 @@ export function IndexPatternDataPanel({
   return (
     <>
       <Loader
-        load={() =>
-          syncExistingFields({
+        load={async () => {
+          await loadIndexPatternFieldCaps({
+            dateRange,
+            setState,
+            dslQuery,
+            indexPatternsService: data.dataViews,
+            pattern: currentIndexPatternId,
+          });
+          await syncExistingFields({
             dateRange,
             setState,
             isFirstExistenceFetch: state.isFirstExistenceFetch,
@@ -192,15 +199,15 @@ export function IndexPatternDataPanel({
             indexPatterns: indexPatternList,
             fetchJson: core.http.post,
             dslQuery,
-          })
-        }
+          });
+        }}
         loadDeps={[
           query,
           filters,
           dateRange.fromDate,
           dateRange.toDate,
           indexPatternList.map((x) => `${x.title}:${x.timeFieldName}`).join(','),
-          state.indexPatterns,
+          // state.indexPatterns,
         ]}
       />
 

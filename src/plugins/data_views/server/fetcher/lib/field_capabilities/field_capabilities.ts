@@ -60,6 +60,7 @@ export async function getFieldCapabilities(params: FieldCapabilitiesParams) {
   const esFieldCaps = await callFieldCapsApi({ callCluster, indices, fieldCapsOptions, filter });
   const fieldsFromFieldCapsByName = keyBy(readFieldCapsResponse(esFieldCaps.body), 'name');
 
+  console.log(indices);
   // get mapping to retrieve additional field information for TSDB/rollups
   const mappings = await callMappingApi({ callCluster, indices, fieldCapsOptions, filter });
 

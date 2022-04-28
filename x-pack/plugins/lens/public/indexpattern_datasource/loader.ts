@@ -34,7 +34,10 @@ import { getFieldByNameFactory } from './pure_helpers';
 import { memoizedGetAvailableOperationsByMetadata } from './operations';
 
 type SetState = DatasourceDataPanelProps<IndexPatternPrivateState>['setState'];
-type IndexPatternsService = Pick<DataViewsContract, 'get' | 'getIdsWithTitle'>;
+type IndexPatternsService = Pick<
+  DataViewsContract,
+  'get' | 'getIdsWithTitle' | 'getFieldsForIndexPattern'
+>;
 type ErrorHandler = (err: Error) => void;
 
 export function convertDataViewIntoLensIndexPattern(dataView: DataView): IndexPattern {
@@ -152,6 +155,86 @@ export async function loadIndexPatterns({
   );
 
   return indexPatternsObject;
+}
+
+function toQuery(
+  timeFieldName: string | undefined,
+  fromDate: string | undefined,
+  toDate: string | undefined,
+  dslQuery: object
+) {
+  const filter =
+    timeFieldName && fromDate && toDate
+      ? [
+          {
+            range: {
+              [timeFieldName]: {
+                format: 'strict_date_optional_time',
+                gte: fromDate,
+                lte: toDate,
+              },
+            },
+          },
+          dslQuery,
+        ]
+      : [dslQuery];
+
+  const query = {
+    bool: {
+      filter,
+    },
+  };
+  return query;
+}
+
+export async function loadIndexPatternFieldCaps({
+  indexPatternsService,
+  dslQuery,
+  setState,
+  dateRange,
+  pattern,
+}: {
+  indexPatternsService: IndexPatternsService;
+  pattern: string;
+  dateRange: DateRange;
+  dslQuery: any;
+  setState: SetState;
+}) {
+  try {
+    const _dataView = await indexPatternsService.get(pattern);
+    const existingFields = await indexPatternsService.getFieldsForIndexPattern(_dataView, {
+      pattern: '',
+      filter: toQuery(_dataView.timeFieldName, dateRange.fromDate, dateRange.toDate, dslQuery),
+    });
+    setState(
+      (state) => {
+        const newFields = state.indexPatterns[pattern].fields.map((f) => {
+          const existingField = existingFields.find((ef) => ef.name === f.name);
+          if (existingField) {
+            return {
+              ...f,
+              ...existingField,
+            };
+          }
+          return f;
+        });
+        return {
+          ...state,
+          indexPatterns: {
+            ...state.indexPatterns,
+            [pattern]: {
+              ...state.indexPatterns[pattern],
+              fields: newFields,
+              getFieldByName: getFieldByNameFactory(newFields),
+            },
+          },
+        };
+      },
+      { applyImmediately: true }
+    );
+  } catch {
+    // empty
+  }
 }
 
 const getLastUsedIndexPatternId = (
