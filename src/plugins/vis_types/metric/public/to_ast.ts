@@ -83,7 +83,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
     )
   );
 
-  if (colorsRange && colorsRange.length) {
+  if (colorsRange && colorsRange.length > 1) {
     const stopsWithColors = getStopsWithColorsFromRanges(colorsRange, colorSchema, invertColors);
     const palette = buildExpressionFunction('palette', {
       ...stopsWithColors,
