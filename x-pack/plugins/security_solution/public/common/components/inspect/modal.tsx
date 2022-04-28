@@ -26,7 +26,7 @@ import { useLocation } from 'react-router-dom';
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import * as i18n from './translations';
 import {
-  EXCLUDE_ELASTIC_CLOUD_INDEX,
+  EXCLUDE_ELASTIC_CLOUD_INDICES,
   getScopeFromPath,
   useSourcererDataView,
 } from '../../containers/sourcerer';
@@ -136,7 +136,10 @@ export const ModalInspectQuery = ({
   );
 
   const isLogsExclude = useMemo(
-    () => (inspectRequests[0]?.index ?? []).includes(EXCLUDE_ELASTIC_CLOUD_INDEX),
+    () =>
+      EXCLUDE_ELASTIC_CLOUD_INDICES.some((index) =>
+        (inspectRequests[0]?.index ?? []).includes(index)
+      ),
     [inspectRequests]
   );
 

@@ -292,7 +292,11 @@ export const useInitSourcerer = (
 };
 
 const LOGS_WILDCARD_INDEX = 'logs-*';
-export const EXCLUDE_ELASTIC_CLOUD_INDEX = '-*elastic-cloud-logs-*';
+export const EXCLUDE_ELASTIC_CLOUD_INDICES = [
+  '-*elastic-cloud-logs-*',
+  '-.ds-logs-elastic_agent*',
+  '-.ds-logs-system-*',
+];
 
 export const useSourcererDataView = (
   scopeId: SourcererScopeName = SourcererScopeName.default
@@ -321,7 +325,7 @@ export const useSourcererDataView = (
   const selectedPatterns = useMemo(
     () =>
       scopeSelectedPatterns.some((index) => index === LOGS_WILDCARD_INDEX)
-        ? [...scopeSelectedPatterns.sort(), EXCLUDE_ELASTIC_CLOUD_INDEX]
+        ? [...scopeSelectedPatterns.sort(), ...EXCLUDE_ELASTIC_CLOUD_INDICES]
         : scopeSelectedPatterns.sort(),
     [scopeSelectedPatterns]
   );
