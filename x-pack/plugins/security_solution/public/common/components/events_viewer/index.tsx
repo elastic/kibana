@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 import type { EntityType, TimelineItem } from '@kbn/timelines-plugin/common';
 import { TGridCellAction } from '@kbn/timelines-plugin/common/types';
+import { useBulkAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_bulk_add_to_case_actions';
 import { inputsModel, State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { ControlColumnProps, RowRenderer, TimelineId } from '../../../../common/types/timeline';
@@ -186,6 +187,8 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
     newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
   };
+
+  const addToCaseBulkActions = useBulkAddToCaseActions();
   const bulkActions = useMemo(
     () => ({
       onAlertStatusActionSuccess: () => {
@@ -195,26 +198,9 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
           refetchQuery(globalQueries);
         }
       },
-      customBulkActions: [
-        {
-          label: 'Attach to new case',
-          key: 'attach-new-case',
-          'data-test-subj': 'attach-new-case',
-          onClick: (items?: TimelineItem[]) => {
-            console.log('new one', items);
-          },
-        },
-        {
-          label: 'Attach to existing case',
-          key: 'attach-existing-case',
-          'data-test-subj': 'attach-existing-case',
-          onClick: (items?: TimelineItem[]) => {
-            console.log('existing one', items);
-          },
-        },
-      ],
+      customBulkActions: addToCaseBulkActions,
     }),
-    [globalQueries, id, timelineQuery]
+    [addToCaseBulkActions, globalQueries, id, timelineQuery]
   );
 
   const fieldBrowserOptions = useFieldBrowserOptions({

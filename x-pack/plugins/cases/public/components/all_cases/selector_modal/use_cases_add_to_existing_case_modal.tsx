@@ -53,18 +53,17 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps) 
   }, [dispatch]);
 
   const handleOnRowClick = useCallback(
-    async (theCase?: Case) => {
+    async (theCase: Case | undefined, attachments: CaseAttachments) => {
       // when the case is undefined in the modal
       // the user clicked "create new case"
       if (theCase === undefined) {
         closeModal();
-        createNewCaseFlyout.open();
+        createNewCaseFlyout.open(attachments);
         return;
       }
 
       try {
         // add attachments to the case
-        const attachments = props.attachments;
         if (attachments !== undefined && attachments.length > 0) {
           await createAttachments({
             caseId: theCase.id,
@@ -74,7 +73,7 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps) 
 
           casesToasts.showSuccessAttach({
             theCase,
-            attachments: props.attachments,
+            attachments,
             title: props.toastTitle,
             content: props.toastContent,
           });
@@ -91,22 +90,28 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingFlyoutProps) 
     [casesToasts, closeModal, createNewCaseFlyout, createAttachments, props]
   );
 
-  const openModal = useCallback(() => {
-    dispatch({
-      type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
-      payload: {
-        ...props,
-        hiddenStatuses: [CaseStatuses.closed, StatusAll],
-        onRowClick: handleOnRowClick,
-        onClose: () => {
-          closeModal();
-          if (props.onClose) {
-            return props.onClose();
-          }
+  const openModal = useCallback(
+    (attachments?: CaseAttachments) => {
+      dispatch({
+        type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
+        payload: {
+          ...props,
+          hiddenStatuses: [CaseStatuses.closed, StatusAll],
+          onRowClick: (theCase?: Case) => {
+            const caseAttachments = attachments ?? props.attachments ?? [];
+            handleOnRowClick(theCase, caseAttachments);
+          },
+          onClose: () => {
+            closeModal();
+            if (props.onClose) {
+              return props.onClose();
+            }
+          },
         },
-      },
-    });
-  }, [closeModal, dispatch, handleOnRowClick, props]);
+      });
+    },
+    [closeModal, dispatch, handleOnRowClick, props]
+  );
   return {
     open: openModal,
     close: closeModal,
