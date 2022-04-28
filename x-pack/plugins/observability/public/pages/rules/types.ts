@@ -4,17 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { Dispatch, SetStateAction } from 'react';
 import { EuiTableSortingType, EuiBasicTableColumn } from '@elastic/eui';
-import { AlertExecutionStatus } from '../../../../alerting/common';
-import { RuleTableItem, Rule } from '../../../../triggers_actions_ui/public';
+import { RuleExecutionStatus } from '@kbn/alerting-plugin/common';
+import { RuleTableItem, Rule } from '@kbn/triggers-actions-ui-plugin/public';
 export interface StatusProps {
   type: RuleStatus;
+  disabled: boolean;
   onClick: () => void;
 }
 
 export enum RuleStatus {
   enabled = 'enabled',
   disabled = 'disabled',
+  snoozed = 'snoozed',
 }
 
 export type Status = Record<
@@ -27,10 +30,12 @@ export type Status = Record<
 
 export interface StatusContextProps {
   item: RuleTableItem;
+  disabled: boolean;
   onStatusChanged: (status: RuleStatus) => void;
   enableRule: (rule: Rule) => Promise<void>;
   disableRule: (rule: Rule) => Promise<void>;
   muteRule: (rule: Rule) => Promise<void>;
+  unMuteRule: (rule: Rule) => Promise<void>;
 }
 
 export interface StatusFilterProps {
@@ -39,7 +44,7 @@ export interface StatusFilterProps {
 }
 
 export interface ExecutionStatusProps {
-  executionStatus: AlertExecutionStatus;
+  executionStatus: RuleExecutionStatus;
 }
 
 export interface LastRunProps {
@@ -64,7 +69,9 @@ export interface Pagination {
 export interface FetchRulesProps {
   searchText: string | undefined;
   ruleLastResponseFilter: string[];
+  typesFilter: string[];
   page: Pagination;
+  setPage: Dispatch<SetStateAction<Pagination>>;
   sort: EuiTableSortingType<RuleTableItem>['sort'];
 }
 
@@ -77,4 +84,11 @@ export interface RulesTableProps {
   sort: EuiTableSortingType<RuleTableItem>['sort'];
   onSortChange: (changedSort: EuiTableSortingType<RuleTableItem>['sort']) => void;
   isLoading: boolean;
+}
+
+export interface RuleState {
+  isLoading: boolean;
+  data: Rule[];
+  error: string | null;
+  totalItemCount: number;
 }

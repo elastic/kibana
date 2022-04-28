@@ -50,9 +50,9 @@ export const HeatmapToolbar = memo(
       frame.datasourceLayers
     ).truncateText;
     return (
-      <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" responsive={false}>
-        <EuiFlexItem>
-          <EuiFlexGroup gutterSize="none" responsive={false}>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
             <ToolbarPopover
               title={i18n.translate('xpack.lens.shared.curveLabel', {
                 defaultMessage: 'Visual options',
@@ -71,6 +71,7 @@ export const HeatmapToolbar = memo(
                 }}
               />
             </ToolbarPopover>
+
             <LegendSettingsPopover
               groupPosition={'right'}
               legendOptions={legendOptions}
@@ -124,8 +125,9 @@ export const HeatmapToolbar = memo(
             />
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup gutterSize="none" responsive={false}>
+
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
             <TooltipWrapper
               tooltipContent={i18n.translate('xpack.lens.heatmap.verticalAxisDisabledHelpText', {
                 defaultMessage: 'This setting only applies when vertical axis is enabled.',
@@ -161,6 +163,7 @@ export const HeatmapToolbar = memo(
                 />
               </ToolbarPopover>
             </TooltipWrapper>
+
             <TooltipWrapper
               tooltipContent={i18n.translate('xpack.lens.heatmap.horizontalAxisDisabledHelpText', {
                 defaultMessage: 'This setting only applies when horizontal axis is enabled.',

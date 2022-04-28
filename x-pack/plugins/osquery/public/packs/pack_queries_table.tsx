@@ -15,6 +15,7 @@ import { OsqueryManagerPackagePolicyInputStream } from '../../common/types';
 
 export interface PackQueriesTableProps {
   data: OsqueryManagerPackagePolicyInputStream[];
+  isReadOnly?: boolean;
   onDeleteClick?: (item: OsqueryManagerPackagePolicyInputStream) => void;
   onEditClick?: (item: OsqueryManagerPackagePolicyInputStream) => void;
   selectedItems?: OsqueryManagerPackagePolicyInputStream[];
@@ -23,6 +24,7 @@ export interface PackQueriesTableProps {
 
 const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
   data,
+  isReadOnly,
   onDeleteClick,
   onEditClick,
   selectedItems,
@@ -127,22 +129,27 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
         }),
         render: renderVersionColumn,
       },
-      {
-        name: i18n.translate('xpack.osquery.pack.queriesTable.actionsColumnTitle', {
-          defaultMessage: 'Actions',
-        }),
-        width: '120px',
-        actions: [
-          {
-            render: renderEditAction,
-          },
-          {
-            render: renderDeleteAction,
-          },
-        ],
-      },
+      ...(!isReadOnly
+        ? [
+            {
+              name: i18n.translate('xpack.osquery.pack.queriesTable.actionsColumnTitle', {
+                defaultMessage: 'Actions',
+              }),
+              width: '120px',
+              actions: [
+                {
+                  render: renderEditAction,
+                },
+                {
+                  render: renderDeleteAction,
+                },
+              ],
+            },
+          ]
+        : []),
     ],
     [
+      isReadOnly,
       renderDeleteAction,
       renderEditAction,
       renderPlatformColumn,
@@ -177,8 +184,7 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
       itemId={itemId}
       columns={columns}
       sorting={sorting}
-      selection={selection}
-      isSelectable
+      {...(!isReadOnly ? { selection, isSelectable: true } : {})}
     />
   );
 };

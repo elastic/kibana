@@ -644,6 +644,305 @@
     "interfaces": [
       {
         "parentPluginId": "core",
+        "id": "def-public.AnalyticsClient",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnalyticsClient",
+        "description": [
+          "\r\nAnalytics client's public APIs"
+        ],
+        "path": "node_modules/@types/elastic__analytics/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.AnalyticsClient.reportEvent",
+            "type": "Function",
+            "tags": [],
+            "label": "reportEvent",
+            "description": [
+              "\r\nReports a telemetry event."
+            ],
+            "signature": [
+              "<EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.AnalyticsClient.reportEvent.$1",
+                "type": "string",
+                "tags": [],
+                "label": "eventType",
+                "description": [
+                  "The event type registered via the `registerEventType` API."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/elastic__analytics/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-public.AnalyticsClient.reportEvent.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "eventData",
+                "description": [
+                  "The properties matching the schema declared in the `registerEventType` API."
+                ],
+                "signature": [
+                  "EventTypeData"
+                ],
+                "path": "node_modules/@types/elastic__analytics/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.AnalyticsClient.registerEventType",
+            "type": "Function",
+            "tags": [],
+            "label": "registerEventType",
+            "description": [
+              "\r\nRegisters the event type that will be emitted via the reportEvent API."
+            ],
+            "signature": [
+              "<EventTypeData>(eventTypeOps: ",
+              "EventTypeOpts",
+              "<EventTypeData>) => void"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.AnalyticsClient.registerEventType.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "eventTypeOps",
+                "description": [],
+                "signature": [
+                  "EventTypeOpts",
+                  "<EventTypeData>"
+                ],
+                "path": "node_modules/@types/elastic__analytics/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.AnalyticsClient.registerShipper",
+            "type": "Function",
+            "tags": [],
+            "label": "registerShipper",
+            "description": [
+              "\r\nSet up the shipper that will be used to report the telemetry events."
+            ],
+            "signature": [
+              "<Shipper extends ",
+              "IShipper",
+              ", ShipperConfig>(Shipper: ",
+              "ShipperClassConstructor",
+              "<Shipper, ShipperConfig>, shipperConfig: ShipperConfig, opts?: ",
+              "RegisterShipperOpts",
+              " | undefined) => void"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.AnalyticsClient.registerShipper.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "Shipper",
+                "description": [
+                  "The {@link IShipper } class to instantiate the shipper."
+                ],
+                "signature": [
+                  "ShipperClassConstructor",
+                  "<Shipper, ShipperConfig>"
+                ],
+                "path": "node_modules/@types/elastic__analytics/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-public.AnalyticsClient.registerShipper.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "shipperConfig",
+                "description": [
+                  "The config specific to the Shipper to instantiate."
+                ],
+                "signature": [
+                  "ShipperConfig"
+                ],
+                "path": "node_modules/@types/elastic__analytics/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-public.AnalyticsClient.registerShipper.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [
+                  "Additional options to register the shipper {@link RegisterShipperOpts }."
+                ],
+                "signature": [
+                  "RegisterShipperOpts",
+                  " | undefined"
+                ],
+                "path": "node_modules/@types/elastic__analytics/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.AnalyticsClient.optIn",
+            "type": "Function",
+            "tags": [],
+            "label": "optIn",
+            "description": [
+              "\r\nUsed to control the user's consent to report the data.\r\nIn the advanced mode, it allows to \"cherry-pick\" which events and shippers are enabled/disabled."
+            ],
+            "signature": [
+              "(optInConfig: ",
+              "OptInConfig",
+              ") => void"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.AnalyticsClient.optIn.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "optInConfig",
+                "description": [
+                  "{@link OptInConfig }"
+                ],
+                "signature": [
+                  "OptInConfig"
+                ],
+                "path": "node_modules/@types/elastic__analytics/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.AnalyticsClient.registerContextProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "registerContextProvider",
+            "description": [
+              "\r\nRegisters the context provider to enrich the any reported events."
+            ],
+            "signature": [
+              "<Context>(contextProviderOpts: ",
+              "ContextProviderOpts",
+              "<Context>) => void"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.AnalyticsClient.registerContextProvider.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "contextProviderOpts",
+                "description": [
+                  "{@link ContextProviderOpts }"
+                ],
+                "signature": [
+                  "ContextProviderOpts",
+                  "<Context>"
+                ],
+                "path": "node_modules/@types/elastic__analytics/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.AnalyticsClient.removeContextProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "removeContextProvider",
+            "description": [
+              "\r\nRemoves the context provider and stop enriching the events from its context."
+            ],
+            "signature": [
+              "(contextProviderName: string) => void"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.AnalyticsClient.removeContextProvider.$1",
+                "type": "string",
+                "tags": [],
+                "label": "contextProviderName",
+                "description": [
+                  "The name of the context provider to remove."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/elastic__analytics/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.AnalyticsClient.telemetryCounter$",
+            "type": "Object",
+            "tags": [],
+            "label": "telemetryCounter$",
+            "description": [
+              "\r\nObservable to emit the stats of the processed events."
+            ],
+            "signature": [
+              "Observable",
+              "<",
+              "TelemetryCounter",
+              ">"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-public.AppCategory",
         "type": "Interface",
         "tags": [],
@@ -803,6 +1102,70 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-public.ContextProviderOpts",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContextProviderOpts",
+        "description": [
+          "\r\nDefinition of a context provider"
+        ],
+        "signature": [
+          "ContextProviderOpts",
+          "<Context>"
+        ],
+        "path": "node_modules/@types/elastic__analytics/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ContextProviderOpts.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\r\nThe name of the provider."
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ContextProviderOpts.context$",
+            "type": "Object",
+            "tags": [],
+            "label": "context$",
+            "description": [
+              "\r\nObservable that emits the custom context."
+            ],
+            "signature": [
+              "Observable",
+              "<Context>"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ContextProviderOpts.schema",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [
+              "\r\nSchema declaring and documenting the expected output in the context$\r\n"
+            ],
+            "signature": [
+              "{ [Key in keyof Required<Context>]: ",
+              "SchemaValue",
+              "<Context[Key]>; }"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-public.CoreSetup",
         "type": "Interface",
         "tags": [],
@@ -823,6 +1186,21 @@
         "path": "src/core/public/index.ts",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.CoreSetup.analytics",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics",
+            "description": [
+              "{@link AnalyticsServiceSetup}"
+            ],
+            "signature": [
+              "AnalyticsClient"
+            ],
+            "path": "src/core/public/index.ts",
+            "deprecated": false
+          },
           {
             "parentPluginId": "core",
             "id": "def-public.CoreSetup.application",
@@ -965,6 +1343,7 @@
             ],
             "path": "src/core/public/index.ts",
             "deprecated": true,
+            "removeBy": "8.8.0",
             "references": [
               {
                 "plugin": "visTypeVega",
@@ -1033,6 +1412,27 @@
         "path": "src/core/public/index.ts",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.CoreStart.analytics",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics",
+            "description": [
+              "{@link AnalyticsServiceStart}"
+            ],
+            "signature": [
+              "{ optIn: (optInConfig: ",
+              "OptInConfig",
+              ") => void; reportEvent: <EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+              "Observable",
+              "<",
+              "TelemetryCounter",
+              ">; }"
+            ],
+            "path": "src/core/public/index.ts",
+            "deprecated": false
+          },
           {
             "parentPluginId": "core",
             "id": "def-public.CoreStart.application",
@@ -1322,6 +1722,7 @@
             ],
             "path": "src/core/public/index.ts",
             "deprecated": true,
+            "removeBy": "8.8.0",
             "references": [
               {
                 "plugin": "monitoring",
@@ -1657,6 +2058,152 @@
               "string | undefined"
             ],
             "path": "src/core/public/notifications/toasts/toasts_api.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.Event_2",
+        "type": "Interface",
+        "tags": [],
+        "label": "Event_2",
+        "description": [
+          "\r\nDefinition of the full event structure"
+        ],
+        "signature": [
+          "Event"
+        ],
+        "path": "node_modules/@types/elastic__analytics/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.Event_2.timestamp",
+            "type": "string",
+            "tags": [],
+            "label": "timestamp",
+            "description": [
+              "\r\nThe time the event was generated in ISO format."
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.Event_2.event_type",
+            "type": "string",
+            "tags": [],
+            "label": "event_type",
+            "description": [
+              "\r\nThe event type."
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.Event_2.properties",
+            "type": "Object",
+            "tags": [],
+            "label": "properties",
+            "description": [
+              "\r\nThe specific properties of the event type."
+            ],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.Event_2.context",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [
+              "\r\nThe {@link EventContext} enriched during the processing pipeline."
+            ],
+            "signature": [
+              "EventContext"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.EventContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "EventContext",
+        "description": [],
+        "path": "node_modules/@types/elastic__analytics/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.EventContext.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: unknown",
+            "description": [],
+            "signature": [
+              "[key: string]:  unknown"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.EventTypeOpts",
+        "type": "Interface",
+        "tags": [],
+        "label": "EventTypeOpts",
+        "description": [
+          "\r\nDefinition of an Event Type."
+        ],
+        "signature": [
+          "EventTypeOpts",
+          "<EventTypeData>"
+        ],
+        "path": "node_modules/@types/elastic__analytics/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.EventTypeOpts.eventType",
+            "type": "string",
+            "tags": [],
+            "label": "eventType",
+            "description": [
+              "\r\nThe event type's unique name."
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.EventTypeOpts.schema",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [
+              "\r\nSchema declaring and documenting the expected structure of this event type.\r\n"
+            ],
+            "signature": [
+              "{ [Key in keyof Required<EventTypeData>]: ",
+              "SchemaValue",
+              "<EventTypeData[Key]>; }"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
             "deprecated": false
           }
         ],
@@ -2058,6 +2605,144 @@
               "string | undefined"
             ],
             "path": "src/core/server/external_url/external_url_config.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.IShipper",
+        "type": "Interface",
+        "tags": [],
+        "label": "IShipper",
+        "description": [
+          "\r\nBasic structure of a Shipper"
+        ],
+        "path": "node_modules/@types/elastic__analytics/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.IShipper.reportEvents",
+            "type": "Function",
+            "tags": [],
+            "label": "reportEvents",
+            "description": [
+              "\r\nAdapts and ships the event to the persisting/analytics solution."
+            ],
+            "signature": [
+              "(events: ",
+              "Event",
+              "[]) => void"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.IShipper.reportEvents.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "events",
+                "description": [
+                  "batched events {@link Event }"
+                ],
+                "signature": [
+                  "Event",
+                  "[]"
+                ],
+                "path": "node_modules/@types/elastic__analytics/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.IShipper.optIn",
+            "type": "Function",
+            "tags": [],
+            "label": "optIn",
+            "description": [
+              "\r\nStops/restarts the shipping mechanism based on the value of isOptedIn"
+            ],
+            "signature": [
+              "(isOptedIn: boolean) => void"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.IShipper.optIn.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "isOptedIn",
+                "description": [
+                  "`true` for resume sending events. `false` to stop."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "node_modules/@types/elastic__analytics/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.IShipper.extendContext",
+            "type": "Function",
+            "tags": [],
+            "label": "extendContext",
+            "description": [
+              "\r\nPerform any necessary calls to the persisting/analytics solution to set the event's context."
+            ],
+            "signature": [
+              "((newContext: ",
+              "EventContext",
+              ") => void) | undefined"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.IShipper.extendContext.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "newContext",
+                "description": [],
+                "signature": [
+                  "EventContext"
+                ],
+                "path": "node_modules/@types/elastic__analytics/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.IShipper.telemetryCounter$",
+            "type": "Object",
+            "tags": [],
+            "label": "telemetryCounter$",
+            "description": [
+              "\r\nObservable to emit the stats of the processed events."
+            ],
+            "signature": [
+              "Observable",
+              "<",
+              "TelemetryCounter",
+              "> | undefined"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
             "deprecated": false
           }
         ],
@@ -2787,6 +3472,53 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-public.OptInConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "OptInConfig",
+        "description": [
+          "\r\n"
+        ],
+        "path": "node_modules/@types/elastic__analytics/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.OptInConfig.global",
+            "type": "Object",
+            "tags": [],
+            "label": "global",
+            "description": [
+              "\r\nControls the global enabled/disabled behaviour of the client and shippers."
+            ],
+            "signature": [
+              "OptInConfigPerType"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.OptInConfig.event_types",
+            "type": "Object",
+            "tags": [],
+            "label": "event_types",
+            "description": [
+              "\r\nControls if an event type should be disabled for a specific type of shipper."
+            ],
+            "signature": [
+              "Record<string, ",
+              "OptInConfigPerType",
+              " | undefined> | undefined"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-public.OverlayBannersStart",
         "type": "Interface",
         "tags": [],
@@ -3106,6 +3838,19 @@
             "type": "CompoundType",
             "tags": [],
             "label": "hideCloseButton",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/core/public/overlays/flyout/flyout_service.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.OverlayFlyoutOpenOptions.outsideClickCloses",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "outsideClickCloses",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -5997,7 +6742,7 @@
               "\nThe outcome for a successful `resolve` call is one of the following values:\n\n * `'exactMatch'` -- One document exactly matched the given ID.\n * `'aliasMatch'` -- One document with a legacy URL alias matched the given ID; in this case the `saved_object.id` field is different\n   than the given ID.\n * `'conflict'` -- Two documents matched the given ID, one was an exact match and another with a legacy URL alias; in this case the\n   `saved_object` object is the exact match, and the `saved_object.id` field is the same as the given ID."
             ],
             "signature": [
-              "\"conflict\" | \"aliasMatch\" | \"exactMatch\""
+              "\"exactMatch\" | \"aliasMatch\" | \"conflict\""
             ],
             "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
             "deprecated": false
@@ -6009,12 +6754,151 @@
             "tags": [],
             "label": "alias_target_id",
             "description": [
-              "\nThe ID of the object that the legacy URL alias points to. This is only defined when the outcome is `'aliasMatch'` or `'conflict'`."
+              "\nThe ID of the object that the legacy URL alias points to.\n\n**Note:** this field is *only* included when an alias was found (in other words, when the outcome is `'aliasMatch'` or `'conflict'`)."
             ],
             "signature": [
               "string | undefined"
             ],
             "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.SavedObjectsResolveResponse.alias_purpose",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "alias_purpose",
+            "description": [
+              "\nThe reason this alias was created.\n\nCurrently this is used to determine whether or not a toast should be shown when a user is redirected from a legacy URL; if the alias\nwas created because of saved object conversion, then we will display a toast telling the user that the object has a new URL.\n\n**Note:** this field is *only* included when an alias was found (in other words, when the outcome is `'aliasMatch'` or `'conflict'`)."
+            ],
+            "signature": [
+              "\"savedObjectConversion\" | \"savedObjectImport\" | undefined"
+            ],
+            "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.ShipperClassConstructor",
+        "type": "Interface",
+        "tags": [],
+        "label": "ShipperClassConstructor",
+        "description": [
+          "\r\nConstructor of a {@link IShipper}"
+        ],
+        "signature": [
+          "ShipperClassConstructor",
+          "<Shipper, Config>"
+        ],
+        "path": "node_modules/@types/elastic__analytics/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ShipperClassConstructor.shipperName",
+            "type": "string",
+            "tags": [],
+            "label": "shipperName",
+            "description": [
+              "\r\nThe shipper's unique name"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ShipperClassConstructor.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [
+              "\r\nThe constructor"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.TelemetryCounter",
+        "type": "Interface",
+        "tags": [],
+        "label": "TelemetryCounter",
+        "description": [
+          "\r\nShape of the events emitted by the telemetryCounter$ observable"
+        ],
+        "path": "node_modules/@types/elastic__analytics/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-public.TelemetryCounter.type",
+            "type": "Enum",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\r\nIndicates if the event contains data about succeeded, failed or dropped events."
+            ],
+            "signature": [
+              "TelemetryCounterType"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.TelemetryCounter.source",
+            "type": "string",
+            "tags": [],
+            "label": "source",
+            "description": [
+              "\r\nWho emitted the event? It can be \"client\" or the name of the shipper."
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.TelemetryCounter.event_type",
+            "type": "string",
+            "tags": [],
+            "label": "event_type",
+            "description": [
+              "\r\nThe event type the success/failure/drop event refers to."
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.TelemetryCounter.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [
+              "\r\nCode to provide additional information about the success or failure. Examples are 200/400/504/ValidationError/UnknownError"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.TelemetryCounter.count",
+            "type": "number",
+            "tags": [],
+            "label": "count",
+            "description": [
+              "\r\nThe number of events that this counter refers to."
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
             "deprecated": false
           }
         ],
@@ -6446,8 +7330,60 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "core",
+        "id": "def-public.TelemetryCounterType",
+        "type": "Enum",
+        "tags": [],
+        "label": "TelemetryCounterType",
+        "description": [
+          "\r\nTypes of the Telemetry Counter: It allows to differentiate what happened to the events"
+        ],
+        "path": "node_modules/@types/elastic__analytics/index.d.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
+      {
+        "parentPluginId": "core",
+        "id": "def-public.AnalyticsServiceSetup",
+        "type": "Type",
+        "tags": [],
+        "label": "AnalyticsServiceSetup",
+        "description": [
+          "\nExposes the public APIs of the AnalyticsClient during the setup phase.\n{@link AnalyticsClient}"
+        ],
+        "signature": [
+          "AnalyticsClient"
+        ],
+        "path": "src/core/public/analytics/analytics_service.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.AnalyticsServiceStart",
+        "type": "Type",
+        "tags": [],
+        "label": "AnalyticsServiceStart",
+        "description": [
+          "\nExposes the public APIs of the AnalyticsClient during the start phase\n{@link AnalyticsClient}"
+        ],
+        "signature": [
+          "{ optIn: (optInConfig: ",
+          "OptInConfig",
+          ") => void; reportEvent: <EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+          "Observable",
+          "<",
+          "TelemetryCounter",
+          ">; }"
+        ],
+        "path": "src/core/public/analytics/analytics_service.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "core",
         "id": "def-public.APP_WRAPPER_CLASS",
@@ -6461,6 +7397,22 @@
           "\"kbnAppWrapper\""
         ],
         "path": "src/core/utils/app_wrapper_class.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-public.EventType",
+        "type": "Type",
+        "tags": [],
+        "label": "EventType",
+        "description": [
+          "\r\nEvent Type used for indexed structures. Only used to improve the readability of the types"
+        ],
+        "signature": [
+          "string"
+        ],
+        "path": "node_modules/@types/elastic__analytics/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -6810,7 +7762,7 @@
         "signature": [
           "{ type?: ",
           "UiSettingsType",
-          " | undefined; description?: string | undefined; name?: string | undefined; options?: string[] | undefined; order?: number | undefined; value?: unknown; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
+          " | undefined; value?: unknown; description?: string | undefined; name?: string | undefined; options?: string[] | undefined; order?: number | undefined; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
           "DeprecationSettings",
           " | undefined; metric?: { type: string; name: string; } | undefined; }"
         ],
@@ -6951,7 +7903,7 @@
         "signature": [
           "Pick<",
           "Toast",
-          ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"security\" | \"className\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"iconType\" | \"toastLifeTimeMs\" | \"onClose\"> & { title?: string | ",
+          ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"className\" | \"security\" | \"defaultValue\" | \"hidden\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\"> & { title?: string | ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -7008,7 +7960,7 @@
         "signature": [
           "Pick<",
           "Toast",
-          ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"security\" | \"className\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"iconType\" | \"toastLifeTimeMs\" | \"onClose\"> & { title?: string | ",
+          ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"className\" | \"security\" | \"defaultValue\" | \"hidden\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\"> & { title?: string | ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -7566,6 +8518,18 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-server.ElasticsearchConfig.maxSockets",
+            "type": "number",
+            "tags": [],
+            "label": "maxSockets",
+            "description": [
+              "\nThe maximum number of sockets that can be used for communications with elasticsearch."
+            ],
+            "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-server.ElasticsearchConfig.compression",
             "type": "boolean",
             "tags": [],
@@ -7786,7 +8750,7 @@
                 "label": "rawConfig",
                 "description": [],
                 "signature": [
-                  "Readonly<{ username?: string | undefined; password?: string | undefined; serviceAccountToken?: string | undefined; } & { ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; healthCheck: Readonly<{} & { delay: moment.Duration; }>; hosts: string | string[]; sniffOnStart: boolean; sniffInterval: false | moment.Duration; sniffOnConnectionFault: boolean; compression: boolean; requestHeadersWhitelist: string | string[]; customHeaders: Record<string, string>; shardTimeout: moment.Duration; requestTimeout: moment.Duration; pingTimeout: moment.Duration; logQueries: boolean; apiVersion: string; ignoreVersionMismatch: boolean; skipStartupConnectionCheck: boolean; }>"
+                  "Readonly<{ username?: string | undefined; password?: string | undefined; serviceAccountToken?: string | undefined; } & { ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>; healthCheck: Readonly<{} & { delay: moment.Duration; }>; hosts: string | string[]; sniffOnStart: boolean; sniffInterval: false | moment.Duration; sniffOnConnectionFault: boolean; maxSockets: number; compression: boolean; requestHeadersWhitelist: string | string[]; customHeaders: Record<string, string>; shardTimeout: moment.Duration; requestTimeout: moment.Duration; pingTimeout: moment.Duration; logQueries: boolean; apiVersion: string; ignoreVersionMismatch: boolean; skipStartupConnectionCheck: boolean; }>"
                 ],
                 "path": "src/core/server/elasticsearch/elasticsearch_config.ts",
                 "deprecated": false,
@@ -7947,6 +8911,305 @@
     "interfaces": [
       {
         "parentPluginId": "core",
+        "id": "def-server.AnalyticsClient",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnalyticsClient",
+        "description": [
+          "\r\nAnalytics client's public APIs"
+        ],
+        "path": "node_modules/@types/elastic__analytics/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.AnalyticsClient.reportEvent",
+            "type": "Function",
+            "tags": [],
+            "label": "reportEvent",
+            "description": [
+              "\r\nReports a telemetry event."
+            ],
+            "signature": [
+              "<EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.AnalyticsClient.reportEvent.$1",
+                "type": "string",
+                "tags": [],
+                "label": "eventType",
+                "description": [
+                  "The event type registered via the `registerEventType` API."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/elastic__analytics/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.AnalyticsClient.reportEvent.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "eventData",
+                "description": [
+                  "The properties matching the schema declared in the `registerEventType` API."
+                ],
+                "signature": [
+                  "EventTypeData"
+                ],
+                "path": "node_modules/@types/elastic__analytics/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.AnalyticsClient.registerEventType",
+            "type": "Function",
+            "tags": [],
+            "label": "registerEventType",
+            "description": [
+              "\r\nRegisters the event type that will be emitted via the reportEvent API."
+            ],
+            "signature": [
+              "<EventTypeData>(eventTypeOps: ",
+              "EventTypeOpts",
+              "<EventTypeData>) => void"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.AnalyticsClient.registerEventType.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "eventTypeOps",
+                "description": [],
+                "signature": [
+                  "EventTypeOpts",
+                  "<EventTypeData>"
+                ],
+                "path": "node_modules/@types/elastic__analytics/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.AnalyticsClient.registerShipper",
+            "type": "Function",
+            "tags": [],
+            "label": "registerShipper",
+            "description": [
+              "\r\nSet up the shipper that will be used to report the telemetry events."
+            ],
+            "signature": [
+              "<Shipper extends ",
+              "IShipper",
+              ", ShipperConfig>(Shipper: ",
+              "ShipperClassConstructor",
+              "<Shipper, ShipperConfig>, shipperConfig: ShipperConfig, opts?: ",
+              "RegisterShipperOpts",
+              " | undefined) => void"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.AnalyticsClient.registerShipper.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "Shipper",
+                "description": [
+                  "The {@link IShipper } class to instantiate the shipper."
+                ],
+                "signature": [
+                  "ShipperClassConstructor",
+                  "<Shipper, ShipperConfig>"
+                ],
+                "path": "node_modules/@types/elastic__analytics/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.AnalyticsClient.registerShipper.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "shipperConfig",
+                "description": [
+                  "The config specific to the Shipper to instantiate."
+                ],
+                "signature": [
+                  "ShipperConfig"
+                ],
+                "path": "node_modules/@types/elastic__analytics/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.AnalyticsClient.registerShipper.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [
+                  "Additional options to register the shipper {@link RegisterShipperOpts }."
+                ],
+                "signature": [
+                  "RegisterShipperOpts",
+                  " | undefined"
+                ],
+                "path": "node_modules/@types/elastic__analytics/index.d.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.AnalyticsClient.optIn",
+            "type": "Function",
+            "tags": [],
+            "label": "optIn",
+            "description": [
+              "\r\nUsed to control the user's consent to report the data.\r\nIn the advanced mode, it allows to \"cherry-pick\" which events and shippers are enabled/disabled."
+            ],
+            "signature": [
+              "(optInConfig: ",
+              "OptInConfig",
+              ") => void"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.AnalyticsClient.optIn.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "optInConfig",
+                "description": [
+                  "{@link OptInConfig }"
+                ],
+                "signature": [
+                  "OptInConfig"
+                ],
+                "path": "node_modules/@types/elastic__analytics/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.AnalyticsClient.registerContextProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "registerContextProvider",
+            "description": [
+              "\r\nRegisters the context provider to enrich the any reported events."
+            ],
+            "signature": [
+              "<Context>(contextProviderOpts: ",
+              "ContextProviderOpts",
+              "<Context>) => void"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.AnalyticsClient.registerContextProvider.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "contextProviderOpts",
+                "description": [
+                  "{@link ContextProviderOpts }"
+                ],
+                "signature": [
+                  "ContextProviderOpts",
+                  "<Context>"
+                ],
+                "path": "node_modules/@types/elastic__analytics/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.AnalyticsClient.removeContextProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "removeContextProvider",
+            "description": [
+              "\r\nRemoves the context provider and stop enriching the events from its context."
+            ],
+            "signature": [
+              "(contextProviderName: string) => void"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.AnalyticsClient.removeContextProvider.$1",
+                "type": "string",
+                "tags": [],
+                "label": "contextProviderName",
+                "description": [
+                  "The name of the context provider to remove."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "node_modules/@types/elastic__analytics/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.AnalyticsClient.telemetryCounter$",
+            "type": "Object",
+            "tags": [],
+            "label": "telemetryCounter$",
+            "description": [
+              "\r\nObservable to emit the stats of the processed events."
+            ],
+            "signature": [
+              "Observable",
+              "<",
+              "TelemetryCounter",
+              ">"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.AppCategory",
         "type": "Interface",
         "tags": [],
@@ -8052,6 +9315,7 @@
         ],
         "path": "src/core/server/plugins/types.ts",
         "deprecated": true,
+        "removeBy": "8.8.0",
         "references": [],
         "children": [
           {
@@ -9025,6 +10289,70 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.ContextProviderOpts",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContextProviderOpts",
+        "description": [
+          "\r\nDefinition of a context provider"
+        ],
+        "signature": [
+          "ContextProviderOpts",
+          "<Context>"
+        ],
+        "path": "node_modules/@types/elastic__analytics/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ContextProviderOpts.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\r\nThe name of the provider."
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ContextProviderOpts.context$",
+            "type": "Object",
+            "tags": [],
+            "label": "context$",
+            "description": [
+              "\r\nObservable that emits the custom context."
+            ],
+            "signature": [
+              "Observable",
+              "<Context>"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ContextProviderOpts.schema",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [
+              "\r\nSchema declaring and documenting the expected output in the context$\r\n"
+            ],
+            "signature": [
+              "{ [Key in keyof Required<Context>]: ",
+              "SchemaValue",
+              "<Context[Key]>; }"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.ContextSetup",
         "type": "Interface",
         "tags": [],
@@ -9074,6 +10402,21 @@
         "path": "src/core/server/index.ts",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CorePreboot.analytics",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics",
+            "description": [
+              "{@link AnalyticsServicePreboot}"
+            ],
+            "signature": [
+              "AnalyticsClient"
+            ],
+            "path": "src/core/server/index.ts",
+            "deprecated": false
+          },
           {
             "parentPluginId": "core",
             "id": "def-server.CorePreboot.elasticsearch",
@@ -9162,6 +10505,21 @@
         "path": "src/core/server/index.ts",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreSetup.analytics",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics",
+            "description": [
+              "{@link AnalyticsServiceSetup}"
+            ],
+            "signature": [
+              "AnalyticsClient"
+            ],
+            "path": "src/core/server/index.ts",
+            "deprecated": false
+          },
           {
             "parentPluginId": "core",
             "id": "def-server.CoreSetup.capabilities",
@@ -9484,6 +10842,27 @@
         "path": "src/core/server/index.ts",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.CoreStart.analytics",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics",
+            "description": [
+              "{@link AnalyticsServiceStart}"
+            ],
+            "signature": [
+              "{ optIn: (optInConfig: ",
+              "OptInConfig",
+              ") => void; reportEvent: <EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+              "Observable",
+              "<",
+              "TelemetryCounter",
+              ">; }"
+            ],
+            "path": "src/core/server/index.ts",
+            "deprecated": false
+          },
           {
             "parentPluginId": "core",
             "id": "def-server.CoreStart.capabilities",
@@ -10613,6 +11992,152 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.Event_2",
+        "type": "Interface",
+        "tags": [],
+        "label": "Event_2",
+        "description": [
+          "\r\nDefinition of the full event structure"
+        ],
+        "signature": [
+          "Event"
+        ],
+        "path": "node_modules/@types/elastic__analytics/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.Event_2.timestamp",
+            "type": "string",
+            "tags": [],
+            "label": "timestamp",
+            "description": [
+              "\r\nThe time the event was generated in ISO format."
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.Event_2.event_type",
+            "type": "string",
+            "tags": [],
+            "label": "event_type",
+            "description": [
+              "\r\nThe event type."
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.Event_2.properties",
+            "type": "Object",
+            "tags": [],
+            "label": "properties",
+            "description": [
+              "\r\nThe specific properties of the event type."
+            ],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.Event_2.context",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [
+              "\r\nThe {@link EventContext} enriched during the processing pipeline."
+            ],
+            "signature": [
+              "EventContext"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.EventContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "EventContext",
+        "description": [],
+        "path": "node_modules/@types/elastic__analytics/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EventContext.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: unknown",
+            "description": [],
+            "signature": [
+              "[key: string]:  unknown"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.EventTypeOpts",
+        "type": "Interface",
+        "tags": [],
+        "label": "EventTypeOpts",
+        "description": [
+          "\r\nDefinition of an Event Type."
+        ],
+        "signature": [
+          "EventTypeOpts",
+          "<EventTypeData>"
+        ],
+        "path": "node_modules/@types/elastic__analytics/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EventTypeOpts.eventType",
+            "type": "string",
+            "tags": [],
+            "label": "eventType",
+            "description": [
+              "\r\nThe event type's unique name."
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EventTypeOpts.schema",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [
+              "\r\nSchema declaring and documenting the expected structure of this event type.\r\n"
+            ],
+            "signature": [
+              "{ [Key in keyof Required<EventTypeData>]: ",
+              "SchemaValue",
+              "<EventTypeData[Key]>; }"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.ExecutionContextSetup",
         "type": "Interface",
         "tags": [],
@@ -10711,7 +12236,7 @@
               "Headers used for authentication against Elasticsearch"
             ],
             "signature": [
-              "{ from?: string | string[] | undefined; date?: string | string[] | undefined; origin?: string | string[] | undefined; range?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; allow?: string | string[] | undefined; accept?: string | string[] | undefined; host?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; authorization?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; etag?: string | string[] | undefined; expect?: string | string[] | undefined; expires?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
+              "{ from?: string | string[] | undefined; date?: string | string[] | undefined; range?: string | string[] | undefined; warning?: string | string[] | undefined; location?: string | string[] | undefined; origin?: string | string[] | undefined; allow?: string | string[] | undefined; accept?: string | string[] | undefined; host?: string | string[] | undefined; \"accept-language\"?: string | string[] | undefined; \"accept-patch\"?: string | string[] | undefined; \"accept-ranges\"?: string | string[] | undefined; \"access-control-allow-credentials\"?: string | string[] | undefined; \"access-control-allow-headers\"?: string | string[] | undefined; \"access-control-allow-methods\"?: string | string[] | undefined; \"access-control-allow-origin\"?: string | string[] | undefined; \"access-control-expose-headers\"?: string | string[] | undefined; \"access-control-max-age\"?: string | string[] | undefined; \"access-control-request-headers\"?: string | string[] | undefined; \"access-control-request-method\"?: string | string[] | undefined; age?: string | string[] | undefined; \"alt-svc\"?: string | string[] | undefined; authorization?: string | string[] | undefined; \"cache-control\"?: string | string[] | undefined; connection?: string | string[] | undefined; \"content-disposition\"?: string | string[] | undefined; \"content-encoding\"?: string | string[] | undefined; \"content-language\"?: string | string[] | undefined; \"content-length\"?: string | string[] | undefined; \"content-location\"?: string | string[] | undefined; \"content-range\"?: string | string[] | undefined; \"content-type\"?: string | string[] | undefined; cookie?: string | string[] | undefined; etag?: string | string[] | undefined; expect?: string | string[] | undefined; expires?: string | string[] | undefined; forwarded?: string | string[] | undefined; \"if-match\"?: string | string[] | undefined; \"if-modified-since\"?: string | string[] | undefined; \"if-none-match\"?: string | string[] | undefined; \"if-unmodified-since\"?: string | string[] | undefined; \"last-modified\"?: string | string[] | undefined; pragma?: string | string[] | undefined; \"proxy-authenticate\"?: string | string[] | undefined; \"proxy-authorization\"?: string | string[] | undefined; \"public-key-pins\"?: string | string[] | undefined; referer?: string | string[] | undefined; \"retry-after\"?: string | string[] | undefined; \"sec-websocket-accept\"?: string | string[] | undefined; \"sec-websocket-extensions\"?: string | string[] | undefined; \"sec-websocket-key\"?: string | string[] | undefined; \"sec-websocket-protocol\"?: string | string[] | undefined; \"sec-websocket-version\"?: string | string[] | undefined; \"set-cookie\"?: string | string[] | undefined; \"strict-transport-security\"?: string | string[] | undefined; tk?: string | string[] | undefined; trailer?: string | string[] | undefined; \"transfer-encoding\"?: string | string[] | undefined; upgrade?: string | string[] | undefined; \"user-agent\"?: string | string[] | undefined; vary?: string | string[] | undefined; via?: string | string[] | undefined; \"www-authenticate\"?: string | string[] | undefined; } & { [header: string]: string | string[] | undefined; }"
             ],
             "path": "src/core/server/elasticsearch/types.ts",
             "deprecated": false
@@ -11737,7 +13262,7 @@
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "CreateResponse",
+              "WriteResponseBase",
               ">; <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument> | ",
@@ -11747,7 +13272,7 @@
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "CreateResponse",
+              "WriteResponseBase",
               ", unknown>>; <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument> | ",
@@ -11755,7 +13280,7 @@
               "<TDocument>, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "CreateResponse",
+              "WriteResponseBase",
               ">; }; monitoring: ",
               "default",
               "; security: ",
@@ -11767,7 +13292,7 @@
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "IndexResponse",
+              "WriteResponseBase",
               ">; <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
@@ -11777,7 +13302,7 @@
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "IndexResponse",
+              "WriteResponseBase",
               ", unknown>>; <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
@@ -11785,7 +13310,7 @@
               "<TDocument>, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "IndexResponse",
+              "WriteResponseBase",
               ">; }; delete: { (this: That, params: ",
               "DeleteRequest",
               " | ",
@@ -11793,7 +13318,7 @@
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "DeleteResponse",
+              "WriteResponseBase",
               ">; (this: That, params: ",
               "DeleteRequest",
               " | ",
@@ -11803,7 +13328,7 @@
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "DeleteResponse",
+              "WriteResponseBase",
               ", unknown>>; (this: That, params: ",
               "DeleteRequest",
               " | ",
@@ -11811,7 +13336,7 @@
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "DeleteResponse",
+              "WriteResponseBase",
               ">; }; get: { <TDocument = unknown>(this: That, params: ",
               "GetRequest",
               " | ",
@@ -11890,9 +13415,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ClosePointInTimeResponse",
-              ">; }; transform: ",
-              "default",
-              "; helpers: ",
+              ">; }; helpers: ",
               "default",
               "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
@@ -12025,7 +13548,7 @@
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "DeleteByQueryRethrottleResponse",
+              "TasksTaskListResponseBase",
               ">; (this: That, params: ",
               "DeleteByQueryRethrottleRequest",
               " | ",
@@ -12035,7 +13558,7 @@
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "DeleteByQueryRethrottleResponse",
+              "TasksTaskListResponseBase",
               ", unknown>>; (this: That, params: ",
               "DeleteByQueryRethrottleRequest",
               " | ",
@@ -12043,7 +13566,7 @@
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "DeleteByQueryRethrottleResponse",
+              "TasksTaskListResponseBase",
               ">; }; deleteScript: { (this: That, params: ",
               "DeleteScriptRequest",
               " | ",
@@ -12051,7 +13574,7 @@
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "DeleteScriptResponse",
+              "AcknowledgedResponseBase",
               ">; (this: That, params: ",
               "DeleteScriptRequest",
               " | ",
@@ -12061,7 +13584,7 @@
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "DeleteScriptResponse",
+              "AcknowledgedResponseBase",
               ", unknown>>; (this: That, params: ",
               "DeleteScriptRequest",
               " | ",
@@ -12069,7 +13592,7 @@
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "DeleteScriptResponse",
+              "AcknowledgedResponseBase",
               ">; }; enrich: ",
               "default",
               "; exists: { (this: That, params: ",
@@ -12140,29 +13663,29 @@
               "ExplainResponse",
               "<TDocument>>; }; features: ",
               "default",
-              "; fieldCaps: { (this: That, params?: ",
+              "; fieldCaps: { (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "FieldCapsResponse",
-              ">; (this: That, params?: ",
+              ">; (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
               "FieldCapsResponse",
-              ", unknown>>; (this: That, params?: ",
+              ", unknown>>; (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "FieldCapsResponse",
@@ -12505,7 +14028,7 @@
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "PutScriptResponse",
+              "AcknowledgedResponseBase",
               ">; (this: That, params: ",
               "PutScriptRequest",
               " | ",
@@ -12515,7 +14038,7 @@
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "PutScriptResponse",
+              "AcknowledgedResponseBase",
               ", unknown>>; (this: That, params: ",
               "PutScriptRequest",
               " | ",
@@ -12523,7 +14046,7 @@
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "PutScriptResponse",
+              "AcknowledgedResponseBase",
               ">; }; rankEval: { (this: That, params: ",
               "RankEvalRequest",
               " | ",
@@ -12550,29 +14073,29 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "RankEvalResponse",
-              ">; }; reindex: { (this: That, params?: ",
+              ">; }; reindex: { (this: That, params: ",
               "ReindexRequest",
               " | ",
               "ReindexRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "ReindexResponse",
-              ">; (this: That, params?: ",
+              ">; (this: That, params: ",
               "ReindexRequest",
               " | ",
               "ReindexRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
               "ReindexResponse",
-              ", unknown>>; (this: That, params?: ",
+              ", unknown>>; (this: That, params: ",
               "ReindexRequest",
               " | ",
               "ReindexRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ReindexResponse",
@@ -12827,6 +14350,8 @@
               " | undefined): Promise<",
               "TermvectorsResponse",
               ">; }; textStructure: ",
+              "default",
+              "; transform: ",
               "default",
               "; updateByQuery: { (this: That, params: ",
               "UpdateByQueryRequest",
@@ -14136,7 +15661,7 @@
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "CreateResponse",
+              "WriteResponseBase",
               ">; <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument> | ",
@@ -14146,7 +15671,7 @@
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "CreateResponse",
+              "WriteResponseBase",
               ", unknown>>; <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument> | ",
@@ -14154,7 +15679,7 @@
               "<TDocument>, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "CreateResponse",
+              "WriteResponseBase",
               ">; }; monitoring: ",
               "default",
               "; security: ",
@@ -14166,7 +15691,7 @@
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "IndexResponse",
+              "WriteResponseBase",
               ">; <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
@@ -14176,7 +15701,7 @@
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "IndexResponse",
+              "WriteResponseBase",
               ", unknown>>; <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
@@ -14184,7 +15709,7 @@
               "<TDocument>, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "IndexResponse",
+              "WriteResponseBase",
               ">; }; delete: { (this: That, params: ",
               "DeleteRequest",
               " | ",
@@ -14192,7 +15717,7 @@
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "DeleteResponse",
+              "WriteResponseBase",
               ">; (this: That, params: ",
               "DeleteRequest",
               " | ",
@@ -14202,7 +15727,7 @@
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "DeleteResponse",
+              "WriteResponseBase",
               ", unknown>>; (this: That, params: ",
               "DeleteRequest",
               " | ",
@@ -14210,7 +15735,7 @@
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "DeleteResponse",
+              "WriteResponseBase",
               ">; }; get: { <TDocument = unknown>(this: That, params: ",
               "GetRequest",
               " | ",
@@ -14289,9 +15814,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ClosePointInTimeResponse",
-              ">; }; transform: ",
-              "default",
-              "; helpers: ",
+              ">; }; helpers: ",
               "default",
               "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
@@ -14424,7 +15947,7 @@
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "DeleteByQueryRethrottleResponse",
+              "TasksTaskListResponseBase",
               ">; (this: That, params: ",
               "DeleteByQueryRethrottleRequest",
               " | ",
@@ -14434,7 +15957,7 @@
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "DeleteByQueryRethrottleResponse",
+              "TasksTaskListResponseBase",
               ", unknown>>; (this: That, params: ",
               "DeleteByQueryRethrottleRequest",
               " | ",
@@ -14442,7 +15965,7 @@
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "DeleteByQueryRethrottleResponse",
+              "TasksTaskListResponseBase",
               ">; }; deleteScript: { (this: That, params: ",
               "DeleteScriptRequest",
               " | ",
@@ -14450,7 +15973,7 @@
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "DeleteScriptResponse",
+              "AcknowledgedResponseBase",
               ">; (this: That, params: ",
               "DeleteScriptRequest",
               " | ",
@@ -14460,7 +15983,7 @@
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "DeleteScriptResponse",
+              "AcknowledgedResponseBase",
               ", unknown>>; (this: That, params: ",
               "DeleteScriptRequest",
               " | ",
@@ -14468,7 +15991,7 @@
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "DeleteScriptResponse",
+              "AcknowledgedResponseBase",
               ">; }; enrich: ",
               "default",
               "; exists: { (this: That, params: ",
@@ -14539,29 +16062,29 @@
               "ExplainResponse",
               "<TDocument>>; }; features: ",
               "default",
-              "; fieldCaps: { (this: That, params?: ",
+              "; fieldCaps: { (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "FieldCapsResponse",
-              ">; (this: That, params?: ",
+              ">; (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
               "FieldCapsResponse",
-              ", unknown>>; (this: That, params?: ",
+              ", unknown>>; (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "FieldCapsResponse",
@@ -14904,7 +16427,7 @@
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "PutScriptResponse",
+              "AcknowledgedResponseBase",
               ">; (this: That, params: ",
               "PutScriptRequest",
               " | ",
@@ -14914,7 +16437,7 @@
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "PutScriptResponse",
+              "AcknowledgedResponseBase",
               ", unknown>>; (this: That, params: ",
               "PutScriptRequest",
               " | ",
@@ -14922,7 +16445,7 @@
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "PutScriptResponse",
+              "AcknowledgedResponseBase",
               ">; }; rankEval: { (this: That, params: ",
               "RankEvalRequest",
               " | ",
@@ -14949,29 +16472,29 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "RankEvalResponse",
-              ">; }; reindex: { (this: That, params?: ",
+              ">; }; reindex: { (this: That, params: ",
               "ReindexRequest",
               " | ",
               "ReindexRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "ReindexResponse",
-              ">; (this: That, params?: ",
+              ">; (this: That, params: ",
               "ReindexRequest",
               " | ",
               "ReindexRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
               "ReindexResponse",
-              ", unknown>>; (this: That, params?: ",
+              ", unknown>>; (this: That, params: ",
               "ReindexRequest",
               " | ",
               "ReindexRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ReindexResponse",
@@ -15226,6 +16749,8 @@
               " | undefined): Promise<",
               "TermvectorsResponse",
               ">; }; textStructure: ",
+              "default",
+              "; transform: ",
               "default",
               "; updateByQuery: { (this: That, params: ",
               "UpdateByQueryRequest",
@@ -15339,7 +16864,7 @@
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "CreateResponse",
+              "WriteResponseBase",
               ">; <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument> | ",
@@ -15349,7 +16874,7 @@
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "CreateResponse",
+              "WriteResponseBase",
               ", unknown>>; <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument> | ",
@@ -15357,7 +16882,7 @@
               "<TDocument>, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "CreateResponse",
+              "WriteResponseBase",
               ">; }; monitoring: ",
               "default",
               "; security: ",
@@ -15369,7 +16894,7 @@
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "IndexResponse",
+              "WriteResponseBase",
               ">; <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
@@ -15379,7 +16904,7 @@
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "IndexResponse",
+              "WriteResponseBase",
               ", unknown>>; <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
@@ -15387,7 +16912,7 @@
               "<TDocument>, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "IndexResponse",
+              "WriteResponseBase",
               ">; }; delete: { (this: That, params: ",
               "DeleteRequest",
               " | ",
@@ -15395,7 +16920,7 @@
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "DeleteResponse",
+              "WriteResponseBase",
               ">; (this: That, params: ",
               "DeleteRequest",
               " | ",
@@ -15405,7 +16930,7 @@
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "DeleteResponse",
+              "WriteResponseBase",
               ", unknown>>; (this: That, params: ",
               "DeleteRequest",
               " | ",
@@ -15413,7 +16938,7 @@
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "DeleteResponse",
+              "WriteResponseBase",
               ">; }; get: { <TDocument = unknown>(this: That, params: ",
               "GetRequest",
               " | ",
@@ -15492,9 +17017,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ClosePointInTimeResponse",
-              ">; }; transform: ",
-              "default",
-              "; helpers: ",
+              ">; }; helpers: ",
               "default",
               "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
@@ -15627,7 +17150,7 @@
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "DeleteByQueryRethrottleResponse",
+              "TasksTaskListResponseBase",
               ">; (this: That, params: ",
               "DeleteByQueryRethrottleRequest",
               " | ",
@@ -15637,7 +17160,7 @@
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "DeleteByQueryRethrottleResponse",
+              "TasksTaskListResponseBase",
               ", unknown>>; (this: That, params: ",
               "DeleteByQueryRethrottleRequest",
               " | ",
@@ -15645,7 +17168,7 @@
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "DeleteByQueryRethrottleResponse",
+              "TasksTaskListResponseBase",
               ">; }; deleteScript: { (this: That, params: ",
               "DeleteScriptRequest",
               " | ",
@@ -15653,7 +17176,7 @@
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "DeleteScriptResponse",
+              "AcknowledgedResponseBase",
               ">; (this: That, params: ",
               "DeleteScriptRequest",
               " | ",
@@ -15663,7 +17186,7 @@
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "DeleteScriptResponse",
+              "AcknowledgedResponseBase",
               ", unknown>>; (this: That, params: ",
               "DeleteScriptRequest",
               " | ",
@@ -15671,7 +17194,7 @@
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "DeleteScriptResponse",
+              "AcknowledgedResponseBase",
               ">; }; enrich: ",
               "default",
               "; exists: { (this: That, params: ",
@@ -15742,29 +17265,29 @@
               "ExplainResponse",
               "<TDocument>>; }; features: ",
               "default",
-              "; fieldCaps: { (this: That, params?: ",
+              "; fieldCaps: { (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "FieldCapsResponse",
-              ">; (this: That, params?: ",
+              ">; (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
               "FieldCapsResponse",
-              ", unknown>>; (this: That, params?: ",
+              ", unknown>>; (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "FieldCapsResponse",
@@ -16107,7 +17630,7 @@
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "PutScriptResponse",
+              "AcknowledgedResponseBase",
               ">; (this: That, params: ",
               "PutScriptRequest",
               " | ",
@@ -16117,7 +17640,7 @@
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "PutScriptResponse",
+              "AcknowledgedResponseBase",
               ", unknown>>; (this: That, params: ",
               "PutScriptRequest",
               " | ",
@@ -16125,7 +17648,7 @@
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "PutScriptResponse",
+              "AcknowledgedResponseBase",
               ">; }; rankEval: { (this: That, params: ",
               "RankEvalRequest",
               " | ",
@@ -16152,29 +17675,29 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "RankEvalResponse",
-              ">; }; reindex: { (this: That, params?: ",
+              ">; }; reindex: { (this: That, params: ",
               "ReindexRequest",
               " | ",
               "ReindexRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "ReindexResponse",
-              ">; (this: That, params?: ",
+              ">; (this: That, params: ",
               "ReindexRequest",
               " | ",
               "ReindexRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
               "ReindexResponse",
-              ", unknown>>; (this: That, params?: ",
+              ", unknown>>; (this: That, params: ",
               "ReindexRequest",
               " | ",
               "ReindexRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ReindexResponse",
@@ -16430,6 +17953,8 @@
               "TermvectorsResponse",
               ">; }; textStructure: ",
               "default",
+              "; transform: ",
+              "default",
               "; updateByQuery: { (this: That, params: ",
               "UpdateByQueryRequest",
               " | ",
@@ -16489,6 +18014,144 @@
               "; }"
             ],
             "path": "src/core/server/elasticsearch/client/scoped_cluster_client.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.IShipper",
+        "type": "Interface",
+        "tags": [],
+        "label": "IShipper",
+        "description": [
+          "\r\nBasic structure of a Shipper"
+        ],
+        "path": "node_modules/@types/elastic__analytics/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.IShipper.reportEvents",
+            "type": "Function",
+            "tags": [],
+            "label": "reportEvents",
+            "description": [
+              "\r\nAdapts and ships the event to the persisting/analytics solution."
+            ],
+            "signature": [
+              "(events: ",
+              "Event",
+              "[]) => void"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.IShipper.reportEvents.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "events",
+                "description": [
+                  "batched events {@link Event }"
+                ],
+                "signature": [
+                  "Event",
+                  "[]"
+                ],
+                "path": "node_modules/@types/elastic__analytics/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.IShipper.optIn",
+            "type": "Function",
+            "tags": [],
+            "label": "optIn",
+            "description": [
+              "\r\nStops/restarts the shipping mechanism based on the value of isOptedIn"
+            ],
+            "signature": [
+              "(isOptedIn: boolean) => void"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.IShipper.optIn.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "isOptedIn",
+                "description": [
+                  "`true` for resume sending events. `false` to stop."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "node_modules/@types/elastic__analytics/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.IShipper.extendContext",
+            "type": "Function",
+            "tags": [],
+            "label": "extendContext",
+            "description": [
+              "\r\nPerform any necessary calls to the persisting/analytics solution to set the event's context."
+            ],
+            "signature": [
+              "((newContext: ",
+              "EventContext",
+              ") => void) | undefined"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.IShipper.extendContext.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "newContext",
+                "description": [],
+                "signature": [
+                  "EventContext"
+                ],
+                "path": "node_modules/@types/elastic__analytics/index.d.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.IShipper.telemetryCounter$",
+            "type": "Object",
+            "tags": [],
+            "label": "telemetryCounter$",
+            "description": [
+              "\r\nObservable to emit the stats of the processed events."
+            ],
+            "signature": [
+              "Observable",
+              "<",
+              "TelemetryCounter",
+              "> | undefined"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
             "deprecated": false
           }
         ],
@@ -17533,6 +19196,7 @@
             ],
             "path": "src/core/server/metrics/types.ts",
             "deprecated": true,
+            "removeBy": "8.8.0",
             "references": [
               {
                 "plugin": "monitoring",
@@ -17922,6 +19586,53 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.OptInConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "OptInConfig",
+        "description": [
+          "\r\n"
+        ],
+        "path": "node_modules/@types/elastic__analytics/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.OptInConfig.global",
+            "type": "Object",
+            "tags": [],
+            "label": "global",
+            "description": [
+              "\r\nControls the global enabled/disabled behaviour of the client and shippers."
+            ],
+            "signature": [
+              "OptInConfigPerType"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.OptInConfig.event_types",
+            "type": "Object",
+            "tags": [],
+            "label": "event_types",
+            "description": [
+              "\r\nControls if an event type should be disabled for a specific type of shipper."
+            ],
+            "signature": [
+              "Record<string, ",
+              "OptInConfigPerType",
+              " | undefined> | undefined"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.PackageInfo",
         "type": "Interface",
         "tags": [],
@@ -18188,7 +19899,14 @@
               "\nList of configuration properties that will be available on the client-side plugin."
             ],
             "signature": [
-              "{ [P in keyof T]?: boolean | undefined; } | undefined"
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.ExposedToBrowserDescriptor",
+                "text": "ExposedToBrowserDescriptor"
+              },
+              "<T> | undefined"
             ],
             "path": "src/core/server/plugins/types.ts",
             "deprecated": false
@@ -18611,7 +20329,7 @@
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "CreateResponse",
+              "WriteResponseBase",
               ">; <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument> | ",
@@ -18621,7 +20339,7 @@
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "CreateResponse",
+              "WriteResponseBase",
               ", unknown>>; <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
               "<TDocument> | ",
@@ -18629,7 +20347,7 @@
               "<TDocument>, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "CreateResponse",
+              "WriteResponseBase",
               ">; }; monitoring: ",
               "default",
               "; security: ",
@@ -18641,7 +20359,7 @@
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "IndexResponse",
+              "WriteResponseBase",
               ">; <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
@@ -18651,7 +20369,7 @@
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "IndexResponse",
+              "WriteResponseBase",
               ", unknown>>; <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
@@ -18659,7 +20377,7 @@
               "<TDocument>, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "IndexResponse",
+              "WriteResponseBase",
               ">; }; delete: { (this: That, params: ",
               "DeleteRequest",
               " | ",
@@ -18667,7 +20385,7 @@
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "DeleteResponse",
+              "WriteResponseBase",
               ">; (this: That, params: ",
               "DeleteRequest",
               " | ",
@@ -18677,7 +20395,7 @@
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "DeleteResponse",
+              "WriteResponseBase",
               ", unknown>>; (this: That, params: ",
               "DeleteRequest",
               " | ",
@@ -18685,7 +20403,7 @@
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "DeleteResponse",
+              "WriteResponseBase",
               ">; }; get: { <TDocument = unknown>(this: That, params: ",
               "GetRequest",
               " | ",
@@ -18764,9 +20482,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ClosePointInTimeResponse",
-              ">; }; transform: ",
-              "default",
-              "; helpers: ",
+              ">; }; helpers: ",
               "default",
               "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
@@ -18899,7 +20615,7 @@
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "DeleteByQueryRethrottleResponse",
+              "TasksTaskListResponseBase",
               ">; (this: That, params: ",
               "DeleteByQueryRethrottleRequest",
               " | ",
@@ -18909,7 +20625,7 @@
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "DeleteByQueryRethrottleResponse",
+              "TasksTaskListResponseBase",
               ", unknown>>; (this: That, params: ",
               "DeleteByQueryRethrottleRequest",
               " | ",
@@ -18917,7 +20633,7 @@
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "DeleteByQueryRethrottleResponse",
+              "TasksTaskListResponseBase",
               ">; }; deleteScript: { (this: That, params: ",
               "DeleteScriptRequest",
               " | ",
@@ -18925,7 +20641,7 @@
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "DeleteScriptResponse",
+              "AcknowledgedResponseBase",
               ">; (this: That, params: ",
               "DeleteScriptRequest",
               " | ",
@@ -18935,7 +20651,7 @@
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "DeleteScriptResponse",
+              "AcknowledgedResponseBase",
               ", unknown>>; (this: That, params: ",
               "DeleteScriptRequest",
               " | ",
@@ -18943,7 +20659,7 @@
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "DeleteScriptResponse",
+              "AcknowledgedResponseBase",
               ">; }; enrich: ",
               "default",
               "; exists: { (this: That, params: ",
@@ -19014,29 +20730,29 @@
               "ExplainResponse",
               "<TDocument>>; }; features: ",
               "default",
-              "; fieldCaps: { (this: That, params?: ",
+              "; fieldCaps: { (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "FieldCapsResponse",
-              ">; (this: That, params?: ",
+              ">; (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
               "FieldCapsResponse",
-              ", unknown>>; (this: That, params?: ",
+              ", unknown>>; (this: That, params: ",
               "FieldCapsRequest",
               " | ",
               "FieldCapsRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "FieldCapsResponse",
@@ -19379,7 +21095,7 @@
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
-              "PutScriptResponse",
+              "AcknowledgedResponseBase",
               ">; (this: That, params: ",
               "PutScriptRequest",
               " | ",
@@ -19389,7 +21105,7 @@
               " | undefined): Promise<",
               "TransportResult",
               "<",
-              "PutScriptResponse",
+              "AcknowledgedResponseBase",
               ", unknown>>; (this: That, params: ",
               "PutScriptRequest",
               " | ",
@@ -19397,7 +21113,7 @@
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
-              "PutScriptResponse",
+              "AcknowledgedResponseBase",
               ">; }; rankEval: { (this: That, params: ",
               "RankEvalRequest",
               " | ",
@@ -19424,29 +21140,29 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "RankEvalResponse",
-              ">; }; reindex: { (this: That, params?: ",
+              ">; }; reindex: { (this: That, params: ",
               "ReindexRequest",
               " | ",
               "ReindexRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "ReindexResponse",
-              ">; (this: That, params?: ",
+              ">; (this: That, params: ",
               "ReindexRequest",
               " | ",
               "ReindexRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<",
               "ReindexResponse",
-              ", unknown>>; (this: That, params?: ",
+              ", unknown>>; (this: That, params: ",
               "ReindexRequest",
               " | ",
               "ReindexRequest",
-              " | undefined, options?: ",
+              ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ReindexResponse",
@@ -19701,6 +21417,8 @@
               " | undefined): Promise<",
               "TermvectorsResponse",
               ">; }; textStructure: ",
+              "default",
+              "; transform: ",
               "default",
               "; updateByQuery: { (this: That, params: ",
               "UpdateByQueryRequest",
@@ -20801,6 +22519,52 @@
       },
       {
         "parentPluginId": "core",
+        "id": "def-server.ShipperClassConstructor",
+        "type": "Interface",
+        "tags": [],
+        "label": "ShipperClassConstructor",
+        "description": [
+          "\r\nConstructor of a {@link IShipper}"
+        ],
+        "signature": [
+          "ShipperClassConstructor",
+          "<Shipper, Config>"
+        ],
+        "path": "node_modules/@types/elastic__analytics/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ShipperClassConstructor.shipperName",
+            "type": "string",
+            "tags": [],
+            "label": "shipperName",
+            "description": [
+              "\r\nThe shipper's unique name"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ShipperClassConstructor.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [
+              "\r\nThe constructor"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
         "id": "def-server.StatusServiceSetup",
         "type": "Interface",
         "tags": [],
@@ -20974,6 +22738,84 @@
             "deprecated": false,
             "children": [],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.TelemetryCounter",
+        "type": "Interface",
+        "tags": [],
+        "label": "TelemetryCounter",
+        "description": [
+          "\r\nShape of the events emitted by the telemetryCounter$ observable"
+        ],
+        "path": "node_modules/@types/elastic__analytics/index.d.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.TelemetryCounter.type",
+            "type": "Enum",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "\r\nIndicates if the event contains data about succeeded, failed or dropped events."
+            ],
+            "signature": [
+              "TelemetryCounterType"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.TelemetryCounter.source",
+            "type": "string",
+            "tags": [],
+            "label": "source",
+            "description": [
+              "\r\nWho emitted the event? It can be \"client\" or the name of the shipper."
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.TelemetryCounter.event_type",
+            "type": "string",
+            "tags": [],
+            "label": "event_type",
+            "description": [
+              "\r\nThe event type the success/failure/drop event refers to."
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.TelemetryCounter.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [
+              "\r\nCode to provide additional information about the success or failure. Examples are 200/400/504/ValidationError/UnknownError"
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.TelemetryCounter.count",
+            "type": "number",
+            "tags": [],
+            "label": "count",
+            "description": [
+              "\r\nThe number of events that this counter refers to."
+            ],
+            "path": "node_modules/@types/elastic__analytics/index.d.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -21634,6 +23476,19 @@
         "path": "src/core/server/plugins/types.ts",
         "deprecated": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.TelemetryCounterType",
+        "type": "Enum",
+        "tags": [],
+        "label": "TelemetryCounterType",
+        "description": [
+          "\r\nTypes of the Telemetry Counter: It allows to differentiate what happened to the events"
+        ],
+        "path": "node_modules/@types/elastic__analytics/index.d.ts",
+        "deprecated": false,
+        "initialIsOpen": false
       }
     ],
     "misc": [
@@ -21667,6 +23522,60 @@
             "deprecated": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.AnalyticsServicePreboot",
+        "type": "Type",
+        "tags": [],
+        "label": "AnalyticsServicePreboot",
+        "description": [
+          "\nExposes the public APIs of the AnalyticsClient during the preboot phase\n{@link AnalyticsClient}"
+        ],
+        "signature": [
+          "AnalyticsClient"
+        ],
+        "path": "src/core/server/analytics/analytics_service.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.AnalyticsServiceSetup",
+        "type": "Type",
+        "tags": [],
+        "label": "AnalyticsServiceSetup",
+        "description": [
+          "\nExposes the public APIs of the AnalyticsClient during the setup phase.\n{@link AnalyticsClient}"
+        ],
+        "signature": [
+          "AnalyticsClient"
+        ],
+        "path": "src/core/server/analytics/analytics_service.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.AnalyticsServiceStart",
+        "type": "Type",
+        "tags": [],
+        "label": "AnalyticsServiceStart",
+        "description": [
+          "\nExposes the public APIs of the AnalyticsClient during the start phase\n{@link AnalyticsClient}"
+        ],
+        "signature": [
+          "{ optIn: (optInConfig: ",
+          "OptInConfig",
+          ") => void; reportEvent: <EventTypeData extends Record<string, unknown>>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+          "Observable",
+          "<",
+          "TelemetryCounter",
+          ">; }"
+        ],
+        "path": "src/core/server/analytics/analytics_service.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
@@ -22056,7 +23965,7 @@
         "label": "EcsEventType",
         "description": [],
         "signature": [
-          "\"start\" | \"user\" | \"error\" | \"end\" | \"info\" | \"group\" | \"protocol\" | \"connection\" | \"access\" | \"admin\" | \"allowed\" | \"change\" | \"creation\" | \"deletion\" | \"denied\" | \"installation\""
+          "\"start\" | \"user\" | \"error\" | \"info\" | \"group\" | \"end\" | \"protocol\" | \"connection\" | \"access\" | \"admin\" | \"allowed\" | \"change\" | \"creation\" | \"deletion\" | \"denied\" | \"installation\""
         ],
         "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
@@ -22113,7 +24022,7 @@
           "<TDocument>, options?: ",
           "TransportRequestOptionsWithOutMeta",
           " | undefined): Promise<",
-          "CreateResponse",
+          "WriteResponseBase",
           ">; <TDocument = unknown>(this: That, params: ",
           "CreateRequest",
           "<TDocument> | ",
@@ -22123,7 +24032,7 @@
           " | undefined): Promise<",
           "TransportResult",
           "<",
-          "CreateResponse",
+          "WriteResponseBase",
           ", unknown>>; <TDocument = unknown>(this: That, params: ",
           "CreateRequest",
           "<TDocument> | ",
@@ -22131,7 +24040,7 @@
           "<TDocument>, options?: ",
           "TransportRequestOptions",
           " | undefined): Promise<",
-          "CreateResponse",
+          "WriteResponseBase",
           ">; }; monitoring: ",
           "default",
           "; security: ",
@@ -22143,7 +24052,7 @@
           "<TDocument>, options?: ",
           "TransportRequestOptionsWithOutMeta",
           " | undefined): Promise<",
-          "IndexResponse",
+          "WriteResponseBase",
           ">; <TDocument = unknown>(this: That, params: ",
           "IndexRequest",
           "<TDocument> | ",
@@ -22153,7 +24062,7 @@
           " | undefined): Promise<",
           "TransportResult",
           "<",
-          "IndexResponse",
+          "WriteResponseBase",
           ", unknown>>; <TDocument = unknown>(this: That, params: ",
           "IndexRequest",
           "<TDocument> | ",
@@ -22161,7 +24070,7 @@
           "<TDocument>, options?: ",
           "TransportRequestOptions",
           " | undefined): Promise<",
-          "IndexResponse",
+          "WriteResponseBase",
           ">; }; delete: { (this: That, params: ",
           "DeleteRequest",
           " | ",
@@ -22169,7 +24078,7 @@
           ", options?: ",
           "TransportRequestOptionsWithOutMeta",
           " | undefined): Promise<",
-          "DeleteResponse",
+          "WriteResponseBase",
           ">; (this: That, params: ",
           "DeleteRequest",
           " | ",
@@ -22179,7 +24088,7 @@
           " | undefined): Promise<",
           "TransportResult",
           "<",
-          "DeleteResponse",
+          "WriteResponseBase",
           ", unknown>>; (this: That, params: ",
           "DeleteRequest",
           " | ",
@@ -22187,7 +24096,7 @@
           ", options?: ",
           "TransportRequestOptions",
           " | undefined): Promise<",
-          "DeleteResponse",
+          "WriteResponseBase",
           ">; }; get: { <TDocument = unknown>(this: That, params: ",
           "GetRequest",
           " | ",
@@ -22266,9 +24175,7 @@
           "TransportRequestOptions",
           " | undefined): Promise<",
           "ClosePointInTimeResponse",
-          ">; }; transform: ",
-          "default",
-          "; helpers: ",
+          ">; }; helpers: ",
           "default",
           "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
           "default",
@@ -22401,7 +24308,7 @@
           ", options?: ",
           "TransportRequestOptionsWithOutMeta",
           " | undefined): Promise<",
-          "DeleteByQueryRethrottleResponse",
+          "TasksTaskListResponseBase",
           ">; (this: That, params: ",
           "DeleteByQueryRethrottleRequest",
           " | ",
@@ -22411,7 +24318,7 @@
           " | undefined): Promise<",
           "TransportResult",
           "<",
-          "DeleteByQueryRethrottleResponse",
+          "TasksTaskListResponseBase",
           ", unknown>>; (this: That, params: ",
           "DeleteByQueryRethrottleRequest",
           " | ",
@@ -22419,7 +24326,7 @@
           ", options?: ",
           "TransportRequestOptions",
           " | undefined): Promise<",
-          "DeleteByQueryRethrottleResponse",
+          "TasksTaskListResponseBase",
           ">; }; deleteScript: { (this: That, params: ",
           "DeleteScriptRequest",
           " | ",
@@ -22427,7 +24334,7 @@
           ", options?: ",
           "TransportRequestOptionsWithOutMeta",
           " | undefined): Promise<",
-          "DeleteScriptResponse",
+          "AcknowledgedResponseBase",
           ">; (this: That, params: ",
           "DeleteScriptRequest",
           " | ",
@@ -22437,7 +24344,7 @@
           " | undefined): Promise<",
           "TransportResult",
           "<",
-          "DeleteScriptResponse",
+          "AcknowledgedResponseBase",
           ", unknown>>; (this: That, params: ",
           "DeleteScriptRequest",
           " | ",
@@ -22445,7 +24352,7 @@
           ", options?: ",
           "TransportRequestOptions",
           " | undefined): Promise<",
-          "DeleteScriptResponse",
+          "AcknowledgedResponseBase",
           ">; }; enrich: ",
           "default",
           "; exists: { (this: That, params: ",
@@ -22516,29 +24423,29 @@
           "ExplainResponse",
           "<TDocument>>; }; features: ",
           "default",
-          "; fieldCaps: { (this: That, params?: ",
+          "; fieldCaps: { (this: That, params: ",
           "FieldCapsRequest",
           " | ",
           "FieldCapsRequest",
-          " | undefined, options?: ",
+          ", options?: ",
           "TransportRequestOptionsWithOutMeta",
           " | undefined): Promise<",
           "FieldCapsResponse",
-          ">; (this: That, params?: ",
+          ">; (this: That, params: ",
           "FieldCapsRequest",
           " | ",
           "FieldCapsRequest",
-          " | undefined, options?: ",
+          ", options?: ",
           "TransportRequestOptionsWithMeta",
           " | undefined): Promise<",
           "TransportResult",
           "<",
           "FieldCapsResponse",
-          ", unknown>>; (this: That, params?: ",
+          ", unknown>>; (this: That, params: ",
           "FieldCapsRequest",
           " | ",
           "FieldCapsRequest",
-          " | undefined, options?: ",
+          ", options?: ",
           "TransportRequestOptions",
           " | undefined): Promise<",
           "FieldCapsResponse",
@@ -22881,7 +24788,7 @@
           ", options?: ",
           "TransportRequestOptionsWithOutMeta",
           " | undefined): Promise<",
-          "PutScriptResponse",
+          "AcknowledgedResponseBase",
           ">; (this: That, params: ",
           "PutScriptRequest",
           " | ",
@@ -22891,7 +24798,7 @@
           " | undefined): Promise<",
           "TransportResult",
           "<",
-          "PutScriptResponse",
+          "AcknowledgedResponseBase",
           ", unknown>>; (this: That, params: ",
           "PutScriptRequest",
           " | ",
@@ -22899,7 +24806,7 @@
           ", options?: ",
           "TransportRequestOptions",
           " | undefined): Promise<",
-          "PutScriptResponse",
+          "AcknowledgedResponseBase",
           ">; }; rankEval: { (this: That, params: ",
           "RankEvalRequest",
           " | ",
@@ -22926,29 +24833,29 @@
           "TransportRequestOptions",
           " | undefined): Promise<",
           "RankEvalResponse",
-          ">; }; reindex: { (this: That, params?: ",
+          ">; }; reindex: { (this: That, params: ",
           "ReindexRequest",
           " | ",
           "ReindexRequest",
-          " | undefined, options?: ",
+          ", options?: ",
           "TransportRequestOptionsWithOutMeta",
           " | undefined): Promise<",
           "ReindexResponse",
-          ">; (this: That, params?: ",
+          ">; (this: That, params: ",
           "ReindexRequest",
           " | ",
           "ReindexRequest",
-          " | undefined, options?: ",
+          ", options?: ",
           "TransportRequestOptionsWithMeta",
           " | undefined): Promise<",
           "TransportResult",
           "<",
           "ReindexResponse",
-          ", unknown>>; (this: That, params?: ",
+          ", unknown>>; (this: That, params: ",
           "ReindexRequest",
           " | ",
           "ReindexRequest",
-          " | undefined, options?: ",
+          ", options?: ",
           "TransportRequestOptions",
           " | undefined): Promise<",
           "ReindexResponse",
@@ -23204,6 +25111,8 @@
           "TermvectorsResponse",
           ">; }; textStructure: ",
           "default",
+          "; transform: ",
+          "default",
           "; updateByQuery: { (this: That, params: ",
           "UpdateByQueryRequest",
           " | ",
@@ -23284,9 +25193,25 @@
             "section": "def-server.ElasticsearchConfig",
             "text": "ElasticsearchConfig"
           },
-          ", \"username\" | \"hosts\" | \"password\" | \"sniffOnStart\" | \"sniffInterval\" | \"sniffOnConnectionFault\" | \"compression\" | \"serviceAccountToken\" | \"requestHeadersWhitelist\" | \"customHeaders\"> & { pingTimeout?: number | moment.Duration | undefined; requestTimeout?: number | moment.Duration | undefined; ssl?: Partial<Pick<Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>, \"key\" | \"verificationMode\" | \"certificate\" | \"keyPassphrase\" | \"alwaysPresentCertificate\"> & { certificateAuthorities?: string[] | undefined; }> | undefined; keepAlive?: boolean | undefined; caFingerprint?: string | undefined; }"
+          ", \"username\" | \"hosts\" | \"password\" | \"sniffOnStart\" | \"sniffInterval\" | \"sniffOnConnectionFault\" | \"maxSockets\" | \"compression\" | \"serviceAccountToken\" | \"requestHeadersWhitelist\" | \"customHeaders\"> & { pingTimeout?: number | moment.Duration | undefined; requestTimeout?: number | moment.Duration | undefined; ssl?: Partial<Pick<Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; alwaysPresentCertificate: boolean; }>, \"key\" | \"verificationMode\" | \"certificate\" | \"keyPassphrase\" | \"alwaysPresentCertificate\"> & { certificateAuthorities?: string[] | undefined; }> | undefined; keepAlive?: boolean | undefined; caFingerprint?: string | undefined; }"
         ],
         "path": "src/core/server/elasticsearch/client/client_config.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.EventType",
+        "type": "Type",
+        "tags": [],
+        "label": "EventType",
+        "description": [
+          "\r\nEvent Type used for indexed structures. Only used to improve the readability of the types"
+        ],
+        "signature": [
+          "string"
+        ],
+        "path": "node_modules/@types/elastic__analytics/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -23307,6 +25232,30 @@
           }
         ],
         "path": "src/core/server/execution_context/execution_context_service.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.ExposedToBrowserDescriptor",
+        "type": "Type",
+        "tags": [],
+        "label": "ExposedToBrowserDescriptor",
+        "description": [
+          "\nType defining the list of configuration properties that will be exposed on the client-side\nObject properties can either be fully exposed\n"
+        ],
+        "signature": [
+          "{ [Key in keyof T]?: (T[Key] extends Maybe<any[]> ? boolean : T[Key] extends Maybe<object> ? boolean | ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.ExposedToBrowserDescriptor",
+            "text": "ExposedToBrowserDescriptor"
+          },
+          "<T[Key]> : boolean) | undefined; }"
+        ],
+        "path": "src/core/server/plugins/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -24355,7 +26304,7 @@
         "signature": [
           "{ type?: ",
           "UiSettingsType",
-          " | undefined; description?: string | undefined; name?: string | undefined; options?: string[] | undefined; order?: number | undefined; value?: unknown; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
+          " | undefined; value?: unknown; description?: string | undefined; name?: string | undefined; options?: string[] | undefined; order?: number | undefined; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; deprecation?: ",
           "DeprecationSettings",
           " | undefined; metric?: { type: string; name: string; } | undefined; }"
         ],

@@ -35,6 +35,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+import { EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
 import { ControlGroupStrings } from '../control_group_strings';
 import {
   ControlEmbeddable,
@@ -44,7 +45,6 @@ import {
 } from '../../types';
 import { CONTROL_WIDTH_OPTIONS } from './editor_constants';
 import { pluginServices } from '../../services';
-import { EmbeddableFactoryDefinition } from '../../../../embeddable/public';
 
 interface EditControlProps {
   embeddable?: ControlEmbeddable;
@@ -56,6 +56,8 @@ interface EditControlProps {
   removeControl?: () => void;
   updateTitle: (title?: string) => void;
   updateWidth: (newWidth: ControlWidth) => void;
+  getRelevantDataViewId?: () => string | undefined;
+  setLastUsedDataViewId?: (newDataViewId: string) => void;
   onTypeEditorChange: (partial: Partial<ControlInput>) => void;
 }
 
@@ -70,6 +72,8 @@ export const ControlEditor = ({
   updateTitle,
   updateWidth,
   onTypeEditorChange,
+  getRelevantDataViewId,
+  setLastUsedDataViewId,
 }: EditControlProps) => {
   const { controls } = pluginServices.getServices();
   const { getControlTypes, getControlFactory } = controls;
@@ -87,6 +91,8 @@ export const ControlEditor = ({
     const ControlTypeEditor = (factory as IEditableControlFactory).controlEditorComponent;
     return ControlTypeEditor ? (
       <ControlTypeEditor
+        getRelevantDataViewId={getRelevantDataViewId}
+        setLastUsedDataViewId={setLastUsedDataViewId}
         onChange={onTypeEditorChange}
         setValidState={setControlEditorValid}
         initialInput={embeddable?.getInput()}
@@ -121,7 +127,7 @@ export const ControlEditor = ({
       );
 
       return tooltip ? (
-        <EuiToolTip content={tooltip} position="bottom">
+        <EuiToolTip content={tooltip} position="top">
           {menuPadItem}
         </EuiToolTip>
       ) : (

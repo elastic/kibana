@@ -9,10 +9,9 @@ import React from 'react';
 import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { PartitionElementEvent } from '@elastic/charts';
 import { ChartPanel } from '../../../components/chart_panel';
-import { useCloudPostureStatsApi } from '../../../common/api';
 import * as TEXT from '../translations';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
-import { Evaluation } from '../../../../common/types';
+import type { ComplianceDashboardData, Evaluation } from '../../../../common/types';
 import { RisksTable } from '../compliance_charts/risks_table';
 import { CasesTable } from '../compliance_charts/cases_table';
 import { useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
@@ -25,46 +24,44 @@ const summarySectionWrapperStyle = {
   height: defaultHeight,
 };
 
-export const SummarySection = () => {
+export const SummarySection = ({ complianceData }: { complianceData: ComplianceDashboardData }) => {
   const navToFindings = useNavigateFindings();
-  const getStats = useCloudPostureStatsApi();
-  if (!getStats.isSuccess) return null;
 
   const handleElementClick = (elements: PartitionElementEvent[]) => {
     const [element] = elements;
     const [layerValue] = element;
     const evaluation = layerValue[0].groupByRollup as Evaluation;
 
-    navToFindings({ 'result.evaluation': evaluation });
+    navToFindings({ 'result.evaluation.keyword': evaluation });
   };
 
-  const handleCellClick = (resourceTypeName: string) => {
-    navToFindings({ 'resource.type': resourceTypeName, 'result.evaluation': RULE_FAILED });
+  const handleCellClick = (ruleSection: string) => {
+    navToFindings({
+      'rule.section.keyword': ruleSection,
+      'result.evaluation.keyword': RULE_FAILED,
+    });
   };
 
   const handleViewAllClick = () => {
-    navToFindings({ 'result.evaluation': RULE_FAILED });
+    navToFindings({ 'result.evaluation.keyword': RULE_FAILED });
   };
 
   return (
     <EuiFlexGrid columns={3} style={summarySectionWrapperStyle}>
       <EuiFlexItem>
-        <ChartPanel
-          title={TEXT.CLOUD_POSTURE_SCORE}
-          isLoading={getStats.isLoading}
-          isError={getStats.isError}
-        >
+        <ChartPanel title={TEXT.CLOUD_POSTURE_SCORE}>
           <CloudPostureScoreChart
             id="cloud_posture_score_chart"
-            data={getStats.data.stats}
+            data={complianceData.stats}
+            trend={complianceData.trend}
             partitionOnElementClick={handleElementClick}
           />
         </ChartPanel>
       </EuiFlexItem>
       <EuiFlexItem>
-        <ChartPanel title={TEXT.RISKS} isLoading={getStats.isLoading} isError={getStats.isError}>
+        <ChartPanel title={TEXT.RISKS}>
           <RisksTable
-            data={getStats.data.resourcesTypes}
+            data={complianceData.groupedFindingsEvaluation}
             maxItems={5}
             onCellClick={handleCellClick}
             onViewAllClick={handleViewAllClick}
@@ -72,11 +69,7 @@ export const SummarySection = () => {
         </ChartPanel>
       </EuiFlexItem>
       <EuiFlexItem>
-        <ChartPanel
-          title={TEXT.OPEN_CASES}
-          isLoading={getStats.isLoading}
-          isError={getStats.isError}
-        >
+        <ChartPanel title={TEXT.OPEN_CASES}>
           <CasesTable />
         </ChartPanel>
       </EuiFlexItem>

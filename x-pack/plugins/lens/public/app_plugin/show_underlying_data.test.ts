@@ -9,14 +9,12 @@ import { createMockDatasource } from '../mocks';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 import { Filter } from '@kbn/es-query';
 import { DatasourcePublicAPI } from '../types';
-import { RecursiveReadonly } from '@kbn/utility-types';
-import { Capabilities } from 'kibana/public';
 
 describe('getLayerMetaInfo', () => {
   const capabilities = {
     navLinks: { discover: true },
     discover: { show: true },
-  } as unknown as RecursiveReadonly<Capabilities>;
+  };
   it('should return error in case of no data', () => {
     expect(
       getLayerMetaInfo(createMockDatasource('testDatasource'), {}, undefined, capabilities).error
@@ -85,7 +83,7 @@ describe('getLayerMetaInfo', () => {
         {
           navLinks: { discover: false },
           discover: { show: true },
-        } as unknown as RecursiveReadonly<Capabilities>
+        }
       ).isVisible
     ).toBeFalsy();
     expect(
@@ -98,7 +96,7 @@ describe('getLayerMetaInfo', () => {
         {
           navLinks: { discover: true },
           discover: { show: false },
-        } as unknown as RecursiveReadonly<Capabilities>
+        }
       ).isVisible
     ).toBeFalsy();
   });
@@ -178,7 +176,7 @@ describe('combineQueryAndFilters', () => {
         undefined
       )
     ).toEqual({
-      query: { language: 'kuery', query: '( myfield: * ) AND ( otherField: * )' },
+      query: { language: 'kuery', query: '( ( myfield: * ) AND ( otherField: * ) )' },
       filters: [],
     });
   });
@@ -198,7 +196,7 @@ describe('combineQueryAndFilters', () => {
         },
         undefined
       )
-    ).toEqual({ query: { language: 'kuery', query: '( otherField: * )' }, filters: [] });
+    ).toEqual({ query: { language: 'kuery', query: 'otherField: *' }, filters: [] });
   });
 
   it('should build single kuery expression from meta filters and join using OR and AND at the right level', () => {
@@ -238,6 +236,7 @@ describe('combineQueryAndFilters', () => {
       filters: [],
     });
   });
+
   it('should assign kuery meta filters to app filters if existing query is using lucene language', () => {
     expect(
       combineQueryAndFilters(
@@ -293,6 +292,7 @@ describe('combineQueryAndFilters', () => {
       ],
     });
   });
+
   it('should append lucene meta filters to app filters even if existing filters are using kuery', () => {
     expect(
       combineQueryAndFilters(
@@ -385,7 +385,7 @@ describe('combineQueryAndFilters', () => {
             must: [
               {
                 query_string: {
-                  query: '( anotherField )',
+                  query: 'anotherField',
                 },
               },
             ],
@@ -407,6 +407,7 @@ describe('combineQueryAndFilters', () => {
       },
     });
   });
+
   it('should append lucene meta filters to an existing lucene query', () => {
     expect(
       combineQueryAndFilters(
@@ -461,10 +462,158 @@ describe('combineQueryAndFilters', () => {
       ],
       query: {
         language: 'lucene',
-        query: '( myField ) AND ( anotherField )',
+        query: '( ( myField ) AND ( anotherField ) )',
       },
     });
   });
+
+  it('should accept multiple queries (and play nice with meta filters)', () => {
+    const { query, filters } = combineQueryAndFilters(
+      [
+        { language: 'lucene', query: 'myFirstField' },
+        { language: 'lucene', query: 'mySecondField' },
+        { language: 'kuery', query: 'myThirdField : *' },
+      ],
+      [],
+      {
+        id: 'testDatasource',
+        columns: [],
+        filters: {
+          enabled: {
+            kuery: [[{ language: 'kuery', query: 'myFourthField : *' }]],
+            lucene: [[{ language: 'lucene', query: 'myFifthField' }]],
+          },
+          disabled: { kuery: [], lucene: [] },
+        },
+      },
+      undefined
+    );
+
+    expect(query).toEqual({
+      language: 'lucene',
+      query: '( ( myFirstField ) AND ( mySecondField ) AND ( myFifthField ) )',
+    });
+
+    expect(filters).toEqual([
+      {
+        $state: {
+          store: 'appState',
+        },
+        bool: {
+          filter: [
+            {
+              bool: {
+                filter: [
+                  {
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          exists: {
+                            field: 'myThirdField',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          exists: {
+                            field: 'myFourthField',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+          must: [],
+          must_not: [],
+          should: [],
+        },
+        meta: {
+          alias: 'Lens context (kuery)',
+          disabled: false,
+          index: 'testDatasource',
+          negate: false,
+          type: 'custom',
+        },
+      },
+    ]);
+  });
+
+  it('should ignore all empty queries', () => {
+    const emptyQueryAndFilters = {
+      filters: [],
+      query: {
+        language: 'kuery',
+        query: '',
+      },
+    };
+
+    expect(
+      combineQueryAndFilters(
+        [{ language: 'lucene', query: '' }],
+        [],
+        {
+          id: 'testDatasource',
+          columns: [],
+          filters: {
+            enabled: {
+              kuery: [[{ language: 'kuery', query: '' }]],
+              lucene: [],
+            },
+            disabled: { kuery: [], lucene: [] },
+          },
+        },
+        undefined
+      )
+    ).toEqual(emptyQueryAndFilters);
+
+    expect(
+      combineQueryAndFilters(
+        { language: 'lucene', query: '' },
+        [],
+        {
+          id: 'testDatasource',
+          columns: [],
+          filters: {
+            enabled: {
+              kuery: [[{ language: 'kuery', query: '' }]],
+              lucene: [],
+            },
+            disabled: { kuery: [], lucene: [] },
+          },
+        },
+        undefined
+      )
+    ).toEqual(emptyQueryAndFilters);
+
+    expect(
+      combineQueryAndFilters(
+        undefined,
+        [],
+        {
+          id: 'testDatasource',
+          columns: [],
+          filters: {
+            enabled: {
+              kuery: [[{ language: 'kuery', query: '' }]],
+              lucene: [],
+            },
+            disabled: { kuery: [], lucene: [] },
+          },
+        },
+        undefined
+      )
+    ).toEqual(emptyQueryAndFilters);
+  });
+
   it('should work for complex cases of nested meta filters', () => {
     // scenario overview:
     // A kuery query
@@ -596,7 +745,7 @@ describe('combineQueryAndFilters', () => {
       query: {
         language: 'kuery',
         query:
-          '( myField: * ) AND ( ( bytes > 4000 ) AND ( ( memory > 5000 ) OR ( memory >= 15000 ) ) AND ( myField: * ) AND ( otherField >= 15 ) )',
+          '( ( myField: * ) AND ( bytes > 4000 ) AND ( ( memory > 5000 ) OR ( memory >= 15000 ) ) AND ( myField: * ) AND ( otherField >= 15 ) )',
       },
     });
   });
@@ -796,7 +945,7 @@ describe('combineQueryAndFilters', () => {
       ],
       query: {
         language: 'lucene',
-        query: '( myField ) AND ( anotherField )',
+        query: '( ( myField ) AND ( anotherField ) )',
       },
     });
   });

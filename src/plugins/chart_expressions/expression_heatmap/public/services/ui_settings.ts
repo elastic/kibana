@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { createGetterSetter } from '../../../../kibana_utils/public';
-import { CoreSetup } from '../../../../../core/public';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+import { CoreSetup } from '@kbn/core/public';
 
 export const [getUISettings, setUISettings] =
   createGetterSetter<CoreSetup['uiSettings']>('core.uiSettings');

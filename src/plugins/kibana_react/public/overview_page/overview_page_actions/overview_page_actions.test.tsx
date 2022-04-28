@@ -7,7 +7,7 @@
  */
 
 import { overviewPageActions } from './overview_page_actions';
-import { ApplicationStart } from 'kibana/public';
+import { ApplicationStart } from '@kbn/core/public';
 
 jest.mock('../../app_links', () => ({
   RedirectAppLinks: jest.fn((element: JSX.Element) => element),

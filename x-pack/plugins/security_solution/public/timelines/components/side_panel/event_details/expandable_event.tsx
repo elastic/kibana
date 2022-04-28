@@ -40,6 +40,7 @@ interface Props {
   timelineId: string;
   hostRisk: HostRisk | null;
   handleOnEventClosed: HandleOnEventClosed;
+  isReadOnly?: boolean;
 }
 
 interface ExpandableEventTitleProps {
@@ -109,6 +110,7 @@ export const ExpandableEvent = React.memo<Props>(
     hostRisk,
     rawEventData,
     handleOnEventClosed,
+    isReadOnly,
   }) => {
     if (!event.eventId) {
       return <EuiTextColor color="subdued">{i18n.EVENT_DETAILS_PLACEHOLDER}</EuiTextColor>;
@@ -133,6 +135,7 @@ export const ExpandableEvent = React.memo<Props>(
             timelineTabType={timelineTabType}
             hostRisk={hostRisk}
             handleOnEventClosed={handleOnEventClosed}
+            isReadOnly={isReadOnly}
           />
         </StyledEuiFlexItem>
       </StyledFlexGroup>

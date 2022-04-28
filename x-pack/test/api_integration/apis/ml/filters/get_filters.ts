@@ -87,14 +87,14 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.items).to.eql(requestBody.items);
     });
 
-    it(`should return 400 if filterId does not exist`, async () => {
+    it(`should return 404 if filterId does not exist`, async () => {
       const { body, status } = await supertest
         .get(`/api/ml/filters/filter_id_dne`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS);
-      ml.api.assertResponseStatusCode(400, status, body);
+      ml.api.assertResponseStatusCode(404, status, body);
 
-      expect(body.error).to.eql('Bad Request');
+      expect(body.error).to.eql('Not Found');
       expect(body.message).to.contain('resource_not_found_exception');
     });
   });

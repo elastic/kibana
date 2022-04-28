@@ -205,6 +205,10 @@ export class PageUrlStateService<T> {
     return this._pageUrlState$.pipe(distinctUntilChanged(isEqual));
   }
 
+  public getPageUrlState(): T | null {
+    return this._pageUrlState$.getValue();
+  }
+
   public updateUrlState(update: Partial<T>, replaceState?: boolean): void {
     if (!this._pageUrlStateCallback) {
       throw new Error('Callback has not been initialized.');
@@ -212,10 +216,18 @@ export class PageUrlStateService<T> {
     this._pageUrlStateCallback(update, replaceState);
   }
 
+  /**
+   * Populates internal subject with currently active state.
+   * @param currentState
+   */
   public setCurrentState(currentState: T): void {
     this._pageUrlState$.next(currentState);
   }
 
+  /**
+   * Sets the callback for the state update.
+   * @param callback
+   */
   public setUpdateCallback(callback: (update: Partial<T>, replaceState?: boolean) => void): void {
     this._pageUrlStateCallback = callback;
   }

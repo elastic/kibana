@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { ContainerOutput } from '@kbn/embeddable-plugin/public';
 import { CommonControlOutput } from '../types';
-import { ContainerOutput } from '../../../embeddable/public';
 
 export type ControlGroupOutput = ContainerOutput & CommonControlOutput;
 

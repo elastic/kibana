@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Datatable } from 'src/plugins/expressions/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { PieChartType, PieLayerState } from '../../common/types';
 import { PartitionChartsMeta } from './partition_charts_meta';
 

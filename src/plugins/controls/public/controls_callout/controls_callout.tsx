@@ -9,8 +9,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiButtonEmpty, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import classNames from 'classnames';
 
+import './controls_callout.scss';
 import { ControlGroupStrings } from '../control_group/control_group_strings';
 import { ControlsIllustration } from './controls_illustration';
 
@@ -32,15 +32,10 @@ export const ControlsCallout = ({ getCreateControlButton }: CalloutProps) => {
   if (controlsCalloutDismissed) return null;
 
   return (
-    <EuiPanel
-      borderRadius="m"
-      color="plain"
-      paddingSize={'s'}
-      className={classNames('controlsWrapper--empty', 'dshDashboardViewport-controls')}
-    >
+    <EuiPanel borderRadius="m" color="plain" paddingSize={'s'} className="controlsWrapper--empty">
       <EuiFlexGroup alignItems="center" gutterSize="xs" data-test-subj="controls-empty">
         <EuiFlexItem grow={1} className="controlsIllustration__container">
-          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
             <EuiFlexItem grow={false}>
               <ControlsIllustration />
             </EuiFlexItem>
@@ -49,13 +44,15 @@ export const ControlsCallout = ({ getCreateControlButton }: CalloutProps) => {
                 <p>{ControlGroupStrings.emptyState.getCallToAction()}</p>
               </EuiText>
             </EuiFlexItem>
-            {getCreateControlButton ? (
-              <EuiFlexItem grow={false}>{getCreateControlButton()}</EuiFlexItem>
-            ) : null}
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="s" onClick={dismissControls}>
-                {ControlGroupStrings.emptyState.getDismissButton()}
-              </EuiButtonEmpty>
+              <EuiFlexGroup justifyContent="spaceAround" responsive={false} gutterSize="xs">
+                {getCreateControlButton && <EuiFlexItem>{getCreateControlButton()}</EuiFlexItem>}
+                <EuiFlexItem>
+                  <EuiButtonEmpty size="s" onClick={dismissControls}>
+                    {ControlGroupStrings.emptyState.getDismissButton()}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

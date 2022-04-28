@@ -27,39 +27,47 @@ export function ObservabilityStatusBoxes({ boxes }: ObservabilityStatusProps) {
 
   return (
     <EuiFlexGroup direction="column">
-      <EuiFlexItem>
-        <EuiTitle size="xs">
-          <h2>
-            <FormattedMessage
-              id="xpack.observability.status.recommendedSteps"
-              defaultMessage="Recommended next steps"
-            />
-          </h2>
-        </EuiTitle>
-      </EuiFlexItem>
-      {noHasDataBoxes.map((box) => (
-        <EuiFlexItem key={box.id} data-test-id={`box-${box.id}`}>
-          <EmptyStatusBox {...box} />
-        </EuiFlexItem>
-      ))}
+      {noHasDataBoxes.length > 0 && (
+        <>
+          <EuiFlexItem>
+            <EuiTitle size="xs">
+              <h2>
+                <FormattedMessage
+                  id="xpack.observability.status.recommendedSteps"
+                  defaultMessage="Recommended next steps"
+                />
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          {noHasDataBoxes.map((box) => (
+            <EuiFlexItem key={box.id} data-test-id={`box-${box.id}`}>
+              <EmptyStatusBox {...box} />
+            </EuiFlexItem>
+          ))}
+        </>
+      )}
 
-      {noHasDataBoxes.length > 0 && <EuiHorizontalRule />}
+      {noHasDataBoxes.length > 0 && hasDataBoxes.length > 0 && <EuiHorizontalRule />}
 
-      <EuiFlexItem>
-        <EuiTitle size="xs">
-          <h2>
-            <FormattedMessage
-              id="xpack.observability.status.dataAvailableTitle"
-              defaultMessage="Data available for"
-            />
-          </h2>
-        </EuiTitle>
-      </EuiFlexItem>
-      {hasDataBoxes.map((box) => (
-        <EuiFlexItem key={box.id} data-test-subj={`box-${box.id}`}>
-          <CompletedStatusBox {...box} />
-        </EuiFlexItem>
-      ))}
+      {hasDataBoxes.length > 0 && (
+        <>
+          <EuiFlexItem>
+            <EuiTitle size="xs">
+              <h2>
+                <FormattedMessage
+                  id="xpack.observability.status.dataAvailableTitle"
+                  defaultMessage="Data available for"
+                />
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          {hasDataBoxes.map((box) => (
+            <EuiFlexItem key={box.id} data-test-subj={`box-${box.id}`}>
+              <CompletedStatusBox {...box} />
+            </EuiFlexItem>
+          ))}
+        </>
+      )}
     </EuiFlexGroup>
   );
 }

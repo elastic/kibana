@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import type { Logger } from 'src/core/server';
+import type { Logger, PackageInfo } from '@kbn/core/server';
 import { PdfMaker } from './pdfmaker';
 import type { Layout } from '../../../layouts';
 import { getTracker } from './tracker';
-import { ScreenshotResult } from '../../../screenshots';
+import type { CaptureResult } from '../../../screenshots';
 
 interface PngsToPdfArgs {
-  results: ScreenshotResult['results'];
+  results: CaptureResult['results'];
   layout: Layout;
+  packageInfo: PackageInfo;
   logger: Logger;
   logo?: string;
   title?: string;
@@ -24,9 +25,10 @@ export async function pngsToPdf({
   layout,
   logo,
   title,
+  packageInfo,
   logger,
-}: PngsToPdfArgs): Promise<{ buffer: Buffer; pageCount: number }> {
-  const pdfMaker = new PdfMaker(layout, logo, logger);
+}: PngsToPdfArgs): Promise<{ buffer: Buffer; pages: number }> {
+  const pdfMaker = new PdfMaker(layout, logo, packageInfo, logger);
   const tracker = getTracker();
   if (title) {
     pdfMaker.setTitle(title);
@@ -57,5 +59,5 @@ export async function pngsToPdf({
     tracker.end();
   }
 
-  return { buffer: Buffer.from(buffer.buffer), pageCount: pdfMaker.getPageCount() };
+  return { buffer: Buffer.from(buffer.buffer), pages: pdfMaker.getPageCount() };
 }

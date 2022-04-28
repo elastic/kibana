@@ -8,7 +8,7 @@
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
-import type { HttpFetchError } from 'kibana/public';
+import type { HttpFetchError } from '@kbn/core/public';
 import { useToasts } from '../../../../common/lib/kibana';
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 import { useDeleteArtifact } from '../../../hooks/artifacts';

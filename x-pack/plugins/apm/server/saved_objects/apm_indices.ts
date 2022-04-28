@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from 'src/core/server';
+import { SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { updateApmOssIndexPaths } from './migrations/update_apm_oss_index_paths';
 

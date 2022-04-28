@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Subject } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
 import { take, toArray } from 'rxjs/operators';
 
 import { ILicense } from './types';
@@ -13,10 +13,10 @@ import { createLicenseUpdate } from './license_update';
 import { licenseMock } from './licensing.mock';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-const stop$ = new Subject();
+const stop$ = new Subject<void>();
 describe('licensing update', () => {
   it('loads updates when triggered', async () => {
-    const trigger$ = new Subject();
+    const trigger$ = new Subject<void>();
     const fetcher = jest
       .fn()
       .mockResolvedValueOnce(licenseMock.createLicense({ license: { type: 'basic' } }))
@@ -27,23 +27,23 @@ describe('licensing update', () => {
     expect(fetcher).toHaveBeenCalledTimes(0);
 
     trigger$.next();
-    const first = await license$.pipe(take(1)).toPromise();
+    const first = await firstValueFrom(license$);
     expect(first.type).toBe('basic');
 
     trigger$.next();
-    const [, second] = await license$.pipe(take(2), toArray()).toPromise();
+    const [, second] = await firstValueFrom(license$.pipe(take(2), toArray()));
     expect(second.type).toBe('gold');
   });
 
   it('starts with initial value if presents', async () => {
     const initialLicense = licenseMock.createLicense({ license: { type: 'platinum' } });
     const fetchedLicense = licenseMock.createLicense({ license: { type: 'gold' } });
-    const trigger$ = new Subject();
+    const trigger$ = new Subject<void>();
 
     const fetcher = jest.fn().mockResolvedValue(fetchedLicense);
     const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher, initialLicense);
     trigger$.next();
-    const [first, second] = await license$.pipe(take(2), toArray()).toPromise();
+    const [first, second] = await firstValueFrom(license$.pipe(take(2), toArray()));
 
     expect(first.type).toBe('platinum');
     expect(second.type).toBe('gold');
@@ -51,7 +51,7 @@ describe('licensing update', () => {
   });
 
   it('does not emit if license has not changed', async () => {
-    const trigger$ = new Subject();
+    const trigger$ = new Subject<void>();
 
     const fetcher = jest
       .fn()
@@ -62,7 +62,7 @@ describe('licensing update', () => {
     const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher);
     trigger$.next();
 
-    const [first] = await license$.pipe(take(1), toArray()).toPromise();
+    const [first] = await firstValueFrom(license$.pipe(take(1), toArray()));
 
     expect(first.type).toBe('basic');
 
@@ -71,14 +71,14 @@ describe('licensing update', () => {
     await Promise.resolve();
     trigger$.next();
 
-    const [, second] = await license$.pipe(take(2), toArray()).toPromise();
+    const [, second] = await firstValueFrom(license$.pipe(take(2), toArray()));
 
     expect(second.type).toBe('gold');
     expect(fetcher).toHaveBeenCalledTimes(3);
   });
 
   it('new subscriptions does not force re-fetch', async () => {
-    const trigger$ = new Subject();
+    const trigger$ = new Subject<void>();
 
     const fetcher = jest.fn().mockResolvedValue(licenseMock.createLicense());
 
@@ -103,7 +103,7 @@ describe('licensing update', () => {
           );
         })
     );
-    const trigger$ = new Subject();
+    const trigger$ = new Subject<void>();
     const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher);
     const values: ILicense[] = [];
     license$.subscribe((license) => values.push(license));
@@ -119,7 +119,7 @@ describe('licensing update', () => {
   });
 
   it('completes license$ stream when stop$ is triggered', () => {
-    const trigger$ = new Subject();
+    const trigger$ = new Subject<void>();
     const fetcher = jest.fn().mockResolvedValue(licenseMock.createLicense());
 
     const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher);
@@ -131,7 +131,7 @@ describe('licensing update', () => {
   });
 
   it('stops fetching when stop$ is triggered', () => {
-    const trigger$ = new Subject();
+    const trigger$ = new Subject<void>();
     const fetcher = jest.fn().mockResolvedValue(licenseMock.createLicense());
 
     const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher);
@@ -145,7 +145,7 @@ describe('licensing update', () => {
   });
 
   it(`refreshManually multiple times gets new license`, async () => {
-    const trigger$ = new Subject();
+    const trigger$ = new Subject<void>();
     const firstLicense = licenseMock.createLicense({ license: { uid: 'first', type: 'basic' } });
     const secondLicense = licenseMock.createLicense({ license: { uid: 'second', type: 'gold' } });
 

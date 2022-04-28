@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { SavedObjectsResolveResponse } from 'src/core/public';
+import type { SavedObjectsResolveResponse } from '@kbn/core/public';
 import {
-  CaseAttributes,
-  CaseConnector,
   CasePatchRequest,
   CaseStatuses,
   User,
@@ -17,6 +15,8 @@ import {
   CaseUserActionResponse,
   CaseMetricsResponse,
   CommentResponse,
+  CaseResponse,
+  CommentResponseAlertsType,
 } from '../api';
 import { SnakeToCamelCase } from '../types';
 
@@ -57,33 +57,10 @@ export type CaseViewRefreshPropInterface = null | {
 };
 
 export type Comment = SnakeToCamelCase<CommentResponse>;
+export type AlertComment = SnakeToCamelCase<CommentResponseAlertsType>;
 export type CaseUserActions = SnakeToCamelCase<CaseUserActionResponse>;
 export type CaseExternalService = SnakeToCamelCase<CaseExternalServiceBasic>;
-
-interface BasicCase {
-  id: string;
-  owner: string;
-  closedAt: string | null;
-  closedBy: ElasticUser | null;
-  comments: Comment[];
-  createdAt: string;
-  createdBy: ElasticUser;
-  status: CaseStatuses;
-  title: string;
-  totalAlerts: number;
-  totalComment: number;
-  updatedAt: string | null;
-  updatedBy: ElasticUser | null;
-  version: string;
-}
-
-export interface Case extends BasicCase {
-  connector: CaseConnector;
-  description: string;
-  externalService: CaseExternalService | null;
-  settings: CaseAttributes['settings'];
-  tags: string[];
-}
+export type Case = Omit<SnakeToCamelCase<CaseResponse>, 'comments'> & { comments: Comment[] };
 
 export interface ResolvedCase {
   case: Case;

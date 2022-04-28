@@ -254,11 +254,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'bytes',
       });
 
-      await PageObjects.lens.waitForVisualization();
-
       await PageObjects.lens.switchToVisualization('heatmap', 'heat');
 
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('heatmapChart');
       await PageObjects.lens.openDimensionEditor('lnsHeatmap_cellPanel > lns-dimensionTrigger');
       await PageObjects.lens.openPalettePanel('lnsHeatmap');
       await testSubjects.click('lnsPalettePanel_dynamicColoring_rangeType_groups_number');

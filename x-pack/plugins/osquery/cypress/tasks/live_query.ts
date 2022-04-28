@@ -16,6 +16,7 @@ export const selectAllAgents = () => {
   cy.react('EuiComboBox', { props: { placeholder: 'Select agents or groups' } }).type(
     '{downArrow}{enter}{esc}'
   );
+  cy.contains('1 agent selected.');
 };
 
 export const inputQuery = (query: string) => cy.get(LIVE_QUERY_EDITOR).type(query);

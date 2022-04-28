@@ -1,0 +1,56 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies Linux binary c89/c99 abuse to break out from restricted environments by spawning an interactive system shell.The c89/c99 utility is an interface to the standard C compilation system and the activity of spawing a shell is not a standard use of this binary by a user or system administrator. It indicates a potentially malicious actor attempting to improve the capabilities or stability of their access.",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License v2",
+  "name": "Linux Restricted Shell Breakout via c89/c99 Shell evasion",
+  "query": "process where event.type == \"start\" and process.name in (\"sh\", \"dash\", \"bash\") and\n  process.parent.name in (\"c89\",\"c99\") and process.parent.args == \"-wrapper\" and\n  process.parent.args in (\"sh,-s\", \"bash,-s\", \"dash,-s\", \"/bin/sh,-s\", \"/bin/bash,-s\", \"/bin/dash,-s\")\n",
+  "references": [
+    "https://gtfobins.github.io/gtfobins/c89/",
+    "https://gtfobins.github.io/gtfobins/c99/"
+  ],
+  "risk_score": 47,
+  "rule_id": "1859ce38-6a50-422b-a5e8-636e231ea0cd",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Execution",
+    "GTFOBins"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/",
+          "subtechnique": [
+            {
+              "id": "T1059.004",
+              "name": "Unix Shell",
+              "reference": "https://attack.mitre.org/techniques/T1059/004/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "eql",
+  "version": 1
+}

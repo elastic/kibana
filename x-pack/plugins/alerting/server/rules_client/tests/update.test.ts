@@ -8,22 +8,22 @@
 import uuid from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
+import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { IntervalSchedule, InvalidatePendingApiKey } from '../../types';
 import { RecoveredActionGroup } from '../../../common';
-import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
-import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
 import { resolvable } from '../../test_utils';
-import { ActionsAuthorization, ActionsClient } from '../../../../actions/server';
-import { TaskStatus } from '../../../../task_manager/server';
-import { auditLoggerMock } from '../../../../security/server/audit/mocks';
+import { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 
-jest.mock('../../../../../../src/core/server/saved_objects/service/lib/utils', () => ({
+jest.mock('@kbn/core/server/saved_objects/service/lib/utils', () => ({
   SavedObjectsUtils: {
     generateId: () => 'mock-saved-object-id',
   },
@@ -122,6 +122,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
     ]);
     rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);
@@ -160,6 +161,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: '2',
@@ -175,6 +177,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -435,6 +438,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: '2',
@@ -450,6 +454,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'another email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: 'preconfigured',
@@ -465,6 +470,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'preconfigured email connector',
         isPreconfigured: true,
+        isDeprecated: false,
       },
     ]);
     actionsClient.isPreconfigured.mockReset();
@@ -1362,6 +1368,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: '2',
@@ -1377,6 +1384,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -1749,6 +1757,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: '2',
@@ -1764,6 +1773,7 @@ describe('update()', () => {
         isMissingSecrets: true,
         name: 'another connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
     ]);
 
@@ -1826,6 +1836,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
       {
         id: '2',
@@ -1841,6 +1852,7 @@ describe('update()', () => {
         isMissingSecrets: false,
         name: 'email connector',
         isPreconfigured: false,
+        isDeprecated: false,
       },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -1947,7 +1959,7 @@ describe('update()', () => {
       },
     });
     expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
-      `Rule schedule interval (1s) is less than the minimum value (1m). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
+      `Rule schedule interval (1s) for "myType" rule type with ID "1" is less than the minimum value (1m). Running rules at this interval may impact alerting performance. Set "xpack.alerting.rules.minimumScheduleInterval.enforce" to true to prevent such changes.`
     );
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
   });

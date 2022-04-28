@@ -72,7 +72,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./full_screen_mode'));
       loadTestFile(require.resolve('./dashboard_filter_bar'));
       loadTestFile(require.resolve('./dashboard_filtering'));
-      loadTestFile(require.resolve('./dashboard_controls_integration'));
       loadTestFile(require.resolve('./panel_expand_toggle'));
       loadTestFile(require.resolve('./dashboard_grid'));
       loadTestFile(require.resolve('./view_edit'));
@@ -116,7 +115,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     // TODO: Remove when vislib is removed
     // https://github.com/elastic/kibana/issues/56143
     describe('new charts library', function () {
-      this.tags('ciGroup6');
+      this.tags('ciGroup5');
 
       before(async () => {
         await loadLogstash();

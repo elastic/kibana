@@ -9,7 +9,8 @@
 import path from 'path';
 import os from 'os';
 
-import { ToolingLog, withProcRunner } from '@kbn/dev-utils';
+import { withProcRunner } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { createCliError } from '../errors';
 import { findMostRecentlyChanged } from './find_most_recently_changed';

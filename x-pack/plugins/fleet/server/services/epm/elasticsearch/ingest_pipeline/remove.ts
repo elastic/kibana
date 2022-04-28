@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { appContextService } from '../../../';
+import { appContextService } from '../../..';
 import { ElasticsearchAssetType } from '../../../../types';
 import { IngestManagerError } from '../../../../errors';
 import { getInstallation } from '../../packages/get';

@@ -14,7 +14,8 @@ import { Chart } from './point_series';
 import { DiscoverHistogram } from './histogram';
 import React from 'react';
 import * as hooks from '../../utils/use_data_state';
-import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { GetStateReturn } from '../../services/discover_state';
 
 const chartData = {
   xAxisOrderedValues: [
@@ -76,6 +77,13 @@ function mountComponent(fetchStatus: FetchStatus) {
   const props = {
     savedSearchData$: charts$,
     timefilterUpdateHandler,
+    stateContainer: {
+      appStateContainer: {
+        getState: () => ({
+          interval: 'auto',
+        }),
+      },
+    } as unknown as GetStateReturn,
   };
 
   return mountWithIntl(
