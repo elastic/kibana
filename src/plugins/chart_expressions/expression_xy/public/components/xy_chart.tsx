@@ -513,6 +513,7 @@ export function XYChart({
     splitColumnAccessor && splitTable
       ? getAccessorByDimension(splitColumnAccessor, splitTable?.columns)
       : undefined;
+
   const splitRowId =
     splitRowAccessor && splitTable
       ? getAccessorByDimension(splitRowAccessor, splitTable?.columns)

@@ -16,6 +16,8 @@ import {
   LayersFieldFormats,
 } from '../helpers';
 
+import './tooltip.scss';
+
 type Props = TooltipInfo & {
   fieldFormats: LayersFieldFormats;
   titles: LayersAccessorsTitles;
@@ -31,6 +33,20 @@ interface TooltipData {
   label: string;
   value: string;
 }
+
+export const TooltipRow: FC<TooltipData> = ({ label, value }) => {
+  return label && value ? (
+    <tr>
+      <td className="detailedTooltip__label">
+        <div className="detailedTooltip__labelContainer">{label}</div>
+      </td>
+
+      <td className="detailedTooltip__value">
+        <div className="detailedTooltip__valueContainer">{value}</div>
+      </td>
+    </tr>
+  ) : null;
+};
 
 export const Tooltip: FC<Props> = ({
   header,
@@ -53,14 +69,13 @@ export const Tooltip: FC<Props> = ({
   const { formattedColumns } = formattedDatatables[layerId];
   const layerTitles = titles[layerId];
   const layerFormats = fieldFormats[layerId];
-
   if (header && xAccessor) {
-    const xFormatter = formattedColumns[xAccessor]
+    const headerFormatter = formattedColumns[xAccessor]
       ? null
       : formatFactory(layerFormats.xAccessors[xAccessor]);
     data.push({
       label: layerTitles.xTitles[xAccessor],
-      value: xFormatter ? xFormatter.convert(header.value) : `${header.value}`,
+      value: headerFormatter ? headerFormatter.convert(header.value) : `${header.value}`,
     });
   }
 
@@ -102,5 +117,15 @@ export const Tooltip: FC<Props> = ({
     });
   }
 
-  return <div>123</div>;
+  const tooltipRows = data.map((tooltipRow, index) => (
+    <TooltipRow {...tooltipRow} key={`${tooltipRow.label}-${tooltipRow.value}-${index}`} />
+  ));
+
+  return (
+    <div className="detailedTooltip">
+      <table>
+        <tbody>{tooltipRows}</tbody>
+      </table>
+    </div>
+  );
 };
