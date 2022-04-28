@@ -16,7 +16,7 @@ interface Dependencies {
 const indexName = '.kibana-metadata-events-streams';
 
 const getTimestamp = () => {
-  return moment(`${moment().format('YYYY-MM-DD')}T00:00:00Z`).toISOString();
+  return moment().toISOString();
 };
 
 export class MetadataEventsStreamsIndex {

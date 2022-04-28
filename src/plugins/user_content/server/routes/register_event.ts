@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, Type } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 
-import { withApiBaseBath } from '../../common';
+import { withApiBaseBath, metadataEventTypes, MetadataEventType } from '../../common';
 import type { RouteDependencies } from './types';
 
 export const registerRegisterEventRoute = (
@@ -21,31 +21,28 @@ export const registerRegisterEventRoute = (
       path: withApiBaseBath('/event/{eventType}'),
       validate: {
         params: schema.object({
-          eventType: schema.oneOf([schema.literal('viewed:kibana'), schema.literal('viewed:api')]),
+          eventType: schema.oneOf(
+            metadataEventTypes.map((eventType) => schema.literal(eventType)) as [
+              Type<MetadataEventType>
+            ]
+          ),
+        }),
+        body: schema.object({
+          soId: schema.string(),
         }),
       },
-      // validate: {
-      //   query: schema.object({
-      //     perPage: schema.number({ min: 0, defaultValue: 20 }),
-      //     page: schema.number({ min: 0, defaultValue: 1 }),
-      //     type: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
-      //     search: schema.maybe(schema.string()),
-      //     defaultSearchOperator: searchOperatorSchema,
-      //     sortField: schema.maybe(schema.string()),
-      //     hasReference: schema.maybe(
-      //       schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])
-      //     ),
-      //     hasReferenceOperator: searchOperatorSchema,
-      //     fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
-      //       defaultValue: [],
-      //     }),
-      //   }),
-      // },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      // const { query, params } = req;
+      const { body, params } = req;
 
-      // console.log('PARAMS', params);
+      const userContentEventStream = await userContentEventStreamPromise;
+
+      userContentEventStream.registerEvent({
+        type: params.eventType,
+        data: {
+          so_id: body.soId,
+        },
+      });
 
       return res.ok({
         body: 'ok',

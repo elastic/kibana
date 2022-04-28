@@ -11,6 +11,8 @@ import {
   MetadataEventsStreamsPluginStart,
 } from '@kbn/metadata-events-streams-plugin/server';
 
+import { MetadataEventType } from '../common';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UserContentPluginSetup {}
 
@@ -21,9 +23,7 @@ export interface UserContentStartDependencies {
   metadataEventsStreams: MetadataEventsStreamsPluginStart;
 }
 
-type UserContentEventType = 'viewed:kibana' | 'edited:kibana';
-
-export interface UserContentMetadataEvent extends MetadataEvent<UserContentEventType> {
+export interface UserContentMetadataEvent extends MetadataEvent<MetadataEventType> {
   data: {
     /** The saved object id */
     so_id: string;
