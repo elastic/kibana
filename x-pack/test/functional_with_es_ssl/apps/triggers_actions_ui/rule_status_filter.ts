@@ -13,7 +13,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const esArchiver = getService('esArchiver');
 
-  describe('Rule state filter', () => {
+  describe('Rule status filter', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
       await PageObjects.common.navigateToUrlWithBrowserHistory(
@@ -26,28 +26,28 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should load from the shareable lazy loader', async () => {
-      await testSubjects.find('ruleStateFilter');
-      const exists = await testSubjects.exists('ruleStateFilter');
+      await testSubjects.find('ruleStatusFilter');
+      const exists = await testSubjects.exists('ruleStatusFilter');
       expect(exists).to.be(true);
     });
 
-    it('should allow rule states to be filtered', async () => {
-      const ruleStateFilter = await testSubjects.find('ruleStateFilter');
-      let badge = await ruleStateFilter.findByCssSelector('.euiFilterButton__notification');
+    it('should allow rule statuses to be filtered', async () => {
+      const ruleStatusFilter = await testSubjects.find('ruleStatusFilter');
+      let badge = await ruleStatusFilter.findByCssSelector('.euiFilterButton__notification');
       expect(await badge.getVisibleText()).to.be('0');
 
-      await testSubjects.click('ruleStateFilter');
-      await testSubjects.click('ruleStateFilterOption-enabled');
+      await testSubjects.click('ruleStatusFilter');
+      await testSubjects.click('ruleStatusFilterOption-enabled');
 
-      badge = await ruleStateFilter.findByCssSelector('.euiFilterButton__notification');
+      badge = await ruleStatusFilter.findByCssSelector('.euiFilterButton__notification');
       expect(await badge.getVisibleText()).to.be('1');
 
-      await testSubjects.click('ruleStateFilterOption-disabled');
+      await testSubjects.click('ruleStatusFilterOption-disabled');
 
-      badge = await ruleStateFilter.findByCssSelector('.euiFilterButton__notification');
+      badge = await ruleStatusFilter.findByCssSelector('.euiFilterButton__notification');
       expect(await badge.getVisibleText()).to.be('2');
 
-      await testSubjects.click('ruleStateFilterOption-enabled');
+      await testSubjects.click('ruleStatusFilterOption-enabled');
       expect(await badge.getVisibleText()).to.be('1');
     });
   });

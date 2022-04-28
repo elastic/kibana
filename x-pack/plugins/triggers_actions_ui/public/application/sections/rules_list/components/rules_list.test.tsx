@@ -810,15 +810,15 @@ describe('rules_list component with items', () => {
     );
   });
 
-  it('does not render the state filter if the feature flag is off', async () => {
+  it('does not render the status filter if the feature flag is off', async () => {
     await setup();
-    expect(wrapper.find('[data-test-subj="ruleStateFilter"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="ruleStatusFilter"]').exists()).toBeFalsy();
   });
 
-  it('renders the tag filter if the experiment is on', async () => {
+  it('renders the status filter if the experiment is on', async () => {
     (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
     await setup();
-    expect(wrapper.find('[data-test-subj="ruleStateFilter"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="ruleStatusFilter"]').exists()).toBeTruthy();
   });
 
   it('can filter by rule states', async () => {
@@ -826,21 +826,21 @@ describe('rules_list component with items', () => {
     loadRules.mockReset();
     await setup();
 
-    expect(loadRules.mock.calls[0][0].ruleStateFilter).toEqual([]);
+    expect(loadRules.mock.calls[0][0].ruleStatusesFilter).toEqual([]);
 
-    wrapper.find('[data-test-subj="ruleStateFilterButton"] button').simulate('click');
+    wrapper.find('[data-test-subj="ruleStatusFilterButton"] button').simulate('click');
 
-    wrapper.find('[data-test-subj="ruleStateFilterOption-enabled"]').first().simulate('click');
+    wrapper.find('[data-test-subj="ruleStatusFilterOption-enabled"]').first().simulate('click');
 
-    expect(loadRules.mock.calls[1][0].ruleStateFilter).toEqual(['enabled']);
+    expect(loadRules.mock.calls[1][0].ruleStatusesFilter).toEqual(['enabled']);
 
-    wrapper.find('[data-test-subj="ruleStateFilterOption-snoozed"]').first().simulate('click');
+    wrapper.find('[data-test-subj="ruleStatusFilterOption-snoozed"]').first().simulate('click');
 
-    expect(loadRules.mock.calls[2][0].ruleStateFilter).toEqual(['enabled', 'snoozed']);
+    expect(loadRules.mock.calls[2][0].ruleStatusesFilter).toEqual(['enabled', 'snoozed']);
 
-    wrapper.find('[data-test-subj="ruleStateFilterOption-snoozed"]').first().simulate('click');
+    wrapper.find('[data-test-subj="ruleStatusFilterOption-snoozed"]').first().simulate('click');
 
-    expect(loadRules.mock.calls[3][0].ruleStateFilter).toEqual(['enabled']);
+    expect(loadRules.mock.calls[3][0].ruleStatusesFilter).toEqual(['enabled']);
   });
 });
 

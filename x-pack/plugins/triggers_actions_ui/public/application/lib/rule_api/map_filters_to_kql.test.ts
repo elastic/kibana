@@ -32,18 +32,18 @@ describe('mapFiltersToKql', () => {
     ]);
   });
 
-  test('should handle ruleStatusesFilter', () => {
+  test('should handle ruleExecutionStatusesFilter', () => {
     expect(
       mapFiltersToKql({
-        ruleStatusesFilter: ['alert', 'statuses', 'filter'],
+        ruleExecutionStatusesFilter: ['alert', 'statuses', 'filter'],
       })
     ).toEqual(['alert.attributes.executionStatus.status:(alert or statuses or filter)']);
   });
 
-  test('should handle ruleStateFilter', () => {
+  test('should handle ruleStatusesFilter', () => {
     expect(
       mapFiltersToKql({
-        ruleStateFilter: ['enabled', 'snoozed'],
+        ruleStatusesFilter: ['enabled', 'snoozed'],
       })
     ).toEqual([
       'alert.attributes.enabled:(true) or (alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)',
@@ -51,7 +51,7 @@ describe('mapFiltersToKql', () => {
 
     expect(
       mapFiltersToKql({
-        ruleStateFilter: ['enabled'],
+        ruleStatusesFilter: ['enabled'],
       })
     ).toEqual([
       'alert.attributes.enabled:(true) and not (alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)',
@@ -59,7 +59,7 @@ describe('mapFiltersToKql', () => {
 
     expect(
       mapFiltersToKql({
-        ruleStateFilter: ['enabled', 'disabled', 'snoozed'],
+        ruleStatusesFilter: ['enabled', 'disabled', 'snoozed'],
       })
     ).toEqual([
       'alert.attributes.enabled:(true or false) or (alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)',
@@ -78,12 +78,12 @@ describe('mapFiltersToKql', () => {
     ]);
   });
 
-  test('should handle typesFilter, actionTypesFilter and ruleStatusesFilter', () => {
+  test('should handle typesFilter, actionTypesFilter and ruleExecutionStatusesFilter', () => {
     expect(
       mapFiltersToKql({
         typesFilter: ['type', 'filter'],
         actionTypesFilter: ['action', 'types', 'filter'],
-        ruleStatusesFilter: ['alert', 'statuses', 'filter'],
+        ruleExecutionStatusesFilter: ['alert', 'statuses', 'filter'],
       })
     ).toEqual([
       'alert.attributes.alertTypeId:(type or filter)',

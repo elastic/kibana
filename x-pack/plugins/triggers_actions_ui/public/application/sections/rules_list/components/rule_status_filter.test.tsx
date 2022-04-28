@@ -8,7 +8,7 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
-import { RuleStateFilter } from './rule_state_filter';
+import { RuleStatusFilter } from './rule_status_filter';
 
 const onChangeMock = jest.fn();
 
@@ -18,7 +18,9 @@ describe('rule_state_filter', () => {
   });
 
   it('renders correctly', () => {
-    const wrapper = mountWithIntl(<RuleStateFilter selectedStates={[]} onChange={onChangeMock} />);
+    const wrapper = mountWithIntl(
+      <RuleStatusFilter selectedStatuses={[]} onChange={onChangeMock} />
+    );
 
     expect(wrapper.find(EuiFilterSelectItem).exists()).toBeFalsy();
     expect(wrapper.find(EuiFilterButton).exists()).toBeTruthy();
@@ -27,7 +29,9 @@ describe('rule_state_filter', () => {
   });
 
   it('can open the popover correctly', () => {
-    const wrapper = mountWithIntl(<RuleStateFilter selectedStates={[]} onChange={onChangeMock} />);
+    const wrapper = mountWithIntl(
+      <RuleStatusFilter selectedStatuses={[]} onChange={onChangeMock} />
+    );
 
     expect(wrapper.find('[data-test-subj="ruleStateFilterSelect"]').exists()).toBeFalsy();
 
@@ -37,8 +41,10 @@ describe('rule_state_filter', () => {
     expect(statusItems.length).toEqual(3);
   });
 
-  it('can select states', () => {
-    const wrapper = mountWithIntl(<RuleStateFilter selectedStates={[]} onChange={onChangeMock} />);
+  it('can select statuses', () => {
+    const wrapper = mountWithIntl(
+      <RuleStatusFilter selectedStatuses={[]} onChange={onChangeMock} />
+    );
 
     wrapper.find(EuiFilterButton).simulate('click');
 
@@ -46,7 +52,7 @@ describe('rule_state_filter', () => {
     expect(onChangeMock).toHaveBeenCalledWith(['enabled']);
 
     wrapper.setProps({
-      selectedStates: ['enabled'],
+      selectedStatuses: ['enabled'],
     });
 
     wrapper.find(EuiFilterSelectItem).at(0).simulate('click');

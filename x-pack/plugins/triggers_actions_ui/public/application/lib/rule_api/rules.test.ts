@@ -240,7 +240,7 @@ describe('loadRules', () => {
     `);
   });
 
-  test('should call find API with ruleStateFilter', async () => {
+  test('should call find API with ruleStatusesilter', async () => {
     const resolvedValue = {
       page: 1,
       per_page: 10,
@@ -251,7 +251,7 @@ describe('loadRules', () => {
 
     let result = await loadRules({
       http,
-      ruleStateFilter: ['enabled', 'snoozed'],
+      ruleStatusesFilter: ['enabled', 'snoozed'],
       page: { index: 0, size: 10 },
     });
     expect(result).toEqual({
@@ -280,7 +280,7 @@ describe('loadRules', () => {
 
     result = await loadRules({
       http,
-      ruleStateFilter: ['disabled'],
+      ruleStatusesFilter: ['disabled'],
       page: { index: 0, size: 10 },
     });
     expect(result).toEqual({
@@ -309,7 +309,7 @@ describe('loadRules', () => {
 
     result = await loadRules({
       http,
-      ruleStateFilter: ['enabled', 'disabled', 'snoozed'],
+      ruleStatusesFilter: ['enabled', 'disabled', 'snoozed'],
       page: { index: 0, size: 10 },
     });
     expect(result).toEqual({

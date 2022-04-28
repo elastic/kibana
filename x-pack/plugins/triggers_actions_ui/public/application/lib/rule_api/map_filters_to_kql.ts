@@ -7,8 +7,8 @@
 
 import { RuleStatus } from '../../../types';
 
-const getEnablementFilter = (ruleStateFilter: RuleStatus[] = []) => {
-  const enablementFilters = ruleStateFilter.reduce<string[]>((result, filter) => {
+const getEnablementFilter = (ruleStatusFilter: RuleStatus[] = []) => {
+  const enablementFilters = ruleStatusFilter.reduce<string[]>((result, filter) => {
     if (filter === 'enabled') {
       return [...result, 'true'];
     }
@@ -23,13 +23,13 @@ const getEnablementFilter = (ruleStateFilter: RuleStatus[] = []) => {
 export const mapFiltersToKql = ({
   typesFilter,
   actionTypesFilter,
+  ruleExecutionStatusesFilter,
   ruleStatusesFilter,
-  ruleStateFilter,
 }: {
   typesFilter?: string[];
   actionTypesFilter?: string[];
-  ruleStatusesFilter?: string[];
-  ruleStateFilter?: RuleStatus[];
+  ruleExecutionStatusesFilter?: string[];
+  ruleStatusesFilter?: RuleStatus[];
 }): string[] => {
   const filters = [];
 
@@ -47,16 +47,18 @@ export const mapFiltersToKql = ({
       ].join('')
     );
   }
-  if (ruleStatusesFilter && ruleStatusesFilter.length) {
-    filters.push(`alert.attributes.executionStatus.status:(${ruleStatusesFilter.join(' or ')})`);
+  if (ruleExecutionStatusesFilter && ruleExecutionStatusesFilter.length) {
+    filters.push(
+      `alert.attributes.executionStatus.status:(${ruleExecutionStatusesFilter.join(' or ')})`
+    );
   }
 
-  if (ruleStateFilter && ruleStateFilter.length) {
-    const enablementFilter = getEnablementFilter(ruleStateFilter);
+  if (ruleStatusesFilter && ruleStatusesFilter.length) {
+    const enablementFilter = getEnablementFilter(ruleStatusesFilter);
     const snoozedFilter = `(alert.attributes.muteAll:true OR alert.attributes.snoozeEndTime > now)`;
     const hasEnablement =
-      ruleStateFilter.includes('enabled') || ruleStateFilter.includes('disabled');
-    const hasSnoozed = ruleStateFilter.includes('snoozed');
+      ruleStatusesFilter.includes('enabled') || ruleStatusesFilter.includes('disabled');
+    const hasSnoozed = ruleStatusesFilter.includes('snoozed');
 
     if (hasEnablement && !hasSnoozed) {
       filters.push(`${enablementFilter} and not ${snoozedFilter}`);

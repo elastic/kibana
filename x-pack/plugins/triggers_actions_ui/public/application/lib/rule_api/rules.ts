@@ -21,8 +21,8 @@ export async function loadRules({
   searchText,
   typesFilter,
   actionTypesFilter,
+  ruleExecutionStatusesFilter,
   ruleStatusesFilter,
-  ruleStateFilter,
   sort = { field: 'name', direction: 'asc' },
 }: {
   http: HttpSetup;
@@ -30,8 +30,8 @@ export async function loadRules({
   searchText?: string;
   typesFilter?: string[];
   actionTypesFilter?: string[];
-  ruleStatusesFilter?: string[];
-  ruleStateFilter?: RuleStatus[];
+  ruleExecutionStatusesFilter?: string[];
+  ruleStatusesFilter?: RuleStatus[];
   sort?: Sorting;
 }): Promise<{
   page: number;
@@ -42,8 +42,8 @@ export async function loadRules({
   const filters = mapFiltersToKql({
     typesFilter,
     actionTypesFilter,
+    ruleExecutionStatusesFilter,
     ruleStatusesFilter,
-    ruleStateFilter,
   });
   const res = await http.get<
     AsApiContract<{
