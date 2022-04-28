@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { combineLatest, Observable, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, Subject, Subscription } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs/operators';
 import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import {
@@ -69,6 +69,7 @@ export class TaskManagerPlugin
   private monitoringStats$ = new Subject<MonitoringStats>();
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private subscriptions: Subscription[];
+  private running$ = new BehaviorSubject<boolean>(true);
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -83,7 +84,10 @@ export class TaskManagerPlugin
     core: CoreSetup,
     plugins: { usageCollection?: UsageCollectionSetup }
   ): TaskManagerSetupContract {
-    this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
+    this.elasticsearchAndSOAvailability$ = combineLatest([
+      getElasticsearchAndSOAvailability(core.status.core$),
+      this.running$,
+    ]).pipe(map(([coreStatus, taskManagerStatus]) => coreStatus && taskManagerStatus));
 
     setupSavedObjects(core.savedObjects, this.config);
     this.taskManagerId = this.initContext.env.instanceUuid;
@@ -253,6 +257,8 @@ export class TaskManagerPlugin
 
   public stop() {
     this.subscriptions.forEach((subscription) => subscription.unsubscribe());
+    this.running$.next(false);
+    this.running$.complete();
   }
 
   /**
