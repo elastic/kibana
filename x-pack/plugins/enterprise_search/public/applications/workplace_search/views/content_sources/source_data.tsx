@@ -18,16 +18,16 @@ import {
 import { FeatureIds, SourceDataItem } from '../../types';
 
 export const staticExternalSourceData: SourceDataItem = {
-  name: SOURCE_NAMES.SHAREPOINT,
+  name: SOURCE_NAMES.CUSTOM_CONNECTOR_PACKAGE,
   serviceType: 'external',
+  categories: ['API', 'Custom'],
   configuration: {
     isPublicKey: false,
     hasOauthRedirect: true,
     needsBaseUrl: false,
-    documentationUrl: docLinks.workplaceSearchExternalSharePointOnline,
-    applicationPortalUrl: 'https://portal.azure.com/',
+    documentationUrl: docLinks.workplaceSearchCustomSources, // TODO Update this when we have a doclink
   },
-  objTypes: [SOURCE_OBJ_TYPES.ALL_STORED_FILES],
+  objTypes: [],
   features: {
     basicOrgContext: [
       FeatureIds.SyncFrequency,
@@ -553,7 +553,7 @@ export const staticSourceData: SourceDataItem[] = [
     },
     accountContextOnly: false,
     internalConnectorAvailable: true,
-    externalConnectorAvailable: true,
+    externalConnectorAvailable: false,
   },
   staticExternalSourceData,
   {

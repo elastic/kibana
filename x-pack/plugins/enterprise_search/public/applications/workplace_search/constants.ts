@@ -149,6 +149,12 @@ export const SOURCE_NAMES = {
     'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.confluenceServer',
     { defaultMessage: 'Confluence (Server)' }
   ),
+  CUSTOM_CONNECTOR_PACKAGE: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.customConnectorPackage',
+    {
+      defaultMessage: 'Custom Connector Package',
+    }
+  ),
   DROPBOX: i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceNames.dropbox', {
     defaultMessage: 'Dropbox',
   }),
