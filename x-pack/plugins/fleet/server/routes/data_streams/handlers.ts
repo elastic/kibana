@@ -175,13 +175,14 @@ export const getListHandler: RequestHandler = async (context, request, response)
             serviceName: {
               terms: {
                 field: 'service.name',
-                size: 1,
+                size: 2,
               },
             },
             environment: {
               terms: {
                 field: 'service.environment',
                 size: 1,
+                missing: 'ENVIRONMENT_NOT_DEFINED',
               },
             },
           },
@@ -208,14 +209,13 @@ export const getListHandler: RequestHandler = async (context, request, response)
         (namespace.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '';
       dataStreamResponse.type =
         (type.buckets as Array<{ key?: string; value?: number }>)[0]?.key || '';
-      const serviceNameValue =
-        (serviceName.buckets as Array<{ key?: string; value?: number }>)[0]?.key || null;
       const environmentValue =
         (environment.buckets as Array<{ key?: string; value?: number }>)[0]?.key || null;
+      const serviceNameBuckets = serviceName.buckets as Array<{ key?: string; value?: number }>;
 
-      if (serviceNameValue && environmentValue) {
+      if (serviceNameBuckets.length === 1 && environmentValue) {
         dataStreamResponse.serviceDetails = {
-          serviceName: serviceNameValue,
+          serviceName: serviceNameBuckets[0].key!,
           environment: environmentValue,
         };
       }

@@ -5,45 +5,77 @@
  * 2.0.
  */
 
-import { merge } from 'lodash';
-import type { LocatorDefinition } from '@kbn/share-plugin/common';
-import { getLocatorEnabledRoutes } from './get_locator_enabled_routes';
-import type { APMLocatorPayload } from './types';
+import { isRight } from 'fp-ts/Either';
+import * as t from 'io-ts';
+import { PathReporter } from 'io-ts/lib/PathReporter';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { LocatorDefinition } from '@kbn/share-plugin/common';
+import { environmentRt } from '../../common/environment_rt';
+
+const apmRouteConfigModule = import('../components/routing/apm_route_config');
 
 export const APM_APP_LOCATOR_ID = 'APM_LOCATOR';
 
-async function loadApmRoutesModule() {
-  const { apmRouter, apmRoutes } = await import(
-    '../components/routing/apm_route_config'
-  );
-  const locatorEnabledRoutes = getLocatorEnabledRoutes(apmRoutes);
+const APMLocatorPayloadValidator = t.intersection([
+  t.type({
+    serviceName: t.string,
+  }),
+  t.partial({
+    serviceOverviewTab: t.keyof({
+      traces: null,
+      metrics: null,
+      logs: null,
+    }),
+  }),
+  t.type({
+    query: environmentRt,
+  }),
+]);
 
-  return {
-    apmRouter,
-    locatorEnabledRoutes,
-  };
-}
+export type APMLocatorPayload = t.TypeOf<typeof APMLocatorPayloadValidator>;
 
 export class APMLocatorDefinition
   implements LocatorDefinition<APMLocatorPayload>
 {
-  readonly id = APM_APP_LOCATOR_ID;
-  apmRoutesModule = loadApmRoutesModule();
+  id = APM_APP_LOCATOR_ID;
+  uiSettings: IUiSettingsClient;
+
+  constructor(uiSettings: IUiSettingsClient) {
+    this.uiSettings = uiSettings;
+  }
 
   async getLocation(payload: APMLocatorPayload) {
-    const { apmRouter, locatorEnabledRoutes } = await this.apmRoutesModule;
-    const route = locatorEnabledRoutes[payload.pageId];
+    const { apmRouter } = await apmRouteConfigModule;
 
-    if (!route) {
-      throw new Error(`Cannot find a matching route for: ${payload.pageId}`);
+    const decodedPayload = APMLocatorPayloadValidator.decode(payload);
+    if (!isRight(decodedPayload)) {
+      throw new Error(PathReporter.report(decodedPayload).join('\n'));
     }
 
-    const defaultQueryParams = merge(route.defaults!.query, payload.query);
+    const mapObj = {
+      logs: '/services/{serviceName}/logs',
+      metrics: '/services/{serviceName}/metrics',
+      traces: '/services/{serviceName}/transactions',
+      default: '/services/{serviceName}/overview',
+    } as const;
 
-    // @ts-ignore
-    const path = apmRouter.link(route.path, {
-      path: 'params' in payload ? payload.params : {},
-      query: defaultQueryParams,
+    const apmPath = mapObj[payload.serviceOverviewTab || 'default'];
+    const { from: rangeFrom, to: rangeTo } = this.uiSettings.get(
+      'timepicker:timeDefaults'
+    );
+    const defaultQueryParams = {
+      kuery: '',
+      serviceGroup: '',
+      comparisonEnabled: false,
+      rangeFrom,
+      rangeTo,
+    };
+    const path = apmRouter.link(apmPath, {
+      path: { serviceName: payload.serviceName },
+      query: {
+        ...defaultQueryParams,
+        ...payload.query,
+      },
     });
 
     return {

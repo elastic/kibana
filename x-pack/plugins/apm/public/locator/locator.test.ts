@@ -4,15 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { Environment } from '../../common/environment_rt';
+import { IUiSettingsClient } from '@kbn/core/public';
 import { APMLocatorDefinition, APM_APP_LOCATOR_ID } from './locator';
-import { APMLocatorPayload } from './types';
-
-const startWith = (str: string) => new RegExp(`^${str}?`);
 
 describe('APMLocatorDefinition', () => {
+  let locator: APMLocatorDefinition;
+
+  beforeEach(() => {
+    const uiSettingsMock = {
+      get: () => ({ from: 'now-15m', to: 'now' }),
+    } as unknown as IUiSettingsClient;
+
+    locator = new APMLocatorDefinition(uiSettingsMock);
+  });
+
   it('locator has the right ID and app', async () => {
-    const locator = new APMLocatorDefinition();
-    const location = await locator.getLocation({ pageId: 'home' });
+    const location = await locator.getLocation({
+      serviceName: 'test-app',
+      query: { environment: 'ENVIRONMENT_ALL' },
+    });
 
     expect(locator.id).toBe(APM_APP_LOCATOR_ID);
     expect(location).toMatchObject({
@@ -20,64 +31,30 @@ describe('APMLocatorDefinition', () => {
     });
   });
 
-  it('should throw an error when given a wrong pageId', async () => {
-    const locator = new APMLocatorDefinition();
-    const run = async () => {
-      await locator.getLocation({
-        // @ts-ignore
-        pageId: 'wrong-pageId',
-      });
-    };
-
-    expect(run()).rejects.toThrow(Error);
-  });
-
-  const serviceName = 'example-app';
-  const cases: Array<[APMLocatorPayload, RegExp]> = [
-    [{ pageId: 'home' }, startWith('/?')],
-    [
-      { pageId: 'serviceOverview', params: { serviceName } },
-      startWith('/services/example-app/overview?'),
-    ],
-    [
-      { pageId: 'serviceTransactionsOverview', params: { serviceName } },
-      startWith('/services/example-app/transactions/view?'),
-    ],
-    [
-      { pageId: 'serviceLogsOverview', params: { serviceName } },
-      startWith('/services/example-app/logs?'),
-    ],
-    [
-      { pageId: 'serviceMetricsOverview', params: { serviceName } },
-      startWith('/services/example-app/metrics?'),
-    ],
-  ];
-  const formatCasesForJestEach = cases.map((aTestCase) => {
-    return [aTestCase[0].pageId, aTestCase[0], aTestCase[1]] as const;
-  });
-
-  it.each(formatCasesForJestEach)(
-    'given the pageId "%s" with and the right params return the correct path',
-    async (_, testCase, expected) => {
-      const locator = new APMLocatorDefinition();
-      const location = await locator.getLocation(testCase);
-      expect(location.path).toMatch(expected);
-    }
-  );
-
-  it('should allow the override of default query params', async () => {
-    const locator = new APMLocatorDefinition();
-
+  it('should return the right link when given a serviceName', async () => {
     const location = await locator.getLocation({
-      pageId: 'home',
+      serviceName: 'example-app',
       query: {
-        rangeFrom: 'now-15d',
-        kuery: 'test-kuery',
+        environment: 'development' as Environment,
       },
     });
 
     expect(location.path).toBe(
-      '/?environment=ENVIRONMENT_ALL&kuery=test-kuery&rangeFrom=now-15d&rangeTo=now'
+      '/services/example-app/overview?comparisonEnabled=false&environment=development&kuery=&latencyAggregationType=avg&rangeFrom=now-15m&rangeTo=now&serviceGroup='
+    );
+  });
+
+  it('should return the right link when given a specific service tab', async () => {
+    const location = await locator.getLocation({
+      serviceName: 'example-app',
+      serviceOverviewTab: 'traces',
+      query: {
+        environment: 'prod' as Environment,
+      },
+    });
+
+    expect(location.path).toBe(
+      '/services/example-app/transactions?comparisonEnabled=false&environment=prod&kuery=&latencyAggregationType=avg&rangeFrom=now-15m&rangeTo=now&serviceGroup='
     );
   });
 });

@@ -146,8 +146,6 @@ export const home = {
       query: {
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
-        rangeFrom: 'now-15m',
-        rangeTo: 'now',
       },
     },
     children: {
@@ -210,7 +208,6 @@ export const home = {
             <RedirectTo pathname="/service-groups" />
           </ServiceGroupsRedirect>
         ),
-        locatorPageId: 'home' as const,
       },
     },
   },

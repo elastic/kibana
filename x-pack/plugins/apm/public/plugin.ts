@@ -302,7 +302,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     registerApmAlerts(observabilityRuleTypeRegistry);
 
     const locator = plugins.share.url.locators.create(
-      new APMLocatorDefinition()
+      new APMLocatorDefinition(core.uiSettings)
     );
 
     return {

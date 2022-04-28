@@ -5,11 +5,15 @@
  * 2.0.
  */
 import type { SerializableRecord } from '@kbn/utility-types';
+import type { ValuesType } from 'utility-types';
+
+import type { LOCATORS_IDS } from '../constants';
 
 import { useStartServices } from './use_core';
 
-export function useLocator<T extends SerializableRecord>(locatorId: string) {
+export function useLocator<T extends SerializableRecord>(
+  locatorId: ValuesType<typeof LOCATORS_IDS>
+) {
   const services = useStartServices();
-  const apmLocator = services.share.url.locators.get<T>(locatorId);
-  return apmLocator;
+  return services.share.url.locators.get<T>(locatorId);
 }

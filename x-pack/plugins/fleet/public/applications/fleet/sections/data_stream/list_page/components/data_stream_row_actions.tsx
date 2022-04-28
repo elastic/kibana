@@ -8,14 +8,12 @@
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import useAsync from 'react-use/lib/useAsync';
 
 import type { DataStream } from '../../../../types';
 import { useKibanaLink } from '../../../../hooks';
-import { useLocator } from '../../../../../../hooks/use_locator';
 import { ContextMenuActions } from '../../../../components';
 
-import { isAPMIntegration, getAPMServicenHrefFor } from './helpers';
+import { useAPMServiceHref } from '../../../../hooks/use_apm_service_href';
 
 export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastream }) => {
   const { dashboards } = datastream;
@@ -44,16 +42,15 @@ export const DataStreamRowActions = memo<{ datastream: DataStream }>(({ datastre
     }
   );
 
-  const apmLocator = useLocator('APM_LOCATOR');
-  const apmLinkState = useAsync(() => getAPMServicenHrefFor(datastream, apmLocator));
+  const { isReady, href } = useAPMServiceHref(datastream);
 
-  if (isAPMIntegration(datastream) && !(apmLinkState.loading || apmLinkState.error)) {
+  if (isReady && href) {
     panels.push({
       id: 0,
       items: [
         {
           icon: 'apmApp',
-          href: apmLinkState.value,
+          href,
           name: viewServiceInApmActionTitle,
         },
       ],
