@@ -13,7 +13,6 @@ import { InitialConfigurationStep } from './initial_configuration_step';
 
 storiesOf('infra/logAnalysis/SetupInitialConfigurationStep', module)
   .addDecorator((renderStory) => <div style={{ maxWidth: 800 }}>{renderStory()}</div>)
-  // @ts-expect-error update types
   .addDecorator(decorateWithGlobalStorybookThemeProviders)
   .add('Reconfiguration with partitioned warnings', () => {
     return (
