@@ -6,7 +6,7 @@
  */
 
 import { uniq, map } from 'lodash';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
   PackagePolicyServiceInterface,
@@ -19,6 +19,7 @@ import type {
   AgentPolicy,
   ListResult,
 } from '@kbn/fleet-plugin/common';
+import { cspRuleAssetSavedObjectType, CspRuleSchema } from '../../../common/schemas/csp_rule';
 import { BENCHMARKS_ROUTE_PATH, CIS_KUBERNETES_PACKAGE_NAME } from '../../../common/constants';
 import {
   BENCHMARK_PACKAGE_POLICY_PREFIX,
@@ -29,7 +30,6 @@ import { CspAppContext } from '../../plugin';
 import type { Benchmark, CspRulesStatus } from '../../../common/types';
 import { isNonNullable } from '../../../common/utils/helpers';
 import { CspRouter } from '../../types';
-import { getCspRules } from '../configuration/update_rules_configuration';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
 
@@ -92,18 +92,43 @@ const addRunningAgentToAgentPolicy = async (
     )
   );
 };
+export interface RulesStatusAggregation {
+  enabled_status: {
+    doc_count: number;
+  };
+}
+export const getCspRulesStatus = async (
+  soClient: SavedObjectsClientContract,
+  packagePolicy: PackagePolicy
+): Promise<SavedObjectsFindResponse<CspRuleSchema, RulesStatusAggregation>> => {
+  const cspRules = soClient.find<CspRuleSchema, RulesStatusAggregation>({
+    type: cspRuleAssetSavedObjectType,
+    filter: `${cspRuleAssetSavedObjectType}.attributes.package_policy_id: ${packagePolicy.id} AND ${cspRuleAssetSavedObjectType}.attributes.policy_id: ${packagePolicy.policy_id}`,
+    aggs: {
+      enabled_status: {
+        filter: {
+          term: {
+            'csp_rule.attributes.enabled': true,
+          },
+        },
+      },
+    },
+    searchFields: ['name'],
+    // TODO: research how to get all rules
+    perPage: 10000,
+  });
+  return cspRules;
+};
 
 export const addPackagePolicyCspRules = async (
   soClient: SavedObjectsClientContract,
   packagePolicy: PackagePolicy
 ): Promise<CspRulesStatus> => {
-  const rules = await getCspRules(soClient, packagePolicy);
-
-  const activatedRules = rules.saved_objects.filter((cspRule) => cspRule.attributes.enabled);
+  const rules = await getCspRulesStatus(soClient, packagePolicy);
   const packagePolicyRules = {
     all: rules.total,
-    enabled: activatedRules.length,
-    disabled: rules.total - activatedRules.length,
+    enabled: rules.aggregations?.enabled_status.doc_count || 0,
+    disabled: rules.total - (rules.aggregations?.enabled_status.doc_count || 0),
   };
   return packagePolicyRules;
 };
@@ -138,7 +163,7 @@ export const createBenchmarkEntry = (
   rules: cspRulesStatus,
 });
 
-const createBenchmarks = async (
+const createBenchmarks = (
   soClient: SavedObjectsClientContract,
   agentPolicies: GetAgentPoliciesResponseItem[],
   cspPackagePolicies: PackagePolicy[]
