@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export const metricSet = {
+import { MetricDescriptor } from '../../../../lib/details/get_metrics';
+
+export const metricSets: {
+  advanced: MetricDescriptor[];
+  overview: MetricDescriptor[];
+} = {
   advanced: [
     {
       keys: ['index_mem_fixed_bit_set', 'index_mem_versions'],

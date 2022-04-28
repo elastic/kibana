@@ -5,30 +5,29 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import {
+  postElasticsearchMlJobsRequestParamsRT,
+  postElasticsearchMlJobsRequestPayloadRT,
+  postElasticsearchMlJobsResponsePayloadRT,
+} from '../../../../../common/http_api/elasticsearch';
 import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
 import { getClusterStatus } from '../../../../lib/cluster/get_cluster_status';
+import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getMlJobs } from '../../../../lib/elasticsearch/get_ml_jobs';
-import { handleError } from '../../../../lib/errors/handle_error';
 import { getIndicesUnassignedShardStats } from '../../../../lib/elasticsearch/shards/get_indices_unassigned_shard_stats';
+import { handleError } from '../../../../lib/errors/handle_error';
+import { MonitoringCore } from '../../../../types';
 
-export function mlJobRoute(server) {
+export function mlJobRoute(server: MonitoringCore) {
+  const validateParams = createValidationFunction(postElasticsearchMlJobsRequestParamsRT);
+  const validateBody = createValidationFunction(postElasticsearchMlJobsRequestPayloadRT);
+
   server.route({
-    method: 'POST',
+    method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/elasticsearch/ml_jobs',
-    config: {
-      validate: {
-        params: schema.object({
-          clusterUuid: schema.string(),
-        }),
-        body: schema.object({
-          ccs: schema.maybe(schema.string()),
-          timeRange: schema.object({
-            min: schema.string(),
-            max: schema.string(),
-          }),
-        }),
-      },
+    validate: {
+      params: validateParams,
+      body: validateBody,
     },
     async handler(req) {
       const clusterUuid = req.params.clusterUuid;
@@ -37,10 +36,10 @@ export function mlJobRoute(server) {
         const clusterStats = await getClusterStats(req, clusterUuid);
         const indicesUnassignedShardStats = await getIndicesUnassignedShardStats(req, clusterStats);
         const rows = await getMlJobs(req);
-        return {
+        return postElasticsearchMlJobsResponsePayloadRT.encode({
           clusterStatus: getClusterStatus(clusterStats, indicesUnassignedShardStats),
           rows,
-        };
+        });
       } catch (err) {
         throw handleError(err, req);
       }

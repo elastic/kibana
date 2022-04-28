@@ -18,12 +18,15 @@ import { handleError } from '../../../../lib/errors';
 import { MonitoringCore } from '../../../../types';
 
 export function beatsListingRoute(server: MonitoringCore) {
+  const validateParams = createValidationFunction(postBeatsListingRequestParamsRT);
+  const validateBody = createValidationFunction(postBeatsListingRequestPayloadRT);
+
   server.route({
     method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/beats/beats',
     validate: {
-      params: createValidationFunction(postBeatsListingRequestParamsRT),
-      body: createValidationFunction(postBeatsListingRequestPayloadRT),
+      params: validateParams,
+      body: validateBody,
     },
     async handler(req) {
       const config = server.config;

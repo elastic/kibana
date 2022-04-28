@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export const metricSets = {
+import { MetricDescriptor } from '../../../../lib/details/get_metrics';
+
+export const metricSets: {
+  advanced: MetricDescriptor[];
+  overview: MetricDescriptor[];
+} = {
   advanced: [
     {
       keys: ['node_jvm_mem_max_in_bytes', 'node_jvm_mem_used_in_bytes'],

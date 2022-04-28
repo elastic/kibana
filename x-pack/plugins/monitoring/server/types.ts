@@ -80,16 +80,22 @@ export interface RouteDependencies {
   logger: Logger;
 }
 
-export type MonitoringRouteConfig<Params, Query, Body, Method extends RouteMethod> = {
-  method: RouteMethod;
-} & RouteConfig<Params, Query, Body, Method> & {
-    handler: (request: LegacyRequest) => any;
-  };
+type LegacyHandler<Params, Query, Body> = (req: LegacyRequest<Params, Query, Body>) => Promise<any>;
+
+export type MonitoringRouteConfig<Params, Query, Body, Method extends RouteMethod> = RouteConfig<
+  Params,
+  Query,
+  Body,
+  Method
+> & {
+  method: Method;
+  handler: LegacyHandler<Params, Query, Body>;
+};
 
 export interface MonitoringCore {
   config: MonitoringConfig;
   log: Logger;
-  route: <Params = any, Query = any, Body = any, Method extends RouteMethod = any>(
+  route: <Params, Query, Body, Method extends RouteMethod>(
     options: MonitoringRouteConfig<Params, Query, Body, Method>
   ) => void;
 }
@@ -112,15 +118,12 @@ export interface MonitoringPluginSetup {
   getKibanaStats: IBulkUploader['getKibanaStats'];
 }
 
-export interface LegacyRequest {
+export interface LegacyRequest<Params = any, Query = any, Body = any> {
   logger: Logger;
   getLogger: (...scopes: string[]) => Logger;
-  payload: {
-    [key: string]: any;
-  };
-  params: {
-    [key: string]: string;
-  };
+  payload: Body;
+  params: Params;
+  query: Query;
   getKibanaStatsCollector: () => any;
   getUiSettingsService: () => any;
   getActionTypeRegistry: () => any;

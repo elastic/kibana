@@ -17,12 +17,15 @@ import { handleError } from '../../../../lib/errors';
 import { MonitoringCore } from '../../../../types';
 
 export function apmInstancesRoute(server: MonitoringCore) {
+  const validateParams = createValidationFunction(postApmInstancesRequestParamsRT);
+  const validateBody = createValidationFunction(postApmInstancesRequestPayloadRT);
+
   server.route({
     method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/apm/instances',
     validate: {
-      params: createValidationFunction(postApmInstancesRequestParamsRT),
-      body: createValidationFunction(postApmInstancesRequestPayloadRT),
+      params: validateParams,
+      body: validateBody,
     },
     async handler(req) {
       const config = server.config;
