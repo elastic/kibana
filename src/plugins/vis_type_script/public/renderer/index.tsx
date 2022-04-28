@@ -12,10 +12,13 @@ import { createEndpoint, fromIframe } from '@remote-ui/rpc';
 import './index.scss';
 import { IExternalUrl } from '@kbn/core/public';
 import {
-  EsSearchOptions,
+  ESSearchOptions,
   VisTypeScriptKibanaApi,
   ESSearchResponse,
   ESSearchRequest,
+  SQLSearchRequest,
+  SQLSearchOptions,
+  SQLSearchResponse,
 } from '../kibana_api';
 
 export const KIBANA_API_CONSTANT_NAME = 'KIBANA';
@@ -40,6 +43,9 @@ const getSandboxDocument = (script: string, dependencies: string[], nonce: strin
           const ${KIBANA_API_CONSTANT_NAME} = {
             searchEs: (payload, options) => {
               return  endpoint.call.esSearch(payload, options);
+            },
+            searchSql: (payload, options) => {
+              return  endpoint.call.sqlSearch(payload, options);
             },
             subscribeToResize: (fn) => {
               onResize = fn;
@@ -102,9 +108,15 @@ export const ScriptRenderer: React.FunctionComponent<{
     endpoint.expose({
       esSearch: async (
         payload: ESSearchRequest,
-        options?: EsSearchOptions
+        options?: ESSearchOptions
       ): Promise<ESSearchResponse> => {
         return kibanaApi.esSearch(payload, options);
+      },
+      sqlSearch: async (
+        payload: SQLSearchRequest,
+        options?: SQLSearchOptions
+      ): Promise<SQLSearchResponse> => {
+        return kibanaApi.sqlSearch(payload, options);
       },
     });
 
