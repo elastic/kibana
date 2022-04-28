@@ -21,7 +21,9 @@ import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import { AppLogic } from '../../../../app_logic';
 import { SOURCES_PATH, PRIVATE_SOURCES_PATH, getSourcesPath, getAddPath } from '../../../../routes';
+import { SourceDataItem } from '../../../../types';
 import { PERSONAL_DASHBOARD_SOURCE_ERROR } from '../../constants';
+import { getSourceData } from '../../source_data';
 import { SourcesLogic } from '../../sources_logic';
 
 import {
@@ -136,6 +138,7 @@ export interface AddSourceValues {
   selectedGithubOrganizations: string[];
   preContentSourceId: string;
   oauthConfigCompleted: boolean;
+  sourceData: SourceDataItem | null;
 }
 
 export interface AddSourceProps {
@@ -190,7 +193,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       setButtonNotLoading: () => true,
       setFirstStep: () => true,
     },
-    reducers: {
+    reducers: ({ props }) => ({
       addSourceCurrentStep: [
         null,
         {
@@ -320,7 +323,8 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
           setPreContentSourceConfigData: () => true,
         },
       ],
-    },
+      sourceData: [getSourceData(props.serviceType) || null, {}],
+    }),
     selectors: ({ selectors }) => ({
       selectedGithubOrganizations: [
         () => [selectors.selectedGithubOrganizationsMap],

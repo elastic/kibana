@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 
 import { LicensingLogic } from '../../../../../shared/licensing';
 import { AppLogic } from '../../../../app_logic';
-import { FeatureIds, Configuration, Features } from '../../../../types';
+import { FeatureIds } from '../../../../types';
 
 import { AddSourceLogic } from './add_source_logic';
 import { DocumentPermissionsCallout } from './document_permissions_callout';
@@ -32,19 +32,10 @@ import { SourceFeatures } from './source_features';
 
 interface ConnectInstanceProps {
   header: React.ReactNode;
-  configuration: Configuration;
-  features?: Features;
-  objTypes?: string[];
   onFormCreated(name: string): void;
 }
 
-export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
-  configuration: { needsSubdomain, hasOauthRedirect },
-  features,
-  objTypes,
-  onFormCreated,
-  header,
-}) => {
+export const ConnectInstance: React.FC<ConnectInstanceProps> = ({ onFormCreated, header }) => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
   const {
@@ -63,6 +54,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     passwordValue,
     indexPermissionsValue,
     subdomainValue,
+    sourceData,
   } = useValues(AddSourceLogic);
 
   const { name, needsPermissions = false } = sourceConfigData;
@@ -73,6 +65,16 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
   useEffect(() => {
     setSourceIndexPermissionsValue(needsPermissions && isOrganization && hasPlatinumLicense);
   }, []);
+
+  if (!sourceData) {
+    return null;
+  }
+
+  const {
+    configuration: { needsSubdomain, hasOauthRedirect },
+    features,
+    objTypes,
+  } = sourceData;
 
   const redirectOauth = (oauthUrl: string) => window.location.replace(oauthUrl);
   const redirectFormCreated = () => onFormCreated(name);

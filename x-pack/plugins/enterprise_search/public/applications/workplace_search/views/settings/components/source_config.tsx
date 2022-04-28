@@ -7,6 +7,8 @@
 
 import React, { useEffect, useState } from 'react';
 
+import { useParams } from 'react-router-dom';
+
 import { useActions, useValues } from 'kea';
 
 import {
@@ -21,19 +23,14 @@ import { i18n } from '@kbn/i18n';
 
 import { WorkplaceSearchPageTemplate } from '../../../components/layout';
 import { NAV, REMOVE_BUTTON, CANCEL_BUTTON } from '../../../constants';
-import { SourceDataItem } from '../../../types';
 import { AddSourceHeader } from '../../content_sources/components/add_source/add_source_header';
 import { AddSourceLogic } from '../../content_sources/components/add_source/add_source_logic';
 import { SaveConfig } from '../../content_sources/components/add_source/save_config';
 import { SettingsLogic } from '../settings_logic';
 
-interface SourceConfigProps {
-  sourceData: SourceDataItem;
-}
-
-export const SourceConfig: React.FC<SourceConfigProps> = ({ sourceData }) => {
+export const SourceConfig: React.FC = () => {
+  const { serviceType } = useParams<{ serviceType: string }>();
   const [confirmModalVisible, setConfirmModalVisibility] = useState(false);
-  const { configuration, serviceType } = sourceData;
   const addSourceLogic = AddSourceLogic({ serviceType });
   const { deleteSourceConfig } = useActions(SettingsLogic);
   const { saveSourceConfig, getSourceConfigData, resetSourceState } = useActions(addSourceLogic);
@@ -59,7 +56,6 @@ export const SourceConfig: React.FC<SourceConfigProps> = ({ sourceData }) => {
       isLoading={dataLoading}
     >
       <SaveConfig
-        configuration={configuration}
         advanceStep={saveUpdatedConfig}
         onDeleteConfig={showConfirmModal}
         header={header}

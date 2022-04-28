@@ -33,7 +33,6 @@ import {
   CLIENT_SECRET_LABEL,
   REMOVE_BUTTON,
 } from '../../../../constants';
-import { Configuration } from '../../../../types';
 
 import { ExternalConnectorFormFields } from './add_external_connector';
 import { ExternalConnectorDocumentation } from './add_external_connector';
@@ -43,21 +42,12 @@ import { OAUTH_SAVE_CONFIG_BUTTON, OAUTH_BACK_BUTTON, OAUTH_STEP_2 } from './con
 
 interface SaveConfigProps {
   header: React.ReactNode;
-  configuration: Configuration;
   advanceStep(): void;
   goBackStep?(): void;
   onDeleteConfig?(): void;
 }
 
 export const SaveConfig: React.FC<SaveConfigProps> = ({
-  configuration: {
-    isPublicKey,
-    needsBaseUrl,
-    documentationUrl,
-    applicationPortalUrl,
-    applicationLinkTitle,
-    baseUrlTitle,
-  },
   advanceStep,
   goBackStep,
   onDeleteConfig,
@@ -67,8 +57,14 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
 
   const { setClientIdValue, setClientSecretValue, setBaseUrlValue } = useActions(AddSourceLogic);
 
-  const { sourceConfigData, buttonLoading, clientIdValue, clientSecretValue, baseUrlValue } =
-    useValues(AddSourceLogic);
+  const {
+    sourceData,
+    sourceConfigData,
+    buttonLoading,
+    clientIdValue,
+    clientSecretValue,
+    baseUrlValue,
+  } = useValues(AddSourceLogic);
 
   const {
     name,
@@ -76,6 +72,21 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
     configuredFields: { publicKey, consumerKey },
     serviceType,
   } = sourceConfigData;
+
+  if (!sourceData) {
+    return null;
+  }
+
+  const {
+    configuration: {
+      isPublicKey,
+      needsBaseUrl,
+      documentationUrl,
+      applicationPortalUrl,
+      applicationLinkTitle,
+      baseUrlTitle,
+    },
+  } = sourceData;
 
   const handleFormSubmission = (e: FormEvent) => {
     e.preventDefault();

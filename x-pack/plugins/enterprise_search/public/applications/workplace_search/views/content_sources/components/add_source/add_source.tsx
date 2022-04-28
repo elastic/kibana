@@ -25,8 +25,6 @@ import {
 import { NAV } from '../../../../constants';
 import { SOURCES_PATH, getSourcesPath, getAddPath, ADD_SOURCE_PATH } from '../../../../routes';
 
-import { getSourceData } from '../../source_data';
-
 import { AddSourceHeader } from './add_source_header';
 import { AddSourceLogic, AddSourceSteps } from './add_source_logic';
 import { ConfigCompleted } from './config_completed';
@@ -38,7 +36,7 @@ import { SaveConfig } from './save_config';
 import './add_source.scss';
 
 export const AddSource: React.FC = () => {
-  const { serviceType, initialStep } = useParams<{ serviceType: string; initialStep: string }>();
+  const { serviceType, initialStep } = useParams<{ serviceType: string; initialStep?: string }>();
   const addSourceLogic = AddSourceLogic({ serviceType, initialStep });
   const { getSourceConfigData, setAddSourceStep, saveSourceConfig, resetSourceState } =
     useActions(addSourceLogic);
@@ -47,8 +45,6 @@ export const AddSource: React.FC = () => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { navigateToUrl } = useValues(KibanaLogic);
 
-  const sourceData = getSourceData(serviceType);
-
   useEffect(() => {
     getSourceConfigData();
     return resetSourceState;
@@ -56,15 +52,9 @@ export const AddSource: React.FC = () => {
 
   const { name, categories, accountContextOnly } = sourceConfigData;
 
-  if (!sourceData) {
-    return null;
-  }
-
   if (!hasPlatinumLicense && accountContextOnly) {
     navigateToUrl(getSourcesPath(ADD_SOURCE_PATH, isOrganization));
   }
-
-  const { configuration, features, objTypes } = sourceData;
 
   const goToConfigurationIntro = () =>
     KibanaLogic.values.navigateToUrl(
@@ -93,7 +83,6 @@ export const AddSource: React.FC = () => {
     <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name || '...']} isLoading={dataLoading}>
       {addSourceCurrentStep === AddSourceSteps.SaveConfigStep && (
         <SaveConfig
-          configuration={configuration}
           advanceStep={goToConfigCompleted}
           goBackStep={goToConfigurationIntro}
           header={header}
@@ -103,13 +92,7 @@ export const AddSource: React.FC = () => {
         <ConfigCompleted advanceStep={goToConnectInstance} header={header} />
       )}
       {addSourceCurrentStep === AddSourceSteps.ConnectInstanceStep && (
-        <ConnectInstance
-          configuration={configuration}
-          features={features}
-          objTypes={objTypes}
-          onFormCreated={goToFormSourceCreated}
-          header={header}
-        />
+        <ConnectInstance onFormCreated={goToFormSourceCreated} header={header} />
       )}
       {addSourceCurrentStep === AddSourceSteps.ConfigureOauthStep && (
         <ConfigureOauth onFormCreated={goToFormSourceCreated} header={header} />
