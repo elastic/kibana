@@ -6,38 +6,35 @@
  */
 
 import { get } from 'lodash';
-import { schema } from '@kbn/config-schema';
+import { prefixIndexPatternWithCcs } from '../../../../../common/ccs_utils';
+import { CCS_REMOTE_PATTERN } from '../../../../../common/constants';
+import {
+  postElasticsearchIndexDetailRequestParamsRT,
+  postElasticsearchIndexDetailRequestPayloadRT,
+  postElasticsearchIndexDetailResponsePayloadRT,
+} from '../../../../../common/http_api/elasticsearch';
 import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
-import { getIndexSummary } from '../../../../lib/elasticsearch/indices';
+import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getMetrics } from '../../../../lib/details/get_metrics';
+import { getIndexSummary } from '../../../../lib/elasticsearch/indices';
 import { getShardAllocation, getShardStats } from '../../../../lib/elasticsearch/shards';
 import { handleError } from '../../../../lib/errors/handle_error';
-import { prefixIndexPatternWithCcs } from '../../../../../common/ccs_utils';
-import { metricSet } from './metric_set_index_detail';
 import { getLogs } from '../../../../lib/logs/get_logs';
-import { CCS_REMOTE_PATTERN } from '../../../../../common/constants';
+import { MonitoringCore } from '../../../../types';
+import { metricSets } from './metric_set_index_detail';
 
-const { advanced: metricSetAdvanced, overview: metricSetOverview } = metricSet;
+const { advanced: metricSetAdvanced, overview: metricSetOverview } = metricSets;
 
-export function esIndexRoute(server) {
+export function esIndexRoute(server: MonitoringCore) {
+  const validateParams = createValidationFunction(postElasticsearchIndexDetailRequestParamsRT);
+  const validateBody = createValidationFunction(postElasticsearchIndexDetailRequestPayloadRT);
+
   server.route({
-    method: 'POST',
+    method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/elasticsearch/indices/{id}',
-    config: {
-      validate: {
-        params: schema.object({
-          clusterUuid: schema.string(),
-          id: schema.string(),
-        }),
-        body: schema.object({
-          ccs: schema.maybe(schema.string()),
-          timeRange: schema.object({
-            min: schema.string(),
-            max: schema.string(),
-          }),
-          is_advanced: schema.boolean(),
-        }),
-      },
+    validate: {
+      params: validateParams,
+      body: validateBody,
     },
     handler: async (req) => {
       try {
@@ -111,12 +108,12 @@ export function esIndexRoute(server) {
           };
         }
 
-        return {
+        return postElasticsearchIndexDetailResponsePayloadRT.encode({
           indexSummary,
           metrics,
           logs,
           ...shardAllocation,
-        };
+        });
       } catch (err) {
         throw handleError(err, req);
       }

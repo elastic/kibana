@@ -10042,7 +10042,6 @@
     "xpack.csp.passed": "Approuvé",
     "xpack.csp.posture_score": "Score du niveau",
     "xpack.csp.posture_score_trend": "Tendance du score du niveau",
-    "xpack.csp.resource_type": "Type de ressource",
     "xpack.csp.rules.activateAllButtonLabel": "Activer {count, plural, one {# règle} other {# règles}}",
     "xpack.csp.rules.bulkActionsButtonLabel": "Actions groupées",
     "xpack.csp.rules.cancelButtonLabel": "Annuler",
