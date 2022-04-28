@@ -18,6 +18,7 @@ import {
   StackTraceID,
 } from '../../common/profiling';
 import { logExecutionLatency } from './logger';
+import { getHitsItems, getDocs } from './compat';
 
 const traceLRU = new LRUCache<StackTraceID, StackTrace>({ max: 20000 });
 const frameIDToFileIDCache = new LRUCache<string, FileID>({ max: 100000 });
@@ -105,7 +106,7 @@ export async function searchStackTraces(
   const executableDocIDs = new Set<string>(); // Set of unique executable FileIDs.
 
   await logExecutionLatency(logger, 'processing data', async () => {
-    const traces = stackResponses.flatMap((response) => response.body.hits.hits);
+    const traces = stackResponses.flatMap((response) => getHitsItems(response));
     for (const trace of traces) {
       const frameIDs = trace.fields.FrameID as string[];
       const fileIDs = extractFileIDArrayFromFrameIDArray(frameIDs);
@@ -149,7 +150,7 @@ export async function mgetStackTraces(
 
   const stackResponses = await logExecutionLatency(
     logger,
-    'mget query for ' + events.size + ' stacktraces',
+    'mget query (' + concurrency + ' parallel) for ' + events.size + ' stacktraces',
     async () => {
       return await Promise.all(
         chunks.map((ids) => {
@@ -172,7 +173,7 @@ export async function mgetStackTraces(
   await logExecutionLatency(logger, 'processing data', async () => {
     // flatMap() is significantly slower than an explicit for loop
     for (const res of stackResponses) {
-      for (const trace of res.body.docs) {
+      for (const trace of getDocs(res)) {
         // Sometimes we don't find the trace.
         // This is due to ES delays writing (data is not immediately seen after write).
         // Also, ES doesn't know about transactions.
@@ -220,6 +221,12 @@ export async function mgetStackFrames(
   client: ElasticsearchClient,
   stackFrameIDs: Set<string>
 ): Promise<Map<StackFrameID, StackFrame>> {
+  const stackFrames = new Map<StackFrameID, StackFrame>();
+
+  if (stackFrameIDs.size === 0) {
+    return stackFrames;
+  }
+
   const resStackFrames = await logExecutionLatency(
     logger,
     'mget query for ' + stackFrameIDs.size + ' stackframes',
@@ -233,10 +240,9 @@ export async function mgetStackFrames(
   );
 
   // Create a lookup map StackFrameID -> StackFrame.
-  const stackFrames = new Map<StackFrameID, StackFrame>();
   let framesFound = 0;
   await logExecutionLatency(logger, 'processing data', async () => {
-    const docs = resStackFrames.body?.docs ?? [];
+    const docs = getDocs(resStackFrames);
     for (const frame of docs) {
       if (frame.found) {
         stackFrames.set(frame._id, frame._source);
@@ -263,6 +269,12 @@ export async function mgetExecutables(
   client: ElasticsearchClient,
   executableIDs: Set<string>
 ): Promise<Map<FileID, Executable>> {
+  const executables = new Map<FileID, Executable>();
+
+  if (executableIDs.size === 0) {
+    return executables;
+  }
+
   const resExecutables = await logExecutionLatency(
     logger,
     'mget query for ' + executableIDs.size + ' executables',
@@ -276,9 +288,8 @@ export async function mgetExecutables(
   );
 
   // Create a lookup map StackFrameID -> StackFrame.
-  const executables = new Map<FileID, Executable>();
   await logExecutionLatency(logger, 'processing data', async () => {
-    const docs = resExecutables.body?.docs ?? [];
+    const docs = getDocs(resExecutables);
     for (const exe of docs) {
       if (exe.found) {
         executables.set(exe._id, exe._source);
