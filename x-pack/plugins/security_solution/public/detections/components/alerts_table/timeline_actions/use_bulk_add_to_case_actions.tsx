@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { CommentType } from '@kbn/cases-plugin/common';
-import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { useMemo } from 'react';
 import { APP_ID } from '../../../../../common/constants';
 import type { TimelineItem } from '../../../../../common/search_strategy';
@@ -16,18 +14,6 @@ import { ADD_TO_CASE_DISABLED, ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../
 export interface UseAddToCaseActions {
   onClose?: () => void;
   onSuccess?: () => Promise<void>;
-}
-
-function timelineItemsToCaseAttachments(items: TimelineItem[] = [], casesUi: CasesUiStart) {
-  return items.map((item) => {
-    return {
-      alertId: item.ecs._id ?? '',
-      index: item.ecs._index ?? '',
-      owner: APP_ID,
-      type: CommentType.alert as const,
-      rule: casesUi.helpers.getRuleIdFromEvent({ ecs: item.ecs, data: item.data }),
-    };
-  });
 }
 
 export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActions = {}) => {
@@ -53,7 +39,7 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
         disableOnQuery: true,
         disabledLabel: ADD_TO_CASE_DISABLED,
         onClick: (items?: TimelineItem[]) => {
-          const caseAttachments = timelineItemsToCaseAttachments(items, casesUi);
+          const caseAttachments = items ? casesUi.helpers.groupAlertsByRule(items, APP_ID) : [];
           createCaseFlyout.open(caseAttachments);
         },
       },
@@ -64,7 +50,7 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
         disabledLabel: ADD_TO_CASE_DISABLED,
         'data-test-subj': 'attach-new-case',
         onClick: (items?: TimelineItem[]) => {
-          const caseAttachments = timelineItemsToCaseAttachments(items, casesUi);
+          const caseAttachments = items ? casesUi.helpers.groupAlertsByRule(items, APP_ID) : [];
           selectCaseModal.open(caseAttachments);
         },
       },

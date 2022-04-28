@@ -24,7 +24,7 @@ export const useStatusBulkActionItems = ({
   query,
   indexName,
   setEventsLoading,
-  showAlertStatusActions,
+  showAlertStatusActions = true,
   setEventsDeleted,
   onUpdateSuccess,
   onUpdateFailure,
