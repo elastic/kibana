@@ -46,10 +46,14 @@ const reduceDeepLinks = (links: LinkItem[], linkProps?: LinkProps): AppDeepLink[
   links.reduce((deepLinks: AppDeepLink[], link: LinkItem) => {
     if (
       linkProps != null &&
+      // exclude link when license is basic and link is premium
       ((linkProps.isBasic && link.isPremium) ||
+        // exclude link when enableExperimental[hideWhenExperimentalKey] is enabled and link has hideWhenExperimentalKey
         (link.hideWhenExperimentalKey != null &&
           linkProps.enableExperimental[link.hideWhenExperimentalKey]) ||
+        // exclude link when enableExperimental[experimentalKey] is disabled and link has experimentalKey
         (link.experimentalKey != null && !linkProps.enableExperimental[link.experimentalKey]) ||
+        // exclude link when link is not part of enabled feature capabilities
         (linkProps.capabilities != null &&
           !hasFeaturesCapability(link.features, linkProps.capabilities)))
     ) {
