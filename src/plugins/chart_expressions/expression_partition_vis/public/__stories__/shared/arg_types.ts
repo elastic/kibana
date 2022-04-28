@@ -54,6 +54,7 @@ export const argTypes: ArgTypes = {
   palette: {
     name: `${visConfigName}.palette`,
     description: 'Palette',
+    // @ts-expect-error update types
     type: { name: 'palette', required: false },
     table: { type: { summary: 'object' } },
     control: { type: 'object' },
@@ -61,6 +62,7 @@ export const argTypes: ArgTypes = {
   labels: {
     name: `${visConfigName}.labels`,
     description: 'Labels configuration',
+    // @ts-expect-error update types
     type: { name: 'object', required: false },
     table: {
       type: {
@@ -81,6 +83,7 @@ export const argTypes: ArgTypes = {
   dimensions: {
     name: `${visConfigName}.dimensions`,
     description: 'dimensions configuration',
+    // @ts-expect-error update types
     type: { name: 'object', required: false },
     table: {
       type: {
