@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import type { StreamName, MetadataEvent } from '../types';
+import type { MetadataEvent } from '../types';
 import { MetadataEventsStreamsIndex } from './metadata_events_streams_index';
 
 interface Dependencies {
   metadataEventsStreamsIndex: MetadataEventsStreamsIndex;
 }
-export class MetadataEventsStream<E extends MetadataEvent> {
-  streamName: StreamName;
+export class MetadataEventsStream<E extends MetadataEvent = MetadataEvent> {
+  streamName: string;
 
   private metadataEventsStreamsIndex: MetadataEventsStreamsIndex;
 
-  constructor(streamName: StreamName, { metadataEventsStreamsIndex }: Dependencies) {
+  constructor(streamName: string, { metadataEventsStreamsIndex }: Dependencies) {
     this.streamName = streamName;
     this.metadataEventsStreamsIndex = metadataEventsStreamsIndex;
   }

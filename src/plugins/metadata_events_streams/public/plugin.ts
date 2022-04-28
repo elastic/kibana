@@ -23,14 +23,13 @@ export class MetadataEventsStreamsPlugin
   private metadataEventsStreamsService: MetadataEventsStreamsService =
     new MetadataEventsStreamsService();
 
-  constructor() {
-    this.metadataEventsStreamsService.init();
-  }
+  constructor() {}
 
   public setup(
     core: CoreSetup<StartDependencies, MetadataEventsStreamsPluginStart>,
     deps: SetupDependencies
   ): MetadataEventsStreamsPluginSetup {
+    this.metadataEventsStreamsService.init();
     return {};
   }
 
