@@ -20,17 +20,16 @@ import {
   PersonalDashboardLayout,
 } from '../../../../components/layout';
 import { NAV } from '../../../../constants';
-import { getSourcesPath, ADD_SOURCE_PATH, getAddPath } from '../../../../routes';
 
-import { hasMultipleConnectorOptions } from '../../../../utils';
+import { getSourcesPath, ADD_SOURCE_PATH } from '../../../../routes';
+
 import { getSourceData } from '../../source_data';
 
-import { AddSourceHeader } from './add_source_header';
-import { ConfigurationIntro } from './configuration_intro';
+import { ConfigurationChoice } from './configuration_choice';
 
 import './add_source.scss';
 
-export const AddSourceIntro: React.FC = () => {
+export const AddSourceChoice: React.FC = () => {
   const { serviceType } = useParams<{ serviceType: string }>();
   const sourceData = getSourceData(serviceType);
 
@@ -42,20 +41,17 @@ export const AddSourceIntro: React.FC = () => {
     return null;
   }
 
-  const { name, categories = [], accountContextOnly } = sourceData;
+  const { name, accountContextOnly } = sourceData;
 
   if (!hasPlatinumLicense && accountContextOnly) {
     navigateToUrl(getSourcesPath(ADD_SOURCE_PATH, isOrganization));
   }
 
-  const header = <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />;
   const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
-  const to =
-    `${getSourcesPath(getAddPath(serviceType), isOrganization)}/` +
-    (hasMultipleConnectorOptions(sourceData) ? 'choice' : '');
+
   return (
     <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name]}>
-      <ConfigurationIntro name={name} advanceStepTo={to} header={header} />
+      <ConfigurationChoice sourceData={sourceData} />
     </Layout>
   );
 };

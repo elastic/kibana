@@ -24,7 +24,6 @@ import { SOURCES_PATH, getSourcesPath, getAddPath } from '../../../../routes';
 import { AddSourceHeader } from './add_source_header';
 import { AddSourceLogic, AddSourceProps, AddSourceSteps } from './add_source_logic';
 import { ConfigCompleted } from './config_completed';
-import { ConfigurationChoice } from './configuration_choice';
 import { ConfigureOauth } from './configure_oauth';
 import { ConnectInstance } from './connect_instance';
 import { Reauthenticate } from './reauthenticate';
@@ -51,7 +50,6 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
     KibanaLogic.values.navigateToUrl(
       `${getSourcesPath(getAddPath(serviceType), isOrganization)}/intro`
     );
-  const goToSaveConfig = () => setAddSourceStep(AddSourceSteps.SaveConfigStep);
   const setConfigCompletedStep = () => setAddSourceStep(AddSourceSteps.ConfigCompletedStep);
   const goToConfigCompleted = () => saveSourceConfig(false, setConfigCompletedStep);
   const FORM_SOURCE_ADDED_SUCCESS_MESSAGE = i18n.translate(
@@ -113,9 +111,6 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
       )}
       {addSourceCurrentStep === AddSourceSteps.ReauthenticateStep && (
         <Reauthenticate name={name} header={header} />
-      )}
-      {addSourceCurrentStep === AddSourceSteps.ChoiceStep && (
-        <ConfigurationChoice sourceData={props.sourceData} goToInternalStep={goToSaveConfig} />
       )}
     </Layout>
   );

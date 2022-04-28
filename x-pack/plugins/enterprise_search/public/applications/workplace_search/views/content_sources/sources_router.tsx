@@ -26,13 +26,12 @@ import {
   getAddPath,
   ADD_CUSTOM_PATH,
 } from '../../routes';
-import { hasMultipleConnectorOptions } from '../../utils';
 
 import { AddSource, AddSourceList, GitHubViaApp } from './components/add_source';
 import { AddCustomSource } from './components/add_source/add_custom_source';
 import { ExternalConnectorConfig } from './components/add_source/add_external_connector';
+import { AddSourceChoice } from './components/add_source/add_source_choice';
 import { AddSourceIntro } from './components/add_source/add_source_intro';
-import { ConfigurationChoice } from './components/add_source/configuration_choice';
 import { OrganizationSources } from './organization_sources';
 import { PrivateSources } from './private_sources';
 import { staticCustomSourceData, staticSourceData as sources } from './source_data';
@@ -90,6 +89,13 @@ export const SourcesRouter: React.FC = () => {
       >
         <AddSourceIntro />
       </Route>
+      <Route
+        exact
+        path={`${getSourcesPath(getAddPath(':serviceType'), isOrganization)}/choice`}
+        data-test-subj="ConnectorChoiceRoute"
+      >
+        <AddSourceChoice />
+      </Route>
       {sources.map((sourceData, i) => {
         const { serviceType, externalConnectorAvailable, internalConnectorAvailable } = sourceData;
         const path = `${getSourcesPath(getAddPath(serviceType), isOrganization)}`;
@@ -98,14 +104,9 @@ export const SourcesRouter: React.FC = () => {
           : externalConnectorAvailable
           ? 'external'
           : 'custom';
-        const showChoice = defaultOption !== 'internal' && hasMultipleConnectorOptions(sourceData);
         return (
           <Route key={i} exact path={path}>
-            {showChoice ? (
-              <ConfigurationChoice sourceData={sourceData} />
-            ) : (
-              <Redirect exact from={path} to={`${path}/${defaultOption}`} />
-            )}
+            <Redirect exact from={path} to={`${path}/${defaultOption}`} />
           </Route>
         );
       })}

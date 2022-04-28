@@ -43,7 +43,6 @@ export enum AddSourceSteps {
   ConnectInstanceStep = 'Connect Instance',
   ConfigureOauthStep = 'Configure Oauth',
   ReauthenticateStep = 'Reauthenticate',
-  ChoiceStep = 'Choice',
 }
 
 export interface OauthParams {
@@ -548,11 +547,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       }
     },
     setFirstStep: ({ addSourceProps }) => {
-      const firstStep = getFirstStep(
-        addSourceProps,
-        values.sourceConfigData,
-        SourcesLogic.values.externalConfigured
-      );
+      const firstStep = getFirstStep(addSourceProps, values.sourceConfigData);
       actions.setAddSourceStep(firstStep);
     },
     createContentSource: async ({ serviceType, successCallback, errorCallback }) => {
@@ -599,32 +594,13 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
 
 const getFirstStep = (
   props: AddSourceProps,
-  sourceConfigData: SourceConfigData,
-  externalConfigured: boolean
+  sourceConfigData: SourceConfigData
 ): AddSourceSteps => {
-  const {
-    connect,
-    configure,
-    reAuthenticate,
-    sourceData: { serviceType, externalConnectorAvailable },
-  } = props;
-  // We can land on this page from a choice page for multiple types of connectors
-  // If that's the case we want to skip the intro and configuration, if the external & internal connector have already been configured
-  const { configuredFields, configured } = sourceConfigData;
-  if (externalConnectorAvailable && configured && externalConfigured)
-    return AddSourceSteps.ConnectInstanceStep;
-  if (externalConnectorAvailable && !configured && externalConfigured)
-    return AddSourceSteps.SaveConfigStep;
-  if (serviceType === 'external') {
-    // external connectors can be partially configured, so we need to check which fields are filled
-    if (configuredFields?.clientId && configuredFields?.clientSecret) {
-      return AddSourceSteps.ConnectInstanceStep;
-    }
-    // Unconfigured external connectors have already shown the intro step before the choice page, so we don't want to show it again
-    return AddSourceSteps.SaveConfigStep;
-  }
+  const { configured } = sourceConfigData;
+  const { connect, configure, reAuthenticate } = props;
   if (connect) return AddSourceSteps.ConnectInstanceStep;
   if (configure) return AddSourceSteps.ConfigureOauthStep;
   if (reAuthenticate) return AddSourceSteps.ReauthenticateStep;
-  return AddSourceSteps.ChoiceStep;
+  if (configured) return AddSourceSteps.ConnectInstanceStep;
+  return AddSourceSteps.SaveConfigStep;
 };

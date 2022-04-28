@@ -5,88 +5,79 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
-import { useValues } from 'kea';
+import { useActions, useValues } from 'kea';
 
-import { EuiButton, EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
-import { KibanaLogic } from '../../../../../shared/kibana';
+import { EuiButtonTo } from '../../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../../app_logic';
 import { getAddPath, getSourcesPath } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
 
+import { SourcesLogic } from '../../sources_logic';
+
 import { AddSourceHeader } from './add_source_header';
-import { AddSourceLogic } from './add_source_logic';
 
 interface ConfigurationChoiceProps {
   sourceData: SourceDataItem;
-  goToInternalStep?: () => void;
 }
 
 interface CardProps {
   title: string;
   description: string;
   buttonText: string;
-  onClick: () => void;
+  to: string;
   badgeLabel?: string;
+  disabledMessage?: string;
 }
 
 export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
   sourceData: {
-    name,
-    serviceType,
     externalConnectorAvailable,
-    internalConnectorAvailable,
     customConnectorAvailable,
+    name,
+    categories = [],
+    serviceType,
   },
-  goToInternalStep,
 }) => {
   const { isOrganization } = useValues(AppLogic);
-  const { sourceConfigData } = useValues(AddSourceLogic);
-  const { categories } = sourceConfigData;
-  const goToInternal = goToInternalStep
-    ? goToInternalStep
-    : () =>
-        KibanaLogic.values.navigateToUrl(
-          `${getSourcesPath(
-            `${getSourcesPath(getAddPath(serviceType), isOrganization)}/internal`,
-            isOrganization
-          )}/`
-        );
-  const goToExternal = () =>
-    KibanaLogic.values.navigateToUrl(
-      `${getSourcesPath(
-        `${getSourcesPath(getAddPath(serviceType), isOrganization)}/external`,
-        isOrganization
-      )}/`
-    );
-  const goToCustom = () =>
-    KibanaLogic.values.navigateToUrl(
-      `${getSourcesPath(
-        `${getSourcesPath(getAddPath(serviceType), isOrganization)}/custom`,
-        isOrganization
-      )}/`
-    );
+
+  const { initializeSources, resetSourcesState } = useActions(SourcesLogic);
+
+  const { externalConfigured } = useValues(SourcesLogic);
+
+  useEffect(() => {
+    initializeSources();
+    return resetSourcesState;
+  }, []);
+
+  const internalTo = `${getSourcesPath(getAddPath(serviceType), isOrganization)}/internal`;
+  const externalTo = `${getSourcesPath(getAddPath(serviceType), isOrganization)}/external`;
+  const customTo = `${getSourcesPath(getAddPath(serviceType), isOrganization)}/custom`;
 
   const ConnectorCard: React.FC<CardProps> = ({
     title,
     description,
     buttonText,
-    onClick,
+    to,
     badgeLabel,
+    disabledMessage,
   }: CardProps) => (
     <EuiFlexItem grow>
       <EuiCard
+        isDisabled={!!disabledMessage}
         hasBorder
         title={title}
-        description={description}
+        description={disabledMessage || description}
         betaBadgeProps={{ label: badgeLabel }}
         footer={
-          <EuiButton color="primary" onClick={onClick}>
+          <EuiButtonTo color="primary" to={to} isDisabled={!!disabledMessage}>
             {buttonText}
-          </EuiButton>
+          </EuiButtonTo>
         }
       />
     </EuiFlexItem>
@@ -118,7 +109,7 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
         defaultMessage: 'Recommended',
       }
     ),
-    onClick: goToInternal,
+    to: internalTo,
   };
 
   const externalConnectorProps: CardProps = {
@@ -141,7 +132,7 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
         defaultMessage: 'Instructions',
       }
     ),
-    onClick: goToExternal,
+    to: externalTo,
     badgeLabel: i18n.translate(
       'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.external.betaLabel',
       {
@@ -169,7 +160,7 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
         defaultMessage: 'Instructions',
       }
     ),
-    onClick: goToCustom,
+    to: customTo,
   };
 
   return (
@@ -177,8 +168,15 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
       <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />
       <EuiSpacer size="l" />
       <EuiFlexGroup justifyContent="flexStart" direction="row" responsive={false}>
-        {internalConnectorAvailable && <ConnectorCard {...internalConnectorProps} />}
-        {externalConnectorAvailable && <ConnectorCard {...externalConnectorProps} />}
+        <ConnectorCard {...internalConnectorProps} />
+        {externalConnectorAvailable && (
+          <ConnectorCard
+            {...externalConnectorProps}
+            disabledMessage={
+              externalConfigured ? "You've already configured an external connector" : undefined
+            }
+          />
+        )}
         {customConnectorAvailable && <ConnectorCard {...customConnectorProps} />}
       </EuiFlexGroup>
     </>
