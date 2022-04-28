@@ -24,6 +24,7 @@ export function MochaReporterProvider({ getService }) {
   const log = getService('log');
   const config = getService('config');
   const lifecycle = getService('lifecycle');
+  const testMetadata = getService('testMetadata');
   let originalLogWriters;
   let reporterCaptureStartTime;
 
@@ -60,6 +61,7 @@ export function MochaReporterProvider({ getService }) {
             config,
             lifecycle,
             runner,
+            testMetadata,
           });
         }
       }

@@ -9,8 +9,6 @@
 import fs from 'fs';
 import { join, resolve } from 'path';
 
-import { ToolingLog } from '@kbn/tooling-log';
-
 jest.mock('fs');
 jest.mock('@kbn/utils', () => {
   return { REPO_ROOT: '/dev/null/root' };
@@ -62,7 +60,7 @@ describe('SuiteTracker', () => {
   };
 
   const runLifecycleWithMocks = async (mocks: Suite[], fn: (objs: any) => any = () => {}) => {
-    const lifecycle = new Lifecycle(new ToolingLog());
+    const lifecycle = new Lifecycle();
     const suiteTracker = SuiteTracker.startTracking(
       lifecycle,
       resolve(REPO_ROOT, MOCK_CONFIG_PATH)

@@ -14,6 +14,8 @@ import { REPO_ROOT } from '@kbn/utils';
 import { Suite, Test } from './fake_mocha_types';
 import {
   Lifecycle,
+  LifecyclePhase,
+  TestMetadata,
   readConfigFile,
   ProviderCollection,
   Providers,
@@ -28,6 +30,10 @@ import {
 import { createEsClientForFtrConfig } from '../es';
 
 export class FunctionalTestRunner {
+  public readonly lifecycle = new Lifecycle();
+  public readonly testMetadata = new TestMetadata(this.lifecycle);
+  private closed = false;
+
   private readonly esVersion: EsVersion;
   constructor(
     private readonly log: ToolingLog,
@@ -35,6 +41,12 @@ export class FunctionalTestRunner {
     private readonly configOverrides: any,
     esVersion?: string | EsVersion
   ) {
+    for (const [key, value] of Object.entries(this.lifecycle)) {
+      if (value instanceof LifecyclePhase) {
+        value.before$.subscribe(() => log.verbose('starting %j lifecycle phase', key));
+        value.after$.subscribe(() => log.verbose('starting %j lifecycle phase', key));
+      }
+    }
     this.esVersion =
       esVersion === undefined
         ? EsVersion.getDefault()
@@ -46,8 +58,8 @@ export class FunctionalTestRunner {
   async run() {
     const testStats = await this.getTestStats();
 
-    return await this.runHarness(async (config, lifecycle, coreProviders) => {
-      SuiteTracker.startTracking(lifecycle, this.configFile);
+    return await this._run(async (config, coreProviders) => {
+      SuiteTracker.startTracking(this.lifecycle, this.configFile);
 
       const realServices =
         !!config.get('testRunner') ||
@@ -89,7 +101,7 @@ export class FunctionalTestRunner {
       }
 
       const mocha = await setupMocha(
-        lifecycle,
+        this.lifecycle,
         this.log,
         config,
         providers,
@@ -107,10 +119,10 @@ export class FunctionalTestRunner {
         return this.simulateMochaDryRun(mocha);
       }
 
-      await lifecycle.beforeTests.trigger(mocha.suite);
+      await this.lifecycle.beforeTests.trigger(mocha.suite);
       this.log.info('Starting tests');
 
-      return await runTests(lifecycle, mocha);
+      return await runTests(this.lifecycle, mocha);
     });
   }
 
@@ -142,13 +154,13 @@ export class FunctionalTestRunner {
   }
 
   async getTestStats() {
-    return await this.runHarness(async (config, lifecycle, coreProviders) => {
+    return await this._run(async (config, coreProviders) => {
       if (config.get('testRunner')) {
         throw new Error('Unable to get test stats for config that uses a custom test runner');
       }
 
       const providers = this.getStubProviderCollection(config, coreProviders);
-      const mocha = await setupMocha(lifecycle, this.log, config, providers, this.esVersion);
+      const mocha = await setupMocha(this.lifecycle, this.log, config, providers, this.esVersion);
 
       const queue = new Set([mocha.suite]);
       const allTests: Test[] = [];
@@ -204,11 +216,10 @@ export class FunctionalTestRunner {
     ]);
   }
 
-  private async runHarness<T = any>(
-    handler: (config: Config, lifecycle: Lifecycle, coreProviders: Providers) => Promise<T>
+  async _run<T = any>(
+    handler: (config: Config, coreProviders: Providers) => Promise<T>
   ): Promise<T> {
     let runErrorOccurred = false;
-    const lifecycle = new Lifecycle(this.log);
 
     try {
       const config = await readConfigFile(
@@ -229,25 +240,26 @@ export class FunctionalTestRunner {
       const dockerServers = new DockerServersService(
         config.get('dockerServers'),
         this.log,
-        lifecycle
+        this.lifecycle
       );
 
       // base level services that functional_test_runner exposes
       const coreProviders = readProviderSpec('Service', {
-        lifecycle: () => lifecycle,
+        lifecycle: () => this.lifecycle,
         log: () => this.log,
+        testMetadata: () => this.testMetadata,
         config: () => config,
         dockerServers: () => dockerServers,
         esVersion: () => this.esVersion,
       });
 
-      return await handler(config, lifecycle, coreProviders);
+      return await handler(config, coreProviders);
     } catch (runError) {
       runErrorOccurred = true;
       throw runError;
     } finally {
       try {
-        await lifecycle.cleanup.trigger();
+        await this.close();
       } catch (closeError) {
         if (runErrorOccurred) {
           this.log.error('failed to close functional_test_runner');
@@ -258,6 +270,13 @@ export class FunctionalTestRunner {
         }
       }
     }
+  }
+
+  async close() {
+    if (this.closed) return;
+
+    this.closed = true;
+    await this.lifecycle.cleanup.trigger();
   }
 
   simulateMochaDryRun(mocha: any) {

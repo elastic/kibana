@@ -17,6 +17,7 @@ import {
 
 import { Config } from '../../config';
 import { Runner } from '../../../fake_mocha_types';
+import { TestMetadata, ScreenshotRecord } from '../../test_metadata';
 import { Lifecycle } from '../../lifecycle';
 import { getSnapshotOfRunnableLogs } from '../../../../mocha';
 
@@ -35,6 +36,7 @@ interface Runnable {
   file: string;
   title: string;
   parent: Suite;
+  _screenshots?: ScreenshotRecord[];
 }
 
 function getHookType(hook: Runnable): CiStatsTestType {
@@ -58,11 +60,13 @@ export function setupCiStatsFtrTestGroupReporter({
   config,
   lifecycle,
   runner,
+  testMetadata,
   reporter,
 }: {
   config: Config;
   lifecycle: Lifecycle;
   runner: Runner;
+  testMetadata: TestMetadata;
   reporter: CiStatsReporter;
 }) {
   const testGroupType = process.env.TEST_GROUP_TYPE_FUNCTIONAL;
@@ -107,6 +111,10 @@ export function setupCiStatsFtrTestGroupReporter({
       type,
       error: error?.stack,
       stdout: getSnapshotOfRunnableLogs(runnable),
+      screenshots: testMetadata.getScreenshots(runnable).map((s) => ({
+        base64Png: s.base64Png,
+        name: s.name,
+      })),
     });
   }
 
