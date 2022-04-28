@@ -23,8 +23,9 @@ describe('AnalyticsNoDataPage', () => {
     jest.resetAllMocks();
   });
 
-  it('renders correctly', () => {
+  it('renders correctly', async () => {
     const component = mountWithIntl(<AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />);
+
     expect(component).toMatchSnapshot();
 
     expect(component.find(AnalyticsNoDataPageComponent).length).toBe(1);

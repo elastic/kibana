@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AnalyticsNoDataPage renders correctly 1`] = `
-<AnalyticsNoDataPage
+exports[`AnalyticsNoDataPageComponent renders correctly 1`] = `
+<AnalyticsNoDataPageComponent
   intl={
     Object {
       "defaultFormats": Object {},
@@ -104,102 +104,54 @@ exports[`AnalyticsNoDataPage renders correctly 1`] = `
       "timeZone": null,
     }
   }
+  kibanaGuideDocLink="http://www.test.com"
   onDataViewCreated={[MockFunction]}
 >
-  <SharedUxServicesProvider
-    application={
+  <ForwardRef
+    noDataConfig={
       Object {
-        "currentAppId$": Observable {},
-        "navigateToUrl": [Function],
+        "action": Object {
+          "elasticAgent": Object {
+            "data-test-subj": "kbnOverviewAddIntegrations",
+            "description": "Use Elastic Agent to collect data and build out Analytics solutions.",
+            "title": "Add integrations",
+          },
+        },
+        "docsLink": "http://www.test.com",
+        "logo": "logoKibana",
+        "pageTitle": "Welcome to Analytics!",
+        "solution": "Analytics",
       }
     }
-    data={
-      Object {
-        "hasDataView": [Function],
-        "hasESData": [Function],
-        "hasUserDataView": [Function],
-      }
-    }
-    docLinks={
-      Object {
-        "dataViewsDocLink": "dummy link",
-        "kibanaGuideDocLink": "Kibana guide",
-      }
-    }
-    editors={
-      Object {
-        "openDataViewEditor": [MockFunction],
-      }
-    }
-    http={
-      Object {
-        "addBasePath": [MockFunction],
-      }
-    }
-    permissions={
-      Object {
-        "canAccessFleet": true,
-        "canCreateNewDataView": true,
-      }
-    }
-    platform={
-      Object {
-        "setIsFullscreen": [MockFunction],
-      }
-    }
+    onDataViewCreated={[MockFunction]}
   >
-    <AnalyticsNoDataPageComponent
-      kibanaGuideDocLink="Kibana guide"
-      onDataViewCreated={[MockFunction]}
-    >
-      <ForwardRef
-        noDataConfig={
-          Object {
-            "action": Object {
-              "elasticAgent": Object {
-                "data-test-subj": "kbnOverviewAddIntegrations",
-                "description": "Use Elastic Agent to collect data and build out Analytics solutions.",
-                "title": "Add integrations",
-              },
-            },
-            "docsLink": "Kibana guide",
-            "logo": "logoKibana",
-            "pageTitle": "Welcome to Analytics!",
-            "solution": "Analytics",
-          }
-        }
-        onDataViewCreated={[MockFunction]}
+    <EuiErrorBoundary>
+      <Suspense
+        fallback={<Fallback />}
       >
-        <EuiErrorBoundary>
-          <Suspense
-            fallback={<Fallback />}
-          >
-            <Fallback>
-              <div
-                css={
-                  Object {
-                    "map": undefined,
-                    "name": "1q0vk5q",
-                    "next": undefined,
-                    "styles": "
+        <Fallback>
+          <div
+            css={
+              Object {
+                "map": undefined,
+                "name": "1q0vk5q",
+                "next": undefined,
+                "styles": "
     text-align: center;
   ",
-                    "toString": [Function],
-                  }
-                }
-              >
-                <EuiLoadingSpinner>
-                  <span
-                    className="euiLoadingSpinner euiLoadingSpinner--medium"
-                  />
-                </EuiLoadingSpinner>
-              </div>
-            </Fallback>
-          </Suspense>
-        </EuiErrorBoundary>
-      </ForwardRef>
-    </AnalyticsNoDataPageComponent>
-    ;
-  </SharedUxServicesProvider>
-</AnalyticsNoDataPage>
+                "toString": [Function],
+              }
+            }
+          >
+            <EuiLoadingSpinner>
+              <span
+                className="euiLoadingSpinner euiLoadingSpinner--medium"
+              />
+            </EuiLoadingSpinner>
+          </div>
+        </Fallback>
+      </Suspense>
+    </EuiErrorBoundary>
+  </ForwardRef>
+</AnalyticsNoDataPageComponent>
 `;

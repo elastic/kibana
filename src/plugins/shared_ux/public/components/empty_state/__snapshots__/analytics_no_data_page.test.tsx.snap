@@ -133,7 +133,19 @@ exports[`AnalyticsNoDataPage renders correctly 1`] = `
     }
     http={
       Object {
-        "addBasePath": [MockFunction],
+        "addBasePath": [MockFunction] {
+          "calls": Array [
+            Array [
+              "/app/integrations/browse",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": "/app/integrations/browse",
+            },
+          ],
+        },
       }
     }
     permissions={
@@ -148,52 +160,632 @@ exports[`AnalyticsNoDataPage renders correctly 1`] = `
       }
     }
   >
-    <ForwardRef
-      noDataConfig={
-        Object {
-          "action": Object {
-            "elasticAgent": Object {
-              "data-test-subj": "kbnOverviewAddIntegrations",
-              "description": "Use Elastic Agent to collect data and build out Analytics solutions.",
-              "title": "Add integrations",
-            },
-          },
-          "docsLink": "Kibana guide",
-          "logo": "logoKibana",
-          "pageTitle": "Welcome to Analytics!",
-          "solution": "Analytics",
-        }
-      }
+    <AnalyticsNoDataPageComponent
+      kibanaGuideDocLink="Kibana guide"
       onDataViewCreated={[MockFunction]}
     >
-      <EuiErrorBoundary>
-        <Suspense
-          fallback={<Fallback />}
-        >
-          <Fallback>
-            <div
-              css={
+      <ForwardRef
+        noDataConfig={
+          Object {
+            "action": Object {
+              "elasticAgent": Object {
+                "data-test-subj": "kbnOverviewAddIntegrations",
+                "description": "Use Elastic Agent to collect data and build out Analytics solutions.",
+                "title": "Add integrations",
+              },
+            },
+            "docsLink": "Kibana guide",
+            "logo": "logoKibana",
+            "pageTitle": "Welcome to Analytics!",
+            "solution": "Analytics",
+          }
+        }
+        onDataViewCreated={[MockFunction]}
+      >
+        <EuiErrorBoundary>
+          <Suspense
+            fallback={<Fallback />}
+          >
+            <KibanaNoDataPage
+              noDataConfig={
                 Object {
-                  "map": undefined,
-                  "name": "1q0vk5q",
-                  "next": undefined,
-                  "styles": "
-    text-align: center;
-  ",
-                  "toString": [Function],
+                  "action": Object {
+                    "elasticAgent": Object {
+                      "data-test-subj": "kbnOverviewAddIntegrations",
+                      "description": "Use Elastic Agent to collect data and build out Analytics solutions.",
+                      "title": "Add integrations",
+                    },
+                  },
+                  "docsLink": "Kibana guide",
+                  "logo": "logoKibana",
+                  "pageTitle": "Welcome to Analytics!",
+                  "solution": "Analytics",
                 }
               }
+              onDataViewCreated={[MockFunction]}
             >
-              <EuiLoadingSpinner>
-                <span
-                  className="euiLoadingSpinner euiLoadingSpinner--medium"
-                />
-              </EuiLoadingSpinner>
-            </div>
-          </Fallback>
-        </Suspense>
-      </EuiErrorBoundary>
-    </ForwardRef>
+              <NoDataConfigPage
+                noDataConfig={
+                  Object {
+                    "action": Object {
+                      "elasticAgent": Object {
+                        "data-test-subj": "kbnOverviewAddIntegrations",
+                        "description": "Use Elastic Agent to collect data and build out Analytics solutions.",
+                        "title": "Add integrations",
+                      },
+                    },
+                    "docsLink": "Kibana guide",
+                    "logo": "logoKibana",
+                    "pageTitle": "Welcome to Analytics!",
+                    "solution": "Analytics",
+                  }
+                }
+              >
+                <EuiPageTemplate
+                  className="kbnPageTemplate kbnPageTemplate--centeredBody"
+                  pageContentProps={
+                    Object {
+                      "color": "transparent",
+                      "hasShadow": false,
+                      "paddingSize": "none",
+                    }
+                  }
+                  restrictWidth={950}
+                  template="centeredBody"
+                >
+                  <EuiPage
+                    className="euiPageTemplate kbnPageTemplate kbnPageTemplate--centeredBody"
+                    grow={true}
+                    paddingSize="l"
+                    style={
+                      Object {
+                        "minHeight": 460,
+                      }
+                    }
+                  >
+                    <div
+                      className="euiPage euiPage--paddingLarge euiPage--grow euiPageTemplate kbnPageTemplate kbnPageTemplate--centeredBody"
+                      style={
+                        Object {
+                          "minHeight": 460,
+                        }
+                      }
+                    >
+                      <EuiPageBody
+                        restrictWidth={950}
+                      >
+                        <div
+                          className="euiPageBody euiPageBody--borderRadiusNone euiPageBody--restrictWidth-custom"
+                          style={
+                            Object {
+                              "maxWidth": 950,
+                            }
+                          }
+                        >
+                          <EuiPageBody>
+                            <div
+                              className="euiPageBody euiPageBody--borderRadiusNone"
+                            >
+                              <EuiPageContent
+                                color="transparent"
+                                hasShadow={false}
+                                horizontalPosition="center"
+                                paddingSize="none"
+                                verticalPosition="center"
+                              >
+                                <EuiPanel
+                                  className="euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+                                  color="transparent"
+                                  hasShadow={false}
+                                  paddingSize="none"
+                                  role="main"
+                                >
+                                  <div
+                                    className="euiPanel euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+                                    role="main"
+                                  >
+                                    <EuiPageContentBody
+                                      paddingSize="none"
+                                      restrictWidth={950}
+                                    >
+                                      <div
+                                        className="euiPageContentBody euiPage--restrictWidth-custom"
+                                        style={
+                                          Object {
+                                            "maxWidth": 950,
+                                          }
+                                        }
+                                      >
+                                        <NoDataPage
+                                          action={
+                                            Object {
+                                              "elasticAgent": Object {
+                                                "data-test-subj": "kbnOverviewAddIntegrations",
+                                                "description": "Use Elastic Agent to collect data and build out Analytics solutions.",
+                                                "title": "Add integrations",
+                                              },
+                                            }
+                                          }
+                                          docsLink="Kibana guide"
+                                          logo="logoKibana"
+                                          pageTitle="Welcome to Analytics!"
+                                          solution="Analytics"
+                                        >
+                                          <div
+                                            className="kbnNoDataPageContents"
+                                          >
+                                            <EuiText
+                                              textAlign="center"
+                                            >
+                                              <div
+                                                className="euiText euiText--medium"
+                                              >
+                                                <EuiTextAlign
+                                                  textAlign="center"
+                                                >
+                                                  <div
+                                                    className="euiTextAlign euiTextAlign--center"
+                                                  >
+                                                    <KibanaSolutionAvatar
+                                                      iconType="logoKibana"
+                                                      name="Analytics"
+                                                      size="xxl"
+                                                    >
+                                                      <EuiAvatar
+                                                        className="kbnSolutionAvatar kbnSolutionAvatar--xxl"
+                                                        color="plain"
+                                                        iconSize="xxl"
+                                                        iconType="logoKibana"
+                                                        name="Analytics"
+                                                        size="xl"
+                                                      >
+                                                        <div
+                                                          aria-label="Analytics"
+                                                          css="unknown styles"
+                                                          role="img"
+                                                          style={Object {}}
+                                                          title="Analytics"
+                                                        >
+                                                          <Insertion
+                                                            cache={
+                                                              Object {
+                                                                "insert": [Function],
+                                                                "inserted": Object {
+                                                                  "1dsx8gj-euiAvatar-xl-user-plain": true,
+                                                                  "1hu4pg0-EuiCard": true,
+                                                                },
+                                                                "key": "css",
+                                                                "nonce": undefined,
+                                                                "registered": Object {
+                                                                  "css-1hu4pg0-EuiCard": "max-width:400px;margin-inline:auto;;label:EuiCard;",
+                                                                },
+                                                                "sheet": StyleSheet {
+                                                                  "_alreadyInsertedOrderInsensitiveRule": true,
+                                                                  "_insertTag": [Function],
+                                                                  "before": null,
+                                                                  "container": <head>
+                                                                    <style
+                                                                      data-emotion="css"
+                                                                      data-s=""
+                                                                    >
+                                                                      
+                                                                      .css-1dsx8gj-euiAvatar-xl-user-plain{-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;display:-webkit-inline-box;display:-webkit-inline-flex;display:-ms-inline-flexbox;display:inline-flex;-webkit-box-pack:center;-ms-flex-pack:center;-webkit-justify-content:center;justify-content:center;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;-webkit-background-size:cover;background-size:cover;text-align:center;vertical-align:middle;overflow-x:hidden;font-weight:500;width:calc(16px * 4);height:calc(16px * 4);line-height:calc(16px * 4);font-size:calc(32px * 0.8);border-radius:50%;background-color:#FFF;}/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9jb21wb25lbnRzL2F2YXRhci9hdmF0YXIuc3R5bGVzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQTBDWSIsImZpbGUiOiIuLi8uLi8uLi9zcmMvY29tcG9uZW50cy9hdmF0YXIvYXZhdGFyLnN0eWxlcy50cyIsInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBDb3B5cmlnaHQgRWxhc3RpY3NlYXJjaCBCLlYuIGFuZC9vciBsaWNlbnNlZCB0byBFbGFzdGljc2VhcmNoIEIuVi4gdW5kZXIgb25lXG4gKiBvciBtb3JlIGNvbnRyaWJ1dG9yIGxpY2Vuc2UgYWdyZWVtZW50cy4gTGljZW5zZWQgdW5kZXIgdGhlIEVsYXN0aWMgTGljZW5zZVxuICogMi4wIGFuZCB0aGUgU2VydmVyIFNpZGUgUHVibGljIExpY2Vuc2UsIHYgMTsgeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHRcbiAqIGluIGNvbXBsaWFuY2Ugd2l0aCwgYXQgeW91ciBlbGVjdGlvbiwgdGhlIEVsYXN0aWMgTGljZW5zZSAyLjAgb3IgdGhlIFNlcnZlclxuICogU2lkZSBQdWJsaWMgTGljZW5zZSwgdiAxLlxuICovXG5cbmltcG9ydCB7IGNzcyB9IGZyb20gJ0BlbW90aW9uL3JlYWN0JztcbmltcG9ydCB7IFVzZUV1aVRoZW1lIH0gZnJvbSAnLi4vLi4vc2VydmljZXMnO1xuXG5jb25zdCBfYXZhdGFyU2l6ZSA9ICh7XG4gIHNpemUsXG4gIGZvbnRTaXplLFxufToge1xuICBzaXplOiBzdHJpbmc7XG4gIGZvbnRTaXplOiBzdHJpbmc7XG59KSA9PiB7XG4gIHJldHVybiBgXG4gICAgd2lkdGg6ICR7c2l6ZX07XG4gICAgaGVpZ2h0OiAke3NpemV9O1xuICAgIGxpbmUtaGVpZ2h0OiAke3NpemV9O1xuICAgIGZvbnQtc2l6ZTogJHtmb250U2l6ZX07XG4gIGA7XG59O1xuXG5leHBvcnQgY29uc3QgZXVpQXZhdGFyU3R5bGVzID0gKHsgZXVpVGhlbWUgfTogVXNlRXVpVGhlbWUpID0+ICh7XG4gIC8vIEJhc2VcbiAgZXVpQXZhdGFyOiBjc3NgXG4gICAgLy8gRW5zdXJlcyBpdCBuZXZlciBzY2FsZXMgZG93biBiZWxvdyBpdHMgaW50ZW5kZWQgc2l6ZVxuICAgIGZsZXgtc2hyaW5rOiAwO1xuICAgIGRpc3BsYXk6IGlubGluZS1mbGV4O1xuICAgIGp1c3RpZnktY29udGVudDogY2VudGVyO1xuICAgIGFsaWduLWl0ZW1zOiBjZW50ZXI7XG4gICAgYmFja2dyb3VuZC1zaXplOiBjb3ZlcjtcbiAgICB0ZXh0LWFsaWduOiBjZW50ZXI7XG4gICAgdmVydGljYWwtYWxpZ246IG1pZGRsZTtcbiAgICBvdmVyZmxvdy14OiBoaWRkZW47XG4gICAgLy8gRXhwbGljaXRseSBzdGF0ZSB3ZWlnaHQgc28gaXQgZG9lc24ndCBnZXQgb3ZlcnJpZGRlbiBieSBpbmhlcml0YW5jZVxuICAgIGZvbnQtd2VpZ2h0OiAke2V1aVRoZW1lLmZvbnQud2VpZ2h0Lm1lZGl1bX07XG4gIGAsXG4gIC8vIFZhcmlhbnRzXG4gIHBsYWluOiBjc3NgXG4gICAgYmFja2dyb3VuZC1jb2xvcjogJHtldWlUaGVtZS5jb2xvcnMuZW1wdHlTaGFkZX07XG4gIGAsXG4gIHN1YmR1ZWQ6IGNzc2BcbiAgICBiYWNrZ3JvdW5kLWNvbG9yOiAke2V1aVRoZW1lLmNvbG9ycy5saWdodGVzdFNoYWRlfTtcbiAgYCxcbiAgdXNlcjogY3NzYFxuICAgIGJvcmRlci1yYWRpdXM6IDUwJTtcbiAgYCxcbiAgc3BhY2U6IGNzc2BcbiAgICBib3JkZXItcmFkaXVzOiAke2V1aVRoZW1lLmJvcmRlci5yYWRpdXMubWVkaXVtfTtcbiAgYCxcbiAgLy8gU3RhdGVzXG4gIGlzRGlzYWJsZWQ6IGNzc2BcbiAgICBjdXJzb3I6IG5vdC1hbGxvd2VkO1xuICAgIGZpbHRlcjogZ3JheXNjYWxlKDEwMCUpO1xuICBgLFxuICAvLyBTaXplc1xuICBzOiBjc3MoXG4gICAgX2F2YXRhclNpemUoe1xuICAgICAgc2l6ZTogZXVpVGhlbWUuc2l6ZS5sLFxuICAgICAgZm9udFNpemU6IGV1aVRoZW1lLnNpemUubSxcbiAgICB9KVxuICApLFxuICBtOiBjc3MoXG4gICAgX2F2YXRhclNpemUoe1xuICAgICAgc2l6ZTogZXVpVGhlbWUuc2l6ZS54bCxcbiAgICAgIGZvbnRTaXplOiBgY2FsYygke2V1aVRoZW1lLnNpemUuYmFzZX0gKiAwLjkpYCxcbiAgICB9KVxuICApLFxuICBsOiBjc3MoXG4gICAgX2F2YXRhclNpemUoe1xuICAgICAgc2l6ZTogZXVpVGhlbWUuc2l6ZS54eGwsXG4gICAgICBmb250U2l6ZTogYGNhbGMoJHtldWlUaGVtZS5zaXplLmx9ICogMC44KWAsXG4gICAgfSlcbiAgKSxcbiAgeGw6IGNzcyhcbiAgICBfYXZhdGFyU2l6ZSh7XG4gICAgICBzaXplOiBgY2FsYygke2V1aVRoZW1lLnNpemUuYmFzZX0gKiA0KWAsXG4gICAgICBmb250U2l6ZTogYGNhbGMoJHtldWlUaGVtZS5zaXplLnhsfSAqIDAuOClgLFxuICAgIH0pXG4gICksXG59KTtcbiJdfQ== */
+                                                                    </style>
+                                                                    <style
+                                                                      data-emotion="css"
+                                                                      data-s=""
+                                                                    >
+                                                                      
+                                                                      .css-1hu4pg0-EuiCard{max-width:400px;margin-inline:auto;}
+                                                                    </style>
+                                                                    <style
+                                                                      data-styled="active"
+                                                                      data-styled-version="5.1.0"
+                                                                    />
+                                                                  </head>,
+                                                                  "ctr": 2,
+                                                                  "insertionPoint": undefined,
+                                                                  "isSpeedy": false,
+                                                                  "key": "css",
+                                                                  "nonce": undefined,
+                                                                  "prepend": undefined,
+                                                                  "tags": Array [
+                                                                    <style
+                                                                      data-emotion="css"
+                                                                      data-s=""
+                                                                    >
+                                                                      
+                                                                      .css-1dsx8gj-euiAvatar-xl-user-plain{-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;display:-webkit-inline-box;display:-webkit-inline-flex;display:-ms-inline-flexbox;display:inline-flex;-webkit-box-pack:center;-ms-flex-pack:center;-webkit-justify-content:center;justify-content:center;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;-webkit-background-size:cover;background-size:cover;text-align:center;vertical-align:middle;overflow-x:hidden;font-weight:500;width:calc(16px * 4);height:calc(16px * 4);line-height:calc(16px * 4);font-size:calc(32px * 0.8);border-radius:50%;background-color:#FFF;}/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9jb21wb25lbnRzL2F2YXRhci9hdmF0YXIuc3R5bGVzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQTBDWSIsImZpbGUiOiIuLi8uLi8uLi9zcmMvY29tcG9uZW50cy9hdmF0YXIvYXZhdGFyLnN0eWxlcy50cyIsInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBDb3B5cmlnaHQgRWxhc3RpY3NlYXJjaCBCLlYuIGFuZC9vciBsaWNlbnNlZCB0byBFbGFzdGljc2VhcmNoIEIuVi4gdW5kZXIgb25lXG4gKiBvciBtb3JlIGNvbnRyaWJ1dG9yIGxpY2Vuc2UgYWdyZWVtZW50cy4gTGljZW5zZWQgdW5kZXIgdGhlIEVsYXN0aWMgTGljZW5zZVxuICogMi4wIGFuZCB0aGUgU2VydmVyIFNpZGUgUHVibGljIExpY2Vuc2UsIHYgMTsgeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHRcbiAqIGluIGNvbXBsaWFuY2Ugd2l0aCwgYXQgeW91ciBlbGVjdGlvbiwgdGhlIEVsYXN0aWMgTGljZW5zZSAyLjAgb3IgdGhlIFNlcnZlclxuICogU2lkZSBQdWJsaWMgTGljZW5zZSwgdiAxLlxuICovXG5cbmltcG9ydCB7IGNzcyB9IGZyb20gJ0BlbW90aW9uL3JlYWN0JztcbmltcG9ydCB7IFVzZUV1aVRoZW1lIH0gZnJvbSAnLi4vLi4vc2VydmljZXMnO1xuXG5jb25zdCBfYXZhdGFyU2l6ZSA9ICh7XG4gIHNpemUsXG4gIGZvbnRTaXplLFxufToge1xuICBzaXplOiBzdHJpbmc7XG4gIGZvbnRTaXplOiBzdHJpbmc7XG59KSA9PiB7XG4gIHJldHVybiBgXG4gICAgd2lkdGg6ICR7c2l6ZX07XG4gICAgaGVpZ2h0OiAke3NpemV9O1xuICAgIGxpbmUtaGVpZ2h0OiAke3NpemV9O1xuICAgIGZvbnQtc2l6ZTogJHtmb250U2l6ZX07XG4gIGA7XG59O1xuXG5leHBvcnQgY29uc3QgZXVpQXZhdGFyU3R5bGVzID0gKHsgZXVpVGhlbWUgfTogVXNlRXVpVGhlbWUpID0+ICh7XG4gIC8vIEJhc2VcbiAgZXVpQXZhdGFyOiBjc3NgXG4gICAgLy8gRW5zdXJlcyBpdCBuZXZlciBzY2FsZXMgZG93biBiZWxvdyBpdHMgaW50ZW5kZWQgc2l6ZVxuICAgIGZsZXgtc2hyaW5rOiAwO1xuICAgIGRpc3BsYXk6IGlubGluZS1mbGV4O1xuICAgIGp1c3RpZnktY29udGVudDogY2VudGVyO1xuICAgIGFsaWduLWl0ZW1zOiBjZW50ZXI7XG4gICAgYmFja2dyb3VuZC1zaXplOiBjb3ZlcjtcbiAgICB0ZXh0LWFsaWduOiBjZW50ZXI7XG4gICAgdmVydGljYWwtYWxpZ246IG1pZGRsZTtcbiAgICBvdmVyZmxvdy14OiBoaWRkZW47XG4gICAgLy8gRXhwbGljaXRseSBzdGF0ZSB3ZWlnaHQgc28gaXQgZG9lc24ndCBnZXQgb3ZlcnJpZGRlbiBieSBpbmhlcml0YW5jZVxuICAgIGZvbnQtd2VpZ2h0OiAke2V1aVRoZW1lLmZvbnQud2VpZ2h0Lm1lZGl1bX07XG4gIGAsXG4gIC8vIFZhcmlhbnRzXG4gIHBsYWluOiBjc3NgXG4gICAgYmFja2dyb3VuZC1jb2xvcjogJHtldWlUaGVtZS5jb2xvcnMuZW1wdHlTaGFkZX07XG4gIGAsXG4gIHN1YmR1ZWQ6IGNzc2BcbiAgICBiYWNrZ3JvdW5kLWNvbG9yOiAke2V1aVRoZW1lLmNvbG9ycy5saWdodGVzdFNoYWRlfTtcbiAgYCxcbiAgdXNlcjogY3NzYFxuICAgIGJvcmRlci1yYWRpdXM6IDUwJTtcbiAgYCxcbiAgc3BhY2U6IGNzc2BcbiAgICBib3JkZXItcmFkaXVzOiAke2V1aVRoZW1lLmJvcmRlci5yYWRpdXMubWVkaXVtfTtcbiAgYCxcbiAgLy8gU3RhdGVzXG4gIGlzRGlzYWJsZWQ6IGNzc2BcbiAgICBjdXJzb3I6IG5vdC1hbGxvd2VkO1xuICAgIGZpbHRlcjogZ3JheXNjYWxlKDEwMCUpO1xuICBgLFxuICAvLyBTaXplc1xuICBzOiBjc3MoXG4gICAgX2F2YXRhclNpemUoe1xuICAgICAgc2l6ZTogZXVpVGhlbWUuc2l6ZS5sLFxuICAgICAgZm9udFNpemU6IGV1aVRoZW1lLnNpemUubSxcbiAgICB9KVxuICApLFxuICBtOiBjc3MoXG4gICAgX2F2YXRhclNpemUoe1xuICAgICAgc2l6ZTogZXVpVGhlbWUuc2l6ZS54bCxcbiAgICAgIGZvbnRTaXplOiBgY2FsYygke2V1aVRoZW1lLnNpemUuYmFzZX0gKiAwLjkpYCxcbiAgICB9KVxuICApLFxuICBsOiBjc3MoXG4gICAgX2F2YXRhclNpemUoe1xuICAgICAgc2l6ZTogZXVpVGhlbWUuc2l6ZS54eGwsXG4gICAgICBmb250U2l6ZTogYGNhbGMoJHtldWlUaGVtZS5zaXplLmx9ICogMC44KWAsXG4gICAgfSlcbiAgKSxcbiAgeGw6IGNzcyhcbiAgICBfYXZhdGFyU2l6ZSh7XG4gICAgICBzaXplOiBgY2FsYygke2V1aVRoZW1lLnNpemUuYmFzZX0gKiA0KWAsXG4gICAgICBmb250U2l6ZTogYGNhbGMoJHtldWlUaGVtZS5zaXplLnhsfSAqIDAuOClgLFxuICAgIH0pXG4gICksXG59KTtcbiJdfQ== */
+                                                                    </style>,
+                                                                    <style
+                                                                      data-emotion="css"
+                                                                      data-s=""
+                                                                    >
+                                                                      
+                                                                      .css-1hu4pg0-EuiCard{max-width:400px;margin-inline:auto;}
+                                                                    </style>,
+                                                                  ],
+                                                                },
+                                                              }
+                                                            }
+                                                            isStringTag={true}
+                                                            serialized={
+                                                              Object {
+                                                                "map": "/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9jb21wb25lbnRzL2F2YXRhci9hdmF0YXIuc3R5bGVzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQTBDWSIsImZpbGUiOiIuLi8uLi8uLi9zcmMvY29tcG9uZW50cy9hdmF0YXIvYXZhdGFyLnN0eWxlcy50cyIsInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBDb3B5cmlnaHQgRWxhc3RpY3NlYXJjaCBCLlYuIGFuZC9vciBsaWNlbnNlZCB0byBFbGFzdGljc2VhcmNoIEIuVi4gdW5kZXIgb25lXG4gKiBvciBtb3JlIGNvbnRyaWJ1dG9yIGxpY2Vuc2UgYWdyZWVtZW50cy4gTGljZW5zZWQgdW5kZXIgdGhlIEVsYXN0aWMgTGljZW5zZVxuICogMi4wIGFuZCB0aGUgU2VydmVyIFNpZGUgUHVibGljIExpY2Vuc2UsIHYgMTsgeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHRcbiAqIGluIGNvbXBsaWFuY2Ugd2l0aCwgYXQgeW91ciBlbGVjdGlvbiwgdGhlIEVsYXN0aWMgTGljZW5zZSAyLjAgb3IgdGhlIFNlcnZlclxuICogU2lkZSBQdWJsaWMgTGljZW5zZSwgdiAxLlxuICovXG5cbmltcG9ydCB7IGNzcyB9IGZyb20gJ0BlbW90aW9uL3JlYWN0JztcbmltcG9ydCB7IFVzZUV1aVRoZW1lIH0gZnJvbSAnLi4vLi4vc2VydmljZXMnO1xuXG5jb25zdCBfYXZhdGFyU2l6ZSA9ICh7XG4gIHNpemUsXG4gIGZvbnRTaXplLFxufToge1xuICBzaXplOiBzdHJpbmc7XG4gIGZvbnRTaXplOiBzdHJpbmc7XG59KSA9PiB7XG4gIHJldHVybiBgXG4gICAgd2lkdGg6ICR7c2l6ZX07XG4gICAgaGVpZ2h0OiAke3NpemV9O1xuICAgIGxpbmUtaGVpZ2h0OiAke3NpemV9O1xuICAgIGZvbnQtc2l6ZTogJHtmb250U2l6ZX07XG4gIGA7XG59O1xuXG5leHBvcnQgY29uc3QgZXVpQXZhdGFyU3R5bGVzID0gKHsgZXVpVGhlbWUgfTogVXNlRXVpVGhlbWUpID0+ICh7XG4gIC8vIEJhc2VcbiAgZXVpQXZhdGFyOiBjc3NgXG4gICAgLy8gRW5zdXJlcyBpdCBuZXZlciBzY2FsZXMgZG93biBiZWxvdyBpdHMgaW50ZW5kZWQgc2l6ZVxuICAgIGZsZXgtc2hyaW5rOiAwO1xuICAgIGRpc3BsYXk6IGlubGluZS1mbGV4O1xuICAgIGp1c3RpZnktY29udGVudDogY2VudGVyO1xuICAgIGFsaWduLWl0ZW1zOiBjZW50ZXI7XG4gICAgYmFja2dyb3VuZC1zaXplOiBjb3ZlcjtcbiAgICB0ZXh0LWFsaWduOiBjZW50ZXI7XG4gICAgdmVydGljYWwtYWxpZ246IG1pZGRsZTtcbiAgICBvdmVyZmxvdy14OiBoaWRkZW47XG4gICAgLy8gRXhwbGljaXRseSBzdGF0ZSB3ZWlnaHQgc28gaXQgZG9lc24ndCBnZXQgb3ZlcnJpZGRlbiBieSBpbmhlcml0YW5jZVxuICAgIGZvbnQtd2VpZ2h0OiAke2V1aVRoZW1lLmZvbnQud2VpZ2h0Lm1lZGl1bX07XG4gIGAsXG4gIC8vIFZhcmlhbnRzXG4gIHBsYWluOiBjc3NgXG4gICAgYmFja2dyb3VuZC1jb2xvcjogJHtldWlUaGVtZS5jb2xvcnMuZW1wdHlTaGFkZX07XG4gIGAsXG4gIHN1YmR1ZWQ6IGNzc2BcbiAgICBiYWNrZ3JvdW5kLWNvbG9yOiAke2V1aVRoZW1lLmNvbG9ycy5saWdodGVzdFNoYWRlfTtcbiAgYCxcbiAgdXNlcjogY3NzYFxuICAgIGJvcmRlci1yYWRpdXM6IDUwJTtcbiAgYCxcbiAgc3BhY2U6IGNzc2BcbiAgICBib3JkZXItcmFkaXVzOiAke2V1aVRoZW1lLmJvcmRlci5yYWRpdXMubWVkaXVtfTtcbiAgYCxcbiAgLy8gU3RhdGVzXG4gIGlzRGlzYWJsZWQ6IGNzc2BcbiAgICBjdXJzb3I6IG5vdC1hbGxvd2VkO1xuICAgIGZpbHRlcjogZ3JheXNjYWxlKDEwMCUpO1xuICBgLFxuICAvLyBTaXplc1xuICBzOiBjc3MoXG4gICAgX2F2YXRhclNpemUoe1xuICAgICAgc2l6ZTogZXVpVGhlbWUuc2l6ZS5sLFxuICAgICAgZm9udFNpemU6IGV1aVRoZW1lLnNpemUubSxcbiAgICB9KVxuICApLFxuICBtOiBjc3MoXG4gICAgX2F2YXRhclNpemUoe1xuICAgICAgc2l6ZTogZXVpVGhlbWUuc2l6ZS54bCxcbiAgICAgIGZvbnRTaXplOiBgY2FsYygke2V1aVRoZW1lLnNpemUuYmFzZX0gKiAwLjkpYCxcbiAgICB9KVxuICApLFxuICBsOiBjc3MoXG4gICAgX2F2YXRhclNpemUoe1xuICAgICAgc2l6ZTogZXVpVGhlbWUuc2l6ZS54eGwsXG4gICAgICBmb250U2l6ZTogYGNhbGMoJHtldWlUaGVtZS5zaXplLmx9ICogMC44KWAsXG4gICAgfSlcbiAgKSxcbiAgeGw6IGNzcyhcbiAgICBfYXZhdGFyU2l6ZSh7XG4gICAgICBzaXplOiBgY2FsYygke2V1aVRoZW1lLnNpemUuYmFzZX0gKiA0KWAsXG4gICAgICBmb250U2l6ZTogYGNhbGMoJHtldWlUaGVtZS5zaXplLnhsfSAqIDAuOClgLFxuICAgIH0pXG4gICksXG59KTtcbiJdfQ== */",
+                                                                "name": "1dsx8gj-euiAvatar-xl-user-plain",
+                                                                "next": undefined,
+                                                                "styles": "flex-shrink:0;display:inline-flex;justify-content:center;align-items:center;background-size:cover;text-align:center;vertical-align:middle;overflow-x:hidden;font-weight:500;;label:euiAvatar;;;
+    width: calc(16px * 4);
+    height: calc(16px * 4);
+    line-height: calc(16px * 4);
+    font-size: calc(32px * 0.8);
+  ;label:xl;;;border-radius:50%;label:user;;;background-color:#FFF;;label:plain;;;;;",
+                                                                "toString": [Function],
+                                                              }
+                                                            }
+                                                          />
+                                                          <div
+                                                            aria-label="Analytics"
+                                                            className="euiAvatar euiAvatar--xl euiAvatar--user kbnSolutionAvatar kbnSolutionAvatar--xxl css-1dsx8gj-euiAvatar-xl-user-plain"
+                                                            role="img"
+                                                            style={Object {}}
+                                                            title="Analytics"
+                                                          >
+                                                            <EuiIcon
+                                                              aria-label="Analytics"
+                                                              className="euiAvatar__icon"
+                                                              size="xxl"
+                                                              type="logoKibana"
+                                                            >
+                                                              <span
+                                                                className="euiAvatar__icon"
+                                                                data-euiicon-type="logoKibana"
+                                                                size="xxl"
+                                                              >
+                                                                Analytics
+                                                              </span>
+                                                            </EuiIcon>
+                                                          </div>
+                                                        </div>
+                                                      </EuiAvatar>
+                                                    </KibanaSolutionAvatar>
+                                                    <EuiSpacer
+                                                      size="l"
+                                                    >
+                                                      <div
+                                                        className="euiSpacer euiSpacer--l"
+                                                      />
+                                                    </EuiSpacer>
+                                                    <h1>
+                                                      Welcome to Analytics!
+                                                    </h1>
+                                                    <EuiTextColor
+                                                      color="subdued"
+                                                    >
+                                                      <span
+                                                        className="euiTextColor euiTextColor--subdued"
+                                                        style={Object {}}
+                                                      >
+                                                        <p>
+                                                          <FormattedMessage
+                                                            defaultMessage="Add your data to get started, or {link} about {solution}."
+                                                            id="sharedUXComponents.noDataPage.intro"
+                                                            values={
+                                                              Object {
+                                                                "link": <EuiLink
+                                                                  href="Kibana guide"
+                                                                >
+                                                                  <FormattedMessage
+                                                                    defaultMessage="learn more"
+                                                                    id="sharedUXComponents.noDataPage.intro.link"
+                                                                    values={Object {}}
+                                                                  />
+                                                                </EuiLink>,
+                                                                "solution": "Analytics",
+                                                              }
+                                                            }
+                                                          >
+                                                            Add your data to get started, or 
+                                                            <EuiLink
+                                                              href="Kibana guide"
+                                                            >
+                                                              <a
+                                                                className="euiLink euiLink--primary"
+                                                                href="Kibana guide"
+                                                                rel="noreferrer"
+                                                              >
+                                                                <FormattedMessage
+                                                                  defaultMessage="learn more"
+                                                                  id="sharedUXComponents.noDataPage.intro.link"
+                                                                  values={Object {}}
+                                                                >
+                                                                  learn more
+                                                                </FormattedMessage>
+                                                              </a>
+                                                            </EuiLink>
+                                                             about Analytics.
+                                                          </FormattedMessage>
+                                                        </p>
+                                                      </span>
+                                                    </EuiTextColor>
+                                                  </div>
+                                                </EuiTextAlign>
+                                              </div>
+                                            </EuiText>
+                                            <EuiSpacer
+                                              size="xxl"
+                                            >
+                                              <div
+                                                className="euiSpacer euiSpacer--xxl"
+                                              />
+                                            </EuiSpacer>
+                                            <ElasticAgentCard
+                                              data-test-subj="kbnOverviewAddIntegrations"
+                                              description="Use Elastic Agent to collect data and build out Analytics solutions."
+                                              key="empty-page-agent-action"
+                                              title="Add integrations"
+                                            >
+                                              <ElasticAgentCardComponent
+                                                canAccessFleet={true}
+                                                currentAppId$={Observable {}}
+                                                data-test-subj="kbnOverviewAddIntegrations"
+                                                description="Use Elastic Agent to collect data and build out Analytics solutions."
+                                                href="/app/integrations/browse"
+                                                navigateToUrl={[Function]}
+                                                title="Add integrations"
+                                              >
+                                                <RedirectAppLinks
+                                                  currentAppId$={Observable {}}
+                                                  navigateToUrl={[Function]}
+                                                >
+                                                  <div>
+                                                    <NoDataCard
+                                                      data-test-subj="kbnOverviewAddIntegrations"
+                                                      description="Use Elastic Agent to collect data and build out Analytics solutions."
+                                                      href="/app/integrations/browse"
+                                                      image="test-file-stub"
+                                                      title="Add integrations"
+                                                    >
+                                                      <EuiCard
+                                                        css={
+                                                          Object {
+                                                            "marginInline": "auto",
+                                                            "maxWidth": 400,
+                                                          }
+                                                        }
+                                                        data-test-subj="kbnOverviewAddIntegrations"
+                                                        description="Use Elastic Agent to collect data and build out Analytics solutions."
+                                                        footer={
+                                                          <EuiButton
+                                                            fill={true}
+                                                          >
+                                                            Add integrations
+                                                          </EuiButton>
+                                                        }
+                                                        href="/app/integrations/browse"
+                                                        image="test-file-stub"
+                                                        paddingSize="l"
+                                                        title="Add integrations"
+                                                      >
+                                                        <EuiPanel
+                                                          css="unknown styles"
+                                                          data-test-subj="kbnOverviewAddIntegrations"
+                                                          element="div"
+                                                          hasShadow={true}
+                                                          onClick={[Function]}
+                                                          paddingSize="l"
+                                                        >
+                                                          <Insertion
+                                                            cache={
+                                                              Object {
+                                                                "insert": [Function],
+                                                                "inserted": Object {
+                                                                  "1dsx8gj-euiAvatar-xl-user-plain": true,
+                                                                  "1hu4pg0-EuiCard": true,
+                                                                },
+                                                                "key": "css",
+                                                                "nonce": undefined,
+                                                                "registered": Object {
+                                                                  "css-1hu4pg0-EuiCard": "max-width:400px;margin-inline:auto;;label:EuiCard;",
+                                                                },
+                                                                "sheet": StyleSheet {
+                                                                  "_alreadyInsertedOrderInsensitiveRule": true,
+                                                                  "_insertTag": [Function],
+                                                                  "before": null,
+                                                                  "container": <head>
+                                                                    <style
+                                                                      data-emotion="css"
+                                                                      data-s=""
+                                                                    >
+                                                                      
+                                                                      .css-1dsx8gj-euiAvatar-xl-user-plain{-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;display:-webkit-inline-box;display:-webkit-inline-flex;display:-ms-inline-flexbox;display:inline-flex;-webkit-box-pack:center;-ms-flex-pack:center;-webkit-justify-content:center;justify-content:center;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;-webkit-background-size:cover;background-size:cover;text-align:center;vertical-align:middle;overflow-x:hidden;font-weight:500;width:calc(16px * 4);height:calc(16px * 4);line-height:calc(16px * 4);font-size:calc(32px * 0.8);border-radius:50%;background-color:#FFF;}/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9jb21wb25lbnRzL2F2YXRhci9hdmF0YXIuc3R5bGVzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQTBDWSIsImZpbGUiOiIuLi8uLi8uLi9zcmMvY29tcG9uZW50cy9hdmF0YXIvYXZhdGFyLnN0eWxlcy50cyIsInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBDb3B5cmlnaHQgRWxhc3RpY3NlYXJjaCBCLlYuIGFuZC9vciBsaWNlbnNlZCB0byBFbGFzdGljc2VhcmNoIEIuVi4gdW5kZXIgb25lXG4gKiBvciBtb3JlIGNvbnRyaWJ1dG9yIGxpY2Vuc2UgYWdyZWVtZW50cy4gTGljZW5zZWQgdW5kZXIgdGhlIEVsYXN0aWMgTGljZW5zZVxuICogMi4wIGFuZCB0aGUgU2VydmVyIFNpZGUgUHVibGljIExpY2Vuc2UsIHYgMTsgeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHRcbiAqIGluIGNvbXBsaWFuY2Ugd2l0aCwgYXQgeW91ciBlbGVjdGlvbiwgdGhlIEVsYXN0aWMgTGljZW5zZSAyLjAgb3IgdGhlIFNlcnZlclxuICogU2lkZSBQdWJsaWMgTGljZW5zZSwgdiAxLlxuICovXG5cbmltcG9ydCB7IGNzcyB9IGZyb20gJ0BlbW90aW9uL3JlYWN0JztcbmltcG9ydCB7IFVzZUV1aVRoZW1lIH0gZnJvbSAnLi4vLi4vc2VydmljZXMnO1xuXG5jb25zdCBfYXZhdGFyU2l6ZSA9ICh7XG4gIHNpemUsXG4gIGZvbnRTaXplLFxufToge1xuICBzaXplOiBzdHJpbmc7XG4gIGZvbnRTaXplOiBzdHJpbmc7XG59KSA9PiB7XG4gIHJldHVybiBgXG4gICAgd2lkdGg6ICR7c2l6ZX07XG4gICAgaGVpZ2h0OiAke3NpemV9O1xuICAgIGxpbmUtaGVpZ2h0OiAke3NpemV9O1xuICAgIGZvbnQtc2l6ZTogJHtmb250U2l6ZX07XG4gIGA7XG59O1xuXG5leHBvcnQgY29uc3QgZXVpQXZhdGFyU3R5bGVzID0gKHsgZXVpVGhlbWUgfTogVXNlRXVpVGhlbWUpID0+ICh7XG4gIC8vIEJhc2VcbiAgZXVpQXZhdGFyOiBjc3NgXG4gICAgLy8gRW5zdXJlcyBpdCBuZXZlciBzY2FsZXMgZG93biBiZWxvdyBpdHMgaW50ZW5kZWQgc2l6ZVxuICAgIGZsZXgtc2hyaW5rOiAwO1xuICAgIGRpc3BsYXk6IGlubGluZS1mbGV4O1xuICAgIGp1c3RpZnktY29udGVudDogY2VudGVyO1xuICAgIGFsaWduLWl0ZW1zOiBjZW50ZXI7XG4gICAgYmFja2dyb3VuZC1zaXplOiBjb3ZlcjtcbiAgICB0ZXh0LWFsaWduOiBjZW50ZXI7XG4gICAgdmVydGljYWwtYWxpZ246IG1pZGRsZTtcbiAgICBvdmVyZmxvdy14OiBoaWRkZW47XG4gICAgLy8gRXhwbGljaXRseSBzdGF0ZSB3ZWlnaHQgc28gaXQgZG9lc24ndCBnZXQgb3ZlcnJpZGRlbiBieSBpbmhlcml0YW5jZVxuICAgIGZvbnQtd2VpZ2h0OiAke2V1aVRoZW1lLmZvbnQud2VpZ2h0Lm1lZGl1bX07XG4gIGAsXG4gIC8vIFZhcmlhbnRzXG4gIHBsYWluOiBjc3NgXG4gICAgYmFja2dyb3VuZC1jb2xvcjogJHtldWlUaGVtZS5jb2xvcnMuZW1wdHlTaGFkZX07XG4gIGAsXG4gIHN1YmR1ZWQ6IGNzc2BcbiAgICBiYWNrZ3JvdW5kLWNvbG9yOiAke2V1aVRoZW1lLmNvbG9ycy5saWdodGVzdFNoYWRlfTtcbiAgYCxcbiAgdXNlcjogY3NzYFxuICAgIGJvcmRlci1yYWRpdXM6IDUwJTtcbiAgYCxcbiAgc3BhY2U6IGNzc2BcbiAgICBib3JkZXItcmFkaXVzOiAke2V1aVRoZW1lLmJvcmRlci5yYWRpdXMubWVkaXVtfTtcbiAgYCxcbiAgLy8gU3RhdGVzXG4gIGlzRGlzYWJsZWQ6IGNzc2BcbiAgICBjdXJzb3I6IG5vdC1hbGxvd2VkO1xuICAgIGZpbHRlcjogZ3JheXNjYWxlKDEwMCUpO1xuICBgLFxuICAvLyBTaXplc1xuICBzOiBjc3MoXG4gICAgX2F2YXRhclNpemUoe1xuICAgICAgc2l6ZTogZXVpVGhlbWUuc2l6ZS5sLFxuICAgICAgZm9udFNpemU6IGV1aVRoZW1lLnNpemUubSxcbiAgICB9KVxuICApLFxuICBtOiBjc3MoXG4gICAgX2F2YXRhclNpemUoe1xuICAgICAgc2l6ZTogZXVpVGhlbWUuc2l6ZS54bCxcbiAgICAgIGZvbnRTaXplOiBgY2FsYygke2V1aVRoZW1lLnNpemUuYmFzZX0gKiAwLjkpYCxcbiAgICB9KVxuICApLFxuICBsOiBjc3MoXG4gICAgX2F2YXRhclNpemUoe1xuICAgICAgc2l6ZTogZXVpVGhlbWUuc2l6ZS54eGwsXG4gICAgICBmb250U2l6ZTogYGNhbGMoJHtldWlUaGVtZS5zaXplLmx9ICogMC44KWAsXG4gICAgfSlcbiAgKSxcbiAgeGw6IGNzcyhcbiAgICBfYXZhdGFyU2l6ZSh7XG4gICAgICBzaXplOiBgY2FsYygke2V1aVRoZW1lLnNpemUuYmFzZX0gKiA0KWAsXG4gICAgICBmb250U2l6ZTogYGNhbGMoJHtldWlUaGVtZS5zaXplLnhsfSAqIDAuOClgLFxuICAgIH0pXG4gICksXG59KTtcbiJdfQ== */
+                                                                    </style>
+                                                                    <style
+                                                                      data-emotion="css"
+                                                                      data-s=""
+                                                                    >
+                                                                      
+                                                                      .css-1hu4pg0-EuiCard{max-width:400px;margin-inline:auto;}
+                                                                    </style>
+                                                                    <style
+                                                                      data-styled="active"
+                                                                      data-styled-version="5.1.0"
+                                                                    />
+                                                                  </head>,
+                                                                  "ctr": 2,
+                                                                  "insertionPoint": undefined,
+                                                                  "isSpeedy": false,
+                                                                  "key": "css",
+                                                                  "nonce": undefined,
+                                                                  "prepend": undefined,
+                                                                  "tags": Array [
+                                                                    <style
+                                                                      data-emotion="css"
+                                                                      data-s=""
+                                                                    >
+                                                                      
+                                                                      .css-1dsx8gj-euiAvatar-xl-user-plain{-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;display:-webkit-inline-box;display:-webkit-inline-flex;display:-ms-inline-flexbox;display:inline-flex;-webkit-box-pack:center;-ms-flex-pack:center;-webkit-justify-content:center;justify-content:center;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;-webkit-background-size:cover;background-size:cover;text-align:center;vertical-align:middle;overflow-x:hidden;font-weight:500;width:calc(16px * 4);height:calc(16px * 4);line-height:calc(16px * 4);font-size:calc(32px * 0.8);border-radius:50%;background-color:#FFF;}/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9jb21wb25lbnRzL2F2YXRhci9hdmF0YXIuc3R5bGVzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQTBDWSIsImZpbGUiOiIuLi8uLi8uLi9zcmMvY29tcG9uZW50cy9hdmF0YXIvYXZhdGFyLnN0eWxlcy50cyIsInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBDb3B5cmlnaHQgRWxhc3RpY3NlYXJjaCBCLlYuIGFuZC9vciBsaWNlbnNlZCB0byBFbGFzdGljc2VhcmNoIEIuVi4gdW5kZXIgb25lXG4gKiBvciBtb3JlIGNvbnRyaWJ1dG9yIGxpY2Vuc2UgYWdyZWVtZW50cy4gTGljZW5zZWQgdW5kZXIgdGhlIEVsYXN0aWMgTGljZW5zZVxuICogMi4wIGFuZCB0aGUgU2VydmVyIFNpZGUgUHVibGljIExpY2Vuc2UsIHYgMTsgeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHRcbiAqIGluIGNvbXBsaWFuY2Ugd2l0aCwgYXQgeW91ciBlbGVjdGlvbiwgdGhlIEVsYXN0aWMgTGljZW5zZSAyLjAgb3IgdGhlIFNlcnZlclxuICogU2lkZSBQdWJsaWMgTGljZW5zZSwgdiAxLlxuICovXG5cbmltcG9ydCB7IGNzcyB9IGZyb20gJ0BlbW90aW9uL3JlYWN0JztcbmltcG9ydCB7IFVzZUV1aVRoZW1lIH0gZnJvbSAnLi4vLi4vc2VydmljZXMnO1xuXG5jb25zdCBfYXZhdGFyU2l6ZSA9ICh7XG4gIHNpemUsXG4gIGZvbnRTaXplLFxufToge1xuICBzaXplOiBzdHJpbmc7XG4gIGZvbnRTaXplOiBzdHJpbmc7XG59KSA9PiB7XG4gIHJldHVybiBgXG4gICAgd2lkdGg6ICR7c2l6ZX07XG4gICAgaGVpZ2h0OiAke3NpemV9O1xuICAgIGxpbmUtaGVpZ2h0OiAke3NpemV9O1xuICAgIGZvbnQtc2l6ZTogJHtmb250U2l6ZX07XG4gIGA7XG59O1xuXG5leHBvcnQgY29uc3QgZXVpQXZhdGFyU3R5bGVzID0gKHsgZXVpVGhlbWUgfTogVXNlRXVpVGhlbWUpID0+ICh7XG4gIC8vIEJhc2VcbiAgZXVpQXZhdGFyOiBjc3NgXG4gICAgLy8gRW5zdXJlcyBpdCBuZXZlciBzY2FsZXMgZG93biBiZWxvdyBpdHMgaW50ZW5kZWQgc2l6ZVxuICAgIGZsZXgtc2hyaW5rOiAwO1xuICAgIGRpc3BsYXk6IGlubGluZS1mbGV4O1xuICAgIGp1c3RpZnktY29udGVudDogY2VudGVyO1xuICAgIGFsaWduLWl0ZW1zOiBjZW50ZXI7XG4gICAgYmFja2dyb3VuZC1zaXplOiBjb3ZlcjtcbiAgICB0ZXh0LWFsaWduOiBjZW50ZXI7XG4gICAgdmVydGljYWwtYWxpZ246IG1pZGRsZTtcbiAgICBvdmVyZmxvdy14OiBoaWRkZW47XG4gICAgLy8gRXhwbGljaXRseSBzdGF0ZSB3ZWlnaHQgc28gaXQgZG9lc24ndCBnZXQgb3ZlcnJpZGRlbiBieSBpbmhlcml0YW5jZVxuICAgIGZvbnQtd2VpZ2h0OiAke2V1aVRoZW1lLmZvbnQud2VpZ2h0Lm1lZGl1bX07XG4gIGAsXG4gIC8vIFZhcmlhbnRzXG4gIHBsYWluOiBjc3NgXG4gICAgYmFja2dyb3VuZC1jb2xvcjogJHtldWlUaGVtZS5jb2xvcnMuZW1wdHlTaGFkZX07XG4gIGAsXG4gIHN1YmR1ZWQ6IGNzc2BcbiAgICBiYWNrZ3JvdW5kLWNvbG9yOiAke2V1aVRoZW1lLmNvbG9ycy5saWdodGVzdFNoYWRlfTtcbiAgYCxcbiAgdXNlcjogY3NzYFxuICAgIGJvcmRlci1yYWRpdXM6IDUwJTtcbiAgYCxcbiAgc3BhY2U6IGNzc2BcbiAgICBib3JkZXItcmFkaXVzOiAke2V1aVRoZW1lLmJvcmRlci5yYWRpdXMubWVkaXVtfTtcbiAgYCxcbiAgLy8gU3RhdGVzXG4gIGlzRGlzYWJsZWQ6IGNzc2BcbiAgICBjdXJzb3I6IG5vdC1hbGxvd2VkO1xuICAgIGZpbHRlcjogZ3JheXNjYWxlKDEwMCUpO1xuICBgLFxuICAvLyBTaXplc1xuICBzOiBjc3MoXG4gICAgX2F2YXRhclNpemUoe1xuICAgICAgc2l6ZTogZXVpVGhlbWUuc2l6ZS5sLFxuICAgICAgZm9udFNpemU6IGV1aVRoZW1lLnNpemUubSxcbiAgICB9KVxuICApLFxuICBtOiBjc3MoXG4gICAgX2F2YXRhclNpemUoe1xuICAgICAgc2l6ZTogZXVpVGhlbWUuc2l6ZS54bCxcbiAgICAgIGZvbnRTaXplOiBgY2FsYygke2V1aVRoZW1lLnNpemUuYmFzZX0gKiAwLjkpYCxcbiAgICB9KVxuICApLFxuICBsOiBjc3MoXG4gICAgX2F2YXRhclNpemUoe1xuICAgICAgc2l6ZTogZXVpVGhlbWUuc2l6ZS54eGwsXG4gICAgICBmb250U2l6ZTogYGNhbGMoJHtldWlUaGVtZS5zaXplLmx9ICogMC44KWAsXG4gICAgfSlcbiAgKSxcbiAgeGw6IGNzcyhcbiAgICBfYXZhdGFyU2l6ZSh7XG4gICAgICBzaXplOiBgY2FsYygke2V1aVRoZW1lLnNpemUuYmFzZX0gKiA0KWAsXG4gICAgICBmb250U2l6ZTogYGNhbGMoJHtldWlUaGVtZS5zaXplLnhsfSAqIDAuOClgLFxuICAgIH0pXG4gICksXG59KTtcbiJdfQ== */
+                                                                    </style>,
+                                                                    <style
+                                                                      data-emotion="css"
+                                                                      data-s=""
+                                                                    >
+                                                                      
+                                                                      .css-1hu4pg0-EuiCard{max-width:400px;margin-inline:auto;}
+                                                                    </style>,
+                                                                  ],
+                                                                },
+                                                              }
+                                                            }
+                                                            isStringTag={false}
+                                                            serialized={
+                                                              Object {
+                                                                "map": undefined,
+                                                                "name": "1hu4pg0-EuiCard",
+                                                                "next": undefined,
+                                                                "styles": "max-width:400px;margin-inline:auto;;label:EuiCard;",
+                                                                "toString": [Function],
+                                                              }
+                                                            }
+                                                          />
+                                                          <EuiPanel
+                                                            className="euiCard euiCard--centerAligned euiCard--isClickable css-1hu4pg0-EuiCard"
+                                                            data-test-subj="kbnOverviewAddIntegrations"
+                                                            element="div"
+                                                            hasShadow={true}
+                                                            onClick={[Function]}
+                                                            paddingSize="l"
+                                                          >
+                                                            <div
+                                                              className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable css-1hu4pg0-EuiCard"
+                                                              data-test-subj="kbnOverviewAddIntegrations"
+                                                              onClick={[Function]}
+                                                            >
+                                                              <div
+                                                                className="euiCard__top"
+                                                              >
+                                                                <div
+                                                                  className="euiCard__image"
+                                                                >
+                                                                  <img
+                                                                    alt=""
+                                                                    src="test-file-stub"
+                                                                  />
+                                                                </div>
+                                                              </div>
+                                                              <div
+                                                                className="euiCard__content"
+                                                              >
+                                                                <EuiTitle
+                                                                  className="euiCard__title"
+                                                                  id="generated-idTitle"
+                                                                  size="s"
+                                                                >
+                                                                  <span
+                                                                    className="euiTitle euiTitle--small euiCard__title"
+                                                                    id="generated-idTitle"
+                                                                  >
+                                                                    <a
+                                                                      aria-describedby="generated-idDescription"
+                                                                      className="euiCard__titleAnchor"
+                                                                      href="/app/integrations/browse"
+                                                                      rel="noreferrer"
+                                                                    >
+                                                                      Add integrations
+                                                                    </a>
+                                                                  </span>
+                                                                </EuiTitle>
+                                                                <EuiText
+                                                                  className="euiCard__description"
+                                                                  id="generated-idDescription"
+                                                                  size="s"
+                                                                >
+                                                                  <div
+                                                                    className="euiText euiText--small euiCard__description"
+                                                                    id="generated-idDescription"
+                                                                  >
+                                                                    <p>
+                                                                      Use Elastic Agent to collect data and build out Analytics solutions.
+                                                                    </p>
+                                                                  </div>
+                                                                </EuiText>
+                                                              </div>
+                                                              <div
+                                                                className="euiCard__footer"
+                                                              >
+                                                                <EuiButton
+                                                                  fill={true}
+                                                                >
+                                                                  <EuiButtonDisplay
+                                                                    baseClassName="euiButton"
+                                                                    disabled={false}
+                                                                    element="button"
+                                                                    fill={true}
+                                                                    isDisabled={false}
+                                                                    type="button"
+                                                                  >
+                                                                    <button
+                                                                      className="euiButton euiButton--primary euiButton--fill"
+                                                                      disabled={false}
+                                                                      style={
+                                                                        Object {
+                                                                          "minWidth": undefined,
+                                                                        }
+                                                                      }
+                                                                      type="button"
+                                                                    >
+                                                                      <EuiButtonContent
+                                                                        className="euiButton__content"
+                                                                        iconSide="left"
+                                                                        textProps={
+                                                                          Object {
+                                                                            "className": "euiButton__text",
+                                                                          }
+                                                                        }
+                                                                      >
+                                                                        <span
+                                                                          className="euiButtonContent euiButton__content"
+                                                                        >
+                                                                          <span
+                                                                            className="euiButton__text"
+                                                                          >
+                                                                            Add integrations
+                                                                          </span>
+                                                                        </span>
+                                                                      </EuiButtonContent>
+                                                                    </button>
+                                                                  </EuiButtonDisplay>
+                                                                </EuiButton>
+                                                              </div>
+                                                            </div>
+                                                          </EuiPanel>
+                                                        </EuiPanel>
+                                                      </EuiCard>
+                                                    </NoDataCard>
+                                                  </div>
+                                                </RedirectAppLinks>
+                                              </ElasticAgentCardComponent>
+                                            </ElasticAgentCard>
+                                          </div>
+                                        </NoDataPage>
+                                      </div>
+                                    </EuiPageContentBody>
+                                  </div>
+                                </EuiPanel>
+                              </EuiPageContent>
+                            </div>
+                          </EuiPageBody>
+                        </div>
+                      </EuiPageBody>
+                    </div>
+                  </EuiPage>
+                </EuiPageTemplate>
+              </NoDataConfigPage>
+            </KibanaNoDataPage>
+          </Suspense>
+        </EuiErrorBoundary>
+      </ForwardRef>
+    </AnalyticsNoDataPageComponent>
     ;
   </SharedUxServicesProvider>
 </AnalyticsNoDataPage>
