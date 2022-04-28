@@ -153,6 +153,7 @@ export const importRulesRoute = (
         } else {
           parsedRules = migratedParsedObjectsWithoutDuplicateErrors;
         }
+
         // gather all exception lists that the imported rules reference
         const foundReferencedExceptionLists = await getReferencedExceptionLists({
           rules: parsedRules,

@@ -93,6 +93,7 @@ import {
   RuleNameOverrideOrUndefined,
   EventCategoryOverrideOrUndefined,
   NamespaceOrUndefined,
+  DataViewIdOrUndefined,
 } from '../../../../common/detection_engine/schemas/common';
 
 import { PartialFilter } from '../types';
@@ -158,6 +159,7 @@ export interface CreateRulesOptions {
   ruleId: RuleId;
   immutable: Immutable;
   index: IndexOrUndefined;
+  dataViewId: DataViewIdOrUndefined;
   interval: Interval;
   license: LicenseOrUndefined;
   maxSignals: MaxSignals;

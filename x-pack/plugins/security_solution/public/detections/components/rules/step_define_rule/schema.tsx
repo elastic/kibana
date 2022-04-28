@@ -79,13 +79,25 @@ export const schema: FormSchema<DefineStepRule> = {
   },
   dataViewId: {
     fieldsToValidateOnChange: ['dataViewId'],
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.dataViewSelector',
+      {
+        defaultMessage: 'Data View',
+      }
+    ),
     validations: [
       {
         validator: (
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ path, formData }] = args;
-          const skipValidation = isMlRule(formData.ruleType) || formData.index != null;
+          // the dropdown defaults the dataViewId to an empty string somehow on render..
+          // need to figure this out.
+          const notEmptyDataViewId = formData.dataViewId != null && formData.dataViewId !== '';
+          const skipValidation =
+            isMlRule(formData.ruleType) ||
+            ((formData.index != null || notEmptyDataViewId) &&
+              !(formData.index != null && notEmptyDataViewId));
 
           if (skipValidation) {
             return;

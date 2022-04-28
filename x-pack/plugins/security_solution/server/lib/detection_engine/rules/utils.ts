@@ -55,6 +55,7 @@ import {
   TimestampOverrideOrUndefined,
   EventCategoryOverrideOrUndefined,
   NamespaceOrUndefined,
+  DataViewIdOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
@@ -100,6 +101,7 @@ export interface UpdateProperties {
   machineLearningJobId: MachineLearningJobIdOrUndefined;
   filters: PartialFilter[] | undefined;
   index: IndexOrUndefined;
+  dataViewId: DataViewIdOrUndefined;
   interval: IntervalOrUndefined;
   maxSignals: MaxSignalsOrUndefined;
   riskScore: RiskScoreOrUndefined;
