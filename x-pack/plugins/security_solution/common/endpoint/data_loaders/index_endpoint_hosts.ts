@@ -201,6 +201,7 @@ export async function indexEndpointHostDocs({
         index: metadataIndex,
         body: hostMetadata,
         op_type: 'create',
+        refresh: 'wait_for',
       })
       .catch(wrapErrorAndRejectPromise);
 
@@ -214,6 +215,7 @@ export async function indexEndpointHostDocs({
         index: policyResponseIndex,
         body: hostPolicyResponse,
         op_type: 'create',
+        refresh: 'wait_for',
       })
       .catch(wrapErrorAndRejectPromise);
 
