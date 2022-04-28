@@ -14,7 +14,7 @@ interface Props {
   onDataViewCreated: (dataView: unknown) => void;
 }
 
-const solution = i18n.translate('sharedUXComponents.noDataConfig.analytics', {
+const solution = i18n.translate('sharedUX.noDataConfig.analytics', {
   defaultMessage: 'Analytics',
 });
 const pageTitle = i18n.translate('sharedUX.noDataConfig.analyticsPageTitle', {
