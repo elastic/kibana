@@ -75,8 +75,8 @@ export const VIEW_ALL_FAILED_FINDINGS = i18n.translate('xpack.csp.view_all_faile
   defaultMessage: 'View all failed findings',
 });
 
-export const RESOURCE_TYPE = i18n.translate('xpack.csp.resource_type', {
-  defaultMessage: 'Resource Type',
+export const RESOURCE_TYPE = i18n.translate('xpack.csp.cis_section', {
+  defaultMessage: 'CIS Section',
 });
 
 export const FINDINGS = i18n.translate('xpack.csp.findings', {

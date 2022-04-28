@@ -12,14 +12,14 @@ import type {
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { Cluster } from '../../../common/types';
-import { getResourceTypeFromAggs, resourceTypeAggQuery } from './get_resources_types';
-import type { ResourceTypeQueryResult } from './get_resources_types';
+import { getFailedFindingsFromAggs, failedFindingsAggQuery } from './get_resources_types';
+import type { FailedFindingsQueryResult } from './get_resources_types';
 import { findingsEvaluationAggsQuery, getStatsFromFindingsEvaluationsAggs } from './get_stats';
 import { KeyDocCount } from './compliance_dashboard';
 
 type UnixEpochTime = number;
 
-export interface ClusterBucket extends ResourceTypeQueryResult, KeyDocCount {
+export interface ClusterBucket extends FailedFindingsQueryResult, KeyDocCount {
   failed_findings: {
     doc_count: number;
   };
@@ -59,7 +59,7 @@ export const getClustersQuery = (query: QueryDslQueryContainer, pitId: string): 
             },
           },
         },
-        ...resourceTypeAggQuery,
+        ...failedFindingsAggQuery,
         ...findingsEvaluationAggsQuery,
       },
     },
@@ -92,7 +92,7 @@ export const getClustersFromAggs = (clusters: ClusterBucket[]): ClusterWithoutTr
     const resourcesTypesAggs = cluster.aggs_by_resource_type.buckets;
     if (!Array.isArray(resourcesTypesAggs))
       throw new Error('missing aggs by resource type per cluster');
-    const resourcesTypes = getResourceTypeFromAggs(resourcesTypesAggs);
+    const resourcesTypes = getFailedFindingsFromAggs(resourcesTypesAggs);
 
     return {
       meta,
