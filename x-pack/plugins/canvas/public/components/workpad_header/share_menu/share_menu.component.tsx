@@ -7,24 +7,34 @@
 
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiContextMenu,
+  EuiContextMenuPanel,
+  EuiContextMenuPanelDescriptor,
+  EuiIcon,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PDF, JSON } from '../../../../i18n/constants';
-import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { ClosePopoverFn, Popover } from '../../popover';
 import { ShareWebsiteFlyout } from './flyout';
+import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 
 const strings = {
+  getExportTitle: () =>
+    i18n.translate('xpack.canvas.workpadHeaderShareMenu.exportCanvasTitle', {
+      defaultMessage: 'Export',
+    }),
   getShareDownloadJSONTitle: () =>
     i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareDownloadJSONTitle', {
-      defaultMessage: 'Download as {JSON}',
+      defaultMessage: 'Export to {JSON}',
       values: {
         JSON,
       },
     }),
   getShareDownloadPDFTitle: () =>
     i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareDownloadPDFTitle', {
-      defaultMessage: '{PDF} reports',
+      defaultMessage: 'Export to {PDF}',
       values: {
         PDF,
       },
@@ -39,7 +49,7 @@ const strings = {
     }),
   getShareWorkpadMessage: () =>
     i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareWorkpadMessage', {
-      defaultMessage: 'Share this workpad',
+      defaultMessage: 'Share the workpad',
     }),
 };
 
@@ -67,39 +77,60 @@ export const ShareMenu = ({ ReportingComponent, onExport }: Props) => {
     setShowFlyout(false);
   };
 
-  const getPanelTree = (closePopover: ClosePopoverFn) => ({
-    id: 0,
-    items: [
+  const getPanelTree = (closePopover: ClosePopoverFn) => {
+    const panelTree: EuiContextMenuPanelDescriptor[] = [
       {
-        name: strings.getShareDownloadJSONTitle(),
-        icon: <EuiIcon type="exportAction" size="m" />,
-        onClick: () => {
-          onExport('json');
-          closePopover();
-        },
-      },
-      ReportingComponent !== null
-        ? {
-            name: strings.getShareDownloadPDFTitle(),
-            icon: 'document',
-            panel: {
-              id: 1,
-              title: strings.getShareDownloadPDFTitle(),
-              content: <ReportingComponent onClose={closePopover} />,
+        id: 0,
+        title: strings.getShareWorkpadMessage(),
+        items: [
+          {
+            name: strings.getExportTitle(),
+            icon: <EuiIcon type="exportAction" size="m" />,
+            panel: 1,
+          },
+          {
+            name: strings.getShareWebsiteTitle(),
+            icon: <EuiIcon type="globe" size="m" />,
+            onClick: () => {
+              setShowFlyout(true);
+              closePopover();
             },
-            'data-test-subj': 'sharePanel-PDFReports',
-          }
-        : false,
-      {
-        name: strings.getShareWebsiteTitle(),
-        icon: <EuiIcon type="globe" size="m" />,
-        onClick: () => {
-          setShowFlyout(true);
-          closePopover();
-        },
+          },
+        ],
       },
-    ].filter(Boolean),
-  });
+      {
+        id: 1,
+        title: strings.getExportTitle(),
+        items: [
+          {
+            name: strings.getShareDownloadJSONTitle(),
+            icon: <EuiIcon type="exportAction" size="m" />,
+            onClick: () => {
+              onExport('json');
+              closePopover();
+            },
+          },
+        ],
+      },
+    ];
+
+    if (ReportingComponent !== null) {
+      panelTree[1].items?.push({
+        name: strings.getShareDownloadPDFTitle(),
+        icon: <EuiIcon type="document" size="m" />,
+        'data-test-subj': 'sharePanel-PDFReports',
+        panel: 2,
+      });
+
+      panelTree.push({
+        id: 2,
+        title: strings.getShareDownloadPDFTitle(),
+        content: <ReportingComponent onClose={closePopover} />,
+      });
+    }
+
+    return panelTree;
+  };
 
   const shareControl = (togglePopover: React.MouseEventHandler<any>) => (
     <EuiButtonEmpty
@@ -118,10 +149,7 @@ export const ShareMenu = ({ ReportingComponent, onExport }: Props) => {
     <div>
       <Popover button={shareControl} panelPaddingSize="none" anchorPosition="downLeft">
         {({ closePopover }: { closePopover: ClosePopoverFn }) => (
-          <EuiContextMenu
-            initialPanelId={0}
-            panels={flattenPanelTree(getPanelTree(closePopover))}
-          />
+          <EuiContextMenu initialPanelId={0} panels={getPanelTree(closePopover)} />
         )}
       </Popover>
       {flyout}
