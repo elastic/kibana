@@ -9,18 +9,26 @@
 import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
+const Fallback = () => <div />;
+
 /**
  * The Lazily-loaded `FilterBar` component.  Consumers should use `React.Suspense` or
  * the withSuspense` HOC to load this component.
  */
-const FilterBarLazy = React.lazy(() => import('./filter_bar'));
+
+const LazyFilterBar = React.lazy(() => import('./filter_bar'));
+export const FilterBar = (props: React.ComponentProps<typeof LazyFilterBar>) => (
+  <React.Suspense fallback={<Fallback />}>
+    <LazyFilterBar {...props} />
+  </React.Suspense>
+);
 
 /**
  * A `FilterBar` component that is wrapped by the `withSuspense` HOC.  This component can
  * be used directly by consumers and will load the `FilterBarLazy` component lazily with
  * a predefined fallback and error boundary.
  */
-export const FilterBar = withSuspense(FilterBarLazy);
+// export const FilterBar = withSuspense(FilterBarLazy);
 
 /**
  * The Lazily-loaded `FilterLabel` component.  Consumers should use `React.Suspense` or
