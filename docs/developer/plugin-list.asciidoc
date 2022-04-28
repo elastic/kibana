@@ -215,8 +215,8 @@ management section itself.
 |Utility plugin:
 
 
-|{kib-repo}blob/{branch}/src/plugins/metadata_events_streams[metadataEventsStreams]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/src/plugins/metadata_events_streams/README.md[metadataEventsStreams]
+|The metadataEventsStreams plugin manages metadata events streams for entities. Currently used for saved objects created by users where we want to register the "viewed" events.
 
 
 |{kib-repo}blob/{branch}/src/plugins/navigation/README.md[navigation]
@@ -307,8 +307,8 @@ In general this plugin provides:
 |The Usage Collection Service defines a set of APIs for other plugins to report the usage of their features. At the same time, it provides necessary the APIs for other services (i.e.: telemetry, monitoring, ...) to consume that usage data.
 
 
-|{kib-repo}blob/{branch}/src/plugins/user_content[userContent]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/src/plugins/user_content/README.md[userContent]
+|The userContent plugin manages all the user generated content (Saved Objects).
 
 
 |{kib-repo}blob/{branch}/src/plugins/vis_default_editor/README.md[visDefaultEditor]
