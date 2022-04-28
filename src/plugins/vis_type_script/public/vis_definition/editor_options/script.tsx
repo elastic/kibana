@@ -83,6 +83,60 @@ const provideSuggestions = (
         range: wordRange,
       },
       {
+        label: 'addFilter',
+        kind: monacoEditor.languages.CompletionItemKind.Method,
+        documentation: {
+          value: 'Adds a Kibana filter',
+          isTrusted: true,
+        },
+        insertText: 'addFilter({$0})',
+        insertTextRules: monacoEditor.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        range: wordRange,
+      },
+      {
+        label: 'removeFilter',
+        kind: monacoEditor.languages.CompletionItemKind.Method,
+        documentation: {
+          value: 'Removes a Kibana filter',
+          isTrusted: true,
+        },
+        insertText: 'removeFilter({$0})',
+        insertTextRules: monacoEditor.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        range: wordRange,
+      },
+      {
+        label: 'removeAllFilters',
+        kind: monacoEditor.languages.CompletionItemKind.Method,
+        documentation: {
+          value: 'Removes all Kibana filters',
+          isTrusted: true,
+        },
+        insertText: 'removeAllFilters()',
+        range: wordRange,
+      },
+      {
+        label: 'searchSql',
+        kind: monacoEditor.languages.CompletionItemKind.Method,
+        documentation: {
+          value: 'Runs an Elasticsearch SQL query',
+          isTrusted: true,
+        },
+        insertText: 'searchSql({\n\tquery: "$0"\n})',
+        insertTextRules: monacoEditor.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        range: wordRange,
+      },
+      {
+        label: 'searchSql',
+        kind: monacoEditor.languages.CompletionItemKind.Method,
+        documentation: {
+          value: 'Runs an Elasticsearch SQL query',
+          isTrusted: true,
+        },
+        insertText: 'searchSql({\n\tquery: "$0"\n})',
+        insertTextRules: monacoEditor.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        range: wordRange,
+      },
+      {
         label: 'subscribeToResize',
         kind: monacoEditor.languages.CompletionItemKind.Method,
         documentation: {
