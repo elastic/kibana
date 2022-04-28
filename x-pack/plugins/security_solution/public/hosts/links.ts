@@ -73,6 +73,7 @@ export const links: LinkItem = {
         defaultMessage: 'Sessions',
       }),
       url: `${HOSTS_PATH}/sessions`,
+      isBeta: true,
     },
   ],
 };

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Capabilities } from '@kbn/core/types';
+import { NavTab } from '../components/navigation/types';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 import { CASES_FEATURE_ID, SecurityPageName, SERVER_APP_ID } from '../../../common/constants';
 
@@ -35,9 +37,18 @@ export interface LinkItem {
   icon?: string;
   id: SecurityPageName;
   image?: string;
+  isBeta?: boolean;
   isPremium?: boolean;
   items?: LinkItem[];
   label: string;
   needsUrlState?: boolean; // defaults to false
   url: string;
+}
+
+export type SiemNavTabs = Partial<Record<SecurityPageName, NavTab>>;
+
+export interface LinkProps {
+  enableExperimental: ExperimentalFeatures;
+  isBasic: boolean;
+  capabilities?: Capabilities;
 }

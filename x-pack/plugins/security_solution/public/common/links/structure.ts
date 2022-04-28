@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { AppNavLinkStatus } from '@kbn/core/public';
 import { SecurityPageName } from '../../../common/constants';
 import { EXPLORE, INVESTIGATE } from '../../app/translations';
 import { FEATURE, LinkItem } from './types';

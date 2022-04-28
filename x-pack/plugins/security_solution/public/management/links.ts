@@ -11,6 +11,7 @@ import {
   ENDPOINTS_PATH,
   EVENT_FILTERS_PATH,
   HOST_ISOLATION_EXCEPTIONS_PATH,
+  MANAGEMENT_PATH,
   POLICIES_PATH,
   SecurityPageName,
   TRUSTED_APPS_PATH,
@@ -29,7 +30,7 @@ import { FEATURE, LinkItem } from '../common/links/types';
 export const links: LinkItem = {
   id: SecurityPageName.administration,
   label: MANAGE,
-  url: ENDPOINTS_PATH,
+  url: MANAGEMENT_PATH,
   globalNavEnabled: false,
   features: [FEATURE.general],
   globalSearchKeywords: [

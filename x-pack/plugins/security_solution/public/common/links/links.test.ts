@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { getDeepLinks, getInitialDeepLinks } from './links';
+import { getDeepLinks, getInitialDeepLinks, getNavTabs, needsUrlState } from './links';
 import { CASES_FEATURE_ID, SecurityPageName, SERVER_APP_ID } from '../../../common/constants';
 import { Capabilities } from '@kbn/core/types';
 import { AppDeepLink } from '@kbn/core/public';
 import { mockGlobalState } from '../mock';
+import { navTabs as navTabsArtifact } from '../../app/home/home_navigations';
 
 const mockExperimentalDefaults = mockGlobalState.app.enableExperimental;
 const basicLicense = 'basic';
@@ -164,6 +165,44 @@ describe('security app link helpers', () => {
       const links = getDeepLinks(mockExperimentalDefaults, platinumLicense, capabilities);
       nonCasesPages.forEach((page) => expect(findDeepLink(page, links)).toBeTruthy());
       casesPages.forEach((page) => expect(findDeepLink(page, links)).toBeFalsy());
+    });
+  });
+  describe('getNavTabs', () => {
+    it('return default SecurityNav tab object when no argument', () => {
+      const navTabs = getNavTabs();
+      expect(navTabs).toEqual(navTabsArtifact);
+    });
+    it('return custom SecurityNav tab object with page arguments', () => {
+      const navTabs = getNavTabs([
+        SecurityPageName.uncommonProcesses,
+        SecurityPageName.caseConfigure,
+      ]);
+      expect(navTabs).toEqual({
+        [SecurityPageName.uncommonProcesses]: {
+          disabled: false,
+          href: '/app/security/hosts/uncommonProcesses',
+          id: SecurityPageName.uncommonProcesses,
+          name: 'Uncommon Processes',
+          urlKey: 'host',
+        },
+        [SecurityPageName.caseConfigure]: {
+          disabled: false,
+          href: '/app/security/cases/configure',
+          id: SecurityPageName.caseConfigure,
+          name: 'Configure Cases',
+          urlKey: undefined,
+        },
+      });
+    });
+  });
+  describe('needsUrlState', () => {
+    it('returns true when url state exists for page', () => {
+      const needsUrl = needsUrlState(SecurityPageName.hosts);
+      expect(needsUrl).toEqual(true);
+    });
+    it('returns false when url state does not exist for page', () => {
+      const needsUrl = needsUrlState(SecurityPageName.caseConfigure);
+      expect(needsUrl).toEqual(false);
     });
   });
 });
