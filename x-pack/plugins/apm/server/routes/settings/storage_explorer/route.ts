@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
-import { getIndicesStats } from './get_total_index_disk_usage';
+import { getIndicesStats } from './get_indices_stats';
 import { getSearchAggregatedTransactions } from '../../../lib/helpers/transactions';
 import { setupRequest } from '../../../lib/helpers/setup_request';
 import { getDocCountPerProcessorEvent } from './get_doc_count_per_processor_event';
