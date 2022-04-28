@@ -63,10 +63,10 @@ export const SYSTEM_ID = i18n.translate(
   }
 );
 
-export const RULE_SECTION = i18n.translate(
+export const CIS_SECTION = i18n.translate(
   'xpack.csp.findings.findingsTable.findingsTableColumn.ruleSectionColumnLabel',
   {
-    defaultMessage: 'Rule Section',
+    defaultMessage: 'CIS Section',
   }
 );
 

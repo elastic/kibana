@@ -75,8 +75,7 @@ const FindingsTableComponent = ({
       },
       {
         field: 'rule.name',
-        name: TEXT.RULE_NAME,
-        truncateText: true,
+        name: TEXT.RULE,
         sortable: true,
         render: ruleNameRenderer,
       },
@@ -84,10 +83,12 @@ const FindingsTableComponent = ({
         field: 'cluster_id',
         name: TEXT.SYSTEM_ID,
         truncateText: true,
+        sortable: true,
       },
       {
         field: 'rule.section',
-        name: TEXT.RULE_SECTION,
+        name: TEXT.CIS_SECTION,
+        sortable: true,
         truncateText: true,
       },
       {
@@ -112,13 +113,6 @@ const FindingsTableComponent = ({
   );
 
   const sorting = useMemo(() => getEuiSortFromEsSearchSource(sort), [sort]);
-
-  const getCellProps = useCallback(
-    (item: CspFinding, column: EuiTableFieldDataColumnType<CspFinding>) => ({
-      onClick: column.field === 'rule.name' ? () => setSelectedFinding(item) : undefined,
-    }),
-    []
-  );
 
   const onTableChange = useCallback(
     (params: Criteria<CspFinding>) => {
@@ -149,7 +143,6 @@ const FindingsTableComponent = ({
         pagination={pagination}
         sorting={sorting}
         onChange={onTableChange}
-        cellProps={getCellProps}
         hasActions
       />
       {selectedFinding && (
