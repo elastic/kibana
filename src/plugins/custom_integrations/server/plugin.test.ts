@@ -141,5 +141,23 @@ describe('CustomIntegrationsPlugin', () => {
         },
       ]);
     });
+
+    test('should register placeholders', () => {
+      const setup = new CustomIntegrationsPlugin(initContext).setup(mockCoreSetup);
+      expect(setup.getAppendCustomIntegrations()).toEqual([
+        {
+          id: 'placeholder.esf',
+          title: 'AWS Serverless Application Repository',
+          description: 'Collect logs using AWS Lambda application available in AWS Serverless Application Repository.',
+          type: 'ui_link',
+          shipper: 'placeholders',
+          uiInternalPath:
+            'https://github.com/elastic/elastic-serverless-forwarder/blob/main/docs/README-AWS.md',
+          isBeta: false,
+          icons: [{ type: 'svg' }],
+          categories: ['aws', 'custom'],
+        },
+      ]);
+    });
   });
 });
