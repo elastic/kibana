@@ -10,7 +10,5 @@ export type RuleSnooze = Array<{
   duration: number;
   timeZone: string;
   id?: string;
-  repeatInterval?: string;
-  occurrences?: number;
-  repeatEndTime?: string;
+  rRule?: string;
 }>;

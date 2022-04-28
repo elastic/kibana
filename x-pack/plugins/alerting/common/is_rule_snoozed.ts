@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import moment from 'moment-timezone';
-import { parseInterval } from '@kbn/data-plugin/common';
+import { rrulestr } from 'rrule';
 import { SanitizedRule, RuleTypeParams } from './rule';
 
 type RuleSnoozeProps = Pick<SanitizedRule<RuleTypeParams>, 'muteAll' | 'snoozeSchedule'>;
@@ -18,7 +17,7 @@ export function getRuleSnoozeEndTime(rule: RuleSnoozeProps): Date | null {
 
   const now = Date.now();
   for (const snooze of rule.snoozeSchedule) {
-    const { startTime, duration, repeatInterval, occurrences, repeatEndTime, timeZone } = snooze;
+    const { startTime, duration, rRule } = snooze;
     const startTimeMS = Date.parse(startTime);
     const initialEndTime = startTimeMS + duration;
     // If now is during the first occurrence of the snooze
@@ -26,47 +25,12 @@ export function getRuleSnoozeEndTime(rule: RuleSnoozeProps): Date | null {
     if (now >= startTimeMS && now < initialEndTime) return new Date(initialEndTime);
 
     // Check to see if now is during a recurrence of the snooze
-    if (repeatInterval) {
-      let occurrence;
-      let occurrenceStartTime;
-      if (repeatEndTime) {
-        const repeatEndTimeMS = Date.parse(repeatEndTime);
-        if (now >= repeatEndTimeMS) continue;
-      }
-      const timeFromInitialStart = now - startTimeMS;
-
-      // Handle day-of-week recurrences
-      if (repeatInterval.startsWith('DOW:')) {
-        const [, daysOfWeekString] = repeatInterval.split(':');
-        const repeatDays = daysOfWeekString
-          .split('')
-          .map((d) => Number(d))
-          .sort();
-        const today = moment(now).tz(timeZone).isoWeekday();
-
-        if (!repeatDays.includes(today)) continue;
-
-        const weeksFromInitialStart = moment(now).diff(moment(startTime), 'weeks');
-        const occurrencesPerWeek = repeatDays.length;
-        occurrence = weeksFromInitialStart * occurrencesPerWeek + repeatDays.indexOf(today);
-        const nowMoment = moment(now);
-        occurrenceStartTime = moment(startTime)
-          .year(nowMoment.year())
-          .dayOfYear(nowMoment.dayOfYear())
-          .valueOf();
-      } else {
-        const interval = parseInterval(repeatInterval)?.asMilliseconds();
-        if (!interval) continue;
-
-        occurrence = Math.floor(timeFromInitialStart / interval);
-        occurrenceStartTime = interval * occurrence + startTimeMS;
-      }
-
-      if (occurrences && occurrence > occurrences) continue;
-
-      const occurrenceEndTime = occurrenceStartTime + duration;
-
-      if (now >= occurrenceStartTime && now < occurrenceEndTime) return new Date(occurrenceEndTime);
+    if (rRule) {
+      const recurrenceRule = rrulestr(rRule);
+      const lastOccurrence = recurrenceRule.before(new Date(now), true);
+      if (!lastOccurrence) continue;
+      const lastOccurrenceEndTime = lastOccurrence.getTime() + duration;
+      if (lastOccurrenceEndTime > now) return new Date(lastOccurrenceEndTime);
     }
   }
 

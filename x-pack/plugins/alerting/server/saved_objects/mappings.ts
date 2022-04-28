@@ -200,15 +200,8 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         duration: {
           type: 'long',
         },
-        repeatInterval: {
+        rRule: {
           type: 'keyword',
-        },
-        occurrences: {
-          type: 'long',
-        },
-        repeatEndTime: {
-          type: 'date',
-          format: 'strict_date_time',
         },
       },
     },
