@@ -81,7 +81,6 @@ describe('AddSourceLogic', () => {
   };
   const DEFAULT_SERVICE_TYPE = {
     name: SOURCE_NAMES.BOX,
-    iconName: SOURCE_NAMES.BOX,
     serviceType: 'box',
     configuration: {
       isPublicKey: false,

@@ -19,7 +19,6 @@ import { FeatureIds, SourceDataItem } from '../../types';
 
 export const staticExternalSourceData: SourceDataItem = {
   name: SOURCE_NAMES.SHAREPOINT,
-  iconName: SOURCE_NAMES.SHAREPOINT,
   serviceType: 'external',
   configuration: {
     isPublicKey: false,
@@ -49,7 +48,6 @@ export const staticExternalSourceData: SourceDataItem = {
 export const staticSourceData: SourceDataItem[] = [
   {
     name: SOURCE_NAMES.BOX,
-    iconName: SOURCE_NAMES.BOX,
     serviceType: 'box',
     configuration: {
       isPublicKey: false,
@@ -78,7 +76,6 @@ export const staticSourceData: SourceDataItem[] = [
   },
   {
     name: SOURCE_NAMES.CONFLUENCE,
-    iconName: SOURCE_NAMES.CONFLUENCE,
     serviceType: 'confluence_cloud',
     configuration: {
       isPublicKey: false,
@@ -112,7 +109,6 @@ export const staticSourceData: SourceDataItem[] = [
   },
   {
     name: SOURCE_NAMES.CONFLUENCE_SERVER,
-    iconName: SOURCE_NAMES.CONFLUENCE_SERVER,
     serviceType: 'confluence_server',
     configuration: {
       isPublicKey: true,
@@ -144,7 +140,6 @@ export const staticSourceData: SourceDataItem[] = [
   },
   {
     name: SOURCE_NAMES.DROPBOX,
-    iconName: SOURCE_NAMES.DROPBOX,
     serviceType: 'dropbox',
     configuration: {
       isPublicKey: false,
@@ -173,7 +168,6 @@ export const staticSourceData: SourceDataItem[] = [
   },
   {
     name: SOURCE_NAMES.GITHUB,
-    iconName: SOURCE_NAMES.GITHUB,
     serviceType: 'github',
     configuration: {
       isPublicKey: false,
@@ -209,7 +203,6 @@ export const staticSourceData: SourceDataItem[] = [
   },
   {
     name: SOURCE_NAMES.GITHUB_ENTERPRISE,
-    iconName: SOURCE_NAMES.GITHUB_ENTERPRISE,
     serviceType: 'github_enterprise_server',
     configuration: {
       isPublicKey: false,
@@ -251,7 +244,6 @@ export const staticSourceData: SourceDataItem[] = [
   },
   {
     name: SOURCE_NAMES.GMAIL,
-    iconName: SOURCE_NAMES.GMAIL,
     serviceType: 'gmail',
     configuration: {
       isPublicKey: false,
@@ -269,7 +261,6 @@ export const staticSourceData: SourceDataItem[] = [
   },
   {
     name: SOURCE_NAMES.GOOGLE_DRIVE,
-    iconName: SOURCE_NAMES.GOOGLE_DRIVE,
     serviceType: 'google_drive',
     configuration: {
       isPublicKey: false,
@@ -302,7 +293,6 @@ export const staticSourceData: SourceDataItem[] = [
   },
   {
     name: SOURCE_NAMES.JIRA,
-    iconName: SOURCE_NAMES.JIRA,
     serviceType: 'jira_cloud',
     configuration: {
       isPublicKey: false,
@@ -338,7 +328,6 @@ export const staticSourceData: SourceDataItem[] = [
   },
   {
     name: SOURCE_NAMES.JIRA_SERVER,
-    iconName: SOURCE_NAMES.JIRA_SERVER,
     serviceType: 'jira_server',
     configuration: {
       isPublicKey: true,
@@ -373,7 +362,6 @@ export const staticSourceData: SourceDataItem[] = [
   },
   {
     name: SOURCE_NAMES.NETWORK_DRVE,
-    iconName: SOURCE_NAMES.NETWORK_DRVE,
     categories: [SOURCE_CATEGORIES.STORAGE],
     serviceType: 'network_drive', // this doesn't exist on the BE
     configuration: {
@@ -390,7 +378,6 @@ export const staticSourceData: SourceDataItem[] = [
   },
   {
     name: SOURCE_NAMES.ONEDRIVE,
-    iconName: SOURCE_NAMES.ONEDRIVE,
     serviceType: 'one_drive',
     configuration: {
       isPublicKey: false,
@@ -419,7 +406,6 @@ export const staticSourceData: SourceDataItem[] = [
   },
   {
     name: SOURCE_NAMES.OUTLOOK,
-    iconName: SOURCE_NAMES.OUTLOOK,
     categories: [
       SOURCE_CATEGORIES.COMMUNICATIONS,
       SOURCE_CATEGORIES.PRODUCTIVITY,
@@ -440,7 +426,6 @@ export const staticSourceData: SourceDataItem[] = [
   },
   {
     name: SOURCE_NAMES.SALESFORCE,
-    iconName: SOURCE_NAMES.SALESFORCE,
     serviceType: 'salesforce',
     configuration: {
       isPublicKey: false,
@@ -476,7 +461,6 @@ export const staticSourceData: SourceDataItem[] = [
   },
   {
     name: SOURCE_NAMES.SALESFORCE_SANDBOX,
-    iconName: SOURCE_NAMES.SALESFORCE_SANDBOX,
     serviceType: 'salesforce_sandbox',
     configuration: {
       isPublicKey: false,
@@ -512,7 +496,6 @@ export const staticSourceData: SourceDataItem[] = [
   },
   {
     name: SOURCE_NAMES.SERVICENOW,
-    iconName: SOURCE_NAMES.SERVICENOW,
     serviceType: 'service_now',
     configuration: {
       isPublicKey: false,
@@ -545,7 +528,6 @@ export const staticSourceData: SourceDataItem[] = [
   },
   {
     name: SOURCE_NAMES.SHAREPOINT,
-    iconName: SOURCE_NAMES.SHAREPOINT,
     serviceType: 'share_point',
     configuration: {
       isPublicKey: false,
@@ -576,7 +558,6 @@ export const staticSourceData: SourceDataItem[] = [
   staticExternalSourceData,
   {
     name: SOURCE_NAMES.SHAREPOINT_SERVER,
-    iconName: SOURCE_NAMES.SHAREPOINT_SERVER,
     categories: [
       SOURCE_CATEGORIES.FILE_SHARING,
       SOURCE_CATEGORIES.STORAGE,
@@ -599,7 +580,6 @@ export const staticSourceData: SourceDataItem[] = [
   },
   {
     name: SOURCE_NAMES.SLACK,
-    iconName: SOURCE_NAMES.SLACK,
     serviceType: 'slack',
     configuration: {
       isPublicKey: false,
@@ -621,7 +601,6 @@ export const staticSourceData: SourceDataItem[] = [
   },
   {
     name: SOURCE_NAMES.TEAMS,
-    iconName: SOURCE_NAMES.TEAMS,
     categories: [
       SOURCE_CATEGORIES.COMMUNICATIONS,
       SOURCE_CATEGORIES.PRODUCTIVITY,
@@ -642,7 +621,6 @@ export const staticSourceData: SourceDataItem[] = [
   },
   {
     name: SOURCE_NAMES.ZENDESK,
-    iconName: SOURCE_NAMES.ZENDESK,
     serviceType: 'zendesk',
     configuration: {
       isPublicKey: false,
@@ -671,7 +649,6 @@ export const staticSourceData: SourceDataItem[] = [
   },
   {
     name: SOURCE_NAMES.ZOOM,
-    iconName: SOURCE_NAMES.ZOOM,
     categories: [SOURCE_CATEGORIES.COMMUNICATIONS, SOURCE_CATEGORIES.PRODUCTIVITY],
     serviceType: 'zoom', // this doesn't exist on the BE
     configuration: {
@@ -690,7 +667,6 @@ export const staticSourceData: SourceDataItem[] = [
 
 export const staticCustomSourceData: SourceDataItem = {
   name: SOURCE_NAMES.CUSTOM,
-  iconName: SOURCE_NAMES.CUSTOM,
   categories: ['API', 'Custom'],
   serviceType: 'custom',
   configuration: {

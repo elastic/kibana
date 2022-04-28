@@ -72,7 +72,6 @@ export interface Configuration {
 
 export interface SourceDataItem {
   name: string;
-  iconName: string;
   categories?: string[];
   serviceType: string;
   configuration: Configuration;
