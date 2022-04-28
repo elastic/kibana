@@ -64,6 +64,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     customizeLocalHostSsl = false,
     rejectUnauthorized = true, // legacy
     emailDomainsAllowed = undefined,
+    testFiles = undefined,
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -139,7 +140,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       : [];
 
     return {
-      testFiles: [require.resolve(`../${name}/tests/`)],
+      testFiles: testFiles ? testFiles : [require.resolve(`../${name}/tests/`)],
       servers,
       services,
       junit: {
