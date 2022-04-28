@@ -46,8 +46,11 @@ export class Lifecycle {
       }
     }
 
-    this.cleanup.after$.subscribe(() => {
-      this.sub.unsubscribe();
+    // after the singular cleanup lifecycle phase completes unsubscribe from the root subscription
+    this.cleanup.after$.pipe(Rx.materialize()).subscribe((n) => {
+      if (n.kind === 'C') {
+        this.sub.unsubscribe();
+      }
     });
   }
 }
