@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import './_index.scss';
 import { compact } from 'lodash';
 import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';

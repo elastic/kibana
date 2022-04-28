@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import './_index.scss';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import {

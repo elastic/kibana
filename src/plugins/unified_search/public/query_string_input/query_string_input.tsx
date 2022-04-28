@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import './_index.scss';
 import React, { PureComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
