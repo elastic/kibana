@@ -49,7 +49,6 @@ export interface OauthParams {
 }
 
 export interface AddSourceActions {
-  initializeAddSource(): void;
   setAddSourceStep(addSourceCurrentStep: AddSourceSteps): AddSourceSteps;
   setSourceConfigData(sourceConfigData: SourceConfigData): SourceConfigData;
   setSourceConnectData(sourceConnectData: SourceConnectData): SourceConnectData;
@@ -156,7 +155,6 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
   {
     path: ['enterprise_search', 'workplace_search', 'add_source_logic'],
     actions: {
-      initializeAddSource: () => true,
       setAddSourceStep: (addSourceCurrentStep: AddSourceSteps) => addSourceCurrentStep,
       setSourceConfigData: (sourceConfigData: SourceConfigData) => sourceConfigData,
       setSourceConnectData: (sourceConnectData: SourceConnectData) => sourceConnectData,
@@ -332,9 +330,6 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       ],
     }),
     listeners: ({ actions, values, props }) => ({
-      initializeAddSource: () => {
-        actions.getSourceConfigData();
-      },
       getSourceConfigData: async () => {
         const { serviceType } = props;
         // TODO: Once multi-config support for connectors is added, this request url will need to include an ID

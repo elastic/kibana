@@ -81,7 +81,7 @@ import {
   SOURCE_SYNC_CONFIRM_TITLE,
   SOURCE_SYNC_CONFIRM_MESSAGE,
 } from '../constants';
-import { getSourceData, staticCustomSourceData } from '../source_data';
+import { getSourceData } from '../source_data';
 import { SourceLogic } from '../source_logic';
 
 import { CustomSourceDeployment } from './custom_source_deployment';
@@ -106,17 +106,21 @@ export const Overview: React.FC = () => {
     isFederatedSource,
     isIndexedSource,
     name,
+    serviceType,
+    baseServiceType,
   } = contentSource;
-
-  const serviceType = contentSource.baseServiceType || contentSource.serviceType;
-
-  const sourceData = getSourceData(serviceType);
 
   const [isSyncing, setIsSyncing] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const closeModal = () => setIsModalVisible(false);
   const handleSyncClick = () => setIsModalVisible(true);
   const showSyncTriggerCallout = !custom && isIndexedSource && isOrganization;
+
+  const sourceData = getSourceData(serviceType, baseServiceType);
+
+  if (!sourceData) {
+    return null;
+  }
 
   const onSyncConfirm = () => {
     initializeSourceSynchronization(id);
@@ -431,11 +435,7 @@ export const Overview: React.FC = () => {
         </h6>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <CustomSourceDeployment
-        source={contentSource}
-        sourceData={sourceData || staticCustomSourceData}
-        small
-      />
+      <CustomSourceDeployment source={contentSource} sourceData={sourceData} small />
     </>
   );
 
