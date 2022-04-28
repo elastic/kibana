@@ -600,5 +600,69 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.missingOrFail('centerJustifiedSpinner');
     });
+
+    it('should filter alerts by the tag', async () => {
+      await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: {
+          tags: ['a'],
+        },
+      });
+      await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: {
+          tags: ['b'],
+        },
+      });
+      await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: {
+          tags: ['a', 'b'],
+        },
+      });
+      await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: {
+          tags: ['b', 'c'],
+        },
+      });
+      await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: {
+          tags: ['c'],
+        },
+      });
+
+      await refreshAlertsList();
+      await testSubjects.click('ruleTagFilter');
+      await testSubjects.click('ruleTagFilterOption-a');
+
+      let filteredRules;
+
+      await retry.try(async () => {
+        filteredRules = await pageObjects.triggersActionsUI.getAlertsList();
+        expect(filteredRules.length).to.equal(2);
+      });
+
+      await testSubjects.click('ruleTagFilterOption-a');
+
+      await retry.try(async () => {
+        filteredRules = await pageObjects.triggersActionsUI.getAlertsList();
+        expect(filteredRules.length).to.equal(5);
+      });
+
+      await testSubjects.click('ruleTagFilterOption-a');
+      await testSubjects.click('ruleTagFilterOption-b');
+
+      await retry.try(async () => {
+        filteredRules = await pageObjects.triggersActionsUI.getAlertsList();
+        expect(filteredRules.length).to.equal(4);
+      });
+    });
   });
 };

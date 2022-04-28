@@ -598,11 +598,11 @@ export const RulesList: React.FunctionComponent = () => {
         sortable: false,
         width: '50px',
         'data-test-subj': 'rulesTableCell-tagsPopover',
-        render: (tags: string[], item: RuleTableItem) => {
-          return tags.length > 0 ? (
+        render: (ruleTags: string[], item: RuleTableItem) => {
+          return ruleTags.length > 0 ? (
             <RuleTagBadge
               isOpen={tagPopoverOpenIndex === item.index}
-              tags={tags}
+              tags={ruleTags}
               onClick={() => setTagPopoverOpenIndex(item.index)}
               onClose={() => setTagPopoverOpenIndex(-1)}
             />
