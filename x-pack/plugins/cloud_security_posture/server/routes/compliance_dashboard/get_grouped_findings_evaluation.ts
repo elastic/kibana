@@ -54,7 +54,7 @@ export const getRisksEsQuery = (query: QueryDslQueryContainer, pitId: string): S
 
 export const getFailedFindingsFromAggs = (
   queryResult: FailedFindingsBucket[]
-): ComplianceDashboardData['resourcesTypes'] =>
+): ComplianceDashboardData['groupedFindingsEvaluation'] =>
   queryResult.map((bucket) => ({
     name: bucket.key,
     totalFindings: bucket.doc_count,
@@ -62,11 +62,11 @@ export const getFailedFindingsFromAggs = (
     totalPassed: bucket.passed_findings.doc_count || 0,
   }));
 
-export const getResourcesTypes = async (
+export const getGroupedFindingsEvaluation = async (
   esClient: ElasticsearchClient,
   query: QueryDslQueryContainer,
   pitId: string
-): Promise<ComplianceDashboardData['resourcesTypes']> => {
+): Promise<ComplianceDashboardData['groupedFindingsEvaluation']> => {
   const resourceTypesQueryResult = await esClient.search<unknown, FailedFindingsQueryResult>(
     getRisksEsQuery(query, pitId)
   );

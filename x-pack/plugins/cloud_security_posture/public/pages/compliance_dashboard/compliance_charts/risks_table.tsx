@@ -14,7 +14,7 @@ import {
   EuiLink,
   EuiText,
 } from '@elastic/eui';
-import { ComplianceDashboardData, ResourceType } from '../../../../common/types';
+import { ComplianceDashboardData, GroupedFindingsEvaluation } from '../../../../common/types';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
 import * as TEXT from '../translations';
 import { INTERNAL_FEATURE_FLAGS } from '../../../../common/constants';
@@ -59,14 +59,14 @@ const mockData = [
 ];
 
 export interface RisksTableProps {
-  data: ComplianceDashboardData['resourcesTypes'];
+  data: ComplianceDashboardData['groupedFindingsEvaluation'];
   maxItems: number;
-  onCellClick: (resourceTypeName: string) => void;
+  onCellClick: (name: string) => void;
   onViewAllClick: () => void;
 }
 
 export const getTopRisks = (
-  resourcesTypes: ComplianceDashboardData['resourcesTypes'],
+  resourcesTypes: ComplianceDashboardData['groupedFindingsEvaluation'],
   maxItems: number
 ) => {
   const filtered = resourcesTypes.filter((x) => x.totalFailed > 0);
@@ -85,15 +85,18 @@ export const RisksTable = ({
     () => [
       {
         field: 'name',
-        name: TEXT.RESOURCE_TYPE,
-        render: (resourceTypeName: ResourceType['name']) => (
-          <EuiLink onClick={() => onCellClick(resourceTypeName)}>{resourceTypeName}</EuiLink>
+        name: TEXT.CIS_SECTION,
+        render: (name: GroupedFindingsEvaluation['name']) => (
+          <EuiLink onClick={() => onCellClick(name)}>{name}</EuiLink>
         ),
       },
       {
         field: 'totalFailed',
         name: TEXT.FINDINGS,
-        render: (totalFailed: ResourceType['totalFailed'], resource: ResourceType) => (
+        render: (
+          totalFailed: GroupedFindingsEvaluation['totalFailed'],
+          resource: GroupedFindingsEvaluation
+        ) => (
           <>
             <EuiText size="s" color="danger">
               <CompactFormattedNumber number={resource.totalFailed} />
@@ -114,7 +117,7 @@ export const RisksTable = ({
   return (
     <EuiFlexGroup direction="column" justifyContent="spaceBetween" gutterSize="s">
       <EuiFlexItem>
-        <EuiBasicTable<ResourceType>
+        <EuiBasicTable<GroupedFindingsEvaluation>
           rowHeader="name"
           items={INTERNAL_FEATURE_FLAGS.showRisksMock ? getTopRisks(mockData, maxItems) : items}
           columns={columns}

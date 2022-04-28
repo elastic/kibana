@@ -61,7 +61,7 @@ export const SummarySection = ({ complianceData }: { complianceData: ComplianceD
       <EuiFlexItem>
         <ChartPanel title={TEXT.RISKS}>
           <RisksTable
-            data={complianceData.resourcesTypes}
+            data={complianceData.groupedFindingsEvaluation}
             maxItems={5}
             onCellClick={handleCellClick}
             onViewAllClick={handleViewAllClick}

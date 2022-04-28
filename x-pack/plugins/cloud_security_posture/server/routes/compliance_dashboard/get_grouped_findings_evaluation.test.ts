@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getFailedFindingsFromAggs, FailedFindingsBucket } from './get_resources_types';
+import { getFailedFindingsFromAggs, FailedFindingsBucket } from './get_grouped_findings_evaluation';
 
 const resourceTypeBuckets: FailedFindingsBucket[] = [
   {

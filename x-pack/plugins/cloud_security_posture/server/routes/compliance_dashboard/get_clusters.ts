@@ -12,8 +12,11 @@ import type {
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { Cluster } from '../../../common/types';
-import { getFailedFindingsFromAggs, failedFindingsAggQuery } from './get_resources_types';
-import type { FailedFindingsQueryResult } from './get_resources_types';
+import {
+  getFailedFindingsFromAggs,
+  failedFindingsAggQuery,
+} from './get_grouped_findings_evaluation';
+import type { FailedFindingsQueryResult } from './get_grouped_findings_evaluation';
 import { findingsEvaluationAggsQuery, getStatsFromFindingsEvaluationsAggs } from './get_stats';
 import { KeyDocCount } from './compliance_dashboard';
 
