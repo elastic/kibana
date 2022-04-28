@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { UserContentType } from '../types';
 import { MetadataEventsService } from './metadata_events_service';
 
 export interface InitOptions<T> {
@@ -22,18 +21,18 @@ interface Dependencies {
   metadataEventService: MetadataEventsService;
 }
 export class UserContentService {
-  private contents: Map<UserContentType, UserContent<unknown>>;
+  private contents: Map<string, UserContent<unknown>>;
   private metadataEventsService: MetadataEventsService | undefined;
 
   constructor() {
-    this.contents = new Map<UserContentType, UserContent<unknown>>();
+    this.contents = new Map<string, UserContent<unknown>>();
   }
 
   init({ metadataEventService }: Dependencies) {
     this.metadataEventsService = metadataEventService;
   }
 
-  register<T>(contentType: UserContentType, { get }: InitOptions<T>): void {
+  register<T>(contentType: string, { get }: InitOptions<T>): void {
     if (this.contents.has(contentType)) {
       throw new Error(`User content type [${contentType}] is already registered`);
     }
@@ -43,7 +42,7 @@ export class UserContentService {
     });
   }
 
-  get<T = unknown>(contentType: UserContentType, contentId: string): Promise<T> {
+  get<T = unknown>(contentType: string, contentId: string): Promise<T> {
     const userContent = this.contents.get(contentType) as UserContent<T>;
 
     if (!userContent) {
