@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { MetadataEvent } from '../types';
+import type { MetadataEvent } from '../../common';
 import { MetadataEventsStream } from './metadata_events_stream';
 
 import type { MetadataEventsStreamsIndex } from './metadata_events_streams_index';
