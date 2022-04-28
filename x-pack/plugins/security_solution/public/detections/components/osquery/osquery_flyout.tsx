@@ -43,7 +43,10 @@ export const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({ agentId, 
 
   const handleAddToTimeline = useCallback(
     (payload: { query: [string, string]; isIcon?: true }) => {
-      const [field, value] = payload.query;
+      const {
+        query: [field, value],
+        isIcon,
+      } = payload;
       const providerA: DataProvider = {
         and: [],
         enabled: true,
@@ -62,7 +65,7 @@ export const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({ agentId, 
         dataProvider: providerA,
         field: value,
         ownFocus: false,
-        ...(payload.isIcon ? { showTooltip: true } : { Component: TimelineComponent }),
+        ...(isIcon ? { showTooltip: true } : { Component: TimelineComponent }),
       });
     },
     [getAddToTimelineButton]
