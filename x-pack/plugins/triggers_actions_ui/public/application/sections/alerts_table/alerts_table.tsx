@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, Suspense, lazy, useCallback, useMemo } from 'react';
+import React, { useState, Suspense, lazy, useCallback, useMemo, useEffect } from 'react';
 import {
   EuiDataGrid,
   EuiEmptyPrompt,
@@ -13,9 +13,9 @@ import {
   EuiDataGridCellValueProps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiToolTip,
   EuiButtonIcon,
+  EuiDataGridStyle,
 } from '@elastic/eui';
 import { useSorting, usePagination } from './hooks';
 import { AlertsTableProps, AlertsField } from '../../../types';
@@ -26,6 +26,9 @@ import {
   ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL,
   ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL,
 } from './translations';
+import './alerts_table.scss';
+
+export const ACTIVE_ROW_CLASS = 'alertsTableActiveRow';
 
 const AlertsFlyout = lazy(() => import('./alerts_flyout'));
 
@@ -35,6 +38,7 @@ const emptyConfiguration = {
 };
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
+  const [rowClasses, setRowClasses] = useState<EuiDataGridStyle['rowClasses']>({});
   const { activePage, alertsCount, onPageChange, onSortChange } = props.useFetchAlertsData();
   const { sortingColumns, onSort } = useSorting(onSortChange);
   const {
@@ -80,14 +84,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
           };
           return (
             <EuiFlexGroup gutterSize="none" responsive={false}>
-              {flyoutAlertIndex === visibleRowIndex ? (
-                <EuiFlexItem grow={false}>
-                  <EuiIcon
-                    type="alert"
-                    data-test-subj={`expandColumnCellAlertIcon-${visibleRowIndex}`}
-                  />
-                </EuiFlexItem>
-              ) : null}
               <EuiFlexItem grow={false}>
                 <EuiToolTip content={ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL}>
                   <EuiButtonIcon
@@ -108,7 +104,15 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       },
       ...props.leadingControlColumns,
     ];
-  }, [props.leadingControlColumns, flyoutAlertIndex, setFlyoutAlertIndex]);
+  }, [props.leadingControlColumns, setFlyoutAlertIndex]);
+
+  useEffect(() => {
+    // Row classes do not deal with visible row indices so we need to handle page offset
+    const rowIndex = flyoutAlertIndex + pagination.pageIndex * pagination.pageSize;
+    setRowClasses({
+      [rowIndex]: ACTIVE_ROW_CLASS,
+    });
+  }, [flyoutAlertIndex, pagination.pageIndex, pagination.pageSize]);
 
   const handleFlyoutClose = useCallback(() => setFlyoutAlertIndex(-1), [setFlyoutAlertIndex]);
 
@@ -126,6 +130,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       )}
       <EuiDataGrid
         aria-label="Alerts table"
+        data-test-subj="alertsTable"
         columns={alertsTableConfiguration.columns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
         trailingControlColumns={props.trailingControlColumns}
@@ -140,6 +145,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
             field: rcvProps.columnId as AlertsField,
           });
         }}
+        gridStyle={{ rowClasses }}
         sorting={{ columns: sortingColumns, onSort }}
         pagination={{
           ...pagination,
@@ -151,7 +157,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     </section>
   ) : (
     <EuiEmptyPrompt
-      data-test-subj="alerts-table-no-configuration"
+      data-test-subj="alertsTableNoConfiguration"
       iconType="watchesApp"
       title={<h2>{ALERTS_TABLE_CONF_ERROR_TITLE}</h2>}
       body={<p>{ALERTS_TABLE_CONF_ERROR_MESSAGE}</p>}

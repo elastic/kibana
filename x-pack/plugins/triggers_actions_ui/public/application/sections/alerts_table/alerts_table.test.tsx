@@ -164,20 +164,6 @@ describe('AlertsTable', () => {
       it('should return at least the flyout action control', async () => {
         const wrapper = render(<AlertsTable {...tableProps} />);
         expect(wrapper.getByTestId('expandColumnHeaderLabel').textContent).toBe('Actions');
-
-        userEvent.click(wrapper.queryByTestId('expandColumnCellOpenFlyoutButton-0')!);
-        expect(wrapper.queryByTestId('expandColumnCellAlertIcon-0')).not.toBeNull();
-      });
-
-      it('should only render an icon for the the active row', async () => {
-        const customTableProps = {
-          ...tableProps,
-          pageSize: 2,
-        };
-        const wrapper = render(<AlertsTable {...customTableProps} />);
-        userEvent.click(wrapper.queryByTestId('expandColumnCellOpenFlyoutButton-1')!);
-        expect(wrapper.queryByTestId('expandColumnCellAlertIcon-0')).toBeNull();
-        expect(wrapper.queryByTestId('expandColumnCellAlertIcon-1')).not.toBeNull();
       });
 
       it('should render other leading controls', () => {
@@ -209,7 +195,7 @@ describe('AlertsTable', () => {
     it('should render an empty error state when the plugin id owner is not registered', async () => {
       const props = { ...tableProps, configurationId: 'none' };
       const result = render(<AlertsTable {...props} />);
-      expect(result.getByTestId('alerts-table-no-configuration')).toBeTruthy();
+      expect(result.getByTestId('alertsTableNoConfiguration')).toBeTruthy();
     });
   });
 });
