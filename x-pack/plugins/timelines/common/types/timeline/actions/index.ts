@@ -56,6 +56,8 @@ export type OnUpdateAlertStatusError = (status: AlertStatus, error: Error) => vo
 export interface CustomBulkAction {
   key: string;
   label: string;
+  disableOnQuery?: boolean;
+  disabledLabel?: string;
   onClick: (items?: TimelineItem[]) => void;
   ['data-test-subj']?: string;
 }

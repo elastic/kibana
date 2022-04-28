@@ -11,7 +11,7 @@ import { useMemo } from 'react';
 import { APP_ID } from '../../../../../common/constants';
 import type { TimelineItem } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
-import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
+import { ADD_TO_CASE_DISABLED, ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
 
 export interface UseAddToCaseActions {
   onClose?: () => void;
@@ -50,6 +50,8 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
         label: ADD_TO_NEW_CASE,
         key: 'attach-new-case',
         'data-test-subj': 'attach-new-case',
+        disableOnQuery: true,
+        disabledLabel: ADD_TO_CASE_DISABLED,
         onClick: (items?: TimelineItem[]) => {
           const caseAttachments = timelineItemsToCaseAttachments(items, casesUi);
           createCaseFlyout.open(caseAttachments);
@@ -58,6 +60,8 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
       {
         label: ADD_TO_EXISTING_CASE,
         key: 'attach-existing-case',
+        disableOnQuery: true,
+        disabledLabel: ADD_TO_CASE_DISABLED,
         'data-test-subj': 'attach-new-case',
         onClick: (items?: TimelineItem[]) => {
           const caseAttachments = timelineItemsToCaseAttachments(items, casesUi);

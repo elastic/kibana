@@ -123,7 +123,7 @@ export const useStatusBulkActionItems = ({
   );
 
   const items = useMemo(() => {
-    const actionItems = [];
+    const actionItems: JSX.Element[] = [];
     if (currentStatus !== FILTER_OPEN) {
       actionItems.push(
         <EuiContextMenuItem
@@ -159,21 +159,25 @@ export const useStatusBulkActionItems = ({
     }
 
     const additionalItems = customBulkActions
-      ? customBulkActions.map((action) => {
-          return (
+      ? customBulkActions.reduce<JSX.Element[]>((acc, action) => {
+          const isDisabled = !!(query && action.disableOnQuery);
+          acc.push(
             <EuiContextMenuItem
               key={action.key}
+              disabled={isDisabled}
               data-test-subj={action['data-test-subj']}
+              toolTipContent={isDisabled ? action.disabledLabel : null}
               onClick={() => action.onClick(eventIds)}
             >
               {action.label}
             </EuiContextMenuItem>
           );
-        })
+          return acc;
+        }, [])
       : [];
 
     return [...actionItems, ...additionalItems];
-  }, [currentStatus, customBulkActions, eventIds, onClickUpdate]);
+  }, [currentStatus, customBulkActions, eventIds, onClickUpdate, query]);
 
   return items;
 };
