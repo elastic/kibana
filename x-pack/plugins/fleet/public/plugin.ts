@@ -275,6 +275,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       Component: LazyCustomLogsAssetsExtension,
     });
     const { capabilities } = core.application;
+    // console.log(JSON.stringify(capabilities.integrations, null, 2));
 
     //  capabilities.fleetv2 returns fleet privileges and capabilities.fleet returns integrations privileges
     return {
@@ -286,6 +287,12 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
         integrations: {
           all: capabilities.fleet.all as boolean,
           read: capabilities.fleet.read as boolean,
+        },
+        packages: {
+          all: capabilities.integrations.all as boolean,
+          read: capabilities.integrations.read as boolean,
+          managePackagePolicy: capabilities.integrations.manage_package_policy as boolean,
+          executePackageAction: capabilities.integrations.execute_package_action as boolean,
         },
         isSuperuser: false,
       }),

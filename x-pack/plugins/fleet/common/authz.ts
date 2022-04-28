@@ -27,6 +27,16 @@ export interface FleetAuthz {
     readIntegrationPolicies: boolean;
     writeIntegrationPolicies: boolean;
   };
+
+  // test for ui capabilities
+  packages?: {
+    // packageName: string;
+    // packageActions: string[];
+    manageAgentPolicy: boolean;
+    managePackagePolicy: boolean;
+    executePackageAction: boolean;
+    readPackageActionResult: boolean;
+  };
 }
 
 export interface FleetPackageAuthz {
@@ -49,12 +59,20 @@ interface CalculateParams {
     read: boolean;
   };
 
+  packages?: {
+    all: boolean;
+    read: boolean;
+    managePackagePolicy: boolean;
+    executePackageAction: boolean;
+  };
+
   isSuperuser: boolean;
 }
 
 export const calculateAuthz = ({
   fleet,
   integrations,
+  packages,
   isSuperuser,
 }: CalculateParams): FleetAuthz => ({
   fleet: {
@@ -82,4 +100,17 @@ export const calculateAuthz = ({
     // manage_all || manage_package_policy || manage_agent_policy
     writeIntegrationPolicies: fleet.all && integrations.all,
   },
+
+  packages: packages
+    ? {
+        manageAgentPolicy: packages.all,
+        managePackagePolicy: packages.all || packages.managePackagePolicy,
+        executePackageAction: packages.all || packages.executePackageAction,
+        readPackageActionResult: packages.all || packages.read,
+
+        // how would package resources be included in capabilities?
+        // packageName: 'endpoint',
+        // packageActions: ['*']
+      }
+    : undefined,
 });

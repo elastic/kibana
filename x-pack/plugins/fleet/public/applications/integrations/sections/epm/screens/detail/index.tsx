@@ -94,18 +94,18 @@ export function Detail() {
   const { getId: getAgentPolicyId } = useAgentPolicyContext();
   const { pkgkey, panel } = useParams<DetailParams>();
   const { getHref } = useLink();
-  const canInstallPackages = useAuthz().integrations.installPackages;
+
+  const authz = useAuthz();
   const canReadPackageSettings = useAuthz().integrations.readPackageSettings;
   const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
   const permissionCheck = usePermissionCheck();
   const missingSecurityConfiguration =
     !permissionCheck.data?.success && permissionCheck.data?.error === 'MISSING_SECURITY';
-  // TODO temporarily disabling ui check to test API package check
-  const userCanInstallPackages = true; // canInstallPackages && permissionCheck.data?.success;
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
+
   const services = useStartServices();
   const agentPolicyIdFromContext = getAgentPolicyId();
 
@@ -113,6 +113,11 @@ export function Detail() {
   const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
   const setPackageInstallStatus = useSetPackageInstallStatus();
   const getPackageInstallStatus = useGetPackageInstallStatus();
+
+  const canInstallPackages =
+    authz.integrations.installPackages || authz.packages?.managePackagePolicy;
+  // || (authz.packages?.managePackagePolicy && authz.packages?.packageName === packageInfo?.name);
+  const userCanInstallPackages = canInstallPackages && permissionCheck.data?.success;
 
   const CustomAssets = useUIExtension(packageInfo?.name ?? '', 'package-detail-assets');
 
