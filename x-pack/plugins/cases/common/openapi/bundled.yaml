@@ -361,6 +361,75 @@ paths:
         - url: https://localhost:5601
     servers:
       - url: https://localhost:5601
+  /api/cases/alerts/{alertId}:
+    get:
+      description: >
+        Returns the cases associated with a specific alert. This functionality
+        is in technical preview and may be changed or removed in a future
+        release. Elastic will apply best effort to fix any issues, but features
+        in technical preview are not subject to the support SLA of official GA
+        features. You must have read privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases you're seeking.
+      parameters:
+        - $ref: '#/components/parameters/alert_id'
+        - in: query
+          name: owner
+          description: >-
+            A filter to limit the retrieved case statistics to a specific set of
+            applications. If this parameter is omitted, the response contains
+            all cases that the user has access to read.
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/owners'
+              - type: array
+                items:
+                  $ref: '#/components/schemas/owners'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /api/cases/configure:
+    get:
+      description: >
+        Retrieves external connection details, such as the closure type and
+        default connector for cases. You must have read privileges for the
+        **Cases** feature in the **Management**, **Observability**, or
+        **Security** section of the Kibana feature privileges, depending on the
+        owner of the case configuration.
+      parameters:
+        - in: query
+          name: owner
+          description: >-
+            A filter to limit the retrieved case statistics to a specific set of
+            applications. If this parameter is omitted, the response contains
+            all cases that the user has access to read.
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/owners'
+              - type: array
+                items:
+                  $ref: '#/components/schemas/owners'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /api/cases/configure/connectors/_find:
     get:
       description: >-
@@ -455,6 +524,30 @@ paths:
               schema:
                 type: string
             examples: {}
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /api/cases/{caseId}/alerts:
+    get:
+      description: >
+        Gets all alerts attached to a case. This functionality is in technical
+        preview and may be changed or removed in a future release. Elastic will
+        apply best effort to fix any issues, but features in technical preview
+        are not subject to the support SLA of official GA features. You must
+        have read privileges for the **Cases** feature in the **Management**,
+        **Observability**, or **Security** section of the Kibana feature
+        privileges, depending on the owner of the cases you're seeking.
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
       servers:
         - url: https://localhost:5601
     servers:
@@ -1055,6 +1148,77 @@ paths:
         - url: https://localhost:5601
     servers:
       - url: https://localhost:5601
+  /s/{spaceId}/api/cases/alerts/{alertId}:
+    get:
+      description: >
+        Returns the cases associated with a specific alert. This functionality
+        is in technical preview and may be changed or removed in a future
+        release. Elastic will apply best effort to fix any issues, but features
+        in technical preview are not subject to the support SLA of official GA
+        features. You must have read privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases you're seeking.
+      parameters:
+        - $ref: '#/components/parameters/alert_id'
+        - $ref: '#/components/parameters/space_id'
+        - in: query
+          name: owner
+          description: >-
+            A filter to limit the retrieved case statistics to a specific set of
+            applications. If this parameter is omitted, the response contains
+            all cases that the user has access to read.
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/owners'
+              - type: array
+                items:
+                  $ref: '#/components/schemas/owners'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/cases/configure:
+    get:
+      description: >
+        Retrieves external connection details, such as the closure type and
+        default connector for cases. You must have read privileges for the
+        **Cases** feature in the **Management**, **Observability**, or
+        **Security** section of the Kibana feature privileges, depending on the
+        owner of the case configuration.
+      parameters:
+        - $ref: '#/components/parameters/space_id'
+        - in: query
+          name: owner
+          description: >-
+            A filter to limit the retrieved case statistics to a specific set of
+            applications. If this parameter is omitted, the response contains
+            all cases that the user has access to read.
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/owners'
+              - type: array
+                items:
+                  $ref: '#/components/schemas/owners'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
   /s/{spaceId}/api/cases/configure/connectors/_find:
     get:
       description: >-
@@ -1154,6 +1318,31 @@ paths:
               schema:
                 type: string
             examples: {}
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/cases/{caseId}/alerts:
+    get:
+      description: >
+        Gets all alerts attached to a case. This functionality is in technical
+        preview and may be changed or removed in a future release. Elastic will
+        apply best effort to fix any issues, but features in technical preview
+        are not subject to the support SLA of official GA features. You must
+        have read privileges for the **Cases** feature in the **Management**,
+        **Observability**, or **Security** section of the Kibana feature
+        privileges, depending on the owner of the cases you're seeking.
+      parameters:
+        - $ref: '#/components/parameters/case_id'
+        - $ref: '#/components/parameters/space_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
       servers:
         - url: https://localhost:5601
     servers:
@@ -1560,6 +1749,14 @@ components:
       schema:
         type: string
       example: now%2B1d
+    alert_id:
+      in: path
+      name: alertId
+      description: An identifier for the alert.
+      required: true
+      schema:
+        type: string
+        example: 09f0c261e39e36351d75995b78bb83673774d1bc2cca9df2d15f0e5c0a99a540
     case_id:
       in: path
       name: caseId

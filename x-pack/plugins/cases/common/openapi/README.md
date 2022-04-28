@@ -17,7 +17,7 @@ It is possible to validate the docs before bundling them with the following
 command in the `x-pack/plugins/cases/common/openapi/` folder:
 
   ```
-    npx swagger-cli validate x-pack/plugins/cases/common/openapi/entrypoint.yaml
+    npx swagger-cli validate entrypoint.yaml
   ```
 
 Then you can generate the `bundled` files by running the following commands:
