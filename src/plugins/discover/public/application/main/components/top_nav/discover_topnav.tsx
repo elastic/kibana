@@ -52,7 +52,10 @@ export const DiscoverTopNav = ({
   );
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data } = services;
-  const editPermission = dataViewFieldEditor.userPermissions.editIndexPattern();
+  const editPermission = useMemo(
+    () => dataViewFieldEditor.userPermissions.editIndexPattern(),
+    [dataViewFieldEditor]
+  );
   const canEditDataViewField = !!editPermission && useNewFieldsApi;
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
