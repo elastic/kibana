@@ -92,25 +92,26 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await waitTableIsLoaded();
       await testSubjects.click('expandColumnCellOpenFlyoutButton-0');
       await waitFlyoutOpen();
+      await waitFlyoutIsLoaded();
 
-      expect(await testSubjects.getVisibleText('alertsFlyoutTitle')).to.be(
+      expect(await testSubjects.getVisibleText('alertsFlyoutName')).to.be(
         'APM Failed Transaction Rate (one)'
       );
       expect(await testSubjects.getVisibleText('alertsFlyoutReason')).to.be(
         'Failed transactions rate is greater than 5.0% (current value is 31%) for elastic-co-frontend'
       );
 
-      await testSubjects.click('alertsFlyoutPaginateNext');
+      await testSubjects.click('pagination-button-next');
 
-      expect(await testSubjects.getVisibleText('alertsFlyoutTitle')).to.be(
+      expect(await testSubjects.getVisibleText('alertsFlyoutName')).to.be(
         'APM Failed Transaction Rate (one)'
       );
       expect(await testSubjects.getVisibleText('alertsFlyoutReason')).to.be(
         'Failed transactions rate is greater than 5.0% (current value is 35%) for opbeans-python'
       );
 
-      await testSubjects.click('alertsFlyoutPaginatePrevious');
-      await testSubjects.click('alertsFlyoutPaginatePrevious');
+      await testSubjects.click('pagination-button-previous');
+      await testSubjects.click('pagination-button-previous');
 
       await waitTableIsLoaded();
 
@@ -134,6 +135,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       return await retry.try(async () => {
         const exists = await testSubjects.exists('alertsFlyout');
         if (!exists) throw new Error('Still loading...');
+      });
+    }
+
+    async function waitFlyoutIsLoaded() {
+      return await retry.try(async () => {
+        const exists = await testSubjects.exists('alertsFlyoutLoading');
+        if (exists) throw new Error('Still loading...');
       });
     }
 
