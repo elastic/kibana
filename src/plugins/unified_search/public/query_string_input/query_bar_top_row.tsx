@@ -21,9 +21,9 @@ import {
   EuiFieldText,
   usePrettyDuration,
   EuiIconProps,
-  EuiButtonIcon,
   OnRefreshProps,
   useIsWithinBreakpoints,
+  EuiSuperUpdateButton,
 } from '@elastic/eui';
 import {
   IDataPluginServices,
@@ -32,6 +32,7 @@ import {
   Query,
   getQueryLog,
 } from '@kbn/data-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { DataView } from '@kbn/data-views-plugin/public';
 import type { PersistedLog } from '@kbn/data-plugin/public';
 import { useKibana, withKibana } from '@kbn/kibana-react-plugin/public';
@@ -46,7 +47,7 @@ import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_butt
 const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any
 ) as unknown as typeof EuiSuperDatePicker;
-const SuperUpdateButton = React.memo(EuiButtonIcon);
+const SuperUpdateButton = React.memo(EuiSuperUpdateButton);
 
 const QueryStringInput = withKibana(QueryStringInputUI);
 
@@ -348,19 +349,38 @@ export const QueryBarTopRow = React.memo(
       if (!shouldRenderUpdatebutton()) {
         return null;
       }
+
+      const buttonLabelUpdate = i18n.translate('unifiedSearch.queryBarTopRow.submitButton.update', {
+        defaultMessage: 'Needs updating',
+      });
+      const buttonLabelRefresh = i18n.translate(
+        'unifiedSearch.queryBarTopRow.submitButton.refresh',
+        {
+          defaultMessage: 'Refresh query',
+        }
+      );
+
       const button = props.customSubmitButton ? (
         React.cloneElement(props.customSubmitButton, { onClick: onClickSubmitButton })
       ) : (
         <EuiFlexItem grow={false}>
           <SuperUpdateButton
-            display="base"
             iconType={props.isDirty ? 'kqlFunction' : 'refresh'}
-            aria-label={props.isLoading ? 'Update query' : 'Refresh query'}
+            iconOnly
+            aria-label={props.isDirty ? buttonLabelUpdate : buttonLabelRefresh}
             isDisabled={isDateRangeInvalid}
+            isLoading={props.isLoading}
             onClick={onClickSubmitButton}
             size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
             color={props.isDirty ? 'success' : 'primary'}
+            fill={props.isDirty}
             data-test-subj="querySubmitButton"
+            // @ts-expect-error Need to fix expecting `children` in EUI
+            toolTipProps={{
+              content: props.isDirty ? buttonLabelUpdate : buttonLabelRefresh,
+              delay: 'long',
+              position: 'bottom',
+            }}
           />
         </EuiFlexItem>
       );
