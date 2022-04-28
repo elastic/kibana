@@ -116,7 +116,7 @@ export class ImportView extends Component {
           // check to see if the user has permission to create and ingest data into the specified index
           if (
             (await fileUpload.hasImportPermission({
-              checkCreateIndexPattern: createDataView,
+              checkCreateDataView: createDataView,
               checkHasManagePipeline: true,
               indexName: index,
             })) === false

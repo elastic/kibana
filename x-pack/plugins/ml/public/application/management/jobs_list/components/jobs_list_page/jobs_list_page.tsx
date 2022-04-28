@@ -9,7 +9,7 @@ import React, { useEffect, useState, Fragment, FC, useMemo, useCallback } from '
 import { Router } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 
 import {
   EuiButtonEmpty,
@@ -22,21 +22,23 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
-import { PLUGIN_ID } from '../../../../../../common/constants/app';
-import type { ManagementAppMountParams } from '../../../../../../../../../src/plugins/management/public';
-
-import { checkGetManagementMlJobsResolver } from '../../../../capabilities/check_capabilities';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import {
   KibanaContextProvider,
   KibanaThemeProvider,
   RedirectAppLinks,
-} from '../../../../../../../../../src/plugins/kibana_react/public';
+} from '@kbn/kibana-react-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SpacesPluginStart, SpacesContextProps } from '@kbn/spaces-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { PLUGIN_ID } from '../../../../../../common/constants/app';
 
-import { getDocLinks } from '../../../../util/dependency_cache';
+import { checkGetManagementMlJobsResolver } from '../../../../capabilities/check_capabilities';
+
 // @ts-ignore undeclared module
-import { JobsListView } from '../../../../jobs/jobs_list/components/jobs_list_view/index';
+import { JobsListView } from '../../../../jobs/jobs_list/components/jobs_list_view';
 import { DataFrameAnalyticsList } from '../../../../data_frame_analytics/pages/analytics_management/components/analytics_list';
 import {
   ModelsList,
@@ -44,8 +46,6 @@ import {
 } from '../../../../trained_models/models_management/models_list';
 import { AccessDeniedPage } from '../access_denied_page';
 import { InsufficientLicensePage } from '../insufficient_license_page';
-import type { SharePluginStart } from '../../../../../../../../../src/plugins/share/public';
-import type { SpacesPluginStart, SpacesContextProps } from '../../../../../../../spaces/public';
 import { JobSpacesSyncFlyout } from '../../../../components/job_spaces_sync';
 import { getDefaultAnomalyDetectionJobsListState } from '../../../../jobs/jobs_list/jobs';
 import { getMlGlobalServices } from '../../../../app';
@@ -53,7 +53,7 @@ import { ListingPageUrlState } from '../../../../../../common/types/common';
 import { getDefaultDFAListState } from '../../../../data_frame_analytics/pages/analytics_management/page';
 import { ExportJobsFlyout, ImportJobsFlyout } from '../../../../components/import_export_jobs';
 import type { JobType, MlSavedObjectType } from '../../../../../../common/types/saved_objects';
-import type { FieldFormatsStart } from '../../../../../../../../../src/plugins/field_formats/public';
+import { useMlKibana } from '../../../../contexts/kibana';
 
 interface Tab extends EuiTabbedContentTab {
   'data-test-subj': string;
@@ -201,30 +201,6 @@ export const JobsListPage: FC<{
     return null;
   }
 
-  const anomalyDetectionJobsUrl = getDocLinks().links.ml.anomalyDetectionJobs;
-  const dataFrameAnalyticsUrl = getDocLinks().links.ml.dataFrameAnalytics;
-
-  const anomalyDetectionDocsLabel = i18n.translate(
-    'xpack.ml.management.jobsList.anomalyDetectionDocsLabel',
-    {
-      defaultMessage: 'Anomaly detection jobs docs',
-    }
-  );
-  const analyticsDocsLabel = i18n.translate('xpack.ml.management.jobsList.analyticsDocsLabel', {
-    defaultMessage: 'Analytics jobs docs',
-  });
-
-  const docsLink = (
-    <EuiButtonEmpty
-      href={currentTabId === 'anomaly-detector' ? anomalyDetectionJobsUrl : dataFrameAnalyticsUrl}
-      target="_blank"
-      iconType="help"
-      data-test-subj="documentationLink"
-    >
-      {currentTabId === 'anomaly-detector' ? anomalyDetectionDocsLabel : analyticsDocsLabel}
-    </EuiButtonEmpty>
-  );
-
   function renderTabs() {
     return (
       <EuiTabbedContent
@@ -271,16 +247,16 @@ export const JobsListPage: FC<{
                   pageTitle={
                     <FormattedMessage
                       id="xpack.ml.management.jobsList.jobsListTitle"
-                      defaultMessage="Machine Learning Jobs"
+                      defaultMessage="Machine Learning"
                     />
                   }
                   description={
                     <FormattedMessage
                       id="xpack.ml.management.jobsList.jobsListTagline"
-                      defaultMessage="View, export, and import machine learning analytics and anomaly detection jobs."
+                      defaultMessage="View, export, and import machine learning analytics and anomaly detection items."
                     />
                   }
-                  rightSideItems={[docsLink]}
+                  rightSideItems={[<DocsLink currentTabId={currentTabId} />]}
                   bottomBorder
                 />
 
@@ -327,5 +303,37 @@ export const JobsListPage: FC<{
         </KibanaThemeProvider>
       </I18nContext>
     </RedirectAppLinks>
+  );
+};
+
+const DocsLink: FC<{ currentTabId: MlSavedObjectType }> = ({ currentTabId }) => {
+  const {
+    services: {
+      docLinks: {
+        links: { ml },
+      },
+    },
+  } = useMlKibana();
+
+  let href = ml.anomalyDetectionJobs;
+  let linkLabel = i18n.translate('xpack.ml.management.jobsList.anomalyDetectionDocsLabel', {
+    defaultMessage: 'Anomaly detection jobs docs',
+  });
+
+  if (currentTabId === 'data-frame-analytics') {
+    href = ml.dataFrameAnalytics;
+    linkLabel = i18n.translate('xpack.ml.management.jobsList.analyticsDocsLabel', {
+      defaultMessage: 'Analytics jobs docs',
+    });
+  } else if (currentTabId === 'trained-model') {
+    href = ml.trainedModels;
+    linkLabel = i18n.translate('xpack.ml.management.jobsList.trainedModelsDocsLabel', {
+      defaultMessage: 'Trained models docs',
+    });
+  }
+  return (
+    <EuiButtonEmpty href={href} target="_blank" iconType="help" data-test-subj="documentationLink">
+      {linkLabel}
+    </EuiButtonEmpty>
   );
 };

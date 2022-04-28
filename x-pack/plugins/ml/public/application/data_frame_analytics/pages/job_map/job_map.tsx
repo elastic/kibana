@@ -41,9 +41,10 @@ ${theme.euiColorLightShade}`,
 interface Props {
   analyticsId?: string;
   modelId?: string;
+  forceRefresh?: boolean;
 }
 
-export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
+export const JobMap: FC<Props> = ({ analyticsId, modelId, forceRefresh }) => {
   // itemsDeleted will reset to false when Controls component calls updateElements to remove nodes deleted from map
   const [itemsDeleted, setItemsDeleted] = useState<boolean>(false);
   const [resetCyToggle, setResetCyToggle] = useState<boolean>(false);
@@ -110,6 +111,12 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
   useEffect(() => {
     fetchAndSetElementsWrapper({ analyticsId, modelId });
   }, [analyticsId, modelId]);
+
+  useEffect(() => {
+    if (forceRefresh === true) {
+      fetchAndSetElementsWrapper({ analyticsId, modelId });
+    }
+  }, [forceRefresh]);
 
   useEffect(() => {
     if (message !== undefined) {

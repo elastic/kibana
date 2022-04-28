@@ -7,7 +7,8 @@
 
 import { get, uniq } from 'lodash';
 
-import type { FeatureKibanaPrivileges, KibanaFeature } from '../../../../../features/server';
+import type { FeatureKibanaPrivileges, KibanaFeature } from '@kbn/features-plugin/server';
+
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
 enum AlertingEntity {
@@ -33,6 +34,7 @@ const writeOperations: Record<AlertingEntity, string[]> = {
     'muteAlert',
     'unmuteAlert',
     'snooze',
+    'unsnooze',
   ],
   alert: ['update'],
 };

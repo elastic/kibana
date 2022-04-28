@@ -28,10 +28,10 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "//packages/elastic-datemath",
   "//packages/elastic-safer-lodash-set",
   "//packages/kbn-analytics",
   "//packages/kbn-babel-preset",
+  "//packages/kbn-datemath",
   "//packages/kbn-flot-charts",
   "//packages/kbn-i18n",
   "//packages/kbn-i18n-react",
@@ -42,9 +42,9 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/elastic-datemath:npm_module_types",
   "//packages/elastic-safer-lodash-set:npm_module_types",
   "//packages/kbn-analytics:npm_module_types",
+  "//packages/kbn-datemath:npm_module_types",
   "//packages/kbn-i18n:npm_module_types",
   "//packages/kbn-i18n-react:npm_module_types",
   "//packages/kbn-monaco:npm_module_types",

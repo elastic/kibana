@@ -8,8 +8,8 @@
 import { filter } from 'lodash';
 import { schema } from '@kbn/config-schema';
 
+import { IRouter } from '@kbn/core/server';
 import { PLUGIN_ID } from '../../../common';
-import { IRouter } from '../../../../../../src/core/server';
 import { savedQuerySavedObjectType } from '../../../common/types';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
@@ -48,7 +48,8 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
       options: { tags: [`access:${PLUGIN_ID}-writeSavedQueries`] },
     },
     async (context, request, response) => {
-      const savedObjectsClient = context.core.savedObjects.client;
+      const coreContext = await context.core;
+      const savedObjectsClient = coreContext.savedObjects.client;
       const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
 
       const {

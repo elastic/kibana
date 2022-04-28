@@ -22,9 +22,11 @@
     "dataViewFieldEditor",
     "expressionGauge",
     "expressionHeatmap",
-    "eventAnnotation"
+    "eventAnnotation",
+    "unifiedSearch"
   ],
   "optionalPlugins": [
+    "expressionXY",
     "usageCollection",
     "taskManager",
     "globalSearch",
@@ -40,6 +42,7 @@
     "common/constants"
   ],
   "requiredBundles": [
+    "unifiedSearch",
     "savedObjects",
     "kibanaUtils",
     "kibanaReact",

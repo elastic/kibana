@@ -8,23 +8,25 @@
 import { getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
 import { Operation, VisualizeEditorContext, Suggestion, OperationDescriptor } from '../types';
-import type { State, XYState, XYSuggestion } from './types';
 import type {
-  SeriesType,
-  XYDataLayerConfig,
+  State,
+  XYState,
+  XYSuggestion,
   XYLayerConfig,
+  XYDataLayerConfig,
   XYReferenceLineLayerConfig,
-} from '../../common/expressions';
+} from './types';
+import type { SeriesType } from '@kbn/expression-xy-plugin/common';
 import { layerTypes } from '../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { LensIconChartBar } from '../assets/chart_bar';
-import type { VisualizeEditorLayersContext } from '../../../../../src/plugins/visualizations/public';
-import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
-import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
-import { Datatable } from 'src/plugins/expressions';
-import { themeServiceMock } from '../../../../../src/core/public/mocks';
-import { eventAnnotationServiceMock } from 'src/plugins/event_annotation/public/mocks';
-import { EventAnnotationConfig } from 'src/plugins/event_annotation/common';
+import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { Datatable } from '@kbn/expressions-plugin';
+import { themeServiceMock } from '@kbn/core/public/mocks';
+import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
+import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 
 const exampleAnnotation: EventAnnotationConfig = {
   id: 'an1',
@@ -35,8 +37,17 @@ const exampleAnnotation: EventAnnotationConfig = {
   },
   icon: 'circle',
 };
+const exampleAnnotation2: EventAnnotationConfig = {
+  icon: 'circle',
+  id: 'an2',
+  key: {
+    timestamp: '2022-04-18T11:01:59.135Z',
+    type: 'point_in_time',
+  },
+  label: 'Annotation2',
+};
 
-function exampleState(): State {
+function exampleState(): XYState {
   return {
     legend: { position: Position.Bottom, isVisible: true },
     valueLabels: 'hide',
@@ -49,7 +60,7 @@ function exampleState(): State {
         splitAccessor: 'd',
         xAccessor: 'a',
         accessors: ['b', 'c'],
-      } as XYDataLayerConfig,
+      },
     ],
   };
 }
@@ -118,7 +129,7 @@ describe('xy_visualization', () => {
   });
 
   describe('#getVisualizationTypeId', () => {
-    function mixedState(...types: SeriesType[]) {
+    function mixedState(...types: SeriesType[]): XYState {
       const state = exampleState();
       return {
         ...state,
@@ -321,16 +332,18 @@ describe('xy_visualization', () => {
         { columnId: 'c', fields: [] },
       ]);
 
-      frame.datasourceLayers = {
-        first: mockDatasource.publicAPIMock,
-      };
-
-      frame.activeData = {
-        first: {
-          type: 'datatable',
-          rows: [],
-          columns: [],
+      frame = {
+        datasourceLayers: {
+          first: mockDatasource.publicAPIMock,
         },
+        activeData: {
+          first: {
+            type: 'datatable',
+            rows: [],
+            columns: [],
+          },
+        },
+        dateRange: { fromDate: '2022-04-10T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
       };
     });
 
@@ -425,7 +438,6 @@ describe('xy_visualization', () => {
 
     describe('annotations', () => {
       it('should add a dimension to a annotation layer', () => {
-        jest.spyOn(Date, 'now').mockReturnValue(new Date('2022-04-18T11:01:58.135Z').valueOf());
         expect(
           xyVisualization.setDimension({
             frame,
@@ -452,12 +464,62 @@ describe('xy_visualization', () => {
               icon: 'triangle',
               id: 'newCol',
               key: {
-                timestamp: '2022-04-18T11:01:58.135Z',
+                timestamp: '2022-04-15T00:00:00.000Z',
                 type: 'point_in_time',
               },
               label: 'Event',
             },
           ],
+        });
+      });
+      it('should copy previous column if passed and assign a new id', () => {
+        expect(
+          xyVisualization.setDimension({
+            frame,
+            prevState: {
+              ...exampleState(),
+              layers: [
+                {
+                  layerId: 'annotation',
+                  layerType: layerTypes.ANNOTATIONS,
+                  annotations: [exampleAnnotation2],
+                },
+              ],
+            },
+            layerId: 'annotation',
+            groupId: 'xAnnotation',
+            previousColumn: 'an2',
+            columnId: 'newColId',
+          }).layers[0]
+        ).toEqual({
+          layerId: 'annotation',
+          layerType: layerTypes.ANNOTATIONS,
+          annotations: [exampleAnnotation2, { ...exampleAnnotation2, id: 'newColId' }],
+        });
+      });
+      it('should reorder a dimension to a annotation layer', () => {
+        expect(
+          xyVisualization.setDimension({
+            frame,
+            prevState: {
+              ...exampleState(),
+              layers: [
+                {
+                  layerId: 'annotation',
+                  layerType: layerTypes.ANNOTATIONS,
+                  annotations: [exampleAnnotation, exampleAnnotation2],
+                },
+              ],
+            },
+            layerId: 'annotation',
+            groupId: 'xAnnotation',
+            previousColumn: 'an2',
+            columnId: 'an1',
+          }).layers[0]
+        ).toEqual({
+          layerId: 'annotation',
+          layerType: layerTypes.ANNOTATIONS,
+          annotations: [exampleAnnotation2, exampleAnnotation],
         });
       });
     });
@@ -980,7 +1042,7 @@ describe('xy_visualization', () => {
                 ...baseState.layers[0],
                 accessors: ['a'],
                 seriesType: 'bar_percentage_stacked',
-              } as XYDataLayerConfig,
+              } as XYLayerConfig,
             ],
           },
           frame,
@@ -1589,7 +1651,7 @@ describe('xy_visualization', () => {
                 ...baseState.layers[0],
                 splitAccessor: undefined,
                 ...layerConfigOverride,
-              } as XYDataLayerConfig,
+              } as XYLayerConfig,
             ],
           },
           frame,

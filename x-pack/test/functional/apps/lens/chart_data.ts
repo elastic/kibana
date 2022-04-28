@@ -32,8 +32,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'average',
         field: 'bytes',
       });
-
-      await PageObjects.lens.waitForVisualization();
     });
 
     const expectedData = [
@@ -75,35 +73,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
 
     it('should render xy chart', async () => {
-      const data = await PageObjects.lens.getCurrentChartDebugState();
+      const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       assertMatchesExpectedData(data!);
     });
 
     it('should render pie chart', async () => {
       await PageObjects.lens.switchToVisualization('pie');
-      await PageObjects.lens.waitForVisualization();
-      const data = await PageObjects.lens.getCurrentChartDebugState();
+      const data = await PageObjects.lens.getCurrentChartDebugState('partitionVisChart');
       assertMatchesExpectedPieData(data!);
     });
 
     it('should render donut chart', async () => {
       await PageObjects.lens.switchToVisualization('donut');
-      await PageObjects.lens.waitForVisualization();
-      const data = await PageObjects.lens.getCurrentChartDebugState();
+      const data = await PageObjects.lens.getCurrentChartDebugState('partitionVisChart');
       assertMatchesExpectedPieData(data!);
     });
 
     it('should render treemap chart', async () => {
       await PageObjects.lens.switchToVisualization('treemap', 'treemap');
-      await PageObjects.lens.waitForVisualization();
-      const data = await PageObjects.lens.getCurrentChartDebugState();
+      const data = await PageObjects.lens.getCurrentChartDebugState('partitionVisChart');
       assertMatchesExpectedPieData(data!);
     });
 
     it('should render heatmap chart', async () => {
       await PageObjects.lens.switchToVisualization('heatmap', 'heat');
-      await PageObjects.lens.waitForVisualization();
-      const debugState = await PageObjects.lens.getCurrentChartDebugState();
+      const debugState = await PageObjects.lens.getCurrentChartDebugState('heatmapChart');
 
       if (!debugState) {
         throw new Error('Debug state is not available');
@@ -150,7 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should render metric', async () => {
       await PageObjects.lens.switchToVisualization('lnsMetric');
-      await PageObjects.lens.waitForVisualization();
+      await PageObjects.lens.waitForVisualization('mtrVis');
       await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
     });
   });

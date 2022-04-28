@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import { ShortUrlStorage } from './types';
 import type { IShortUrlClientFactory, ILocatorClient } from '../../../common/url_service';
 import { ServerShortUrlClient } from './short_url_client';

@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Conhost Spawned By Suspicious Parent Process",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n  process.name : \"conhost.exe\" and\n  process.parent.name : (\"svchost.exe\", \"lsass.exe\", \"services.exe\", \"smss.exe\", \"winlogon.exe\", \"explorer.exe\",\n                         \"dllhost.exe\", \"rundll32.exe\", \"regsvr32.exe\", \"userinit.exe\", \"wininit.exe\", \"spoolsv.exe\",\n                         \"wermgr.exe\", \"csrss.exe\", \"ctfmon.exe\")\n",
   "references": [
     "https://www.fireeye.com/blog/threat-research/2017/08/monitoring-windows-console-activity-part-one.html"
@@ -45,5 +46,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 5
 }

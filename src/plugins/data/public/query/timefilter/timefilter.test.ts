@@ -137,6 +137,17 @@ describe('setRefreshInterval', () => {
     autoRefreshSub.unsubscribe();
   });
 
+  test('isRefreshIntervalTouched is initially set to false', () => {
+    expect(timefilter.isRefreshIntervalTouched()).toBe(false);
+  });
+
+  test('should register changes to the initial interval', () => {
+    timefilter.setRefreshInterval(timefilterConfig.refreshIntervalDefaults);
+    expect(timefilter.isRefreshIntervalTouched()).toBe(false);
+    timefilter.setRefreshInterval({ pause: false, value: 1000 });
+    expect(timefilter.isRefreshIntervalTouched()).toBe(true);
+  });
+
   test('should update refresh interval', () => {
     timefilter.setRefreshInterval({ pause: true, value: 10 });
     expect(timefilter.getRefreshInterval()).toEqual({ pause: true, value: 10 });

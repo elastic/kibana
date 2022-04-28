@@ -7,8 +7,8 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { Storage } from '../../../../kibana_utils/public';
-import { ApplicationStart, PublicAppInfo } from '../../../../../core/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { ApplicationStart, PublicAppInfo } from '@kbn/core/public';
 import {
   EmbeddableEditorState,
   isEmbeddableEditorState,

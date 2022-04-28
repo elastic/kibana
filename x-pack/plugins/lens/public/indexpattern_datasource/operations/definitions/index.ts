@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup, CoreStart } from 'kibana/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import {
+  IUiSettingsClient,
+  SavedObjectsClientContract,
+  HttpSetup,
+  CoreStart,
+} from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { ExpressionAstFunction } from '@kbn/expressions-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { termsOperation } from './terms';
 import { filtersOperation } from './filters';
 import { cardinalityOperation } from './cardinality';
@@ -28,6 +36,7 @@ import {
   overallMinOperation,
   overallMaxOperation,
   overallAverageOperation,
+  timeScaleOperation,
 } from './calculations';
 import { countOperation } from './count';
 import { mathOperation, formulaOperation } from './formula';
@@ -42,8 +51,6 @@ import type {
 } from './column_types';
 import { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../types';
 import { DateRange, LayerType } from '../../../../common';
-import { ExpressionAstFunction } from '../../../../../../../src/plugins/expressions/public';
-import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { rangeOperation } from './ranges';
 import { IndexPatternDimensionEditorProps, OperationSupportMatrix } from '../../dimension_panel';
 
@@ -75,6 +82,7 @@ export type {
   OverallMinIndexPatternColumn,
   OverallMaxIndexPatternColumn,
   OverallAverageIndexPatternColumn,
+  TimeScaleIndexPatternColumn,
 } from './calculations';
 export type { CountIndexPatternColumn } from './count';
 export type { LastValueIndexPatternColumn } from './last_value';
@@ -110,6 +118,7 @@ const internalOperationDefinitions = [
   overallMaxOperation,
   overallAverageOperation,
   staticValueOperation,
+  timeScaleOperation,
 ];
 
 export { termsOperation } from './terms';
@@ -129,6 +138,7 @@ export {
   overallAverageOperation,
   overallMaxOperation,
   overallMinOperation,
+  timeScaleOperation,
 } from './calculations';
 export { formulaOperation } from './formula/formula';
 export { staticValueOperation } from './static_value';
@@ -154,6 +164,7 @@ export interface ParamEditorProps<C> {
   http: HttpSetup;
   dateRange: DateRange;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   activeData?: IndexPatternDimensionEditorProps['activeData'];
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
   paramEditorCustomProps?: ParamEditorCustomProps;

@@ -6,16 +6,14 @@
  */
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import type { SeriesType, YConfig, ValidLayer } from '@kbn/expression-xy-plugin/common';
 import type { FramePublicAPI, DatasourcePublicAPI } from '../types';
-import type {
-  SeriesType,
+import {
+  visualizationTypes,
   XYLayerConfig,
-  YConfig,
-  ValidLayer,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
-} from '../../common/expressions';
-import { visualizationTypes } from './types';
+} from './types';
 import { getDataLayers, isAnnotationsLayer, isDataLayer } from './visualization_helpers';
 
 export function isHorizontalSeries(seriesType: SeriesType) {

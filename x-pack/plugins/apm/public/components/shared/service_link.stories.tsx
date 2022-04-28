@@ -37,6 +37,7 @@ Example.args = {
     rangeFrom: 'now-15m',
     rangeTo: 'now',
     serviceGroup: '',
+    comparisonEnabled: false,
   },
   serviceName: 'opbeans-java',
 };

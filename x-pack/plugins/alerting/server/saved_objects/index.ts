@@ -10,11 +10,10 @@ import type {
   SavedObject,
   SavedObjectsExportTransformContext,
   SavedObjectsServiceSetup,
-  SavedObjectsTypeMappingDefinition,
-} from 'kibana/server';
-import mappings from './mappings.json';
+} from '@kbn/core/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { alertMappings } from './mappings';
 import { getMigrations } from './migrations';
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import { transformRulesForExport } from './transform_rule_for_export';
 import { RawRule } from '../types';
 import { getImportWarnings } from './get_import_warnings';
@@ -60,7 +59,7 @@ export function setupSavedObjects(
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',
     migrations: getMigrations(encryptedSavedObjects, isPreconfigured),
-    mappings: mappings.alert as SavedObjectsTypeMappingDefinition,
+    mappings: alertMappings,
     management: {
       displayName: 'rule',
       importableAndExportable: true,

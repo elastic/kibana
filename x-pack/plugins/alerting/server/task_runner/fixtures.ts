@@ -6,10 +6,15 @@
  */
 
 import { isNil } from 'lodash';
-import { Alert, AlertTypeParams, RecoveredActionGroup } from '../../common';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import {
+  Rule,
+  RuleExecutionStatusWarningReasons,
+  RuleTypeParams,
+  RecoveredActionGroup,
+} from '../../common';
 import { getDefaultRuleMonitoring } from './task_runner';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import { TaskStatus } from '../../../task_manager/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 
 interface GeneratorParams {
@@ -22,6 +27,7 @@ export const RULE_TYPE_ID = 'test';
 export const DATE_1969 = '1969-12-31T00:00:00.000Z';
 export const DATE_1970 = '1970-01-01T00:00:00.000Z';
 export const DATE_1970_5_MIN = '1969-12-31T23:55:00.000Z';
+export const DATE_9999 = '9999-12-31T12:34:56.789Z';
 export const MOCK_DURATION = 86400000000000;
 
 export const SAVED_OBJECT = {
@@ -29,6 +35,7 @@ export const SAVED_OBJECT = {
   type: 'alert',
   attributes: {
     apiKey: Buffer.from('123:abc').toString('base64'),
+    consumer: 'bar',
     enabled: true,
   },
   references: [],
@@ -101,11 +108,6 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   recoveryActionGroup: RecoveredActionGroup,
   executor: jest.fn(),
   producer: 'alerts',
-  config: {
-    execution: {
-      actions: { max: 1000 },
-    },
-  },
 };
 
 export const mockRunNowResponse = {
@@ -114,7 +116,7 @@ export const mockRunNowResponse = {
 
 export const mockDate = new Date('2019-02-12T21:01:22.479Z');
 
-export const mockedRuleTypeSavedObject: Alert<AlertTypeParams> = {
+export const mockedRuleTypeSavedObject: Rule<RuleTypeParams> = {
   id: '1',
   consumer: 'bar',
   createdAt: mockDate,
@@ -174,6 +176,8 @@ export const mockTaskInstance = () => ({
   taskType: 'alerting:test',
   params: {
     alertId: RULE_ID,
+    spaceId: 'default',
+    consumer: 'bar',
   },
   ownerId: null,
 });
@@ -196,6 +200,7 @@ export const generateEventLog = ({
   action,
   task,
   duration,
+  consumer,
   start,
   end,
   outcome,
@@ -206,6 +211,10 @@ export const generateEventLog = ({
   actionId,
   status,
   numberOfTriggeredActions,
+  numberOfGeneratedActions,
+  numberOfActiveAlerts,
+  numberOfRecoveredAlerts,
+  numberOfNewAlerts,
   savedObjects = [generateAlertSO('1')],
 }: GeneratorParams = {}) => ({
   ...(status === 'error' && {
@@ -226,17 +235,26 @@ export const generateEventLog = ({
   kibana: {
     alert: {
       rule: {
+        ...(consumer && { consumer }),
         execution: {
           uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-          ...(!isNil(numberOfTriggeredActions) && {
+          ...((!isNil(numberOfTriggeredActions) || !isNil(numberOfGeneratedActions)) && {
             metrics: {
               number_of_triggered_actions: numberOfTriggeredActions,
+              number_of_generated_actions: numberOfGeneratedActions,
+              number_of_active_alerts: numberOfActiveAlerts ?? 0,
+              number_of_new_alerts: numberOfNewAlerts ?? 0,
+              number_of_recovered_alerts: numberOfRecoveredAlerts ?? 0,
+              total_number_of_alerts:
+                ((numberOfActiveAlerts ?? 0) as number) +
+                ((numberOfRecoveredAlerts ?? 0) as number),
               number_of_searches: 3,
               es_search_duration_ms: 33,
               total_search_duration_ms: 23423,
             },
           }),
         },
+        rule_type_id: 'test',
       },
     },
     ...((actionSubgroup || actionGroupId || instanceId || status) && {
@@ -248,6 +266,7 @@ export const generateEventLog = ({
       },
     }),
     saved_objects: savedObjects,
+    space_ids: ['default'],
     ...(task && {
       task: {
         schedule_delay: 0,
@@ -318,6 +337,12 @@ const generateMessage = ({
     if (actionGroupId === 'recovered') {
       return `rule-name' instanceId: '${instanceId}' scheduled actionGroup: '${actionGroupId}' action: action:${actionId}`;
     }
+    if (
+      status === 'warning' &&
+      reason === RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS
+    ) {
+      return `The maximum number of actions for this rule type was reached; excess actions were not triggered.`;
+    }
     return `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`;
   }
 };
@@ -364,6 +389,7 @@ export const generateEnqueueFunctionInput = () => ({
   params: {
     foo: true,
   },
+  consumer: 'bar',
   relatedSavedObjects: [
     {
       id: '1',
@@ -379,7 +405,7 @@ export const generateEnqueueFunctionInput = () => ({
     },
     type: 'SAVED_OBJECT',
   },
-  spaceId: undefined,
+  spaceId: 'default',
 });
 
 export const generateAlertInstance = ({ id, duration, start }: GeneratorParams = { id: 1 }) => ({

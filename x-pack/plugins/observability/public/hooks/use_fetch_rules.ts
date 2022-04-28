@@ -7,22 +7,16 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { isEmpty } from 'lodash';
-import { loadRules, Rule } from '../../../triggers_actions_ui/public';
+import { loadRules } from '@kbn/triggers-actions-ui-plugin/public';
 import { RULES_LOAD_ERROR } from '../pages/rules/translations';
-import { FetchRulesProps } from '../pages/rules/types';
+import { FetchRulesProps, RuleState } from '../pages/rules/types';
 import { OBSERVABILITY_RULE_TYPES } from '../pages/rules/config';
 import { useKibana } from '../utils/kibana_react';
-
-interface RuleState {
-  isLoading: boolean;
-  data: Rule[];
-  error: string | null;
-  totalItemCount: number;
-}
 
 export function useFetchRules({
   searchText,
   ruleLastResponseFilter,
+  typesFilter,
   setPage,
   page,
   sort,
@@ -47,7 +41,7 @@ export function useFetchRules({
         http,
         page,
         searchText,
-        typesFilter: OBSERVABILITY_RULE_TYPES,
+        typesFilter: typesFilter.length > 0 ? typesFilter : OBSERVABILITY_RULE_TYPES,
         ruleStatusesFilter: ruleLastResponseFilter,
         sort,
       });
@@ -61,14 +55,18 @@ export function useFetchRules({
       if (!response.data?.length && page.index > 0) {
         setPage({ ...page, index: 0 });
       }
-      const isFilterApplied = !(isEmpty(searchText) && isEmpty(ruleLastResponseFilter));
+      const isFilterApplied = !(
+        isEmpty(searchText) &&
+        isEmpty(ruleLastResponseFilter) &&
+        isEmpty(typesFilter)
+      );
 
       setNoData(response.data.length === 0 && !isFilterApplied);
     } catch (_e) {
       setRulesState((oldState) => ({ ...oldState, isLoading: false, error: RULES_LOAD_ERROR }));
     }
     setInitialLoad(false);
-  }, [http, page, setPage, searchText, ruleLastResponseFilter, sort]);
+  }, [http, page, setPage, searchText, ruleLastResponseFilter, typesFilter, sort]);
   useEffect(() => {
     fetchRules();
   }, [fetchRules]);

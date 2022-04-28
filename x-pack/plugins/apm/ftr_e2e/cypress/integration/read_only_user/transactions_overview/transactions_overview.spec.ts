@@ -38,9 +38,10 @@ describe('Transactions Overview', () => {
 
   it('has no detectable a11y violations on load', () => {
     cy.visit(serviceTransactionsHref);
-    cy.contains('aria-selected="true"', 'Transactions').should(
-      'have.class',
-      'euiTab-isSelected'
+    cy.get('a:contains(Transactions)').should(
+      'have.attr',
+      'aria-selected',
+      'true'
     );
     // set skipFailures to true to not fail the test when there are accessibility failures
     checkA11y({ skipFailures: true });

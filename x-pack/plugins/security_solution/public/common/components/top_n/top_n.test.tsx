@@ -199,9 +199,9 @@ describe('TopN', () => {
     });
 
     test(`it renders EventsByDataset when defaultView is 'raw'`, () => {
-      expect(
-        wrapper.find('[data-test-subj="eventsByDatasetOverview-uuid.v4()Panel"]').exists()
-      ).toBe(true);
+      expect(wrapper.find('[data-test-subj="eventsByDatasetOverview-topNPanel"]').exists()).toBe(
+        true
+      );
     });
 
     test(`it does NOT render SignalsByCategory when defaultView is 'raw'`, () => {
@@ -235,9 +235,9 @@ describe('TopN', () => {
         </TestProviders>
       );
       await waitFor(() => {
-        expect(
-          wrapper.find('[data-test-subj="eventsByDatasetOverview-uuid.v4()Panel"]').exists()
-        ).toBe(false);
+        expect(wrapper.find('[data-test-subj="eventsByDatasetOverview-topNPanel"]').exists()).toBe(
+          false
+        );
       });
     });
   });
@@ -259,9 +259,9 @@ describe('TopN', () => {
     });
 
     test(`it renders EventsByDataset when defaultView is 'all'`, () => {
-      expect(
-        wrapper.find('[data-test-subj="eventsByDatasetOverview-uuid.v4()Panel"]').exists()
-      ).toBe(true);
+      expect(wrapper.find('[data-test-subj="eventsByDatasetOverview-topNPanel"]').exists()).toBe(
+        true
+      );
     });
 
     test(`it does NOT render SignalsByCategory when defaultView is 'all'`, () => {

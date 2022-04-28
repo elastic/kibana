@@ -9,30 +9,32 @@ import {
   httpServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 import {
   ElasticsearchClientMock,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from 'src/core/server/elasticsearch/client/mocks';
+} from '@kbn/core/server/elasticsearch/client/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { KibanaRequest } from 'src/core/server/http/router/request';
+import { KibanaRequest } from '@kbn/core/server/http/router/request';
 import {
-  defineGetBenchmarksRoute,
   benchmarksInputSchema,
   DEFAULT_BENCHMARKS_PER_PAGE,
+} from '../../../common/schemas/benchmark';
+import {
+  defineGetBenchmarksRoute,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   getPackagePolicies,
   getAgentPolicies,
   createBenchmarkEntry,
 } from './benchmarks';
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import {
   createMockAgentPolicyService,
   createPackagePolicyServiceMock,
-} from '../../../../fleet/server/mocks';
-import { createPackagePolicyMock } from '../../../../fleet/common/mocks';
-import { AgentPolicy } from '../../../../fleet/common';
+} from '@kbn/fleet-plugin/server/mocks';
+import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import { AgentPolicy } from '@kbn/fleet-plugin/common';
 
 import { CspAppService } from '../../lib/csp_app_services';
 import { CspAppContext } from '../../plugin';
@@ -84,9 +86,9 @@ describe('benchmarks API', () => {
     };
     defineGetBenchmarksRoute(router, cspContext);
 
-    const [config, _] = router.get.mock.calls[0];
+    const [config] = router.get.mock.calls[0];
 
-    expect(config.path).toEqual('/api/csp/benchmarks');
+    expect(config.path).toEqual('/internal/cloud_security_posture/benchmarks');
   });
 
   it('should accept to a user with fleet.all privilege', async () => {
@@ -180,7 +182,7 @@ describe('benchmarks API', () => {
 
   it('should not throw when sort_field is a string', async () => {
     expect(() => {
-      benchmarksInputSchema.validate({ sort_field: 'name' });
+      benchmarksInputSchema.validate({ sort_field: 'package_policy.name' });
     }).not.toThrow();
   });
 
@@ -204,7 +206,7 @@ describe('benchmarks API', () => {
 
   it('should not throw when fields is a known string literal', async () => {
     expect(() => {
-      benchmarksInputSchema.validate({ sort_field: 'name' });
+      benchmarksInputSchema.validate({ sort_field: 'package_policy.name' });
     }).not.toThrow();
   });
 
@@ -240,7 +242,7 @@ describe('benchmarks API', () => {
         await getPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
           page: 1,
           per_page: 100,
-          sort_field: 'name',
+          sort_field: 'package_policy.name',
           sort_order: 'desc',
         });
 
@@ -261,7 +263,7 @@ describe('benchmarks API', () => {
         await getPackagePolicies(mockSoClient, mockAgentPolicyService, 'myPackage', {
           page: 1,
           per_page: 100,
-          sort_field: 'name',
+          sort_field: 'package_policy.name',
           sort_order: 'asc',
         });
 

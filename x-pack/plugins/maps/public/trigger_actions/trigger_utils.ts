@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Action } from 'src/plugins/ui_actions/public';
+import { Action } from '@kbn/ui-actions-plugin/public';
+import { DatatableColumnType } from '@kbn/expressions-plugin';
 import { RawValue } from '../../common/constants';
-import { DatatableColumnType } from '../../../../../src/plugins/expressions';
 
 export function isUrlDrilldown(action: Action) {
   return action.type === 'URL_DRILLDOWN';

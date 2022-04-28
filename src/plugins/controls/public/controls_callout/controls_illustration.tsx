@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import './controls_illustration.scss';
 import React from 'react';
 
 export const ControlsIllustration = () => (

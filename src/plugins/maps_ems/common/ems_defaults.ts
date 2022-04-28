@@ -8,7 +8,7 @@
 
 export const DEFAULT_EMS_FILE_API_URL = 'https://vector.maps.elastic.co';
 export const DEFAULT_EMS_TILE_API_URL = 'https://tiles.maps.elastic.co';
-export const DEFAULT_EMS_LANDING_PAGE_URL = 'https://maps.elastic.co/v8.1';
+export const DEFAULT_EMS_LANDING_PAGE_URL = 'https://maps.elastic.co/v8.2';
 export const DEFAULT_EMS_FONT_LIBRARY_URL =
   'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf';
 

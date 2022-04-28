@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createSignalsIndex, deleteAllAlerts, deleteSignalsIndex } from '../../utils';
 
@@ -65,10 +65,7 @@ export default ({ getService }: FtrProviderContext) => {
           body: {
             alert: {
               name: 'test 7.14',
-              tags: [
-                '__internal_rule_id:82747bb8-bae0-4b59-8119-7f65ac564e14',
-                '__internal_immutable:false',
-              ],
+              tags: [],
               alertTypeId: 'siem.queryRule',
               consumer: 'siem',
               params: {

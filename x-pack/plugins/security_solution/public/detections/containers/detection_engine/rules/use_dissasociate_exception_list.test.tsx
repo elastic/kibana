@@ -7,7 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 
 import * as api from './api';
 import { getRulesSchemaMock } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';

@@ -12,7 +12,7 @@ import {
   goToRuleEditPage,
   executeRulesBulkAction,
 } from '../../../pages/detection_engine/rules/all/actions';
-import { RuleActionsOverflow } from './index';
+import { RuleActionsOverflow } from '.';
 import { mockRule } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
@@ -178,7 +178,7 @@ describe('RuleActionsOverflow', () => {
       ).toEqual(false);
     });
 
-    test('it calls duplicateRulesAction when rules-details-duplicate-rule is clicked', () => {
+    test('it calls duplicate action when rules-details-duplicate-rule is clicked', () => {
       const wrapper = mount(
         <RuleActionsOverflow
           rule={mockRule('id')}
@@ -195,7 +195,7 @@ describe('RuleActionsOverflow', () => {
       );
     });
 
-    test('it calls duplicateRulesAction with the rule and rule.id when rules-details-duplicate-rule is clicked', () => {
+    test('it calls duplicate action with the rule and rule.id when rules-details-duplicate-rule is clicked', () => {
       const rule = mockRule('id');
       const wrapper = mount(
         <RuleActionsOverflow rule={rule} userHasPermissions canDuplicateRuleWithActions={true} />
@@ -210,7 +210,7 @@ describe('RuleActionsOverflow', () => {
     });
   });
 
-  test('it calls editRuleAction after the rule is duplicated', async () => {
+  test('it navigates to edit page after the rule is duplicated', async () => {
     const rule = mockRule('id');
     const ruleDuplicate = mockRule('newRule');
     executeRulesBulkActionMock.mockImplementation(() =>

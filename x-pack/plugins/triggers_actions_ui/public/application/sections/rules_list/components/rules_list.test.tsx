@@ -14,11 +14,11 @@ import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { RulesList, percentileFields } from './rules_list';
 import { RuleTypeModel, ValidationResult, Percentiles } from '../../../../types';
 import {
-  AlertExecutionStatusErrorReasons,
-  AlertExecutionStatusWarningReasons,
+  RuleExecutionStatusErrorReasons,
+  RuleExecutionStatusWarningReasons,
   ALERTS_FEATURE_ID,
   parseDuration,
-} from '../../../../../../alerting/common';
+} from '@kbn/alerting-plugin/common';
 import { getFormattedDuration, getFormattedMilliseconds } from '../../../lib/monitoring_utils';
 
 import { useKibana } from '../../../../common/lib/kibana';
@@ -305,7 +305,7 @@ describe('rules_list component with items', () => {
         lastDuration: 122000,
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         error: {
-          reason: AlertExecutionStatusErrorReasons.Unknown,
+          reason: RuleExecutionStatusErrorReasons.Unknown,
           message: 'test',
         },
       },
@@ -331,7 +331,7 @@ describe('rules_list component with items', () => {
         lastDuration: 500,
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         error: {
-          reason: AlertExecutionStatusErrorReasons.License,
+          reason: RuleExecutionStatusErrorReasons.License,
           message: 'test',
         },
       },
@@ -357,7 +357,7 @@ describe('rules_list component with items', () => {
         lastDuration: 500,
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         warning: {
-          reason: AlertExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+          reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
           message: 'test',
         },
       },
@@ -427,11 +427,6 @@ describe('rules_list component with items', () => {
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(mockedRulesData.length);
 
-    // Enabled switch column
-    expect(wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-enabled"]').length).toEqual(
-      mockedRulesData.length
-    );
-
     // Name and rule type column
     const ruleNameColumns = wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-name"]');
     expect(ruleNameColumns.length).toEqual(mockedRulesData.length);
@@ -444,7 +439,7 @@ describe('rules_list component with items', () => {
       wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-tagsPopover"]').length
     ).toEqual(mockedRulesData.length);
     // only show tags popover if tags exist on rule
-    const tagsBadges = wrapper.find('EuiBadge[data-test-subj="ruleTagsBadge"]');
+    const tagsBadges = wrapper.find('EuiBadge[data-test-subj="ruleTagBadge"]');
     expect(tagsBadges.length).toEqual(
       mockedRulesData.filter((data) => data.tags.length > 0).length
     );
@@ -512,10 +507,10 @@ describe('rules_list component with items', () => {
       'The length of time it took for the rule to run (mm:ss).'
     );
 
-    // Status column
-    expect(wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-status"]').length).toEqual(
-      mockedRulesData.length
-    );
+    // Last response column
+    expect(
+      wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-lastResponse"]').length
+    ).toEqual(mockedRulesData.length);
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-active"]').length).toEqual(1);
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-ok"]').length).toEqual(1);
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-pending"]').length).toEqual(1);
@@ -534,6 +529,11 @@ describe('rules_list component with items', () => {
     );
     expect(wrapper.find('EuiHealth[data-test-subj="ruleStatus-error"]').last().text()).toEqual(
       'License Error'
+    );
+
+    // Status control column
+    expect(wrapper.find('EuiTableRowCell[data-test-subj="rulesTableCell-status"]').length).toEqual(
+      mockedRulesData.length
     );
 
     // Monitoring column
@@ -727,7 +727,7 @@ describe('rules_list component with items', () => {
   it('sorts rules when clicking the name column', async () => {
     await setup();
     wrapper
-      .find('[data-test-subj="tableHeaderCell_name_1"] .euiTableHeaderButton')
+      .find('[data-test-subj="tableHeaderCell_name_0"] .euiTableHeaderButton')
       .first()
       .simulate('click');
 
@@ -746,10 +746,10 @@ describe('rules_list component with items', () => {
     );
   });
 
-  it('sorts rules when clicking the enabled column', async () => {
+  it('sorts rules when clicking the status control column', async () => {
     await setup();
     wrapper
-      .find('[data-test-subj="tableHeaderCell_enabled_0"] .euiTableHeaderButton')
+      .find('[data-test-subj="tableHeaderCell_enabled_8"] .euiTableHeaderButton')
       .first()
       .simulate('click');
 

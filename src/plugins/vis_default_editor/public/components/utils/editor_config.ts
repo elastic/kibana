@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IndexPattern } from 'src/plugins/data/public';
+import { IndexPattern } from '@kbn/data-plugin/public';
 
 /**
  * A hidden parameter can be hidden from the UI completely.

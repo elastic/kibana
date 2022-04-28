@@ -53,6 +53,7 @@ export class StringType extends Type<string> {
       );
     }
 
+    schema.type = 'string';
     super(schema, options);
   }
 

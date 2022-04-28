@@ -7,19 +7,18 @@
 
 import { Ast } from '@kbn/interpreter';
 import { ScaleType } from '@elastic/charts';
-import { PaletteRegistry } from 'src/plugins/charts/public';
-import { EventAnnotationServiceType } from 'src/plugins/event_annotation/public';
-import { State } from './types';
-import { OperationMetadata, DatasourcePublicAPI } from '../types';
-import { getColumnToLabelMap } from './state_helpers';
-import type {
-  ValidLayer,
-  XYAnnotationLayerConfig,
-  XYReferenceLineLayerConfig,
-  YConfig,
+import type { PaletteRegistry } from '@kbn/coloring';
+
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type { ValidLayer, YConfig } from '@kbn/expression-xy-plugin/common';
+import {
+  State,
   XYDataLayerConfig,
-} from '../../common/expressions';
-import { layerTypes } from '../../common';
+  XYReferenceLineLayerConfig,
+  XYAnnotationLayerConfig,
+} from './types';
+import { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '../types';
+import { getColumnToLabelMap } from './state_helpers';
 import { hasIcon } from './xy_config_panel/shared/icon_select';
 import { defaultReferenceLineColor } from './color_assignment';
 import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
@@ -29,8 +28,8 @@ import {
   getReferenceLayers,
   getAnnotationsLayers,
 } from './visualization_helpers';
-import { defaultAnnotationLabel } from './annotations/config_panel';
-import { getUniqueLabels } from './annotations/helpers';
+import { getUniqueLabels, defaultAnnotationLabel } from './annotations/helpers';
+import { layerTypes } from '../../common';
 
 export const getSortedAccessors = (
   datasource: DatasourcePublicAPI,
@@ -48,7 +47,7 @@ export const getSortedAccessors = (
 
 export const toExpression = (
   state: State,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   attributes: Partial<{ title: string; description: string }> = {},
   eventAnnotationService: EventAnnotationServiceType
@@ -105,7 +104,7 @@ const simplifiedLayerExpression = {
 
 export function toPreviewExpression(
   state: State,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   eventAnnotationService: EventAnnotationServiceType
 ) {
@@ -156,7 +155,7 @@ export function getScaleType(metadata: OperationMetadata | null, defaultScale: S
 export const buildExpression = (
   state: State,
   metadata: Record<string, Record<string, OperationMetadata | null>>,
-  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
   attributes: Partial<{ title: string; description: string }> = {},
   eventAnnotationService: EventAnnotationServiceType
@@ -195,7 +194,7 @@ export const buildExpression = (
     chain: [
       {
         type: 'function',
-        function: 'lens_xy_chart',
+        function: 'xyVis',
         arguments: {
           title: [attributes?.title || ''],
           description: [attributes?.description || ''],
@@ -208,7 +207,7 @@ export const buildExpression = (
               chain: [
                 {
                   type: 'function',
-                  function: 'lens_xy_legendConfig',
+                  function: 'legendConfig',
                   arguments: {
                     isVisible: [state.legend.isVisible],
                     showSingleSeries: state.legend.showSingleSeries
@@ -249,7 +248,7 @@ export const buildExpression = (
               chain: [
                 {
                   type: 'function',
-                  function: 'lens_xy_axisExtentConfig',
+                  function: 'axisExtentConfig',
                   arguments: {
                     mode: [state?.yLeftExtent?.mode || 'full'],
                     lowerBound:
@@ -271,7 +270,7 @@ export const buildExpression = (
               chain: [
                 {
                   type: 'function',
-                  function: 'lens_xy_axisExtentConfig',
+                  function: 'axisExtentConfig',
                   arguments: {
                     mode: [state?.yRightExtent?.mode || 'full'],
                     lowerBound:
@@ -293,7 +292,7 @@ export const buildExpression = (
               chain: [
                 {
                   type: 'function',
-                  function: 'lens_xy_axisTitlesVisibilityConfig',
+                  function: 'axisTitlesVisibilityConfig',
                   arguments: {
                     x: [state?.axisTitlesVisibilitySettings?.x ?? true],
                     yLeft: [state?.axisTitlesVisibilitySettings?.yLeft ?? true],
@@ -309,7 +308,7 @@ export const buildExpression = (
               chain: [
                 {
                   type: 'function',
-                  function: 'lens_xy_tickLabelsConfig',
+                  function: 'tickLabelsConfig',
                   arguments: {
                     x: [state?.tickLabelsVisibilitySettings?.x ?? true],
                     yLeft: [state?.tickLabelsVisibilitySettings?.yLeft ?? true],
@@ -325,7 +324,7 @@ export const buildExpression = (
               chain: [
                 {
                   type: 'function',
-                  function: 'lens_xy_gridlinesConfig',
+                  function: 'gridlinesConfig',
                   arguments: {
                     x: [state?.gridlinesVisibilitySettings?.x ?? true],
                     yLeft: [state?.gridlinesVisibilitySettings?.yLeft ?? true],
@@ -341,7 +340,7 @@ export const buildExpression = (
               chain: [
                 {
                   type: 'function',
-                  function: 'lens_xy_labelsOrientationConfig',
+                  function: 'labelsOrientationConfig',
                   arguments: {
                     x: [state?.labelsOrientation?.x ?? 0],
                     yLeft: [state?.labelsOrientation?.yLeft ?? 0],
@@ -388,7 +387,7 @@ const referenceLineLayerToExpression = (
     chain: [
       {
         type: 'function',
-        function: 'lens_xy_referenceLine_layer',
+        function: 'referenceLineLayer',
         arguments: {
           layerId: [layer.layerId],
           yConfig: layer.yConfig
@@ -396,7 +395,6 @@ const referenceLineLayerToExpression = (
                 yConfigToExpression(yConfig, defaultReferenceLineColor)
               )
             : [],
-          layerType: [layerTypes.REFERENCELINE],
           accessors: layer.accessors,
           columnToLabel: [JSON.stringify(getColumnToLabelMap(layer, datasourceLayer))],
         },
@@ -414,11 +412,10 @@ const annotationLayerToExpression = (
     chain: [
       {
         type: 'function',
-        function: 'lens_xy_annotation_layer',
+        function: 'annotationLayer',
         arguments: {
           hide: [Boolean(layer.hide)],
           layerId: [layer.layerId],
-          layerType: [layerTypes.ANNOTATIONS],
           annotations: layer.annotations
             ? layer.annotations.map(
                 (ann): Ast =>
@@ -462,7 +459,7 @@ const dataLayerToExpression = (
     chain: [
       {
         type: 'function',
-        function: 'lens_xy_data_layer',
+        function: 'dataLayer',
         arguments: {
           layerId: [layer.layerId],
           hide: [Boolean(layer.hide)],
@@ -477,32 +474,33 @@ const dataLayerToExpression = (
             ? layer.yConfig.map((yConfig) => yConfigToExpression(yConfig))
             : [],
           seriesType: [layer.seriesType],
-          layerType: [layerTypes.DATA],
           accessors: layer.accessors,
           columnToLabel: [JSON.stringify(columnToLabel)],
-          ...(layer.palette
-            ? {
-                palette: [
-                  {
-                    type: 'expression',
-                    chain: [
-                      {
-                        type: 'function',
-                        function: 'theme',
-                        arguments: {
-                          variable: ['palette'],
-                          default: [
-                            paletteService
-                              .get(layer.palette.name)
-                              .toExpression(layer.palette.params),
-                          ],
-                        },
+          palette: [
+            {
+              type: 'expression',
+              chain: [
+                layer.palette
+                  ? {
+                      type: 'function',
+                      function: 'theme',
+                      arguments: {
+                        variable: ['palette'],
+                        default: [
+                          paletteService.get(layer.palette.name).toExpression(layer.palette.params),
+                        ],
                       },
-                    ],
-                  },
-                ],
-              }
-            : {}),
+                    }
+                  : {
+                      type: 'function',
+                      function: 'system_palette',
+                      arguments: {
+                        name: ['default'],
+                      },
+                    },
+              ],
+            },
+          ],
         },
       },
     ],
@@ -515,7 +513,7 @@ const yConfigToExpression = (yConfig: YConfig, defaultColor?: string): Ast => {
     chain: [
       {
         type: 'function',
-        function: 'lens_xy_yConfig',
+        function: 'yConfig',
         arguments: {
           forAccessor: [yConfig.forAccessor],
           axisMode: yConfig.axisMode ? [yConfig.axisMode] : [],

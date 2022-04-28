@@ -25,6 +25,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { SectionError, Error } from '../../../../../shared_imports';
 
 import { useCore, useServices } from '../../../../app_context';
@@ -50,7 +51,6 @@ import {
 } from '../../../../components';
 import { TypeDetails } from './type_details';
 
-import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { getRepositoryTypeDocUrl } from '../../../../lib/type_to_doc_url';
 
 interface Props {

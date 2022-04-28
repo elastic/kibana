@@ -16,10 +16,21 @@ export function getFormattedDuration(value: number) {
   if (!value) {
     return '00:00';
   }
+
   const duration = moment.duration(value);
-  const minutes = Math.floor(duration.asMinutes()).toString().padStart(2, '0');
-  const seconds = duration.seconds().toString().padStart(2, '0');
-  return `${minutes}:${seconds}`;
+  let minutes = Math.floor(duration.asMinutes());
+  let seconds = duration.seconds();
+  const ms = duration.milliseconds();
+
+  if (ms >= 500) {
+    seconds += 1;
+    if (seconds === 60) {
+      seconds = 0;
+      minutes += 1;
+    }
+  }
+
+  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
 export function getFormattedMilliseconds(value: number) {

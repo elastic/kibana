@@ -131,14 +131,18 @@ export function EmptyDimensionButton({
     setNewColumnId(generateId());
   }, [itemIndex]);
 
-  const dropProps = getDropProps(layerDatasource, {
-    ...(layerDatasourceDropProps || {}),
-    dragging,
-    columnId: newColumnId,
-    filterOperations: group.filterOperations,
-    groupId: group.groupId,
-    dimensionGroups: groups,
-  });
+  const dropProps = getDropProps(
+    layerDatasource,
+    {
+      ...(layerDatasourceDropProps || {}),
+      dragging,
+      columnId: newColumnId,
+      filterOperations: group.filterOperations,
+      groupId: group.groupId,
+      dimensionGroups: groups,
+    },
+    true
+  );
 
   const dropTypes = dropProps?.dropTypes;
   const nextLabel = dropProps?.nextLabel;
