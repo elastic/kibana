@@ -20,6 +20,11 @@ import { loadSnippet } from './load_snippet';
 
 export type FullStoryShipperConfig = FullStorySnippetConfig;
 
+/**
+ * FullStory's custom events rate limit is very aggressive. We'll only send some allowed events.
+ */
+const CUSTOM_EVENT_TYPES_ALLOWLIST = ['Loaded Kibana'];
+
 export class FullStoryShipper implements IShipper {
   public static shipperName = 'FullStory';
   private readonly fullStoryApi: FullStoryApi;
@@ -87,9 +92,11 @@ export class FullStoryShipper implements IShipper {
 
   public reportEvents(events: Event[]): void {
     this.initContext.logger.debug(`Reporting ${events.length} events to FS`);
-    events.forEach((event) => {
-      // We only read event.properties and discard the rest because the context is already sent in the other APIs.
-      this.fullStoryApi.event(event.event_type, formatPayload(event.properties));
-    });
+    events
+      .filter((event) => CUSTOM_EVENT_TYPES_ALLOWLIST.includes(event.event_type))
+      .forEach((event) => {
+        // We only read event.properties and discard the rest because the context is already sent in the other APIs.
+        this.fullStoryApi.event(event.event_type, formatPayload(event.properties));
+      });
   }
 }

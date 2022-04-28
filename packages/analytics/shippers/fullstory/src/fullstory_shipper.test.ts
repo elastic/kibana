@@ -108,7 +108,7 @@ describe('FullStoryShipper', () => {
   });
 
   describe('reportEvents', () => {
-    test('calls the API once per event in the array with the properties transformed', () => {
+    test('filters the events by the allow-list and calls the API once per event in the array with the properties transformed', () => {
       fullstoryShipper.reportEvents([
         {
           event_type: 'test-event-1',
@@ -122,14 +122,26 @@ describe('FullStoryShipper', () => {
           properties: { test: 'test-2' },
           context: { pageName: 'test-page-1' },
         },
+        {
+          event_type: 'Loaded Kibana',
+          timestamp: '2020-01-01T00:00:00.000Z',
+          properties: { test: 'test-1' },
+          context: { pageName: 'test-page-1' },
+        },
+        {
+          event_type: 'Loaded Kibana',
+          timestamp: '2020-01-01T00:00:00.000Z',
+          properties: { other_property: 'test-2' },
+          context: { pageName: 'test-page-1' },
+        },
       ]);
 
       expect(fullStoryApiMock.event).toHaveBeenCalledTimes(2);
-      expect(fullStoryApiMock.event).toHaveBeenCalledWith('test-event-1', {
+      expect(fullStoryApiMock.event).toHaveBeenCalledWith('Loaded Kibana', {
         test_str: 'test-1',
       });
-      expect(fullStoryApiMock.event).toHaveBeenCalledWith('test-event-2', {
-        test_str: 'test-2',
+      expect(fullStoryApiMock.event).toHaveBeenCalledWith('Loaded Kibana', {
+        other_property_str: 'test-2',
       });
     });
   });
