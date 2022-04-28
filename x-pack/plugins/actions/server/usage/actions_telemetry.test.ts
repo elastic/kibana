@@ -244,6 +244,7 @@ Object {
         actionTypeId: '.email',
         name: 'test',
         isPreconfigured: true,
+        isDeprecated: false,
         config: {
           tenantId: 'sdsd',
           clientId: 'sdfsdf',
@@ -257,6 +258,7 @@ Object {
         actionTypeId: '.server-log',
         name: 'test',
         isPreconfigured: true,
+        isDeprecated: false,
         secrets: {},
       },
     ]);
@@ -370,6 +372,7 @@ Object {
         actionTypeId: '.test',
         name: 'test',
         isPreconfigured: true,
+        isDeprecated: false,
         secrets: {},
       },
       {
@@ -377,6 +380,7 @@ Object {
         actionTypeId: '.server-log',
         name: 'test',
         isPreconfigured: true,
+        isDeprecated: false,
         secrets: {},
       },
     ]);
@@ -481,6 +485,7 @@ Object {
         actionTypeId: '.server-log',
         name: 'test',
         isPreconfigured: true,
+        isDeprecated: false,
         secrets: {},
       },
     ]);
