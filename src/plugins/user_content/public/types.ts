@@ -15,5 +15,5 @@ export type UserContentType = DashboardContentType;
 export interface UserContentPluginSetup {}
 
 export interface UserContentPluginStart {
-  userContentService: UserContentService;
+  userContentService: Pick<UserContentService, 'register' | 'get'>;
 }
