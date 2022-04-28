@@ -8,7 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ComplianceDashboardData } from '../../../common/types';
-import { LATEST_FINDINGS_INDEX_PATTERN, STATS_ROUTE_PATH } from '../../../common/constants';
+import { LATEST_FINDINGS_INDEX_DEFAULT_NS, STATS_ROUTE_PATH } from '../../../common/constants';
 import { CspAppContext } from '../../plugin';
 import { getResourcesTypes } from './get_resources_types';
 import { ClusterWithoutTrend, getClusters } from './get_clusters';
@@ -47,7 +47,7 @@ export const defineGetComplianceDashboardRoute = (
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
         const { id: pitId } = await esClient.openPointInTime({
-          index: LATEST_FINDINGS_INDEX_PATTERN,
+          index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
           keep_alive: '30s',
         });
 

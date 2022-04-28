@@ -84,7 +84,7 @@ export class CspPlugin
 
     plugins.fleet.fleetSetupCompleted().then(async () => {
       const packageInfo = await plugins.fleet.packageService.asInternalUser.getInstallation(
-        CIS_KUBERNETES_PACKAGE_NAME
+        CLOUD_SECURITY_POSTURE_PACKAGE_NAME
       );
 
       // If package is installed we want to make sure all needed assets are installed
