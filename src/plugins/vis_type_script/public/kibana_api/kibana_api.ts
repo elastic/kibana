@@ -15,9 +15,11 @@ export interface VisTypeScriptKibanaApiDeps {
   data: DataPublicPluginStart;
 }
 
-export interface SearchOptions {
+export interface EsSearchOptions {
   useKibanaContext: boolean;
 }
+export type ESSearchRequest = estypes.SearchRequest;
+export type ESSearchResponse = estypes.SearchResponse;
 
 export class VisTypeScriptKibanaApi {
   constructor(
@@ -26,9 +28,9 @@ export class VisTypeScriptKibanaApi {
   ) {}
 
   async esSearch(
-    payload: estypes.SearchRequest,
-    { useKibanaContext = true }: SearchOptions = { useKibanaContext: true }
-  ): Promise<estypes.SearchResponse> {
+    payload: ESSearchRequest,
+    { useKibanaContext = true }: EsSearchOptions = { useKibanaContext: true }
+  ): Promise<ESSearchResponse> {
     if (useKibanaContext) {
       // TODO: adjust request based on this.visSearchContext
       // eslint-disable-next-line no-console
