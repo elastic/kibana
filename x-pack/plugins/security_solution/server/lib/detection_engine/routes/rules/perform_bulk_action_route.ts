@@ -146,13 +146,11 @@ const fetchRulesByQueryOrIds = async ({
   query,
   ids,
   rulesClient,
-  isRuleRegistryEnabled,
   abortSignal,
 }: {
   query: string | undefined;
   ids: string[] | undefined;
   rulesClient: RulesClient;
-  isRuleRegistryEnabled: boolean;
   abortSignal: AbortSignal;
 }): Promise<PromisePoolOutcome<string, RuleAlertType>> => {
   if (ids) {
@@ -160,7 +158,7 @@ const fetchRulesByQueryOrIds = async ({
       concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
       items: ids,
       executor: async (id: string) => {
-        const rule = await readRules({ id, rulesClient, isRuleRegistryEnabled, ruleId: undefined });
+        const rule = await readRules({ id, rulesClient, ruleId: undefined });
         if (rule == null) {
           throw Error('Rule not found');
         }
@@ -171,7 +169,6 @@ const fetchRulesByQueryOrIds = async ({
   }
 
   const { data, total } = await findRules({
-    isRuleRegistryEnabled,
     rulesClient,
     perPage: MAX_RULES_TO_PROCESS_TOTAL,
     filter: query !== '' ? query : undefined,
@@ -229,8 +226,7 @@ export const migrateRuleActions = async ({
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  logger: Logger,
-  isRuleRegistryEnabled: boolean
+  logger: Logger
 ) => {
   router.post(
     {
@@ -291,7 +287,6 @@ export const performBulkActionRoute = (
         });
 
         const fetchRulesOutcome = await fetchRulesByQueryOrIds({
-          isRuleRegistryEnabled,
           rulesClient,
           query: body.query,
           ids: body.ids,
@@ -386,7 +381,7 @@ export const performBulkActionRoute = (
                 throwAuthzError(await mlAuthz.validateRuleType(migratedRule.params.type));
 
                 const createdRule = await rulesClient.create({
-                  data: duplicateRule(migratedRule, isRuleRegistryEnabled),
+                  data: duplicateRule(migratedRule),
                 });
 
                 return createdRule;
@@ -400,8 +395,7 @@ export const performBulkActionRoute = (
               exceptionsClient,
               savedObjectsClient,
               rules.map(({ params }) => ({ rule_id: params.ruleId })),
-              logger,
-              isRuleRegistryEnabled
+              logger
             );
 
             const responseBody = `${exported.rulesNdjson}${exported.exceptionLists}${exported.exportDetails}`;
