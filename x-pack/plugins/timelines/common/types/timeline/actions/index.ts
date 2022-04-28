@@ -62,7 +62,7 @@ export interface CustomBulkAction {
   ['data-test-subj']?: string;
 }
 
-export type StatusCustomBulkAction = Omit<CustomBulkAction, 'onClick'> & {
+export type CustomBulkActionProp = Omit<CustomBulkAction, 'onClick'> & {
   onClick: (eventIds: string[]) => void;
 };
 
@@ -76,7 +76,7 @@ export interface BulkActionsProps {
   showAlertStatusActions?: boolean;
   onUpdateSuccess?: OnUpdateAlertStatusSuccess;
   onUpdateFailure?: OnUpdateAlertStatusError;
-  customBulkActions?: StatusCustomBulkAction[];
+  customBulkActions?: CustomBulkActionProp[];
   timelineId?: string;
 }
 export interface HeaderActionProps {

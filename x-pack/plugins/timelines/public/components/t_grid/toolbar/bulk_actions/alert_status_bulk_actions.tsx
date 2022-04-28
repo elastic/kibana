@@ -13,7 +13,7 @@ import type {
   SetEventsDeleted,
   OnUpdateAlertStatusSuccess,
   OnUpdateAlertStatusError,
-  StatusCustomBulkAction,
+  CustomBulkActionProp,
 } from '../../../../../common/types';
 import type { Refetch } from '../../../../store/t_grid/inputs';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../../store/t_grid';
@@ -29,7 +29,7 @@ interface OwnProps {
   showAlertStatusActions?: boolean;
   onActionSuccess?: OnUpdateAlertStatusSuccess;
   onActionFailure?: OnUpdateAlertStatusError;
-  customBulkActions?: StatusCustomBulkAction[];
+  customBulkActions?: CustomBulkActionProp[];
   refetch: Refetch;
 }
 
