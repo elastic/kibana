@@ -23,7 +23,6 @@ export default function serviceNowAccessTokenTest({ getService }: FtrProviderCon
   describe('get servicenow access token', () => {
     let servicenowSimulatorURL: string = '';
     let proxyServer: httpProxy | undefined;
-    let proxyHaveBeenCalled = false;
     const configService = getService('config');
 
     // need to wait for kibanaServer to settle ...
@@ -34,9 +33,7 @@ export default function serviceNowAccessTokenTest({ getService }: FtrProviderCon
       proxyServer = await getHttpProxyServer(
         kibanaServer.resolveUrl('/'),
         configService.get('kbnTestServer.serverArgs'),
-        () => {
-          proxyHaveBeenCalled = true;
-        }
+        () => {}
       );
     });
 
