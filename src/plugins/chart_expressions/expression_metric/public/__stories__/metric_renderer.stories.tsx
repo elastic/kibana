@@ -70,7 +70,7 @@ const config: MetricVisRenderConfig = {
       iconColor: '#FF0000',
       iconPosition: IconPositions.BELOW,
       iconSize: 'l',
-      iconBackground: IconBackgroundTypes.SHADOW,
+      iconBackground: IconBackgroundTypes.COLOR,
       iconAlignment: 'center',
     },
     dimensions: {

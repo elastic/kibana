@@ -114,15 +114,16 @@ export const MetricVisValue = ({
           }}
         >
           <div
-            className="mtrVis__iconContainer"
-            style={{
-              backgroundColor:
-                iconBackground === 'none'
-                  ? 'transparent'
-                  : iconBackground === 'shadow'
-                  ? '#0000001A'
-                  : `${iconColor}1A`,
-            }}
+            className={classNames('mtrVis__iconContainer', {
+              'mtrVis__iconContainer--textShaded': iconBackground === 'color' && !iconColor,
+            })}
+            style={
+              iconBackground === 'color' && iconColor
+                ? {
+                    backgroundColor: `${iconColor}1A`,
+                  }
+                : {}
+            }
           >
             <EuiIcon
               className="mtrVis__iconInner"

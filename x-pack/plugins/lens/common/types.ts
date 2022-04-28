@@ -112,6 +112,6 @@ export interface MetricState {
   iconColor?: string;
   iconPosition?: IconPosition;
   iconSize?: 'xl' | 'xxl' | 'l' | 'm';
-  iconBackground?: 'none' | 'shadow' | 'color';
+  iconBackground?: 'none' | 'color';
   iconAlignment?: 'start' | 'center' | 'end';
 }

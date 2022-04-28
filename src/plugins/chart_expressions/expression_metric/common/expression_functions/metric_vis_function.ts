@@ -145,14 +145,9 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       }),
     },
     iconPosition: {
-      default: IconPositions.LEFT,
+      default: IconPositions.ABOVE,
       types: ['string'],
-      options: [
-        IconPositions.ABOVE,
-        IconPositions.BELOW,
-        IconPositions.LEFT,
-        IconPositions.RIGHT,
-      ],
+      options: [IconPositions.ABOVE, IconPositions.BELOW, IconPositions.LEFT, IconPositions.RIGHT],
       help: i18n.translate('expressionMetricVis.function.icon.iconPosition.help', {
         defaultMessage: 'Icon aligment',
       }),
@@ -166,9 +161,9 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       }),
     },
     iconBackground: {
-      default: IconBackgroundTypes.SHADOW,
+      default: IconBackgroundTypes.COLOR,
       types: ['string'],
-      options: [IconBackgroundTypes.NONE, IconBackgroundTypes.SHADOW, IconBackgroundTypes.COLOR],
+      options: [IconBackgroundTypes.NONE, IconBackgroundTypes.COLOR, IconBackgroundTypes.COLOR],
       help: i18n.translate('expressionMetricVis.function.icon.iconBackground.help', {
         defaultMessage: 'Icon background',
       }),

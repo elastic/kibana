@@ -168,6 +168,7 @@ const iconPositionOptions = [
   },
 ];
 
+
 export const IconOptions: React.FC<IconProps> = ({ state, setState }) => {
   const isEmptyIcon = state.iconType === 'empty' || !state.iconType;
   const backgroundOptions = [
@@ -176,21 +177,16 @@ export const IconOptions: React.FC<IconProps> = ({ state, setState }) => {
       label: i18n.translate('xpack.lens.metricChart.iconBgOptions.none', {
         defaultMessage: 'None',
       }),
-    },
-    {
-      id: 'shadow',
-      label: i18n.translate('xpack.lens.metricChart.iconBgOptions.shadow', {
-        defaultMessage: 'Shadow',
-      }),
+      isDisabled: state?.iconPosition === 'left' || state?.iconPosition === 'right'
     },
     {
       id: 'color',
       label: i18n.translate('xpack.lens.metricChart.iconBgOptions.color', {
         defaultMessage: 'Color',
       }),
-      isDisabled: !state.iconColor,
     },
   ];
+  
   return (
     <>
       <EuiFormRow
@@ -218,10 +214,7 @@ export const IconOptions: React.FC<IconProps> = ({ state, setState }) => {
           disabled={isEmptyIcon}
           compressed
           isClearable={Boolean(state.iconColor !== '#000')}
-          onChange={(value) =>
-            value
-              ? setState({ ...state, iconColor: value, iconBackground: 'color' })
-              : setState({ ...state, iconColor: '', iconBackground: 'shadow' })
+          onChange={(value) => setState({ ...state, iconColor: value })
           }
           color={state.iconColor}
           placeholder={i18n.translate('xpack.lens.metricChart.iconColor.default', {
@@ -245,8 +238,12 @@ export const IconOptions: React.FC<IconProps> = ({ state, setState }) => {
           data-test-subj="lnsMissingValuesSelect"
           legend="This is a basic group"
           options={iconPositionOptions}
-          idSelected={state.iconPosition ?? 'left'}
+          idSelected={state.iconPosition ?? 'above'}
           onChange={(value) => {
+            if (value==='left'|| value==='right'){
+              setState({ ...state, iconPosition: value as MetricState['iconPosition'], iconBackground: 'color' });
+              return  
+            }
             setState({ ...state, iconPosition: value as MetricState['iconPosition'] });
           }}
           buttonSize="compressed"
@@ -266,7 +263,7 @@ export const IconOptions: React.FC<IconProps> = ({ state, setState }) => {
           isFullWidth={true}
           legend="icon background color"
           options={backgroundOptions}
-          idSelected={state.iconBackground ?? 'shadow'}
+          idSelected={state.iconBackground ?? 'color'}
           onChange={(value) => {
             setState({ ...state, iconBackground: value as MetricState['iconBackground'] });
           }}

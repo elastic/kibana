@@ -115,3 +115,7 @@
   display: grid;
   align-items: center;
 }
+
+.mtrVis__iconContainer--textShaded {
+  background-color: transparentize($euiTextColor, .9);
+}

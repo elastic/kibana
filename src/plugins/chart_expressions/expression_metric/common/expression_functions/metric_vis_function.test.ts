@@ -27,7 +27,7 @@ describe('interpreter/functions#metric', () => {
       iconPosition: IconPositions.BELOW,
       iconSize: 'l',
       iconAlignment: 'center',
-      iconBackground: IconBackgroundTypes.SHADOW,
+      iconBackground: IconBackgroundTypes.COLOR,
       percentageMode: false,
       colorMode: 'None',
       palette: {

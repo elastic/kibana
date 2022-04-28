@@ -22,6 +22,5 @@ export const IconPositions = {
 
 export const IconBackgroundTypes = {
   NONE: 'none',
-  SHADOW: 'shadow',
   COLOR: 'color',
 } as const;

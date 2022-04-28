@@ -43,7 +43,7 @@ Object {
         "autoScale": undefined,
         "colorFullBackground": false,
         "iconAlignment": "center",
-        "iconBackground": "shadow",
+        "iconBackground": "color",
         "iconColor": "#FF0000",
         "iconPosition": "below",
         "iconSize": "l",
