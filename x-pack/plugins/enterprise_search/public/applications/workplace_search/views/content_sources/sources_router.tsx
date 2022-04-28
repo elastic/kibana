@@ -24,7 +24,6 @@ import {
   SOURCES_PATH,
   getSourcesPath,
   getAddPath,
-  ADD_CUSTOM_PATH,
 } from '../../routes';
 
 import { AddSource, AddSourceList, GitHubViaApp } from './components/add_source';
@@ -34,7 +33,7 @@ import { AddSourceChoice } from './components/add_source/add_source_choice';
 import { AddSourceIntro } from './components/add_source/add_source_intro';
 import { OrganizationSources } from './organization_sources';
 import { PrivateSources } from './private_sources';
-import { staticCustomSourceData, staticSourceData as sources } from './source_data';
+import { staticSourceData as sources } from './source_data';
 import { SourceRouter } from './source_router';
 import { SourcesLogic } from './sources_logic';
 
@@ -110,9 +109,6 @@ export const SourcesRouter: React.FC = () => {
           </Route>
         );
       })}
-      <Route exact path={getSourcesPath(ADD_CUSTOM_PATH, isOrganization)}>
-        <AddCustomSource sourceData={staticCustomSourceData} />
-      </Route>
       {sources
         .filter((sourceData) => sourceData.internalConnectorAvailable)
         .map((sourceData, i) => {
@@ -150,24 +146,20 @@ export const SourcesRouter: React.FC = () => {
             </Route>
           );
         })}
-      {sources
-        .filter((sourceData) => sourceData.customConnectorAvailable)
-        .map((sourceData, i) => {
-          const { serviceType, accountContextOnly } = sourceData;
-          return (
-            <Route
-              key={i}
-              exact
-              path={`${getSourcesPath(getAddPath(serviceType), isOrganization)}/custom`}
-            >
-              {!hasPlatinumLicense && accountContextOnly ? (
-                <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
-              ) : (
-                <AddCustomSource sourceData={sourceData} initialValue={sourceData.name} />
-              )}
-            </Route>
-          );
-        })}
+      <Route
+        exact
+        path={`${getSourcesPath(getAddPath('custom'), isOrganization)}/`}
+        data-test-subj="AddCustomSourceRoute"
+      >
+        <AddCustomSource />
+      </Route>
+      <Route
+        exact
+        path={`${getSourcesPath(getAddPath(':serviceType'), isOrganization)}/custom`}
+        data-test-subj="AddCustomSourceRoute"
+      >
+        <AddCustomSource />
+      </Route>
       {sources.map((sourceData, i) => (
         <Route
           key={i}
