@@ -396,7 +396,7 @@ export type {
   DeprecationSettings,
 } from './ui_settings';
 
-export type { UiServiceSetup } from './ui';
+export type { UiServiceSetup, UiApplication } from './ui';
 
 export type {
   OpsMetrics,

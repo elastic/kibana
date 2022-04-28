@@ -9,12 +9,17 @@
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { PluginName } from '../plugins';
-import { InternalUiServiceSetup, InternalUiServiceStart } from './types';
+import {
+  InternalUiServiceSetup,
+  InternalUiServiceStart,
+  UiApplication,
+  InternalUiApplication,
+} from './types';
 
 export class UiService {
   private readonly logger: Logger;
   private readonly requiredPlugins = new Set<PluginName>();
-  private readonly appIdToPluginNameMap = new Map<string, PluginName>();
+  private readonly registeredApps: InternalUiApplication[] = [];
 
   constructor(core: CoreContext) {
     this.logger = core.logger.get('ui-service');
@@ -28,18 +33,20 @@ export class UiService {
       markAsRequiredFor: (pluginName: PluginName, ...pluginNames: PluginName[]) => {
         // TODO: implement
       },
-      registerApp: (pluginName: PluginName, routeId: string) => {
+      registerApp: (pluginName: PluginName, app: UiApplication) => {
         // TODO: check presence in map
-        this.appIdToPluginNameMap.set(routeId, pluginName);
+        this.registeredApps.push({
+          ...app,
+          pluginName,
+        });
       },
     };
   }
 
   start(): InternalUiServiceStart {
     return {
-      getPluginForApp: (appId: string) => {
-        // TODO: handle missing entry
-        return this.appIdToPluginNameMap.get(appId)!;
+      getRegisteredApps: () => {
+        return [...this.registeredApps];
       },
     };
   }

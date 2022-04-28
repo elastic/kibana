@@ -7,4 +7,10 @@
  */
 
 export { UiService } from './ui_service';
-export type { UiServiceSetup, InternalUiServiceSetup, InternalUiServiceStart } from './types';
+export type {
+  UiServiceSetup,
+  InternalUiServiceSetup,
+  InternalUiServiceStart,
+  UiApplication,
+  InternalUiApplication,
+} from './types';

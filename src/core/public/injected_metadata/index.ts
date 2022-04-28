@@ -11,4 +11,5 @@ export type {
   InjectedMetadataSetup,
   InjectedMetadataStart,
   InjectedPluginMetadata,
+  RegisteredApplication,
 } from './injected_metadata_service';

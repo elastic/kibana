@@ -14,14 +14,35 @@ import { PluginName } from '../plugins';
 export interface InternalUiServiceSetup {
   markAsRequired(pluginName: PluginName): void;
   markAsRequiredFor(pluginName: PluginName, ...pluginNames: PluginName[]): void;
-  registerApp(pluginName: PluginName, routeId: string): void;
+  registerApp(pluginName: PluginName, app: UiApplication): void;
 }
 
 /**
  * @internal
  */
 export interface InternalUiServiceStart {
-  getPluginForApp(appId: string): PluginName;
+  getRegisteredApps(): InternalUiApplication[];
+}
+
+/**
+ * @public
+ */
+export interface UiApplication {
+  /**
+   * The id of the registered client-side application.
+   */
+  appId: string;
+  /**
+   * The optional route defined for the app if not the default `/app/{appId}`
+   */
+  appRoute?: string;
+}
+
+/**
+ * @internal
+ */
+export interface InternalUiApplication extends UiApplication {
+  pluginName: PluginName;
 }
 
 /**
@@ -48,5 +69,5 @@ export interface UiServiceSetup {
    * so we need all plugins to register their applications on the server-side too, and we
    * need that to compute the plugin dependency tree when loading an app.
    */
-  registerApp(appId: string): void;
+  registerApp(app: UiApplication): void;
 }

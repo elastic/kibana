@@ -19,6 +19,6 @@ export const getJsDependencyPaths = (
     `${regularBundlePath}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.jsFilename}`,
     `${regularBundlePath}/core/core.entry.js`,
     // TODO: remove, plugins will now be loaded from client-side
-    ...[...bundlePaths.values()].map((plugin) => plugin.bundlePath),
+    // ...[...bundlePaths.values()].map((plugin) => plugin.bundlePath),
   ];
 };

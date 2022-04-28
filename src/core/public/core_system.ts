@@ -220,7 +220,7 @@ export class CoreSystem {
         theme,
         targetDomElement: notificationsTargetDomElement,
       });
-      const application = await this.application.start({ http, theme, overlays });
+      const application = await this.application.start({ http, theme, overlays, injectedMetadata });
 
       const executionContext = this.executionContext.start({
         curApp$: application.currentAppId$,

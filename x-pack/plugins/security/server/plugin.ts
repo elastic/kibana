@@ -227,9 +227,9 @@ export class SecurityPlugin
     core.ui.markAsRequired();
 
     // flag the `home` app as being owned by the `home` plugin
-    core.ui.registerApp('security_login');
-    core.ui.registerApp('security_logout');
-    core.ui.registerApp('security_logged_out');
+    core.ui.registerApp({ appId: 'security_login', appRoute: '/login' });
+    core.ui.registerApp({ appId: 'security_logout', appRoute: '/logout' });
+    core.ui.registerApp({ appId: 'security_logged_out', appRoute: '/logged_out' });
 
     const config = this.getConfig();
     const kibanaIndexName = this.getKibanaIndexName();

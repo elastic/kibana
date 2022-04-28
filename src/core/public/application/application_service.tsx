@@ -16,6 +16,7 @@ import { HttpSetup, HttpStart } from '../http';
 import { OverlayStart } from '../overlays';
 import { PluginOpaqueId } from '../plugins';
 import type { ThemeServiceStart } from '../theme';
+import type { InjectedMetadataStart, RegisteredApplication } from '../injected_metadata';
 import { AppRouter } from './ui';
 import { Capabilities, CapabilitiesService } from './capabilities';
 import {
@@ -35,7 +36,13 @@ import {
 } from './types';
 import { getLeaveAction, isConfirmAction } from './application_leave';
 import { getUserConfirmationHandler } from './navigation_confirm';
-import { appendAppPath, parseAppUrl, relativeToAbsolute, getAppInfo } from './utils';
+import {
+  appendAppPath,
+  parseAppUrl,
+  relativeToAbsolute,
+  getAppInfo,
+  getMatchingRegisteredApp,
+} from './utils';
 
 interface SetupDeps {
   http: HttpSetup;
@@ -48,6 +55,7 @@ interface StartDeps {
   http: HttpStart;
   theme: ThemeServiceStart;
   overlays: OverlayStart;
+  injectedMetadata: InjectedMetadataStart;
 }
 
 function filterAvailable<T>(m: Map<string, T>, capabilities: Capabilities) {
@@ -106,6 +114,7 @@ export class ApplicationService {
   private openInNewTab?: (url: string) => void;
   private redirectTo?: (url: string) => void;
   private overlayStart$ = new Subject<OverlayStart>();
+  private ensureDependenciesLoaded?: (pluginId: string) => Promise<void>;
 
   public setup({
     http: { basePath },
@@ -201,7 +210,12 @@ export class ApplicationService {
     };
   }
 
-  public async start({ http, overlays, theme }: StartDeps): Promise<InternalApplicationStart> {
+  public async start({
+    http,
+    overlays,
+    theme,
+    injectedMetadata,
+  }: StartDeps): Promise<InternalApplicationStart> {
     if (!this.redirectTo) {
       throw new Error('ApplicationService#setup() must be invoked before start.');
     }
@@ -346,8 +360,21 @@ export class ApplicationService {
             setAppLeaveHandler={this.setAppLeaveHandler}
             setAppActionMenu={this.setAppActionMenu}
             setIsMounting={(isMounting) => httpLoadingCount$.next(isMounting ? 1 : 0)}
+            ensureDependenciesLoaded={(appPath: string) => {
+              const matchingApp = getMatchingRegisteredApp({
+                currentPath: appPath,
+                registeredApplications: injectedMetadata.getRegisteredApps(),
+              });
+
+              console.log('application-service: ensureDependenciesLoaded', appPath, matchingApp);
+              // TODO: handle missing case
+              return this.ensureDependenciesLoaded!(matchingApp!.pluginName);
+            }}
           />
         );
+      },
+      setEnsureDependenciesLoaded: (ensureDependenciesLoaded) => {
+        this.ensureDependenciesLoaded = ensureDependenciesLoaded;
       },
     };
   }

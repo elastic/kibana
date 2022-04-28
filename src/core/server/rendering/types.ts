@@ -15,7 +15,7 @@ import { InternalHttpServicePreboot, InternalHttpServiceSetup, KibanaRequest } f
 import { UiPlugins, DiscoveredPlugin } from '../plugins';
 import { IUiSettingsClient, UserProvidedValues } from '../ui_settings';
 import type { InternalStatusServiceSetup } from '../status';
-import { InternalUiServiceStart } from '../ui';
+import type { InternalUiServiceStart, InternalUiApplication } from '../ui';
 import { IExternalUrlPolicy } from '../external_url';
 
 /** @internal */
@@ -55,6 +55,7 @@ export interface InjectedMetadata {
     appId: string;
     pluginId: string;
   };
+  registeredApps: InternalUiApplication[];
   csp: Pick<ICspConfig, 'warnLegacyBrowsers'>;
   externalUrl: { policy: IExternalUrlPolicy[] };
   vars: Record<string, any>;

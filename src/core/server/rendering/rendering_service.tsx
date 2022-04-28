@@ -119,7 +119,8 @@ export class RenderingService {
       buildNum,
     });
 
-    // TODO: use appId to filter plugins
+    const registeredApps = this.uiStart!.getRegisteredApps();
+    const pluginId = registeredApps.find((app) => app.appId === appId)!.pluginName;
 
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
@@ -140,9 +141,10 @@ export class RenderingService {
         serverBasePath,
         publicBaseUrl,
         env,
+        registeredApps,
         initialApp: {
           appId,
-          pluginId: this.uiStart!.getPluginForApp(appId),
+          pluginId,
         },
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {

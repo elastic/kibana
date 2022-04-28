@@ -73,7 +73,7 @@ export const parseAppUrl = (
 
 const separators = ['/', '?', '#'];
 
-const urlInApp = (url: string, appPath: string) => {
+export const urlInApp = (url: string, appPath: string) => {
   if (url === appPath) {
     return true;
   }
