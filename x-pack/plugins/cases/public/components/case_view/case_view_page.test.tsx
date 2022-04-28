@@ -10,7 +10,6 @@ import userEvent from '@testing-library/user-event';
 import { mount } from 'enzyme';
 import React from 'react';
 import { ConnectorTypes } from '../../../common/api';
-import { useIsMainApplication } from '../../common/hooks';
 import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
 import '../../common/mock/match_media';
 import { useCaseViewNavigation, useUrlParams } from '../../common/navigation/hooks';
@@ -47,7 +46,6 @@ const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
-const useIsMainApplicationMock = useIsMainApplication as jest.Mock;
 
 export const caseProps: CaseViewPageProps = {
   ...caseViewProps,
@@ -103,7 +101,6 @@ describe('CaseViewPage', () => {
     useGetCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
     usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });
     useConnectorsMock.mockReturnValue({ connectors: connectorsMock, loading: false });
-    useIsMainApplicationMock.mockReturnValue(false);
   });
 
   it('should render CaseViewPage', async () => {
@@ -650,12 +647,21 @@ describe('CaseViewPage', () => {
       });
     });
 
-    it('should not display the alerts tab in stack management', async () => {
-      useIsMainApplicationMock.mockReturnValue(true);
+    it('should display the alerts tab when the feature is enabled', async () => {
+      appMockRender = createAppMockRenderer({ features: { alerts: { enabled: true } } });
       const result = appMockRender.render(<CaseViewPage {...caseProps} />);
       await act(async () => {
-        expect(result.queryByTestId('case-view-tab-content-activity')).toBeTruthy();
-        expect(result.queryByTestId('case-view-tab-content-alerts')).toBeFalsy();
+        expect(result.queryByTestId('case-view-tab-title-activity')).toBeTruthy();
+        expect(result.queryByTestId('case-view-tab-title-alerts')).toBeTruthy();
+      });
+    });
+
+    it('should not display the alerts tab when the feature is disabled', async () => {
+      appMockRender = createAppMockRenderer({ features: { alerts: { enabled: false } } });
+      const result = appMockRender.render(<CaseViewPage {...caseProps} />);
+      await act(async () => {
+        expect(result.queryByTestId('case-view-tab-title-activity')).toBeTruthy();
+        expect(result.queryByTestId('case-view-tab-title-alerts')).toBeFalsy();
       });
     });
   });
