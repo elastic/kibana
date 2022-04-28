@@ -22,7 +22,6 @@ export const buildLastEventTimeQuery = ({
   indexKey,
   details,
   defaultIndex,
-  docValueFields,
 }: TimelineEventsLastEventTimeRequestOptions) => {
   const indicesToQuery: EventIndices = {
     hosts: defaultIndex,
@@ -44,7 +43,6 @@ export const buildLastEventTimeQuery = ({
             ignore_unavailable: true,
             track_total_hits: false,
             body: {
-              ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
               query: { bool: { filter: { bool: { should: getIpDetailsFilter(details.ip) } } } },
               _source: false,
               fields: ['@timestamp'],
@@ -68,7 +66,6 @@ export const buildLastEventTimeQuery = ({
             ignore_unavailable: true,
             track_total_hits: false,
             body: {
-              ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
               query: { bool: { filter: getHostDetailsFilter(details.hostName) } },
               _source: false,
               fields: ['@timestamp'],
@@ -92,7 +89,6 @@ export const buildLastEventTimeQuery = ({
             ignore_unavailable: true,
             track_total_hits: false,
             body: {
-              ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
               query: { bool: { filter: getUserDetailsFilter(details.userName) } },
               _source: false,
               fields: ['@timestamp'],
@@ -117,7 +113,6 @@ export const buildLastEventTimeQuery = ({
           ignore_unavailable: true,
           track_total_hits: false,
           body: {
-            ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
             query: { match_all: {} },
             _source: false,
             fields: ['@timestamp'],

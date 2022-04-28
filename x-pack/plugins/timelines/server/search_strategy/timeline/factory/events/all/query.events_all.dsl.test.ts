@@ -11,17 +11,9 @@ import { buildTimelineEventsAllQuery } from './query.events_all.dsl';
 describe('buildTimelineEventsAllQuery', () => {
   it('should return ip details query if index key is ipDetails', () => {
     const defaultIndex = ['.siem-signals-default'];
-    const docValueFields = [
-      { field: '@timestamp' },
-      { field: 'agent.ephemeral_id' },
-      { field: 'agent.id' },
-      { field: 'agent.name' },
-    ];
-
     const query = buildTimelineEventsAllQuery({
       fields: [],
       defaultIndex,
-      docValueFields,
       filterQuery: '',
       language: 'eql',
       pagination: {
@@ -57,20 +49,6 @@ describe('buildTimelineEventsAllQuery', () => {
               },
             },
           },
-          "docvalue_fields": Array [
-            Object {
-              "field": "@timestamp",
-            },
-            Object {
-              "field": "agent.ephemeral_id",
-            },
-            Object {
-              "field": "agent.id",
-            },
-            Object {
-              "field": "agent.name",
-            },
-          ],
           "fields": Array [],
           "from": 0,
           "query": Object {

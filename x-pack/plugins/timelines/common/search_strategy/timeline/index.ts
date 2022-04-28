@@ -20,7 +20,6 @@ import {
   EntityType,
 } from './events';
 import {
-  DocValueFields,
   PaginationInputPaginated,
   TimerangeInput,
   SortField,
@@ -41,7 +40,6 @@ export interface TimelineRequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
   filterQuery: ESQuery | string | undefined;
   defaultIndex: string[];
-  docValueFields?: DocValueFields[];
   factoryQueryType?: TimelineFactoryQueryTypes;
   entityType?: EntityType;
   runtimeMappings: MappingRuntimeFields;

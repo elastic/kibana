@@ -11,13 +11,11 @@ import { DocValueFields } from '../../../../../../common/search_strategy';
 
 export const buildTimelineDetailsQuery = ({
   authFilter,
-  docValueFields,
   id,
   indexName,
   runtimeMappings,
 }: {
   authFilter?: JsonObject;
-  docValueFields: DocValueFields[];
   id: string;
   indexName: string;
   runtimeMappings: MappingRuntimeFields;
@@ -45,9 +43,14 @@ export const buildTimelineDetailsQuery = ({
     index: indexName,
     ignore_unavailable: true,
     body: {
-      docvalue_fields: docValueFields,
       query,
-      fields: [{ field: '*', include_unmapped: true }],
+      fields: [
+        { field: '*', include_unmapped: true },
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
       // Remove and instead pass index_pattern.id once issue resolved: https://github.com/elastic/kibana/issues/111762
       runtime_mappings: runtimeMappings,
       _source: false,
