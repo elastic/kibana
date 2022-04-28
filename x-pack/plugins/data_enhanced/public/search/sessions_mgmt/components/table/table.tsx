@@ -69,7 +69,7 @@ export function SearchSessionsMgmtTable({
     let results: UISession[] = [];
     try {
       results = await api.fetchTableData();
-    } catch (e) { } // eslint-disable-line no-empty
+    } catch (e) {} // eslint-disable-line no-empty
 
     if (showLatestResultsHandler.current === renderResults) {
       renderResults(results);
