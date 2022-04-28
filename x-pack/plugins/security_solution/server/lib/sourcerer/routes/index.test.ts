@@ -154,7 +154,6 @@ describe('sourcerer route', () => {
 
       test('returns sourcerer formatted Data Views when SIEM Data View does NOT exist but has been created in the mean time', async () => {
         const getMock = jest.fn();
-        // getMock.mockResolvedValueOnce(null);
         getMock.mockResolvedValueOnce(mockPattern);
         const getStartServicesSpecial = jest.fn().mockResolvedValue([
           null,
