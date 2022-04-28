@@ -7,6 +7,7 @@ export DISABLE_BOOTSTRAP_VALIDATION=false
 
 .buildkite/scripts/steps/checks/commit/commit.sh
 .buildkite/scripts/steps/checks/telemetry.sh
+.buildkite/scripts/steps/checks/validate_ci_groups.sh
 .buildkite/scripts/steps/checks/ts_projects.sh
 .buildkite/scripts/steps/checks/jest_configs.sh
 .buildkite/scripts/steps/checks/doc_api_changes.sh
