@@ -5,14 +5,14 @@
  * 2.0.
  */
 import React from 'react';
-import { useKubebeatDataView } from '../../common/api/use_kubebeat_data_view';
+import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
 import { allNavigationItems } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
 import { FindingsContainer } from './findings_container';
 import { CspPageTemplate } from '../../components/csp_page_template';
 
 export const Findings = () => {
-  const dataViewQuery = useKubebeatDataView();
+  const dataViewQuery = useLatestFindingsDataView();
   useCspBreadcrumbs([allNavigationItems.findings]);
 
   return (

@@ -103,6 +103,24 @@ export const latestFindingsMapping: MappingTypeMapping = {
             },
           },
         },
+        section: {
+          type: 'text',
+          fields: {
+            keyword: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    },
+    cluster_id: {
+      type: 'text',
+      fields: {
+        keyword: {
+          ignore_above: 1024,
+          type: 'keyword',
+        },
       },
     },
   },

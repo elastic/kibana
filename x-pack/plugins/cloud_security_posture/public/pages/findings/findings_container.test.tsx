@@ -8,7 +8,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { FindingsContainer, getDefaultQuery } from './findings_container';
 import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
-import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
+import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../common/constants';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { TestProvider } from '../../test/test_provider';
@@ -19,7 +19,7 @@ import { RisonObject } from 'rison-node';
 import { buildEsQuery } from '@kbn/es-query';
 import { getFindingsCountAggQuery } from './use_findings_count';
 
-jest.mock('../../common/api/use_kubebeat_data_view');
+jest.mock('../../common/api/use_latest_findings_data_view');
 jest.mock('../../common/api/use_cis_kubernetes_integration');
 
 jest.mock('react-router-dom', () => ({
@@ -38,7 +38,7 @@ describe('<FindingsContainer />', () => {
     const dataMock = dataPluginMock.createStartContract();
     const dataView = createStubDataView({
       spec: {
-        id: CSP_KUBEBEAT_INDEX_PATTERN,
+        id: CSP_LATEST_FINDINGS_DATA_VIEW,
       },
     });
 

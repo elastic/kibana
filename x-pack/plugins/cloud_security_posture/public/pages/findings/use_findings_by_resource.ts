@@ -55,7 +55,7 @@ export const getFindingsByResourceAggQuery = ({
           sources: [
             { resource_id: { terms: { field: 'resource_id.keyword' } } },
             { cluster_id: { terms: { field: 'cluster_id.keyword' } } },
-            { cis_section: { terms: { field: 'rule.section' } } },
+            { cis_section: { terms: { field: 'rule.section.keyword' } } },
           ],
         },
         aggs: {
