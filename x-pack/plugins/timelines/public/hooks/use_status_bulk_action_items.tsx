@@ -27,9 +27,8 @@ export const useStatusBulkActionItems = ({
   setEventsDeleted,
   onUpdateSuccess,
   onUpdateFailure,
+  customBulkActions,
   timelineId,
-  onCasesAttachToNewCase,
-  onCasesAttachToExistingCase,
 }: StatusBulkActionsProps) => {
   const { updateAlertStatus } = useUpdateAlertsStatus(timelineId !== STANDALONE_ID);
   const { addSuccess, addError, addWarning } = useAppToasts();
@@ -159,31 +158,22 @@ export const useStatusBulkActionItems = ({
       );
     }
 
-    if (onCasesAttachToNewCase) {
-      actionItems.push(
-        <EuiContextMenuItem
-          key="close"
-          data-test-subj="attach-alerts-new-case"
-          onClick={() => onCasesAttachToNewCase(eventIds)}
-        >
-          {i18n.BULK_ACTION_ATTACH_NEW_CASE}
-        </EuiContextMenuItem>
-      );
-    }
+    const additionalItems = customBulkActions
+      ? customBulkActions.map((action) => {
+          return (
+            <EuiContextMenuItem
+              key={action.key}
+              data-test-subj={action['data-test-subj']}
+              onClick={() => action.onClick(eventIds)}
+            >
+              {action.label}
+            </EuiContextMenuItem>
+          );
+        })
+      : [];
 
-    if (onCasesAttachToExistingCase) {
-      actionItems.push(
-        <EuiContextMenuItem
-          key="close"
-          data-test-subj="attach-alerts-existing-case"
-          onClick={() => onCasesAttachToExistingCase(eventIds)}
-        >
-          {i18n.BULK_ACTION_ATTACH_EXISTING_CASE}
-        </EuiContextMenuItem>
-      );
-    }
-    return actionItems;
-  }, [currentStatus, eventIds, onCasesAttachToExistingCase, onCasesAttachToNewCase, onClickUpdate]);
+    return [...actionItems, ...additionalItems];
+  }, [currentStatus, customBulkActions, eventIds, onClickUpdate]);
 
   return items;
 };

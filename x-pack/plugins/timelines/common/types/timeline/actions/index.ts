@@ -53,8 +53,16 @@ export type OnUpdateAlertStatusSuccess = (
 ) => void;
 export type OnUpdateAlertStatusError = (status: AlertStatus, error: Error) => void;
 
-export type OnCasesAttachToNewCase = (eventIds: string[]) => void;
-export type OnCasesAttachToExistingCase = (eventIds: string[]) => void;
+export interface CustomBulkAction {
+  key: string;
+  label: string;
+  onClick: (items?: TimelineItem[]) => void;
+  ['data-test-subj']?: string;
+}
+
+export type StatusCustomBulkAction = Omit<CustomBulkAction, 'onClick'> & {
+  onClick: (eventIds: string[]) => void;
+};
 
 export interface StatusBulkActionsProps {
   eventIds: string[];
@@ -65,8 +73,7 @@ export interface StatusBulkActionsProps {
   setEventsDeleted: SetEventsDeleted;
   onUpdateSuccess?: OnUpdateAlertStatusSuccess;
   onUpdateFailure?: OnUpdateAlertStatusError;
-  onCasesAttachToNewCase?: OnCasesAttachToNewCase;
-  onCasesAttachToExistingCase?: OnCasesAttachToExistingCase;
+  customBulkActions?: StatusCustomBulkAction[];
   timelineId?: string;
 }
 export interface HeaderActionProps {
@@ -122,8 +129,7 @@ export interface BulkActionsObjectProp {
   alertStatusActions?: boolean;
   onAlertStatusActionSuccess?: OnUpdateAlertStatusSuccess;
   onAlertStatusActionFailure?: OnUpdateAlertStatusError;
-  onCasesAttachToNewCase?: (items: TimelineItem[]) => void;
-  onCasesAttachToExistingCase?: (items: TimelineItem[]) => void;
+  customBulkActions?: CustomBulkAction[];
 }
 export type BulkActionsProp = boolean | BulkActionsObjectProp;
 

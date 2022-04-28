@@ -195,12 +195,24 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
           refetchQuery(globalQueries);
         }
       },
-      onCasesAttachToNewCase: (items: TimelineItem[]) => {
-        console.log('new one', items);
-      },
-      onCasesAttachToExistingCase: (items: TimelineItem[]) => {
-        console.log('existing one', items);
-      },
+      customBulkActions: [
+        {
+          label: 'Attach to new case',
+          key: 'attach-new-case',
+          'data-test-subj': 'attach-new-case',
+          onClick: (items?: TimelineItem[]) => {
+            console.log('new one', items);
+          },
+        },
+        {
+          label: 'Attach to existing case',
+          key: 'attach-existing-case',
+          'data-test-subj': 'attach-existing-case',
+          onClick: (items?: TimelineItem[]) => {
+            console.log('existing one', items);
+          },
+        },
+      ],
     }),
     [globalQueries, id, timelineQuery]
   );

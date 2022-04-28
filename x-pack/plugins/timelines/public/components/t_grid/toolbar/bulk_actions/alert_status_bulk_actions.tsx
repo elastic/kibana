@@ -13,8 +13,7 @@ import type {
   SetEventsDeleted,
   OnUpdateAlertStatusSuccess,
   OnUpdateAlertStatusError,
-  OnCasesAttachToNewCase,
-  OnCasesAttachToExistingCase,
+  AlertStatusCustomBulkAction,
 } from '../../../../../common/types';
 import type { Refetch } from '../../../../store/t_grid/inputs';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../../store/t_grid';
@@ -29,8 +28,7 @@ interface OwnProps {
   indexName: string;
   onActionSuccess?: OnUpdateAlertStatusSuccess;
   onActionFailure?: OnUpdateAlertStatusError;
-  onCasesAttachToNewCase?: OnCasesAttachToNewCase;
-  onCasesAttachToExistingCase?: OnCasesAttachToExistingCase;
+  customBulkActions?: AlertStatusCustomBulkAction[];
   refetch: Refetch;
 }
 
@@ -51,8 +49,7 @@ export const AlertStatusBulkActionsComponent = React.memo<StatefulAlertStatusBul
     indexName,
     onActionSuccess,
     onActionFailure,
-    onCasesAttachToNewCase,
-    onCasesAttachToExistingCase,
+    customBulkActions,
     refetch,
   }) => {
     const dispatch = useDispatch();
@@ -126,8 +123,7 @@ export const AlertStatusBulkActionsComponent = React.memo<StatefulAlertStatusBul
       setEventsDeleted,
       onUpdateSuccess,
       onUpdateFailure,
-      onCasesAttachToExistingCase,
-      onCasesAttachToNewCase,
+      customBulkActions,
       timelineId: id,
     });
 
