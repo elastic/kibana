@@ -77,7 +77,6 @@ const FindingsTableComponent = ({
         field: 'rule.name',
         name: TEXT.RULE,
         sortable: true,
-        render: ruleNameRenderer,
       },
       {
         field: 'cluster_id',
@@ -198,12 +197,6 @@ const timestampRenderer = (timestamp: string) => (
 const resourceFilenameRenderer = (filename: string) => (
   <EuiToolTip position="top" content={filename}>
     <span>{filename}</span>
-  </EuiToolTip>
-);
-
-const ruleNameRenderer = (name: string) => (
-  <EuiToolTip position="top" content={name}>
-    <span>{name}</span>
   </EuiToolTip>
 );
 
