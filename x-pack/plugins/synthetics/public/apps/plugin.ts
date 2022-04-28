@@ -24,18 +24,9 @@ import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
-<<<<<<< HEAD:x-pack/plugins/uptime/public/apps/plugin.ts
-} from '../../../triggers_actions_ui/public';
-import {
-  DataPublicPluginSetup,
-  DataPublicPluginStart,
-} from '../../../../../src/plugins/data/public';
-import { UnifiedSearchPublicPluginStart } from '../../../../../src/plugins/unified_search/public';
-=======
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
->>>>>>> origin/main:x-pack/plugins/synthetics/public/apps/plugin.ts
 
 import { FleetStart } from '@kbn/fleet-plugin/public';
 import {

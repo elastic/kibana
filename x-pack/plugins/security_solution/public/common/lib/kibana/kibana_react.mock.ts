@@ -10,19 +10,11 @@
 import React from 'react';
 
 import { RecursivePartial } from '@elastic/eui/src/components/common';
-<<<<<<< HEAD
-import { coreMock, themeServiceMock } from '../../../../../../../src/core/public/mocks';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
-import { unifiedSearchPluginMock } from '../../../../../../../src/plugins/unified_search/public/mocks';
-import { securityMock } from '../../../../../../plugins/security/public/mocks';
-=======
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
->>>>>>> origin/main
 import {
   DEFAULT_APP_REFRESH_INTERVAL,
   DEFAULT_APP_TIME_RANGE,

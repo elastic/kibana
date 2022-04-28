@@ -18,13 +18,8 @@ import { FilterStateStore } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { buildGlobalQuery } from '../helpers';
-<<<<<<< HEAD
-import { setAutocomplete } from '../../../../../../../../src/plugins/unified_search/public/services';
-import { unifiedSearchPluginMock } from '../../../../../../../../src/plugins/unified_search/public/mocks';
-=======
 import { setAutocomplete } from '@kbn/unified-search-plugin/public/services';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
->>>>>>> origin/main
 
 import {
   QueryBarTimeline,

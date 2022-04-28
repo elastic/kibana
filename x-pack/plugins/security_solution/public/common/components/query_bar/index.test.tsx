@@ -14,13 +14,8 @@ import { TestProviders, mockIndexPattern } from '../../mock';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { QueryBar, QueryBarComponentProps } from '.';
-<<<<<<< HEAD
-import { setAutocomplete } from '../../../../../../../src/plugins/unified_search/public/services';
-import { unifiedSearchPluginMock } from '../../../../../../../src/plugins/unified_search/public/mocks';
-=======
 import { setAutocomplete } from '@kbn/unified-search-plugin/public/services';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
->>>>>>> origin/main
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
