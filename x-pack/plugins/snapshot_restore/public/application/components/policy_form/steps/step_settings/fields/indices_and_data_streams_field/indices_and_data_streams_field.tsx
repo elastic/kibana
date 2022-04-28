@@ -17,8 +17,9 @@ import {
   EuiLink,
   EuiPanel,
   EuiSelectable,
-  EuiSelectableOption,
   EuiSpacer,
+  EuiSelectableOption,
+  EuiCallOut,
   EuiSwitch,
   EuiTitle,
   EuiToolTip,
@@ -193,6 +194,21 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
           )}
           {isAllIndices ? null : (
             <Fragment>
+              {config.includeGlobalState && (
+                <>
+                  <EuiSpacer size="m" />
+                  <EuiFormRow>
+                    <EuiCallOut title="System indices will be included" color="warning" iconType="alert">
+                      <p>
+                        <FormattedMessage
+                          id="xpack.snapshotRestore.policyForm.stepSettings.indicesWithGlobalStateEnabled"
+                          defaultMessage="Given that include global state is enabled, all system indices will be captured as well."
+                        />
+                      </p>
+                    </EuiCallOut>
+                  </EuiFormRow>
+                </>
+              )}
               <EuiSpacer size="m" />
               <EuiFormRow
                 className="snapshotRestore__policyForm__stepSettings__indicesFieldWrapper"

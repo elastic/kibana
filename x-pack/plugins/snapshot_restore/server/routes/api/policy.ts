@@ -224,6 +224,22 @@ export function registerPolicyRoutes({
     })
   );
 
+  // Get policy feature states
+  router.get(
+    { path: addBasePath('policies/features'), validate: false },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
+
+      try {
+        const response = await clusterClient.asCurrentUser.features.getFeatures();
+
+        return res.ok({ body: response });
+      } catch (e) {
+        return handleEsError({ error: e, response: res });
+      }
+    })
+  );
+
   // Get retention settings
   router.get(
     { path: addBasePath('policies/retention_settings'), validate: false },

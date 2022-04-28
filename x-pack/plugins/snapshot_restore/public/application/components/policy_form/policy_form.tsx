@@ -67,6 +67,8 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
   const [policy, setPolicy] = useState<SlmPolicyPayload>({
     ...originalPolicy,
     config: {
+      // By default, the policy should include global state
+      includeGlobalState: true,
       ...(originalPolicy.config || {}),
     },
     retention: {

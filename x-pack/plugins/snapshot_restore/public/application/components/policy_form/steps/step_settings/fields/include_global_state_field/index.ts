@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { IndicesAndDataStreamsField } from './indices_and_data_streams_field';
 export { IncludeGlobalStateField } from './include_global_state_field';

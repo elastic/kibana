@@ -21,7 +21,7 @@ import {
 import { SlmPolicyPayload } from '../../../../../../common/types';
 import { StepProps } from '..';
 
-import { IndicesAndDataStreamsField } from './fields';
+import { IndicesAndDataStreamsField, IncludeGlobalStateField } from './fields';
 import { useCore } from '../../../../app_context';
 
 export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
@@ -127,45 +127,7 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
     </EuiDescribedFormGroup>
   );
 
-  const renderIncludeGlobalStateField = () => (
-    <EuiDescribedFormGroup
-      title={
-        <EuiTitle size="s">
-          <h3>
-            <FormattedMessage
-              id="xpack.snapshotRestore.policyForm.stepSettings.includeGlobalStateDescriptionTitle"
-              defaultMessage="Include global state"
-            />
-          </h3>
-        </EuiTitle>
-      }
-      description={
-        <FormattedMessage
-          id="xpack.snapshotRestore.policyForm.stepSettings.includeGlobalStateDescription"
-          defaultMessage="Stores the global cluster state and system indices as part of the snapshot. This will capture all system indices in addition to any specific indices that have been selected for capture."
-        />
-      }
-      fullWidth
-    >
-      <EuiFormRow hasEmptyLabelSpace fullWidth>
-        <EuiSwitch
-          data-test-subj="globalStateToggle"
-          label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.policyForm.stepSettings.policyIncludeGlobalStateLabel"
-              defaultMessage="Include global state"
-            />
-          }
-          checked={config.includeGlobalState === undefined || config.includeGlobalState}
-          onChange={(e) => {
-            updatePolicyConfig({
-              includeGlobalState: e.target.checked,
-            });
-          }}
-        />
-      </EuiFormRow>
-    </EuiDescribedFormGroup>
-  );
+
   return (
     <div className="snapshotRestore__policyForm__stepSettings">
       {/* Step title and doc link */}
@@ -209,7 +171,12 @@ export const PolicyStepSettings: React.FunctionComponent<StepProps> = ({
 
       {renderIgnoreUnavailableField()}
       {renderPartialField()}
-      {renderIncludeGlobalStateField()}
+
+      <IncludeGlobalStateField
+        errors={errors}
+        policy={policy}
+        onUpdate={updatePolicyConfig}
+      />
     </div>
   );
 };
