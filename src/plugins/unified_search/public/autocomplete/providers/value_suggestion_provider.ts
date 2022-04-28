@@ -8,7 +8,6 @@
 
 import type { CoreSetup } from '@kbn/core/public';
 import dateMath from '@kbn/datemath';
-import { buildQueryFromFilters } from '@kbn/es-query';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { IIndexPattern, IFieldType, ValueSuggestionsMethod } from '@kbn/data-plugin/common';
 import type { TimefilterSetup } from '@kbn/data-plugin/public';
@@ -115,6 +114,7 @@ export const setupValueSuggestionProvider = (
     }
 
     const timeFilter = useTimeRange ? getAutocompleteTimefilter(timefilter, dataView) : undefined;
+    const { buildQueryFromFilters } = await import('@kbn/es-query');
     const filterQuery = timeFilter ? buildQueryFromFilters([timeFilter], dataView).filter : [];
     const filters = [...(boolFilter ? boolFilter : []), ...filterQuery];
     try {

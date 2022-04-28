@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
+import dataViewResponse from './__fixtures__/data_view_response.json';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import type { KueryNode } from '@kbn/es-query';
 import { setupGetValueSuggestions } from './value';
-import dataViewResponse from './__fixtures__/data_view_response.json';
 
 import type { QuerySuggestionGetFnArgs } from '../query_suggestion_provider';
 
