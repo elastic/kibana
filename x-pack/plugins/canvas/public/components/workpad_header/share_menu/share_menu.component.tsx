@@ -10,7 +10,6 @@ import PropTypes from 'prop-types';
 import {
   EuiButtonEmpty,
   EuiContextMenu,
-  EuiContextMenuPanel,
   EuiContextMenuPanelDescriptor,
   EuiIcon,
 } from '@elastic/eui';
@@ -18,7 +17,6 @@ import { i18n } from '@kbn/i18n';
 import { PDF, JSON } from '../../../../i18n/constants';
 import { ClosePopoverFn, Popover } from '../../popover';
 import { ShareWebsiteFlyout } from './flyout';
-import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 
 const strings = {
   getExportTitle: () =>

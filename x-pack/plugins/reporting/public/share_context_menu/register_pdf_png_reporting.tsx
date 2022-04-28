@@ -112,7 +112,7 @@ export const reportingScreenshotShareProvider = ({
     const shareActions = [];
 
     const pngPanelTitle = i18n.translate('xpack.reporting.shareContextMenu.pngReportsButtonLabel', {
-      defaultMessage: 'PNG Reports',
+      defaultMessage: 'Export to PNG',
     });
 
     const jobProviderOptions: JobParamsProviderOptions = {
@@ -156,7 +156,7 @@ export const reportingScreenshotShareProvider = ({
     };
 
     const pdfPanelTitle = i18n.translate('xpack.reporting.shareContextMenu.pdfReportsButtonLabel', {
-      defaultMessage: 'PDF Reports',
+      defaultMessage: 'Export to PDF',
     });
 
     const pdfReportType = isV2Job ? 'printablePdfV2' : 'printablePdf';
