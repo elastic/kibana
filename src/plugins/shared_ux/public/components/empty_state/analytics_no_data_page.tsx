@@ -12,11 +12,11 @@ import { SharedUxServicesProvider } from '@kbn/shared-ux-services';
 import { getSharedUXServices } from '../../plugin';
 import { AnalyticsNoDataPageComponent } from './analytics_no_data_page.component';
 
-interface Props {
+export interface AnalyticsNoDataPageProps {
   onDataViewCreated: (dataView: unknown) => void;
 }
 
-export const AnalyticsNoDataPage = ({ onDataViewCreated }: Props) => {
+export const AnalyticsNoDataPage = ({ onDataViewCreated }: AnalyticsNoDataPageProps) => {
   const services = getSharedUXServices();
   const { kibanaGuideDocLink } = services.docLinks;
   return (

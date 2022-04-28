@@ -1,0 +1,21 @@
+---
+id: sharedUX/Components/AnalyticsNoDataPage
+slug: /shared-ux/analytics_no_data_page
+title: Analytics No Data Page
+summary: A page to be displayed when there is no data in Elasticsearch, or no data views; specific to Analytics apps
+tags: ['shared-ux', 'component']
+date: 2022-04-28
+---
+
+## Description
+
+This component is meant to be used in scenarios when there is no data in Elasticsearch, or there haven't been any data views created yet, in Analytics apps. 
+It displays an appropriate message to the user and facilitate addition of integrations and creation of data views. The screens have been preconfigured with the Analytics-specific messages.
+If a more generic version of the component is needed, `KibanaNoDataPage` from `shared-ux-components` should be used instead
+
+## Component: `AnalyticsNoDataPage`
+
+- an Analytics-specific wrapper around `KibanaNoDataPage`
+- uses `hasUserDataView` and `hasData` API from `HasData` service in `data_views` plugin to check for existence of data / data views
+- uses `onDataViewCreated` callback to be called once the data view has been created
+- is wrapped in `ServicesContext` provided by the start contract of the `shared_ux` plugin

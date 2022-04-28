@@ -11,10 +11,16 @@ import { action } from '@storybook/addon-actions';
 import { SharedUxServicesProvider } from '@kbn/shared-ux-services';
 import { servicesFactory, DataServiceFactoryConfig } from '@kbn/shared-ux-storybook';
 import { AnalyticsNoDataPageComponent } from './analytics_no_data_page.component';
+import mdx from './analytics_no_data_page.component.mdx';
 
 export default {
   title: 'Analytics No Data Page',
   description: 'An Analytics-specific version of KibanaNoDataPage',
+  parameters: {
+    docs: {
+      page: mdx,
+    },
+  },
 };
 
 type Params = Pick<DataServiceFactoryConfig, 'hasESData' | 'hasUserDataView'>;

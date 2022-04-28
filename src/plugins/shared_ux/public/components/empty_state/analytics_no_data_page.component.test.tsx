@@ -9,7 +9,6 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { KibanaNoDataPage } from '@kbn/shared-ux-components';
-import { mockServicesFactory } from '@kbn/shared-ux-services';
 import { AnalyticsNoDataPageComponent } from './analytics_no_data_page.component';
 
 describe('AnalyticsNoDataPageComponent', () => {
@@ -30,7 +29,7 @@ describe('AnalyticsNoDataPageComponent', () => {
     expect(noDataConfig.solution).toEqual('Analytics');
     expect(noDataConfig.pageTitle).toEqual('Welcome to Analytics!');
     expect(noDataConfig.logo).toEqual('logoKibana');
-    expect(noDataConfig.docsLink).toEqual(mockServicesFactory().docLinks.kibanaGuideDocLink);
+    expect(noDataConfig.docsLink).toEqual('http://www.test.com');
     expect(noDataConfig.action.elasticAgent).not.toBeNull();
   });
 });

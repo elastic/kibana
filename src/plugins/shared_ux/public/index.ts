@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import React from 'react';
+import { withSuspense } from '@kbn/shared-ux-utility';
 import { SharedUXPlugin } from './plugin';
-
 /**
  * Creates the Shared UX plugin.
  */
@@ -16,3 +16,20 @@ export function plugin() {
 }
 
 export type { SharedUXPluginSetup, SharedUXPluginStart } from './types';
+
+/**
+ * An Analytics-specific implementation of `KibanaNoDataPage`. The component is lazily-loaded. Consumers should use `React.Suspense` or the
+ * `withSuspense` HOC to load this component.
+ */
+export const AnalyticsNoDataPageLazy = React.lazy(() =>
+  import('./components').then(({ AnalyticsNoDataPage }) => ({
+    default: AnalyticsNoDataPage,
+  }))
+);
+
+/**
+ * A `AnalyticsNoDataPage` component that is wrapped by the `withSuspense` HOC.  This component can
+ * be used directly by consumers and will load the `AnalyticsNoDataPage` component lazily with
+ * a predefined fallback and error boundary.
+ */
+export const AnalyticsNoDataPage = withSuspense(AnalyticsNoDataPageLazy);
