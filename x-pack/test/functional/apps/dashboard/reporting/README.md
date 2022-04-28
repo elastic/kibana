@@ -11,8 +11,8 @@ Every now and then visual changes will be made that will require the snapshots t
 1. **Load the ES Archive containing the dashboard and data.**
    This will load the test data into an Elasticsearch instance running via the functional test server:
   ```
-  node scripts/es_archiver load reporting/ecommerce --config=x-pack/test/functional/config.js
-  node scripts/es_archiver load reporting/ecommerce_kibana --config=x-pack/test/functional/config.js
+  node scripts/es_archiver load reporting/ecommerce --config=x-pack/test/functional/apps/dashboard/config.ts
+  node scripts/es_archiver load reporting/ecommerce_kibana --config=x-pack/test/functional/apps/dashboard/config.ts
   ```
 2. **Generate the reports of the E-commerce dashboard in the Kibana UI.**
    Navigate to `http://localhost:5620`, find the archived dashboard, and generate all the types of reports for which there are stored baseline images.

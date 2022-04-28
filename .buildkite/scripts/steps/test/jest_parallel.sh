@@ -20,7 +20,7 @@ else
 fi
 
 export TEST_TYPE
-echo "--- downloading integration test run order"
+echo "--- downloading jest test run order"
 buildkite-agent artifact download jest_run_order.json .
 configs=$(jq -r 'getpath([env.TEST_TYPE]) | .groups[env.JOB | tonumber].names | .[]' jest_run_order.json)
 

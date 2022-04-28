@@ -7,12 +7,10 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
-// @ts-ignore untyped module
-import getFunctionalConfig from '../../functional/config';
 
 // eslint-disable-next-line import/no-default-export
 export default async ({ readConfigFile }: FtrConfigProviderContext) => {
-  const functionalConfig = await getFunctionalConfig({ readConfigFile });
+  const functionalConfig = await readConfigFile(require.resolve('../../functional/config.base.js'));
 
   return {
     ...functionalConfig,

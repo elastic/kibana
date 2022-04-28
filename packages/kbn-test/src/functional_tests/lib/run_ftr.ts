@@ -122,5 +122,5 @@ export async function hasTests({ configPath, options }: CreateFtrParams) {
     return true;
   }
   const stats = await ftr.getTestStats();
-  return stats.testCount > 0;
+  return stats.nonSkippedTestCount > 0;
 }

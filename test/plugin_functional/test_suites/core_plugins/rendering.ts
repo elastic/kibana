@@ -189,7 +189,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.osquery.savedQueries (boolean)',
         'xpack.remote_clusters.ui.enabled (boolean)',
         /**
-         * NOTE: The Reporting plugin is currently disabled in functional tests (see test/functional/config.js).
+         * NOTE: The Reporting plugin is currently disabled in functional tests (see test/functional/config.base.js).
          * It will be re-enabled once #102552 is completed.
          */
         // 'xpack.reporting.roles.allow (array)',

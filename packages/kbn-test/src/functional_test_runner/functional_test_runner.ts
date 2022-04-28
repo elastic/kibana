@@ -18,6 +18,7 @@ import {
   TestMetadata,
   readConfigFile,
   ProviderCollection,
+  Providers,
   readProviderSpec,
   setupMocha,
   runTests,
@@ -55,19 +56,29 @@ export class FunctionalTestRunner {
   }
 
   async run() {
+    const testStats = await this.getTestStats();
+
     return await this._run(async (config, coreProviders) => {
       SuiteTracker.startTracking(this.lifecycle, this.configFile);
 
-      const providers = new ProviderCollection(this.log, [
-        ...coreProviders,
-        ...readProviderSpec('Service', config.get('services')),
-        ...readProviderSpec('PageObject', config.get('pageObjects')),
-      ]);
+      const realServices =
+        !!config.get('testRunner') ||
+        (testStats.testCount > 0 && testStats.nonSkippedTestCount > 0);
 
-      if (providers.hasService('es')) {
-        await this.validateEsVersion(config);
+      const providers = realServices
+        ? new ProviderCollection(this.log, [
+            ...coreProviders,
+            ...readProviderSpec('Service', config.get('services')),
+            ...readProviderSpec('PageObject', config.get('pageObjects')),
+          ])
+        : this.getStubProviderCollection(config, coreProviders);
+
+      if (realServices) {
+        if (providers.hasService('es')) {
+          await this.validateEsVersion(config);
+        }
+        await providers.loadAll();
       }
-      await providers.loadAll();
 
       const customTestRunner = config.get('testRunner');
       if (customTestRunner) {
@@ -148,53 +159,65 @@ export class FunctionalTestRunner {
         throw new Error('Unable to get test stats for config that uses a custom test runner');
       }
 
-      // replace the function of custom service providers so that they return
-      // promise-like objects which never resolve, essentially disabling them
-      // allowing us to load the test files and populate the mocha suites
-      const readStubbedProviderSpec = (type: string, providers: any, skip: string[]) =>
-        readProviderSpec(type, providers).map((p) => ({
-          ...p,
-          fn: skip.includes(p.name)
-            ? (ctx: any) => {
-                const result = ProviderCollection.callProviderFn(p.fn, ctx);
-
-                if ('then' in result) {
-                  throw new Error(
-                    `Provider [${p.name}] returns a promise so it can't loaded during test analysis`
-                  );
-                }
-
-                return result;
-              }
-            : () => ({
-                then: () => {},
-              }),
-        }));
-
-      const providers = new ProviderCollection(this.log, [
-        ...coreProviders,
-        ...readStubbedProviderSpec(
-          'Service',
-          config.get('services'),
-          config.get('servicesRequiredForTestAnalysis')
-        ),
-        ...readStubbedProviderSpec('PageObject', config.get('pageObjects'), []),
-      ]);
-
+      const providers = this.getStubProviderCollection(config, coreProviders);
       const mocha = await setupMocha(this.lifecycle, this.log, config, providers, this.esVersion);
 
-      const countTests = (suite: Suite): number =>
-        suite.suites.reduce((sum, s) => sum + countTests(s), suite.tests.length);
+      const queue = new Set([mocha.suite]);
+      const allTests: Test[] = [];
+      for (const suite of queue) {
+        for (const test of suite.tests) {
+          allTests.push(test);
+        }
+        for (const childSuite of suite.suites) {
+          queue.add(childSuite);
+        }
+      }
 
       return {
-        testCount: countTests(mocha.suite),
+        testCount: allTests.length,
+        nonSkippedTestCount: allTests.filter((t) => !t.pending).length,
         testsExcludedByTag: mocha.testsExcludedByTag.map((t: Test) => t.fullTitle()),
       };
     });
   }
 
+  private getStubProviderCollection(config: Config, coreProviders: Providers) {
+    // when we want to load the tests but not actually run anything we can
+    // use stubbed providers which allow mocha to do it's thing without taking
+    // too much time
+    const readStubbedProviderSpec = (type: string, providers: any, skip: string[]) =>
+      readProviderSpec(type, providers).map((p) => ({
+        ...p,
+        fn: skip.includes(p.name)
+          ? (ctx: any) => {
+              const result = ProviderCollection.callProviderFn(p.fn, ctx);
+
+              if ('then' in result) {
+                throw new Error(
+                  `Provider [${p.name}] returns a promise so it can't loaded during test analysis`
+                );
+              }
+
+              return result;
+            }
+          : () => ({
+              then: () => {},
+            }),
+      }));
+
+    return new ProviderCollection(this.log, [
+      ...coreProviders,
+      ...readStubbedProviderSpec(
+        'Service',
+        config.get('services'),
+        config.get('servicesRequiredForTestAnalysis')
+      ),
+      ...readStubbedProviderSpec('PageObject', config.get('pageObjects'), []),
+    ]);
+  }
+
   async _run<T = any>(
-    handler: (config: Config, coreProvider: ReturnType<typeof readProviderSpec>) => Promise<T>
+    handler: (config: Config, coreProviders: Providers) => Promise<T>
   ): Promise<T> {
     let runErrorOccurred = false;
 
@@ -205,7 +228,7 @@ export class FunctionalTestRunner {
         this.configFile,
         this.configOverrides
       );
-      this.log.info('Config loaded');
+      this.log.debug('Config loaded');
 
       if (
         (!config.get('testFiles') || config.get('testFiles').length === 0) &&

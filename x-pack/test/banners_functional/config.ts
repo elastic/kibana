@@ -9,7 +9,7 @@ import { FtrConfigProviderContext } from '@kbn/test';
 import { services, pageObjects } from './ftr_provider_context';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const kibanaFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
+  const kibanaFunctionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
 
   return {
     testFiles: [require.resolve('./tests')],

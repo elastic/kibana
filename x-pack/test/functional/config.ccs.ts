@@ -10,7 +10,7 @@ import { RemoteEsArchiverProvider } from './services/remote_es/remote_es_archive
 import { RemoteEsProvider } from './services/remote_es/remote_es';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('./config'));
+  const functionalConfig = await readConfigFile(require.resolve('./config.base.js'));
 
   return {
     ...functionalConfig.getAll(),

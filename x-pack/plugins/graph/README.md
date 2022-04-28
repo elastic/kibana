@@ -11,7 +11,7 @@ Graph shows only up in the side bar if your server is running on a platinum or t
 * Run linter `node scripts/eslint.js x-pack/plugins/graph`
 * Run functional tests (make sure to stop dev server)
   * Server `cd x-pack && node ./scripts/functional_tests_server.js`
-  * Tests `cd x-pack && node ../scripts/functional_test_runner.js --config ./test/functional/config.js --grep=graph`
+  * Tests `cd x-pack && node ../scripts/functional_test_runner.js --config ./test/functional/config.base.js --grep=graph`
 
 ## Folder structure
 

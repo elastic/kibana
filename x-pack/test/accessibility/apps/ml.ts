@@ -13,7 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
   const a11y = getService('a11y');
   const ml = getService('ml');
 
-  describe('ml', () => {
+  describe('ml Accessibility', () => {
     const esArchiver = getService('esArchiver');
 
     before(async () => {

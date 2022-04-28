@@ -69,6 +69,11 @@ export function setupCiStatsFtrTestGroupReporter({
   testMetadata: TestMetadata;
   reporter: CiStatsReporter;
 }) {
+  const testGroupType = process.env.TEST_GROUP_TYPE_FUNCTIONAL;
+  if (!testGroupType) {
+    throw new Error('missing process.env.TEST_GROUP_TYPE_FUNCTIONAL');
+  }
+
   let startMs: number | undefined;
   runner.on('start', () => {
     startMs = Date.now();
@@ -78,7 +83,7 @@ export function setupCiStatsFtrTestGroupReporter({
   const group: CiStatsReportTestsOptions['group'] = {
     startTime: new Date(start).toJSON(),
     durationMs: 0,
-    type: config.path.startsWith('x-pack') ? 'X-Pack Functional Tests' : 'Functional Tests',
+    type: testGroupType,
     name: Path.relative(REPO_ROOT, config.path),
     result: 'skip',
     meta: {
