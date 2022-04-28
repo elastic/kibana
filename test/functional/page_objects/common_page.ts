@@ -282,6 +282,15 @@ export class CommonPageObject extends FtrService {
         if (appName === 'discover') {
           await this.browser.setLocalStorageItem('data.autocompleteFtuePopover', 'true');
         }
+        if (appName === 'dashboard') {
+          const disableTour = JSON.stringify({
+            currentTourStep: 0,
+            isTourActive: false,
+            tourPopoverWidth: 0,
+          });
+          await this.browser.setLocalStorageItem('dashboard.edit.tourState', disableTour);
+          await this.browser.setLocalStorageItem('dashboard.view.tourState', disableTour);
+        }
         return currentUrl;
       });
 

@@ -87,7 +87,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     // Each of these tests call initTests themselves, the way it was originally written.  The above tests only load
     // the data once to save on time. Eventually, all of these tests should just use current data and we can reserve
     // legacy data only for specifically testing BWC situations.
-    describe('using legacy data', function () {
+    describe.only('using legacy data', function () {
       this.tags('ciGroup4');
       before(loadLogstash);
       after(unloadLogstash);

@@ -11,7 +11,7 @@ import React, { useEffect } from 'react';
 import { CustomFooter } from './custom_footer';
 import { DashboardTourStrings } from './translations';
 
-export const DASHBOARD_EDIT_TOUR_STORAGE_KEY = 'dashboardEditTourState';
+export const DASHBOARD_EDIT_TOUR_STORAGE_KEY = 'dashboard.edit.tourState';
 const TOUR_POPOVER_WIDTH = 360;
 
 const dashboardEditTourConfig = {

@@ -10,7 +10,7 @@ import { EuiStatelessTourStep, EuiText, EuiTourState, EuiTourStep, useEuiTour } 
 import React, { useEffect } from 'react';
 import { DashboardTourStrings } from './translations';
 
-export const DASHBOARD_VIEW_TOUR_STORAGE_KEY = 'dashboardViewTourState';
+export const DASHBOARD_VIEW_TOUR_STORAGE_KEY = 'dashboard.view.tourState';
 const TOUR_POPOVER_WIDTH = 360;
 
 export const dashboardViewTourConfig = {
