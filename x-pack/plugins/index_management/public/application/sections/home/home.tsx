@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
-import { documentationService } from '../../services/documentation';
+import {
+  EuiButtonEmpty,
+  EuiLink,
+  EuiLoadingContent,
+  EuiPageHeader,
+  EuiPopover,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { DataStreamList } from './data_stream_list';
 import { IndexList } from './index_list';
 import { TemplateList } from './template_list';
@@ -32,6 +39,12 @@ export const homeSections = [
 
 interface MatchParams {
   section: Section;
+}
+
+interface DocsPreview {
+  title: string;
+  url: string;
+  description: string;
 }
 
 export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
@@ -82,6 +95,74 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
     breadcrumbService.setBreadcrumbs('home');
   }, []);
 
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const [docsPreview, setDocsPreview] = useState<DocsPreview>({
+    title: '',
+    url: '',
+    description: '',
+  });
+  const onDocsButtonClick = () => {
+    setIsPopoverOpen(!isPopoverOpen);
+    if (docsPreview.title === '' || docsPreview.description === '' || docsPreview.url === '') {
+      $.ajax({
+        url: 'https://raw.githubusercontent.com/elastic/built-docs/17ec08c679921ac1f6e1f8b1b5f63900d197b799/html/en/elasticsearch/reference/master/index-mgmt.html',
+      }).done((unformattedResponse) => {
+        const response = $.parseHTML(unformattedResponse);
+        const metaTags = $(response).filter('meta');
+        setDocsPreview({
+          title: $(metaTags).filter('[property="og:title"]').attr('content') ?? '',
+          url: $(metaTags).filter('[property="og:url"]').attr('content') ?? '',
+          description: $(metaTags).filter('[property="og:description"]').attr('content') ?? '',
+        });
+      });
+    }
+  };
+  const closePopover = () => setIsPopoverOpen(false);
+
+  const docsButton = (
+    <EuiButtonEmpty
+      iconType="documentation"
+      data-test-subj="documentationLink"
+      onClick={onDocsButtonClick}
+    >
+      <FormattedMessage
+        id="xpack.idxMgmt.home.idxMgmtDocsLinkText"
+        defaultMessage="Index Management docs"
+      />
+    </EuiButtonEmpty>
+  );
+
+  const DocsPopover = () => (
+    <EuiPopover
+      panelStyle={{ width: 300 }}
+      button={docsButton}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      anchorPosition="downRight"
+    >
+      <EuiText id="doc-content">
+        <h4>{docsPreview.title === '' ? <EuiLoadingContent lines={1} /> : docsPreview.title}</h4>
+        <p>
+          <EuiLink href={docsPreview.url} target="_blank" external>
+            {docsPreview.url === '' ? (
+              <EuiLoadingContent lines={1} />
+            ) : (
+              docsPreview.url.substring(0, 28) + '...'
+            )}
+          </EuiLink>
+        </p>
+        <p>
+          {docsPreview.description === '' ? (
+            <EuiLoadingContent lines={4} />
+          ) : (
+            docsPreview.description.substring(0, 115) + '...'
+          )}
+        </p>
+      </EuiText>
+    </EuiPopover>
+  );
+
   return (
     <>
       <EuiPageHeader
@@ -92,19 +173,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
           </span>
         }
         bottomBorder
-        rightSideItems={[
-          <EuiButtonEmpty
-            href={documentationService.getIdxMgmtDocumentationLink()}
-            target="_blank"
-            iconType="help"
-            data-test-subj="documentationLink"
-          >
-            <FormattedMessage
-              id="xpack.idxMgmt.home.idxMgmtDocsLinkText"
-              defaultMessage="Index Management docs"
-            />
-          </EuiButtonEmpty>,
-        ]}
+        rightSideItems={[<DocsPopover />]}
         tabs={tabs.map((tab) => ({
           onClick: () => onSectionChange(tab.id),
           isSelected: tab.id === section,
