@@ -255,6 +255,7 @@ function ObservabilityActions({
     linkToRule,
     alert,
     setFlyoutAlert,
+    closeActionsPopover,
   ]);
 
   const actionsToolTip =
