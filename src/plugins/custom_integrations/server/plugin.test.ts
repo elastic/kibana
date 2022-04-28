@@ -148,7 +148,8 @@ describe('CustomIntegrationsPlugin', () => {
         {
           id: 'placeholder.esf',
           title: 'AWS Serverless Application Repository',
-          description: 'Collect logs using AWS Lambda application available in AWS Serverless Application Repository.',
+          description:
+            'Collect logs using AWS Lambda application available in AWS Serverless Application Repository.',
           type: 'ui_link',
           shipper: 'placeholders',
           uiInternalPath:
