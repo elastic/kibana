@@ -10,7 +10,12 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
-import { getScopeFromPath, useInitSourcerer, useSourcererDataView } from '.';
+import {
+  EXCLUDE_ELASTIC_CLOUD_INDICES,
+  getScopeFromPath,
+  useInitSourcerer,
+  useSourcererDataView,
+} from '.';
 import { mockPatterns } from './mocks';
 import { RouteSpyState } from '../../utils/route/types';
 import { DEFAULT_INDEX_PATTERN, SecurityPageName } from '../../../../common/constants';
@@ -309,7 +314,7 @@ describe('Sourcerer Hooks', () => {
         rerender();
         expect(result.current.selectedPatterns).toEqual([
           ...mockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns,
-          '-*elastic-cloud-logs-*',
+          ...EXCLUDE_ELASTIC_CLOUD_INDICES,
         ]);
       });
     });
@@ -408,6 +413,58 @@ describe('Sourcerer Hooks', () => {
           'packetbeat-*',
           'traces-apm*',
           'winlogbeat-*',
+        ]);
+      });
+    });
+
+    it('Should put any excludes in the index pattern at the end of the pattern list', async () => {
+      await act(async () => {
+        store = createStore(
+          {
+            ...mockGlobalState,
+            sourcerer: {
+              ...mockGlobalState.sourcerer,
+              sourcererScopes: {
+                ...mockGlobalState.sourcerer.sourcererScopes,
+                [SourcererScopeName.default]: {
+                  ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+                  selectedPatterns: [
+                    'endgame-*',
+                    'auditbeat-*',
+                    'filebeat-*',
+                    'winlogbeat-*',
+                    '-filebeat-*',
+                    'packetbeat-*',
+                    '-packetbeat-*',
+                    'traces-apm*',
+                    'apm-*-transaction*',
+                  ],
+                },
+              },
+            },
+          },
+          SUB_PLUGINS_REDUCER,
+          kibanaObservable,
+          storage
+        );
+        const { result, rerender, waitForNextUpdate } = renderHook<
+          SourcererScopeName,
+          SelectedDataView
+        >(() => useSourcererDataView(), {
+          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+        });
+        await waitForNextUpdate();
+        rerender();
+        expect(result.current.selectedPatterns).toEqual([
+          'apm-*-transaction*',
+          'auditbeat-*',
+          'endgame-*',
+          'filebeat-*',
+          'packetbeat-*',
+          'traces-apm*',
+          'winlogbeat-*',
+          '-filebeat-*',
+          '-packetbeat-*',
         ]);
       });
     });

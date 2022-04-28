@@ -14,8 +14,14 @@ export const findExistingIndices = async (
   Promise.all(
     indices
       .map(async (index) => {
+        const splitIndex = index.split('');
+        const isLeadingDash = splitIndex.shift() === '-';
+        let indexToQuery = index;
+        if (isLeadingDash) {
+          indexToQuery = splitIndex.join('');
+        }
         const searchResponse = await esClient.fieldCaps({
-          index,
+          index: indexToQuery,
           fields: '_id',
           ignore_unavailable: true,
           allow_no_indices: false,

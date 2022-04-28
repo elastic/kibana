@@ -298,6 +298,17 @@ export const EXCLUDE_ELASTIC_CLOUD_INDICES = [
   '-.ds-logs-system-*',
 ];
 
+const sortWithExcludesAtEnd = (indices: string[]) => {
+  const allSorted = indices.reduce(
+    (acc: { includes: string[]; excludes: string[] }, index) =>
+      index.split('').shift() === '-'
+        ? { includes: acc.includes.sort(), excludes: [...acc.excludes, index].sort() }
+        : { includes: [...acc.includes, index].sort(), excludes: acc.excludes.sort() },
+    { includes: [], excludes: [] }
+  );
+  return [...allSorted.includes, ...allSorted.excludes];
+};
+
 export const useSourcererDataView = (
   scopeId: SourcererScopeName = SourcererScopeName.default
 ): SelectedDataView => {
@@ -321,12 +332,11 @@ export const useSourcererDataView = (
       sourcererScope,
     };
   });
-
   const selectedPatterns = useMemo(
     () =>
       scopeSelectedPatterns.some((index) => index === LOGS_WILDCARD_INDEX)
-        ? [...scopeSelectedPatterns.sort(), ...EXCLUDE_ELASTIC_CLOUD_INDICES]
-        : scopeSelectedPatterns.sort(),
+        ? [...sortWithExcludesAtEnd(scopeSelectedPatterns), ...EXCLUDE_ELASTIC_CLOUD_INDICES]
+        : sortWithExcludesAtEnd(scopeSelectedPatterns),
     [scopeSelectedPatterns]
   );
 
