@@ -15,7 +15,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...functionalConfig.getAll(),
 
-    testFiles: [require.resolve('./apps/lens')],
+    testFiles: [require.resolve('./apps/lens/group1')],
 
     junit: {
       reportName: 'X-Pack CCS Tests',
