@@ -74,6 +74,14 @@ export class DashboardPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
   }
 
+  public async forceSkipTour() {
+    const disableTour = JSON.stringify({
+      isTourActive: false,
+    });
+    await this.browser.setLocalStorageItem('dashboard.edit.tourState', disableTour);
+    await this.browser.setLocalStorageItem('dashboard.view.tourState', disableTour);
+  }
+
   public async clickFullScreenMode() {
     this.log.debug(`clickFullScreenMode`);
     await this.testSubjects.click('dashboardFullScreenMode');
@@ -203,6 +211,7 @@ export class DashboardPageObject extends FtrService {
       });
       await this.expectExistsDashboardLandingPage();
     }
+    await this.forceSkipTour();
   }
 
   public async clickClone() {
@@ -327,6 +336,8 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async clickNewDashboard(continueEditing = false) {
+    await this.forceSkipTour();
+
     const discardButtonExists = await this.testSubjects.exists('discardDashboardPromptButton');
     if (!continueEditing && discardButtonExists) {
       this.log.debug('found discard button');
@@ -349,6 +360,8 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async clickNewDashboardExpectWarning(continueEditing = false) {
+    await this.forceSkipTour();
+
     const discardButtonExists = await this.testSubjects.exists('discardDashboardPromptButton');
     if (!continueEditing && discardButtonExists) {
       this.log.debug('found discard button');
@@ -370,6 +383,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async clickCreateDashboardPrompt() {
+    await this.forceSkipTour();
     await this.testSubjects.click('createDashboardPromptButton');
   }
 

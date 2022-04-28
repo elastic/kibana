@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Dashboard Panel', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('dashboard');
-      await testSubjects.click('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard');
+      await PageObjects.dashboard.loadSavedDashboard('[Flights] Global Flight Dashboard');
     });
 
     it('dashboard panel open ', async () => {

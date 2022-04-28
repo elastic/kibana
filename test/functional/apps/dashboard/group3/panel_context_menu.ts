@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'visualize',
     'discover',
     'timePicker',
+    'common',
   ]);
   const dashboardName = 'Dashboard Panel Controls Test';
 
@@ -140,6 +141,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before('reset dashboard', async () => {
         const currentUrl = await browser.getCurrentUrl();
         await browser.get(currentUrl.toString(), false);
+        await PageObjects.dashboard.forceSkipTour();
       });
 
       before('and add one panel and save to put dashboard in "view" mode', async () => {

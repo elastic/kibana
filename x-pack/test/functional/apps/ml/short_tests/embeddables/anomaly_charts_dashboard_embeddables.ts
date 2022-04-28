@@ -56,6 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             testData.datafeedConfig
           );
           await PageObjects.common.navigateToApp('dashboard');
+          await PageObjects.dashboard.forceSkipTour();
         });
 
         after(async () => {

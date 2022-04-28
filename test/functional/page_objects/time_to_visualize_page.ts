@@ -68,6 +68,7 @@ export class TimeToVisualizePageObject extends FtrService {
       let option: DashboardPickerOption = 'add-to-library-option';
       if (addToDashboard) {
         option = dashboardId ? 'existing-dashboard-option' : 'new-dashboard-option';
+        await this.dashboard.forceSkipTour();
       }
       this.log.debug('save modal dashboard selector, choosing option:', option);
       const dashboardSelector = await this.testSubjects.find('add-to-dashboard-options');

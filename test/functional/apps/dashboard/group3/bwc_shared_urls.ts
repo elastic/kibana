@@ -95,6 +95,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('6.0 urls', () => {
       let savedDashboardId: string;
 
+      beforeEach(async () => {
+        await PageObjects.dashboard.forceSkipTour();
+      });
+
       it('loads an unsaved dashboard', async function () {
         const url = `${kibanaLegacyBaseUrl}#/dashboard?${urlQuery}`;
         log.debug(`Navigating to ${url}`);
