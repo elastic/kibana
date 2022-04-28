@@ -17,6 +17,8 @@ import {
 } from './plugin_context';
 import { InternalCoreSetup, InternalCoreStart } from '../core_system';
 import { InjectedPluginMetadata } from '../injected_metadata';
+import { PluginInfo } from './types';
+import { loadPluginBundles } from './load_plugin_bundles';
 
 /** @internal */
 export type PluginsServiceSetupDeps = InternalCoreSetup;
@@ -146,13 +148,33 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
   private async loadPluginDependencies(pluginId: string): Promise<void> {
     // plugin already instantiated, returning.
-    if(this.pluginSetupContracts.has(pluginId)) {
+    if (this.pluginSetupContracts.has(pluginId)) {
       return Promise.resolve();
     }
 
-    // TODO
     console.log('plugin_service loadPluginDependencies', pluginId);
-    return Promise.resolve();
+
+    const { plugins } = await this.coreInternalStart!.http.get<{ plugins: PluginInfo[] }>(
+      `/internal/core/rendering/plugin/${pluginId}/dependencies`
+    );
+
+    return await this.loadPluginsAsync(plugins);
+  }
+
+  private async loadPluginsAsync(plugins: PluginInfo[]): Promise<void> {
+    const pluginsToLoad = plugins.filter(
+      ({ pluginId }) => !this.pluginSetupContracts.has(pluginId)
+    );
+
+    await loadPluginBundles(pluginsToLoad);
+
+    const pluginIds = pluginsToLoad.map(({ pluginId }) => pluginId);
+    for (const pluginId of pluginIds) {
+      this.setupPlugin(pluginId);
+    }
+    for (const pluginId of pluginIds) {
+      this.startPlugin(pluginId);
+    }
   }
 
   private startPlugin(pluginName: PluginName) {

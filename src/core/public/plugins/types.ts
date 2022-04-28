@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { IRouter } from '../../http';
-import { registerAppInfoRoute } from './app_info';
-
-export const registerCorePluginRoutes = ({ router }: { router: IRouter }) => {
-  registerAppInfoRoute({ router });
-};
+/** @internal */
+export interface PluginInfo {
+  pluginId: string;
+  publicPath: string;
+  bundlePath: string;
+}

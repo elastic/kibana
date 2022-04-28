@@ -30,6 +30,7 @@ import { KibanaRequest } from '../http';
 import { IUiSettingsClient } from '../ui_settings';
 import { InternalUiServiceStart } from '../ui';
 import { filterUiPlugins } from './filter_ui_plugins';
+import { registerRoutes } from './routes';
 
 type RenderOptions = (RenderingPrebootDeps & { status?: never }) | RenderingSetupDeps;
 
@@ -66,14 +67,23 @@ export class RenderingService {
     status,
     uiPlugins,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
+    const router = http.createRouter('');
     registerBootstrapRoute({
-      router: http.createRouter(''),
+      router,
       renderer: bootstrapRendererFactory({
         uiPlugins,
         serverBasePath: http.basePath.serverBasePath,
         packageInfo: this.coreContext.env.packageInfo,
         auth: http.auth,
       }),
+    });
+
+    registerRoutes({
+      router,
+      uiPlugins,
+      getUiStart: () => this.uiStart!,
+      serverBasePath: http.basePath.serverBasePath,
+      packageInfo: this.coreContext.env.packageInfo,
     });
 
     return {
