@@ -13,13 +13,13 @@ import {
   ControlGroupContainer,
   LazyControlsCallout,
 } from '@kbn/controls-plugin/public';
+import { DashboardTour } from '@kbn/dashboard-plugin/public/dashboard_tour';
 import { ViewMode } from '../../../services/embeddable';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
 import { context } from '../../../services/kibana_react';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 import { withSuspense } from '../../../services/presentation_util';
-import { DashboardTour } from '@kbn/dashboard-plugin/public/dashboard_tour';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;
