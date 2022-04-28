@@ -230,7 +230,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
             path: `${HOSTS_PATH}/externalAlerts`,
           },
           {
-            id: SecurityPageName.usersRisk,
+            id: SecurityPageName.hostsRisk,
             title: i18n.translate('xpack.securitySolution.search.hosts.risk', {
               defaultMessage: 'Hosts by risk',
             }),
