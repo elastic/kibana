@@ -5,36 +5,23 @@
  * 2.0.
  */
 
-import { ALERT_DURATION, ALERT_REASON, ALERT_STATUS, TIMESTAMP } from '@kbn/rule-data-utils';
 import { AlertsTableConfigurationRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
-import { observabilityFeatureId } from '../../common';
-import { translations } from './translations';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
-export const registerAlertsTableConfiguration = (
-  registry: AlertsTableConfigurationRegistryContract
-) => {
+import { TGridModel } from '@kbn/timelines-plugin/public';
+import { observabilityFeatureId } from '../../common';
+import { ALERT_TABLE_STATE_STORAGE_KEY } from '../pages/alerts/containers/alerts_page/alerts_page';
+import { columns } from '../pages/alerts/containers/alerts_table_t_grid/alerts_table_t_grid';
+
+const registerAlertsTableConfiguration = (registry: AlertsTableConfigurationRegistryContract) => {
+  const storage = new Storage(window.localStorage);
+  const tGridState: Partial<TGridModel> | null = storage.get(ALERT_TABLE_STATE_STORAGE_KEY);
+  const alertO11yColumns = tGridState?.columns ?? columns;
+
   registry.register({
     id: observabilityFeatureId,
-    columns: [
-      {
-        displayAsText: translations.alertsTable.statusColumnDescription,
-        id: ALERT_STATUS,
-        initialWidth: 110,
-      },
-      {
-        displayAsText: translations.alertsTable.lastUpdatedColumnDescription,
-        id: TIMESTAMP,
-        initialWidth: 230,
-      },
-      {
-        displayAsText: translations.alertsTable.durationColumnDescription,
-        id: ALERT_DURATION,
-        initialWidth: 116,
-      },
-      {
-        displayAsText: translations.alertsTable.reasonColumnDescription,
-        id: ALERT_REASON,
-      },
-    ],
+    columns: alertO11yColumns,
   });
 };
+
+export { registerAlertsTableConfiguration };
