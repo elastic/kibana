@@ -8,7 +8,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import {
   type Criteria,
   EuiToolTip,
-  EuiLink,
   EuiTableFieldDataColumnType,
   EuiEmptyPrompt,
   EuiBasicTable,
@@ -17,7 +16,6 @@ import {
 } from '@elastic/eui';
 import moment from 'moment';
 import { SortDirection } from '@kbn/data-plugin/common';
-import { ApiKey } from '@kbn/security-plugin/common';
 import { EuiTableActionsColumnType } from '@elastic/eui/src/components/basic_table/table_types';
 import { extractErrorMessage } from '../../../common/utils/helpers';
 import * as TEST_SUBJECTS from './test_subjects';
@@ -26,7 +24,6 @@ import type { CspFinding } from './types';
 import { CspEvaluationBadge } from '../../components/csp_evaluation_badge';
 import type { FindingsGroupByNoneQuery, CspFindingsResult } from './use_findings';
 import { FindingsRuleFlyout } from './findings_flyout/findings_flyout';
-import { LAST_CHECKED } from './translations';
 
 interface BaseFindingsTableProps extends FindingsGroupByNoneQuery {
   setQuery(query: Partial<FindingsGroupByNoneQuery>): void;
@@ -47,59 +44,62 @@ const FindingsTableComponent = ({
 
   const columns: Array<
     EuiTableFieldDataColumnType<CspFinding> | EuiTableActionsColumnType<CspFinding>
-  > = [
-    {
-      width: '40px',
-      actions: [
-        {
-          name: 'Expand',
-          description: 'Expand',
-          type: 'icon',
-          icon: 'expand',
-          onClick: (item) => setSelectedFinding(item),
-        },
-      ],
-    },
-    {
-      field: 'resource_id',
-      name: TEXT.RESOURCE_ID,
-      truncateText: true,
-      width: '15%',
-      sortable: true,
-      render: resourceFilenameRenderer,
-    },
-    {
-      field: 'result.evaluation',
-      name: TEXT.RESULT,
-      width: '100px',
-      sortable: true,
-      render: resultEvaluationRenderer,
-    },
-    {
-      field: 'rule.name',
-      name: TEXT.RULE_NAME,
-      truncateText: true,
-      sortable: true,
-      render: ruleNameRenderer,
-    },
-    {
-      field: 'cluster_id',
-      name: TEXT.SYSTEM_ID,
-      truncateText: true,
-    },
-    {
-      field: 'rule.section',
-      name: TEXT.RULE_SECTION,
-      truncateText: true,
-    },
-    {
-      field: '@timestamp',
-      name: TEXT.LAST_CHECKED,
-      truncateText: true,
-      sortable: true,
-      render: timestampRenderer,
-    },
-  ];
+  > = useMemo(
+    () => [
+      {
+        width: '40px',
+        actions: [
+          {
+            name: 'Expand',
+            description: 'Expand',
+            type: 'icon',
+            icon: 'expand',
+            onClick: (item) => setSelectedFinding(item),
+          },
+        ],
+      },
+      {
+        field: 'resource_id',
+        name: TEXT.RESOURCE_ID,
+        truncateText: true,
+        width: '15%',
+        sortable: true,
+        render: resourceFilenameRenderer,
+      },
+      {
+        field: 'result.evaluation',
+        name: TEXT.RESULT,
+        width: '100px',
+        sortable: true,
+        render: resultEvaluationRenderer,
+      },
+      {
+        field: 'rule.name',
+        name: TEXT.RULE_NAME,
+        truncateText: true,
+        sortable: true,
+        render: ruleNameRenderer,
+      },
+      {
+        field: 'cluster_id',
+        name: TEXT.SYSTEM_ID,
+        truncateText: true,
+      },
+      {
+        field: 'rule.section',
+        name: TEXT.RULE_SECTION,
+        truncateText: true,
+      },
+      {
+        field: '@timestamp',
+        name: TEXT.LAST_CHECKED,
+        truncateText: true,
+        sortable: true,
+        render: timestampRenderer,
+      },
+    ],
+    []
+  );
 
   const pagination = useMemo(
     () =>
