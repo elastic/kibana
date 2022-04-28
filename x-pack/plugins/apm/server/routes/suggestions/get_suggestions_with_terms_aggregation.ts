@@ -42,6 +42,7 @@ export async function getSuggestionsWithTermsAggregation({
         ],
       },
       body: {
+        timeout: '1500ms',
         size: 0,
         query: {
           bool: {
