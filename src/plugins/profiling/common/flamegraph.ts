@@ -77,7 +77,6 @@ export class FlameGraph {
 
   private getExeFileName(exe: any, type: number) {
     if (exe?.FileName === undefined) {
-      this.logger.warn('missing executable FileName');
       return '';
     }
     if (exe.FileName !== '') {

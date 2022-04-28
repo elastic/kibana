@@ -15,6 +15,7 @@ import { logExecutionLatency } from './logger';
 import { newProjectTimeQuery, ProjectTimeQuery } from './mappings';
 import { downsampleEventsRandomly, findDownsampledIndex } from './downsampling';
 import { mgetExecutables, mgetStackFrames, mgetStackTraces, searchStackTraces } from './stacktrace';
+import { getHitsItems, getAggs, getClient } from './compat';
 
 export function parallelMget(
   nQueries: number,
@@ -69,21 +70,18 @@ async function queryFlameGraph(
       return await client.search(
         {
           index: eventsIndex.name,
-          size: 0,
+          track_total_hits: false,
           query: filter,
           aggs: {
             group_by: {
-              composite: {
-                size: 100000, // This is the upper limit of entries per event index.
-                sources: [
-                  {
-                    traceid: {
-                      terms: {
-                        field: 'StackTraceID',
-                      },
-                    },
-                  },
-                ],
+              terms: {
+                // 'size' should be max 100k, but might be slightly more. Better be on the safe side.
+                size: 150000,
+                field: 'StackTraceID',
+                // 'execution_hint: map' skips the slow building of ordinals that we don't need.
+                // Especially with high cardinality fields, this makes aggregations really slow.
+                // E.g. it reduces the latency from 70s to 0.7s on our 8.1. MVP cluster (as of 28.04.2022).
+                execution_hint: 'map',
               },
               aggs: {
                 count: {
@@ -113,12 +111,12 @@ async function queryFlameGraph(
     }
   );
 
-  let totalCount: number = resEvents.body.aggregations?.total_count.value;
-  let stackTraceEvents = new Map<StackTraceID, number>();
+  let totalCount: number = getAggs(resEvents)?.total_count.value;
+  const stackTraceEvents = new Map<StackTraceID, number>();
 
   await logExecutionLatency(logger, 'processing events data', async () => {
-    resEvents.body.aggregations?.group_by.buckets.forEach((item: any) => {
-      const traceid: StackTraceID = item.key.traceid;
+    getAggs(resEvents)?.group_by.buckets.forEach((item: any) => {
+      const traceid: StackTraceID = item.key;
       stackTraceEvents.set(traceid, item.count.value);
     });
   });
@@ -180,7 +178,7 @@ export function registerFlameChartElasticSearchRoute(
       const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
 
       try {
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
+        const esClient = await getClient(context);
         const filter = newProjectTimeQuery(projectID!, timeFrom!, timeTo!);
 
         const flamegraph = await queryFlameGraph(
@@ -231,7 +229,7 @@ export function registerFlameChartPixiSearchRoute(
       const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
 
       try {
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
+        const esClient = await getClient(context);
         const filter = newProjectTimeQuery(projectID!, timeFrom!, timeTo!);
 
         const flamegraph = await queryFlameGraph(

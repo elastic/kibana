@@ -10,6 +10,7 @@ import seedrandom from 'seedrandom';
 import type { ElasticsearchClient, Logger } from 'kibana/server';
 import { ProjectTimeQuery } from './mappings';
 import { StackTraceID } from '../../common/profiling';
+import { getHits } from './compat';
 
 export interface DownsampledEventsIndex {
   name: string;
@@ -97,7 +98,7 @@ export async function findDownsampledIndex(
         track_total_hits: true,
       },
     });
-    sampleCountFromInitialExp = resp.body.hits.total?.value as number;
+    sampleCountFromInitialExp = getHits(resp).total?.value as number;
   } catch (e) {
     logger.info(e.message);
   }
