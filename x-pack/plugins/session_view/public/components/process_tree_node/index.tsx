@@ -104,7 +104,7 @@ export function ProcessTreeNode({
     [hasAlerts, alerts, investigatedAlertId]
   );
   const isSelected = selectedProcess?.id === process.id;
-  const styles = useStyles({ depth, hasAlerts, hasInvestigatedAlert, isSelected });
+  const styles = useStyles({ depth, hasAlerts, hasInvestigatedAlert, isSelected, isSessionLeader });
   const buttonStyles = useButtonStyles();
 
   const nodeRef = useVisible({
@@ -255,12 +255,12 @@ export function ProcessTreeNode({
           onClick={onProcessClicked}
         >
           {isSessionLeader ? (
-            <div css={styles.sessionLeader}>
+            <>
               <EuiIcon type={sessionIcon} css={styles.icon} />{' '}
               <b css={styles.darkText}>{dataOrDash(name || args?.[0])}</b>{' '}
               <FormattedMessage id="xpack.sessionView.startedBy" defaultMessage="started by" />{' '}
               <EuiIcon type="user" /> <b css={styles.darkText}>{dataOrDash(user?.name)}</b>
-            </div>
+            </>
           ) : (
             <span>
               {showTimestamp && (
