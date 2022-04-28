@@ -16,6 +16,7 @@ import { ManagementAppMountParams, ManagementSetup } from '@kbn/management-plugi
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
+import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -30,6 +31,7 @@ import { getAddAlertFlyoutLazy } from './common/get_add_alert_flyout';
 import { getEditAlertFlyoutLazy } from './common/get_edit_alert_flyout';
 import { getAlertsTableLazy } from './common/get_alerts_table';
 import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
+import { getRuleTagBadgeLazy } from './common/get_rule_tag_badge';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
 import {
   ExperimentalFeatures,
@@ -45,6 +47,7 @@ import type {
   ConnectorEditFlyoutProps,
   AlertsTableProps,
   RuleStatusDropdownProps,
+  RuleTagBadgeProps,
   AlertsTableConfigurationRegistry,
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
@@ -75,12 +78,14 @@ export interface TriggersAndActionsUIPublicPluginStart {
   ) => ReactElement<RuleEditProps>;
   getAlertsTable: (props: AlertsTableProps) => ReactElement<AlertsTableProps>;
   getRuleStatusDropdown: (props: RuleStatusDropdownProps) => ReactElement<RuleStatusDropdownProps>;
+  getRuleTagBadge: (props: RuleTagBadgeProps) => ReactElement<RuleTagBadgeProps>;
 }
 
 interface PluginsSetup {
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
   cloud?: { isCloudEnabled: boolean };
+  actions: ActionsPublicPluginSetup;
 }
 
 interface PluginsStart {
@@ -193,6 +198,9 @@ export class Plugin
 
     registerBuiltInActionTypes({
       actionTypeRegistry: this.actionTypeRegistry,
+      services: {
+        validateEmailAddresses: plugins.actions.validateEmailAddresses,
+      },
     });
 
     if (this.experimentalFeatures.internalAlertsTable) {
@@ -243,6 +251,9 @@ export class Plugin
       },
       getRuleStatusDropdown: (props: RuleStatusDropdownProps) => {
         return getRuleStatusDropdownLazy(props);
+      },
+      getRuleTagBadge: (props: RuleTagBadgeProps) => {
+        return getRuleTagBadgeLazy(props);
       },
     };
   }
