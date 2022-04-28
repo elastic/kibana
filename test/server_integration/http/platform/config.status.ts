@@ -52,6 +52,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...httpConfig.get('kbnTestServer.runOptions'),
         // Don't wait for Kibana to be completely ready so that we can test the status timeouts
         wait: /Kibana is now unavailable/,
+        alwaysUseSource: true,
       },
     },
   };

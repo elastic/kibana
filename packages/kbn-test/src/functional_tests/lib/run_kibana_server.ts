@@ -36,8 +36,8 @@ export async function runKibanaServer({
   config: Config;
   options: { installDir?: string; extraKbnOpts?: string[] };
 }) {
-  const { installDir } = options;
   const runOptions = config.get('kbnTestServer.runOptions');
+  const installDir = runOptions.alwaysUseSource ? undefined : options.installDir;
   const env = config.get('kbnTestServer.env');
 
   await procs.run('kibana', {
