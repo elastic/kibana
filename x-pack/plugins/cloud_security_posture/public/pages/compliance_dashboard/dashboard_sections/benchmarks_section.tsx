@@ -110,7 +110,7 @@ export const BenchmarksSection = ({
                 <EuiFlexItem grow={4}>
                   <ChartPanel title={TEXT.RISKS} hasBorder={false}>
                     <RisksTable
-                      data={cluster.resourcesTypes}
+                      data={cluster.groupedFindingsEvaluation}
                       maxItems={3}
                       onCellClick={(resourceTypeName) =>
                         handleCellClick(cluster.meta.clusterId, resourceTypeName)

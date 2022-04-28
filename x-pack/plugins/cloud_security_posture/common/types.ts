@@ -36,7 +36,7 @@ export interface Cluster {
     lastUpdate: number; // unix epoch time
   };
   stats: Stats;
-  resourcesTypes: GroupedFindingsEvaluation[];
+  groupedFindingsEvaluation: GroupedFindingsEvaluation[];
   trend: PostureTrend[];
 }
 

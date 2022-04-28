@@ -95,12 +95,12 @@ export const getClustersFromAggs = (clusters: ClusterBucket[]): ClusterWithoutTr
     const resourcesTypesAggs = cluster.aggs_by_resource_type.buckets;
     if (!Array.isArray(resourcesTypesAggs))
       throw new Error('missing aggs by resource type per cluster');
-    const resourcesTypes = getFailedFindingsFromAggs(resourcesTypesAggs);
+    const groupedFindingsEvaluation = getFailedFindingsFromAggs(resourcesTypesAggs);
 
     return {
       meta,
       stats,
-      resourcesTypes,
+      groupedFindingsEvaluation,
     };
   });
 

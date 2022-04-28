@@ -66,10 +66,10 @@ export interface RisksTableProps {
 }
 
 export const getTopRisks = (
-  resourcesTypes: ComplianceDashboardData['groupedFindingsEvaluation'],
+  groupedFindingsEvaluation: ComplianceDashboardData['groupedFindingsEvaluation'],
   maxItems: number
 ) => {
-  const filtered = resourcesTypes.filter((x) => x.totalFailed > 0);
+  const filtered = groupedFindingsEvaluation.filter((x) => x.totalFailed > 0);
   const sorted = filtered.slice().sort((first, second) => second.totalFailed - first.totalFailed);
 
   return sorted.slice(0, maxItems);
