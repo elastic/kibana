@@ -95,6 +95,7 @@ export function RulesPage() {
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
   const [createRuleFlyoutVisibility, setCreateRuleFlyoutVisibility] = useState(false);
+  const [tagPopoverOpenIndex, setTagPopoverOpenIndex] = useState<number>(-1);
 
   const isRuleTypeEditableInContext = (ruleTypeId: string) =>
     ruleTypeRegistry.has(ruleTypeId) ? !ruleTypeRegistry.get(ruleTypeId).requiresAppContext : false;
@@ -169,6 +170,23 @@ export function RulesPage() {
         width: '30%',
         'data-test-subj': 'rulesTableCell-name',
         render: (name: string, rule: RuleTableItem) => <Name name={name} rule={rule} />,
+      },
+      {
+        field: 'tags',
+        name: '',
+        sortable: false,
+        width: '50px',
+        'data-test-subj': 'rulesTableCell-tagsPopover',
+        render: (tags: string[], item: RuleTableItem) => {
+          return tags.length > 0
+            ? triggersActionsUi.getRuleTagBadge({
+                isOpen: tagPopoverOpenIndex === item.index,
+                tags,
+                onClick: () => setTagPopoverOpenIndex(item.index),
+                onClose: () => setTagPopoverOpenIndex(-1),
+              })
+            : null;
+        },
       },
       {
         field: 'executionStatus.lastExecutionDate',

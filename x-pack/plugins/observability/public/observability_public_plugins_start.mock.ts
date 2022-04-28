@@ -37,6 +37,7 @@ const triggersActionsUiStartMock = {
     return {
       getAddAlertFlyout: jest.fn(),
       getRuleStatusDropdown: jest.fn(),
+      getRuleTagBadge: jest.fn(),
       ruleTypeRegistry: {
         has: jest.fn(),
         register: jest.fn(),
