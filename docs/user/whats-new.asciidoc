@@ -138,7 +138,7 @@ unexpectedly or during known downtimes. For more information, check
 <<controlling-rules>>.
 
 [role="screenshot"]
-image::images/highlights-alerting-snooze.png["UI for enabling snooze mode", width=50%]
+image::images/highlights-alerting-snooze.png["UI for enabling snooze mode"]
 
 [float]
 ==== View rule history
