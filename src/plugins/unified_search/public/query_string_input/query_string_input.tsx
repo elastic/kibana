@@ -8,10 +8,6 @@
 
 import React, { PureComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-
-import classNames from 'classnames';
-import { METRIC_TYPE } from '@kbn/analytics';
-
 import {
   EuiButton,
   EuiFlexGroup,
@@ -26,13 +22,15 @@ import {
   PopoverAnchorPosition,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { compact, debounce, isEqual, isFunction } from 'lodash';
 import { Toast } from '@kbn/core/public';
-import { IDataPluginServices, Query, getQueryLog } from '@kbn/data-plugin/public';
+import { getQueryLog } from '@kbn/data-plugin/public';
+import type { PersistedLog, IDataPluginServices, Query } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import type { PersistedLog } from '@kbn/data-plugin/public';
 import { getFieldSubtypeNested, KIBANA_USER_QUERY_LANGUAGE_KEY } from '@kbn/data-plugin/common';
-import { KibanaReactContextValue, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { type KibanaReactContextValue, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { compact, debounce, isEqual, isFunction } from 'lodash';
+import classNames from 'classnames';
 import { matchPairs } from './match_pairs';
 import { toUser } from './to_user';
 import { fromUser } from './from_user';
@@ -41,7 +39,7 @@ import { QueryLanguageSwitcher } from './language_switcher';
 import type { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '../typeahead';
 import { onRaf } from '../utils';
-import { QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
+import { type QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
 import { getTheme, getAutocomplete } from '../services';
 
 export interface QueryStringInputProps {

@@ -10,9 +10,9 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
-import type { DataViewSelectProps, StatefulSearchBarProps } from '.';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { AutocompleteSetup, AutocompleteStart } from './autocomplete';
+import type { IndexPatternSelectProps, StatefulSearchBarProps } from '.';
 
 export interface UnifiedSearchSetupDependencies {
   uiActions: UiActionsSetup;
@@ -35,7 +35,7 @@ export interface UnifiedSearchStartDependencies {
  * Unified search plugin prewired UI components
  */
 interface UnifiedSearchPublicPluginStartUi {
-  IndexPatternSelect: React.ComponentType<DataViewSelectProps>;
+  IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
   SearchBar: React.ComponentType<StatefulSearchBarProps>;
 }
 

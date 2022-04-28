@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { get, map } from 'lodash';
-import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IFieldType, getFieldSubtypeNested } from '@kbn/data-plugin/common';
-import { ConfigSchema } from '../../config';
+import { type IFieldType, getFieldSubtypeNested } from '@kbn/data-plugin/common';
+import { get, map } from 'lodash';
+import type { ConfigSchema } from '../../config';
 import { findIndexPatternById as findDataViewById, getFieldByName } from '../data_views';
 
 export async function termsAggSuggestions(

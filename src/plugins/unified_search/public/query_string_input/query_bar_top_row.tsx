@@ -6,13 +6,8 @@
  * Side Public License, v 1.
  */
 
-import dateMath from '@kbn/datemath';
-import classNames from 'classnames';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import deepEqual from 'fast-deep-equal';
-import useObservable from 'react-use/lib/useObservable';
-import { EMPTY } from 'rxjs';
-import { map } from 'rxjs/operators';
+import dateMath from '@kbn/datemath';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,17 +18,22 @@ import {
   EuiSuperUpdateButton,
   OnRefreshProps,
 } from '@elastic/eui';
-import {
+import { getQueryLog } from '@kbn/data-plugin/public';
+import type {
+  PersistedLog,
   IDataPluginServices,
   TimeRange,
   TimeHistoryContract,
   Query,
-  getQueryLog,
 } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import type { PersistedLog } from '@kbn/data-plugin/public';
 import { useKibana, withKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import classNames from 'classnames';
+import deepEqual from 'fast-deep-equal';
+import useObservable from 'react-use/lib/useObservable';
+import { EMPTY } from 'rxjs';
+import { map } from 'rxjs/operators';
 import QueryStringInputUI from './query_string_input';
 import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../utils';

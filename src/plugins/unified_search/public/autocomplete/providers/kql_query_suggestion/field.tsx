@@ -7,11 +7,11 @@
  */
 
 import { IFieldType, indexPatterns } from '@kbn/data-plugin/public';
+import { escapeKuery } from '@kbn/es-query';
 import { flatten } from 'lodash';
-import { escapeKuery } from './lib/escape_kuery';
 import { sortPrefixFirst } from './sort_prefix_first';
-import { QuerySuggestionField, QuerySuggestionTypes } from '../query_suggestion_provider';
-import { KqlQuerySuggestionProvider } from './types';
+import { type QuerySuggestionField, QuerySuggestionTypes } from '../query_suggestion_provider';
+import type { KqlQuerySuggestionProvider } from './types';
 
 const keywordComparator = (first: IFieldType, second: IFieldType) => {
   const extensions = ['raw', 'keyword'];

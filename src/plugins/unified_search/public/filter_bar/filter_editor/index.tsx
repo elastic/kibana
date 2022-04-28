@@ -21,8 +21,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import type { Filter } from '@kbn/es-query';
 import {
-  Filter,
   FieldFilter,
   buildFilter,
   buildCustomFilter,
@@ -43,7 +43,7 @@ import {
   getOperatorOptions,
   isFilterValid,
 } from './lib/filter_editor_utils';
-import { Operator } from './lib/filter_operators';
+import type { Operator } from './lib/filter_operators';
 import { PhraseValueInput } from './phrase_value_input';
 import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';

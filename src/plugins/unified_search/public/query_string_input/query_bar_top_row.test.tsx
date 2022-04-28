@@ -6,20 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { mockPersistedLogFactory } from './query_string_input.test.mocks';
-
 import React from 'react';
-import { mount } from 'enzyme';
-import { render } from '@testing-library/react';
-import { EMPTY } from 'rxjs';
-
-import QueryBarTopRow from './query_bar_top_row';
+import { mockPersistedLogFactory } from './query_string_input.test.mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { stubDataView } from '@kbn/data-plugin/public/stubs';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { render } from '@testing-library/react';
+import { mount } from 'enzyme';
+import { EMPTY } from 'rxjs';
+
+import QueryBarTopRow from './query_bar_top_row';
 import { setAutocomplete } from '../services';
 import { unifiedSearchPluginMock } from '../mocks';
 

@@ -7,11 +7,11 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
-import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { ConfigSchema } from '../../config';
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { termsAggSuggestions } from './terms_agg';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { ConfigSchema } from '../../config';
+import { termsAggSuggestions } from './terms_agg';
 import { duration } from 'moment';
 
 let savedObjectsClientMock: jest.Mocked<SavedObjectsClientContract>;

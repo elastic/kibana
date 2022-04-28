@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import React, { useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiForm,
@@ -21,7 +22,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 export interface QueryLanguageSwitcherProps {

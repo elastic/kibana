@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AutocompleteSetup } from './autocomplete';
+import type { AutocompleteSetup } from './autocomplete';
 
 const autocompleteSetupMock: jest.Mocked<AutocompleteSetup> = {
   getAutocompleteSettings: jest.fn(),

@@ -6,15 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { ConfigSchema, configSchema } from '../config';
-import {
-  UnifiedSearchServerPlugin,
-  UnifiedSearchServerPluginSetup,
-  UnifiedSearchServerPluginStart,
-} from './plugin';
-
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import type { UnifiedSearchServerPluginSetup, UnifiedSearchServerPluginStart } from './plugin';
+import { UnifiedSearchServerPlugin } from './plugin';
 import { autocompleteConfigDeprecationProvider } from './config_deprecations';
+import { type ConfigSchema, configSchema } from '../config';
 
 /**
  * Static code to be shared externally

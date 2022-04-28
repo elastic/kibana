@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IFieldType } from '@kbn/data-plugin/common';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { IFieldType } from '@kbn/data-plugin/common';
+import type { ConfigSchema } from '../../config';
 import { findIndexPatternById as findDataViewById, getFieldByName } from '../data_views';
-import { ConfigSchema } from '../../config';
 
 export async function termsEnumSuggestions(
   config: ConfigSchema,

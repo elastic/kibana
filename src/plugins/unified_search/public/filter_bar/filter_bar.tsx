@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
+import React, { useState, useRef } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import type { Filter } from '@kbn/es-query';
 import {
   buildEmptyFilter,
-  Filter,
   enableFilter,
   disableFilter,
   pinFilter,
@@ -18,14 +19,12 @@ import {
   toggleFilterNegated,
   unpinFilter,
 } from '@kbn/es-query';
-import classNames from 'classnames';
-import React, { useState, useRef } from 'react';
-
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { IDataPluginServices } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
+import classNames from 'classnames';
 import { FilterOptions } from './filter_options';
 import { FILTER_EDITOR_WIDTH, FilterItem } from './filter_item';
 import { FilterEditor } from './filter_editor';

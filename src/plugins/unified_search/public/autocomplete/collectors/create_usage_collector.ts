@@ -10,7 +10,7 @@ import { first } from 'rxjs/operators';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { AUTOCOMPLETE_EVENT_TYPE, AutocompleteUsageCollector } from './types';
+import { AUTOCOMPLETE_EVENT_TYPE, type AutocompleteUsageCollector } from './types';
 
 export const createUsageCollector = (
   getStartServices: StartServicesAccessor,

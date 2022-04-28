@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import React, { useEffect, useRef } from 'react';
-import { CoreStart } from '@kbn/core/public';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { QueryStart, SavedQuery, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { Query, TimeRange } from '@kbn/data-plugin/common';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { Filter } from '@kbn/es-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { QueryStart, SavedQuery, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { Filter, Query, TimeRange } from '@kbn/data-plugin/common';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import _ from 'lodash';
 import { SearchBar } from '.';
 import type { SearchBarOwnProps } from '.';
 import { useFilterManager } from './lib/use_filter_manager';

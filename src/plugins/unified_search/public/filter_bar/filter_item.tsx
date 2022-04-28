@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { EuiContextMenu, EuiPopover, EuiPopoverProps } from '@elastic/eui';
-import { InjectedIntl } from '@kbn/i18n-react';
+import React, { MouseEvent, useState, useEffect, HTMLAttributes } from 'react';
+import { EuiContextMenu, EuiPopover, type EuiPopoverProps } from '@elastic/eui';
+import type { InjectedIntl } from '@kbn/i18n-react';
+import type { Filter } from '@kbn/es-query';
 import {
-  Filter,
   isFilterPinned,
   toggleFilterNegated,
   toggleFilterPinned,
   toggleFilterDisabled,
 } from '@kbn/es-query';
-import classNames from 'classnames';
-import React, { MouseEvent, useState, useEffect, HTMLAttributes } from 'react';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '@kbn/data-plugin/public';
+import classNames from 'classnames';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
 import { getDataViews } from '../services';

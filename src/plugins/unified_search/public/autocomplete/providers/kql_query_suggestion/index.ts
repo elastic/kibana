@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup } from '@kbn/core/public';
-import { $Keys } from 'utility-types';
-import { flatten, uniqBy } from 'lodash';
+import type { CoreSetup } from '@kbn/core/public';
 import { fromKueryExpression } from '@kbn/es-query';
+import type { $Keys } from 'utility-types';
+import { flatten, uniqBy } from 'lodash';
 import { setupGetFieldSuggestions } from './field';
 import { setupGetValueSuggestions } from './value';
 import { setupGetOperatorSuggestions } from './operator';
 import { setupGetConjunctionSuggestions } from './conjunction';
-import { UnifiedSearchPublicPluginStart } from '../../../types';
-import {
+import type { UnifiedSearchPublicPluginStart } from '../../../types';
+import type {
   QuerySuggestion,
   QuerySuggestionGetFnArgs,
   QuerySuggestionGetFn,

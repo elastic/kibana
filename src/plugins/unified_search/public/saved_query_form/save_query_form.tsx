@@ -22,8 +22,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { sortBy, isEqual } from 'lodash';
 import { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';
+import { sortBy, isEqual } from 'lodash';
 
 interface Props {
   savedQuery?: SavedQuery;

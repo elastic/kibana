@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiListGroupItem, EuiConfirmModal, EuiIconTip } from '@elastic/eui';
-
 import React, { Fragment, useState } from 'react';
-import classNames from 'classnames';
+import { EuiListGroupItem, EuiConfirmModal, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SavedQuery } from '@kbn/data-plugin/public';
+import classNames from 'classnames';
 
 interface Props {
   savedQuery: SavedQuery;

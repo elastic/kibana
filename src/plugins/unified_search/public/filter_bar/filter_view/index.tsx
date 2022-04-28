@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiBadge, EuiBadgeProps, useInnerText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
-import { Filter, isFilterPinned } from '@kbn/es-query';
+import { EuiBadge, type EuiBadgeProps, useInnerText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { Filter } from '@kbn/es-query';
+import { isFilterPinned } from '@kbn/es-query';
 import { FilterLabel } from '..';
 import type { FilterLabelStatus } from '../filter_item';
 

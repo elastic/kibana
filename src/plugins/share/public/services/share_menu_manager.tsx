@@ -14,10 +14,10 @@ import { EuiWrappingPopover } from '@elastic/eui';
 import { CoreStart, ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ShareContextMenu } from '../components/share_context_menu';
+import type { BrowserUrlService } from '../types';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
-import type { BrowserUrlService } from '../types';
 
 export class ShareMenuManager {
   private isOpen = false;

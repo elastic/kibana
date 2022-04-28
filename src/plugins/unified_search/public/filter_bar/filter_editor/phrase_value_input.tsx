@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EuiFormRow } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
-import { uniq } from 'lodash';
 import React from 'react';
+import { EuiFormRow } from '@elastic/eui';
+import { type InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
-import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
-import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
+import { uniq } from 'lodash';
+import { GenericComboBox, type GenericComboBoxProps } from './generic_combo_box';
+import { PhraseSuggestorUI, type PhraseSuggestorProps } from './phrase_suggestor';
 import { ValueInputType } from './value_input_type';
 
 interface Props extends PhraseSuggestorProps {

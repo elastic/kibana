@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup, PluginInitializerContext } from '@kbn/core/public';
 import moment from 'moment';
 import type { TimefilterSetup } from '@kbn/data-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { QuerySuggestionGetFn } from './providers/query_suggestion_provider';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { QuerySuggestionGetFn } from './providers/query_suggestion_provider';
 import {
   getEmptyValueSuggestions,
   setupValueSuggestionProvider,
@@ -23,7 +23,7 @@ import {
   KUERY_LANGUAGE_NAME,
   setupKqlQuerySuggestionProvider,
 } from './providers/kql_query_suggestion';
-import { UnifiedSearchPublicPluginStart, UnifiedSearchStartDependencies } from '../types';
+import type { UnifiedSearchPublicPluginStart, UnifiedSearchStartDependencies } from '../types';
 
 export class AutocompleteService {
   autocompleteConfig: ConfigSchema['autocomplete'];

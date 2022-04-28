@@ -10,7 +10,7 @@ import React from 'react';
 import { withKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import { IFieldType, UI_SETTINGS } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { IDataPluginServices } from '@kbn/data-plugin/public';
+import type { IDataPluginServices } from '@kbn/data-plugin/public';
 import { debounce } from 'lodash';
 
 import { getAutocomplete } from '../../services';

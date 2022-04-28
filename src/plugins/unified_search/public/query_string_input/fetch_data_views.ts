@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { isEmpty } from 'lodash';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { isEmpty } from 'lodash';
 
 export async function fetchDataViews(
   dataViewsService: DataViewsContract,

@@ -14,7 +14,7 @@ import {
   stubDataView,
   stubFields,
 } from '@kbn/data-plugin/common/stubs';
-import { toggleFilterNegated } from '@kbn/data-plugin/common';
+import { toggleFilterNegated } from '@kbn/es-query';
 import {
   getFieldFromFilter,
   getFilterableFields,

@@ -6,26 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { compact } from 'lodash';
-import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
-import classNames from 'classnames';
 import React, { Component } from 'react';
-import { get, isEqual } from 'lodash';
-import { EuiIconProps } from '@elastic/eui';
-import memoizeOne from 'memoize-one';
-
+import { type InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import type { EuiIconProps } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { Query, Filter } from '@kbn/es-query';
-import { withKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
-
+import type { Query, Filter } from '@kbn/es-query';
+import { withKibana, type KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import type { TimeHistoryContract, SavedQuery } from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
-import { IDataPluginServices } from '@kbn/data-plugin/public';
-import { TimeRange } from '@kbn/data-plugin/common';
+import type { IDataPluginServices, TimeRange } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { compact } from 'lodash';
+import classNames from 'classnames';
+import { get, isEqual } from 'lodash';
+import memoizeOne from 'memoize-one';
 import { FilterBar } from '../filter_bar';
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
-import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
+import { type SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementComponent } from '../saved_query_management';
 
 export interface SearchBarInjectedDeps {

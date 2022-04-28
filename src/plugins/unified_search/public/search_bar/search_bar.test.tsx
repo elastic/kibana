@@ -7,12 +7,13 @@
  */
 
 import React from 'react';
-import SearchBar from './search_bar';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { coreMock } from '@kbn/core/public/mocks';
+import SearchBar from './search_bar';
+
 const startMock = coreMock.createStart();
 
 import { mount } from 'enzyme';

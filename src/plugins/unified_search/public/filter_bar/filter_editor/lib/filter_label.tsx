@@ -9,7 +9,8 @@
 import React, { Fragment } from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Filter, FILTERS } from '@kbn/data-plugin/common';
+import { FILTERS } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { existsOperator, isOneOfOperator } from './filter_operators';
 import type { FilterLabelStatus } from '../../filter_item';
 

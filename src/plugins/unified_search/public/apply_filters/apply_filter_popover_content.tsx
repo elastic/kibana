@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import React, { Component } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -18,10 +19,9 @@ import {
   EuiCheckbox,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Component } from 'react';
-import { getDisplayValueFromFilter, mapAndFlattenFilters } from '@kbn/data-plugin/public';
-import { Filter } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { getDisplayValueFromFilter, mapAndFlattenFilters } from '@kbn/data-plugin/public';
+import type { Filter } from '@kbn/es-query';
 import { FilterLabel } from '../filter_bar';
 
 interface Props {

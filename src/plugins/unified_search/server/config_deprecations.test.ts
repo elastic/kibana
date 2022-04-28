@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep } from 'lodash';
-
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
 import { configDeprecationsMock } from '@kbn/core/server/mocks';
+import { cloneDeep } from 'lodash';
 
 import { autocompleteConfigDeprecationProvider } from './config_deprecations';
 

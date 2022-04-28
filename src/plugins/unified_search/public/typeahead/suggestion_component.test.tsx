@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
+import { mount, shallow } from 'enzyme';
+import { type QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
 import { SuggestionComponent } from './suggestion_component';
 
 const noop = () => {

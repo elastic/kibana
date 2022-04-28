@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React, { Component } from 'react';
 import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
-import { Component } from 'react';
-import React from 'react';
 
 interface Props {
   onEnableAll: () => void;

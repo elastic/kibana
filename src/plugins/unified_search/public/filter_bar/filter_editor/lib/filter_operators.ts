@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { FILTERS } from '@kbn/es-query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { IFieldType } from '@kbn/data-views-plugin/common';
+import type { IFieldType } from '@kbn/data-views-plugin/common';
 
 export interface Operator {
   message: string;

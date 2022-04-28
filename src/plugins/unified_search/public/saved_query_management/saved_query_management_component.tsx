@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import React, { useCallback, useEffect, useState, Fragment, useRef } from 'react';
 import {
   EuiPopover,
   EuiPopoverTitle,
@@ -20,11 +21,9 @@ import {
   EuiSpacer,
   EuiIcon,
 } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useState, Fragment, useRef } from 'react';
+import type { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';
 import { sortBy } from 'lodash';
-import { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';
 import { SavedQueryListItem } from './saved_query_list_item';
 
 const perPage = 50;

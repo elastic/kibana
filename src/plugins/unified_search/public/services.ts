@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ThemeServiceStart, OverlayStart } from '@kbn/core/public';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { AutocompleteStart } from '.';
+import type { ThemeServiceStart, OverlayStart } from '@kbn/core/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { AutocompleteStart } from '.';
 
 export const [getDataViews, setDataViews] = createGetterSetter<DataViewsContract>('IndexPatterns');
 

@@ -6,28 +6,25 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { waitFor } from '@testing-library/dom';
+import { render } from '@testing-library/react';
+
+import { EuiTextArea, EuiIcon } from '@elastic/eui';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { stubDataView } from '@kbn/data-plugin/public/stubs';
+import { KibanaContextProvider, withKibana } from '@kbn/kibana-react-plugin/public';
+import { mount } from 'enzyme';
 import {
   mockFetchDataViews,
   mockPersistedLog,
   mockPersistedLogFactory,
 } from './query_string_input.test.mocks';
 
-import React from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
-import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/dom';
-import { render } from '@testing-library/react';
-
-import { EuiTextArea, EuiIcon } from '@elastic/eui';
-
 import { QueryLanguageSwitcher } from './language_switcher';
 import QueryStringInputUI from './query_string_input';
-
-import { coreMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { stubDataView } from '@kbn/data-plugin/public/stubs';
-import { KibanaContextProvider, withKibana } from '@kbn/kibana-react-plugin/public';
-
 import { setAutocomplete } from '../services';
 import { unifiedSearchPluginMock } from '../mocks';
 
