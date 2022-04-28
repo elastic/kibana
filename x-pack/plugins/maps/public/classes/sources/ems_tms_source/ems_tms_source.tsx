@@ -8,7 +8,6 @@
 import React from 'react';
 import { Adapters } from '@kbn/inspector-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { TMSService } from '@elastic/ems-client';
 import { AbstractSource, SourceEditorArgs } from '../source';
 import { ITMSSource } from '../tms_source';
 import { getEmsTmsServices } from '../../../util';
@@ -52,7 +51,6 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
         typeof descriptor.lightModeDefault !== 'undefined'
           ? descriptor.lightModeDefault
           : getEmsTileLayerId().desaturated,
-      locale: typeof descriptor.locale !== 'undefined' ? descriptor.locale : 'en',
     };
   }
 
@@ -141,21 +139,14 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
     return 'ems/' + this.getTileLayerId();
   }
 
-  async getVectorStyleSheetAndSpriteMeta(isRetina: boolean, locale?: string) {
+  async getVectorStyleSheetAndSpriteMeta(isRetina: boolean) {
     const emsTMSService = await this._getEMSTMSService();
-    let styleSheet = await emsTMSService.getVectorStyleSheet();
-    if (styleSheet !== undefined && locale !== undefined) {
-      styleSheet = TMSService.transformLanguage(styleSheet, locale);
-    }
+    const styleSheet = await emsTMSService.getVectorStyleSheet();
     const spriteMeta = await emsTMSService.getSpriteSheetMeta(isRetina);
     return {
       vectorStyleSheet: styleSheet,
       spriteMeta,
     };
-  }
-
-  getLocale() {
-    return this._descriptor.locale;
   }
 
   getTileLayerId() {

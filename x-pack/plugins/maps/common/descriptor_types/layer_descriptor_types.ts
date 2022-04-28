@@ -9,6 +9,7 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Query } from '@kbn/data-plugin/public';
+import { TMSService } from '@elastic/ems-client';
 import { Feature } from 'geojson';
 import {
   HeatmapStyleDescriptor,
@@ -55,7 +56,7 @@ export type LayerDescriptor = {
   attribution?: Attribution;
   id: string;
   label?: string | null;
-  locale?: string | null;
+  locale?: keyof typeof TMSService.SupportedLanguages | null;
   areLabelsOnTop?: boolean;
   minZoom?: number;
   maxZoom?: number;

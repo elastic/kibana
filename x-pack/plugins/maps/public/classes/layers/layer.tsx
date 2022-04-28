@@ -12,6 +12,7 @@ import { Query } from '@kbn/data-plugin/public';
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import { EuiIcon } from '@elastic/eui';
+import { TMSService } from '@elastic/ems-client';
 import uuid from 'uuid/v4';
 import { FeatureCollection } from 'geojson';
 import { DataRequest } from '../util/data_request';
@@ -53,7 +54,7 @@ export interface ILayer {
   supportsFitToBounds(): Promise<boolean>;
   getAttributions(): Promise<Attribution[]>;
   getLabel(): string;
-  getLocale(): string;
+  getLocale(): keyof typeof TMSService.SupportedLanguages | null;
   hasLegendDetails(): Promise<boolean>;
   renderLegendDetails(): ReactElement<any> | null;
   showAtZoomLevel(zoom: number): boolean;
@@ -146,7 +147,7 @@ export class AbstractLayer implements ILayer {
       minZoom: _.get(options, 'minZoom', MIN_ZOOM),
       maxZoom: _.get(options, 'maxZoom', MAX_ZOOM),
       alpha: _.get(options, 'alpha', 0.75),
-      locale: _.get(options, 'locale', 'en'),
+      locale: _.get(options, 'locale'),
       visible: _.get(options, 'visible', true),
       style: _.get(options, 'style', null),
       includeInFitToBounds:
@@ -260,8 +261,8 @@ export class AbstractLayer implements ILayer {
     return this._descriptor.label ? this._descriptor.label : '';
   }
 
-  getLocale(): string {
-    return this._descriptor.locale ? this._descriptor.locale : 'en';
+  getLocale(): keyof typeof TMSService.SupportedLanguages | null {
+    return this._descriptor.locale ?? null;
   }
 
   getLayerIcon(isTocIcon: boolean): LayerIcon {

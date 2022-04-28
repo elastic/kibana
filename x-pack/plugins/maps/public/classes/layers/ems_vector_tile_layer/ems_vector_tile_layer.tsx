@@ -6,6 +6,7 @@
  */
 
 import type { Map as MbMap, LayerSpecification, StyleSpecification } from '@kbn/mapbox-gl';
+import { TMSService } from '@elastic/ems-client';
 import _ from 'lodash';
 // @ts-expect-error
 import { RGBAImage } from './image_utils';
@@ -20,7 +21,6 @@ import { TileStyle } from '../../styles/tile/tile_style';
 
 interface SourceRequestMeta {
   tileLayerId: string;
-  locale?: string;
 }
 
 // TODO remove once ems_client exports EmsSpriteSheet and EmsSprite type
@@ -100,12 +100,11 @@ export class EmsVectorTileLayer extends AbstractLayer {
       return false;
     }
 
-    return prevMeta.tileLayerId === nextMeta.tileLayerId && prevMeta.locale === nextMeta.locale;
+    return prevMeta.tileLayerId === nextMeta.tileLayerId;
   }
 
   async syncData({ startLoading, stopLoading, onLoadError }: DataRequestContext) {
-    const locale = this.getSource().getLocale();
-    const nextMeta = { tileLayerId: this.getSource().getTileLayerId(), locale };
+    const nextMeta = { tileLayerId: this.getSource().getTileLayerId() };
     const canSkipSync = this._canSkipSync({
       prevDataRequest: this.getSourceDataRequest(),
       nextMeta,
@@ -117,10 +116,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
     const requestToken = Symbol(`layer-source-refresh:${this.getId()} - source`);
     try {
       startLoading(SOURCE_DATA_REQUEST_ID, requestToken, nextMeta);
-      const styleAndSprites = await this.getSource().getVectorStyleSheetAndSpriteMeta(
-        isRetina(),
-        locale
-      );
+      const styleAndSprites = await this.getSource().getVectorStyleSheetAndSpriteMeta(isRetina());
       const spriteSheetImageData = styleAndSprites.spriteMeta
         ? await this._loadSpriteSheetImageData(styleAndSprites.spriteMeta.png)
         : undefined;
@@ -311,47 +307,47 @@ export class EmsVectorTileLayer extends AbstractLayer {
         return;
       }
       this._addSpriteSheetToMapFromImageData(newJson, imageData, mbMap);
+      // sync layers
+      const layers = vectorStyle.layers ? vectorStyle.layers : [];
+      layers.forEach((layer) => {
+        const mbLayerId = this._generateMbId(layer.id);
+        const mbLayer = mbMap.getLayer(mbLayerId);
+        if (mbLayer) {
+          mbMap.removeLayer(mbLayerId);
+        }
+        const newLayerObject = {
+          ...layer,
+          source: this._generateMbSourceId(
+            'source' in layer && typeof layer.source === 'string'
+              ? (layer.source as string)
+              : undefined
+          ),
+          id: mbLayerId,
+        };
+
+        if (
+          newLayerObject.type === 'symbol' &&
+          newLayerObject.layout &&
+          typeof newLayerObject.layout['icon-image'] === 'string'
+        ) {
+          newLayerObject.layout['icon-image'] = this._makeNamespacedImageId(
+            newLayerObject.layout['icon-image']
+          );
+        }
+
+        if (
+          newLayerObject.type === 'fill' &&
+          newLayerObject.paint &&
+          typeof newLayerObject.paint['fill-pattern'] === 'string'
+        ) {
+          newLayerObject.paint['fill-pattern'] = this._makeNamespacedImageId(
+            newLayerObject.paint['fill-pattern']
+          );
+        }
+
+        mbMap.addLayer(newLayerObject);
+      });
     }
-    // sync layers
-    const layers = vectorStyle.layers ? vectorStyle.layers : [];
-    layers.forEach((layer) => {
-      const mbLayerId = this._generateMbId(layer.id);
-      const mbLayer = mbMap.getLayer(mbLayerId);
-      if (mbLayer) {
-        mbMap.removeLayer(mbLayerId);
-      }
-      const newLayerObject = {
-        ...layer,
-        source: this._generateMbSourceId(
-          'source' in layer && typeof layer.source === 'string'
-            ? (layer.source as string)
-            : undefined
-        ),
-        id: mbLayerId,
-      };
-
-      if (
-        newLayerObject.type === 'symbol' &&
-        newLayerObject.layout &&
-        typeof newLayerObject.layout['icon-image'] === 'string'
-      ) {
-        newLayerObject.layout['icon-image'] = this._makeNamespacedImageId(
-          newLayerObject.layout['icon-image']
-        );
-      }
-
-      if (
-        newLayerObject.type === 'fill' &&
-        newLayerObject.paint &&
-        typeof newLayerObject.paint['fill-pattern'] === 'string'
-      ) {
-        newLayerObject.paint['fill-pattern'] = this._makeNamespacedImageId(
-          newLayerObject.paint['fill-pattern']
-        );
-      }
-
-      mbMap.addLayer(newLayerObject);
-    });
 
     this._setTileLayerProperties(mbMap);
   }
@@ -392,6 +388,16 @@ export class EmsVectorTileLayer extends AbstractLayer {
     });
   }
 
+  _setLanguage(mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) {
+    const locale = this.getLocale();
+    if (locale !== null) {
+      const textProperty = TMSService.transformLanguageProperty(mbLayer, locale);
+      if (textProperty !== undefined) {
+        mbMap.setLayoutProperty(mbLayerId, 'text-field', textProperty);
+      }
+    }
+  }
+
   _setLayerZoomRange(mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) {
     let minZoom = this.getMinZoom();
     if (typeof mbLayer.minzoom === 'number') {
@@ -415,6 +421,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
       this.syncVisibilityWithMb(mbMap, mbLayerId);
       this._setLayerZoomRange(mbMap, mbLayer, mbLayerId);
       this._setOpacityForType(mbMap, mbLayer, mbLayerId);
+      this._setLanguage(mbMap, mbLayer, mbLayerId);
     });
   }
 

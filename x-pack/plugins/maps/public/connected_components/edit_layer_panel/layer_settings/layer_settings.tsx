@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { TMSService } from '@elastic/ems-client';
 import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
 import { Attribution } from '../../../../common/descriptor_types';
 import { MAX_ZOOM } from '../../../../common/constants';
@@ -163,6 +164,35 @@ export function LayerSettings(props: Props) {
     );
   };
 
+  const renderShowLocaleSelector = () => {
+    if (!props.layer.supportsLabelLocales()) {
+      return null;
+    }
+
+    const supportedLanguages = Object.entries(TMSService.SupportedLanguages).map(([key, { label }]) => {
+      const i18nLabel = i18n.translate(`xpack.maps.source.emsTile.basemapLabel${key}`, {
+        defaultMessage: label,
+      });
+      return { key, label: i18nLabel };
+    });
+
+    return (
+      <EuiFormRow
+        display="columnCompressed"
+        // TODO i18n
+        label="Label language"
+        helpText="Display labels in a different language"
+      >
+        <EuiComboBox
+          options={supportedLanguages}
+          singleSelection={{ asPlainText: true }}
+          selectedOptions={supportedLanguages.filter(({ key }) => key === props.layer.getLocale())}
+          onChange={onLocaleChange}
+        />
+      </EuiFormRow>
+    );
+  };
+
   return (
     <Fragment>
       <EuiPanel>
@@ -180,6 +210,7 @@ export function LayerSettings(props: Props) {
         {renderZoomSliders()}
         <AlphaSlider alpha={props.layer.getAlpha()} onChange={onAlphaChange} />
         {renderShowLabelsOnTop()}
+        {renderShowLocaleSelector()}
         <AttributionFormRow layer={props.layer} onChange={onAttributionChange} />
         {renderIncludeInFitToBounds()}
       </EuiPanel>
