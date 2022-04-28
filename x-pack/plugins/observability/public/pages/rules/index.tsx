@@ -93,6 +93,7 @@ function RulesPage() {
   });
   const [inputText, setInputText] = useState<string | undefined>();
   const [searchText, setSearchText] = useState<string | undefined>();
+  const [tagsFilter, setTagsFilter] = useState<string[]>([]);
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const { lastResponse, setLastResponse } = useRulesPageStateContainer();
   const { status, setStatus } = useRulesPageStateContainer();
@@ -108,11 +109,12 @@ function RulesPage() {
     setCurrentRuleToEdit(ruleItem);
   };
 
-  const { rulesState, setRulesState, reload, noData, initialLoad } = useFetchRules({
+  const { rulesState, setRulesState, reload, noData, initialLoad, tags } = useFetchRules({
     searchText,
     ruleLastResponseFilter: lastResponse,
     ruleStatusesFilter: status,
     typesFilter,
+    tagsFilter,
     page,
     setPage,
     sort,
@@ -182,11 +184,11 @@ function RulesPage() {
         sortable: false,
         width: '50px',
         'data-test-subj': 'rulesTableCell-tagsPopover',
-        render: (tags: string[], item: RuleTableItem) => {
-          return tags.length > 0
+        render: (ruleTags: string[], item: RuleTableItem) => {
+          return ruleTags.length > 0
             ? triggersActionsUi.getRuleTagBadge({
                 isOpen: tagPopoverOpenIndex === item.index,
-                tags,
+                tags: ruleTags,
                 onClick: () => setTagPopoverOpenIndex(item.index),
                 onClose: () => setTagPopoverOpenIndex(-1),
               })
@@ -351,6 +353,13 @@ function RulesPage() {
                 })
               )}
             />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {triggersActionsUi.getRuleTagFilter({
+              tags,
+              selectedTags: tagsFilter,
+              onChange: (myTags: string[]) => setTagsFilter(myTags),
+            })}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <LastResponseFilter

@@ -7,7 +7,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { isEmpty } from 'lodash';
-import { loadRules } from '@kbn/triggers-actions-ui-plugin/public';
+import { loadRules, loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { RULES_LOAD_ERROR } from '../pages/rules/translations';
 import { FetchRulesProps, RuleState } from '../pages/rules/types';
 import { OBSERVABILITY_RULE_TYPES } from '../pages/rules/config';
@@ -18,6 +18,7 @@ export function useFetchRules({
   ruleLastResponseFilter,
   ruleStatusesFilter,
   typesFilter,
+  tagsFilter,
   setPage,
   page,
   sort,
@@ -33,6 +34,27 @@ export function useFetchRules({
 
   const [noData, setNoData] = useState<boolean>(true);
   const [initialLoad, setInitialLoad] = useState<boolean>(true);
+  const [tags, setTags] = useState<string[]>([]);
+
+  const loadRuleAggs = useCallback(async () => {
+    try {
+      const rulesAggs = await loadRuleAggregations({
+        http,
+        searchText,
+        typesFilter,
+      });
+
+      if (rulesAggs?.ruleTags) {
+        setTags(rulesAggs.ruleTags);
+      }
+    } catch (e) {
+      // toasts.addDanger({
+      //   title: i18n.translate('xpack.observability.rulesList.unableToLoadRuleStatusInfoMessage', {
+      //     defaultMessage: 'Unable to load rule status info',
+      //   }),
+      // });
+    }
+  }, [http, typesFilter, searchText]);
 
   const fetchRules = useCallback(async () => {
     setRulesState((oldState) => ({ ...oldState, isLoading: true }));
@@ -43,10 +65,12 @@ export function useFetchRules({
         page,
         searchText,
         typesFilter: typesFilter.length > 0 ? typesFilter : OBSERVABILITY_RULE_TYPES,
+        tagsFilter,
         ruleExecutionStatusesFilter: ruleLastResponseFilter,
         ruleStatusesFilter,
         sort,
       });
+      await loadRuleAggs();
       setRulesState((oldState) => ({
         ...oldState,
         isLoading: false,
@@ -60,8 +84,9 @@ export function useFetchRules({
       const isFilterApplied = !(
         isEmpty(searchText) &&
         isEmpty(ruleLastResponseFilter) &&
-        isEmpty(ruleStatusesFilter) &&
-        isEmpty(typesFilter)
+        isEmpty(typesFilter) &&
+        isEmpty(tagsFilter) &&
+        isEmpty(ruleStatusesFilter)
       );
 
       setNoData(response.data.length === 0 && !isFilterApplied);
@@ -75,13 +100,16 @@ export function useFetchRules({
     setPage,
     searchText,
     ruleLastResponseFilter,
+    tagsFilter,
+    loadRuleAggs,
     ruleStatusesFilter,
     typesFilter,
     sort,
   ]);
   useEffect(() => {
     fetchRules();
-  }, [fetchRules]);
+    loadRuleAggs();
+  }, [fetchRules, loadRuleAggs]);
 
   return {
     rulesState,
@@ -89,5 +117,6 @@ export function useFetchRules({
     setRulesState,
     noData,
     initialLoad,
+    tags,
   };
 }

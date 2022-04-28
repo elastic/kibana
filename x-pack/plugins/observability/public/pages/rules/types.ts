@@ -44,6 +44,7 @@ export interface FetchRulesProps {
   ruleLastResponseFilter: string[];
   ruleStatusesFilter: RuleStatus[];
   typesFilter: string[];
+  tagsFilter: string[];
   page: Pagination;
   setPage: Dispatch<SetStateAction<Pagination>>;
   sort: EuiTableSortingType<RuleTableItem>['sort'];
