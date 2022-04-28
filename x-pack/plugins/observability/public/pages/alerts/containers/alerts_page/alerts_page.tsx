@@ -71,7 +71,7 @@ const ALERT_STATUS_REGEX = new RegExp(
   'gm'
 );
 
-export const ALERT_TABLE_STATE_STORAGE_KEY = 'xpack.observability.alert.tableState';
+const ALERT_TABLE_STATE_STORAGE_KEY = 'xpack.observability.alert.tableState';
 
 function AlertsPage() {
   const { ObservabilityPageTemplate, config } = usePluginContext();
