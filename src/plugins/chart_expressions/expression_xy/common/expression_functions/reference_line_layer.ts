@@ -17,7 +17,14 @@ export const referenceLineLayerFunction: ReferenceLineLayerFn = {
   type: REFERENCE_LINE_LAYER,
   help: strings.getRLHelp(),
   inputTypes: ['datatable'],
-  args: { ...commonReferenceLineLayerArgs },
+  args: {
+    ...commonReferenceLineLayerArgs,
+    accessors: {
+      types: ['string', 'vis_dimension'],
+      help: strings.getRLAccessorsHelp(),
+      multi: true,
+    },
+  },
   fn(table, args) {
     return {
       type: REFERENCE_LINE_LAYER,

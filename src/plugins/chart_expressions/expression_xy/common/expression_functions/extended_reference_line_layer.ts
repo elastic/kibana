@@ -19,6 +19,11 @@ export const extendedReferenceLineLayerFunction: ExtendedReferenceLineLayerFn = 
   inputTypes: ['datatable'],
   args: {
     ...commonReferenceLineLayerArgs,
+    accessors: {
+      types: ['string'],
+      help: strings.getRLAccessorsHelp(),
+      multi: true,
+    },
     table: {
       types: ['datatable'],
       help: strings.getTableHelp(),
