@@ -521,6 +521,7 @@
     "@percy/agent": "^0.28.6",
     "@storybook/addon-a11y": "^6.4.22",
     "@storybook/addon-actions": "^6.4.22",
+    "@storybook/addon-controls": "^6.4.22",
     "@storybook/addon-docs": "^6.4.22",
     "@storybook/addon-essentials": "^6.4.22",
     "@storybook/addon-knobs": "^6.4.0",
