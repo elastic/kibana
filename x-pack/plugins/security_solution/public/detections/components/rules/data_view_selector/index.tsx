@@ -7,9 +7,9 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 
-import { FieldHook } from '../../../../shared_imports';
+import { FieldHook, getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import * as i18n from './translations';
 import { sourcererModel } from '../../../../common/store/sourcerer';
 
@@ -24,6 +24,8 @@ export const DataViewSelector = ({
   field,
   dataViewId,
 }: DataViewSelectorProps) => {
+  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
     dataViewId != null && dataViewId.length > 0 ? [{ label: dataViewId }] : []
   );
@@ -53,15 +55,22 @@ export const DataViewSelector = ({
   /* kibanaDataViews.map((dataView) => ({ label: dataView.id }))} */
 
   return (
-    <EuiComboBox
-      isClearable
-      singleSelection={{ asPlainText: true }}
-      onChange={onChangeIndexPatterns}
-      options={kibanaDataViews.map((dataView) => ({ label: dataView.id, id: dataView.id }))}
-      selectedOptions={selectedOptions}
-      aria-label={i18n.PICK_INDEX_PATTERNS}
-      placeholder={i18n.PICK_INDEX_PATTERNS}
-      data-test-subj="detectionsDataViewSelectorDropdown"
-    />
+    <EuiFormRow
+      label={field.label}
+      helpText={field.helpText}
+      error={errorMessage}
+      isInvalid={isInvalid}
+    >
+      <EuiComboBox
+        isClearable
+        singleSelection={{ asPlainText: true }}
+        onChange={onChangeIndexPatterns}
+        options={kibanaDataViews.map((dataView) => ({ label: dataView.id, id: dataView.id }))}
+        selectedOptions={selectedOptions}
+        aria-label={i18n.PICK_INDEX_PATTERNS}
+        placeholder={i18n.PICK_INDEX_PATTERNS}
+        data-test-subj="detectionsDataViewSelectorDropdown"
+      />
+    </EuiFormRow>
   );
 };

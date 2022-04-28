@@ -78,32 +78,28 @@ export const schema: FormSchema<DefineStepRule> = {
     ],
   },
   dataViewId: {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fiedIndexPatternsLabel',
-      {
-        defaultMessage: 'Data Views',
-      }
-    ),
+    fieldsToValidateOnChange: ['dataViewId'],
     validations: [
       {
         validator: (
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ formData }] = args;
+          const [{ path, formData }] = args;
           const skipValidation = isMlRule(formData.ruleType) || formData.index != null;
 
           if (skipValidation) {
             return;
           }
 
-          return fieldValidators.emptyField(
-            i18n.translate(
-              'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.outputIndiceNameFieldRequiredError',
+          return {
+            path,
+            message: i18n.translate(
+              'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.dataViewSelectorFieldRequired',
               {
-                defaultMessage: 'A minimum of one index pattern is required.',
+                defaultMessage: 'Please select an available Data View or Index Pattern.',
               }
-            )
-          )(...args);
+            ),
+          };
         },
       },
     ],

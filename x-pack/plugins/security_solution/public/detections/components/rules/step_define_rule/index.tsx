@@ -395,6 +395,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     if (radioIdSelected === dataViewRadioButtonId) {
       return (
         <UseField
+          key="DataViewSelector"
           path="dataViewId"
           component={DataViewSelector}
           componentProps={{
