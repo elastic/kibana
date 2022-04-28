@@ -31343,7 +31343,6 @@
     "unifiedSearch.filter.options.pinAllFiltersButtonLabel": "全部固定",
     "unifiedSearch.filter.options.unpinAllFiltersButtonLabel": "全部取消固定",
     "xpack.watcher.watcherDescription": "通过创建、管理和监测警报来检测数据中的更改。",
-    "unifiedSearch.filter.searchBar.changeAllFiltersTitle": "更改所有筛选",
     "unifiedSearch.kueryAutocomplete.andOperatorDescription": "需要{bothArguments}为 true",
     "unifiedSearch.kueryAutocomplete.andOperatorDescription.bothArgumentsText": "两个参数都",
     "unifiedSearch.kueryAutocomplete.equalOperatorDescription": "{equals}某一值",

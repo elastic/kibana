@@ -31115,7 +31115,6 @@
     "unifiedSearch.filter.options.invertNegatedFiltersButtonLabel": "Inverser l'inclusion",
     "unifiedSearch.filter.options.pinAllFiltersButtonLabel": "Tout épingler",
     "unifiedSearch.filter.options.unpinAllFiltersButtonLabel": "Tout désépingler",
-    "unifiedSearch.filter.searchBar.changeAllFiltersTitle": "Changer tous les filtres",
     "unifiedSearch.kueryAutocomplete.andOperatorDescription": "Nécessite que {bothArguments} soient ''vrai''.",
     "unifiedSearch.kueryAutocomplete.andOperatorDescription.bothArgumentsText": "les deux arguments",
     "unifiedSearch.kueryAutocomplete.equalOperatorDescription": "{equals} une certaine valeur",
