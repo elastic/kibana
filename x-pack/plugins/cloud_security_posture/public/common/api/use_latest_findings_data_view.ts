@@ -7,23 +7,19 @@
 
 import { useQuery } from 'react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
+import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../common/constants';
 import { CspClientPluginStartDeps } from '../../types';
 
 /**
  *  TODO: use perfected kibana data views
  */
-export const useKubebeatDataView = () => {
+export const useLatestFindingsDataView = () => {
   const {
     data: { dataViews },
   } = useKibana<CspClientPluginStartDeps>().services;
 
-  // TODO: check if index exists
-  // if not, no point in creating a data view
-  // const check = () => http?.get(`/kubebeat`);
-
   // TODO: use `dataViews.get(ID)`
-  const findDataView = async () => (await dataViews.find(CSP_KUBEBEAT_INDEX_PATTERN))?.[0];
+  const findDataView = async () => (await dataViews.find(CSP_LATEST_FINDINGS_DATA_VIEW))?.[0];
 
-  return useQuery(['kubebeat_dataview'], findDataView);
+  return useQuery(['latest_findings_dataview'], findDataView);
 };
