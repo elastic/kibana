@@ -17,7 +17,8 @@
     "observability",
     "ruleRegistry",
     "triggersActionsUi",
-    "share"
+    "share",
+    "unifiedSearch"
   ],
   "optionalPlugins": [
     "actions",

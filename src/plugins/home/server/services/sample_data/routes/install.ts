@@ -38,7 +38,7 @@ export function createInstallRoute(
       //  @ts-ignore Custom query validation used
       const now = query.now ? new Date(query.now) : new Date();
 
-      const sampleDataInstaller = getSampleDataInstaller({
+      const sampleDataInstaller = await getSampleDataInstaller({
         datasetId: sampleDataset.id,
         sampleDatasets,
         logger,

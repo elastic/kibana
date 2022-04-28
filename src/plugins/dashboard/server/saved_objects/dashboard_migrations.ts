@@ -22,16 +22,15 @@ import {
   MigrateFunction,
   MigrateFunctionsObject,
 } from '@kbn/kibana-utils-plugin/common';
-import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
+import {
+  CONTROL_GROUP_TYPE,
+  rawControlGroupAttributesToSerializable,
+  serializableToRawControlGroupAttributes,
+} from '@kbn/controls-plugin/common';
 import { migrations730 } from './migrations_730';
 import { SavedDashboardPanel } from '../../common/types';
 import { migrateMatchAllQuery } from './migrate_match_all_query';
-import {
-  serializableToRawAttributes,
-  DashboardDoc700To720,
-  DashboardDoc730ToLatest,
-  rawAttributesToSerializable,
-} from '../../common';
+import { DashboardDoc700To720, DashboardDoc730ToLatest } from '../../common';
 import { injectReferences, extractReferences } from '../../common/saved_dashboard_references';
 import {
   convertPanelStateToSavedDashboardPanel,
@@ -221,12 +220,15 @@ const migrateByValuePanels =
     const { attributes } = doc;
 
     if (attributes?.controlGroupInput) {
-      const controlGroupInput = rawAttributesToSerializable(attributes.controlGroupInput);
+      const controlGroupInput = rawControlGroupAttributesToSerializable(
+        attributes.controlGroupInput
+      );
       const migratedControlGroupInput = migrate({
         ...controlGroupInput,
         type: CONTROL_GROUP_TYPE,
       });
-      attributes.controlGroupInput = serializableToRawAttributes(migratedControlGroupInput);
+      attributes.controlGroupInput =
+        serializableToRawControlGroupAttributes(migratedControlGroupInput);
     }
 
     // Skip if panelsJSON is missing otherwise this will cause saved object import to fail when

@@ -99,11 +99,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
       },
       {
         title: <DetailPanelListItem>args</DetailPanelListItem>,
-        description: (
-          <DetailPanelCopy textToCopy={leaderArgs}>
-            <span css={styles.description}>{leaderArgs}</span>
-          </DetailPanelCopy>
-        ),
+        description: <DetailPanelCopy textToCopy={leaderArgs}>{leaderArgs}</DetailPanelCopy>,
       },
       {
         title: <DetailPanelListItem>interactive</DetailPanelListItem>,
@@ -137,19 +133,11 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
       },
       {
         title: <DetailPanelListItem>start</DetailPanelListItem>,
-        description: (
-          <DetailPanelCopy textToCopy={start}>
-            <span css={styles.description}>{dataOrDash(start)}</span>
-          </DetailPanelCopy>
-        ),
+        description: <DetailPanelCopy textToCopy={start}>{dataOrDash(start)}</DetailPanelCopy>,
       },
       {
         title: <DetailPanelListItem>end</DetailPanelListItem>,
-        description: (
-          <DetailPanelCopy textToCopy={end ?? ''}>
-            <span css={styles.description}>{dataOrDash(end)}</span>
-          </DetailPanelCopy>
-        ),
+        description: <DetailPanelCopy textToCopy={end ?? ''}>{dataOrDash(end)}</DetailPanelCopy>,
       },
       {
         title: <DetailPanelListItem>exit_code</DetailPanelListItem>,
@@ -164,17 +152,13 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
       {
         title: <DetailPanelListItem>user.name</DetailPanelListItem>,
         description: (
-          <DetailPanelCopy textToCopy={userName}>
-            <span css={styles.description}>{dataOrDash(userName)}</span>
-          </DetailPanelCopy>
+          <DetailPanelCopy textToCopy={userName}>{dataOrDash(userName)}</DetailPanelCopy>
         ),
       },
       {
         title: <DetailPanelListItem>group.name</DetailPanelListItem>,
         description: (
-          <DetailPanelCopy textToCopy={groupName}>
-            <span css={styles.description}>{dataOrDash(groupName)}</span>
-          </DetailPanelCopy>
+          <DetailPanelCopy textToCopy={groupName}>{dataOrDash(groupName)}</DetailPanelCopy>
         ),
       },
     ];
@@ -195,7 +179,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
           title: <DetailPanelListItem>entry_meta.source.ip</DetailPanelListItem>,
           description: (
             <DetailPanelCopy textToCopy={entryMetaSourceIp}>
-              <span css={styles.description}>{dataOrDash(entryMetaSourceIp)}</span>
+              {dataOrDash(entryMetaSourceIp)}
             </DetailPanelCopy>
           ),
         }
@@ -242,11 +226,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
           },
           {
             title: <DetailPanelListItem>args</DetailPanelListItem>,
-            description: (
-              <DetailPanelCopy textToCopy={processArgs}>
-                <span css={styles.description}>{processArgs}</span>
-              </DetailPanelCopy>
-            ),
+            description: <DetailPanelCopy textToCopy={processArgs}>{processArgs}</DetailPanelCopy>,
           },
           {
             title: <DetailPanelListItem>executable</DetailPanelListItem>,
@@ -258,7 +238,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
                 {executable.map((execTuple, idx) => {
                   const [exec, eventAction] = execTuple;
                   return (
-                    <div key={`executable-${idx}`} css={styles.description}>
+                    <div key={`executable-${idx}`} css={styles.ellipsis}>
                       <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
                         {dataOrDash(exec)}
                       </EuiTextColor>
@@ -303,19 +283,11 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
           },
           {
             title: <DetailPanelListItem>start</DetailPanelListItem>,
-            description: (
-              <DetailPanelCopy textToCopy={start}>
-                <span css={styles.description}>{dataOrDash(start)}</span>
-              </DetailPanelCopy>
-            ),
+            description: <DetailPanelCopy textToCopy={start}>{dataOrDash(start)}</DetailPanelCopy>,
           },
           {
             title: <DetailPanelListItem>end</DetailPanelListItem>,
-            description: (
-              <DetailPanelCopy textToCopy={end}>
-                <span css={styles.description}>{dataOrDash(end)}</span>
-              </DetailPanelCopy>
-            ),
+            description: <DetailPanelCopy textToCopy={end}>{dataOrDash(end)}</DetailPanelCopy>,
           },
           {
             title: <DetailPanelListItem>exit_code</DetailPanelListItem>,
@@ -330,17 +302,13 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
           {
             title: <DetailPanelListItem>user.name</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={userName}>
-                <span css={styles.description}>{dataOrDash(userName)}</span>
-              </DetailPanelCopy>
+              <DetailPanelCopy textToCopy={userName}>{dataOrDash(userName)}</DetailPanelCopy>
             ),
           },
           {
             title: <DetailPanelListItem>group.name</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={groupName}>
-                <span css={styles.description}>{dataOrDash(groupName)}</span>
-              </DetailPanelCopy>
+              <DetailPanelCopy textToCopy={groupName}>{dataOrDash(groupName)}</DetailPanelCopy>
             ),
           },
         ]}

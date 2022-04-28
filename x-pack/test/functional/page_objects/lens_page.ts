@@ -720,15 +720,24 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async switchToVisualization(subVisualizationId: string, searchTerm?: string) {
       await this.openChartSwitchPopover();
-      const searchInput = await testSubjects.find('lnsChartSwitchSearch');
-      await searchInput.focus();
-      await this.searchOnChartSwitch(subVisualizationId, searchTerm);
+      await this.waitForSearchInputValue(subVisualizationId, searchTerm);
       await testSubjects.click(`lnsChartSwitchPopover_${subVisualizationId}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
+    async waitForSearchInputValue(subVisualizationId: string, searchTerm?: string) {
+      await retry.try(async () => {
+        await this.searchOnChartSwitch(subVisualizationId, searchTerm);
+        await PageObjects.common.sleep(1000); // give time for the value to be typed
+        const searchInputValue = await testSubjects.getAttribute('lnsChartSwitchSearch', 'value');
+        const queryTerm = searchTerm ?? subVisualizationId.substring(subVisualizationId.length - 3);
+        if (searchInputValue !== queryTerm) {
+          throw new Error('Search input value is not the expected value');
+        }
+      });
+    },
 
     async openChartSwitchPopover() {
-      if (await testSubjects.exists('lnsChartSwitchList')) {
+      if (await testSubjects.exists('lnsChartSwitchList', { timeout: 50 })) {
         return;
       }
       await retry.try(async () => {
@@ -897,7 +906,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
-    async getCurrentChartDebugState() {
+    async getCurrentChartDebugState(visType: string) {
+      await this.waitForVisualization(visType);
       return await elasticChart.getChartDebugData('lnsWorkspace');
     },
 
