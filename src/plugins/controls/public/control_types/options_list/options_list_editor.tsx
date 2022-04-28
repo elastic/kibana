@@ -8,39 +8,31 @@
 
 import useMount from 'react-use/lib/useMount';
 import React, { useEffect, useState } from 'react';
-import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 
-import { IFieldSubTypeMulti } from '@kbn/es-query';
-import { pluginServices } from '../../services';
-import { ControlEditorProps } from '../../types';
-import { OptionsListEmbeddableInput } from './types';
-import { OptionsListStrings } from './options_list_strings';
-import { DataViewListItem, DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import {
   LazyDataViewPicker,
   LazyFieldPicker,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
+import { IFieldSubTypeMulti } from '@kbn/es-query';
+import { EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { DataViewListItem, DataView } from '@kbn/data-views-plugin/common';
+
 import { pluginServices } from '../../services';
 import { ControlEditorProps } from '../../types';
-import { OptionsListEmbeddableInput } from './types';
 import { OptionsListStrings } from './options_list_strings';
-
+import { OptionsListEmbeddableInput, OptionsListField } from './types';
 interface OptionsListEditorState {
   singleSelect?: boolean;
+  runPastTimeout?: boolean;
   dataViewListItems: DataViewListItem[];
-  availableFields?: { [key: string]: DataViewField & { textField?: string } };
+  fieldsMap?: { [key: string]: OptionsListField };
   dataView?: DataView;
   fieldName?: string;
 }
 
 const FieldPicker = withSuspense(LazyFieldPicker, null);
 const DataViewPicker = withSuspense(LazyDataViewPicker, null);
-
-type DoubleLinkedDataViewField = DataViewField & {
-  parentFieldName?: string;
-  childFieldName?: string;
-};
 
 export const OptionsListEditor = ({
   onChange,
@@ -57,6 +49,7 @@ export const OptionsListEditor = ({
   const [state, setState] = useState<OptionsListEditorState>({
     fieldName: initialInput?.fieldName,
     singleSelect: initialInput?.singleSelect,
+    runPastTimeout: initialInput?.runPastTimeout,
     dataViewListItems: [],
   });
 
@@ -83,40 +76,41 @@ export const OptionsListEditor = ({
   useEffect(() => {
     if (!state.dataView) return;
 
-    // from the parent child relationship include whichever field is keyword, if the parent or child is mapped as text, add it as the textField
-
-    const newFieldsMap: OptionsListEditorState['availableFields'] = {};
-    const doubleLinkedFields: Array<DoubleLinkedDataViewField> = state.dataView?.fields
-      .getAll()
-      .map((field) => {
-        const parentFieldName = (field.subType as IFieldSubTypeMulti)?.multi?.parent;
-        if (parentFieldName) {
-          (field as DoubleLinkedDataViewField).parentFieldName = parentFieldName;
-          const parentField = state.dataView?.getFieldByName(parentFieldName);
-          (parentField as DoubleLinkedDataViewField).childFieldName = field.name;
-        }
-        return field;
-      });
-    for (const doubleLinkedField of doubleLinkedFields) {
-      const parentName = (field.subType as IFieldSubTypeMulti)?.multi?.parent;
-      if (parentName) {
-        const parentField = state.dataView.fields.getByName(parentName);
-        if (!parentField) continue;
-
-        const isAggregatable = field.aggregatable || parentField?.aggregatable;
-        const hasText = field.esTypes?.includes('text') || parentField?.esTypes?.includes('text');
-
-        if (hasText && isAggregatable) {
-          newFieldsMap[parentName] = parentField;
-        }
-
-        continue;
-      }
-      if ((field.aggregatable && field.type === 'string') || field.type === 'boolean') {
-        newFieldsMap[field.name] = field;
+    // double link the parent-child relationship so that we can filter in fields which are multi-typed to text / keyword
+    const doubleLinkedFields: OptionsListField[] = state.dataView?.fields.getAll();
+    for (const field of doubleLinkedFields) {
+      const parentFieldName = (field.subType as IFieldSubTypeMulti)?.multi?.parent;
+      if (parentFieldName) {
+        (field as OptionsListField).parentFieldName = parentFieldName;
+        const parentField = state.dataView?.getFieldByName(parentFieldName);
+        (parentField as OptionsListField).childFieldName = field.name;
       }
     }
 
+    const newFieldsMap: OptionsListEditorState['fieldsMap'] = {};
+    for (const field of doubleLinkedFields) {
+      if (field.type === 'boolean') {
+        newFieldsMap[field.name] = field;
+      }
+
+      // field type is keyword, check if this field is related to a text mapped field and include it.
+      if (field.aggregatable && field.type === 'string') {
+        const childField =
+          (field.childFieldName && state.dataView?.fields.getByName(field.childFieldName)) ||
+          undefined;
+        const parentField =
+          (field.parentFieldName && state.dataView?.fields.getByName(field.parentFieldName)) ||
+          undefined;
+
+        const textFieldName = childField?.esTypes?.includes('text')
+          ? childField.name
+          : parentField?.esTypes?.includes('text')
+          ? parentField.name
+          : undefined;
+
+        newFieldsMap[field.name] = { ...field, textFieldName } as OptionsListField;
+      }
+    }
     setState((s) => ({ ...s, fieldsMap: newFieldsMap }));
   }, [state.dataView]);
 
@@ -149,12 +143,16 @@ export const OptionsListEditor = ({
       </EuiFormRow>
       <EuiFormRow label={OptionsListStrings.editor.getFieldTitle()}>
         <FieldPicker
-          filterPredicate={(field) => Boolean(state.availableFields?.[field.name])}
+          filterPredicate={(field) => Boolean(state.fieldsMap?.[field.name])}
           selectedFieldName={fieldName}
           dataView={dataView}
           onSelectField={(field) => {
             setDefaultTitle(field.displayName ?? field.name);
-            onChange({ fieldName: field.name });
+            const textFieldName = state.fieldsMap?.[field.name].textFieldName;
+            onChange({
+              fieldName: field.name,
+              textFieldName,
+            });
             setState((s) => ({ ...s, fieldName: field.name }));
           }}
         />
@@ -166,6 +164,16 @@ export const OptionsListEditor = ({
           onChange={() => {
             onChange({ singleSelect: !state.singleSelect });
             setState((s) => ({ ...s, singleSelect: !s.singleSelect }));
+          }}
+        />
+      </EuiFormRow>
+      <EuiFormRow>
+        <EuiSwitch
+          label={OptionsListStrings.editor.getRunPastTimeoutTitle()}
+          checked={Boolean(state.runPastTimeout)}
+          onChange={() => {
+            onChange({ runPastTimeout: !state.runPastTimeout });
+            setState((s) => ({ ...s, runPastTimeout: !s.runPastTimeout }));
           }}
         />
       </EuiFormRow>
