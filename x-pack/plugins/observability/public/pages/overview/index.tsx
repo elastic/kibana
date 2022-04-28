@@ -5,16 +5,18 @@
  * 2.0.
  */
 import {
+  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
-  EuiHorizontalRule,
-  EuiButton,
   EuiFlyout,
-  EuiFlyoutHeader,
-  EuiTitle,
   EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiHorizontalRule,
+  EuiSpacer,
   EuiText,
+  EuiTitle,
+  EuiTourStep,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -162,6 +164,7 @@ export function OverviewPage({ routeParams }: Props) {
           ? {
               children: (
                 <PageHeader
+                  showTour={true}
                   handleGuidedSetupClick={handleGuidedSetupClick}
                   onTimeRangeRefresh={onTimeRangeRefresh}
                 />
@@ -274,6 +277,9 @@ function PageHeader({
   handleGuidedSetupClick,
   onTimeRangeRefresh,
 }: PageHeaderProps) {
+  const [isTourVisible, setIsTourVisible] = useState(true);
+  const closeTour = useCallback(() => setIsTourVisible(false), []);
+
   const { relativeStart, relativeEnd, refreshInterval, refreshPaused } = useDatePickerContext();
   return (
     <EuiFlexGroup wrap gutterSize="s" justifyContent="flexEnd">
@@ -292,12 +298,39 @@ function PageHeader({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ alignItems: 'flex-end' }}>
-        <EuiButton color="text" iconType="wrench" onClick={handleGuidedSetupClick}>
-          <FormattedMessage
-            id="xpack.observability.overview.guidedSetupButton"
-            defaultMessage="Guided setup"
-          />
-        </EuiButton>
+        <EuiTourStep
+          isStepOpen={showTour && isTourVisible}
+          title={i18n.translate('xpack.observability.overview.guidedSetupTourTitle', {
+            defaultMessage: 'Guided setup is always available',
+          })}
+          content={
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.observability.overview.guidedSetupTourContent"
+                defaultMessage="If you're ever in doubt you can always access the integration status and view next steps by clicking on this action."
+              />
+            </EuiText>
+          }
+          step={1}
+          stepsTotal={1}
+          maxWidth={400}
+          onFinish={closeTour}
+          footerAction={
+            <EuiButtonEmpty color="text" flush="right" size="xs" onClick={closeTour}>
+              <FormattedMessage
+                id="xpack.observability.overview.guidedSetupTourDismissButton"
+                defaultMessage="Dismiss"
+              />
+            </EuiButtonEmpty>
+          }
+        >
+          <EuiButton color="text" iconType="wrench" onClick={handleGuidedSetupClick}>
+            <FormattedMessage
+              id="xpack.observability.overview.guidedSetupButton"
+              defaultMessage="Guided setup"
+            />
+          </EuiButton>
+        </EuiTourStep>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
