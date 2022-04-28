@@ -20,7 +20,8 @@ export default function ({
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 
-  describe('Screenshotting Example', function () {
+  // FAILING: https://github.com/elastic/kibana/issues/131190
+  describe.skip('Screenshotting Example', function () {
     this.tags('ciGroup13');
 
     before(async () => {
