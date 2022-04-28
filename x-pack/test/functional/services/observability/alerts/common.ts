@@ -131,12 +131,14 @@ export function ObservabilityAlertsCommonProvider({
   };
 
   // Flyout
-  const getOpenFlyoutButton = async () => {
-    return await testSubjects.find('openFlyoutButton');
+  const getViewAlertDetailsFlyoutButton = async () => {
+    await openActionsMenuForRow(0);
+
+    return await testSubjects.find('viewAlertDetails');
   };
 
   const openAlertsFlyout = async () => {
-    await (await getOpenFlyoutButton()).click();
+    await (await getViewAlertDetailsFlyoutButton()).click();
     await retry.waitFor(
       'flyout open',
       async () => await testSubjects.exists(ALERTS_FLYOUT_SELECTOR, { timeout: 2500 })
