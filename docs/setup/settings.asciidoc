@@ -500,7 +500,7 @@ send on all responses to the client from the {kib} server. *Default: `{}`*
 
 |[[server-host]] `server.host:`
  | This setting specifies the host of the
-back end server. To allow remote users to connect, set the value to the IP address or DNS name of the {kib} server. *Default: `"localhost"`*
+back end server. To allow remote users to connect, set the value to the IP address or DNS name of the {kib} server. Use `0.0.0.0` to make Kibana listen on all IPs (public and private). *Default: `"localhost"`*
 
 | `server.keepaliveTimeout:`
  | The number of milliseconds to wait for additional data before restarting
