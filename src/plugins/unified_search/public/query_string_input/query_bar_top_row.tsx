@@ -379,7 +379,7 @@ export const QueryBarTopRow = React.memo(
             toolTipProps={{
               content: props.isDirty ? buttonLabelUpdate : buttonLabelRefresh,
               delay: 'long',
-              position: 'bottom',
+              position: 'top',
             }}
           />
         </EuiFlexItem>
