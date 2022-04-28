@@ -53,7 +53,6 @@ import { SecurityAppStore } from './common/store/store';
 import { licenseService } from './common/hooks/use_license';
 import { SecuritySolutionUiConfigType } from './common/types';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
-import { registerAlertsTableConfiguration } from './common/lib/triggers_actions_ui/register_alerts_table_configuration';
 
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
 import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
@@ -143,6 +142,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       euiIconType: APP_ICON_SOLUTION,
       deepLinks: getDeepLinks(this.experimentalFeatures),
       mount: async (params: AppMountParameters) => {
+        // required to show the alert table inside cases
+        const { alertsTableConfigurationRegistry } = plugins.triggersActionsUi;
+        const { registerAlertsTableConfiguration } =
+          await this.lazyRegisterAlertsTableConfiguration();
+        registerAlertsTableConfiguration(alertsTableConfigurationRegistry, this.storage);
+
         const [coreStart, startPlugins] = await core.getStartServices();
         const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
         const { renderApp } = await this.lazyApplicationDependencies();
@@ -244,10 +249,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       }));
     }
 
-    // required to show the alert table inside cases
-    const { alertsTableConfigurationRegistry } = plugins.triggersActionsUi;
-    registerAlertsTableConfiguration(alertsTableConfigurationRegistry, this.storage);
-
     return {};
   }
 
@@ -285,6 +286,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     return import(
       /* webpackChunkName: "lazy_sub_plugins" */
       './lazy_sub_plugins'
+    );
+  }
+
+  private lazyRegisterAlertsTableConfiguration() {
+    /**
+     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+     * See https://webpack.js.org/api/module-methods/#magic-comments
+     */
+    return import(
+      /* webpackChunkName: "lazy_sub_plugins" */
+      './common/lib/triggers_actions_ui/register_alerts_table_configuration'
     );
   }
 
