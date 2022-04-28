@@ -1,6 +1,6 @@
 in: query
 name: owner
-description: A filter to limit the retrieved cases to a specific set of applications. Valid values are:cases, observability, and securitySolution. If this parameter is omitted, the response contains all cases that the user has access to read.
+description: A filter to limit the response to a specific set of applications. If this parameter is omitted, the response contains information about all the cases that the user has access to read.
 schema:
   oneOf:
     - $ref: '../schemas/owners.yaml'
