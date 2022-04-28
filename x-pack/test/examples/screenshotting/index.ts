@@ -21,8 +21,9 @@ export default function ({
   const PageObjects = getPageObjects(['common']);
 
   describe('Screenshotting Example', function () {
+    this.tags('ciGroup13');
+
     before(async () => {
-      this.tags('ciGroup13');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/visualize.json');
       await PageObjects.common.navigateToApp('screenshottingExample');
