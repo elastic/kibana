@@ -33,6 +33,8 @@ import {
   POLICIES,
   ENDPOINTS,
   GETTING_STARTED,
+  THREAT_HUNTING,
+  DASHBOARDS,
 } from '../translations';
 import {
   OVERVIEW_PATH,
@@ -54,6 +56,8 @@ import {
   HOST_ISOLATION_EXCEPTIONS_PATH,
   SERVER_APP_ID,
   USERS_PATH,
+  THREAT_HUNTING_PATH,
+  DASHBOARDS_PATH,
 } from '../../../common/constants';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 
@@ -102,6 +106,30 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
     keywords: [
       i18n.translate('xpack.securitySolution.search.getStarted', {
         defaultMessage: 'Getting started',
+      }),
+    ],
+  },
+  {
+    id: SecurityPageName.threatHuntingLanding,
+    title: THREAT_HUNTING,
+    path: THREAT_HUNTING_PATH,
+    navLinkStatus: AppNavLinkStatus.hidden,
+    features: [FEATURE.general],
+    keywords: [
+      i18n.translate('xpack.securitySolution.search.threatHunting', {
+        defaultMessage: 'Threat Hunting',
+      }),
+    ],
+  },
+  {
+    id: SecurityPageName.dashboardsLanding,
+    title: DASHBOARDS,
+    path: DASHBOARDS_PATH,
+    navLinkStatus: AppNavLinkStatus.hidden,
+    features: [FEATURE.general],
+    keywords: [
+      i18n.translate('xpack.securitySolution.search.dashboards', {
+        defaultMessage: 'Dashboards',
       }),
     ],
   },
@@ -230,7 +258,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
             path: `${HOSTS_PATH}/externalAlerts`,
           },
           {
-            id: SecurityPageName.usersRisk,
+            id: SecurityPageName.hostsRisk,
             title: i18n.translate('xpack.securitySolution.search.hosts.risk', {
               defaultMessage: 'Hosts by risk',
             }),
