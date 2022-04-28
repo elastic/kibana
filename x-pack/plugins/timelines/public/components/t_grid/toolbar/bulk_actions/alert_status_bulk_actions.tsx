@@ -33,12 +33,12 @@ interface OwnProps {
   refetch: Refetch;
 }
 
-export type StatefulAlertStatusBulkActionsProps = OwnProps & PropsFromRedux;
+export type StatefulAlertBulkActionsProps = OwnProps & PropsFromRedux;
 
 /**
  * Component to render status bulk actions
  */
-export const AlertStatusBulkActionsComponent = React.memo<StatefulAlertStatusBulkActionsProps>(
+export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProps>(
   ({
     id,
     totalItems,
@@ -144,7 +144,7 @@ export const AlertStatusBulkActionsComponent = React.memo<StatefulAlertStatusBul
   }
 );
 
-AlertStatusBulkActionsComponent.displayName = 'AlertStatusBulkActionsComponent';
+AlertBulkActionsComponent.displayName = 'AlertBulkActionsComponent';
 
 const makeMapStateToProps = () => {
   const getTGrid = tGridSelectors.getTGridByIdSelector();
@@ -168,7 +168,7 @@ const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
-export const StatefulAlertStatusBulkActions = connector(AlertStatusBulkActionsComponent);
+export const StatefulAlertBulkActions = connector(AlertBulkActionsComponent);
 
 // eslint-disable-next-line import/no-default-export
-export { StatefulAlertStatusBulkActions as default };
+export { StatefulAlertBulkActions as default };

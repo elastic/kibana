@@ -80,7 +80,7 @@ import { ViewSelection } from '../event_rendered_view/selector';
 import { EventRenderedView } from '../event_rendered_view';
 import { REMOVE_COLUMN } from './column_headers/translations';
 
-const StatefulAlertStatusBulkActions = lazy(
+const StatefulAlertBulkActions = lazy(
   () => import('../toolbar/bulk_actions/alert_status_bulk_actions')
 );
 
@@ -470,7 +470,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           </EuiFlexItem>
           {showBulkActions && (
             <Suspense fallback={<EuiLoadingSpinner />}>
-              <StatefulAlertStatusBulkActions
+              <StatefulAlertBulkActions
                 showAlertStatusActions={showAlertStatusActions}
                 data-test-subj="bulk-actions"
                 id={id}
@@ -513,7 +513,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
             {showBulkActions ? (
               <>
                 <Suspense fallback={<EuiLoadingSpinner />}>
-                  <StatefulAlertStatusBulkActions
+                  <StatefulAlertBulkActions
                     showAlertStatusActions={showAlertStatusActions}
                     data-test-subj="bulk-actions"
                     id={id}
