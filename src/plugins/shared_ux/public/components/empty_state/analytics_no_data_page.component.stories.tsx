@@ -11,7 +11,7 @@ import { action } from '@storybook/addon-actions';
 import { SharedUxServicesProvider } from '@kbn/shared-ux-services';
 import { servicesFactory, DataServiceFactoryConfig } from '@kbn/shared-ux-storybook';
 import { AnalyticsNoDataPageComponent } from './analytics_no_data_page.component';
-import mdx from './analytics_no_data_page.component.mdx';
+import mdx from './analytics_no_data_page.mdx';
 
 export default {
   title: 'Analytics No Data Page',
