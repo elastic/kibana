@@ -18,6 +18,8 @@ export class VegaView extends VegaBaseView {
 
     if (this._parser.useResize) this.updateVegaSize(view);
     view.initialize(this._$container.get(0), this._$controls.get(0));
+    // resize again to take controls into account
+    if (this._parser.useResize) this.updateVegaSize(view);
 
     if (this._parser.useHover) view.hover();
 
