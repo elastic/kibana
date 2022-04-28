@@ -180,6 +180,25 @@ describe('ServiceNowSIR Fields', () => {
     expect(screen.queryByTestId('deprecated-connector-warning-callout')).not.toBeInTheDocument();
   });
 
+  it('does not show the deprecated callout when the connector is preconfigured', async () => {
+    render(
+      <Fields
+        fields={fields}
+        onChange={onChange}
+        connector={{ ...connector, isPreconfigured: true }}
+      />
+    );
+    expect(screen.queryByTestId('deprecated-connector-warning-callout')).not.toBeInTheDocument();
+  });
+
+  it('does not show the deprecated callout when the config of the connector is undefined', async () => {
+    render(
+      // @ts-expect-error
+      <Fields fields={fields} onChange={onChange} connector={{ ...connector, config: undefined }} />
+    );
+    expect(screen.queryByTestId('deprecated-connector-warning-callout')).not.toBeInTheDocument();
+  });
+
   test('it should hide subcategory if selecting a category without subcategories', async () => {
     // Failed Login doesn't have defined subcategories
     const customFields = {

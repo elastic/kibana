@@ -17,8 +17,8 @@ import {
 import { LifecycleQuery } from '../queries/lifecycle';
 import { DescendantsQuery } from '../queries/descendants';
 import { StatsQuery } from '../queries/stats';
-import { IScopedClusterClient } from 'src/core/server';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { IScopedClusterClient } from '@kbn/core/server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   FieldsObject,
   ResolverNode,

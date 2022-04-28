@@ -41,16 +41,16 @@ const getLoggingResponse = (toggle: boolean): DeprecationLoggingStatus => ({
 
 describe('ES deprecation logs', () => {
   let testBed: EsDeprecationLogsTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
   beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(getLoggingResponse(true));
-    testBed = await setupESDeprecationLogsPage();
-    testBed.component.update();
-  });
+    const mockEnvironment = setupEnvironment();
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    httpSetup = mockEnvironment.httpSetup;
 
-  afterAll(() => {
-    server.restore();
+    httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(getLoggingResponse(true));
+    testBed = await setupESDeprecationLogsPage(httpSetup);
+    testBed.component.update();
   });
 
   describe('Documentation link', () => {
@@ -71,8 +71,11 @@ describe('ES deprecation logs', () => {
 
       await actions.clickDeprecationToggle();
 
-      const latestRequest = server.requests[server.requests.length - 1];
-      expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual({ isEnabled: false });
+      expect(httpSetup.put).toHaveBeenLastCalledWith(
+        `/api/upgrade_assistant/deprecation_logging`,
+        expect.objectContaining({ body: JSON.stringify({ isEnabled: false }) })
+      );
+
       expect(find('deprecationLoggingToggle').props()['aria-checked']).toBe(false);
     });
 
@@ -83,7 +86,7 @@ describe('ES deprecation logs', () => {
       });
 
       await act(async () => {
-        testBed = await setupESDeprecationLogsPage();
+        testBed = await setupESDeprecationLogsPage(httpSetup);
       });
 
       const { exists, component } = testBed;
@@ -119,7 +122,7 @@ describe('ES deprecation logs', () => {
       httpRequestsMockHelpers.setLoadDeprecationLoggingResponse(undefined, error);
 
       await act(async () => {
-        testBed = await setupESDeprecationLogsPage();
+        testBed = await setupESDeprecationLogsPage(httpSetup);
       });
 
       const { component, exists } = testBed;
@@ -136,7 +139,7 @@ describe('ES deprecation logs', () => {
       });
 
       await act(async () => {
-        testBed = await setupESDeprecationLogsPage();
+        testBed = await setupESDeprecationLogsPage(httpSetup);
       });
 
       const { exists, component } = testBed;
@@ -156,7 +159,7 @@ describe('ES deprecation logs', () => {
 
     test('Has a link to see logs in observability app', async () => {
       await act(async () => {
-        testBed = await setupESDeprecationLogsPage({
+        testBed = await setupESDeprecationLogsPage(httpSetup, {
           http: {
             basePath: {
               prepend: (url: string) => url,
@@ -194,7 +197,7 @@ describe('ES deprecation logs', () => {
 
     test('Has a link to see logs in discover app', async () => {
       await act(async () => {
-        testBed = await setupESDeprecationLogsPage();
+        testBed = await setupESDeprecationLogsPage(httpSetup);
       });
 
       const { exists, component, find } = testBed;
@@ -233,7 +236,7 @@ describe('ES deprecation logs', () => {
       });
 
       await act(async () => {
-        testBed = await setupESDeprecationLogsPage();
+        testBed = await setupESDeprecationLogsPage(httpSetup);
       });
 
       const { find, exists, component } = testBed;
@@ -250,7 +253,7 @@ describe('ES deprecation logs', () => {
       });
 
       await act(async () => {
-        testBed = await setupESDeprecationLogsPage();
+        testBed = await setupESDeprecationLogsPage(httpSetup);
       });
 
       const { find, exists, component } = testBed;
@@ -271,7 +274,7 @@ describe('ES deprecation logs', () => {
       httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse(undefined, error);
 
       await act(async () => {
-        testBed = await setupESDeprecationLogsPage();
+        testBed = await setupESDeprecationLogsPage(httpSetup);
       });
 
       const { exists, actions, component } = testBed;
@@ -295,7 +298,7 @@ describe('ES deprecation logs', () => {
       });
 
       await act(async () => {
-        testBed = await setupESDeprecationLogsPage();
+        testBed = await setupESDeprecationLogsPage(httpSetup);
       });
 
       const { exists, actions, component } = testBed;
@@ -327,7 +330,7 @@ describe('ES deprecation logs', () => {
 
       const addDanger = jest.fn();
       await act(async () => {
-        testBed = await setupESDeprecationLogsPage({
+        testBed = await setupESDeprecationLogsPage(httpSetup, {
           services: {
             core: {
               notifications: {
@@ -365,7 +368,7 @@ describe('ES deprecation logs', () => {
           count: 0,
         });
 
-        testBed = await setupESDeprecationLogsPage();
+        testBed = await setupESDeprecationLogsPage(httpSetup);
       });
 
       afterEach(() => {
@@ -401,7 +404,7 @@ describe('ES deprecation logs', () => {
 
     test('It shows copy with compatibility api header advice', async () => {
       await act(async () => {
-        testBed = await setupESDeprecationLogsPage();
+        testBed = await setupESDeprecationLogsPage(httpSetup);
       });
 
       const { exists, component } = testBed;
@@ -425,7 +428,7 @@ describe('ES deprecation logs', () => {
 
     test(`doesn't show analyze and resolve logs if it doesn't have the right privileges`, async () => {
       await act(async () => {
-        testBed = await setupESDeprecationLogsPage({
+        testBed = await setupESDeprecationLogsPage(httpSetup, {
           privileges: {
             hasAllPrivileges: false,
             missingPrivileges: {

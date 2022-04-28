@@ -8,33 +8,33 @@
 import type {
   KibanaRequest,
   KibanaResponseFactory,
-  RequestHandlerContext,
+  CustomRequestHandlerContext,
   IScopedClusterClient,
   RequestHandler,
   SavedObjectsClientContract,
-} from 'kibana/server';
-import type { SpacesPluginSetup } from '../../../spaces/server';
-import type { SecurityPluginSetup } from '../../../security/server';
+} from '@kbn/core/server';
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
-import { jobSavedObjectServiceFactory, JobSavedObjectService } from '../saved_objects';
+import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
+import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import { mlSavedObjectServiceFactory, MLSavedObjectService } from '../saved_objects';
 import type { MlLicense } from '../../common/license';
 
-import { MlClient, getMlClient } from '../lib/ml_client';
-import type { AlertingApiRequestHandlerContext } from '../../../alerting/server';
-import type { PluginStart as DataViewsPluginStart } from '../../../../../src/plugins/data_views/server';
-import type { DataViewsService } from '../../../../../src/plugins/data_views/common';
+import { MlClient, getMlClient } from './ml_client';
 import { getDataViewsServiceFactory } from './data_views_utils';
 
-type MLRequestHandlerContext = RequestHandlerContext & {
+type MLRequestHandlerContext = CustomRequestHandlerContext<{
   alerting?: AlertingApiRequestHandlerContext;
-};
+}>;
 
 type Handler<P = unknown, Q = unknown, B = unknown> = (handlerParams: {
   client: IScopedClusterClient;
   request: KibanaRequest<P, Q, B>;
   response: KibanaResponseFactory;
   context: MLRequestHandlerContext;
-  jobSavedObjectService: JobSavedObjectService;
+  mlSavedObjectService: MLSavedObjectService;
   mlClient: MlClient;
   getDataViewsService(): Promise<DataViewsService>;
 }) => ReturnType<RequestHandler<P, Q, B>>;
@@ -73,12 +73,13 @@ export class RouteGuard {
   public fullLicenseAPIGuard<P, Q, B>(handler: Handler<P, Q, B>) {
     return this._guard(() => this._mlLicense.isFullLicense(), handler);
   }
+
   public basicLicenseAPIGuard<P, Q, B>(handler: Handler<P, Q, B>) {
     return this._guard(() => this._mlLicense.isMinimumLicense(), handler);
   }
 
   private _guard<P, Q, B>(check: () => boolean, handler: Handler<P, Q, B>) {
-    return (
+    return async (
       context: MLRequestHandlerContext,
       request: KibanaRequest<P, Q, B>,
       response: KibanaResponseFactory
@@ -87,7 +88,8 @@ export class RouteGuard {
         return response.forbidden();
       }
 
-      const client = context.core.elasticsearch.client;
+      const { elasticsearch, savedObjects } = await context.core;
+      const client = elasticsearch.client;
       const mlSavedObjectClient = this._getMlSavedObjectClient(request);
       const internalSavedObjectsClient = this._getInternalSavedObjectClient();
       if (mlSavedObjectClient === null || internalSavedObjectsClient === null) {
@@ -96,11 +98,12 @@ export class RouteGuard {
         });
       }
 
-      const jobSavedObjectService = jobSavedObjectServiceFactory(
+      const mlSavedObjectService = mlSavedObjectServiceFactory(
         mlSavedObjectClient,
         internalSavedObjectsClient,
         this._spacesPlugin !== undefined,
         this._authorization,
+        client,
         this._isMlReady
       );
 
@@ -109,11 +112,11 @@ export class RouteGuard {
         request,
         response,
         context,
-        jobSavedObjectService,
-        mlClient: getMlClient(client, jobSavedObjectService),
+        mlSavedObjectService,
+        mlClient: getMlClient(client, mlSavedObjectService),
         getDataViewsService: getDataViewsServiceFactory(
           this._getDataViews,
-          context.core.savedObjects.client,
+          savedObjects.client,
           client,
           request
         ),

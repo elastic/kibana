@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { Dispatch, SetStateAction } from 'react';
-
 export const toggleSelectedGroup = (
   group: string,
   selectedGroups: string[],
-  setSelectedGroups: Dispatch<SetStateAction<string[]>>
+  setSelectedGroups: (groups: string[]) => void
 ): void => {
   const selectedGroupIndex = selectedGroups.indexOf(group);
   const updatedSelectedGroups = [...selectedGroups];

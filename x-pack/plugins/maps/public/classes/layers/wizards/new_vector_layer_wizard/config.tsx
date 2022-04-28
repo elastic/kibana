@@ -11,11 +11,12 @@ import { LayerWizard, RenderWizardArguments } from '../layer_wizard_registry';
 import { NewVectorLayerEditor } from './wizard';
 import { DrawLayerIcon } from '../icons/draw_layer_icon';
 import { getFileUpload } from '../../../../kibana_services';
-import { LAYER_WIZARD_CATEGORY } from '../../../../../common/constants';
+import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../../common/constants';
 
 const ADD_VECTOR_DRAWING_LAYER = 'ADD_VECTOR_DRAWING_LAYER';
 
 export const newVectorLayerWizardConfig: LayerWizard = {
+  id: WIZARD_ID.NEW_VECTOR,
   order: 10,
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.newVectorLayerWizard.description', {
@@ -27,7 +28,7 @@ export const newVectorLayerWizardConfig: LayerWizard = {
   }),
   getIsDisabled: async () => {
     const hasImportPermission = await getFileUpload().hasImportPermission({
-      checkCreateIndexPattern: true,
+      checkCreateDataView: true,
       checkHasManagePipeline: false,
     });
     return !hasImportPermission;

@@ -16,11 +16,12 @@ import {
   SavedObjectAttributes,
   SavedObjectAttribute,
   SavedObjectReference,
-} from '../../../../../src/core/server';
-import { RawRule, RawAlertAction } from '../types';
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
-import type { IsMigrationNeededPredicate } from '../../../encrypted_saved_objects/server';
+} from '@kbn/core/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { IsMigrationNeededPredicate } from '@kbn/encrypted-saved-objects-plugin/server';
+import { RawRule, RawRuleAction, RawRuleExecutionStatus } from '../types';
 import { extractRefsFromGeoContainmentAlert } from './geo_containment/migrations';
+import { getMappedParams } from '../rules_client/lib/mapped_params_utils';
 
 const SIEM_APP_ID = 'securitySolution';
 const SIEM_SERVER_APP_ID = 'siem';
@@ -145,6 +146,18 @@ export function getMigrations(
     pipeMigrations(addSecuritySolutionAADRuleTypeTags)
   );
 
+  const migrationRules820 = createEsoMigration(
+    encryptedSavedObjects,
+    (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
+    pipeMigrations(addMappedParams)
+  );
+
+  const migrationRules830 = createEsoMigration(
+    encryptedSavedObjects,
+    (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
+    pipeMigrations(removeInternalTags)
+  );
+
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
     '7.11.0': executeMigrationWithErrorHandling(migrationAlertUpdatedAtAndNotifyWhen, '7.11.0'),
@@ -155,6 +168,8 @@ export function getMigrations(
     '7.16.0': executeMigrationWithErrorHandling(migrateRules716, '7.16.0'),
     '8.0.0': executeMigrationWithErrorHandling(migrationRules800, '8.0.0'),
     '8.0.1': executeMigrationWithErrorHandling(migrationRules801, '8.0.1'),
+    '8.2.0': executeMigrationWithErrorHandling(migrationRules820, '8.2.0'),
+    '8.3.0': executeMigrationWithErrorHandling(migrationRules830, '8.3.0'),
   };
 }
 
@@ -272,7 +287,7 @@ function initializeExecutionStatus(
         status: 'pending',
         lastExecutionDate: new Date().toISOString(),
         error: null,
-      },
+      } as RawRuleExecutionStatus,
     },
   };
 }
@@ -345,7 +360,7 @@ function restructureConnectorsThatSupportIncident(
               },
             },
           },
-        ] as RawAlertAction[];
+        ] as RawRuleAction[];
       } else if (action.actionTypeId === '.jira') {
         const { title, comments, description, issueType, priority, labels, parent, summary } =
           action.params.subActionParams as {
@@ -377,7 +392,7 @@ function restructureConnectorsThatSupportIncident(
               },
             },
           },
-        ] as RawAlertAction[];
+        ] as RawRuleAction[];
       } else if (action.actionTypeId === '.resilient') {
         const { title, comments, description, incidentTypes, severityCode, name } = action.params
           .subActionParams as {
@@ -405,12 +420,12 @@ function restructureConnectorsThatSupportIncident(
               },
             },
           },
-        ] as RawAlertAction[];
+        ] as RawRuleAction[];
       }
     }
 
     return [...acc, action];
-  }, [] as RawAlertAction[]);
+  }, [] as RawRuleAction[]);
 
   return {
     ...doc,
@@ -822,17 +837,65 @@ function fixInventoryThresholdGroupId(
   }
 }
 
+function addMappedParams(
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
+  const {
+    attributes: { params },
+  } = doc;
+
+  const mappedParams = getMappedParams(params);
+
+  if (Object.keys(mappedParams).length) {
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        mapped_params: mappedParams,
+      },
+    };
+  }
+
+  return doc;
+}
+
 function getCorrespondingAction(
   actions: SavedObjectAttribute,
   connectorRef: string
-): RawAlertAction | null {
+): RawRuleAction | null {
   if (!Array.isArray(actions)) {
     return null;
   } else {
     return actions.find(
-      (action) => (action as RawAlertAction)?.actionRef === connectorRef
-    ) as RawAlertAction;
+      (action) => (action as RawRuleAction)?.actionRef === connectorRef
+    ) as RawRuleAction;
   }
+}
+/**
+ * removes internal tags(starts with '__internal') from Security Solution rules
+ * @param doc rule to be migrated
+ * @returns migrated rule if it's Security Solution rule or unchanged if not
+ */
+function removeInternalTags(
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
+  if (!isDetectionEngineAADRuleType(doc)) {
+    return doc;
+  }
+
+  const {
+    attributes: { tags },
+  } = doc;
+
+  const filteredTags = (tags ?? []).filter((tag) => !tag.startsWith('__internal_'));
+
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      tags: filteredTags,
+    },
+  };
 }
 
 function pipeMigrations(...migrations: AlertMigration[]): AlertMigration {

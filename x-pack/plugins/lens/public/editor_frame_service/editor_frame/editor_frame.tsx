@@ -6,8 +6,8 @@
  */
 
 import React, { useCallback, useRef } from 'react';
-import { CoreStart } from 'kibana/public';
-import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
+import { CoreStart } from '@kbn/core/public';
+import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import { DatasourceMap, FramePublicAPI, VisualizationMap, Suggestion } from '../../types';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { ConfigPanelWrapper } from './config_panel';
@@ -79,7 +79,7 @@ export function EditorFrame(props: EditorFrameProps) {
       const suggestion = getSuggestionForField.current!(field);
       if (suggestion) {
         trackUiEvent('drop_onto_workspace');
-        switchToSuggestion(dispatchLens, suggestion, true);
+        switchToSuggestion(dispatchLens, suggestion, { clearStagedPreview: true });
       }
     },
     [getSuggestionForField, dispatchLens]

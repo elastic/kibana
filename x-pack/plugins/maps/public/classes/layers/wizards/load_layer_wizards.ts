@@ -29,6 +29,7 @@ import { choroplethLayerWizardConfig } from './choropleth_layer_wizard';
 import { newVectorLayerWizardConfig } from './new_vector_layer_wizard';
 
 let registered = false;
+
 export function registerLayerWizards() {
   if (registered) {
     return;

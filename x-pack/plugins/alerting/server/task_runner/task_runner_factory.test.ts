@@ -6,29 +6,35 @@
  */
 
 import sinon from 'sinon';
-import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
-import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerContext, TaskRunnerFactory } from './task_runner_factory';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
   httpServiceMock,
   savedObjectsServiceMock,
   elasticsearchServiceMock,
-} from '../../../../../src/core/server/mocks';
-import { actionsMock } from '../../../actions/server/mocks';
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { rulesClientMock } from '../mocks';
-import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
+import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
-import { executionContextServiceMock } from '../../../../../src/core/server/mocks';
+import { executionContextServiceMock } from '@kbn/core/server/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 
+const inMemoryMetrics = inMemoryMetricsMock.create();
 const executionContext = executionContextServiceMock.createSetupContract();
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
+const uiSettingsService = uiSettingsServiceMock.createStartContract();
 const elasticsearchService = elasticsearchServiceMock.createInternalStart();
+const dataPlugin = dataPluginMock.createStartContract();
 const ruleType: UntypedNormalizedRuleType = {
   id: 'test',
   name: 'My test alert',
@@ -76,7 +82,9 @@ describe('Task Runner Factory', () => {
   const rulesClient = rulesClientMock.create();
 
   const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> = {
+    data: dataPlugin,
     savedObjects: savedObjectsService,
+    uiSettings: uiSettingsService,
     elasticsearch: elasticsearchService,
     getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
     actionsPlugin: actionsMock.createStart(),
@@ -93,6 +101,11 @@ describe('Task Runner Factory', () => {
     cancelAlertsOnRuleTimeout: true,
     executionContext,
     usageCounter: mockUsageCounter,
+    actionsConfigMap: {
+      default: {
+        max: 1000,
+      },
+    },
   };
 
   beforeEach(() => {
@@ -102,7 +115,7 @@ describe('Task Runner Factory', () => {
   test(`throws an error if factory isn't initialized`, () => {
     const factory = new TaskRunnerFactory();
     expect(() =>
-      factory.create(ruleType, { taskInstance: mockedTaskInstance })
+      factory.create(ruleType, { taskInstance: mockedTaskInstance }, inMemoryMetrics)
     ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory not initialized"`);
   });
 

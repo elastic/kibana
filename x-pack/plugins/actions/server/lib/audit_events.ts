@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { EcsEventOutcome, EcsEventType } from 'src/core/server';
-import { AuditEvent } from '../../../security/server';
+import type { EcsEventOutcome, EcsEventType } from '@kbn/core/server';
+import { AuditEvent } from '@kbn/security-plugin/server';
 
 export enum ConnectorAuditAction {
   CREATE = 'connector_create',

@@ -9,13 +9,13 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { ScopedHistory, CoreStart, CoreTheme } from 'kibana/public';
+import { ScopedHistory, CoreStart, CoreTheme } from '@kbn/core/public';
 import { Observable } from 'rxjs';
 import {
   KibanaContextProvider,
   KibanaThemeProvider,
   RedirectAppLinks,
-} from '../../../kibana_react/public';
+} from '@kbn/kibana-react-plugin/public';
 // @ts-ignore
 import { HomeApp } from './components/home_app';
 import { getServices } from './kibana_services';

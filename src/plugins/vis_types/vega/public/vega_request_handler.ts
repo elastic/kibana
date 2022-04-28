@@ -5,17 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { KibanaExecutionContext } from 'src/core/public';
-import { DataView } from 'src/plugins/data/common';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { Filter, buildEsQuery } from '@kbn/es-query';
-import { getEsQueryConfig, TimeRange, Query } from '../../../data/public';
+import { getEsQueryConfig, TimeRange, Query } from '@kbn/data-plugin/public';
 
 import { SearchAPI } from './data_model/search_api';
 import { TimeCache } from './data_model/time_cache';
 
 import { VegaVisualizationDependencies } from './plugin';
 import { VisParams } from './vega_fn';
-import { getData, getInjectedMetadata } from './services';
+import { getData, getInjectedMetadata, getDataViews } from './services';
 import { VegaInspectorAdapters } from './vega_inspector';
 
 interface VegaRequestHandlerParams {
@@ -48,7 +48,8 @@ export function createVegaRequestHandler(
     searchSessionId,
     executionContext,
   }: VegaRequestHandlerParams) {
-    const { dataViews, search } = getData();
+    const { search } = getData();
+    const dataViews = getDataViews();
 
     if (!searchAPI) {
       searchAPI = new SearchAPI(

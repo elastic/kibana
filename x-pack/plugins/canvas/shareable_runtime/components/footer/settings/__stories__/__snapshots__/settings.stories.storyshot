@@ -30,7 +30,6 @@ exports[`Storyshots shareables/Footer/Settings component 1`] = `
           <button
             aria-label="Settings"
             className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
-            disabled={false}
             onClick={[Function]}
             type="button"
           >
@@ -40,7 +39,9 @@ exports[`Storyshots shareables/Footer/Settings component 1`] = `
               color="inherit"
               data-euiicon-type="gear"
               size="m"
-            />
+            >
+              
+            </span>
           </button>
         </div>
       </div>
@@ -79,7 +80,6 @@ exports[`Storyshots shareables/Footer/Settings contextual 1`] = `
           <button
             aria-label="Settings"
             className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
-            disabled={false}
             onClick={[Function]}
             type="button"
           >
@@ -89,7 +89,9 @@ exports[`Storyshots shareables/Footer/Settings contextual 1`] = `
               color="inherit"
               data-euiicon-type="gear"
               size="m"
-            />
+            >
+              
+            </span>
           </button>
         </div>
       </div>

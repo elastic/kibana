@@ -11,11 +11,11 @@ import { mount, shallow } from 'enzyme';
 
 import { Position } from '@elastic/charts';
 
-import { IAggConfig, IAggType } from 'src/plugins/data/public';
+import { IAggConfig, IAggType } from '@kbn/data-plugin/public';
 
 import { ChartType } from '../../../../../common';
 import { VisParams, SeriesParam, ValueAxis } from '../../../../types';
-import MetricsAxisOptions from './index';
+import MetricsAxisOptions from '.';
 import { ValidationVisOptionsProps } from '../../common';
 import { ValueAxesPanel } from './value_axes_panel';
 import { CategoryAxisPanel } from './category_axis_panel';

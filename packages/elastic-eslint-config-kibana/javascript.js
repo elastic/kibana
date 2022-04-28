@@ -18,14 +18,6 @@ module.exports = {
         'prefer-object-spread',
       ],
 
-      settings: {
-        'import/resolver': {
-          '@kbn/eslint-import-resolver-kibana': {
-            forceNode: true,
-          },
-        },
-      },
-
       env: {
         es6: true,
         node: true,
@@ -93,7 +85,6 @@ module.exports = {
         'mocha/handle-done-callback': 'error',
         'mocha/no-exclusive-tests': 'error',
 
-        'import/no-unresolved': [ 'error', { 'amd': true, 'commonjs': true } ],
         'import/named': 'error',
         'import/namespace': 'error',
         'import/default': 'error',

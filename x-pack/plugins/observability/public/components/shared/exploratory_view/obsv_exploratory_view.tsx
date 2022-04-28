@@ -8,7 +8,7 @@
 import * as React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiErrorBoundary } from '@elastic/eui';
-import { ExploratoryViewPage } from './index';
+import { ExploratoryViewPage } from '.';
 import { ExploratoryViewContextProvider } from './contexts/exploratory_view_config';
 import { AppDataType, ReportViewType } from './types';
 
@@ -29,7 +29,7 @@ import { getMobileKPIDistributionConfig } from './configurations/mobile/distribu
 import { getMobileKPIConfig } from './configurations/mobile/kpi_over_time_config';
 import { getMobileDeviceDistributionConfig } from './configurations/mobile/device_distribution_config';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
-import { getMetricsKPIConfig } from './configurations/infra_metrics/kpi_over_time_config';
+import { getLogsKPIConfig } from './configurations/infra_logs/kpi_over_time_config';
 
 export const DataTypesLabels = {
   [DataTypes.UX]: i18n.translate('xpack.observability.overview.exploratoryView.uxLabel', {
@@ -44,7 +44,11 @@ export const DataTypesLabels = {
   ),
 
   [DataTypes.METRICS]: i18n.translate('xpack.observability.overview.exploratoryView.metricsLabel', {
-    defaultMessage: 'Infra metrics',
+    defaultMessage: 'Metrics',
+  }),
+
+  [DataTypes.LOGS]: i18n.translate('xpack.observability.overview.exploratoryView.logsLabel', {
+    defaultMessage: 'Logs',
   }),
 
   [DataTypes.MOBILE]: i18n.translate(
@@ -64,8 +68,8 @@ export const dataTypes: Array<{ id: AppDataType; label: string }> = [
     label: DataTypesLabels[DataTypes.UX],
   },
   {
-    id: DataTypes.METRICS,
-    label: DataTypesLabels[DataTypes.METRICS],
+    id: DataTypes.LOGS,
+    label: DataTypesLabels[DataTypes.LOGS],
   },
   {
     id: DataTypes.MOBILE,
@@ -91,7 +95,7 @@ export const obsvReportConfigMap = {
     getMobileKPIDistributionConfig,
     getMobileDeviceDistributionConfig,
   ],
-  [DataTypes.METRICS]: [getMetricsKPIConfig],
+  [DataTypes.LOGS]: [getLogsKPIConfig],
 };
 
 export function ObservabilityExploratoryView() {
@@ -101,7 +105,7 @@ export function ObservabilityExploratoryView() {
       <ExploratoryViewContextProvider
         reportTypes={reportTypesList}
         dataTypes={dataTypes}
-        indexPatterns={{}}
+        dataViews={{}}
         reportConfigMap={obsvReportConfigMap}
         setHeaderActionMenu={appMountParameters.setHeaderActionMenu}
         theme$={appMountParameters.theme$}

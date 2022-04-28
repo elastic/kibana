@@ -36,7 +36,7 @@ import {
   CoreStart,
   IUiSettingsClient,
   SavedObjectsStart,
-} from 'src/core/public';
+} from '@kbn/core/public';
 
 import { LISTING_LIMIT_SETTING } from '../../common';
 

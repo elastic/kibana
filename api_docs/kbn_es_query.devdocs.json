@@ -1665,6 +1665,38 @@
       },
       {
         "parentPluginId": "@kbn/es-query",
+        "id": "def-common.escapeKuery",
+        "type": "Function",
+        "tags": [],
+        "label": "escapeKuery",
+        "description": [
+          "\nEscapes a Kuery node value to ensure that special characters, operators, and whitespace do not result in a parsing error or unintended\nbehavior when using the value as an argument for the `buildNode` function."
+        ],
+        "signature": [
+          "(str: string) => string"
+        ],
+        "path": "packages/kbn-es-query/src/kuery/utils/escape_kuery.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.escapeKuery.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "A"
+            ],
+            "path": "node_modules/@types/lodash/ts3.1/common/util.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
         "id": "def-common.fromKueryExpression",
         "type": "Function",
         "tags": [],
@@ -3388,7 +3420,7 @@
             "label": "function",
             "description": [],
             "signature": [
-              "\"nested\" | \"is\" | \"exists\" | \"and\" | \"or\" | \"range\" | \"not\""
+              "\"nested\" | \"exists\" | \"and\" | \"or\" | \"is\" | \"range\" | \"not\""
             ],
             "path": "packages/kbn-es-query/src/kuery/node_types/types.ts",
             "deprecated": false
@@ -3889,14 +3921,6 @@
             "pluginId": "@kbn/es-query",
             "scope": "common",
             "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.MatchAllFilter",
-            "text": "MatchAllFilter"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
             "section": "def-common.PhraseFilter",
             "text": "PhraseFilter"
           },
@@ -3915,6 +3939,14 @@
             "docId": "kibKbnEsQueryPluginApi",
             "section": "def-common.RangeFilter",
             "text": "RangeFilter"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.MatchAllFilter",
+            "text": "MatchAllFilter"
           }
         ],
         "path": "packages/kbn-es-query/src/filters/build_filters/types.ts",

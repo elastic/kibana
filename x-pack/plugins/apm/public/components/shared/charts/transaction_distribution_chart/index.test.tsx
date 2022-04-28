@@ -7,7 +7,7 @@
 
 import type { HistogramItem } from '../../../../../common/correlations/types';
 
-import { replaceHistogramDotsWithBars } from './index';
+import { replaceHistogramDotsWithBars } from '.';
 
 describe('TransactionDistributionChart', () => {
   describe('replaceHistogramDotsWithBars', () => {

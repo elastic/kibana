@@ -7,15 +7,19 @@
 
 import moment from 'moment-timezone';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../common/constants';
-import { AuthenticatedUser } from '../../../../../security/common/model';
+import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import { NavigateToAppOptions } from '@kbn/core/public';
+import {
+  FEATURE_ID,
+  DEFAULT_DATE_FORMAT,
+  DEFAULT_DATE_FORMAT_TZ,
+} from '../../../../common/constants';
 import { convertToCamelCase } from '../../../containers/utils';
 import { StartServices } from '../../../types';
 import { useUiSetting, useKibana } from './kibana_react';
-import { NavigateToAppOptions } from '../../../../../../../src/core/public';
 
 export const useDateFormat = (): string => useUiSetting<string>(DEFAULT_DATE_FORMAT);
 
@@ -154,4 +158,50 @@ export const useNavigation = (appId: string) => {
   const { navigateTo } = useNavigateTo(appId);
   const { getAppUrl } = useAppUrl(appId);
   return { navigateTo, getAppUrl };
+};
+
+interface Capabilities {
+  crud: boolean;
+  read: boolean;
+}
+interface UseApplicationCapabilities {
+  actions: Capabilities;
+  generalCases: Capabilities;
+  visualize: Capabilities;
+  dashboard: Capabilities;
+}
+
+/**
+ * Returns the capabilities of various applications
+ *
+ */
+
+export const useApplicationCapabilities = (): UseApplicationCapabilities => {
+  const capabilities = useKibana().services?.application?.capabilities;
+  const casesCapabilities = capabilities[FEATURE_ID];
+
+  return useMemo(
+    () => ({
+      actions: { crud: !!capabilities.actions?.save, read: !!capabilities.actions?.show },
+      generalCases: {
+        crud: !!casesCapabilities?.crud_cases,
+        read: !!casesCapabilities?.read_cases,
+      },
+      visualize: { crud: !!capabilities.visualize?.save, read: !!capabilities.visualize?.show },
+      dashboard: {
+        crud: !!capabilities.dashboard?.createNew,
+        read: !!capabilities.dashboard?.show,
+      },
+    }),
+    [
+      capabilities.actions?.save,
+      capabilities.actions?.show,
+      capabilities.dashboard?.createNew,
+      capabilities.dashboard?.show,
+      capabilities.visualize?.save,
+      capabilities.visualize?.show,
+      casesCapabilities?.crud_cases,
+      casesCapabilities?.read_cases,
+    ]
+  );
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TaskRunCreatorFunction } from '../../../../task_manager/server';
+import { TaskRunCreatorFunction } from '@kbn/task-manager-plugin/server';
 import { ReportSource, TaskRunResult } from '../../../common/types';
 import { BasePayload } from '../../types';
 

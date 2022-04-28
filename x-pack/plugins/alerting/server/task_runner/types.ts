@@ -6,36 +6,43 @@
  */
 
 import { Dictionary } from 'lodash';
-import { Logger } from 'kibana/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { IEventLogger } from '@kbn/event-log-plugin/server';
+import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import {
   ActionGroup,
+  RuleAction,
   AlertInstanceContext,
   AlertInstanceState,
-  AlertTypeParams,
-  AlertTypeState,
+  RuleTypeParams,
+  RuleTypeState,
   IntervalSchedule,
-  RuleExecutionState,
   RuleMonitoring,
   RuleTaskState,
-  SanitizedAlert,
+  SanitizedRule,
 } from '../../common';
-import { ConcreteTaskInstance } from '../../../task_manager/server';
-import { Alert as CreatedAlert } from '../alert';
-import { IEventLogger } from '../../../event_log/server';
+import { Alert } from '../alert';
 import { NormalizedRuleType } from '../rule_type_registry';
 import { ExecutionHandler } from './create_execution_handler';
-
-export interface RuleTaskRunResultWithActions {
-  state: RuleExecutionState;
-  monitoring: RuleMonitoring | undefined;
-  schedule: IntervalSchedule | undefined;
-}
+import { RawRule } from '../types';
+import { ActionsConfigMap } from '../lib/get_actions_config_map';
+import { RuleRunMetrics, RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 
 export interface RuleTaskRunResult {
   state: RuleTaskState;
   monitoring: RuleMonitoring | undefined;
   schedule: IntervalSchedule | undefined;
 }
+
+// This is the state of the alerting task after rule execution, which includes run metrics plus the task state
+export type RuleTaskStateAndMetrics = RuleTaskState & {
+  metrics: RuleRunMetrics;
+};
+
+export type RuleRunResult = Pick<RuleTaskRunResult, 'monitoring' | 'schedule'> & {
+  stateWithMetrics: RuleTaskStateAndMetrics;
+};
 
 export interface RuleTaskInstance extends ConcreteTaskInstance {
   state: RuleTaskState;
@@ -45,9 +52,9 @@ export interface TrackAlertDurationsParams<
   InstanceState extends AlertInstanceState,
   InstanceContext extends AlertInstanceContext
 > {
-  originalAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
-  currentAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
-  recoveredAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
+  originalAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
+  currentAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
+  recoveredAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
 }
 
 export interface GenerateNewAndRecoveredAlertEventsParams<
@@ -56,16 +63,16 @@ export interface GenerateNewAndRecoveredAlertEventsParams<
 > {
   eventLogger: IEventLogger;
   executionId: string;
-  originalAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
-  currentAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
-  recoveredAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext>>;
+  originalAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
+  currentAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
+  recoveredAlerts: Dictionary<Alert<InstanceState, InstanceContext>>;
   ruleId: string;
   ruleLabel: string;
   namespace: string | undefined;
   ruleType: NormalizedRuleType<
-    AlertTypeParams,
-    AlertTypeParams,
-    AlertTypeState,
+    RuleTypeParams,
+    RuleTypeParams,
+    RuleTypeState,
     {
       [x: string]: unknown;
     },
@@ -75,7 +82,9 @@ export interface GenerateNewAndRecoveredAlertEventsParams<
     string,
     string
   >;
-  rule: SanitizedAlert<AlertTypeParams>;
+  rule: SanitizedRule<RuleTypeParams>;
+  spaceId: string;
+  ruleRunMetricsStore: RuleRunMetricsStore;
 }
 
 export interface ScheduleActionsForRecoveredAlertsParams<
@@ -85,10 +94,11 @@ export interface ScheduleActionsForRecoveredAlertsParams<
 > {
   logger: Logger;
   recoveryActionGroup: ActionGroup<RecoveryActionGroupId>;
-  recoveredAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext, RecoveryActionGroupId>>;
+  recoveredAlerts: Dictionary<Alert<InstanceState, InstanceContext, RecoveryActionGroupId>>;
   executionHandler: ExecutionHandler<RecoveryActionGroupId | RecoveryActionGroupId>;
   mutedAlertIdsSet: Set<string>;
   ruleLabel: string;
+  ruleRunMetricsStore: RuleRunMetricsStore;
 }
 
 export interface LogActiveAndRecoveredAlertsParams<
@@ -98,8 +108,56 @@ export interface LogActiveAndRecoveredAlertsParams<
   RecoveryActionGroupId extends string
 > {
   logger: Logger;
-  activeAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext, ActionGroupIds>>;
-  recoveredAlerts: Dictionary<CreatedAlert<InstanceState, InstanceContext, RecoveryActionGroupId>>;
+  activeAlerts: Dictionary<Alert<InstanceState, InstanceContext, ActionGroupIds>>;
+  recoveredAlerts: Dictionary<Alert<InstanceState, InstanceContext, RecoveryActionGroupId>>;
   ruleLabel: string;
   canSetRecoveryContext: boolean;
+}
+
+// / ExecutionHandler
+
+export interface CreateExecutionHandlerOptions<
+  Params extends RuleTypeParams,
+  ExtractedParams extends RuleTypeParams,
+  State extends RuleTypeState,
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+> {
+  ruleId: string;
+  ruleName: string;
+  ruleConsumer: string;
+  executionId: string;
+  tags?: string[];
+  actionsPlugin: ActionsPluginStartContract;
+  actions: RuleAction[];
+  spaceId: string;
+  apiKey: RawRule['apiKey'];
+  kibanaBaseUrl: string | undefined;
+  ruleType: NormalizedRuleType<
+    Params,
+    ExtractedParams,
+    State,
+    InstanceState,
+    InstanceContext,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  >;
+  logger: Logger;
+  eventLogger: IEventLogger;
+  request: KibanaRequest;
+  ruleParams: RuleTypeParams;
+  supportsEphemeralTasks: boolean;
+  maxEphemeralActionsPerRule: number;
+  actionsConfigMap: ActionsConfigMap;
+}
+
+export interface ExecutionHandlerOptions<ActionGroupIds extends string> {
+  actionGroup: ActionGroupIds;
+  actionSubgroup?: string;
+  alertId: string;
+  context: AlertInstanceContext;
+  state: AlertInstanceState;
+  ruleRunMetricsStore: RuleRunMetricsStore;
 }

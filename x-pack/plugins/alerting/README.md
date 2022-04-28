@@ -116,7 +116,6 @@ This is the primary function for a rule type. Whenever the rule needs to execute
 |services.log(tags, [data], [timestamp])|Use this to create server logs. (This is the same function as server.log)|
 |services.shouldWriteAlerts()|This returns a boolean indicating whether the executor should write out alerts as data. This is determined by whether rule execution has been cancelled due to timeout AND whether both the Kibana `cancelAlertsOnRuleTimeout` flag and the rule type `cancelAlertsOnRuleTimeout` are set to `true`.|
 |services.shouldStopExecution()|This returns a boolean indicating whether rule execution has been cancelled due to timeout.|
-|services.search|This provides an implementation of Elasticsearch client `search` function that aborts searches if rule execution is cancelled mid-search.|
 |startedAt|The date and time the rule type started execution.|
 |previousStartedAt|The previous date and time the rule type started a successful execution.|
 |params|Parameters for the execution. This is where the parameters you require will be passed in. (e.g. threshold). Use rule type validation to ensure values are set before execution.|
@@ -225,28 +224,28 @@ This example rule type receives server and threshold as parameters. It will read
 
 ```typescript
 import { schema } from '@kbn/config-schema';
-import { RuleType, AlertExecutorOptions } from '../../../alerting/server';
+import { RuleType, RuleExecutorOptions } from '../../../alerting/server';
 // These type names will eventually be updated to reflect the new terminology
 import {
-	AlertTypeParams,
-	AlertTypeState,
+	RuleTypeParams,
+	RuleTypeState,
 	AlertInstanceState,
 	AlertInstanceContext,
 } from '../../../alerting/common';
 ...
-interface MyRuleTypeParams extends AlertTypeParams {
+interface MyRuleTypeParams extends RuleTypeParams {
 	server: string;
 	threshold: number;
 	testSavedObjectId: string;
 }
 
-interface MyRuleTypeExtractedParams extends AlertTypeParams {
+interface MyRuleTypeExtractedParams extends RuleTypeParams {
 	server: string;
 	threshold: number;
 	testSavedObjectRef: string;
 }
 
-interface MyRuleTypeState extends AlertTypeState {
+interface MyRuleTypeState extends RuleTypeState {
 	lastChecked: Date;
 }
 
@@ -307,7 +306,7 @@ const myRuleType: RuleType<
 		params,
 		state,
 		rule,
-	}: AlertExecutorOptions<
+	}: RuleExecutorOptions<
 		MyRuleTypeParams,
 		MyRuleTypeExtractedParams,
 		MyRuleTypeState,
@@ -321,7 +320,7 @@ const myRuleType: RuleType<
 		// Query Elasticsearch using a cancellable search
 		// If rule execution is cancelled mid-search, the search request will be aborted
 		// and an error will be thrown.
-		const esClient = services.search.asCurrentUser;
+		const esClient = services.scopedClusterClient.asCurrentUser;
 		await esClient.search(esQuery);
 
 		// Call a function to get the server's current CPU usage
@@ -644,6 +643,7 @@ When a user is granted the `read` role in the Alerting Framework, they will be a
 - `get`
 - `getRuleState`
 - `getAlertSummary`
+- `getExecutionLog`
 - `find`
 
 When a user is granted the `all` role in the Alerting Framework, they will be able to execute all of the `read` privileged api calls, but in addition they'll be granted the following calls:
@@ -677,8 +677,8 @@ The signature of such a handler is:
 
 ```typescript
 type AlertNavigationHandler = (
-  alert: SanitizedAlert,
-  alertType: RuleType
+  rule: SanitizedRule,
+  ruleType: RuleType
 ) => string;
 ```
 
@@ -692,7 +692,7 @@ The _registerNavigation_ api allows you to register a handler for a specific ale
 alerting.registerNavigation(
 	'my-application-id',
 	'my-application-id.my-rule-type',
-	(alert: SanitizedAlert) => `/my-unique-rule/${rule.id}`
+	(rule: SanitizedRule) => `/my-unique-rule/${rule.id}`
 );
 ```
 
@@ -708,7 +708,7 @@ The _registerDefaultNavigation_ API allows you to register a handler for any rul
 ```
 alerting.registerDefaultNavigation(
 	'my-application-id',
-	(alert: SanitizedAlert) => `/my-other-rules/${rule.id}`
+	(rule: SanitizedRule) => `/my-other-rules/${rule.id}`
 );
 ```
 

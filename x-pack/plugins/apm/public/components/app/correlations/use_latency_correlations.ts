@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { chunk, debounce } from 'lodash';
 
-import { IHttpFetchError, ResponseErrorBody } from 'src/core/public';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 
 import {
   DEBOUNCE_INTERVAL,
@@ -177,6 +177,7 @@ export function useLatencyCorrelations() {
         chunkSize
       );
 
+      const fallbackResults: LatencyCorrelation[] = [];
       for (const fieldValuePairChunk of fieldValuePairChunks) {
         const significantCorrelations = await callApmApi(
           'POST /internal/apm/correlations/significant_correlations',
@@ -197,6 +198,12 @@ export function useLatencyCorrelations() {
           );
           responseUpdate.latencyCorrelations =
             getLatencyCorrelationsSortedByCorrelation([...latencyCorrelations]);
+        } else {
+          // If there's no correlation results that matches the criteria
+          // Consider the fallback results
+          if (significantCorrelations.fallbackResult) {
+            fallbackResults.push(significantCorrelations.fallbackResult);
+          }
         }
 
         chunkLoadCounter++;
@@ -213,6 +220,23 @@ export function useLatencyCorrelations() {
         }
       }
 
+      if (latencyCorrelations.length === 0 && fallbackResults.length > 0) {
+        // Rank the fallback results and show at least one value
+        const sortedFallbackResults = fallbackResults
+          .filter((r) => r.correlation > 0)
+          .sort((a, b) => b.correlation - a.correlation);
+
+        responseUpdate.latencyCorrelations = sortedFallbackResults
+          .slice(0, 1)
+          .map((r) => ({ ...r, isFallbackResult: true }));
+        setResponse({
+          ...responseUpdate,
+          loaded:
+            LOADED_FIELD_VALUE_PAIRS +
+            (chunkLoadCounter / fieldValuePairChunks.length) *
+              PROGRESS_STEP_CORRELATIONS,
+        });
+      }
       setResponse.flush();
 
       const { stats } = await callApmApi(

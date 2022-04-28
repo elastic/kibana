@@ -45,6 +45,10 @@ export const strings = {
     i18n.translate('expressionPartitionVis.reusable.function.args.legendPositionHelpText', {
       defaultMessage: 'Position the legend on top, bottom, left, right of the chart',
     }),
+  getLegendSizeArgHelp: () =>
+    i18n.translate('expressionPartitionVis.reusable.function.args.legendSizeHelpText', {
+      defaultMessage: 'Specifies the legend size in pixels',
+    }),
   getNestedLegendArgHelp: () =>
     i18n.translate('expressionPartitionVis.reusable.function.args.nestedLegendHelpText', {
       defaultMessage: 'Show a more detailed legend',

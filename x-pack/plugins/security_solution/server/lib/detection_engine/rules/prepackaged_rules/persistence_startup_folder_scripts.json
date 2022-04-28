@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Identifies script engines creating files in the startup folder, or the creation of script files in the startup folder.",
+  "description": "Identifies script engines creating files in the Startup folder, or the creation of script files in the Startup folder. Adversaries may abuse this technique to maintain persistence in an environment.",
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Persistent Scripts in the Startup Directory",
+  "note": "## Triage and analysis\n\n### Investigating Persistent Scripts in the Startup Directory\n\nThe Windows Startup folder is a special folder in Windows. Programs added to this folder are executed during account\nlogon, without user interaction, providing an excellent way for attackers to maintain persistence.\n\nThis rule looks for shortcuts created by wscript.exe or cscript.exe, or js/vbs scripts created by any process.\n\n#### Possible investigation steps\n\n- Investigate the process execution chain (parent process tree).\n- Investigate other alerts related to the user/host in the last 48 hours.\n- Validate the activity is not related to planned patches, updates, network administrator activity, or legitimate\nsoftware installations.\n- Determine if activity is unique by validating if other machines in the organization have similar entries.\n- Retrieve the script file:\n  - Use a sandboxed malware analysis system to perform analysis.\n    - Observe attempts to contact external domains and addresses.\n  - Use the PowerShell Get-FileHash cmdlet to get the SHA-256 hash value of the file.\n    - Search for the existence and reputation of this file in resources like VirusTotal, Hybrid-Analysis, CISCO Talos, Any.run, etc.\n\n### False positive analysis\n\n- There is a low possibility of benign legitimate scripts being added to Startup folders. Validate whether this activity\nis benign.\n\n\n### Related rules\n\n- Suspicious Startup Shell Folder Modification - c8b150f0-0164-475b-a75e-74b47800a9ff\n- Startup Folder Persistence via Unsigned Process - 2fba96c0-ade5-4bce-b92f-a5df2509da3f\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved host to prevent further post-compromise behavior.\n- If the triage identified malware, search the environment for additional compromised hosts.\n  - Implement any temporary network rules, procedures, and segmentation required to contain the malware.\n  - Immediately block the identified indicators of compromise (IoCs).\n- Reset passwords for the user account and other potentially compromised accounts (email, services, CRMs, etc.).\n\n## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "file where event.type != \"deletion\" and user.domain != \"NT AUTHORITY\" and\n  \n  /* detect shortcuts created by wscript.exe or cscript.exe */\n  (file.path : \"C:\\\\*\\\\Programs\\\\Startup\\\\*.lnk\" and\n     process.name : (\"wscript.exe\", \"cscript.exe\")) or\n\n  /* detect vbs or js files created by any process */\n  file.path : (\"C:\\\\*\\\\Programs\\\\Startup\\\\*.vbs\", \n               \"C:\\\\*\\\\Programs\\\\Startup\\\\*.vbe\", \n               \"C:\\\\*\\\\Programs\\\\Startup\\\\*.wsh\", \n               \"C:\\\\*\\\\Programs\\\\Startup\\\\*.wsf\", \n               \"C:\\\\*\\\\Programs\\\\Startup\\\\*.js\")\n",
   "risk_score": 47,
   "rule_id": "f7c4dc5a-a58d-491d-9f14-9b66507121c0",
@@ -49,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }

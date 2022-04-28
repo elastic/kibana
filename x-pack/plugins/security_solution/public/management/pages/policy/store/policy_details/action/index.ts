@@ -6,6 +6,5 @@
  */
 
 import { PolicySettingsAction } from './policy_settings_action';
-import { PolicyTrustedAppsAction } from './policy_trusted_apps_action';
 
-export type PolicyDetailsAction = PolicySettingsAction | PolicyTrustedAppsAction;
+export type PolicyDetailsAction = PolicySettingsAction;

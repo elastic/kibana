@@ -6,63 +6,41 @@
  */
 
 import React from 'react';
-import type { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
-import type { UiActionsStart } from 'src/plugins/ui_actions/public';
-import type { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
-import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
-import type { DashboardStart } from 'src/plugins/dashboard/public';
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import type { Setup as InspectorSetupContract } from '@kbn/inspector-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
   AppMountParameters,
   CoreSetup,
   CoreStart,
   Plugin,
   PluginInitializerContext,
-} from '../../../../src/core/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-import { MapInspectorView } from './inspector/map_inspector_view';
-import { setMapAppConfig, setStartServices } from './kibana_services';
-import { featureCatalogueEntry } from './feature_catalogue_entry';
-import { getMapsVisTypeAlias } from './maps_vis_type_alias';
-import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import type {
-  VisualizationsSetup,
-  VisualizationsStart,
-} from '../../../../src/plugins/visualizations/public';
-import type { Plugin as ExpressionsPublicPlugin } from '../../../../src/plugins/expressions/public';
-import { APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
-import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../src/plugins/ui_actions/public';
-import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_action';
-import { filterByMapExtentAction } from './trigger_actions/filter_by_map_extent_action';
-import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
-import type { EmbeddableSetup, EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
-import { MapsXPackConfig, MapsConfigType } from '../config';
-import { getAppTitle } from '../common/i18n_getters';
-import { lazyLoadMapModules } from './lazy_load_bundle';
-import {
-  createLayerDescriptors,
-  MapsSetupApi,
-  MapsStartApi,
-  suggestEMSTermJoinConfig,
-} from './api';
-import { registerLayerWizardExternal } from './classes/layers';
-import { registerSource } from './classes/sources/source_registry';
-import type { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
-import type { MapsEmsPluginPublicStart } from '../../../../src/plugins/maps_ems/public';
-import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import type { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
-import type { FileUploadPluginStart } from '../../file_upload/public';
-import type { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
-import type { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
-import { registerLicensedFeatures, setLicensingPluginStart } from './licensed_features';
-import type { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
-import type { ChartsPluginStart } from '../../../../src/plugins/charts/public';
-import {
-  MapsAppLocatorDefinition,
-  MapsAppRegionMapLocatorDefinition,
-  MapsAppTileMapLocatorDefinition,
-} from './locators';
+} from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
+import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
+import type { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { LensPublicSetup } from '@kbn/lens-plugin/public';
 import {
   createRegionMapFn,
   regionMapRenderer,
@@ -71,13 +49,40 @@ import {
   tileMapRenderer,
   tileMapVisType,
 } from './legacy_visualizations';
-import type { SecurityPluginStart } from '../../security/public';
-import type { SpacesPluginStart } from '../../spaces/public';
+import {
+  MapsAppLocatorDefinition,
+  MapsAppRegionMapLocatorDefinition,
+  MapsAppTileMapLocatorDefinition,
+} from './locators';
+import { registerLicensedFeatures, setLicensingPluginStart } from './licensed_features';
+import { registerSource } from './classes/sources/source_registry';
+import { registerLayerWizardExternal } from './classes/layers';
+import {
+  createLayerDescriptors,
+  MapsSetupApi,
+  MapsStartApi,
+  suggestEMSTermJoinConfig,
+} from './api';
+import { lazyLoadMapModules } from './lazy_load_bundle';
+import { getAppTitle } from '../common/i18n_getters';
+import { MapsXPackConfig, MapsConfigType } from '../config';
+import { MapEmbeddableFactory } from './embeddable/map_embeddable_factory';
+import { filterByMapExtentAction } from './trigger_actions/filter_by_map_extent_action';
+import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_action';
+import { APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+import { getMapsVisTypeAlias } from './maps_vis_type_alias';
+import { featureCatalogueEntry } from './feature_catalogue_entry';
+import { setIsCloudEnabled, setMapAppConfig, setStartServices } from './kibana_services';
+import { MapInspectorView } from './inspector/map_inspector_view';
+
+import { setupLensChoroplethChart } from './lens';
 
 export interface MapsPluginSetupDependencies {
+  cloud?: CloudSetup;
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   inspector: InspectorSetupContract;
   home?: HomePublicPluginSetup;
+  lens: LensPublicSetup;
   visualizations: VisualizationsSetup;
   embeddable: EmbeddableSetup;
   share: SharePluginSetup;
@@ -88,7 +93,9 @@ export interface MapsPluginSetupDependencies {
 export interface MapsPluginStartDependencies {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   embeddable: EmbeddableStart;
+  fieldFormats: FieldFormatsStart;
   fileUpload: FileUploadPluginStart;
   inspector: InspectorStartContract;
   licensing: LicensingPluginStart;
@@ -130,7 +137,10 @@ export class MapsPlugin
     this._initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup, plugins: MapsPluginSetupDependencies): MapsSetupApi {
+  public setup(
+    core: CoreSetup<MapsPluginStartDependencies, MapsPluginStart>,
+    plugins: MapsPluginSetupDependencies
+  ): MapsSetupApi {
     registerLicensedFeatures(plugins.licensing);
 
     const config = this._initializerContext.config.get<MapsConfigType>();
@@ -174,6 +184,8 @@ export class MapsPlugin
       },
     });
 
+    setupLensChoroplethChart(core, plugins.expressions, plugins.lens);
+
     // register wrapper around legacy tile_map and region_map visualizations
     plugins.expressions.registerFunction(createRegionMapFn);
     plugins.expressions.registerRenderer(regionMapRenderer);
@@ -181,6 +193,8 @@ export class MapsPlugin
     plugins.expressions.registerFunction(createTileMapFn);
     plugins.expressions.registerRenderer(tileMapRenderer);
     plugins.visualizations.createBaseVisualization(tileMapVisType);
+
+    setIsCloudEnabled(!!plugins.cloud?.isCloudEnabled);
 
     return {
       registerLayerWizard: registerLayerWizardExternal,

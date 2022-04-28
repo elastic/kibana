@@ -20,13 +20,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('dashboard query bar', () => {
     before(async () => {
-      await esArchiver.load('test/functional/fixtures/es_archiver/dashboard/current/kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+      );
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('dashboard with filter');
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('causes panels to reload when refresh is clicked', async () => {

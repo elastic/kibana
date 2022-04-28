@@ -14,6 +14,7 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./file'));
     loadTestFile(require.resolve('./template'));
     loadTestFile(require.resolve('./ilm'));
+    loadTestFile(require.resolve('./install_bundled'));
     loadTestFile(require.resolve('./install_by_upload'));
     loadTestFile(require.resolve('./install_endpoint'));
     loadTestFile(require.resolve('./install_overrides'));
@@ -26,6 +27,7 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./update_assets'));
     loadTestFile(require.resolve('./data_stream'));
     loadTestFile(require.resolve('./package_install_complete'));
+    loadTestFile(require.resolve('./remove_legacy_templates'));
     loadTestFile(require.resolve('./install_error_rollback'));
     loadTestFile(require.resolve('./final_pipeline'));
   });

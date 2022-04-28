@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectsClientContract } from 'src/core/server';
+import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 export const markApiKeyForInvalidation = async (
   { apiKey }: { apiKey: string | null },

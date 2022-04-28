@@ -32,9 +32,11 @@ export interface FleetConfigType {
   packages?: PreconfiguredPackage[];
   outputs?: PreconfiguredOutput[];
   agentIdVerificationEnabled?: boolean;
+  enableExperimental?: string[];
   developer?: {
     disableRegistryVersionCheck?: boolean;
     allowAgentUpgradeSourceUri?: boolean;
+    bundledPackageLocation?: string;
   };
 }
 

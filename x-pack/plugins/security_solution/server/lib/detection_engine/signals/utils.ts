@@ -9,7 +9,7 @@ import { chunk, get, invert, isEmpty, partition } from 'lodash';
 import moment from 'moment';
 import uuidv5 from 'uuid/v5';
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { ALERT_UUID, ALERT_RULE_UUID, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
@@ -20,23 +20,24 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 
+import type {
+  ElasticsearchClient,
+  IUiSettingsClient,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  RuleExecutorServices,
+  parseDuration,
+} from '@kbn/alerting-plugin/server';
+import type { ExceptionListClient, ListClient, ListPluginSetup } from '@kbn/lists-plugin/server';
 import {
   TimestampOverrideOrUndefined,
   Privilege,
   RuleExecutionStatus,
 } from '../../../../common/detection_engine/schemas/common';
-import type {
-  ElasticsearchClient,
-  Logger,
-  SavedObjectsClientContract,
-} from '../../../../../../../src/core/server';
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertServices,
-  parseDuration,
-} from '../../../../../alerting/server';
-import type { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
 import type {
   BulkResponseErrorAggregation,
   SignalHit,
@@ -61,10 +62,11 @@ import type {
   ThreatRuleParams,
   ThresholdRuleParams,
 } from '../schemas/rule_schemas';
-import type { RACAlert, WrappedRACAlert } from '../rule_types/types';
-import type { SearchTypes } from '../../../../common/detection_engine/types';
+import type { BaseHit, SearchTypes } from '../../../../common/detection_engine/types';
 import type { IRuleExecutionLogForExecutors } from '../rule_execution_log';
 import { withSecuritySpan } from '../../../utils/with_security_span';
+import { DetectionAlert } from '../../../../common/detection_engine/schemas/alerts';
+import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../common/constants';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
@@ -93,12 +95,19 @@ export const hasReadIndexPrivileges = async (args: {
   logger: Logger;
   buildRuleMessage: BuildRuleMessage;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  uiSettingsClient: IUiSettingsClient;
 }): Promise<boolean> => {
-  const { privileges, logger, buildRuleMessage, ruleExecutionLogger } = args;
+  const { privileges, logger, buildRuleMessage, ruleExecutionLogger, uiSettingsClient } = args;
+
+  const isCcsPermissionWarningEnabled = await uiSettingsClient.get(ENABLE_CCS_READ_WARNING_SETTING);
 
   const indexNames = Object.keys(privileges.index);
+  const filteredIndexNames = isCcsPermissionWarningEnabled
+    ? indexNames
+    : indexNames.filter((indexName) => !indexName.includes(':')); // Cross cluster indices uniquely contain `:` in their name
+
   const [, indexesWithNoReadPrivileges] = partition(
-    indexNames,
+    filteredIndexNames,
     (indexName) => privileges.index[indexName].read
   );
 
@@ -184,7 +193,7 @@ export const hasTimestampFields = async (args: {
 };
 
 export const checkPrivileges = async (
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>,
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>,
   indices: string[]
 ): Promise<Privilege> =>
   checkPrivilegesFromEsClient(services.scopedClusterClient.asCurrentUser, indices);
@@ -238,7 +247,7 @@ export const getListsClient = ({
   lists: ListPluginSetup | undefined;
   spaceId: string;
   updatedByUser: string | null;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   savedObjectClient: SavedObjectsClientContract;
 }): {
   listClient: ListClient;
@@ -962,18 +971,18 @@ export const buildChunkedOrFilter = (field: string, values: string[], chunkSize:
 };
 
 export const isWrappedEventHit = (event: SimpleHit): event is WrappedEventHit => {
-  return !isWrappedSignalHit(event) && !isWrappedRACAlert(event);
+  return !isWrappedSignalHit(event) && !isWrappedDetectionAlert(event);
 };
 
 export const isWrappedSignalHit = (event: SimpleHit): event is WrappedSignalHit => {
   return (event as WrappedSignalHit)?._source?.signal != null;
 };
 
-export const isWrappedRACAlert = (event: SimpleHit): event is WrappedRACAlert => {
-  return (event as WrappedRACAlert)?._source?.[ALERT_UUID] != null;
+export const isWrappedDetectionAlert = (event: SimpleHit): event is BaseHit<DetectionAlert> => {
+  return (event as BaseHit<DetectionAlert>)?._source?.[ALERT_UUID] != null;
 };
 
-export const isRACAlert = (event: unknown): event is RACAlert => {
+export const isDetectionAlert = (event: unknown): event is DetectionAlert => {
   return get(event, ALERT_UUID) != null;
 };
 
@@ -1010,19 +1019,19 @@ export const racFieldMappings: Record<string, string> = {
   'signal.rule.immutable': `${ALERT_RULE_PARAMETERS}.immutable`,
 };
 
-export const getField = <T extends SearchTypes>(event: SimpleHit, field: string): T | undefined => {
-  if (isWrappedRACAlert(event)) {
+export const getField = (event: SimpleHit, field: string): SearchTypes | undefined => {
+  if (isWrappedDetectionAlert(event)) {
     const mappedField = racFieldMappings[field] ?? field.replace('signal', 'kibana.alert');
     const parts = mappedField.split('.');
     if (mappedField.includes(ALERT_RULE_PARAMETERS) && parts[parts.length - 1] !== 'parameters') {
       const params = get(event._source, ALERT_RULE_PARAMETERS);
       return get(params, parts[parts.length - 1]);
     }
-    return get(event._source, mappedField) as T;
+    return get(event._source, mappedField) as SearchTypes | undefined;
   } else if (isWrappedSignalHit(event)) {
     const mappedField = invert(racFieldMappings)[field] ?? field.replace('kibana.alert', 'signal');
-    return get(event._source, mappedField) as T;
+    return get(event._source, mappedField) as SearchTypes | undefined;
   } else if (isWrappedEventHit(event)) {
-    return get(event._source, field) as T;
+    return get(event._source, field) as SearchTypes | undefined;
   }
 };

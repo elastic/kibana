@@ -103,6 +103,11 @@ export class FilterBarService extends FtrService {
     return filters.length;
   }
 
+  public async getFiltersLabel(): Promise<string[]> {
+    const filters = await this.testSubjects.findAll('~filter');
+    return Promise.all(filters.map((filter) => filter.getVisibleText()));
+  }
+
   /**
    * Adds a filter to the filter bar.
    *

@@ -17,7 +17,7 @@ import {
   CaseStatuses,
   CommentRequest,
   CommentRequestActionsType,
-} from '../../../../plugins/cases/common/api';
+} from '@kbn/cases-plugin/common/api';
 
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
 /**
@@ -85,6 +85,7 @@ export const postCaseResp = (
   ...req,
   ...(id != null ? { id } : {}),
   comments: [],
+  duration: null,
   totalAlerts: 0,
   totalComment: 0,
   closed_by: null,

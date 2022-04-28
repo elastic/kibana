@@ -10,9 +10,10 @@ Represents a meta-information about a Kibana entity initiating a search request.
 
 ```typescript
 export declare type KibanaExecutionContext = {
-    readonly type: string;
-    readonly name: string;
-    readonly id: string;
+    readonly type?: string;
+    readonly name?: string;
+    readonly page?: string;
+    readonly id?: string;
     readonly description?: string;
     readonly url?: string;
     child?: KibanaExecutionContext;

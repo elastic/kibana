@@ -14,6 +14,8 @@ steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
     timeout_in_minutes: 10
+    agents:
+      queue: kibana-default
 
   - wait
 
@@ -27,7 +29,7 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/xpack_cigroup.sh
     label: 'Default CI Group'
-    parallelism: 27
+    parallelism: 31
     agents:
       queue: n2-4
     depends_on: build
@@ -38,21 +40,9 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: CI_GROUP=Docker .buildkite/scripts/steps/functional/xpack_cigroup.sh
-    label: 'Docker CI Group'
-    agents:
-      queue: n2-4
-    depends_on: build
-    timeout_in_minutes: 120
-    key: default-cigroup-docker
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
   - command: .buildkite/scripts/steps/functional/oss_cigroup.sh
     label: 'OSS CI Group'
-    parallelism: 11
+    parallelism: 12
     agents:
       queue: ci-group-4d
     depends_on: build
@@ -63,13 +53,12 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/test/jest_integration.sh
-    label: 'Jest Integration Tests'
-    parallelism: 2
+  - command: .buildkite/scripts/steps/test/pick_jest_config_run_order.sh
+    label: 'Pick Jest Config Run Order'
     agents:
-      queue: n2-4
-    timeout_in_minutes: 120
-    key: jest-integration
+      queue: kibana-default
+    env:
+      FILTER_JEST_CONFIG_TYPE: integration
     retry:
       automatic:
         - exit_status: '*'
@@ -85,9 +74,10 @@ steps:
   - command: .buildkite/scripts/steps/es_snapshots/trigger_promote.sh
     label: Trigger promotion
     timeout_in_minutes: 10
+    agents:
+      queue: kibana-default
     depends_on:
       - default-cigroup
-      - default-cigroup-docker
       - oss-cigroup
       - jest-integration
       - api-integration
@@ -98,3 +88,5 @@ steps:
   - command: .buildkite/scripts/lifecycle/post_build.sh
     label: Post-Build
     timeout_in_minutes: 10
+    agents:
+      queue: kibana-default

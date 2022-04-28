@@ -7,10 +7,10 @@
  */
 import { fetchDocuments } from './fetch_documents';
 import { throwError as throwErrorRx, of } from 'rxjs';
-import { RequestAdapter } from '../../../../../inspector';
+import { RequestAdapter } from '@kbn/inspector-plugin';
 import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { IKibanaSearchResponse } from 'src/plugins/data/common';
+import { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { FetchDeps } from './fetch_all';
 import { fetchTotalHits } from './fetch_total_hits';
@@ -57,10 +57,6 @@ describe('test fetchDocuments', () => {
     expect(fetch$Mock.mock.calls[0][0].executionContext).toMatchInlineSnapshot(`
       Object {
         "description": "fetch total hits",
-        "id": "the-saved-search-id",
-        "name": "discover",
-        "type": "application",
-        "url": "/",
       }
     `);
   });

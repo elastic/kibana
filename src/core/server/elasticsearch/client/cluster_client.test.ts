@@ -26,6 +26,7 @@ const createConfig = (
     sniffOnStart: false,
     sniffOnConnectionFault: false,
     sniffInterval: false,
+    maxSockets: Infinity,
     compression: false,
     requestHeadersWhitelist: ['authorization'],
     customHeaders: {},

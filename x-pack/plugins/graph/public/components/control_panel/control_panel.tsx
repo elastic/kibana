@@ -126,7 +126,7 @@ const ControlPanelComponent = ({
       {control === 'editLabel' && selectedNode && (
         <SelectedNodeEditor workspace={workspace} selectedNode={selectedNode} />
       )}
-      {control === 'mergeTerms' && mergeCandidates.length > 0 && (
+      {control === 'mergeTerms' && (
         <MergeCandidates
           workspace={workspace}
           mergeCandidates={mergeCandidates}

@@ -24,6 +24,9 @@ export const SET_OPEN_TOC_DETAILS = 'SET_OPEN_TOC_DETAILS';
 export const SHOW_TOC_DETAILS = 'SHOW_TOC_DETAILS';
 export const HIDE_TOC_DETAILS = 'HIDE_TOC_DETAILS';
 export const SET_DRAW_MODE = 'SET_DRAW_MODE';
+export const SET_AUTO_OPEN_WIZARD_ID = 'SET_AUTO_OPEN_WIZARD_ID';
+export const PUSH_DELETED_FEATURE_ID = 'PUSH_DELETED_FEATURE_ID';
+export const CLEAR_DELETED_FEATURE_IDS = 'CLEAR_DELETED_FEATURE_IDS';
 
 export function exitFullScreen() {
   return {
@@ -121,5 +124,30 @@ export function closeTimeslider() {
       isTimesliderOpen: false,
     });
     dispatch(setQuery({ clearTimeslice: true }));
+  };
+}
+
+export function setAutoOpenLayerWizardId(autoOpenLayerWizardId: string) {
+  return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+    dispatch(setSelectedLayer(null));
+    dispatch(updateFlyout(FLYOUT_STATE.ADD_LAYER_WIZARD));
+    dispatch(setDrawMode(DRAW_MODE.NONE));
+    dispatch({
+      type: SET_AUTO_OPEN_WIZARD_ID,
+      autoOpenLayerWizardId,
+    });
+  };
+}
+
+export function pushDeletedFeatureId(featureId: string) {
+  return {
+    type: PUSH_DELETED_FEATURE_ID,
+    featureId,
+  };
+}
+
+export function clearDeletedFeatureIds() {
+  return {
+    type: CLEAR_DELETED_FEATURE_IDS,
   };
 }

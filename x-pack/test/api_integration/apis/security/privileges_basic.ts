@@ -30,6 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
             savedObjectsTagging: ['all', 'read', 'minimal_all', 'minimal_read'],
             graph: ['all', 'read', 'minimal_all', 'minimal_read'],
             maps: ['all', 'read', 'minimal_all', 'minimal_read'],
+            generalCases: ['all', 'read', 'minimal_all', 'minimal_read'],
             observabilityCases: ['all', 'read', 'minimal_all', 'minimal_read'],
             canvas: ['all', 'read', 'minimal_all', 'minimal_read'],
             infrastructure: ['all', 'read', 'minimal_all', 'minimal_read'],

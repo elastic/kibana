@@ -8,16 +8,17 @@
 
 import { combineLatest, from } from 'rxjs';
 import { map, tap, switchMap } from 'rxjs/operators';
-import type { CoreStart, IUiSettingsClient, KibanaExecutionContext } from 'kibana/public';
+import type { CoreStart, IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
 import {
   getSearchParamsFromRequest,
   SearchRequest,
   DataPublicPluginStart,
   IEsSearchResponse,
-} from '../../../../data/public';
-import { search as dataPluginSearch } from '../../../../data/public';
+} from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { search as dataPluginSearch } from '@kbn/data-plugin/public';
+import type { RequestResponder } from '@kbn/inspector-plugin/public';
 import type { VegaInspectorAdapters } from '../vega_inspector';
-import type { RequestResponder } from '../../../../inspector/public';
 
 /** @internal **/
 export const extendSearchParamsWithRuntimeFields = async (
@@ -48,7 +49,7 @@ export interface SearchAPIDependencies {
   uiSettings: IUiSettingsClient;
   injectedMetadata: CoreStart['injectedMetadata'];
   search: DataPublicPluginStart['search'];
-  indexPatterns: DataPublicPluginStart['indexPatterns'];
+  indexPatterns: DataViewsPublicPluginStart;
 }
 
 export class SearchAPI {

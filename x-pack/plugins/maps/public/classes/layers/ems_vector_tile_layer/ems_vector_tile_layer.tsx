@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Map as MbMap, Layer as MbLayer, Style as MbStyle } from '@kbn/mapbox-gl';
+import type { Map as MbMap, LayerSpecification, StyleSpecification } from '@kbn/mapbox-gl';
 import _ from 'lodash';
 // @ts-expect-error
 import { RGBAImage } from './image_utils';
@@ -38,7 +38,7 @@ export interface EmsSpriteSheet {
 
 interface SourceRequestData {
   spriteSheetImageData?: ImageData;
-  vectorStyleSheet?: MbStyle;
+  vectorStyleSheet?: StyleSpecification;
   spriteMeta?: {
     png: string;
     json: EmsSpriteSheet;
@@ -141,7 +141,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
     return `${this._generateMbSourceIdPrefix()}${name}`;
   }
 
-  _getVectorStyle() {
+  _getVectorStyle(): StyleSpecification | null | undefined {
     const sourceDataRequest = this.getSourceDataRequest();
     if (!sourceDataRequest) {
       return null;
@@ -317,8 +317,8 @@ export class EmsVectorTileLayer extends AbstractLayer {
         const newLayerObject = {
           ...layer,
           source: this._generateMbSourceId(
-            typeof (layer as MbLayer).source === 'string'
-              ? ((layer as MbLayer).source as string)
+            'source' in layer && typeof layer.source === 'string'
+              ? (layer.source as string)
               : undefined
           ),
           id: mbLayerId,
@@ -375,7 +375,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
     return [];
   }
 
-  _setOpacityForType(mbMap: MbMap, mbLayer: MbLayer, mbLayerId: string) {
+  _setOpacityForType(mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) {
     this._getOpacityProps(mbLayer.type).forEach((opacityProp) => {
       const mbPaint = mbLayer.paint as { [key: string]: unknown } | undefined;
       if (mbPaint && typeof mbPaint[opacityProp] === 'number') {
@@ -387,7 +387,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
     });
   }
 
-  _setLayerZoomRange(mbMap: MbMap, mbLayer: MbLayer, mbLayerId: string) {
+  _setLayerZoomRange(mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) {
     let minZoom = this.getMinZoom();
     if (typeof mbLayer.minzoom === 'number') {
       minZoom = Math.max(minZoom, mbLayer.minzoom);

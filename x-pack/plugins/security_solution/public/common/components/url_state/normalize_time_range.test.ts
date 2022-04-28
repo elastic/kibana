@@ -13,7 +13,7 @@ import {
   RelativeTimeRange,
   isRelativeTimeRange,
 } from '../../store/inputs/model';
-import DateMath from '@elastic/datemath';
+import DateMath from '@kbn/datemath';
 import { getTimeRangeSettings } from '../../utils/default_date_settings';
 
 const getTimeRangeSettingsMock = getTimeRangeSettings as jest.Mock;

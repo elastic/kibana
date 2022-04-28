@@ -158,7 +158,7 @@ describe('Navigation Breadcrumbs', () => {
       );
       expect(breadcrumbs).toEqual([
         {
-          href: 'securitySolutionUI/overview',
+          href: 'securitySolutionUI/get_started',
           text: 'Security',
         },
         {
@@ -178,7 +178,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: 'securitySolutionUI/overview' },
+        { text: 'Security', href: 'securitySolutionUI/get_started' },
         {
           text: 'Network',
           href: "securitySolutionUI/network?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
@@ -196,7 +196,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: 'securitySolutionUI/overview' },
+        { text: 'Security', href: 'securitySolutionUI/get_started' },
         {
           text: 'Timelines',
           href: "securitySolutionUI/timelines?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
@@ -210,7 +210,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: 'securitySolutionUI/overview' },
+        { text: 'Security', href: 'securitySolutionUI/get_started' },
         {
           text: 'Hosts',
           href: "securitySolutionUI/hosts?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
@@ -229,7 +229,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: 'securitySolutionUI/overview' },
+        { text: 'Security', href: 'securitySolutionUI/get_started' },
         {
           text: 'Network',
           href: "securitySolutionUI/network?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
@@ -248,7 +248,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: 'securitySolutionUI/overview' },
+        { text: 'Security', href: 'securitySolutionUI/get_started' },
         {
           text: 'Network',
           href: "securitySolutionUI/network?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
@@ -267,7 +267,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: 'securitySolutionUI/overview' },
+        { text: 'Security', href: 'securitySolutionUI/get_started' },
         {
           text: 'Alerts',
           href: '',
@@ -281,7 +281,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: 'securitySolutionUI/overview' },
+        { text: 'Security', href: 'securitySolutionUI/get_started' },
         {
           text: 'Exceptions',
           href: '',
@@ -295,7 +295,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: 'securitySolutionUI/overview' },
+        { text: 'Security', href: 'securitySolutionUI/get_started' },
         {
           text: 'Rules',
           href: "securitySolutionUI/rules?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
@@ -309,7 +309,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: 'securitySolutionUI/overview' },
+        { text: 'Security', href: 'securitySolutionUI/get_started' },
         {
           text: 'Rules',
           href: "securitySolutionUI/rules?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
@@ -335,7 +335,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: 'securitySolutionUI/overview' },
+        { text: 'Security', href: 'securitySolutionUI/get_started' },
         {
           text: 'Rules',
           href: "securitySolutionUI/rules?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
@@ -361,7 +361,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: 'securitySolutionUI/overview' },
+        { text: 'Security', href: 'securitySolutionUI/get_started' },
         {
           text: 'Rules',
           href: "securitySolutionUI/rules?sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2019-05-16T23:10:43.696Z',fromStr:now-24h,kind:relative,to:'2019-05-17T23:10:43.697Z',toStr:now)))",
@@ -406,7 +406,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: 'securitySolutionUI/overview' },
+        { text: 'Security', href: 'securitySolutionUI/get_started' },
         {
           text: 'Endpoints',
           href: '',
@@ -428,7 +428,7 @@ describe('Navigation Breadcrumbs', () => {
       expect(setBreadcrumbsMock).toBeCalledWith([
         expect.objectContaining({
           text: 'Security',
-          href: 'securitySolutionUI/overview',
+          href: 'securitySolutionUI/get_started',
           onClick: expect.any(Function),
         }),
         expect.objectContaining({

@@ -161,3 +161,16 @@ export interface GetAgentStatusResponse {
     updating: number;
   };
 }
+
+export interface GetAgentIncomingDataRequest {
+  query: {
+    agentsIds: string[];
+  };
+}
+
+export interface IncomingDataList {
+  [key: string]: { data: boolean };
+}
+export interface GetAgentIncomingDataResponse {
+  items: IncomingDataList[];
+}

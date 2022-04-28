@@ -8,12 +8,7 @@
 import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
 import { setupRequest } from '../../lib/helpers/setup_request';
-import {
-  environmentRt,
-  kueryRt,
-  offsetRt,
-  rangeRt,
-} from '../default_api_types';
+import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getMetadataForBackend } from './get_metadata_for_backend';
 import { getLatencyChartsForBackend } from './get_latency_charts_for_backend';
@@ -21,7 +16,8 @@ import { getTopBackends } from './get_top_backends';
 import { getUpstreamServicesForBackend } from './get_upstream_services_for_backend';
 import { getThroughputChartsForBackend } from './get_throughput_charts_for_backend';
 import { getErrorRateChartsForBackend } from './get_error_rate_charts_for_backend';
-import { ConnectionStatsItemWithImpact } from './../../../common/connections';
+import { ConnectionStatsItemWithImpact } from '../../../common/connections';
+import { offsetRt } from '../../../common/offset_rt';
 
 const topBackendsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/backends/top_backends',

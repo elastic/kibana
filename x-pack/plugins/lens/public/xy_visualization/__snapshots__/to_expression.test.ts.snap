@@ -20,7 +20,7 @@ Object {
                     true,
                   ],
                 },
-                "function": "lens_xy_axisTitlesVisibilityConfig",
+                "function": "axisTitlesVisibilityConfig",
                 "type": "function",
               },
             ],
@@ -32,6 +32,12 @@ Object {
         ],
         "description": Array [
           "",
+        ],
+        "emphasizeFitting": Array [
+          true,
+        ],
+        "endValue": Array [
+          "Nearest",
         ],
         "fillOpacity": Array [
           0.3,
@@ -54,7 +60,7 @@ Object {
                     true,
                   ],
                 },
-                "function": "lens_xy_gridlinesConfig",
+                "function": "gridlinesConfig",
                 "type": "function",
               },
             ],
@@ -79,7 +85,7 @@ Object {
                     -45,
                   ],
                 },
-                "function": "lens_xy_labelsOrientationConfig",
+                "function": "labelsOrientationConfig",
                 "type": "function",
               },
             ],
@@ -107,8 +113,21 @@ Object {
                   "layerId": Array [
                     "first",
                   ],
-                  "layerType": Array [
-                    "data",
+                  "palette": Array [
+                    Object {
+                      "chain": Array [
+                        Object {
+                          "arguments": Object {
+                            "name": Array [
+                              "default",
+                            ],
+                          },
+                          "function": "system_palette",
+                          "type": "function",
+                        },
+                      ],
+                      "type": "expression",
+                    },
                   ],
                   "seriesType": Array [
                     "area",
@@ -127,7 +146,7 @@ Object {
                     "linear",
                   ],
                 },
-                "function": "lens_xy_layer",
+                "function": "dataLayer",
                 "type": "function",
               },
             ],
@@ -145,6 +164,7 @@ Object {
                   "isVisible": Array [
                     true,
                   ],
+                  "legendSize": Array [],
                   "maxLines": Array [],
                   "position": Array [
                     "bottom",
@@ -155,7 +175,7 @@ Object {
                   "showSingleSeries": Array [],
                   "verticalAlignment": Array [],
                 },
-                "function": "lens_xy_legendConfig",
+                "function": "legendConfig",
                 "type": "function",
               },
             ],
@@ -177,7 +197,7 @@ Object {
                     true,
                   ],
                 },
-                "function": "lens_xy_tickLabelsConfig",
+                "function": "tickLabelsConfig",
                 "type": "function",
               },
             ],
@@ -207,7 +227,7 @@ Object {
                   ],
                   "upperBound": Array [],
                 },
-                "function": "lens_xy_axisExtentConfig",
+                "function": "axisExtentConfig",
                 "type": "function",
               },
             ],
@@ -229,7 +249,7 @@ Object {
                     456,
                   ],
                 },
-                "function": "lens_xy_axisExtentConfig",
+                "function": "axisExtentConfig",
                 "type": "function",
               },
             ],
@@ -243,7 +263,7 @@ Object {
           "",
         ],
       },
-      "function": "lens_xy_chart",
+      "function": "xyVis",
       "type": "function",
     },
   ],
