@@ -28,6 +28,10 @@ const NUMBER_OF_TRIGGERED_ACTIONS_FIELD =
   'kibana.alert.rule.execution.metrics.number_of_triggered_actions';
 const NUMBER_OF_GENERATED_ACTIONS_FIELD =
   'kibana.alert.rule.execution.metrics.number_of_generated_actions';
+const NUMBER_OF_ACTIVE_ALERTS_FIELD = 'kibana.alert.rule.execution.metrics.number_of_active_alerts';
+const NUMBER_OF_NEW_ALERTS_FIELD = 'kibana.alert.rule.execution.metrics.number_of_new_alerts';
+const NUMBER_OF_RECOVERED_ALERTS_FIELD =
+  'kibana.alert.rule.execution.metrics.number_of_recovered_alerts';
 const EXECUTION_UUID_FIELD = 'kibana.alert.rule.execution.uuid';
 
 const Millis2Nanos = 1000 * 1000;
@@ -36,14 +40,6 @@ export const EMPTY_EXECUTION_LOG_RESULT = {
   total: 0,
   data: [],
 };
-
-interface IAlertCounts extends estypes.AggregationsMultiBucketAggregateBase {
-  buckets: {
-    activeAlerts: estypes.AggregationsSingleBucketAggregateBase;
-    newAlerts: estypes.AggregationsSingleBucketAggregateBase;
-    recoveredAlerts: estypes.AggregationsSingleBucketAggregateBase;
-  };
-}
 
 interface IActionExecution
   extends estypes.AggregationsTermsAggregateBase<{ key: string; doc_count: number }> {
@@ -60,9 +56,11 @@ interface IExecutionUuidAggBucket extends estypes.AggregationsStringTermsBucketK
     totalSearchDuration: estypes.AggregationsMaxAggregate;
     numTriggeredActions: estypes.AggregationsMaxAggregate;
     numGeneratedActions: estypes.AggregationsMaxAggregate;
+    numActiveAlerts: estypes.AggregationsMaxAggregate;
+    numRecoveredAlerts: estypes.AggregationsMaxAggregate;
+    numNewAlerts: estypes.AggregationsMaxAggregate;
     outcomeAndMessage: estypes.AggregationsTopHitsAggregate;
   };
-  alertCounts: IAlertCounts;
   actionExecution: {
     actionOutcomes: IActionExecution;
   };
@@ -91,6 +89,9 @@ const ExecutionLogSortFields: Record<string, string> = {
   schedule_delay: 'ruleExecution>scheduleDelay',
   num_triggered_actions: 'ruleExecution>numTriggeredActions',
   num_generated_actions: 'ruleExecution>numGeneratedActions',
+  num_active_alerts: 'ruleExecution>numActiveAlerts',
+  num_recovered_alerts: 'ruleExecution>numRecoveredAlerts',
+  num_new_alerts: 'ruleExecution>numNewAlerts',
 };
 
 export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLogAggOptions) {
@@ -153,16 +154,6 @@ export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLo
                 gap_policy: 'insert_zeros' as estypes.AggregationsGapPolicy,
               },
             },
-            // Get counts for types of alerts and whether there was an execution timeout
-            alertCounts: {
-              filters: {
-                filters: {
-                  newAlerts: { match: { [ACTION_FIELD]: 'new-instance' } },
-                  activeAlerts: { match: { [ACTION_FIELD]: 'active-instance' } },
-                  recoveredAlerts: { match: { [ACTION_FIELD]: 'recovered-instance' } },
-                },
-              },
-            },
             // Filter by action execute doc and get information from this event
             actionExecution: {
               filter: getProviderAndActionFilter('actions', 'execute'),
@@ -207,6 +198,21 @@ export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLo
                 numGeneratedActions: {
                   max: {
                     field: NUMBER_OF_GENERATED_ACTIONS_FIELD,
+                  },
+                },
+                numActiveAlerts: {
+                  max: {
+                    field: NUMBER_OF_ACTIVE_ALERTS_FIELD,
+                  },
+                },
+                numRecoveredAlerts: {
+                  max: {
+                    field: NUMBER_OF_RECOVERED_ALERTS_FIELD,
+                  },
+                },
+                numNewAlerts: {
+                  max: {
+                    field: NUMBER_OF_NEW_ALERTS_FIELD,
                   },
                 },
                 executionDuration: {
@@ -281,9 +287,9 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     duration_ms: durationUs / Millis2Nanos,
     status,
     message,
-    num_active_alerts: bucket?.alertCounts?.buckets?.activeAlerts?.doc_count ?? 0,
-    num_new_alerts: bucket?.alertCounts?.buckets?.newAlerts?.doc_count ?? 0,
-    num_recovered_alerts: bucket?.alertCounts?.buckets?.recoveredAlerts?.doc_count ?? 0,
+    num_active_alerts: bucket?.ruleExecution?.numActiveAlerts?.value ?? 0,
+    num_new_alerts: bucket?.ruleExecution?.numNewAlerts?.value ?? 0,
+    num_recovered_alerts: bucket?.ruleExecution?.numRecoveredAlerts?.value ?? 0,
     num_triggered_actions: bucket?.ruleExecution?.numTriggeredActions?.value ?? 0,
     num_generated_actions: bucket?.ruleExecution?.numGeneratedActions?.value ?? 0,
     num_succeeded_actions: actionExecutionSuccess,

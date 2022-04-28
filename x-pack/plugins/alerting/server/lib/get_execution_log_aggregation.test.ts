@@ -83,7 +83,7 @@ describe('getExecutionLogAggregation', () => {
         sort: [{ notsortable: { order: 'asc' } }],
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions,num_generated_actions]"`
+      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions,num_generated_actions,num_active_alerts,num_recovered_alerts,num_new_alerts]"`
     );
   });
 
@@ -95,7 +95,7 @@ describe('getExecutionLogAggregation', () => {
         sort: [{ notsortable: { order: 'asc' } }, { timestamp: { order: 'asc' } }],
       });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions,num_generated_actions]"`
+      `"Invalid sort field \\"notsortable\\" - must be one of [timestamp,execution_duration,total_search_duration,es_search_duration,schedule_delay,num_triggered_actions,num_generated_actions,num_active_alerts,num_recovered_alerts,num_new_alerts]"`
     );
   });
 
@@ -164,15 +164,6 @@ describe('getExecutionLogAggregation', () => {
                   gap_policy: 'insert_zeros',
                 },
               },
-              alertCounts: {
-                filters: {
-                  filters: {
-                    newAlerts: { match: { 'event.action': 'new-instance' } },
-                    activeAlerts: { match: { 'event.action': 'active-instance' } },
-                    recoveredAlerts: { match: { 'event.action': 'recovered-instance' } },
-                  },
-                },
-              },
               actionExecution: {
                 filter: {
                   bool: {
@@ -214,6 +205,21 @@ describe('getExecutionLogAggregation', () => {
                   numGeneratedActions: {
                     max: {
                       field: 'kibana.alert.rule.execution.metrics.number_of_generated_actions',
+                    },
+                  },
+                  numActiveAlerts: {
+                    max: {
+                      field: 'kibana.alert.rule.execution.metrics.number_of_active_alerts',
+                    },
+                  },
+                  numRecoveredAlerts: {
+                    max: {
+                      field: 'kibana.alert.rule.execution.metrics.number_of_recovered_alerts',
+                    },
+                  },
+                  numNewAlerts: {
+                    max: {
+                      field: 'kibana.alert.rule.execution.metrics.number_of_new_alerts',
                     },
                   },
                   executionDuration: { max: { field: 'event.duration' } },
@@ -278,20 +284,6 @@ describe('formatExecutionLogResult', () => {
                   meta: {},
                   doc_count: 0,
                 },
-                alertCounts: {
-                  meta: {},
-                  buckets: {
-                    activeAlerts: {
-                      doc_count: 5,
-                    },
-                    newAlerts: {
-                      doc_count: 5,
-                    },
-                    recoveredAlerts: {
-                      doc_count: 0,
-                    },
-                  },
-                },
                 ruleExecution: {
                   meta: {},
                   doc_count: 1,
@@ -300,6 +292,15 @@ describe('formatExecutionLogResult', () => {
                   },
                   numGeneratedActions: {
                     value: 5.0,
+                  },
+                  numActiveAlerts: {
+                    value: 5.0,
+                  },
+                  numNewAlerts: {
+                    value: 5.0,
+                  },
+                  numRecoveredAlerts: {
+                    value: 0.0,
                   },
                   outcomeAndMessage: {
                     hits: {
@@ -363,20 +364,6 @@ describe('formatExecutionLogResult', () => {
                   meta: {},
                   doc_count: 0,
                 },
-                alertCounts: {
-                  meta: {},
-                  buckets: {
-                    activeAlerts: {
-                      doc_count: 5,
-                    },
-                    newAlerts: {
-                      doc_count: 5,
-                    },
-                    recoveredAlerts: {
-                      doc_count: 5,
-                    },
-                  },
-                },
                 ruleExecution: {
                   meta: {},
                   doc_count: 1,
@@ -384,6 +371,15 @@ describe('formatExecutionLogResult', () => {
                     value: 5.0,
                   },
                   numGeneratedActions: {
+                    value: 5.0,
+                  },
+                  numActiveAlerts: {
+                    value: 5.0,
+                  },
+                  numNewAlerts: {
+                    value: 5.0,
+                  },
+                  numRecoveredAlerts: {
                     value: 5.0,
                   },
                   outcomeAndMessage: {
@@ -512,20 +508,6 @@ describe('formatExecutionLogResult', () => {
                   meta: {},
                   doc_count: 0,
                 },
-                alertCounts: {
-                  meta: {},
-                  buckets: {
-                    activeAlerts: {
-                      doc_count: 5,
-                    },
-                    newAlerts: {
-                      doc_count: 5,
-                    },
-                    recoveredAlerts: {
-                      doc_count: 0,
-                    },
-                  },
-                },
                 ruleExecution: {
                   meta: {},
                   doc_count: 1,
@@ -534,6 +516,15 @@ describe('formatExecutionLogResult', () => {
                   },
                   numGeneratedActions: {
                     value: 5.0,
+                  },
+                  numActiveAlerts: {
+                    value: 5.0,
+                  },
+                  numNewAlerts: {
+                    value: 5.0,
+                  },
+                  numRecoveredAlerts: {
+                    value: 0.0,
                   },
                   outcomeAndMessage: {
                     hits: {
@@ -600,20 +591,6 @@ describe('formatExecutionLogResult', () => {
                   meta: {},
                   doc_count: 0,
                 },
-                alertCounts: {
-                  meta: {},
-                  buckets: {
-                    activeAlerts: {
-                      doc_count: 5,
-                    },
-                    newAlerts: {
-                      doc_count: 5,
-                    },
-                    recoveredAlerts: {
-                      doc_count: 5,
-                    },
-                  },
-                },
                 ruleExecution: {
                   meta: {},
                   doc_count: 1,
@@ -621,6 +598,15 @@ describe('formatExecutionLogResult', () => {
                     value: 5.0,
                   },
                   numGeneratedActions: {
+                    value: 5.0,
+                  },
+                  numActiveAlerts: {
+                    value: 5.0,
+                  },
+                  numNewAlerts: {
+                    value: 5.0,
+                  },
+                  numRecoveredAlerts: {
                     value: 5.0,
                   },
                   outcomeAndMessage: {
@@ -749,20 +735,6 @@ describe('formatExecutionLogResult', () => {
                   meta: {},
                   doc_count: 1,
                 },
-                alertCounts: {
-                  meta: {},
-                  buckets: {
-                    activeAlerts: {
-                      doc_count: 0,
-                    },
-                    newAlerts: {
-                      doc_count: 0,
-                    },
-                    recoveredAlerts: {
-                      doc_count: 0,
-                    },
-                  },
-                },
                 ruleExecution: {
                   meta: {},
                   doc_count: 1,
@@ -770,6 +742,15 @@ describe('formatExecutionLogResult', () => {
                     value: 0.0,
                   },
                   numGeneratedActions: {
+                    value: 0.0,
+                  },
+                  numActiveAlerts: {
+                    value: 0.0,
+                  },
+                  numNewAlerts: {
+                    value: 0.0,
+                  },
+                  numRecoveredAlerts: {
                     value: 0.0,
                   },
                   outcomeAndMessage: {
@@ -829,20 +810,6 @@ describe('formatExecutionLogResult', () => {
                   meta: {},
                   doc_count: 0,
                 },
-                alertCounts: {
-                  meta: {},
-                  buckets: {
-                    activeAlerts: {
-                      doc_count: 5,
-                    },
-                    newAlerts: {
-                      doc_count: 5,
-                    },
-                    recoveredAlerts: {
-                      doc_count: 5,
-                    },
-                  },
-                },
                 ruleExecution: {
                   meta: {},
                   doc_count: 1,
@@ -850,6 +817,15 @@ describe('formatExecutionLogResult', () => {
                     value: 5.0,
                   },
                   numGeneratedActions: {
+                    value: 5.0,
+                  },
+                  numActiveAlerts: {
+                    value: 5.0,
+                  },
+                  numNewAlerts: {
+                    value: 5.0,
+                  },
+                  numRecoveredAlerts: {
                     value: 5.0,
                   },
                   outcomeAndMessage: {
@@ -978,20 +954,6 @@ describe('formatExecutionLogResult', () => {
                   meta: {},
                   doc_count: 0,
                 },
-                alertCounts: {
-                  meta: {},
-                  buckets: {
-                    activeAlerts: {
-                      doc_count: 5,
-                    },
-                    newAlerts: {
-                      doc_count: 5,
-                    },
-                    recoveredAlerts: {
-                      doc_count: 5,
-                    },
-                  },
-                },
                 ruleExecution: {
                   meta: {},
                   doc_count: 1,
@@ -999,6 +961,15 @@ describe('formatExecutionLogResult', () => {
                     value: 5.0,
                   },
                   numGeneratedActions: {
+                    value: 5.0,
+                  },
+                  numActiveAlerts: {
+                    value: 5.0,
+                  },
+                  numNewAlerts: {
+                    value: 5.0,
+                  },
+                  numRecoveredAlerts: {
                     value: 5.0,
                   },
                   outcomeAndMessage: {
@@ -1063,20 +1034,6 @@ describe('formatExecutionLogResult', () => {
                   meta: {},
                   doc_count: 0,
                 },
-                alertCounts: {
-                  meta: {},
-                  buckets: {
-                    activeAlerts: {
-                      doc_count: 5,
-                    },
-                    newAlerts: {
-                      doc_count: 5,
-                    },
-                    recoveredAlerts: {
-                      doc_count: 5,
-                    },
-                  },
-                },
                 ruleExecution: {
                   meta: {},
                   doc_count: 1,
@@ -1084,6 +1041,15 @@ describe('formatExecutionLogResult', () => {
                     value: 5.0,
                   },
                   numGeneratedActions: {
+                    value: 5.0,
+                  },
+                  numActiveAlerts: {
+                    value: 5.0,
+                  },
+                  numNewAlerts: {
+                    value: 5.0,
+                  },
+                  numRecoveredAlerts: {
                     value: 5.0,
                   },
                   outcomeAndMessage: {

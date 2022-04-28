@@ -13,6 +13,9 @@ export const executionLogSortableColumns = [
   'schedule_delay',
   'num_triggered_actions',
   'num_generated_actions',
+  'num_active_alerts',
+  'num_recovered_alerts',
+  'num_new_alerts',
 ] as const;
 
 export type ExecutionLogSortFields = typeof executionLogSortableColumns[number];
