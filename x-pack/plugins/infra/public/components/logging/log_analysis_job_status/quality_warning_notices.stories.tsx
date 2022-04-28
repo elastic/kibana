@@ -13,6 +13,7 @@ import { decorateWithGlobalStorybookThemeProviders } from '../../../test_utils/u
 import { CategoryQualityWarnings } from './quality_warning_notices';
 
 storiesOf('infra/logAnalysis/CategoryQualityWarnings', module)
+  // @ts-expect-error update types
   .addDecorator(decorateWithGlobalStorybookThemeProviders)
   .add('Partitioned warnings', () => {
     return (
