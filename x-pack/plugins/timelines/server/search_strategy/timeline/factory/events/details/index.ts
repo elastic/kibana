@@ -26,11 +26,10 @@ import { buildEcsObjects } from '../../helpers/build_ecs_objects';
 
 export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.details> = {
   buildDsl: ({ authFilter, ...options }: TimelineEventsDetailsRequestOptions) => {
-    const { indexName, eventId, docValueFields = [], runtimeMappings = {} } = options;
+    const { indexName, eventId, runtimeMappings = {} } = options;
     return buildTimelineDetailsQuery({
       indexName,
       id: eventId,
-      docValueFields,
       runtimeMappings,
       authFilter,
     });
@@ -39,13 +38,13 @@ export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.detail
     options: TimelineEventsDetailsRequestOptions,
     response: IEsSearchResponse<EventHit>
   ): Promise<TimelineEventsDetailsStrategyResponse> => {
-    const { indexName, eventId, docValueFields = [], runtimeMappings = {} } = options;
+    const { indexName, eventId, runtimeMappings = {} } = options;
     const { fields, ...hitsData } = cloneDeep(response.rawResponse.hits.hits[0] ?? {});
 
     const inspect = {
       dsl: [
         inspectStringifyObject(
-          buildTimelineDetailsQuery({ indexName, id: eventId, docValueFields, runtimeMappings })
+          buildTimelineDetailsQuery({ indexName, id: eventId, runtimeMappings })
         ),
       ],
     };
