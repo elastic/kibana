@@ -5,33 +5,30 @@
  * 2.0.
  */
 
-import React from 'react';
-import { mount } from 'enzyme';
 import { act, waitFor } from '@testing-library/react';
-
+import userEvent from '@testing-library/user-event';
+import { mount } from 'enzyme';
+import React from 'react';
+import { ConnectorTypes } from '../../../common/api';
+import { useIsMainApplication } from '../../common/hooks';
+import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
 import '../../common/mock/match_media';
-import { CaseViewPage } from './case_view_page';
-import { CaseViewPageProps } from './types';
+import { useCaseViewNavigation, useUrlParams } from '../../common/navigation/hooks';
+import { useConnectors } from '../../containers/configure/use_connectors';
 import {
   basicCaseClosed,
   basicCaseMetrics,
   caseUserActions,
-  getAlertUserAction,
   connectorsMock,
+  getAlertUserAction,
 } from '../../containers/mock';
-import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
-import { useUpdateCase } from '../../containers/use_update_case';
-import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
-
-import { useConnectors } from '../../containers/configure/use_connectors';
-import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
-import { ConnectorTypes } from '../../../common/api';
-import { caseViewProps, caseData } from './index.test';
-import { useCaseViewNavigation, useUrlParams } from '../../common/navigation/hooks';
-import { CASE_VIEW_PAGE_TABS } from '../../../common/constants';
-import userEvent from '@testing-library/user-event';
-import { useIsMainApplication } from '../../common/hooks';
+import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
+import { usePostPushToService } from '../../containers/use_post_push_to_service';
+import { useUpdateCase } from '../../containers/use_update_case';
+import { CaseViewPage } from './case_view_page';
+import { caseData, caseViewProps } from './index.test';
+import { CaseViewPageProps, CASE_VIEW_PAGE_TABS } from './types';
 
 jest.mock('../../containers/use_update_case');
 jest.mock('../../containers/use_get_case_metrics');

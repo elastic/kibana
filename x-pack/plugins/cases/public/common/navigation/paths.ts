@@ -6,7 +6,7 @@
  */
 
 import { generatePath } from 'react-router-dom';
-import { CASE_VIEW_PAGE_TABS } from '../../../common/constants';
+import { CASE_VIEW_PAGE_TABS } from '../../components/case_view/types';
 
 export const DEFAULT_BASE_PATH = '/cases';
 
@@ -23,7 +23,8 @@ export const CASES_CREATE_PATH = '/create' as const;
 export const CASES_CONFIGURE_PATH = '/configure' as const;
 export const CASE_VIEW_PATH = '/:detailName' as const;
 export const CASE_VIEW_COMMENT_PATH = `${CASE_VIEW_PATH}/:commentId` as const;
-export const CASE_VIEW_ALERT_TABLE_PATH = `${CASE_VIEW_PATH}/?tabId=alerts` as const;
+export const CASE_VIEW_ALERT_TABLE_PATH =
+  `${CASE_VIEW_PATH}/?tabId=${CASE_VIEW_PAGE_TABS.ALERTS}` as const;
 export const CASE_VIEW_TAB_PATH = `${CASE_VIEW_PATH}/?tabId=:tabId` as const;
 
 const normalizePath = (path: string): string => path.replaceAll('//', '/');

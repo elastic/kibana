@@ -15,9 +15,7 @@ import {
   EuiTabs,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CASE_VIEW_PAGE_TABS } from '../../../common/constants';
 import { Case, UpdateKey } from '../../../common/ui';
-import { useIsMainApplication } from '../../common/hooks';
 import { useCaseViewNavigation, useUrlParams } from '../../common/navigation';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
@@ -32,7 +30,7 @@ import { ContentWrapper, WhitePageWrapper } from '../wrappers';
 import { CaseViewActivity } from './components/case_view_activity';
 import { CaseViewMetrics } from './metrics';
 import { ACTIVITY_TAB, ALERTS_TAB } from './translations';
-import type { CaseViewPageProps } from './types';
+import { CaseViewPageProps, CASE_VIEW_PAGE_TABS } from './types';
 import { useOnUpdateField } from './use_on_update_field';
 
 export const CaseViewPage = React.memo<CaseViewPageProps>(
@@ -48,11 +46,9 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     showAlertDetails,
     useFetchAlertData,
   }) => {
-    const { userCanCrud } = useCasesContext();
+    const { userCanCrud, features } = useCasesContext();
     const { metricsFeatures } = useCasesFeatures();
     useCasesTitleBreadcrumbs(caseData.title);
-
-    const isMainApplication = useIsMainApplication();
 
     const { navigateToCaseView } = useCaseViewNavigation();
     const { urlParams } = useUrlParams();
@@ -183,7 +179,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             />
           ),
         },
-        ...(!isMainApplication
+        ...(features.alerts.enabled
           ? [
               {
                 id: CASE_VIEW_PAGE_TABS.ALERTS,
@@ -202,10 +198,10 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
         actionsNavigation,
         caseData,
         caseId,
+        features.alerts.enabled,
         fetchCaseMetrics,
         getCaseUserActions,
         initLoadingData,
-        isMainApplication,
         ruleDetailsNavigation,
         showAlertDetails,
         updateCase,
