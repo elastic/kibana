@@ -59,7 +59,7 @@ import { agentFlyoutContext } from '..';
 import { AgentTableHeader } from './components/table_header';
 import type { SelectionMode } from './components/bulk_actions';
 import { SearchAndFilterBar } from './components/search_and_filter_bar';
-import { Labels } from './components/labels';
+import { Tags } from './components/tags';
 
 const MOCK_TAGS = [
   'linux',
@@ -200,14 +200,21 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   // Status for filtering
   const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
 
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
   const isUsingFilter =
-    search.trim() || selectedAgentPolicies.length || selectedStatus.length || showUpgradeable;
+    search.trim() ||
+    selectedAgentPolicies.length ||
+    selectedStatus.length ||
+    selectedTags.length ||
+    showUpgradeable;
 
   const clearFilters = useCallback(() => {
     setDraftKuery('');
     setSearch('');
     setSelectedAgentPolicies([]);
     setSelectedStatus([]);
+    setSelectedTags([]);
     setShowUpgradeable(false);
   }, [setSearch, setDraftKuery, setSelectedAgentPolicies, setSelectedStatus, setShowUpgradeable]);
 
@@ -237,6 +244,11 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         .map((agentPolicy) => `"${agentPolicy}"`)
         .join(' or ')})`;
     }
+
+    if (selectedTags.length) {
+      kueryBuilder = `${kueryBuilder} and ${AGENTS_PREFIX}.tags : (${selectedTags.join(' or ')})`;
+    }
+
     if (selectedStatus.length) {
       const kueryStatus = selectedStatus
         .map((status) => {
@@ -266,7 +278,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     }
 
     return kueryBuilder;
-  }, [selectedStatus, selectedAgentPolicies, search]);
+  }, [search, selectedAgentPolicies, selectedTags, selectedStatus]);
 
   const showInactive = useMemo(() => {
     return selectedStatus.includes('inactive');
@@ -279,6 +291,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [totalAgents, setTotalAgents] = useState(0);
   const [totalInactiveAgents, setTotalInactiveAgents] = useState(0);
+
+  const allTags = Array.from(new Set(agents.flatMap((agent) => agent.tags ?? [])));
 
   // Request to fetch agents and agent status
   const currentRequestRef = useRef<number>(0);
@@ -328,7 +342,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
         setAgents(
           agentsRequest.data.items.map((item) => {
-            // TEMP: Mock tags data for building out label UI
+            // TEMP: Mock tags data for building out tags UI
             item.tags = sampleSize(MOCK_TAGS, Math.floor(Math.random() * MOCK_TAGS.length));
             return item;
           })
@@ -430,10 +444,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     {
       field: 'tags',
       width: '240px',
-      name: i18n.translate('xpack.fleet.agentList.labelColumnTitle', {
-        defaultMessage: 'Label',
+      name: i18n.translate('xpack.fleet.agentList.tagsColumnTitle', {
+        defaultMessage: 'Tags',
       }),
-      render: (tags: string[], agent: any) => <Labels tags={tags} />,
+      render: (tags: string[], agent: any) => <Tags tags={tags} />,
     },
     {
       field: 'policy_id',
@@ -622,6 +636,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         onSelectedStatusChange={setSelectedStatus}
         showUpgradeable={showUpgradeable}
         onShowUpgradeableChange={setShowUpgradeable}
+        tags={allTags}
+        selectedTags={selectedTags}
+        onSelectedTagsChange={setSelectedTags}
       />
       <EuiSpacer size="m" />
 

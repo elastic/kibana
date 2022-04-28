@@ -15,7 +15,7 @@ interface Props {
 
 const MAX_TAGS_TO_DISPLAY = 3;
 
-export const Labels: React.FunctionComponent<Props> = ({ tags }) => {
+export const Tags: React.FunctionComponent<Props> = ({ tags }) => {
   return (
     <>
       {tags.length > MAX_TAGS_TO_DISPLAY ? (

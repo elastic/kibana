@@ -67,6 +67,9 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   onSelectedStatusChange: (selectedStatus: string[]) => void;
   showUpgradeable: boolean;
   onShowUpgradeableChange: (showUpgradeable: boolean) => void;
+  tags: string[];
+  selectedTags: string[];
+  onSelectedTagsChange: (selectedTags: string[]) => void;
 }> = ({
   agentPolicies,
   draftKuery,
@@ -78,6 +81,9 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   onSelectedStatusChange,
   showUpgradeable,
   onShowUpgradeableChange,
+  tags,
+  selectedTags,
+  onSelectedTagsChange,
 }) => {
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(false);
 
@@ -85,7 +91,9 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   const [isAgentPoliciesFilterOpen, setIsAgentPoliciesFilterOpen] = useState<boolean>(false);
 
   // Status for filtering
-  const [isStatusFilterOpen, setIsStatutsFilterOpen] = useState<boolean>(false);
+  const [isStatusFilterOpen, setIsStatusFilterOpen] = useState<boolean>(false);
+
+  const [isTagsFilterOpen, setIsTagsFilterOpen] = useState<boolean>(false);
 
   // Add a agent policy id to current search
   const addAgentPolicyFilter = (policyId: string) => {
@@ -97,6 +105,14 @@ export const SearchAndFilterBar: React.FunctionComponent<{
     onSelectedAgentPoliciesChange(
       selectedAgentPolicies.filter((agentPolicy) => agentPolicy !== policyId)
     );
+  };
+
+  const addTagsFilter = (tag: string) => {
+    onSelectedTagsChange([...selectedTags, tag]);
+  };
+
+  const removeTagsFilter = (tag: string) => {
+    onSelectedTagsChange(selectedTags.filter((t) => t !== tag));
   };
 
   return (
@@ -131,7 +147,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                   button={
                     <EuiFilterButton
                       iconType="arrowDown"
-                      onClick={() => setIsStatutsFilterOpen(!isStatusFilterOpen)}
+                      onClick={() => setIsStatusFilterOpen(!isStatusFilterOpen)}
                       isSelected={isStatusFilterOpen}
                       hasActiveFilters={selectedStatus.length > 0}
                       disabled={agentPolicies.length === 0}
@@ -144,7 +160,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                     </EuiFilterButton>
                   }
                   isOpen={isStatusFilterOpen}
-                  closePopover={() => setIsStatutsFilterOpen(false)}
+                  closePopover={() => setIsStatusFilterOpen(false)}
                   panelPaddingSize="none"
                 >
                   <div className="euiFilterSelect__items">
@@ -161,6 +177,45 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                         }}
                       >
                         {label}
+                      </EuiFilterSelectItem>
+                    ))}
+                  </div>
+                </EuiPopover>
+                <EuiPopover
+                  ownFocus
+                  button={
+                    <EuiFilterButton
+                      iconType="arrowDown"
+                      onClick={() => setIsTagsFilterOpen(!isTagsFilterOpen)}
+                      isSelected={isTagsFilterOpen}
+                      hasActiveFilters={selectedTags.length > 0}
+                      disabled={tags.length === 0}
+                      data-test-subj="agentList.tagsFilter"
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.agentList.tagsFilterText"
+                        defaultMessage="Tags"
+                      />
+                    </EuiFilterButton>
+                  }
+                  isOpen={isTagsFilterOpen}
+                  closePopover={() => setIsTagsFilterOpen(false)}
+                  panelPaddingSize="none"
+                >
+                  <div className="euiFilterSelect__items">
+                    {tags.map((tag, index) => (
+                      <EuiFilterSelectItem
+                        checked={selectedTags.includes(tag) ? 'on' : undefined}
+                        key={index}
+                        onClick={() => {
+                          if (selectedTags.includes(tag)) {
+                            removeTagsFilter(tag);
+                          } else {
+                            addTagsFilter(tag);
+                          }
+                        }}
+                      >
+                        {tag}
                       </EuiFilterSelectItem>
                     ))}
                   </div>
