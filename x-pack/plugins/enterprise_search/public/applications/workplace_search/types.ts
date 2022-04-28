@@ -78,8 +78,6 @@ export interface SourceDataItem {
   serviceType: string;
   baseServiceType?: string;
   configuration: Configuration;
-  configured?: boolean;
-  externalConnectorServiceDescribed?: boolean;
   connected?: boolean;
   features?: Features;
   objTypes?: string[];
@@ -243,6 +241,7 @@ export interface Connector {
   serviceType: string;
   name: string;
   configured: boolean;
+  externalConnectorServiceDescribed?: boolean;
   supportedByLicense: boolean;
   accountContextOnly: boolean;
 }

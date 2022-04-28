@@ -51,7 +51,7 @@ export interface IPermissionsModalProps {
   additionalConfiguration: boolean;
 }
 
-type CombinedDataItem = SourceDataItem & { connected: boolean };
+type CombinedDataItem = SourceDataItem & Partial<Connector> & { connected: boolean };
 
 export interface ISourcesValues {
   contentSources: ContentSourceDetails[];
@@ -145,7 +145,7 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
   selectors: ({ selectors }) => ({
     availableSources: [
       () => [selectors.sourceData],
-      (sourceData: SourceDataItem[]) =>
+      (sourceData: CombinedDataItem[]) =>
         sortByName(
           sourceData.filter(
             ({ configured, externalConnectorServiceDescribed }) =>
@@ -155,7 +155,7 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
     ],
     configuredSources: [
       () => [selectors.sourceData],
-      (sourceData: SourceDataItem[]) =>
+      (sourceData: CombinedDataItem[]) =>
         sortByName(
           sourceData.filter(
             ({ configured, externalConnectorServiceDescribed }) =>
