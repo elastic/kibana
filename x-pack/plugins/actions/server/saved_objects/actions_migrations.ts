@@ -232,13 +232,9 @@ const addUsesTableApiToServiceNowConnectors = (
 const addIsOAuthToServiceNowConnectors = (
   doc: SavedObjectUnsanitizedDoc<RawAction>
 ): SavedObjectUnsanitizedDoc<RawAction> => {
-  if (
-    doc.attributes.actionTypeId !== '.servicenow' &&
-    doc.attributes.actionTypeId !== '.servicenow-sir' &&
-    doc.attributes.actionTypeId !== '.servicenow-itom'
-  ) {
-    return doc;
-  }
+  // checking for actionTypeId inside the migrationActions830 function
+  // if that check changes to be more inclusive, we should check specifically
+  // for servicenow actionTypeIds here.
 
   return {
     ...doc,
