@@ -23,6 +23,6 @@ done
 
 # archive json files with traces and upload as build artifacts
 echo "--- Archive jsons and upload as artefact"
-tar -czf target/performance/scalability_traces.tar.gz output
-buildkite-agent artifact upload "target/performance/scalability_traces.tar.gz"
+tar -czf scalability_traces.tar.gz output
+buildkite-agent artifact upload "scalability_traces.tar.gz"
 
