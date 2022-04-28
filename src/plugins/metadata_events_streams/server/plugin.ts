@@ -6,21 +6,10 @@
  * Side Public License, v 1.
  */
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import type {
-  MetadataEventsStreamsPluginSetup,
-  MetadataEventsStreamsPluginStart,
-  StreamName,
-  MetadataEvent,
-  UserContentMetadataEvent,
-} from './types';
-// import { SavedObjectsManagement } from './services';
-// import { registerRoutes } from './routes';
-// import { capabilitiesProvider } from './capabilities_provider';
-import {
-  MetadataEventsStream,
-  MetadataEventsStreams,
-  MetadataEventsStreamsIndex,
-} from './services';
+
+import type { MetadataEventsStreamsPluginSetup, MetadataEventsStreamsPluginStart } from './types';
+import { registerRoutes } from './routes';
+import { MetadataEventsStreams, MetadataEventsStreamsIndex } from './services';
 
 export class MetadataEventsStreamsPlugin
   implements Plugin<MetadataEventsStreamsPluginSetup, MetadataEventsStreamsPluginStart, {}, {}>
@@ -40,10 +29,10 @@ export class MetadataEventsStreamsPlugin
   public setup({ http }: CoreSetup) {
     this.logger.debug('Setting up UserContent plugin');
 
-    // registerRoutes({
-    //   http,
-    //   managementServicePromise: firstValueFrom(this.managementService$),
-    // });
+    registerRoutes({
+      http,
+      metadataEventsStreams: this.metadataEventsStreams,
+    });
 
     return {};
   }
@@ -52,28 +41,18 @@ export class MetadataEventsStreamsPlugin
     this.logger.debug('Starting up UserContent plugin');
 
     const esClient = core.elasticsearch.client.asInternalUser;
+
+    /** Create the .kibana-events-streams index */
     this.metadataEventsStreamsIndex.init({ esClient });
 
-    const userContentMetadataEventsStream =
-      this.registerEventStream<UserContentMetadataEvent>('userContent');
-
-    // const managementService = new SavedObjectsManagement(core.savedObjects.getTypeRegistry());
-    // this.managementService$.next(managementService);
-
-    return {
-      userContentMetadataEventsStream,
-    };
-  }
-
-  private registerEventStream<T extends MetadataEvent>(
-    streamName: StreamName
-  ): MetadataEventsStream<T> {
-    const stream = new MetadataEventsStream<T>(streamName, {
+    this.metadataEventsStreams.init({
       metadataEventsStreamsIndex: this.metadataEventsStreamsIndex,
     });
 
-    this.metadataEventsStreams.register(streamName, stream);
-
-    return stream;
+    return {
+      registerEventStream: this.metadataEventsStreams.registerEventStream.bind(
+        this.metadataEventsStreams
+      ),
+    };
   }
 }

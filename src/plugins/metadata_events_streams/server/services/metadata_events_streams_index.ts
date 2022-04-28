@@ -7,7 +7,7 @@
  */
 import moment from 'moment';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { StreamName, MetadataEvent, MetadataEventDoc } from '../types';
+import type { MetadataEvent, MetadataEventDoc } from '../types';
 
 interface Dependencies {
   logger: Logger;
@@ -32,7 +32,7 @@ export class MetadataEventsStreamsIndex {
     this.createIndexIfNotExist(indexName);
   }
 
-  addEventToStream<E extends MetadataEvent>(streamName: StreamName, event: E) {
+  addEventToStream<E extends MetadataEvent>(streamName: string, event: E) {
     const document: MetadataEventDoc = {
       ...event,
       '@timestamp': getTimestamp(),

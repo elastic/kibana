@@ -5,21 +5,38 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { StreamName, MetadataEvent } from '../types';
+import type { MetadataEvent } from '../types';
 import { MetadataEventsStream } from './metadata_events_stream';
 
+import type { MetadataEventsStreamsIndex } from './metadata_events_streams_index';
+
 export class MetadataEventsStreams {
-  private streams: Map<StreamName, MetadataEventsStream<MetadataEvent>>;
+  private streams: Map<string, MetadataEventsStream<MetadataEvent>>;
+  private metadataEventsStreamsIndex: MetadataEventsStreamsIndex | undefined;
 
   constructor() {
-    this.streams = new Map<StreamName, MetadataEventsStream<MetadataEvent>>();
+    this.streams = new Map<string, MetadataEventsStream<MetadataEvent>>();
   }
 
-  register(streamName: StreamName, stream: MetadataEventsStream<MetadataEvent>) {
-    this.streams.set(streamName, stream);
+  init({ metadataEventsStreamsIndex }: { metadataEventsStreamsIndex: MetadataEventsStreamsIndex }) {
+    this.metadataEventsStreamsIndex = metadataEventsStreamsIndex;
   }
 
-  get(streamName: StreamName) {
+  get(streamName: string) {
     return this.streams.get(streamName);
+  }
+
+  registerEventStream<T extends MetadataEvent>(streamName: string): MetadataEventsStream<T> {
+    if (!this.metadataEventsStreamsIndex) {
+      throw new Error(`Metadata events streams service has not been initialized`);
+    }
+
+    const stream = new MetadataEventsStream<T>(streamName, {
+      metadataEventsStreamsIndex: this.metadataEventsStreamsIndex,
+    });
+
+    this.streams.set(streamName, stream);
+
+    return stream;
   }
 }

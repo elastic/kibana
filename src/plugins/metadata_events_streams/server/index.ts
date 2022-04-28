@@ -12,4 +12,10 @@ import { MetadataEventsStreamsPlugin } from './plugin';
 export const plugin = (context: PluginInitializerContext) =>
   new MetadataEventsStreamsPlugin(context);
 
-export type { MetadataEventsStreamsPluginSetup, MetadataEventsStreamsPluginStart } from './types';
+export type {
+  MetadataEventsStreamsPluginSetup,
+  MetadataEventsStreamsPluginStart,
+  MetadataEvent,
+} from './types';
+
+export type { MetadataEventsStream } from './services';
