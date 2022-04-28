@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile }: FtrProviderContext): void => {
-  describe('detection engine api security and spaces enabled - group 7', function () {
+  describe('detection engine api security and spaces enabled - group 8', function () {
     loadTestFile(require.resolve('./exception_operators_data_types'));
   });
 };
