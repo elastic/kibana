@@ -272,7 +272,7 @@ export function createTestEsCluster<
       await Promise.all(
         this.nodes.map(async (node, i) => {
           log.info(`[es] stopping node ${nodes[i].name}`);
-          await node.kill();
+          await node.stop();
         })
       );
 
@@ -280,7 +280,15 @@ export function createTestEsCluster<
     }
 
     async cleanup() {
-      await this.stop();
+      log.info('[es] killing', this.nodes.length === 1 ? 'node' : `${this.nodes.length} nodes`);
+      await Promise.all(
+        this.nodes.map(async (node, i) => {
+          log.info(`[es] stopping node ${nodes[i].name}`);
+          // we are deleting this install, stop ES more aggressively
+          await node.kill();
+        })
+      );
+
       await del(config.installPath, { force: true });
       log.info('[es] cleanup complete');
     }
