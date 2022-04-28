@@ -103,7 +103,13 @@ async function mountComponent(isTimeBased: boolean = false) {
     savedSearchRefetch$: new Subject(),
     searchSource: searchSourceMock,
     state: { columns: [] },
-    stateContainer: {} as GetStateReturn,
+    stateContainer: {
+      appStateContainer: {
+        getState: () => ({
+          interval: 'auto',
+        }),
+      },
+    } as unknown as GetStateReturn,
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     setDiscoverViewMode: jest.fn(),
   };

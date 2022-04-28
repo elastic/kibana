@@ -215,6 +215,7 @@ export function DiscoverChart({
             <DiscoverHistogramMemoized
               savedSearchData$={savedSearchDataChart$}
               timefilterUpdateHandler={timefilterUpdateHandler}
+              stateContainer={stateContainer}
             />
           </section>
           <EuiSpacer size="s" />
