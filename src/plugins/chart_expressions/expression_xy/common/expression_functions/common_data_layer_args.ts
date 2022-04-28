@@ -12,14 +12,14 @@ import { DataLayerFn, ExtendedDataLayerFn } from '../types';
 
 type CommonDataLayerFn = DataLayerFn | ExtendedDataLayerFn;
 
-export const commonDataLayerArgs: CommonDataLayerFn['args'] = {
+export const getCommonDataLayerArgs = (isExtendedLayer?: boolean): CommonDataLayerFn['args'] => ({
   hide: {
     types: ['boolean'],
     default: false,
     help: strings.getHideHelp(),
   },
   xAccessor: {
-    types: ['string'],
+    types: isExtendedLayer ? ['string'] : ['string', 'vis_dimension'],
     help: strings.getXAccessorHelp(),
   },
   seriesType: {
@@ -47,11 +47,11 @@ export const commonDataLayerArgs: CommonDataLayerFn['args'] = {
     strict: true,
   },
   splitAccessor: {
-    types: ['string'],
+    types: isExtendedLayer ? ['string'] : ['string', 'vis_dimension'],
     help: strings.getSplitAccessorHelp(),
   },
   accessors: {
-    types: ['string'],
+    types: isExtendedLayer ? ['string'] : ['string', 'vis_dimension'],
     help: strings.getAccessorsHelp(),
     multi: true,
   },
@@ -69,4 +69,4 @@ export const commonDataLayerArgs: CommonDataLayerFn['args'] = {
     help: strings.getPaletteHelp(),
     default: '{palette}',
   },
-};
+});

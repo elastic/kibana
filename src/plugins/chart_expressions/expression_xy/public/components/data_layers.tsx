@@ -15,7 +15,8 @@ import {
 import React, { FC } from 'react';
 import { PaletteRegistry } from '@kbn/coloring';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
-import { getAccessorByDimension } from '../../../../../plugins/visualizations/common/utils';
+import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
+
 import {
   CommonXYDataLayerConfig,
   EndValue,

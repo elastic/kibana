@@ -24,11 +24,12 @@ import {
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin';
-import { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
 import {
-  getAccessorByDimension,
   getFormatByAccessor,
-} from '../../../../visualizations/common/utils';
+  getAccessorByDimension,
+} from '@kbn/visualizations-plugin/common/utils';
+import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
+import { PaletteRegistry, SeriesLayer } from '@kbn/coloring';
 import { CommonXYDataLayerConfig, XScaleType } from '../../common';
 import { FormatFactory } from '../types';
 import { getSeriesColor } from './state';
@@ -56,7 +57,8 @@ type GetSeriesPropsFn = (config: {
 type GetSeriesNameFn = (
   data: XYChartSeriesIdentifier,
   config: {
-    layer: CommonXYDataLayerConfig;
+    splitColumnId?: string;
+    accessorsCount: number;
     splitHint: SerializedFieldFormat<FieldFormatParams> | undefined;
     splitFormatter: FieldFormat;
     alreadyFormattedColumns: Record<string, boolean>;
@@ -115,17 +117,30 @@ export const getFormattedRow = (
 export const getFormattedTable = (
   table: Datatable,
   formatFactory: FormatFactory,
-  xAccessor: string | undefined,
+  xAccessor: string | ExpressionValueVisDimension | undefined,
+  splitAccessor: string | ExpressionValueVisDimension | undefined,
+  accessors: Array<string | ExpressionValueVisDimension>,
   xScaleType: XScaleType
 ): { table: Datatable; formattedColumns: Record<string, true> } => {
   const xColumnId = xAccessor ? getAccessorByDimension(xAccessor, table.columns) : undefined;
+  const splitColumnId = splitAccessor
+    ? getAccessorByDimension(splitAccessor, table.columns)
+    : undefined;
   const columnsFormatters = table.columns.reduce<Record<string, IFieldFormat>>(
-    (formatters, { id, meta }) => ({
-      ...formatters,
-      [id]: formatFactory(
-        id === xColumnId ? getFormatByAccessor(xColumnId, table.columns) : meta.params
-      ),
-    }),
+    (formatters, { id, meta }) => {
+      let accessor: string | ExpressionValueVisDimension | undefined;
+      if (id === xColumnId) {
+        accessor = xColumnId;
+      } else if (id === splitColumnId) {
+        accessor = splitAccessor;
+      } else {
+        accessor = accessors.find((a) => getAccessorByDimension(a, table.columns) === id);
+      }
+      return {
+        ...formatters,
+        [id]: formatFactory(accessor ? getFormatByAccessor(accessor, table.columns) : meta.params),
+      };
+    },
     {}
   );
 
@@ -163,9 +178,16 @@ export const getFormattedTablesByLayers = (
   formatFactory: FormatFactory
 ): DatatablesWithFormatInfo =>
   layers.reduce(
-    (formattedDatatables, { layerId, table, xAccessor, xScaleType }) => ({
+    (formattedDatatables, { layerId, table, xAccessor, splitAccessor, accessors, xScaleType }) => ({
       ...formattedDatatables,
-      [layerId]: getFormattedTable(table, formatFactory, xAccessor, xScaleType),
+      [layerId]: getFormattedTable(
+        table,
+        formatFactory,
+        xAccessor,
+        splitAccessor,
+        accessors,
+        xScaleType
+      ),
     }),
     {}
   );

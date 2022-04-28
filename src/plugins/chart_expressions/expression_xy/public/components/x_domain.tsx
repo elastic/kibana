@@ -11,10 +11,7 @@ import React from 'react';
 import moment from 'moment';
 import { Endzones } from '@kbn/charts-plugin/public';
 import { search } from '@kbn/data-plugin/public';
-import {
-  getColumnByAccessor,
-  getAccessorByDimension,
-} from '../../../../../plugins/visualizations/common/utils';
+import { getAccessorByDimension, getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import type { CommonXYDataLayerConfig } from '../../common';
 
 export interface XDomain {

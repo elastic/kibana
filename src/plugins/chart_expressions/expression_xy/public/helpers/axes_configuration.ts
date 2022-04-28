@@ -7,10 +7,7 @@
  */
 
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import {
-  getAccessorByDimension,
-  getFormatByAccessor,
-} from '../../../../../plugins/visualizations/common/utils';
+import { getFormatByAccessor, getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import { FormatFactory } from '../types';
 import { AxisExtentConfig, CommonXYDataLayerConfig, ExtendedYConfig, YConfig } from '../../common';
 import { isDataLayer } from './visualization';

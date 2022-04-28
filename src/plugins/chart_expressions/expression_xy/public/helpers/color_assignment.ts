@@ -8,10 +8,7 @@
 
 import { uniq, mapValues } from 'lodash';
 import { euiLightVars } from '@kbn/ui-theme';
-import {
-  getAccessorByDimension,
-  getFormatByAccessor,
-} from '../../../../../plugins/visualizations/common/utils';
+import { getFormatByAccessor, getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import { FormatFactory } from '../types';
 import { isDataLayer } from './visualization';
 import { CommonXYDataLayerConfig, CommonXYLayerConfig } from '../../common';

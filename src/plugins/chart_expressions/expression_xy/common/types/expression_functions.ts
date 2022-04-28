@@ -11,6 +11,7 @@ import { $Values } from '@kbn/utility-types';
 import type { PaletteOutput } from '@kbn/coloring';
 import { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import {
   AxisExtentModes,
   FillStyles,

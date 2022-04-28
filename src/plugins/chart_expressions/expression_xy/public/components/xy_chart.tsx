@@ -33,10 +33,10 @@ import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public'
 import { ChartsPluginSetup, ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import {
-  getColumnByAccessor,
-  getAccessorByDimension,
   getFormatByAccessor,
-} from '../../../../../plugins/visualizations/common/utils';
+  getAccessorByDimension,
+  getColumnByAccessor,
+} from '@kbn/visualizations-plugin/common/utils';
 import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
 import type { CommonXYDataLayerConfig, SeriesType, XYChartProps } from '../../common/types';
 import {

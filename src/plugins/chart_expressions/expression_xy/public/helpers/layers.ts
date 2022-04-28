@@ -7,8 +7,8 @@
  */
 
 import { Datatable } from '@kbn/expressions-plugin/common';
-import { getAccessorByDimension } from '../../../../../plugins/visualizations/common/utils';
-import type { ExpressionValueVisDimension } from '../../../../../plugins/visualizations/common';
+import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
+import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import {
   CommonXYDataLayerConfig,
   CommonXYLayerConfig,
@@ -24,6 +24,11 @@ export function getFilteredLayers(layers: CommonXYLayerConfig[]) {
       let xAccessor: undefined | string | number;
       let splitAccessor: undefined | string | number;
 
+      if (isDataLayer(layer) || isReferenceLayer(layer)) {
+        table = layer.table;
+        accessors = layer.accessors;
+      }
+
       if (isDataLayer(layer)) {
         xAccessor =
           layer.xAccessor && table && getAccessorByDimension(layer.xAccessor, table.columns);
@@ -31,11 +36,6 @@ export function getFilteredLayers(layers: CommonXYLayerConfig[]) {
           layer.splitAccessor &&
           table &&
           getAccessorByDimension(layer.splitAccessor, table.columns);
-      }
-
-      if (isDataLayer(layer) || isReferenceLayer(layer)) {
-        table = layer.table;
-        accessors = layer.accessors;
       }
 
       return !(
