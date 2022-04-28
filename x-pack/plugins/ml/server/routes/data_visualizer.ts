@@ -97,18 +97,20 @@ export function dataVisualizerRoutes({ router, routeGuard }: RouteInitialization
     routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const stream = new ResponseStream();
-        stream.push(JSON.stringify({ type: 'message', value: 'hey' }) + '\n');
 
         let count = 0;
-        let aborted = false;
+        let shouldStop = false;
 
         request.events.aborted$.subscribe(() => {
-          aborted = true;
+          shouldStop = true;
+        });
+        request.events.completed$.subscribe(() => {
+          shouldStop = true;
         });
 
         function doStream() {
           setTimeout((): void => {
-            if (aborted) {
+            if (shouldStop) {
               stream.push(null);
               return;
             }
