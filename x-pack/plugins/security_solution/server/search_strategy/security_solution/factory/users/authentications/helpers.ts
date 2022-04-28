@@ -52,7 +52,7 @@ export const formatAuthenticationData = (hit: AuthenticationHit): Authentication
   }
 
   const lastFailureFields = getAuthenticationFields(authenticationsFields, hit, 'lasFailure');
-  if (Object.keys(lastSuccessFields).length > 0) {
+  if (Object.keys(lastFailureFields).length > 0) {
     flattenedFields = set('node.lastFailure', lastFailureFields, flattenedFields);
   }
 
