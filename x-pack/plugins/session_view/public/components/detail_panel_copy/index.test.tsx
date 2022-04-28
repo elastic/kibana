@@ -28,6 +28,7 @@ describe('DetailPanelCopy component', () => {
       );
 
       expect(renderResult.queryByText(TEST_TEXT_COPY)).toBeVisible();
+      expect(renderResult).toMatchSnapshot();
     });
   });
 });
