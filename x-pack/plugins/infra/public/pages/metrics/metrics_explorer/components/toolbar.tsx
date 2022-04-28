@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import {
   MetricsExplorerMetric,
   MetricsExplorerAggregation,

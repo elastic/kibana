@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreStart } from 'kibana/public';
-import { IClickActionDescriptor } from '../';
+import { CoreStart } from '@kbn/core/public';
+import { IClickActionDescriptor } from '..';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { UISession } from '../../types';
 import { createDeleteActionDescriptor } from './delete_button';

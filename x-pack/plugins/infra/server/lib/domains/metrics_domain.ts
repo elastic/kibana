@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
+import { KibanaRequest } from '@kbn/core/server';
 import type { InfraPluginRequestHandlerContext } from '../../types';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from '../adapters/metrics/adapter_types';
 import { NodeDetailsMetricData } from '../../../common/http_api/node_details_api';

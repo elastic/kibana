@@ -7,10 +7,14 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { isNestedField, FieldSpec, DataView } from '../../../data/common';
+import { isNestedField, FieldSpec, DataView } from '@kbn/data-plugin/common';
+import {
+  FieldFormat,
+  FieldFormatsRegistry,
+  FIELD_FORMAT_IDS,
+} from '@kbn/field-formats-plugin/common';
 import { FieldNotFoundError } from './errors';
 import type { FetchedIndexPattern, SanitizedFieldType } from './types';
-import { FieldFormat, FieldFormatsRegistry, FIELD_FORMAT_IDS } from '../../../field_formats/common';
 
 export const extractFieldLabel = (
   fields: SanitizedFieldType[],

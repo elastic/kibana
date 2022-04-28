@@ -6,8 +6,9 @@
  */
 
 import { useMemo } from 'react';
-import { useEuiTheme, transparentize } from '@elastic/eui';
+import { transparentize } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
+import { useEuiTheme } from '../../hooks';
 
 interface StylesDeps {
   depth: number;
@@ -17,12 +18,13 @@ interface StylesDeps {
 }
 
 export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }: StylesDeps) => {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, euiVars } = useEuiTheme();
 
   const cached = useMemo(() => {
     const { colors, border, size, font } = euiTheme;
 
     const TREE_INDENT = `calc(${size.l} + ${size.xxs})`;
+    const PROCESS_TREE_LEFT_PADDING = size.s;
 
     const darkText: CSSObject = {
       color: colors.text,
@@ -39,12 +41,16 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
       borderLeft: border.editable,
     };
 
+    const icon: CSSObject = {
+      color: euiVars.euiColorDarkShade,
+    };
+
     /**
      * gets border, bg and hover colors for a process
      */
     const getHighlightColors = () => {
       let bgColor = 'none';
-      const hoverColor = transparentize(colors.primary, 0.04);
+      let hoverColor = transparentize(colors.primary, 0.04);
       let borderColor = 'transparent';
       let searchResColor = transparentize(colors.warning, 0.32);
 
@@ -52,12 +58,18 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
         borderColor = colors.danger;
       }
 
-      if (hasInvestigatedAlert) {
-        bgColor = transparentize(colors.danger, 0.04);
-      }
-
       if (isSelected) {
         searchResColor = colors.warning;
+        bgColor = transparentize(colors.primary, 0.08);
+        hoverColor = transparentize(colors.primary, 0.12);
+      }
+
+      if (hasInvestigatedAlert) {
+        bgColor = transparentize(colors.danger, 0.04);
+        hoverColor = transparentize(colors.danger, 0.12);
+        if (isSelected) {
+          bgColor = transparentize(colors.danger, 0.08);
+        }
       }
 
       return { bgColor, borderColor, hoverColor, searchResColor };
@@ -79,10 +91,10 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
         height: '100%',
         pointerEvents: 'none',
         content: `''`,
-        marginLeft: `calc(-${depth} * ${TREE_INDENT})`,
+        marginLeft: `calc(-${depth} * ${TREE_INDENT} - ${PROCESS_TREE_LEFT_PADDING})`,
         borderLeft: `${size.xs} solid ${borderColor}`,
         backgroundColor: bgColor,
-        width: `calc(100% + ${depth} * ${TREE_INDENT})`,
+        width: `calc(100% + ${depth} * ${TREE_INDENT} + ${PROCESS_TREE_LEFT_PADDING})`,
         transform: `translateY(-${size.xs})`,
       },
     };
@@ -97,10 +109,10 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
       paddingLeft: size.s,
       position: 'relative',
       verticalAlign: 'middle',
-      color: colors.mediumShade,
+      color: euiVars.euiTextSubduedColor,
       wordBreak: 'break-all',
-      minHeight: size.l,
-      lineHeight: size.l,
+      minHeight: `calc(${size.l} - ${size.xxs})`,
+      lineHeight: `calc(${size.l} - ${size.xxs})`,
     };
 
     const workingDir: CSSObject = {
@@ -136,8 +148,9 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
       workingDir,
       timeStamp,
       alertDetails,
+      icon,
     };
-  }, [depth, euiTheme, hasAlerts, hasInvestigatedAlert, isSelected]);
+  }, [depth, euiTheme, hasAlerts, hasInvestigatedAlert, isSelected, euiVars]);
 
   return cached;
 };

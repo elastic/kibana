@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { getPackageInfo, getInstallation } from '../epm/packages';
 import { getDataStreamPrivileges } from '../package_policies_to_agent_permissions';

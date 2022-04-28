@@ -8,16 +8,19 @@
 
 import './index.scss';
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import {
+  Storage,
+  IStorageWrapper,
+  createStartServicesGetter,
+} from '@kbn/kibana-utils-plugin/public';
 import { ConfigSchema } from '../config';
-import { Storage, IStorageWrapper, createStartServicesGetter } from '../../kibana_utils/public';
 import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   DataSetupDependencies,
   DataStartDependencies,
 } from './types';
-import { AutocompleteService } from './autocomplete';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query';
 import {
@@ -48,7 +51,6 @@ export class DataPublicPlugin
       DataStartDependencies
     >
 {
-  private readonly autocomplete: AutocompleteService;
   private readonly searchService: SearchService;
   private readonly queryService: QueryService;
   private readonly storage: IStorageWrapper;
@@ -58,7 +60,6 @@ export class DataPublicPlugin
     this.searchService = new SearchService(initializerContext);
     this.queryService = new QueryService();
 
-    this.autocomplete = new AutocompleteService(initializerContext);
     this.storage = new Storage(window.localStorage);
     this.nowProvider = new NowProvider();
   }
@@ -109,10 +110,6 @@ export class DataPublicPlugin
     );
 
     return {
-      autocomplete: this.autocomplete.setup(core, {
-        timefilter: queryService.timefilter,
-        usageCollection,
-      }),
       search: searchService,
       query: queryService,
     };
@@ -157,7 +154,6 @@ export class DataPublicPlugin
         createFiltersFromValueClickAction,
         createFiltersFromRangeSelectAction,
       },
-      autocomplete: this.autocomplete.start(),
       datatableUtilities,
       fieldFormats,
       indexPatterns: dataViews,
@@ -171,7 +167,6 @@ export class DataPublicPlugin
   }
 
   public stop() {
-    this.autocomplete.clearProviders();
     this.queryService.stop();
     this.searchService.stop();
   }

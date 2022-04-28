@@ -12,18 +12,18 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { Observable } from 'rxjs';
 
+import { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
+import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
+import { FieldSpec, getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
+import { PluginSetup as UnifiedSearchPluginSetup } from '@kbn/unified-search-plugin/server';
 import {
   OptionsListRequestBody,
   OptionsListResponse,
 } from '../../../common/control_types/options_list/types';
-import { CoreSetup, ElasticsearchClient } from '../../../../../core/server';
-import { getKbnServerError, reportServerError } from '../../../../kibana_utils/server';
-import { PluginSetup as DataPluginSetup } from '../../../../data/server';
-import { FieldSpec, getFieldSubtypeNested } from '../../../../data_views/common';
 
 export const setupOptionsListSuggestionsRoute = (
   { http }: CoreSetup,
-  getAutocompleteSettings: DataPluginSetup['autocomplete']['getAutocompleteSettings']
+  getAutocompleteSettings: UnifiedSearchPluginSetup['autocomplete']['getAutocompleteSettings']
 ) => {
   const router = http.createRouter();
 
@@ -53,7 +53,7 @@ export const setupOptionsListSuggestionsRoute = (
       try {
         const suggestionRequest: OptionsListRequestBody = request.body;
         const { index } = request.params;
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
         const suggestionsResponse = await getOptionsListSuggestions({
           abortedEvent$: request.events.aborted$,
           request: suggestionRequest,

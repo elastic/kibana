@@ -7,7 +7,7 @@
 
 import { get } from 'lodash';
 import { first } from 'rxjs/operators';
-import type { CoreSetup, Logger, PluginInitializerContext } from 'kibana/server';
+import type { CoreSetup, Logger, PluginInitializerContext } from '@kbn/core/server';
 import { createConfig$ } from './create_config';
 import { ReportingConfigType } from './schema';
 

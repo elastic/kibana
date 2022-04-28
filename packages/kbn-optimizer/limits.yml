@@ -1,9 +1,10 @@
 pageLoadAssetSize:
   advancedSettings: 27596
+  actions: 20000
   alerting: 106936
   apm: 64385
   canvas: 1066647
-  charts: 95000
+  charts: 55000
   cloud: 21076
   console: 46091
   core: 435325
@@ -30,7 +31,7 @@ pageLoadAssetSize:
   inputControlVis: 172675
   inspector: 148711
   kibanaOverview: 56279
-  lens: 96624
+  lens: 35000
   licenseManagement: 41817
   licensing: 29004
   lists: 22900
@@ -56,9 +57,8 @@ pageLoadAssetSize:
   telemetry: 51957
   telemetryManagementSection: 38586
   transform: 41007
-  triggersActionsUi: 102400
+  triggersActionsUi: 103400
   upgradeAssistant: 81241
-  uptime: 40825
   urlForwarding: 32579
   usageCollection: 39762
   visDefaultEditor: 50178
@@ -116,14 +116,16 @@ pageLoadAssetSize:
   reporting: 57003
   visTypeHeatmap: 25340
   expressionGauge: 25000
-  controls: 34788
+  controls: 40000
   expressionPartitionVis: 26338
   sharedUX: 16225
   ux: 20784
   sessionView: 77750
   cloudSecurityPosture: 19109
   visTypeGauge: 24113
-  unifiedSearch: 49195
+  unifiedSearch: 104869
   data: 454087
   expressionXY: 26500
   eventAnnotation: 19334
+  screenshotting: 22870
+  synthetics: 40958

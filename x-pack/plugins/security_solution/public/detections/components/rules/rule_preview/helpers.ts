@@ -8,7 +8,7 @@
 import { Position, ScaleType } from '@elastic/charts';
 import { EuiSelectOption } from '@elastic/eui';
 import { Type, Language, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
-import { Unit } from '@elastic/datemath';
+import { Unit } from '@kbn/datemath';
 import type { Filter } from '@kbn/es-query';
 import * as i18n from './translations';
 import { histogramDateTimeFormatter } from '../../../../common/components/utils';
@@ -234,7 +234,7 @@ export const getIsRulePreviewDisabled = ({
   if (ruleType === 'machine_learning') {
     return machineLearningJobId.length === 0;
   }
-  if (ruleType === 'eql') {
+  if (ruleType === 'eql' || ruleType === 'query' || ruleType === 'threshold') {
     return queryBar.query.query.length === 0;
   }
   return false;

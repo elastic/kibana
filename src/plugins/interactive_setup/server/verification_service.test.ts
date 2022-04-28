@@ -8,7 +8,7 @@
 
 import fs from 'fs';
 
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { VerificationCode } from './verification_code';
 import { VerificationService } from './verification_service';

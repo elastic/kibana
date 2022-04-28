@@ -8,7 +8,7 @@ import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { UseQueryResult } from 'react-query/types/react/types';
-import { createStubDataView } from '../../../../../../src/plugins/data_views/public/data_views/data_view.stub';
+import { createStubDataView } from '@kbn/data-views-plugin/public/data_views/data_view.stub';
 import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
 import { useKubebeatDataView } from '../../common/api/use_kubebeat_data_view';
 import { createCspBenchmarkIntegrationFixture } from '../../test/fixtures/csp_benchmark_integration';
