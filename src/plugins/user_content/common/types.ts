@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export { API_BASE_PATH, metadataEventTypes } from './constants';
 
-export { withApiBaseBath } from './lib';
+import { metadataEventTypes } from './constants';
 
-export type { MetadataEventType } from './types';
+export type MetadataEventType = typeof metadataEventTypes[number];

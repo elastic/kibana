@@ -7,3 +7,5 @@
  */
 
 export const API_BASE_PATH = '/api/user_content';
+
+export const metadataEventTypes = ['viewed:kibana', 'viewed:api'] as const;
