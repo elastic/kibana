@@ -23,7 +23,7 @@ import { KibanaContextProvider, KibanaServices } from '@kbn/kibana-react-plugin/
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setIndexPatterns } from '@kbn/unified-search-plugin/public/services';
+import { setDataViews } from '@kbn/unified-search-plugin/public/services';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -144,7 +144,7 @@ export function MockKibanaProvider<ExtraCore extends Partial<CoreStart>>({
   kibanaProps,
 }: MockKibanaProviderProps<ExtraCore>) {
   const dataView = mockDataView;
-  setIndexPatterns({
+  setDataViews({
     ...[dataView],
     get: async () => dataView,
   } as unknown as DataViewsContract);

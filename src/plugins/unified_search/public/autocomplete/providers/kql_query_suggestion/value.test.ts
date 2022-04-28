@@ -7,11 +7,11 @@
  */
 
 import { setupGetValueSuggestions } from './value';
-import dataViewResponse from './__fixtures__/index_pattern_response.json';
+import dataViewResponse from './__fixtures__/data_view_response.json';
 
 import { coreMock } from '@kbn/core/public/mocks';
-import { KueryNode } from '@kbn/data-plugin/public';
-import { QuerySuggestionGetFnArgs } from '../query_suggestion_provider';
+import type { KueryNode } from '@kbn/data-plugin/public';
+import type { QuerySuggestionGetFnArgs } from '../query_suggestion_provider';
 
 const mockKueryNode = (kueryNode: Partial<KueryNode>) => kueryNode as unknown as KueryNode;
 
