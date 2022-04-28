@@ -57,6 +57,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       fromTime = fromTime || PageObjects.timePicker.defaultStartTime;
       toTime = toTime || PageObjects.timePicker.defaultEndTime;
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      // give some time for the update button tooltip to close
+      await PageObjects.common.sleep(500);
     },
 
     /**
