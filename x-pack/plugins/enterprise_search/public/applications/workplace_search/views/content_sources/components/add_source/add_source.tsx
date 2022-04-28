@@ -7,22 +7,28 @@
 
 import React, { useEffect } from 'react';
 
+import { useParams } from 'react-router-dom';
+
 import { useActions, useValues } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
 import { flashSuccessToast } from '../../../../../shared/flash_messages';
 import { KibanaLogic } from '../../../../../shared/kibana';
+import { LicensingLogic } from '../../../../../shared/licensing';
+
 import { AppLogic } from '../../../../app_logic';
 import {
   WorkplaceSearchPageTemplate,
   PersonalDashboardLayout,
 } from '../../../../components/layout';
 import { NAV } from '../../../../constants';
-import { SOURCES_PATH, getSourcesPath, getAddPath } from '../../../../routes';
+import { SOURCES_PATH, getSourcesPath, getAddPath, ADD_SOURCE_PATH } from '../../../../routes';
+
+import { getSourceData } from '../../source_data';
 
 import { AddSourceHeader } from './add_source_header';
-import { AddSourceLogic, AddSourceProps, AddSourceSteps } from './add_source_logic';
+import { AddSourceLogic, AddSourceSteps } from './add_source_logic';
 import { ConfigCompleted } from './config_completed';
 import { ConfigureOauth } from './configure_oauth';
 import { ConnectInstance } from './connect_instance';
@@ -31,19 +37,34 @@ import { SaveConfig } from './save_config';
 
 import './add_source.scss';
 
-export const AddSource: React.FC<AddSourceProps> = (props) => {
-  const { initializeAddSource, setAddSourceStep, saveSourceConfig, resetSourceState } =
-    useActions(AddSourceLogic);
-  const { addSourceCurrentStep, sourceConfigData, dataLoading } = useValues(AddSourceLogic);
-  const { name, categories, needsPermissions, accountContextOnly, privateSourcesEnabled } =
-    sourceConfigData;
-  const { serviceType, configuration, features, objTypes } = props.sourceData;
+export const AddSource: React.FC = () => {
+  const { serviceType, initialStep } = useParams<{ serviceType: string; initialStep: string }>();
+  const addSourceLogic = AddSourceLogic({ serviceType, initialStep });
+  const { getSourceConfigData, setAddSourceStep, saveSourceConfig, resetSourceState } =
+    useActions(addSourceLogic);
+  const { addSourceCurrentStep, sourceConfigData, dataLoading } = useValues(addSourceLogic);
   const { isOrganization } = useValues(AppLogic);
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
+  const { navigateToUrl } = useValues(KibanaLogic);
+
+  const sourceData = getSourceData(serviceType);
 
   useEffect(() => {
-    initializeAddSource(props);
+    getSourceConfigData();
     return resetSourceState;
-  }, []);
+  }, [serviceType]);
+
+  const { name, categories, accountContextOnly } = sourceConfigData;
+
+  if (!sourceData) {
+    return null;
+  }
+
+  if (!hasPlatinumLicense && accountContextOnly) {
+    navigateToUrl(getSourcesPath(ADD_SOURCE_PATH, isOrganization));
+  }
+
+  const { configuration, features, objTypes } = sourceData;
 
   const goToConfigurationIntro = () =>
     KibanaLogic.values.navigateToUrl(
@@ -72,7 +93,6 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
     <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name || '...']} isLoading={dataLoading}>
       {addSourceCurrentStep === AddSourceSteps.SaveConfigStep && (
         <SaveConfig
-          name={name}
           configuration={configuration}
           advanceStep={goToConfigCompleted}
           goBackStep={goToConfigurationIntro}
@@ -80,32 +100,22 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
         />
       )}
       {addSourceCurrentStep === AddSourceSteps.ConfigCompletedStep && (
-        <ConfigCompleted
-          name={name}
-          accountContextOnly={accountContextOnly}
-          advanceStep={goToConnectInstance}
-          privateSourcesEnabled={privateSourcesEnabled}
-          header={header}
-          showFeedbackLink={serviceType === 'external'}
-        />
+        <ConfigCompleted advanceStep={goToConnectInstance} header={header} />
       )}
       {addSourceCurrentStep === AddSourceSteps.ConnectInstanceStep && (
         <ConnectInstance
-          name={name}
-          serviceType={serviceType}
           configuration={configuration}
           features={features}
           objTypes={objTypes}
-          needsPermissions={!!needsPermissions}
           onFormCreated={goToFormSourceCreated}
           header={header}
         />
       )}
       {addSourceCurrentStep === AddSourceSteps.ConfigureOauthStep && (
-        <ConfigureOauth name={name} onFormCreated={goToFormSourceCreated} header={header} />
+        <ConfigureOauth onFormCreated={goToFormSourceCreated} header={header} />
       )}
       {addSourceCurrentStep === AddSourceSteps.ReauthenticateStep && (
-        <Reauthenticate name={name} header={header} />
+        <Reauthenticate header={header} />
       )}
     </Layout>
   );

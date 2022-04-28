@@ -26,21 +26,18 @@ import { CONFIG_OAUTH_LABEL, CONFIG_OAUTH_BUTTON } from './constants';
 
 interface ConfigureOauthProps {
   header: React.ReactNode;
-  name: string;
   onFormCreated(name: string): void;
 }
 
-export const ConfigureOauth: React.FC<ConfigureOauthProps> = ({ name, onFormCreated, header }) => {
+export const ConfigureOauth: React.FC<ConfigureOauthProps> = ({ onFormCreated, header }) => {
   const [formLoading, setFormLoading] = useState(false);
 
   const { getPreContentSourceConfigData, setSelectedGithubOrganizations, createContentSource } =
     useActions(AddSourceLogic);
-  const {
-    currentServiceType,
-    githubOrganizations,
-    selectedGithubOrganizationsMap,
-    sectionLoading,
-  } = useValues(AddSourceLogic);
+  const { sourceConfigData, githubOrganizations, selectedGithubOrganizationsMap, sectionLoading } =
+    useValues(AddSourceLogic);
+
+  const { name } = sourceConfigData;
 
   const checkboxOptions = githubOrganizations.map((item) => ({ id: item, label: item }));
 
@@ -54,7 +51,7 @@ export const ConfigureOauth: React.FC<ConfigureOauthProps> = ({ name, onFormCrea
   const handleFormSubmit = (e: FormEvent) => {
     setFormLoading(true);
     e.preventDefault();
-    createContentSource(currentServiceType, formSubmitSuccess, handleFormSubmitError);
+    createContentSource(formSubmitSuccess, handleFormSubmitError);
   };
 
   const configfieldsForm = (

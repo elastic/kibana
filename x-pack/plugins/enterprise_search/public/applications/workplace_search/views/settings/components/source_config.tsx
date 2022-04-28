@@ -34,16 +34,18 @@ interface SourceConfigProps {
 export const SourceConfig: React.FC<SourceConfigProps> = ({ sourceData }) => {
   const [confirmModalVisible, setConfirmModalVisibility] = useState(false);
   const { configuration, serviceType } = sourceData;
+  const addSourceLogic = AddSourceLogic({ serviceType });
   const { deleteSourceConfig } = useActions(SettingsLogic);
-  const { saveSourceConfig, getSourceConfigData } = useActions(AddSourceLogic);
+  const { saveSourceConfig, getSourceConfigData, resetSourceState } = useActions(addSourceLogic);
   const {
     sourceConfigData: { name, categories },
     dataLoading,
-  } = useValues(AddSourceLogic);
+  } = useValues(addSourceLogic);
 
   useEffect(() => {
-    getSourceConfigData(serviceType);
-  }, []);
+    getSourceConfigData();
+    return resetSourceState;
+  }, [serviceType]);
 
   const hideConfirmModal = () => setConfirmModalVisibility(false);
   const showConfirmModal = () => setConfirmModalVisibility(true);
@@ -57,7 +59,6 @@ export const SourceConfig: React.FC<SourceConfigProps> = ({ sourceData }) => {
       isLoading={dataLoading}
     >
       <SaveConfig
-        name={name}
         configuration={configuration}
         advanceStep={saveUpdatedConfig}
         onDeleteConfig={showConfirmModal}

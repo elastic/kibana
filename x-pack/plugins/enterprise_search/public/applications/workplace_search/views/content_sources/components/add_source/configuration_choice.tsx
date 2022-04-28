@@ -9,10 +9,11 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiButton, EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
-import { KibanaLogic } from '../../../../../shared/kibana';
+import { EuiButtonTo } from '../../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../../app_logic';
 import { getAddPath, getSourcesPath } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
@@ -31,7 +32,7 @@ interface CardProps {
   title: string;
   description: string;
   buttonText: string;
-  onClick: () => void;
+  to: string;
   badgeLabel?: string;
   disabledMessage?: string;
 }
@@ -53,26 +54,18 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
     return resetSourcesState;
   }, []);
 
-  const goToInternal = () =>
-    KibanaLogic.values.navigateToUrl(`${getSourcesPath(getAddPath(serviceType), isOrganization)}/`);
-
-  const goToExternal = () =>
-    KibanaLogic.values.navigateToUrl(
-      `${getSourcesPath(
-        getAddPath('external', serviceType),
-        isOrganization
-      )}/connector_registration`
-    );
-  const goToCustom = () =>
-    KibanaLogic.values.navigateToUrl(
-      `${getSourcesPath(getAddPath('custom', serviceType), isOrganization)}`
-    );
+  const internalTo = `${getSourcesPath(getAddPath(serviceType), isOrganization)}/`;
+  const externalTo = `${getSourcesPath(
+    getAddPath('external', serviceType),
+    isOrganization
+  )}/connector_registration`;
+  const customTo = `${getSourcesPath(getAddPath('custom', serviceType), isOrganization)}`;
 
   const ConnectorCard: React.FC<CardProps> = ({
     title,
     description,
     buttonText,
-    onClick,
+    to,
     badgeLabel,
     disabledMessage,
   }: CardProps) => (
@@ -84,9 +77,9 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
         description={disabledMessage || description}
         betaBadgeProps={{ label: badgeLabel }}
         footer={
-          <EuiButton color="primary" onClick={onClick} disabled={!!disabledMessage}>
+          <EuiButtonTo color="primary" to={to} isDisabled={!!disabledMessage}>
             {buttonText}
-          </EuiButton>
+          </EuiButtonTo>
         }
       />
     </EuiFlexItem>
@@ -118,7 +111,7 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
         defaultMessage: 'Recommended',
       }
     ),
-    onClick: goToInternal,
+    to: internalTo,
   };
 
   const externalConnectorProps: CardProps = {
@@ -141,7 +134,7 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
         defaultMessage: 'Instructions',
       }
     ),
-    onClick: goToExternal,
+    to: externalTo,
     badgeLabel: i18n.translate(
       'xpack.enterpriseSearch.workplaceSearch.contentSource.configExternalChoice.external.betaLabel',
       {
@@ -169,7 +162,7 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
         defaultMessage: 'Instructions',
       }
     ),
-    onClick: goToCustom,
+    to: customTo,
   };
 
   return (

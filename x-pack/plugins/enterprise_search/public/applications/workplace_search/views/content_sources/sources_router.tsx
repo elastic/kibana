@@ -11,7 +11,6 @@ import { Redirect, Route, Switch, useLocation } from 'react-router-dom';
 import { Location } from 'history';
 import { useActions, useValues } from 'kea';
 
-import { LicensingLogic } from '../../../shared/licensing';
 import { AppLogic } from '../../app_logic';
 import {
   GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE,
@@ -34,7 +33,6 @@ import { AddSourceChoice } from './components/add_source/add_source_choice';
 import { AddSourceIntro } from './components/add_source/add_source_intro';
 import { OrganizationSources } from './organization_sources';
 import { PrivateSources } from './private_sources';
-import { staticCustomSourceData, staticSourceData as sources } from './source_data';
 import { SourceRouter } from './source_router';
 import { SourcesLogic } from './sources_logic';
 
@@ -42,7 +40,6 @@ import './sources.scss';
 
 export const SourcesRouter: React.FC = () => {
   const { pathname } = useLocation() as Location;
-  const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { resetSourcesState } = useActions(SourcesLogic);
   const {
     account: { canCreatePrivateSources },
@@ -68,16 +65,6 @@ export const SourcesRouter: React.FC = () => {
     return null;
   }
 
-  const internalSources = sources.filter(
-    (sourceData) => sourceData.serviceType !== 'custom' && sourceData.serviceType !== 'external'
-  );
-  const externalSources = sources.filter((sourceData) => sourceData.serviceType === 'external');
-  const customSources = [
-    ...sources.filter((sourceData) => sourceData.serviceType === 'custom'),
-    staticCustomSourceData,
-  ];
-  const internalAndExternalSources = [...internalSources, ...externalSources];
-
   return (
     <Switch>
       <Route exact path={PRIVATE_SOURCES_PATH}>
@@ -92,146 +79,58 @@ export const SourcesRouter: React.FC = () => {
       <Route exact path={getAddPath(GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE)}>
         <GitHubViaApp isGithubEnterpriseServer />
       </Route>
-      {internalSources.map((sourceData, i) => {
-        const { serviceType, accountContextOnly } = sourceData;
-        return (
-          <Route
-            key={i}
-            exact
-            path={`${getSourcesPath(getAddPath(serviceType), isOrganization)}/choice`}
-            data-test-subj="ConnectorChoiceRoute"
-          >
-            {!hasPlatinumLicense && accountContextOnly ? (
-              <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
-            ) : (
-              <AddSourceChoice sourceData={sourceData} />
-            )}
-          </Route>
-        );
-      })}
-      {internalSources.map((sourceData, i) => {
-        const { baseServiceType, serviceType, accountContextOnly } = sourceData;
-        return (
-          <Route
-            key={i}
-            exact
-            path={`${getSourcesPath(
-              getAddPath(serviceType, baseServiceType),
-              isOrganization
-            )}/intro`}
-            data-test-subj="ConnectorIntroRoute"
-          >
-            {!hasPlatinumLicense && accountContextOnly ? (
-              <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
-            ) : (
-              <AddSourceIntro sourceData={sourceData} />
-            )}
-          </Route>
-        );
-      })}
       <Route
         exact
         path={`${getSourcesPath(getAddPath('external'), isOrganization)}/intro`}
-        data-test-subj="ConnectorIntroRoute"
+        data-test-subj="ConnectorBYOIntroRoute"
       >
         <AddSourceBYOIntro />
       </Route>
-      {internalAndExternalSources.map((sourceData, i) => {
-        const { baseServiceType, serviceType, accountContextOnly } = sourceData;
-        return (
-          <Route
-            key={i}
-            exact
-            path={`${getSourcesPath(getAddPath(serviceType, baseServiceType), isOrganization)}/`}
-            data-test-subj="AddSourceRoute"
-          >
-            {!hasPlatinumLicense && accountContextOnly ? (
-              <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
-            ) : (
-              <AddSource sourceData={sourceData} />
-            )}
-          </Route>
-        );
-      })}
-      {internalAndExternalSources.map((sourceData, i) => (
-        <Route
-          key={i}
-          exact
-          path={`${getSourcesPath(
-            getAddPath(sourceData.serviceType, sourceData.baseServiceType),
-            isOrganization
-          )}/connect`}
-          data-test-subj="AddSourceConnectRoute"
-        >
-          <AddSource connect sourceData={sourceData} />
-        </Route>
-      ))}
-      {internalAndExternalSources.map((sourceData, i) => (
-        <Route
-          key={i}
-          exact
-          path={`${getSourcesPath(
-            getAddPath(sourceData.serviceType, sourceData.baseServiceType),
-            isOrganization
-          )}/reauthenticate`}
-          data-test-subj="AddSourceReauthenticateRoute"
-        >
-          <AddSource reAuthenticate sourceData={sourceData} />
-        </Route>
-      ))}
-      {internalAndExternalSources.map((sourceData, i) => {
-        if (sourceData.configuration.needsConfiguration)
-          return (
-            <Route
-              key={i}
-              exact
-              path={`${getSourcesPath(
-                getAddPath(sourceData.serviceType, sourceData.baseServiceType),
-                isOrganization
-              )}/configure`}
-              data-test-subj="AddSourceConfigureRoute"
-            >
-              <AddSource configure sourceData={sourceData} />
-            </Route>
-          );
-      })}
-      {externalSources.map((sourceData, i) => {
-        const { baseServiceType, serviceType, accountContextOnly } = sourceData;
-        return (
-          <Route
-            key={i}
-            exact
-            path={`${getSourcesPath(
-              getAddPath(serviceType, baseServiceType),
-              isOrganization
-            )}/connector_registration`}
-            data-test-subj="ExternalConnectorConfigRoute"
-          >
-            {!hasPlatinumLicense && accountContextOnly ? (
-              <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
-            ) : (
-              <ExternalConnectorConfig sourceData={sourceData} />
-            )}
-          </Route>
-        );
-      })}
-      {customSources.map((sourceData, i) => {
-        const { baseServiceType, serviceType, accountContextOnly } = sourceData;
-        return (
-          <Route
-            key={i}
-            exact
-            path={`${getSourcesPath(getAddPath(serviceType, baseServiceType), isOrganization)}/`}
-            data-test-subj="AddCustomSourceRoute"
-          >
-            {!hasPlatinumLicense && accountContextOnly ? (
-              <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
-            ) : (
-              <AddCustomSource sourceData={sourceData} initialValue={sourceData.name} />
-            )}
-          </Route>
-        );
-      })}
+      <Route
+        exact
+        path={`${getSourcesPath(getAddPath(':serviceType'), isOrganization)}/intro`}
+        data-test-subj="ConnectorIntroRoute"
+      >
+        <AddSourceIntro />
+      </Route>
+      <Route
+        exact
+        path={`${getSourcesPath(getAddPath(':serviceType'), isOrganization)}/choice`}
+        data-test-subj="ConnectorChoiceRoute"
+      >
+        <AddSourceChoice />
+      </Route>
+      <Route
+        exact
+        path={`${getSourcesPath(getAddPath(':serviceType'), isOrganization)}/:initialStep?`}
+        data-test-subj="AddSourceRoute"
+      >
+        <AddSource />
+      </Route>
+      <Route
+        exact
+        path={`${getSourcesPath(getAddPath('external'), isOrganization)}/connector_registration`}
+        data-test-subj="ExternalConnectorConfigRoute"
+      >
+        <ExternalConnectorConfig />
+      </Route>
+      <Route
+        exact
+        path={`${getSourcesPath(
+          getAddPath('external', ':baseServiceType'),
+          isOrganization
+        )}/connector_registration`}
+        data-test-subj="ExternalConnectorConfigRoute"
+      >
+        <ExternalConnectorConfig />
+      </Route>
+      <Route
+        exact
+        path={`${getSourcesPath(getAddPath('custom', ':baseServiceType'), isOrganization)}/`}
+        data-test-subj="AddCustomSourceRoute"
+      >
+        <AddCustomSource />
+      </Route>
       {canCreatePrivateSources ? (
         <Route exact path={getSourcesPath(ADD_SOURCE_PATH, false)}>
           <AddSourceList />

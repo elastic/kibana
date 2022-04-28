@@ -7,7 +7,12 @@
 
 import React from 'react';
 
+import { useParams } from 'react-router-dom';
+
 import { useValues } from 'kea';
+
+import { KibanaLogic } from '../../../../../shared/kibana';
+import { LicensingLogic } from '../../../../../shared/licensing';
 
 import { AppLogic } from '../../../../app_logic';
 import {
@@ -15,36 +20,38 @@ import {
   PersonalDashboardLayout,
 } from '../../../../components/layout';
 import { NAV } from '../../../../constants';
-import { getSourcesPath, getAddPath } from '../../../../routes';
+import { getSourcesPath, ADD_SOURCE_PATH, getAddPath } from '../../../../routes';
 
-import { SourceDataItem } from '../../../../types';
-
-import { hasMultipleConnectorOptions } from '../../source_data';
+import { getSourceData, hasMultipleConnectorOptions } from '../../source_data';
 
 import { AddSourceHeader } from './add_source_header';
 import { ConfigurationIntro } from './configuration_intro';
 
 import './add_source.scss';
 
-interface AddSourceIntroProps {
-  sourceData: SourceDataItem;
-}
+export const AddSourceIntro: React.FC = () => {
+  const { serviceType } = useParams<{ serviceType: string }>();
+  const sourceData = getSourceData(serviceType);
 
-export const AddSourceIntro: React.FC<AddSourceIntroProps> = (props) => {
-  const { name, categories = [], serviceType, baseServiceType } = props.sourceData;
   const { isOrganization } = useValues(AppLogic);
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
+  const { navigateToUrl } = useValues(KibanaLogic);
 
-  const header = (
-    <AddSourceHeader
-      name={name}
-      serviceType={baseServiceType || serviceType}
-      categories={categories}
-    />
-  );
+  if (!sourceData) {
+    return null;
+  }
+
+  const { name, categories = [], accountContextOnly } = sourceData;
+
+  if (!hasPlatinumLicense && accountContextOnly) {
+    navigateToUrl(getSourcesPath(ADD_SOURCE_PATH, isOrganization));
+  }
+
+  const header = <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />;
   const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
   const to =
-    `${getSourcesPath(getAddPath(serviceType, baseServiceType), isOrganization)}/` +
-    (hasMultipleConnectorOptions(props.sourceData.serviceType) ? 'choice' : '');
+    `${getSourcesPath(getAddPath(serviceType), isOrganization)}/` +
+    (hasMultipleConnectorOptions(sourceData.serviceType) ? 'choice' : '');
   return (
     <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name]}>
       <ConfigurationIntro name={name} advanceStepTo={to} header={header} />

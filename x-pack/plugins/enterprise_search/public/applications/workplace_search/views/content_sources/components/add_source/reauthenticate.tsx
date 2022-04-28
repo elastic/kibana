@@ -23,16 +23,18 @@ interface SourceQueryParams {
 }
 
 interface ReauthenticateProps {
-  name: string;
   header: React.ReactNode;
 }
 
-export const Reauthenticate: React.FC<ReauthenticateProps> = ({ name, header }) => {
+export const Reauthenticate: React.FC<ReauthenticateProps> = ({ header }) => {
   const { search } = useLocation() as Location;
 
   const { sourceId } = parseQueryParams(search) as unknown as SourceQueryParams;
   const [formLoading, setFormLoading] = useState(false);
 
+  const {
+    sourceConfigData: { name },
+  } = useValues(AddSourceLogic);
   const { getSourceReConnectData } = useActions(AddSourceLogic);
   const {
     sourceConnectData: { oauthUrl },

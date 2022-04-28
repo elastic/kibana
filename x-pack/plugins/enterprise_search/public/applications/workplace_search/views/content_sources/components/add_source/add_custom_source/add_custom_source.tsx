@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { useParams } from 'react-router-dom';
+
 import { useValues } from 'kea';
 
 import { AppLogic } from '../../../../../app_logic';
@@ -16,20 +18,27 @@ import {
 } from '../../../../../components/layout';
 import { NAV } from '../../../../../constants';
 
-import { SourceDataItem } from '../../../../../types';
+import { getSourceData } from '../../../source_data';
 
 import { AddCustomSourceLogic, AddCustomSourceSteps } from './add_custom_source_logic';
 import { ConfigureCustom } from './configure_custom';
 import { SaveCustom } from './save_custom';
 
-interface Props {
-  sourceData: SourceDataItem;
-  initialValue?: string;
-}
-export const AddCustomSource: React.FC<Props> = ({ sourceData, initialValue = '' }) => {
-  const addCustomSourceLogic = AddCustomSourceLogic({ sourceData, initialValue });
+export const AddCustomSource: React.FC = () => {
+  const { baseServiceType } = useParams<{ baseServiceType?: string }>();
+  const sourceData = getSourceData('custom', baseServiceType);
+
+  const addCustomSourceLogic = AddCustomSourceLogic({
+    baseServiceType,
+    initialValue: sourceData?.name,
+  });
+
   const { currentStep } = useValues(addCustomSourceLogic);
   const { isOrganization } = useValues(AppLogic);
+
+  if (!sourceData) {
+    return null;
+  }
 
   const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
 

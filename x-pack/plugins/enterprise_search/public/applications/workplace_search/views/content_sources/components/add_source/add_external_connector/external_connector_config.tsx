@@ -7,11 +7,12 @@
 
 import React, { FormEvent } from 'react';
 
+import { useParams } from 'react-router-dom';
+
 import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -26,28 +27,20 @@ import {
   PersonalDashboardLayout,
   WorkplaceSearchPageTemplate,
 } from '../../../../../components/layout';
-import { NAV, REMOVE_BUTTON } from '../../../../../constants';
-import { SourceDataItem } from '../../../../../types';
+import { NAV } from '../../../../../constants';
 
+import { getSourceData } from '../../../source_data';
 import { AddSourceHeader } from '../add_source_header';
 import { ConfigDocsLinks } from '../config_docs_links';
-import { OAUTH_SAVE_CONFIG_BUTTON, OAUTH_BACK_BUTTON } from '../constants';
+import { OAUTH_SAVE_CONFIG_BUTTON } from '../constants';
 
 import { ExternalConnectorDocumentation } from './external_connector_documentation';
 import { ExternalConnectorFormFields } from './external_connector_form_fields';
 import { ExternalConnectorLogic } from './external_connector_logic';
 
-interface SaveConfigProps {
-  sourceData: SourceDataItem;
-  goBack?: () => void;
-  onDeleteConfig?: () => void;
-}
-
-export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({
-  sourceData,
-  goBack,
-  onDeleteConfig,
-}) => {
+export const ExternalConnectorConfig: React.FC = () => {
+  const { baseServiceType } = useParams<{ baseServiceType?: string }>();
+  const sourceData = getSourceData('external', baseServiceType);
   const { saveExternalConnectorConfig } = useActions(ExternalConnectorLogic);
 
   const { formDisabled, buttonLoading, externalConnectorUrl, externalConnectorApiKey, urlValid } =
@@ -58,14 +51,17 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({
     saveExternalConnectorConfig({ url: externalConnectorUrl, apiKey: externalConnectorApiKey });
   };
 
+  const { isOrganization } = useValues(AppLogic);
+
+  if (!sourceData) {
+    return null;
+  }
+
   const {
     name,
     categories = [],
-    serviceType,
-    baseServiceType,
     configuration: { applicationLinkTitle, applicationPortalUrl, documentationUrl },
   } = sourceData;
-  const { isOrganization } = useValues(AppLogic);
 
   const saveButton = (
     <EuiButton color="primary" fill isLoading={buttonLoading} disabled={formDisabled} type="submit">
@@ -73,22 +69,11 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({
     </EuiButton>
   );
 
-  const deleteButton = (
-    <EuiButton color="danger" fill disabled={buttonLoading} onClick={onDeleteConfig}>
-      {REMOVE_BUTTON}
-    </EuiButton>
-  );
-
-  const backButton = <EuiButtonEmpty onClick={goBack}>{OAUTH_BACK_BUTTON}</EuiButtonEmpty>;
-
   const formActions = (
     <EuiFormRow>
       <EuiFlexGroup justifyContent="flexStart" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>{saveButton}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {goBack && backButton}
-          {onDeleteConfig && deleteButton}
-        </EuiFlexItem>
+        <EuiFlexItem grow={false} />
       </EuiFlexGroup>
     </EuiFormRow>
   );
@@ -125,7 +110,7 @@ export const ExternalConnectorConfig: React.FC<SaveConfigProps> = ({
   const header = (
     <AddSourceHeader
       name={name}
-      serviceType={baseServiceType || serviceType}
+      serviceType={baseServiceType || 'external'}
       categories={categories}
     />
   );

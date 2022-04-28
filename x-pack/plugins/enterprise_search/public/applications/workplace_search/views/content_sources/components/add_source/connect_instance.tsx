@@ -35,9 +35,6 @@ interface ConnectInstanceProps {
   configuration: Configuration;
   features?: Features;
   objTypes?: string[];
-  name: string;
-  serviceType: string;
-  needsPermissions: boolean;
   onFormCreated(name: string): void;
 }
 
@@ -45,9 +42,6 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
   configuration: { needsSubdomain, hasOauthRedirect },
   features,
   objTypes,
-  name,
-  serviceType,
-  needsPermissions,
   onFormCreated,
   header,
 }) => {
@@ -62,8 +56,16 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     setSourceIndexPermissionsValue,
   } = useActions(AddSourceLogic);
 
-  const { buttonLoading, loginValue, passwordValue, indexPermissionsValue, subdomainValue } =
-    useValues(AddSourceLogic);
+  const {
+    sourceConfigData,
+    buttonLoading,
+    loginValue,
+    passwordValue,
+    indexPermissionsValue,
+    subdomainValue,
+  } = useValues(AddSourceLogic);
+
+  const { name, needsPermissions = false } = sourceConfigData;
 
   const { isOrganization } = useValues(AppLogic);
 
@@ -74,8 +76,8 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
 
   const redirectOauth = (oauthUrl: string) => window.location.replace(oauthUrl);
   const redirectFormCreated = () => onFormCreated(name);
-  const onOauthFormSubmit = () => getSourceConnectData(serviceType, redirectOauth);
-  const onCredentialsFormSubmit = () => createContentSource(serviceType, redirectFormCreated);
+  const onOauthFormSubmit = () => getSourceConnectData(redirectOauth);
+  const onCredentialsFormSubmit = () => createContentSource(redirectFormCreated);
 
   const handleFormSubmit = (e: FormEvent) => {
     e.preventDefault();
