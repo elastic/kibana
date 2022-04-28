@@ -10,7 +10,7 @@ import { access, link, unlink, chmod } from 'fs';
 import { resolve, basename } from 'path';
 import { promisify } from 'util';
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson } from '@kbn/utils';
 
 import { write, copyAll, mkdirp, exec, Config, Build } from '../../../lib';
@@ -76,6 +76,7 @@ export async function runDockerGenerator(
 
   const dockerPush = config.getDockerPush();
   const dockerTagQualifier = config.getDockerTagQualfiier();
+  const dockerCrossCompile = config.getDockerCrossCompile();
   const publicArtifactSubdomain = config.isRelease ? 'artifacts' : 'snapshots-no-kpi';
 
   const scope: TemplateContext = {
@@ -91,6 +92,7 @@ export async function runDockerGenerator(
     dockerTargetFilename,
     dockerPush,
     dockerTagQualifier,
+    dockerCrossCompile,
     baseOSImage,
     dockerBuildDate,
     ubi: flags.ubi,
@@ -110,7 +112,7 @@ export async function runDockerGenerator(
     arm64: 'aarch64',
   };
   const buildArchitectureSupported = hostTarget[process.arch] === flags.architecture;
-  if (flags.architecture && !buildArchitectureSupported) {
+  if (flags.architecture && !buildArchitectureSupported && !dockerCrossCompile) {
     return;
   }
 

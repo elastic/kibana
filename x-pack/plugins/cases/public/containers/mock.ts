@@ -7,7 +7,12 @@
 
 import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } from './types';
 
-import type { ResolvedCase, CaseMetrics, CaseMetricsFeature } from '../../common/ui/types';
+import type {
+  ResolvedCase,
+  CaseMetrics,
+  CaseMetricsFeature,
+  AlertComment,
+} from '../../common/ui/types';
 import {
   Actions,
   ActionTypes,
@@ -31,11 +36,12 @@ import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 import { SnakeToCamelCase } from '../../common/types';
 import { covertToSnakeCase } from './utils';
-export { connectorsMock } from './configure/mock';
 
+export { connectorsMock } from '../common/mock/connectors';
 export const basicCaseId = 'basic-case-id';
 export const caseWithAlertsId = 'case-with-alerts-id';
 export const caseWithAlertsSyncOffId = 'case-with-alerts-syncoff-id';
+
 const basicCommentId = 'basic-comment-id';
 const basicCreatedAt = '2020-02-19T23:06:33.798Z';
 const basicUpdatedAt = '2020-02-20T15:02:57.995Z';
@@ -64,7 +70,7 @@ export const basicComment: Comment = {
   version: 'WzQ3LDFc',
 };
 
-export const alertComment: Comment = {
+export const alertComment: AlertComment = {
   alertId: 'alert-id-1',
   index: 'alert-index-1',
   type: CommentType.alert,
@@ -148,6 +154,7 @@ export const basicCase: Case = {
     fields: null,
   },
   description: 'Security banana Issue',
+  duration: null,
   externalService: null,
   status: CaseStatuses.open,
   tags,
@@ -239,6 +246,7 @@ export const mockCase: Case = {
     type: ConnectorTypes.none,
     fields: null,
   },
+  duration: null,
   description: 'Security banana Issue',
   externalService: null,
   status: CaseStatuses.open,
@@ -377,6 +385,7 @@ export const basicCaseSnake: CaseResponse = {
   connector: { id: 'none', name: 'My Connector', type: ConnectorTypes.none, fields: null },
   created_at: basicCreatedAt,
   created_by: elasticUserSnake,
+  duration: null,
   external_service: null,
   updated_at: basicUpdatedAt,
   updated_by: elasticUserSnake,

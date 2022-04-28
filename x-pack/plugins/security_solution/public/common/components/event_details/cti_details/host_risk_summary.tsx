@@ -11,9 +11,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
 import { RISKY_HOSTS_DOC_LINK } from '../../../../overview/components/overview_risky_host_links/risky_hosts_disabled_module';
 import { EnrichedDataRow, ThreatSummaryPanelHeader } from './threat_summary_view';
-import { HostRisk } from '../../../containers/hosts_risk/types';
-import { HostRiskScore } from '../../../../hosts/components/common/host_risk_score';
-import { HostRiskSeverity } from '../../../../../common/search_strategy';
+import { RiskScore } from '../../severity/common';
+import { RiskSeverity } from '../../../../../common/search_strategy';
+import { HostRisk } from '../../../../risk_score/containers';
 
 const HostRiskSummaryComponent: React.FC<{
   hostRisk: HostRisk;
@@ -56,10 +56,7 @@ const HostRiskSummaryComponent: React.FC<{
           <EnrichedDataRow
             field={'host.risk.keyword'}
             value={
-              <HostRiskScore
-                severity={hostRisk.result[0].risk as HostRiskSeverity}
-                hideBackgroundColor
-              />
+              <RiskScore severity={hostRisk.result[0].risk as RiskSeverity} hideBackgroundColor />
             }
           />
         </>

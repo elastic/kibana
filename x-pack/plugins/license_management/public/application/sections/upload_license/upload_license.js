@@ -24,7 +24,7 @@ import { TelemetryOptIn } from '../../components/telemetry_opt_in';
 import { shouldShowTelemetryOptIn } from '../../lib/telemetry';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 export class UploadLicense extends React.PureComponent {
   state = {
@@ -183,7 +183,10 @@ export class UploadLicense extends React.PureComponent {
             <EuiSpacer size="m" />
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty {...reactRouterNavigate(history, '/home')}>
+                <EuiButtonEmpty
+                  data-test-subj="cancelUploadButton"
+                  {...reactRouterNavigate(history, '/home')}
+                >
                   <FormattedMessage
                     id="xpack.licenseMgmt.uploadLicense.cancelButtonLabel"
                     defaultMessage="Cancel"

@@ -30,7 +30,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('rulesTab');
   }
 
-  describe('alerts list', function () {
+  describe('rules list', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');
@@ -162,10 +162,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('disableButton');
 
-      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
+      await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
         createdAlert.name,
-        'enableSwitch',
-        'true'
+        'statusDropdown',
+        'disabled'
       );
     });
 
@@ -181,10 +181,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
 
       await testSubjects.click('disableButton');
-      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
+      await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
         createdAlert.name,
-        'enableSwitch',
-        'false'
+        'statusDropdown',
+        'enabled'
       );
     });
 
@@ -201,9 +201,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('muteButton');
 
       await retry.tryForTime(30000, async () => {
-        await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-        const muteBadge = await testSubjects.find('mutedActionsBadge');
-        expect(await muteBadge.isDisplayed()).to.eql(true);
+        await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
+          createdAlert.name,
+          'statusDropdown',
+          'snoozed'
+        );
       });
     });
 
@@ -221,9 +223,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('muteButton');
 
       await retry.tryForTime(30000, async () => {
-        await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-        const muteBadge = await testSubjects.find('mutedActionsBadge');
-        expect(await muteBadge.isDisplayed()).to.eql(true);
+        await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
+          createdAlert.name,
+          'statusDropdown',
+          'snoozed'
+        );
       });
     });
 
@@ -241,8 +245,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('muteButton');
       await retry.tryForTime(30000, async () => {
-        await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-        await testSubjects.missingOrFail('mutedActionsBadge');
+        await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
+          createdAlert.name,
+          'statusDropdown',
+          'enabled'
+        );
       });
     });
 
@@ -289,9 +296,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await retry.tryForTime(30000, async () => {
-        await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-        const muteBadge = await testSubjects.find('mutedActionsBadge');
-        expect(await muteBadge.isDisplayed()).to.eql(true);
+        await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
+          createdAlert.name,
+          'statusDropdown',
+          'snoozed'
+        );
       });
     });
 
@@ -312,8 +321,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('muteAll');
 
       await retry.tryForTime(30000, async () => {
-        await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-        await testSubjects.missingOrFail('mutedActionsBadge');
+        await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
+          createdAlert.name,
+          'statusDropdown',
+          'enabled'
+        );
       });
     });
 
@@ -331,10 +343,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Enable all button shows after clicking disable all
       await testSubjects.existOrFail('enableAll');
 
-      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
+      await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
         createdAlert.name,
-        'enableSwitch',
-        'false'
+        'statusDropdown',
+        'disabled'
       );
     });
 
@@ -354,10 +366,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Disable all button shows after clicking enable all
       await testSubjects.existOrFail('disableAll');
 
-      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
+      await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
         createdAlert.name,
-        'enableSwitch',
-        'true'
+        'statusDropdown',
+        'enabled'
       );
     });
 
@@ -388,6 +400,29 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('rulesTable-P95ColumnName');
         await testSubjects.existOrFail('P95Percentile');
       });
+    });
+
+    it('should render interval info icon when schedule interval is less than configured minimum', async () => {
+      await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: { name: 'b', schedule: { interval: '1s' } },
+      });
+      await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: { name: 'c' },
+      });
+      await refreshAlertsList();
+
+      await testSubjects.existOrFail('ruleInterval-config-icon-0');
+      await testSubjects.missingOrFail('ruleInterval-config-icon-1');
+
+      // open edit flyout when icon is clicked
+      const infoIcon = await testSubjects.find('ruleInterval-config-icon-0');
+      await infoIcon.click();
+
+      await testSubjects.click('cancelSaveEditedRuleButton');
     });
 
     it('should delete all selection', async () => {
@@ -465,10 +500,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
         expect(alertsErrorBannerExistErrors).to.have.length(1);
         expect(
-          await (
-            await alertsErrorBannerExistErrors[0].findByCssSelector('.euiCallOutHeader')
-          ).getVisibleText()
-        ).to.equal('Error found in 1 rule.');
+          await (await alertsErrorBannerExistErrors[0].findByTagName('p')).getVisibleText()
+        ).to.equal(' Error found in 1 rule. Show rule with error');
       });
 
       await refreshAlertsList();
@@ -478,6 +511,36 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await testSubjects.getVisibleText('totalErrorRulesCount')).to.be('Error: 1');
       expect(await testSubjects.getVisibleText('totalPendingRulesCount')).to.be('Pending: 0');
       expect(await testSubjects.getVisibleText('totalUnknownRulesCount')).to.be('Unknown: 0');
+    });
+
+    it('Expand error in rules table when there is rule with an error associated', async () => {
+      const createdAlert = await createAlert({ supertest, objectRemover });
+      await retry.try(async () => {
+        await refreshAlertsList();
+        const refreshResults = await pageObjects.triggersActionsUI.getAlertsListWithStatus();
+        expect(refreshResults.length).to.equal(1);
+        expect(refreshResults[0].name).to.equal(`${createdAlert.name}Test: Noop`);
+        expect(refreshResults[0].interval).to.equal('1 min');
+        expect(refreshResults[0].status).to.equal('Ok');
+        expect(refreshResults[0].duration).to.match(/\d{2,}:\d{2}/);
+      });
+
+      let expandRulesErrorLink = await find.allByCssSelector('[data-test-subj="expandRulesError"]');
+      expect(expandRulesErrorLink).to.have.length(0);
+
+      await createFailingAlert({ supertest, objectRemover });
+      await retry.try(async () => {
+        await refreshAlertsList();
+        expandRulesErrorLink = await find.allByCssSelector('[data-test-subj="expandRulesError"]');
+        expect(expandRulesErrorLink).to.have.length(1);
+      });
+      await refreshAlertsList();
+      await testSubjects.click('expandRulesError');
+      const expandedRow = await find.allByCssSelector('.euiTableRow-isExpandedRow');
+      expect(expandedRow).to.have.length(1);
+      expect(await (await expandedRow[0].findByTagName('div')).getVisibleText()).to.equal(
+        'Error from last run\nFailed to execute alert type'
+      );
     });
 
     it('should filter alerts by the alert type', async () => {

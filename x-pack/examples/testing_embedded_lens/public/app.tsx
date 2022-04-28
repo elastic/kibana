@@ -17,11 +17,11 @@ import {
   EuiPanel,
   EuiCallOut,
 } from '@elastic/eui';
-import type { CoreStart } from 'kibana/public';
+import type { CoreStart } from '@kbn/core/public';
 import useDebounce from 'react-use/lib/useDebounce';
-import { DOCUMENT_FIELD_NAME } from '../../../plugins/lens/common/constants';
-import type { DataView } from '../../../../src/plugins/data_views/public';
-import { ViewMode } from '../../../../src/plugins/embeddable/public';
+import { DOCUMENT_FIELD_NAME } from '@kbn/lens-plugin/common/constants';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
@@ -36,14 +36,10 @@ import type {
   RangeIndexPatternColumn,
   PieVisualizationState,
   MedianIndexPatternColumn,
-} from '../../../plugins/lens/public';
+} from '@kbn/lens-plugin/public';
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { CodeEditor, HJsonLang, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { StartDependencies } from './plugin';
-import type { ActionExecutionContext } from '../../../../src/plugins/ui_actions/public';
-import {
-  CodeEditor,
-  HJsonLang,
-  KibanaContextProvider,
-} from '../../../../src/plugins/kibana_react/public';
 
 type RequiredType = 'date' | 'string' | 'number';
 type FieldsMap = Record<RequiredType, string>;

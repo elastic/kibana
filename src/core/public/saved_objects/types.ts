@@ -31,7 +31,18 @@ export interface ResolvedSimpleSavedObject<T = unknown> {
    */
   outcome: SavedObjectsResolveResponse['outcome'];
   /**
-   * The ID of the object that the legacy URL alias points to. This is only defined when the outcome is `'aliasMatch'` or `'conflict'`.
+   * The ID of the object that the legacy URL alias points to.
+   *
+   * **Note:** this field is *only* included when an alias was found (in other words, when the outcome is `'aliasMatch'` or `'conflict'`).
    */
   alias_target_id?: SavedObjectsResolveResponse['alias_target_id'];
+  /**
+   * The reason this alias was created.
+   *
+   * Currently this is used to determine whether or not a toast should be shown when a user is redirected from a legacy URL; if the alias
+   * was created because of saved object conversion, then we will display a toast telling the user that the object has a new URL.
+   *
+   * **Note:** this field is *only* included when an alias was found (in other words, when the outcome is `'aliasMatch'` or `'conflict'`).
+   */
+  alias_purpose?: SavedObjectsResolveResponse['alias_purpose'];
 }

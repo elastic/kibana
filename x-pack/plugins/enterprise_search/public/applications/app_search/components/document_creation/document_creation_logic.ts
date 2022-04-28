@@ -20,10 +20,13 @@ import {
 import { DocumentCreationMode, DocumentCreationStep, DocumentCreationSummary } from './types';
 import { readUploadedFileAsText } from './utils';
 
+export type ActiveJsonTab = 'uploadTab' | 'pasteTab';
+
 interface DocumentCreationValues {
   isDocumentCreationOpen: boolean;
   creationMode: DocumentCreationMode;
   creationStep: DocumentCreationStep;
+  activeJsonTab: ActiveJsonTab;
   textInput: string;
   fileInput: File | null;
   isUploading: boolean;
@@ -37,6 +40,7 @@ interface DocumentCreationActions {
   openDocumentCreation(creationMode: DocumentCreationMode): { creationMode: DocumentCreationMode };
   closeDocumentCreation(): void;
   setCreationStep(creationStep: DocumentCreationStep): { creationStep: DocumentCreationStep };
+  setActiveJsonTab(activeJsonTab: ActiveJsonTab): { activeJsonTab: ActiveJsonTab };
   setTextInput(textInput: string): { textInput: string };
   setFileInput(fileInput: File | null): { fileInput: File | null };
   setWarnings(warnings: string[]): { warnings: string[] };
@@ -56,6 +60,7 @@ export const DocumentCreationLogic = kea<
     openDocumentCreation: (creationMode) => ({ creationMode }),
     closeDocumentCreation: () => null,
     setCreationStep: (creationStep) => ({ creationStep }),
+    setActiveJsonTab: (activeJsonTab) => ({ activeJsonTab }),
     setTextInput: (textInput) => ({ textInput }),
     setFileInput: (fileInput) => ({ fileInput }),
     setWarnings: (warnings) => ({ warnings }),
@@ -75,9 +80,15 @@ export const DocumentCreationLogic = kea<
       },
     ],
     creationMode: [
-      'text',
+      'api',
       {
         openDocumentCreation: (_, { creationMode }) => creationMode,
+      },
+    ],
+    activeJsonTab: [
+      'uploadTab',
+      {
+        setActiveJsonTab: (_, { activeJsonTab }) => activeJsonTab,
       },
     ],
     creationStep: [
@@ -93,6 +104,7 @@ export const DocumentCreationLogic = kea<
       {
         setTextInput: (_, { textInput }) => textInput,
         closeDocumentCreation: () => dedent(DOCUMENTS_API_JSON_EXAMPLE),
+        setActiveJsonTab: () => dedent(DOCUMENTS_API_JSON_EXAMPLE),
       },
     ],
     fileInput: [
@@ -100,6 +112,7 @@ export const DocumentCreationLogic = kea<
       {
         setFileInput: (_, { fileInput }) => fileInput,
         closeDocumentCreation: () => null,
+        setActiveJsonTab: () => null,
       },
     ],
     isUploading: [
@@ -109,6 +122,7 @@ export const DocumentCreationLogic = kea<
         onSubmitJson: () => true,
         setErrors: () => false,
         setSummary: () => false,
+        setActiveJsonTab: () => false,
       },
     ],
     warnings: [
@@ -117,6 +131,7 @@ export const DocumentCreationLogic = kea<
         onSubmitJson: () => [],
         setWarnings: (_, { warnings }) => warnings,
         closeDocumentCreation: () => [],
+        setActiveJsonTab: () => [],
       },
     ],
     errors: [
@@ -125,6 +140,7 @@ export const DocumentCreationLogic = kea<
         onSubmitJson: () => [],
         setErrors: (_, { errors }) => (Array.isArray(errors) ? errors : [errors]),
         closeDocumentCreation: () => [],
+        setActiveJsonTab: () => [],
       },
     ],
     summary: [

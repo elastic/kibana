@@ -7,14 +7,21 @@
 
 import { getSuggestions } from './xy_suggestions';
 import type { TableSuggestionColumn, VisualizationSuggestion, TableSuggestion } from '../types';
-import { State, XYState, visualizationTypes } from './types';
+import {
+  State,
+  XYState,
+  visualizationTypes,
+  XYAnnotationLayerConfig,
+  XYDataLayerConfig,
+} from './types';
 import { generateId } from '../id_generator';
 import { getXyVisualization } from './xy_visualization';
-import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
-import { PaletteOutput } from 'src/plugins/charts/public';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
+import type { PaletteOutput } from '@kbn/coloring';
 import { layerTypes } from '../../common';
-import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
-import { themeServiceMock } from '../../../../../src/core/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { themeServiceMock } from '@kbn/core/public/mocks';
 
 jest.mock('../id_generator');
 
@@ -23,6 +30,7 @@ const xyVisualization = getXyVisualization({
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
   useLegacyTimeAxis: false,
   kibanaTheme: themeServiceMock.createStartContract(),
+  eventAnnotationService: eventAnnotationServiceMock,
 });
 
 describe('xy_suggestions', () => {
@@ -89,12 +97,14 @@ describe('xy_suggestions', () => {
   // Helper that plucks out the important part of a suggestion for
   // most test assertions
   function suggestionSubset(suggestion: VisualizationSuggestion<State>) {
-    return suggestion.state.layers.map(({ seriesType, splitAccessor, xAccessor, accessors }) => ({
-      seriesType,
-      splitAccessor,
-      x: xAccessor,
-      y: accessors,
-    }));
+    return (suggestion.state.layers as XYDataLayerConfig[]).map(
+      ({ seriesType, splitAccessor, xAccessor, accessors }) => ({
+        seriesType,
+        splitAccessor,
+        x: xAccessor,
+        y: accessors,
+      })
+    );
   }
 
   beforeEach(() => {
@@ -530,6 +540,60 @@ describe('xy_suggestions', () => {
     );
   });
 
+  test('passes annotation layer without modifying it', () => {
+    const annotationLayer: XYAnnotationLayerConfig = {
+      layerId: 'second',
+      layerType: layerTypes.ANNOTATIONS,
+      annotations: [
+        {
+          id: '1',
+          key: {
+            type: 'point_in_time',
+            timestamp: '2020-20-22',
+          },
+          label: 'annotation',
+        },
+      ],
+    };
+    const currentState: XYState = {
+      legend: { isVisible: true, position: 'bottom' },
+      valueLabels: 'hide',
+      preferredSeriesType: 'bar',
+      fittingFunction: 'None',
+      layers: [
+        {
+          accessors: ['price'],
+          layerId: 'first',
+          layerType: layerTypes.DATA,
+          seriesType: 'bar',
+          splitAccessor: 'date',
+          xAccessor: 'product',
+        },
+        annotationLayer,
+      ],
+    };
+    const suggestions = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), dateCol('date'), strCol('product')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      state: currentState,
+      keptLayerIds: [],
+    });
+
+    suggestions.every((suggestion) =>
+      expect(suggestion.state.layers).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            layerType: layerTypes.ANNOTATIONS,
+          }),
+        ])
+      )
+    );
+  });
+
   test('includes passed in palette for split charts if specified', () => {
     const mainPalette: PaletteOutput = { type: 'palette', name: 'mock' };
     const [suggestion] = getSuggestions({
@@ -543,7 +607,7 @@ describe('xy_suggestions', () => {
       mainPalette,
     });
 
-    expect(suggestion.state.layers[0].palette).toEqual(mainPalette);
+    expect((suggestion.state.layers as XYDataLayerConfig[])[0].palette).toEqual(mainPalette);
   });
 
   test('ignores passed in palette for non splitted charts', () => {
@@ -559,7 +623,7 @@ describe('xy_suggestions', () => {
       mainPalette,
     });
 
-    expect(suggestion.state.layers[0].palette).toEqual(undefined);
+    expect((suggestion.state.layers as XYDataLayerConfig[])[0].palette).toEqual(undefined);
   });
 
   test('hides reduced suggestions if there is a current state', () => {
@@ -655,7 +719,7 @@ describe('xy_suggestions', () => {
 
     expect(suggestions[0].hide).toEqual(false);
     expect(suggestions[0].state.preferredSeriesType).toEqual('line');
-    expect(suggestions[0].state.layers[0].seriesType).toEqual('line');
+    expect((suggestions[0].state.layers[0] as XYDataLayerConfig).seriesType).toEqual('line');
   });
 
   test('makes a visible seriesType suggestion for unchanged table without split', () => {
@@ -779,7 +843,11 @@ describe('xy_suggestions', () => {
 
     expect(rest).toHaveLength(visualizationTypes.length - 1);
     expect(suggestion.state.preferredSeriesType).toEqual('bar_horizontal');
-    expect(suggestion.state.layers.every((l) => l.seriesType === 'bar_horizontal')).toBeTruthy();
+    expect(
+      (suggestion.state.layers as XYDataLayerConfig[]).every(
+        (l) => l.seriesType === 'bar_horizontal'
+      )
+    ).toBeTruthy();
     expect(suggestion.title).toEqual('Flip');
   });
 

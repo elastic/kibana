@@ -24,7 +24,7 @@ export class BaseSpan extends Serializable<ApmFields> {
     });
   }
 
-  parent(span: BaseSpan) {
+  parent(span: BaseSpan): this {
     this.fields['trace.id'] = span.fields['trace.id'];
     this.fields['parent.id'] = span.isSpan()
       ? span.fields['span.id']
@@ -40,7 +40,7 @@ export class BaseSpan extends Serializable<ApmFields> {
     return this;
   }
 
-  children(...children: BaseSpan[]) {
+  children(...children: BaseSpan[]): this {
     children.forEach((child) => {
       child.parent(this);
     });
@@ -50,17 +50,17 @@ export class BaseSpan extends Serializable<ApmFields> {
     return this;
   }
 
-  success() {
+  success(): this {
     this.fields['event.outcome'] = 'success';
     return this;
   }
 
-  failure() {
+  failure(): this {
     this.fields['event.outcome'] = 'failure';
     return this;
   }
 
-  outcome(outcome: 'success' | 'failure' | 'unknown') {
+  outcome(outcome: 'success' | 'failure' | 'unknown'): this {
     this.fields['event.outcome'] = outcome;
     return this;
   }

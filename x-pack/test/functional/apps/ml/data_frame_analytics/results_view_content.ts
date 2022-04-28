@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DeepPartial } from '../../../../../plugins/ml/common/types/common';
-import { DataFrameAnalyticsConfig } from '../../../../../plugins/ml/public/application/data_frame_analytics/common';
+import { DeepPartial } from '@kbn/ml-plugin/common/types/common';
+import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -283,6 +283,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('should display the total feature importance in the results view', async () => {
+          await ml.dataFrameAnalyticsResults.expandFeatureImportanceSection(true);
           await ml.dataFrameAnalyticsResults.assertTotalFeatureImportanceEvaluatePanelExists();
         });
 

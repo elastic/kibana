@@ -7,12 +7,12 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { ExploratoryEmbeddableProps, ExploratoryEmbeddableComponentProps } from './embeddable';
 import { ObservabilityDataViews } from '../../../../utils/observability_data_views';
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
-import type { IndexPatternState } from '../hooks/use_app_index_pattern';
-import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
+import type { DataViewState } from '../hooks/use_app_data_view';
 import type { AppDataType } from '../types';
 
 const Embeddable = React.lazy(() => import('./embeddable'));
@@ -30,7 +30,7 @@ export function getExploratoryViewEmbeddable(
   plugins: ObservabilityPublicPluginsStart
 ) {
   return (props: ExploratoryEmbeddableProps) => {
-    const [indexPatterns, setIndexPatterns] = useState<IndexPatternState>({} as IndexPatternState);
+    const [indexPatterns, setIndexPatterns] = useState<DataViewState>({} as DataViewState);
     const [loading, setLoading] = useState(false);
 
     const series = props.attributes && props.attributes[0];

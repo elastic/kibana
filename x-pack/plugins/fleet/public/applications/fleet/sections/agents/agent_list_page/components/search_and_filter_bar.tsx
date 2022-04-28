@@ -121,6 +121,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                   }
                 }}
                 indexPattern={AGENTS_INDEX}
+                dataTestSubj="agentList.queryInput"
               />
             </EuiFlexItem>
             <EuiFlexItem grow={2}>
@@ -134,6 +135,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                       isSelected={isStatusFilterOpen}
                       hasActiveFilters={selectedStatus.length > 0}
                       disabled={agentPolicies.length === 0}
+                      data-test-subj="agentList.statusFilter"
                     >
                       <FormattedMessage
                         id="xpack.fleet.agentList.statusFilterText"
@@ -174,6 +176,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                       numActiveFilters={selectedAgentPolicies.length}
                       numFilters={agentPolicies.length}
                       disabled={agentPolicies.length === 0}
+                      data-test-subj="agentList.policyFilter"
                     >
                       <FormattedMessage
                         id="xpack.fleet.agentList.policyFilterText"
@@ -208,6 +211,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                   onClick={() => {
                     onShowUpgradeableChange(!showUpgradeable);
                   }}
+                  data-test-subj="agentList.showUpgradeable"
                 >
                   <FormattedMessage
                     id="xpack.fleet.agentList.showUpgradeableFilterLabel"

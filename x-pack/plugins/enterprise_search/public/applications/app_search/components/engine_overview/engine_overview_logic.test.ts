@@ -15,7 +15,7 @@ import { nextTick } from '@kbn/test-jest-helpers';
 
 import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 
-import { EngineOverviewLogic } from './';
+import { EngineOverviewLogic } from '.';
 
 describe('EngineOverviewLogic', () => {
   const { mount } = new LogicMounter(EngineOverviewLogic);

@@ -11,9 +11,9 @@ import { unitOfTime } from 'moment';
 
 import { DomainRange } from '@elastic/charts';
 
-import { getAdjustedInterval } from '../../../../charts/public';
-import { Datatable } from '../../../../expressions/public';
-import { DateHistogramParams, HistogramParams } from '../../../../visualizations/public';
+import { getAdjustedInterval } from '@kbn/charts-plugin/public';
+import { Datatable } from '@kbn/expressions-plugin/public';
+import { DateHistogramParams, HistogramParams } from '@kbn/visualizations-plugin/public';
 
 import { Aspect } from '../types';
 

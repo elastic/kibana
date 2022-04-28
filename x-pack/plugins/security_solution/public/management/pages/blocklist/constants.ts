@@ -24,3 +24,12 @@ export const BLOCKLISTS_LIST_DEFINITION: CreateExceptionListSchema = {
   list_id: ENDPOINT_BLOCKLISTS_LIST_ID,
   type: BLOCKLISTS_LIST_TYPE,
 };
+
+export const SEARCHABLE_FIELDS: Readonly<string[]> = [
+  `name`,
+  `description`,
+  'item_id',
+  `entries.value`,
+  `entries.entries.value`,
+  `comments.comment`,
+];

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mlPluginServerMock } from '../../../../ml/server/mocks';
+import { mlPluginServerMock } from '@kbn/ml-plugin/server/mocks';
 
 export const mlServicesMock = mlPluginServerMock;
 

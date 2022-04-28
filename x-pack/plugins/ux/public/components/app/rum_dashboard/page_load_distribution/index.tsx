@@ -14,13 +14,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { createExploratoryViewUrl } from '@kbn/observability-plugin/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { I18LABELS } from '../translations';
 import { BreakdownFilter } from '../breakdowns/breakdown_filter';
 import { PageLoadDistChart } from '../charts/page_load_dist_chart';
 import { ResetPercentileZoom } from './reset_percentile_zoom';
-import { createExploratoryViewUrl } from '../../../../../../observability/public';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
 
@@ -32,7 +32,7 @@ export interface PercentileRange {
 export function PageLoadDistribution() {
   const { http } = useKibanaServices();
 
-  const { urlParams, uxUiFilters } = useLegacyUrlParams();
+  const { rangeId, urlParams, uxUiFilters } = useLegacyUrlParams();
 
   const { start, end, rangeFrom, rangeTo, searchTerm } = urlParams;
 
@@ -67,6 +67,8 @@ export function PageLoadDistribution() {
       }
       return Promise.resolve(null);
     },
+    // `rangeId` acts as a cache buster for stable ranges like "Today"
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       end,
       start,
@@ -75,6 +77,7 @@ export function PageLoadDistribution() {
       percentileRange.max,
       searchTerm,
       serviceName,
+      rangeId,
     ]
   );
 

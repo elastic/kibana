@@ -12,7 +12,7 @@ import { debounce } from 'lodash';
 import type { monaco } from '@kbn/monaco';
 import usePrevious from 'react-use/lib/usePrevious';
 
-import { CodeEditor } from '../../../../kibana_react/public';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
 import { ExpressionInputProps } from '../types';
 import { EXPRESSIONS_LANGUAGE_ID } from '../../../common';

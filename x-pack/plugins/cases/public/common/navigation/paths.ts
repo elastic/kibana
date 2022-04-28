@@ -18,12 +18,16 @@ export const CASES_CONFIGURE_PATH = '/configure' as const;
 export const CASE_VIEW_PATH = '/:detailName' as const;
 export const CASE_VIEW_COMMENT_PATH = `${CASE_VIEW_PATH}/:commentId` as const;
 
-export const getCreateCasePath = (casesBasePath: string) => `${casesBasePath}${CASES_CREATE_PATH}`;
+const normalizePath = (path: string): string => path.replaceAll('//', '/');
+
+export const getCreateCasePath = (casesBasePath: string) =>
+  normalizePath(`${casesBasePath}${CASES_CREATE_PATH}`);
 export const getCasesConfigurePath = (casesBasePath: string) =>
-  `${casesBasePath}${CASES_CONFIGURE_PATH}`;
-export const getCaseViewPath = (casesBasePath: string) => `${casesBasePath}${CASE_VIEW_PATH}`;
+  normalizePath(`${casesBasePath}${CASES_CONFIGURE_PATH}`);
+export const getCaseViewPath = (casesBasePath: string) =>
+  normalizePath(`${casesBasePath}${CASE_VIEW_PATH}`);
 export const getCaseViewWithCommentPath = (casesBasePath: string) =>
-  `${casesBasePath}${CASE_VIEW_COMMENT_PATH}`;
+  normalizePath(`${casesBasePath}${CASE_VIEW_COMMENT_PATH}`);
 
 export const generateCaseViewPath = (params: CaseViewPathParams): string => {
   const { commentId } = params;
@@ -31,7 +35,7 @@ export const generateCaseViewPath = (params: CaseViewPathParams): string => {
   const pathParams = params as unknown as { [paramName: string]: string };
 
   if (commentId) {
-    return generatePath(CASE_VIEW_COMMENT_PATH, pathParams);
+    return normalizePath(generatePath(CASE_VIEW_COMMENT_PATH, pathParams));
   }
-  return generatePath(CASE_VIEW_PATH, pathParams);
+  return normalizePath(generatePath(CASE_VIEW_PATH, pathParams));
 };

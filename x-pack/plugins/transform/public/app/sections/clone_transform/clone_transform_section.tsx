@@ -36,7 +36,7 @@ import { overrideTransformForCloning } from '../../common/transform';
 type Props = RouteComponentProps<{ transformId: string }>;
 
 export const CloneTransformSection: FC<Props> = ({ match, location }) => {
-  const { indexPatternId }: Record<string, any> = parse(location.search, {
+  const { dataViewId }: Record<string, any> = parse(location.search, {
     sort: false,
   });
   // Set breadcrumb and page title
@@ -73,7 +73,7 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
     }
 
     try {
-      if (indexPatternId === undefined) {
+      if (dataViewId === undefined) {
         throw new Error(
           i18n.translate('xpack.transform.clone.fetchErrorPromptText', {
             defaultMessage: 'Could not fetch the Kibana data view ID.',
@@ -81,7 +81,7 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
         );
       }
 
-      setSavedObjectId(indexPatternId);
+      setSavedObjectId(dataViewId);
 
       setTransformConfig(overrideTransformForCloning(transformConfigs.transforms[0]));
       setErrorMessage(undefined);

@@ -23,7 +23,11 @@ export type {
   CopySavedObjectsToSpaceResponse,
 } from './copy_saved_objects_to_space';
 
-export type { LegacyUrlConflictProps, EmbeddableLegacyUrlConflictProps } from './legacy_urls';
+export type {
+  LegacyUrlConflictProps,
+  EmbeddableLegacyUrlConflictProps,
+  RedirectLegacyUrlParams,
+} from './legacy_urls';
 
 export type {
   ShareToSpaceFlyoutProps,

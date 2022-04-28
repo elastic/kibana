@@ -126,3 +126,11 @@ export const getFirstSeen = (enrichment: CtiEnrichment): number => {
   const firstSeenDate = Date.parse(firstSeenValue ?? 'no date');
   return Number.isInteger(firstSeenDate) ? firstSeenDate : new Date(-1).valueOf();
 };
+
+export interface ThreatDetailsRow {
+  title: string;
+  description: {
+    fieldName: string;
+    value: string;
+  };
+}

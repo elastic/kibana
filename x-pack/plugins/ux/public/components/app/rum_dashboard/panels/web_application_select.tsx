@@ -13,6 +13,7 @@ import { RUM_AGENT_NAMES } from '../../../../../common/agent_name';
 
 export function WebApplicationSelect() {
   const {
+    rangeId,
     urlParams: { start, end },
   } = useLegacyUrlParams();
 
@@ -30,7 +31,9 @@ export function WebApplicationSelect() {
         });
       }
     },
-    [start, end]
+    // `rangeId` works as a cache buster for ranges that never change, like `Today`
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [start, end, rangeId]
   );
 
   const rumServiceNames = data?.rumServices ?? [];

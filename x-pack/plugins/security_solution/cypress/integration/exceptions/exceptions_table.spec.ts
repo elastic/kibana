@@ -5,17 +5,14 @@
  * 2.0.
  */
 
+import { ROLES } from '../../../common/test';
 import { getExceptionList, expectedExportedExceptionList } from '../../objects/exception';
 import { getNewRule } from '../../objects/rule';
 
 import { createCustomRule } from '../../tasks/api_calls/rules';
-import {
-  loginAndWaitForPageWithoutDateRange,
-  waitForPageWithoutDateRange,
-} from '../../tasks/login';
+import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../../tasks/login';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL, EXCEPTIONS_URL } from '../../urls/navigation';
-import { cleanKibana } from '../../tasks/common';
+import { EXCEPTIONS_URL } from '../../urls/navigation';
 import {
   deleteExceptionListWithRuleReference,
   deleteExceptionListWithoutRuleReference,
@@ -25,10 +22,12 @@ import {
   clearSearchSelection,
 } from '../../tasks/exceptions_table';
 import {
+  EXCEPTIONS_TABLE_DELETE_BTN,
   EXCEPTIONS_TABLE_LIST_NAME,
   EXCEPTIONS_TABLE_SHOWING_LISTS,
 } from '../../screens/exceptions';
 import { createExceptionList } from '../../tasks/api_calls/exceptions';
+import { esArchiverResetKibana } from '../../tasks/es_archiver';
 
 const getExceptionList1 = () => ({
   ...getExceptionList(),
@@ -43,8 +42,8 @@ const getExceptionList2 = () => ({
 
 describe('Exceptions Table', () => {
   before(() => {
-    cleanKibana();
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+    esArchiverResetKibana();
+    login();
 
     // Create exception list associated with a rule
     createExceptionList(getExceptionList2(), getExceptionList2().list_id).then((response) =>
@@ -66,7 +65,7 @@ describe('Exceptions Table', () => {
       'exceptionListResponse'
     );
 
-    waitForPageWithoutDateRange(EXCEPTIONS_URL);
+    visitWithoutDateRange(EXCEPTIONS_URL);
 
     // Using cy.contains because we do not care about the exact text,
     // just checking number of lists shown
@@ -76,7 +75,7 @@ describe('Exceptions Table', () => {
   it('Exports exception list', function () {
     cy.intercept(/(\/api\/exception_lists\/_export)/).as('export');
 
-    waitForPageWithoutDateRange(EXCEPTIONS_URL);
+    visitWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
     exportExceptionList();
 
@@ -88,7 +87,7 @@ describe('Exceptions Table', () => {
   });
 
   it('Filters exception lists on search', () => {
-    waitForPageWithoutDateRange(EXCEPTIONS_URL);
+    visitWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
 
     // Using cy.contains because we do not care about the exact text,
@@ -139,7 +138,7 @@ describe('Exceptions Table', () => {
   });
 
   it('Deletes exception list without rule reference', () => {
-    waitForPageWithoutDateRange(EXCEPTIONS_URL);
+    visitWithoutDateRange(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
 
     // Using cy.contains because we do not care about the exact text,
@@ -166,5 +165,26 @@ describe('Exceptions Table', () => {
     // Using cy.contains because we do not care about the exact text,
     // just checking number of lists shown
     cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
+  });
+});
+
+describe('Exceptions Table - read only', () => {
+  before(() => {
+    // First we login as a privileged user to create exception list
+    esArchiverResetKibana();
+    login(ROLES.platform_engineer);
+    visitWithoutDateRange(EXCEPTIONS_URL, ROLES.platform_engineer);
+    createExceptionList(getExceptionList(), getExceptionList().list_id);
+
+    // Then we login as read-only user to test.
+    login(ROLES.reader);
+    visitWithoutDateRange(EXCEPTIONS_URL, ROLES.reader);
+    waitForExceptionsTableToBeLoaded();
+
+    cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 1 list`);
+  });
+
+  it('Delete icon is not shown', () => {
+    cy.get(EXCEPTIONS_TABLE_DELETE_BTN).should('not.exist');
   });
 });

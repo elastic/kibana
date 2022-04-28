@@ -1,0 +1,146 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildUserDetailsQuery build query from options correctly 1`] = `
+Object {
+  "allow_no_indices": true,
+  "body": Object {
+    "aggregations": Object {
+      "first_seen": Object {
+        "min": Object {
+          "field": "@timestamp",
+        },
+      },
+      "host_ip": Object {
+        "aggs": Object {
+          "timestamp": Object {
+            "max": Object {
+              "field": "@timestamp",
+            },
+          },
+        },
+        "terms": Object {
+          "order": Object {
+            "timestamp": "desc",
+          },
+          "script": Object {
+            "lang": "painless",
+            "source": "doc['host.ip']",
+          },
+          "size": 10,
+        },
+      },
+      "host_os_family": Object {
+        "aggs": Object {
+          "timestamp": Object {
+            "max": Object {
+              "field": "@timestamp",
+            },
+          },
+        },
+        "terms": Object {
+          "field": "host.os.family",
+          "order": Object {
+            "timestamp": "desc",
+          },
+          "size": 10,
+        },
+      },
+      "host_os_name": Object {
+        "aggs": Object {
+          "timestamp": Object {
+            "max": Object {
+              "field": "@timestamp",
+            },
+          },
+        },
+        "terms": Object {
+          "field": "host.os.name",
+          "order": Object {
+            "timestamp": "desc",
+          },
+          "size": 10,
+        },
+      },
+      "last_seen": Object {
+        "max": Object {
+          "field": "@timestamp",
+        },
+      },
+      "user_domain": Object {
+        "aggs": Object {
+          "timestamp": Object {
+            "max": Object {
+              "field": "@timestamp",
+            },
+          },
+        },
+        "terms": Object {
+          "field": "user.domain",
+          "order": Object {
+            "timestamp": "desc",
+          },
+          "size": 10,
+        },
+      },
+      "user_id": Object {
+        "aggs": Object {
+          "timestamp": Object {
+            "max": Object {
+              "field": "@timestamp",
+            },
+          },
+        },
+        "terms": Object {
+          "field": "user.id",
+          "order": Object {
+            "timestamp": "desc",
+          },
+          "size": 10,
+        },
+      },
+      "user_name": Object {
+        "aggs": Object {
+          "timestamp": Object {
+            "max": Object {
+              "field": "@timestamp",
+            },
+          },
+        },
+        "terms": Object {
+          "field": "user.name",
+          "order": Object {
+            "timestamp": "desc",
+          },
+          "size": 10,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "user.name": "bastion00.siem.estc.dev",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "strict_date_optional_time",
+                "gte": "2020-09-02T15:17:13.678Z",
+                "lte": "2020-09-03T15:17:13.678Z",
+              },
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+  "ignore_unavailable": true,
+  "index": Array [
+    "test_indices*",
+  ],
+  "track_total_hits": false,
+}
+`;

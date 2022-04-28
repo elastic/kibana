@@ -201,6 +201,7 @@ describe('TabbedAggResponseWriter class', () => {
             indexPatternId: '1234',
             params: {
               field: 'machine.os.raw',
+              emptyAsNull: false,
             },
             type: 'cardinality',
           },
@@ -264,6 +265,7 @@ describe('TabbedAggResponseWriter class', () => {
             indexPatternId: '1234',
             params: {
               field: 'machine.os.raw',
+              emptyAsNull: false,
             },
             type: 'cardinality',
           },

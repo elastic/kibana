@@ -130,7 +130,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await PageObjects.lens.switchToVisualization('lnsMetric');
 
-        await PageObjects.lens.waitForVisualization();
+        await PageObjects.lens.waitForVisualization('mtrVis');
         await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
 
         await PageObjects.header.waitUntilLoadingHasFinished();

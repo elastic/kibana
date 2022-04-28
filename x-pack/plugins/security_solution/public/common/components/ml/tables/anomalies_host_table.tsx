@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
 import { HeaderSection } from '../../header_section';
@@ -21,6 +21,7 @@ import { BasicTable } from './basic_table';
 import { getCriteriaFromHostType } from '../criteria/get_criteria_from_host_type';
 import { Panel } from '../../panel';
 import { anomaliesTableDefaultEquality } from './default_equality';
+import { useQueryToggle } from '../../../containers/query_toggle';
 
 const sorting = {
   sort: {
@@ -37,10 +38,24 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
   type,
 }) => {
   const capabilities = useMlCapabilities();
+  const { toggleStatus, setToggleStatus } = useQueryToggle(`AnomaliesHostTable`);
+  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(skip || !toggleStatus);
+  }, [skip, toggleStatus]);
+  const toggleQuery = useCallback(
+    (status: boolean) => {
+      setToggleStatus(status);
+      // toggle on = skipQuery false
+      setQuerySkip(!status);
+    },
+    [setQuerySkip, setToggleStatus]
+  );
+
   const [loading, tableData] = useAnomaliesTableData({
     startDate,
     endDate,
-    skip,
+    skip: querySkip,
     criteriaFields: getCriteriaFromHostType(type, hostName),
     filterQuery: {
       exists: { field: 'host.name' },
@@ -55,7 +70,7 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
     initialPageSize: 10,
     totalItemCount: hosts.length,
     pageSizeOptions: [5, 10, 20, 50],
-    hidePerPageOptions: false,
+    showPerPageOptions: true,
   };
 
   if (!hasMlUserPermissions(capabilities)) {
@@ -64,21 +79,26 @@ const AnomaliesHostTableComponent: React.FC<AnomaliesHostTableProps> = ({
     return (
       <Panel loading={loading}>
         <HeaderSection
+          height={!toggleStatus ? 40 : undefined}
           subtitle={`${i18n.SHOWING}: ${pagination.totalItemCount.toLocaleString()} ${i18n.UNIT(
             pagination.totalItemCount
           )}`}
           title={i18n.ANOMALIES}
+          toggleQuery={toggleQuery}
+          toggleStatus={toggleStatus}
           tooltip={i18n.TOOLTIP}
           isInspectDisabled={skip}
         />
-
-        <BasicTable
-          // @ts-expect-error the Columns<T, U> type is not as specific as EUI's...
-          columns={columns}
-          items={hosts}
-          pagination={pagination}
-          sorting={sorting}
-        />
+        {toggleStatus && (
+          <BasicTable
+            data-test-subj="host-anomalies-table"
+            // @ts-expect-error the Columns<T, U> type is not as specific as EUI's...
+            columns={columns}
+            items={hosts}
+            pagination={pagination}
+            sorting={sorting}
+          />
+        )}
 
         {loading && (
           <Loader data-test-subj="anomalies-host-table-loading-panel" overlay size="xl" />

@@ -11,10 +11,11 @@ import { DynamicStyleProperty } from './dynamic_style_property';
 import { OrdinalLegend } from '../components/legend/ordinal_legend';
 import { makeMbClampedNumberExpression } from '../style_util';
 import {
+  FieldFormatter,
   HALF_MAKI_ICON_SIZE,
-  // @ts-expect-error
-} from '../symbol_utils';
-import { FieldFormatter, MB_LOOKUP_FUNCTION, VECTOR_STYLES } from '../../../../../common/constants';
+  MB_LOOKUP_FUNCTION,
+  VECTOR_STYLES,
+} from '../../../../../common/constants';
 import { SizeDynamicOptions } from '../../../../../common/descriptor_types';
 import { IField } from '../../../fields/field';
 import { IVectorLayer } from '../../../layers/vector_layer';
@@ -34,7 +35,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
     this._isSymbolizedAsIcon = isSymbolizedAsIcon;
   }
 
-  supportsMbFeatureState() {
+  supportsFeatureState() {
     // mb style "icon-size" does not support feature state
     if (this.getStyleName() === VECTOR_STYLES.ICON_SIZE && this._isSymbolizedAsIcon) {
       return false;
@@ -45,7 +46,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
       return false;
     }
 
-    return super.supportsMbFeatureState();
+    return true;
   }
 
   syncHaloWidthWithMb(mbLayerId: string, mbMap: MbMap) {

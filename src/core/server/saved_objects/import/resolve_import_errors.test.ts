@@ -138,7 +138,6 @@ describe('#importSavedObjectsFromStream', () => {
     return {
       type: 'foo-type',
       id: uuidv4(),
-      title: 'some-title',
       meta: { title },
       error: { type: 'conflict' },
     };

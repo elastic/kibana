@@ -70,6 +70,7 @@ export const StatusPopoverButton = React.memo<StatusPopoverButtonProps>(
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         panelPaddingSize="none"
+        data-test-subj="alertStatus"
       >
         <EuiPopoverTitle paddingSize="m">{CHANGE_ALERT_STATUS}</EuiPopoverTitle>
         <EuiContextMenuPanel items={actionItems} />

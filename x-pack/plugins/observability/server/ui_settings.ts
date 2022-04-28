@@ -7,15 +7,25 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { UiSettingsParams } from '../../../../src/core/types';
-import { observabilityFeatureId } from '../common';
+import { UiSettingsParams } from '@kbn/core/types';
+import { observabilityFeatureId, ProgressiveLoadingQuality } from '../common';
 import {
   enableComparisonByDefault,
   enableInspectEsQueries,
   maxSuggestions,
   enableInfrastructureView,
   defaultApmServiceEnvironment,
+  apmProgressiveLoading,
+  enableServiceGroups,
+  apmServiceInventoryOptimizedSorting,
 } from '../common/ui_settings_keys';
+
+const technicalPreviewLabel = i18n.translate(
+  'xpack.observability.uiSettings.technicalPreviewLabel',
+  {
+    defaultMessage: 'technical preview',
+  }
+);
 
 /**
  * uiSettings definitions for Observability.
@@ -59,7 +69,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     name: i18n.translate('xpack.observability.enableInfrastructureView', {
       defaultMessage: 'Infrastructure feature',
     }),
-    value: true,
+    value: false,
     description: i18n.translate('xpack.observability.enableInfrastructureViewDescription', {
       defaultMessage: 'Enable the Infrastruture view feature in APM app',
     }),
@@ -76,5 +86,88 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     }),
     value: '',
     schema: schema.string(),
+  },
+  [apmProgressiveLoading]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmProgressiveLoading', {
+      defaultMessage: 'Use progressive loading of selected APM views',
+    }),
+    description: i18n.translate('xpack.observability.apmProgressiveLoadingDescription', {
+      defaultMessage:
+        '{technicalPreviewLabel} Whether to load data progressively for APM views. Data may be requested with a lower sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background',
+      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+    }),
+    value: ProgressiveLoadingQuality.off,
+    schema: schema.oneOf([
+      schema.literal(ProgressiveLoadingQuality.off),
+      schema.literal(ProgressiveLoadingQuality.low),
+      schema.literal(ProgressiveLoadingQuality.medium),
+      schema.literal(ProgressiveLoadingQuality.high),
+    ]),
+    requiresPageReload: false,
+    type: 'select',
+    options: [
+      ProgressiveLoadingQuality.off,
+      ProgressiveLoadingQuality.low,
+      ProgressiveLoadingQuality.medium,
+      ProgressiveLoadingQuality.high,
+    ],
+    optionLabels: {
+      [ProgressiveLoadingQuality.off]: i18n.translate(
+        'xpack.observability.apmProgressiveLoadingQualityOff',
+        {
+          defaultMessage: 'Off',
+        }
+      ),
+      [ProgressiveLoadingQuality.low]: i18n.translate(
+        'xpack.observability.apmProgressiveLoadingQualityLow',
+        {
+          defaultMessage: 'Low sampling rate (fastest, least accurate)',
+        }
+      ),
+      [ProgressiveLoadingQuality.medium]: i18n.translate(
+        'xpack.observability.apmProgressiveLoadingQualityMedium',
+        {
+          defaultMessage: 'Medium sampling rate',
+        }
+      ),
+      [ProgressiveLoadingQuality.high]: i18n.translate(
+        'xpack.observability.apmProgressiveLoadingQualityHigh',
+        {
+          defaultMessage: 'High sampling rate (slower, most accurate)',
+        }
+      ),
+    },
+  },
+  [enableServiceGroups]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableServiceGroups', {
+      defaultMessage: 'Service groups feature',
+    }),
+    value: false,
+    description: i18n.translate('xpack.observability.enableServiceGroupsDescription', {
+      defaultMessage: '{technicalPreviewLabel} Enable the Service groups feature on APM UI',
+      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+    }),
+    schema: schema.boolean(),
+    requiresPageReload: true,
+  },
+  [apmServiceInventoryOptimizedSorting]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmServiceInventoryOptimizedSorting', {
+      defaultMessage: 'Optimize APM Service Inventory page load performance',
+    }),
+    description: i18n.translate(
+      'xpack.observability.apmServiceInventoryOptimizedSortingDescription',
+      {
+        defaultMessage:
+          '{technicalPreviewLabel} Default APM Service Inventory page sort (for Services without Machine Learning applied) to sort by Service Name',
+        values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
+      }
+    ),
+    schema: schema.boolean(),
+    value: false,
+    requiresPageReload: false,
+    type: 'boolean',
   },
 };

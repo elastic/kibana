@@ -30,7 +30,7 @@ import {
 } from '../../../../../common/search_strategy';
 import { HostRiskSummary } from './host_risk_summary';
 import { EnrichmentSummary } from './enrichment_summary';
-import { HostRisk } from '../../../containers/hosts_risk/types';
+import { HostRisk } from '../../../../risk_score/containers';
 
 export interface ThreatSummaryDescription {
   browserField: BrowserField;

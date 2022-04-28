@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* es-lint-disable import/no-extraneous-dependencies */
-
 import React from 'react';
 import { createStore } from 'redux';
 import { Provider as ReduxProvider } from 'react-redux';

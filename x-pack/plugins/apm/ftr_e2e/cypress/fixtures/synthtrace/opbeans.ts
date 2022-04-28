@@ -24,47 +24,36 @@ export function opbeans({ from, to }: { from: number; to: number }) {
     apm.getChromeUserAgentDefaults()
   );
 
-  return [
-    ...range
-      .interval('1s')
-      .rate(1)
-      .flatMap((timestamp) => [
-        ...opbeansJava
-          .transaction('GET /api/product')
-          .timestamp(timestamp)
-          .duration(1000)
-          .success()
-          .errors(
-            opbeansJava
-              .error('[MockError] Foo', `Exception`)
-              .timestamp(timestamp)
-          )
-          .children(
-            opbeansJava
-              .span('SELECT * FROM product', 'db', 'postgresql')
-              .timestamp(timestamp)
-              .duration(50)
-              .success()
-              .destination('postgresql')
-          )
-          .serialize(),
-        ...opbeansNode
-          .transaction('GET /api/product/:id')
-          .timestamp(timestamp)
-          .duration(500)
-          .success()
-          .serialize(),
-        ...opbeansNode
-          .transaction('Worker job', 'Worker')
-          .timestamp(timestamp)
-          .duration(1000)
-          .success()
-          .serialize(),
-        ...opbeansRum
-          .transaction('/')
-          .timestamp(timestamp)
-          .duration(1000)
-          .serialize(),
-      ]),
-  ];
+  return range
+    .interval('1s')
+    .rate(1)
+    .generator((timestamp) => [
+      opbeansJava
+        .transaction('GET /api/product')
+        .timestamp(timestamp)
+        .duration(1000)
+        .success()
+        .errors(
+          opbeansJava.error('[MockError] Foo', `Exception`).timestamp(timestamp)
+        )
+        .children(
+          opbeansJava
+            .span('SELECT * FROM product', 'db', 'postgresql')
+            .timestamp(timestamp)
+            .duration(50)
+            .success()
+            .destination('postgresql')
+        ),
+      opbeansNode
+        .transaction('GET /api/product/:id')
+        .timestamp(timestamp)
+        .duration(500)
+        .success(),
+      opbeansNode
+        .transaction('Worker job', 'Worker')
+        .timestamp(timestamp)
+        .duration(1000)
+        .success(),
+      opbeansRum.transaction('/').timestamp(timestamp).duration(1000),
+    ]);
 }

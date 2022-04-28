@@ -8,8 +8,8 @@
 
 import { gaugeFunction } from './gauge_function';
 import { GaugeArguments, GaugeShapes } from '..';
-import { functionWrapper } from '../../../../expressions/common/expression_functions/specs/tests/utils';
-import { Datatable } from '../../../../expressions/common/expression_types/specs';
+import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
+import { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import {
   GaugeCentralMajorModes,
   GaugeColorModes,
@@ -36,28 +36,19 @@ describe('interpreter/functions#gauge', () => {
     min: 'col-1-2',
     metric: 'col-0-1',
   };
-  const checkArg = (
-    arg: keyof GaugeArguments,
-    options: Record<string, string>,
-    invalidValue: string
-  ) => {
+  const checkArg = (arg: keyof GaugeArguments, options: Record<string, string>) => {
     Object.values(options).forEach((option) => {
       it(`returns an object with the correct structure for the ${option} ${arg}`, () => {
         const actual = fn(context, { ...args, [arg]: option }, undefined);
         expect(actual).toMatchSnapshot();
       });
     });
-
-    it(`throws error on wrong ${arg} type`, () => {
-      const actual = () => fn(context, { ...args, [arg]: invalidValue as any }, undefined);
-      expect(actual).toThrowErrorMatchingSnapshot();
-    });
   };
 
-  checkArg('shape', GaugeShapes, 'invalid_shape');
-  checkArg('colorMode', GaugeColorModes, 'invalid_color_mode');
-  checkArg('ticksPosition', GaugeTicksPositions, 'invalid_ticks_position');
-  checkArg('labelMajorMode', GaugeLabelMajorModes, 'invalid_label_major_mode');
+  checkArg('shape', GaugeShapes);
+  checkArg('colorMode', GaugeColorModes);
+  checkArg('ticksPosition', GaugeTicksPositions);
+  checkArg('labelMajorMode', GaugeLabelMajorModes);
 
   it(`returns an object with the correct structure for the circle if centralMajor and centralMajorMode are passed`, () => {
     const actual = fn(

@@ -20,15 +20,21 @@ import type {
   SearchRequest as SearchRequestWithBody,
   AggregationsAggregate,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IScopedClusterClient, ElasticsearchClient, Logger } from 'src/core/server';
-import { ElasticsearchClientWithChild, RuleExecutionMetrics } from '../types';
-import { Alert as Rule } from '../types';
+import { IScopedClusterClient, ElasticsearchClient, Logger } from '@kbn/core/server';
+import { Rule } from '../types';
+import { RuleRunMetrics } from './rule_run_metrics_store';
 
 type RuleInfo = Pick<Rule, 'name' | 'alertTypeId' | 'id'> & { spaceId: string };
+type SearchMetrics = Pick<
+  RuleRunMetrics,
+  'numSearches' | 'totalSearchDurationMs' | 'esSearchDurationMs'
+>;
+
 interface WrapScopedClusterClientFactoryOpts {
   scopedClusterClient: IScopedClusterClient;
   rule: RuleInfo;
   logger: Logger;
+  abortController: AbortController;
 }
 
 type WrapScopedClusterClientOpts = WrapScopedClusterClientFactoryOpts & {
@@ -60,7 +66,7 @@ export function createWrappedScopedClusterClientFactory(opts: WrapScopedClusterC
 
   return {
     client: () => wrappedClient,
-    getMetrics: (): RuleExecutionMetrics => {
+    getMetrics: (): SearchMetrics => {
       return {
         esSearchDurationMs,
         totalSearchDurationMs,
@@ -87,8 +93,7 @@ function wrapScopedClusterClient(opts: WrapScopedClusterClientOpts): IScopedClus
 function wrapEsClient(opts: WrapEsClientOpts): ElasticsearchClient {
   const { esClient, ...rest } = opts;
 
-  // Core hides access to .child via TS
-  const wrappedClient = (esClient as ElasticsearchClientWithChild).child({});
+  const wrappedClient = esClient.child({});
 
   // Mutating the functions we want to wrap
   wrappedClient.search = getWrappedSearchFn({ esClient: wrappedClient, ...rest });
@@ -141,6 +146,7 @@ function getWrappedSearchFn(opts: WrapEsClientOpts) {
       );
       const result = (await originalSearch.call(opts.esClient, params, {
         ...searchOptions,
+        signal: opts.abortController.signal,
       })) as
         | TransportResult<SearchResponse<TDocument, TAggregations>, unknown>
         | SearchResponse<TDocument, TAggregations>;
@@ -161,6 +167,9 @@ function getWrappedSearchFn(opts: WrapEsClientOpts) {
       opts.logMetricsFn({ esSearchDuration: took ?? 0, totalSearchDuration: durationMs });
       return result;
     } catch (e) {
+      if (opts.abortController.signal.aborted) {
+        throw new Error('Search has been aborted due to cancelled execution');
+      }
       throw e;
     }
   }

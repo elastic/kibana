@@ -15,11 +15,11 @@ Object {
       "data": Object {
         "@timestamp": 1606234833273,
         "process.entity_id": "A",
-        "process.name": "lsass.exe",
+        "process.name": "powershell.exe",
         "process.parent.entity_id": "",
       },
       "id": "A",
-      "name": "lsass.exe",
+      "name": "powershell.exe",
       "parent": undefined,
       "stats": Object {
         "byCategory": Object {},
@@ -33,11 +33,11 @@ Object {
       "data": Object {
         "@timestamp": 1606234833273,
         "process.entity_id": "A",
-        "process.name": "lsass.exe",
+        "process.name": "powershell.exe",
         "process.parent.entity_id": "",
       },
       "id": "A",
-      "name": "lsass.exe",
+      "name": "powershell.exe",
       "parent": undefined,
       "stats": Object {
         "byCategory": Object {},
@@ -58,11 +58,11 @@ Object {
       "data": Object {
         "@timestamp": 1606234833273,
         "process.entity_id": "A",
-        "process.name": "notepad.exe",
+        "process.name": "lsass.exe",
         "process.parent.entity_id": "",
       },
       "id": "A",
-      "name": "notepad.exe",
+      "name": "lsass.exe",
       "parent": undefined,
       "stats": Object {
         "byCategory": Object {},
@@ -73,11 +73,11 @@ Object {
       "data": Object {
         "@timestamp": 1606234833273,
         "process.entity_id": "B",
-        "process.name": "mimikatz.exe",
+        "process.name": "powershell.exe",
         "process.parent.entity_id": "A",
       },
       "id": "B",
-      "name": "mimikatz.exe",
+      "name": "powershell.exe",
       "parent": "A",
       "stats": Object {
         "byCategory": Object {},
@@ -88,11 +88,11 @@ Object {
       "data": Object {
         "@timestamp": 1606234833273,
         "process.entity_id": "C",
-        "process.name": "notepad.exe",
+        "process.name": "iexlorer.exe",
         "process.parent.entity_id": "A",
       },
       "id": "C",
-      "name": "notepad.exe",
+      "name": "iexlorer.exe",
       "parent": "A",
       "stats": Object {
         "byCategory": Object {},
@@ -103,11 +103,11 @@ Object {
       "data": Object {
         "@timestamp": 1606234833273,
         "process.entity_id": "I",
-        "process.name": "mimikatz.exe",
+        "process.name": "explorer.exe",
         "process.parent.entity_id": "A",
       },
       "id": "I",
-      "name": "mimikatz.exe",
+      "name": "explorer.exe",
       "parent": "A",
       "stats": Object {
         "byCategory": Object {},
@@ -118,11 +118,11 @@ Object {
       "data": Object {
         "@timestamp": 1606234833273,
         "process.entity_id": "D",
-        "process.name": "powershell.exe",
+        "process.name": "mimikatz.exe",
         "process.parent.entity_id": "B",
       },
       "id": "D",
-      "name": "powershell.exe",
+      "name": "mimikatz.exe",
       "parent": "B",
       "stats": Object {
         "byCategory": Object {},
@@ -148,11 +148,11 @@ Object {
       "data": Object {
         "@timestamp": 1606234833273,
         "process.entity_id": "F",
-        "process.name": "iexlorer.exe",
+        "process.name": "explorer.exe",
         "process.parent.entity_id": "C",
       },
       "id": "F",
-      "name": "iexlorer.exe",
+      "name": "explorer.exe",
       "parent": "C",
       "stats": Object {
         "byCategory": Object {},
@@ -163,11 +163,11 @@ Object {
       "data": Object {
         "@timestamp": 1606234833273,
         "process.entity_id": "G",
-        "process.name": "iexlorer.exe",
+        "process.name": "powershell.exe",
         "process.parent.entity_id": "C",
       },
       "id": "G",
-      "name": "iexlorer.exe",
+      "name": "powershell.exe",
       "parent": "C",
       "stats": Object {
         "byCategory": Object {},
@@ -178,11 +178,11 @@ Object {
       "data": Object {
         "@timestamp": 1606234833273,
         "process.entity_id": "H",
-        "process.name": "iexlorer.exe",
+        "process.name": "lsass.exe",
         "process.parent.entity_id": "G",
       },
       "id": "H",
-      "name": "iexlorer.exe",
+      "name": "lsass.exe",
       "parent": "G",
       "stats": Object {
         "byCategory": Object {},
@@ -439,11 +439,11 @@ Object {
       "data": Object {
         "@timestamp": 1606234833273,
         "process.entity_id": "A",
-        "process.name": "notepad.exe",
+        "process.name": "lsass.exe",
         "process.parent.entity_id": "",
       },
       "id": "A",
-      "name": "notepad.exe",
+      "name": "lsass.exe",
       "parent": undefined,
       "stats": Object {
         "byCategory": Object {},
@@ -457,11 +457,11 @@ Object {
       "data": Object {
         "@timestamp": 1606234833273,
         "process.entity_id": "B",
-        "process.name": "mimikatz.exe",
+        "process.name": "powershell.exe",
         "process.parent.entity_id": "A",
       },
       "id": "B",
-      "name": "mimikatz.exe",
+      "name": "powershell.exe",
       "parent": "A",
       "stats": Object {
         "byCategory": Object {},
@@ -475,11 +475,11 @@ Object {
       "data": Object {
         "@timestamp": 1606234833273,
         "process.entity_id": "C",
-        "process.name": "notepad.exe",
+        "process.name": "iexlorer.exe",
         "process.parent.entity_id": "A",
       },
       "id": "C",
-      "name": "notepad.exe",
+      "name": "iexlorer.exe",
       "parent": "A",
       "stats": Object {
         "byCategory": Object {},
@@ -493,11 +493,11 @@ Object {
       "data": Object {
         "@timestamp": 1606234833273,
         "process.entity_id": "I",
-        "process.name": "mimikatz.exe",
+        "process.name": "explorer.exe",
         "process.parent.entity_id": "A",
       },
       "id": "I",
-      "name": "mimikatz.exe",
+      "name": "explorer.exe",
       "parent": "A",
       "stats": Object {
         "byCategory": Object {},
@@ -511,11 +511,11 @@ Object {
       "data": Object {
         "@timestamp": 1606234833273,
         "process.entity_id": "D",
-        "process.name": "powershell.exe",
+        "process.name": "mimikatz.exe",
         "process.parent.entity_id": "B",
       },
       "id": "D",
-      "name": "powershell.exe",
+      "name": "mimikatz.exe",
       "parent": "B",
       "stats": Object {
         "byCategory": Object {},
@@ -547,11 +547,11 @@ Object {
       "data": Object {
         "@timestamp": 1606234833273,
         "process.entity_id": "F",
-        "process.name": "iexlorer.exe",
+        "process.name": "explorer.exe",
         "process.parent.entity_id": "C",
       },
       "id": "F",
-      "name": "iexlorer.exe",
+      "name": "explorer.exe",
       "parent": "C",
       "stats": Object {
         "byCategory": Object {},
@@ -565,11 +565,11 @@ Object {
       "data": Object {
         "@timestamp": 1606234833273,
         "process.entity_id": "G",
-        "process.name": "iexlorer.exe",
+        "process.name": "powershell.exe",
         "process.parent.entity_id": "C",
       },
       "id": "G",
-      "name": "iexlorer.exe",
+      "name": "powershell.exe",
       "parent": "C",
       "stats": Object {
         "byCategory": Object {},
@@ -583,11 +583,11 @@ Object {
       "data": Object {
         "@timestamp": 1606234833273,
         "process.entity_id": "H",
-        "process.name": "iexlorer.exe",
+        "process.name": "lsass.exe",
         "process.parent.entity_id": "G",
       },
       "id": "H",
-      "name": "iexlorer.exe",
+      "name": "lsass.exe",
       "parent": "G",
       "stats": Object {
         "byCategory": Object {},
@@ -608,11 +608,11 @@ Object {
       "data": Object {
         "@timestamp": 1606234833273,
         "process.entity_id": "A",
-        "process.name": "powershell.exe",
+        "process.name": "explorer.exe",
         "process.parent.entity_id": "",
       },
       "id": "A",
-      "name": "powershell.exe",
+      "name": "explorer.exe",
       "parent": undefined,
       "stats": Object {
         "byCategory": Object {},
@@ -623,11 +623,11 @@ Object {
       "data": Object {
         "@timestamp": 1606234833273,
         "process.entity_id": "B",
-        "process.name": "powershell.exe",
+        "process.name": "iexlorer.exe",
         "process.parent.entity_id": "A",
       },
       "id": "B",
-      "name": "powershell.exe",
+      "name": "iexlorer.exe",
       "parent": "A",
       "stats": Object {
         "byCategory": Object {},
@@ -661,11 +661,11 @@ Object {
       "data": Object {
         "@timestamp": 1606234833273,
         "process.entity_id": "A",
-        "process.name": "powershell.exe",
+        "process.name": "explorer.exe",
         "process.parent.entity_id": "",
       },
       "id": "A",
-      "name": "powershell.exe",
+      "name": "explorer.exe",
       "parent": undefined,
       "stats": Object {
         "byCategory": Object {},
@@ -679,11 +679,11 @@ Object {
       "data": Object {
         "@timestamp": 1606234833273,
         "process.entity_id": "B",
-        "process.name": "powershell.exe",
+        "process.name": "iexlorer.exe",
         "process.parent.entity_id": "A",
       },
       "id": "B",
-      "name": "powershell.exe",
+      "name": "iexlorer.exe",
       "parent": "A",
       "stats": Object {
         "byCategory": Object {},

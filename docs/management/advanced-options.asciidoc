@@ -478,13 +478,6 @@ The default index when using the `.es()` query.
 [[timelion-estimefield]]`timelion:es.timefield`::
 The default field containing a timestamp when using the `.es()` query.
 
-[[timelion-graphite-url]]`timelion:graphite.url`::
-experimental:[]
-Used with graphite queries, this is the URL of your graphite host
-in the form https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite. This URL can
-be selected from an allow-list configured in the `kibana.yml` under
-`timelion.graphiteUrls`.
-
 [[timelion-maxbuckets]]`timelion:max_buckets`::
 The maximum number of buckets a single data source can return. This value is
 used for calculating automatic intervals in visualizations.
@@ -492,16 +485,12 @@ used for calculating automatic intervals in visualizations.
 [[timelion-mininterval]]`timelion:min_interval`::
 The smallest interval to calculate when using "auto".
 
-[[timelion-quandlkey]]`timelion:quandl.key`::
-experimental:[]
-Used with quandl queries, this is your API key from
-https://www.quandl.com/[www.quandl.com].
-
 [[timelion-targetbuckets]]`timelion:target_buckets`::
 Used for calculating automatic intervals in visualizations, this is the number
 of buckets to try to represent.
 
 [[timelion-legacyChartsLibrary]]`timelion:legacyChartsLibrary`::
+**The legacy timelion charts are deprecated and will not be supported as of 8.4.**
 Enables the legacy charts library for timelion charts in Visualize.
 
 
@@ -521,6 +510,7 @@ Enables the legacy time axis for charts in Lens, Discover, Visualize and TSVB
 The maximum number of buckets a datasource can return. High numbers can have a negative impact on your browser rendering performance.
 
 [[visualization-visualize-pieChartslibrary]]`visualization:visualize:legacyPieChartsLibrary`::
+**The legacy pie charts are deprecated and will not be supported in a future version.**
 The visualize editor uses new pie charts with improved performance, color palettes, label positioning, and more. Enable this option if you prefer to use the legacy charts library.
 
 [[visualization-visualize-heatmapChartslibrary]]`visualization:visualize:legacyHeatmapChartsLibrary`::

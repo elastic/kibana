@@ -4,8 +4,8 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["bfetch", "expressions", "uiActions", "share", "inspector", "fieldFormats", "dataViews"],
-  "serviceFolders": ["search", "query", "autocomplete", "ui"],
-  "optionalPlugins": ["usageCollection"],
+  "serviceFolders": ["search", "query", "ui"],
+  "optionalPlugins": ["usageCollection", "taskManager", "security"],
   "extraPublicDirs": ["common"],
   "requiredBundles": ["kibanaUtils", "kibanaReact", "inspector"],
   "owner": {

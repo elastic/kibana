@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart } from 'kibana/public';
+import type { HttpSetup } from '@kbn/core/public';
 
 export interface NewsItem {
   title: { en: string };
@@ -18,9 +18,9 @@ interface NewsFeed {
   items: NewsItem[];
 }
 
-export async function getNewsFeed({ core }: { core: CoreStart }): Promise<NewsFeed> {
+export async function getNewsFeed({ http }: { http: HttpSetup }): Promise<NewsFeed> {
   try {
-    return await core.http.get('https://feeds.elastic.co/observability-solution/v8.0.0.json');
+    return await http.get('https://feeds.elastic.co/observability-solution/v8.0.0.json');
   } catch (e) {
     console.error('Error while fetching news feed', e);
     return { items: [] };

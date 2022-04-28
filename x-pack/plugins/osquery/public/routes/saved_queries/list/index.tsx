@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 
-import { SavedObject } from 'kibana/public';
+import { SavedObject } from '@kbn/core/public';
 import { ECSMapping } from '../../../../common/schemas/common';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
@@ -125,12 +125,12 @@ const SavedQueriesPageComponent = () => {
   );
 
   const renderPlayAction = useCallback(
-    (item: SavedQuerySO) => (
-      <PlayButton
-        savedQuery={item}
-        disabled={!(permissions.runSavedQueries || permissions.writeLiveQueries)}
-      />
-    ),
+    (item: SavedQuerySO) =>
+      permissions.runSavedQueries || permissions.writeLiveQueries ? (
+        <PlayButton savedQuery={item} disabled={false} />
+      ) : (
+        <></>
+      ),
     [permissions.runSavedQueries, permissions.writeLiveQueries]
   );
 
@@ -141,6 +141,7 @@ const SavedQueriesPageComponent = () => {
       item.attributes.updated_by !== item.attributes.created_by
         ? ` @ ${item.attributes.updated_by}`
         : '';
+
     return updatedAt ? `${moment(updatedAt).fromNow()}${updatedBy}` : '-';
   }, []);
 

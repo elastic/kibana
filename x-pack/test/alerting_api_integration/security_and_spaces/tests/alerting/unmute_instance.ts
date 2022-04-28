@@ -12,7 +12,7 @@ import {
   AlertUtils,
   checkAAD,
   getUrlPrefix,
-  getTestAlertData,
+  getTestRuleData,
   ObjectRemover,
   getConsumerUnauthorizedErrorMessage,
   getProducerUnauthorizedErrorMessage,
@@ -49,7 +49,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 enabled: false,
                 actions: [
                   {
@@ -122,7 +122,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 enabled: false,
                 rule_type_id: 'test.restricted-noop',
                 consumer: 'alertsRestrictedFixture',
@@ -183,7 +183,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 enabled: false,
                 rule_type_id: 'test.unrestricted-noop',
                 consumer: 'alertsFixture',
@@ -255,7 +255,7 @@ export default function createMuteAlertInstanceTests({ getService }: FtrProvider
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
-              getTestAlertData({
+              getTestRuleData({
                 enabled: false,
                 rule_type_id: 'test.restricted-noop',
                 consumer: 'alerts',
