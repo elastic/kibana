@@ -18,6 +18,7 @@ import {
   EuiTitle,
   EuiText,
   EuiToolTip,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -61,16 +62,12 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
               }
             )}
           >
-            <EuiButtonEmptyTo disabled={disabled} to={getSourcesPath(addPath, true)}>
-              Connect
-            </EuiButtonEmptyTo>
+            <EuiButtonEmpty disabled>Connect</EuiButtonEmpty>
           </EuiToolTip>
         );
       } else {
         return (
-          <EuiButtonEmptyTo disabled={disabled} to={getSourcesPath(addPath, true)}>
-            Connect
-          </EuiButtonEmptyTo>
+          <EuiButtonEmptyTo to={`${getSourcesPath(addPath, true)}/intro`}>Connect</EuiButtonEmptyTo>
         );
       }
     };

@@ -38,7 +38,6 @@ export interface AddSourceProps {
 }
 
 export enum AddSourceSteps {
-  ConfigIntroStep = 'Config Intro',
   SaveConfigStep = 'Save Config',
   ConfigCompletedStep = 'Config Completed',
   ConnectInstanceStep = 'Connect Instance',
@@ -134,7 +133,7 @@ export interface OrganizationsMap {
 
 export interface AddSourceValues {
   addSourceProps: AddSourceProps;
-  addSourceCurrentStep: AddSourceSteps;
+  addSourceCurrentStep: AddSourceSteps | null;
   dataLoading: boolean;
   sectionLoading: boolean;
   buttonLoading: boolean;
@@ -217,7 +216,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       },
     ],
     addSourceCurrentStep: [
-      AddSourceSteps.ConfigIntroStep,
+      null,
       {
         setAddSourceStep: (_, addSourceCurrentStep) => addSourceCurrentStep,
       },
@@ -627,5 +626,5 @@ const getFirstStep = (
   if (connect) return AddSourceSteps.ConnectInstanceStep;
   if (configure) return AddSourceSteps.ConfigureOauthStep;
   if (reAuthenticate) return AddSourceSteps.ReauthenticateStep;
-  return AddSourceSteps.ConfigIntroStep;
+  return AddSourceSteps.ChoiceStep;
 };

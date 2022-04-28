@@ -31,6 +31,7 @@ import { hasMultipleConnectorOptions } from '../../utils';
 import { AddSource, AddSourceList, GitHubViaApp } from './components/add_source';
 import { AddCustomSource } from './components/add_source/add_custom_source';
 import { ExternalConnectorConfig } from './components/add_source/add_external_connector';
+import { AddSourceIntro } from './components/add_source/add_source_intro';
 import { ConfigurationChoice } from './components/add_source/configuration_choice';
 import { OrganizationSources } from './organization_sources';
 import { PrivateSources } from './private_sources';
@@ -81,6 +82,13 @@ export const SourcesRouter: React.FC = () => {
       </Route>
       <Route exact path={getAddPath(GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE)}>
         <GitHubViaApp isGithubEnterpriseServer />
+      </Route>
+      <Route
+        exact
+        path={`${getSourcesPath(getAddPath(':serviceType'), isOrganization)}/intro`}
+        data-test-subj="ConnectorIntroRoute"
+      >
+        <AddSourceIntro />
       </Route>
       {sources.map((sourceData, i) => {
         const { serviceType, externalConnectorAvailable, internalConnectorAvailable } = sourceData;
