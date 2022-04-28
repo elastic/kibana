@@ -80,6 +80,11 @@
   margin: 16px;
 }
 
+.mtrVis__iconContainer:not(.mtrVis__iconContainer--textShaded) .mtrVis__iconInner {
+  margin: 0;
+}
+
+
 .mtrVis__container-iconLeft {
 
   height: 100%;

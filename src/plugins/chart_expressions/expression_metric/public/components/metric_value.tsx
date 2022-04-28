@@ -115,7 +115,7 @@ export const MetricVisValue = ({
         >
           <div
             className={classNames('mtrVis__iconContainer', {
-              'mtrVis__iconContainer--textShaded': iconBackground === 'color' && !iconColor,
+              'mtrVis__iconContainer--textShaded': iconBackground === 'color',
             })}
             style={
               iconBackground === 'color' && iconColor
