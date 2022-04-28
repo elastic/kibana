@@ -6,8 +6,9 @@
  */
 
 import { useMemo } from 'react';
-import { useEuiTheme, transparentize } from '@elastic/eui';
+import { transparentize } from '@elastic/eui';
 import { CSSObject } from '@emotion/react';
+import { useEuiTheme } from '../../hooks';
 
 interface StylesDeps {
   depth: number;
@@ -17,7 +18,7 @@ interface StylesDeps {
 }
 
 export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }: StylesDeps) => {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, euiVars } = useEuiTheme();
 
   const cached = useMemo(() => {
     const { colors, border, size, font } = euiTheme;
@@ -40,12 +41,16 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
       borderLeft: border.editable,
     };
 
+    const icon: CSSObject = {
+      color: euiVars.euiColorDarkShade,
+    };
+
     /**
      * gets border, bg and hover colors for a process
      */
     const getHighlightColors = () => {
       let bgColor = 'none';
-      const hoverColor = transparentize(colors.primary, 0.04);
+      let hoverColor = transparentize(colors.primary, 0.04);
       let borderColor = 'transparent';
       let searchResColor = transparentize(colors.warning, 0.32);
 
@@ -55,11 +60,16 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
 
       if (isSelected) {
         searchResColor = colors.warning;
-        bgColor = `${transparentize(colors.primary, 0.1)}!important`;
+        bgColor = transparentize(colors.primary, 0.08);
+        hoverColor = transparentize(colors.primary, 0.12);
       }
 
       if (hasInvestigatedAlert) {
-        bgColor = `${transparentize(colors.danger, 0.04)}!important`;
+        bgColor = transparentize(colors.danger, 0.04);
+        hoverColor = transparentize(colors.danger, 0.12);
+        if (isSelected) {
+          bgColor = transparentize(colors.danger, 0.08);
+        }
       }
 
       return { bgColor, borderColor, hoverColor, searchResColor };
@@ -99,7 +109,7 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
       paddingLeft: size.s,
       position: 'relative',
       verticalAlign: 'middle',
-      color: colors.mediumShade,
+      color: euiVars.euiTextSubduedColor,
       wordBreak: 'break-all',
       minHeight: `calc(${size.l} - ${size.xxs})`,
       lineHeight: `calc(${size.l} - ${size.xxs})`,
@@ -143,8 +153,9 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
       timeStamp,
       alertDetails,
       sessionLeader,
+      icon,
     };
-  }, [depth, euiTheme, hasAlerts, hasInvestigatedAlert, isSelected]);
+  }, [depth, euiTheme, hasAlerts, hasInvestigatedAlert, isSelected, euiVars]);
 
   return cached;
 };

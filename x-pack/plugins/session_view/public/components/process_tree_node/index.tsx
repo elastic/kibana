@@ -105,7 +105,7 @@ export function ProcessTreeNode({
   );
   const isSelected = selectedProcess?.id === process.id;
   const styles = useStyles({ depth, hasAlerts, hasInvestigatedAlert, isSelected });
-  const buttonStyles = useButtonStyles({});
+  const buttonStyles = useButtonStyles();
 
   const nodeRef = useVisible({
     viewPortEl: scrollerRef.current,
@@ -255,14 +255,12 @@ export function ProcessTreeNode({
           onClick={onProcessClicked}
         >
           {isSessionLeader ? (
-            <>
-              <div css={styles.sessionLeader}>
-                <EuiIcon type={sessionIcon} />{' '}
-                <b css={styles.darkText}>{dataOrDash(name || args?.[0])}</b>{' '}
-                <FormattedMessage id="xpack.sessionView.startedBy" defaultMessage="started by" />{' '}
-                <EuiIcon type="user" /> <b css={styles.darkText}>{dataOrDash(user?.name)}</b>
-              </div>
-            </>
+            <div css={styles.sessionLeader}>
+              <EuiIcon type={sessionIcon} css={styles.icon} />{' '}
+              <b css={styles.darkText}>{dataOrDash(name || args?.[0])}</b>{' '}
+              <FormattedMessage id="xpack.sessionView.startedBy" defaultMessage="started by" />{' '}
+              <EuiIcon type="user" /> <b css={styles.darkText}>{dataOrDash(user?.name)}</b>
+            </div>
           ) : (
             <span>
               {showTimestamp && (
@@ -271,7 +269,7 @@ export function ProcessTreeNode({
                 </span>
               )}
               <EuiToolTip position="top" content={iconTooltip}>
-                <EuiIcon data-test-subj={iconTestSubj} type={processIcon} />
+                <EuiIcon data-test-subj={iconTestSubj} type={processIcon} css={styles.icon} />
               </EuiToolTip>{' '}
               <span ref={textRef}>
                 <span css={styles.workingDir}>{dataOrDash(workingDirectory)}</span>&nbsp;
@@ -310,7 +308,7 @@ export function ProcessTreeNode({
         <ProcessTreeAlerts
           alerts={alerts}
           investigatedAlertId={investigatedAlertId}
-          isProcessSelected={selectedProcess?.id === process.id}
+          isProcessSelected={isSelected}
           onAlertSelected={onProcessClicked}
           onShowAlertDetails={onShowAlertDetails}
         />
