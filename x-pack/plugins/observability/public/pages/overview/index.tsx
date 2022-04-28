@@ -96,6 +96,7 @@ export function OverviewPage({ routeParams }: Props) {
   const { hasAnyData, isAllRequestsComplete } = useHasData();
   const refetch = useRef<() => void>();
 
+  const [isGuidedSetupTourVisible, setGuidedSetupTourVisible] = useState(false);
   const { isGuidedSetupProgressDismissed } = useGuidedSetupProgress();
 
   const bucketSize = useMemo(
@@ -164,7 +165,7 @@ export function OverviewPage({ routeParams }: Props) {
           ? {
               children: (
                 <PageHeader
-                  showTour={true}
+                  showTour={isGuidedSetupTourVisible}
                   handleGuidedSetupClick={handleGuidedSetupClick}
                   onTimeRangeRefresh={onTimeRangeRefresh}
                 />
@@ -176,7 +177,10 @@ export function OverviewPage({ routeParams }: Props) {
       {hasData && (
         <>
           <ObservabilityHeaderMenu />
-          <ObservabilityStatusProgress onViewDetailsClick={() => setIsFlyoutVisible(true)} />
+          <ObservabilityStatusProgress
+            onViewDetailsClick={() => setIsFlyoutVisible(true)}
+            onDismissClick={() => setGuidedSetupTourVisible(true)}
+          />
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
               <SectionContainer
