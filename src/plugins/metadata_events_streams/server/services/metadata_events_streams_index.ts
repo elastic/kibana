@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import moment from 'moment';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { MetadataEvent, MetadataEventDoc } from '../../common';
 
@@ -49,6 +50,47 @@ export class MetadataEventsStreamsIndex {
       index: indexName,
       document,
     });
+  }
+
+  search(stream: string, searchRequest?: estypes.SearchRequest) {
+    if (!this.esClient) {
+      throw new Error(
+        `Missing ElasticsearchClient. Make sure that MetadataEventsStreamsIndex is initialized.`
+      );
+    }
+
+    // Add a boolean query to match the stream
+
+    const query: estypes.QueryDslQueryContainer = {
+      // @ts-expect-error
+      ...(searchRequest?.query ?? searchRequest?.body?.query),
+    };
+
+    const matchStreamTerm: estypes.QueryDslQueryContainer = {
+      term: { stream },
+    };
+
+    if (query.bool) {
+      if (query.bool.must) {
+        const boolMust = Array.isArray(query.bool.must)
+          ? [...query.bool.must, matchStreamTerm]
+          : [query.bool.must, matchStreamTerm];
+
+        query.bool = {
+          ...query.bool,
+          must: boolMust,
+        };
+      } else {
+        query.bool = {
+          ...query.bool,
+          must: matchStreamTerm,
+        };
+      }
+    } else {
+      query.bool = { must: matchStreamTerm };
+    }
+
+    return this.esClient.search({ ...searchRequest, query });
   }
 
   private async createIndexIfNotExist(

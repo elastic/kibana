@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { MetadataEvent } from '../../common';
 import { MetadataEventsStreamsIndex } from './metadata_events_streams_index';
 
@@ -24,5 +25,9 @@ export class MetadataEventsStream<E extends MetadataEvent = MetadataEvent> {
 
   registerEvent(event: E): void {
     return this.metadataEventsStreamsIndex.addEventToStream<E>(this.streamName, event);
+  }
+
+  search(searchRequest?: estypes.SearchRequest) {
+    return this.metadataEventsStreamsIndex.search(this.streamName, searchRequest);
   }
 }

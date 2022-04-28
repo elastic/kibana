@@ -5,8 +5,5 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { MetadataEventsStreams } from '../services';
 
-export interface RouteDependencies {
-  metadataEventsStreams: MetadataEventsStreams;
-}
+export { MetadataEventsService } from './metadata_events_service';
