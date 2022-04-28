@@ -45,7 +45,7 @@ export const ResponseBodyIndexField = ({ defaultValue, onChange, onBlur }: Props
           checked={checked}
           label={
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseConfig.indexResponseBody"
+              id="xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseConfig.indexResponseBody"
               defaultMessage="Index response body"
             />
           }
@@ -60,7 +60,7 @@ export const ResponseBodyIndexField = ({ defaultValue, onChange, onBlur }: Props
         <EuiFlexItem>
           <EuiSelect
             aria-label={i18n.translate(
-              'xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseConfig.responseBodyIndexPolicy',
+              'xpack.synthetics.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseConfig.responseBodyIndexPolicy',
               {
                 defaultMessage: 'Response body index policy',
               }
@@ -83,7 +83,7 @@ const responseBodyIndexPolicyOptions = [
   {
     value: ResponseBodyIndexPolicy.ALWAYS,
     text: i18n.translate(
-      'xpack.uptime.createPackagePolicy.stepConfigure.responseBodyIndex.always',
+      'xpack.synthetics.createPackagePolicy.stepConfigure.responseBodyIndex.always',
       {
         defaultMessage: 'Always',
       }
@@ -92,7 +92,7 @@ const responseBodyIndexPolicyOptions = [
   {
     value: ResponseBodyIndexPolicy.ON_ERROR,
     text: i18n.translate(
-      'xpack.uptime.createPackagePolicy.stepConfigure.responseBodyIndex.onError',
+      'xpack.synthetics.createPackagePolicy.stepConfigure.responseBodyIndex.onError',
       {
         defaultMessage: 'On error',
       }
