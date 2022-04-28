@@ -7,16 +7,13 @@
 
 import * as t from 'io-ts';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
-import { getTotalIndexDiskUsage } from './get_total_index_disk_usage';
+import { getIndicesStats } from './get_total_index_disk_usage';
 import { getSearchAggregatedTransactions } from '../../../lib/helpers/transactions';
 import { setupRequest } from '../../../lib/helpers/setup_request';
 import { getDocCountPerProcessorEvent } from './get_doc_count_per_processor_event';
 import { environmentRt, rangeRt } from '../../default_api_types';
 import { StorageExplorerItem } from '../../../../common/storage_explorer_types';
-import {
-  getNumberOfApmDocs,
-  getServiceStatistics,
-} from './get_service_statistics';
+import { getServiceStatistics } from './get_service_statistics';
 import { getTotalTransactionsPerService } from './get_total_transactions_per_service';
 
 const storageExplorerRoute = createApmServerRoute({
@@ -28,7 +25,7 @@ const storageExplorerRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    totalIndexDiskUsage?: number;
+    totalSizeInBytes?: number;
     serviceStatistics: StorageExplorerItem[];
   }> => {
     const setup = await setupRequest(resources);
@@ -43,39 +40,32 @@ const storageExplorerRoute = createApmServerRoute({
       kuery: '',
     });
 
-    const [
-      docCountPerProcessorEvent,
-      totalApmDocs,
-      totalIndexDiskUsage,
-      totalTransactionsPerService,
-    ] = await Promise.all([
-      getDocCountPerProcessorEvent({
-        searchAggregatedTransactions,
-        setup,
-        start,
-        end,
-        environment,
-      }),
-      getNumberOfApmDocs({ context, setup }),
-      getTotalIndexDiskUsage({ context, setup }),
-      getTotalTransactionsPerService({
-        setup,
-        start,
-        end,
-        environment,
-        searchAggregatedTransactions,
-      }),
-    ]);
+    const [docCountPerProcessorEvent, diskUsage, totalTransactionsPerService] =
+      await Promise.all([
+        getDocCountPerProcessorEvent({
+          searchAggregatedTransactions,
+          setup,
+          start,
+          end,
+          environment,
+        }),
+        getIndicesStats({ context, setup }),
+        getTotalTransactionsPerService({
+          setup,
+          start,
+          end,
+          environment,
+          searchAggregatedTransactions,
+        }),
+      ]);
 
     const serviceStatistics = getServiceStatistics({
       docCountPerProcessorEvent,
       totalTransactionsPerService,
-      totalApmDocs,
-      totalIndexDiskUsage,
+      ...diskUsage,
     });
 
     return {
-      totalIndexDiskUsage,
       serviceStatistics,
     };
   },

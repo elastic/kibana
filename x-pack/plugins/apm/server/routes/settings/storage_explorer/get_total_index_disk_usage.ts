@@ -8,7 +8,7 @@ import { uniq } from 'lodash';
 import { ApmPluginRequestHandlerContext } from '../../typings';
 import { Setup } from '../../../lib/helpers/setup_request';
 
-export async function getTotalIndexDiskUsage({
+export async function getIndicesStats({
   context,
   setup,
 }: {
@@ -23,5 +23,8 @@ export async function getTotalIndexDiskUsage({
   const esClient = (await context.core).elasticsearch.client;
   const diskUsage = await esClient.asCurrentUser.indices.stats({ index });
 
-  return diskUsage._all.total?.store?.size_in_bytes;
+  return {
+    totalApmDocs: diskUsage._all.total?.docs?.count,
+    totalSizeInBytes: diskUsage._all.total?.store?.size_in_bytes,
+  };
 }
