@@ -9,7 +9,7 @@
 import { ExtendedDataLayerFn } from '../types';
 import { EXTENDED_DATA_LAYER, LayerTypes } from '../constants';
 import { strings } from '../i18n';
-import { getCommonDataLayerArgs } from './common_data_layer_args';
+import { commonDataLayerArgs } from './common_data_layer_args';
 
 export const extendedDataLayerFunction: ExtendedDataLayerFn = {
   name: EXTENDED_DATA_LAYER,
@@ -18,7 +18,20 @@ export const extendedDataLayerFunction: ExtendedDataLayerFn = {
   help: strings.getDataLayerFnHelp(),
   inputTypes: ['datatable'],
   args: {
-    ...getCommonDataLayerArgs(true),
+    ...commonDataLayerArgs,
+    xAccessor: {
+      types: ['string'],
+      help: strings.getXAccessorHelp(),
+    },
+    splitAccessor: {
+      types: ['string'],
+      help: strings.getSplitAccessorHelp(),
+    },
+    accessors: {
+      types: ['string'],
+      help: strings.getAccessorsHelp(),
+      multi: true,
+    },
     table: {
       types: ['datatable'],
       help: strings.getTableHelp(),

@@ -9,7 +9,7 @@
 import { DataLayerFn } from '../types';
 import { DATA_LAYER, LayerTypes } from '../constants';
 import { strings } from '../i18n';
-import { getCommonDataLayerArgs } from './common_data_layer_args';
+import { commonDataLayerArgs } from './common_data_layer_args';
 
 export const dataLayerFunction: DataLayerFn = {
   name: DATA_LAYER,
@@ -17,7 +17,22 @@ export const dataLayerFunction: DataLayerFn = {
   type: DATA_LAYER,
   help: strings.getDataLayerFnHelp(),
   inputTypes: ['datatable'],
-  args: { ...getCommonDataLayerArgs() },
+  args: {
+    ...commonDataLayerArgs,
+    xAccessor: {
+      types: ['string', 'vis_dimension'],
+      help: strings.getXAccessorHelp(),
+    },
+    splitAccessor: {
+      types: ['string', 'vis_dimension'],
+      help: strings.getSplitAccessorHelp(),
+    },
+    accessors: {
+      types: ['string', 'vis_dimension'],
+      help: strings.getAccessorsHelp(),
+      multi: true,
+    },
+  },
   fn(table, args) {
     return {
       type: DATA_LAYER,

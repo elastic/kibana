@@ -12,15 +12,14 @@ import { DataLayerFn, ExtendedDataLayerFn } from '../types';
 
 type CommonDataLayerFn = DataLayerFn | ExtendedDataLayerFn;
 
-export const getCommonDataLayerArgs = (isExtendedLayer?: boolean): CommonDataLayerFn['args'] => ({
+export const commonDataLayerArgs: Omit<
+  CommonDataLayerFn['args'],
+  'accessors' | 'xAccessor' | 'splitAccessor'
+> = {
   hide: {
     types: ['boolean'],
     default: false,
     help: strings.getHideHelp(),
-  },
-  xAccessor: {
-    types: isExtendedLayer ? ['string'] : ['string', 'vis_dimension'],
-    help: strings.getXAccessorHelp(),
   },
   seriesType: {
     types: ['string'],
@@ -46,15 +45,6 @@ export const getCommonDataLayerArgs = (isExtendedLayer?: boolean): CommonDataLay
     default: YScaleTypes.LINEAR,
     strict: true,
   },
-  splitAccessor: {
-    types: isExtendedLayer ? ['string'] : ['string', 'vis_dimension'],
-    help: strings.getSplitAccessorHelp(),
-  },
-  accessors: {
-    types: isExtendedLayer ? ['string'] : ['string', 'vis_dimension'],
-    help: strings.getAccessorsHelp(),
-    multi: true,
-  },
   yConfig: {
     types: [Y_CONFIG],
     help: strings.getYConfigHelp(),
@@ -69,4 +59,4 @@ export const getCommonDataLayerArgs = (isExtendedLayer?: boolean): CommonDataLay
     help: strings.getPaletteHelp(),
     default: '{palette}',
   },
-});
+};
