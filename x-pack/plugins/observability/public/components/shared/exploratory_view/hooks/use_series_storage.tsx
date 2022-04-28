@@ -6,10 +6,8 @@
  */
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import {
-  IKbnUrlStateStorage,
-  ISessionStorageStateStorage,
-} from '../../../../../../../../src/plugins/kibana_utils/public';
+import { IKbnUrlStateStorage, ISessionStorageStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { OperationType, SeriesType } from '@kbn/lens-plugin/public';
 import { useUiTracker } from '../../../../hooks/use_track_metric';
 import type {
   AppDataType,
@@ -19,7 +17,6 @@ import type {
   URLReportDefinition,
 } from '../types';
 import { convertToShortUrl } from '../configurations/utils';
-import { OperationType, SeriesType } from '../../../../../../lens/public';
 import { URL_KEYS } from '../configurations/constants/url_constants';
 import { trackTelemetryOnApply } from '../utils/telemetry';
 

@@ -38,7 +38,7 @@ const getBootstrapScript = (isDev) => {
     const { bootstrapDevMode } = require(DEV_MODE_PATH);
     return bootstrapDevMode;
   } else {
-    const { bootstrap } = require('../../core/server');
+    const { bootstrap } = require('@kbn/core/server');
     return bootstrap;
   }
 };

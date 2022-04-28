@@ -9,7 +9,7 @@
 import _ from 'lodash';
 import React from 'react';
 
-import { IndexPatternsContract as DataViewsContract } from '../../../data/public';
+import { IndexPatternsContract as DataViewsContract } from '@kbn/data-plugin/public';
 import DataViewSelect, { DataViewSelectProps } from './data_view_select';
 
 // Takes in stateful runtime dependencies and pre-wires them to the component

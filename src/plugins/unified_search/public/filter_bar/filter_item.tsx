@@ -17,14 +17,11 @@ import {
 } from '@kbn/es-query';
 import classNames from 'classnames';
 import React, { MouseEvent, useState, useEffect, HTMLAttributes } from 'react';
-import { IUiSettingsClient } from 'src/core/public';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '@kbn/data-plugin/public';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
-import { DataView } from '../../../data_views/public';
-import {
-  getIndexPatternFromFilter as getDataViewFromFilter,
-  getDisplayValueFromFilter,
-} from '../../../data/public';
 import { getDataViews } from '../services';
 
 type PanelOptions = 'pinFilter' | 'editFilter' | 'negateFilter' | 'disableFilter' | 'deleteFilter';
@@ -277,7 +274,7 @@ export function FilterItem(props: FilterItemProps) {
     // Any filter is applicable if no data views were provided to FilterBar.
     if (!props.indexPatterns.length) return true;
 
-    const ip = getDataViewFromFilter(filter, dataViews);
+    const ip = getIndexPatternFromFilter(filter, dataViews);
     if (ip) return true;
 
     const allFields = dataViews.map((dataView) => {

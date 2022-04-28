@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { ScreenshotModePlugin } from './plugin';
 import { setScreenshotModeEnabled, setScreenshotModeDisabled } from '../common';
 

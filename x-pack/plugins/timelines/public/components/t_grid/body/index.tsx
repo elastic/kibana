@@ -36,6 +36,7 @@ import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import styled, { ThemeContext } from 'styled-components';
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { Filter } from '@kbn/es-query';
+import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import {
   TGridCellAction,
   BulkActionsProp,
@@ -67,7 +68,7 @@ import type { OnRowSelected, OnSelectAll } from '../types';
 import type { FieldBrowserOptions } from '../../../../common/types';
 import type { Refetch } from '../../../store/t_grid/inputs';
 import { getPageRowIndex } from '../../../../common/utils/pagination';
-import { StatefulEventContext } from '../../../components/stateful_event_context';
+import { StatefulEventContext } from '../../stateful_event_context';
 import { StatefulFieldsBrowser } from '../toolbar/fields_browser';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
@@ -75,7 +76,6 @@ import { RowAction } from './row_action';
 import * as i18n from './translations';
 import { AlertCount } from '../styles';
 import { checkBoxControlColumn } from './control_columns';
-import type { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
 import { ViewSelection } from '../event_rendered_view/selector';
 import { EventRenderedView } from '../event_rendered_view';
 import { REMOVE_COLUMN } from './column_headers/translations';
@@ -851,7 +851,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
             <EventRenderedView
               appId={appId}
               alertToolbar={alertToolbar}
-              browserFields={browserFields}
               events={data}
               leadingControlColumns={leadingTGridControlColumns ?? []}
               onChangePage={onChangePage}

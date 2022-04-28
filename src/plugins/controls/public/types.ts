@@ -14,12 +14,12 @@ import {
   EmbeddableSetup,
   EmbeddableStart,
   IEmbeddable,
-} from '../../embeddable/public';
+} from '@kbn/embeddable-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { ControlInput } from '../common/types';
-import { DataPublicPluginStart } from '../../data/public';
-import { UnifiedSearchPublicPluginStart } from '../../unified_search/public';
 import { ControlsService } from './services/controls';
-import { DataView, DataViewsPublicPluginStart } from '../../data_views/public';
 
 export interface CommonControlOutput {
   filters?: Filter[];
@@ -77,4 +77,4 @@ export interface ControlsPluginStartDeps {
 }
 
 // re-export from common
-export type { ControlWidth, ControlInput, ControlStyle } from '../common/types';
+export type { ControlWidth, ControlInput, DataControlInput, ControlStyle } from '../common/types';

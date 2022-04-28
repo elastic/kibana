@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { coreMock } from '@kbn/core/server/mocks';
+import {
+  createFieldFormatsSetupMock,
+  createFieldFormatsStartMock,
+} from '@kbn/field-formats-plugin/server/mocks';
 import {
   createSearchSetupMock,
   createSearchStartMock,
   createSearchRequestHandlerContext,
 } from './search/mocks';
-import {
-  createFieldFormatsSetupMock,
-  createFieldFormatsStartMock,
-} from '../../field_formats/server/mocks';
 import { createIndexPatternsStartMock } from './data_views/mocks';
 import { createDatatableUtilitiesMock } from './datatable_utilities/mock';
-import { DataRequestHandlerContext } from './search';
 
 function createSetupContract() {
   return {
@@ -43,8 +43,9 @@ function createStartContract() {
 
 function createRequestHandlerContext() {
   return {
+    core: coreMock.createRequestHandlerContext(),
     search: createSearchRequestHandlerContext(),
-  } as unknown as jest.Mocked<DataRequestHandlerContext>;
+  };
 }
 
 export const dataPluginMock = {

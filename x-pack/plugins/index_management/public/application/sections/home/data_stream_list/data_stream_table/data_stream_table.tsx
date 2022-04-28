@@ -9,7 +9,7 @@ import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink } from '@elastic/eui';
-import { ScopedHistory } from 'kibana/public';
+import { ScopedHistory } from '@kbn/core/public';
 
 import { DataStream } from '../../../../../../common/types';
 import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';

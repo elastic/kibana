@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
+export type { DataViewSelectProps } from './data_view_select';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { ConfigSchema } from '../config';
-export type { DataViewSelectProps as IndexPatternSelectProps } from './data_view_select';
 export type { QueryStringInputProps } from './query_string_input';
 export { QueryStringInput } from './query_string_input';
 export type { StatefulSearchBarProps, SearchBarProps } from './search_bar';
@@ -22,7 +22,12 @@ export { ACTION_GLOBAL_APPLY_FILTER } from './actions';
 /*
  * Autocomplete query suggestions:
  */
-export type { QuerySuggestion, QuerySuggestionGetFn, AutocompleteStart } from './autocomplete';
+export type {
+  QuerySuggestion,
+  QuerySuggestionGetFn,
+  QuerySuggestionGetFnArgs,
+  AutocompleteStart,
+} from './autocomplete';
 
 export { QuerySuggestionTypes } from './autocomplete';
 

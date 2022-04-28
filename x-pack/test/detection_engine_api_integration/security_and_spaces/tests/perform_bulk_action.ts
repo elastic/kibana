@@ -10,11 +10,12 @@ import expect from '@kbn/expect';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
-} from '../../../../plugins/security_solution/common/constants';
+} from '@kbn/security-solution-plugin/common/constants';
 import {
   BulkAction,
   BulkActionEditType,
-} from '../../../../plugins/security_solution/common/detection_engine/schemas/common/schemas';
+} from '@kbn/security-solution-plugin/common/detection_engine/schemas/common/schemas';
+import { RulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/response';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   binaryToString,
@@ -28,7 +29,6 @@ import {
   createLegacyRuleAction,
   getLegacyActionSO,
 } from '../../utils';
-import { RulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/response';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

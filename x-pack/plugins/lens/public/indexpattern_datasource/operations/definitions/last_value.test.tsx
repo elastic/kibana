@@ -8,13 +8,13 @@
 import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
-import { unifiedSearchPluginMock } from '../../../../../../../src/plugins/unified_search/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
 import { LastValueIndexPatternColumn } from './last_value';
-import { lastValueOperation } from './index';
+import { lastValueOperation } from '.';
 import type { IndexPattern, IndexPatternLayer } from '../../types';
 import { TermsIndexPatternColumn } from './terms';
 import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';

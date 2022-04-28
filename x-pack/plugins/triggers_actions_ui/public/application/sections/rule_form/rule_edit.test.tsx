@@ -8,7 +8,7 @@
 import * as React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import {
   ValidationResult,
@@ -20,7 +20,7 @@ import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
 import RuleEdit from './rule_edit';
 import { useKibana } from '../../../common/lib/kibana';
-import { ALERTS_FEATURE_ID } from '../../../../../alerting/common';
+import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();

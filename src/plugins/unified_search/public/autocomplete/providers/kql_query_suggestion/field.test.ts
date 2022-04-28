@@ -8,10 +8,10 @@
 
 import dataViewResponse from './__fixtures__/data_view_response.json';
 
+import { indexPatterns as dataViewsUtils, KueryNode } from '@kbn/data-plugin/public';
 import { setupGetFieldSuggestions } from './field';
-import { indexPatterns as dataViewsUtils, KueryNode } from '../../../../../data/public';
-import { QuerySuggestionGetFnArgs } from '../../index';
-import { coreMock } from '../../../../../../core/public/mocks';
+import { QuerySuggestionGetFnArgs } from '../query_suggestion_provider';
+import { coreMock } from '@kbn/core/public/mocks';
 
 const mockKueryNode = (kueryNode: Partial<KueryNode>) => kueryNode as unknown as KueryNode;
 

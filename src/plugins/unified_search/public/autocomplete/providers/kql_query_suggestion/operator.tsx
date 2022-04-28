@@ -12,7 +12,7 @@ import { $Keys } from 'utility-types';
 import { flatten } from 'lodash';
 
 import { KqlQuerySuggestionProvider } from './types';
-import { QuerySuggestionTypes } from '../../index';
+import { QuerySuggestionTypes } from '../query_suggestion_provider';
 
 const equalsText = (
   <FormattedMessage

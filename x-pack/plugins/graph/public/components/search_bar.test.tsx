@@ -15,12 +15,13 @@ import {
   NotificationsStart,
   OverlayStart,
   SavedObjectsStart,
-} from 'kibana/public';
+} from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
-import { QueryStringInput } from '../../../../../src/plugins/unified_search/public';
-import type { DataView } from '../../../../../src/plugins/data_views/public';
-
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import { QueryStringInput } from '@kbn/unified-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { setAutocomplete } from '@kbn/unified-search-plugin/public/services';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider, InjectedIntl } from '@kbn/i18n-react';
 
 import { openSourceModal } from '../services/source_modal';
@@ -102,6 +103,11 @@ describe('search_bar', () => {
       });
     },
   };
+
+  beforeEach(() => {
+    const autocompleteStart = unifiedSearchPluginMock.createStartContract();
+    setAutocomplete(autocompleteStart.autocomplete);
+  });
 
   beforeEach(() => {
     store = createMockGraphStore({

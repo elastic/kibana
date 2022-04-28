@@ -9,7 +9,7 @@
 import { cloneDeep } from 'lodash';
 
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
-import { configDeprecationsMock } from '../../../core/server/mocks';
+import { configDeprecationsMock } from '@kbn/core/server/mocks';
 
 import { autocompleteConfigDeprecationProvider } from './config_deprecations';
 
@@ -54,8 +54,7 @@ describe('Config Deprecations', () => {
     expect(migrated.unifiedSearch.autocomplete.valueSuggestions.terminateAfter).toEqual(123);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting \\"kibana.autocompleteTerminateAfter\\" has been replaced by \\"data.autocomplete.valueSuggestions.terminateAfter\\"",
-        "Setting \\"data.autocomplete.valueSuggestions.terminateAfter\\" has been replaced by \\"unifiedSearch.autocomplete.valueSuggestions.terminateAfter\\"",
+        "Setting \\"kibana.autocompleteTerminateAfter\\" has been replaced by \\"unifiedSearch.autocomplete.valueSuggestions.terminateAfter\\"",
       ]
     `);
   });
@@ -71,8 +70,67 @@ describe('Config Deprecations', () => {
     expect(migrated.unifiedSearch.autocomplete.valueSuggestions.timeout).toEqual(123);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting \\"kibana.autocompleteTimeout\\" has been replaced by \\"data.autocomplete.valueSuggestions.timeout\\"",
-        "Setting \\"data.autocomplete.valueSuggestions.timeout\\" has been replaced by \\"unifiedSearch.autocomplete.valueSuggestions.timeout\\"",
+        "Setting \\"kibana.autocompleteTimeout\\" has been replaced by \\"unifiedSearch.autocomplete.valueSuggestions.timeout\\"",
+      ]
+    `);
+  });
+
+  it('renames data.autocomplete.querySuggestions.enabled to unifiedSearch.autocomplete.querySuggestions.enabled', () => {
+    const config = {
+      data: {
+        autocomplete: {
+          querySuggestions: {
+            enabled: false,
+          },
+        },
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated.data?.autocomplete.querySuggestions.enabled).not.toBeDefined();
+    expect(migrated.unifiedSearch.autocomplete.querySuggestions.enabled).toEqual(false);
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Setting \\"data.autocomplete.querySuggestions.enabled\\" has been replaced by \\"unifiedSearch.autocomplete.querySuggestions.enabled\\"",
+      ]
+    `);
+  });
+
+  it('renames data.autocomplete.valueSuggestions.enabled to unifiedSearch.autocomplete.valueSuggestions.enabled', () => {
+    const config = {
+      data: {
+        autocomplete: {
+          valueSuggestions: {
+            enabled: false,
+          },
+        },
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated.data?.autocomplete.valueSuggestions.enabled).not.toBeDefined();
+    expect(migrated.unifiedSearch.autocomplete.valueSuggestions.enabled).toEqual(false);
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Setting \\"data.autocomplete.valueSuggestions.enabled\\" has been replaced by \\"unifiedSearch.autocomplete.valueSuggestions.enabled\\"",
+      ]
+    `);
+  });
+
+  it('renames data.autocomplete.valueSuggestions.tiers to unifiedSearch.autocomplete.valueSuggestions.tiers', () => {
+    const config = {
+      data: {
+        autocomplete: {
+          valueSuggestions: {
+            tiers: [],
+          },
+        },
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated.data?.autocomplete.valueSuggestions.tiers).not.toBeDefined();
+    expect(migrated.unifiedSearch.autocomplete.valueSuggestions.tiers).toEqual([]);
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Setting \\"data.autocomplete.valueSuggestions.tiers\\" has been replaced by \\"unifiedSearch.autocomplete.valueSuggestions.tiers\\"",
       ]
     `);
   });

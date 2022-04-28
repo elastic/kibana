@@ -26,7 +26,7 @@ import {
   HorizontalAlignment,
 } from '@elastic/charts';
 
-import { renderEndzoneTooltip } from '../../../../charts/public';
+import { renderEndzoneTooltip } from '@kbn/charts-plugin/public';
 
 import { getThemeService } from '../services';
 import { VisConfig } from '../types';

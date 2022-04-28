@@ -30,8 +30,8 @@ import {
 } from '@kbn/securitysolution-autocomplete';
 
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import * as i18n from './translations';
-import { FieldHook } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 import { SeverityOptionItem } from '../step_about_rule/data';
 import { AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
 import { useKibana } from '../../../../common/lib/kibana';

@@ -7,10 +7,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { firstValueFrom, Observable } from 'rxjs';
-import { getRequestAbortedSignal } from '../../../data/server';
-import { getKbnServerError, reportServerError } from '../../../kibana_utils/server';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
+import { getKbnServerError, reportServerError } from '@kbn/kibana-utils-plugin/server';
 import type { ConfigSchema } from '../../config';
 import { termsEnumSuggestions } from './terms_enum';
 import { termsAggSuggestions } from './terms_agg';
@@ -45,13 +45,14 @@ export function registerValueSuggestionsRoute(router: IRouter, config$: Observab
       const { field: fieldName, query, filters, fieldMeta, method } = request.body;
       const { index } = request.params;
       const abortSignal = getRequestAbortedSignal(request.events.aborted$);
+      const { savedObjects, elasticsearch } = await context.core;
 
       try {
         const fn = method === 'terms_agg' ? termsAggSuggestions : termsEnumSuggestions;
         const body = await fn(
           config,
-          context.core.savedObjects.client,
-          context.core.elasticsearch.client.asCurrentUser,
+          savedObjects.client,
+          elasticsearch.client.asCurrentUser,
           index,
           fieldName,
           query,

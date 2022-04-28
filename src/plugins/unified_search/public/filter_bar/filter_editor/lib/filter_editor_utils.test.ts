@@ -13,8 +13,8 @@ import {
   rangeFilter,
   stubDataView,
   stubFields,
-} from '../../../../../data/common/stubs';
-import { toggleFilterNegated } from '../../../../../data/common';
+} from '@kbn/data-plugin/common/stubs';
+import { toggleFilterNegated } from '@kbn/data-plugin/common';
 import {
   getFieldFromFilter,
   getFilterableFields,

@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { stubDataView, stubFields } from '../../../../data/public/stubs';
-import type { TimefilterSetup } from '../../../../data/public';
+import { IUiSettingsClient, CoreSetup } from '@kbn/core/public';
+import { stubDataView, stubFields } from '@kbn/data-plugin/public/stubs';
+import type { TimefilterSetup } from '@kbn/data-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { setupValueSuggestionProvider } from './value_suggestion_provider';
 import type { ValueSuggestionsGetFn } from './value_suggestion_provider';
-import { IUiSettingsClient, CoreSetup } from 'kibana/public';
-import { UI_SETTINGS } from '../../../../data/common';
 
 describe('FieldSuggestions', () => {
   let getValueSuggestions: ValueSuggestionsGetFn;

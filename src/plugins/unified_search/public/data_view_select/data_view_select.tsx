@@ -11,7 +11,7 @@ import React, { Component } from 'react';
 
 import { Required } from '@kbn/utility-types';
 import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
-import { IndexPatternsContract as DataViewsContract } from '../../../data/public';
+import { DataViewsContract } from '@kbn/data-plugin/public';
 
 export type DataViewSelectProps = Required<
   Omit<

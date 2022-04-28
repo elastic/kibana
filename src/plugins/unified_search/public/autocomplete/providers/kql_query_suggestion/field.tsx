@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { IFieldType, indexPatterns } from '@kbn/data-plugin/public';
 import { flatten } from 'lodash';
 import { escapeKuery } from './lib/escape_kuery';
 import { sortPrefixFirst } from './sort_prefix_first';
-import { IFieldType, indexPatterns as dataViewsUtils } from '../../../../../data/public';
-import { QuerySuggestionField, QuerySuggestionTypes } from '../../index';
+import { QuerySuggestionField, QuerySuggestionTypes } from '../query_suggestion_provider';
 import { KqlQuerySuggestionProvider } from './types';
 
 const keywordComparator = (first: IFieldType, second: IFieldType) => {
@@ -30,12 +30,12 @@ export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<QuerySuggestio
   return ({ indexPatterns: dataViews }, { start, end, prefix, suffix, nestedPath = '' }) => {
     const allFields = flatten(
       dataViews.map((dataView) => {
-        return dataView.fields.filter(dataViewsUtils.isFilterable);
+        return dataView.fields.filter(indexPatterns.isFilterable);
       })
     );
     const search = `${prefix}${suffix}`.trim().toLowerCase();
     const matchingFields = allFields.filter((field) => {
-      const subTypeNested = dataViewsUtils.getFieldSubtypeNested(field);
+      const subTypeNested = indexPatterns.getFieldSubtypeNested(field);
       return (
         (!nestedPath || (nestedPath && subTypeNested?.nested.path.includes(nestedPath))) &&
         field.name.toLowerCase().includes(search)

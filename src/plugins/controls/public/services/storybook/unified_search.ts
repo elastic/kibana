@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { PluginServiceFactory } from '../../../../presentation_util/public';
-import { DataViewField } from '../../../../data_views/common';
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/common';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { ControlsUnifiedSearchService } from '../unified_search';
-import { UnifiedSearchPublicPluginStart } from '../../../../unified_search/public';
 
 let valueSuggestionMethod = ({ field, query }: { field: DataViewField; query: string }) =>
   Promise.resolve(['storybook', 'default', 'values']);

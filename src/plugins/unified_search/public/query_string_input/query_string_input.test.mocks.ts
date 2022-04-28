@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { stubDataView } from '../../../data/public/stubs';
+import { stubDataView } from '@kbn/data-plugin/public/stubs';
 
 export const mockPersistedLog = {
   add: jest.fn(),
@@ -19,7 +19,7 @@ export const mockPersistedLogFactory = jest.fn<jest.Mocked<typeof mockPersistedL
 
 export const mockFetchDataViews = jest.fn().mockReturnValue(Promise.resolve([stubDataView]));
 
-jest.mock('../../../data/public/query/persisted_log', () => ({
+jest.mock('@kbn/data-plugin/public/query/persisted_log', () => ({
   PersistedLog: mockPersistedLogFactory,
 }));
 

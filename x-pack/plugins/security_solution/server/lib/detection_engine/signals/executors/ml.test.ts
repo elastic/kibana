@@ -6,16 +6,16 @@
  */
 
 import dateMath from '@kbn/datemath';
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { alertsMock, RuleExecutorServicesMock } from '../../../../../../alerting/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { alertsMock, RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { mlExecutor } from './ml';
-import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { getCompleteRuleMock, getMlRuleParams } from '../../schemas/rule_schemas.mock';
 import { buildRuleMessageFactory } from '../rule_messages';
-import { getListClientMock } from '../../../../../../lists/server/services/lists/list_client.mock';
+import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
 import { findMlSignals } from '../find_ml_signals';
 import { bulkCreateMlSignals } from '../bulk_create_ml_signals';
-import { mlPluginServerMock } from '../../../../../../ml/server/mocks';
+import { mlPluginServerMock } from '@kbn/ml-plugin/server/mocks';
 import { MachineLearningRuleParams } from '../../schemas/rule_schemas';
 
 jest.mock('../find_ml_signals');

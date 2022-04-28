@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
-import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
-import { BfetchServerSetup } from 'src/plugins/bfetch/server';
-import { PluginStart as DataViewsServerPluginStart } from 'src/plugins/data_views/server';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
+import { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { ConfigSchema } from '../config';
 import { DatatableUtilitiesService } from './datatable_utilities';
 import type { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
@@ -17,8 +19,6 @@ import { SearchService } from './search/search_service';
 import { QueryService } from './query/query_service';
 import { ScriptsService } from './scripts';
 import { KqlTelemetryService } from './kql_telemetry';
-import { UsageCollectionSetup } from '../../usage_collection/server';
-import { FieldFormatsSetup, FieldFormatsStart } from '../../field_formats/server';
 import { getUiSettings } from './ui_settings';
 import { QuerySetup } from './query';
 

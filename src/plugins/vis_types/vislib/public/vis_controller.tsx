@@ -9,10 +9,10 @@
 import $ from 'jquery';
 import React, { RefObject } from 'react';
 
-import { mountReactNode } from '../../../../core/public/utils';
-import { ChartsPluginSetup } from '../../../charts/public';
-import type { PersistedState } from '../../../visualizations/public';
-import { IInterpreterRenderHandlers } from '../../../expressions/public';
+import { mountReactNode } from '@kbn/core/public/utils';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 
 import { VisTypeVislibCoreSetup } from './plugin';
 import { VisLegend, CUSTOM_LEGEND_VIS_TYPES } from './vislib/components/legend';

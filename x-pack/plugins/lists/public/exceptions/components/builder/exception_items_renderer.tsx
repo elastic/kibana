@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useReducer } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
-import { HttpStart } from 'kibana/public';
+import { HttpStart } from '@kbn/core/public';
 import { addIdToItem } from '@kbn/securitysolution-utils';
 import {
   CreateExceptionListItemSchema,
@@ -32,8 +32,8 @@ import {
   getNewExceptionItem,
 } from '@kbn/securitysolution-list-utils';
 import { DataViewBase } from '@kbn/es-query';
+import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
 
-import type { AutocompleteStart } from '../../../../../../../src/plugins/unified_search/public';
 import { AndOrBadge } from '../and_or_badge';
 
 import { BuilderExceptionListItemComponent } from './exception_item_renderer';
