@@ -53,6 +53,8 @@ const getSandboxDocument = (script: string, dependencies: string[], nonce: strin
 
 
           window.addEventListener('resize', () => onResize(window.innerWidth, window.innerHeight));
+          function handleGlobalError(e) {
+            console.error(e);
             // TODO a nicer error:
             document.body.innerHTML = "<h1>" + (e.reason || e.message || e).toString() + "</h1>" + "<code>" + (e.reason || e).stack || '' + "</code>";
           }
