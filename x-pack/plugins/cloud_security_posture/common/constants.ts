@@ -23,11 +23,6 @@ export const LATEST_FINDINGS_INDEX_DEFAULT_NS = 'logs-' + LATEST_FINDINGS_INDEX_
 export const BENCHMARK_SCORE_INDEX_NAME = 'cloud_security_posture.scores';
 export const BENCHMARK_SCORE_INDEX_DEFAULT_NS = 'logs-' + BENCHMARK_SCORE_INDEX_NAME + '-default';
 
-// export const CSP_FINDINGS_INDEX_NAME = 'findings';
-// export const FINDINGS_DATA_STREAM_NAME =
-//   // Currently 'cis_kubernetes_benchmark.findings', To be refactored to 'cloud_security_posture.findings'
-//   CLOUD_SECURITY_POSTURE_PACKAGE_NAME + '.' + CSP_FINDINGS_INDEX_NAME;
-
 export const RULE_PASSED = `passed`;
 export const RULE_FAILED = `failed`;
 
