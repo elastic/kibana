@@ -69,6 +69,7 @@ interface CspFindingResource {
   mode: string;
   path: string;
   type: string;
+  [other_keys: string]: unknown;
 }
 
 interface CspFindingHost {
@@ -88,6 +89,7 @@ interface CspFindingHost {
     family: string;
     name: string;
   };
+  [other_keys: string]: unknown;
 }
 
 interface CspFindingAgent {

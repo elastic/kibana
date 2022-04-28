@@ -21,13 +21,14 @@ import type {
   AggregationsAggregate,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient, ElasticsearchClient, Logger } from '@kbn/core/server';
-import { LogSearchMetricsOpts, RuleInfo } from './types';
+import { Rule } from '../types';
+import { RuleRunMetrics } from './rule_run_metrics_store';
 
-export type LogSearchMetricsFn = (metrics: LogSearchMetricsOpts) => void;
-
-type WrapEsClientOpts = Omit<WrapScopedClusterClientOpts, 'scopedClusterClient'> & {
-  esClient: ElasticsearchClient;
-};
+type RuleInfo = Pick<Rule, 'name' | 'alertTypeId' | 'id'> & { spaceId: string };
+type SearchMetrics = Pick<
+  RuleRunMetrics,
+  'numSearches' | 'totalSearchDurationMs' | 'esSearchDurationMs'
+>;
 
 interface WrapScopedClusterClientFactoryOpts {
   scopedClusterClient: IScopedClusterClient;
@@ -39,6 +40,16 @@ interface WrapScopedClusterClientFactoryOpts {
 type WrapScopedClusterClientOpts = WrapScopedClusterClientFactoryOpts & {
   logMetricsFn: LogSearchMetricsFn;
 };
+
+type WrapEsClientOpts = Omit<WrapScopedClusterClientOpts, 'scopedClusterClient'> & {
+  esClient: ElasticsearchClient;
+};
+
+interface LogSearchMetricsOpts {
+  esSearchDuration: number;
+  totalSearchDuration: number;
+}
+type LogSearchMetricsFn = (metrics: LogSearchMetricsOpts) => void;
 
 export interface ScopedClusterClientMetrics {
   esSearchDurationMs: number;
@@ -61,7 +72,7 @@ export function createWrappedScopedClusterClientFactory(opts: WrapScopedClusterC
 
   return {
     client: () => wrappedClient,
-    getMetrics: (): ScopedClusterClientMetrics => {
+    getMetrics: (): SearchMetrics => {
       return {
         esSearchDurationMs,
         totalSearchDurationMs,
