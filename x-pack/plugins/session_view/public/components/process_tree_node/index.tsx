@@ -256,10 +256,12 @@ export function ProcessTreeNode({
         >
           {isSessionLeader ? (
             <>
-              <EuiIcon type={sessionIcon} />{' '}
-              <b css={styles.darkText}>{dataOrDash(name || args?.[0])}</b>{' '}
-              <FormattedMessage id="xpack.sessionView.startedBy" defaultMessage="started by" />{' '}
-              <EuiIcon type="user" /> <b css={styles.darkText}>{dataOrDash(user?.name)}</b>
+              <div css={styles.sessionLeader}>
+                <EuiIcon type={sessionIcon} />{' '}
+                <b css={styles.darkText}>{dataOrDash(name || args?.[0])}</b>{' '}
+                <FormattedMessage id="xpack.sessionView.startedBy" defaultMessage="started by" />{' '}
+                <EuiIcon type="user" /> <b css={styles.darkText}>{dataOrDash(user?.name)}</b>
+              </div>
             </>
           ) : (
             <span>

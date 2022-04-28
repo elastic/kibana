@@ -108,7 +108,7 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
     const workingDir: CSSObject = {
       color: colors.successText,
       fontFamily: font.familyCode,
-      fontWeight: font.weight.medium,
+      fontWeight: font.weight.regular,
       paddingLeft: size.s,
       paddingRight: size.xxs,
     };
@@ -129,6 +129,10 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
       borderRadius: border.radius.medium,
     };
 
+    const sessionLeader: CSSObject = {
+      paddingBottom: size.s,
+    };
+
     return {
       darkText,
       searchHighlight,
@@ -138,6 +142,7 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
       workingDir,
       timeStamp,
       alertDetails,
+      sessionLeader,
     };
   }, [depth, euiTheme, hasAlerts, hasInvestigatedAlert, isSelected]);
 
