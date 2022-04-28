@@ -79,6 +79,11 @@ export const KibanaPageTemplateLazy = React.lazy(() =>
 export const KibanaPageTemplate = withSuspense(KibanaPageTemplateLazy);
 
 /**
+ * A `KibanaPageTemplateProps` type.
+ */
+export type { KibanaPageTemplateProps } from './page_template';
+
+/**
  * The lazily loaded `KibanaPageTemplateSolutionNav` component that is wrapped by the `withSuspense` HOC. Consumers should use
  * `React.Suspense` or `withSuspense` HOC to load this component.
  */

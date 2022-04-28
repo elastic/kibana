@@ -11,7 +11,6 @@
 import { SharedUxServices } from '@kbn/shared-ux-services';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DocLinksStart } from '@kbn/core/public';
 
 /** @internal */
 export interface SharedUXPluginSetup {}
@@ -65,5 +64,4 @@ export interface SharedUXPluginSetupDeps {}
 export interface SharedUXPluginStartDeps {
   dataViewEditor: DataViewEditorStart;
   dataViews: DataViewsPublicPluginStart;
-  docLinks: DocLinksStart;
 }
