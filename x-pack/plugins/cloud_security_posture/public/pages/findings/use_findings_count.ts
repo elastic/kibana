@@ -10,7 +10,9 @@ import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { showErrorToast } from './use_findings';
-import type { FindingsBaseQuery } from './findings_container';
+import type { FindingsBaseEsQuery, FindingsQueryStatus } from './types';
+
+interface UseFindingsCountOptions extends FindingsBaseEsQuery, FindingsQueryStatus {}
 
 type FindingsAggRequest = IKibanaSearchRequest<estypes.SearchRequest>;
 type FindingsAggResponse = IKibanaSearchResponse<estypes.SearchResponse<{}, FindingsAggs>>;
@@ -23,17 +25,17 @@ interface FindingsAggs extends estypes.AggregationsMultiBucketAggregateBase {
   };
 }
 
-export const getFindingsCountAggQuery = ({ index, query }: Omit<FindingsBaseQuery, 'error'>) => ({
+export const getFindingsCountAggQuery = ({ index, query }: FindingsBaseEsQuery) => ({
   index,
   size: 0,
   track_total_hits: true,
   body: {
     query,
-    aggs: { count: { terms: { field: 'result.evaluation' } } },
+    aggs: { count: { terms: { field: 'result.evaluation.keyword' } } },
   },
 });
 
-export const useFindingsCounter = ({ index, query, error }: FindingsBaseQuery) => {
+export const useFindingsCounter = ({ enabled, index, query }: UseFindingsCountOptions) => {
   const {
     data,
     notifications: { toasts },
@@ -48,7 +50,7 @@ export const useFindingsCounter = ({ index, query, error }: FindingsBaseQuery) =
         })
       ),
     {
-      enabled: !error,
+      enabled,
       onError: (err) => showErrorToast(toasts, err),
       select: (response) =>
         Object.fromEntries(

@@ -97,7 +97,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     }
     this.enhancements.set(enhancement.id, {
       id: enhancement.id,
-      telemetry: enhancement.telemetry || (() => ({})),
+      telemetry: enhancement.telemetry || ((state, stats) => stats),
       inject: enhancement.inject || identity,
       extract:
         enhancement.extract ||
@@ -130,7 +130,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     }
     this.embeddableFactories.set(factory.id, {
       id: factory.id,
-      telemetry: factory.telemetry || (() => ({})),
+      telemetry: factory.telemetry || ((state, stats) => stats),
       inject: factory.inject || identity,
       extract: factory.extract || ((state: EmbeddableStateWithType) => ({ state, references: [] })),
       migrations: factory.migrations || {},
