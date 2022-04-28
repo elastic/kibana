@@ -59,6 +59,14 @@ const leaderDescriptionListInfo = [
   },
 ];
 
+const PROCESS_FIELD_PREFIX = 'process';
+const LEADER_FIELD_PREFIX = [
+  `${PROCESS_FIELD_PREFIX}.entry_leader`,
+  `${PROCESS_FIELD_PREFIX}.session_leader`,
+  `${PROCESS_FIELD_PREFIX}.group_leader`,
+  `${PROCESS_FIELD_PREFIX}.parent`,
+];
+
 /**
  * Detail panel in the session view.
  */
@@ -90,7 +98,9 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
       {
         title: <DetailPanelListItem>entity_id</DetailPanelListItem>,
         description: (
-          <DetailPanelCopy textToCopy={id}>
+          <DetailPanelCopy
+            textToCopy={`${LEADER_FIELD_PREFIX[idx]}.entity_id: "${dataOrDash(id)}"`}
+          >
             <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
               {dataOrDash(id)}
             </EuiTextColor>
@@ -99,12 +109,18 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
       },
       {
         title: <DetailPanelListItem>args</DetailPanelListItem>,
-        description: <DetailPanelCopy textToCopy={leaderArgs}>{leaderArgs}</DetailPanelCopy>,
+        description: (
+          <DetailPanelCopy textToCopy={`${LEADER_FIELD_PREFIX[idx]}.args: ${leaderArgs}`}>
+            {leaderArgs}
+          </DetailPanelCopy>
+        ),
       },
       {
         title: <DetailPanelListItem>interactive</DetailPanelListItem>,
         description: (
-          <DetailPanelCopy textToCopy={isLeaderInteractive}>
+          <DetailPanelCopy
+            textToCopy={`${LEADER_FIELD_PREFIX[idx]}.interactive: ${isLeaderInteractive}`}
+          >
             <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
               {isLeaderInteractive}
             </EuiTextColor>
@@ -114,7 +130,11 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
       {
         title: <DetailPanelListItem>working_directory</DetailPanelListItem>,
         description: (
-          <DetailPanelCopy textToCopy={workingDirectory}>
+          <DetailPanelCopy
+            textToCopy={`${LEADER_FIELD_PREFIX[idx]}.working_directory: "${dataOrDash(
+              workingDirectory
+            )}"`}
+          >
             <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
               {dataOrDash(workingDirectory)}
             </EuiTextColor>
@@ -124,7 +144,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
       {
         title: <DetailPanelListItem>pid</DetailPanelListItem>,
         description: (
-          <DetailPanelCopy textToCopy={pid}>
+          <DetailPanelCopy textToCopy={`${LEADER_FIELD_PREFIX[idx]}.pid: ${dataOrDash(pid)}`}>
             <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
               {dataOrDash(pid)}
             </EuiTextColor>
@@ -133,16 +153,26 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
       },
       {
         title: <DetailPanelListItem>start</DetailPanelListItem>,
-        description: <DetailPanelCopy textToCopy={start}>{dataOrDash(start)}</DetailPanelCopy>,
+        description: (
+          <DetailPanelCopy textToCopy={`${LEADER_FIELD_PREFIX[idx]}.start: "${dataOrDash(start)}"`}>
+            {dataOrDash(start)}
+          </DetailPanelCopy>
+        ),
       },
       {
         title: <DetailPanelListItem>end</DetailPanelListItem>,
-        description: <DetailPanelCopy textToCopy={end ?? ''}>{dataOrDash(end)}</DetailPanelCopy>,
+        description: (
+          <DetailPanelCopy textToCopy={`${LEADER_FIELD_PREFIX[idx]}.end: "${dataOrDash(end)}"`}>
+            {dataOrDash(end)}
+          </DetailPanelCopy>
+        ),
       },
       {
         title: <DetailPanelListItem>exit_code</DetailPanelListItem>,
         description: (
-          <DetailPanelCopy textToCopy={exitCode ?? ''}>
+          <DetailPanelCopy
+            textToCopy={`${LEADER_FIELD_PREFIX[idx]}.exit_code: ${dataOrDash(exitCode)}`}
+          >
             <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
               {dataOrDash(exitCode)}
             </EuiTextColor>
@@ -152,13 +182,21 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
       {
         title: <DetailPanelListItem>user.name</DetailPanelListItem>,
         description: (
-          <DetailPanelCopy textToCopy={userName}>{dataOrDash(userName)}</DetailPanelCopy>
+          <DetailPanelCopy
+            textToCopy={`${LEADER_FIELD_PREFIX[idx]}.user.name: "${dataOrDash(userName)}"`}
+          >
+            {dataOrDash(userName)}
+          </DetailPanelCopy>
         ),
       },
       {
         title: <DetailPanelListItem>group.name</DetailPanelListItem>,
         description: (
-          <DetailPanelCopy textToCopy={groupName}>{dataOrDash(groupName)}</DetailPanelCopy>
+          <DetailPanelCopy
+            textToCopy={`${LEADER_FIELD_PREFIX[idx]}.group.name: "${dataOrDash(groupName)}"`}
+          >
+            {dataOrDash(groupName)}
+          </DetailPanelCopy>
         ),
       },
     ];
@@ -168,7 +206,11 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
         {
           title: <DetailPanelListItem>entry_meta.type</DetailPanelListItem>,
           description: (
-            <DetailPanelCopy textToCopy={entryMetaType}>
+            <DetailPanelCopy
+              textToCopy={`${LEADER_FIELD_PREFIX[idx]}.entry_meta.type: "${dataOrDash(
+                entryMetaType
+              )}"`}
+            >
               <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
                 {dataOrDash(entryMetaType)}
               </EuiTextColor>
@@ -178,7 +220,11 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
         {
           title: <DetailPanelListItem>entry_meta.source.ip</DetailPanelListItem>,
           description: (
-            <DetailPanelCopy textToCopy={entryMetaSourceIp}>
+            <DetailPanelCopy
+              textToCopy={`${LEADER_FIELD_PREFIX[idx]}.entry_meta.source.ip: "${dataOrDash(
+                entryMetaSourceIp
+              )}"`}
+            >
               {dataOrDash(entryMetaSourceIp)}
             </DetailPanelCopy>
           ),
@@ -217,7 +263,9 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
           {
             title: <DetailPanelListItem>entity_id</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={id}>
+              <DetailPanelCopy
+                textToCopy={`${PROCESS_FIELD_PREFIX}.entity_id: "${dataOrDash(id)}"`}
+              >
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
                   {dataOrDash(id)}
                 </EuiTextColor>
@@ -226,13 +274,19 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
           },
           {
             title: <DetailPanelListItem>args</DetailPanelListItem>,
-            description: <DetailPanelCopy textToCopy={processArgs}>{processArgs}</DetailPanelCopy>,
+            description: (
+              <DetailPanelCopy textToCopy={`${PROCESS_FIELD_PREFIX}.args: ${processArgs}`}>
+                {processArgs}
+              </DetailPanelCopy>
+            ),
           },
           {
             title: <DetailPanelListItem>executable</DetailPanelListItem>,
             description: (
               <DetailPanelCopy
-                textToCopy={getProcessExecutableCopyText(executable)}
+                textToCopy={`${PROCESS_FIELD_PREFIX}.executable: ${getProcessExecutableCopyText(
+                  executable
+                )}`}
                 display="block"
               >
                 {executable.map((execTuple, idx) => {
@@ -254,7 +308,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
           {
             title: <DetailPanelListItem>interactive</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={isInteractive}>
+              <DetailPanelCopy textToCopy={`${PROCESS_FIELD_PREFIX}.interactive: ${isInteractive}`}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
                   {isInteractive}
                 </EuiTextColor>
@@ -264,7 +318,11 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
           {
             title: <DetailPanelListItem>working_directory</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={workingDirectory}>
+              <DetailPanelCopy
+                textToCopy={`${PROCESS_FIELD_PREFIX}.working_directory: "${dataOrDash(
+                  workingDirectory
+                )}"`}
+              >
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
                   {dataOrDash(workingDirectory)}
                 </EuiTextColor>
@@ -274,7 +332,7 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
           {
             title: <DetailPanelListItem>pid</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={pid}>
+              <DetailPanelCopy textToCopy={`${PROCESS_FIELD_PREFIX}.pid: ${dataOrDash(pid)}`}>
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
                   {dataOrDash(pid)}
                 </EuiTextColor>
@@ -283,16 +341,26 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
           },
           {
             title: <DetailPanelListItem>start</DetailPanelListItem>,
-            description: <DetailPanelCopy textToCopy={start}>{dataOrDash(start)}</DetailPanelCopy>,
+            description: (
+              <DetailPanelCopy textToCopy={`${PROCESS_FIELD_PREFIX}.start: "${dataOrDash(start)}"`}>
+                {dataOrDash(start)}
+              </DetailPanelCopy>
+            ),
           },
           {
             title: <DetailPanelListItem>end</DetailPanelListItem>,
-            description: <DetailPanelCopy textToCopy={end}>{dataOrDash(end)}</DetailPanelCopy>,
+            description: (
+              <DetailPanelCopy textToCopy={`${PROCESS_FIELD_PREFIX}.end: "${dataOrDash(end)}"`}>
+                {dataOrDash(end)}
+              </DetailPanelCopy>
+            ),
           },
           {
             title: <DetailPanelListItem>exit_code</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={exitCode}>
+              <DetailPanelCopy
+                textToCopy={`${PROCESS_FIELD_PREFIX}.exit_code: ${dataOrDash(exitCode)}`}
+              >
                 <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
                   {dataOrDash(exitCode)}
                 </EuiTextColor>
@@ -302,13 +370,21 @@ export const DetailPanelProcessTab = ({ processDetail }: DetailPanelProcessTabDe
           {
             title: <DetailPanelListItem>user.name</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={userName}>{dataOrDash(userName)}</DetailPanelCopy>
+              <DetailPanelCopy
+                textToCopy={`${PROCESS_FIELD_PREFIX}.user.name: ${dataOrDash(userName)}`}
+              >
+                {dataOrDash(userName)}
+              </DetailPanelCopy>
             ),
           },
           {
             title: <DetailPanelListItem>group.name</DetailPanelListItem>,
             description: (
-              <DetailPanelCopy textToCopy={groupName}>{dataOrDash(groupName)}</DetailPanelCopy>
+              <DetailPanelCopy
+                textToCopy={`${PROCESS_FIELD_PREFIX}.group.name: ${dataOrDash(groupName)}`}
+              >
+                {dataOrDash(groupName)}
+              </DetailPanelCopy>
             ),
           },
         ]}
