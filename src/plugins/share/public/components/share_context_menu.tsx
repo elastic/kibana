@@ -59,25 +59,15 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
     ];
     let menuItems: ShareContextMenuPanelItem[] = [];
 
-    menuItems.push(
-      {
-        name: i18n.translate('share.contextMenu.permalinksLabel', {
-          defaultMessage: 'Get link',
-        }),
-        icon: 'link',
-        panel: 'permaLinksPanel',
-        sortOrder: 0,
-      },
-      {
-        name: i18n.translate('share.contextMenu.exportLabel', {
-          defaultMessage: 'Export',
-        }),
-        icon: 'exportAction',
-        panel: 'exportActionPanel',
-        sortOrder: 2,
-      }
-    );
-
+    /** Get link **/
+    menuItems.push({
+      name: i18n.translate('share.contextMenu.permalinksLabel', {
+        defaultMessage: 'Get link',
+      }),
+      icon: 'link',
+      panel: 'permaLinksPanel',
+      sortOrder: 0,
+    });
     const permalinkPanel = {
       id: 'permaLinksPanel',
       title: i18n.translate('share.contextMenu.permalinkPanelTitle', {
@@ -97,19 +87,35 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
     };
     topLevelMenu.push(permalinkPanel);
 
-    const exportPanel = {
-      id: 'exportActionPanel',
-      title: i18n.translate('share.contextMenu.exportPanelTitle', {
-        defaultMessage: 'Export',
-      }),
-      items: [] as ShareContextMenuPanelItem[],
-    };
-    this.props.shareMenuItems.forEach(({ shareMenuItem, panel }) => {
-      exportPanel.items.push({ ...shareMenuItem, panel: panel.id });
+    /** Export **/
+    if (this.props.shareMenuItems.length > 1) {
+      menuItems.push({
+        name: i18n.translate('share.contextMenu.exportLabel', {
+          defaultMessage: 'Export',
+        }),
+        icon: 'exportAction',
+        panel: 'exportActionPanel',
+        sortOrder: 2,
+      });
+      const exportPanel = {
+        id: 'exportActionPanel',
+        title: i18n.translate('share.contextMenu.exportPanelTitle', {
+          defaultMessage: 'Export',
+        }),
+        items: [] as ShareContextMenuPanelItem[],
+      };
+      this.props.shareMenuItems.forEach(({ shareMenuItem, panel }) => {
+        exportPanel.items.push({ ...shareMenuItem, panel: panel.id });
+        topLevelMenu.push(panel);
+      });
+      topLevelMenu.push(exportPanel);
+    } else {
+      const { shareMenuItem, panel } = this.props.shareMenuItems[0];
+      menuItems.push({ ...shareMenuItem, panel: panel.id });
       topLevelMenu.push(panel);
-    });
-    topLevelMenu.push(exportPanel);
+    }
 
+    /** Embed code **/
     if (this.props.allowEmbed) {
       menuItems.push({
         name: i18n.translate('share.contextMenu.embedCodeLabel', {
