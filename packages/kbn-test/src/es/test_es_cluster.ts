@@ -41,6 +41,7 @@ interface Node {
   ) => Promise<{ insallPath: string }>;
   start: (installPath: string, opts: Record<string, unknown>) => Promise<void>;
   stop: () => Promise<void>;
+  kill: () => Promise<void>;
 }
 
 export interface ICluster {
@@ -268,14 +269,12 @@ export function createTestEsCluster<
     }
 
     async stop() {
-      const nodeStopPromises = [];
-      for (let i = 0; i < this.nodes.length; i++) {
-        nodeStopPromises.push(async () => {
+      await Promise.all(
+        this.nodes.map(async (node, i) => {
           log.info(`[es] stopping node ${nodes[i].name}`);
-          return await this.nodes[i].stop();
-        });
-      }
-      await Promise.all(nodeStopPromises.map(async (stop) => await stop()));
+          await node.kill();
+        })
+      );
 
       log.info('[es] stopped');
     }

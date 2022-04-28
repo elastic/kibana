@@ -8,6 +8,7 @@
 
 import { relative } from 'path';
 import * as Rx from 'rxjs';
+import { setTimeout } from 'timers/promises';
 import { startWith, switchMap, take } from 'rxjs/operators';
 import { withProcRunner } from '@kbn/dev-utils';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -119,7 +120,7 @@ export async function runTests(options: RunTestsParams) {
             const delay = config.get('kbnTestServer.delayShutdown');
             if (typeof delay === 'number') {
               log.info('Delaying shutdown of Kibana for', delay, 'ms');
-              await new Promise((r) => setTimeout(r, delay));
+              await setTimeout(delay);
             }
 
             await procs.stop('kibana');
