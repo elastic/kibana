@@ -62,7 +62,9 @@ post:
     - url: https://localhost:5601
 
 patch:
-  description: Updates a comment in a case.
+  description: >
+    Updates a comment in a case.
+    You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating.
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
     - $ref: ../components/parameters/case_id.yaml
@@ -148,7 +150,8 @@ delete:
     - url: https://localhost:5601
 
 get:
-  description: Retrieves all the comments from a case.
+  description: >
+    Retrieves all the comments from a case.
   deprecated: true
   parameters:
     - $ref: '../components/parameters/case_id.yaml'

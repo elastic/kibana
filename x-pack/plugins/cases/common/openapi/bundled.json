@@ -215,7 +215,7 @@
         ]
       },
       "patch": {
-        "description": "Updates one or more cases.",
+        "description": "Updates one or more cases. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating.\n",
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -556,6 +556,187 @@
           }
         ]
       },
+      "post": {
+        "description": "Sets external connection details, such as the closure type and default connector for cases. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. Refer to the add connectors API. If you set a default connector, it is automatically selected when you create cases in Kibana. If you use the create case API, however, you must still specify all of the connector details.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "closure_type": {
+                    "$ref": "#/components/schemas/closure_types"
+                  },
+                  "connector": {
+                    "description": "An object that contains the connector configuration.",
+                    "type": "object",
+                    "properties": {
+                      "fields": {
+                        "description": "An object that contains the connector fields. TIP: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to null.\n",
+                        "type": "object",
+                        "additionalProperties": true,
+                        "example": null
+                      },
+                      "id": {
+                        "description": "The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.",
+                        "type": "string",
+                        "example": "none"
+                      },
+                      "name": {
+                        "description": "The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.",
+                        "type": "string",
+                        "example": "none"
+                      },
+                      "type": {
+                        "$ref": "#/components/schemas/connector_types"
+                      }
+                    },
+                    "required": [
+                      "fields",
+                      "id",
+                      "name",
+                      "type"
+                    ]
+                  },
+                  "owner": {
+                    "$ref": "#/components/schemas/owners"
+                  },
+                  "settings": {
+                    "description": "An object that contains the case settings.",
+                    "type": "object",
+                    "properties": {
+                      "syncAlerts": {
+                        "description": "Turns alert syncing on or off.",
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "syncAlerts"
+                    ]
+                  }
+                },
+                "required": [
+                  "closure_type",
+                  "connector",
+                  "owner"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json; charset=utf-8": {
+                "schema": {
+                  "type": "string"
+                },
+                "examples": {}
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/api/cases/configure/{configurationId}": {
+      "patch": {
+        "description": "Updates external connection details, such as the closure type and default connector for cases. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can it in your cases. Refer to the add connectors API.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/configuration_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "closure_type": {
+                    "$ref": "#/components/schemas/closure_types"
+                  },
+                  "connector": {
+                    "description": "An object that contains the connector configuration.",
+                    "type": "object",
+                    "properties": {
+                      "fields": {
+                        "description": "An object that contains the connector fields. TIP: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to null.\n",
+                        "type": "object",
+                        "additionalProperties": true,
+                        "example": null
+                      },
+                      "id": {
+                        "description": "The identifier for the connector. To To retrieve connector IDs, use the find connectors API.",
+                        "type": "string",
+                        "example": "none"
+                      },
+                      "name": {
+                        "description": "The name of the connector.",
+                        "type": "string",
+                        "example": "none"
+                      },
+                      "type": {
+                        "$ref": "#/components/schemas/connector_types"
+                      }
+                    },
+                    "required": [
+                      "fields",
+                      "id",
+                      "name",
+                      "type"
+                    ]
+                  },
+                  "version": {
+                    "description": "The version of the connector. To retrieve the version value, use the get configuration API.",
+                    "type": "string",
+                    "example": "WzIwMiwxXQ=="
+                  }
+                },
+                "required": [
+                  "version"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json; charset=utf-8": {
+                "schema": {
+                  "type": "string"
+                },
+                "examples": {}
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
       "servers": [
         {
           "url": "https://localhost:5601"
@@ -847,7 +1028,7 @@
         ]
       },
       "patch": {
-        "description": "Updates a comment in a case.",
+        "description": "Updates a comment in a case. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating.\n",
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -1286,7 +1467,7 @@
         ]
       },
       "patch": {
-        "description": "Updates one or more cases.",
+        "description": "Updates one or more cases. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating.\n",
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -1639,6 +1820,193 @@
           }
         ]
       },
+      "post": {
+        "description": "Sets external connection details, such as the closure type and default connector for cases. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. Refer to the add connectors API. If you set a default connector, it is automatically selected when you create cases in Kibana. If you use the create case API, however, you must still specify all of the connector details.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "closure_type": {
+                    "$ref": "#/components/schemas/closure_types"
+                  },
+                  "connector": {
+                    "description": "An object that contains the connector configuration.",
+                    "type": "object",
+                    "properties": {
+                      "fields": {
+                        "description": "An object that contains the connector fields. TIP: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to null.\n",
+                        "type": "object",
+                        "additionalProperties": true,
+                        "example": null
+                      },
+                      "id": {
+                        "description": "The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.",
+                        "type": "string",
+                        "example": "none"
+                      },
+                      "name": {
+                        "description": "The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.",
+                        "type": "string",
+                        "example": "none"
+                      },
+                      "type": {
+                        "$ref": "#/components/schemas/connector_types"
+                      }
+                    },
+                    "required": [
+                      "fields",
+                      "id",
+                      "name",
+                      "type"
+                    ]
+                  },
+                  "owner": {
+                    "$ref": "#/components/schemas/owners"
+                  },
+                  "settings": {
+                    "description": "An object that contains the case settings.",
+                    "type": "object",
+                    "properties": {
+                      "syncAlerts": {
+                        "description": "Turns alert syncing on or off.",
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "syncAlerts"
+                    ]
+                  }
+                },
+                "required": [
+                  "closure_type",
+                  "connector",
+                  "owner"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json; charset=utf-8": {
+                "schema": {
+                  "type": "string"
+                },
+                "examples": {}
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
+    "/s/{spaceId}/api/cases/configure/{configurationId}": {
+      "patch": {
+        "description": "Updates external connection details, such as the closure type and default connector for cases. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case configuration. Connectors are used to interface with external systems. You must create a connector before you can it in your cases. Refer to the add connectors API.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/configuration_id"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "closure_type": {
+                    "$ref": "#/components/schemas/closure_types"
+                  },
+                  "connector": {
+                    "description": "An object that contains the connector configuration.",
+                    "type": "object",
+                    "properties": {
+                      "fields": {
+                        "description": "An object that contains the connector fields. TIP: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to null.\n",
+                        "type": "object",
+                        "additionalProperties": true,
+                        "example": null
+                      },
+                      "id": {
+                        "description": "The identifier for the connector. To To retrieve connector IDs, use the find connectors API.",
+                        "type": "string",
+                        "example": "none"
+                      },
+                      "name": {
+                        "description": "The name of the connector.",
+                        "type": "string",
+                        "example": "none"
+                      },
+                      "type": {
+                        "$ref": "#/components/schemas/connector_types"
+                      }
+                    },
+                    "required": [
+                      "fields",
+                      "id",
+                      "name",
+                      "type"
+                    ]
+                  },
+                  "version": {
+                    "description": "The version of the connector. To retrieve the version value, use the get configuration API.",
+                    "type": "string",
+                    "example": "WzIwMiwxXQ=="
+                  }
+                },
+                "required": [
+                  "version"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json; charset=utf-8": {
+                "schema": {
+                  "type": "string"
+                },
+                "examples": {}
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
       "servers": [
         {
           "url": "https://localhost:5601"
@@ -1950,7 +2318,7 @@
         ]
       },
       "patch": {
-        "description": "Updates a comment in a case.",
+        "description": "Updates a comment in a case. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating.\n",
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -2068,7 +2436,7 @@
         ]
       },
       "get": {
-        "description": "Retrieves all the comments from a case.",
+        "description": "Retrieves all the comments from a case.\n",
         "deprecated": true,
         "parameters": [
           {
@@ -2418,6 +2786,16 @@
           "example": "09f0c261e39e36351d75995b78bb83673774d1bc2cca9df2d15f0e5c0a99a540"
         }
       },
+      "configuration_id": {
+        "in": "path",
+        "name": "configurationId",
+        "description": "An identifier for the configuration.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "3297a0f0-b5ec-11ec-b141-0fdb20a7f9a9"
+        }
+      },
       "case_id": {
         "in": "path",
         "name": "caseId",
@@ -2478,6 +2856,14 @@
           "closed",
           "in-progress",
           "open"
+        ]
+      },
+      "closure_types": {
+        "type": "string",
+        "description": "Indicates whether a case is automatically closed when it is pushed to external systems (`close-by-pushing`) or not automatically closed (`close-by-user`).",
+        "enum": [
+          "close-by-pushing",
+          "close-by-user"
         ]
       },
       "comment_types": {
