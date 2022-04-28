@@ -181,6 +181,9 @@
           "id": {
             "type": "keyword"
           },
+          "timeZone": {
+            "type": "keyword"
+          },
           "startTime": {
             "type": "date",
             "format": "strict_date_time"

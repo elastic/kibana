@@ -6,37 +6,40 @@
  */
 
 import React, { useState } from 'react';
+import { RuleSnooze } from '@kbn/alerting-plugin/common';
 import { getRuleStatusDropdownLazy } from '../../../common/get_rule_status_dropdown';
 
 export const RuleStatusDropdownSandbox: React.FC<{}> = () => {
   const [enabled, setEnabled] = useState(true);
-  const [snoozeEndTime, setSnoozeEndTime] = useState<Date | null>(null);
+  const [snoozeSchedule, setSnoozeSchedule] = useState<RuleSnooze>([]);
   const [muteAll, setMuteAll] = useState(false);
 
   return getRuleStatusDropdownLazy({
     rule: {
       enabled,
-      snoozeEndTime,
+      snoozeSchedule,
       muteAll,
     },
     enableRule: async () => {
       setEnabled(true);
       setMuteAll(false);
-      setSnoozeEndTime(null);
+      setSnoozeSchedule([]);
     },
     disableRule: async () => setEnabled(false),
     snoozeRule: async (time) => {
       if (time === -1) {
-        setSnoozeEndTime(null);
+        setSnoozeSchedule([]);
         setMuteAll(true);
       } else {
-        setSnoozeEndTime(new Date(time));
+        setSnoozeSchedule([
+          { startTime: new Date().toISOString(), duration: Date.parse(time) - Date.now() },
+        ]);
         setMuteAll(false);
       }
     },
     unsnoozeRule: async () => {
       setMuteAll(false);
-      setSnoozeEndTime(null);
+      setSnoozeSchedule([]);
     },
     onRuleChanged: () => {},
     isEditable: true,
