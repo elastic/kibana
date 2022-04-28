@@ -9,4 +9,4 @@ export { API_BASE_PATH, metadataEventTypes } from './constants';
 
 export { withApiBaseBath } from './lib';
 
-export type { MetadataEventType } from './types';
+export type { MetadataEventType, UserContentMetadataEvent } from './types';

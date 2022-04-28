@@ -9,7 +9,7 @@
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 
 import { UserContentPluginSetup, UserContentPluginStart } from './types';
-import { UserContentService } from './services';
+import { UserContentService, MetadataEventsService } from './services';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SetupDependencies {}
@@ -19,15 +19,19 @@ export interface StartDependencies {}
 
 export class UserContentPlugin implements Plugin<UserContentPluginSetup, UserContentPluginStart> {
   private userContentService: UserContentService = new UserContentService();
-
-  constructor() {
-    this.userContentService.init();
-  }
+  constructor() {}
 
   public setup(
     core: CoreSetup<StartDependencies, UserContentPluginStart>,
     deps: SetupDependencies
   ): UserContentPluginSetup {
+    const { http } = core;
+
+    const metadataEventService = new MetadataEventsService();
+    metadataEventService.init({ http });
+
+    this.userContentService.init({ metadataEventService });
+
     return {};
   }
 
