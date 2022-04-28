@@ -464,7 +464,8 @@
     },
     "/api/cases/alerts/{alertId}": {
       "get": {
-        "description": "Returns the cases associated with a specific alert. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
+        "description": "Returns the cases associated with a specific alert. You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
+        "x-technical-preview": true,
         "parameters": [
           {
             "$ref": "#/components/parameters/alert_id"
@@ -731,7 +732,8 @@
     },
     "/api/cases/{caseId}/alerts": {
       "get": {
-        "description": "Gets all alerts attached to a case. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
+        "description": "Gets all alerts attached to a case. You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
+        "x-technical-preview": true,
         "parameters": [
           {
             "$ref": "#/components/parameters/case_id"
@@ -1539,7 +1541,8 @@
     },
     "/s/{spaceId}/api/cases/alerts/{alertId}": {
       "get": {
-        "description": "Returns the cases associated with a specific alert. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
+        "description": "Returns the cases associated with a specific alert. You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
+        "x-technical-preview": true,
         "parameters": [
           {
             "$ref": "#/components/parameters/alert_id"
@@ -1826,7 +1829,8 @@
     },
     "/s/{spaceId}/api/cases/{caseId}/alerts": {
       "get": {
-        "description": "Gets all alerts attached to a case. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features. You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
+        "description": "Gets all alerts attached to a case. You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
+        "x-technical-preview": true,
         "parameters": [
           {
             "$ref": "#/components/parameters/case_id"
