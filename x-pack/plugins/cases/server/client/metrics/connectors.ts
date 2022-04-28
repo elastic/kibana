@@ -10,6 +10,7 @@ import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { SingleCaseBaseHandler } from './single_case_base_handler';
 import { SingleCaseBaseHandlerCommonOptions } from './types';
+
 export class Connectors extends SingleCaseBaseHandler {
   constructor(options: SingleCaseBaseHandlerCommonOptions) {
     super(options, ['connectors']);
