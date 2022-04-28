@@ -56,7 +56,7 @@ export const LegendColorPickerWrapper: LegendColorPicker = ({
   const { legendPosition, setColor, uiState } = colorPickerWrappingContext;
   const seriesName = seriesIdentifier.key;
 
-  const overwriteColors: Record<string, string> = uiState?.get('vis.colors', {}) ?? {};
+  const overwriteColors: Record<string, string> = uiState?.get?.('vis.colors', {}) ?? {};
   const colorIsOverwritten = seriesName.toString() in overwriteColors;
   let keyDownEventOn = false;
 

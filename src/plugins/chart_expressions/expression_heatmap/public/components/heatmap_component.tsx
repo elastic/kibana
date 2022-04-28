@@ -138,7 +138,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     // legacy heatmap legend is handled by the uiState
     const [showLegend, setShowLegend] = useState<boolean>(() => {
       const bwcLegendStateDefault = args.legend.isVisible ?? true;
-      return uiState?.get('vis.legendOpen', bwcLegendStateDefault);
+      return uiState?.get?.('vis.legendOpen', bwcLegendStateDefault);
     });
 
     const toggleLegend = useCallback(() => {
@@ -154,16 +154,16 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
 
     const setColor = useCallback(
       (newColor: string | null, seriesLabel: string | number) => {
-        const colors = uiState?.get('vis.colors') || {};
+        const colors = uiState?.get?.('vis.colors') || {};
         if (colors[seriesLabel] === newColor || !newColor) {
           delete colors[seriesLabel];
         } else {
           colors[seriesLabel] = newColor;
         }
-        uiState?.setSilent('vis.colors', null);
-        uiState?.set('vis.colors', colors);
-        uiState?.emit('reload');
-        uiState?.emit('colorChanged');
+        uiState?.setSilent?.('vis.colors', null);
+        uiState?.set?.('vis.colors', colors);
+        uiState?.emit?.('reload');
+        uiState?.emit?.('colorChanged');
       },
       [uiState]
     );
@@ -370,7 +370,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
           : min + ((max - min) * paletteParams.rangeMax) / 100) + smattering;
     }
 
-    const overwriteColors = uiState?.get('vis.colors') ?? null;
+    const overwriteColors = uiState?.get?.('vis.colors') ?? null;
     const hasSingleValue = max === min;
     const bands = ranges.map((start, index, array) => {
       const isPenultimate = index === array.length - 1;

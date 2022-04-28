@@ -254,7 +254,7 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
     // To support the behavior of the color overriding, it is required to skip all the formatting, except percent.
     const overrideColor = useCallback(
       (value: number, bands: number[], formatter?: FieldFormat) => {
-        const overrideColors = uiState?.get('vis.colors') ?? {};
+        const overrideColors = uiState?.get?.('vis.colors') ?? {};
         const valueIndex = bands.findIndex((band, index, allBands) => {
           if (index === allBands.length - 1) {
             return false;

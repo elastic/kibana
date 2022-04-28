@@ -106,7 +106,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
 
   const showLegendDefault = useCallback(() => {
     const showLegendDef = shouldShowLegend(visType, visParams.legendDisplay, bucketColumns);
-    return props.uiState?.get('vis.legendOpen', showLegendDef) ?? showLegendDef;
+    return props.uiState?.get?.('vis.legendOpen', showLegendDef) ?? showLegendDef;
   }, [bucketColumns, props.uiState, visParams.legendDisplay, visType]);
 
   const [showLegend, setShowLegend] = useState<boolean>(() => showLegendDefault());
@@ -193,22 +193,22 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const toggleLegend = useCallback(() => {
     setShowLegend((value) => {
       const newValue = !value;
-      props.uiState?.set('vis.legendOpen', newValue);
+      props.uiState?.set?.('vis.legendOpen', newValue);
       return newValue;
     });
   }, [props.uiState]);
 
   const setColor = useCallback(
     (newColor: string | null, seriesLabel: string | number) => {
-      const colors = props.uiState?.get('vis.colors') || {};
+      const colors = props.uiState?.get?.('vis.colors') || {};
       if (colors[seriesLabel] === newColor || !newColor) {
         delete colors[seriesLabel];
       } else {
         colors[seriesLabel] = newColor;
       }
-      props.uiState?.setSilent('vis.colors', null);
-      props.uiState?.set('vis.colors', colors);
-      props.uiState?.emit('reload');
+      props.uiState?.setSilent?.('vis.colors', null);
+      props.uiState?.set?.('vis.colors', colors);
+      props.uiState?.emit?.('reload');
     },
     [props.uiState]
   );
@@ -256,7 +256,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
         bucketColumns,
         visParams,
         visData,
-        props.uiState?.get('vis.colors', {}),
+        props.uiState?.get?.('vis.colors', {}),
         visData.rows,
         props.palettesRegistry,
         formatters,

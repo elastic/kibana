@@ -88,11 +88,11 @@ const PieOptions = (props: PieOptionsProps) => {
     paramName: T,
     value: PartitionVisParams['labels'][T]
   ) => setValue('labels', { ...stateParams.labels, [paramName]: value });
-  const legendUiStateValue = props.uiState?.get('vis.legendOpen');
+  const legendUiStateValue = props.uiState?.get?.('vis.legendOpen');
   const [palettesRegistry, setPalettesRegistry] = useState<PaletteRegistry | undefined>(undefined);
   const [legendVisibility, setLegendVisibility] = useState<boolean>(() => {
     const bwcLegendStateDefault = stateParams.legendDisplay === LegendDisplay.SHOW;
-    return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault);
+    return props.uiState?.get?.('vis.legendOpen', bwcLegendStateDefault);
   });
   const hasSplitChart = Boolean(aggs?.aggs?.find((agg) => agg.schema === 'split' && agg.enabled));
   const segments = aggs?.aggs?.filter((agg) => agg.schema === 'segment' && agg.enabled) ?? [];
@@ -134,7 +134,7 @@ const PieOptions = (props: PieOptionsProps) => {
       }
       setValue(name, legendDisplay);
 
-      props.uiState?.set('vis.legendOpen', show);
+      props.uiState?.set?.('vis.legendOpen', show);
     },
     [getLegendDisplay, props.uiState, setValue, stateParams]
   );

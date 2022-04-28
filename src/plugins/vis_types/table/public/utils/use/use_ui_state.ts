@@ -19,11 +19,11 @@ const defaultSort = {
 
 export const useUiState = (uiState: PersistedState): TableVisUseUiStateProps => {
   const [sort, setSortState] = useState<TableVisUiState['sort']>(
-    uiState?.get('vis.params.sort') || defaultSort
+    uiState?.get?.('vis.params.sort') || defaultSort
   );
 
   const [columnsWidth, setColumnsWidthState] = useState<TableVisUiState['colWidth']>(
-    uiState?.get('vis.params.colWidth') || []
+    uiState?.get?.('vis.params.colWidth') || []
   );
 
   const uiStateValues = useRef<{
