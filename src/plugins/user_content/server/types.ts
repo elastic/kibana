@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 import {
-  MetadataEvent,
   MetadataEventsStream,
   MetadataEventsStreamsPluginStart,
 } from '@kbn/metadata-events-streams-plugin/server';
 
-import { MetadataEventType } from '../common';
+import { UserContentMetadataEvent } from '../common';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UserContentPluginSetup {}
@@ -21,14 +20,6 @@ export interface UserContentPluginStart {}
 
 export interface UserContentStartDependencies {
   metadataEventsStreams: MetadataEventsStreamsPluginStart;
-}
-
-export interface UserContentMetadataEvent extends MetadataEvent<MetadataEventType> {
-  data: {
-    /** The saved object id */
-    so_id: string;
-    [key: string]: unknown;
-  };
 }
 
 export type UserContentEventsStream = MetadataEventsStream<UserContentMetadataEvent>;

@@ -6,25 +6,32 @@
  * Side Public License, v 1.
  */
 import { UserContentType } from '../types';
+import { MetadataEventsService } from './metadata_events_service';
 
 export interface InitOptions<T> {
   /** Handler to fetch the saved object */
   get: (contentId: string) => Promise<T>;
 }
 
-interface Content<T> {
-  /** Handler to fetch the saved object */
+interface UserContent<T> {
+  /** Handler to fetch the user content */
   get: (contentId: string) => Promise<T>;
 }
 
+interface Dependencies {
+  metadataEventService: MetadataEventsService;
+}
 export class UserContentService {
-  private contents: Map<UserContentType, Content<unknown>>;
+  private contents: Map<UserContentType, UserContent<unknown>>;
+  private metadataEventsService: MetadataEventsService | undefined;
 
   constructor() {
-    this.contents = new Map<UserContentType, Content<unknown>>();
+    this.contents = new Map<UserContentType, UserContent<unknown>>();
   }
 
-  init() {}
+  init({ metadataEventService }: Dependencies) {
+    this.metadataEventsService = metadataEventService;
+  }
 
   register<T>(contentType: UserContentType, { get }: InitOptions<T>): void {
     if (this.contents.has(contentType)) {
@@ -37,10 +44,17 @@ export class UserContentService {
   }
 
   get<T = unknown>(contentType: UserContentType, contentId: string): Promise<T> {
-    if (!this.contents.has(contentType)) {
+    const userContent = this.contents.get(contentType) as UserContent<T>;
+
+    if (!userContent) {
       throw new Error(`Can't fetch content [${contentId}]. Unknown content type [${contentType}].`);
     }
 
-    return this.contents.get(contentType)!.get(contentId) as unknown as Promise<T>;
+    this.metadataEventsService?.registerEvent({
+      type: 'viewed:kibana',
+      data: { so_id: contentId },
+    });
+
+    return userContent.get(contentId);
   }
 }

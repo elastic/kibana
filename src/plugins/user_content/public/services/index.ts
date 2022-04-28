@@ -7,3 +7,5 @@
  */
 
 export { UserContentService } from './user_content_service';
+
+export { MetadataEventsService } from './metadata_events_service';
