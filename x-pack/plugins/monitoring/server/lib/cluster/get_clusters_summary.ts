@@ -47,7 +47,8 @@ export function getClustersSummary(
     } = cluster;
 
     const license = cluster.license || cluster.elasticsearch?.cluster?.stats?.license;
-    const version = cluster.version || cluster.elasticsearch?.version;
+    const version =
+      cluster.version || (cluster.elasticsearch?.cluster?.stats?.nodes?.versions || [])[0];
     const clusterUuid = cluster.cluster_uuid || cluster.elasticsearch?.cluster?.id;
     const clusterStatsLegacy = cluster.cluster_stats;
     const clusterStatsMB = cluster.elasticsearch?.cluster?.stats;
