@@ -10139,7 +10139,6 @@
     "xpack.csp.passed": "合格",
     "xpack.csp.posture_score": "態勢スコア",
     "xpack.csp.posture_score_trend": "態勢スコア傾向",
-    "xpack.csp.resource_type": "リソースタイプ",
     "xpack.csp.rules.activateAllButtonLabel": "{count, plural, other {#個のルール}}をアクティブ化",
     "xpack.csp.rules.activatedLabel": "有効化",
     "xpack.csp.rules.activateLabel": "有効化",

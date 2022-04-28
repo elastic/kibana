@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getResourceTypeFromAggs, ResourceTypeBucket } from './get_resources_types';
+import { getFailedFindingsFromAggs, FailedFindingsBucket } from './get_grouped_findings_evaluation';
 
-const resourceTypeBuckets: ResourceTypeBucket[] = [
+const resourceTypeBuckets: FailedFindingsBucket[] = [
   {
     key: 'foo_type',
     doc_count: 41,
@@ -30,9 +30,9 @@ const resourceTypeBuckets: ResourceTypeBucket[] = [
   },
 ];
 
-describe('getResourceTypeFromAggs', () => {
+describe('getFailedFindingsFromAggs', () => {
   it('should return value matching ComplianceDashboardData["resourcesTypes"]', async () => {
-    const resourceTypes = getResourceTypeFromAggs(resourceTypeBuckets);
+    const resourceTypes = getFailedFindingsFromAggs(resourceTypeBuckets);
     expect(resourceTypes).toEqual([
       {
         name: 'foo_type',

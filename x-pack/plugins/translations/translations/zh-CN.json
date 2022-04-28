@@ -10160,7 +10160,6 @@
     "xpack.csp.passed": "通过",
     "xpack.csp.posture_score": "态势分数",
     "xpack.csp.posture_score_trend": "态势分数趋势",
-    "xpack.csp.resource_type": "资源类型",
     "xpack.csp.rules.activateAllButtonLabel": "激活 {count, plural, other {# 个规则}}",
     "xpack.csp.rules.activatedLabel": "已激活",
     "xpack.csp.rules.activateLabel": "激活",
