@@ -1628,10 +1628,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.5.1.tgz#96acf39c3d599950646ef8ccfd24a3f057cf4932"
   integrity sha512-Tby6TKjixRFY+atVNeYUdGr9m0iaOq8230KTwn8BbUhkh7LwozfgKq0U98HRX7n63ZL62szl+cDKTYzh5WPCFQ==
 
-"@elastic/performance-testing-dataset-extractor@^0.0.2":
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@elastic/performance-testing-dataset-extractor/-/performance-testing-dataset-extractor-0.0.2.tgz#c4745a2cb454adb404ae7d93c66345b9eccbab5b"
-  integrity sha512-4PoVSLaz6WayEzK5ChQ4afS9lYFkgCy23Ioh/ajqPXULBm5WXifICQRUlrfFnrUIZqzU78Uf6/F/uDsMqeFG7g==
+"@elastic/performance-testing-dataset-extractor@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@elastic/performance-testing-dataset-extractor/-/performance-testing-dataset-extractor-0.0.3.tgz#c9823154c1d23c0dfec86f7183a5e2327999d0ca"
+  integrity sha512-ND33m4P1yOLPqnKnwWTcwDNB5dCw5NK9503e2WaZzljoy75RN9Lg5+YsQM7RFZKDs/+yNp7XRCJszeiUOcMFvg==
   dependencies:
     "@elastic/elasticsearch" "7.17.0"
     axios "^0.26.1"
