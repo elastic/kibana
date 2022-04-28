@@ -35,14 +35,14 @@ export const MonitorManagementAdvancedFields = memo<Props>(
         title={
           <h4>
             <FormattedMessage
-              id="xpack.uptime.monitorManagement.monitorAdvancedOptions.dataStreamConfiguration.title"
+              id="xpack.synthetics.monitorManagement.monitorAdvancedOptions.dataStreamConfiguration.title"
               defaultMessage="Data stream settings"
             />
           </h4>
         }
         description={
           <FormattedMessage
-            id="xpack.uptime.monitorManagement.monitorAdvancedOptions.dataStreamConfiguration.description"
+            id="xpack.synthetics.monitorManagement.monitorAdvancedOptions.dataStreamConfiguration.description"
             defaultMessage="Configure additional Data Stream options."
           />
         }
@@ -54,13 +54,13 @@ export const MonitorManagementAdvancedFields = memo<Props>(
           error={namespaceErrorMsg}
           label={
             <FormattedMessage
-              id="xpack.uptime.monitorManagement.monitorAdvancedOptions.monitorNamespaceFieldLabel"
+              id="xpack.synthetics.monitorManagement.monitorAdvancedOptions.monitorNamespaceFieldLabel"
               defaultMessage="Namespace"
             />
           }
           helpText={
             <FormattedMessage
-              id="xpack.uptime.monitorManagement.monitorAdvancedOptions.namespaceHelpLabel"
+              id="xpack.synthetics.monitorManagement.monitorAdvancedOptions.namespaceHelpLabel"
               defaultMessage="Change the default namespace. This setting changes the name of the monitor's data stream. {learnMore}."
               values={{
                 learnMore: (
@@ -70,7 +70,7 @@ export const MonitorManagementAdvancedFields = memo<Props>(
                     external
                   >
                     <FormattedMessage
-                      id="xpack.uptime.monitorManagement.monitorAdvancedOptions.namespaceHelpLearnMoreLabel"
+                      id="xpack.synthetics.monitorManagement.monitorAdvancedOptions.namespaceHelpLearnMoreLabel"
                       defaultMessage="Learn More"
                     />
                   </EuiLink>
