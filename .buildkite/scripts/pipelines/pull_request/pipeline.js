@@ -65,6 +65,7 @@ const uploadPipeline = (pipelineContent) => {
 
     if (
       (await doAnyChangesMatch([
+        /^x-pack\/plugins\/cases/,
         /^x-pack\/plugins\/lists/,
         /^x-pack\/plugins\/security_solution/,
         /^x-pack\/plugins\/timelines/,
@@ -89,13 +90,6 @@ const uploadPipeline = (pipelineContent) => {
       process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/response_ops.yml'));
-    }
-
-    if (
-      (await doAnyChangesMatch([/^x-pack\/plugins\/cases/])) ||
-      process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
-    ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/response_ops_cases.yml'));
     }
 
     if (
