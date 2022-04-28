@@ -23,6 +23,18 @@ import type { CiStatsTestGroupInfo, CiStatsTestRun } from './ci_stats_test_group
 
 const BASE_URL = 'https://ci-stats.kibana.dev';
 
+function limitMetaStrings(meta: CiStatsMetadata) {
+  return Object.fromEntries(
+    Object.entries(meta).map(([key, value]) => {
+      if (typeof value === 'string' && value.length > 2000) {
+        return [key, value.slice(0, 2000)];
+      }
+
+      return [key, value];
+    })
+  );
+}
+
 /** A ci-stats metric record */
 export interface CiStatsMetric {
   /** Top-level categorization for the metric, e.g. "page load bundle size" */
@@ -84,10 +96,8 @@ export interface CiStatsReportTestsOptions {
 }
 
 /* @internal */
-interface ReportTestsResponse {
-  buildId: string;
+interface ReportTestGroupResponse {
   groupId: string;
-  testRunCount: number;
 }
 
 /* @internal */
@@ -138,7 +148,14 @@ export class CiStatsReporter {
     }
 
     const buildId = this.config?.buildId;
-    const timings = options.timings;
+    const timings = options.timings.map((timing) =>
+      timing.meta
+        ? {
+            ...timing,
+            meta: limitMetaStrings(timing.meta),
+          }
+        : timing
+    );
     const upstreamBranch = options.upstreamBranch ?? this.getUpstreamBranch();
     const kibanaUuid = options.kibanaUuid === undefined ? this.getKibanaUuid() : options.kibanaUuid;
     let email;
@@ -238,18 +255,51 @@ export class CiStatsReporter {
       );
     }
 
-    return await this.req<ReportTestsResponse>({
+    const groupResp = await this.req<ReportTestGroupResponse>({
       auth: true,
-      path: '/v1/test_group',
+      path: '/v2/test_group',
       query: {
         buildId: this.config?.buildId,
       },
-      bodyDesc: `[${group.name}/${group.type}] test groups with ${testRuns.length} tests`,
-      body: [
-        JSON.stringify({ group }),
-        ...testRuns.map((testRun) => JSON.stringify({ testRun })),
-      ].join('\n'),
+      bodyDesc: `[${group.name}/${group.type}] test group`,
+      body: group,
     });
+
+    if (!groupResp) {
+      return;
+    }
+
+    let bufferBytes = 0;
+    const buffer: string[] = [];
+    const flushBuffer = async () => {
+      await this.req<{ testRunCount: number }>({
+        auth: true,
+        path: '/v2/test_runs',
+        query: {
+          buildId: this.config?.buildId,
+          groupId: groupResp.groupId,
+          groupType: group.type,
+        },
+        bodyDesc: `[${group.name}/${group.type}] Chunk of ${bufferBytes} bytes`,
+        body: buffer.join('\n'),
+      });
+      buffer.length = 0;
+      bufferBytes = 0;
+    };
+
+    // send test runs in chunks of ~500kb
+    for (const testRun of testRuns) {
+      const json = JSON.stringify(testRun);
+      bufferBytes += json.length;
+      buffer.push(json);
+      if (bufferBytes >= 450000) {
+        await flushBuffer();
+      }
+    }
+
+    if (bufferBytes) {
+      await flushBuffer();
+    }
   }
 
   /**
