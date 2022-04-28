@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { parseInterval } from '@kbn/data-plugin/common';
 import { SanitizedRule, RuleTypeParams } from './rule';
 
@@ -18,7 +18,7 @@ export function getRuleSnoozeEndTime(rule: RuleSnoozeProps): Date | null {
 
   const now = Date.now();
   for (const snooze of rule.snoozeSchedule) {
-    const { startTime, duration, repeatInterval, occurrences, repeatEndTime } = snooze;
+    const { startTime, duration, repeatInterval, occurrences, repeatEndTime, timeZone } = snooze;
     const startTimeMS = Date.parse(startTime);
     const initialEndTime = startTimeMS + duration;
     // If now is during the first occurrence of the snooze
@@ -42,7 +42,7 @@ export function getRuleSnoozeEndTime(rule: RuleSnoozeProps): Date | null {
           .split('')
           .map((d) => Number(d))
           .sort();
-        const today = moment(now).isoWeekday();
+        const today = moment(now).tz(timeZone).isoWeekday();
 
         if (!repeatDays.includes(today)) continue;
 

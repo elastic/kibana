@@ -8,6 +8,7 @@
 import { isRuleType, ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { isString } from 'lodash/fp';
 import { omit } from 'lodash';
+import moment from 'moment-timezone';
 import {
   LogMeta,
   SavedObjectMigrationMap,
@@ -876,6 +877,7 @@ function convertSnoozes(
             {
               startTime: new Date().toISOString(),
               duration: Date.parse(snoozeEndTime as string) - Date.now(),
+              timeZone: moment.tz.guess(),
             },
           ]
         : [],

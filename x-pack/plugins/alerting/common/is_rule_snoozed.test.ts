@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import sinon from 'sinon';
 import { isRuleSnoozed } from './is_rule_snoozed';
 
-const LOCAL_OFFSET = moment('2020-01-01T00:00:00.000').format('Z');
-const DATE_9999 = '9999-12-31T12:34:56.789' + LOCAL_OFFSET;
-const DATE_1970 = '1970-01-01T00:00:00.000' + LOCAL_OFFSET;
-const DATE_1970_PLUS_6_HOURS = '1970-01-01T06:00:00.000' + LOCAL_OFFSET;
-const DATE_2020 = '2020-01-01T00:00:00.000' + LOCAL_OFFSET;
-const DATE_2020_MINUS_1_HOUR = '2019-12-31T23:00:00.000' + LOCAL_OFFSET;
-const DATE_2020_MINUS_1_MONTH = '2019-12-01T00:00:00.000' + LOCAL_OFFSET;
+const DATE_9999 = '9999-12-31T12:34:56.789Z';
+const DATE_1970 = '1970-01-01T00:00:00.000Z';
+const DATE_1970_PLUS_6_HOURS = '1970-01-01T06:00:00.000Z';
+const DATE_2020 = '2020-01-01T00:00:00.000Z';
+const DATE_2020_MINUS_1_HOUR = '2019-12-31T23:00:00.000Z';
+const DATE_2020_MINUS_1_MONTH = '2019-12-01T00:00:00.000Z';
 
 const NOW = DATE_2020;
 
@@ -33,6 +31,7 @@ describe('isRuleSnoozed', () => {
       {
         startTime: DATE_9999,
         duration: 100000000,
+        timeZone: 'UTC',
       },
     ];
     expect(isRuleSnoozed({ snoozeSchedule, muteAll: false })).toBe(false);
@@ -43,6 +42,7 @@ describe('isRuleSnoozed', () => {
       {
         startTime: NOW,
         duration: 100000000,
+        timeZone: 'UTC',
       },
     ];
     expect(isRuleSnoozed({ snoozeSchedule, muteAll: false })).toBe(true);
@@ -53,6 +53,7 @@ describe('isRuleSnoozed', () => {
       {
         startTime: DATE_1970,
         duration: 100000000,
+        timeZone: 'UTC',
       },
     ];
     expect(isRuleSnoozed({ snoozeSchedule, muteAll: false })).toBe(false);
@@ -63,6 +64,7 @@ describe('isRuleSnoozed', () => {
       {
         startTime: DATE_9999,
         duration: 100000000,
+        timeZone: 'UTC',
       },
     ];
     expect(isRuleSnoozed({ snoozeSchedule, muteAll: true })).toBe(true);
@@ -73,6 +75,7 @@ describe('isRuleSnoozed', () => {
       {
         startTime: DATE_1970,
         duration: 60 * 1000,
+        timeZone: 'UTC',
         repeatInterval: '1d',
       },
     ];
@@ -82,6 +85,7 @@ describe('isRuleSnoozed', () => {
         startTime: DATE_1970_PLUS_6_HOURS,
         duration: 60 * 1000,
         repeatInterval: '1d',
+        timeZone: 'UTC',
       },
     ];
     expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleB, muteAll: false })).toBe(false);
@@ -90,6 +94,7 @@ describe('isRuleSnoozed', () => {
         startTime: DATE_2020_MINUS_1_HOUR,
         duration: 60 * 1000,
         repeatInterval: '1h',
+        timeZone: 'UTC',
       },
     ];
     expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleC, muteAll: false })).toBe(true);
@@ -109,6 +114,7 @@ describe('isRuleSnoozed', () => {
       {
         startTime: DATE_1970,
         duration: 60 * 1000,
+        timeZone: 'UTC',
         repeatInterval: '1h',
         occurrences: 25,
       },
@@ -133,6 +139,7 @@ describe('isRuleSnoozed', () => {
       {
         startTime: DATE_1970,
         duration: 60 * 1000,
+        timeZone: 'UTC',
         repeatInterval: '1h',
         repeatEndTime: DATE_9999,
       },
@@ -142,6 +149,7 @@ describe('isRuleSnoozed', () => {
       {
         startTime: DATE_1970,
         duration: 60 * 1000,
+        timeZone: 'UTC',
         repeatInterval: '1h',
         repeatEndTime: DATE_2020_MINUS_1_HOUR,
       },
@@ -154,6 +162,7 @@ describe('isRuleSnoozed', () => {
       {
         startTime: DATE_1970,
         duration: 60 * 1000,
+        timeZone: 'UTC',
         repeatInterval: 'DOW:135', // Monday Wednesday Friday; Jan 1 2020 was a Wednesday
       },
     ];
@@ -162,6 +171,7 @@ describe('isRuleSnoozed', () => {
       {
         startTime: DATE_1970,
         duration: 60 * 1000,
+        timeZone: 'UTC',
         repeatInterval: 'DOW:2467', // Tue, Thu, Sat, Sun
       },
     ];
@@ -170,6 +180,7 @@ describe('isRuleSnoozed', () => {
       {
         startTime: DATE_2020_MINUS_1_MONTH,
         duration: 60 * 1000,
+        timeZone: 'UTC',
         repeatInterval: 'DOW:135',
         occurrences: 12,
       },
@@ -179,6 +190,7 @@ describe('isRuleSnoozed', () => {
       {
         startTime: DATE_2020_MINUS_1_MONTH,
         duration: 60 * 1000,
+        timeZone: 'UTC',
         repeatInterval: 'DOW:135',
         occurrences: 15,
       },
