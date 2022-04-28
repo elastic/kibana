@@ -19,12 +19,7 @@ import {
   TimelineKpiStrategyResponse,
   EntityType,
 } from './events';
-import {
-  PaginationInputPaginated,
-  TimerangeInput,
-  SortField,
-  Maybe,
-} from '../common';
+import { PaginationInputPaginated, TimerangeInput, SortField, Maybe } from '../common';
 import {
   DataProviderType,
   TimelineType,
