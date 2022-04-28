@@ -32,8 +32,13 @@ export class UserContentPlugin implements Plugin<UserContentPluginSetup, UserCon
   }
 
   public start(core: CoreStart, deps: StartDependencies) {
+    const { register, get } = this.userContentService;
+
     return {
-      userContentService: this.userContentService,
+      userContentService: {
+        register: register.bind(this.userContentService),
+        get: get.bind(this.userContentService),
+      },
     };
   }
 }

@@ -7,7 +7,7 @@
  */
 import { UserContentType } from '../types';
 
-interface InitOptions<T> {
+export interface InitOptions<T> {
   /** Handler to fetch the saved object */
   get: (contentId: string) => Promise<T>;
 }
@@ -26,17 +26,21 @@ export class UserContentService {
 
   init() {}
 
-  register<T>(contentType: UserContentType, { get }: InitOptions<T>) {
+  register<T>(contentType: UserContentType, { get }: InitOptions<T>): void {
+    if (this.contents.has(contentType)) {
+      throw new Error(`User content type [${contentType}] is already registered`);
+    }
+
     this.contents.set(contentType, {
       get,
     });
   }
 
-  get<T = unknown>(contentType: UserContentType, contentId: string) {
+  get<T = unknown>(contentType: UserContentType, contentId: string): Promise<T> {
     if (!this.contents.has(contentType)) {
       throw new Error(`Can't fetch content [${contentId}]. Unknown content type [${contentType}].`);
     }
 
-    return this.contents.get(contentType)!.get(contentId) as unknown as T;
+    return this.contents.get(contentType)!.get(contentId) as unknown as Promise<T>;
   }
 }
