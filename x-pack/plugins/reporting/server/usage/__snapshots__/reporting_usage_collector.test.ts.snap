@@ -48,6 +48,9 @@ Object {
         "unknown_error": Object {
           "type": "long",
         },
+        "visual_reporting_soft_disabled_error": Object {
+          "type": "long",
+        },
       },
       "metrics": Object {
         "png_cpu": Object {
@@ -147,6 +150,9 @@ Object {
           "type": "long",
         },
         "unknown_error": Object {
+          "type": "long",
+        },
+        "visual_reporting_soft_disabled_error": Object {
           "type": "long",
         },
       },
@@ -416,6 +422,9 @@ Object {
           "unknown_error": Object {
             "type": "long",
           },
+          "visual_reporting_soft_disabled_error": Object {
+            "type": "long",
+          },
         },
         "metrics": Object {
           "png_cpu": Object {
@@ -515,6 +524,9 @@ Object {
             "type": "long",
           },
           "unknown_error": Object {
+            "type": "long",
+          },
+          "visual_reporting_soft_disabled_error": Object {
             "type": "long",
           },
         },
@@ -803,6 +815,9 @@ Object {
           "unknown_error": Object {
             "type": "long",
           },
+          "visual_reporting_soft_disabled_error": Object {
+            "type": "long",
+          },
         },
         "layout": Object {
           "canvas": Object {
@@ -930,6 +945,9 @@ Object {
             "type": "long",
           },
           "unknown_error": Object {
+            "type": "long",
+          },
+          "visual_reporting_soft_disabled_error": Object {
             "type": "long",
           },
         },
@@ -1534,6 +1552,9 @@ Object {
         "unknown_error": Object {
           "type": "long",
         },
+        "visual_reporting_soft_disabled_error": Object {
+          "type": "long",
+        },
       },
       "layout": Object {
         "canvas": Object {
@@ -1661,6 +1682,9 @@ Object {
           "type": "long",
         },
         "unknown_error": Object {
+          "type": "long",
+        },
+        "visual_reporting_soft_disabled_error": Object {
           "type": "long",
         },
       },

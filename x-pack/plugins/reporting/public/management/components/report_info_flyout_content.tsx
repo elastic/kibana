@@ -17,10 +17,14 @@ import {
 import moment from 'moment';
 
 import { USES_HEADLESS_JOB_TYPES } from '../../../common/constants';
+import { VisualReportingSoftDisabledError } from '../../../common/errors';
 
 import type { Job } from '../../lib/job';
 import { useKibana } from '../../shared_imports';
 
+import { sharedI18nTexts } from '../../shared_i18n_texts';
+
+// TODO: Move all of these i18n texts to ./i18n_texts.tsx
 const NA = i18n.translate('xpack.reporting.listing.infoPanel.notApplicableLabel', {
   defaultMessage: 'N/A',
 });
@@ -40,7 +44,7 @@ const createDateFormatter = (format: string, tz: string) => (date: string) => {
 
 export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
   const {
-    services: { uiSettings },
+    services: { uiSettings, docLinks },
   } = useKibana();
 
   const timezone =
@@ -186,19 +190,31 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
   ];
 
   const warnings = info.getWarnings();
-  const errored = info.getError();
+  const errored =
+    /*
+     * We link the user to documentation if they hit this error case. Note: this
+     * should only occur on cloud.
+     */
+    info.error_code === VisualReportingSoftDisabledError.code
+      ? sharedI18nTexts.cloud.insufficientMemoryError(
+          docLinks.links.reporting.cloudMinimumRequirements
+        )
+      : info.getError();
 
   return (
     <>
       {Boolean(errored) && (
-        <EuiCallOut
-          title={i18n.translate('xpack.reporting.listing.infoPanel.callout.failedReportTitle', {
-            defaultMessage: 'Report failed',
-          })}
-          color="danger"
-        >
-          {errored}
-        </EuiCallOut>
+        <>
+          <EuiCallOut
+            title={i18n.translate('xpack.reporting.listing.infoPanel.callout.failedReportTitle', {
+              defaultMessage: 'No report generated',
+            })}
+            color="danger"
+          >
+            {errored}
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
       )}
       {Boolean(warnings) && (
         <>

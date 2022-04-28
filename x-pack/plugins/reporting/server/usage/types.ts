@@ -203,6 +203,7 @@ export interface ErrorCodeStats {
   browser_unexpectedly_closed_error: number | null;
   browser_screenshot_error: number | null;
   kibana_shutting_down_error: number | null;
+  visual_reporting_soft_disabled_error: number | null;
 }
 
 export interface MetricsStats {

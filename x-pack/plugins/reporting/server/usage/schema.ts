@@ -88,6 +88,7 @@ const errorCodesSchemaPng: MakeSchemaFrom<JobTypes['PNGV2']['error_codes']> = {
   browser_could_not_launch_error: { type: 'long' },
   browser_unexpectedly_closed_error: { type: 'long' },
   browser_screenshot_error: { type: 'long' },
+  visual_reporting_soft_disabled_error: { type: 'long' },
 };
 const errorCodesSchemaPdf: MakeSchemaFrom<JobTypes['printable_pdf_v2']['error_codes']> = {
   pdf_worker_out_of_memory_error: { type: 'long' },
@@ -98,6 +99,7 @@ const errorCodesSchemaPdf: MakeSchemaFrom<JobTypes['printable_pdf_v2']['error_co
   browser_could_not_launch_error: { type: 'long' },
   browser_unexpectedly_closed_error: { type: 'long' },
   browser_screenshot_error: { type: 'long' },
+  visual_reporting_soft_disabled_error: { type: 'long' },
 };
 
 const availableTotalSchema: MakeSchemaFrom<AvailableTotal> = {
