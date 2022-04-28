@@ -6,6 +6,7 @@
  */
 
 import React, { FC } from 'react';
+import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { MLJobEditor } from '../../../../jobs/jobs_list/components/ml_job_editor';
 
@@ -27,7 +28,7 @@ export const RawOutput: FC<{
 }> = ({ inferrer }) => {
   const inferenceError = useObservable(inferrer.inferenceError$);
   const runningState = useObservable(inferrer.runningState$);
-  const inferenceResult = useObservable<InferenceResponse>(inferrer.inferenceResult$ as any);
+  const inferenceResult = useObservable(inferrer.inferenceResult$ as Observable<InferenceResponse>);
 
   if (
     (runningState === RUNNING_STATE.FINISHED_WITH_ERRORS && !inferenceError) ||
