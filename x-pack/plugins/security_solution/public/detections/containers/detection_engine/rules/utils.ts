@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { INTERNAL_IMMUTABLE_KEY } from '../../../../../common/constants';
 import { escapeKuery } from '../../../../common/lib/keury';
 import { FilterOptions } from './types';
 
@@ -16,6 +15,8 @@ const SEARCHABLE_RULE_PARAMS = [
   'alert.attributes.params.threat.tactic.name',
   'alert.attributes.params.threat.technique.id',
   'alert.attributes.params.threat.technique.name',
+  'alert.attributes.params.threat.technique.subtechnique.id',
+  'alert.attributes.params.threat.technique.subtechnique.name',
 ];
 
 /**
@@ -33,12 +34,12 @@ export const convertRulesFilterToKQL = ({
 }: FilterOptions): string => {
   const filters: string[] = [];
 
-  if (showCustomRules) {
-    filters.push(`alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:false"`);
-  }
-
-  if (showElasticRules) {
-    filters.push(`alert.attributes.tags: "${INTERNAL_IMMUTABLE_KEY}:true"`);
+  if (showCustomRules && showElasticRules) {
+    // if both showCustomRules && showElasticRules selected we omit filter, as it includes all existing rules
+  } else if (showElasticRules) {
+    filters.push('alert.attributes.params.immutable: true');
+  } else if (showCustomRules) {
+    filters.push('alert.attributes.params.immutable: false');
   }
 
   if (tags.length > 0) {

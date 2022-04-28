@@ -7,14 +7,15 @@
 
 import React from 'react';
 
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import {
   notificationServiceMock,
   docLinksServiceMock,
   applicationServiceMock,
-} from '../../../../../../../../../../src/core/public/mocks';
+  executionContextServiceMock,
+} from '@kbn/core/public/mocks';
 
-import { GlobalFlyout } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
+import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
 import { AppContextProvider } from '../../../../../app_context';
 import { MappingsEditorProvider } from '../../../../mappings_editor';
 import { ComponentTemplatesProvider } from '../../../component_templates_context';
@@ -37,6 +38,7 @@ export const componentTemplatesDependencies = (httpSetup: HttpSetup) => ({
   toasts: notificationServiceMock.createSetupContract().toasts,
   setBreadcrumbs: () => {},
   getUrlForApp: applicationServiceMock.createStartContract().getUrlForApp,
+  executionContext: executionContextServiceMock.createInternalStartContract(),
 });
 
 export const setupEnvironment = initHttpRequests;

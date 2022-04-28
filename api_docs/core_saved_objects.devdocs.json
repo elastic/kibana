@@ -16956,7 +16956,9 @@
         ],
         "signature": [
           "MappingProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }"
+          " & { dynamic?: false | \"strict\" | undefined; properties?: Record<string, ",
+          "MappingProperty",
+          "> | undefined; }"
         ],
         "path": "src/core/server/saved_objects/mappings/types.ts",
         "deprecated": false,

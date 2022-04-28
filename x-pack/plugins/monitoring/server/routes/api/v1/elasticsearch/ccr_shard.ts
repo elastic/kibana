@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 // @ts-ignore
 import { handleError } from '../../../../lib/errors/handle_error';
 // @ts-ignore
-import { prefixIndexPattern } from '../../../../../common/ccs_utils';
+import { prefixIndexPatternWithCcs } from '../../../../../common/ccs_utils';
 // @ts-ignore
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { ElasticsearchResponse } from '../../../../../common/types/es';
@@ -89,7 +89,7 @@ export function ccrShardRoute(server: { route: (p: any) => void; config: () => {
           index: schema.string(),
           shardId: schema.string(),
         }),
-        payload: schema.object({
+        body: schema.object({
           ccs: schema.maybe(schema.string()),
           timeRange: schema.object({
             min: schema.string(),

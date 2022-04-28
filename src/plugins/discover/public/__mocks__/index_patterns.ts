@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataViewsContract } from '../../../data_views/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { indexPatternMock } from './index_pattern';
 
 export const indexPatternsMock = {

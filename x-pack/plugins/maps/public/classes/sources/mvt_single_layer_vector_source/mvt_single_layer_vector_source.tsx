@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import React from 'react';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { AbstractSource, ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { BoundsRequestMeta, GeoJsonWithMeta, IMvtVectorSource } from '../vector_source';
 import {
@@ -28,7 +29,6 @@ import {
 import { MVTField } from '../../fields/mvt_field';
 import { UpdateSourceEditor } from './update_source_editor';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 
 export const sourceTitle = i18n.translate(
   'xpack.maps.source.MVTSingleLayerVectorSource.sourceTitle',

@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { IScopedClusterClient, Logger } from 'kibana/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs/operators';
 import { SqlGetAsyncRequest, SqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
+import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type {
   IAsyncSearchOptions,
@@ -18,7 +19,6 @@ import type {
 import { pollSearch } from '../../../../common';
 import { getDefaultAsyncGetParams, getDefaultAsyncSubmitParams } from './request_utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
-import { getKbnServerError } from '../../../../../kibana_utils/server';
 
 export const sqlSearchStrategyProvider = (
   logger: Logger,

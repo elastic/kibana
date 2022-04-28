@@ -52,7 +52,7 @@ peggy(
     "--allowed-start-rules",
     "expression,argument",
     "-o",
-    "$(@D)/index.js",
+    "$(@D)/built_grammar.js",
     "./%s/grammar/grammar.peggy" % package_name()
   ],
 )

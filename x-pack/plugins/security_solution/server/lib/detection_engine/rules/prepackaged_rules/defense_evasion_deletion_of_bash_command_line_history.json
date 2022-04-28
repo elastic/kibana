@@ -11,6 +11,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Tampering of Bash Command-Line History",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "process where event.type in (\"start\", \"process_started\") and\n (\n  (process.args : (\"rm\", \"echo\") and process.args : (\".bash_history\", \"/root/.bash_history\", \"/home/*/.bash_history\")) or\n  (process.name : \"history\" and process.args : \"-c\") or\n  (process.args : \"export\" and process.args : (\"HISTFILE=/dev/null\", \"HISTFILESIZE=0\")) or\n  (process.args : \"unset\" and process.args : \"HISTFILE\") or\n  (process.args : \"set\" and process.args : \"history\" and process.args : \"+o\")\n )\n",
   "risk_score": 47,
   "rule_id": "7bcbb3ac-e533-41ad-a612-d6c3bf666aba",
@@ -48,5 +49,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 6
+  "version": 7
 }

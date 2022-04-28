@@ -11,9 +11,9 @@ import {
   KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
-} from 'kibana/server';
-import { Logger } from '../../../../../src/core/server';
-import { AlertingRulesConfig } from '../../../alerting/server';
+} from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
+import { AlertingRulesConfig } from '@kbn/alerting-plugin/server';
 
 export function createConfigRoute(
   logger: Logger,

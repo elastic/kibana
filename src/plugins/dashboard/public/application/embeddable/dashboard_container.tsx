@@ -11,9 +11,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import uuid from 'uuid';
-import { CoreStart, IUiSettingsClient, KibanaExecutionContext } from 'src/core/public';
-import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+import { CoreStart, IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
+import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 
+import { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import { UiActionsStart } from '../../services/ui_actions';
 import { RefreshInterval, TimeRange, Query, Filter } from '../../services/data';
 import {
@@ -47,7 +48,6 @@ import {
   combineDashboardFiltersWithControlGroupFilters,
   syncDashboardControlGroup,
 } from '../lib/dashboard_control_group';
-import { ControlGroupContainer } from '../../../../controls/public';
 
 export interface DashboardContainerServices {
   ExitFullScreenButton: React.ComponentType<any>;

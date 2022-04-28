@@ -17,6 +17,7 @@ interface ResultTabsProps {
   agentIds?: string[];
   startDate?: string;
   endDate?: string;
+  isExternal?: true;
 }
 
 const ResultTabsComponent: React.FC<ResultTabsProps> = ({
@@ -24,6 +25,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   agentIds,
   endDate,
   startDate,
+  isExternal,
 }) => {
   const tabs = useMemo(
     () => [
@@ -38,6 +40,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
               agentIds={agentIds}
               startDate={startDate}
               endDate={endDate}
+              isExternal={isExternal}
             />
           </>
         ),
@@ -57,7 +60,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
         ),
       },
     ],
-    [actionId, agentIds, endDate, startDate]
+    [actionId, agentIds, endDate, startDate, isExternal]
   );
 
   return (

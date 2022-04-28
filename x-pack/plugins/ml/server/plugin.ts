@@ -17,12 +17,13 @@ import type {
   IClusterClient,
   SavedObjectsServiceStart,
   UiSettingsServiceStart,
-} from 'kibana/server';
-import type { SecurityPluginSetup } from '../../security/server';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
-import type { PluginStart as DataViewsPluginStart } from '../../../../src/plugins/data_views/server';
+} from '@kbn/core/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { PluginsSetup, PluginsStart, RouteInitialization } from './types';
-import type { SpacesPluginSetup } from '../../spaces/server';
 import { PLUGIN_ID } from '../common/constants/app';
 import type { MlCapabilities } from '../common/types/capabilities';
 
@@ -61,7 +62,6 @@ import { registerMlAlerts } from './lib/alerts/register_ml_alerts';
 import { ML_ALERT_TYPES } from '../common/constants/alerts';
 import { alertingRoutes } from './routes/alerting';
 import { registerCollector } from './usage';
-import { FieldFormatsStart } from '../../../../src/plugins/field_formats/server';
 import { SavedObjectsSyncService } from './saved_objects/sync_task';
 
 export type MlPluginSetup = SharedServices;

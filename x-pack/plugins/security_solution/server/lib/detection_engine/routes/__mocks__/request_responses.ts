@@ -9,21 +9,22 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
-import { SavedObjectsFindResponse } from 'src/core/server';
+import { SavedObjectsFindResponse } from '@kbn/core/server';
 
-import { ActionResult } from '../../../../../../actions/server';
+import { ActionResult } from '@kbn/actions-plugin/server';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
   DETECTION_ENGINE_PRIVILEGES_URL,
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
-  INTERNAL_RULE_ID_KEY,
-  INTERNAL_IMMUTABLE_KEY,
   DETECTION_ENGINE_PREPACKAGED_URL,
   DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULE_EXECUTION_EVENTS_URL,
+  DETECTION_ENGINE_RULES_BULK_UPDATE,
+  DETECTION_ENGINE_RULES_BULK_DELETE,
+  DETECTION_ENGINE_RULES_BULK_CREATE,
 } from '../../../../../common/constants';
 import { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
 import { RuleAlertType, HapiReadableStream } from '../../rules/types';
@@ -35,7 +36,7 @@ import { getFinalizeSignalsMigrationSchemaMock } from '../../../../../common/det
 import { EqlSearchResponse } from '../../../../../common/detection_engine/types';
 import { getSignalsMigrationStatusSchemaMock } from '../../../../../common/detection_engine/schemas/request/get_signals_migration_status_schema.mock';
 import { RuleParams } from '../../schemas/rule_schemas';
-import { SanitizedAlert, ResolvedSanitizedRule } from '../../../../../../alerting/common';
+import { SanitizedRule, ResolvedSanitizedRule } from '@kbn/alerting-plugin/common';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import {
   getPerformBulkActionSchemaMock,
@@ -110,21 +111,21 @@ export const getFindRequest = () =>
 export const getReadBulkRequest = () =>
   requestMock.create({
     method: 'post',
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
+    path: DETECTION_ENGINE_RULES_BULK_CREATE,
     body: [getCreateRulesSchemaMock()],
   });
 
 export const getUpdateBulkRequest = () =>
   requestMock.create({
     method: 'put',
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+    path: DETECTION_ENGINE_RULES_BULK_UPDATE,
     body: [getCreateRulesSchemaMock()],
   });
 
 export const getPatchBulkRequest = () =>
   requestMock.create({
     method: 'patch',
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
+    path: DETECTION_ENGINE_RULES_BULK_UPDATE,
     body: [getCreateRulesSchemaMock()],
   });
 
@@ -145,28 +146,28 @@ export const getBulkActionEditRequest = () =>
 export const getDeleteBulkRequest = () =>
   requestMock.create({
     method: 'delete',
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    path: DETECTION_ENGINE_RULES_BULK_DELETE,
     body: [{ rule_id: 'rule-1' }],
   });
 
 export const getDeleteBulkRequestById = () =>
   requestMock.create({
     method: 'delete',
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    path: DETECTION_ENGINE_RULES_BULK_DELETE,
     body: [{ id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
   });
 
 export const getDeleteAsPostBulkRequestById = () =>
   requestMock.create({
     method: 'post',
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    path: DETECTION_ENGINE_RULES_BULK_DELETE,
     body: [{ id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd' }],
   });
 
 export const getDeleteAsPostBulkRequest = () =>
   requestMock.create({
     method: 'post',
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    path: DETECTION_ENGINE_RULES_BULK_DELETE,
     body: [{ rule_id: 'rule-1' }],
   });
 
@@ -203,18 +204,18 @@ export const getEmptyFindResult = (): FindHit => ({
   data: [],
 });
 
-export const getFindResultWithSingleHit = (isRuleRegistryEnabled: boolean): FindHit => ({
+export const getFindResultWithSingleHit = (): FindHit => ({
   page: 1,
   perPage: 1,
   total: 1,
-  data: [getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())],
+  data: [getRuleMock(getQueryRuleParams())],
 });
 
-export const nonRuleFindResult = (isRuleRegistryEnabled: boolean): FindHit => ({
+export const nonRuleFindResult = (): FindHit => ({
   page: 1,
   perPage: 1,
   total: 1,
-  data: [nonRuleAlert(isRuleRegistryEnabled)],
+  data: [nonRuleAlert()],
 });
 
 export const getFindResultWithMultiHits = ({
@@ -244,10 +245,8 @@ export const getRuleExecutionEventsRequest = () =>
       ruleId: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
     },
     query: {
-      start: 'now-30',
-      end: 'now',
-      query_text: '',
-      status_filters: '',
+      start: '2022-03-31T22:02:01.622Z',
+      end: '2022-03-31T22:02:31.622Z',
     },
   });
 
@@ -378,24 +377,22 @@ export const createActionResult = (): ActionResult => ({
   name: '',
   config: {},
   isPreconfigured: false,
+  isDeprecated: false,
 });
 
-export const nonRuleAlert = (isRuleRegistryEnabled: boolean) => ({
+export const nonRuleAlert = () => ({
   // Defaulting to QueryRuleParams because ts doesn't like empty objects
-  ...getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()),
+  ...getRuleMock(getQueryRuleParams()),
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bc',
   name: 'Non-Rule Alert',
   alertTypeId: 'something',
 });
 
-export const getAlertMock = <T extends RuleParams>(
-  isRuleRegistryEnabled: boolean,
-  params: T
-): SanitizedAlert<T> => ({
+export const getRuleMock = <T extends RuleParams>(params: T): SanitizedRule<T> => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   name: 'Detect Root/Admin Users',
-  tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`, `${INTERNAL_IMMUTABLE_KEY}:false`],
-  alertTypeId: isRuleRegistryEnabled ? ruleTypeMappings[params.type] : 'siem.signals',
+  tags: [],
+  alertTypeId: ruleTypeMappings[params.type],
   consumer: 'siem',
   params,
   createdAt: new Date('2019-12-13T16:40:33.400Z'),
@@ -417,12 +414,9 @@ export const getAlertMock = <T extends RuleParams>(
   },
 });
 
-export const resolveAlertMock = <T extends RuleParams>(
-  isRuleRegistryEnabled: boolean,
-  params: T
-): ResolvedSanitizedRule<T> => ({
+export const resolveRuleMock = <T extends RuleParams>(params: T): ResolvedSanitizedRule<T> => ({
   outcome: 'exactMatch',
-  ...getAlertMock(isRuleRegistryEnabled, params),
+  ...getRuleMock(params),
 });
 
 export const updateActionResult = (): ActionResult => ({
@@ -431,6 +425,7 @@ export const updateActionResult = (): ActionResult => ({
   name: '',
   config: {},
   isPreconfigured: false,
+  isDeprecated: false,
 });
 
 export const getMockPrivilegesResult = () => ({
@@ -696,7 +691,7 @@ export const getSignalsMigrationStatusRequest = () =>
 export const legacyGetNotificationResult = (): LegacyRuleNotificationAlertType => ({
   id: '200dbf2f-b269-4bf9-aa85-11ba32ba73ba',
   name: 'Notification for Rule Test',
-  tags: ['__internal_rule_alert_id:85b64e8a-2e40-4096-86af-5ac172c10825'],
+  tags: [],
   alertTypeId: 'siem.notifications',
   consumer: 'siem',
   params: {

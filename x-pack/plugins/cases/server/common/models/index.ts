@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './commentable_case';
+export * from './case_with_comments';

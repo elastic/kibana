@@ -9,7 +9,7 @@
 import { isNumber } from 'lodash';
 import handlebars from 'handlebars';
 import { isEmptyValue, DISPLAY_EMPTY_VALUE } from '../../../../common/last_value_utils';
-import { inputFormats, outputFormats, isDuration } from '../lib/durations';
+import { inputFormats, outputFormats, isDuration } from './durations';
 import { getFieldFormats } from '../../../services';
 
 export const createTickFormatter = (format = '0,0.[00]', template, getConfig = null) => {
