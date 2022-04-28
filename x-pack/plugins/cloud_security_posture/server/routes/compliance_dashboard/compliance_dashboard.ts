@@ -10,7 +10,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { ComplianceDashboardData } from '../../../common/types';
 import { LATEST_FINDINGS_INDEX_PATTERN, STATS_ROUTE_PATH } from '../../../common/constants';
 import { CspAppContext } from '../../plugin';
-import { getResourcesTypes } from './get_resources_types';
+import { getGroupedFindingsEvaluation } from './get_grouped_findings_evaluation';
 import { ClusterWithoutTrend, getClusters } from './get_clusters';
 import { getStats } from './get_stats';
 import { CspRouter } from '../../types';
@@ -55,12 +55,14 @@ export const defineGetComplianceDashboardRoute = (
           match_all: {},
         };
 
-        const [stats, resourcesTypes, clustersWithoutTrends, trends] = await Promise.all([
-          getStats(esClient, query, pitId),
-          getResourcesTypes(esClient, query, pitId),
-          getClusters(esClient, query, pitId),
-          getTrends(esClient),
-        ]);
+        const [stats, groupedFindingsEvaluation, clustersWithoutTrends, trends] = await Promise.all(
+          [
+            getStats(esClient, query, pitId),
+            getGroupedFindingsEvaluation(esClient, query, pitId),
+            getClusters(esClient, query, pitId),
+            getTrends(esClient),
+          ]
+        );
 
         // Try closing the PIT, if it fails we can safely ignore the error since it closes itself after the keep alive
         //   ends. Not waiting on the promise returned from the `closePointInTime` call to avoid delaying the request
@@ -73,7 +75,7 @@ export const defineGetComplianceDashboardRoute = (
 
         const body: ComplianceDashboardData = {
           stats,
-          resourcesTypes,
+          groupedFindingsEvaluation,
           clusters,
           trend,
         };
