@@ -165,10 +165,10 @@ const getTitleForYAccessor = (
     )
   );
   if (isRight) {
-    return yRightTitle ?? column!.name;
+    return yRightTitle || column!.name;
   }
 
-  return yTitle ?? column!.name;
+  return yTitle || column!.name;
 };
 
 export const getLayerTitles = (

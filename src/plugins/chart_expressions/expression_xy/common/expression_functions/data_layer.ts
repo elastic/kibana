@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { DataLayerFn } from '../types';
 import { DATA_LAYER, LayerTypes } from '../constants';
 import { strings } from '../i18n';
@@ -19,6 +20,10 @@ export const dataLayerFunction: DataLayerFn = {
   inputTypes: ['datatable'],
   args: { ...commonDataLayerArgs },
   fn(table, args) {
+    validateAccessor(args.xAccessor, table.columns);
+    args.accessors.forEach((accessor) => validateAccessor(accessor, table.columns));
+    validateAccessor(args.splitAccessor, table.columns);
+
     return {
       type: DATA_LAYER,
       ...args,

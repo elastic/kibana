@@ -32,6 +32,7 @@ import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { ChartsPluginSetup, ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
+import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
 import type { CommonXYDataLayerConfig, SeriesType, XYChartProps } from '../../common/types';
 import {
@@ -508,6 +509,14 @@ export function XYChart({
       };
   const isSplitChart = splitColumnAccessor || splitRowAccessor;
   const splitTable = isSplitChart ? dataLayers[0].table : undefined;
+  const splitColumnId =
+    splitColumnAccessor && splitTable
+      ? getAccessorByDimension(splitColumnAccessor, splitTable?.columns)
+      : undefined;
+  const splitRowId =
+    splitRowAccessor && splitTable
+      ? getAccessorByDimension(splitRowAccessor, splitTable?.columns)
+      : undefined;
 
   return (
     <Chart ref={chartRef}>
@@ -557,6 +566,7 @@ export function XYChart({
               fieldFormats={fieldFormats}
               formatFactory={formatFactory}
               formattedDatatables={formattedDatatables}
+              splitAccessors={{ splitColumnAccessor: splitColumnId, splitRowAccessor: splitRowId }}
             />
           ),
         }}
