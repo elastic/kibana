@@ -15,13 +15,13 @@ export const sharedI18nTexts = {
     insufficientMemoryError: (helpUrl: string) => (
       <FormattedMessage
         id="xpack.reporting.listing.infoPanel.callout.cloud.insufficientMemoryError"
-        defaultMessage="Kibana needs more memory to generate this report. Check the {link}."
+        defaultMessage="Kibana needs more memory to generate this report. Check {link}."
         values={{
           link: (
             <EuiLink href={helpUrl}>
               {i18n.translate(
                 'xpack.reporting.listing.infoPanel.callout.cloud.insufficientMemoryError.urlLink',
-                { defaultMessage: 'minimum RAM requirements' }
+                { defaultMessage: 'RAM requirements' }
               )}
             </EuiLink>
           ),
