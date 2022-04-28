@@ -436,5 +436,113 @@ describe('utils', () => {
         `Not able to update ServiceNow connector token for connectorId: 123 due to error: updateOrReplace error`
       );
     });
+
+    test('gets access token if connectorId is not provided', async () => {
+      (createJWTAssertion as jest.Mock).mockReturnValueOnce('newassertion');
+      (requestOAuthJWTToken as jest.Mock).mockResolvedValueOnce({
+        tokenType: 'access_token',
+        accessToken: 'brandnewaccesstoken',
+        expiresIn: 1000,
+      });
+
+      const accessToken = await getAccessToken({
+        logger,
+        configurationUtilities,
+        credentials: {
+          config: {
+            apiUrl: 'https://servicenow',
+            usesTableApi: true,
+            isOAuth: true,
+            clientId: 'clientId',
+            jwtKeyId: 'jwtKeyId',
+            userIdentifierValue: 'userIdentifierValue',
+          },
+          secrets: {
+            clientSecret: 'clientSecret',
+            privateKey: 'privateKey',
+            privateKeyPassword: 'privateKeyPassword',
+            username: null,
+            password: null,
+          },
+        },
+        snServiceUrl: 'https://dev23432523.service-now.com',
+        connectorTokenClient,
+      });
+
+      expect(connectorTokenClient.get).not.toHaveBeenCalled();
+      expect(connectorTokenClient.updateOrReplace).not.toHaveBeenCalled();
+      expect(accessToken).toEqual('access_token brandnewaccesstoken');
+      expect(createJWTAssertion as jest.Mock).toHaveBeenCalledWith(
+        logger,
+        'privateKey',
+        'privateKeyPassword',
+        {
+          audience: 'clientId',
+          issuer: 'clientId',
+          subject: 'userIdentifierValue',
+          keyId: 'jwtKeyId',
+        }
+      );
+      expect(requestOAuthJWTToken as jest.Mock).toHaveBeenCalledWith(
+        'https://dev23432523.service-now.com/oauth_token.do',
+        { clientId: 'clientId', clientSecret: 'clientSecret', assertion: 'newassertion' },
+        logger,
+        configurationUtilities
+      );
+    });
+
+    test('gets access token if connectorTokenClient is not provided', async () => {
+      (createJWTAssertion as jest.Mock).mockReturnValueOnce('newassertion');
+      (requestOAuthJWTToken as jest.Mock).mockResolvedValueOnce({
+        tokenType: 'access_token',
+        accessToken: 'brandnewaccesstoken',
+        expiresIn: 1000,
+      });
+
+      const accessToken = await getAccessToken({
+        connectorId: '123',
+        logger,
+        configurationUtilities,
+        credentials: {
+          config: {
+            apiUrl: 'https://servicenow',
+            usesTableApi: true,
+            isOAuth: true,
+            clientId: 'clientId',
+            jwtKeyId: 'jwtKeyId',
+            userIdentifierValue: 'userIdentifierValue',
+          },
+          secrets: {
+            clientSecret: 'clientSecret',
+            privateKey: 'privateKey',
+            privateKeyPassword: 'privateKeyPassword',
+            username: null,
+            password: null,
+          },
+        },
+        snServiceUrl: 'https://dev23432523.service-now.com',
+      });
+
+      expect(connectorTokenClient.get).not.toHaveBeenCalled();
+      expect(connectorTokenClient.updateOrReplace).not.toHaveBeenCalled();
+      expect(accessToken).toEqual('access_token brandnewaccesstoken');
+      expect(createJWTAssertion as jest.Mock).toHaveBeenCalledWith(
+        logger,
+        'privateKey',
+        'privateKeyPassword',
+        {
+          audience: 'clientId',
+          issuer: 'clientId',
+          subject: 'userIdentifierValue',
+          keyId: 'jwtKeyId',
+        }
+      );
+      expect(requestOAuthJWTToken as jest.Mock).toHaveBeenCalledWith(
+        'https://dev23432523.service-now.com/oauth_token.do',
+        { clientId: 'clientId', clientSecret: 'clientSecret', assertion: 'newassertion' },
+        logger,
+        configurationUtilities
+      );
+    });
   });
 });

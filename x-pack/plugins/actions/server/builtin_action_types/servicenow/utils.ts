@@ -20,7 +20,7 @@ import { FIELD_PREFIX } from './config';
 import { addTimeZoneToDate, getErrorMessage } from '../lib/axios_utils';
 import * as i18n from './translations';
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { ConnectorTokenClientContract } from '../../types';
+import { ConnectorToken, ConnectorTokenClientContract } from '../../types';
 import { createJWTAssertion } from '../lib/create_jwt_assertion';
 import { requestOAuthJWTToken } from '../lib/request_oauth_jwt_token';
 
@@ -84,12 +84,12 @@ export const throwIfSubActionIsNotSupported = ({
 };
 
 export interface GetAccessTokenAndAxiosInstanceOpts {
-  connectorId: string;
+  connectorId?: string;
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
   credentials: ExternalServiceCredentials;
   snServiceUrl: string;
-  connectorTokenClient: ConnectorTokenClientContract;
+  connectorTokenClient?: ConnectorTokenClientContract;
 }
 
 export const getAxiosInstance = ({
@@ -151,9 +151,17 @@ export const getAccessToken = async ({
     credentials.secrets as ServiceNowSecretConfigurationType;
 
   let accessToken: string;
+  let connectorToken: ConnectorToken | null = null;
+  let hasErrors: boolean = false;
 
-  // Check if there is a token stored for this connector
-  const { connectorToken, hasErrors } = await connectorTokenClient.get({ connectorId });
+  if (connectorId && connectorTokenClient) {
+    // Check if there is a token stored for this connector
+    const { connectorToken: token, hasErrors: errors } = await connectorTokenClient.get({
+      connectorId,
+    });
+    connectorToken = token;
+    hasErrors = errors;
+  }
 
   if (connectorToken === null || Date.parse(connectorToken.expiresAt) <= Date.now()) {
     // generate a new assertion
@@ -189,18 +197,20 @@ export const getAccessToken = async ({
     accessToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;
 
     // try to update connector_token SO
-    try {
-      await connectorTokenClient.updateOrReplace({
-        connectorId,
-        token: connectorToken,
-        newToken: accessToken,
-        expiresInSec: tokenResult.expiresIn,
-        deleteExisting: hasErrors,
-      });
-    } catch (err) {
-      logger.warn(
-        `Not able to update ServiceNow connector token for connectorId: ${connectorId} due to error: ${err.message}`
-      );
+    if (connectorId && connectorTokenClient) {
+      try {
+        await connectorTokenClient.updateOrReplace({
+          connectorId,
+          token: connectorToken,
+          newToken: accessToken,
+          expiresInSec: tokenResult.expiresIn,
+          deleteExisting: hasErrors,
+        });
+      } catch (err) {
+        logger.warn(
+          `Not able to update ServiceNow connector token for connectorId: ${connectorId} due to error: ${err.message}`
+        );
+      }
     }
   } else {
     // use existing valid token
