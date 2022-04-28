@@ -47,6 +47,7 @@ export const indexFleetAgentForHost = async (
   fleetAgentGenerator: FleetAgentGenerator = defaultFleetAgentGenerator
 ): Promise<IndexedFleetAgentResponse> => {
   const agentDoc = fleetAgentGenerator.generateEsHit({
+    _id: endpointHost.agent.id,
     _source: {
       agent: {
         id: endpointHost.agent.id,
