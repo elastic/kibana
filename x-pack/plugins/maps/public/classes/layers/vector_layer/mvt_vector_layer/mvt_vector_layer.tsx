@@ -69,7 +69,9 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   }
 
   isInitialDataLoadComplete(): boolean {
-    return !!this._descriptor.__areTilesLoaded;
+    return this._descriptor.__areTilesLoaded === undefined || !this._descriptor.__areTilesLoaded
+      ? false
+      : super.isInitialDataLoadComplete();
   }
 
   async getBounds(syncContext: DataRequestContext) {
