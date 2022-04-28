@@ -467,7 +467,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       </Form>
       {showSavedQueryFlyout ? (
         <SavedQueryFlyout
-          isExternal={addToTimeline}
+          isExternal={!!addToTimeline}
           onClose={handleCloseSaveQueryFlout}
           defaultValue={flyoutFormDefaultValue}
         />
