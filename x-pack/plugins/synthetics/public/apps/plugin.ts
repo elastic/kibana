@@ -38,6 +38,7 @@ import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { PLUGIN } from '../../common/constants/plugin';
 import {
   LazySyntheticsPolicyCreateExtension,
@@ -67,6 +68,7 @@ export interface ClientPluginsStart {
   share: SharePluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesUiStart;
+  dataViews: DataViewsPublicPluginStart;
 }
 
 export interface UptimePluginServices extends Partial<CoreStart> {
