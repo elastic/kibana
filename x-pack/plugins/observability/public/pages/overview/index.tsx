@@ -264,11 +264,16 @@ export function OverviewPage({ routeParams }: Props) {
 }
 
 interface PageHeaderProps {
+  showTour?: boolean;
   handleGuidedSetupClick: () => void;
   onTimeRangeRefresh: () => void;
 }
 
-function PageHeader({ handleGuidedSetupClick, onTimeRangeRefresh }: PageHeaderProps) {
+function PageHeader({
+  showTour = false,
+  handleGuidedSetupClick,
+  onTimeRangeRefresh,
+}: PageHeaderProps) {
   const { relativeStart, relativeEnd, refreshInterval, refreshPaused } = useDatePickerContext();
   return (
     <EuiFlexGroup wrap gutterSize="s" justifyContent="flexEnd">
