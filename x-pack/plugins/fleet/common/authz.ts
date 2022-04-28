@@ -32,7 +32,7 @@ export interface FleetAuthz {
 export interface FleetPackageAuthz {
   packageName: string;
   packageActions: string[];
-  manageAgentPolicy: boolean; // or manageAll to be equivalent of legacy fleet.all
+  manageAgentPolicy: boolean;
   managePackagePolicy: boolean;
   executePackageAction: boolean;
   readPackageActionResult: boolean;

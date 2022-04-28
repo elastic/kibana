@@ -387,7 +387,8 @@ async function authHandler(
   request: KibanaRequest,
   response: KibanaResponseFactory
 ) {
-  if (!(await hasRoutePrivileges(request, fleetAuthzConfig, context.fleet.spaceId))) {
+  const fleetContext = await context.fleet;
+  if (!(await hasRoutePrivileges(request, fleetAuthzConfig, fleetContext.spaceId))) {
     return response.forbidden();
   }
 
