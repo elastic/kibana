@@ -10,6 +10,7 @@ import { FC } from 'react';
 
 import {
   SharedUxApplicationService,
+  SharedUxDataService,
   SharedUxDocLinksService,
   SharedUxEditorsService,
   SharedUxHttpService,
@@ -32,6 +33,7 @@ export interface SharedUxServices {
   http: SharedUxHttpService;
   permissions: SharedUxUserPermissionsService;
   platform: SharedUxPlatformService;
+  data: SharedUxDataService;
 }
 
 /**
