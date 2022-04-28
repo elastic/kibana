@@ -44,6 +44,7 @@ import type { Overview } from './overview';
 import type { Rules } from './rules';
 import type { Timelines } from './timelines';
 import type { Management } from './management';
+import { LandingPages } from './landing_pages';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
@@ -106,6 +107,7 @@ export interface SubPlugins {
   overview: Overview;
   timelines: Timelines;
   management: Management;
+  landingPages: LandingPages;
 }
 
 // TODO: find a better way to defined these types
@@ -120,4 +122,5 @@ export interface StartedSubPlugins {
   overview: ReturnType<Overview['start']>;
   timelines: ReturnType<Timelines['start']>;
   management: ReturnType<Management['start']>;
+  landingPages: ReturnType<LandingPages['start']>;
 }

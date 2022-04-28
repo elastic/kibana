@@ -37,4 +37,6 @@ export type UrlStateType =
   | 'network'
   | 'overview'
   | 'rules'
-  | 'timeline';
+  | 'timeline'
+  | 'threat_hunting'
+  | 'dashboards';
