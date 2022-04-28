@@ -8,7 +8,10 @@
 
 import React from 'react';
 import type { LegendAction, XYChartSeriesIdentifier } from '@elastic/charts';
-import { getFormatByAccessor, getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
+import {
+  getFormatByAccessor,
+  getAccessorByDimension,
+} from '@kbn/visualizations-plugin/common/utils';
 import type { FilterEvent } from '../types';
 import type { CommonXYDataLayerConfig } from '../../common';
 import type { FormatFactory } from '../types';
