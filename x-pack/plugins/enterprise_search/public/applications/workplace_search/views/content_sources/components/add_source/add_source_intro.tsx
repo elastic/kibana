@@ -56,7 +56,7 @@ export const AddSourceIntro: React.FC = () => {
       ? 'choice'
       : serviceType === 'external'
       ? 'connector_registration'
-      : 'internal');
+      : '');
   return (
     <Layout pageChrome={[NAV.SOURCES, NAV.ADD_SOURCE, name]}>
       <ConfigurationIntro name={name} advanceStepTo={to} header={header} />

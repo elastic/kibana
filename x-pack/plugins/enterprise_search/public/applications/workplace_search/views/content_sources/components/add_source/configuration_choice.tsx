@@ -55,7 +55,7 @@ export const ConfigurationChoice: React.FC<ConfigurationChoiceProps> = ({
     return resetSourcesState;
   }, []);
 
-  const internalTo = `${getSourcesPath(getAddPath(serviceType), isOrganization)}/internal`;
+  const internalTo = `${getSourcesPath(getAddPath(serviceType), isOrganization)}/`;
   const externalTo = `${getSourcesPath(
     getAddPath('external'), // TODO add serviceType after baseServiceType support
     isOrganization

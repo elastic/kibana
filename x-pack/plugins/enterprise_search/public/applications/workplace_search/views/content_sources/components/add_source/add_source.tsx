@@ -7,22 +7,27 @@
 
 import React, { useEffect } from 'react';
 
+import { useParams } from 'react-router-dom';
+
 import { useActions, useValues } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
 import { flashSuccessToast } from '../../../../../shared/flash_messages';
 import { KibanaLogic } from '../../../../../shared/kibana';
+import { LicensingLogic } from '../../../../../shared/licensing';
 import { AppLogic } from '../../../../app_logic';
 import {
   WorkplaceSearchPageTemplate,
   PersonalDashboardLayout,
 } from '../../../../components/layout';
 import { NAV } from '../../../../constants';
-import { SOURCES_PATH, getSourcesPath, getAddPath } from '../../../../routes';
+import { SOURCES_PATH, getSourcesPath, getAddPath, ADD_SOURCE_PATH } from '../../../../routes';
+
+import { getSourceData } from '../../source_data';
 
 import { AddSourceHeader } from './add_source_header';
-import { AddSourceLogic, AddSourceProps, AddSourceSteps } from './add_source_logic';
+import { AddSourceLogic, AddSourceSteps } from './add_source_logic';
 import { ConfigCompleted } from './config_completed';
 import { ConfigureOauth } from './configure_oauth';
 import { ConnectInstance } from './connect_instance';
@@ -31,20 +36,35 @@ import { SaveConfig } from './save_config';
 
 import './add_source.scss';
 
-export const AddSource: React.FC<AddSourceProps> = (props) => {
-  const { initializeAddSource, setAddSourceStep, saveSourceConfig, resetSourceState } =
-    useActions(AddSourceLogic);
-  const { addSourceCurrentStep, sourceConfigData, dataLoading } = useValues(AddSourceLogic);
-  const { name, categories, needsPermissions, accountContextOnly, privateSourcesEnabled } =
-    sourceConfigData;
-  const { serviceType, configuration, features, objTypes } = props.sourceData;
-  const addPath = getAddPath(serviceType);
+export const AddSource: React.FC = () => {
+  const { serviceType, initialStep } = useParams<{ serviceType: string; initialStep?: string }>();
+  const addSourceLogic = AddSourceLogic({ serviceType, initialStep });
+  const { getSourceConfigData, setAddSourceStep, saveSourceConfig, resetSourceState } =
+    useActions(addSourceLogic);
+  const { addSourceCurrentStep, sourceConfigData, dataLoading } = useValues(addSourceLogic);
   const { isOrganization } = useValues(AppLogic);
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
+  const { navigateToUrl } = useValues(KibanaLogic);
 
   useEffect(() => {
-    initializeAddSource(props);
+    getSourceConfigData();
     return resetSourceState;
-  }, []);
+  }, [serviceType]);
+
+  const sourceData = getSourceData(serviceType);
+
+  if (!sourceData) {
+    return null;
+  }
+
+  const { configuration, features, objTypes } = sourceData;
+
+  const { name, categories, needsPermissions, accountContextOnly, privateSourcesEnabled } =
+    sourceConfigData;
+
+  if (!hasPlatinumLicense && accountContextOnly) {
+    navigateToUrl(getSourcesPath(ADD_SOURCE_PATH, isOrganization));
+  }
 
   const goToConfigurationIntro = () =>
     KibanaLogic.values.navigateToUrl(
@@ -60,11 +80,7 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
     }
   );
 
-  const goToConnectInstance = () => {
-    setAddSourceStep(AddSourceSteps.ConnectInstanceStep);
-    KibanaLogic.values.navigateToUrl(`${getSourcesPath(addPath, isOrganization)}/connect`);
-  };
-
+  const goToConnectInstance = () => setAddSourceStep(AddSourceSteps.ConnectInstanceStep);
   const goToFormSourceCreated = () => {
     KibanaLogic.values.navigateToUrl(`${getSourcesPath(SOURCES_PATH, isOrganization)}`);
     flashSuccessToast(FORM_SOURCE_ADDED_SUCCESS_MESSAGE);

@@ -11,7 +11,6 @@ import { Redirect, Route, Switch, useLocation } from 'react-router-dom';
 import { Location } from 'history';
 import { useActions, useValues } from 'kea';
 
-import { LicensingLogic } from '../../../shared/licensing';
 import { AppLogic } from '../../app_logic';
 import {
   GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE,
@@ -33,7 +32,6 @@ import { AddSourceChoice } from './components/add_source/add_source_choice';
 import { AddSourceIntro } from './components/add_source/add_source_intro';
 import { OrganizationSources } from './organization_sources';
 import { PrivateSources } from './private_sources';
-import { staticSourceData as sources } from './source_data';
 import { SourceRouter } from './source_router';
 import { SourcesLogic } from './sources_logic';
 
@@ -41,7 +39,6 @@ import './sources.scss';
 
 export const SourcesRouter: React.FC = () => {
   const { pathname } = useLocation() as Location;
-  const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { resetSourcesState } = useActions(SourcesLogic);
   const {
     account: { canCreatePrivateSources },
@@ -95,38 +92,6 @@ export const SourcesRouter: React.FC = () => {
       >
         <AddSourceChoice />
       </Route>
-      {sources.map((sourceData, i) => {
-        const { serviceType, externalConnectorAvailable, internalConnectorAvailable } = sourceData;
-        const path = `${getSourcesPath(getAddPath(serviceType), isOrganization)}`;
-        const defaultOption = internalConnectorAvailable
-          ? 'internal'
-          : externalConnectorAvailable
-          ? 'connector_registration'
-          : 'custom';
-        return (
-          <Route key={i} exact path={path}>
-            <Redirect exact from={path} to={`${path}/${defaultOption}`} />
-          </Route>
-        );
-      })}
-      {sources
-        .filter((sourceData) => sourceData.internalConnectorAvailable)
-        .map((sourceData, i) => {
-          const { serviceType, accountContextOnly } = sourceData;
-          return (
-            <Route
-              key={i}
-              exact
-              path={`${getSourcesPath(getAddPath(serviceType), isOrganization)}/internal`}
-            >
-              {!hasPlatinumLicense && accountContextOnly ? (
-                <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
-              ) : (
-                <AddSource sourceData={sourceData} />
-              )}
-            </Route>
-          );
-        })}
       <Route
         exact
         path={`${getSourcesPath(
@@ -151,42 +116,13 @@ export const SourcesRouter: React.FC = () => {
       >
         <AddCustomSource />
       </Route>
-      {sources.map((sourceData, i) => (
-        <Route
-          key={i}
-          exact
-          path={`${getSourcesPath(getAddPath(sourceData.serviceType), isOrganization)}/connect`}
-        >
-          <AddSource connect sourceData={sourceData} />
-        </Route>
-      ))}
-      {sources.map((sourceData, i) => (
-        <Route
-          key={i}
-          exact
-          path={`${getSourcesPath(
-            getAddPath(sourceData.serviceType),
-            isOrganization
-          )}/reauthenticate`}
-        >
-          <AddSource reAuthenticate sourceData={sourceData} />
-        </Route>
-      ))}
-      {sources.map((sourceData, i) => {
-        if (sourceData.configuration.needsConfiguration)
-          return (
-            <Route
-              key={i}
-              exact
-              path={`${getSourcesPath(
-                getAddPath(sourceData.serviceType),
-                isOrganization
-              )}/configure`}
-            >
-              <AddSource configure sourceData={sourceData} />
-            </Route>
-          );
-      })}
+      <Route
+        exact
+        path={`${getSourcesPath(getAddPath(':serviceType'), isOrganization)}/:initialStep?`}
+        data-test-subj="AddSourceRoute"
+      >
+        <AddSource />
+      </Route>
       {canCreatePrivateSources ? (
         <Route exact path={getSourcesPath(ADD_SOURCE_PATH, false)}>
           <AddSourceList />
