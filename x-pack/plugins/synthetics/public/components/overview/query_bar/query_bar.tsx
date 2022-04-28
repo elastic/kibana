@@ -11,7 +11,7 @@ import { EuiFlexItem } from '@elastic/eui';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { SyntaxType, useQueryBar } from './use_query_bar';
 import { KQL_PLACE_HOLDER, SIMPLE_SEARCH_PLACEHOLDER } from './translations';
-import { useGetUrlParams, useIndexPattern } from '../../../hooks';
+import { useGetUrlParams, useUptimeDataView } from '../../../hooks';
 
 const SYNTAX_STORAGE = 'uptime:queryBarSyntax';
 
@@ -35,7 +35,7 @@ export const QueryBar = () => {
 
   const { query, setQuery, submitImmediately } = useQueryBar();
 
-  const indexPattern = useIndexPattern();
+  const dataView = useUptimeDataView();
 
   const [inputVal, setInputVal] = useState<string>(query.query as string);
 
@@ -49,7 +49,7 @@ export const QueryBar = () => {
   return (
     <EuiFlexItem grow={1} style={{ flexBasis: 485 }}>
       <QueryStringInput
-        indexPatterns={indexPattern ? [indexPattern] : []}
+        indexPatterns={dataView ? [dataView] : []}
         nonKqlMode="text"
         iconType="search"
         isClearable={true}
@@ -68,7 +68,7 @@ export const QueryBar = () => {
           submitImmediately();
         }}
         query={{ ...query, query: inputVal }}
-        aria-label={i18n.translate('xpack.uptime.filterBar.ariaLabel', {
+        aria-label={i18n.translate('xpack.synthetics.filterBar.ariaLabel', {
           defaultMessage: 'Input filter criteria for the overview page',
         })}
         data-test-subj="uptimeSearchBarInput"

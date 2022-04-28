@@ -13,7 +13,7 @@ import { store } from '../../../state';
 import { ClientPluginsStart } from '../../../apps/plugin';
 import { kibanaService } from '../../../state/kibana_service';
 import { AlertMonitorStatus } from '../../../components/overview/alerts/alerts_containers/alert_monitor_status';
-import { UptimeIndexPatternContextProvider } from '../../../contexts/uptime_index_pattern_context';
+import { UptimeDataViewContextProvider } from '../../../contexts/uptime_data_view_context';
 
 interface Props {
   core: CoreStart;
@@ -27,9 +27,9 @@ export default function MonitorStatusAlert({ core, plugins, params }: Props) {
   return (
     <ReduxProvider store={store}>
       <KibanaContextProvider services={{ ...core, ...plugins }}>
-        <UptimeIndexPatternContextProvider data={plugins.data}>
-          <AlertMonitorStatus {...params} autocomplete={plugins.data.autocomplete} />
-        </UptimeIndexPatternContextProvider>
+        <UptimeDataViewContextProvider dataViews={plugins.dataViews}>
+          <AlertMonitorStatus {...params} autocomplete={plugins.unifiedSearch.autocomplete} />
+        </UptimeDataViewContextProvider>
       </KibanaContextProvider>
     </ReduxProvider>
   );

@@ -12,7 +12,7 @@ import classNames from 'classnames';
 import { css } from '@emotion/react';
 
 import useRafState from 'react-use/lib/useRafState';
-import { QuerySuggestion } from '@kbn/data-plugin/public';
+import { QuerySuggestion } from '../autocomplete';
 import { SuggestionComponent } from './suggestion_component';
 import {
   SUGGESTIONS_LIST_REQUIRED_BOTTOM_SPACE,
