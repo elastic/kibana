@@ -80,7 +80,10 @@ export function getActionsMigrations(
 
   const migrationActions830 = createEsoMigration(
     encryptedSavedObjects,
-    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> => true,
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
+      doc.attributes.actionTypeId === '.servicenow' ||
+      doc.attributes.actionTypeId === '.servicenow-sir' ||
+      doc.attributes.actionTypeId === '.servicenow-itom',
     pipeMigrations(addIsOAuthToServiceNowConnectors)
   );
 
