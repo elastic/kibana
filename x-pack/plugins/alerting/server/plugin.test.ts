@@ -21,7 +21,7 @@ import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
-import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spaces_service.mock';
+import { spacesServiceMock } from '@kbn/spaces-plugin/server/mocks';
 
 function createStartMock() {
   return {
