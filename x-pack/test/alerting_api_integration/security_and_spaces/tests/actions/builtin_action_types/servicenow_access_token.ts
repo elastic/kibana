@@ -7,7 +7,9 @@
 
 import { generateKeyPairSync } from 'crypto';
 import expect from '@kbn/expect';
+import httpProxy from 'http-proxy';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { getHttpProxyServer } from '../../../../common/lib/get_proxy_server';
 import {
   ExternalServiceSimulator,
   getExternalServiceSimulatorPath,
@@ -19,6 +21,31 @@ export default function serviceNowAccessTokenTest({ getService }: FtrProviderCon
   const kibanaServer = getService('kibanaServer');
 
   describe('get servicenow access token', () => {
+    let servicenowSimulatorURL: string = '';
+    let proxyServer: httpProxy | undefined;
+    let proxyHaveBeenCalled = false;
+    const configService = getService('config');
+
+    // need to wait for kibanaServer to settle ...
+    before(async () => {
+      servicenowSimulatorURL = kibanaServer.resolveUrl(
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
+      );
+      proxyServer = await getHttpProxyServer(
+        kibanaServer.resolveUrl('/'),
+        configService.get('kbnTestServer.serverArgs'),
+        () => {
+          proxyHaveBeenCalled = true;
+        }
+      );
+    });
+
+    after(() => {
+      if (proxyServer) {
+        proxyServer.close();
+      }
+    });
+
     it('should return 200 when requesting an access token with OAuth credentials', async () => {
       const { privateKey } = generateKeyPairSync('rsa', {
         modulusLength: 3072,
@@ -30,9 +57,7 @@ export default function serviceNowAccessTokenTest({ getService }: FtrProviderCon
         .post('/internal/actions/connector/_servicenow_access_token')
         .set('kbn-xsrf', 'foo')
         .send({
-          apiUrl: `${kibanaServer.resolveUrl(
-            getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
-          )}`,
+          apiUrl: `${servicenowSimulatorURL}`,
           config: {
             clientId: 'abc',
             userIdentifierValue: 'elastic',
@@ -45,7 +70,7 @@ export default function serviceNowAccessTokenTest({ getService }: FtrProviderCon
         })
         .expect(200);
 
-      expect(accessToken).to.equal(`Bearer tokentokentoken`);
+      expect(accessToken).to.eql({ accessToken: 'Bearer tokentokentoken' });
     });
   });
 }
