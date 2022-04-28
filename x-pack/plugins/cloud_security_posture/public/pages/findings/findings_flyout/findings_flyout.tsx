@@ -165,7 +165,7 @@ const getGeneralCards = ({ rule }: CspFinding): Card[] => [
 
 const getRemediationCards = ({ result, ...rest }: CspFinding): Card[] => [
   {
-    title: TEXT.RESULT,
+    title: TEXT.RESULT_DETAILS,
     listItems: [
       [TEXT.EXPECTED, ''],
       [TEXT.EVIDENCE, <CodeBlock>{JSON.stringify(result.evidence, null, 2)}</CodeBlock>],
