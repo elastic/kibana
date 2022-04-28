@@ -787,6 +787,7 @@ export class VisualBuilderPageObject extends FtrService {
     });
 
     await this.setMetricsGroupByFiltering(filtering.include, filtering.exclude);
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async setAnotherGroupByTermsField(field: string) {

@@ -907,6 +907,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getCurrentChartDebugState() {
+      await this.waitForVisualization();
       return await elasticChart.getChartDebugData('lnsWorkspace');
     },
 
