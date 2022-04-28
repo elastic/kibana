@@ -102,13 +102,6 @@ export const SourcesRouter: React.FC = () => {
       </Route>
       <Route
         exact
-        path={`${getSourcesPath(getAddPath(':serviceType'), isOrganization)}/:initialStep?`}
-        data-test-subj="AddSourceRoute"
-      >
-        <AddSource />
-      </Route>
-      <Route
-        exact
         path={`${getSourcesPath(getAddPath('external'), isOrganization)}/connector_registration`}
         data-test-subj="ExternalConnectorConfigRoute"
       >
@@ -126,10 +119,24 @@ export const SourcesRouter: React.FC = () => {
       </Route>
       <Route
         exact
+        path={`${getSourcesPath(getAddPath('custom'), isOrganization)}/`}
+        data-test-subj="AddCustomSourceRoute"
+      >
+        <AddCustomSource />
+      </Route>
+      <Route
+        exact
         path={`${getSourcesPath(getAddPath('custom', ':baseServiceType'), isOrganization)}/`}
         data-test-subj="AddCustomSourceRoute"
       >
         <AddCustomSource />
+      </Route>
+      <Route
+        exact
+        path={`${getSourcesPath(getAddPath(':serviceType'), isOrganization)}/:initialStep?`}
+        data-test-subj="AddSourceRoute"
+      >
+        <AddSource />
       </Route>
       {canCreatePrivateSources ? (
         <Route exact path={getSourcesPath(ADD_SOURCE_PATH, false)}>
