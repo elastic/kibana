@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EventFiltersForm } from '.';
+import { EventFiltersForm } from './form';
 import { RenderResult, act } from '@testing-library/react';
 import { fireEvent, waitFor } from '@testing-library/dom';
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';

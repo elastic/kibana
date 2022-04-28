@@ -9,7 +9,7 @@ import { AppContextTestRender, createAppRootMockRenderer } from '../../../../com
 import React from 'react';
 import { fireEvent, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { EventFiltersListPage } from './event_filters_list_page';
+import { EventFiltersList } from './event_filters_list';
 import { eventFiltersListQueryHttpMock } from '../test_utils';
 import { isFailedResourceState, isLoadedResourceState } from '../../../state';
 import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
@@ -34,7 +34,7 @@ describe('When on the Event Filters List Page', () => {
 
   const dataReceived = () =>
     act(async () => {
-      await waitForAction('eventFiltersListPageDataChanged', {
+      await waitForAction('eventFiltersListDataChanged', {
         validate(action) {
           return isLoadedResourceState(action.payload);
         },
@@ -45,7 +45,7 @@ describe('When on the Event Filters List Page', () => {
     const mockedContext = createAppRootMockRenderer();
 
     ({ history, coreStart } = mockedContext);
-    render = () => (renderResult = mockedContext.render(<EventFiltersListPage />));
+    render = () => (renderResult = mockedContext.render(<EventFiltersList />));
     mockedApi = eventFiltersListQueryHttpMock(coreStart.http);
     waitForAction = mockedContext.middlewareSpy.waitForAction;
 
@@ -66,7 +66,7 @@ describe('When on the Event Filters List Page', () => {
       render();
 
       await act(async () => {
-        await waitForAction('eventFiltersListPageDataExistsChanged', {
+        await waitForAction('eventFiltersListDataExistsChanged', {
           validate(action) {
             return isLoadedResourceState(action.payload);
           },
@@ -134,7 +134,7 @@ describe('When on the Event Filters List Page', () => {
       });
       render();
       await act(async () => {
-        await waitForAction('eventFiltersListPageDataChanged', {
+        await waitForAction('eventFiltersListDataChanged', {
           validate(action) {
             return isFailedResourceState(action.payload);
           },
@@ -169,7 +169,7 @@ describe('When on the Event Filters List Page', () => {
       });
       renderResult = render();
       await act(async () => {
-        await waitForAction('eventFiltersListPageDataChanged');
+        await waitForAction('eventFiltersListDataChanged');
       });
     });
 

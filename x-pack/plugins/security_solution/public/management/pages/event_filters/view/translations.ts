@@ -49,3 +49,39 @@ export const ABOUT_EVENT_FILTERS = i18n.translate('xpack.securitySolution.eventF
   defaultMessage:
     'Add an event filter to exclude high volume or unwanted events from being written to Elasticsearch.',
 });
+
+export const NAME_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.eventFilter.form.name.placeholder',
+  {
+    defaultMessage: 'Event filter name',
+  }
+);
+
+export const NAME_LABEL = i18n.translate('xpack.securitySolution.eventFilter.form.name.label', {
+  defaultMessage: 'Name your event filter',
+});
+export const DESCRIPTION_LABEL = i18n.translate(
+  'xpack.securitySolution.eventFilter.form.description.placeholder',
+  {
+    defaultMessage: 'Description',
+  }
+);
+
+export const DESCRIPTION_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.eventFilter.form.description.label',
+  {
+    defaultMessage: 'Describe your event filter',
+  }
+);
+
+export const NAME_ERROR = i18n.translate('xpack.securitySolution.eventFilter.form.name.error', {
+  defaultMessage: "The name can't be empty",
+});
+
+export const OS_LABEL = i18n.translate('xpack.securitySolution.eventFilter.form.os.label', {
+  defaultMessage: 'Select operating system',
+});
+
+export const RULE_NAME = i18n.translate('xpack.securitySolution.eventFilter.form.rule.name', {
+  defaultMessage: 'Endpoint Event Filtering',
+});

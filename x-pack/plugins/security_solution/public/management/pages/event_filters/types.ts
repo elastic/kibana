@@ -60,22 +60,3 @@ export interface EventFiltersListPageData {
   /** The data retrieved from the API */
   content: FoundExceptionListItemSchema;
 }
-
-export interface EventFiltersListPageState {
-  entries: ExceptionListItemSchema[];
-  form: EventFiltersForm;
-  location: EventFiltersPageLocation;
-  /** State for the Event Filters List page */
-  listPage: {
-    active: boolean;
-    forceRefresh: boolean;
-    data: AsyncResourceState<EventFiltersListPageData>;
-    /** tracks if the overall list (not filtered or with invalid page numbers) contains data */
-    dataExist: AsyncResourceState<boolean>;
-    /** state for deletion of items from the list */
-    deletion: {
-      item: ExceptionListItemSchema | undefined;
-      status: AsyncResourceState<ExceptionListItemSchema>;
-    };
-  };
-}
