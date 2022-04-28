@@ -8,6 +8,7 @@
 import { BehaviorSubject } from 'rxjs';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { MLHttpFetchError } from '../../../../../../common/util/errors';
 import { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
 
 const DEFAULT_INPUT_FIELD = 'text_field';
@@ -34,7 +35,7 @@ export abstract class InferenceBase<TInferResponse> {
   protected readonly inputField: string;
   public inputText$ = new BehaviorSubject<string>('');
   public inferenceResult$ = new BehaviorSubject<TInferResponse | null>(null);
-  public inferenceError$ = new BehaviorSubject<any | null>(null);
+  public inferenceError$ = new BehaviorSubject<MLHttpFetchError | null>(null);
   public runningState$ = new BehaviorSubject<RUNNING_STATE>(RUNNING_STATE.STOPPED);
 
   constructor(
@@ -57,7 +58,7 @@ export abstract class InferenceBase<TInferResponse> {
     this.runningState$.next(RUNNING_STATE.FINISHED);
   }
 
-  public setFinishedWithErrors(error: Error) {
+  public setFinishedWithErrors(error: MLHttpFetchError) {
     this.inferenceError$.next(error);
     this.runningState$.next(RUNNING_STATE.FINISHED_WITH_ERRORS);
   }
