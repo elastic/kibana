@@ -18,7 +18,7 @@ import type {
 import type { Refetch } from '../../../../store/t_grid/inputs';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../../store/t_grid';
 import { BulkActions } from '.';
-import { useStatusBulkActionItems } from '../../../../hooks/use_status_bulk_action_items';
+import { useBulkActionItems } from '../../../../hooks/use_status_bulk_action_items';
 
 interface OwnProps {
   id: string;
@@ -116,7 +116,7 @@ export const AlertStatusBulkActionsComponent = React.memo<StatefulAlertStatusBul
       [dispatch, id]
     );
 
-    const statusBulkActionItems = useStatusBulkActionItems({
+    const statusBulkActionItems = useBulkActionItems({
       indexName,
       eventIds: Object.keys(selectedEventIds),
       currentStatus: filterStatus,

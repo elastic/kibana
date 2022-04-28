@@ -66,7 +66,7 @@ export type StatusCustomBulkAction = Omit<CustomBulkAction, 'onClick'> & {
   onClick: (eventIds: string[]) => void;
 };
 
-export interface StatusBulkActionsProps {
+export interface BulkActionsProps {
   eventIds: string[];
   currentStatus?: AlertStatus;
   query?: string;
