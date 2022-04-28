@@ -441,6 +441,13 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       }
     }, [bulkActions, data]);
 
+    const showAlertStatusActions = useMemo(() => {
+      if (typeof bulkActions === 'boolean') {
+        return bulkActions;
+      }
+      return bulkActions.alertStatusActions ?? true;
+    }, [bulkActions]);
+
     const showBulkActions = useMemo(() => {
       if (!hasAlertsCrud) {
         return false;
@@ -452,7 +459,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       if (typeof bulkActions === 'boolean') {
         return bulkActions;
       }
-      return bulkActions.alertStatusActions ?? true;
+      return (bulkActions?.customBulkActions?.length || bulkActions?.alertStatusActions) ?? true;
     }, [hasAlertsCrud, selectedCount, showCheckboxes, bulkActions]);
 
     const alertToolbar = useMemo(
@@ -464,6 +471,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           {showBulkActions && (
             <Suspense fallback={<EuiLoadingSpinner />}>
               <StatefulAlertStatusBulkActions
+                showAlertStatusActions={showAlertStatusActions}
                 data-test-subj="bulk-actions"
                 id={id}
                 totalItems={totalSelectAllAlerts ?? totalItems}
@@ -489,6 +497,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         onAlertStatusActionFailure,
         onAlertStatusActionSuccess,
         refetch,
+        showAlertStatusActions,
         showBulkActions,
         totalItems,
         totalSelectAllAlerts,
@@ -505,6 +514,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               <>
                 <Suspense fallback={<EuiLoadingSpinner />}>
                   <StatefulAlertStatusBulkActions
+                    showAlertStatusActions={showAlertStatusActions}
                     data-test-subj="bulk-actions"
                     id={id}
                     totalItems={totalSelectAllAlerts ?? totalItems}
@@ -550,6 +560,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         isLoading,
         alertCountText,
         showBulkActions,
+        showAlertStatusActions,
         id,
         totalSelectAllAlerts,
         totalItems,

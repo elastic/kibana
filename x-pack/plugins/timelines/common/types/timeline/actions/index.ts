@@ -73,6 +73,7 @@ export interface StatusBulkActionsProps {
   indexName: string;
   setEventsLoading: SetEventsLoading;
   setEventsDeleted: SetEventsDeleted;
+  showAlertStatusActions?: boolean;
   onUpdateSuccess?: OnUpdateAlertStatusSuccess;
   onUpdateFailure?: OnUpdateAlertStatusError;
   customBulkActions?: StatusCustomBulkAction[];

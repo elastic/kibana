@@ -24,6 +24,7 @@ export const useStatusBulkActionItems = ({
   query,
   indexName,
   setEventsLoading,
+  showAlertStatusActions,
   setEventsDeleted,
   onUpdateSuccess,
   onUpdateFailure,
@@ -124,38 +125,40 @@ export const useStatusBulkActionItems = ({
 
   const items = useMemo(() => {
     const actionItems: JSX.Element[] = [];
-    if (currentStatus !== FILTER_OPEN) {
-      actionItems.push(
-        <EuiContextMenuItem
-          key="open"
-          data-test-subj="open-alert-status"
-          onClick={() => onClickUpdate(FILTER_OPEN)}
-        >
-          {i18n.BULK_ACTION_OPEN_SELECTED}
-        </EuiContextMenuItem>
-      );
-    }
-    if (currentStatus !== FILTER_ACKNOWLEDGED) {
-      actionItems.push(
-        <EuiContextMenuItem
-          key="acknowledge"
-          data-test-subj="acknowledged-alert-status"
-          onClick={() => onClickUpdate(FILTER_ACKNOWLEDGED)}
-        >
-          {i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED}
-        </EuiContextMenuItem>
-      );
-    }
-    if (currentStatus !== FILTER_CLOSED) {
-      actionItems.push(
-        <EuiContextMenuItem
-          key="close"
-          data-test-subj="close-alert-status"
-          onClick={() => onClickUpdate(FILTER_CLOSED)}
-        >
-          {i18n.BULK_ACTION_CLOSE_SELECTED}
-        </EuiContextMenuItem>
-      );
+    if (showAlertStatusActions) {
+      if (currentStatus !== FILTER_OPEN) {
+        actionItems.push(
+          <EuiContextMenuItem
+            key="open"
+            data-test-subj="open-alert-status"
+            onClick={() => onClickUpdate(FILTER_OPEN)}
+          >
+            {i18n.BULK_ACTION_OPEN_SELECTED}
+          </EuiContextMenuItem>
+        );
+      }
+      if (currentStatus !== FILTER_ACKNOWLEDGED) {
+        actionItems.push(
+          <EuiContextMenuItem
+            key="acknowledge"
+            data-test-subj="acknowledged-alert-status"
+            onClick={() => onClickUpdate(FILTER_ACKNOWLEDGED)}
+          >
+            {i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED}
+          </EuiContextMenuItem>
+        );
+      }
+      if (currentStatus !== FILTER_CLOSED) {
+        actionItems.push(
+          <EuiContextMenuItem
+            key="close"
+            data-test-subj="close-alert-status"
+            onClick={() => onClickUpdate(FILTER_CLOSED)}
+          >
+            {i18n.BULK_ACTION_CLOSE_SELECTED}
+          </EuiContextMenuItem>
+        );
+      }
     }
 
     const additionalItems = customBulkActions
@@ -177,7 +180,7 @@ export const useStatusBulkActionItems = ({
       : [];
 
     return [...actionItems, ...additionalItems];
-  }, [currentStatus, customBulkActions, eventIds, onClickUpdate, query]);
+  }, [currentStatus, customBulkActions, eventIds, onClickUpdate, query, showAlertStatusActions]);
 
   return items;
 };

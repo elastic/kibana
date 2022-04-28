@@ -13,7 +13,7 @@ import type {
   SetEventsDeleted,
   OnUpdateAlertStatusSuccess,
   OnUpdateAlertStatusError,
-  AlertStatusCustomBulkAction,
+  StatusCustomBulkAction,
 } from '../../../../../common/types';
 import type { Refetch } from '../../../../store/t_grid/inputs';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../../store/t_grid';
@@ -26,9 +26,10 @@ interface OwnProps {
   filterStatus?: AlertStatus;
   query?: string;
   indexName: string;
+  showAlertStatusActions?: boolean;
   onActionSuccess?: OnUpdateAlertStatusSuccess;
   onActionFailure?: OnUpdateAlertStatusError;
-  customBulkActions?: AlertStatusCustomBulkAction[];
+  customBulkActions?: StatusCustomBulkAction[];
   refetch: Refetch;
 }
 
@@ -47,6 +48,7 @@ export const AlertStatusBulkActionsComponent = React.memo<StatefulAlertStatusBul
     isSelectAllChecked,
     clearSelected,
     indexName,
+    showAlertStatusActions,
     onActionSuccess,
     onActionFailure,
     customBulkActions,
@@ -121,6 +123,7 @@ export const AlertStatusBulkActionsComponent = React.memo<StatefulAlertStatusBul
       ...(showClearSelection ? { query } : {}),
       setEventsLoading,
       setEventsDeleted,
+      showAlertStatusActions,
       onUpdateSuccess,
       onUpdateFailure,
       customBulkActions,
