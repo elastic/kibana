@@ -22646,7 +22646,6 @@
     "xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportMessage": "报告“{reportObjectTitle}”包含电子表格应用程序可解释为公式的字符。",
     "xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportTitle": "{reportType} 可能包含公式",
     "xpack.reporting.publicNotifier.downloadReportButtonLabel": "下载报告",
-    "xpack.reporting.publicNotifier.error.calloutTitle": "报告作业失败",
     "xpack.reporting.publicNotifier.error.checkManagement": "前往 {path} 了解详情。",
     "xpack.reporting.publicNotifier.error.couldNotCreateReportTitle": "无法为“{reportObjectTitle}”创建 {reportType} 报告。",
     "xpack.reporting.publicNotifier.error.reportingSectionUrlLinkLabel": "堆栈管理 > Kibana > Reporting",
