@@ -64,19 +64,30 @@ function getTestSuitesFromJson(json) {
     fail(`JSON test config must be an array`);
   }
 
-  /** @type {Array<{ key: string, count: number }>} */
+  /** @type {Array<{ key: string; count: number } | { ftrConfig: string; count: number }>} */
   const testSuites = [];
   for (const item of parsed) {
     if (typeof item !== 'object' || item === null) {
       fail(`testSuites must be objects`);
     }
-    const key = item.key;
-    if (typeof key !== 'string') {
-      fail(`testSuite.key must be a string`);
-    }
+
     const count = item.count;
     if (typeof count !== 'number') {
       fail(`testSuite.count must be a number`);
+    }
+
+    const ftrConfig = item.ftrConfig;
+    if (typeof ftrConfig === 'string') {
+      testSuites.push({
+        ftrConfig,
+        count,
+      });
+      continue;
+    }
+
+    const key = item.key;
+    if (typeof key !== 'string') {
+      fail(`testSuite.key must be a string`);
     }
     testSuites.push({
       key,
@@ -108,7 +119,7 @@ const pipeline = {
   env: {
     IGNORE_SHIP_CI_STATS_ERROR: 'true',
   },
-  steps: steps,
+  steps,
 };
 
 steps.push({
@@ -120,6 +131,32 @@ steps.push({
 });
 
 for (const testSuite of testSuites) {
+  if (testSuite.ftrConfig) {
+    if (testSuite.count > 0) {
+      steps.push({
+        command: `.buildkite/scripts/steps/test/ftr_configs.sh`,
+        env: {
+          configs: testSuite.ftrConfig,
+        },
+        label: 'FTR Configs',
+        parallelism: testSuite.count,
+        agents: {
+          queue: 'n2-4-spot-2',
+        },
+        depends_on: 'build',
+        timeout_in_minutes: 150,
+        key: 'ftr-configs',
+        retry: {
+          automatic: [
+            { exit_status: '-1', limit: 3 },
+            // { exit_status: '*', limit: 1 },
+          ],
+        },
+      });
+    }
+    continue;
+  }
+
   const TEST_SUITE = testSuite.key;
   const RUN_COUNT = testSuite.count;
   const UUID = process.env.UUID;

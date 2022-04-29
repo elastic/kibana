@@ -1,19 +1,6 @@
 {
   "groups": [
     {
-      "key": "oss/cigroup",
-      "name": "OSS CI Group",
-      "ciGroups": 12
-    },
-    {
-      "key": "oss/firefox",
-      "name": "OSS Firefox"
-    },
-    {
-      "key": "oss/accessibility",
-      "name": "OSS Accessibility"
-    },
-    {
       "key": "xpack/cypress/security_solution",
       "name": "Security Solution - Cypress"
     },
@@ -28,19 +15,6 @@
     {
       "key": "xpack/cypress/apm_cypress",
       "name": "APM - Cypress"
-    },
-    {
-      "key": "xpack/cigroup",
-      "name": "Default CI Group",
-      "ciGroups": 30
-    },
-    {
-      "key": "xpack/firefox",
-      "name": "Default Firefox"
-    },
-    {
-      "key": "xpack/accessibility",
-      "name": "Default Accessibility"
     }
   ]
 }
