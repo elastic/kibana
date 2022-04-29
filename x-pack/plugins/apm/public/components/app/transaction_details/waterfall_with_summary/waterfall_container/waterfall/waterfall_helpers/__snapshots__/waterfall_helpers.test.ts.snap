@@ -41,7 +41,6 @@ Object {
           "spanType": undefined,
         },
         "offset": 41627,
-        "outgoingSpanLinks": undefined,
         "parent": Object {
           "color": "",
           "doc": Object {
@@ -79,7 +78,6 @@ Object {
             "spanType": undefined,
           },
           "offset": 40498,
-          "outgoingSpanLinks": undefined,
           "parent": Object {
             "color": "",
             "doc": Object {
@@ -121,7 +119,6 @@ Object {
               "spanType": "",
             },
             "offset": 39298,
-            "outgoingSpanLinks": undefined,
             "parent": Object {
               "color": "",
               "doc": Object {
@@ -159,7 +156,6 @@ Object {
                 "spanType": undefined,
               },
               "offset": 1754,
-              "outgoingSpanLinks": undefined,
               "parent": Object {
                 "color": "",
                 "doc": Object {
@@ -191,22 +187,41 @@ Object {
                   "spanType": "",
                 },
                 "offset": 0,
-                "outgoingSpanLinks": undefined,
                 "parent": undefined,
                 "parentId": undefined,
                 "skew": 0,
+                "spanLinksSize": Object {
+                  "incoming": 0,
+                  "outgoing": 0,
+                },
               },
               "parentId": "myTransactionId1",
               "skew": 0,
+              "spanLinksSize": Object {
+                "incoming": 0,
+                "outgoing": 0,
+              },
             },
             "parentId": "mySpanIdD",
             "skew": 0,
+            "spanLinksSize": Object {
+              "incoming": 0,
+              "outgoing": 0,
+            },
           },
           "parentId": "myTransactionId2",
           "skew": 0,
+          "spanLinksSize": Object {
+            "incoming": 0,
+            "outgoing": 0,
+          },
         },
         "parentId": "mySpanIdA",
         "skew": 0,
+        "spanLinksSize": Object {
+          "incoming": 0,
+          "outgoing": 0,
+        },
       },
       Object {
         "color": "",
@@ -245,7 +260,6 @@ Object {
           "spanType": undefined,
         },
         "offset": 43899,
-        "outgoingSpanLinks": undefined,
         "parent": Object {
           "color": "",
           "doc": Object {
@@ -283,7 +297,6 @@ Object {
             "spanType": undefined,
           },
           "offset": 40498,
-          "outgoingSpanLinks": undefined,
           "parent": Object {
             "color": "",
             "doc": Object {
@@ -325,7 +338,6 @@ Object {
               "spanType": "",
             },
             "offset": 39298,
-            "outgoingSpanLinks": undefined,
             "parent": Object {
               "color": "",
               "doc": Object {
@@ -363,7 +375,6 @@ Object {
                 "spanType": undefined,
               },
               "offset": 1754,
-              "outgoingSpanLinks": undefined,
               "parent": Object {
                 "color": "",
                 "doc": Object {
@@ -395,22 +406,41 @@ Object {
                   "spanType": "",
                 },
                 "offset": 0,
-                "outgoingSpanLinks": undefined,
                 "parent": undefined,
                 "parentId": undefined,
                 "skew": 0,
+                "spanLinksSize": Object {
+                  "incoming": 0,
+                  "outgoing": 0,
+                },
               },
               "parentId": "myTransactionId1",
               "skew": 0,
+              "spanLinksSize": Object {
+                "incoming": 0,
+                "outgoing": 0,
+              },
             },
             "parentId": "mySpanIdD",
             "skew": 0,
+            "spanLinksSize": Object {
+              "incoming": 0,
+              "outgoing": 0,
+            },
           },
           "parentId": "myTransactionId2",
           "skew": 0,
+          "spanLinksSize": Object {
+            "incoming": 0,
+            "outgoing": 0,
+          },
         },
         "parentId": "mySpanIdA",
         "skew": 0,
+        "spanLinksSize": Object {
+          "incoming": 0,
+          "outgoing": 0,
+        },
       },
     ],
     "mySpanIdD": Array [
@@ -455,7 +485,6 @@ Object {
           "spanType": "",
         },
         "offset": 39298,
-        "outgoingSpanLinks": undefined,
         "parent": Object {
           "color": "",
           "doc": Object {
@@ -493,7 +522,6 @@ Object {
             "spanType": undefined,
           },
           "offset": 1754,
-          "outgoingSpanLinks": undefined,
           "parent": Object {
             "color": "",
             "doc": Object {
@@ -525,16 +553,27 @@ Object {
               "spanType": "",
             },
             "offset": 0,
-            "outgoingSpanLinks": undefined,
             "parent": undefined,
             "parentId": undefined,
             "skew": 0,
+            "spanLinksSize": Object {
+              "incoming": 0,
+              "outgoing": 0,
+            },
           },
           "parentId": "myTransactionId1",
           "skew": 0,
+          "spanLinksSize": Object {
+            "incoming": 0,
+            "outgoing": 0,
+          },
         },
         "parentId": "mySpanIdD",
         "skew": 0,
+        "spanLinksSize": Object {
+          "incoming": 0,
+          "outgoing": 0,
+        },
       },
     ],
     "myTransactionId1": Array [
@@ -575,7 +614,6 @@ Object {
           "spanType": undefined,
         },
         "offset": 1754,
-        "outgoingSpanLinks": undefined,
         "parent": Object {
           "color": "",
           "doc": Object {
@@ -607,13 +645,20 @@ Object {
             "spanType": "",
           },
           "offset": 0,
-          "outgoingSpanLinks": undefined,
           "parent": undefined,
           "parentId": undefined,
           "skew": 0,
+          "spanLinksSize": Object {
+            "incoming": 0,
+            "outgoing": 0,
+          },
         },
         "parentId": "myTransactionId1",
         "skew": 0,
+        "spanLinksSize": Object {
+          "incoming": 0,
+          "outgoing": 0,
+        },
       },
     ],
     "myTransactionId2": Array [
@@ -654,7 +699,6 @@ Object {
           "spanType": undefined,
         },
         "offset": 40498,
-        "outgoingSpanLinks": undefined,
         "parent": Object {
           "color": "",
           "doc": Object {
@@ -696,7 +740,6 @@ Object {
             "spanType": "",
           },
           "offset": 39298,
-          "outgoingSpanLinks": undefined,
           "parent": Object {
             "color": "",
             "doc": Object {
@@ -734,7 +777,6 @@ Object {
               "spanType": undefined,
             },
             "offset": 1754,
-            "outgoingSpanLinks": undefined,
             "parent": Object {
               "color": "",
               "doc": Object {
@@ -766,19 +808,34 @@ Object {
                 "spanType": "",
               },
               "offset": 0,
-              "outgoingSpanLinks": undefined,
               "parent": undefined,
               "parentId": undefined,
               "skew": 0,
+              "spanLinksSize": Object {
+                "incoming": 0,
+                "outgoing": 0,
+              },
             },
             "parentId": "myTransactionId1",
             "skew": 0,
+            "spanLinksSize": Object {
+              "incoming": 0,
+              "outgoing": 0,
+            },
           },
           "parentId": "mySpanIdD",
           "skew": 0,
+          "spanLinksSize": Object {
+            "incoming": 0,
+            "outgoing": 0,
+          },
         },
         "parentId": "myTransactionId2",
         "skew": 0,
+        "spanLinksSize": Object {
+          "incoming": 0,
+          "outgoing": 0,
+        },
       },
     ],
     "root": Array [
@@ -813,10 +870,13 @@ Object {
           "spanType": "",
         },
         "offset": 0,
-        "outgoingSpanLinks": undefined,
         "parent": undefined,
         "parentId": undefined,
         "skew": 0,
+        "spanLinksSize": Object {
+          "incoming": 0,
+          "outgoing": 0,
+        },
       },
     ],
   },
@@ -852,10 +912,13 @@ Object {
       "spanType": "",
     },
     "offset": 0,
-    "outgoingSpanLinks": undefined,
     "parent": undefined,
     "parentId": undefined,
     "skew": 0,
+    "spanLinksSize": Object {
+      "incoming": 0,
+      "outgoing": 0,
+    },
   },
   "errorItems": Array [
     Object {
@@ -925,10 +988,13 @@ Object {
           "spanType": "",
         },
         "offset": 0,
-        "outgoingSpanLinks": undefined,
         "parent": undefined,
         "parentId": undefined,
         "skew": 0,
+        "spanLinksSize": Object {
+          "incoming": 0,
+          "outgoing": 0,
+        },
       },
       "parentId": "myTransactionId1",
       "skew": 0,
@@ -967,10 +1033,13 @@ Object {
         "spanType": "",
       },
       "offset": 0,
-      "outgoingSpanLinks": undefined,
       "parent": undefined,
       "parentId": undefined,
       "skew": 0,
+      "spanLinksSize": Object {
+        "incoming": 0,
+        "outgoing": 0,
+      },
     },
     Object {
       "color": "",
@@ -1009,7 +1078,6 @@ Object {
         "spanType": undefined,
       },
       "offset": 1754,
-      "outgoingSpanLinks": undefined,
       "parent": Object {
         "color": "",
         "doc": Object {
@@ -1041,13 +1109,20 @@ Object {
           "spanType": "",
         },
         "offset": 0,
-        "outgoingSpanLinks": undefined,
         "parent": undefined,
         "parentId": undefined,
         "skew": 0,
+        "spanLinksSize": Object {
+          "incoming": 0,
+          "outgoing": 0,
+        },
       },
       "parentId": "myTransactionId1",
       "skew": 0,
+      "spanLinksSize": Object {
+        "incoming": 0,
+        "outgoing": 0,
+      },
     },
     Object {
       "color": "",
@@ -1090,7 +1165,6 @@ Object {
         "spanType": "",
       },
       "offset": 39298,
-      "outgoingSpanLinks": undefined,
       "parent": Object {
         "color": "",
         "doc": Object {
@@ -1128,7 +1202,6 @@ Object {
           "spanType": undefined,
         },
         "offset": 1754,
-        "outgoingSpanLinks": undefined,
         "parent": Object {
           "color": "",
           "doc": Object {
@@ -1160,16 +1233,27 @@ Object {
             "spanType": "",
           },
           "offset": 0,
-          "outgoingSpanLinks": undefined,
           "parent": undefined,
           "parentId": undefined,
           "skew": 0,
+          "spanLinksSize": Object {
+            "incoming": 0,
+            "outgoing": 0,
+          },
         },
         "parentId": "myTransactionId1",
         "skew": 0,
+        "spanLinksSize": Object {
+          "incoming": 0,
+          "outgoing": 0,
+        },
       },
       "parentId": "mySpanIdD",
       "skew": 0,
+      "spanLinksSize": Object {
+        "incoming": 0,
+        "outgoing": 0,
+      },
     },
     Object {
       "color": "",
@@ -1208,7 +1292,6 @@ Object {
         "spanType": undefined,
       },
       "offset": 40498,
-      "outgoingSpanLinks": undefined,
       "parent": Object {
         "color": "",
         "doc": Object {
@@ -1250,7 +1333,6 @@ Object {
           "spanType": "",
         },
         "offset": 39298,
-        "outgoingSpanLinks": undefined,
         "parent": Object {
           "color": "",
           "doc": Object {
@@ -1288,7 +1370,6 @@ Object {
             "spanType": undefined,
           },
           "offset": 1754,
-          "outgoingSpanLinks": undefined,
           "parent": Object {
             "color": "",
             "doc": Object {
@@ -1320,19 +1401,34 @@ Object {
               "spanType": "",
             },
             "offset": 0,
-            "outgoingSpanLinks": undefined,
             "parent": undefined,
             "parentId": undefined,
             "skew": 0,
+            "spanLinksSize": Object {
+              "incoming": 0,
+              "outgoing": 0,
+            },
           },
           "parentId": "myTransactionId1",
           "skew": 0,
+          "spanLinksSize": Object {
+            "incoming": 0,
+            "outgoing": 0,
+          },
         },
         "parentId": "mySpanIdD",
         "skew": 0,
+        "spanLinksSize": Object {
+          "incoming": 0,
+          "outgoing": 0,
+        },
       },
       "parentId": "myTransactionId2",
       "skew": 0,
+      "spanLinksSize": Object {
+        "incoming": 0,
+        "outgoing": 0,
+      },
     },
     Object {
       "color": "",
@@ -1371,7 +1467,6 @@ Object {
         "spanType": undefined,
       },
       "offset": 41627,
-      "outgoingSpanLinks": undefined,
       "parent": Object {
         "color": "",
         "doc": Object {
@@ -1409,7 +1504,6 @@ Object {
           "spanType": undefined,
         },
         "offset": 40498,
-        "outgoingSpanLinks": undefined,
         "parent": Object {
           "color": "",
           "doc": Object {
@@ -1451,7 +1545,6 @@ Object {
             "spanType": "",
           },
           "offset": 39298,
-          "outgoingSpanLinks": undefined,
           "parent": Object {
             "color": "",
             "doc": Object {
@@ -1489,7 +1582,6 @@ Object {
               "spanType": undefined,
             },
             "offset": 1754,
-            "outgoingSpanLinks": undefined,
             "parent": Object {
               "color": "",
               "doc": Object {
@@ -1521,22 +1613,41 @@ Object {
                 "spanType": "",
               },
               "offset": 0,
-              "outgoingSpanLinks": undefined,
               "parent": undefined,
               "parentId": undefined,
               "skew": 0,
+              "spanLinksSize": Object {
+                "incoming": 0,
+                "outgoing": 0,
+              },
             },
             "parentId": "myTransactionId1",
             "skew": 0,
+            "spanLinksSize": Object {
+              "incoming": 0,
+              "outgoing": 0,
+            },
           },
           "parentId": "mySpanIdD",
           "skew": 0,
+          "spanLinksSize": Object {
+            "incoming": 0,
+            "outgoing": 0,
+          },
         },
         "parentId": "myTransactionId2",
         "skew": 0,
+        "spanLinksSize": Object {
+          "incoming": 0,
+          "outgoing": 0,
+        },
       },
       "parentId": "mySpanIdA",
       "skew": 0,
+      "spanLinksSize": Object {
+        "incoming": 0,
+        "outgoing": 0,
+      },
     },
     Object {
       "color": "",
@@ -1575,7 +1686,6 @@ Object {
         "spanType": undefined,
       },
       "offset": 43899,
-      "outgoingSpanLinks": undefined,
       "parent": Object {
         "color": "",
         "doc": Object {
@@ -1613,7 +1723,6 @@ Object {
           "spanType": undefined,
         },
         "offset": 40498,
-        "outgoingSpanLinks": undefined,
         "parent": Object {
           "color": "",
           "doc": Object {
@@ -1655,7 +1764,6 @@ Object {
             "spanType": "",
           },
           "offset": 39298,
-          "outgoingSpanLinks": undefined,
           "parent": Object {
             "color": "",
             "doc": Object {
@@ -1693,7 +1801,6 @@ Object {
               "spanType": undefined,
             },
             "offset": 1754,
-            "outgoingSpanLinks": undefined,
             "parent": Object {
               "color": "",
               "doc": Object {
@@ -1725,22 +1832,41 @@ Object {
                 "spanType": "",
               },
               "offset": 0,
-              "outgoingSpanLinks": undefined,
               "parent": undefined,
               "parentId": undefined,
               "skew": 0,
+              "spanLinksSize": Object {
+                "incoming": 0,
+                "outgoing": 0,
+              },
             },
             "parentId": "myTransactionId1",
             "skew": 0,
+            "spanLinksSize": Object {
+              "incoming": 0,
+              "outgoing": 0,
+            },
           },
           "parentId": "mySpanIdD",
           "skew": 0,
+          "spanLinksSize": Object {
+            "incoming": 0,
+            "outgoing": 0,
+          },
         },
         "parentId": "myTransactionId2",
         "skew": 0,
+        "spanLinksSize": Object {
+          "incoming": 0,
+          "outgoing": 0,
+        },
       },
       "parentId": "mySpanIdA",
       "skew": 0,
+      "spanLinksSize": Object {
+        "incoming": 0,
+        "outgoing": 0,
+      },
     },
   ],
   "legends": Array [
@@ -1830,7 +1956,6 @@ Object {
           "spanType": undefined,
         },
         "offset": 2329,
-        "outgoingSpanLinks": undefined,
         "parent": Object {
           "color": "",
           "doc": Object {
@@ -1868,7 +1993,6 @@ Object {
             "spanType": undefined,
           },
           "offset": 1200,
-          "outgoingSpanLinks": undefined,
           "parent": Object {
             "color": "",
             "doc": Object {
@@ -1910,16 +2034,27 @@ Object {
               "spanType": "",
             },
             "offset": 0,
-            "outgoingSpanLinks": undefined,
             "parent": undefined,
             "parentId": "mySpanIdD",
             "skew": 0,
+            "spanLinksSize": Object {
+              "incoming": 0,
+              "outgoing": 0,
+            },
           },
           "parentId": "myTransactionId2",
           "skew": 0,
+          "spanLinksSize": Object {
+            "incoming": 0,
+            "outgoing": 0,
+          },
         },
         "parentId": "mySpanIdA",
         "skew": 0,
+        "spanLinksSize": Object {
+          "incoming": 0,
+          "outgoing": 0,
+        },
       },
       Object {
         "color": "",
@@ -1958,7 +2093,6 @@ Object {
           "spanType": undefined,
         },
         "offset": 4601,
-        "outgoingSpanLinks": undefined,
         "parent": Object {
           "color": "",
           "doc": Object {
@@ -1996,7 +2130,6 @@ Object {
             "spanType": undefined,
           },
           "offset": 1200,
-          "outgoingSpanLinks": undefined,
           "parent": Object {
             "color": "",
             "doc": Object {
@@ -2038,16 +2171,27 @@ Object {
               "spanType": "",
             },
             "offset": 0,
-            "outgoingSpanLinks": undefined,
             "parent": undefined,
             "parentId": "mySpanIdD",
             "skew": 0,
+            "spanLinksSize": Object {
+              "incoming": 0,
+              "outgoing": 0,
+            },
           },
           "parentId": "myTransactionId2",
           "skew": 0,
+          "spanLinksSize": Object {
+            "incoming": 0,
+            "outgoing": 0,
+          },
         },
         "parentId": "mySpanIdA",
         "skew": 0,
+        "spanLinksSize": Object {
+          "incoming": 0,
+          "outgoing": 0,
+        },
       },
     ],
     "mySpanIdD": Array [
@@ -2092,10 +2236,13 @@ Object {
           "spanType": "",
         },
         "offset": 0,
-        "outgoingSpanLinks": undefined,
         "parent": undefined,
         "parentId": "mySpanIdD",
         "skew": 0,
+        "spanLinksSize": Object {
+          "incoming": 0,
+          "outgoing": 0,
+        },
       },
     ],
     "myTransactionId2": Array [
@@ -2136,7 +2283,6 @@ Object {
           "spanType": undefined,
         },
         "offset": 1200,
-        "outgoingSpanLinks": undefined,
         "parent": Object {
           "color": "",
           "doc": Object {
@@ -2178,13 +2324,20 @@ Object {
             "spanType": "",
           },
           "offset": 0,
-          "outgoingSpanLinks": undefined,
           "parent": undefined,
           "parentId": "mySpanIdD",
           "skew": 0,
+          "spanLinksSize": Object {
+            "incoming": 0,
+            "outgoing": 0,
+          },
         },
         "parentId": "myTransactionId2",
         "skew": 0,
+        "spanLinksSize": Object {
+          "incoming": 0,
+          "outgoing": 0,
+        },
       },
     ],
   },
@@ -2230,10 +2383,13 @@ Object {
       "spanType": "",
     },
     "offset": 0,
-    "outgoingSpanLinks": undefined,
     "parent": undefined,
     "parentId": "mySpanIdD",
     "skew": 0,
+    "spanLinksSize": Object {
+      "incoming": 0,
+      "outgoing": 0,
+    },
   },
   "errorItems": Array [],
   "getErrorCount": [Function],
@@ -2279,10 +2435,13 @@ Object {
         "spanType": "",
       },
       "offset": 0,
-      "outgoingSpanLinks": undefined,
       "parent": undefined,
       "parentId": "mySpanIdD",
       "skew": 0,
+      "spanLinksSize": Object {
+        "incoming": 0,
+        "outgoing": 0,
+      },
     },
     Object {
       "color": "",
@@ -2321,7 +2480,6 @@ Object {
         "spanType": undefined,
       },
       "offset": 1200,
-      "outgoingSpanLinks": undefined,
       "parent": Object {
         "color": "",
         "doc": Object {
@@ -2363,13 +2521,20 @@ Object {
           "spanType": "",
         },
         "offset": 0,
-        "outgoingSpanLinks": undefined,
         "parent": undefined,
         "parentId": "mySpanIdD",
         "skew": 0,
+        "spanLinksSize": Object {
+          "incoming": 0,
+          "outgoing": 0,
+        },
       },
       "parentId": "myTransactionId2",
       "skew": 0,
+      "spanLinksSize": Object {
+        "incoming": 0,
+        "outgoing": 0,
+      },
     },
     Object {
       "color": "",
@@ -2408,7 +2573,6 @@ Object {
         "spanType": undefined,
       },
       "offset": 2329,
-      "outgoingSpanLinks": undefined,
       "parent": Object {
         "color": "",
         "doc": Object {
@@ -2446,7 +2610,6 @@ Object {
           "spanType": undefined,
         },
         "offset": 1200,
-        "outgoingSpanLinks": undefined,
         "parent": Object {
           "color": "",
           "doc": Object {
@@ -2488,16 +2651,27 @@ Object {
             "spanType": "",
           },
           "offset": 0,
-          "outgoingSpanLinks": undefined,
           "parent": undefined,
           "parentId": "mySpanIdD",
           "skew": 0,
+          "spanLinksSize": Object {
+            "incoming": 0,
+            "outgoing": 0,
+          },
         },
         "parentId": "myTransactionId2",
         "skew": 0,
+        "spanLinksSize": Object {
+          "incoming": 0,
+          "outgoing": 0,
+        },
       },
       "parentId": "mySpanIdA",
       "skew": 0,
+      "spanLinksSize": Object {
+        "incoming": 0,
+        "outgoing": 0,
+      },
     },
     Object {
       "color": "",
@@ -2536,7 +2710,6 @@ Object {
         "spanType": undefined,
       },
       "offset": 4601,
-      "outgoingSpanLinks": undefined,
       "parent": Object {
         "color": "",
         "doc": Object {
@@ -2574,7 +2747,6 @@ Object {
           "spanType": undefined,
         },
         "offset": 1200,
-        "outgoingSpanLinks": undefined,
         "parent": Object {
           "color": "",
           "doc": Object {
@@ -2616,16 +2788,27 @@ Object {
             "spanType": "",
           },
           "offset": 0,
-          "outgoingSpanLinks": undefined,
           "parent": undefined,
           "parentId": "mySpanIdD",
           "skew": 0,
+          "spanLinksSize": Object {
+            "incoming": 0,
+            "outgoing": 0,
+          },
         },
         "parentId": "myTransactionId2",
         "skew": 0,
+        "spanLinksSize": Object {
+          "incoming": 0,
+          "outgoing": 0,
+        },
       },
       "parentId": "mySpanIdA",
       "skew": 0,
+      "spanLinksSize": Object {
+        "incoming": 0,
+        "outgoing": 0,
+      },
     },
   ],
   "legends": Array [
@@ -2748,6 +2931,10 @@ Array [
     "offset": 0,
     "parent": undefined,
     "skew": 0,
+    "spanLinksSize": Object {
+      "incoming": 0,
+      "outgoing": 0,
+    },
   },
   Object {
     "color": "",
@@ -2801,9 +2988,17 @@ Array [
       "offset": 0,
       "parent": undefined,
       "skew": 0,
+      "spanLinksSize": Object {
+        "incoming": 0,
+        "outgoing": 0,
+      },
     },
     "parentId": "a",
     "skew": 0,
+    "spanLinksSize": Object {
+      "incoming": 0,
+      "outgoing": 0,
+    },
   },
   Object {
     "color": "",
@@ -2857,9 +3052,17 @@ Array [
       "offset": 0,
       "parent": undefined,
       "skew": 0,
+      "spanLinksSize": Object {
+        "incoming": 0,
+        "outgoing": 0,
+      },
     },
     "parentId": "a",
     "skew": 0,
+    "spanLinksSize": Object {
+      "incoming": 0,
+      "outgoing": 0,
+    },
   },
   Object {
     "color": "",
@@ -2938,12 +3141,24 @@ Array [
         "offset": 0,
         "parent": undefined,
         "skew": 0,
+        "spanLinksSize": Object {
+          "incoming": 0,
+          "outgoing": 0,
+        },
       },
       "parentId": "a",
       "skew": 0,
+      "spanLinksSize": Object {
+        "incoming": 0,
+        "outgoing": 0,
+      },
     },
     "parentId": "b",
     "skew": 0,
+    "spanLinksSize": Object {
+      "incoming": 0,
+      "outgoing": 0,
+    },
   },
   Object {
     "color": "",
@@ -3050,15 +3265,31 @@ Array [
           "offset": 0,
           "parent": undefined,
           "skew": 0,
+          "spanLinksSize": Object {
+            "incoming": 0,
+            "outgoing": 0,
+          },
         },
         "parentId": "a",
         "skew": 0,
+        "spanLinksSize": Object {
+          "incoming": 0,
+          "outgoing": 0,
+        },
       },
       "parentId": "b",
       "skew": 0,
+      "spanLinksSize": Object {
+        "incoming": 0,
+        "outgoing": 0,
+      },
     },
     "parentId": "c",
     "skew": 0,
+    "spanLinksSize": Object {
+      "incoming": 0,
+      "outgoing": 0,
+    },
   },
 ]
 `;

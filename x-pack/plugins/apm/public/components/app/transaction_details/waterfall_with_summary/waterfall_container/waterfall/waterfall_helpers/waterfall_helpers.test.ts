@@ -133,7 +133,7 @@ describe('waterfall_helpers', () => {
         traceDocs: hits,
         errorDocs,
         exceedsMax: false,
-        outgoingSpanLinks: {},
+        outgoingSpanLinksSizeMap: {},
       };
       const waterfall = getWaterfall(apiResp, entryTransactionId);
       const { apiResponse, ...waterfallRest } = waterfall;
@@ -152,7 +152,7 @@ describe('waterfall_helpers', () => {
         traceDocs: hits,
         errorDocs,
         exceedsMax: false,
-        outgoingSpanLinks: {},
+        outgoingSpanLinksSizeMap: {},
       };
       const waterfall = getWaterfall(apiResp, entryTransactionId);
 
@@ -238,7 +238,7 @@ describe('waterfall_helpers', () => {
           traceDocs: traceItems,
           errorDocs: [],
           exceedsMax: false,
-          outgoingSpanLinks: {},
+          outgoingSpanLinksSizeMap: {},
         },
         entryTransactionId
       );
@@ -345,7 +345,7 @@ describe('waterfall_helpers', () => {
           traceDocs: traceItems,
           errorDocs: [],
           exceedsMax: false,
-          outgoingSpanLinks: {},
+          outgoingSpanLinksSizeMap: {},
         },
         entryTransactionId
       );
@@ -408,6 +408,10 @@ describe('waterfall_helpers', () => {
           skew: 0,
           legendValues,
           color: '',
+          spanLinksSize: {
+            incoming: 0,
+            outgoing: 0,
+          },
         },
         {
           docType: 'span',
@@ -430,6 +434,10 @@ describe('waterfall_helpers', () => {
           skew: 0,
           legendValues,
           color: '',
+          spanLinksSize: {
+            incoming: 0,
+            outgoing: 0,
+          },
         },
         {
           docType: 'span',
@@ -452,6 +460,10 @@ describe('waterfall_helpers', () => {
           skew: 0,
           legendValues,
           color: '',
+          spanLinksSize: {
+            incoming: 0,
+            outgoing: 0,
+          },
         },
         {
           docType: 'transaction',
@@ -468,6 +480,10 @@ describe('waterfall_helpers', () => {
           skew: 0,
           legendValues,
           color: '',
+          spanLinksSize: {
+            incoming: 0,
+            outgoing: 0,
+          },
         },
         {
           docType: 'transaction',
@@ -485,6 +501,10 @@ describe('waterfall_helpers', () => {
           skew: 0,
           legendValues,
           color: '',
+          spanLinksSize: {
+            incoming: 0,
+            outgoing: 0,
+          },
         },
       ];
 
