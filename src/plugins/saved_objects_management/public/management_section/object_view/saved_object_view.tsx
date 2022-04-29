@@ -25,6 +25,7 @@ import { Header, Inspect, NotFoundErrors } from './components';
 import { bulkGetObjects } from '../../lib/bulk_get_objects';
 import { SavedObjectWithMetadata } from '../../types';
 import './saved_object_view.scss';
+import { kibanaResponseFactory } from '../../../../../core/server';
 export interface SavedObjectEditionProps {
   id: string;
   savedObjectType: string;
@@ -86,10 +87,7 @@ export class SavedObjectEdition extends Component<
   }
 
   canViewInApp(capabilities: Capabilities, obj?: SavedObjectWithMetadata<any>) {
-    return obj && obj.meta.inAppUrl
-      ? get(capabilities, obj?.meta.inAppUrl?.uiCapabilitiesPath, false) &&
-          Boolean(obj?.meta.inAppUrl?.path)
-      : false;
+    return false;
   }
 
   render() {

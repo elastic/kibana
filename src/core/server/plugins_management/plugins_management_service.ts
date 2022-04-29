@@ -38,6 +38,14 @@ export class PluginsManagementService {
   public setup({ http }: SetupDeps): PluginsManagementServiceSetup {
     const router = http.createRouter('/api/plugins/');
     this.pluginsManager = new PluginsManager();
+    this.pluginsManager
+      .resetConsole()
+      .then(() => {
+        console.log('sucessfully reset console!');
+      })
+      .catch((e) => {
+        console.log(`failed reset console ${e}`);
+      });
 
     registerRoutes({
       router,

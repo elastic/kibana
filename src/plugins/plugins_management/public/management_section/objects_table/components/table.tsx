@@ -12,6 +12,7 @@ import {
   EuiSearchBar,
   EuiBasicTable,
   EuiButton,
+  EuiButtonEmpty,
   EuiIcon,
   EuiLink,
   EuiSpacer,
@@ -57,6 +58,8 @@ export interface TableProps {
   onShowRelationships: (object: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
   initialQuery?: QueryType;
+  onUpgrade: (id: string) => void;
+  upgradeInProgressForId?: string;
 }
 
 interface TableState {
@@ -134,6 +137,8 @@ export class Table extends PureComponent<TableProps, TableState> {
       onActionRefresh,
       onTableChange,
       goInspectObject,
+      onUpgrade,
+      upgradeInProgressForId,
       basePath,
       columnRegistry,
       taggingApi,
@@ -200,7 +205,7 @@ export class Table extends PureComponent<TableProps, TableState> {
         },
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
       {
-        field: 'meta.title',
+        field: 'pluginName',
         name: i18n.translate('savedObjectsManagement.objectsTable.table.columnTitleName', {
           defaultMessage: 'Title',
         }),
@@ -211,16 +216,6 @@ export class Table extends PureComponent<TableProps, TableState> {
         dataType: 'string',
         sortable: false,
         'data-test-subj': 'savedObjectsTableRowTitle',
-        render: (title: string, object: SavedObjectWithMetadata) => {
-          const { path = '' } = object.meta.inAppUrl || {};
-          const canGoInApp = this.props.canGoInApp(object);
-          if (!canGoInApp) {
-            return <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>;
-          }
-          return (
-            <EuiLink href={basePath.prepend(path)}>{title || getDefaultTitle(object)}</EuiLink>
-          );
-        },
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
       {
         name: i18n.translate('savedObjectsManagement.objectsTable.table.columnActionsName', {
@@ -245,16 +240,31 @@ export class Table extends PureComponent<TableProps, TableState> {
           {
             name: i18n.translate(
               'savedObjectsManagement.objectsTable.table.columnActions.updateActionName',
-              { defaultMessage: 'Update' }
+              { defaultMessage: 'Upgrade' }
             ),
-            description: i18n.translate(
-              'savedObjectsManagement.objectsTable.table.columnActions.updateActionDescription',
-              { defaultMessage: 'Update this plugin' }
-            ),
-            type: 'button',
-            icon: 'download',
-            onClick: (object) => goInspectObject(object),
-            'data-test-subj': 'savedObjectsTableAction-inspect',
+            render: (plugin) => {
+              const isLoading = plugin.pluginName === upgradeInProgressForId;
+              return (
+                <EuiToolTip
+                  position="top"
+                  content={i18n.translate(
+                    'savedObjectsManagement.objectsTable.table.columnActions.updateActionDescription',
+                    { defaultMessage: 'Upgrade this plugin' }
+                  )}
+                >
+                  <EuiButtonEmpty
+                    disabled={isLoading || !(plugin as any).upgradeAvailable}
+                    iconType="sortUp"
+                    size="s"
+                    isLoading={isLoading}
+                    onClick={() => onUpgrade(plugin.pluginName)}
+                    data-test-subj="pluginSource"
+                  >
+                    Upgrade
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+              );
+            },
           },
         ],
       } as EuiTableActionsColumnType<SavedObjectWithMetadata>,

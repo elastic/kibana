@@ -86,11 +86,8 @@ const PluginsTablePage = ({
           : `/app/management/kibana/objects/${savedObject.type}/${savedObject.id}`;
         coreStart.application.navigateToUrl(coreStart.http.basePath.prepend(savedObjectEditUrl));
       }}
-      canGoInApp={(savedObject) => {
-        const { inAppUrl } = savedObject.meta;
-        if (!inAppUrl) return false;
-        if (!inAppUrl.uiCapabilitiesPath) return true;
-        return Boolean(get(capabilities, inAppUrl.uiCapabilitiesPath));
+      canGoInApp={() => {
+        return false;
       }}
     />
   );

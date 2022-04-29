@@ -9,6 +9,7 @@
 import { IRouter } from '../../http';
 import { registerGetPluginsRoute } from './get_plugins';
 import { registerGetAllowedPluginSourcesRoute } from './get_allowed_sources';
+import { registerUpgradeRoute } from './upgrade';
 import { PluginsManager } from '../plugins_manager';
 
 interface RegisterRoutesConfigs {
@@ -19,4 +20,5 @@ interface RegisterRoutesConfigs {
 export const registerRoutes = ({ router, pluginsManager }: RegisterRoutesConfigs) => {
   registerGetPluginsRoute(router, { pluginsManager });
   registerGetAllowedPluginSourcesRoute(router, { pluginsManager });
+  registerUpgradeRoute(router, { pluginsManager });
 };

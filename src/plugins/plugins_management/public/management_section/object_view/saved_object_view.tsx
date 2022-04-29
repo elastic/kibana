@@ -23,7 +23,7 @@ import {
 } from '@kbn/core/public';
 import { Header, Inspect, NotFoundErrors } from './components';
 import { bulkGetObjects } from '../../lib/bulk_get_objects';
-import { SavedObjectWithMetadata } from '../../types';
+// import { SavedObjectWithMetadata } from '../../types';
 import './saved_object_view.scss';
 export interface SavedObjectEditionProps {
   id: string;
@@ -40,17 +40,14 @@ export interface SavedObjectEditionProps {
 }
 export interface SavedObjectEditionState {
   type: string;
-  object?: SavedObjectWithMetadata<any>;
+  // object?: SavedObjectWithMetadata<any>;
 }
 
 const unableFindSavedObjectNotificationMessage = i18n.translate(
   'savedObjectsManagement.objectView.unableFindSavedObjectNotificationMessage',
   { defaultMessage: 'Unable to find saved object' }
 );
-export class SavedObjectEdition extends Component<
-  SavedObjectEditionProps,
-  SavedObjectEditionState
-> {
+export class SavedObjectEdition extends Component<SavedObjectEditionProps, SavedObjectEditionState> {
   constructor(props: SavedObjectEditionProps) {
     super(props);
 
@@ -85,11 +82,8 @@ export class SavedObjectEdition extends Component<
       });
   }
 
-  canViewInApp(capabilities: Capabilities, obj?: SavedObjectWithMetadata<any>) {
-    return obj && obj.meta.inAppUrl
-      ? get(capabilities, obj?.meta.inAppUrl?.uiCapabilitiesPath, false) &&
-          Boolean(obj?.meta.inAppUrl?.path)
-      : false;
+  canViewInApp(capabilities: Capabilities, obj?: any) {
+    return false;
   }
 
   render() {
@@ -109,7 +103,7 @@ export class SavedObjectEdition extends Component<
               canDelete={canDelete && !object?.meta.hiddenType}
               canViewInApp={canView}
               onDeleteClick={() => this.delete()}
-              viewUrl={http.basePath.prepend(object?.meta.inAppUrl?.path || '')}
+              viewUrl={http.basePath.prepend('')}
               title={object?.meta.title}
             />
           </EuiFlexItem>

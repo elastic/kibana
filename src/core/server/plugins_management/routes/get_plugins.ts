@@ -17,7 +17,7 @@ interface RouteConfigs {
 export const registerGetPluginsRoute = (router: IRouter, { pluginsManager }: RouteConfigs) => {
   router.get(
     {
-      path: '/',
+      path: '/_list',
       validate: {},
       options: {
         authRequired: false,

@@ -51,6 +51,12 @@ import {
   ExportModal,
 } from './components';
 
+interface PluginDescriptor {
+  pluginName: string;
+  source: 'external' | 'verified';
+  version: string;
+}
+
 interface ExportAllOption {
   id: string;
   label: string;
@@ -78,21 +84,22 @@ export interface SavedObjectsTableState {
   totalCount: number;
   page: number;
   perPage: number;
-  savedObjects: SavedObjectWithMetadata[];
+  plugins: PluginDescriptor[];
   savedObjectCounts: Record<string, number>;
   activeQuery: Query;
-  selectedSavedObjects: SavedObjectWithMetadata[];
+  // selectedSavedObjects: SavedObjectWithMetadata[];
   isShowingImportFlyout: boolean;
   isSearching: boolean;
   filteredItemCount: number;
   isShowingRelationships: boolean;
-  relationshipObject?: SavedObjectWithMetadata;
+  // relationshipObject?: SavedObjectWithMetadata;
   isShowingDeleteConfirmModal: boolean;
   isShowingExportAllOptionsModal: boolean;
   isDeleting: boolean;
   exportAllOptions: ExportAllOption[];
   exportAllSelectedOptions: Record<string, boolean>;
   isIncludeReferencesDeepChecked: boolean;
+  upgradeInProgressForId?: string;
 }
 
 const unableFindSavedObjectsNotificationMessage = i18n.translate(
@@ -114,7 +121,7 @@ export class PluginsTable extends Component<SavedObjectsTableProps, SavedObjects
       totalCount: 0,
       page: 0,
       perPage: props.perPageConfig || 50,
-      savedObjects: [],
+      plugins: [],
       savedObjectCounts: props.allowedSources.reduce((typeToCountMap, type) => {
         typeToCountMap[type.name] = 0;
         return typeToCountMap;
@@ -144,7 +151,7 @@ export class PluginsTable extends Component<SavedObjectsTableProps, SavedObjects
   componentWillUnmount() {
     this._isMounted = false;
     this.debouncedFindObjects.cancel();
-    this.debouncedBulkGetObjects.cancel();
+    // this.debouncedBulkGetObjects.cancel();
   }
 
   fetchCounts = async () => {
@@ -207,10 +214,10 @@ export class PluginsTable extends Component<SavedObjectsTableProps, SavedObjects
   };
 
   fetchSavedObjects = (objects: Array<{ type: string; id: string }>) => {
-    this.setState({ isSearching: true }, () => this.debouncedBulkGetObjects(objects));
+    // this.setState({ isSearching: true }, () => this.debouncedBulkGetObjects(objects));
   };
 
-  debouncedFindObjects = debounce(async () => {
+  findObjects = async () => {
     const { activeQuery: query, page, perPage } = this.state;
     const { notifications, http, allowedSources, taggingApi } = this.props;
     const { queryText, visibleTypes, selectedTags } = parseQuery(query, allowedSources);
@@ -235,22 +242,15 @@ export class PluginsTable extends Component<SavedObjectsTableProps, SavedObjects
     findOptions.hasReference = getTagFindReferences({ selectedTags, taggingApi });
 
     try {
-      const resp = await findObjects(http, findOptions);
+      const resp = await http.get('/api/plugins/_list');
+      console.log('response:', resp);
       if (!this._isMounted) {
         return;
       }
 
-      this.setState(({ activeQuery }) => {
-        // ignore results for old requests
-        if (activeQuery.text !== query.text) {
-          return null;
-        }
-
-        return {
-          savedObjects: resp.savedObjects,
-          filteredItemCount: resp.total,
-          isSearching: false,
-        };
+      this.setState({
+        plugins: resp,
+        isSearching: false,
       });
     } catch (error) {
       if (this._isMounted) {
@@ -263,73 +263,75 @@ export class PluginsTable extends Component<SavedObjectsTableProps, SavedObjects
         text: `${error}`,
       });
     }
-  }, 300);
+  };
 
-  debouncedBulkGetObjects = debounce(async (objects: Array<{ type: string; id: string }>) => {
-    const { notifications, http } = this.props;
-    try {
-      const resp = await bulkGetObjects(http, objects);
-      if (!this._isMounted) {
-        return;
-      }
+  debouncedFindObjects = debounce(this.findObjects, 300);
 
-      const { map: fetchedObjectsMap, errors: objectErrors } = resp.reduce(
-        ({ map, errors }, obj) => {
-          if (obj.error) {
-            errors.push(obj.error.message);
-          } else {
-            map.set(getObjectKey(obj), obj);
-          }
-          return { map, errors };
-        },
-        { map: new Map<string, SavedObjectWithMetadata>(), errors: [] as string[] }
-      );
+  // debouncedBulkGetObjects = debounce(async (objects: Array<{ type: string; id: string }>) => {
+  //   const { notifications, http } = this.props;
+  //   try {
+  //     const resp = await bulkGetObjects(http, objects);
+  //     if (!this._isMounted) {
+  //       return;
+  //     }
 
-      if (objectErrors.length) {
-        notifications.toasts.addDanger({
-          title: unableFindSavedObjectNotificationMessage,
-          text: objectErrors.join(', '),
-        });
-      }
+  //     const { map: fetchedObjectsMap, errors: objectErrors } = resp.reduce(
+  //       ({ map, errors }, obj) => {
+  //         if (obj.error) {
+  //           errors.push(obj.error.message);
+  //         } else {
+  //           map.set(getObjectKey(obj), obj);
+  //         }
+  //         return { map, errors };
+  //       },
+  //       { map: new Map<string, SavedObjectWithMetadata>(), errors: [] as string[] }
+  //     );
 
-      this.setState(({ savedObjects, filteredItemCount }) => {
-        // modify the existing objects array, replacing any existing objects with the newly fetched ones
-        const refreshedSavedObjects = savedObjects.map((obj) => {
-          const fetchedObject = fetchedObjectsMap.get(getObjectKey(obj));
-          return fetchedObject ?? obj;
-        });
-        return {
-          savedObjects: refreshedSavedObjects,
-          filteredItemCount,
-          isSearching: false,
-        };
-      });
-    } catch (error) {
-      if (this._isMounted) {
-        this.setState({
-          isSearching: false,
-        });
-      }
-      notifications.toasts.addDanger({
-        title: unableFindSavedObjectsNotificationMessage,
-        text: `${error}`,
-      });
-    }
-  }, 300);
+  //     if (objectErrors.length) {
+  //       notifications.toasts.addDanger({
+  //         title: unableFindSavedObjectNotificationMessage,
+  //         text: objectErrors.join(', '),
+  //       });
+  //     }
+
+  //     this.setState(({ savedObjects, filteredItemCount }) => {
+  //       // modify the existing objects array, replacing any existing objects with the newly fetched ones
+  //       const refreshedSavedObjects = savedObjects.map((obj) => {
+  //         const fetchedObject = fetchedObjectsMap.get(getObjectKey(obj));
+  //         return fetchedObject ?? obj;
+  //       });
+  //       return {
+  //         savedObjects: refreshedSavedObjects,
+  //         filteredItemCount,
+  //         isSearching: false,
+  //       };
+  //     });
+  //   } catch (error) {
+  //     if (this._isMounted) {
+  //       this.setState({
+  //         isSearching: false,
+  //       });
+  //     }
+  //     notifications.toasts.addDanger({
+  //       title: unableFindSavedObjectsNotificationMessage,
+  //       text: `${error}`,
+  //     });
+  //   }
+  // }, 300);
 
   refreshAllPlugins = async () => {
     await Promise.all([this.fetchAllSavedObjects(), this.fetchCounts()]);
   };
 
   refreshObjects = async (objects: Array<{ type: string; id: string }>) => {
-    const currentObjectsSet = this.state.savedObjects.reduce(
-      (acc, obj) => acc.add(getObjectKey(obj)),
-      new Set<string>()
-    );
-    const objectsToFetch = objects.filter((obj) => currentObjectsSet.has(getObjectKey(obj)));
-    if (objectsToFetch.length) {
-      this.fetchSavedObjects(objectsToFetch);
-    }
+    // const currentObjectsSet = this.state.savedObjects.reduce(
+    //   (acc, obj) => acc.add(getObjectKey(obj)),
+    //   new Set<string>()
+    // );
+    // const objectsToFetch = objects.filter((obj) => currentObjectsSet.has(getObjectKey(obj)));
+    // if (objectsToFetch.length) {
+    //   this.fetchSavedObjects(objectsToFetch);
+    // }
   };
 
   onSelectionChanged = (selection: SavedObjectWithMetadata[]) => {
@@ -649,12 +651,13 @@ export class PluginsTable extends Component<SavedObjectsTableProps, SavedObjects
       selectedSavedObjects,
       page,
       perPage,
-      savedObjects,
+      plugins,
       filteredItemCount,
       isSearching,
       savedObjectCounts,
+      upgradeInProgressForId,
     } = this.state;
-    const { http, taggingApi, allowedSources, applications } = this.props;
+    const { http, taggingApi, allowedSources, applications, notifications } = this.props;
 
     const selectionConfig = {
       onSelectionChange: this.onSelectionChanged,
@@ -676,6 +679,26 @@ export class PluginsTable extends Component<SavedObjectsTableProps, SavedObjects
         <EuiSpacer size="l" />
         <RedirectAppLinks application={applications}>
           <Table
+            onUpgrade={(id) => {
+              this.setState({ upgradeInProgressForId: id });
+              http.post('/api/plugins/_upgrade').finally(() => {
+                this.findObjects()
+                  .then(() =>
+                    notifications.toasts.addSuccess({
+                      title: 'Succesfully upgraded plugin',
+                    })
+                  )
+                  .catch(() =>
+                    notifications.toasts.addDanger({
+                      title: 'Could not upgrade plugin',
+                    })
+                  )
+                  .finally(() => {
+                    this.setState({ upgradeInProgressForId: undefined });
+                  });
+              });
+            }}
+            upgradeInProgressForId={upgradeInProgressForId}
             basePath={http.basePath}
             taggingApi={taggingApi}
             initialQuery={this.props.initialQuery}
@@ -695,7 +718,7 @@ export class PluginsTable extends Component<SavedObjectsTableProps, SavedObjects
             goInspectObject={this.props.goInspectObject}
             pageIndex={page}
             pageSize={perPage}
-            items={savedObjects}
+            items={plugins}
             totalItemCount={filteredItemCount}
             isSearching={isSearching}
             onShowRelationships={this.onShowRelationships}

@@ -266,7 +266,7 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
         dataType: 'string',
         sortable: false,
         render: (title: string, object: SavedObjectWithMetadata) => {
-          const { path = '' } = object.meta.inAppUrl || {};
+          const { path = '' } = object.meta?.inAppUrl || {};
           const canGoInApp = this.props.canGoInApp(object);
           if (!canGoInApp) {
             return (

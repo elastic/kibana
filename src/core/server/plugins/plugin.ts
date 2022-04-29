@@ -198,7 +198,8 @@ export class PluginWrapper<
       // isolatePath = join(this.path)
     }
 
-    const isolateInstance = this.manifest.upgradable
+    // const isolateInstance = this.manifest.upgradable
+    const isolateInstance = false
       ? requireIsolate<
           | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
           | PrebootPlugin<TSetup, TPluginsSetup>

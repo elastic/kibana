@@ -24,7 +24,6 @@ export const registerGetAllowedPluginSourcesRoute = (
       validate: false,
     },
     async (ctx, req, res) => {
-      console.log('oK i am called');
       const allowedPluginSources: AllowedPluginSource[] =
         await pluginsManager.getAllowedPluginSources();
 

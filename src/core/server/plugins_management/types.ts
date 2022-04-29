@@ -12,6 +12,7 @@ export interface PluginDescriptor {
   version: string;
   // new version is available (8.3.1)
   upgradeTarget?: string;
+  upgradeAvailable?: boolean;
 }
 
 export interface AllowedPluginSource {

@@ -1,0 +1,38 @@
+.conHistory {
+  @include euiBottomShadow;
+  padding: $euiSizeM;
+}
+
+.conHistory__body {
+  display: flex;
+  height: $euiSizeXL * 10;
+  > ul {
+    margin-bottom: 0;
+  }
+}
+
+.conHistory__body__spacer {
+  flex: 0 0 1%;
+}
+
+.conHistory__reqs,
+.conHistory__viewer {
+  flex: 0 0 49.5%;
+}
+
+.conHistory__reqs {
+  overflow: auto;
+}
+
+.conHistory__req {
+  display: flex;
+  justify-content: space-between;
+
+  &-selected {
+    background-color: $euiColorLightestShade;
+  }
+}
+
+.conHistory__reqIcon {
+  color: $euiColorMediumShade;
+}
