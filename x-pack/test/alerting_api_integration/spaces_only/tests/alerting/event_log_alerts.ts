@@ -102,7 +102,7 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
 
             currentAlertSpan.alertId = instanceEvents[i]?.kibana?.alerting?.instance_id;
             currentAlertSpan.start = instanceEvents[i]?.event?.start;
-            currentAlertSpan.durationToDate = instanceEvents[i]?.event?.duration;
+            currentAlertSpan.durationToDate = `${instanceEvents[i]?.event?.duration}`;
             break;
 
           case 'active-instance':
@@ -116,7 +116,7 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
                   BigInt(currentAlertSpan.durationToDate!)
               ).to.be(true);
             }
-            currentAlertSpan.durationToDate = instanceEvents[i]?.event?.duration;
+            currentAlertSpan.durationToDate = `${instanceEvents[i]?.event?.duration}`;
             break;
 
           case 'recovered-instance':

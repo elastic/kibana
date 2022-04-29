@@ -403,10 +403,12 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_searches).to.be(
                   numSearches
                 );
-                const esSearchDuration =
-                  event?.kibana?.alert?.rule?.execution?.metrics?.es_search_duration_ms;
-                const totalSearchDuration =
-                  event?.kibana?.alert?.rule?.execution?.metrics?.total_search_duration_ms;
+                const esSearchDuration = Number(
+                  event?.kibana?.alert?.rule?.execution?.metrics?.es_search_duration_ms
+                );
+                const totalSearchDuration = Number(
+                  event?.kibana?.alert?.rule?.execution?.metrics?.total_search_duration_ms
+                );
 
                 expect(esSearchDuration).not.to.be(undefined);
                 expect(totalSearchDuration).not.to.be(undefined);
