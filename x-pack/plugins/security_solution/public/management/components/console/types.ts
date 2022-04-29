@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ReactNode, ComponentType } from 'react';
+import type { ComponentType, ComponentProps } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import { Immutable } from '../../../../common/endpoint/types';
 import type { ParsedArgData, ParsedCommandInput } from './service/parsed_command_input';
@@ -17,6 +17,11 @@ export interface CommandDefinition {
    * The Component that will be used to render the Command
    */
   Component: CommandExecutionComponent;
+  /**
+   * If defined, this command's use of `--help` will be displayed using this component instead of
+   * the console's built in output.
+   */
+  HelpComponent?: CommandExecutionComponent;
   /**
    * A store for any data needed when the command is executed.
    * The entire `CommandDefinition` is passed along to the component
@@ -83,6 +88,8 @@ export type CommandExecutionComponent = ComponentType<{
   setStatus: (status: 'pending' | 'success' | 'error') => void;
 }>;
 
+export type CommandExecutionComponentProps = ComponentProps<CommandExecutionComponent>;
+
 export interface CommandServiceInterface {
   /**
    * Returns the list of commands that will be available in the console for execution
@@ -91,15 +98,9 @@ export interface CommandServiceInterface {
 
   /**
    * If defined, then the `help` builtin command will display this output instead of the default one
-   * which is generated out of the Command list
+   * which is generated out of the Command list.
    */
-  getHelp?: () => Promise<{ result: ReactNode }>;
-
-  /**
-   * If defined, then the output of this function will be used to display individual
-   * command help (`--help`)
-   */
-  getCommandUsage?: (command: CommandDefinition) => Promise<{ result: ReactNode }>;
+  HelpComponent?: CommandExecutionComponent;
 }
 
 export interface ConsoleProps extends CommonProps {

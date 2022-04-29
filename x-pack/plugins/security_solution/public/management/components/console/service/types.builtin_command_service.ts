@@ -7,20 +7,8 @@
 
 import { ReactNode } from 'react';
 import { CommandDefinition, CommandServiceInterface } from '../types';
-import { ParsedCommandInput } from './parsed_command_input';
-import { HistoryItemComponent } from '../components/history_item';
 
 export interface BuiltinCommandServiceInterface extends CommandServiceInterface {
-  executeBuiltinCommand(
-    parsedInput: ParsedCommandInput,
-    contextConsoleService: CommandServiceInterface
-  ): { result: ReturnType<HistoryItemComponent> | null; clearBuffer?: boolean };
-
-  getHelpContent(
-    parsedInput: ParsedCommandInput,
-    commandService: CommandServiceInterface
-  ): Promise<{ result: ReactNode }>;
-
   isBuiltin(name: string): boolean;
 
   getCommandUsage(command: CommandDefinition): Promise<{ result: ReactNode }>;

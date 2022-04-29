@@ -8,6 +8,6 @@
 import { useConsoleStore } from '../../components/console_state/console_state';
 import { CommandServiceInterface } from '../../types';
 
-export const useCommandService = (): CommandServiceInterface => {
+export const useBuiltinCommandService = (): CommandServiceInterface => {
   return useConsoleStore().state.builtinCommandService;
 };

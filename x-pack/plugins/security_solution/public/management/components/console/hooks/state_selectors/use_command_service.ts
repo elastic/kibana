@@ -8,6 +8,9 @@
 import { useConsoleStore } from '../../components/console_state/console_state';
 import { CommandServiceInterface } from '../../types';
 
+/**
+ * Returns the Command service that the console was provided on input
+ */
 export const useCommandService = (): CommandServiceInterface => {
   return useConsoleStore().state.commandService;
 };
