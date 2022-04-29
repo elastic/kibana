@@ -13,7 +13,7 @@ export default async ({ readConfigFile }: FtrConfigProviderContext) => {
   const baseConfig = await readConfigFile(require.resolve('../../functional/config.base.js'));
 
   return {
-    ...baseConfig,
+    ...baseConfig.getAll(),
 
     testFiles: [require.resolve('./test')],
 
