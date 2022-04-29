@@ -45,4 +45,5 @@ export const pipelineSchema = schema.object({
 export const inferTrainedModelQuery = schema.object({ timeout: schema.maybe(schema.string()) });
 export const inferTrainedModelBody = schema.object({
   docs: schema.any(),
+  inference_config: schema.maybe(schema.any()),
 });
