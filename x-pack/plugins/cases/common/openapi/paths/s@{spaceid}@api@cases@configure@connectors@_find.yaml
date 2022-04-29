@@ -1,5 +1,7 @@
 get:
-  description: Retrieves information about connectors. In particular, only the connectors that are supported for use in cases are returned.
+  description: >
+    Retrieves information about connectors. In particular, only the connectors that are supported for use in cases are returned.
+    You must have read privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
   parameters:
     - $ref: '../components/parameters/space_id.yaml'
   responses:

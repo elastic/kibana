@@ -1,5 +1,7 @@
 delete:
-  description: Deletes a comment from a case.
+  description: >
+    Deletes a comment from a case.
+    You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're updating.
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
     - $ref: ../components/parameters/case_id.yaml
@@ -11,7 +13,9 @@ delete:
     - url: https://localhost:5601
 
 get:
-  description: Retrieves a comment from a case.
+  description: >
+    Retrieves a comment from a case.
+    You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.
   parameters:
     - $ref: '../components/parameters/case_id.yaml'
     - $ref: '../components/parameters/comment_id.yaml'

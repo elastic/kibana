@@ -15,7 +15,11 @@ servers:
 paths:
   /api/cases:
     post:
-      description: Creates a case.
+      description: >
+        Creates a case. You must have all privileges for the **Cases** feature
+        in the **Management**, **Observability**, or **Security** section of the
+        Kibana feature privileges, depending on the owner of the case you're
+        creating.
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
       requestBody:
@@ -164,14 +168,19 @@ paths:
       servers:
         - url: https://localhost:5601
     delete:
-      description: Deletes one or more cases.
+      description: >
+        Deletes one or more cases. You must have all privileges for the
+        **Cases** feature in the **Management**, **Observability**, or
+        **Security** section of the Kibana feature privileges, depending on the
+        owner of the cases you're deleting.
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - name: ids
           description: >-
-            The cases that you want to removed. All non-ASCII characters must be
-            URL encoded.
+            The cases that you want to removed. To retrieve case IDs, use the
+            find cases API. All non-ASCII characters must be URL encoded.
           in: query
+          required: true
           schema:
             type: string
           example: '%5B%22d4e7abb0-b462-11ec-9a8d-698504725a43%22%5D'
@@ -337,7 +346,11 @@ paths:
       - url: https://localhost:5601
   /api/cases/_find:
     get:
-      description: Retrieves a paginated subset of cases.
+      description: >
+        Retrieves a paginated subset of cases. You must have read privileges for
+        the **Cases** feature in the **Management**, **Observability**, or
+        **Security** section of the Kibana feature privileges, depending on the
+        owner of the cases you're seeking.
       parameters:
         - $ref: '#/components/parameters/default_search_operator'
         - $ref: '#/components/parameters/fields'
@@ -586,9 +599,11 @@ paths:
       - url: https://localhost:5601
   /api/cases/configure/connectors/_find:
     get:
-      description: >-
+      description: >
         Retrieves information about connectors. In particular, only the
-        connectors that are supported for use in cases are returned.
+        connectors that are supported for use in cases are returned. You must
+        have read privileges for the **Actions and Connectors** feature in the
+        **Management** section of the Kibana feature privileges.
       responses:
         '200':
           description: Indicates a successful call.
@@ -624,21 +639,14 @@ paths:
       - url: https://localhost:5601
   /api/cases/status:
     get:
-      description: Returns the number of cases that are open, closed, and in progress.
+      description: >
+        Returns the number of cases that are open, closed, and in progress. You
+        must have read privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases you're seeking.
       deprecated: true
       parameters:
-        - in: query
-          name: owner
-          description: >-
-            A filter to limit the retrieved case statistics to a specific set of
-            applications. If this parameter is omitted, the response contains
-            all cases that the user has access to read.
-          schema:
-            oneOf:
-              - $ref: '#/components/schemas/owners'
-              - type: array
-                items:
-                  $ref: '#/components/schemas/owners'
+        - $ref: '#/components/parameters/owner'
       responses:
         '200':
           description: Indicates a successful call.
@@ -685,7 +693,11 @@ paths:
       - url: https://localhost:5601
   /api/cases/{caseId}:
     get:
-      description: Retrieves a specified case.
+      description: >
+        Retrieves a specified case. You must have read privileges for the
+        **Cases** feature in the **Management**, **Observability**, or
+        **Security** section of the Kibana feature privileges, depending on the
+        owner of the cases you're seeking.
       parameters:
         - $ref: '#/components/parameters/case_id'
         - in: query
@@ -731,7 +743,11 @@ paths:
       - url: https://localhost:5601
   /api/cases/{caseId}/comments:
     post:
-      description: Adds a comment to a case.
+      description: >
+        Adds a comment to a case. You must have all privileges for the **Cases**
+        feature in the **Management**, **Observability**, or **Security**
+        section of the Kibana feature privileges, depending on the owner of the
+        case you're updating.
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/case_id'
@@ -904,7 +920,11 @@ paths:
       servers:
         - url: https://localhost:5601
     delete:
-      description: Deletes all comments from a case.
+      description: >
+        Deletes all comments from a case. You must have all privileges for the
+        **Cases** feature in the **Management**, **Observability**, or
+        **Security** section of the Kibana feature privileges, depending on the
+        owner of the cases you're updating.
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/case_id'
@@ -914,7 +934,11 @@ paths:
       servers:
         - url: https://localhost:5601
     get:
-      description: Retrieves all the comments from a case.
+      description: >
+        Retrieves all the comments from a case. You must have read privileges
+        for the **Cases** feature in the **Management**, **Observability**, or
+        **Security** section of the Kibana feature privileges, depending on the
+        owner of the cases with the comments you're seeking.
       deprecated: true
       parameters:
         - $ref: '#/components/parameters/case_id'
@@ -932,7 +956,11 @@ paths:
       - url: https://localhost:5601
   /api/cases/{caseId}/comments/{commentId}:
     delete:
-      description: Deletes a comment from a case.
+      description: >
+        Deletes a comment from a case. You must have all privileges for the
+        **Cases** feature in the **Management**, **Observability**, or
+        **Security** section of the Kibana feature privileges, depending on the
+        owner of the cases you're updating.
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/case_id'
@@ -943,7 +971,11 @@ paths:
       servers:
         - url: https://localhost:5601
     get:
-      description: Retrieves a comment from a case.
+      description: >
+        Retrieves a comment from a case. You must have read privileges for the
+        **Cases** feature in the **Management**, **Observability**, or
+        **Security** section of the Kibana feature privileges, depending on the
+        owner of the cases with the comments you're seeking.
       parameters:
         - $ref: '#/components/parameters/case_id'
         - $ref: '#/components/parameters/comment_id'
@@ -981,7 +1013,11 @@ paths:
       - url: https://localhost:5601
   /api/cases/{caseId}/user_actions:
     get:
-      description: Returns all user activity for the specified case.
+      description: >
+        Returns all user activity for the specified case. You must have read
+        privileges for the **Cases** feature in the **Management**,
+        **Observability**, or **Security** section of the Kibana feature
+        privileges, depending on the owner of the cases you're seeking.
       deprecated: true
       parameters:
         - $ref: '#/components/parameters/case_id'
@@ -999,7 +1035,11 @@ paths:
       - url: https://localhost:5601
   /s/{spaceId}/api/cases:
     post:
-      description: Creates a case.
+      description: >
+        Creates a case. You must have all privileges for the **Cases** feature
+        in the **Management**, **Observability**, or **Security** section of the
+        Kibana feature privileges, depending on the owner of the case you're
+        creating.
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/space_id'
@@ -1149,7 +1189,11 @@ paths:
       servers:
         - url: https://localhost:5601
     delete:
-      description: Deletes one or more cases.
+      description: >
+        Deletes one or more cases. You must have all privileges for the
+        **Cases** feature in the **Management**, **Observability**, or
+        **Security** section of the Kibana feature privileges, depending on the
+        owner of the cases you're deleting.
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/space_id'
@@ -1158,6 +1202,7 @@ paths:
             The cases that you want to removed. All non-ASCII characters must be
             URL encoded.
           in: query
+          required: true
           schema:
             type: string
           example: '%5B%22d4e7abb0-b462-11ec-9a8d-698504725a43%22%5D'
@@ -1324,7 +1369,11 @@ paths:
       - url: https://localhost:5601
   /s/{spaceId}/api/cases/_find:
     get:
-      description: Retrieves a paginated subset of cases.
+      description: >
+        Retrieves a paginated subset of cases. You must have read privileges for
+        the **Cases** feature in the **Management**, **Observability**, or
+        **Security** section of the Kibana feature privileges, depending on the
+        owner of the cases you're seeking.
       parameters:
         - $ref: '#/components/parameters/space_id'
         - $ref: '#/components/parameters/default_search_operator'
@@ -1578,9 +1627,11 @@ paths:
       - url: https://localhost:5601
   /s/{spaceId}/api/cases/configure/connectors/_find:
     get:
-      description: >-
+      description: >
         Retrieves information about connectors. In particular, only the
-        connectors that are supported for use in cases are returned.
+        connectors that are supported for use in cases are returned. You must
+        have read privileges for the **Actions and Connectors** feature in the
+        **Management** section of the Kibana feature privileges.
       parameters:
         - $ref: '#/components/parameters/space_id'
       responses:
@@ -1619,22 +1670,15 @@ paths:
       - url: https://localhost:5601
   /s/{spaceId}/api/cases/status:
     get:
-      description: Returns the number of cases that are open, closed, and in progress.
+      description: >
+        Returns the number of cases that are open, closed, and in progress. You
+        must have read privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases you're seeking.
       deprecated: true
       parameters:
         - $ref: '#/components/parameters/space_id'
-        - in: query
-          name: owner
-          description: >-
-            A filter to limit the retrieved case statistics to a specific set of
-            applications. If this parameter is omitted, the response contains
-            all cases that the user has access to read.
-          schema:
-            oneOf:
-              - $ref: '#/components/schemas/owners'
-              - type: array
-                items:
-                  $ref: '#/components/schemas/owners'
+        - $ref: '#/components/parameters/owner'
       responses:
         '200':
           description: Indicates a successful call.
@@ -1682,7 +1726,11 @@ paths:
       - url: https://localhost:5601
   /s/{spaceId}/api/cases/{caseId}:
     get:
-      description: Retrieves a specified case.
+      description: >
+        Retrieves a specified case. You must have read privileges for the
+        **Cases** feature in the **Management**, **Observability**, or
+        **Security** section of the Kibana feature privileges, depending on the
+        owner of the cases you're seeking.
       parameters:
         - $ref: '#/components/parameters/case_id'
         - $ref: '#/components/parameters/space_id'
@@ -1730,7 +1778,11 @@ paths:
       - url: https://localhost:5601
   /s/{spaceId}/api/cases/{caseId}/comments:
     post:
-      description: Adds a comment to a case.
+      description: >
+        Adds a comment to a case. You must have all privileges for the **Cases**
+        feature in the **Management**, **Observability**, or **Security**
+        section of the Kibana feature privileges, depending on the owner of the
+        case you're updating.
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/case_id'
@@ -1905,7 +1957,11 @@ paths:
       servers:
         - url: https://localhost:5601
     delete:
-      description: Deletes all comments from a case.
+      description: >
+        Deletes all comments from a case. You must have all privileges for the
+        **Cases** feature in the **Management**, **Observability**, or
+        **Security** section of the Kibana feature privileges, depending on the
+        owner of the cases you're updating.
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/case_id'
@@ -1916,8 +1972,11 @@ paths:
       servers:
         - url: https://localhost:5601
     get:
-      description: |
-        Retrieves all the comments from a case.
+      description: >
+        Retrieves all the comments from a case. You must have read privileges
+        for the **Cases** feature in the **Management**, **Observability**, or
+        **Security** section of the Kibana feature privileges, depending on the
+        owner of the cases with the comments you're seeking.
       deprecated: true
       parameters:
         - $ref: '#/components/parameters/case_id'
@@ -1936,7 +1995,11 @@ paths:
       - url: https://localhost:5601
   /s/{spaceId}/api/cases/{caseId}/comments/{commentId}:
     delete:
-      description: Deletes a comment from a case.
+      description: >
+        Deletes a comment from a case. You must have all privileges for the
+        **Cases** feature in the **Management**, **Observability**, or
+        **Security** section of the Kibana feature privileges, depending on the
+        owner of the cases you're updating.
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/space_id'
@@ -1948,7 +2011,11 @@ paths:
       servers:
         - url: https://localhost:5601
     get:
-      description: Retrieves a comment from a case.
+      description: >
+        Retrieves a comment from a case. You must have read privileges for the
+        **Cases** feature in the **Management**, **Observability**, or
+        **Security*** section of the Kibana feature privileges, depending on the
+        owner of the cases with the comments you're seeking.
       parameters:
         - $ref: '#/components/parameters/case_id'
         - $ref: '#/components/parameters/comment_id'
@@ -1988,7 +2055,11 @@ paths:
       - url: https://localhost:5601
   /s/{spaceId}/api/cases/{caseId}/user_actions:
     get:
-      description: Returns all user activity for the specified case.
+      description: >
+        Returns all user activity for the specified case. You must have read
+        privileges for the **Cases** feature in the **Management**,
+        **Observability**, or **Security** section of the Kibana feature
+        privileges, depending on the owner of the cases you're seeking.
       deprecated: true
       parameters:
         - $ref: '#/components/parameters/case_id'
