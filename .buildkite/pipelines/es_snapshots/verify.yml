@@ -42,7 +42,7 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/oss_cigroup.sh
     label: 'OSS CI Group'
-    parallelism: 11
+    parallelism: 12
     agents:
       queue: ci-group-4d
     depends_on: build
@@ -53,13 +53,12 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/test/jest_integration.sh
-    label: 'Jest Integration Tests'
-    parallelism: 3
+  - command: .buildkite/scripts/steps/test/pick_jest_config_run_order.sh
+    label: 'Pick Jest Config Run Order'
     agents:
-      queue: n2-4
-    timeout_in_minutes: 120
-    key: jest-integration
+      queue: kibana-default
+    env:
+      FILTER_JEST_CONFIG_TYPE: integration
     retry:
       automatic:
         - exit_status: '*'
