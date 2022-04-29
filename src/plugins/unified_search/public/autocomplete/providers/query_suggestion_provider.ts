@@ -7,7 +7,8 @@
  */
 
 import { ValueSuggestionsMethod } from '@kbn/data-plugin/common';
-import { IFieldType, IIndexPattern } from '@kbn/data-plugin/common';
+import type { IIndexPattern } from '@kbn/data-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 
 export enum QuerySuggestionTypes {
   Field = 'field',
@@ -47,7 +48,7 @@ export interface QuerySuggestionBasic {
 /** @public **/
 export interface QuerySuggestionField extends QuerySuggestionBasic {
   type: QuerySuggestionTypes.Field;
-  field: IFieldType;
+  field: DataViewField;
 }
 
 /** @public **/

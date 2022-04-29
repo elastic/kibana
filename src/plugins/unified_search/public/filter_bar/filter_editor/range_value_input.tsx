@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiFormControlLayoutDelimited } from '@elastic/eui';
 import { type InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { IFieldType } from '@kbn/data-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import moment from 'moment';
 import { get } from 'lodash';
 import { ValueInputType } from './value_input_type';
@@ -23,7 +23,7 @@ interface RangeParams {
 type RangeParamsPartial = Partial<RangeParams>;
 
 interface Props {
-  field: IFieldType;
+  field: DataViewField;
   value?: RangeParams;
   onChange: (params: RangeParamsPartial) => void;
   intl: InjectedIntl;

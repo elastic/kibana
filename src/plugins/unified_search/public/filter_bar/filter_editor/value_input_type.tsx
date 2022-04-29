@@ -9,13 +9,13 @@
 import React, { Component } from 'react';
 import { EuiFieldNumber, EuiFieldText, EuiSelect } from '@elastic/eui';
 import { type InjectedIntl, injectI18n } from '@kbn/i18n-react';
-import type { IFieldType } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { isEmpty } from 'lodash';
 import { validateParams } from './lib/filter_editor_utils';
 
 interface Props {
   value?: string | number;
-  field: IFieldType;
+  field: DataViewField;
   onChange: (value: string | number | boolean) => void;
   onBlur?: (value: string | number | boolean) => void;
   placeholder: string;

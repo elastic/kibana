@@ -31082,7 +31082,7 @@
     "unifiedSearch.filter.filterBar.filterItemBadgeIconAriaLabel": "Supprimer {filter}",
     "unifiedSearch.filter.filterBar.includeFilterButtonLabel": "Inclure les résultats",
     "unifiedSearch.filter.filterBar.dataViewSelectPlaceholder": "Sélectionner un modèle d'indexation",
-    "unifiedSearch.filter.filterBar.labelErrorInfo": "Modèle d'indexation {indexPattern} introuvable",
+    "unifiedSearch.filter.filterBar.labelErrorInfo": "Modèle d'indexation {dataView} introuvable",
     "unifiedSearch.filter.filterBar.labelErrorText": "Erreur",
     "unifiedSearch.filter.filterBar.labelWarningInfo": "Le champ {fieldName} n'existe pas dans la vue en cours.",
     "unifiedSearch.filter.filterBar.labelWarningText": "Avertissement",
