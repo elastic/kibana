@@ -230,6 +230,12 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
             loader: 'raw-loader',
           },
         },
+        {
+          test: /\.mp4$/,
+          use: {
+            loader: 'file-loader',
+          },
+        },
       ],
     },
 

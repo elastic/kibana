@@ -29,3 +29,9 @@ declare module '*.mdx' {
   // eslint-disable-next-line import/no-default-export
   export default MDXComponent;
 }
+
+declare module '*.mp4' {
+  const src: string;
+  // eslint-disable-next-line import/no-default-export
+  export default src;
+}

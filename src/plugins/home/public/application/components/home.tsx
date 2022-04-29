@@ -11,6 +11,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate, OverviewPageFooter } from '@kbn/kibana-react-plugin/public';
+import { EuiButton, EuiModal, EuiModalBody, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+
 import { HOME_APP_BASE_PATH } from '../../../common/constants';
 import type {
   FeatureCatalogueEntry,
@@ -22,6 +24,7 @@ import { AddData } from './add_data';
 import { ManageData } from './manage_data';
 import { SolutionsSection } from './solutions_section';
 import { Welcome } from './welcome';
+import testVideo from './GettingToKnowKibana.mp4';
 
 const KEY_ENABLE_WELCOME = 'home:welcome:show';
 
@@ -38,6 +41,7 @@ interface State {
   isLoading: boolean;
   isNewKibanaInstance: boolean;
   isWelcomeEnabled: boolean;
+  isModalOpen: boolean;
 }
 
 export class Home extends Component<HomeProps, State> {
@@ -62,6 +66,7 @@ export class Home extends Component<HomeProps, State> {
       isLoading: isWelcomeEnabled,
       isNewKibanaInstance: false,
       isWelcomeEnabled,
+      isModalOpen: false,
     };
   }
 
@@ -136,35 +141,63 @@ export class Home extends Component<HomeProps, State> {
       manageDataFeatures.push(devTools);
     }
 
+    const closeModal = () => this.setState({ isModalOpen: false });
+    const showModal = () => this.setState({ isModalOpen: true });
+
+    let modal;
+
+    if (this.state.isModalOpen) {
+      modal = (
+        <EuiModal onClose={closeModal}>
+          <EuiModalBody>
+            <EuiSpacer size="m" />
+            <video width="650px" height="auto" controls autoPlay>
+              <source src={testVideo} type={testVideo.type} />
+              Your browser does not support the video tag.
+            </video>
+          </EuiModalBody>
+        </EuiModal>
+      );
+    }
+
     return (
-      <KibanaPageTemplate
-        data-test-subj="homeApp"
-        pageHeader={{
-          bottomBorder: false,
-          pageTitle: <FormattedMessage id="home.header.title" defaultMessage="Welcome home" />,
-        }}
-        template="empty"
-      >
-        <SolutionsSection addBasePath={addBasePath} solutions={solutions} />
+      <KibanaPageTemplate data-test-subj="homeApp" template="empty">
+        <>
+          <EuiPageHeader
+            pageTitle={
+              <span data-test-subj="appTitle">
+                <FormattedMessage id="home.header.title" defaultMessage="Welcome home" />
+              </span>
+            }
+            bottomBorder
+            rightSideItems={[
+              <EuiButton iconType="play" onClick={showModal}>
+                Get to know Kibana
+              </EuiButton>,
+            ]}
+          />
+          {modal}
+          <SolutionsSection addBasePath={addBasePath} solutions={solutions} />
 
-        <AddData addBasePath={addBasePath} application={application} isDarkMode={isDarkMode} />
+          <AddData addBasePath={addBasePath} application={application} isDarkMode={isDarkMode} />
 
-        <ManageData
-          addBasePath={addBasePath}
-          application={application}
-          features={manageDataFeatures}
-        />
+          <ManageData
+            addBasePath={addBasePath}
+            application={application}
+            features={manageDataFeatures}
+          />
 
-        <OverviewPageFooter
-          addBasePath={addBasePath}
-          path={HOME_APP_BASE_PATH}
-          onSetDefaultRoute={() => {
-            trackUiMetric(METRIC_TYPE.CLICK, 'set_home_as_default_route');
-          }}
-          onChangeDefaultRoute={() => {
-            trackUiMetric(METRIC_TYPE.CLICK, 'change_to_different_default_route');
-          }}
-        />
+          <OverviewPageFooter
+            addBasePath={addBasePath}
+            path={HOME_APP_BASE_PATH}
+            onSetDefaultRoute={() => {
+              trackUiMetric(METRIC_TYPE.CLICK, 'set_home_as_default_route');
+            }}
+            onChangeDefaultRoute={() => {
+              trackUiMetric(METRIC_TYPE.CLICK, 'change_to_different_default_route');
+            }}
+          />
+        </>
       </KibanaPageTemplate>
     );
   }
