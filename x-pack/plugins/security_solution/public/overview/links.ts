@@ -17,8 +17,8 @@ import { FEATURE, LinkItem } from '../common/links/types';
 
 export const links: LinkItem = {
   id: SecurityPageName.overview,
-  label: OVERVIEW,
-  url: OVERVIEW_PATH,
+  title: OVERVIEW,
+  path: OVERVIEW_PATH,
   globalNavEnabled: true,
   features: [FEATURE.general],
   globalSearchKeywords: [
@@ -31,8 +31,8 @@ export const links: LinkItem = {
 
 export const landingLinks: LinkItem = {
   id: SecurityPageName.landing,
-  label: GETTING_STARTED,
-  url: LANDING_PATH,
+  title: GETTING_STARTED,
+  path: LANDING_PATH,
   globalNavEnabled: false,
   features: [FEATURE.general],
   globalSearchKeywords: [
@@ -44,8 +44,8 @@ export const landingLinks: LinkItem = {
 
 export const detectionResponseLinks: LinkItem = {
   id: SecurityPageName.detectionAndResponse,
-  label: DETECTION_RESPONSE,
-  url: DETECTION_RESPONSE_PATH,
+  title: DETECTION_RESPONSE,
+  path: DETECTION_RESPONSE_PATH,
   globalNavEnabled: false,
   experimentalKey: 'detectionResponseEnabled',
   features: [FEATURE.general],

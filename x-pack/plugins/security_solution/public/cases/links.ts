@@ -5,24 +5,38 @@
  * 2.0.
  */
 
-import { getCasesLinkItems } from '@kbn/cases-plugin/public';
+import { getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import { CASES_PATH, SecurityPageName } from '../../common/constants';
 import { FEATURE, LinkItem } from '../common/links/types';
 
-export const links: LinkItem = getCasesLinkItems({
-  basePath: CASES_PATH,
-  extend: {
-    [SecurityPageName.case]: {
-      globalNavEnabled: true,
-      globalNavOrder: 9006,
-      features: [FEATURE.casesRead],
+export const getCasesLinkItems = (): LinkItem => {
+  const casesLinks = getCasesDeepLinks<LinkItem>({
+    basePath: CASES_PATH,
+    extend: {
+      [SecurityPageName.case]: {
+        globalNavEnabled: true,
+        globalNavOrder: 9006,
+        features: [FEATURE.casesRead],
+      },
+      [SecurityPageName.caseConfigure]: {
+        features: [FEATURE.casesCrud],
+        isPremium: true,
+      },
+      [SecurityPageName.caseCreate]: {
+        features: [FEATURE.casesCrud],
+      },
     },
-    [SecurityPageName.caseConfigure]: {
-      features: [FEATURE.casesCrud],
-      isPremium: true,
-    },
-    [SecurityPageName.caseCreate]: {
-      features: [FEATURE.casesCrud],
-    },
-  },
-});
+  });
+  const { id, deepLinks, ...rest } = casesLinks;
+  return {
+    ...rest,
+    id: SecurityPageName.case,
+    links: deepLinks.map((link) => {
+      const { id: subId, ...all } = link;
+      if (subId === SecurityPageName.caseConfigure) {
+        return { ...all, id: SecurityPageName.caseConfigure };
+      }
+      return { ...all, id: SecurityPageName.caseCreate };
+    }),
+  };
+};

@@ -8,27 +8,52 @@
 import { AppDeepLink, AppNavLinkStatus, Capabilities } from '@kbn/core/public';
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { get } from 'lodash';
-import { APP_PATH, SecurityPageName } from '../../../common/constants';
+import { SecurityPageName } from '../../../common/constants';
 import { UrlStateType } from '../components/url_state/constants';
-import { securityNavKeys } from '../components/navigation/types';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
-import { ADMINISTRATION } from '../../app/translations';
 import { appLinks } from './structure';
-import { Feature, LinkItem, LinkProps, SiemNavTabs } from './types';
+import { Feature, LinkItem, LinkProps, NavLinkItem } from './types';
 
 const createDeepLink = (link: LinkItem, linkProps?: LinkProps): AppDeepLink => ({
-  ...(link.items && link.items.length ? { deepLinks: reduceDeepLinks(link.items, linkProps) } : {}),
+  id: link.id,
+  path: link.path,
+  title: link.title,
+  ...(link.links && link.links.length
+    ? {
+        deepLinks: reduceLinks<AppDeepLink>({
+          links: link.links,
+          linkProps,
+          formatFunction: createDeepLink,
+        }),
+      }
+    : {}),
   ...(link.icon != null ? { euiIconType: link.icon } : {}),
   ...(link.image != null ? { icon: link.image } : {}),
-  id: link.id,
   ...(link.globalSearchKeywords != null ? { keywords: link.globalSearchKeywords } : {}),
   ...(link.globalNavEnabled != null
     ? { navLinkStatus: link.globalNavEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden }
     : {}),
   ...(link.globalNavOrder != null ? { order: link.globalNavOrder } : {}),
-  path: link.url,
   ...(link.globalSearchEnabled != null ? { searchable: link.globalSearchEnabled } : {}),
-  title: link.label,
+});
+
+const createNavLinkItem = (link: LinkItem, linkProps?: LinkProps): NavLinkItem => ({
+  id: link.id,
+  path: link.path,
+  title: link.title,
+  ...(link.description != null ? { description: link.description } : {}),
+  ...(link.icon != null ? { icon: link.icon } : {}),
+  ...(link.image != null ? { image: link.image } : {}),
+  ...(link.links && link.links.length
+    ? {
+        links: reduceLinks<NavLinkItem>({
+          links: link.links,
+          linkProps,
+          formatFunction: createNavLinkItem,
+        }),
+      }
+    : {}),
+  ...(link.skipUrlState != null ? { skipUrlState: link.skipUrlState } : {}),
 });
 
 const hasFeaturesCapability = (
@@ -41,8 +66,16 @@ const hasFeaturesCapability = (
   return features.some((featureKey) => get(capabilities, featureKey, false));
 };
 
-const reduceDeepLinks = (links: LinkItem[], linkProps?: LinkProps): AppDeepLink[] =>
-  links.reduce((deepLinks: AppDeepLink[], link: LinkItem) => {
+export function reduceLinks<T>({
+  links,
+  linkProps,
+  formatFunction,
+}: {
+  links: LinkItem[];
+  linkProps?: LinkProps;
+  formatFunction: (link: LinkItem, linkProps?: LinkProps) => T;
+}): T[] {
+  return links.reduce((deepLinks: T[], link: LinkItem) => {
     if (
       linkProps != null &&
       // exclude link when license is basic and link is premium
@@ -58,8 +91,9 @@ const reduceDeepLinks = (links: LinkItem[], linkProps?: LinkProps): AppDeepLink[
     ) {
       return deepLinks;
     }
-    return [...deepLinks, createDeepLink(link, linkProps)];
+    return [...deepLinks, formatFunction(link, linkProps)];
   }, []);
+}
 
 export const getInitialDeepLinks = (): AppDeepLink[] => {
   return appLinks.map((link) => createDeepLink(link));
@@ -71,22 +105,39 @@ export const getDeepLinks = (
   capabilities?: Capabilities
 ): AppDeepLink[] => {
   const isBasic = licenseType === 'basic';
-  return reduceDeepLinks(appLinks, { enableExperimental, isBasic, capabilities });
+  return reduceLinks<AppDeepLink>({
+    links: appLinks,
+    linkProps: { enableExperimental, isBasic, capabilities },
+    formatFunction: createDeepLink,
+  });
+};
+
+export const getNavLinkItems = (
+  enableExperimental: ExperimentalFeatures,
+  licenseType?: LicenseType,
+  capabilities?: Capabilities
+): NavLinkItem[] => {
+  const isBasic = licenseType === 'basic';
+  return reduceLinks<NavLinkItem>({
+    links: appLinks,
+    linkProps: { enableExperimental, isBasic, capabilities },
+    formatFunction: createNavLinkItem,
+  });
 };
 
 const flattenLinkItems = (
   ids: SecurityPageName[],
   linkItems: LinkItem[]
-): Array<Omit<LinkItem, 'items'>> =>
-  linkItems.reduce((linkItemFound: Array<Omit<LinkItem, 'items'>>, linkItem) => {
+): Array<Omit<LinkItem, 'links'>> =>
+  linkItems.reduce((linkItemFound: Array<Omit<LinkItem, 'links'>>, linkItem) => {
     let topLevelItems = [...linkItemFound];
     if (ids.includes(linkItem.id)) {
-      // omit items from result
-      const { items, ...rest } = linkItem;
+      // omit links from result
+      const { links, ...rest } = linkItem;
       topLevelItems = [...topLevelItems, rest];
     }
-    if (linkItem.items) {
-      topLevelItems = [...topLevelItems, ...flattenLinkItems(ids, linkItem.items)];
+    if (linkItem.links) {
+      topLevelItems = [...topLevelItems, ...flattenLinkItems(ids, linkItem.links)];
     }
     return topLevelItems;
   }, []);
@@ -175,24 +226,6 @@ const urlKeys: Array<{ key: UrlStateType; pages: SecurityPageName[] }> = [
 const findUrlKey = (id: SecurityPageName) => {
   const urlKeyObj = urlKeys.find((p) => p.pages.includes(id));
   return urlKeyObj ? urlKeyObj.key : undefined;
-};
-
-// const needsUrlState = ()
-
-export const getNavTabs = (ids?: SecurityPageName[]): SiemNavTabs => {
-  const linkItems = flattenLinkItems(ids == null ? Object.values(securityNavKeys) : ids, appLinks);
-  const securityNav: SiemNavTabs = {};
-  linkItems.forEach((link) => {
-    securityNav[link.id] = {
-      disabled: false,
-      href: `${APP_PATH}${link.url}`,
-      id: link.id,
-      name: link.id === SecurityPageName.administration ? ADMINISTRATION : link.label,
-      urlKey: findUrlKey(link.id),
-      ...(link.isBeta != null ? { isBeta: link.isBeta } : {}),
-    };
-  });
-  return securityNav;
 };
 
 export const needsUrlState = (id: SecurityPageName): boolean => findUrlKey(id) != null;

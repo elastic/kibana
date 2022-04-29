@@ -11,8 +11,8 @@ import { LinkItem, FEATURE } from '../common/links/types';
 
 export const links: LinkItem = {
   id: SecurityPageName.detections,
-  label: DETECT,
-  url: ALERTS_PATH,
+  title: DETECT,
+  path: ALERTS_PATH,
   globalNavEnabled: false,
   features: [FEATURE.general],
   globalSearchKeywords: [
@@ -20,11 +20,11 @@ export const links: LinkItem = {
       defaultMessage: 'Detect',
     }),
   ],
-  items: [
+  links: [
     {
       id: SecurityPageName.alerts,
-      label: ALERTS,
-      url: ALERTS_PATH,
+      title: ALERTS,
+      path: ALERTS_PATH,
       globalNavEnabled: true,
       globalSearchKeywords: [
         i18n.translate('xpack.securitySolution.search.alerts', {
@@ -36,8 +36,8 @@ export const links: LinkItem = {
     },
     {
       id: SecurityPageName.rules,
-      label: RULES,
-      url: RULES_PATH,
+      title: RULES,
+      path: RULES_PATH,
       globalNavEnabled: false,
       globalSearchKeywords: [
         i18n.translate('xpack.securitySolution.search.rules', {
@@ -48,8 +48,8 @@ export const links: LinkItem = {
     },
     {
       id: SecurityPageName.exceptions,
-      label: EXCEPTIONS,
-      url: EXCEPTIONS_PATH,
+      title: EXCEPTIONS,
+      path: EXCEPTIONS_PATH,
       globalNavEnabled: false,
       globalSearchKeywords: [
         i18n.translate('xpack.securitySolution.search.exceptions', {

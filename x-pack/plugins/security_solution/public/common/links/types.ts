@@ -6,6 +6,7 @@
  */
 
 import { Capabilities } from '@kbn/core/types';
+import { needsUrlState } from './links';
 import { NavTab } from '../components/navigation/types';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 import { CASES_FEATURE_ID, SecurityPageName, SERVER_APP_ID } from '../../../common/constants';
@@ -29,23 +30,32 @@ export interface LinkItem {
   /**
    * Hides deep link when feature flag is enabled.
    */
-  hideWhenExperimentalKey?: keyof ExperimentalFeatures;
   globalNavEnabled?: boolean; // default false
   globalNavOrder?: number;
   globalSearchEnabled?: boolean;
   globalSearchKeywords?: string[];
+  hideWhenExperimentalKey?: keyof ExperimentalFeatures;
   icon?: string;
   id: SecurityPageName;
   image?: string;
   isBeta?: boolean;
   isPremium?: boolean;
-  items?: LinkItem[];
-  label: string;
-  needsUrlState?: boolean; // defaults to false
-  url: string;
+  links?: LinkItem[];
+  path: string;
+  skipUrlState?: boolean; // defaults to false
+  title: string;
 }
 
-export type SiemNavTabs = Partial<Record<SecurityPageName, NavTab>>;
+export interface NavLinkItem {
+  description?: string;
+  icon?: string;
+  id: SecurityPageName;
+  links?: NavLinkItem[];
+  image?: string;
+  path: string;
+  title: string;
+  skipUrlState?: boolean; // default to false
+}
 
 export interface LinkProps {
   enableExperimental: ExperimentalFeatures;

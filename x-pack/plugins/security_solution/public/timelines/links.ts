@@ -12,8 +12,8 @@ import { FEATURE, LinkItem } from '../common/links/types';
 
 export const links: LinkItem = {
   id: SecurityPageName.timelines,
-  label: TIMELINES,
-  url: TIMELINES_PATH,
+  title: TIMELINES,
+  path: TIMELINES_PATH,
   globalNavEnabled: true,
   features: [FEATURE.general],
   globalSearchKeywords: [
@@ -22,13 +22,13 @@ export const links: LinkItem = {
     }),
   ],
   globalNavOrder: 9005,
-  items: [
+  links: [
     {
       id: SecurityPageName.timelinesTemplates,
-      label: i18n.translate('xpack.securitySolution.search.timeline.templates', {
+      title: i18n.translate('xpack.securitySolution.search.timeline.templates', {
         defaultMessage: 'Templates',
       }),
-      url: `${TIMELINES_PATH}/template`,
+      path: `${TIMELINES_PATH}/template`,
     },
   ],
 };

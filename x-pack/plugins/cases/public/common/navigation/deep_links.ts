@@ -49,36 +49,3 @@ export const getCasesDeepLinks = <T extends AppDeepLink = AppDeepLink>({
     },
   ],
 });
-
-export const getCasesLinkItems = ({
-  basePath = DEFAULT_BASE_PATH,
-  extend = {},
-}: {
-  basePath?: string;
-  extend?: Partial<Record<ICasesDeepLinkId, Partial<T>>>;
-}) => ({
-  label: i18n.translate('xpack.cases.navigation.cases', {
-    defaultMessage: 'Cases',
-  }),
-  ...(extend[CasesDeepLinkId.cases] ?? {}),
-  id: CasesDeepLinkId.cases,
-  url: basePath,
-  items: [
-    {
-      label: i18n.translate('xpack.cases.navigation.create', {
-        defaultMessage: 'Create New Case',
-      }),
-      ...(extend[CasesDeepLinkId.casesCreate] ?? {}),
-      id: CasesDeepLinkId.casesCreate,
-      url: getCreateCasePath(basePath),
-    },
-    {
-      label: i18n.translate('xpack.cases.navigation.configure', {
-        defaultMessage: 'Configure Cases',
-      }),
-      ...(extend[CasesDeepLinkId.casesConfigure] ?? {}),
-      id: CasesDeepLinkId.casesConfigure,
-      url: getCasesConfigurePath(basePath),
-    },
-  ],
-});

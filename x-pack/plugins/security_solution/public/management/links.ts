@@ -29,8 +29,8 @@ import { FEATURE, LinkItem } from '../common/links/types';
 
 export const links: LinkItem = {
   id: SecurityPageName.administration,
-  label: MANAGE,
-  url: MANAGEMENT_PATH,
+  title: MANAGE,
+  path: MANAGEMENT_PATH,
   globalNavEnabled: false,
   features: [FEATURE.general],
   globalSearchKeywords: [
@@ -38,39 +38,39 @@ export const links: LinkItem = {
       defaultMessage: 'Manage',
     }),
   ],
-  items: [
+  links: [
     {
       id: SecurityPageName.endpoints,
       globalNavEnabled: true,
-      label: ENDPOINTS,
+      title: ENDPOINTS,
       globalNavOrder: 9006,
-      url: ENDPOINTS_PATH,
+      path: ENDPOINTS_PATH,
     },
     {
       id: SecurityPageName.policies,
-      label: POLICIES,
-      url: POLICIES_PATH,
+      title: POLICIES,
+      path: POLICIES_PATH,
       experimentalKey: 'policyListEnabled',
     },
     {
       id: SecurityPageName.trustedApps,
-      label: TRUSTED_APPLICATIONS,
-      url: TRUSTED_APPS_PATH,
+      title: TRUSTED_APPLICATIONS,
+      path: TRUSTED_APPS_PATH,
     },
     {
       id: SecurityPageName.eventFilters,
-      label: EVENT_FILTERS,
-      url: EVENT_FILTERS_PATH,
+      title: EVENT_FILTERS,
+      path: EVENT_FILTERS_PATH,
     },
     {
       id: SecurityPageName.hostIsolationExceptions,
-      label: HOST_ISOLATION_EXCEPTIONS,
-      url: HOST_ISOLATION_EXCEPTIONS_PATH,
+      title: HOST_ISOLATION_EXCEPTIONS,
+      path: HOST_ISOLATION_EXCEPTIONS_PATH,
     },
     {
       id: SecurityPageName.blocklist,
-      label: BLOCKLIST,
-      url: BLOCKLIST_PATH,
+      title: BLOCKLIST,
+      path: BLOCKLIST_PATH,
     },
   ],
 };

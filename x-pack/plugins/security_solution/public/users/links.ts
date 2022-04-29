@@ -12,8 +12,8 @@ import { LinkItem } from '../common/links/types';
 
 export const links: LinkItem = {
   id: SecurityPageName.users,
-  label: USERS,
-  url: USERS_PATH,
+  title: USERS,
+  path: USERS_PATH,
   globalNavEnabled: true,
   experimentalKey: 'usersEnabled',
   globalSearchKeywords: [
@@ -22,43 +22,43 @@ export const links: LinkItem = {
     }),
   ],
   globalNavOrder: 9004,
-  items: [
+  links: [
     {
       id: SecurityPageName.usersAuthentications,
-      label: i18n.translate('xpack.securitySolution.search.users.authentications', {
+      title: i18n.translate('xpack.securitySolution.search.users.authentications', {
         defaultMessage: 'Authentications',
       }),
-      url: `${USERS_PATH}/authentications`,
+      path: `${USERS_PATH}/authentications`,
     },
     {
       id: SecurityPageName.usersAnomalies,
-      label: i18n.translate('xpack.securitySolution.search.users.anomalies', {
+      title: i18n.translate('xpack.securitySolution.search.users.anomalies', {
         defaultMessage: 'Anomalies',
       }),
-      url: `${USERS_PATH}/anomalies`,
+      path: `${USERS_PATH}/anomalies`,
       isPremium: true,
     },
     {
       id: SecurityPageName.usersRisk,
-      label: i18n.translate('xpack.securitySolution.search.users.risk', {
+      title: i18n.translate('xpack.securitySolution.search.users.risk', {
         defaultMessage: 'Users by risk',
       }),
-      url: `${USERS_PATH}/userRisk`,
+      path: `${USERS_PATH}/userRisk`,
       experimentalKey: 'riskyUsersEnabled',
     },
     {
       id: SecurityPageName.usersEvents,
-      label: i18n.translate('xpack.securitySolution.search.users.events', {
+      title: i18n.translate('xpack.securitySolution.search.users.events', {
         defaultMessage: 'Events',
       }),
-      url: `${USERS_PATH}/events`,
+      path: `${USERS_PATH}/events`,
     },
     {
       id: SecurityPageName.usersExternalAlerts,
-      label: i18n.translate('xpack.securitySolution.search.users.externalAlerts', {
+      title: i18n.translate('xpack.securitySolution.search.users.externalAlerts', {
         defaultMessage: 'External Alerts',
       }),
-      url: `${USERS_PATH}/externalAlerts`,
+      path: `${USERS_PATH}/externalAlerts`,
     },
   ],
 };

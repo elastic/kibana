@@ -13,7 +13,7 @@ import { links as detectionLinks } from '../../detections/links';
 import { links as networkLinks } from '../../network/links';
 import { links as usersLinks } from '../../users/links';
 import { links as timelinesLinks } from '../../timelines/links';
-import { links as casesLinks } from '../../cases/links';
+import { getCasesLinkItems } from '../../cases/links';
 import { links as managementLinks } from '../../management/links';
 import { links as overviewLinks, landingLinks, detectionResponseLinks } from '../../overview/links';
 
@@ -24,8 +24,8 @@ export const appLinks: LinkItem[] = [
   detectionLinks,
   {
     id: SecurityPageName.explore,
-    label: EXPLORE,
-    url: 'to do',
+    title: EXPLORE,
+    path: 'to do',
     globalNavEnabled: false,
     features: [FEATURE.general],
     globalSearchKeywords: [
@@ -33,12 +33,12 @@ export const appLinks: LinkItem[] = [
         defaultMessage: 'Threat hunting',
       }),
     ],
-    items: [hostsLinks, networkLinks, usersLinks],
+    links: [hostsLinks, networkLinks, usersLinks],
   },
   {
     id: SecurityPageName.investigate,
-    label: INVESTIGATE,
-    url: 'to do',
+    title: INVESTIGATE,
+    path: 'to do',
     globalNavEnabled: false,
     features: [FEATURE.general, FEATURE.casesRead],
     globalSearchKeywords: [
@@ -46,7 +46,7 @@ export const appLinks: LinkItem[] = [
         defaultMessage: 'Investigate',
       }),
     ],
-    items: [timelinesLinks, casesLinks],
+    links: [timelinesLinks, getCasesLinkItems()],
   },
   managementLinks,
 ];

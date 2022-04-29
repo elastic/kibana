@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { getDeepLinks, getInitialDeepLinks, getNavTabs, needsUrlState } from './links';
+import { getDeepLinks, getInitialDeepLinks, getNavLinkItems, needsUrlState } from './links';
 import { CASES_FEATURE_ID, SecurityPageName, SERVER_APP_ID } from '../../../common/constants';
 import { Capabilities } from '@kbn/core/types';
 import { AppDeepLink } from '@kbn/core/public';
 import { mockGlobalState } from '../mock';
-import { navTabs as navTabsArtifact } from '../../app/home/home_navigations';
+import { NavLinkItem } from './types';
+// import { navTabs as navTabsArtifact } from '../../app/home/home_navigations';
 
 const mockExperimentalDefaults = mockGlobalState.app.enableExperimental;
 const basicLicense = 'basic';
@@ -30,6 +31,20 @@ const findDeepLink = (id: string, deepLinks: AppDeepLink[]): AppDeepLink | null 
     }
     if (deepLink.deepLinks) {
       return findDeepLink(id, deepLink.deepLinks);
+    }
+    return null;
+  }, null);
+
+const findNavLink = (id: SecurityPageName, navLinks: NavLinkItem[]): NavLinkItem | null =>
+  navLinks.reduce((deepLinkFound: NavLinkItem | null, deepLink) => {
+    if (deepLinkFound !== null) {
+      return deepLinkFound;
+    }
+    if (deepLink.id === id) {
+      return deepLink;
+    }
+    if (deepLink.links) {
+      return findNavLink(id, deepLink.links);
     }
     return null;
   }, null);
@@ -167,34 +182,108 @@ describe('security app link helpers', () => {
       casesPages.forEach((page) => expect(findDeepLink(page, links)).toBeFalsy());
     });
   });
-  describe('getNavTabs', () => {
-    it('return default SecurityNav tab object when no argument', () => {
-      const navTabs = getNavTabs();
-      expect(navTabs).toEqual(navTabsArtifact);
-    });
-    it('return custom SecurityNav tab object with page arguments', () => {
-      const navTabs = getNavTabs([
-        SecurityPageName.uncommonProcesses,
-        SecurityPageName.caseConfigure,
-      ]);
-      expect(navTabs).toEqual({
-        [SecurityPageName.uncommonProcesses]: {
-          disabled: false,
-          href: '/app/security/hosts/uncommonProcesses',
-          id: SecurityPageName.uncommonProcesses,
-          name: 'Uncommon Processes',
-          urlKey: 'host',
-        },
-        [SecurityPageName.caseConfigure]: {
-          disabled: false,
-          href: '/app/security/cases/configure',
-          id: SecurityPageName.caseConfigure,
-          name: 'Configure Cases',
-          urlKey: undefined,
-        },
+
+  describe('getNavLinkItems', () => {
+    it('basicLicense should return only basic links', () => {
+      const links = getNavLinkItems(mockExperimentalDefaults, basicLicense, mockCapabilities);
+      expect(findNavLink(SecurityPageName.hostsAnomalies, links)).toBeFalsy();
+      allPages.forEach((page) => {
+        if (premiumPages.includes(page)) {
+          return expect(findNavLink(page, links)).toBeFalsy();
+        }
+        if (featureFlagPages.includes(page)) {
+          // ignore feature flag pages
+          return;
+        }
+        expect(findNavLink(page, links)).toBeTruthy();
       });
     });
+    it('platinumLicense should return all links', () => {
+      const links = getNavLinkItems(mockExperimentalDefaults, platinumLicense, mockCapabilities);
+      allPages.forEach((page) => {
+        if (premiumPages.includes(page) && !featureFlagPages.includes(page)) {
+          return expect(findNavLink(page, links)).toBeTruthy();
+        }
+        if (featureFlagPages.includes(page)) {
+          // ignore feature flag pages
+          return;
+        }
+        expect(findNavLink(page, links)).toBeTruthy();
+      });
+    });
+    it('hideWhenExperimentalKey hides entry when key = true', () => {
+      const links = getNavLinkItems(
+        { ...mockExperimentalDefaults, usersEnabled: true },
+        platinumLicense,
+        mockCapabilities
+      );
+      expect(findNavLink(SecurityPageName.hostsAuthentications, links)).toBeFalsy();
+    });
+    it('hideWhenExperimentalKey shows entry when key = false', () => {
+      const links = getNavLinkItems(
+        { ...mockExperimentalDefaults, usersEnabled: false },
+        platinumLicense,
+        mockCapabilities
+      );
+      expect(findNavLink(SecurityPageName.hostsAuthentications, links)).toBeTruthy();
+    });
+    it('experimentalKey shows entry when key = false', () => {
+      const links = getNavLinkItems(
+        {
+          ...mockExperimentalDefaults,
+          riskyHostsEnabled: false,
+          riskyUsersEnabled: false,
+          detectionResponseEnabled: false,
+        },
+        platinumLicense,
+        mockCapabilities
+      );
+      expect(findNavLink(SecurityPageName.hostsRisk, links)).toBeFalsy();
+      expect(findNavLink(SecurityPageName.usersRisk, links)).toBeFalsy();
+      expect(findNavLink(SecurityPageName.detectionAndResponse, links)).toBeFalsy();
+    });
+    it('experimentalKey shows entry when key = true', () => {
+      const links = getNavLinkItems(
+        {
+          ...mockExperimentalDefaults,
+          riskyHostsEnabled: true,
+          riskyUsersEnabled: true,
+          detectionResponseEnabled: true,
+        },
+        platinumLicense,
+        mockCapabilities
+      );
+      expect(findNavLink(SecurityPageName.hostsRisk, links)).toBeTruthy();
+      expect(findNavLink(SecurityPageName.usersRisk, links)).toBeTruthy();
+      expect(findNavLink(SecurityPageName.detectionAndResponse, links)).toBeTruthy();
+    });
+
+    it('Removes siem features when siem capabilities are false', () => {
+      const capabilities = {
+        ...mockCapabilities,
+        [SERVER_APP_ID]: { show: false },
+      } as unknown as Capabilities;
+      const links = getNavLinkItems(mockExperimentalDefaults, platinumLicense, capabilities);
+      nonCasesPages.forEach((page) => {
+        // investigate is active for both Cases and Timelines pages
+        if (page === SecurityPageName.investigate) {
+          return expect(findNavLink(page, links)).toBeTruthy();
+        }
+        return expect(findNavLink(page, links)).toBeFalsy();
+      });
+      casesPages.forEach((page) => expect(findNavLink(page, links)).toBeTruthy());
+    });
+    it('Removes cases features when cases capabilities are false', () => {
+      const capabilities = {
+        ...mockCapabilities,
+        [CASES_FEATURE_ID]: { read_cases: false, crud_cases: false },
+      } as unknown as Capabilities;
+      const links = getNavLinkItems(mockExperimentalDefaults, platinumLicense, capabilities);
+      nonCasesPages.forEach((page) => expect(findNavLink(page, links)).toBeTruthy());
+      casesPages.forEach((page) => expect(findNavLink(page, links)).toBeFalsy());
+    });
   });
+
   describe('needsUrlState', () => {
     it('returns true when url state exists for page', () => {
       const needsUrl = needsUrlState(SecurityPageName.hosts);

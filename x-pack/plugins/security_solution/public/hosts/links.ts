@@ -11,8 +11,8 @@ import { LinkItem } from '../common/links/types';
 
 export const links: LinkItem = {
   id: SecurityPageName.hosts,
-  label: HOSTS,
-  url: HOSTS_PATH,
+  title: HOSTS,
+  path: HOSTS_PATH,
   globalNavEnabled: true,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.search.hosts', {
@@ -21,58 +21,58 @@ export const links: LinkItem = {
   ],
   globalSearchEnabled: true,
   globalNavOrder: 9002,
-  items: [
+  links: [
     {
       id: SecurityPageName.hostsAuthentications,
-      label: i18n.translate('xpack.securitySolution.search.hosts.authentications', {
+      title: i18n.translate('xpack.securitySolution.search.hosts.authentications', {
         defaultMessage: 'Authentications',
       }),
-      url: `${HOSTS_PATH}/authentications`,
+      path: `${HOSTS_PATH}/authentications`,
       hideWhenExperimentalKey: 'usersEnabled',
     },
     {
       id: SecurityPageName.uncommonProcesses,
-      label: i18n.translate('xpack.securitySolution.search.hosts.uncommonProcesses', {
+      title: i18n.translate('xpack.securitySolution.search.hosts.uncommonProcesses', {
         defaultMessage: 'Uncommon Processes',
       }),
-      url: `${HOSTS_PATH}/uncommonProcesses`,
+      path: `${HOSTS_PATH}/uncommonProcesses`,
     },
     {
       id: SecurityPageName.hostsAnomalies,
-      label: i18n.translate('xpack.securitySolution.search.hosts.anomalies', {
+      title: i18n.translate('xpack.securitySolution.search.hosts.anomalies', {
         defaultMessage: 'Anomalies',
       }),
-      url: `${HOSTS_PATH}/anomalies`,
+      path: `${HOSTS_PATH}/anomalies`,
       isPremium: true,
     },
     {
       id: SecurityPageName.hostsEvents,
-      label: i18n.translate('xpack.securitySolution.search.hosts.events', {
+      title: i18n.translate('xpack.securitySolution.search.hosts.events', {
         defaultMessage: 'Events',
       }),
-      url: `${HOSTS_PATH}/events`,
+      path: `${HOSTS_PATH}/events`,
     },
     {
       id: SecurityPageName.hostsExternalAlerts,
-      label: i18n.translate('xpack.securitySolution.search.hosts.externalAlerts', {
+      title: i18n.translate('xpack.securitySolution.search.hosts.externalAlerts', {
         defaultMessage: 'External Alerts',
       }),
-      url: `${HOSTS_PATH}/externalAlerts`,
+      path: `${HOSTS_PATH}/externalAlerts`,
     },
     {
       id: SecurityPageName.hostsRisk,
-      label: i18n.translate('xpack.securitySolution.search.hosts.risk', {
+      title: i18n.translate('xpack.securitySolution.search.hosts.risk', {
         defaultMessage: 'Hosts by risk',
       }),
-      url: `${HOSTS_PATH}/hostRisk`,
+      path: `${HOSTS_PATH}/hostRisk`,
       experimentalKey: 'riskyHostsEnabled',
     },
     {
       id: SecurityPageName.sessions,
-      label: i18n.translate('xpack.securitySolution.search.hosts.sessions', {
+      title: i18n.translate('xpack.securitySolution.search.hosts.sessions', {
         defaultMessage: 'Sessions',
       }),
-      url: `${HOSTS_PATH}/sessions`,
+      path: `${HOSTS_PATH}/sessions`,
       isBeta: true,
     },
   ],

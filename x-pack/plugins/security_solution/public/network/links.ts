@@ -12,8 +12,8 @@ import { LinkItem } from '../common/links/types';
 
 export const links: LinkItem = {
   id: SecurityPageName.network,
-  label: NETWORK,
-  url: NETWORK_PATH,
+  title: NETWORK,
+  path: NETWORK_PATH,
   globalNavEnabled: true,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.search.network', {
@@ -21,41 +21,41 @@ export const links: LinkItem = {
     }),
   ],
   globalNavOrder: 9003,
-  items: [
+  links: [
     {
       id: SecurityPageName.networkDns,
-      label: i18n.translate('xpack.securitySolution.search.network.dns', {
+      title: i18n.translate('xpack.securitySolution.search.network.dns', {
         defaultMessage: 'DNS',
       }),
-      url: `${NETWORK_PATH}/dns`,
+      path: `${NETWORK_PATH}/dns`,
     },
     {
       id: SecurityPageName.networkHttp,
-      label: i18n.translate('xpack.securitySolution.search.network.http', {
+      title: i18n.translate('xpack.securitySolution.search.network.http', {
         defaultMessage: 'HTTP',
       }),
-      url: `${NETWORK_PATH}/http`,
+      path: `${NETWORK_PATH}/http`,
     },
     {
       id: SecurityPageName.networkTls,
-      label: i18n.translate('xpack.securitySolution.search.network.tls', {
+      title: i18n.translate('xpack.securitySolution.search.network.tls', {
         defaultMessage: 'TLS',
       }),
-      url: `${NETWORK_PATH}/tls`,
+      path: `${NETWORK_PATH}/tls`,
     },
     {
       id: SecurityPageName.networkExternalAlerts,
-      label: i18n.translate('xpack.securitySolution.search.network.externalAlerts', {
+      title: i18n.translate('xpack.securitySolution.search.network.externalAlerts', {
         defaultMessage: 'External Alerts',
       }),
-      url: `${NETWORK_PATH}/external-alerts`,
+      path: `${NETWORK_PATH}/external-alerts`,
     },
     {
       id: SecurityPageName.networkAnomalies,
-      label: i18n.translate('xpack.securitySolution.search.hosts.anomalies', {
+      title: i18n.translate('xpack.securitySolution.search.hosts.anomalies', {
         defaultMessage: 'Anomalies',
       }),
-      url: `${NETWORK_PATH}/anomalies`,
+      path: `${NETWORK_PATH}/anomalies`,
       isPremium: true,
     },
   ],
