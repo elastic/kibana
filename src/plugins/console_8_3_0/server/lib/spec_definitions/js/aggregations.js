@@ -1,10 +1,3 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.aggs = void 0;
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -13,10 +6,15 @@ exports.aggs = void 0;
  * Side Public License, v 1.
  */
 
+Object.defineProperty(exports, '__esModule', {
+  value: true,
+});
+exports.aggs = void 0;
+
 /* eslint-disable @typescript-eslint/naming-convention */
 const significantTermsArgs = {
   __template: {
-    field: ''
+    field: '',
   },
   field: '{field}',
   size: 10,
@@ -24,121 +22,129 @@ const significantTermsArgs = {
   shard_min_doc_count: 10,
   min_doc_count: 10,
   include: {
-    __one_of: ['*', {
-      pattern: '',
-      flags: ''
-    }]
+    __one_of: [
+      '*',
+      {
+        pattern: '',
+        flags: '',
+      },
+    ],
   },
   exclude: {
-    __one_of: ['*', {
-      pattern: '',
-      flags: ''
-    }]
+    __one_of: [
+      '*',
+      {
+        pattern: '',
+        flags: '',
+      },
+    ],
   },
   execution_hint: {
-    __one_of: ['map', 'global_ordinals', 'global_ordinals_hash']
+    __one_of: ['map', 'global_ordinals', 'global_ordinals_hash'],
   },
   background_filter: {
-    __scope_link: 'GLOBAL.filter'
+    __scope_link: 'GLOBAL.filter',
   },
   mutual_information: {
     include_negatives: {
-      __one_of: [true, false]
-    }
+      __one_of: [true, false],
+    },
   },
   chi_square: {
     include_negatives: {
-      __one_of: [true, false]
+      __one_of: [true, false],
     },
     background_is_superset: {
-      __one_of: [true, false]
-    }
+      __one_of: [true, false],
+    },
   },
   percentage: {},
   gnd: {
     background_is_superset: {
-      __one_of: [true, false]
-    }
+      __one_of: [true, false],
+    },
   },
   script_heuristic: {
     __template: {
-      script: '_subset_freq/(_superset_freq - _subset_freq + 1)'
+      script: '_subset_freq/(_superset_freq - _subset_freq + 1)',
     },
-    script: {// populated by a global rule
-    }
-  }
+    script: {
+      // populated by a global rule
+    },
+  },
 };
 const simple_metric = {
   __template: {
-    field: ''
+    field: '',
   },
   field: '{field}',
   missing: 0,
-  script: {// populated by a global rule
-  }
+  script: {
+    // populated by a global rule
+  },
 };
 const field_metric = {
   __template: {
-    field: ''
+    field: '',
   },
-  field: '{field}'
+  field: '{field}',
 };
 const gap_policy = {
-  __one_of: ['skip', 'insert_zeros']
+  __one_of: ['skip', 'insert_zeros'],
 };
 const simple_pipeline = {
   __template: {
-    buckets_path: ''
+    buckets_path: '',
   },
   buckets_path: '',
   format: '',
-  gap_policy
+  gap_policy,
 };
 const rules = {
   '*': {
     aggs: {
       __template: {
         NAME: {
-          AGG_TYPE: {}
-        }
-      }
+          AGG_TYPE: {},
+        },
+      },
     },
     boxplot: {
       __template: {
-        field: ''
+        field: '',
       },
       field: '{field}',
       compression: 100,
-      missing: 0
+      missing: 0,
     },
     t_test: {
       a: {
         field: '{field}',
         filter: {
-          __scope_link: 'GLOBAL.filter'
-        }
+          __scope_link: 'GLOBAL.filter',
+        },
       },
       b: {
         field: '{field}',
         filter: {
-          __scope_link: 'GLOBAL.filter'
-        }
+          __scope_link: 'GLOBAL.filter',
+        },
       },
       type: {
-        __one_of: ['paired', 'homoscedastic', 'heteroscedastic']
+        __one_of: ['paired', 'homoscedastic', 'heteroscedastic'],
       },
       __template: {
         a: {
-          field: ''
+          field: '',
         },
         b: {
-          field: ''
+          field: '',
         },
-        type: ''
-      }
+        type: '',
+      },
     },
     adjacency_matrix: {
-      filters: {}
+      filters: {},
     },
     diversified_sampler: {
       shard_size: 100,
@@ -146,8 +152,8 @@ const rules = {
       max_docs_per_value: 1,
       execution_hint: {
         __template: 'global_ordinals',
-        __one_of: ['global_ordinals', 'map', 'bytes_hash']
-      }
+        __one_of: ['global_ordinals', 'map', 'bytes_hash'],
+      },
     },
     min: simple_metric,
     max: simple_metric,
@@ -157,509 +163,532 @@ const rules = {
     extended_stats: simple_metric,
     value_count: {
       __template: {
-        field: ''
+        field: '',
       },
       field: '{field}',
-      script: {// populated by a global rule
-      }
+      script: {
+        // populated by a global rule
+      },
     },
     global: {},
     filter: {},
     filters: {
       __template: {
         filters: {
-          NAME: {}
-        }
+          NAME: {},
+        },
       },
       filters: {
         '*': {
-          __scope_link: 'GLOBAL.filter'
-        }
+          __scope_link: 'GLOBAL.filter',
+        },
       },
       other_bucket: {
-        __one_of: [true, false]
+        __one_of: [true, false],
       },
-      other_bucket_key: ''
+      other_bucket_key: '',
     },
     missing: field_metric,
     nested: {
       __template: {
-        path: ''
+        path: '',
       },
-      path: ''
+      path: '',
     },
     reverse_nested: {
       __template: {
-        path: ''
+        path: '',
       },
-      path: ''
+      path: '',
     },
     terms: {
       __template: {
         field: '',
-        size: 10
+        size: 10,
       },
       field: '{field}',
       size: 10,
       shard_size: 10,
       order: {
         __template: {
-          _key: 'asc'
+          _key: 'asc',
         },
         _term: {
-          __one_of: ['asc', 'desc']
+          __one_of: ['asc', 'desc'],
         },
         _count: {
-          __one_of: ['asc', 'desc']
+          __one_of: ['asc', 'desc'],
         },
         '*': {
-          __one_of: ['asc', 'desc']
-        }
+          __one_of: ['asc', 'desc'],
+        },
       },
       min_doc_count: 10,
-      script: {// populated by a global rule
+      script: {
+        // populated by a global rule
       },
       include: '.*',
       exclude: '.*',
       execution_hint: {
-        __one_of: ['map', 'global_ordinals', 'global_ordinals_hash', 'global_ordinals_low_cardinality']
+        __one_of: [
+          'map',
+          'global_ordinals',
+          'global_ordinals_hash',
+          'global_ordinals_low_cardinality',
+        ],
       },
       show_term_doc_count_error: {
-        __one_of: [true, false]
+        __one_of: [true, false],
       },
       collect_mode: {
-        __one_of: ['depth_first', 'breadth_first']
+        __one_of: ['depth_first', 'breadth_first'],
       },
-      missing: ''
+      missing: '',
     },
-    significant_text: { ...significantTermsArgs,
-      filter_duplicate_text: '__flag__'
-    },
+    significant_text: { ...significantTermsArgs, filter_duplicate_text: '__flag__' },
     significant_terms: significantTermsArgs,
     range: {
       __template: {
         field: '',
-        ranges: [{
-          from: 50,
-          to: 100
-        }]
+        ranges: [
+          {
+            from: 50,
+            to: 100,
+          },
+        ],
       },
       field: '{field}',
-      ranges: [{
-        to: 50,
-        from: 100,
-        key: ''
-      }],
+      ranges: [
+        {
+          to: 50,
+          from: 100,
+          key: '',
+        },
+      ],
       keyed: {
-        __one_of: [true, false]
+        __one_of: [true, false],
       },
-      script: {// populated by a global rule
-      }
+      script: {
+        // populated by a global rule
+      },
     },
     date_range: {
       __template: {
         field: '',
-        ranges: [{
-          from: 'now-10d/d',
-          to: 'now'
-        }]
+        ranges: [
+          {
+            from: 'now-10d/d',
+            to: 'now',
+          },
+        ],
       },
       field: '{field}',
       format: 'MM-yyy',
-      ranges: [{
-        to: '',
-        from: '',
-        key: ''
-      }],
+      ranges: [
+        {
+          to: '',
+          from: '',
+          key: '',
+        },
+      ],
       keyed: {
-        __one_of: [true, false]
+        __one_of: [true, false],
       },
-      script: {// populated by a global rule
-      }
+      script: {
+        // populated by a global rule
+      },
     },
     ip_range: {
       __template: {
         field: '',
-        ranges: [{
-          from: '10.0.0.5',
-          to: '10.0.0.10'
-        }]
+        ranges: [
+          {
+            from: '10.0.0.5',
+            to: '10.0.0.10',
+          },
+        ],
       },
       field: '{field}',
       format: 'MM-yyy',
-      ranges: [{
-        to: '',
-        from: '',
-        key: '',
-        mask: '10.0.0.127/25'
-      }],
+      ranges: [
+        {
+          to: '',
+          from: '',
+          key: '',
+          mask: '10.0.0.127/25',
+        },
+      ],
       keyed: {
-        __one_of: [true, false]
+        __one_of: [true, false],
       },
-      script: {// populated by a global rule
-      }
+      script: {
+        // populated by a global rule
+      },
     },
     histogram: {
       __template: {
         field: 'price',
-        interval: 50
+        interval: 50,
       },
       field: '{field}',
       interval: 50,
       extended_bounds: {
         __template: {
           min: 0,
-          max: 50
+          max: 50,
         },
         min: 0,
-        max: 50
+        max: 50,
       },
       min_doc_count: 0,
       order: {
         __template: {
-          _key: 'asc'
+          _key: 'asc',
         },
         _key: {
-          __one_of: ['asc', 'desc']
+          __one_of: ['asc', 'desc'],
         },
         _count: {
-          __one_of: ['asc', 'desc']
+          __one_of: ['asc', 'desc'],
         },
         '*': {
-          __one_of: ['asc', 'desc']
-        }
+          __one_of: ['asc', 'desc'],
+        },
       },
       keyed: {
-        __one_of: [true, false]
+        __one_of: [true, false],
       },
-      missing: 0
+      missing: 0,
     },
     date_histogram: {
       __template: {
         field: 'date',
-        interval: 'month'
+        interval: 'month',
       },
       field: '{field}',
       interval: {
-        __one_of: ['year', 'quarter', 'week', 'day', 'hour', 'minute', 'second']
+        __one_of: ['year', 'quarter', 'week', 'day', 'hour', 'minute', 'second'],
       },
       min_doc_count: 0,
       extended_bounds: {
         __template: {
           min: 'now/d',
-          max: 'now/d'
+          max: 'now/d',
         },
         min: 'now/d',
-        max: 'now/d'
+        max: 'now/d',
       },
       order: {
         __template: {
-          _key: 'asc'
+          _key: 'asc',
         },
         _key: {
-          __one_of: ['asc', 'desc']
+          __one_of: ['asc', 'desc'],
         },
         _count: {
-          __one_of: ['asc', 'desc']
+          __one_of: ['asc', 'desc'],
         },
         '*': {
-          __one_of: ['asc', 'desc']
-        }
+          __one_of: ['asc', 'desc'],
+        },
       },
       keyed: {
-        __one_of: [true, false]
+        __one_of: [true, false],
       },
       pre_zone: '-01:00',
       post_zone: '-01:00',
       pre_zone_adjust_large_interval: {
-        __one_of: [true, false]
+        __one_of: [true, false],
       },
       factor: 1000,
       pre_offset: '1d',
       post_offset: '1d',
       format: 'yyyy-MM-dd',
       time_zone: '00:00',
-      missing: ''
+      missing: '',
     },
     geo_distance: {
       __template: {
         field: 'location',
         origin: {
           lat: 52.376,
-          lon: 4.894
+          lon: 4.894,
         },
-        ranges: [{
-          from: 100,
-          to: 300
-        }]
+        ranges: [
+          {
+            from: 100,
+            to: 300,
+          },
+        ],
       },
       field: '{field}',
       origin: {
         lat: 0.0,
-        lon: 0.0
+        lon: 0.0,
       },
       unit: {
-        __one_of: ['mi', 'km', 'in', 'yd', 'm', 'cm', 'mm']
+        __one_of: ['mi', 'km', 'in', 'yd', 'm', 'cm', 'mm'],
       },
-      ranges: [{
-        from: 50,
-        to: 100
-      }],
+      ranges: [
+        {
+          from: 50,
+          to: 100,
+        },
+      ],
       distance_type: {
-        __one_of: ['arc', 'sloppy_arc', 'plane']
-      }
+        __one_of: ['arc', 'sloppy_arc', 'plane'],
+      },
     },
     geohash_grid: {
       __template: {
         field: '',
-        precision: 3
+        precision: 3,
       },
       field: '{field}',
       precision: {
-        __one_of: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+        __one_of: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
       },
       size: 10,
-      shard_size: 10
+      shard_size: 10,
     },
     composite: {
       __template: {
-        sources: [{
-          NAME: {
-            AGG_TYPE: {}
-          }
-        }]
+        sources: [
+          {
+            NAME: {
+              AGG_TYPE: {},
+            },
+          },
+        ],
       },
-      sources: [{
-        __scope_link: '.',
-        __template: {
-          NAME: {
-            AGG_TYPE: {}
-          }
-        }
-      }],
+      sources: [
+        {
+          __scope_link: '.',
+          __template: {
+            NAME: {
+              AGG_TYPE: {},
+            },
+          },
+        },
+      ],
       size: 10,
-      after: {}
+      after: {},
     },
     percentiles: {
       __template: {
         field: '',
-        percents: [1.0, 5.0, 25.0, 50.0, 75.0, 95.0, 99.0]
+        percents: [1.0, 5.0, 25.0, 50.0, 75.0, 95.0, 99.0],
       },
       field: '{field}',
       percents: {
         __template: [1.0, 5.0, 25.0, 50.0, 75.0, 95.0, 99.0],
         // mark type as list
-        __any_of: []
+        __any_of: [],
       },
-      script: {// populated by a global rule
+      script: {
+        // populated by a global rule
       },
       compression: 100,
       method: {
-        __one_of: ['hdr', 'tdigest']
+        __one_of: ['hdr', 'tdigest'],
       },
-      missing: 0
+      missing: 0,
     },
     cardinality: {
       __template: {
-        field: ''
+        field: '',
       },
       precision_threshold: 100,
       rehash: true,
-      script: {// populated by a global rule
+      script: {
+        // populated by a global rule
       },
-      missing: ''
+      missing: '',
     },
     cumulative_cardinality: {
       __template: {
-        buckets_path: ''
+        buckets_path: '',
       },
       buckets_path: '',
-      format: ''
+      format: '',
     },
     scripted_metric: {
       __template: {
         init_script: '',
         map_script: '',
         combine_script: '',
-        reduce_script: ''
+        reduce_script: '',
       },
       init_script: {
-        __scope_link: 'GLOBAL.script'
+        __scope_link: 'GLOBAL.script',
       },
       map_script: {
-        __scope_link: 'GLOBAL.script'
+        __scope_link: 'GLOBAL.script',
       },
       combine_script: {
-        __scope_link: 'GLOBAL.script'
+        __scope_link: 'GLOBAL.script',
       },
       reduce_script: {
-        __scope_link: 'GLOBAL.script'
+        __scope_link: 'GLOBAL.script',
       },
       lang: 'groovy',
       params: {},
-      reduce_params: {}
+      reduce_params: {},
     },
     geo_bounds: {
       __template: {
-        field: ''
+        field: '',
       },
       field: '{field}',
       wrap_longitude: {
-        __one_of: [true, false]
-      }
+        __one_of: [true, false],
+      },
     },
     top_hits: {
       __template: {
-        size: 10
+        size: 10,
       },
       from: 0,
       size: 10,
       sort: {
         __template: [],
-        __scope_link: 'search.sort'
+        __scope_link: 'search.sort',
       },
       highlight: {},
       explain: {
-        __one_of: [true, false]
+        __one_of: [true, false],
       },
       _source: {
         __template: '',
-        __scope_link: 'search._source'
+        __scope_link: 'search._source',
       },
       script_fields: {
-        __scope_link: 'search.script_fields'
+        __scope_link: 'search.script_fields',
       },
       docvalue_fields: ['{field}'],
       version: {
-        __one_of: [true, false]
-      }
+        __one_of: [true, false],
+      },
     },
     percentile_ranks: {
       __template: {
         field: '',
-        values: [10, 15]
+        values: [10, 15],
       },
       field: '{field}',
       values: [],
-      script: {// populated by a global rule
+      script: {
+        // populated by a global rule
       },
       compression: 100,
       method: {
-        __one_of: ['hdr', 'tdigest']
+        __one_of: ['hdr', 'tdigest'],
       },
-      missing: 0
+      missing: 0,
     },
     sampler: {
       __template: {},
-      shard_size: 100
+      shard_size: 100,
     },
     children: {
       __template: {
-        type: ''
+        type: '',
       },
-      type: ''
+      type: '',
     },
     derivative: simple_pipeline,
     avg_bucket: simple_pipeline,
     max_bucket: simple_pipeline,
     min_bucket: simple_pipeline,
     stats_bucket: simple_pipeline,
-    extended_stats_bucket: { ...simple_pipeline,
-      sigma: ''
-    },
-    percentiles_bucket: { ...simple_pipeline,
-      percents: []
-    },
+    extended_stats_bucket: { ...simple_pipeline, sigma: '' },
+    percentiles_bucket: { ...simple_pipeline, percents: [] },
     sum_bucket: simple_pipeline,
     moving_avg: {
       __template: {
-        buckets_path: ''
+        buckets_path: '',
       },
       buckets_path: '',
       format: '',
       gap_policy,
       window: 5,
       model: {
-        __one_of: ['simple', 'linear', 'ewma', 'holt', 'holt_winters']
+        __one_of: ['simple', 'linear', 'ewma', 'holt', 'holt_winters'],
       },
       settings: {
         type: {
-          __one_of: ['add', 'mult']
+          __one_of: ['add', 'mult'],
         },
         alpha: 0.5,
         beta: 0.5,
         gamma: 0.5,
-        period: 7
-      }
+        period: 7,
+      },
     },
     cumulative_sum: {
       __template: {
-        buckets_path: ''
+        buckets_path: '',
       },
       buckets_path: '',
-      format: ''
+      format: '',
     },
     serial_diff: {
       __template: {
         buckets_path: '',
-        lag: 7
+        lag: 7,
       },
       lag: 7,
       gap_policy,
       buckets_path: '',
-      format: ''
+      format: '',
     },
     bucket_script: {
       __template: {
         buckets_path: {},
-        script: ''
+        script: '',
       },
       buckets_path: {},
       format: '',
       gap_policy,
-      script: ''
+      script: '',
     },
     bucket_selector: {
       __template: {
         buckets_path: {},
-        script: ''
+        script: '',
       },
       buckets_path: {},
       gap_policy,
-      script: ''
+      script: '',
     },
     bucket_sort: {
       __template: {
-        sort: []
+        sort: [],
       },
       sort: ['{field}'],
       from: 0,
       size: 0,
-      gap_policy
+      gap_policy,
     },
     matrix_stats: {
       __template: {
-        fields: []
+        fields: [],
       },
-      fields: ['{field}']
-    }
-  }
+      fields: ['{field}'],
+    },
+  },
 };
-const {
-  terms,
-  histogram,
-  date_histogram
-} = rules['*'];
+const { terms, histogram, date_histogram } = rules['*'];
 
-const aggs = specService => {
+const aggs = (specService) => {
   specService.addGlobalAutocompleteRules('aggregations', rules);
   specService.addGlobalAutocompleteRules('aggs', rules);
   specService.addGlobalAutocompleteRules('groupByAggs', {
     '*': {
       terms,
       histogram,
-      date_histogram
-    }
+      date_histogram,
+    },
   });
 };
 

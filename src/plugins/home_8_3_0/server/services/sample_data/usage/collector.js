@@ -1,12 +1,3 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.makeSampleDataUsageCollector = makeSampleDataUsageCollector;
-
-var _collector_fetch = require("./collector_fetch");
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -14,6 +5,14 @@ var _collector_fetch = require("./collector_fetch");
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+Object.defineProperty(exports, '__esModule', {
+  value: true,
+});
+exports.makeSampleDataUsageCollector = makeSampleDataUsageCollector;
+
+const _collector_fetch = require('./collector_fetch');
+
 function makeSampleDataUsageCollector(usageCollection, kibanaIndex) {
   const collector = usageCollection.makeUsageCollector({
     type: 'sample-data',
@@ -23,28 +22,28 @@ function makeSampleDataUsageCollector(usageCollection, kibanaIndex) {
       installed: {
         type: 'array',
         items: {
-          type: 'keyword'
-        }
+          type: 'keyword',
+        },
       },
       last_install_date: {
-        type: 'date'
+        type: 'date',
       },
       last_install_set: {
-        type: 'keyword'
+        type: 'keyword',
       },
       last_uninstall_date: {
-        type: 'date'
+        type: 'date',
       },
       last_uninstall_set: {
-        type: 'keyword'
+        type: 'keyword',
       },
       uninstalled: {
         type: 'array',
         items: {
-          type: 'keyword'
-        }
-      }
-    }
+          type: 'keyword',
+        },
+      },
+    },
   });
   usageCollection.registerCollector(collector);
 }

@@ -1,18 +1,3 @@
-"use strict";
-
-var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.loadData = loadData;
-
-var _readline = _interopRequireDefault(require("readline"));
-
-var _fs = _interopRequireDefault(require("fs"));
-
-var _zlib = require("zlib");
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -20,6 +5,20 @@ var _zlib = require("zlib");
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+const _interopRequireDefault = require('@babel/runtime/helpers/interopRequireDefault');
+
+Object.defineProperty(exports, '__esModule', {
+  value: true,
+});
+exports.loadData = loadData;
+
+const _readline = _interopRequireDefault(require('readline'));
+
+const _fs = _interopRequireDefault(require('fs'));
+
+const _zlib = require('zlib');
+
 const BULK_INSERT_SIZE = 500;
 
 function loadData(path, bulkInsert) {
@@ -29,11 +28,11 @@ function loadData(path, bulkInsert) {
     let isPaused = false; // pause does not stop lines already in buffer. Use smaller buffer size to avoid bulk inserting to many records
 
     const readStream = _fs.default.createReadStream(path, {
-      highWaterMark: 1024 * 4
+      highWaterMark: 1024 * 4,
     });
 
     const lineStream = _readline.default.createInterface({
-      input: readStream.pipe((0, _zlib.createUnzip)())
+      input: readStream.pipe((0, _zlib.createUnzip)()),
     });
 
     const onClose = async () => {
@@ -51,13 +50,13 @@ function loadData(path, bulkInsert) {
 
     lineStream.on('close', onClose);
 
-    const closeWithError = err => {
+    const closeWithError = (err) => {
       lineStream.removeListener('close', onClose);
       lineStream.close();
       reject(err);
     };
 
-    lineStream.on('line', async line => {
+    lineStream.on('line', async (line) => {
       if (line.length === 0 || line.charAt(0) === '#') {
         return;
       }
@@ -67,7 +66,11 @@ function loadData(path, bulkInsert) {
       try {
         doc = JSON.parse(line);
       } catch (err) {
-        closeWithError(new Error(`Unable to parse line as JSON document, line: """${line}""", Error: ${err.message}`));
+        closeWithError(
+          new Error(
+            `Unable to parse line as JSON document, line: """${line}""", Error: ${err.message}`
+          )
+        );
         return;
       }
 

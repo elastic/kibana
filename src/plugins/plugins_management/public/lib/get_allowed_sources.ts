@@ -14,8 +14,6 @@ interface GetAllowedTypesResponse {
 }
 
 export async function getAllowedPluginSources(http: HttpStart): Promise<AllowedPluginSource[]> {
-  const response = await http.get<GetAllowedTypesResponse>(
-    '/api/plugins/_allowed_sources'
-  );
+  const response = await http.get<GetAllowedTypesResponse>('/api/plugins/_allowed_sources');
   return response.sources;
 }

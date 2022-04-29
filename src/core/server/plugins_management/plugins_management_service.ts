@@ -19,13 +19,11 @@ export interface SetupDeps {
   // plugins: PluginsService;
 }
 
-
 /**
  * @public
  */
 export interface PluginsManagementServiceSetup {}
 export interface PluginsManagementServiceStart {}
-
 
 export class PluginsManagementService {
   private readonly log: Logger;
@@ -46,18 +44,12 @@ export class PluginsManagementService {
       pluginsManager: this.pluginsManager,
     });
 
-    return {
-      
-    };
+    return {};
   }
 
   public start(): PluginsManagementServiceStart {
-    return {
-
-    }
+    return {};
   }
 
-  public stop() {
-
-  }
+  public stop() {}
 }

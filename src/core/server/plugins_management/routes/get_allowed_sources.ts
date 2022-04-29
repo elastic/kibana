@@ -8,22 +8,26 @@
 
 import { IRouter } from '../../http';
 import type { AllowedPluginSource } from '../types';
-import { PluginsManager } from '../plugins_manager'
+import { PluginsManager } from '../plugins_manager';
 
 interface RouteConfigs {
   pluginsManager: PluginsManager;
 }
 
-export const registerGetAllowedPluginSourcesRoute = (router: IRouter, { pluginsManager }: RouteConfigs) => {
+export const registerGetAllowedPluginSourcesRoute = (
+  router: IRouter,
+  { pluginsManager }: RouteConfigs
+) => {
   router.get(
     {
       path: '/_allowed_sources',
       validate: false,
     },
     async (ctx, req, res) => {
-      console.log('oK i am called')
-      const allowedPluginSources: AllowedPluginSource[] = await pluginsManager.getAllowedPluginSources();
-      
+      console.log('oK i am called');
+      const allowedPluginSources: AllowedPluginSource[] =
+        await pluginsManager.getAllowedPluginSources();
+
       return res.ok({
         headers: { 'content-type': 'application/json' },
         body: { sources: allowedPluginSources },

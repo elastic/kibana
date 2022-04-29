@@ -1,16 +1,3 @@
-"use strict";
-
-var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.EsLegacyConfigService = void 0;
-
-var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
-
-var _rxjs = require("rxjs");
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -18,16 +5,28 @@ var _rxjs = require("rxjs");
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+const _interopRequireDefault = require('@babel/runtime/helpers/interopRequireDefault');
+
+Object.defineProperty(exports, '__esModule', {
+  value: true,
+});
+exports.EsLegacyConfigService = void 0;
+
+const _defineProperty2 = _interopRequireDefault(require('@babel/runtime/helpers/defineProperty'));
+
+const _rxjs = require('rxjs');
+
 class EsLegacyConfigService {
   constructor() {
-    (0, _defineProperty2.default)(this, "config", void 0);
-    (0, _defineProperty2.default)(this, "config$", void 0);
-    (0, _defineProperty2.default)(this, "configSub", void 0);
+    (0, _defineProperty2.default)(this, 'config', void 0);
+    (0, _defineProperty2.default)(this, 'config$', void 0);
+    (0, _defineProperty2.default)(this, 'configSub', void 0);
   }
 
   setup(config$) {
     this.config$ = config$;
-    this.configSub = this.config$.subscribe(config => {
+    this.configSub = this.config$.subscribe((config) => {
       this.config = config;
     });
   }
@@ -49,7 +48,6 @@ class EsLegacyConfigService {
 
     return this.config;
   }
-
 }
 
 exports.EsLegacyConfigService = EsLegacyConfigService;

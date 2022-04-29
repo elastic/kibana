@@ -184,8 +184,8 @@ export class Table extends PureComponent<TableProps, TableState> {
         sortable: false,
         'data-test-subj': 'savedObjectsTableRowType',
         render: (source: string, object: SavedObjectWithMetadata) => {
-          const iconType = source === 'external'? 'folderExclamation' : 'folderCheck';
-          const sourceLabel = source === 'external'? 'External' : 'Verified';
+          const iconType = source === 'external' ? 'folderExclamation' : 'folderCheck';
+          const sourceLabel = source === 'external' ? 'External' : 'Verified';
 
           return (
             <EuiToolTip position="top" content={sourceLabel}>

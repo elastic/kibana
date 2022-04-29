@@ -269,7 +269,7 @@ export interface PluginManifest {
   /**
    * Specifies whether this plugin is upgradable via the plugins manager. Default is false.
    */
-   readonly upgradable?: boolean;
+  readonly upgradable?: boolean;
 }
 
 /**

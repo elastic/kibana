@@ -1,10 +1,3 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.fieldMappings = void 0;
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -12,87 +5,93 @@ exports.fieldMappings = void 0;
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+Object.defineProperty(exports, '__esModule', {
+  value: true,
+});
+exports.fieldMappings = void 0;
+
 const fieldMappings = {
   timestamp: {
-    type: 'date'
+    type: 'date',
   },
   dayOfWeek: {
-    type: 'integer'
+    type: 'integer',
   },
   Carrier: {
-    type: 'keyword'
+    type: 'keyword',
   },
   FlightNum: {
-    type: 'keyword'
+    type: 'keyword',
   },
   Origin: {
-    type: 'keyword'
+    type: 'keyword',
   },
   OriginAirportID: {
-    type: 'keyword'
+    type: 'keyword',
   },
   OriginCityName: {
-    type: 'keyword'
+    type: 'keyword',
   },
   OriginRegion: {
-    type: 'keyword'
+    type: 'keyword',
   },
   OriginCountry: {
-    type: 'keyword'
+    type: 'keyword',
   },
   OriginLocation: {
-    type: 'geo_point'
+    type: 'geo_point',
   },
   Dest: {
-    type: 'keyword'
+    type: 'keyword',
   },
   DestAirportID: {
-    type: 'keyword'
+    type: 'keyword',
   },
   DestCityName: {
-    type: 'keyword'
+    type: 'keyword',
   },
   DestRegion: {
-    type: 'keyword'
+    type: 'keyword',
   },
   DestCountry: {
-    type: 'keyword'
+    type: 'keyword',
   },
   DestLocation: {
-    type: 'geo_point'
+    type: 'geo_point',
   },
   AvgTicketPrice: {
-    type: 'float'
+    type: 'float',
   },
   OriginWeather: {
-    type: 'keyword'
+    type: 'keyword',
   },
   DestWeather: {
-    type: 'keyword'
+    type: 'keyword',
   },
   Cancelled: {
-    type: 'boolean'
+    type: 'boolean',
   },
   DistanceMiles: {
-    type: 'float'
+    type: 'float',
   },
   DistanceKilometers: {
-    type: 'float'
+    type: 'float',
   },
   FlightDelayMin: {
-    type: 'integer'
+    type: 'integer',
   },
   FlightDelay: {
-    type: 'boolean'
+    type: 'boolean',
   },
   FlightDelayType: {
-    type: 'keyword'
+    type: 'keyword',
   },
   FlightTimeMin: {
-    type: 'float'
+    type: 'float',
   },
   FlightTimeHour: {
-    type: 'keyword'
-  }
+    type: 'keyword',
+  },
 };
 exports.fieldMappings = fieldMappings;

@@ -37,7 +37,7 @@ import { InternalHttpResourcesPreboot, InternalHttpResourcesSetup } from './http
 import { InternalStatusServiceSetup } from './status';
 import { InternalLoggingServicePreboot, InternalLoggingServiceSetup } from './logging';
 import { CoreUsageDataStart, InternalCoreUsageDataSetup } from './core_usage_data';
-import { PluginsManagementServiceSetup, PluginsManagementServiceStart } from './plugins_management'
+import { PluginsManagementServiceSetup, PluginsManagementServiceStart } from './plugins_management';
 import { I18nServiceSetup } from './i18n';
 import { InternalDeprecationsServiceSetup, InternalDeprecationsServiceStart } from './deprecations';
 import type {

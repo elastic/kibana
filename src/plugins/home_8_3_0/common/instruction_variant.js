@@ -1,13 +1,3 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.INSTRUCTION_VARIANT = void 0;
-exports.getDisplayText = getDisplayText;
-
-var _i18n = require("@kbn/i18n");
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -15,6 +5,15 @@ var _i18n = require("@kbn/i18n");
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+Object.defineProperty(exports, '__esModule', {
+  value: true,
+});
+exports.INSTRUCTION_VARIANT = void 0;
+exports.getDisplayText = getDisplayText;
+
+const _i18n = require('@kbn/i18n');
+
 const INSTRUCTION_VARIANT = {
   ESC: 'esc',
   OSX: 'osx',
@@ -33,7 +32,7 @@ const INSTRUCTION_VARIANT = {
   DOTNET: 'dotnet',
   LINUX: 'linux',
   PHP: 'php',
-  FLEET: 'fleet'
+  FLEET: 'fleet',
 };
 exports.INSTRUCTION_VARIANT = INSTRUCTION_VARIANT;
 const DISPLAY_MAP = {
@@ -55,8 +54,8 @@ const DISPLAY_MAP = {
   [INSTRUCTION_VARIANT.LINUX]: 'Linux',
   [INSTRUCTION_VARIANT.PHP]: 'PHP',
   [INSTRUCTION_VARIANT.FLEET]: _i18n.i18n.translate('home.tutorial.instruction_variant.fleet', {
-    defaultMessage: 'Elastic APM in Fleet'
-  })
+    defaultMessage: 'Elastic APM in Fleet',
+  }),
 };
 /**
  * Convert instruction variant id into display text.

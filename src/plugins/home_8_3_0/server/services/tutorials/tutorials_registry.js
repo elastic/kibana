@@ -1,20 +1,3 @@
-"use strict";
-
-var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.TutorialsRegistry = void 0;
-
-var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
-
-var _tutorial_schema = require("./lib/tutorial_schema");
-
-var _register = require("../../tutorials/register");
-
-var _constants = require("../../../common/constants");
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -22,22 +5,46 @@ var _constants = require("../../../common/constants");
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+const _interopRequireDefault = require('@babel/runtime/helpers/interopRequireDefault');
+
+Object.defineProperty(exports, '__esModule', {
+  value: true,
+});
+exports.TutorialsRegistry = void 0;
+
+const _defineProperty2 = _interopRequireDefault(require('@babel/runtime/helpers/defineProperty'));
+
+const _tutorial_schema = require('./lib/tutorial_schema');
+
+const _register = require('../../tutorials/register');
+
+const _constants = require('../../../common/constants');
+
 function registerTutorialWithCustomIntegrations(customIntegrations, tutorial) {
-  var _tutorial$integration;
+  let _tutorial$integration;
 
   customIntegrations.registerCustomIntegration({
     id: tutorial.id,
     title: tutorial.name,
-    categories: (_tutorial$integration = tutorial.integrationBrowserCategories) !== null && _tutorial$integration !== void 0 ? _tutorial$integration : [],
+    categories:
+      (_tutorial$integration = tutorial.integrationBrowserCategories) !== null &&
+      _tutorial$integration !== void 0
+        ? _tutorial$integration
+        : [],
     uiInternalPath: `${_constants.HOME_APP_BASE_PATH}#/tutorial/${tutorial.id}`,
     description: tutorial.shortDescription,
-    icons: tutorial.euiIconType ? [{
-      type: 'eui',
-      src: tutorial.euiIconType
-    }] : [],
+    icons: tutorial.euiIconType
+      ? [
+          {
+            type: 'eui',
+            src: tutorial.euiIconType,
+          },
+        ]
+      : [],
     shipper: 'tutorial',
     isBeta: false,
-    eprOverlap: tutorial.eprPackageOverlap
+    eprOverlap: tutorial.eprPackageOverlap,
   });
 }
 
@@ -48,44 +55,52 @@ function registerBeatsTutorialsWithCustomIntegrations(core, customIntegrations, 
     categories: tutorial.integrationBrowserCategories,
     uiInternalPath: `${_constants.HOME_APP_BASE_PATH}#/tutorial/${tutorial.id}`,
     description: tutorial.shortDescription,
-    icons: tutorial.euiIconType ? [{
-      type: tutorial.euiIconType.endsWith('svg') ? 'svg' : 'eui',
-      src: core.http.basePath.prepend(tutorial.euiIconType)
-    }] : [],
+    icons: tutorial.euiIconType
+      ? [
+          {
+            type: tutorial.euiIconType.endsWith('svg') ? 'svg' : 'eui',
+            src: core.http.basePath.prepend(tutorial.euiIconType),
+          },
+        ]
+      : [],
     shipper: 'beats',
     eprOverlap: tutorial.moduleName,
-    isBeta: false
+    isBeta: false,
   });
 }
 
 class TutorialsRegistry {
   // pre-register all the tutorials we know we want in here
   constructor(initContext) {
-    (0, _defineProperty2.default)(this, "tutorialProviders", []);
-    (0, _defineProperty2.default)(this, "scopedTutorialContextFactories", []);
+    (0, _defineProperty2.default)(this, 'tutorialProviders', []);
+    (0, _defineProperty2.default)(this, 'scopedTutorialContextFactories', []);
     this.initContext = initContext;
   }
 
   setup(core, customIntegrations) {
     const router = core.http.createRouter();
-    router.get({
-      path: '/api/kibana/home/tutorials',
-      validate: false
-    }, async (context, req, res) => {
-      const initialContext = this.baseTutorialContext;
-      const scopedContext = this.scopedTutorialContextFactories.reduce((accumulatedContext, contextFactory) => {
-        return { ...accumulatedContext,
-          ...contextFactory(req)
-        };
-      }, initialContext);
-      return res.ok({
-        body: this.tutorialProviders.map(tutorialProvider => {
-          return tutorialProvider(scopedContext); // All the tutorialProviders need to be refactored so that they don't need the server.
-        })
-      });
-    });
+    router.get(
+      {
+        path: '/api/kibana/home/tutorials',
+        validate: false,
+      },
+      async (context, req, res) => {
+        const initialContext = this.baseTutorialContext;
+        const scopedContext = this.scopedTutorialContextFactories.reduce(
+          (accumulatedContext, contextFactory) => {
+            return { ...accumulatedContext, ...contextFactory(req) };
+          },
+          initialContext
+        );
+        return res.ok({
+          body: this.tutorialProviders.map((tutorialProvider) => {
+            return tutorialProvider(scopedContext); // All the tutorialProviders need to be refactored so that they don't need the server.
+          }),
+        });
+      }
+    );
     return {
-      registerTutorial: specProvider => {
+      registerTutorial: (specProvider) => {
         const emptyContext = this.baseTutorialContext;
         let tutorial;
 
@@ -101,16 +116,20 @@ class TutorialsRegistry {
 
         this.tutorialProviders.push(specProvider);
       },
-      unregisterTutorial: specProvider => {
-        this.tutorialProviders = this.tutorialProviders.filter(provider => provider !== specProvider);
+      unregisterTutorial: (specProvider) => {
+        this.tutorialProviders = this.tutorialProviders.filter(
+          (provider) => provider !== specProvider
+        );
       },
-      addScopedTutorialContextFactory: scopedTutorialContextFactory => {
+      addScopedTutorialContextFactory: (scopedTutorialContextFactory) => {
         if (typeof scopedTutorialContextFactory !== 'function') {
-          throw new Error(`Unable to add scoped(request) context factory because you did not provide a function`);
+          throw new Error(
+            `Unable to add scoped(request) context factory because you did not provide a function`
+          );
         }
 
         this.scopedTutorialContextFactories.push(scopedTutorialContextFactory);
-      }
+      },
     };
   }
 
@@ -119,7 +138,7 @@ class TutorialsRegistry {
     this.tutorialProviders.push(..._register.builtInTutorials);
 
     if (customIntegrations) {
-      _register.builtInTutorials.forEach(provider => {
+      _register.builtInTutorials.forEach((provider) => {
         const tutorial = provider(this.baseTutorialContext);
         registerBeatsTutorialsWithCustomIntegrations(core, customIntegrations, tutorial);
       });
@@ -130,12 +149,10 @@ class TutorialsRegistry {
 
   get baseTutorialContext() {
     return {
-      kibanaBranch: this.initContext.env.packageInfo.branch
+      kibanaBranch: this.initContext.env.packageInfo.branch,
     };
   }
-
 }
 /** @public */
-
 
 exports.TutorialsRegistry = TutorialsRegistry;

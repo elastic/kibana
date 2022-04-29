@@ -1,10 +1,3 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.getSpaceIdForBeatsTutorial = getSpaceIdForBeatsTutorial;
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -12,6 +5,11 @@ exports.getSpaceIdForBeatsTutorial = getSpaceIdForBeatsTutorial;
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+Object.defineProperty(exports, '__esModule', {
+  value: true,
+});
+exports.getSpaceIdForBeatsTutorial = getSpaceIdForBeatsTutorial;
 
 /**
  * Returns valid configuration for a beat.yml file for adding the space id

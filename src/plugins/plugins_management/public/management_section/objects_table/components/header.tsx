@@ -10,15 +10,11 @@ import React from 'react';
 import { EuiButtonEmpty, EuiIcon, EuiPageHeader } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const Header = ({
-  onRefresh,
-}: {
-  onRefresh: () => void;
-}) => (
+export const Header = ({ onRefresh }: { onRefresh: () => void }) => (
   <EuiPageHeader
     pageTitle={
       <>
-        <EuiIcon type="package" size='xl'/>
+        <EuiIcon type="package" size="xl" />
         <FormattedMessage
           id="pluginsManagement.objectsTable.header.savedObjectsTitle"
           defaultMessage="Plugins Management"

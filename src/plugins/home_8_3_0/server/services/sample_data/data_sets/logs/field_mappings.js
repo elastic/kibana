@@ -1,10 +1,3 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.fieldMappings = void 0;
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -12,151 +5,157 @@ exports.fieldMappings = void 0;
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+Object.defineProperty(exports, '__esModule', {
+  value: true,
+});
+exports.fieldMappings = void 0;
+
 const fieldMappings = {
   request: {
     type: 'text',
     fields: {
       keyword: {
         type: 'keyword',
-        ignore_above: 256
-      }
-    }
+        ignore_above: 256,
+      },
+    },
   },
   geo: {
     properties: {
       srcdest: {
-        type: 'keyword'
+        type: 'keyword',
       },
       src: {
-        type: 'keyword'
+        type: 'keyword',
       },
       dest: {
-        type: 'keyword'
+        type: 'keyword',
       },
       coordinates: {
-        type: 'geo_point'
-      }
-    }
+        type: 'geo_point',
+      },
+    },
   },
   utc_time: {
-    type: 'date'
+    type: 'date',
   },
   url: {
     type: 'text',
     fields: {
       keyword: {
         type: 'keyword',
-        ignore_above: 256
-      }
-    }
+        ignore_above: 256,
+      },
+    },
   },
   message: {
     type: 'text',
     fields: {
       keyword: {
         type: 'keyword',
-        ignore_above: 256
-      }
-    }
+        ignore_above: 256,
+      },
+    },
   },
   host: {
     type: 'text',
     fields: {
       keyword: {
         type: 'keyword',
-        ignore_above: 256
-      }
-    }
+        ignore_above: 256,
+      },
+    },
   },
   clientip: {
-    type: 'ip'
+    type: 'ip',
   },
   response: {
     type: 'text',
     fields: {
       keyword: {
         type: 'keyword',
-        ignore_above: 256
-      }
-    }
+        ignore_above: 256,
+      },
+    },
   },
   machine: {
     properties: {
       ram: {
-        type: 'long'
+        type: 'long',
       },
       os: {
         type: 'text',
         fields: {
           keyword: {
             type: 'keyword',
-            ignore_above: 256
-          }
-        }
-      }
-    }
+            ignore_above: 256,
+          },
+        },
+      },
+    },
   },
   agent: {
     type: 'text',
     fields: {
       keyword: {
         type: 'keyword',
-        ignore_above: 256
-      }
-    }
+        ignore_above: 256,
+      },
+    },
   },
   bytes: {
-    type: 'long'
+    type: 'long',
   },
   tags: {
     type: 'text',
     fields: {
       keyword: {
         type: 'keyword',
-        ignore_above: 256
-      }
-    }
+        ignore_above: 256,
+      },
+    },
   },
   referer: {
-    type: 'keyword'
+    type: 'keyword',
   },
   ip: {
-    type: 'ip'
+    type: 'ip',
   },
   ip_range: {
-    type: 'ip_range'
+    type: 'ip_range',
   },
   timestamp: {
-    type: 'date'
+    type: 'date',
   },
   '@timestamp': {
     type: 'alias',
-    path: 'timestamp'
+    path: 'timestamp',
   },
   timestamp_range: {
-    type: 'date_range'
+    type: 'date_range',
   },
   phpmemory: {
-    type: 'long'
+    type: 'long',
   },
   memory: {
-    type: 'double'
+    type: 'double',
   },
   extension: {
     type: 'text',
     fields: {
       keyword: {
         type: 'keyword',
-        ignore_above: 256
-      }
-    }
+        ignore_above: 256,
+      },
+    },
   },
   event: {
     properties: {
       dataset: {
-        type: 'keyword'
-      }
-    }
-  }
+        type: 'keyword',
+      },
+    },
+  },
 };
 exports.fieldMappings = fieldMappings;

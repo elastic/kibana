@@ -8,7 +8,7 @@
 
 import { IRouter } from '../../http';
 import type { PluginDescriptor } from '../types';
-import { PluginsManager } from '../plugins_manager'
+import { PluginsManager } from '../plugins_manager';
 
 interface RouteConfigs {
   pluginsManager: PluginsManager;
@@ -25,7 +25,7 @@ export const registerGetPluginsRoute = (router: IRouter, { pluginsManager }: Rou
     },
     (ctx, req, res) => {
       const pluginDescriptors: PluginDescriptor[] = pluginsManager.getPluginDescriptors();
-      
+
       return res.ok({
         headers: { 'content-type': 'application/json' },
         body: pluginDescriptors,

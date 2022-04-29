@@ -17,7 +17,7 @@ import {
 } from './config';
 import { CoreApp } from './core_app';
 import { I18nService } from './i18n';
-import { PluginsManagementService } from './plugins_management'
+import { PluginsManagementService } from './plugins_management';
 import { ElasticsearchService } from './elasticsearch';
 import { HttpService } from './http';
 import { HttpResourcesService } from './http_resources';
@@ -273,7 +273,10 @@ export class Server {
     });
 
     const loggingSetup = this.logging.setup();
-    const pluginsManagmentSetup = this.pluginsManagment.setup({ http: httpSetup, plugins: this.plugins });
+    const pluginsManagmentSetup = this.pluginsManagment.setup({
+      http: httpSetup,
+      plugins: this.plugins,
+    });
 
     const coreSetup: InternalCoreSetup = {
       analytics: analyticsSetup,
@@ -374,7 +377,7 @@ export class Server {
     await this.metrics.stop();
     await this.status.stop();
     await this.logging.stop();
-    this.pluginsManagment.stop()
+    this.pluginsManagment.stop();
     this.deprecations.stop();
   }
 

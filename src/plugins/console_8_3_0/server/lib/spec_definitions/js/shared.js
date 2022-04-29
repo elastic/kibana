@@ -1,10 +1,3 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.BOOLEAN = void 0;
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -12,7 +5,13 @@ exports.BOOLEAN = void 0;
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+Object.defineProperty(exports, '__esModule', {
+  value: true,
+});
+exports.BOOLEAN = void 0;
+
 const BOOLEAN = Object.freeze({
-  __one_of: [true, false]
+  __one_of: [true, false],
 });
 exports.BOOLEAN = BOOLEAN;

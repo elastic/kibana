@@ -1,22 +1,3 @@
-"use strict";
-
-var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.HomeServerPlugin = void 0;
-
-var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
-
-var _services = require("./services");
-
-var _capabilities_provider = require("./capabilities_provider");
-
-var _saved_objects = require("./saved_objects");
-
-var _routes = require("./routes");
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -24,11 +5,29 @@ var _routes = require("./routes");
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+const _interopRequireDefault = require('@babel/runtime/helpers/interopRequireDefault');
+
+Object.defineProperty(exports, '__esModule', {
+  value: true,
+});
+exports.HomeServerPlugin = void 0;
+
+const _defineProperty2 = _interopRequireDefault(require('@babel/runtime/helpers/defineProperty'));
+
+const _services = require('./services');
+
+const _capabilities_provider = require('./capabilities_provider');
+
+const _saved_objects = require('./saved_objects');
+
+const _routes = require('./routes');
+
 class HomeServerPlugin {
   constructor(initContext) {
-    (0, _defineProperty2.default)(this, "tutorialsRegistry", void 0);
-    (0, _defineProperty2.default)(this, "sampleDataRegistry", void 0);
-    (0, _defineProperty2.default)(this, "customIntegrations", void 0);
+    (0, _defineProperty2.default)(this, 'tutorialsRegistry', void 0);
+    (0, _defineProperty2.default)(this, 'sampleDataRegistry', void 0);
+    (0, _defineProperty2.default)(this, 'customIntegrations', void 0);
     this.initContext = initContext;
     this.sampleDataRegistry = new _services.SampleDataRegistry(this.initContext);
     this.tutorialsRegistry = new _services.TutorialsRegistry(this.initContext);
@@ -40,30 +39,26 @@ class HomeServerPlugin {
     core.savedObjects.registerType(_saved_objects.sampleDataTelemetry);
     const router = core.http.createRouter();
     (0, _routes.registerRoutes)(router);
-    console.log('RUNNING SETUP!!@#!@')
+    console.log('RUNNING SETUP!!@#!@');
     return {
-      tutorials: { ...this.tutorialsRegistry.setup(core, plugins.customIntegrations)
+      tutorials: { ...this.tutorialsRegistry.setup(core, plugins.customIntegrations) },
+      sampleData: {
+        ...this.sampleDataRegistry.setup(core, plugins.usageCollection, plugins.customIntegrations),
       },
-      sampleData: { ...this.sampleDataRegistry.setup(core, plugins.usageCollection, plugins.customIntegrations)
-      }
     };
   }
 
   start(core) {
-    console.log('RUNNING START!!@#!@')
+    console.log('RUNNING START!!@#!@');
     return {
-      tutorials: { ...this.tutorialsRegistry.start(core, this.customIntegrations)
-      },
-      sampleData: { ...this.sampleDataRegistry.start()
-      }
+      tutorials: { ...this.tutorialsRegistry.start(core, this.customIntegrations) },
+      sampleData: { ...this.sampleDataRegistry.start() },
     };
   }
-  stop () {
-    console.log('RUNNING STOP!!@#!@') 
+  stop() {
+    console.log('RUNNING STOP!!@#!@');
   }
-
 }
 /** @public */
-
 
 exports.HomeServerPlugin = HomeServerPlugin;

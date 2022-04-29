@@ -1,12 +1,3 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.settings = void 0;
-
-var _shared = require("./shared");
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -14,7 +5,15 @@ var _shared = require("./shared");
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-const settings = specService => {
+
+Object.defineProperty(exports, '__esModule', {
+  value: true,
+});
+exports.settings = void 0;
+
+const _shared = require('./shared');
+
+const settings = (specService) => {
   specService.addEndpointDescription('put_settings', {
     data_autocomplete_rules: {
       refresh_interval: '1s',
@@ -36,35 +35,35 @@ const settings = specService => {
       routing: {
         allocation: {
           include: {
-            tag: ''
+            tag: '',
           },
           exclude: {
-            tag: ''
+            tag: '',
           },
           require: {
-            tag: ''
+            tag: '',
           },
-          total_shards_per_node: -1
-        }
+          total_shards_per_node: -1,
+        },
       },
       'recovery.initial_shards': {
-        __one_of: ['quorum', 'quorum-1', 'half', 'full', 'full-1']
+        __one_of: ['quorum', 'quorum-1', 'half', 'full', 'full-1'],
       },
       'ttl.disable_purge': _shared.BOOLEAN,
       analysis: {
         analyzer: {},
         tokenizer: {},
         filter: {},
-        char_filter: {}
+        char_filter: {},
       },
       'cache.query.enable': _shared.BOOLEAN,
       shadow_replicas: _shared.BOOLEAN,
       shared_filesystem: _shared.BOOLEAN,
       data_path: 'path',
       codec: {
-        __one_of: ['default', 'best_compression', 'lucene_default']
-      }
-    }
+        __one_of: ['default', 'best_compression', 'lucene_default'],
+      },
+    },
   });
 };
 

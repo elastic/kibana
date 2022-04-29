@@ -57,10 +57,10 @@ export class PluginWrapper<
   private readonly log: Logger;
   private readonly initializerContext: PluginInitializerContext;
 
-  private instance?: 
+  private instance?:
     | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
     | PrebootPlugin<TSetup, TPluginsSetup>
-    | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
+    | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
   private isolateTeardown?: () => Promise<void>;
 
@@ -105,15 +105,15 @@ export class PluginWrapper<
 
     if (this.isPrebootPluginInstance(this.instance)) {
       if (this.manifest.upgradable) {
-        console.log('running preboot')
+        console.log('running preboot');
       }
       return this.instance.setup(setupContext as CorePreboot, plugins);
     }
     if (this.manifest.upgradable) {
-      console.log('running setup')
+      console.log('running setup');
     }
-    
-    console.log('running setup FOR ', this.manifest.id)
+
+    console.log('running setup FOR ', this.manifest.id);
     return this.instance.setup(setupContext as CoreSetup, plugins);
   }
 
@@ -130,7 +130,7 @@ export class PluginWrapper<
     }
 
     if (this.manifest.upgradable) {
-      console.log('running start!')
+      console.log('running start!');
     }
     if (this.isPrebootPluginInstance(this.instance)) {
       throw new Error(`Plugin "${this.name}" is a preboot plugin and cannot be started.`);
@@ -163,7 +163,7 @@ export class PluginWrapper<
     if (typeof this.isolateTeardown === 'function') {
       await this.isolateTeardown();
     }
-    
+
     this.isolateTeardown = undefined;
     this.instance = undefined;
   }
@@ -198,19 +198,19 @@ export class PluginWrapper<
       // isolatePath = join(this.path)
     }
 
-    const isolateInstance = this.manifest.upgradable?
-      requireIsolate<
-        | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
-        | PrebootPlugin<TSetup, TPluginsSetup>
-        | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
-      >(join(isolatePath!, 'server')) :
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      { isolateModule: require(join(this.path, 'server')), isolateTeardown: undefined };
+    const isolateInstance = this.manifest.upgradable
+      ? requireIsolate<
+          | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
+          | PrebootPlugin<TSetup, TPluginsSetup>
+          | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
+        >(join(isolatePath!, 'server'))
+      : // eslint-disable-next-line @typescript-eslint/no-var-requires
+        { isolateModule: require(join(this.path, 'server')), isolateTeardown: undefined };
 
     if (this.manifest.upgradable) {
       console.log('isolateInstance::', isolateInstance);
     }
-        
+
     const { isolateModule: pluginDefinition, isolateTeardown } = isolateInstance;
     this.isolateTeardown = isolateTeardown;
     if (!('plugin' in pluginDefinition)) {

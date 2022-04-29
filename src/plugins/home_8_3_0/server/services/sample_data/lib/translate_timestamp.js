@@ -1,12 +1,3 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.dateToIso8601IgnoringTime = dateToIso8601IgnoringTime;
-exports.translateTimeRelativeToDifference = translateTimeRelativeToDifference;
-exports.translateTimeRelativeToWeek = translateTimeRelativeToWeek;
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -14,6 +5,14 @@ exports.translateTimeRelativeToWeek = translateTimeRelativeToWeek;
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+Object.defineProperty(exports, '__esModule', {
+  value: true,
+});
+exports.dateToIso8601IgnoringTime = dateToIso8601IgnoringTime;
+exports.translateTimeRelativeToDifference = translateTimeRelativeToDifference;
+exports.translateTimeRelativeToWeek = translateTimeRelativeToWeek;
+
 const MILLISECONDS_IN_DAY = 86400000;
 
 function iso8601ToDateIgnoringTime(iso8601) {
@@ -41,7 +40,6 @@ function dateToIso8601IgnoringTime(date) {
 } // Translate source timestamp by targetReference timestamp,
 // perserving the distance between source and sourceReference
 
-
 function translateTimeRelativeToDifference(source, sourceReference, targetReference) {
   const sourceDate = iso8601ToDateIgnoringTime(source);
   const sourceReferenceDate = iso8601ToDateIgnoringTime(sourceReference);
@@ -52,7 +50,6 @@ function translateTimeRelativeToDifference(source, sourceReference, targetRefere
 } // Translate source timestamp by targetReference timestamp,
 // perserving the week distance between source and sourceReference and day of week of the source timestamp
 
-
 function translateTimeRelativeToWeek(source, sourceReference, targetReference) {
   const sourceReferenceDate = iso8601ToDateIgnoringTime(sourceReference);
   const targetReferenceDate = iso8601ToDateIgnoringTime(targetReference); // If these dates were in the same week, how many days apart would they be?
@@ -62,6 +59,8 @@ function translateTimeRelativeToWeek(source, sourceReference, targetReference) {
   // days of the week.
 
   const normalizationDelta = dayOfWeekDelta * MILLISECONDS_IN_DAY;
-  const normalizedTargetReference = dateToIso8601IgnoringTime(new Date(targetReferenceDate.getTime() + normalizationDelta));
+  const normalizedTargetReference = dateToIso8601IgnoringTime(
+    new Date(targetReferenceDate.getTime() + normalizationDelta)
+  );
   return translateTimeRelativeToDifference(source, sourceReference, normalizedTargetReference);
 }

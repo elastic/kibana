@@ -1,15 +1,26 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
 import SynchronousWorker from 'synchronous-worker';
 import { setImmediate } from 'timers/promises';
 
 function bubbleError(err: Error) {
-  console.error({
-    err: {
-      message: err.message,
-      stack: err.stack
-    }
-  }, 'error encounterated within the isolate plugin');
+  console.error(
+    {
+      err: {
+        message: err.message,
+        stack: err.stack,
+      },
+    },
+    'error encounterated within the isolate plugin'
+  );
 
-  process.emit('uncaughtException', err)
+  process.emit('uncaughtException', err);
 }
 
 type Nullable<Subj> = Subj | null;
@@ -25,7 +36,7 @@ export function requireIsolate<Module>(modulePath: string): IsolateInstance<Modu
   //   sharedMicrotaskQueue: true,
   // });
 
-  // const req = isolate.createRequire(modulePath);
+  // const req = isolate.creaeteRequire(modulePath);
   // let promise;
   // isolate.runInWorkerScope(() => {
   //   promise = req('vm').runInThisContext(`(async(req, pt) => {
@@ -35,14 +46,12 @@ export function requireIsolate<Module>(modulePath: string): IsolateInstance<Modu
 
   // isolate.runLoopUntilPromiseResolved(promise);
 
-
-
   // let _require: Nullable<NodeJS.Require> = isolate.createRequire(modulePath);
   // isolate.process.on('uncaughtException', bubbleError)
   // isolate.globalThis.Error = Error
   // require plugin inside VM isolate
   const isolateModule = require(modulePath);
-  // console.log('require.cache::', require.cache)
+  // console.log('require.cache::', require.cache);
 
   // ready to be garbage collected
   // _require = null;
@@ -50,7 +59,7 @@ export function requireIsolate<Module>(modulePath: string): IsolateInstance<Modu
   return {
     isolateModule,
     isolateTeardown: async () => {
-      console.log('tearing down!')
+      console.log('tearing down!');
       // the immediate blocks are needed to ensure that the worker
       // has actually finished its work before closing
       await setImmediate();
@@ -58,6 +67,6 @@ export function requireIsolate<Module>(modulePath: string): IsolateInstance<Modu
       // isolateModule.terminate();
       // await isolate.stop();
       await setImmediate();
-    }
-  }
+    },
+  };
 }

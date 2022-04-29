@@ -1,22 +1,3 @@
-"use strict";
-
-var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.proxyRequest = void 0;
-
-var _http = _interopRequireDefault(require("http"));
-
-var _https = _interopRequireDefault(require("https"));
-
-var _boom = _interopRequireDefault(require("@hapi/boom"));
-
-var _url = require("url");
-
-var _lodash = require("lodash");
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -25,21 +6,41 @@ var _lodash = require("lodash");
  * Side Public License, v 1.
  */
 
+const _interopRequireDefault = require('@babel/runtime/helpers/interopRequireDefault');
+
+Object.defineProperty(exports, '__esModule', {
+  value: true,
+});
+exports.proxyRequest = void 0;
+
+const _http = _interopRequireDefault(require('http'));
+
+const _https = _interopRequireDefault(require('https'));
+
+const _boom = _interopRequireDefault(require('@hapi/boom'));
+
+const _url = require('url');
+
+const _lodash = require('lodash');
+
 /**
  * Node http request library does not expect there to be trailing "[" or "]"
  * characters in ipv6 host names.
  */
-const sanitizeHostname = hostName => hostName.trim().replace(/^\[/, '').replace(/\]$/, '');
+const sanitizeHostname = (hostName) => hostName.trim().replace(/^\[/, '').replace(/\]$/, '');
 /**
  * Node URL percent-encodes any invalid characters in the pathname which results a 400 bad request error.
  * We need to decode the percent-encoded pathname, and encode it correctly with encodeURIComponent
  */
 
+const encodePathname = (pathname) => {
+  let _URLSearchParams$get;
 
-const encodePathname = pathname => {
-  var _URLSearchParams$get;
-
-  const decodedPath = (_URLSearchParams$get = new _url.URLSearchParams(`path=${pathname}`).get('path')) !== null && _URLSearchParams$get !== void 0 ? _URLSearchParams$get : ''; // Skip if it is valid
+  const decodedPath =
+    (_URLSearchParams$get = new _url.URLSearchParams(`path=${pathname}`).get('path')) !== null &&
+    _URLSearchParams$get !== void 0
+      ? _URLSearchParams$get
+      : ''; // Skip if it is valid
 
   if (pathname === decodedPath) {
     return pathname;
@@ -50,23 +51,8 @@ const encodePathname = pathname => {
 // with bodies, but ES APIs do. Similarly with DELETE requests with bodies. Another library, `request`
 // diverged too much from current behaviour.
 
-
-const proxyRequest = ({
-  method,
-  headers,
-  agent,
-  uri,
-  timeout,
-  payload,
-  rejectUnauthorized
-}) => {
-  const {
-    hostname,
-    port,
-    protocol,
-    pathname,
-    search
-  } = uri;
+const proxyRequest = ({ method, headers, agent, uri, timeout, payload, rejectUnauthorized }) => {
+  const { hostname, port, protocol, pathname, search } = uri;
   const client = uri.protocol === 'https:' ? _https.default : _http.default;
   const encodedPath = encodePathname(pathname);
   let resolved = false;
@@ -76,9 +62,8 @@ const proxyRequest = ({
     resolve = res;
     reject = rej;
   });
-  const finalUserHeaders = { ...headers
-  };
-  const hasHostHeader = Object.keys(finalUserHeaders).some(key => key.toLowerCase() === 'host');
+  const finalUserHeaders = { ...headers };
+  const hasHostHeader = Object.keys(finalUserHeaders).some((key) => key.toLowerCase() === 'host');
 
   if (!hasHostHeader) {
     finalUserHeaders.host = hostname;
@@ -92,17 +77,18 @@ const proxyRequest = ({
     port: port === '' ? undefined : parseInt(port, 10),
     protocol,
     path: `${encodedPath}${search || ''}`,
-    headers: { ...finalUserHeaders,
+    headers: {
+      ...finalUserHeaders,
       'content-type': 'application/json',
-      'transfer-encoding': 'chunked'
+      'transfer-encoding': 'chunked',
     },
-    agent
+    agent,
   });
-  req.once('response', res => {
+  req.once('response', (res) => {
     resolved = true;
     resolve(res);
   });
-  req.once('socket', socket => {
+  req.once('socket', (socket) => {
     if (!socket.connecting) {
       payload.pipe(req);
     } else {
@@ -112,7 +98,7 @@ const proxyRequest = ({
     }
   });
 
-  const onError = e => reject(e);
+  const onError = (e) => reject(e);
 
   req.once('error', onError);
   const timeoutPromise = new Promise((timeoutResolve, timeoutReject) => {

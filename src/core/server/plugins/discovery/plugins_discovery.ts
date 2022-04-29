@@ -57,7 +57,7 @@ export function discover(
       return ![
         '/Users/bamieh/Bamieh/elastic/kibana/src/plugins/home_8_3_0',
         '/Users/bamieh/Bamieh/elastic/kibana/src/plugins/console_8_3_0',
-      ].some(p => p === value)
+      ].some((p) => p === value);
     }),
     concatMap((pluginPathOrError) => {
       return typeof pluginPathOrError === 'string'

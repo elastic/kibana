@@ -1,10 +1,3 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.search = void 0;
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -12,96 +5,117 @@ exports.search = void 0;
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-const search = specService => {
+
+Object.defineProperty(exports, '__esModule', {
+  value: true,
+});
+exports.search = void 0;
+
+const search = (specService) => {
   specService.addEndpointDescription('search', {
     priority: 10,
     // collides with get doc by id
     data_autocomplete_rules: {
-      query: {// populated by a global rule
+      query: {
+        // populated by a global rule
       },
       profile: {
-        __one_of: [true, false]
+        __one_of: [true, false],
       },
       aggs: {
         __template: {
           NAME: {
-            AGG_TYPE: {}
-          }
-        }
+            AGG_TYPE: {},
+          },
+        },
       },
       post_filter: {
-        __scope_link: 'GLOBAL.filter'
+        __scope_link: 'GLOBAL.filter',
       },
       size: {
-        __template: 20
+        __template: 20,
       },
       from: 0,
       sort: {
-        __template: [{
-          FIELD: {
-            order: 'desc'
-          }
-        }],
-        __any_of: [{
-          '{field}': {
-            order: {
-              __one_of: ['desc', 'asc']
+        __template: [
+          {
+            FIELD: {
+              order: 'desc',
             },
-            missing: {
-              __one_of: ['_last', '_first']
-            },
-            mode: {
-              __one_of: ['min', 'max', 'avg', 'sum']
-            },
-            nested_path: '',
-            nested_filter: {
-              __scope_link: 'GLOBAL.filter'
-            }
-          }
-        }, '{field}', '_score', {
-          _geo_distance: {
-            __template: {
-              FIELD: {
-                lat: 40,
-                lon: -70
-              },
-              order: 'asc'
-            },
+          },
+        ],
+        __any_of: [
+          {
             '{field}': {
-              __one_of: [{
-                __template: {
+              order: {
+                __one_of: ['desc', 'asc'],
+              },
+              missing: {
+                __one_of: ['_last', '_first'],
+              },
+              mode: {
+                __one_of: ['min', 'max', 'avg', 'sum'],
+              },
+              nested_path: '',
+              nested_filter: {
+                __scope_link: 'GLOBAL.filter',
+              },
+            },
+          },
+          '{field}',
+          '_score',
+          {
+            _geo_distance: {
+              __template: {
+                FIELD: {
                   lat: 40,
-                  lon: -70
+                  lon: -70,
                 },
-                lat: 40,
-                lon: -70
-              }, [{
-                __template: {
-                  lat: 40,
-                  lon: -70
-                },
-                lat: 40,
-                lon: -70
-              }], [''], '']
+                order: 'asc',
+              },
+              '{field}': {
+                __one_of: [
+                  {
+                    __template: {
+                      lat: 40,
+                      lon: -70,
+                    },
+                    lat: 40,
+                    lon: -70,
+                  },
+                  [
+                    {
+                      __template: {
+                        lat: 40,
+                        lon: -70,
+                      },
+                      lat: 40,
+                      lon: -70,
+                    },
+                  ],
+                  [''],
+                  '',
+                ],
+              },
+              distance_type: {
+                __one_of: ['sloppy_arc', 'arc', 'plane'],
+              },
+              sort_mode: {
+                __one_of: ['min', 'max', 'avg'],
+              },
+              order: {
+                __one_of: ['asc', 'desc'],
+              },
+              unit: 'km',
             },
-            distance_type: {
-              __one_of: ['sloppy_arc', 'arc', 'plane']
-            },
-            sort_mode: {
-              __one_of: ['min', 'max', 'avg']
-            },
-            order: {
-              __one_of: ['asc', 'desc']
-            },
-            unit: 'km'
-          }
-        }]
+          },
+        ],
       },
       pit: {
         __template: {
           id: '',
-          keep_alive: '1m'
-        }
+          keep_alive: '1m',
+        },
       },
       search_after: [],
       stored_fields: ['{field}'],
@@ -110,132 +124,159 @@ const search = specService => {
           YOUR_SUGGESTION: {
             text: 'YOUR TEXT',
             term: {
-              FIELD: 'MESSAGE'
-            }
-          }
+              FIELD: 'MESSAGE',
+            },
+          },
         },
         '*': {
           include: [],
-          exclude: []
-        }
+          exclude: [],
+        },
       },
       docvalue_fields: ['{field}'],
       fields: {
-        __one_of: [[{
-          __one_of: ['{field}', '*', {
-            field: '{field}',
-            include_unmapped: {
-              __one_of: ['true', 'false']
+        __one_of: [
+          [
+            {
+              __one_of: [
+                '{field}',
+                '*',
+                {
+                  field: '{field}',
+                  include_unmapped: {
+                    __one_of: ['true', 'false'],
+                  },
+                  format: '',
+                },
+              ],
             },
-            format: ''
-          }]
-        }], '*']
+          ],
+          '*',
+        ],
       },
       collapse: {
         __template: {
-          field: 'FIELD'
-        }
+          field: 'FIELD',
+        },
       },
       indices_boost: {
-        __template: [{
-          INDEX: 1.0
-        }]
+        __template: [
+          {
+            INDEX: 1.0,
+          },
+        ],
       },
       rescore: {
         __template: {
           query: {},
-          window_size: 50
-        }
+          window_size: 50,
+        },
       },
       script_fields: {
         __template: {
           FIELD: {
-            script: {// populated by a global rule
-            }
-          }
+            script: {
+              // populated by a global rule
+            },
+          },
         },
         '*': {
-          __scope_link: 'GLOBAL.script'
-        }
+          __scope_link: 'GLOBAL.script',
+        },
       },
       runtime_mappings: {
         __template: {
           FIELD: {
             type: '',
-            script: {// populated by a global rule
-            }
-          }
+            script: {
+              // populated by a global rule
+            },
+          },
         },
         '*': {
-          __scope_link: 'GLOBAL.script'
-        }
+          __scope_link: 'GLOBAL.script',
+        },
       },
       partial_fields: {
         __template: {
           NAME: {
-            include: []
-          }
+            include: [],
+          },
         },
         '*': {
           include: [],
-          exclude: []
-        }
+          exclude: [],
+        },
       },
-      highlight: {// populated by a global rule
+      highlight: {
+        // populated by a global rule
       },
       _source: {
-        __one_of: [['{field}'], '*', '{field}', true, false, {
-          includes: {
-            __one_of: ['{field}', ['{field}']]
+        __one_of: [
+          ['{field}'],
+          '*',
+          '{field}',
+          true,
+          false,
+          {
+            includes: {
+              __one_of: ['{field}', ['{field}']],
+            },
+            excludes: {
+              __one_of: ['{field}', ['{field}']],
+            },
           },
-          excludes: {
-            __one_of: ['{field}', ['{field}']]
-          }
-        }]
+        ],
       },
       explain: {
-        __one_of: [true, false]
+        __one_of: [true, false],
       },
       stats: [''],
       timeout: '1s',
       version: {
-        __one_of: [true, false]
+        __one_of: [true, false],
       },
       track_total_hits: {
-        __one_of: [true, false]
-      }
-    }
+        __one_of: [true, false],
+      },
+    },
   });
   specService.addEndpointDescription('search_template', {
     data_autocomplete_rules: {
       template: {
-        __one_of: [{
-          __scope_link: 'search'
-        }, {
-          __scope_link: 'GLOBAL.script'
-        }]
+        __one_of: [
+          {
+            __scope_link: 'search',
+          },
+          {
+            __scope_link: 'GLOBAL.script',
+          },
+        ],
       },
-      params: {}
-    }
+      params: {},
+    },
   });
   specService.addEndpointDescription('render_search_template', {
     data_autocomplete_rules: {
-      __one_of: [{
-        source: {
-          __scope_link: 'search'
-        }
-      }, {
-        __scope_link: 'GLOBAL.script'
-      }],
-      params: {}
-    }
+      __one_of: [
+        {
+          source: {
+            __scope_link: 'search',
+          },
+        },
+        {
+          __scope_link: 'GLOBAL.script',
+        },
+      ],
+      params: {},
+    },
   });
   specService.addEndpointDescription('_search/template/{id}', {
     data_autocomplete_rules: {
       template: {
-        __scope_link: 'search'
-      }
-    }
+        __scope_link: 'search',
+      },
+    },
   });
 };
 

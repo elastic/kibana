@@ -1,10 +1,3 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.usage = usage;
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -12,10 +5,16 @@ exports.usage = usage;
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+Object.defineProperty(exports, '__esModule', {
+  value: true,
+});
+exports.usage = usage;
+
 const SAVED_OBJECT_ID = 'sample-data-telemetry';
 
 function usage(savedObjects, logger) {
-  const handleIncrementError = err => {
+  const handleIncrementError = (err) => {
     if (err && err.stack) {
       logger.debug(err.stack);
     }
@@ -23,9 +22,9 @@ function usage(savedObjects, logger) {
     logger.warn(`saved objects repository incrementCounter encountered an error: ${err}`);
   };
 
-  const internalRepositoryPromise = savedObjects.then(so => so.createInternalRepository());
+  const internalRepositoryPromise = savedObjects.then((so) => so.createInternalRepository());
   return {
-    addInstall: async dataSet => {
+    addInstall: async (dataSet) => {
       try {
         const internalRepository = await internalRepositoryPromise;
         await internalRepository.incrementCounter(SAVED_OBJECT_ID, dataSet, [`installCount`]);
@@ -33,13 +32,13 @@ function usage(savedObjects, logger) {
         handleIncrementError(err);
       }
     },
-    addUninstall: async dataSet => {
+    addUninstall: async (dataSet) => {
       try {
         const internalRepository = await internalRepositoryPromise;
         await internalRepository.incrementCounter(SAVED_OBJECT_ID, dataSet, [`unInstallCount`]);
       } catch (err) {
         handleIncrementError(err);
       }
-    }
+    },
   };
 }

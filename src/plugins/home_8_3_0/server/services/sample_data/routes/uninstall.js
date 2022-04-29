@@ -1,16 +1,3 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.createUninstallRoute = createUninstallRoute;
-
-var _configSchema = require("@kbn/config-schema");
-
-var _utils = require("./utils");
-
-var _errors = require("../errors");
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -18,46 +5,59 @@ var _errors = require("../errors");
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+Object.defineProperty(exports, '__esModule', {
+  value: true,
+});
+exports.createUninstallRoute = createUninstallRoute;
+
+const _configSchema = require('@kbn/config-schema');
+
+const _utils = require('./utils');
+
+const _errors = require('../errors');
+
 function createUninstallRoute(router, sampleDatasets, logger, usageTracker) {
-  router.delete({
-    path: '/api/sample_data/{id}',
-    validate: {
-      params: _configSchema.schema.object({
-        id: _configSchema.schema.string()
-      })
-    }
-  }, async (context, request, response) => {
-    const sampleDataset = sampleDatasets.find(({
-      id
-    }) => id === request.params.id);
+  router.delete(
+    {
+      path: '/api/sample_data/{id}',
+      validate: {
+        params: _configSchema.schema.object({
+          id: _configSchema.schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const sampleDataset = sampleDatasets.find(({ id }) => id === request.params.id);
 
-    if (!sampleDataset) {
-      return response.notFound();
-    }
-
-    const sampleDataInstaller = await (0, _utils.getSampleDataInstaller)({
-      datasetId: sampleDataset.id,
-      sampleDatasets,
-      logger,
-      context
-    });
-
-    try {
-      await sampleDataInstaller.uninstall(request.params.id); // track the usage operation in a non-blocking way
-
-      usageTracker.addUninstall(request.params.id);
-      return response.noContent();
-    } catch (e) {
-      if (e instanceof _errors.SampleDataInstallError) {
-        return response.customError({
-          body: {
-            message: e.message
-          },
-          statusCode: e.httpCode
-        });
+      if (!sampleDataset) {
+        return response.notFound();
       }
 
-      throw e;
+      const sampleDataInstaller = await (0, _utils.getSampleDataInstaller)({
+        datasetId: sampleDataset.id,
+        sampleDatasets,
+        logger,
+        context,
+      });
+
+      try {
+        await sampleDataInstaller.uninstall(request.params.id); // track the usage operation in a non-blocking way
+
+        usageTracker.addUninstall(request.params.id);
+        return response.noContent();
+      } catch (e) {
+        if (e instanceof _errors.SampleDataInstallError) {
+          return response.customError({
+            body: {
+              message: e.message,
+            },
+            statusCode: e.httpCode,
+          });
+        }
+
+        throw e;
+      }
     }
-  });
+  );
 }

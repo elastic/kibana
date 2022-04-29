@@ -1,22 +1,3 @@
-"use strict";
-
-var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.ProxyConfig = void 0;
-
-var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
-
-var _lodash = require("lodash");
-
-var _url = require("url");
-
-var _https = require("https");
-
-var _wildcard_matcher = require("./wildcard_matcher");
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -24,32 +5,49 @@ var _wildcard_matcher = require("./wildcard_matcher");
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+const _interopRequireDefault = require('@babel/runtime/helpers/interopRequireDefault');
+
+Object.defineProperty(exports, '__esModule', {
+  value: true,
+});
+exports.ProxyConfig = void 0;
+
+const _defineProperty2 = _interopRequireDefault(require('@babel/runtime/helpers/defineProperty'));
+
+const _lodash = require('lodash');
+
+const _url = require('url');
+
+const _https = require('https');
+
+const _wildcard_matcher = require('./wildcard_matcher');
+
 class ProxyConfig {
   // @ts-ignore
   constructor(config) {
-    (0, _defineProperty2.default)(this, "id", void 0);
-    (0, _defineProperty2.default)(this, "matchers", void 0);
-    (0, _defineProperty2.default)(this, "timeout", void 0);
-    (0, _defineProperty2.default)(this, "sslAgent", void 0);
-    (0, _defineProperty2.default)(this, "verifySsl", void 0);
-    config = { ...config
-    }; // -----
+    (0, _defineProperty2.default)(this, 'id', void 0);
+    (0, _defineProperty2.default)(this, 'matchers', void 0);
+    (0, _defineProperty2.default)(this, 'timeout', void 0);
+    (0, _defineProperty2.default)(this, 'sslAgent', void 0);
+    (0, _defineProperty2.default)(this, 'verifySsl', void 0);
+    config = { ...config }; // -----
     // read "match" info
     // -----
 
-    const rawMatches = { ...config.match
-    };
-    this.id = (0, _url.format)({
-      protocol: rawMatches.protocol,
-      hostname: rawMatches.host,
-      port: rawMatches.port,
-      pathname: rawMatches.path
-    }) || '*';
+    const rawMatches = { ...config.match };
+    this.id =
+      (0, _url.format)({
+        protocol: rawMatches.protocol,
+        hostname: rawMatches.host,
+        port: rawMatches.port,
+        pathname: rawMatches.path,
+      }) || '*';
     this.matchers = {
       protocol: new _wildcard_matcher.WildcardMatcher(rawMatches.protocol),
       host: new _wildcard_matcher.WildcardMatcher(rawMatches.host),
       port: new _wildcard_matcher.WildcardMatcher(rawMatches.port),
-      path: new _wildcard_matcher.WildcardMatcher(rawMatches.path, '/')
+      path: new _wildcard_matcher.WildcardMatcher(rawMatches.path, '/'),
     }; // -----
     // read config vars
     // -----
@@ -64,7 +62,7 @@ class ProxyConfig {
     const sslAgentOpts = {
       ca: ssl.ca,
       cert: ssl.cert,
-      key: ssl.key
+      key: ssl.key,
     };
 
     if ((0, _lodash.values)(sslAgentOpts).filter(Boolean).length) {
@@ -73,12 +71,7 @@ class ProxyConfig {
     }
   }
 
-  getForParsedUri({
-    protocol,
-    hostname,
-    port,
-    pathname
-  }) {
+  getForParsedUri({ protocol, hostname, port, pathname }) {
     let match = this.matchers.protocol.match(protocol.slice(0, -1));
     match = match && this.matchers.host.match(hostname);
     match = match && this.matchers.port.match(port);
@@ -87,10 +80,9 @@ class ProxyConfig {
     return {
       timeout: this.timeout,
       rejectUnauthorized: this.sslAgent ? undefined : this.verifySsl,
-      agent: protocol === 'https:' ? this.sslAgent : undefined
+      agent: protocol === 'https:' ? this.sslAgent : undefined,
     };
   }
-
 }
 
 exports.ProxyConfig = ProxyConfig;
