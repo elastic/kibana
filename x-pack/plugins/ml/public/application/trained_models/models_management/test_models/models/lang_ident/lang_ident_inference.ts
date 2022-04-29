@@ -69,11 +69,12 @@ export class LangIdentInference extends InferenceBase<LangIdentResponse> {
           inputText,
         };
         this.inferenceResult$.next(r);
+        this.setFinished();
         return r;
       }
-      this.setFinished();
       const r: LangIdentResponse = { response: [], rawResponse: resp, inputText };
       this.inferenceResult$.next(r);
+      this.setFinished();
       return r;
     } catch (error) {
       this.setFinishedWithErrors(error);
