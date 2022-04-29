@@ -91,7 +91,7 @@ export class WhereExpression extends Component<Props, State> {
             showQueryInput={true}
             query={whereQuery ? whereQuery : getData().query.queryString.getDefaultQuery()}
             onQuerySubmit={this._onQueryChange}
-            indexPatterns={[indexPattern]}
+            dataViews={[indexPattern]}
             customSubmitButton={
               <EuiButton fill data-test-subj="mapWhereFilterEditorSubmitButton">
                 <FormattedMessage

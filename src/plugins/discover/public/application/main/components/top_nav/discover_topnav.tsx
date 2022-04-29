@@ -103,7 +103,7 @@ export const DiscoverTopNav = ({
     <TopNavMenu
       appName="discover"
       config={topNavMenu}
-      indexPatterns={[indexPattern]}
+      dataViews={[indexPattern]}
       onQuerySubmit={updateQuery}
       onSavedQueryIdChange={updateSavedQueryId}
       query={query}

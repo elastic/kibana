@@ -525,7 +525,7 @@ export function DashboardTopNav({
       showDatePicker,
       showFilterBar,
       setMenuMountPoint: embedSettings ? undefined : setHeaderActionMenu,
-      indexPatterns: dashboardAppState.dataViews,
+      dataViews: dashboardAppState.dataViews,
       showSaveQuery: dashboardCapabilities.saveQuery,
       useDefaultBehaviors: true,
       savedQuery: state.savedQuery,

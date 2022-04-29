@@ -231,7 +231,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
             showQueryInput={true}
             query={this.context.services.data.query.queryString.getDefaultQuery()}
             onQuerySubmit={this.previewScript}
-            indexPatterns={[this.props.indexPattern]}
+            dataViews={[this.props.indexPattern]}
             customSubmitButton={
               <EuiButton
                 disabled={this.props.script ? false : true}

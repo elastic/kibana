@@ -61,7 +61,7 @@ export const AdminSearchBar = memo(() => {
           <SearchBar
             dataTestSubj="adminSearchBar"
             query={searchBarQuery}
-            indexPatterns={clonedIndexPatterns as DataView[]}
+            dataViews={clonedIndexPatterns as DataView[]}
             timeHistory={timeHistory}
             onQuerySubmit={onQuerySubmit}
             fillSubmitButton={true}

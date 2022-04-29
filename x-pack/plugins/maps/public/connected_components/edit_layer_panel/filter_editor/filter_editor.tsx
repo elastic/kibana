@@ -141,7 +141,7 @@ export class FilterEditor extends Component<Props, State> {
             showQueryInput={true}
             query={layerQuery ? layerQuery : getData().query.queryString.getDefaultQuery()}
             onQuerySubmit={this._onQueryChange}
-            indexPatterns={this.state.indexPatterns}
+            dataViews={this.state.indexPatterns}
             customSubmitButton={
               <EuiButton fill data-test-subj="mapFilterEditorSubmitButton">
                 <FormattedMessage

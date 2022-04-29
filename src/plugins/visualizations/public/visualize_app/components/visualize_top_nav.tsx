@@ -261,7 +261,7 @@ const TopNav = ({
       onQuerySubmit={handleRefresh}
       savedQueryId={currentAppState.savedQuery}
       onSavedQueryIdChange={stateContainer.transitions.updateSavedQuery}
-      indexPatterns={indexPatterns}
+      dataViews={indexPatterns}
       screenTitle={vis.title}
       showAutoRefreshOnly={!showDatePicker()}
       showDatePicker={showDatePicker()}
@@ -279,7 +279,7 @@ const TopNav = ({
     <TopNavMenu
       appName={VISUALIZE_APP_NAME}
       setMenuMountPoint={setHeaderActionMenu}
-      indexPatterns={indexPatterns}
+      dataViews={indexPatterns}
       showSearchBar
       showSaveQuery={false}
       showDatePicker={false}

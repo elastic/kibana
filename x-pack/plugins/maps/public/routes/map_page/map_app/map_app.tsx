@@ -399,7 +399,7 @@ export class MapApp extends React.Component<Props, State> {
         setMenuMountPoint={this.props.setHeaderActionMenu}
         appName={APP_ID}
         config={topNavConfig}
-        indexPatterns={this.state.indexPatterns}
+        dataViews={this.state.indexPatterns}
         filters={this.props.filters}
         query={this.props.query}
         onQuerySubmit={({ dateRange, query }) => {

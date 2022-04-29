@@ -36,7 +36,7 @@ export interface SearchBarInjectedDeps {
 }
 
 export interface SearchBarOwnProps {
-  indexPatterns?: DataView[];
+  dataViews?: DataView[];
   isLoading?: boolean;
   customSubmitButton?: React.ReactNode;
   screenTitle?: string;
@@ -192,8 +192,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
   private shouldRenderQueryBar() {
     const showDatePicker = this.props.showDatePicker || this.props.showAutoRefreshOnly;
-    const showQueryInput =
-      this.props.showQueryInput && this.props.indexPatterns && this.state.query;
+    const showQueryInput = this.props.showQueryInput && this.props.dataViews && this.state.query;
     return this.props.showQueryBar && (showDatePicker || showQueryInput);
   }
 
@@ -201,8 +200,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     return (
       this.props.showFilterBar &&
       this.props.filters &&
-      this.props.indexPatterns &&
-      compact(this.props.indexPatterns).length > 0
+      this.props.dataViews &&
+      compact(this.props.dataViews).length > 0
     );
   }
 
@@ -357,7 +356,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           query={this.state.query}
           screenTitle={this.props.screenTitle}
           onSubmit={this.onQueryBarSubmit}
-          dataViews={this.props.indexPatterns}
+          dataViews={this.props.dataViews}
           isLoading={this.props.isLoading}
           fillSubmitButton={this.props.fillSubmitButton || false}
           prepend={
@@ -407,7 +406,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             className="globalFilterGroup__filterBar"
             filters={this.props.filters!}
             onFiltersUpdated={this.props.onFiltersUpdated}
-            dataViews={this.props.indexPatterns!}
+            dataViews={this.props.dataViews!}
             appName={this.services.appName}
             timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           />

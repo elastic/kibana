@@ -48,7 +48,7 @@ export function AlertsSearchBar({
 
   return (
     <SearchBar
-      indexPatterns={compatibleIndexPatterns as DataView[]}
+      dataViews={compatibleIndexPatterns as DataView[]}
       placeholder={translations.alertsSearchBar.placeholder}
       query={{ query: query ?? '', language: queryLanguage }}
       timeHistory={timeHistory}

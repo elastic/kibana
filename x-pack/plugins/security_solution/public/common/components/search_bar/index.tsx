@@ -326,7 +326,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
         <SearchBar
           appName="siem"
           isLoading={isLoading}
-          indexPatterns={indexPatterns as DataView[]}
+          dataViews={indexPatterns as DataView[]}
           query={filterQuery}
           onClearSavedQuery={onClearSavedQuery}
           onQuerySubmit={onQuerySubmit}
