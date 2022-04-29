@@ -52,7 +52,12 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
 
     const { navigateToCaseView } = useCaseViewNavigation();
     const { urlParams } = useUrlParams();
-    const activeTabId = urlParams.tabId || CASE_VIEW_PAGE_TABS.ACTIVITY;
+    const activeTabId = useMemo(() => {
+      if (urlParams.tabId && Object.values(CASE_VIEW_PAGE_TABS).includes(urlParams.tabId)) {
+        return urlParams.tabId;
+      }
+      return CASE_VIEW_PAGE_TABS.ACTIVITY;
+    }, [urlParams.tabId]);
 
     const [initLoadingData, setInitLoadingData] = useState(true);
     const init = useRef(true);

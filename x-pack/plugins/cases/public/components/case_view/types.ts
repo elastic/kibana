@@ -42,7 +42,7 @@ export interface OnUpdateFields {
   onError?: () => void;
 }
 
-export const enum CASE_VIEW_PAGE_TABS {
+export enum CASE_VIEW_PAGE_TABS {
   ALERTS = 'alerts',
   ACTIVITY = 'activity',
 }

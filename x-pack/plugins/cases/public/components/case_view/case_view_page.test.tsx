@@ -623,6 +623,19 @@ describe('CaseViewPage', () => {
       });
     });
 
+    it('renders the activity tab when the query parameter tabId has an unknown value', async () => {
+      useUrlParamsMock.mockReturnValue({
+        urlParams: {
+          tabId: 'what-is-love',
+        },
+      });
+      const result = appMockRender.render(<CaseViewPage {...caseProps} />);
+      await act(async () => {
+        expect(result.getByTestId('case-view-tab-content-activity')).toBeTruthy();
+        expect(result.queryByTestId('case-view-tab-content-alerts')).toBeFalsy();
+      });
+    });
+
     it('navigates to the activity tab when the activity tab is clicked', async () => {
       const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
       const result = appMockRender.render(<CaseViewPage {...caseProps} />);
