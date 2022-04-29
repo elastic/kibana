@@ -67,6 +67,7 @@ export function ServiceGroupTemplate({
         return callApmApi('GET /internal/apm/service-groups');
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
