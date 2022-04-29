@@ -259,26 +259,31 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({ dataView, spik
     // onTableChange(tableSettings);
   }, []);
 
-  const cpBarSeries = useMemo(
-    () =>
-      response.changePoints?.map((cp) => {
-        return {
-          ...cp,
-          data:
-            response?.overallTimeSeries?.map((o, i) => {
-              const current = cp.histogram?.find((d) => d.key_as_string === o.key_as_string) ?? {
-                doc_count: 0,
-              };
-              return {
-                ...o,
-                doc_count: current.doc_count,
-                other: Math.max(0, o.doc_count - current.doc_count),
-              };
-            }) ?? [],
-        };
-      }) ?? [],
-    [response.changePoints, response.overallTimeSeries]
-  );
+  const overallTimeSeries = Array.isArray(response?.overallTimeSeries)
+    ? response?.overallTimeSeries[0].data
+    : [];
+  const cpBarSeries =
+    response.changePoints?.map((cp) => {
+      return {
+        ...cp,
+        data:
+          overallTimeSeries.map((o, i) => {
+            const changePointHistogram = response.changePointsHistograms?.find(
+              (d) => d.fieldName === cp.fieldName && d.fieldValue === cp.fieldValue
+            );
+            const current = changePointHistogram?.histogram?.find(
+              (d) => d.key_as_string === o.key_as_string
+            ) ?? {
+              doc_count: 0,
+            };
+            return {
+              ...o,
+              doc_count: current.doc_count,
+              other: Math.max(0, o.doc_count - current.doc_count),
+            };
+          }) ?? [],
+      };
+    }) ?? [];
 
   // const treeItems = useMemo(() => {
   //   let id = 1;
@@ -408,7 +413,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({ dataView, spik
           {response?.tree && response?.frequentItemsHistograms && response?.overallTimeSeries && (
             <TreeView
               frequentItemsHistograms={response?.frequentItemsHistograms}
-              overallHistogram={response?.overallTimeSeries}
+              overallHistogram={overallTimeSeries}
               tree={response?.tree.root.children()}
             />
           )}

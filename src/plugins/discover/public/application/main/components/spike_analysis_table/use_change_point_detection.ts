@@ -8,9 +8,7 @@
 
 import { useCallback, useMemo, useReducer, useRef } from 'react';
 
-import { chunk, debounce } from 'lodash';
-
-import { asyncForEach } from '@kbn/std';
+import { debounce } from 'lodash';
 
 import { IHttpFetchError, ResponseErrorBody } from 'src/core/public';
 
@@ -52,6 +50,8 @@ export interface ChangePoint extends FieldValuePair {
   score: number;
   pValue: number | null;
   normalizedScore: number;
+}
+export interface ChangePointHistogram extends FieldValuePair {
   histogram: HistogramItem[];
 }
 
@@ -93,20 +93,20 @@ export interface ChangePointsResponseTree {
   parentSimilarityWeight: number;
 }
 export type FrequentItemsHistograms = Record<string, HistogramItem[]>;
-export interface ChangePointsResponse {
-  ccsWarning: boolean;
-  changePoints?: ChangePoint[];
-  fieldStats?: FieldStats[];
-  overallTimeSeries?: HistogramItem[];
-  tree?: ChangePointsResponseTree;
-  frequentItemsHistograms?: FrequentItemsHistograms;
-}
-
 type HistogramResponse = Array<{
   data: HistogramItem[];
   interval: number;
   stats: [number, number];
 }>;
+export interface ChangePointsResponse {
+  ccsWarning: boolean;
+  changePoints?: ChangePoint[];
+  changePointsHistograms?: ChangePointHistogram[];
+  fieldStats?: FieldStats[];
+  overallTimeSeries?: HistogramResponse;
+  tree?: ChangePointsResponseTree;
+  frequentItemsHistograms?: FrequentItemsHistograms;
+}
 
 export type Items = Record<string, string[]>;
 interface ItemsMeta {
@@ -114,24 +114,13 @@ interface ItemsMeta {
 }
 export type FrequentItems = ItemsMeta;
 
-export const DEBOUNCE_INTERVAL = 100;
-
-// Overall progress is a float from 0 to 1.
-// const LOADED_OVERALL_HISTOGRAM = 0.05;
-const LOADED_FIELD_CANDIDATES = 0.05;
-const LOADED_DONE = 1;
-const PROGRESS_STEP_P_VALUES = 0.6;
-const PROGRESS_STEP_HISTOGRAMS = 0.1;
-const PROGRESS_STEP_FREQUENT_ITEMS = 0.1;
+export const DEBOUNCE_INTERVAL = 20;
 
 export function useChangePointDetection(
   dataView: DataView,
   searchStrategyParams?: WindowParameters
 ) {
-  const {
-    data,
-    core: { http },
-  } = useDiscoverServices();
+  const { data } = useDiscoverServices();
 
   const discoverQuery = useMemo(() => data.query.getEsQuery(dataView), [data.query, dataView]);
 
@@ -167,7 +156,6 @@ export function useChangePointDetection(
   const abortCtrl = useRef(new AbortController());
 
   const startFetch = useCallback(async () => {
-    let loaded = 0;
     abortCtrl.current.abort();
     abortCtrl.current = new AbortController();
 
@@ -197,206 +185,19 @@ export function useChangePointDetection(
 
       // loaded += LOADED_OVERALL_HISTOGRAM;
 
-      setResponse({
-        ...responseUpdate,
-        loaded,
-        loadingState: 'Loading field candidates.',
-      });
-      setResponse.flush();
-
-      const { fieldCandidates } = await http.get<{ fieldCandidates: string[] }>(
-        '/internal/apm/correlations/field_candidates',
-        {
-          signal: abortCtrl.current.signal,
-          query: fetchParams,
-        }
-      );
-
-      if (abortCtrl.current.signal.aborted) {
-        return;
-      }
-
-      loaded += LOADED_FIELD_CANDIDATES;
-      setResponse({
-        loaded,
-        loadingState: `Identified ${fieldCandidates.length} field candidates.`,
-      });
-      setResponse.flush();
-
-      const changePoints: ChangePoint[] = [];
-      const fieldsToSample = new Set<string>();
-      const chunkSize = 10;
-
-      const fieldCandidatesChunks = chunk(fieldCandidates, chunkSize);
-
-      for (const fieldCandidatesChunk of fieldCandidatesChunks) {
-        const { changePoints: pValues } = await http.post<{
-          changePoints: ChangePoint[];
-        }>('/internal/apm/correlations/change_point_p_values', {
-          signal: abortCtrl.current.signal,
-          body: JSON.stringify({
-            ...fetchParams,
-            timestampField,
-            fieldCandidates: fieldCandidatesChunk,
-            ...searchStrategyParams,
-          }),
-        });
-
-        if (pValues.length > 0) {
-          pValues.forEach((d) => {
-            fieldsToSample.add(d.fieldName);
-          });
-          changePoints.push(...pValues);
-          responseUpdate.changePoints = getChangePointsSortedByScore([...changePoints]);
-        }
-
-        loaded += (1 / fieldCandidatesChunks.length) * PROGRESS_STEP_P_VALUES;
-        setResponse({
-          ...responseUpdate,
-          loaded,
-          loadingState: `Identified ${
-            responseUpdate.changePoints?.length ?? 0
-          } significant field/value pairs.`,
-        });
-
-        if (abortCtrl.current.signal.aborted) {
-          return;
-        }
-      }
-
-      setResponse({
-        loadingState: `Loading fields stats.`,
-      });
-      setResponse.flush();
-
-      const { stats } = await http.post<{ stats: FieldStats[] }>(
-        '/internal/apm/correlations/field_stats',
-        {
-          signal: abortCtrl.current.signal,
-          body: JSON.stringify({ ...fetchParams, fieldsToSample: [...fieldsToSample] }),
-        }
-      );
-
-      // overall time series
-      const body = JSON.stringify({
-        query: discoverQuery,
-        fields: [{ fieldName: '@timestamp', type: 'date' }],
-        samplerShardSize: -1,
-      });
-
-      responseUpdate.fieldStats = stats;
-
-      loaded += 0.05;
-      setResponse({
-        loaded,
-        loadingState: `Loading overall timeseries.`,
-      });
-      setResponse.flush();
-
-      const overallTimeSeries = await http.post<HistogramResponse>({
-        path: `/api/ml/data_visualizer/get_field_histograms/${dataViewTitle}`,
-        body,
-      });
-
-      responseUpdate.overallTimeSeries = overallTimeSeries[0].data;
-
-      loaded += 0.05;
-      setResponse({
-        loaded,
-        loadingState: `Loading significant timeseries.`,
-      });
-      setResponse.flush();
-
-      // console.log('responseUpdate.changePoints', responseUpdate.changePoints);
-
-      // time series filtered by fields
-      if (responseUpdate.changePoints) {
-        await asyncForEach(responseUpdate.changePoints, async (cp, index) => {
-          if (responseUpdate.changePoints) {
-            const histogramQuery = {
-              bool: {
-                filter: [
-                  ...discoverQuery.bool.filter,
-                  {
-                    term: { [cp.fieldName]: cp.fieldValue },
-                  },
-                ],
-              },
-            };
-
-            const hBody = JSON.stringify({
-              query: histogramQuery,
-              fields: [
-                {
-                  fieldName: '@timestamp',
-                  type: 'date',
-                  interval: overallTimeSeries[0].interval,
-                  min: overallTimeSeries[0].stats[0],
-                  max: overallTimeSeries[0].stats[1],
-                },
-              ],
-              samplerShardSize: -1,
-            });
-
-            const cpTimeSeries = await http.post<HistogramResponse>({
-              path: `/api/ml/data_visualizer/get_field_histograms/${dataViewTitle}`,
-              body: hBody,
-            });
-
-            responseUpdate.changePoints[index].histogram = cpTimeSeries[0].data;
-          }
-        });
-        loaded += (1 / responseUpdate.changePoints.length) * PROGRESS_STEP_HISTOGRAMS;
-        setResponse({
-          ...responseUpdate,
-          loaded,
-          isRunning: true,
-        });
-      }
-
-      const frequentItemsFieldCandidates = responseUpdate.changePoints
-        ?.map(({ fieldName, fieldValue }) => ({ fieldName, fieldValue }))
-        .filter(
-          (d) =>
-            d.fieldName !== 'clientip' &&
-            d.fieldName !== 'ip' &&
-            d.fieldName !== 'extension.keyword'
-        );
-
-      if (Array.isArray(frequentItemsFieldCandidates) && frequentItemsFieldCandidates.length > 10) {
-        frequentItemsFieldCandidates.length = 10;
-      }
-
-      const orderedFields = [
-        ...(new Set(frequentItemsFieldCandidates?.map((d) => d.fieldName)) ?? []),
-      ];
-
-      // console.log('orderedFields', orderedFields);
-
-      if (frequentItemsFieldCandidates === undefined) {
-        setResponse({
-          ...responseUpdate,
-          loaded: LOADED_DONE,
-          isRunning: false,
-          loadingState: `Done.`,
-        });
-        setResponse.flush();
-        return;
-      }
-
-      loaded += PROGRESS_STEP_FREQUENT_ITEMS;
-      setResponse({
-        loaded,
-        loadingState: `Loading frequent item sets.`,
-      });
-      setResponse.flush();
-
       const stream = await fetch('/api/ml/data_visualizer/spike_analysis', {
         signal: abortCtrl.current.signal,
         headers: {
+          'Content-Type': 'application/json',
           'kbn-xsrf': 'stream',
         },
         method: 'POST',
+        body: JSON.stringify({
+          ...fetchParams,
+          discoverQuery,
+          timestampField,
+          ...searchStrategyParams,
+        }),
       });
 
       if (stream.body !== null) {
@@ -408,104 +209,54 @@ export function useChangePointDetection(
           const { value, done } = await reader.read();
           if (done) break;
 
-          // console.log('Received', value);
-
           const full = `${partial}${value}`;
           const parts = full.split('\n');
           const last = parts.pop();
 
           partial = last ?? '';
 
-          const parsed = parts.map((p) => {
+          console.log(
+            'parts',
+            parts.map((d) => JSON.parse(d))
+          );
+
+          const parsed = parts.reduce((p, cRaw) => {
             try {
-              return JSON.parse(p);
+              const c = JSON.parse(cRaw);
+
+              Object.entries(c).forEach(([key, value]) => {
+                if (Array.isArray(p[key])) {
+                  p[key].push(...value);
+                } else {
+                  p[key] = value;
+                }
+              });
+
+              return p;
             } catch (e) {
               console.error('failed JSON parsing', p, e);
             }
-          });
+          }, responseUpdate);
 
-          console.log('parsed', parsed);
+          console.log('parsed', { ...parsed });
+
+          setResponse(parsed);
         }
 
         console.log('Response fully received');
+
+        const { itemsets, itemSetTree } = generateItemsets(
+          responseUpdate.orderedFields,
+          responseUpdate.frequentItems,
+          responseUpdate.changePoints ?? [],
+          responseUpdate.totalDocCount
+        );
+
+        setResponse({
+          ...responseUpdate,
+          tree: itemSetTree,
+        });
       }
-
-      const { frequentItems, totalDocCount } = await http.post<{
-        frequentItems: FrequentItems;
-        totalDocCount: number;
-      }>('/internal/apm/correlations/change_point_frequent_items', {
-        signal: abortCtrl.current.signal,
-        body: JSON.stringify({
-          ...fetchParams,
-          timestampField,
-          fieldCandidates: frequentItemsFieldCandidates,
-          ...searchStrategyParams,
-        }),
-      });
-
-      setResponse({
-        loadingState: `Generating tree structure`,
-      });
-      setResponse.flush();
-
-      const { itemsets, itemSetTree } = generateItemsets(
-        orderedFields,
-        frequentItems,
-        responseUpdate.changePoints ?? [],
-        totalDocCount
-      );
-
-      const frequentItemsHistograms: FrequentItemsHistograms = {};
-
-      await asyncForEach(itemsets, async (fi, index) => {
-        const fiFilters = [];
-
-        for (const [fieldName, values] of Object.entries(fi.key)) {
-          for (const value of values) {
-            fiFilters.push({
-              term: { [fieldName]: value },
-            });
-          }
-        }
-
-        const histogramQuery = {
-          bool: {
-            filter: [...discoverQuery.bool.filter, ...fiFilters],
-          },
-        };
-
-        const hBody = JSON.stringify({
-          query: histogramQuery,
-          fields: [
-            {
-              fieldName: '@timestamp',
-              type: 'date',
-              interval: overallTimeSeries[0].interval,
-              min: overallTimeSeries[0].stats[0],
-              max: overallTimeSeries[0].stats[1],
-            },
-          ],
-          samplerShardSize: -1,
-        });
-
-        const fiTimeSeries = await http.post<HistogramResponse>({
-          path: `/api/ml/data_visualizer/get_field_histograms/${dataViewTitle}`,
-          body: hBody,
-        });
-
-        frequentItemsHistograms[JSON.stringify(fi.key)] = fiTimeSeries[0].data;
-      });
-
-      responseUpdate.frequentItemsHistograms = frequentItemsHistograms;
-      responseUpdate.tree = itemSetTree;
-
-      setResponse({
-        ...responseUpdate,
-        loaded: LOADED_DONE,
-        isRunning: false,
-        loadingState: `Done.`,
-      });
-      setResponse.flush();
     } catch (e) {
       if (!abortCtrl.current.signal.aborted) {
         const err = e as Error | IHttpFetchError<ResponseErrorBody>;
@@ -516,15 +267,7 @@ export function useChangePointDetection(
         setResponse.flush();
       }
     }
-  }, [
-    dataViewTitle,
-    discoverQuery,
-    http,
-    fetchParams,
-    setResponse,
-    searchStrategyParams,
-    timestampField,
-  ]);
+  }, [discoverQuery, fetchParams, setResponse, searchStrategyParams, timestampField]);
 
   const cancelFetch = useCallback(() => {
     abortCtrl.current.abort();

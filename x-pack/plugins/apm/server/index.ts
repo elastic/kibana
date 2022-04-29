@@ -128,3 +128,10 @@ export type {
 export type { APMRouteHandlerResources } from './routes/typings';
 
 export type { ProcessorEvent } from '../common/processor_event';
+
+export {
+  fetchChangePointPValues,
+  fetchFieldsStats,
+  fetchSpikeAnalysisFrequentItems,
+  fetchTransactionDurationFieldCandidates,
+} from './routes/correlations/queries';
