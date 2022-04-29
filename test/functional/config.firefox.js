@@ -18,7 +18,7 @@ export default async function ({ readConfigFile }) {
       require.resolve('./apps/dashboard_elements'),
       require.resolve('./apps/discover'),
       require.resolve('./apps/home'),
-      require.resolve('./apps/visualize/group5/_tsvb_time_series'),
+      require.resolve('./apps/visualize/group5'),
     ],
 
     browser: {
