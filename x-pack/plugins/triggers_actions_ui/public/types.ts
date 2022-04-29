@@ -48,6 +48,7 @@ import {
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { TypeRegistry } from './application/type_registry';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
+import { RuleTagBadgeProps } from './application/sections/rules_list/components/rule_tag_badge';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
@@ -80,6 +81,7 @@ export type {
   ResolvedRule,
   SanitizedRule,
   RuleStatusDropdownProps,
+  RuleTagBadgeProps,
 };
 export type { ActionType, AsApiContract };
 export {
@@ -374,7 +376,12 @@ export interface TriggersActionsUiConfig {
   };
 }
 
-export type AlertsData = Record<string, any[]>;
+export enum AlertsField {
+  name = 'kibana.alert.rule.name',
+  reason = 'kibana.alert.reason',
+}
+
+export type AlertsData = Record<AlertsField, any[]>;
 
 export interface FetchAlertData {
   activePage: number;
@@ -405,12 +412,18 @@ export interface AlertsTableProps {
   pageSize: number;
   pageSizeOptions: number[];
   leadingControlColumns: EuiDataGridControlColumn[];
-  renderCellValue: (props: EuiDataGridCellValueElementProps) => React.ReactNode;
+  renderCellValue: (props: RenderCellValueProps) => React.ReactNode;
   showCheckboxes: boolean;
   trailingControlColumns: EuiDataGridControlColumn[];
   useFetchAlertsData: () => FetchAlertData;
+  alerts: AlertsData[];
   'data-test-subj': string;
 }
+
+export type RenderCellValueProps = EuiDataGridCellValueElementProps & {
+  alert: AlertsData;
+  field: AlertsField;
+};
 
 export interface AlertsTableConfigurationRegistry {
   id: string;
