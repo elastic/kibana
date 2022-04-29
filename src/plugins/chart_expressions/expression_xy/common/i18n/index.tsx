@@ -113,6 +113,10 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.ariaLabel.help', {
       defaultMessage: 'Specifies the aria label of the xy chart',
     }),
+  getDetailedTooltipHelp: () =>
+    i18n.translate('expressionXY.xyVis.detailedTooltip.help', {
+      defaultMessage: 'Show detailed tooltip',
+    }),
   getSplitColumnAccessorHelp: () =>
     i18n.translate('expressionXY.xyVis.splitColumnAccessor.help', {
       defaultMessage: 'Specifies split column of the xy chart',

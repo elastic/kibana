@@ -115,4 +115,8 @@ export const commonXYArgs: CommonXYFn['args'] = {
     types: ['string'],
     help: strings.getAriaLabelHelp(),
   },
+  detailedTooltip: {
+    types: ['boolean'],
+    help: strings.getDetailedTooltipHelp(),
+  },
 };

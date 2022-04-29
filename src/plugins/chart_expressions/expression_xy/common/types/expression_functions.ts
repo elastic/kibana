@@ -207,6 +207,7 @@ export interface XYArgs {
   ariaLabel?: string;
   splitRowAccessor?: ExpressionValueVisDimension | string;
   splitColumnAccessor?: ExpressionValueVisDimension | string;
+  detailedTooltip?: boolean;
 }
 
 export interface LayeredXYArgs {
@@ -230,6 +231,7 @@ export interface LayeredXYArgs {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
+  detailedTooltip?: boolean;
 }
 
 export interface XYProps {
@@ -255,6 +257,7 @@ export interface XYProps {
   ariaLabel?: string;
   splitRowAccessor?: ExpressionValueVisDimension | string;
   splitColumnAccessor?: ExpressionValueVisDimension | string;
+  detailedTooltip?: boolean;
 }
 
 export interface AnnotationLayerArgs {

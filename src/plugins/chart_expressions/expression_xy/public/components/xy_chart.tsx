@@ -559,28 +559,32 @@ export function XYChart({
         baseTheme={chartBaseTheme}
         tooltip={{
           boundary: document.getElementById('app-fixed-viewport') ?? undefined,
-          headerFormatter: ({ value }) => (
-            <TooltipHeader
-              value={value}
-              formatter={safeXAccessorLabelRenderer}
-              xDomain={rawXDomain}
-            />
-          ),
-          customTooltip: ({ header, values }) => (
-            <Tooltip
-              header={header}
-              values={values}
-              titles={titles}
-              fieldFormats={fieldFormats}
-              formatFactory={formatFactory}
-              formattedDatatables={formattedDatatables}
-              splitAccessors={{
-                splitColumnAccessor: splitColumnId,
-                splitRowAccessor: splitRowId,
-              }}
-              xDomain={isTimeViz ? rawXDomain : undefined}
-            />
-          ),
+          headerFormatter: !args.detailedTooltip
+            ? ({ value }) => (
+                <TooltipHeader
+                  value={value}
+                  formatter={safeXAccessorLabelRenderer}
+                  xDomain={rawXDomain}
+                />
+              )
+            : undefined,
+          customTooltip: args.detailedTooltip
+            ? ({ header, values }) => (
+                <Tooltip
+                  header={header}
+                  values={values}
+                  titles={titles}
+                  fieldFormats={fieldFormats}
+                  formatFactory={formatFactory}
+                  formattedDatatables={formattedDatatables}
+                  splitAccessors={{
+                    splitColumnAccessor: splitColumnId,
+                    splitRowAccessor: splitRowId,
+                  }}
+                  xDomain={isTimeViz ? rawXDomain : undefined}
+                />
+              )
+            : undefined,
         }}
         allowBrushingLastHistogramBin={isTimeViz}
         rotation={shouldRotate ? 90 : 0}
