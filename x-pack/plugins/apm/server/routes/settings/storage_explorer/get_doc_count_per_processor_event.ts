@@ -56,13 +56,13 @@ export async function getDocCountPerProcessorEvent({
           services: {
             terms: {
               field: SERVICE_NAME,
-              size: 10,
+              size: 500,
             },
             aggs: {
               environments: {
                 terms: {
                   field: SERVICE_ENVIRONMENT,
-                  size: 10,
+                  size: 500,
                 },
               },
               processor_event: {
