@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const ACTION_ID = 'ACTION_EXPLORE_DATA';
 const ACTION_TEST_SUBJ = `embeddablePanelAction-${ACTION_ID}`;

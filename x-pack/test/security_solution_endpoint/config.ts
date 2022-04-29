@@ -15,7 +15,9 @@ import {
 } from '../security_solution_endpoint_api_int/registry';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
+  const xpackFunctionalConfig = await readConfigFile(
+    require.resolve('../functional/config.base.js')
+  );
 
   return {
     ...xpackFunctionalConfig.getAll(),
