@@ -13,6 +13,8 @@ interface GetInstallPkgRouteOptionsParams {
   agentPolicyId?: string;
   pkgkey: string;
   isCloud: boolean;
+  isExperimentalAddIntegrationPageEnabled: boolean;
+  isFirstTimeIntegrationsUser: boolean;
 }
 /*
  * When the install package button is pressed, this fn decides which page to navigate to
@@ -23,18 +25,16 @@ export const getInstallPkgRouteOptions = ({
   integration,
   agentPolicyId,
   pkgkey,
+  isFirstTimeIntegrationsUser,
   isCloud,
+  isExperimentalAddIntegrationPageEnabled,
 }: GetInstallPkgRouteOptionsParams): [string, { path: string; state: unknown }] => {
   const integrationOpts: { integration?: string } = integration ? { integration } : {};
-  const packageExemptFromStepsLayout = isPackageExemptFromStepsLayout(pkgkey);
-  const useMultiPageLayout =
-    isExperimentalAddIntegrationPageEnabled &&
-    isCloud &&
-    isFirstTimeAgentUser &&
-    !packageExemptFromStepsLayout;
+  const useStepsLayout =
+    isExperimentalAddIntegrationPageEnabled && isCloud && isFirstTimeIntegrationsUser;
   const path = pagePathGetters.add_integration_to_policy({
     pkgkey,
-    useMultiPageLayout,
+    useStepsLayout,
     ...integrationOpts,
     ...(agentPolicyId ? { agentPolicyId } : {}),
   })[1];
