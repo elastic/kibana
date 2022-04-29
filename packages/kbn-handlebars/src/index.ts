@@ -3,6 +3,7 @@
  * See `packages/kbn-handlebars/LICENSE` for more information.
  */
 
+// The handlebars module uses `export =`, so we should technically use `import OriginalHandlebars = require('handlebars')`, but Babel will not allow this.
 import OriginalHandlebars from 'handlebars';
 import {
   createProtoAccessControl,
@@ -16,23 +17,6 @@ import { indexOf, createFrame } from 'handlebars/dist/cjs/handlebars/utils';
 // @ts-expect-error: Could not find a declaration file for module
 import { moveHelperToHooks } from 'handlebars/dist/cjs/handlebars/helpers';
 
-export type ExtendedCompileOptions = Pick<
-  CompileOptions,
-  'knownHelpers' | 'knownHelpersOnly' | 'strict' | 'assumeObjects' | 'noEscape' | 'data'
->;
-export type ExtendedRuntimeOptions = Pick<RuntimeOptions, 'helpers' | 'blockParams' | 'data'>;
-
-// eslint-disable-next-line @typescript-eslint/no-namespace
-export declare namespace ExtendedHandlebars {
-  export function compileAST(
-    input: string | hbs.AST.Program,
-    options?: ExtendedCompileOptions
-  ): (context: any, options?: ExtendedRuntimeOptions) => string;
-  export function create(): typeof Handlebars; // eslint-disable-line @typescript-eslint/no-shadow
-}
-
-export const compileFnName: 'compile' | 'compileAST' = allowUnsafeEval() ? 'compile' : 'compileAST';
-
 const originalCreate = OriginalHandlebars.create;
 const Handlebars: typeof ExtendedHandlebars & typeof OriginalHandlebars = OriginalHandlebars as any;
 
@@ -44,10 +28,31 @@ type NodeType = typeof kHelper | typeof kAmbiguous | typeof kSimple;
 type ProcessableNode = hbs.AST.MustacheStatement | hbs.AST.BlockStatement | hbs.AST.SubExpression;
 type ProcessableNodeWithPathParts = ProcessableNode & { path: hbs.AST.PathExpression };
 
-// I've not been able to successfully re-export all of Handlebars, so for now we just re-export the features that we use.
-// The handlebars module uses `export =`, so it can't be re-exported using `export *`. However, because of Babel, we're not allowed to use `export =` ourselves.
-// Similarly we should technically be using `import OriginalHandlebars = require('handlebars')` above, but again, Babel will not allow this.
-export default Handlebars; // eslint-disable-line import/no-default-export
+export const compileFnName: 'compile' | 'compileAST' = allowUnsafeEval() ? 'compile' : 'compileAST';
+
+export type ExtendedCompileOptions = Pick<
+  CompileOptions,
+  'knownHelpers' | 'knownHelpersOnly' | 'strict' | 'assumeObjects' | 'noEscape' | 'data'
+>;
+
+export type ExtendedRuntimeOptions = Pick<RuntimeOptions, 'helpers' | 'blockParams' | 'data'>;
+
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export declare namespace ExtendedHandlebars {
+  export function compileAST(
+    input: string | hbs.AST.Program,
+    options?: ExtendedCompileOptions
+  ): (context: any, options?: ExtendedRuntimeOptions) => string;
+  export function create(): typeof Handlebars; // eslint-disable-line @typescript-eslint/no-shadow
+}
+
+// The handlebars module uses `export =`, so it can't be re-exported using `export *`.
+// However, because of Babel, we're not allowed to use `export =` ourselves.
+// So we have to resort to using `exports default` even though eslint doesn't like it.
+//
+// eslint-disable-next-line import/no-default-export
+export default Handlebars;
+
 export type { HelperDelegate, HelperOptions } from 'handlebars';
 
 export function create(): typeof Handlebars {
