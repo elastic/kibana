@@ -206,6 +206,7 @@ export class MbMap extends Component<Props, State> {
       this._tileStatusTracker = new TileStatusTracker({
         mbMap,
         getCurrentLayerList: () => this.props.layerList,
+        getInspectorAdapters: () => this.props.inspectorAdapters,
         updateTileStatus: (layer: ILayer, areTilesLoaded: boolean, errorMessage?: string) => {
           this.props.setAreTilesLoaded(layer.getId(), areTilesLoaded);
 

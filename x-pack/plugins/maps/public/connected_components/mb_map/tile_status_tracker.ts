@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { Map as MapboxMap, MapSourceDataEvent } from '@kbn/mapbox-gl';
+import type { Map as MapboxMap, MapSourceDataEvent, VectorTileSource } from '@kbn/mapbox-gl';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { Adapters } from '@kbn/inspector-plugin/public';
 import { ILayer } from '../../classes/layers/layer';
-import { SPATIAL_FILTERS_LAYER_ID } from '../../../common/constants';
+import { LAYER_TYPE, SPATIAL_FILTERS_LAYER_ID } from '../../../common/constants';
 import { getTileKey } from '../../classes/util/geo_tile_utils';
 
 interface MbTile {
@@ -39,6 +40,7 @@ export class TileStatusTracker {
     errorMessage?: string
   ) => void;
   private readonly _getCurrentLayerList: () => ILayer[];
+  private readonly _getInspectorAdapters: () => Adapters;
 
   private readonly _onSourceDataLoading = (e: MapSourceDataEvent) => {
     if (
@@ -48,6 +50,26 @@ export class TileStatusTracker {
       e.tile &&
       (e.source.type === 'vector' || e.source.type === 'raster')
     ) {
+      const targetLayer = this._getCurrentLayerList().find((layer) => {
+        return layer.ownsMbSourceId(e.sourceId);
+      });
+      const adapters = this._getInspectorAdapters();
+      if (
+        adapters.vectorTiles &&
+        targetLayer &&
+        targetLayer.getType() === LAYER_TYPE.MVT_VECTOR &&
+        targetLayer.getSource().isESSource()
+      ) {
+        const mbSource = this._mbMap.getSource(e.sourceId) as VectorTileSource;
+        if (mbSource && mbSource.tiles && mbSource.tiles.length) {
+          let tileUrl = mbSource.tiles[0];
+          tileUrl = tileUrl.replace('{z}', e.tile.tileID.canonical.z);
+          tileUrl = tileUrl.replace('{x}', e.tile.tileID.canonical.x);
+          tileUrl = tileUrl.replace('{y}', e.tile.tileID.canonical.y);
+          adapters.vectorTiles.addTileRequest(targetLayer, tileUrl);
+        }
+      }
+
       const tracked = this._tileCache.find((tile) => {
         return (
           tile.mbKey === (e.tile.tileID.key as unknown as string) && tile.mbSourceId === e.sourceId
@@ -115,6 +137,10 @@ export class TileStatusTracker {
     if (this._prevCenterTileKey !== centerTileKey) {
       this._prevCenterTileKey = centerTileKey;
       this._tileErrorCache = {};
+      const adapters = this._getInspectorAdapters();
+      if (adapters.vectorTiles) {
+        adapters.vectorTiles.reset();
+      }
     }
   };
 
@@ -122,15 +148,18 @@ export class TileStatusTracker {
     mbMap,
     updateTileStatus,
     getCurrentLayerList,
+    getInspectorAdapters,
   }: {
     mbMap: MapboxMap;
     updateTileStatus: (layer: ILayer, areTilesLoaded: boolean, errorMessage?: string) => void;
     getCurrentLayerList: () => ILayer[];
+    getInspectorAdapters: () => Adapters;
   }) {
     this._tileCache = [];
     this._tileErrorCache = {};
     this._updateTileStatus = updateTileStatus;
     this._getCurrentLayerList = getCurrentLayerList;
+    this._getInspectorAdapters = getInspectorAdapters;
 
     this._mbMap = mbMap;
     this._mbMap.on('sourcedataloading', this._onSourceDataLoading);

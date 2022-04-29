@@ -8,22 +8,22 @@
 import React, { lazy } from 'react';
 import type { Adapters } from '@kbn/inspector-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { LazyWrapper } from '../lazy_wrapper';
+import { LazyWrapper } from '../../lazy_wrapper';
 
 const getLazyComponent = () => {
-  return lazy(() => import('./map_view_component'));
+  return lazy(() => import('./vector_tile_view_component'));
 };
 
-export const MapInspectorView = {
-  title: i18n.translate('xpack.maps.inspector.mapDetailsViewTitle', {
-    defaultMessage: 'Map details',
+export const VectorTileInspectorView = {
+  title: i18n.translate('xpack.maps.inspector.vectorTileViewTitle', {
+    defaultMessage: 'Vector tiles',
   }),
   order: 30,
-  help: i18n.translate('xpack.maps.inspector.mapDetailsViewHelpText', {
-    defaultMessage: 'View the map state',
+  help: i18n.translate('xpack.maps.inspector.vectorTileViewHelpText', {
+    defaultMessage: 'View Elasticsearch vector tile requests',
   }),
   shouldShow(adapters: Adapters) {
-    return Boolean(adapters.map);
+    return true;
   },
   component: (props: { adapters: Adapters }) => {
     return <LazyWrapper getLazyComponent={getLazyComponent} lazyComponentProps={props} />;

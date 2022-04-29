@@ -99,6 +99,9 @@ describe('TileStatusTracker', () => {
           createMockLayer('foobar', 'foobarsource'),
         ];
       },
+      getInspectorAdapters: () => {
+        return {};
+      },
     });
 
     mockMbMap.emit('sourcedataloading', createMockMbDataEvent('foosource', 'aa11'));
@@ -135,6 +138,9 @@ describe('TileStatusTracker', () => {
       updateTileStatus: () => {},
       getCurrentLayerList: () => {
         return [];
+      },
+      getInspectorAdapters: () => {
+        return {};
       },
     });
 
