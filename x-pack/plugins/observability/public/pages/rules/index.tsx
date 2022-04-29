@@ -203,7 +203,11 @@ export function RulesPage() {
         width: '120px',
         'data-test-subj': 'rulesTableCell-status',
         render: (_executionStatus: RuleExecutionStatus, item: RuleTableItem) => (
-          <ExecutionStatus executionStatus={item.executionStatus} />
+          <ExecutionStatus
+            executionStatus={item.executionStatus}
+            item={item}
+            licenseType={ruleTypeIndex.get(item.ruleTypeId)?.minimumLicenseRequired}
+          />
         ),
       },
       {
