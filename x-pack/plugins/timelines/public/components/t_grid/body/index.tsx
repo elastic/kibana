@@ -442,11 +442,14 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     }, [bulkActions, data]);
 
     const showAlertStatusActions = useMemo(() => {
+      if (!hasAlertsCrud) {
+        return false;
+      }
       if (typeof bulkActions === 'boolean') {
         return bulkActions;
       }
       return bulkActions.alertStatusActions ?? true;
-    }, [bulkActions]);
+    }, [bulkActions, hasAlertsCrud]);
 
     const showBulkActions = useMemo(() => {
       if (!hasAlertsCrud) {
