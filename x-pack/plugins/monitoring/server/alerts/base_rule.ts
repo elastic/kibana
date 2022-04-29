@@ -345,8 +345,6 @@ export class BaseRule {
       globalState.push(`ccs:${ccs}`);
     }
 
-    const baseUrl = Globals.app.url || '(server.publicBaseUrl)';
-
-    return `${baseUrl}/app/monitoring#/${link}?_g=(${globalState.toString()})`;
+    return `${Globals.app.url ?? ''}/app/monitoring#/${link}?_g=(${globalState.toString()})`;
   }
 }
