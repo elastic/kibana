@@ -1,0 +1,153 @@
+{
+  "id": "@kbn/handlebars",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/handlebars",
+        "id": "def-common.create",
+        "type": "Function",
+        "tags": [],
+        "label": "create",
+        "description": [
+          "\nCreates an isolated Handlebars environment.\n\nEach environment has its own helpers.\nThis is only necessary for use cases that demand distinct helpers.\nMost use cases can use the root Handlebars environment directly.\n"
+        ],
+        "signature": [
+          "() => typeof ",
+          {
+            "pluginId": "@kbn/handlebars",
+            "scope": "common",
+            "docId": "kibKbnHandlebarsPluginApi",
+            "section": "def-common.ExtendedHandlebars",
+            "text": "ExtendedHandlebars"
+          },
+          " & typeof Handlebars"
+        ],
+        "path": "packages/kbn-handlebars/src/index.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [
+          "A sandboxed/scoped version of the"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/handlebars",
+        "id": "def-common.compileFnName",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "compileFnName",
+        "description": [
+          "\nIf the `unsafe-eval` CSP is set, this string constant will be `compile`,\notherwise `compileAST`.\n\nThis can be used to call the more optimized `compile` function in\nenvironments that support it, or fall back to `compileAST` on environments\nthat don't."
+        ],
+        "signature": [
+          "\"compile\" | \"compileAST\""
+        ],
+        "path": "packages/kbn-handlebars/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/handlebars",
+        "id": "def-common.ExtendedCompileOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "ExtendedCompileOptions",
+        "description": [
+          "\nSupported Handlebars compile options.\n\nThis is a subset of all the compile options supported by the upstream\nHandlebars module."
+        ],
+        "signature": [
+          "{ data?: boolean | undefined; strict?: boolean | undefined; knownHelpers?: KnownHelpers | undefined; knownHelpersOnly?: boolean | undefined; assumeObjects?: boolean | undefined; noEscape?: boolean | undefined; }"
+        ],
+        "path": "packages/kbn-handlebars/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/handlebars",
+        "id": "def-common.ExtendedRuntimeOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "ExtendedRuntimeOptions",
+        "description": [
+          "\nSupported Handlebars runtime options\n\nThis is a subset of all the runtime options supported by the upstream\nHandlebars module."
+        ],
+        "signature": [
+          "{ data?: any; helpers?: { [name: string]: Function; } | undefined; blockParams?: any[] | undefined; }"
+        ],
+        "path": "packages/kbn-handlebars/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/handlebars",
+        "id": "def-common.Handlebars",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "Handlebars",
+        "description": [
+          "\nA custom version of the Handlesbars module with an extra `compileAST` function."
+        ],
+        "signature": [
+          "typeof ",
+          {
+            "pluginId": "@kbn/handlebars",
+            "scope": "common",
+            "docId": "kibKbnHandlebarsPluginApi",
+            "section": "def-common.ExtendedHandlebars",
+            "text": "ExtendedHandlebars"
+          },
+          " & typeof Handlebars"
+        ],
+        "path": "packages/kbn-handlebars/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/handlebars",
+        "id": "def-common.ExtendedHandlebars",
+        "type": "Object",
+        "tags": [],
+        "label": "ExtendedHandlebars",
+        "description": [
+          "\nNormally this namespace isn't used directly. It's required to be present by\nTypeScript when calling the `Handlebars.create()` function."
+        ],
+        "signature": [
+          "typeof ",
+          {
+            "pluginId": "@kbn/handlebars",
+            "scope": "common",
+            "docId": "kibKbnHandlebarsPluginApi",
+            "section": "def-common.ExtendedHandlebars",
+            "text": "ExtendedHandlebars"
+          }
+        ],
+        "path": "packages/kbn-handlebars/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

@@ -18,6 +18,10 @@ import { indexOf, createFrame } from 'handlebars/dist/cjs/handlebars/utils';
 import { moveHelperToHooks } from 'handlebars/dist/cjs/handlebars/helpers';
 
 const originalCreate = OriginalHandlebars.create;
+
+/**
+ * A custom version of the Handlesbars module with an extra `compileAST` function.
+ */
 const Handlebars: typeof ExtendedHandlebars & typeof OriginalHandlebars = OriginalHandlebars as any;
 
 const kHelper = Symbol('helper');
@@ -28,15 +32,39 @@ type NodeType = typeof kHelper | typeof kAmbiguous | typeof kSimple;
 type ProcessableNode = hbs.AST.MustacheStatement | hbs.AST.BlockStatement | hbs.AST.SubExpression;
 type ProcessableNodeWithPathParts = ProcessableNode & { path: hbs.AST.PathExpression };
 
+/**
+ * If the `unsafe-eval` CSP is set, this string constant will be `compile`,
+ * otherwise `compileAST`.
+ *
+ * This can be used to call the more optimized `compile` function in
+ * environments that support it, or fall back to `compileAST` on environments
+ * that don't.
+ */
 export const compileFnName: 'compile' | 'compileAST' = allowUnsafeEval() ? 'compile' : 'compileAST';
 
+/**
+ * Supported Handlebars compile options.
+ *
+ * This is a subset of all the compile options supported by the upstream
+ * Handlebars module.
+ */
 export type ExtendedCompileOptions = Pick<
   CompileOptions,
   'knownHelpers' | 'knownHelpersOnly' | 'strict' | 'assumeObjects' | 'noEscape' | 'data'
 >;
 
+/**
+ * Supported Handlebars runtime options
+ *
+ * This is a subset of all the runtime options supported by the upstream
+ * Handlebars module.
+ */
 export type ExtendedRuntimeOptions = Pick<RuntimeOptions, 'helpers' | 'blockParams' | 'data'>;
 
+/**
+ * Normally this namespace isn't used directly. It's required to be present by
+ * TypeScript when calling the `Handlebars.create()` function.
+ */
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export declare namespace ExtendedHandlebars {
   export function compileAST(
@@ -53,6 +81,15 @@ export declare namespace ExtendedHandlebars {
 // eslint-disable-next-line import/no-default-export
 export default Handlebars;
 
+/**
+ * Creates an isolated Handlebars environment.
+ *
+ * Each environment has its own helpers.
+ * This is only necessary for use cases that demand distinct helpers.
+ * Most use cases can use the root Handlebars environment directly.
+ *
+ * @returns A sandboxed/scoped version of the @kbn/handlebars module
+ */
 export function create(): typeof Handlebars {
   const SandboxedHandlebars = originalCreate.call(Handlebars) as typeof Handlebars;
   // When creating new Handlebars environments, ensure the custom compileAST function is present in the new environment as well
@@ -62,7 +99,11 @@ export function create(): typeof Handlebars {
 
 Handlebars.create = create;
 
-// Custom function to compile only the AST so we don't have to use `eval`
+/**
+ * Compiles the given Handlbars template without the use of `eval`.
+ *
+ * @returns A render function with the same API as the return value from the regular Handlebars `compile` function.
+ */
 Handlebars.compileAST = function (
   input: string | hbs.AST.Program,
   options?: ExtendedCompileOptions
