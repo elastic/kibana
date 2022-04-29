@@ -42,7 +42,8 @@ export function HistoryViewer({ settings, req }: Props) {
   if (viewerRef.current) {
     const { current: viewer } = viewerRef;
     if (req) {
-      const formattedData = req.data ? formatRequestBodyDoc([req.data], true).data : '';
+      const indent = true;
+      const formattedData = req.data ? formatRequestBodyDoc([req.data], indent).data : '';
       const s = req.method + ' ' + req.endpoint + '\n' + formattedData;
       viewer.update(s, inputMode);
       viewer.clearSelection();

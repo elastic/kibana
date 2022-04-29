@@ -33,7 +33,8 @@ export function restoreRequestFromHistory(editor: SenseEditor, req: ESRequest) {
 
   let s = prefix + req.method + ' ' + req.endpoint;
   if (req.data) {
-    const formattedData = formatRequestBodyDoc([req.data], true);
+    const indent = true;
+    const formattedData = formatRequestBodyDoc([req.data], indent);
     s += '\n' + formattedData.data;
   }
 
