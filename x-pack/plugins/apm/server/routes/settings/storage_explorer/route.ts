@@ -11,8 +11,11 @@ import { getIndicesStats } from './get_indices_stats';
 import { getSearchAggregatedTransactions } from '../../../lib/helpers/transactions';
 import { setupRequest } from '../../../lib/helpers/setup_request';
 import { getDocCountPerProcessorEvent } from './get_doc_count_per_processor_event';
-import { environmentRt, rangeRt } from '../../default_api_types';
-import { StorageExplorerItem } from '../../../../common/storage_explorer_types';
+import { environmentRt } from '../../default_api_types';
+import {
+  StorageExplorerItem,
+  indexLifecyclePhaseRt,
+} from '../../../../common/storage_explorer_types';
 import { getServiceStatistics } from './get_service_statistics';
 import { getTotalTransactionsPerService } from './get_total_transactions_per_service';
 
@@ -20,7 +23,7 @@ const storageExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_explorer',
   options: { tags: ['access:apm'] },
   params: t.type({
-    query: t.intersection([environmentRt, rangeRt]),
+    query: t.intersection([environmentRt, indexLifecyclePhaseRt]),
   }),
   handler: async (
     resources
@@ -31,7 +34,7 @@ const storageExplorerRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params, context } = resources;
     const {
-      query: { environment, start, end },
+      query: { environment, indexLifecyclePhase },
     } = params;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
@@ -43,19 +46,16 @@ const storageExplorerRoute = createApmServerRoute({
     const [docCountPerProcessorEvent, diskUsage, totalTransactionsPerService] =
       await Promise.all([
         getDocCountPerProcessorEvent({
-          searchAggregatedTransactions,
           setup,
-          start,
-          end,
           environment,
+          indexLifecyclePhase,
         }),
-        getIndicesStats({ context, setup }),
+        getIndicesStats({ context, setup, indexLifecyclePhase }),
         getTotalTransactionsPerService({
           setup,
-          start,
-          end,
           environment,
           searchAggregatedTransactions,
+          indexLifecyclePhase,
         }),
       ]);
 

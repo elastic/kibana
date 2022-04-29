@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import * as t from 'io-ts';
+
 export interface StorageExplorerItem {
   service: string;
   environments: string[];
@@ -15,3 +17,26 @@ export interface StorageExplorerItem {
   error: number;
   metric: number;
 }
+
+export enum IndexLifecyclePhase {
+  Hot = 'hot',
+  Warm = 'warm',
+  Cold = 'cold',
+  Frozen = 'frozen',
+}
+
+export const indexLifeCyclePhaseToDataTier = {
+  [IndexLifecyclePhase.Hot]: 'data_hot',
+  [IndexLifecyclePhase.Warm]: 'data_warm',
+  [IndexLifecyclePhase.Cold]: 'data_cold',
+  [IndexLifecyclePhase.Frozen]: 'data_frozen',
+};
+
+export const indexLifecyclePhaseRt = t.type({
+  indexLifecyclePhase: t.union([
+    t.literal(IndexLifecyclePhase.Hot),
+    t.literal(IndexLifecyclePhase.Warm),
+    t.literal(IndexLifecyclePhase.Cold),
+    t.literal(IndexLifecyclePhase.Frozen),
+  ]),
+});

@@ -5,27 +5,32 @@
  * 2.0.
  */
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { rangeQuery } from '@kbn/observability-plugin/server';
+import { termQuery } from '@kbn/observability-plugin/server';
 import { Setup } from '../../../lib/helpers/setup_request';
 import {
   getProcessorEventForTransactions,
   getDocumentTypeFilterForTransactions,
 } from '../../../lib/helpers/transactions';
-import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
+import {
+  SERVICE_NAME,
+  TIER,
+} from '../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../common/utils/environment_query';
+import {
+  IndexLifecyclePhase,
+  indexLifeCyclePhaseToDataTier,
+} from '../../../../common/storage_explorer_types';
 
 export async function getTotalTransactionsPerService({
   setup,
-  start,
-  end,
   environment,
   searchAggregatedTransactions,
+  indexLifecyclePhase,
 }: {
   setup: Setup;
-  start: number;
-  end: number;
   environment: string;
   searchAggregatedTransactions: boolean;
+  indexLifecyclePhase: IndexLifecyclePhase;
 }) {
   const { apmEventClient } = setup;
 
@@ -42,10 +47,13 @@ export async function getTotalTransactionsPerService({
         query: {
           bool: {
             filter: [
-              ...rangeQuery(start, end),
               ...environmentQuery(environment),
               ...getDocumentTypeFilterForTransactions(
                 searchAggregatedTransactions
+              ),
+              ...termQuery(
+                TIER,
+                indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
               ),
             ] as QueryDslQueryContainer[],
           },

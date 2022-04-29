@@ -213,6 +213,8 @@ exports[`Error SPAN_TYPE 1`] = `undefined`;
 
 exports[`Error TBT_FIELD 1`] = `undefined`;
 
+exports[`Error TIER 1`] = `undefined`;
+
 exports[`Error TRACE_ID 1`] = `"trace id"`;
 
 exports[`Error TRANSACTION_DOM_INTERACTIVE 1`] = `undefined`;
@@ -455,6 +457,8 @@ exports[`Span SPAN_SUBTYPE 1`] = `"my subtype"`;
 exports[`Span SPAN_TYPE 1`] = `"span type"`;
 
 exports[`Span TBT_FIELD 1`] = `undefined`;
+
+exports[`Span TIER 1`] = `undefined`;
 
 exports[`Span TRACE_ID 1`] = `"trace id"`;
 
@@ -712,6 +716,8 @@ exports[`Transaction SPAN_SUBTYPE 1`] = `undefined`;
 exports[`Transaction SPAN_TYPE 1`] = `undefined`;
 
 exports[`Transaction TBT_FIELD 1`] = `undefined`;
+
+exports[`Transaction TIER 1`] = `undefined`;
 
 exports[`Transaction TRACE_ID 1`] = `"trace id"`;
 

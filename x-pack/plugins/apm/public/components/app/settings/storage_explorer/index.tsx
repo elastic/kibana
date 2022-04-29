@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiInMemoryTable,
   EuiBasicTableColumn,
@@ -24,22 +24,25 @@ import {
   Settings,
 } from '@elastic/charts';
 import { useChartTheme } from '@kbn/observability-plugin/public';
-import { isEmpty } from 'lodash';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { useTimeRange } from '../../../../hooks/use_time_range';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import { StorageExplorerItem } from '../../../../../common/storage_explorer_types';
+import {
+  StorageExplorerItem,
+  IndexLifecyclePhase,
+} from '../../../../../common/storage_explorer_types';
 import { asDynamicBytes } from '../../../../../common/utils/formatters';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { IndexLifecyclePhaseSelect } from './index_lifecycle_phase_select';
 
 export function StorageExplorer() {
-  const rangeFrom = 'now-15d';
-  const rangeTo = 'now';
+  const [indexLifecyclePhase, setIndexLifecyclePhase] = useState(
+    IndexLifecyclePhase.Hot
+  );
+
   const environment = ENVIRONMENT_ALL.value;
 
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const chartTheme = useChartTheme();
   const groupedPalette = euiPaletteColorBlind({
     rotations: 3,
@@ -49,19 +52,16 @@ export function StorageExplorer() {
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (start && end) {
-        return callApmApi('GET /internal/apm/storage_explorer', {
-          params: {
-            query: {
-              start,
-              end,
-              environment,
-            },
+      return callApmApi('GET /internal/apm/storage_explorer', {
+        params: {
+          query: {
+            environment,
+            indexLifecyclePhase,
           },
-        });
-      }
+        },
+      });
     },
-    [start, end, environment]
+    [environment, indexLifecyclePhase]
   );
 
   const items: StorageExplorerItem[] = data?.serviceStatistics ?? [];
@@ -158,6 +158,12 @@ export function StorageExplorer() {
     box: {
       incremental: true,
     },
+    toolsRight: [
+      <IndexLifecyclePhaseSelect
+        indexLifecyclePhase={indexLifecyclePhase}
+        onChange={setIndexLifecyclePhase}
+      />,
+    ],
   };
 
   const loading =
@@ -194,24 +200,6 @@ export function StorageExplorer() {
               'xpack.apm.settings.storageExplorer.loadingPromptTitle',
               {
                 defaultMessage: 'Could not load storage explorer',
-              }
-            )}
-          </h2>
-        }
-      />
-    );
-  }
-
-  if (items && isEmpty(items)) {
-    return (
-      <EuiEmptyPrompt
-        iconType="alert"
-        title={
-          <h2>
-            {i18n.translate(
-              'xpack.apm.settings.storageExplorer.emptyPromptTitle',
-              {
-                defaultMessage: 'There are no data for storage explorer',
               }
             )}
           </h2>

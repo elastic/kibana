@@ -6,27 +6,29 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { rangeQuery } from '@kbn/observability-plugin/server';
+import { termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup } from '../../../lib/helpers/setup_request';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
+  TIER,
 } from '../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../common/utils/environment_query';
+import {
+  IndexLifecyclePhase,
+  indexLifeCyclePhaseToDataTier,
+} from '../../../../common/storage_explorer_types';
 
 export async function getDocCountPerProcessorEvent({
   setup,
-  start,
-  end,
   environment,
+  indexLifecyclePhase,
 }: {
-  searchAggregatedTransactions: boolean;
   setup: Setup;
-  start: number;
-  end: number;
   environment: string;
+  indexLifecyclePhase: IndexLifecyclePhase;
 }) {
   const { apmEventClient } = setup;
 
@@ -46,8 +48,11 @@ export async function getDocCountPerProcessorEvent({
         query: {
           bool: {
             filter: [
-              ...rangeQuery(start, end),
               ...environmentQuery(environment),
+              ...termQuery(
+                TIER,
+                indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
+              ),
             ] as QueryDslQueryContainer[],
           },
         },
