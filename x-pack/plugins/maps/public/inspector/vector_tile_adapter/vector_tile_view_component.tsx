@@ -7,16 +7,18 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { Adapters } from '@kbn/inspector-plugin/public';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { EmptyPrompt } from './empty_prompt';
+import type { TileRequest } from './types';
 
 interface Props {
   adapters: Adapters;
 }
 
 interface State {
-  selectedLayerId: string | null;
+  selectedLayer: EuiComboBoxOptionOption<string> | null;
   tileRequests: TileRequest[];
   layerOptions: Array<EuiComboBoxOptionOption<string>>;
 }
@@ -25,33 +27,35 @@ class VectorTileViewComponent extends Component<Props, State> {
   private _isMounted = false;
 
   state: State = {
-    selectedLayerId: null,
+    selectedLayer: null,
     tileRequests: [],
     layerOptions: [],
   };
 
   _onAdapterChange = () => {
-    const layerOptions = this.props.adapters.vectorTiles.getLayerOptions();
+    const layerOptions = this.props.adapters.vectorTiles.getLayerOptions() as Array<
+      EuiComboBoxOptionOption<string>
+    >;
     if (layerOptions.length === 0) {
       this.setState({
-        selectedLayerId: null,
+        selectedLayer: null,
         tileRequests: [],
         layerOptions: [],
       });
       return;
     }
 
-    const selectedLayerId =
-      this.state.selectedLayerId &&
+    const selectedLayer =
+      this.state.selectedLayer &&
       layerOptions.some((layerOption) => {
-        return this.state.selectedLayerId === layerOption.value;
+        return this.state.selectedLayer?.value === layerOption.value;
       })
-        ? this.state.selectedLayerId
-        : layerOptions[0].value;
+        ? this.state.selectedLayer
+        : layerOptions[0];
 
     this.setState({
-      selectedLayerId,
-      tileRequests: this.props.adapters.vectorTiles.getTileRequests(selectedLayerId),
+      selectedLayer,
+      tileRequests: this.props.adapters.vectorTiles.getTileRequests(selectedLayer.value),
       layerOptions,
     });
   };
@@ -76,21 +80,35 @@ class VectorTileViewComponent extends Component<Props, State> {
   _onLayerSelect = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
     if (selectedOptions.length === 0) {
       this.setState({
-        selectedLayerId: null,
+        selectedLayer: null,
         tileRequests: [],
       });
       return;
     }
 
-    const selectedLayerId = selectedOptions[0].value;
     this.setState({
-      selectedLayerId,
-      tileRequests: this.props.adapters.vectorTiles.getTileRequests(selectedLayerId),
+      selectedLayer: selectedOptions[0],
+      tileRequests: this.props.adapters.vectorTiles.getTileRequests(selectedOptions[0].value),
     });
   };
 
   render() {
-    return this.state.layerOptions.length === 0 ? <EmptyPrompt /> : <div>Hello world</div>;
+    return this.state.layerOptions.length === 0 ? (
+      <EmptyPrompt />
+    ) : (
+      <>
+        <EuiComboBox
+          singleSelection={true}
+          options={this.state.layerOptions}
+          selectedOptions={this.state.selectedLayer ? [this.state.selectedLayer] : []}
+          onChange={this._onLayerSelect}
+          isClearable={false}
+          prepend={i18n.translate('xpack.maps.inspector.vectorTile.layerSelectPrepend', {
+            defaultMessage: 'Layer',
+          })}
+        />
+      </>
+    );
   }
 }
 

@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import type { Adapters } from '@kbn/inspector-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
