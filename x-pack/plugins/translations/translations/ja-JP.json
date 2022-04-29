@@ -8848,7 +8848,6 @@
     "xpack.canvas.savedElementsModal.modalTitle": "マイエレメント",
     "xpack.canvas.shareWebsiteFlyout.description": "外部 Web サイトでこのワークパッドの不動バージョンを共有するには、これらの手順に従ってください。現在のワークパッドのビジュアルスナップショットになり、ライブデータにはアクセスできません。",
     "xpack.canvas.shareWebsiteFlyout.flyoutCalloutDescription": "共有するには、このワークパッド、{CANVAS} シェアラブルワークパッドランタイム、サンプル {HTML} ファイルを含む {link} を使用します。",
-    "xpack.canvas.shareWebsiteFlyout.flyoutTitle": "Webサイトで共有",
     "xpack.canvas.shareWebsiteFlyout.runtimeStep.description": "共有可能なワークパッドをレンダリングするには、{CANVAS} シェアラブルワークパッドランタイムも含める必要があります。Web サイトにすでにランタイムが含まれている場合、この手順をスキップすることができます。",
     "xpack.canvas.shareWebsiteFlyout.runtimeStep.downloadLabel": "ダウンロードランタイム",
     "xpack.canvas.shareWebsiteFlyout.snippetsStep.addSnippetsTitle": "スナップショットを Web サイトに追加",
