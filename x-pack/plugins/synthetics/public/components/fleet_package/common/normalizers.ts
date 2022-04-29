@@ -7,9 +7,11 @@
 
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { CommonFields, ConfigKey, DataStream } from '../types';
-import { defaultValues as commonDefaultValues } from './default_values';
-import { DEFAULT_NAMESPACE_STRING } from '../../../../common/constants';
-import { defaultConfig } from '../contexts';
+import {
+  DEFAULT_COMMON_FIELDS,
+  DEFAULT_NAMESPACE_STRING,
+  DEFAULT_FIELDS,
+} from '../../../../common/constants/monitor_defaults';
 
 // TO DO: create a standard input format that all fields resolve to
 export type Normalizer = (fields: NewPackagePolicyInput['vars']) => unknown;
@@ -46,15 +48,15 @@ export function getCronNormalizer<Fields>(key: string, defaultValues: Fields): N
 }
 
 export const getCommonNormalizer = (key: ConfigKey) => {
-  return getNormalizer(key, commonDefaultValues);
+  return getNormalizer(key, DEFAULT_COMMON_FIELDS);
 };
 
 export const getCommonjsonToJavascriptNormalizer = (key: ConfigKey) => {
-  return getJsonToJavascriptNormalizer(key, commonDefaultValues);
+  return getJsonToJavascriptNormalizer(key, DEFAULT_COMMON_FIELDS);
 };
 
 export const getCommonCronToSecondsNormalizer = (key: ConfigKey) => {
-  return getCronNormalizer(key, commonDefaultValues);
+  return getCronNormalizer(key, DEFAULT_COMMON_FIELDS);
 };
 
 export const commonNormalizers: CommonNormalizerMap = {
@@ -76,7 +78,7 @@ export const commonNormalizers: CommonNormalizerMap = {
         number,
       };
     } else {
-      return defaultConfig[type][ConfigKey.SCHEDULE];
+      return DEFAULT_FIELDS[type][ConfigKey.SCHEDULE];
     }
   },
   [ConfigKey.APM_SERVICE_NAME]: getCommonNormalizer(ConfigKey.APM_SERVICE_NAME),
