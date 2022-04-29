@@ -211,6 +211,7 @@ export function LayerSettings(props: Props) {
           singleSelection={{ asPlainText: true }}
           selectedOptions={options.filter(({ key }) => key === props.layer.getLocale())}
           onChange={onLocaleChange}
+          compressed
         />
       </EuiFormRow>
     );
@@ -227,12 +228,12 @@ export function LayerSettings(props: Props) {
         label="Color theme"
         helpText="Apply a color theme to the basemap"
       >
-      <EuiColorPicker
-        color={props.layer.getColorTheme()}
-        mode='default'
-        onChange={onColorThemeChange}
-      />
-
+        <EuiColorPicker
+          color={props.layer.getColorTheme()}
+          mode='default'
+          onChange={onColorThemeChange}
+          compressed
+        />
       </EuiFormRow>
     )
   }
