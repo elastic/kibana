@@ -237,10 +237,6 @@
 ---
 >           goodbyes: [{ text: 'goodbye' }, { text: 'Goodbye' }, { text: 'GOODBYE' }],
 >           world: 'world',
-230c196
-<         .withCompileOptions({ data: false })
----
->         .withCompileOptions({ data: false }) // TODO: We do not take data on compile options into account
 240c206
 <     it('each without context', function() {
 ---

@@ -9,7 +9,7 @@
 >  * See `packages/kbn-handlebars/LICENSE` for more information.
 >  */
 > 
-> import Handlebars, { HelperOptions } from '..';
+> import Handlebars from '..';
 > import { expectTemplate } from '../__jest__/test_bench';
 > 
 > describe('data', () => {
@@ -37,7 +37,7 @@
 <     helpers.let = function(options) {
 <       var frame = Handlebars.createFrame(options.data);
 ---
->     helpers.let = function (options: HelperOptions) {
+>     helpers.let = function (options: Handlebars.HelperOptions) {
 >       const frame = Handlebars.createFrame(options.data);
 27c36
 <       for (var prop in options.hash) {
