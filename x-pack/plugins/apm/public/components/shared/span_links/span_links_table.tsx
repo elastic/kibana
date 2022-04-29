@@ -160,7 +160,7 @@ export function SpanLinksTable({ items }: Props) {
                   >
                     {i18n.translate(
                       'xpack.apm.spanLinks.table.actions.goToTraceDetails',
-                      { defaultMessage: 'Go to parent trace' }
+                      { defaultMessage: 'Go to trace' }
                     )}
                   </EuiLink>
                 </EuiFlexItem>
