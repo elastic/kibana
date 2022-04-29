@@ -10,7 +10,7 @@ const { Client, HttpConnection } = require('@elastic/elasticsearch');
 import { RESEARCH_CI_JOB_NAME } from './constants';
 import { whichIndex } from './ingest_helpers';
 import { fromNullable } from './either';
-import { always, id, flatMap, ccMark, lazyF } from './utils';
+import { always, id, flatMap, ccMark, noop } from './utils';
 
 const node = process.env.ES_HOST || 'http://localhost:9200';
 const client = new Client({
@@ -21,19 +21,29 @@ const client = new Client({
 });
 const isResearchJob = process.env.COVERAGE_JOB_NAME === RESEARCH_CI_JOB_NAME ? true : false;
 
-export const ingestList = (log) => async (xs) => {
-  await bulkIngest();
+const doPeek = process.env.COVERAGE_PEEK || false;
 
-  async function bulkIngest() {
-    log.verbose(`\n${ccMark} Ingesting ${xs.length} docs at a time`);
+// Defaults to 4 because of the bulk json format
+// A default of 2 would only give you one record
+// because of the bulk format.
+const peekSize = process.env.COVERAGE_PEEK_SIZE || 4;
 
-    const body = parseIndexes(xs);
+const peek = (log) => (size) => (body) =>
+  log.verbose(
+    `\n${ccMark} Peeking at ${size} docs: \n${JSON.stringify(body.slice(0, size), null, 2)}`
+  );
 
-    const bulkResponse = await client.bulk({ refresh: true, body });
+const bulkIngest = (log) => (count) => async (body) => {
+  log.verbose(`\n${ccMark} Ingesting ${count} docs at a time`);
 
-    handleErrors(body, bulkResponse)(log);
-  }
+  doPeek ? peek(log)(peekSize)(body) : noop();
+
+  const bulkResponse = await client.bulk({ refresh: true, body });
+
+  handleErrors(body, bulkResponse)(log);
 };
+
+export const ingestList = (log) => async (xs) => await bulkIngest(log)(xs.length)(parseIndexes(xs));
 
 function handleErrors(body, bulkResponse) {
   return (log) =>
@@ -74,26 +84,3 @@ function parseIndexes(xs) {
     return [{ index: { _index } }, doc];
   })(xs);
 }
-
-export const ingestHelpers$ = (log) => async (dataStream) => {
-  fromNullable(process.env.NODE_ENV).fold(lazyF(ingestStream(log)(dataStream), id));
-
-  function ingestStream(log) {
-    return async (data$) => {
-      // See: https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/client-helpers.html
-      const result = await client.helpers.bulk({
-        datasource: data$,
-        // flushInterval: 20000,
-        // concurrency: 6,
-        onDocument: (doc) => ({
-          index: { _index: whichIndex(isResearchJob)(!!doc.isTotal) },
-        }),
-        onDrop(doc) {
-          log.error(`${ccMark} ${JSON.stringify(doc, null, 2)} was dropped`);
-        },
-      });
-
-      log.verbose(JSON.stringify(result, null, 2));
-    };
-  }
-};
