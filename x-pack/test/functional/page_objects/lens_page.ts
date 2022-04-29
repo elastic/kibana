@@ -59,6 +59,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       // give some time for the update button tooltip to close
       await PageObjects.common.sleep(500);
+      // const header = await testSubjects.find('headerGlobalNav');
+      // await header.clickMouseButton();
     },
 
     /**
