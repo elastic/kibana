@@ -13,6 +13,10 @@ import fetch from 'node-fetch';
 import { getUrl } from '@kbn/test';
 import moment from 'moment';
 import { FtrService } from '../ftr_provider_context';
+import { asyncForEach } from '@kbn/std';
+import { HttpConnection } from '@elastic/elasticsearch';
+import request from 'superagent';
+import cheerio from 'cheerio';
 
 interface NavigateProps {
   appConfig: {};
@@ -116,6 +120,7 @@ export class CommonPageObject extends FtrService {
         throw new Error(`expected ${currentUrl}.includes(${appUrl})`);
       }
     });
+    await this.checkLinks();
   }
 
   /**
@@ -295,6 +300,52 @@ export class CommonPageObject extends FtrService {
         }
       });
     });
+    await this.checkLinks();
+  }
+
+  async checkLinks() {
+    let url;
+    const urls = new Set([]);
+    const linkList = await this.find.allByCssSelector('a', 100);
+    this.log.debug(`\n>>>>>>>>>>>>>>>>>>>>>>>>>>>> found ${linkList.length} links`);
+
+    await asyncForEach(linkList, async ({ _webElement }) => {
+      const url = await _webElement.getAttribute('href');
+      urls.add(url);
+      const response = await request.head(url);
+      this.log.debug(`${url} response: ${response.status}`);
+    });
+    // console.log(urls);
+    // await asyncForEach(urls, async (myUrl) => {
+    // urls.forEach((myUrl) => {
+    //   this.log.debug(myUrl);
+    //   const response = request.head('some url');
+    //   this.log.debug(`${myUrl} response: ${response}`);
+    // });
+
+
+    // const bodyEl = await this.find.byCssSelector('body');
+    // const $ = await bodyEl.parseDomContent();
+    // // const appUrl = getUrl.noAuth(this.config.get('servers.kibana'), appConfig);
+    // const baseUrl = getUrl.noAuth(this.config.get('servers.kibana'), {});
+    // const links = $('a')
+    //   .toArray()
+    //   .map((element) => $(element).attr('href'));
+    // const uniqueLinks = Array.from(new Set(links)).map((i) => baseUrl.concat(i));
+
+    // await Promise.all(
+    //   uniqueLinks.map(async (link) => {
+    //     this.log.debug(link);
+    //     const response = await request.head(link);
+    //     this.log.debug(`${link} response: ${response}`);
+    //   })
+    // );
+
+    // await asyncForEach(uniqueLinks, async (myUrl) => {
+    //   this.log.debug(myUrl);
+    //   const response = await request.head('some url');
+    //   this.log.debug(`${myUrl} response: ${response}`);
+    // });
   }
 
   async waitUntilUrlIncludes(path: string) {
