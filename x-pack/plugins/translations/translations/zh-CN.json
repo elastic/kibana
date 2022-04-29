@@ -8869,7 +8869,6 @@
     "xpack.canvas.savedElementsModal.modalTitle": "我的元素",
     "xpack.canvas.shareWebsiteFlyout.description": "按照以下步骤在外部网站上共享此 Workpad 的静态版本。其将是当前 Workpad 的可视化快照，对实时数据没有访问权限。",
     "xpack.canvas.shareWebsiteFlyout.flyoutCalloutDescription": "要尝试共享，可以{link}，其包含此 Workpad、{CANVAS} Shareable Workpad Runtime 及示例 {HTML} 文件。",
-    "xpack.canvas.shareWebsiteFlyout.flyoutTitle": "在网站上共享",
     "xpack.canvas.shareWebsiteFlyout.runtimeStep.description": "要呈现可共享 Workpad，还需要加入 {CANVAS} Shareable Workpad Runtime。如果您的网站已包含该运行时，则可以跳过此步骤。",
     "xpack.canvas.shareWebsiteFlyout.runtimeStep.downloadLabel": "下载运行时",
     "xpack.canvas.shareWebsiteFlyout.snippetsStep.addSnippetsTitle": "将代码段添加到网站",

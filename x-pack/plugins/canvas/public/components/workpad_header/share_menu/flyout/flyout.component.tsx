@@ -61,7 +61,7 @@ const strings = {
     }),
   getTitle: () =>
     i18n.translate('xpack.canvas.shareWebsiteFlyout.flyoutTitle', {
-      defaultMessage: 'Share on a website',
+      defaultMessage: 'Embed code',
     }),
   getUnsupportedRendererWarning: () =>
     i18n.translate('xpack.canvas.workpadHeaderShareMenu.unsupportedRendererWarning', {
