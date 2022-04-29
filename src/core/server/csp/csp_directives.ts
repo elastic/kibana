@@ -94,6 +94,9 @@ const parseConfigDirectives = (cspConfig: CspConfigType): Map<CspDirectiveName, 
   if (cspConfig.script_src?.length) {
     map.set('script-src', cspConfig.script_src);
   }
+  if (cspConfig.unsafe_eval) {
+    map.set('script-src', ["'unsafe-eval'", ...(map.get('script-src') ?? [])]);
+  }
   if (cspConfig.worker_src?.length) {
     map.set('worker-src', cspConfig.worker_src);
   }

@@ -114,6 +114,59 @@ describe('CspConfig', () => {
       );
     });
 
+    describe('unsafe_eval', () => {
+      const isKibanaDistributable =
+        require('../../../../package.json').build?.distributable === true; // eslint-disable-line @typescript-eslint/no-var-requires
+
+      test('when "unsafe_eval" is set to `false`, the `unsafe-eval` CSP should not be set', () => {
+        const config = new CspConfig({
+          ...defaultConfig,
+          unsafe_eval: false,
+          script_src: ['foo', 'bar'],
+        });
+
+        expect(config.header).toEqual(
+          `script-src 'self' foo bar; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+        );
+      });
+
+      test('when "unsafe_eval" is set to `true`, the `unsafe-eval` CSP should be set', () => {
+        const config = new CspConfig({
+          ...defaultConfig,
+          unsafe_eval: true,
+          script_src: ['foo', 'bar'],
+        });
+
+        expect(config.header).toEqual(
+          `script-src 'self' 'unsafe-eval' foo bar; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+        );
+      });
+
+      if (isKibanaDistributable) {
+        test('in a distributable, when "unsafe_eval" is not set, the `unsafe-eval` CSP should be set', () => {
+          const config = new CspConfig({
+            ...defaultConfig,
+            script_src: ['foo', 'bar'],
+          });
+
+          expect(config.header).toEqual(
+            `script-src 'self' 'unsafe-eval' foo bar; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+          );
+        });
+      } else {
+        test('not in a distributable, when "unsafe_eval" is not set, the `unsafe-eval` CSP should be not set', () => {
+          const config = new CspConfig({
+            ...defaultConfig,
+            script_src: ['foo', 'bar'],
+          });
+
+          expect(config.header).toEqual(
+            `script-src 'self' foo bar; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+          );
+        });
+      }
+    });
+
     describe('allows "disableEmbedding" to be set', () => {
       const disableEmbedding = true;
 
