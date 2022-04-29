@@ -25,6 +25,7 @@ interface CreateTestConfigOptions {
   customizeLocalHostSsl?: boolean;
   rejectUnauthorized?: boolean; // legacy
   emailDomainsAllowed?: string[];
+  testFiles?: string[];
 }
 
 // test.not-enabled is specifically not enabled
