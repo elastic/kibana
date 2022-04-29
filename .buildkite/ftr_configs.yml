@@ -2,12 +2,56 @@ disabled:
   # TODO: Enable once RBAC timeline search strategy test updated
   - x-pack/test/timeline/security_and_spaces/config_basic.ts
 
+  # Base config files, only necessary to inform config finding script
+  - test/functional/config.base.js
+  - x-pack/test/functional/config.base.js
+  - x-pack/test/detection_engine_api_integration/security_and_spaces/config.base.ts
+  - x-pack/test/functional_enterprise_search/base_config.ts
+  - test/server_integration/config.base.js
+
+  # QA suites that are run out-of-band
+  - x-pack/test/stack_functional_integration/configs/config.stack_functional_integration_base.js
+  - x-pack/test/upgrade/config.ts
+  - test/functional/config.edge.js
+  - x-pack/test/functional/config.edge.js
+
+  # Cypress configs, for now these are still run manually
+  - x-pack/test/fleet_cypress/cli_config.ts
+  - x-pack/test/fleet_cypress/config.ts
+  - x-pack/test/fleet_cypress/visual_config.ts
+  - x-pack/test/functional_enterprise_search/cypress.config.ts
+  - x-pack/test/osquery_cypress/cli_config.ts
+  - x-pack/test/osquery_cypress/config.ts
+  - x-pack/test/osquery_cypress/visual_config.ts
+  - x-pack/test/security_solution_cypress/cases_cli_config.ts
+  - x-pack/test/security_solution_cypress/ccs_config.ts
+  - x-pack/test/security_solution_cypress/cli_config.ts
+  - x-pack/test/security_solution_cypress/config.firefox.ts
+  - x-pack/test/security_solution_cypress/config.ts
+  - x-pack/test/security_solution_cypress/response_ops_cli_config.ts
+  - x-pack/test/security_solution_cypress/upgrade_config.ts
+  - x-pack/test/security_solution_cypress/visual_config.ts
+  - x-pack/test/functional_enterprise_search/with_host_configured.config.ts
+
+  # Configs that exist but weren't running in CI when this file was introduced
+  - test/visual_regression/config.ts
+  - x-pack/test/visual_regression/config.ts
+  - x-pack/test/alerting_api_integration/security_and_spaces/group2/tests/actions/config.ts
+  - x-pack/test/alerting_api_integration/security_and_spaces/group2/tests/telemetry/config.ts
+  - x-pack/test/alerting_api_integration/spaces_only_legacy/config.ts
+  - x-pack/test/banners_functional/config.ts
+  - x-pack/test/cloud_integration/config.ts
+  - x-pack/test/performance/config.playwright.ts
+  - x-pack/test/load/config.ts
+  - x-pack/test/plugin_api_perf/config.js
+  - x-pack/test/screenshot_creation/config.ts
+
 enabled:
   - test/accessibility/config.ts
   - test/analytics/config.ts
   - test/api_integration/config.js
-  - test/api_integration/config.js
   - test/examples/config.js
+  - test/functional/apps/bundles/config.ts
   - test/functional/apps/console/config.ts
   - test/functional/apps/context/config.ts
   - test/functional/apps/dashboard_elements/config.ts
@@ -39,9 +83,7 @@ enabled:
   - test/interactive_setup_functional/manual_configuration_without_tls.config.ts
   - test/interactive_setup_functional/manual_configuration.config.ts
   - test/interpreter_functional/config.ts
-  - test/interpreter_functional/config.ts
   - test/new_visualize_flow/config.ts
-  - test/plugin_functional/config.ts
   - test/plugin_functional/config.ts
   - test/server_integration/http/platform/config.status.ts
   - test/server_integration/http/platform/config.ts
