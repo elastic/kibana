@@ -35,6 +35,7 @@ export type {
   BulkActionsObjectProp,
   RuleSummary,
   AlertStatus,
+  AlertsTableConfigurationRegistryContract,
 } from './types';
 
 export {

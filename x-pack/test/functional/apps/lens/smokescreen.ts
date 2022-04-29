@@ -240,14 +240,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.changeAxisSide('right');
-      await PageObjects.lens.waitForVisualization('xyVisChart');
-      let data = await PageObjects.lens.getCurrentChartDebugState();
+      let data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.axes?.y.length).to.eql(2);
       expect(data?.axes?.y.some(({ position }) => position === 'right')).to.eql(true);
 
       await PageObjects.lens.changeAxisSide('left');
-      await PageObjects.lens.waitForVisualization('xyVisChart');
-      data = await PageObjects.lens.getCurrentChartDebugState();
+      data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.axes?.y.length).to.eql(1);
       expect(data?.axes?.y.some(({ position }) => position === 'right')).to.eql(false);
 
@@ -262,18 +260,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.openVisualOptions();
       await testSubjects.click('lns_valueLabels_inside');
 
-      await PageObjects.lens.waitForVisualization('xyVisChart');
-
       // check for value labels
-      let data = await PageObjects.lens.getCurrentChartDebugState();
+      let data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.bars?.[0].labels).not.to.eql(0);
 
       // switch to stacked bar chart
       await PageObjects.lens.switchToVisualization('bar_stacked');
-      await PageObjects.lens.waitForVisualization('xyVisChart');
 
       // check for value labels
-      data = await PageObjects.lens.getCurrentChartDebugState();
+      data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.bars?.[0].labels.length).to.eql(0);
     });
 
@@ -283,16 +278,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('lnsyLeftAxisTitle', axisTitle, {
         clearWithKeyboard: true,
       });
-      await PageObjects.lens.waitForVisualization('xyVisChart');
 
-      let data = await PageObjects.lens.getCurrentChartDebugState();
+      let data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.axes?.y?.[0].title).to.eql(axisTitle);
 
       // hide the gridlines
       await testSubjects.click('lnsshowyLeftAxisGridlines');
-      await PageObjects.lens.waitForVisualization('xyVisChart');
 
-      data = await PageObjects.lens.getCurrentChartDebugState();
+      data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.axes?.y?.[0].gridlines.length).to.eql(0);
     });
 

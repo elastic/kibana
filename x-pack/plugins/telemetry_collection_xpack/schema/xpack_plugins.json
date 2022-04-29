@@ -4557,19 +4557,6 @@
         }
       }
     },
-    "search-session": {
-      "properties": {
-        "transientCount": {
-          "type": "long"
-        },
-        "persistedCount": {
-          "type": "long"
-        },
-        "totalCount": {
-          "type": "long"
-        }
-      }
-    },
     "discoverEnhanced": {
       "properties": {
         "exploreDataInChartActionEnabled": {
@@ -6989,6 +6976,9 @@
                 },
                 "browser_screenshot_error": {
                   "type": "long"
+                },
+                "visual_reporting_soft_disabled_error": {
+                  "type": "long"
                 }
               }
             }
@@ -7103,6 +7093,9 @@
                   "type": "long"
                 },
                 "browser_screenshot_error": {
+                  "type": "long"
+                },
+                "visual_reporting_soft_disabled_error": {
                   "type": "long"
                 }
               }
@@ -7251,6 +7244,9 @@
                 },
                 "browser_screenshot_error": {
                   "type": "long"
+                },
+                "visual_reporting_soft_disabled_error": {
+                  "type": "long"
                 }
               }
             }
@@ -7397,6 +7393,9 @@
                   "type": "long"
                 },
                 "browser_screenshot_error": {
+                  "type": "long"
+                },
+                "visual_reporting_soft_disabled_error": {
                   "type": "long"
                 }
               }
@@ -8252,6 +8251,9 @@
                     },
                     "browser_screenshot_error": {
                       "type": "long"
+                    },
+                    "visual_reporting_soft_disabled_error": {
+                      "type": "long"
                     }
                   }
                 }
@@ -8366,6 +8368,9 @@
                       "type": "long"
                     },
                     "browser_screenshot_error": {
+                      "type": "long"
+                    },
+                    "visual_reporting_soft_disabled_error": {
                       "type": "long"
                     }
                   }
@@ -8514,6 +8519,9 @@
                     },
                     "browser_screenshot_error": {
                       "type": "long"
+                    },
+                    "visual_reporting_soft_disabled_error": {
+                      "type": "long"
                     }
                   }
                 }
@@ -8660,6 +8668,9 @@
                       "type": "long"
                     },
                     "browser_screenshot_error": {
+                      "type": "long"
+                    },
+                    "visual_reporting_soft_disabled_error": {
                       "type": "long"
                     }
                   }

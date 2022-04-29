@@ -891,6 +891,7 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async getChartDebugState(chartData?: DebugState) {
+    await this.header.waitUntilLoadingHasFinished();
     return chartData ?? (await this.elasticChart.getChartDebugData())!;
   }
 
@@ -908,7 +909,6 @@ export class VisualBuilderPageObject extends FtrService {
     chartData?: DebugState,
     itemType: 'areas' | 'bars' | 'annotations' = 'areas'
   ) {
-    await this.header.waitUntilLoadingHasFinished();
     return (await this.getChartDebugState(chartData))?.[itemType];
   }
 
