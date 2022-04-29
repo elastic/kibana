@@ -35,7 +35,7 @@ export const SourceSearchBar: FC<SourceSearchBarProps> = ({ dataView, searchBar 
         <QueryStringInput
           bubbleSubmitEvent={true}
           query={searchInput}
-          indexPatterns={[dataView]}
+          dataViews={[dataView]}
           onChange={searchChangeHandler}
           onSubmit={searchSubmitHandler}
           placeholder={

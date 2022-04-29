@@ -58,7 +58,7 @@ export const LogsToolbar = () => {
           <QueryStringInput
             disableLanguageSwitcher={true}
             iconType="search"
-            indexPatterns={[derivedDataView as DataView]}
+            dataViews={[derivedDataView as DataView]}
             isInvalid={!isFilterQueryDraftValid}
             onChange={(query: Query) => {
               setSurroundingLogsId(null);

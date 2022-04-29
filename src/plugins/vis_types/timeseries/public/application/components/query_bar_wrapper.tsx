@@ -28,13 +28,13 @@ export function QueryBarWrapper({
   'data-test-subj': dataTestSubj,
 }: QueryBarWrapperProps) {
   const dataViews = getDataViewsStart();
-  const [indexes, setIndexes] = useState<QueryStringInputProps['indexPatterns']>([]);
+  const [indexes, setIndexes] = useState<QueryStringInputProps['dataViews']>([]);
 
   const coreStartContext = useContext(CoreStartContext);
 
   useEffect(() => {
     async function fetchIndexes() {
-      const i: QueryStringInputProps['indexPatterns'] = [];
+      const i: QueryStringInputProps['dataViews'] = [];
 
       for (const index of indexPatterns ?? []) {
         if (index) {
@@ -66,7 +66,7 @@ export function QueryBarWrapper({
       query={query}
       onChange={onChange}
       isInvalid={isInvalid}
-      indexPatterns={indexes}
+      dataViews={indexes}
       {...coreStartContext}
       dataTestSubj={dataTestSubj}
     />

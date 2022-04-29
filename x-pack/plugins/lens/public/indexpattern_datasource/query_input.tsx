@@ -38,7 +38,7 @@ export const QueryInput = ({
       disableAutoFocus={disableAutoFocus}
       isInvalid={isInvalid}
       bubbleSubmitEvent={false}
-      indexPatterns={[indexPatternTitle]}
+      dataViews={[indexPatternTitle]}
       query={inputValue}
       onChange={(newQuery) => {
         if (!isEqual(newQuery, inputValue)) {

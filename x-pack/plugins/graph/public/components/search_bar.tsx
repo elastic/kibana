@@ -114,7 +114,7 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
           <QueryStringInput
             disableAutoFocus
             bubbleSubmitEvent
-            indexPatterns={currentIndexPattern ? [currentIndexPattern] : []}
+            dataViews={currentIndexPattern ? [currentIndexPattern] : []}
             placeholder={i18n.translate('xpack.graph.bar.searchFieldPlaceholder', {
               defaultMessage: 'Search your data and add to graph',
             })}

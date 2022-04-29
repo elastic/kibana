@@ -49,7 +49,7 @@ export const QueryBar = () => {
   return (
     <EuiFlexItem grow={1} style={{ flexBasis: 485 }}>
       <QueryStringInput
-        indexPatterns={indexPattern ? [indexPattern] : []}
+        dataViews={indexPattern ? [indexPattern] : []}
         nonKqlMode="text"
         iconType="search"
         isClearable={true}

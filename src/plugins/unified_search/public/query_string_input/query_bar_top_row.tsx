@@ -348,7 +348,7 @@ export const QueryBarTopRow = React.memo(
         <EuiFlexItem>
           <QueryStringInput
             disableAutoFocus={props.disableAutoFocus}
-            indexPatterns={props.dataViews!}
+            dataViews={props.dataViews!}
             prepend={props.prepend}
             query={props.query!}
             screenTitle={props.screenTitle}

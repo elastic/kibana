@@ -94,7 +94,7 @@ function FilterRow({
       >
         <QueryStringInput
           query={value}
-          indexPatterns={[agg.getIndexPattern()]}
+          dataViews={[agg.getIndexPattern()]}
           onChange={(query: Query) => onChangeValue(id, query, customLabel)}
           onBlur={onBlur}
           disableAutoFocus={!autoFocus}

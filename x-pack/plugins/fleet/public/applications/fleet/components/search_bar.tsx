@@ -79,7 +79,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
     <QueryStringInput
       iconType="search"
       disableLanguageSwitcher={true}
-      indexPatterns={
+      dataViews={
         indexPatternFields
           ? ([
               {

@@ -43,7 +43,7 @@ import { type QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
 import { getTheme, getAutocomplete } from '../services';
 
 export interface QueryStringInputProps {
-  indexPatterns: Array<DataView | string>;
+  dataViews: Array<DataView | string>;
   query: Query;
   disableAutoFocus?: boolean;
   screenTitle?: string;
@@ -158,10 +158,10 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
   };
 
   private fetchDataViews = debounce(async () => {
-    const stringPatterns = this.props.indexPatterns.filter(
+    const stringPatterns = this.props.dataViews.filter(
       (dataView) => typeof dataView === 'string'
     ) as string[];
-    const objectPatterns = this.props.indexPatterns.filter(
+    const objectPatterns = this.props.dataViews.filter(
       (dataView) => typeof dataView !== 'string'
     ) as DataView[];
 
@@ -172,7 +172,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
     const currentAbortController = this.fetchDataViewsAbortController;
 
     const objectPatternsFromStrings = (await fetchDataViews(
-      this.services.data.indexPatterns,
+      this.services.data.dataViews,
       stringPatterns
     )) as DataView[];
 
@@ -617,7 +617,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
 
     this.initPersistedLog();
 
-    if (!isEqual(prevProps.indexPatterns, this.props.indexPatterns)) {
+    if (!isEqual(prevProps.dataViews, this.props.dataViews)) {
       this.fetchDataViews();
     } else if (!isEqual(prevProps.query, this.props.query)) {
       this.updateSuggestions();

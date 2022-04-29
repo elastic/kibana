@@ -188,7 +188,7 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
         <QueryStringInput
           disableAutoFocus
           bubbleSubmitEvent
-          indexPatterns={indexPattern ? [indexPattern] : []}
+          dataViews={indexPattern ? [indexPattern] : []}
           query={indexQueryInput}
           onChange={(query) => {
             if (query.language) {
@@ -232,7 +232,7 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
         <QueryStringInput
           disableAutoFocus
           bubbleSubmitEvent
-          indexPatterns={boundaryIndexPattern ? [boundaryIndexPattern] : []}
+          dataViews={boundaryIndexPattern ? [boundaryIndexPattern] : []}
           query={boundaryIndexQueryInput}
           onChange={(query) => {
             if (query.language) {

@@ -178,7 +178,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
             <QueryStringInput
               bubbleSubmitEvent={false}
               query={searchInput}
-              indexPatterns={[indexPattern]}
+              dataViews={[indexPattern]}
               onChange={searchChangeHandler}
               onSubmit={searchSubmitHandler}
               placeholder={

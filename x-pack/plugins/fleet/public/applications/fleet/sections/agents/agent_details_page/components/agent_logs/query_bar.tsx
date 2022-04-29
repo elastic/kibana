@@ -53,7 +53,7 @@ export const LogQueryBar: React.FunctionComponent<{
     <QueryStringInput
       iconType="search"
       disableLanguageSwitcher={true}
-      indexPatterns={
+      dataViews={
         indexPatternFields
           ? ([
               {

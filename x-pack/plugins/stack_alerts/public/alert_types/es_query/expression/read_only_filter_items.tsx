@@ -37,7 +37,7 @@ export const ReadOnlyFilterItems = ({ filters, indexPatterns }: ReadOnlyFilterIt
           filter={filter}
           onUpdate={noOp}
           onRemove={noOp}
-          indexPatterns={indexPatterns}
+          dataViews={indexPatterns}
           uiSettings={uiSettings!}
           readonly
         />

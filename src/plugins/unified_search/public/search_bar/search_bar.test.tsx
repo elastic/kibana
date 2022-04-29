@@ -115,7 +115,7 @@ describe('SearchBar', () => {
   it('Should render query bar when no options provided (in reality - timepicker)', () => {
     const component = mount(
       wrapSearchBarInContext({
-        indexPatterns: [mockDataView],
+        dataViews: [mockDataView],
       })
     );
 
@@ -127,7 +127,7 @@ describe('SearchBar', () => {
   it('Should render empty when timepicker is off and no options provided', () => {
     const component = mount(
       wrapSearchBarInContext({
-        indexPatterns: [mockDataView],
+        dataViews: [mockDataView],
         showDatePicker: false,
       })
     );
@@ -140,7 +140,7 @@ describe('SearchBar', () => {
   it('Should render filter bar, when required fields are provided', () => {
     const component = mount(
       wrapSearchBarInContext({
-        indexPatterns: [mockDataView],
+        dataViews: [mockDataView],
         showDatePicker: false,
         onFiltersUpdated: noop,
         filters: [],
@@ -155,7 +155,7 @@ describe('SearchBar', () => {
   it('Should NOT render filter bar, if disabled', () => {
     const component = mount(
       wrapSearchBarInContext({
-        indexPatterns: [mockDataView],
+        dataViews: [mockDataView],
         showFilterBar: false,
         filters: [],
         onFiltersUpdated: noop,
@@ -171,7 +171,7 @@ describe('SearchBar', () => {
   it('Should render query bar, when required fields are provided', () => {
     const component = mount(
       wrapSearchBarInContext({
-        indexPatterns: [mockDataView],
+        dataViews: [mockDataView],
         screenTitle: 'test screen',
         onQuerySubmit: noop,
         query: kqlQuery,
@@ -186,7 +186,7 @@ describe('SearchBar', () => {
   it('Should NOT render query bar, if disabled', () => {
     const component = mount(
       wrapSearchBarInContext({
-        indexPatterns: [mockDataView],
+        dataViews: [mockDataView],
         screenTitle: 'test screen',
         onQuerySubmit: noop,
         query: kqlQuery,
@@ -202,7 +202,7 @@ describe('SearchBar', () => {
   it('Should render query bar and filter bar', () => {
     const component = mount(
       wrapSearchBarInContext({
-        indexPatterns: [mockDataView],
+        dataViews: [mockDataView],
         screenTitle: 'test screen',
         onQuerySubmit: noop,
         query: kqlQuery,

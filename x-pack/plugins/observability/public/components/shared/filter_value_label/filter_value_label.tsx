@@ -73,7 +73,7 @@ export function FilterValueLabel({
 
   return dataView ? (
     <FilterItemI18n
-      indexPatterns={[dataView]}
+      dataViews={[dataView]}
       id={`${field}-${value}-${negate}`}
       filter={filter}
       onRemove={() => {

@@ -31,7 +31,7 @@ export const AlertQueryBar = ({ query = '', onChange }: Props) => {
   return (
     <EuiFlexItem grow={1} style={{ flexBasis: 485 }}>
       <QueryStringInput
-        indexPatterns={indexPattern ? [indexPattern] : []}
+        dataViews={indexPattern ? [indexPattern] : []}
         iconType="search"
         isClearable={true}
         onChange={(queryN) => {
