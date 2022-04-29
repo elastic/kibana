@@ -24,11 +24,7 @@ import { useEffect, useMemo } from 'react';
 import { DEFAULT_MODEL_MEMORY_LIMIT } from '../../../../../../../common/constants/new_job';
 import { ml } from '../../../../../services/ml_api_service';
 import { JobValidator, VALIDATION_DELAY_MS } from '../../job_validator/job_validator';
-import {
-  MLHttpFetchError,
-  MLResponseError,
-  extractErrorMessage,
-} from '../../../../../../../common/util/errors';
+import { MLHttpFetchError, extractErrorMessage } from '../../../../../../../common/util/errors';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { JobCreator } from '../job_creator';
 
@@ -41,10 +37,10 @@ export const modelMemoryEstimatorProvider = (
   jobValidator: JobValidator
 ) => {
   const modelMemoryCheck$ = new Subject<CalculatePayload>();
-  const error$ = new Subject<MLHttpFetchError<MLResponseError>>();
+  const error$ = new Subject<MLHttpFetchError>();
 
   return {
-    get error$(): Observable<MLHttpFetchError<MLResponseError>> {
+    get error$(): Observable<MLHttpFetchError> {
       return error$.asObservable();
     },
     get updates$(): Observable<string> {
