@@ -163,6 +163,42 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           startedAt.valueOf()
         );
       }
+
+      const { getRecoveredAlerts } = services.alertFactory.done();
+      const recoveredAlerts = getRecoveredAlerts();
+      for (const alert of recoveredAlerts) {
+        const recoveredAlertId = alert.getId();
+        const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? startedAt.toISOString();
+        const relativeViewInAppUrl = getLogsAppAlertUrl(new Date(indexedStartedAt).getTime());
+        const viewInAppUrl = basePath.publicBaseUrl
+          ? new URL(basePath.prepend(relativeViewInAppUrl), basePath.publicBaseUrl).toString()
+          : relativeViewInAppUrl;
+
+        const baseContext = {
+          group: hasGroupBy(validatedParams) ? recoveredAlertId : null,
+          timestamp: startedAt.toISOString(),
+          viewInAppUrl,
+        };
+
+        if (isRatioRuleParams(validatedParams)) {
+          const { criteria } = validatedParams;
+          const context = {
+            ...baseContext,
+            numeratorConditions: createConditionsMessageForCriteria(getNumerator(criteria)),
+            denominatorConditions: createConditionsMessageForCriteria(getDenominator(criteria)),
+            isRatio: true,
+          };
+          alert.setContext(context);
+        } else {
+          const { criteria } = validatedParams;
+          const context = {
+            ...baseContext,
+            conditions: createConditionsMessageForCriteria(criteria),
+            isRatio: false,
+          };
+          alert.setContext(context);
+        }
+      }
     } catch (e) {
       throw new Error(e);
     }
