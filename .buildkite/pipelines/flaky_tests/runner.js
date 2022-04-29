@@ -165,76 +165,14 @@ for (const testSuite of testSuites) {
     continue;
   }
 
-  const TEST_SUITE = testSuite.key;
-  const RUN_COUNT = testSuite.count;
-  const UUID = process.env.UUID;
-
-  const JOB_PARTS = TEST_SUITE.split('/');
-  const IS_XPACK = JOB_PARTS[0] === 'xpack';
-  const TASK = JOB_PARTS[1];
-  const CI_GROUP = JOB_PARTS.length > 2 ? JOB_PARTS[2] : '';
-
-  if (RUN_COUNT < 1) {
+  if (testSuite.count <= 0) {
     continue;
   }
 
-  switch (TASK) {
-    case 'cigroup':
-      if (IS_XPACK) {
-        steps.push({
-          command: `CI_GROUP=${CI_GROUP} .buildkite/scripts/steps/functional/xpack_cigroup.sh`,
-          label: `Default CI Group ${CI_GROUP}`,
-          agents: { queue: 'n2-4' },
-          depends_on: 'build',
-          parallelism: RUN_COUNT,
-          concurrency: concurrency,
-          concurrency_group: UUID,
-          concurrency_method: 'eager',
-        });
-      } else {
-        steps.push({
-          command: `CI_GROUP=${CI_GROUP} .buildkite/scripts/steps/functional/oss_cigroup.sh`,
-          label: `OSS CI Group ${CI_GROUP}`,
-          agents: { queue: 'ci-group-4d' },
-          depends_on: 'build',
-          parallelism: RUN_COUNT,
-          concurrency: concurrency,
-          concurrency_group: UUID,
-          concurrency_method: 'eager',
-        });
-      }
-      break;
-
-    case 'firefox':
-      steps.push({
-        command: `.buildkite/scripts/steps/functional/${IS_XPACK ? 'xpack' : 'oss'}_firefox.sh`,
-        label: `${IS_XPACK ? 'Default' : 'OSS'} Firefox`,
-        agents: { queue: IS_XPACK ? 'n2-4' : 'ci-group-4d' },
-        depends_on: 'build',
-        parallelism: RUN_COUNT,
-        concurrency: concurrency,
-        concurrency_group: UUID,
-        concurrency_method: 'eager',
-      });
-      break;
-
-    case 'accessibility':
-      steps.push({
-        command: `.buildkite/scripts/steps/functional/${
-          IS_XPACK ? 'xpack' : 'oss'
-        }_accessibility.sh`,
-        label: `${IS_XPACK ? 'Default' : 'OSS'} Accessibility`,
-        agents: { queue: IS_XPACK ? 'n2-4' : 'ci-group-4d' },
-        depends_on: 'build',
-        parallelism: RUN_COUNT,
-        concurrency: concurrency,
-        concurrency_group: UUID,
-        concurrency_method: 'eager',
-      });
-      break;
-
+  const keyParts = testSuite.key.split('/');
+  switch (keyParts[0]) {
     case 'cypress':
-      const CYPRESS_SUITE = CI_GROUP;
+      const CYPRESS_SUITE = keyParts[1];
       const group = groups.find((group) => group.key.includes(CYPRESS_SUITE));
       if (!group) {
         throw new Error(
@@ -246,12 +184,14 @@ for (const testSuite of testSuites) {
         label: group.name,
         agents: { queue: 'ci-group-6' },
         depends_on: 'build',
-        parallelism: RUN_COUNT,
+        parallelism: testSuite.count,
         concurrency: concurrency,
-        concurrency_group: UUID,
+        concurrency_group: process.env.UUID,
         concurrency_method: 'eager',
       });
       break;
+    default:
+      throw new Error(`unknown test suite: ${testSuite.key}`);
   }
 }
 

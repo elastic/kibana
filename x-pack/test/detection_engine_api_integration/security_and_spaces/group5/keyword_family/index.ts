@@ -10,12 +10,8 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Detection keyword family data types', function () {
-    describe('', function () {
-      this.tags('ciGroup11');
-
-      loadTestFile(require.resolve('./keyword'));
-      loadTestFile(require.resolve('./const_keyword'));
-      loadTestFile(require.resolve('./keyword_mixed_with_const'));
-    });
+    loadTestFile(require.resolve('./keyword'));
+    loadTestFile(require.resolve('./const_keyword'));
+    loadTestFile(require.resolve('./keyword_mixed_with_const'));
   });
 };

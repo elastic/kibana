@@ -1,19 +1,19 @@
 {
   "groups": [
     {
-      "key": "xpack/cypress/security_solution",
+      "key": "cypress/security_solution",
       "name": "Security Solution - Cypress"
     },
     {
-      "key": "xpack/cypress/osquery_cypress",
+      "key": "cypress/osquery_cypress",
       "name": "Osquery - Cypress"
     },
     {
-      "key": "xpack/cypress/fleet_cypress",
+      "key": "cypress/fleet_cypress",
       "name": "Fleet - Cypress"
     },
     {
-      "key": "xpack/cypress/apm_cypress",
+      "key": "cypress/apm_cypress",
       "name": "APM - Cypress"
     }
   ]

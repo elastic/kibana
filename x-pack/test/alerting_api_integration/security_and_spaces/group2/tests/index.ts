@@ -9,15 +9,9 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function alertingApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
-  describe('alerting api integration security and spaces enabled', function () {
-    describe('', function () {
-      this.tags('ciGroup17');
-      loadTestFile(require.resolve('./telemetry'));
-      loadTestFile(require.resolve('./actions'));
-    });
-
-    describe('', function () {
-      loadTestFile(require.resolve('./alerting'));
-    });
+  describe('alerting api integration security and spaces enabled - Group 2', function () {
+    loadTestFile(require.resolve('./telemetry'));
+    loadTestFile(require.resolve('./actions'));
+    loadTestFile(require.resolve('./alerting'));
   });
 }

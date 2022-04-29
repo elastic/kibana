@@ -21,8 +21,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
   }
 
-  describe('dashboard app', function () {
-    this.tags('ciGroup4');
+  describe('dashboard app - group 3', function () {
     before(loadLogstash);
     after(unloadLogstash);
 

@@ -22,7 +22,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   }
 
   describe('dashboard app - group 4', function () {
-    this.tags('ciGroup5');
     before(loadLogstash);
     after(unloadLogstash);
 

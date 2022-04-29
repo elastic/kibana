@@ -10,22 +10,8 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Detection exceptions data types and operators', function () {
-    describe('', function () {
-      this.tags('ciGroup24');
-
-      loadTestFile(require.resolve('./text_array'));
-    });
-
-    describe('', function () {
-      this.tags('ciGroup16');
-
-      loadTestFile(require.resolve('./ip'));
-    });
-
-    describe('', function () {
-      this.tags('ciGroup21');
-
-      loadTestFile(require.resolve('./ip_array'));
-    });
+    loadTestFile(require.resolve('./text_array'));
+    loadTestFile(require.resolve('./ip'));
+    loadTestFile(require.resolve('./ip_array'));
   });
 };

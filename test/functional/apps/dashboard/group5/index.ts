@@ -22,12 +22,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
   }
 
-  describe('dashboard app', function () {
+  describe('dashboard app - group 5', function () {
     // TODO: Remove when vislib is removed
     // https://github.com/elastic/kibana/issues/56143
     describe('new charts library', function () {
-      this.tags('ciGroup5');
-
       before(async () => {
         await loadLogstash();
         await kibanaServer.uiSettings.update({

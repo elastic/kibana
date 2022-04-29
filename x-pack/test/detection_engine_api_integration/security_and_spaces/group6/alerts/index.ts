@@ -10,10 +10,6 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Detection engine signals/alerts compatibility', function () {
-    describe('', function () {
-      this.tags('ciGroup11');
-
-      loadTestFile(require.resolve('./alerts_compatibility'));
-    });
+    loadTestFile(require.resolve('./alerts_compatibility'));
   });
 };
