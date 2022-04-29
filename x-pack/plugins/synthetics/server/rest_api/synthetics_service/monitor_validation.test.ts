@@ -160,8 +160,11 @@ describe('validateMonitor', () => {
     testBrowserSimpleFields = {
       ...testZipUrlTLSFields,
       ...testCommonFields,
+      [ConfigKey.IS_PUSH_MONITOR]: false,
+      [ConfigKey.CUSTOM_ID]: '',
       [ConfigKey.METADATA]: testMetaData,
       [ConfigKey.SOURCE_INLINE]: '',
+      [ConfigKey.SOURCE_PUSH]: '',
       [ConfigKey.SOURCE_ZIP_URL]: '',
       [ConfigKey.SOURCE_ZIP_FOLDER]: '',
       [ConfigKey.SOURCE_ZIP_USERNAME]: 'test-username',
