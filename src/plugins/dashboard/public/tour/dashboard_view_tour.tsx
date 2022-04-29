@@ -32,14 +32,17 @@ export const dashboardViewTourSteps = [
 
 export const DashboardViewTour = () => {
   const initialState = localStorage.getItem(DASHBOARD_VIEW_TOUR_STORAGE_KEY);
-  let tourState: EuiTourState;
+  let tourState: Pick<EuiTourState, Exclude<keyof EuiTourState, 'tourSubtitle'>>;
   if (initialState) {
     tourState = { ...JSON.parse(initialState) };
   } else {
     tourState = dashboardViewTourConfig;
   }
 
-  const [[euiTourStepOne], _, reducerState] = useEuiTour(dashboardViewTourSteps, tourState);
+  const [[euiTourStepOne], _, reducerState] = useEuiTour(
+    dashboardViewTourSteps,
+    tourState as EuiTourState
+  );
 
   useEffect(() => {
     localStorage.setItem(DASHBOARD_VIEW_TOUR_STORAGE_KEY, JSON.stringify(reducerState));

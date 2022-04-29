@@ -19,7 +19,7 @@ import { DashboardGrid } from '../grid';
 import { context } from '../../../services/kibana_react';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 import { withSuspense } from '../../../services/presentation_util';
-import { DashboardTour } from '@kbn/dashboard-plugin/public/dashboard_tour';
+import { DashboardEditTour } from '../../../tour';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;
@@ -110,6 +110,9 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
 
     return (
       <>
+        {isEditMode && (
+          <DashboardEditTour panelCount={panelCount} controlsEnabled={controlsEnabled ?? false} />
+        )}
         {controlsEnabled ? (
           <>
             {isEditMode && panelCount !== 0 && controlGroup?.getPanelCount() === 0 ? (

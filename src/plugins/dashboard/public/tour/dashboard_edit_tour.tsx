@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { EuiStatelessTourStep, EuiText, EuiTourState, EuiTourStep, useEuiTour } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiI18n,
+  EuiStatelessTourStep,
+  EuiText,
+  EuiTourState,
+  EuiTourStep,
+  useEuiTour,
+} from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { CustomFooter } from './custom_footer';
 import { DashboardTourStrings } from './translations';
@@ -64,7 +72,13 @@ const dashboardEditTourSteps = [
   } as EuiStatelessTourStep,
 ];
 
-export const DashboardEditTour = ({ panelCount }: { panelCount: number }) => {
+export const DashboardEditTour = ({
+  panelCount,
+  controlsEnabled,
+}: {
+  panelCount: number;
+  controlsEnabled: boolean;
+}) => {
   const initialState = localStorage.getItem(DASHBOARD_EDIT_TOUR_STORAGE_KEY);
   let tourState: EuiTourState;
   if (initialState) {
@@ -96,6 +110,15 @@ export const DashboardEditTour = ({ panelCount }: { panelCount: number }) => {
     }
   };
 
+  const EndTourIfNoControlsFooter = () => {
+    if (controlsEnabled) return <CustomFooter {...commonFooterProps} />;
+    return (
+      <EuiButtonEmpty color="text" size="xs" onClick={() => actions.finishTour()}>
+        {EuiI18n({ token: 'core.euiTourStep.endTour', default: 'End tour' })}
+      </EuiButtonEmpty>
+    );
+  };
+
   const TourSteps = () => {
     return (
       <>
@@ -110,7 +133,7 @@ export const DashboardEditTour = ({ panelCount }: { panelCount: number }) => {
         />
         <EuiTourStep {...euiTourStepTwo} footerAction={<CustomFooter {...commonFooterProps} />} />
         <EuiTourStep {...euiTourStepThree} footerAction={<CustomFooter {...commonFooterProps} />} />
-        <EuiTourStep {...euiTourStepFour} footerAction={<CustomFooter {...commonFooterProps} />} />
+        <EuiTourStep {...euiTourStepFour} footerAction={<EndTourIfNoControlsFooter />} />
         <EuiTourStep {...euiTourStepFive} />
       </>
     );
