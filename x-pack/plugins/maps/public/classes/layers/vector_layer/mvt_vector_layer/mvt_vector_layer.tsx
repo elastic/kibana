@@ -5,15 +5,19 @@
  * 2.0.
  */
 
+import _ from 'lodash';
 import type {
+  FeatureIdentifier,
+  FilterSpecification,
   Map as MbMap,
-  AnyLayer as MbLayer,
-  GeoJSONSource as MbGeoJSONSource,
-  VectorSource as MbVectorSource,
+  LayerSpecification,
+  VectorTileSource,
 } from '@kbn/mapbox-gl';
 import { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
+import { buildPhrasesFilter } from '@kbn/es-query';
 import { VectorStyle } from '../../../styles/vector/vector_style';
+import { getField } from '../../../../../common/elasticsearch_util';
 import { LAYER_TYPE, SOURCE_TYPES } from '../../../../../common/constants';
 import {
   NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
@@ -23,13 +27,18 @@ import {
 import { IMvtVectorSource } from '../../../sources/vector_source';
 import { DataRequestContext } from '../../../../actions';
 import {
+  DataRequestMeta,
   StyleMetaDescriptor,
   TileMetaFeature,
   VectorLayerDescriptor,
 } from '../../../../../common/descriptor_types';
 import { ESSearchSource } from '../../../sources/es_search_source';
+import { IESSource } from '../../../sources/es_source';
+import { InnerJoin } from '../../../joins/inner_join';
 import { LayerIcon } from '../../layer';
 import { MvtSourceData, syncMvtSourceData } from './mvt_source_data';
+import { PropertiesMap } from '../../../../../common/elasticsearch_util';
+import { pluckStyleMeta } from './pluck_style_meta';
 
 export const ES_MVT_META_LAYER_NAME = 'meta';
 const ES_MVT_HITS_TOTAL_RELATION = 'hits.total.relation';
@@ -54,9 +63,34 @@ export class MvtVectorLayer extends AbstractVectorLayer {
 
   readonly _source: IMvtVectorSource;
 
-  constructor({ layerDescriptor, source, customIcons }: VectorLayerArguments) {
-    super({ layerDescriptor, source, customIcons });
-    this._source = source as IMvtVectorSource;
+  constructor(args: VectorLayerArguments) {
+    super(args);
+    this._source = args.source as IMvtVectorSource;
+  }
+
+  async getBounds(syncContext: DataRequestContext) {
+    // Add filter to narrow bounds to features with matching join keys
+    let joinKeyFilter;
+    if (this.getSource().isESSource()) {
+      const { join, joinPropertiesMap } = this._getJoinResults();
+      if (join && joinPropertiesMap) {
+        const indexPattern = await (this.getSource() as IESSource).getIndexPattern();
+        const joinField = getField(indexPattern, join.getLeftField().getName());
+        joinKeyFilter = buildPhrasesFilter(
+          joinField,
+          Array.from(joinPropertiesMap.keys()),
+          indexPattern
+        );
+      }
+    }
+
+    return super.getBounds({
+      ...syncContext,
+      dataFilters: {
+        ...syncContext.dataFilters,
+        joinKeyFilter,
+      },
+    });
   }
 
   getFeatureId(feature: Feature): string | number | undefined {
@@ -198,11 +232,16 @@ export class MvtVectorLayer extends AbstractVectorLayer {
         syncContext.isForceRefresh,
         syncContext.dataFilters,
         this.getSource(),
-        this.getCurrentStyle()
+        this.getCurrentStyle(),
+        syncContext.isFeatureEditorOpenForLayer
       ),
       source: this.getSource() as IMvtVectorSource,
       syncContext,
     });
+
+    if (this.hasJoins()) {
+      await this._syncJoins(syncContext, this.getCurrentStyle());
+    }
   }
 
   _syncSourceBindingWithMb(mbMap: MbMap) {
@@ -229,6 +268,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       tiles: [sourceData.tileUrl],
       minzoom: sourceData.tileMinZoom,
       maxzoom: sourceData.tileMaxZoom,
+      promoteId: this._getSourcePromoteId(),
     });
   }
 
@@ -240,8 +280,97 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     return this.getMbSourceId() === mbSourceId;
   }
 
+  _getJoinResults(): {
+    join?: InnerJoin;
+    joinPropertiesMap?: PropertiesMap;
+    joinRequestMeta?: DataRequestMeta;
+  } {
+    const joins = this.getValidJoins();
+    if (!joins || !joins.length) {
+      return {};
+    }
+
+    const join = joins[0];
+    const joinDataRequest = this.getDataRequest(join.getSourceDataRequestId());
+    return {
+      join,
+      joinPropertiesMap: joinDataRequest?.getData() as PropertiesMap | undefined,
+      joinRequestMeta: joinDataRequest?.getMeta(),
+    };
+  }
+
   _getMbTooManyFeaturesLayerId() {
     return this.makeMbLayerId('toomanyfeatures');
+  }
+
+  _getJoinFilterExpression(): FilterSpecification | undefined {
+    const { join, joinPropertiesMap } = this._getJoinResults();
+    if (!join) {
+      return undefined;
+    }
+
+    // When there are no join results, return a filter that hides all features
+    // work around for 'match' with empty array not filtering out features
+    // This filter always returns false because features will never have `__kbn_never_prop__` property
+    const hideAllFilter = ['has', '__kbn_never_prop__'];
+
+    if (!joinPropertiesMap) {
+      return hideAllFilter;
+    }
+
+    const joinKeys = Array.from(joinPropertiesMap.keys());
+    return joinKeys.length
+      ? // Unable to check FEATURE_VISIBLE_PROPERTY_NAME flag since filter expressions do not support feature-state
+        // Instead, remove unjoined source features by filtering out features without matching join keys
+        ([
+          'match',
+          ['get', join.getLeftField().getName()],
+          joinKeys,
+          true, // match value
+          false, // fallback - value with no match
+        ] as FilterSpecification)
+      : hideAllFilter;
+  }
+
+  _syncFeatureState(mbMap: MbMap) {
+    const { joinPropertiesMap, joinRequestMeta } = this._getJoinResults();
+    if (!joinPropertiesMap) {
+      return;
+    }
+
+    const [firstKey] = joinPropertiesMap.keys();
+    const firstKeyFeatureState = mbMap.getFeatureState({
+      source: this.getMbSourceId(),
+      sourceLayer: this._source.getTileSourceLayer(),
+      id: firstKey,
+    });
+    const joinRequestStopTime = joinRequestMeta?.requestStopTime;
+    if (firstKeyFeatureState?.requestStopTime === joinRequestStopTime) {
+      // Do not update feature state when it already contains current join results
+      return;
+    }
+
+    // Clear existing feature state
+    mbMap.removeFeatureState({
+      source: this.getMbSourceId(),
+      sourceLayer: this._source.getTileSourceLayer(),
+      // by omitting 'id' argument, all feature state is cleared for source
+    });
+
+    // Set feature state for join results
+    // reusing featureIdentifier to avoid creating new object in tight loops
+    const featureIdentifier: FeatureIdentifier = {
+      source: this.getMbSourceId(),
+      sourceLayer: this._source.getTileSourceLayer(),
+      id: undefined,
+    };
+    joinPropertiesMap.forEach((value: object, key: string) => {
+      featureIdentifier.id = key;
+      mbMap.setFeatureState(featureIdentifier, {
+        ...value,
+        requestStopTime: joinRequestStopTime,
+      });
+    });
   }
 
   _syncStylePropertiesWithMb(mbMap: MbMap) {
@@ -280,7 +409,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     const tooManyFeaturesLayerId = this._getMbTooManyFeaturesLayerId();
 
     if (!mbMap.getLayer(tooManyFeaturesLayerId)) {
-      const mbTooManyFeaturesLayer: MbLayer = {
+      const mbTooManyFeaturesLayer: LayerSpecification = {
         id: tooManyFeaturesLayerId,
         type: 'line',
         source: this.getId(),
@@ -307,8 +436,20 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     mbMap.setLayerZoomRange(tooManyFeaturesLayerId, this.getMinZoom(), this.getMaxZoom());
   }
 
+  _getSourcePromoteId() {
+    const { join } = this._getJoinResults();
+    return join
+      ? {
+          [this._source.getTileSourceLayer()]: join.getLeftField().getName(),
+        }
+      : undefined;
+  }
+
+  // Maplibre does not expose API for updating source attributes.
+  // Must remove/add vector source to update source attributes.
+  // _requiresPrevSourceCleanup returns true when vector source needs to be removed so it can be re-added with updated attributes
   _requiresPrevSourceCleanup(mbMap: MbMap): boolean {
-    const mbSource = mbMap.getSource(this.getMbSourceId()) as MbVectorSource | MbGeoJSONSource;
+    const mbSource = mbMap.getSource(this.getMbSourceId());
     if (!mbSource) {
       return false;
     }
@@ -316,7 +457,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       // Expected source is not compatible, so remove.
       return true;
     }
-    const mbTileSource = mbSource as MbVectorSource;
+    const mbTileSource = mbSource as VectorTileSource;
 
     const sourceDataRequest = this.getSourceDataRequest();
     if (!sourceDataRequest) {
@@ -330,7 +471,8 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     const isSourceDifferent =
       mbTileSource.tiles?.[0] !== sourceData.tileUrl ||
       mbTileSource.minzoom !== sourceData.tileMinZoom ||
-      mbTileSource.maxzoom !== sourceData.tileMaxZoom;
+      mbTileSource.maxzoom !== sourceData.tileMaxZoom ||
+      !_.isEqual(mbTileSource.promoteId, this._getSourcePromoteId());
 
     if (isSourceDifferent) {
       return true;
@@ -343,9 +485,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       // but the programmable JS-object uses camelcase `sourceLayer`
       if (
         mbLayer &&
-        // @ts-expect-error
         mbLayer.sourceLayer !== sourceData.tileSourceLayer &&
-        // @ts-expect-error
         mbLayer.sourceLayer !== ES_MVT_META_LAYER_NAME
       ) {
         // If the source-pointer of one of the layers is stale, they will all be stale.
@@ -360,11 +500,8 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   syncLayerWithMB(mbMap: MbMap) {
     this._removeStaleMbSourcesAndLayers(mbMap);
     this._syncSourceBindingWithMb(mbMap);
+    this._syncFeatureState(mbMap);
     this._syncStylePropertiesWithMb(mbMap);
-  }
-
-  getJoins() {
-    return [];
   }
 
   getMinZoom() {
@@ -377,6 +514,12 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   }
 
   async getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null> {
-    return await this.getCurrentStyle().pluckStyleMetaFromTileMeta(this._getMetaFromTiles());
+    const { joinPropertiesMap } = this._getJoinResults();
+    return await pluckStyleMeta(
+      this._getMetaFromTiles(),
+      joinPropertiesMap,
+      await this.getSource().getSupportedShapeTypes(),
+      this.getCurrentStyle().getDynamicPropertiesArray()
+    );
   }
 }

@@ -12,7 +12,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { nodeBuilder, fromKueryExpression, KueryNode } from '@kbn/es-query';
+import { nodeBuilder, fromKueryExpression, KueryNode, escapeKuery } from '@kbn/es-query';
 import { CASE_SAVED_OBJECT } from '../../common/constants';
 import {
   OWNER_FIELD,
@@ -199,8 +199,14 @@ export const buildRangeFilter = ({
   }
 
   try {
-    const fromKQL = from != null ? `${savedObjectType}.attributes.${field} >= ${from}` : undefined;
-    const toKQL = to != null ? `${savedObjectType}.attributes.${field} <= ${to}` : undefined;
+    const fromKQL =
+      from != null
+        ? `${escapeKuery(savedObjectType)}.attributes.${escapeKuery(field)} >= ${escapeKuery(from)}`
+        : undefined;
+    const toKQL =
+      to != null
+        ? `${escapeKuery(savedObjectType)}.attributes.${escapeKuery(field)} <= ${escapeKuery(to)}`
+        : undefined;
 
     const rangeKQLQuery = `${fromKQL != null ? fromKQL : ''} ${
       fromKQL != null && toKQL != null ? 'and' : ''

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  Datatable,
-  ExpressionFunctionDefinition,
-} from '../../../../../../src/plugins/expressions';
+import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin';
 
 export type TimeScaleUnit = 's' | 'm' | 'h' | 'd';
 

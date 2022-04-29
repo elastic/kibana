@@ -19,9 +19,9 @@ import {
 } from '@elastic/charts';
 import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { EventAnnotationArgs } from '../../../../event_annotation/common';
-import type { FieldFormat } from '../../../../field_formats/common';
-import { defaultAnnotationColor } from '../../../../../../src/plugins/event_annotation/public';
+import type { EventAnnotationArgs } from '@kbn/event-annotation-plugin/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { defaultAnnotationColor } from '@kbn/event-annotation-plugin/public';
 import type { AnnotationLayerArgs, AnnotationLayerConfigResult } from '../../common/types';
 import { AnnotationIcon, hasIcon, Marker, MarkerBody } from '../helpers';
 import { mapVerticalToHorizontalPlacement, LINES_MARKER_SIZE } from '../helpers';

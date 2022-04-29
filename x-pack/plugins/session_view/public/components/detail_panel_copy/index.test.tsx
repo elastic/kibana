@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { DetailPanelCopy } from './index';
+import { DetailPanelCopy } from '.';
 
 const TEST_TEXT_COPY = 'copy component test';
 const TEST_CHILD = <span>{TEST_TEXT_COPY}</span>;
@@ -28,6 +28,7 @@ describe('DetailPanelCopy component', () => {
       );
 
       expect(renderResult.queryByText(TEST_TEXT_COPY)).toBeVisible();
+      expect(renderResult).toMatchSnapshot();
     });
   });
 });

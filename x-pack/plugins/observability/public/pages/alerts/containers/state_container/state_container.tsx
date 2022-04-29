@@ -8,7 +8,7 @@
 import {
   createStateContainer,
   createStateContainerReactHelpers,
-} from '../../../../../../../../src/plugins/kibana_utils/public';
+} from '@kbn/kibana-utils-plugin/public';
 
 interface AlertsPageContainerState {
   rangeFrom: string;

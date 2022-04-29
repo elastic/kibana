@@ -5,7 +5,7 @@
  * 2.0.
  */
 import moment from 'moment';
-import { parseInterval } from '../../../../../src/plugins/data/common';
+import { parseInterval } from '@kbn/data-plugin/common';
 
 export function getOffsetInMs({
   start,

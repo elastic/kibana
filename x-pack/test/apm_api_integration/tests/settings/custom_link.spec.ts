@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { CustomLink } from '../../../../plugins/apm/common/custom_link/custom_link_types';
+import { CustomLink } from '@kbn/apm-plugin/common/custom_link/custom_link_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { ApmApiError } from '../../common/apm_api_supertest';
 

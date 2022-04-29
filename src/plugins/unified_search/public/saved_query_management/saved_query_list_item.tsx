@@ -11,7 +11,7 @@ import { EuiListGroupItem, EuiConfirmModal, EuiIconTip } from '@elastic/eui';
 import React, { Fragment, useState } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
-import { SavedQuery } from '../../../data/public';
+import { SavedQuery } from '@kbn/data-plugin/public';
 
 interface Props {
   savedQuery: SavedQuery;

@@ -14,7 +14,7 @@ import {
   sessionViewAlertProcessMock,
 } from '../../../common/mocks/constants/session_view_process.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { ProcessDeps, ProcessTreeNode } from './index';
+import { ProcessDeps, ProcessTreeNode } from '.';
 import { Cancelable } from 'lodash';
 import { DEBOUNCE_TIMEOUT } from '../../../common/constants';
 
@@ -216,7 +216,7 @@ describe('ProcessTreeNode component', () => {
 
         expect(renderResult.queryByTestId('processTreeNodeAlertButton')).toBeTruthy();
         expect(renderResult.queryByTestId('processTreeNodeAlertButton')?.textContent).toBe(
-          `Alerts(${sessionViewAlertProcessMock.getAlerts().length})`
+          `Alerts (${sessionViewAlertProcessMock.getAlerts().length})`
         );
       });
       it('renders Alerts button with 99+ when process has more than 99 alerts', async () => {
@@ -234,7 +234,7 @@ describe('ProcessTreeNode component', () => {
 
         expect(renderResult.queryByTestId('processTreeNodeAlertButton')).toBeTruthy();
         expect(renderResult.queryByTestId('processTreeNodeAlertButton')?.textContent).toBe(
-          'Alerts(99+)'
+          'Alerts (99+)'
         );
       });
       it('toggle Alert Details button when Alert button is clicked', async () => {

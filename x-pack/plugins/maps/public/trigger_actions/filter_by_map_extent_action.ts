@@ -6,13 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  Embeddable,
-  EmbeddableInput,
-  ViewMode,
-} from '../../../../../src/plugins/embeddable/public';
+import { Embeddable, EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/public';
+import { createAction } from '@kbn/ui-actions-plugin/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
-import { createAction } from '../../../../../src/plugins/ui_actions/public';
 
 export const FILTER_BY_MAP_EXTENT = 'FILTER_BY_MAP_EXTENT';
 

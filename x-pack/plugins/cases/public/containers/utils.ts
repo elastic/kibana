@@ -11,7 +11,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { ToastInputFields } from 'kibana/public';
+import { ToastInputFields } from '@kbn/core/public';
 import {
   CasesFindResponse,
   CasesFindResponseRt,

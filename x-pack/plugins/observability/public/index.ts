@@ -8,7 +8,7 @@
 // TODO: https://github.com/elastic/kibana/issues/110905
 /* eslint-disable @kbn/eslint/no_export_all */
 
-import { PluginInitializerContext, PluginInitializer } from 'kibana/public';
+import { PluginInitializerContext, PluginInitializer } from '@kbn/core/public';
 import { lazy } from 'react';
 import {
   Plugin,
@@ -36,7 +36,6 @@ export interface ConfigSchema {
     alertingExperience: { enabled: boolean };
     rules: { enabled: boolean };
     cases: { enabled: boolean };
-    overviewNext: { enabled: boolean };
   };
 }
 
@@ -49,9 +48,9 @@ export const plugin: PluginInitializer<
   return new Plugin(context);
 };
 
-export * from './components/shared/action_menu/';
+export * from './components/shared/action_menu';
 
-export type { UXMetrics } from './components/shared/core_web_vitals/';
+export type { UXMetrics } from './components/shared/core_web_vitals';
 export { DatePickerContextProvider } from './context/date_picker_context';
 export {
   getCoreVitalsComponent,
@@ -61,7 +60,7 @@ export {
   SelectableUrlList,
   ExploratoryView,
   DatePicker,
-} from './components/shared/';
+} from './components/shared';
 
 export type { LazyObservabilityPageTemplateProps } from './components/shared';
 
