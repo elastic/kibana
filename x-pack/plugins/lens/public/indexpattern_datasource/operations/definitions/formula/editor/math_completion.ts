@@ -372,7 +372,7 @@ export async function getNamedArgumentSuggestions({
     query,
     selectionStart: position,
     selectionEnd: position,
-    indexPatterns: [indexPattern as unknown as DataView],
+    dataViews: [indexPattern as unknown as DataView],
     boolFilter: [],
   });
   return {

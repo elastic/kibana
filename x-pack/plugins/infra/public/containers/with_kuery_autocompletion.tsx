@@ -86,7 +86,7 @@ class WithKueryAutocompletionComponent extends React.Component<
         query: expression,
         selectionStart: cursorPosition,
         selectionEnd: cursorPosition,
-        indexPatterns: [indexPattern as DataView],
+        dataViews: [indexPattern as DataView],
         boolFilter: [],
       })) || [];
 

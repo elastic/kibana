@@ -217,7 +217,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
       const suggestions =
         (await getAutocomplete().getQuerySuggestions({
           language,
-          indexPatterns: dataViews,
+          dataViews,
           query: queryString,
           selectionStart,
           selectionEnd,

@@ -21,7 +21,7 @@ describe('Kuery operator suggestions', () => {
 
   beforeEach(() => {
     querySuggestionsArgs = {
-      indexPatterns: [dataViewResponse],
+      dataViews: [dataViewResponse],
     } as unknown as QuerySuggestionGetFnArgs;
 
     getSuggestions = setupGetOperatorSuggestions(coreMock.createSetup());

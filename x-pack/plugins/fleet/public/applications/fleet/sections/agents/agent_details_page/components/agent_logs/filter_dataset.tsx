@@ -32,7 +32,7 @@ export const DatasetFilter: React.FunctionComponent<{
       setIsLoading(true);
       try {
         const values = await unifiedSearch.autocomplete.getValueSuggestions({
-          indexPattern: {
+          dataView: {
             title: AGENT_LOG_INDEX_PATTERN,
             fields: [DATASET_FIELD],
           } as DataView,

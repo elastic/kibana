@@ -27,7 +27,7 @@ const keywordComparator = (first: DataViewField, second: DataViewField) => {
 export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<QuerySuggestionField> = (
   core
 ) => {
-  return async ({ indexPatterns: dataViews }, { start, end, prefix, suffix, nestedPath = '' }) => {
+  return async ({ dataViews }, { start, end, prefix, suffix, nestedPath = '' }) => {
     const allFields = flatten(
       dataViews.map((dataView) => {
         return dataView.fields.filter(indexPatterns.isFilterable);

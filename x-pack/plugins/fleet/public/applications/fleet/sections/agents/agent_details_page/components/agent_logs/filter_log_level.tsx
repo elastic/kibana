@@ -43,7 +43,7 @@ export const LogLevelFilter: React.FunctionComponent<{
       setIsLoading(true);
       try {
         const values: string[] = await unifiedSearch.autocomplete.getValueSuggestions({
-          indexPattern: {
+          dataView: {
             title: AGENT_LOG_INDEX_PATTERN,
             fields: [LOG_LEVEL_FIELD],
           } as DataView,

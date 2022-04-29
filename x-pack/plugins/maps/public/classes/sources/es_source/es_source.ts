@@ -492,7 +492,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       const indexPattern = await this.getIndexPattern();
       const indexPatternField = indexPattern.fields.getByName(field.getRootName())!;
       return await getAutocompleteService().getValueSuggestions({
-        indexPattern,
+        dataView: indexPattern,
         field: indexPatternField,
         query,
       });

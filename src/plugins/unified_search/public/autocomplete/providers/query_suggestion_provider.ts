@@ -24,7 +24,7 @@ export type QuerySuggestionGetFn = (
 /** @public **/
 export interface QuerySuggestionGetFnArgs {
   language: string;
-  indexPatterns: DataView[];
+  dataViews: DataView[];
   query: string;
   selectionStart: number;
   selectionEnd: number;

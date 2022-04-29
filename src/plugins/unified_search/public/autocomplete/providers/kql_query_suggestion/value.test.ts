@@ -46,7 +46,7 @@ describe('Kuery value suggestions', () => {
     });
     getSuggestions = setupGetValueSuggestions(coreSetup);
     querySuggestionsArgs = {
-      indexPatterns: [dataViewResponse],
+      dataViews: [dataViewResponse],
     } as unknown as QuerySuggestionGetFnArgs;
 
     jest.clearAllMocks();
