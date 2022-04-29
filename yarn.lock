@@ -13009,10 +13009,10 @@ elastic-apm-http-client@11.0.1:
     semver "^6.3.0"
     stream-chopper "^3.0.1"
 
-elastic-apm-node@^3.31.0:
-  version "3.31.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.31.0.tgz#6e0bf622d922c95ff0127a263babcdeaeea71457"
-  integrity sha512-0OulazfhkXYbOaGkHncqjwOfxtcvzsDyzUKr6Y1k95HwKrjf1Vi+xPutZv4p/WfDdO+JadphI0U2Uu5ncGB2iA==
+elastic-apm-node@^3.32.0:
+  version "3.32.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.32.0.tgz#fdad3c03aabc4e7994b4155b031f68d9774af49a"
+  integrity sha512-6vOe1FZv5toCouuyfiXZuWNE1+1fim9zvsv7H56BKRYa7xQ3X1fxq7QAP2gLd/Z9zvSDLGNXS4DPE1eqX1A1Jw==
   dependencies:
     "@elastic/ecs-pino-format" "^1.2.0"
     after-all-results "^2.0.0"
