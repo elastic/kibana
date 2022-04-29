@@ -9,9 +9,9 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import { FilterManager, UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
-import { FilterLabel } from '../../../../../../../../src/plugins/unified_search/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { FilterManager, UI_SETTINGS } from '@kbn/data-plugin/public';
+import { FilterLabel } from '@kbn/unified-search-plugin/public';
 import { DataViewBase, FilterStateStore } from '@kbn/es-query';
 import { SeverityBadge } from '../severity_badge';
 

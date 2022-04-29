@@ -11,6 +11,7 @@ import { useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import { StatefulEventContext } from '@kbn/timelines-plugin/public';
 import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
 import {
   DragEffects,
@@ -19,12 +20,9 @@ import {
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { Content } from '../../../common/components/draggables';
 import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
-import { parseQueryValue } from '../../../timelines/components/timeline/body/renderers/parse_query_value';
-import {
-  DataProvider,
-  IS_OPERATOR,
-} from '../../../timelines/components/timeline/data_providers/data_provider';
-import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
+import { parseQueryValue } from '../timeline/body/renderers/parse_query_value';
+import { DataProvider, IS_OPERATOR } from '../timeline/data_providers/data_provider';
+import { Provider } from '../timeline/data_providers/provider';
 import {
   TimelineExpandedDetailType,
   TimelineId,
@@ -33,7 +31,6 @@ import {
 import { activeTimeline } from '../../containers/active_timeline_context';
 import { timelineActions } from '../../store/timeline';
 import { NetworkDetailsLink } from '../../../common/components/links';
-import { StatefulEventContext } from '../../../../../timelines/public';
 
 const getUniqueId = ({
   contextId,

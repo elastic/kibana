@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger, ElasticsearchClient } from 'kibana/server';
+import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
   RuleType,
@@ -13,9 +13,10 @@ import {
   Alert,
   RulesClient,
   RuleExecutorServices,
-} from '../../../alerting/server';
-import { Rule, RuleTypeParams, RawAlertInstance, SanitizedRule } from '../../../alerting/common';
-import { ActionsClient } from '../../../actions/server';
+} from '@kbn/alerting-plugin/server';
+import { Rule, RuleTypeParams, RawAlertInstance, SanitizedRule } from '@kbn/alerting-plugin/common';
+import { ActionsClient } from '@kbn/actions-plugin/server';
+import { parseDuration } from '@kbn/alerting-plugin/common';
 import {
   AlertState,
   AlertNodeState,
@@ -29,7 +30,6 @@ import {
 } from '../../common/types/alerts';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { AlertSeverity } from '../../common/enums';
-import { parseDuration } from '../../../alerting/common';
 import { Globals } from '../static_globals';
 
 type ExecutedState =

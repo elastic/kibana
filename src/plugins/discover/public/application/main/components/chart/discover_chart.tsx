@@ -17,7 +17,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DataView } from '../../../../../../data_views/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { HitsCounter } from '../hits_counter';
 import { SavedSearch } from '../../../../services/saved_searches';
 import { GetStateReturn } from '../../services/discover_state';
@@ -215,6 +215,7 @@ export function DiscoverChart({
             <DiscoverHistogramMemoized
               savedSearchData$={savedSearchDataChart$}
               timefilterUpdateHandler={timefilterUpdateHandler}
+              stateContainer={stateContainer}
             />
           </section>
           <EuiSpacer size="s" />

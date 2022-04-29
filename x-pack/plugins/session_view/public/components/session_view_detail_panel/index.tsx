@@ -17,7 +17,7 @@ import { DetailPanelAlertTab } from '../detail_panel_alert_tab';
 import { ALERT_COUNT_THRESHOLD } from '../../../common/constants';
 
 interface SessionViewDetailPanelDeps {
-  selectedProcess: Process | undefined;
+  selectedProcess: Process | null;
   alerts?: ProcessEvent[];
   investigatedAlertId?: string;
   onJumpToEvent: (event: ProcessEvent) => void;
@@ -105,7 +105,7 @@ export const SessionViewDetailPanel = ({
   const styles = useStyles();
 
   return (
-    <div css={styles.detailsPanelLeftBorder}>
+    <div css={styles.detailsPanel}>
       <EuiTabs size="l" expand>
         {tabs.map((tab, index) => (
           <EuiTab

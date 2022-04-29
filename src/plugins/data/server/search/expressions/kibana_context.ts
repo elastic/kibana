@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { StartServicesAccessor } from 'src/core/server';
+import { StartServicesAccessor } from '@kbn/core/server';
 import { getKibanaContextFn } from '../../../common/search/expressions';
 import { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
 import { SavedObjectsClientCommon } from '../../../common';

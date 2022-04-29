@@ -8,7 +8,7 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IndexPatternsFetcher } from '.';
-import { elasticsearchServiceMock } from '../../../../core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import * as indexNotFoundException from './index_not_found_exception.json';
 
 describe('Index Pattern Fetcher - server', () => {

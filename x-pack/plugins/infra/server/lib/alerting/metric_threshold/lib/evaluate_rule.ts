@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import moment from 'moment';
 import { MetricExpressionParams } from '../../../../../common/alerting/metrics';
 import { InfraSource } from '../../../../../common/source_configuration/source_configuration';

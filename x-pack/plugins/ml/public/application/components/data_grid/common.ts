@@ -13,11 +13,11 @@ import { EuiDataGridCellValueElementProps, EuiDataGridStyle } from '@elastic/eui
 
 import { i18n } from '@kbn/i18n';
 
-import { CoreSetup } from 'src/core/public';
+import { CoreSetup } from '@kbn/core/public';
 
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 
-import type { DataView, DataViewField } from '../../../../../../../src/plugins/data_views/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 
 import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
 import { extractErrorMessage } from '../../../../common/util/errors';

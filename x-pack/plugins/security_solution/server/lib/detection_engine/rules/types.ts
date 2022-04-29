@@ -7,7 +7,7 @@
 
 import { Readable } from 'stream';
 
-import { SavedObjectAttributes, SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectAttributes, SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   MachineLearningJobIdOrUndefined,
   From,
@@ -39,9 +39,11 @@ import type {
   ThrottleOrNull,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { VersionOrUndefined, Version } from '@kbn/securitysolution-io-ts-types';
-import { SIGNALS_ID, ruleTypeMappings } from '@kbn/securitysolution-rules';
+import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
 import type { ListArrayOrUndefined, ListArray } from '@kbn/securitysolution-io-ts-list-types';
+import { RulesClient, PartialRule } from '@kbn/alerting-plugin/server';
+import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import {
@@ -93,8 +95,6 @@ import {
   NamespaceOrUndefined,
 } from '../../../../common/detection_engine/schemas/common';
 
-import { RulesClient, PartialRule } from '../../../../../alerting/server';
-import { SanitizedRule } from '../../../../../alerting/common';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
 import { IRuleExecutionLogForRoutes } from '../rule_execution_log';
@@ -125,20 +125,16 @@ export interface Clients {
 }
 
 export const isAlertTypes = (
-  isRuleRegistryEnabled: boolean,
   partialAlert: Array<PartialRule<RuleParams>>
 ): partialAlert is RuleAlertType[] => {
-  return partialAlert.every((rule) => isAlertType(isRuleRegistryEnabled, rule));
+  return partialAlert.every((rule) => isAlertType(rule));
 };
 
 export const isAlertType = (
-  isRuleRegistryEnabled: boolean,
   partialAlert: PartialRule<RuleParams>
 ): partialAlert is RuleAlertType => {
   const ruleTypeValues = Object.values(ruleTypeMappings) as unknown as string[];
-  return isRuleRegistryEnabled
-    ? ruleTypeValues.includes(partialAlert.alertTypeId as string)
-    : partialAlert.alertTypeId === SIGNALS_ID;
+  return ruleTypeValues.includes(partialAlert.alertTypeId as string);
 };
 
 export interface CreateRulesOptions {
@@ -192,7 +188,6 @@ export interface CreateRulesOptions {
   version: Version;
   exceptionsList: ListArray;
   actions: RuleAlertAction[];
-  isRuleRegistryEnabled: boolean;
   namespace?: NamespaceOrUndefined;
   id?: string;
 }
@@ -261,7 +256,6 @@ interface PatchRulesFieldsOptions {
 }
 
 export interface ReadRuleOptions {
-  isRuleRegistryEnabled: boolean;
   rulesClient: RulesClient;
   id: IdOrUndefined;
   ruleId: RuleIdOrUndefined;
@@ -274,7 +268,6 @@ export interface DeleteRuleOptions {
 }
 
 export interface FindRuleOptions {
-  isRuleRegistryEnabled: boolean;
   rulesClient: RulesClient;
   perPage: PerPageOrUndefined;
   page: PageOrUndefined;

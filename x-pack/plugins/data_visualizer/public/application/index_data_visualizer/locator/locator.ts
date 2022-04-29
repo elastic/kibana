@@ -8,9 +8,9 @@ import { encode } from 'rison-node';
 import { stringify } from 'query-string';
 import { SerializableRecord } from '@kbn/utility-types';
 import { Filter } from '@kbn/es-query';
-import { RefreshInterval, TimeRange } from '../../../../../../../src/plugins/data/common';
-import { LocatorDefinition, LocatorPublic } from '../../../../../../../src/plugins/share/common';
-import { QueryState } from '../../../../../../../src/plugins/data/public';
+import { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
+import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
+import { QueryState } from '@kbn/data-plugin/public';
 import { Dictionary, isRisonSerializationRequired } from '../../common/util/url_state';
 import { SearchQueryLanguage } from '../types/combined_query';
 

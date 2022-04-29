@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { getIndexState } from '../../common/get_index_state';
 import { ResolveIndexResponseFromES } from '../../common/types';
 

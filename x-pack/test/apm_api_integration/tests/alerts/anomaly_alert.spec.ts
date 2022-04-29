@@ -8,7 +8,7 @@
 import { apm, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { range } from 'lodash';
-import { AlertType } from '../../../../plugins/apm/common/alert_types';
+import { AlertType } from '@kbn/apm-plugin/common/alert_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createAndRunApmMlJob } from '../../common/utils/create_and_run_apm_ml_job';
 import { waitForRuleStatus } from './wait_for_rule_status';
@@ -43,7 +43,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const events = timerange(new Date(start).getTime(), new Date(end).getTime())
           .interval('1m')
           .rate(1)
-          .spans((timestamp) => {
+          .generator((timestamp) => {
             const isInSpike = timestamp >= spikeStart && timestamp < spikeEnd;
             const count = isInSpike ? 4 : NORMAL_RATE;
             const duration = isInSpike ? 1000 : NORMAL_DURATION;
@@ -56,7 +56,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   .timestamp(timestamp)
                   .duration(duration)
                   .outcome(outcome)
-                  .serialize()
               ),
             ];
           });
