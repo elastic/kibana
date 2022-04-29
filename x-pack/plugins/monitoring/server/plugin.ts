@@ -328,7 +328,7 @@ export class MonitoringPlugin
           const plugins = (await getCoreServices())[1];
           const coreContext = await context.core;
           const actionContext = await context.actions;
-          const legacyRequest: LegacyRequest = {
+          const legacyRequest: LegacyRequest<Params, Query, Body> = {
             ...req,
             logger: this.log,
             getLogger: this.getLogger,
