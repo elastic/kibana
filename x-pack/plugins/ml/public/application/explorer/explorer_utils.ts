@@ -19,6 +19,7 @@ import {
 } from '../../../common/constants/search';
 import { EntityField, getEntityFieldList } from '../../../common/util/anomaly_utils';
 import { extractErrorMessage } from '../../../common/util/errors';
+import { ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
 import {
   isSourceDataChartableForDetector,
   isModelPlotChartableForDetector,
@@ -495,6 +496,10 @@ export async function loadAnomaliesTableData(
           }
 
           anomaly.isTimeSeriesViewRecord = isChartable;
+
+          if (detector !== undefined && detector.function === ML_JOB_AGGREGATION.LAT_LONG) {
+            anomaly.isGeoRecord = true;
+          }
 
           if (mlJobService.customUrlsByJob[jobId] !== undefined) {
             anomaly.customUrls = mlJobService.customUrlsByJob[jobId];

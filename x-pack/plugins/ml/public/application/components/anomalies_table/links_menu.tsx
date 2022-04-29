@@ -9,6 +9,7 @@ import { cloneDeep } from 'lodash';
 import moment from 'moment';
 import rison, { RisonValue } from 'rison-node';
 import React, { FC, useEffect, useMemo, useState } from 'react';
+import { APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';
 import {
   EuiButtonIcon,
   EuiContextMenuItem,
@@ -20,8 +21,10 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { MAPS_APP_LOCATOR } from '@kbn/maps-plugin/public';
 import { mlJobService } from '../../services/job_service';
 import { getDataViewIdFromName } from '../../util/index_utils';
+import { getInitialAnomaliesLayers } from '../../../maps/util';
 import {
   formatHumanReadableDateTimeSeconds,
   timeFormatter,
@@ -49,6 +52,7 @@ import type { AnomaliesTableRecord } from '../../../../common/types/anomalies';
 interface LinksMenuProps {
   anomaly: AnomaliesTableRecord;
   bounds: TimeRangeBounds;
+  showMapsLink: boolean;
   showViewSeriesLink: boolean;
   isAggregatedData: boolean;
   interval: 'day' | 'hour' | 'second';
@@ -66,8 +70,20 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
   const kibana = useMlKibana();
   const {
-    services: { share, application },
+    services: { data, share, application },
   } = kibana;
+
+  const getMapsLink = async (anomaly: any) => {
+    const initialLayers = getInitialAnomaliesLayers(anomaly.jobId);
+
+    const locator = share.url.locators.get(MAPS_APP_LOCATOR);
+    const location = await locator?.getLocation({
+      initialLayers,
+      timeRange: data.query.timefilter.timefilter.getTime(),
+      // {from: '2022-04-14T00:04:19.000Z', to: '2022-04-28T21:46:05.000Z'}
+    });
+    return location;
+  };
 
   useEffect(() => {
     let unmounted = false;
@@ -561,23 +577,44 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       );
     }
 
-    if (showViewSeriesLink === true && anomaly.isTimeSeriesViewRecord === true) {
-      items.push(
-        <EuiContextMenuItem
-          key="view_series"
-          icon="visLine"
-          onClick={() => {
-            closePopover();
-            viewSeries();
-          }}
-          data-test-subj="mlAnomaliesListRowActionViewSeriesButton"
-        >
-          <FormattedMessage
-            id="xpack.ml.anomaliesTable.linksMenu.viewSeriesLabel"
-            defaultMessage="View series"
-          />
-        </EuiContextMenuItem>
-      );
+    if (showViewSeriesLink === true) {
+      if (anomaly.isTimeSeriesViewRecord) {
+        items.push(
+          <EuiContextMenuItem
+            key="view_series"
+            icon="visLine"
+            onClick={() => {
+              closePopover();
+              viewSeries();
+            }}
+            data-test-subj="mlAnomaliesListRowActionViewSeriesButton"
+          >
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.linksMenu.viewSeriesLabel"
+              defaultMessage="View series"
+            />
+          </EuiContextMenuItem>
+        );
+      }
+
+      if (anomaly.isGeoRecord === true) {
+        items.push(
+          <EuiContextMenuItem
+            key="view_in_maps"
+            icon="logoMaps"
+            onClick={async () => {
+              const mapsLink = await getMapsLink(anomaly);
+              await application.navigateToApp(MAPS_APP_ID, { path: mapsLink?.path });
+            }}
+            data-test-subj="mlAnomaliesListRowActionViewInMapsButton"
+          >
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.linksMenu.viewInMapsLabel"
+              defaultMessage="View in maps"
+            />
+          </EuiContextMenuItem>
+        );
+      }
     }
 
     if (application.capabilities.discover?.show && isCategorizationAnomalyRecord) {
