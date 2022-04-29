@@ -18,7 +18,7 @@ const IndexPatternFlyoutContentContainer = ({
   onCancel = () => {},
   defaultTypeIsRollup,
   requireTimestampField = false,
-  skipEmptyPrompt = false,
+  skipNoDataViewsPrompt = false,
 }: DataViewEditorProps) => {
   const {
     services: { dataViews, notifications },
@@ -49,7 +49,7 @@ const IndexPatternFlyoutContentContainer = ({
       onCancel={onCancel}
       defaultTypeIsRollup={defaultTypeIsRollup}
       requireTimestampField={requireTimestampField}
-      skipEmptyPrompt={skipEmptyPrompt}
+      skipNoDataViewsPrompt={skipNoDataViewsPrompt}
     />
   );
 };

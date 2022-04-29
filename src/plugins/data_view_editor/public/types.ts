@@ -53,7 +53,7 @@ export interface DataViewEditorProps {
    * If set, the screen for prompting a user to create a data view will be skipped, and the user will be taken directly
    * to data view creation.
    */
-  skipEmptyPrompt?: boolean;
+  skipNoDataViewsPrompt?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
