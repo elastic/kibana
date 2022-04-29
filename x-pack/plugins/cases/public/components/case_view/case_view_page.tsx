@@ -26,7 +26,7 @@ import { HeaderPage } from '../header_page';
 import { EditableTitle } from '../header_page/editable_title';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
-import { ContentWrapper, WhitePageWrapper } from '../wrappers';
+import { WhitePageWrapperNoBorder } from '../wrappers';
 import { CaseViewActivity } from './components/case_view_activity';
 import { CaseViewMetrics } from './metrics';
 import { ACTIVITY_TAB, ALERTS_TAB } from './translations';
@@ -228,6 +228,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     return (
       <>
         <HeaderPage
+          border={false}
           showBackButton={true}
           data-test-subj="case-view-title"
           titleNode={
@@ -250,28 +251,28 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
           />
         </HeaderPage>
 
-        <WhitePageWrapper>
-          <ContentWrapper>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                {!initLoadingData && metricsFeatures.length > 0 ? (
+        <WhitePageWrapperNoBorder>
+          {!initLoadingData && metricsFeatures.length > 0 ? (
+            <>
+              <EuiFlexGroup>
+                <EuiFlexItem>
                   <CaseViewMetrics
                     data-test-subj="case-view-metrics"
                     isLoading={isLoadingMetrics}
                     metrics={metrics}
                     features={metricsFeatures}
                   />
-                ) : null}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="m" />
-            <EuiTabs>{renderTabs()}</EuiTabs>
-            <EuiSpacer size="l" />
-            <EuiFlexGroup data-test-subj={`case-view-tab-content-${activeTabId}`}>
-              {selectedTabContent}
-            </EuiFlexGroup>
-          </ContentWrapper>
-        </WhitePageWrapper>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="xs" />
+            </>
+          ) : null}
+          <EuiTabs>{renderTabs()}</EuiTabs>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup data-test-subj={`case-view-tab-content-${activeTabId}`}>
+            {selectedTabContent}
+          </EuiFlexGroup>
+        </WhitePageWrapperNoBorder>
         {timelineUi?.renderTimelineDetailsPanel ? timelineUi.renderTimelineDetailsPanel() : null}
       </>
     );
