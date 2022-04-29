@@ -21,7 +21,7 @@ export const wrapErrorIfNeeded = (error: Error): EndpointDataLoadingError =>
 // Use it in Promise's `.catch()` as `.catch(wrapErrorAndRejectPromise)`
 export const wrapErrorAndRejectPromise = (error: Error) => Promise.reject(wrapErrorIfNeeded(error));
 
-export const mergeAndAppendArrays = <T, S>(destinationObj: T, srcObj: S) => {
+export const mergeAndAppendArrays = <T, S>(destinationObj: T, srcObj: S): T => {
   const customizer = (objValue: T[keyof T], srcValue: S[keyof S]) => {
     if (Array.isArray(objValue)) {
       return objValue.concat(srcValue);
