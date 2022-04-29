@@ -24,8 +24,8 @@ import { AddData } from './add_data';
 import { ManageData } from './manage_data';
 import { SolutionsSection } from './solutions_section';
 import { Welcome } from './welcome';
-import testVideo from './GettingToKnowKibana.mp4';
-import testVideoCaptions from './GettingToKnowKibana.vtt';
+import testVideo from './video/getting_to_know_kibana.mp4';
+import testVideoCaptions from './video/getting_to_know_kibana.vtt';
 
 const KEY_ENABLE_WELCOME = 'home:welcome:show';
 
@@ -152,7 +152,7 @@ export class Home extends Component<HomeProps, State> {
           <EuiModalBody>
             <EuiSpacer size="m" />
             <video width="650px" height="auto" controls autoPlay>
-              <source src={testVideo} type={testVideo.type} />
+              <source src={testVideo} type="video/mp4" />
               <track
                 src={testVideoCaptions}
                 kind="captions"
