@@ -22,7 +22,8 @@ type ScriptVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
 export const toExpressionAst: VisToExpressionAst<VisParams> = (vis) => {
   const scriptVis = buildExpressionFunction<ScriptVisExpressionFunctionDefinition>('scriptVis', {
     script: vis.params.script,
-    dependencyUrls: vis.params.dependencyUrls,
+    scriptDependencyUrls: vis.params.scriptDependencyUrls,
+    styleDependencyUrls: vis.params.styleDependencyUrls,
   });
 
   const ast = buildExpression([scriptVis]);

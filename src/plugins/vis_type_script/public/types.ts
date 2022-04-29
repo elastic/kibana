@@ -11,12 +11,14 @@ import { TimeRange } from '@kbn/data-plugin/common';
 
 export interface Arguments {
   script: string;
-  dependencyUrls: string[];
+  scriptDependencyUrls: string[];
+  styleDependencyUrls: string[];
 }
 
 export interface VisParams {
   script: Arguments['script'];
-  dependencyUrls: Arguments['dependencyUrls'];
+  scriptDependencyUrls: Arguments['scriptDependencyUrls'];
+  styleDependencyUrls: Arguments['styleDependencyUrls'];
 }
 
 export interface VisSearchContext {
