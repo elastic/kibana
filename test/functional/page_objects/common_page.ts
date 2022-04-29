@@ -304,7 +304,7 @@ export class CommonPageObject extends FtrService {
   }
 
   async checkLinks() {
-    let url;
+    // let url;
     const urls = new Set([]);
     const linkList = await this.find.allByCssSelector('a', 100);
     this.log.debug(`\n>>>>>>>>>>>>>>>>>>>>>>>>>>>> found ${linkList.length} links`);
