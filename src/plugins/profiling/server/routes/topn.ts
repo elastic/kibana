@@ -77,20 +77,24 @@ export async function topNElasticSearchQuery(
     });
   }
 
+  let totalDocCount = 0;
   let totalCount = 0;
   const stackTraceEvents = new Map<StackTraceID, number>();
 
   const histogramBuckets = (histogram?.buckets as AggregationsHistogramBucket[]) ?? [];
   for (let i = 0; i < histogramBuckets.length; i++) {
-    totalCount += histogramBuckets[i].doc_count;
+    totalDocCount += histogramBuckets[i].doc_count;
     histogramBuckets[i].group_by.buckets.forEach(
       (stackTraceItem: AggregationsStringTermsBucket) => {
-        stackTraceEvents.set(stackTraceItem.key, stackTraceItem.count.value);
+        const count = stackTraceItem.count.value;
+        const oldCount = stackTraceEvents.get(stackTraceItem.key);
+        totalCount += count + (oldCount ?? 0);
+        stackTraceEvents.set(stackTraceItem.key, count + (oldCount ?? 0));
       }
     );
   }
 
-  logger.info('events total count: ' + totalCount);
+  logger.info('events total count: ' + totalCount + ' (' + totalDocCount + ' docs)');
   logger.info('unique stacktraces: ' + stackTraceEvents.size);
 
   // profiling-stacktraces is configured with 16 shards
