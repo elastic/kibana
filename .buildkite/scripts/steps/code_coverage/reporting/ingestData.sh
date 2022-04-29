@@ -39,11 +39,13 @@ CI_STATS_DISABLED=true node scripts/generate_team_assignments.js --verbose --src
 for x in functional jest; do
   echo "### Ingesting coverage for ${x}"
   COVERAGE_SUMMARY_FILE=target/kibana-coverage/${x}-combined/coverage-summary.json
+  head -50 ${COVERAGE_SUMMARY_FILE}
   # running in background to speed up ingestion
   COVERAGE_PEEK=true \
   COVERAGE_PEEK_SIZE=4 \
   CI_STATS_DISABLED=true \
   node scripts/ingest_coverage.js \
+  --verbose
   --path ${COVERAGE_SUMMARY_FILE} \
   --vcsInfoPath ./VCS_INFO.txt \
   --teamAssignmentsPath $TEAM_ASSIGN_PATH > ${x}-ingestion.txt &
