@@ -12,18 +12,18 @@ export interface JWTClaims {
   audience: string;
   subject: string;
   issuer: string;
-  expireInMilisecons?: number;
+  expireInMilliseconds?: number;
   keyId?: string;
 }
 
 export function createJWTAssertion(
   logger: Logger,
   privateKey: string,
-  privateKeyPassword: string,
+  privateKeyPassword: string | null,
   reservedClaims: JWTClaims,
   customClaims?: Record<string, string>
 ): string {
-  const { subject, audience, issuer, expireInMilisecons, keyId } = reservedClaims;
+  const { subject, audience, issuer, expireInMilliseconds, keyId } = reservedClaims;
   const iat = Math.floor(Date.now() / 1000);
 
   const headerObj = { algorithm: 'RS256' as Algorithm, ...(keyId ? { keyid: keyId } : {}) };
@@ -33,17 +33,19 @@ export function createJWTAssertion(
     aud: audience, // audience claim identifies the recipients that the JWT is intended for
     iss: issuer, // issuer claim identifies the principal that issued the JWT
     iat, // issued at claim identifies the time at which the JWT was issued
-    exp: iat + (expireInMilisecons ?? 3600), // expiration time claim identifies the expiration time on or after which the JWT MUST NOT be accepted for processing
+    exp: iat + (expireInMilliseconds ?? 3600), // expiration time claim identifies the expiration time on or after which the JWT MUST NOT be accepted for processing
     ...(customClaims ?? {}),
   };
 
   try {
     const jwtToken = jwt.sign(
-      JSON.stringify(payloadObj),
-      {
-        key: privateKey,
-        passphrase: privateKeyPassword,
-      },
+      payloadObj,
+      privateKeyPassword
+        ? {
+            key: privateKey,
+            passphrase: privateKeyPassword,
+          }
+        : privateKey,
       headerObj
     );
     return jwtToken;
