@@ -15,6 +15,8 @@ exitCode=0
 
 configs="${FTR_CONFIG:-}"
 
+# The first retry should only run the configs that failed in the previous attempt
+# Any subsequent retries, which would generally only happen by someone clicking the button in the UI, will run everything
 if [[ ! "$configs" && "${BUILDKITE_RETRY_COUNT:-0}" == "1" ]]; then
   configs=$(buildkite-agent meta-data get "$FAILED_CONFIGS_KEY" --default '')
   if [[ "$configs" ]]; then
@@ -39,21 +41,23 @@ while read -r config; do
   echo "--- $ node scripts/functional_tests --bail --config $config"
   # prevent non-zero exit code from breaking the loop
   set +e;
-
-  # node ./scripts/functional_tests \
-  #   --bail \
-  #   --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-  #   --config="$config"
-  # lastCode=$?
-  echo "$config"
-  lastCode=$(((1 + $RANDOM % 2) - 1))
+  node ./scripts/functional_tests \
+    --bail \
+    --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
+    --config="$config"
+  lastCode=$?
   set -e;
 
   if [ $lastCode -ne 0 ]; then
     exitCode=10
     echo "FTR exited with code $lastCode"
     echo "^^^ +++"
-    failedConfigs="${failedConfigs}"$'\n'"$config"
+
+    if [[ "$failedConfigs" ]]; then
+      failedConfigs="${failedConfigs}"$'\n'"$config"
+    else
+      failedConfigs="$config"
+    fi
   fi
 done <<< "$configs"
 
