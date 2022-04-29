@@ -75,7 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
         await observability.alerts.rulesPage.clickCreateRuleButton();
         await retry.waitFor(
           'Create Rule flyout is visible',
-          async () => await testSubjects.exists('addRuleFlyout')
+          async () => await testSubjects.exists('addRuleFlyoutTitle')
         );
       });
     });
