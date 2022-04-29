@@ -282,7 +282,6 @@ export class TOCEntry extends Component<Props, State> {
           openLayerSettings={this._openLayerPanelWithCheck}
           isEditButtonDisabled={this.props.isEditButtonDisabled}
           supportsFitToBounds={this.state.supportsFitToBounds}
-          isFeatureEditorOpenForLayer={this.props.isFeatureEditorOpenForLayer}
         />
 
         {this._renderQuickActions()}
