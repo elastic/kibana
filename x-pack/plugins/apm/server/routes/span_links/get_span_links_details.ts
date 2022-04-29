@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { kqlQuery } from '@kbn/observability-plugin/server';
+import { chunk, isEmpty } from 'lodash';
 import {
   SERVICE_NAME,
   SPAN_ID,
@@ -36,16 +38,18 @@ export interface SpanLinkDetails {
   spanSubtype?: string;
   spanType?: string;
   environment?: Environment;
+  transactionId?: string;
 }
 
-// TODO: caue add kuery filter
-export async function getSpanLinksDetails({
+async function fetchSpanLinksDetails({
   setup,
+  kuery,
   spanLinks,
 }: {
   setup: Setup;
+  kuery: string;
   spanLinks: SpanLinks;
-}): Promise<SpanLinkDetails[]> {
+}) {
   const { apmEventClient } = setup;
 
   const response = await apmEventClient.search('get_span_links_details', {
@@ -71,6 +75,7 @@ export async function getSpanLinksDetails({
       query: {
         bool: {
           filter: [
+            ...kqlQuery(kuery),
             {
               bool: {
                 should: spanLinks.map((item) => ({
@@ -95,46 +100,74 @@ export async function getSpanLinksDetails({
       },
     },
   });
+  return response.hits.hits;
+}
+
+export async function getSpanLinksDetails({
+  setup,
+  spanLinks,
+  kuery,
+}: {
+  setup: Setup;
+  spanLinks: SpanLinks;
+  kuery: string;
+}): Promise<SpanLinkDetails[]> {
+  // chunk span links to avoid too_many_nested_clauses problem
+  const spanLinksChunks = chunk(spanLinks, 500);
+  const chunckedResponse = await Promise.all(
+    spanLinksChunks.map((spanLinksChunk) =>
+      fetchSpanLinksDetails({ setup, kuery, spanLinks: spanLinksChunk })
+    )
+  );
+
+  const response = chunckedResponse.flat();
 
   // Creates a map for all span links details found
-  const spanLinksDetailsMap = response.hits.hits.reduce<
-    Record<string, SpanLinkDetails>
-  >((acc, { _source: source }) => {
-    const commontProps = {
-      traceId: source.trace.id,
-      serviceName: source.service.name,
-      agentName: source.agent.name,
-      environment: source.service.environment as Environment,
-    };
+  const spanLinksDetailsMap = response.reduce<Record<string, SpanLinkDetails>>(
+    (acc, { _source: source }) => {
+      const commontProps = {
+        traceId: source.trace.id,
+        serviceName: source.service.name,
+        agentName: source.agent.name,
+        environment: source.service.environment as Environment,
+        transactionId: source.transaction?.id,
+      };
 
-    if (source.processor.event === ProcessorEvent.transaction) {
-      const transaction = source as TransactionRaw;
-      const key = `${transaction.trace.id}:${transaction.transaction.id}`;
+      if (source.processor.event === ProcessorEvent.transaction) {
+        const transaction = source as TransactionRaw;
+        const key = `${transaction.trace.id}:${transaction.transaction.id}`;
+        return {
+          ...acc,
+          [key]: {
+            ...commontProps,
+            spanId: transaction.transaction.id,
+            spanName: transaction.transaction.name,
+            duration: transaction.transaction.duration.us,
+          },
+        };
+      }
+
+      const span = source as SpanRaw;
+      const key = `${span.trace.id}:${span.span.id}`;
       return {
         ...acc,
         [key]: {
           ...commontProps,
-          spanId: transaction.transaction.id,
-          spanName: transaction.transaction.name,
-          duration: transaction.transaction.duration.us,
+          spanId: span.span.id,
+          spanName: span.span.name,
+          duration: span.span.duration.us,
+          spanSubtype: span.span.subtype,
+          spanType: span.span.type,
         },
       };
-    }
+    },
+    {}
+  );
 
-    const span = source as SpanRaw;
-    const key = `${span.trace.id}:${span.span.id}`;
-    return {
-      ...acc,
-      [key]: {
-        ...commontProps,
-        spanId: span.span.id,
-        spanName: span.span.name,
-        duration: span.span.duration.us,
-        spanSubtype: span.span.subtype,
-        spanType: span.span.type,
-      },
-    };
-  }, {});
+  // When kuery is set, returns only the items found in the query
+  if (!isEmpty(kuery)) {
+    return Object.values(spanLinksDetailsMap);
+  }
 
   // It's important to keep the original order of the span links,
   // so loops trough the original list merging external links and links with details.

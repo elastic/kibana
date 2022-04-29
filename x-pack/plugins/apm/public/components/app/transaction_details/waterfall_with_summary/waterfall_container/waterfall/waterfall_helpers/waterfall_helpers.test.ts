@@ -133,6 +133,7 @@ describe('waterfall_helpers', () => {
         traceDocs: hits,
         errorDocs,
         exceedsMax: false,
+        outgoingSpanLinks: {},
       };
       const waterfall = getWaterfall(apiResp, entryTransactionId);
       const { apiResponse, ...waterfallRest } = waterfall;
@@ -151,6 +152,7 @@ describe('waterfall_helpers', () => {
         traceDocs: hits,
         errorDocs,
         exceedsMax: false,
+        outgoingSpanLinks: {},
       };
       const waterfall = getWaterfall(apiResp, entryTransactionId);
 
@@ -236,6 +238,7 @@ describe('waterfall_helpers', () => {
           traceDocs: traceItems,
           errorDocs: [],
           exceedsMax: false,
+          outgoingSpanLinks: {},
         },
         entryTransactionId
       );
@@ -342,6 +345,7 @@ describe('waterfall_helpers', () => {
           traceDocs: traceItems,
           errorDocs: [],
           exceedsMax: false,
+          outgoingSpanLinks: {},
         },
         entryTransactionId
       );

@@ -41,6 +41,7 @@ Object {
           "spanType": undefined,
         },
         "offset": 41627,
+        "outgoingSpanLinks": undefined,
         "parent": Object {
           "color": "",
           "doc": Object {
@@ -78,6 +79,7 @@ Object {
             "spanType": undefined,
           },
           "offset": 40498,
+          "outgoingSpanLinks": undefined,
           "parent": Object {
             "color": "",
             "doc": Object {
@@ -119,6 +121,7 @@ Object {
               "spanType": "",
             },
             "offset": 39298,
+            "outgoingSpanLinks": undefined,
             "parent": Object {
               "color": "",
               "doc": Object {
@@ -156,6 +159,7 @@ Object {
                 "spanType": undefined,
               },
               "offset": 1754,
+              "outgoingSpanLinks": undefined,
               "parent": Object {
                 "color": "",
                 "doc": Object {
@@ -187,6 +191,7 @@ Object {
                   "spanType": "",
                 },
                 "offset": 0,
+                "outgoingSpanLinks": undefined,
                 "parent": undefined,
                 "parentId": undefined,
                 "skew": 0,
@@ -240,6 +245,7 @@ Object {
           "spanType": undefined,
         },
         "offset": 43899,
+        "outgoingSpanLinks": undefined,
         "parent": Object {
           "color": "",
           "doc": Object {
@@ -277,6 +283,7 @@ Object {
             "spanType": undefined,
           },
           "offset": 40498,
+          "outgoingSpanLinks": undefined,
           "parent": Object {
             "color": "",
             "doc": Object {
@@ -318,6 +325,7 @@ Object {
               "spanType": "",
             },
             "offset": 39298,
+            "outgoingSpanLinks": undefined,
             "parent": Object {
               "color": "",
               "doc": Object {
@@ -355,6 +363,7 @@ Object {
                 "spanType": undefined,
               },
               "offset": 1754,
+              "outgoingSpanLinks": undefined,
               "parent": Object {
                 "color": "",
                 "doc": Object {
@@ -386,6 +395,7 @@ Object {
                   "spanType": "",
                 },
                 "offset": 0,
+                "outgoingSpanLinks": undefined,
                 "parent": undefined,
                 "parentId": undefined,
                 "skew": 0,
@@ -445,6 +455,7 @@ Object {
           "spanType": "",
         },
         "offset": 39298,
+        "outgoingSpanLinks": undefined,
         "parent": Object {
           "color": "",
           "doc": Object {
@@ -482,6 +493,7 @@ Object {
             "spanType": undefined,
           },
           "offset": 1754,
+          "outgoingSpanLinks": undefined,
           "parent": Object {
             "color": "",
             "doc": Object {
@@ -513,6 +525,7 @@ Object {
               "spanType": "",
             },
             "offset": 0,
+            "outgoingSpanLinks": undefined,
             "parent": undefined,
             "parentId": undefined,
             "skew": 0,
@@ -562,6 +575,7 @@ Object {
           "spanType": undefined,
         },
         "offset": 1754,
+        "outgoingSpanLinks": undefined,
         "parent": Object {
           "color": "",
           "doc": Object {
@@ -593,6 +607,7 @@ Object {
             "spanType": "",
           },
           "offset": 0,
+          "outgoingSpanLinks": undefined,
           "parent": undefined,
           "parentId": undefined,
           "skew": 0,
@@ -639,6 +654,7 @@ Object {
           "spanType": undefined,
         },
         "offset": 40498,
+        "outgoingSpanLinks": undefined,
         "parent": Object {
           "color": "",
           "doc": Object {
@@ -680,6 +696,7 @@ Object {
             "spanType": "",
           },
           "offset": 39298,
+          "outgoingSpanLinks": undefined,
           "parent": Object {
             "color": "",
             "doc": Object {
@@ -717,6 +734,7 @@ Object {
               "spanType": undefined,
             },
             "offset": 1754,
+            "outgoingSpanLinks": undefined,
             "parent": Object {
               "color": "",
               "doc": Object {
@@ -748,6 +766,7 @@ Object {
                 "spanType": "",
               },
               "offset": 0,
+              "outgoingSpanLinks": undefined,
               "parent": undefined,
               "parentId": undefined,
               "skew": 0,
@@ -794,6 +813,7 @@ Object {
           "spanType": "",
         },
         "offset": 0,
+        "outgoingSpanLinks": undefined,
         "parent": undefined,
         "parentId": undefined,
         "skew": 0,
@@ -832,6 +852,7 @@ Object {
       "spanType": "",
     },
     "offset": 0,
+    "outgoingSpanLinks": undefined,
     "parent": undefined,
     "parentId": undefined,
     "skew": 0,
@@ -904,6 +925,7 @@ Object {
           "spanType": "",
         },
         "offset": 0,
+        "outgoingSpanLinks": undefined,
         "parent": undefined,
         "parentId": undefined,
         "skew": 0,
@@ -945,6 +967,7 @@ Object {
         "spanType": "",
       },
       "offset": 0,
+      "outgoingSpanLinks": undefined,
       "parent": undefined,
       "parentId": undefined,
       "skew": 0,
@@ -986,6 +1009,7 @@ Object {
         "spanType": undefined,
       },
       "offset": 1754,
+      "outgoingSpanLinks": undefined,
       "parent": Object {
         "color": "",
         "doc": Object {
@@ -1017,6 +1041,7 @@ Object {
           "spanType": "",
         },
         "offset": 0,
+        "outgoingSpanLinks": undefined,
         "parent": undefined,
         "parentId": undefined,
         "skew": 0,
@@ -1065,6 +1090,7 @@ Object {
         "spanType": "",
       },
       "offset": 39298,
+      "outgoingSpanLinks": undefined,
       "parent": Object {
         "color": "",
         "doc": Object {
@@ -1102,6 +1128,7 @@ Object {
           "spanType": undefined,
         },
         "offset": 1754,
+        "outgoingSpanLinks": undefined,
         "parent": Object {
           "color": "",
           "doc": Object {
@@ -1133,6 +1160,7 @@ Object {
             "spanType": "",
           },
           "offset": 0,
+          "outgoingSpanLinks": undefined,
           "parent": undefined,
           "parentId": undefined,
           "skew": 0,
@@ -1180,6 +1208,7 @@ Object {
         "spanType": undefined,
       },
       "offset": 40498,
+      "outgoingSpanLinks": undefined,
       "parent": Object {
         "color": "",
         "doc": Object {
@@ -1221,6 +1250,7 @@ Object {
           "spanType": "",
         },
         "offset": 39298,
+        "outgoingSpanLinks": undefined,
         "parent": Object {
           "color": "",
           "doc": Object {
@@ -1258,6 +1288,7 @@ Object {
             "spanType": undefined,
           },
           "offset": 1754,
+          "outgoingSpanLinks": undefined,
           "parent": Object {
             "color": "",
             "doc": Object {
@@ -1289,6 +1320,7 @@ Object {
               "spanType": "",
             },
             "offset": 0,
+            "outgoingSpanLinks": undefined,
             "parent": undefined,
             "parentId": undefined,
             "skew": 0,
@@ -1339,6 +1371,7 @@ Object {
         "spanType": undefined,
       },
       "offset": 41627,
+      "outgoingSpanLinks": undefined,
       "parent": Object {
         "color": "",
         "doc": Object {
@@ -1376,6 +1409,7 @@ Object {
           "spanType": undefined,
         },
         "offset": 40498,
+        "outgoingSpanLinks": undefined,
         "parent": Object {
           "color": "",
           "doc": Object {
@@ -1417,6 +1451,7 @@ Object {
             "spanType": "",
           },
           "offset": 39298,
+          "outgoingSpanLinks": undefined,
           "parent": Object {
             "color": "",
             "doc": Object {
@@ -1454,6 +1489,7 @@ Object {
               "spanType": undefined,
             },
             "offset": 1754,
+            "outgoingSpanLinks": undefined,
             "parent": Object {
               "color": "",
               "doc": Object {
@@ -1485,6 +1521,7 @@ Object {
                 "spanType": "",
               },
               "offset": 0,
+              "outgoingSpanLinks": undefined,
               "parent": undefined,
               "parentId": undefined,
               "skew": 0,
@@ -1538,6 +1575,7 @@ Object {
         "spanType": undefined,
       },
       "offset": 43899,
+      "outgoingSpanLinks": undefined,
       "parent": Object {
         "color": "",
         "doc": Object {
@@ -1575,6 +1613,7 @@ Object {
           "spanType": undefined,
         },
         "offset": 40498,
+        "outgoingSpanLinks": undefined,
         "parent": Object {
           "color": "",
           "doc": Object {
@@ -1616,6 +1655,7 @@ Object {
             "spanType": "",
           },
           "offset": 39298,
+          "outgoingSpanLinks": undefined,
           "parent": Object {
             "color": "",
             "doc": Object {
@@ -1653,6 +1693,7 @@ Object {
               "spanType": undefined,
             },
             "offset": 1754,
+            "outgoingSpanLinks": undefined,
             "parent": Object {
               "color": "",
               "doc": Object {
@@ -1684,6 +1725,7 @@ Object {
                 "spanType": "",
               },
               "offset": 0,
+              "outgoingSpanLinks": undefined,
               "parent": undefined,
               "parentId": undefined,
               "skew": 0,
@@ -1788,6 +1830,7 @@ Object {
           "spanType": undefined,
         },
         "offset": 2329,
+        "outgoingSpanLinks": undefined,
         "parent": Object {
           "color": "",
           "doc": Object {
@@ -1825,6 +1868,7 @@ Object {
             "spanType": undefined,
           },
           "offset": 1200,
+          "outgoingSpanLinks": undefined,
           "parent": Object {
             "color": "",
             "doc": Object {
@@ -1866,6 +1910,7 @@ Object {
               "spanType": "",
             },
             "offset": 0,
+            "outgoingSpanLinks": undefined,
             "parent": undefined,
             "parentId": "mySpanIdD",
             "skew": 0,
@@ -1913,6 +1958,7 @@ Object {
           "spanType": undefined,
         },
         "offset": 4601,
+        "outgoingSpanLinks": undefined,
         "parent": Object {
           "color": "",
           "doc": Object {
@@ -1950,6 +1996,7 @@ Object {
             "spanType": undefined,
           },
           "offset": 1200,
+          "outgoingSpanLinks": undefined,
           "parent": Object {
             "color": "",
             "doc": Object {
@@ -1991,6 +2038,7 @@ Object {
               "spanType": "",
             },
             "offset": 0,
+            "outgoingSpanLinks": undefined,
             "parent": undefined,
             "parentId": "mySpanIdD",
             "skew": 0,
@@ -2044,6 +2092,7 @@ Object {
           "spanType": "",
         },
         "offset": 0,
+        "outgoingSpanLinks": undefined,
         "parent": undefined,
         "parentId": "mySpanIdD",
         "skew": 0,
@@ -2087,6 +2136,7 @@ Object {
           "spanType": undefined,
         },
         "offset": 1200,
+        "outgoingSpanLinks": undefined,
         "parent": Object {
           "color": "",
           "doc": Object {
@@ -2128,6 +2178,7 @@ Object {
             "spanType": "",
           },
           "offset": 0,
+          "outgoingSpanLinks": undefined,
           "parent": undefined,
           "parentId": "mySpanIdD",
           "skew": 0,
@@ -2179,6 +2230,7 @@ Object {
       "spanType": "",
     },
     "offset": 0,
+    "outgoingSpanLinks": undefined,
     "parent": undefined,
     "parentId": "mySpanIdD",
     "skew": 0,
@@ -2227,6 +2279,7 @@ Object {
         "spanType": "",
       },
       "offset": 0,
+      "outgoingSpanLinks": undefined,
       "parent": undefined,
       "parentId": "mySpanIdD",
       "skew": 0,
@@ -2268,6 +2321,7 @@ Object {
         "spanType": undefined,
       },
       "offset": 1200,
+      "outgoingSpanLinks": undefined,
       "parent": Object {
         "color": "",
         "doc": Object {
@@ -2309,6 +2363,7 @@ Object {
           "spanType": "",
         },
         "offset": 0,
+        "outgoingSpanLinks": undefined,
         "parent": undefined,
         "parentId": "mySpanIdD",
         "skew": 0,
@@ -2353,6 +2408,7 @@ Object {
         "spanType": undefined,
       },
       "offset": 2329,
+      "outgoingSpanLinks": undefined,
       "parent": Object {
         "color": "",
         "doc": Object {
@@ -2390,6 +2446,7 @@ Object {
           "spanType": undefined,
         },
         "offset": 1200,
+        "outgoingSpanLinks": undefined,
         "parent": Object {
           "color": "",
           "doc": Object {
@@ -2431,6 +2488,7 @@ Object {
             "spanType": "",
           },
           "offset": 0,
+          "outgoingSpanLinks": undefined,
           "parent": undefined,
           "parentId": "mySpanIdD",
           "skew": 0,
@@ -2478,6 +2536,7 @@ Object {
         "spanType": undefined,
       },
       "offset": 4601,
+      "outgoingSpanLinks": undefined,
       "parent": Object {
         "color": "",
         "doc": Object {
@@ -2515,6 +2574,7 @@ Object {
           "spanType": undefined,
         },
         "offset": 1200,
+        "outgoingSpanLinks": undefined,
         "parent": Object {
           "color": "",
           "doc": Object {
@@ -2556,6 +2616,7 @@ Object {
             "spanType": "",
           },
           "offset": 0,
+          "outgoingSpanLinks": undefined,
           "parent": undefined,
           "parentId": "mySpanIdD",
           "skew": 0,

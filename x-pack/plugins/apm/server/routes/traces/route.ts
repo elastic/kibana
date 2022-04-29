@@ -6,11 +6,17 @@
  */
 
 import * as t from 'io-ts';
+import moment from 'moment';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getTraceItems } from './get_trace_items';
 import { getTopTracesPrimaryStats } from './get_top_traces_primary_stats';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
+import {
+  environmentRt,
+  kueryRt,
+  probabilityRt,
+  rangeRt,
+} from '../default_api_types';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
 import { getRootTransactionByTraceId } from '../transactions/get_transaction_by_trace';
 import { getTransaction } from '../transactions/get_transaction';
@@ -20,7 +26,7 @@ import type { SpanLinks } from '../../../typings/es_schemas/raw/fields/span_link
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces',
   params: t.type({
-    query: t.intersection([environmentRt, kueryRt, rangeRt]),
+    query: t.intersection([environmentRt, kueryRt, rangeRt, probabilityRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
@@ -39,7 +45,7 @@ const tracesRoute = createApmServerRoute({
   }> => {
     const setup = await setupRequest(resources);
     const { params } = resources;
-    const { environment, kuery, start, end } = params.query;
+    const { environment, kuery, start, end, probability } = params.query;
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
       ...setup,
       kuery,
@@ -50,6 +56,7 @@ const tracesRoute = createApmServerRoute({
     return await getTopTracesPrimaryStats({
       environment,
       kuery,
+      probability,
       setup,
       searchAggregatedTransactions,
       start,
@@ -87,7 +94,12 @@ const tracesByIdRoute = createApmServerRoute({
 
     const [traceItems, outgoingSpanLinks] = await Promise.all([
       getTraceItems(traceId, setup, start, end),
-      getOutgoingSpanLinks({ traceId, setup }),
+      getOutgoingSpanLinks({
+        traceId,
+        setup,
+        start: moment(start).subtract(4, 'days').valueOf(),
+        end: moment(end).add(4, 'days').valueOf(),
+      }),
     ]);
 
     return { ...traceItems, outgoingSpanLinks };

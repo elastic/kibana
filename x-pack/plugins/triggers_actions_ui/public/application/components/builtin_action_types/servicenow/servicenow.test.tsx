@@ -9,6 +9,7 @@ import { TypeRegistry } from '../../../type_registry';
 import { registerBuiltInActionTypes } from '..';
 import { ActionTypeModel } from '../../../../types';
 import { ServiceNowActionConnector } from './types';
+import { registrationServicesMock } from '../../../../mocks';
 
 const SERVICENOW_ITSM_ACTION_TYPE_ID = '.servicenow';
 const SERVICENOW_SIR_ACTION_TYPE_ID = '.servicenow-sir';
@@ -17,7 +18,7 @@ let actionTypeRegistry: TypeRegistry<ActionTypeModel>;
 
 beforeAll(() => {
   actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-  registerBuiltInActionTypes({ actionTypeRegistry });
+  registerBuiltInActionTypes({ actionTypeRegistry, services: registrationServicesMock });
 });
 
 describe('actionTypeRegistry.get() works', () => {
@@ -50,6 +51,7 @@ describe('servicenow connector validation', () => {
         actionTypeId: id,
         name: 'ServiceNow',
         isPreconfigured: false,
+        isDeprecated: false,
         config: {
           apiUrl: 'https://dev94428.service-now.com/',
           usesTableApi: false,

@@ -23,6 +23,7 @@ export function getSpanLinksTabContent({
 
   return {
     id: 'span_links',
+    'data-test-subj': 'spanLinksTab',
     name: (
       <>
         {i18n.translate('xpack.apm.propertiesTable.tabs.spanLinks', {

@@ -35,13 +35,14 @@ export const logEventRoute = (router: IRouter, eventLogger: IEventLogger, logger
     ): Promise<IKibanaResponse<any>> {
       const { id } = req.params as { id: string };
       const event: IValidatedEvent = req.body;
+      const soClient = (await context.core).savedObjects.client;
       logger.info(`test fixture: log event: ${id} ${JSON.stringify(event)}`);
       try {
-        await context.core.savedObjects.client.get('event_log_test', id);
+        await soClient.get('event_log_test', id);
         logger.info(`found existing saved object`);
       } catch (ex) {
         logger.info(`log event error: ${ex}`);
-        await context.core.savedObjects.client.create('event_log_test', {}, { id });
+        await soClient.create('event_log_test', {}, { id });
         logger.info(`created saved object ${id}`);
       }
       // mark now as start and end

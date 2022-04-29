@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { rangeQuery } from '@kbn/observability-plugin/server';
 import { Setup } from '../../lib/helpers/setup_request';
 import {
   SPAN_LINKS,
@@ -17,13 +18,16 @@ import type { SpanLinks } from '../../../typings/es_schemas/raw/fields/span_link
 import type { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
 import type { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 
-// TODO: caue: add time range 4d
 export async function getOutgoingSpanLinks({
   traceId,
   setup,
+  start,
+  end,
 }: {
   traceId: string;
   setup: Setup;
+  start: number;
+  end: number;
 }): Promise<Record<string, SpanLinks>> {
   const { apmEventClient } = setup;
   const response = await apmEventClient.search('get_outgoing_span_links', {
@@ -34,7 +38,12 @@ export async function getOutgoingSpanLinks({
     body: {
       size: 1000,
       query: {
-        bool: { filter: [{ term: { [SPAN_LINKS_TRACE_ID]: traceId } }] },
+        bool: {
+          filter: [
+            { term: { [SPAN_LINKS_TRACE_ID]: traceId } },
+            ...rangeQuery(start, end),
+          ],
+        },
       },
     },
   });

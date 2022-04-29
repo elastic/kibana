@@ -7,16 +7,18 @@
 import {
   EuiBasicTableColumn,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiInMemoryTable,
   EuiLink,
+  EuiPopover,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useState } from 'react';
 import { asDuration } from '../../../../common/utils/formatters';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
@@ -25,7 +27,7 @@ import { ServiceLink } from '../service_link';
 import { getSpanIcon } from '../span_icon/get_span_icon';
 
 type SpanLinksDetails =
-  APIReturnType<'GET /internal/apm/span_links/details'>['spanLinksDetails'];
+  APIReturnType<'POST /internal/apm/span_links/details'>['spanLinksDetails'];
 
 type SpanLinkDetails = SpanLinksDetails[0];
 
@@ -38,6 +40,9 @@ export function SpanLinksTable({ items }: Props) {
   const {
     query: { rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/transactions/view');
+  const [idActionMenuOpen, setIdActionMenuOpen] = useState<
+    string | undefined
+  >();
 
   const columns: Array<EuiBasicTableColumn<SpanLinkDetails>> = [
     {
@@ -83,7 +88,10 @@ export function SpanLinksTable({ items }: Props) {
         defaultMessage: 'Span',
       }),
       sortable: true,
-      render: (_, { spanId, traceId, spanSubtype, spanType, spanName }) => {
+      render: (
+        _,
+        { spanId, traceId, spanSubtype, spanType, spanName, transactionId }
+      ) => {
         if (spanName) {
           return (
             <EuiFlexGroup
@@ -95,10 +103,9 @@ export function SpanLinksTable({ items }: Props) {
                 <EuiIcon type={getSpanIcon(spanType, spanSubtype)} size="l" />
               </EuiFlexItem>
               <EuiFlexItem>
-                {/* TODO: caue: this might not work because we pass span.id some times */}
                 <EuiLink
                   href={link('/link-to/transaction/{transactionId}', {
-                    path: { transactionId: spanId },
+                    path: { transactionId: transactionId || spanId },
                   })}
                 >
                   {spanName}
@@ -116,6 +123,7 @@ export function SpanLinksTable({ items }: Props) {
         defaultMessage: 'Span duration',
       }),
       sortable: true,
+      width: '150',
       render: (_, { duration }) => {
         return (
           <EuiText size="s" color="subdued">
@@ -125,45 +133,93 @@ export function SpanLinksTable({ items }: Props) {
       },
     },
     {
+      field: 'actions',
       name: 'Actions',
-      actions: [
-        {
-          render: (item) => {
-            return <EuiLink onClick={() => {}}>go to parent trace</EuiLink>;
-          },
-        },
-        {
-          render: (item) => {
-            return (
-              <EuiCopy textToCopy={item.traceId}>
-                {(copy) => (
-                  <EuiButtonEmpty onClick={copy} flush="both">
-                    copy parent trace id
-                  </EuiButtonEmpty>
-                )}
-              </EuiCopy>
-            );
-          },
-        },
-        {
-          render: (item) => {
-            return <EuiLink onClick={() => {}}>go to span details</EuiLink>;
-          },
-        },
-        {
-          render: (item) => {
-            return (
-              <EuiCopy textToCopy={item.spanId}>
-                {(copy) => (
-                  <EuiButtonEmpty onClick={copy} flush="both">
-                    copy span id
-                  </EuiButtonEmpty>
-                )}
-              </EuiCopy>
-            );
-          },
-        },
-      ],
+      width: '100',
+      render: (_, { spanId, traceId, transactionId, spanName }) => {
+        const id = `${traceId}:${spanId}`;
+        return (
+          <EuiPopover
+            button={
+              <EuiButtonIcon
+                aria-label="Edit"
+                iconType="boxesHorizontal"
+                onClick={() => {
+                  setIdActionMenuOpen(id);
+                }}
+              />
+            }
+            isOpen={idActionMenuOpen === id}
+            closePopover={() => {
+              setIdActionMenuOpen(undefined);
+            }}
+          >
+            <EuiFlexGroup direction="column" gutterSize="s">
+              {spanName && (
+                <EuiFlexItem>
+                  {/* TODO: caue check url */}
+                  <EuiLink onClick={() => {}}>
+                    {i18n.translate(
+                      'xpack.apm.spanLinks.table.actions.goToTraceDetails',
+                      { defaultMessage: 'Go to parent trace' }
+                    )}
+                  </EuiLink>
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem>
+                <EuiCopy textToCopy={traceId}>
+                  {(copy) => (
+                    <EuiButtonEmpty
+                      onClick={() => {
+                        copy();
+                        setIdActionMenuOpen(undefined);
+                      }}
+                      flush="both"
+                    >
+                      {i18n.translate(
+                        'xpack.apm.spanLinks.table.actions.copyParentTraceId',
+                        { defaultMessage: 'Copy parent trace id' }
+                      )}
+                    </EuiButtonEmpty>
+                  )}
+                </EuiCopy>
+              </EuiFlexItem>
+              {spanName && (
+                <EuiFlexItem>
+                  <EuiLink
+                    href={link('/link-to/transaction/{transactionId}', {
+                      path: { transactionId: transactionId || spanId },
+                    })}
+                  >
+                    {i18n.translate(
+                      'xpack.apm.spanLinks.table.actions.goToSpanDetails',
+                      { defaultMessage: 'Go to span details' }
+                    )}
+                  </EuiLink>
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem>
+                <EuiCopy textToCopy={spanId}>
+                  {(copy) => (
+                    <EuiButtonEmpty
+                      onClick={() => {
+                        copy();
+                        setIdActionMenuOpen(undefined);
+                      }}
+                      flush="both"
+                    >
+                      {i18n.translate(
+                        'xpack.apm.spanLinks.table.actions.copySpanId',
+                        { defaultMessage: 'Copy span id' }
+                      )}
+                    </EuiButtonEmpty>
+                  )}
+                </EuiCopy>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPopover>
+        );
+      },
     },
   ];
 

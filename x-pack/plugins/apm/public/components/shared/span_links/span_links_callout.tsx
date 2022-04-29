@@ -28,16 +28,7 @@ export function SpanLinksCallout() {
       <p>
         <FormattedMessage
           id="xpack.apm.spanLinks.callout.description"
-          defaultMessage="A Link is a pointer from the current span to another span in the same trace or in a different trace. For example. this can be used in batching operations, where a single batch handler processes multiple requests from different traces or when the handler receives a request from a different project. Learn more in the {docsLink}."
-          // TODO: caue: check doc link
-          values={{
-            docsLink: i18n.translate(
-              'xpack.apm.spanLinks.callout.description.link.doc',
-              {
-                defaultMessage: 'docs',
-              }
-            ),
-          }}
+          defaultMessage="A Link is a pointer from the current span to another span in the same trace or in a different trace. For example. this can be used in batching operations, where a single batch handler processes multiple requests from different traces or when the handler receives a request from a different project."
         />
       </p>
       <EuiButton

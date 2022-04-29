@@ -154,6 +154,7 @@ function getActionTypeForm(
     },
     id: 'test',
     isPreconfigured: false,
+    isDeprecated: false,
     name: 'test name',
     secrets: {},
   };
@@ -176,6 +177,7 @@ function getActionTypeForm(
       },
       id: 'test',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'test name',
       secrets: {},
     },
@@ -184,6 +186,7 @@ function getActionTypeForm(
       name: 'Server log',
       actionTypeId: '.server-log',
       isPreconfigured: false,
+      isDeprecated: false,
       config: {},
       secrets: {},
     },
