@@ -6,8 +6,9 @@
  */
 
 export function millisToNanos(millis: number): string {
-  if (millis === 0) {
+  const roundedMillis = Math.round(millis);
+  if (roundedMillis === 0) {
     return '0';
   }
-  return `${millis}000000`;
+  return `${roundedMillis}000000`;
 }

@@ -19,4 +19,8 @@ describe('millisToNanos', () => {
   test('should return "9007199254740991000000" when passing in 9007199254740991 (Number.MAX_SAFE_INTEGER)', () => {
     expect(millisToNanos(9007199254740991)).toEqual('9007199254740991000000');
   });
+
+  test('should round to "1000000" wheen passing in 0.75 millis', () => {
+    expect(millisToNanos(0.75)).toEqual('1000000');
+  });
 });
