@@ -50,8 +50,7 @@ export class FunctionalTestRunner {
       SuiteTracker.startTracking(lifecycle, this.configFile);
 
       const realServices =
-        !!config.get('testRunner') ||
-        (testStats.testCount > 0 && testStats.nonSkippedTestCount > 0);
+        !testStats || (testStats.testCount > 0 && testStats.nonSkippedTestCount > 0);
 
       const providers = realServices
         ? new ProviderCollection(this.log, [
@@ -144,7 +143,7 @@ export class FunctionalTestRunner {
   async getTestStats() {
     return await this.runHarness(async (config, lifecycle, coreProviders) => {
       if (config.get('testRunner')) {
-        throw new Error('Unable to get test stats for config that uses a custom test runner');
+        return;
       }
 
       const providers = this.getStubProviderCollection(config, coreProviders);

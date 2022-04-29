@@ -90,6 +90,9 @@ export async function assertNoneExcluded({ configPath, options }: CreateFtrParam
   }
 
   const stats = await ftr.getTestStats();
+  if (!stats) {
+    throw new Error('unable to get test stats');
+  }
   if (stats.testsExcludedByTag.length > 0) {
     throw new CliError(`
       ${stats.testsExcludedByTag.length} tests in the ${configPath} config
@@ -122,5 +125,8 @@ export async function hasTests({ configPath, options }: CreateFtrParams) {
     return true;
   }
   const stats = await ftr.getTestStats();
+  if (!stats) {
+    throw new Error('unable to get test stats');
+  }
   return stats.nonSkippedTestCount > 0;
 }
