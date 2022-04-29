@@ -14,11 +14,11 @@ import type {
 import type { ComplianceDashboardData } from '../../../common/types';
 import { KeyDocCount } from './compliance_dashboard';
 
-export interface ResourceTypeQueryResult {
-  aggs_by_resource_type: Aggregation<ResourceTypeBucket>;
+export interface FailedFindingsQueryResult {
+  aggs_by_resource_type: Aggregation<FailedFindingsBucket>;
 }
 
-export interface ResourceTypeBucket extends KeyDocCount {
+export interface FailedFindingsBucket extends KeyDocCount {
   failed_findings: {
     doc_count: number;
   };
@@ -27,10 +27,10 @@ export interface ResourceTypeBucket extends KeyDocCount {
   };
 }
 
-export const resourceTypeAggQuery = {
+export const failedFindingsAggQuery = {
   aggs_by_resource_type: {
     terms: {
-      field: 'type.keyword',
+      field: 'rule.section.keyword',
     },
     aggs: {
       failed_findings: {
@@ -46,15 +46,15 @@ export const resourceTypeAggQuery = {
 export const getRisksEsQuery = (query: QueryDslQueryContainer, pitId: string): SearchRequest => ({
   size: 0,
   query,
-  aggs: resourceTypeAggQuery,
+  aggs: failedFindingsAggQuery,
   pit: {
     id: pitId,
   },
 });
 
-export const getResourceTypeFromAggs = (
-  queryResult: ResourceTypeBucket[]
-): ComplianceDashboardData['resourcesTypes'] =>
+export const getFailedFindingsFromAggs = (
+  queryResult: FailedFindingsBucket[]
+): ComplianceDashboardData['groupedFindingsEvaluation'] =>
   queryResult.map((bucket) => ({
     name: bucket.key,
     totalFindings: bucket.doc_count,
@@ -62,17 +62,19 @@ export const getResourceTypeFromAggs = (
     totalPassed: bucket.passed_findings.doc_count || 0,
   }));
 
-export const getResourcesTypes = async (
+export const getGroupedFindingsEvaluation = async (
   esClient: ElasticsearchClient,
   query: QueryDslQueryContainer,
   pitId: string
-): Promise<ComplianceDashboardData['resourcesTypes']> => {
-  const resourceTypesQueryResult = await esClient.search<unknown, ResourceTypeQueryResult>(
+): Promise<ComplianceDashboardData['groupedFindingsEvaluation']> => {
+  const resourceTypesQueryResult = await esClient.search<unknown, FailedFindingsQueryResult>(
     getRisksEsQuery(query, pitId)
   );
 
-  const resourceTypes = resourceTypesQueryResult.aggregations?.aggs_by_resource_type.buckets;
-  if (!Array.isArray(resourceTypes)) throw new Error('missing resources types buckets');
+  const ruleSections = resourceTypesQueryResult.aggregations?.aggs_by_resource_type.buckets;
+  if (!Array.isArray(ruleSections)) {
+    return [];
+  }
 
-  return getResourceTypeFromAggs(resourceTypes);
+  return getFailedFindingsFromAggs(ruleSections);
 };
