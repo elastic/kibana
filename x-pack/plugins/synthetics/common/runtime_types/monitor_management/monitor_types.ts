@@ -10,6 +10,7 @@ import { secretKeys } from '../../constants/monitor_management';
 import { ConfigKey } from './config_key';
 import { MonitorServiceLocationsCodec, ServiceLocationErrors } from './locations';
 import {
+  DataStream,
   DataStreamCodec,
   ModeCodec,
   ResponseBodyIndexPolicyCodec,
@@ -307,6 +308,15 @@ export type SyntheticsMonitorWithId = t.TypeOf<typeof SyntheticsMonitorWithIdCod
 export type EncryptedSyntheticsMonitorWithId = t.TypeOf<
   typeof EncryptedSyntheticsMonitorWithIdCodec
 >;
+
+export const MonitorDefaultsCodec = t.interface({
+  [DataStream.HTTP]: HTTPFieldsCodec,
+  [DataStream.TCP]: TCPFieldsCodec,
+  [DataStream.ICMP]: ICMPSimpleFieldsCodec,
+  [DataStream.BROWSER]: BrowserFieldsCodec,
+});
+
+export type MonitorDefaults = t.TypeOf<typeof MonitorDefaultsCodec>;
 
 export const MonitorManagementListResultCodec = t.type({
   monitors: t.array(

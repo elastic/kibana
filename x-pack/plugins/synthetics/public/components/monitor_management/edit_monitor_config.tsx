@@ -18,7 +18,7 @@ import {
 import { SyntheticsProviders } from '../fleet_package/contexts';
 import { PolicyConfig } from '../fleet_package/types';
 import { MonitorConfig } from './monitor_config/monitor_config';
-import { DEFAULT_NAMESPACE_STRING } from '../../../common/constants';
+import { DEFAULT_NAMESPACE_STRING } from '../../../common/constants/monitor_defaults';
 
 interface Props {
   monitor: MonitorFields;

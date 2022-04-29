@@ -25,34 +25,10 @@ import {
   useTLSFieldsContext,
   useBrowserSimpleFieldsContext,
   useBrowserAdvancedFieldsContext,
-  defaultHTTPAdvancedFields,
-  defaultHTTPSimpleFields,
-  defaultICMPSimpleFields,
-  defaultTCPSimpleFields,
-  defaultTCPAdvancedFields,
-  defaultBrowserSimpleFields,
-  defaultBrowserAdvancedFields,
-  defaultTLSFields,
 } from '../contexts';
+import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 
-export const defaultConfig: PolicyConfig = {
-  [DataStream.HTTP]: {
-    ...defaultHTTPSimpleFields,
-    ...defaultHTTPAdvancedFields,
-    ...defaultTLSFields,
-  },
-  [DataStream.TCP]: {
-    ...defaultTCPSimpleFields,
-    ...defaultTCPAdvancedFields,
-    ...defaultTLSFields,
-  },
-  [DataStream.ICMP]: defaultICMPSimpleFields,
-  [DataStream.BROWSER]: {
-    ...defaultBrowserSimpleFields,
-    ...defaultBrowserAdvancedFields,
-    ...defaultTLSFields,
-  },
-};
+export const defaultConfig: PolicyConfig = DEFAULT_FIELDS;
 
 export const usePolicy = (fleetPolicyName: string = '') => {
   const {

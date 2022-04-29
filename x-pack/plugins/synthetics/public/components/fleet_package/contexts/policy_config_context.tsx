@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { DEFAULT_NAMESPACE_STRING } from '../../../../common/constants';
+import { DEFAULT_NAMESPACE_STRING } from '../../../../common/constants/monitor_defaults';
 import {
   ScheduleUnit,
   MonitorServiceLocations,
