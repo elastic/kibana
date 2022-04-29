@@ -27,6 +27,8 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
+import { useTestIdGenerator } from '../../../../components/hooks/use_test_id_generator';
+import { PolicyData } from '../../../../../../common/endpoint/types';
 import { AddExceptionComments } from '../../../../../common/components/exceptions/add_exception_comments';
 import { useFetchIndex } from '../../../../../common/containers/source';
 import { Loader } from '../../../../../common/components/loader';
@@ -34,31 +36,29 @@ import { useLicense } from '../../../../../common/hooks/use_license';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { filterIndexPatterns } from '../../../../../common/components/exceptions/helpers';
+import {
+  isArtifactGlobal,
+  getPolicyIdsFromArtifact,
+  GLOBAL_ARTIFACT_TAG,
+  BY_POLICY_ARTIFACT_TAG_PREFIX,
+} from '../../../../../../common/endpoint/service/artifacts';
 
 import {
   ABOUT_EVENT_FILTERS,
   NAME_LABEL,
   NAME_ERROR,
   DESCRIPTION_LABEL,
-  DESCRIPTION_PLACEHOLDER,
-  NAME_PLACEHOLDER,
   OS_LABEL,
   RULE_NAME,
-} from '../translations';
+} from '../event_filters_list';
 import { OS_TITLES } from '../../../../common/translations';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST_TYPE } from '../../constants';
 
 import {
   EffectedPolicySelect,
   EffectedPolicySelection,
-  EffectedPolicySelectProps,
 } from '../../../../components/effected_policy_select';
-import {
-  getArtifactTagsByEffectedPolicySelection,
-  getArtifactTagsWithoutPolicies,
-  getEffectedPolicySelectionByTags,
-  isGlobalPolicyEffected,
-} from '../../../../components/effected_policy_select/utils';
+import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -79,137 +79,136 @@ const getAddedFieldsCounts = (formFields: string[]): { [k: string]: number } =>
 const computeHasDuplicateFields = (formFieldsList: Record<string, number>): boolean =>
   Object.values(formFieldsList).some((e) => e > 1);
 
-export const EventFiltersForm: React.FC<ArtifactFormComponentProps> = memo(
-  ({ item, policies, policiesIsLoading, onChange, mode }) => {
+const defaultConditionEntry = (): ExceptionListItemSchema['entries'] => [
+  {
+    field: '',
+    operator: 'included',
+    type: 'match',
+    value: '',
+  },
+];
+
+type EventFilterItemEntries = Array<{
+  field: string;
+  value: string;
+  operator: 'included' | 'excluded';
+  type: Exclude<ExceptionListItemSchema['entries'][number]['type'], 'list'>;
+}>;
+
+export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSelectOs?: boolean }> =
+  memo(({ allowSelectOs = true, item: exception, policies, policiesIsLoading, onChange, mode }) => {
+    const getTestId = useTestIdGenerator('eventFilters-form');
     const { http, unifiedSearch } = useKibana().services;
 
-    // const hasNameError = useEventFiltersSelector(getHasNameError);
-    // const newComment = useEventFiltersSelector(getNewComment);
-    const [hasBeenInputNameVisited, setHasBeenInputNameVisited] = useState(false);
-    const isPlatinumPlus = useLicense().isPlatinumPlus();
     const [hasFormChanged, setHasFormChanged] = useState(false);
-    const [hasDuplicateFields, setHasDuplicateFields] = useState<boolean>(false);
+    const [hasNameError, setHasNameError] = useState<boolean>(!exception.name);
+    const [newComment, setNewComment] = useState('');
+    const [hasBeenInputNameVisited, setHasBeenInputNameVisited] = useState(false);
+    const [selectedPolicies, setSelectedPolicies] = useState<PolicyData[]>([]);
+    const isPlatinumPlus = useLicense().isPlatinumPlus();
+    const isGlobal = useMemo(
+      () => isArtifactGlobal(exception as ExceptionListItemSchema),
+      [exception]
+    );
+    const [wasByPolicy, setWasByPolicy] = useState(!isGlobalPolicyEffected(exception?.tags));
 
+    const [hasDuplicateFields, setHasDuplicateFields] = useState<boolean>(false);
     // This value has to be memoized to avoid infinite useEffect loop on useFetchIndex
     const indexNames = useMemo(() => ['logs-endpoint.events.*'], []);
     const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(indexNames);
-
-    const [selection, setSelection] = useState<EffectedPolicySelection>({
-      selected: [],
-      isGlobal: isGlobalPolicyEffected(item?.tags),
-    });
-
-    const isEditMode = useMemo(() => !!item?.item_id, [item?.item_id]);
-    const [wasByPolicy, setWasByPolicy] = useState(!isGlobalPolicyEffected(item?.tags));
+    const [areConditionsValid, setAreConditionsValid] = useState(
+      !!exception.entries.length || false
+    );
+    // compute this for initial render only
+    const existingComments = useMemo<ExceptionListItemSchema['comments']>(
+      () => (exception as ExceptionListItemSchema)?.comments,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      []
+    );
 
     const showAssignmentSection = useMemo(() => {
       return (
         isPlatinumPlus ||
-        (isEditMode &&
-          (!selection.isGlobal || (wasByPolicy && selection.isGlobal && hasFormChanged)))
+        (mode === 'edit' && (!isGlobal || (wasByPolicy && isGlobal && hasFormChanged)))
       );
-    }, [isEditMode, selection.isGlobal, hasFormChanged, isPlatinumPlus, wasByPolicy]);
+    }, [mode, isGlobal, hasFormChanged, isPlatinumPlus, wasByPolicy]);
 
-    // set current policies if not previously selected
-    useEffect(() => {
-      if (selection.selected.length === 0 && item?.tags) {
-        setSelection(getEffectedPolicySelectionByTags(item.tags, policies));
-      }
-    }, [item?.tags, policies, selection.selected.length]);
+    const isFormValid = useMemo(() => {
+      // verify that it has legit entries
+      // and not just default entry without values
+      return (
+        !hasNameError &&
+        !!exception.entries.length &&
+        (exception.entries as EventFilterItemEntries).some((e) => e.value !== '' || e.value.length)
+      );
+    }, [hasNameError, exception.entries]);
 
-    // set initial state of `wasByPolicy` that checks if the initial state of the item was by policy or not
-    useEffect(() => {
-      if (!hasFormChanged && item?.tags) {
-        setWasByPolicy(!isGlobalPolicyEffected(item?.tags));
-      }
-    }, [item?.tags, hasFormChanged]);
-
-    const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = useMemo(
-      () => OPERATING_SYSTEMS.map((os) => ({ value: os, inputDisplay: OS_TITLES[os] })),
-      []
-    );
-
-    const handleOnBuilderChange = useCallback(
-      (arg: OnChangeProps) => {
-        if (
-          (!hasFormChanged && arg.exceptionItems[0] === undefined) ||
-          isEqual(arg.exceptionItems[0]?.entries, item?.entries)
-        ) {
-          const addedFields = arg.exceptionItems[0]?.entries.map((e) => e.field) || [''];
-          setHasDuplicateFields(computeHasDuplicateFields(getAddedFieldsCounts(addedFields)));
-          setHasFormChanged(true);
-          return;
-        }
-        setHasFormChanged(true);
+    const processChanged = useCallback(
+      (updatedItem?: Partial<ArtifactFormComponentProps['item']>) => {
+        onChange({
+          item: updatedItem
+            ? {
+                ...exception,
+                ...updatedItem,
+              }
+            : exception,
+          isValid: isFormValid && areConditionsValid,
+        });
       },
-      [item, hasFormChanged]
+      [areConditionsValid, exception, isFormValid, onChange]
     );
 
+    useEffect(() => {
+      processChanged();
+    }, [processChanged]);
+
+    // set initial state of `wasByPolicy` that checks
+    // if the initial state of the exception was by policy or not
+    useEffect(() => {
+      if (!hasFormChanged && exception.tags) {
+        setWasByPolicy(!isGlobalPolicyEffected(exception.tags));
+      }
+    }, [exception.tags, hasFormChanged]);
+
+    // select policies if editing
+    useEffect(() => {
+      if (hasFormChanged) return;
+      const policyIds = exception.tags ? getPolicyIdsFromArtifact({ tags: exception.tags }) : [];
+
+      if (!policyIds.length) return;
+      const policiesData = policies.filter((policy) => policyIds.includes(policy.id));
+      setSelectedPolicies(policiesData);
+    }, [hasFormChanged, exception, policies]);
+
+    const eventFilterItem = useMemo<ArtifactFormComponentProps['item']>(() => {
+      const ef: ArtifactFormComponentProps['item'] = exception;
+      ef.entries = exception.entries.length
+        ? (exception.entries as ExceptionListItemSchema['entries'])
+        : defaultConditionEntry();
+
+      // TODO: `id` gets added to the exception.entries item
+      // Is there a simpler way to this?
+      ef.entries.map(
+        (e: ArtifactFormComponentProps['item']['entries'][number] & { id?: string }) => {
+          delete e.id;
+          return e;
+        }
+      );
+
+      setAreConditionsValid(!!exception.entries.length);
+      return ef;
+    }, [exception]);
+
+    // name and handler
     const handleOnChangeName = useCallback(
-      (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (!item) return;
-        setHasFormChanged(true);
-        // const name = e.target.value.toString().trim();
-      },
-      [item]
-    );
-
-    const handleOnDescriptionChange = useCallback(
-      (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        if (!item) return;
-        setHasFormChanged(true);
-        const description = e.target.value.toString().trim();
-      },
-      [item]
-    );
-
-    const handleOnChangeComment = useCallback(
-      (value: string) => {
-        if (!item) return;
+      (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (!exception) return;
+        const name = event.target.value.trim();
+        setHasNameError(!name);
+        processChanged({ name });
         setHasFormChanged(true);
       },
-      [item]
-    );
-
-    const handleOnChangeEffectScope: EffectedPolicySelectProps['onChange'] = useCallback(
-      (currentSelection) => {
-        if (currentSelection.isGlobal) {
-          // Preserve last selection inputs
-          setSelection({ ...selection, isGlobal: true });
-        } else {
-          setSelection(currentSelection);
-        }
-
-        if (!item) return;
-        setHasFormChanged(true);
-      },
-      [item, selection]
-    );
-
-    const exceptionBuilderComponentMemo = useMemo(
-      () =>
-        getExceptionBuilderComponentLazy({
-          allowLargeValueLists: false,
-          httpService: http,
-          autocompleteService: unifiedSearch.autocomplete,
-          exceptionListItems: [item as ExceptionListItemSchema],
-          listType: EVENT_FILTER_LIST_TYPE,
-          listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
-          listNamespaceType: 'agnostic',
-          ruleName: RULE_NAME,
-          indexPatterns,
-          isOrDisabled: true,
-          isOrHidden: true,
-          isAndDisabled: false,
-          isNestedDisabled: false,
-          dataTestSubj: 'alert-exception-builder',
-          idAria: 'alert-exception-builder',
-          onChange: handleOnBuilderChange,
-          listTypeSpecificIndexPatternFilter: filterIndexPatterns,
-          operatorsList: EVENT_FILTERS_OPERATORS,
-          osTypes: item?.os_types,
-        }),
-      [unifiedSearch, handleOnBuilderChange, http, indexPatterns, item]
+      [exception, processChanged]
     );
 
     const nameInputMemo = useMemo(
@@ -221,37 +220,69 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps> = memo(
           error={NAME_ERROR}
         >
           <EuiFieldText
+            aria-label={NAME_LABEL}
             id="eventFiltersFormInputName"
-            placeholder={NAME_PLACEHOLDER}
-            defaultValue={item?.name ?? ''}
-            onChange={handleOnChangeName}
+            defaultValue={exception?.name ?? ''}
             fullWidth
-            aria-label={NAME_PLACEHOLDER}
-            required={hasBeenInputNameVisited}
             maxLength={256}
+            required={hasBeenInputNameVisited}
+            onChange={handleOnChangeName}
             onBlur={() => !hasBeenInputNameVisited && setHasBeenInputNameVisited(true)}
           />
         </EuiFormRow>
       ),
-      [hasNameError, item?.name, handleOnChangeName, hasBeenInputNameVisited]
+      [hasNameError, handleOnChangeName, hasBeenInputNameVisited, exception?.name]
     );
 
+    // description and handler
+    const handleOnDescriptionChange = useCallback(
+      (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+        if (!exception) return;
+        setHasFormChanged(true);
+        processChanged({ description: event.target.value.toString().trim() });
+      },
+      [exception, processChanged]
+    );
     const descriptionInputMemo = useMemo(
       () => (
         <EuiFormRow label={DESCRIPTION_LABEL} fullWidth>
           <EuiTextArea
             id="eventFiltersFormInputDescription"
-            placeholder={DESCRIPTION_PLACEHOLDER}
-            defaultValue={item?.description ?? ''}
+            defaultValue={exception?.description ?? ''}
             onChange={handleOnDescriptionChange}
             fullWidth
             data-test-subj="eventFilters-form-description-input"
-            aria-label={DESCRIPTION_PLACEHOLDER}
+            aria-label={DESCRIPTION_LABEL}
             maxLength={256}
           />
         </EuiFormRow>
       ),
-      [item?.description, handleOnDescriptionChange]
+      [exception?.description, handleOnDescriptionChange]
+    );
+
+    // OS and handler
+    const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = useMemo(
+      () => OPERATING_SYSTEMS.map((os) => ({ value: os, inputDisplay: OS_TITLES[os] })),
+      []
+    );
+
+    const selectedOs = useMemo((): OperatingSystem => {
+      if (!exception?.os_types?.length) {
+        return OperatingSystem.WINDOWS;
+      }
+      return exception.os_types[0] as OperatingSystem;
+    }, [exception?.os_types]);
+
+    const handleOnOsChange = useCallback(
+      (os: OperatingSystem) => {
+        if (!exception) return;
+        processChanged({
+          os_types: [os],
+          entries: exception.entries,
+        });
+        setHasFormChanged(true);
+      },
+      [exception, processChanged]
     );
 
     const osInputMemo = useMemo(
@@ -261,77 +292,36 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps> = memo(
             name="os"
             options={osOptions}
             fullWidth
-            valueOfSelected={item?.os_types ? item.os_types[0] : OS_TITLES[OperatingSystem.WINDOWS]}
-            onChange={}
+            valueOfSelected={selectedOs}
+            onChange={handleOnOsChange}
           />
         </EuiFormRow>
       ),
-      [item, osOptions]
+      [osOptions, handleOnOsChange, selectedOs]
     );
 
+    // comments and handler
+    const handleOnChangeComment = useCallback(
+      (value: string) => {
+        if (!exception) return;
+        setNewComment(value);
+        processChanged({ comments: [{ comment: value }] });
+        setHasFormChanged(true);
+      },
+      [exception, processChanged]
+    );
     const commentsInputMemo = useMemo(
       () => (
         <AddExceptionComments
-          exceptionItemComments={item?.comments}
+          exceptionItemComments={existingComments}
           newCommentValue={newComment}
           newCommentOnChange={handleOnChangeComment}
         />
       ),
-      [item, handleOnChangeComment, newComment]
+      [existingComments, handleOnChangeComment, newComment]
     );
 
-    const detailsSection = useMemo(
-      () => (
-        <>
-          <EuiText size="xs">
-            <h3>
-              <FormattedMessage
-                id="xpack.securitySolution.eventFilters.detailsSectionTitle"
-                defaultMessage="Details"
-              />
-            </h3>
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <EuiText size="s">
-            <p>{ABOUT_EVENT_FILTERS}</p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          {nameInputMemo}
-          {descriptionInputMemo}
-        </>
-      ),
-      [nameInputMemo, descriptionInputMemo]
-    );
-
-    const criteriaSection = useMemo(
-      () => (
-        <>
-          <EuiText size="xs">
-            <h3>
-              <FormattedMessage
-                id="xpack.securitySolution.eventFilters.criteriaSectionTitle"
-                defaultMessage="Conditions"
-              />
-            </h3>
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <EuiText size="s">
-            <p>
-              <FormattedMessage
-                id="xpack.securitySolution.eventFilters.criteriaSectionDescription"
-                defaultMessage="Select an operating system and add conditions."
-              />
-            </p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          {osInputMemo}
-          <EuiSpacer />
-          {exceptionBuilderComponentMemo}
-        </>
-      ),
-      [exceptionBuilderComponentMemo, osInputMemo]
-    );
-
+    // comments
     const commentsSection = useMemo(
       () => (
         <>
@@ -359,12 +349,169 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps> = memo(
       [commentsInputMemo]
     );
 
-    if (isIndexPatternLoading || !item) {
+    // details
+    const detailsSection = useMemo(
+      () => (
+        <>
+          <EuiText size="xs">
+            <h3>
+              <FormattedMessage
+                id="xpack.securitySolution.eventFilters.detailsSectionTitle"
+                defaultMessage="Details"
+              />
+            </h3>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiText size="s">
+            <p>{ABOUT_EVENT_FILTERS}</p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          {nameInputMemo}
+          {descriptionInputMemo}
+        </>
+      ),
+      [nameInputMemo, descriptionInputMemo]
+    );
+
+    // conditions and handler
+    const handleOnBuilderChange = useCallback(
+      (arg: OnChangeProps) => {
+        const hasDuplicates =
+          (!hasFormChanged && arg.exceptionItems[0] === undefined) ||
+          isEqual(arg.exceptionItems[0]?.entries, exception?.entries);
+        if (hasDuplicates) {
+          const addedFields = arg.exceptionItems[0]?.entries.map((e) => e.field) || [''];
+          setHasDuplicateFields(computeHasDuplicateFields(getAddedFieldsCounts(addedFields)));
+          setHasFormChanged(true);
+          return;
+        }
+        const updatedItem: Partial<ArtifactFormComponentProps['item']> =
+          arg.exceptionItems[0] !== undefined
+            ? {
+                ...arg.exceptionItems[0],
+                name: exception?.name ?? '',
+                description: exception?.description ?? '',
+                comments: exception?.comments ?? [],
+                os_types: exception?.os_types ?? [OperatingSystem.WINDOWS],
+                tags: exception?.tags ?? [],
+              }
+            : exception;
+        const hasValidConditions =
+          arg.exceptionItems[0] !== undefined
+            ? !(arg.errorExists && !arg.exceptionItems[0]?.entries?.length)
+            : false;
+
+        setAreConditionsValid(hasValidConditions);
+        processChanged(updatedItem);
+        setHasFormChanged(true);
+      },
+      [exception, hasFormChanged, processChanged]
+    );
+    const exceptionBuilderComponentMemo = useMemo(
+      () =>
+        getExceptionBuilderComponentLazy({
+          allowLargeValueLists: false,
+          httpService: http,
+          autocompleteService: unifiedSearch.autocomplete,
+          exceptionListItems: [eventFilterItem as ExceptionListItemSchema],
+          listType: EVENT_FILTER_LIST_TYPE,
+          listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
+          listNamespaceType: 'agnostic',
+          ruleName: RULE_NAME,
+          indexPatterns,
+          isOrDisabled: true,
+          isOrHidden: true,
+          isAndDisabled: false,
+          isNestedDisabled: false,
+          dataTestSubj: 'alert-exception-builder',
+          idAria: 'alert-exception-builder',
+          onChange: handleOnBuilderChange,
+          listTypeSpecificIndexPatternFilter: filterIndexPatterns,
+          operatorsList: EVENT_FILTERS_OPERATORS,
+          osTypes: exception.os_types,
+        }),
+      [unifiedSearch, handleOnBuilderChange, http, indexPatterns, exception, eventFilterItem]
+    );
+
+    // conditions
+    const criteriaSection = useMemo(
+      () => (
+        <>
+          <EuiText size="xs">
+            <h3>
+              <FormattedMessage
+                id="xpack.securitySolution.eventFilters.criteriaSectionTitle"
+                defaultMessage="Conditions"
+              />
+            </h3>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="xpack.securitySolution.eventFilters.criteriaSectionDescription"
+                defaultMessage="Select an operating system and add conditions."
+              />
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          {allowSelectOs ? (
+            <>
+              {osInputMemo}
+              <EuiSpacer />
+            </>
+          ) : null}
+          {exceptionBuilderComponentMemo}
+        </>
+      ),
+      [allowSelectOs, exceptionBuilderComponentMemo, osInputMemo]
+    );
+
+    // policy and handler
+    const handleOnPolicyChange = useCallback(
+      (change: EffectedPolicySelection) => {
+        const tags = change.isGlobal
+          ? [GLOBAL_ARTIFACT_TAG]
+          : change.selected.map((policy) => `${BY_POLICY_ARTIFACT_TAG_PREFIX}${policy.id}`);
+
+        // Preserve old selected policies when switching to global
+        if (!change.isGlobal) {
+          setSelectedPolicies(change.selected);
+        }
+        processChanged({ tags });
+        setHasFormChanged(true);
+      },
+      [processChanged]
+    );
+
+    const policiesSection = useMemo(
+      () => (
+        <EffectedPolicySelect
+          selected={selectedPolicies}
+          options={policies}
+          isGlobal={isGlobal}
+          isLoading={policiesIsLoading}
+          isPlatinumPlus={isPlatinumPlus}
+          onChange={handleOnPolicyChange}
+          data-test-subj={'effectedPolicies-select'}
+        />
+      ),
+      [
+        policies,
+        selectedPolicies,
+        isGlobal,
+        isPlatinumPlus,
+        handleOnPolicyChange,
+        policiesIsLoading,
+      ]
+    );
+
+    if (isIndexPatternLoading || !exception) {
       return <Loader size="xl" />;
     }
 
     return (
-      <EuiForm component="div">
+      <EuiForm component="div" data-test-subj={getTestId('')}>
         {detailsSection}
         <EuiHorizontalRule />
         {criteriaSection}
@@ -382,22 +529,13 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps> = memo(
         {showAssignmentSection && (
           <>
             <EuiHorizontalRule />
-            <EffectedPolicySelect
-              selected={selection.selected}
-              options={policies}
-              isGlobal={selection.isGlobal}
-              isLoading={policiesIsLoading}
-              isPlatinumPlus={isPlatinumPlus}
-              onChange={handleOnChangeEffectScope}
-              data-test-subj={'effectedPolicies-select'}
-            />
+            {policiesSection}
           </>
         )}
         <EuiHorizontalRule />
         {commentsSection}
       </EuiForm>
     );
-  }
-);
+  });
 
 EventFiltersForm.displayName = 'EventFiltersForm';

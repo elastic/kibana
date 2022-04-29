@@ -17,6 +17,33 @@ import { EventFiltersApiClient } from '../service/api_client';
 import { EventFiltersForm } from './components/form';
 import { SEARCHABLE_FIELDS } from '../constants';
 
+export const ABOUT_EVENT_FILTERS = i18n.translate('xpack.securitySolution.eventFilters.aboutInfo', {
+  defaultMessage:
+    'Event filters exclude high volume or unwanted events from being written to Elasticsearch.',
+});
+
+export const NAME_LABEL = i18n.translate('xpack.securitySolution.eventFilter.form.name.label', {
+  defaultMessage: 'Name',
+});
+export const DESCRIPTION_LABEL = i18n.translate(
+  'xpack.securitySolution.eventFilter.form.description.placeholder',
+  {
+    defaultMessage: 'Description',
+  }
+);
+
+export const NAME_ERROR = i18n.translate('xpack.securitySolution.eventFilter.form.name.error', {
+  defaultMessage: "The name can't be empty",
+});
+
+export const OS_LABEL = i18n.translate('xpack.securitySolution.eventFilter.form.os.label', {
+  defaultMessage: 'Select operating system',
+});
+
+export const RULE_NAME = i18n.translate('xpack.securitySolution.eventFilter.form.rule.name', {
+  defaultMessage: 'Endpoint Event Filtering',
+});
+
 const EVENT_FILTERS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   pageTitle: i18n.translate('xpack.securitySolution.eventFilters.pageTitle', {
     defaultMessage: 'Event Filters',
@@ -115,6 +142,7 @@ export const EventFiltersList = memo(() => {
       labels={EVENT_FILTERS_PAGE_LABELS}
       data-test-subj="EventFiltersList"
       searchableFields={SEARCHABLE_FIELDS}
+      flyoutSize="l"
     />
   );
 });

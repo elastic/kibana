@@ -9,25 +9,24 @@ import { EventFiltersForm } from './form';
 import { RenderResult, act } from '@testing-library/react';
 import { fireEvent, waitFor } from '@testing-library/dom';
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
-import { getInitialExceptionFromEvent } from '../../../store/utils';
-import { useFetchIndex } from '../../../../../../common/containers/source';
-import { ecsEventMock } from '../../../test_utils';
-import { NAME_ERROR, NAME_PLACEHOLDER } from './translations';
-import { useCurrentUser, useKibana } from '../../../../../../common/lib/kibana';
-import { licenseService } from '../../../../../../common/hooks/use_license';
+import { getInitialExceptionFromEvent } from '../utils';
+import { useFetchIndex } from '../../../../../common/containers/source';
+import { ecsEventMock } from '../../test_utils';
+import { NAME_ERROR, NAME_LABEL } from '../translations';
+import { useCurrentUser, useKibana } from '../../../../../common/lib/kibana';
+import { licenseService } from '../../../../../common/hooks/use_license';
 import {
   AppContextTestRender,
   createAppRootMockRenderer,
-} from '../../../../../../common/mock/endpoint';
-import { EventFiltersListPageState } from '../../../types';
-import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../../services/policies/test_mock_utils';
-import { GetPolicyListResponse } from '../../../../policy/types';
+} from '../../../../../common/mock/endpoint';
+import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../services/policies/test_mock_utils';
+import { GetPolicyListResponse } from '../../../policy/types';
 import userEvent from '@testing-library/user-event';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-jest.mock('../../../../../../common/lib/kibana');
-jest.mock('../../../../../../common/containers/source');
-jest.mock('../../../../../../common/hooks/use_license', () => {
+jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../../common/containers/source');
+jest.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
     isPlatinumPlus: jest.fn(),
   };
@@ -48,17 +47,16 @@ describe('Event filter form', () => {
   let renderWithData: (
     customEventFilterProps?: Partial<ExceptionListItemSchema>
   ) => Promise<ReturnType<AppContextTestRender['render']>>;
-  let getState: () => EventFiltersListPageState;
+
   let policiesRequest: GetPolicyListResponse;
 
   beforeEach(async () => {
     (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
     mockedContext = createAppRootMockRenderer();
     policiesRequest = await sendGetEndpointSpecificPackagePoliciesMock();
-    getState = () => mockedContext.store.getState().management.eventFilters;
     render = (props) =>
       mockedContext.render(
-        <EventFiltersForm policies={policiesRequest.items} arePoliciesLoading={false} {...props} />
+        <EventFiltersForm policies={policiesRequest.items} policiesIsLoading={false} {...props} />
       );
     renderWithData = async (customEventFilterProps = {}) => {
       const renderResult = render();
@@ -105,7 +103,7 @@ describe('Event filter form', () => {
   });
 
   it('should displays loader when policies are still loading', () => {
-    component = render({ arePoliciesLoading: true });
+    component = render({ policiesIsLoading: true });
 
     expect(component.queryByTestId('exceptionsBuilderWrapper')).toBeNull();
     expect(component.getByTestId('loading-spinner')).not.toBeNull();
@@ -122,7 +120,7 @@ describe('Event filter form', () => {
   it('should display name error only when on blur and empty name', async () => {
     component = await renderWithData();
     expect(component.queryByText(NAME_ERROR)).toBeNull();
-    const nameInput = component.getByPlaceholderText(NAME_PLACEHOLDER);
+    const nameInput = component.getByLabelText(NAME_LABEL);
     act(() => {
       fireEvent.blur(nameInput);
     });
@@ -132,7 +130,7 @@ describe('Event filter form', () => {
   it('should change name', async () => {
     component = await renderWithData();
 
-    const nameInput = component.getByPlaceholderText(NAME_PLACEHOLDER);
+    const nameInput = component.getByLabelText(NAME_LABEL);
 
     act(() => {
       fireEvent.change(nameInput, {
@@ -149,7 +147,7 @@ describe('Event filter form', () => {
   it('should change name with a white space still shows an error', async () => {
     component = await renderWithData();
 
-    const nameInput = component.getByPlaceholderText(NAME_PLACEHOLDER);
+    const nameInput = component.getByLabelText(NAME_LABEL);
 
     act(() => {
       fireEvent.change(nameInput, {
@@ -182,7 +180,7 @@ describe('Event filter form', () => {
   it('should change comments', async () => {
     component = await renderWithData();
 
-    const commentInput = component.getByPlaceholderText('Add a new comment...');
+    const commentInput = component.getByLabelText('Add a new LABEL');
 
     act(() => {
       fireEvent.change(commentInput, {

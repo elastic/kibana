@@ -12,7 +12,6 @@ import type {
   UpdateExceptionListItemSchema,
   ExceptionListSummarySchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { AsyncResourceState } from '../../state/async_resource_state';
 import { Immutable } from '../../../../common/endpoint/types';
 
 export interface EventFiltersPageLocation {
@@ -23,15 +22,6 @@ export interface EventFiltersPageLocation {
   id?: string;
   filter: string;
   included_policies: string;
-}
-
-export interface EventFiltersForm {
-  entry: UpdateExceptionListItemSchema | CreateExceptionListItemSchema | undefined;
-  newComment: string;
-  hasNameError: boolean;
-  hasItemsError: boolean;
-  hasOSError: boolean;
-  submissionResourceState: AsyncResourceState<ExceptionListItemSchema>;
 }
 
 export type EventFiltersServiceGetListOptions = Partial<{
