@@ -25,7 +25,7 @@ export const RadioFlexGroup = styled(EuiFlexGroup)`
     margin-right: 0;
   }
   .no-horizontal-margin-radio {
-    margin: ${(props) => props.theme.eui.ruleMargins.marginSmall} 0;
+    margin: ${(props) => props.theme.eui.euiSizeM} 0;
   }
 `;
 
