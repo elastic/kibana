@@ -24,7 +24,7 @@ describe('Host Isolation utils isVersionSupported', () => {
     ${'8.0.0-SNAPSHOT'}       | ${'7.14.0'}        | ${true}
     ${'8.0.0'}                | ${'7.14.0'}        | ${true}
     ${'7.15.0.8295.0'}        | ${'7.14.0'}        | ${false}
-    ${'NOTE_SEMVER'}          | ${'7.14.0'}        | ${false}
+    ${'NOT_SEMVER'}           | ${'7.14.0'}        | ${false}
   `(
     'should validate that version $a is compatible($expected) to $b',
     ({ currentVersion, minVersionRequired, expected }) => {
