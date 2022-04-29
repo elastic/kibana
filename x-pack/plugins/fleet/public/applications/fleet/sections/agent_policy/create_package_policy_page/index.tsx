@@ -50,7 +50,11 @@ import { ExtensionWrapper } from '../../../components';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { pkgKeyFromPackageInfo } from '../../../services';
 
-import { CreatePackagePolicyPageLayout, PostInstallAddAgentModal } from './components';
+import {
+  CreatePackagePolicyPageLayout,
+  CreatePackagePolicyPageStepsLayout,
+  PostInstallAddAgentModal,
+} from './components';
 import type { EditPackagePolicyFrom, PackagePolicyFormState } from './types';
 import type { PackagePolicyValidationResults } from './services';
 import { validatePackagePolicy, validationHasErrors } from './services';
@@ -100,6 +104,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     () => queryParams.get('policyId') ?? undefined,
     [queryParams]
   );
+  const useStepsLayout = useMemo(() => queryParams.has('useStepsLayout'), [queryParams]);
 
   /**
    * Please note: policyId can come from one of two sources. The URL param (in the URL path) or
@@ -618,8 +623,9 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     );
   }
 
+  const Cmp = useStepsLayout ? CreatePackagePolicyPageStepsLayout : CreatePackagePolicyPageLayout;
   return (
-    <CreatePackagePolicyPageLayout {...layoutProps} data-test-subj="createPackagePolicy">
+    <Cmp {...layoutProps} data-test-subj="createPackagePolicy">
       <EuiErrorBoundary>
         {formState === 'CONFIRM' && agentPolicy && (
           <ConfirmDeployAgentPolicyModal
@@ -694,7 +700,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
           </EuiFlexGroup>
         </CustomEuiBottomBar>
       </EuiErrorBoundary>
-    </CreatePackagePolicyPageLayout>
+    </Cmp>
   );
 };
 
