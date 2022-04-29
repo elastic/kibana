@@ -60,7 +60,6 @@ export class MetadataEventsStreamsIndex {
     }
 
     // Add a boolean query to match the stream
-
     const query: estypes.QueryDslQueryContainer = {
       // @ts-expect-error
       ...(searchRequest?.query ?? searchRequest?.body?.query),

@@ -27,7 +27,7 @@ export class UserContentPlugin
 
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
-    this.metadataEventsService = new MetadataEventsService();
+    this.metadataEventsService = new MetadataEventsService({ logger: this.logger });
   }
 
   public setup({ http }: CoreSetup) {
