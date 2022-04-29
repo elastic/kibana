@@ -20,7 +20,7 @@ import { FtrConfigProviderContext } from '@kbn/test';
  */
 // eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const httpConfig = await readConfigFile(require.resolve('../../config'));
+  const httpConfig = await readConfigFile(require.resolve('../../config.base.js'));
 
   // Find all folders in __fixtures__/plugins since we treat all them as plugin folder
   const allFiles = fs.readdirSync(path.resolve(__dirname, '../../__fixtures__/plugins'));
