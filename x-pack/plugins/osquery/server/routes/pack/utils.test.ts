@@ -7,7 +7,7 @@
 
 import { convertSOQueriesToPack } from './utils';
 
-const testQueries = (additionalFields?: Record<string, unknown>, packName = 'default') => ({
+const getTestQueries = (additionalFields?: Record<string, unknown>, packName = 'default') => ({
   [packName]: {
     ...additionalFields,
     query:
@@ -42,16 +42,16 @@ const oneLiner = {
 describe('Pack utils', () => {
   describe('convertSOQueriesToPack', () => {
     test('converts to pack with empty ecs_mapping', () => {
-      const convertedQueries = convertSOQueriesToPack(testQueries());
-      expect(convertedQueries).toStrictEqual(testQueries({ ecs_mapping: {} }));
+      const convertedQueries = convertSOQueriesToPack(getTestQueries());
+      expect(convertedQueries).toStrictEqual(getTestQueries({ ecs_mapping: {} }));
     });
     test('converts to pack with converting query to single line', () => {
-      const convertedQueries = convertSOQueriesToPack(testQueries(), true);
+      const convertedQueries = convertSOQueriesToPack(getTestQueries(), true);
       expect(convertedQueries).toStrictEqual(oneLiner);
     });
     test('converts to object with pack names after query.id', () => {
-      const convertedQueries = convertSOQueriesToPack(testQueries({ id: 'testId' }));
-      expect(convertedQueries).toStrictEqual(testQueries({ ecs_mapping: {} }, 'testId'));
+      const convertedQueries = convertSOQueriesToPack(getTestQueries({ id: 'testId' }));
+      expect(convertedQueries).toStrictEqual(getTestQueries({ ecs_mapping: {} }, 'testId'));
     });
   });
 });
