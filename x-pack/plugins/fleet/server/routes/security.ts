@@ -117,7 +117,7 @@ function containsRequirement(authz: Authz, requirements: DeepPartialTruthy<Authz
   return true;
 }
 
-function hasRequiredFleetAuthzPrivilege(
+export function hasRequiredFleetAuthzPrivilege(
   authz: FleetAuthz,
   { fleetAuthz }: { fleetAuthz?: FleetAuthzRequirements }
 ): boolean {
@@ -145,7 +145,7 @@ type FleetAuthzRouteRegistrar<
   handler: RequestHandler<P, Q, B, Context, Method>
 ) => void;
 
-interface FleetAuthzRouteConfig {
+export interface FleetAuthzRouteConfig {
   fleetAuthz?: FleetAuthzRequirements;
 }
 

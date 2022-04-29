@@ -27,6 +27,7 @@ import {
   RegistryConnectionError,
   RegistryError,
   RegistryResponseError,
+  FleetUnauthorizedError,
 } from '.';
 
 type IngestErrorHandler = (
@@ -64,6 +65,9 @@ const getHTTPResponseCode = (error: IngestManagerError): number => {
   }
   if (error instanceof AgentNotFoundError) {
     return 404;
+  }
+  if (error instanceof FleetUnauthorizedError) {
+    return 403; // Unauthorized
   }
   return 400; // Bad Request
 };

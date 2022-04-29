@@ -91,6 +91,8 @@ import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
 import { TelemetryEventsSender } from './telemetry/sender';
 import { setupFleet } from './services/setup';
+import type { PackagePolicyService } from './services/package_policy_service';
+import { PackagePolicyServiceImpl } from './services/package_policy';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -191,9 +193,9 @@ export class FleetPlugin
   private encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
   private readonly telemetryEventsSender: TelemetryEventsSender;
   private readonly fleetStatus$: BehaviorSubject<ServiceStatus>;
-
   private agentService?: AgentService;
   private packageService?: PackageService;
+  private packagePolicyService?: PackagePolicyService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<FleetConfigType>();
@@ -329,6 +331,14 @@ export class FleetPlugin
             return {
               asCurrentUser: agentService.asScoped(request),
               asInternalUser: agentService.asInternalUser,
+            };
+          },
+          get packagePolicyService() {
+            const service = plugin.setupPackagePolicyService();
+
+            return {
+              asCurrentUser: service.asScoped(request),
+              asInternalUser: service.asInternalUser,
             };
           },
           authz: await getAuthzFromRequest(request),
@@ -488,6 +498,14 @@ export class FleetPlugin
 
     this.agentService = new AgentServiceImpl(internalEsClient);
     return this.agentService;
+  }
+
+  private setupPackagePolicyService(): PackagePolicyService {
+    if (this.packagePolicyService) {
+      return this.packagePolicyService;
+    }
+    this.packagePolicyService = new PackagePolicyServiceImpl();
+    return this.packagePolicyService;
   }
 
   private setupPackageService(
