@@ -558,4 +558,26 @@ describe('Executable filenames with wildcard PATHS', () => {
       })
     ).toEqual(false);
   });
+
+  it('should return FALSE when WINDOWS wildcards paths do not have a file name', () => {
+    expect(
+      hasSimpleExecutableName({
+        os: OperatingSystem.WINDOWS,
+        type: 'wildcard',
+        value: 'c:\\folder\\',
+      })
+    ).toEqual(false);
+  });
+
+  it('should TRUE when WINDOWS wildcards paths `type` is not `wildcard`', () => {
+    expect(
+      hasSimpleExecutableName({
+        os: OperatingSystem.WINDOWS,
+        type: 'match',
+        // Long path below is on purpose due to an issue found in the field
+        value:
+          'C:\\ProgramData\\Package Cache\\sdjfhwojvmlowhnknblkm\\658945C6D1 992AD 576CCC0F43728A9 E60A8908A2\\658945C6D1992AD576CCC0F43728A9E60A8908A2\\Installers\\WimMountAdkSetupAmd64.exe',
+      })
+    ).toEqual(true);
+  });
 });
