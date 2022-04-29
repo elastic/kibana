@@ -49,6 +49,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       const jobTypeAttribute = `mlAnalyticsCreation-${jobType}-option`;
       await testSubjects.click(jobTypeAttribute);
       await this.assertJobTypeSelection(jobTypeAttribute);
+      await headerPage.waitUntilLoadingHasFinished();
     },
 
     async assertAdvancedEditorSwitchExists() {
@@ -147,9 +148,14 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       );
     },
 
+    async scrollSourceDataPreviewIntoView() {
+      await testSubjects.scrollIntoView('mlAnalyticsCreationDataGrid loaded');
+    },
+
     async assertSourceDataPreviewHistogramCharts(
       expectedHistogramCharts: Array<{ chartAvailable: boolean; id: string; legend: string }>
     ) {
+      await this.scrollSourceDataPreviewIntoView();
       // For each chart, get the content of each header cell and assert
       // the legend text and column id and if the chart should be present or not.
       await retry.tryForTime(10000, async () => {
