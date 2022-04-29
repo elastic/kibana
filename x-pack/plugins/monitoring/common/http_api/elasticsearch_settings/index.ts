@@ -8,3 +8,5 @@
 export * from './get_elasticsearch_settings_cluster';
 export * from './get_elasticsearch_settings_nodes';
 export * from './post_elasticsearch_settings_internal_monitoring';
+export * from './put_elasticsearch_settings_collection_enabled';
+export * from './put_elasticsearch_settings_collection_interval';

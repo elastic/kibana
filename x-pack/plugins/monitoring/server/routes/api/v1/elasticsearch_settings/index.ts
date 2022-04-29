@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export { internalMonitoringCheckRoute } from './check/internal_monitoring';
 export { clusterSettingsCheckRoute } from './check/cluster';
+export { internalMonitoringCheckRoute } from './check/internal_monitoring';
 export { nodesSettingsCheckRoute } from './check/nodes';
 export { setCollectionEnabledRoute } from './set/collection_enabled';
 export { setCollectionIntervalRoute } from './set/collection_interval';

@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import { postElasticsearchSettingsCollectionIntervalResponsePayloadRT } from '../../../../../../common/http_api/elasticsearch_settings';
 import { setCollectionInterval } from '../../../../../lib/elasticsearch_settings';
 import { handleSettingsError } from '../../../../../lib/errors';
+import { MonitoringCore } from '../../../../../types';
 
 /*
  * Cluster Settings Check Route
  */
-export function setCollectionIntervalRoute(server) {
+export function setCollectionIntervalRoute(server: MonitoringCore) {
   server.route({
-    method: 'PUT',
+    method: 'put',
     path: '/api/monitoring/v1/elasticsearch_settings/set/collection_interval',
-    config: {
-      validate: {},
-    },
+    validate: {},
     async handler(req) {
       try {
         const response = await setCollectionInterval(req);
-        return response;
+        return postElasticsearchSettingsCollectionIntervalResponsePayloadRT.encode(response);
       } catch (err) {
         throw handleSettingsError(err);
       }

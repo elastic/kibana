@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import { postElasticsearchSettingsCollectionEnabledResponsePayloadRT } from '../../../../../../common/http_api/elasticsearch_settings';
 import { setCollectionEnabled } from '../../../../../lib/elasticsearch_settings';
 import { handleSettingsError } from '../../../../../lib/errors';
+import { MonitoringCore } from '../../../../../types';
 
 /*
  * Cluster Settings Check Route
  */
-export function setCollectionEnabledRoute(server) {
+export function setCollectionEnabledRoute(server: MonitoringCore) {
   server.route({
-    method: 'PUT',
+    method: 'put',
     path: '/api/monitoring/v1/elasticsearch_settings/set/collection_enabled',
-    config: {
-      validate: {},
-    },
+    validate: {},
     async handler(req) {
       try {
         const response = await setCollectionEnabled(req);
-        return response;
+        return postElasticsearchSettingsCollectionEnabledResponsePayloadRT.encode(response);
       } catch (err) {
         throw handleSettingsError(err);
       }
