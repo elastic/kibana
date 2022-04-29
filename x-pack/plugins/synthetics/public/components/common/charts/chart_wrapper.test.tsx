@@ -47,7 +47,7 @@ describe('ChartWrapper component', () => {
     );
 
     let loadingChart = component.find(`.euiLoadingChart`);
-    expect(loadingChart.length).toBe(1);
+    expect(loadingChart.length).toBe(2);
 
     component.setProps({
       loading: false,
