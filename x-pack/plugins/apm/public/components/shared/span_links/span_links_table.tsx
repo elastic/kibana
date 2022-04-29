@@ -101,6 +101,7 @@ export function SpanLinksTable({ items }: Props) {
                 <EuiLink
                   href={link('/link-to/transaction/{transactionId}', {
                     path: { transactionId: transactionId || spanId },
+                    query: { waterfallItemId: spanId },
                   })}
                 >
                   {spanName}
@@ -152,8 +153,11 @@ export function SpanLinksTable({ items }: Props) {
             <EuiFlexGroup direction="column" gutterSize="s">
               {spanName && (
                 <EuiFlexItem>
-                  {/* TODO: caue check url */}
-                  <EuiLink onClick={() => {}}>
+                  <EuiLink
+                    href={link('/link-to/transaction/{transactionId}', {
+                      path: { transactionId: transactionId || spanId },
+                    })}
+                  >
                     {i18n.translate(
                       'xpack.apm.spanLinks.table.actions.goToTraceDetails',
                       { defaultMessage: 'Go to parent trace' }
@@ -184,6 +188,7 @@ export function SpanLinksTable({ items }: Props) {
                   <EuiLink
                     href={link('/link-to/transaction/{transactionId}', {
                       path: { transactionId: transactionId || spanId },
+                      query: { waterfallItemId: spanId },
                     })}
                   >
                     {i18n.translate(

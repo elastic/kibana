@@ -47,6 +47,7 @@ const apmRoutes = {
         query: t.partial({
           rangeFrom: t.string,
           rangeTo: t.string,
+          waterfallItemId: t.string,
         }),
       }),
     ]),
