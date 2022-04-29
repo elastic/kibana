@@ -1,0 +1,14 @@
+{
+  "id": "aiops",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "ml",
+    "githubTeam": "ml-ui"
+  },
+  "description": "AIOps plugin maintained by ML team.",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["navigation"],
+  "optionalPlugins": []
+}
