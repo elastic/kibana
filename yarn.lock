@@ -9281,20 +9281,7 @@ brfs@^2.0.0, brfs@^2.0.2:
     static-module "^3.0.2"
     through2 "^2.0.0"
 
-broadcast-channel@^3.4.1:
-  version "3.4.1"
-  resolved "https://registry.yarnpkg.com/broadcast-channel/-/broadcast-channel-3.4.1.tgz#65b63068d0a5216026a19905c9b2d5e9adf0928a"
-  integrity sha512-VXYivSkuBeQY+pL5hNQQNvBdKKQINBAROm4G8lAbWQfOZ7Yn4TMcgLNlJyEqlkxy5G8JJBsI3VJ1u8FUTOROcg==
-  dependencies:
-    "@babel/runtime" "^7.7.2"
-    detect-node "^2.0.4"
-    js-sha3 "0.8.0"
-    microseconds "0.2.0"
-    nano-time "1.0.0"
-    rimraf "3.0.2"
-    unload "2.2.0"
-
-broadcast-channel@^4.10.0:
+broadcast-channel@4.10.0:
   version "4.10.0"
   resolved "https://registry.yarnpkg.com/broadcast-channel/-/broadcast-channel-4.10.0.tgz#d19fb902df227df40b1b580351713d30c302d198"
   integrity sha512-hOUh312XyHk6JTVyX9cyXaH1UYs+2gHVtnW16oQAu9FL7ALcXGXc/YoJWqlkV8vUn14URQPMmRi4A9q4UrwVEQ==
@@ -9307,6 +9294,19 @@ broadcast-channel@^4.10.0:
     p-queue "6.6.2"
     rimraf "3.0.2"
     unload "2.3.1"
+
+broadcast-channel@^3.4.1:
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/broadcast-channel/-/broadcast-channel-3.4.1.tgz#65b63068d0a5216026a19905c9b2d5e9adf0928a"
+  integrity sha512-VXYivSkuBeQY+pL5hNQQNvBdKKQINBAROm4G8lAbWQfOZ7Yn4TMcgLNlJyEqlkxy5G8JJBsI3VJ1u8FUTOROcg==
+  dependencies:
+    "@babel/runtime" "^7.7.2"
+    detect-node "^2.0.4"
+    js-sha3 "0.8.0"
+    microseconds "0.2.0"
+    nano-time "1.0.0"
+    rimraf "3.0.2"
+    unload "2.2.0"
 
 brorand@^1.0.1, brorand@^1.1.0:
   version "1.1.0"
@@ -13009,10 +13009,10 @@ elastic-apm-http-client@11.0.1:
     semver "^6.3.0"
     stream-chopper "^3.0.1"
 
-elastic-apm-node@^3.31.0:
-  version "3.31.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.31.0.tgz#6e0bf622d922c95ff0127a263babcdeaeea71457"
-  integrity sha512-0OulazfhkXYbOaGkHncqjwOfxtcvzsDyzUKr6Y1k95HwKrjf1Vi+xPutZv4p/WfDdO+JadphI0U2Uu5ncGB2iA==
+elastic-apm-node@^3.32.0:
+  version "3.32.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.32.0.tgz#fdad3c03aabc4e7994b4155b031f68d9774af49a"
+  integrity sha512-6vOe1FZv5toCouuyfiXZuWNE1+1fim9zvsv7H56BKRYa7xQ3X1fxq7QAP2gLd/Z9zvSDLGNXS4DPE1eqX1A1Jw==
   dependencies:
     "@elastic/ecs-pino-format" "^1.2.0"
     after-all-results "^2.0.0"
