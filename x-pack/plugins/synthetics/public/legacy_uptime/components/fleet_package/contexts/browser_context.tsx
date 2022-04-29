@@ -6,8 +6,8 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { BrowserSimpleFields, ConfigKey, DataStream, ScheduleUnit } from '../types';
-import { defaultValues as commonDefaultValues } from '../common/default_values';
+import { BrowserSimpleFields } from '../types';
+import { DEFAULT_BROWSER_SIMPLE_FIELDS } from '../../../../../common/constants/monitor_defaults';
 
 interface BrowserSimpleFieldsContext {
   setFields: React.Dispatch<React.SetStateAction<BrowserSimpleFields>>;
@@ -20,36 +20,7 @@ interface BrowserSimpleFieldsContextProvider {
   defaultValues?: BrowserSimpleFields;
 }
 
-export const initialValues: BrowserSimpleFields = {
-  ...commonDefaultValues,
-  [ConfigKey.SCHEDULE]: {
-    unit: ScheduleUnit.MINUTES,
-    number: '10',
-  },
-  [ConfigKey.METADATA]: {
-    script_source: {
-      is_generated_script: false,
-      file_name: '',
-    },
-    is_zip_url_tls_enabled: false,
-  },
-  [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
-  [ConfigKey.SOURCE_ZIP_URL]: '',
-  [ConfigKey.SOURCE_ZIP_USERNAME]: '',
-  [ConfigKey.SOURCE_ZIP_PASSWORD]: '',
-  [ConfigKey.SOURCE_ZIP_FOLDER]: '',
-  [ConfigKey.SOURCE_ZIP_PROXY_URL]: '',
-  [ConfigKey.SOURCE_INLINE]: '',
-  [ConfigKey.PARAMS]: '',
-  [ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: undefined,
-  [ConfigKey.ZIP_URL_TLS_CERTIFICATE]: undefined,
-  [ConfigKey.ZIP_URL_TLS_KEY]: undefined,
-  [ConfigKey.ZIP_URL_TLS_KEY_PASSPHRASE]: undefined,
-  [ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]: undefined,
-  [ConfigKey.ZIP_URL_TLS_VERSION]: undefined,
-  [ConfigKey.URLS]: undefined,
-  [ConfigKey.PORT]: undefined,
-};
+export const initialValues: BrowserSimpleFields = DEFAULT_BROWSER_SIMPLE_FIELDS;
 
 const defaultContext: BrowserSimpleFieldsContext = {
   setFields: (_fields: React.SetStateAction<BrowserSimpleFields>) => {

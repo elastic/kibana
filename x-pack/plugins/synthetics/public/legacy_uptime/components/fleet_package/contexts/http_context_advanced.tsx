@@ -6,7 +6,8 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { HTTPAdvancedFields, ConfigKey, Mode, ResponseBodyIndexPolicy, HTTPMethod } from '../types';
+import { HTTPAdvancedFields } from '../types';
+import { DEFAULT_HTTP_ADVANCED_FIELDS } from '../../../../../common/constants/monitor_defaults';
 
 interface HTTPAdvancedFieldsContext {
   setFields: React.Dispatch<React.SetStateAction<HTTPAdvancedFields>>;
@@ -19,23 +20,7 @@ interface HTTPAdvancedFieldsContextProvider {
   defaultValues?: HTTPAdvancedFields;
 }
 
-export const initialValues: HTTPAdvancedFields = {
-  [ConfigKey.PASSWORD]: '',
-  [ConfigKey.PROXY_URL]: '',
-  [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: [],
-  [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: [],
-  [ConfigKey.RESPONSE_BODY_INDEX]: ResponseBodyIndexPolicy.ON_ERROR,
-  [ConfigKey.RESPONSE_HEADERS_CHECK]: {},
-  [ConfigKey.RESPONSE_HEADERS_INDEX]: true,
-  [ConfigKey.RESPONSE_STATUS_CHECK]: [],
-  [ConfigKey.REQUEST_BODY_CHECK]: {
-    value: '',
-    type: Mode.PLAINTEXT,
-  },
-  [ConfigKey.REQUEST_HEADERS_CHECK]: {},
-  [ConfigKey.REQUEST_METHOD_CHECK]: HTTPMethod.GET,
-  [ConfigKey.USERNAME]: '',
-};
+export const initialValues: HTTPAdvancedFields = DEFAULT_HTTP_ADVANCED_FIELDS;
 
 export const defaultContext: HTTPAdvancedFieldsContext = {
   setFields: (_fields: React.SetStateAction<HTTPAdvancedFields>) => {

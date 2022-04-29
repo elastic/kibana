@@ -6,8 +6,8 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { ICMPSimpleFields, ConfigKey, DataStream } from '../types';
-import { defaultValues as commonDefaultValues } from '../common/default_values';
+import { ICMPSimpleFields } from '../types';
+import { DEFAULT_ICMP_SIMPLE_FIELDS } from '../../../../../common/constants/monitor_defaults';
 
 interface ICMPSimpleFieldsContext {
   setFields: React.Dispatch<React.SetStateAction<ICMPSimpleFields>>;
@@ -20,12 +20,7 @@ interface ICMPSimpleFieldsContextProvider {
   defaultValues?: ICMPSimpleFields;
 }
 
-export const initialValues: ICMPSimpleFields = {
-  ...commonDefaultValues,
-  [ConfigKey.HOSTS]: '',
-  [ConfigKey.MONITOR_TYPE]: DataStream.ICMP,
-  [ConfigKey.WAIT]: '1',
-};
+export const initialValues: ICMPSimpleFields = DEFAULT_ICMP_SIMPLE_FIELDS;
 
 const defaultContext: ICMPSimpleFieldsContext = {
   setFields: (_fields: React.SetStateAction<ICMPSimpleFields>) => {

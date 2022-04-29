@@ -6,8 +6,8 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { TCPSimpleFields, ConfigKey, DataStream } from '../types';
-import { defaultValues as commonDefaultValues } from '../common/default_values';
+import { TCPSimpleFields } from '../types';
+import { DEFAULT_TCP_SIMPLE_FIELDS } from '../../../../../common/constants/monitor_defaults';
 
 interface TCPSimpleFieldsContext {
   setFields: React.Dispatch<React.SetStateAction<TCPSimpleFields>>;
@@ -20,14 +20,7 @@ interface TCPSimpleFieldsContextProvider {
   defaultValues?: TCPSimpleFields;
 }
 
-export const initialValues: TCPSimpleFields = {
-  ...commonDefaultValues,
-  [ConfigKey.METADATA]: {
-    is_tls_enabled: false,
-  },
-  [ConfigKey.HOSTS]: '',
-  [ConfigKey.MONITOR_TYPE]: DataStream.TCP,
-};
+export const initialValues: TCPSimpleFields = DEFAULT_TCP_SIMPLE_FIELDS;
 
 const defaultContext: TCPSimpleFieldsContext = {
   setFields: (_fields: React.SetStateAction<TCPSimpleFields>) => {

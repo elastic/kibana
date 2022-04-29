@@ -7,7 +7,7 @@
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
 import { TLSFields } from '../types';
-import { defaultValues as tlsDefaultValues } from '../tls/default_values';
+import { DEFAULT_TLS_FIELDS } from '../../../../../common/constants/monitor_defaults';
 
 interface TLSFieldsContext {
   setFields: React.Dispatch<React.SetStateAction<TLSFields>>;
@@ -20,7 +20,7 @@ interface TLSFieldsContextProvider {
   defaultValues?: TLSFields;
 }
 
-export const initialValues: TLSFields = tlsDefaultValues;
+export const initialValues: TLSFields = DEFAULT_TLS_FIELDS;
 
 const defaultContext: TLSFieldsContext = {
   setFields: (_fields: React.SetStateAction<TLSFields>) => {

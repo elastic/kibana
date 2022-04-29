@@ -6,7 +6,8 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { BrowserAdvancedFields, ConfigKey, ScreenshotOption } from '../types';
+import { BrowserAdvancedFields } from '../types';
+import { DEFAULT_BROWSER_ADVANCED_FIELDS } from '../../../../../common/constants/monitor_defaults';
 
 interface BrowserAdvancedFieldsContext {
   setFields: React.Dispatch<React.SetStateAction<BrowserAdvancedFields>>;
@@ -19,18 +20,7 @@ interface BrowserAdvancedFieldsContextProvider {
   defaultValues?: BrowserAdvancedFields;
 }
 
-export const initialValues: BrowserAdvancedFields = {
-  [ConfigKey.SCREENSHOTS]: ScreenshotOption.ON,
-  [ConfigKey.SYNTHETICS_ARGS]: [],
-  [ConfigKey.JOURNEY_FILTERS_MATCH]: '',
-  [ConfigKey.JOURNEY_FILTERS_TAGS]: [],
-  [ConfigKey.IGNORE_HTTPS_ERRORS]: false,
-  [ConfigKey.IS_THROTTLING_ENABLED]: true,
-  [ConfigKey.DOWNLOAD_SPEED]: '5',
-  [ConfigKey.UPLOAD_SPEED]: '3',
-  [ConfigKey.LATENCY]: '20',
-  [ConfigKey.THROTTLING_CONFIG]: '5d/3u/20l',
-};
+export const initialValues: BrowserAdvancedFields = DEFAULT_BROWSER_ADVANCED_FIELDS;
 
 const defaultContext: BrowserAdvancedFieldsContext = {
   setFields: (_fields: React.SetStateAction<BrowserAdvancedFields>) => {
