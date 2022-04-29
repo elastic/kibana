@@ -77,6 +77,7 @@ const AddToTimelineCell = React.memo<AlertSummaryRow['description']>(
       return (
         <EuiButtonIcon
           aria-label={ACTION_INVESTIGATE_IN_TIMELINE}
+          className="timelines__hoverActionButton"
           iconSize="s"
           iconType="timeline"
           onClick={configureAndOpenTimeline}
