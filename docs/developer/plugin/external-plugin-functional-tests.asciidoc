@@ -8,7 +8,7 @@ Plugins use the `FunctionalTestRunner` by running it out of the {kib} repo. Ensu
 
 Every project or plugin should have its own `FunctionalTestRunner` config file. Just like {kib}'s, this config file will define all of the test files to load, providers for Services and PageObjects, as well as configuration options for certain services.
 
-To get started copy and paste this example to `test/functional/config.base.js`:
+To get started copy and paste this example to `test/functional/config.js`:
 
 ["source","js"]
 -----------
