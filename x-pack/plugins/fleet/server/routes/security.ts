@@ -68,6 +68,8 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
         security.authz.actions.api.get(`${INTEGRATIONS_PLUGIN_ID}-all`),
         security.authz.actions.api.get(`${INTEGRATIONS_PLUGIN_ID}-read`),
         security.authz.actions.api.get('fleet-setup'),
+        security.authz.actions.api.get(`${INTEGRATIONS_PLUGIN_ID}-writeEndpointIntegration`),
+        security.authz.actions.api.get(`${INTEGRATIONS_PLUGIN_ID}-readEndpointIntegration`),
       ],
     });
     const fleetAllAuth = getAuthorizationFromPrivileges(privileges.kibana, `${PLUGIN_ID}-all`);
@@ -81,16 +83,36 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
     );
     const fleetSetupAuth = getAuthorizationFromPrivileges(privileges.kibana, 'fleet-setup');
 
+    const writeEndpointIntegrationAuth = getAuthorizationFromPrivileges(
+      privileges.kibana,
+      `${INTEGRATIONS_PLUGIN_ID}-writeEndpointIntegration`
+    );
+
+    const readEndpointIntegrationAuth = getAuthorizationFromPrivileges(
+      privileges.kibana,
+      `${INTEGRATIONS_PLUGIN_ID}-readEndpointIntegration`
+    );
+
     return calculateAuthz({
       fleet: { all: fleetAllAuth, setup: fleetSetupAuth },
-      integrations: { all: intAllAuth, read: intReadAuth },
+      integrations: {
+        all: intAllAuth,
+        read: intReadAuth,
+        writeEndpointIntegration: writeEndpointIntegrationAuth,
+        readEndpointIntegration: readEndpointIntegrationAuth,
+      },
       isSuperuser: checkSuperuser(req),
     });
   }
 
   return calculateAuthz({
     fleet: { all: false, setup: false },
-    integrations: { all: false, read: false },
+    integrations: {
+      all: false,
+      read: false,
+      writeEndpointIntegration: false,
+      readEndpointIntegration: false,
+    },
     isSuperuser: false,
   });
 }

@@ -1011,11 +1011,23 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
       overwrite?: boolean;
     }
   ): Promise<PackagePolicy> {
-    await this.#runPreflight({
-      fleetAuthz: {
-        integrations: { writeIntegrationPolicies: true },
-      },
-    });
+    try {
+      await this.#runPreflight({
+        fleetAuthz: {
+          integrations: { writeIntegrationPolicies: true },
+        },
+      });
+    } catch (error) {
+      if (packagePolicy.package?.name === 'endpoint') {
+        await this.#runPreflight({
+          fleetAuthz: {
+            integrations: { writeEndpointIntegration: true },
+          },
+        });
+      } else {
+        throw error;
+      }
+    }
 
     return super.create(soClient, esClient, packagePolicy, options);
   }

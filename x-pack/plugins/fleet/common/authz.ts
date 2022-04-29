@@ -26,6 +26,9 @@ export interface FleetAuthz {
 
     readIntegrationPolicies: boolean;
     writeIntegrationPolicies: boolean;
+
+    writeEndpointIntegration: boolean;
+    readEndpointIntegration: boolean;
   };
 }
 
@@ -38,6 +41,8 @@ interface CalculateParams {
   integrations: {
     all: boolean;
     read: boolean;
+    writeEndpointIntegration: boolean;
+    readEndpointIntegration: boolean;
   };
 
   isSuperuser: boolean;
@@ -70,5 +75,12 @@ export const calculateAuthz = ({
 
     readIntegrationPolicies: fleet.all && (integrations.all || integrations.read),
     writeIntegrationPolicies: fleet.all && integrations.all,
+
+    writeEndpointIntegration: integrations.all || integrations.writeEndpointIntegration,
+    readEndpointIntegration:
+      integrations.all ||
+      integrations.read ||
+      integrations.readEndpointIntegration ||
+      integrations.writeEndpointIntegration,
   },
 });

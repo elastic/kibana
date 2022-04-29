@@ -286,6 +286,8 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
         integrations: {
           all: capabilities.fleet.all as boolean,
           read: capabilities.fleet.read as boolean,
+          writeEndpointIntegration: capabilities.fleet.writeEndpointIntegration as boolean,
+          readEndpointIntegration: capabilities.fleet.readEndpointIntegration as boolean,
         },
         isSuperuser: false,
       }),

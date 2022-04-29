@@ -94,13 +94,13 @@ export function Detail() {
   const { getId: getAgentPolicyId } = useAgentPolicyContext();
   const { pkgkey, panel } = useParams<DetailParams>();
   const { getHref } = useLink();
-  const canInstallPackages = useAuthz().integrations.installPackages;
+
   const canReadPackageSettings = useAuthz().integrations.readPackageSettings;
   const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
   const permissionCheck = usePermissionCheck();
   const missingSecurityConfiguration =
     !permissionCheck.data?.success && permissionCheck.data?.error === 'MISSING_SECURITY';
-  const userCanInstallPackages = canInstallPackages && permissionCheck.data?.success;
+
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
@@ -112,6 +112,12 @@ export function Detail() {
   const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
   const setPackageInstallStatus = useSetPackageInstallStatus();
   const getPackageInstallStatus = useGetPackageInstallStatus();
+
+  const authz = useAuthz();
+  const canInstallPackages =
+    authz.integrations.installPackages ||
+    (packageInfo?.name === 'endpoint' && authz.integrations.writeEndpointIntegration);
+  const userCanInstallPackages = canInstallPackages && permissionCheck.data?.success;
 
   const CustomAssets = useUIExtension(packageInfo?.name ?? '', 'package-detail-assets');
 

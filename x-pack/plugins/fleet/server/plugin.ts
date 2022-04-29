@@ -315,6 +315,43 @@ export class FleetPlugin
             ui: ['read'],
           },
         },
+        subFeatures: [
+          {
+            name: 'Endpoint integration',
+            privilegeGroups: [
+              {
+                groupType: 'mutually_exclusive',
+                privileges: [
+                  {
+                    api: [
+                      `${INTEGRATIONS_PLUGIN_ID}-writeEndpointIntegration`,
+                      `${INTEGRATIONS_PLUGIN_ID}-readEndpointIntegration`,
+                    ],
+                    id: 'endpoint_all',
+                    includeIn: 'all',
+                    name: 'All',
+                    savedObject: {
+                      all: [],
+                      read: [],
+                    },
+                    ui: ['writeEndpointIntegration', 'readEndpointIntegration'],
+                  },
+                  {
+                    api: [`${INTEGRATIONS_PLUGIN_ID}-readEndpointIntegration`],
+                    id: 'endpoint_read',
+                    includeIn: 'read',
+                    name: 'Read',
+                    savedObject: {
+                      all: [],
+                      read: [],
+                    },
+                    ui: ['readEndpointIntegration'],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
       });
     }
 
