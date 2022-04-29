@@ -60,7 +60,7 @@ export class PluginsManager {
     });
 
     // TODO: Server side upgrade
-  };;
+  };
 
   getPluginDescriptors = (): PluginDescriptor[] => {
     return this.pluginDescriptors;
