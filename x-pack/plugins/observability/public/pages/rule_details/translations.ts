@@ -15,3 +15,22 @@ export const RULE_LOAD_ERROR = (errorMessage: string) =>
 export const TAGS_TITLE = i18n.translate('xpack.observability.ruleDetails.tagsTitle', {
   defaultMessage: 'Tags',
 });
+
+export const LAST_UPDATED_MESSAGE = i18n.translate(
+  'xpack.observability.ruleDetails.lastUpdatedMessage',
+  {
+    defaultMessage: 'Last updated',
+  }
+);
+
+export const BY_WORD = i18n.translate('xpack.observability.ruleDetails.byWord', {
+  defaultMessage: 'by',
+});
+
+export const ON_WORD = i18n.translate('xpack.observability.ruleDetails.onWord', {
+  defaultMessage: 'on',
+});
+
+export const CREATED_WORD = i18n.translate('xpack.observability.ruleDetails.createdWord', {
+  defaultMessage: 'Created',
+});
