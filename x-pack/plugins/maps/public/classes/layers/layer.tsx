@@ -12,7 +12,6 @@ import { Query } from '@kbn/data-plugin/public';
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import { EuiIcon } from '@elastic/eui';
-import { TMSService } from '@elastic/ems-client';
 import uuid from 'uuid/v4';
 import { FeatureCollection } from 'geojson';
 import { DataRequest } from '../util/data_request';
@@ -55,7 +54,7 @@ export interface ILayer {
   getAttributions(): Promise<Attribution[]>;
   getColorTheme(): string | null;
   getLabel(): string;
-  getLocale(): keyof typeof TMSService.SupportedLanguages | null;
+  getLocale(): string | null;
   hasLegendDetails(): Promise<boolean>;
   renderLegendDetails(): ReactElement<any> | null;
   showAtZoomLevel(zoom: number): boolean;
@@ -268,7 +267,7 @@ export class AbstractLayer implements ILayer {
     return this._descriptor.label ? this._descriptor.label : '';
   }
 
-  getLocale(): keyof typeof TMSService.SupportedLanguages | null {
+  getLocale(): string | null {
     return this._descriptor.locale ?? null;
   }
 

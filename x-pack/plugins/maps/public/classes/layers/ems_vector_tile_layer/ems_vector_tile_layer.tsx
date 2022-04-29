@@ -7,6 +7,7 @@
 
 import type { Map as MbMap, LayerSpecification, StyleSpecification } from '@kbn/mapbox-gl';
 import { TMSService } from '@elastic/ems-client';
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 // @ts-expect-error
 import { RGBAImage } from './image_utils';
@@ -400,10 +401,15 @@ export class EmsVectorTileLayer extends AbstractLayer {
 
   _setLanguage(mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) {
     const locale = this.getLocale();
+    let textProperty;
     if (locale !== null) {
-      const textProperty = TMSService.transformLanguageProperty(mbLayer, locale);
-      if (textProperty !== undefined) {
-        mbMap.setLayoutProperty(mbLayerId, 'text-field', textProperty);
+      if (locale === 'autoselect') {
+        textProperty = TMSService.transformLanguageProperty(mbLayer, i18n.getLocale());
+      } else {
+        textProperty = TMSService.transformLanguageProperty(mbLayer, locale);
+      }
+        if (textProperty !== undefined) {
+          mbMap.setLayoutProperty(mbLayerId, 'text-field', textProperty);
       }
     }
   }

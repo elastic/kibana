@@ -181,12 +181,12 @@ export function LayerSettings(props: Props) {
         label: i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageDefault', {
           defaultMessage: 'Default',
         }),
-        value: '',
+        value: 'default',
       },
       {
         key: 'autoselect',
         label: i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageAutoselect', {
-          defaultMessage: 'Autoselect based on locale in Kibana settings',
+          defaultMessage: 'Autoselect based on Kibana locale',
         }),
         value: 'autoselect',
       }

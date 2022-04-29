@@ -57,7 +57,7 @@ export type LayerDescriptor = {
   id: string;
   colorTheme?: string;
   label?: string | null;
-  locale?: keyof typeof TMSService.SupportedLanguages | null;
+  locale?: string | null;
   areLabelsOnTop?: boolean;
   minZoom?: number;
   maxZoom?: number;
