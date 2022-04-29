@@ -28,6 +28,7 @@ import {
   muteRule,
   useLoadRuleTypes,
   unmuteRule,
+  RuleStatus,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { RuleExecutionStatus, ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -92,6 +93,7 @@ export function RulesPage() {
   const [inputText, setInputText] = useState<string | undefined>();
   const [searchText, setSearchText] = useState<string | undefined>();
   const [ruleLastResponseFilter, setRuleLastResponseFilter] = useState<string[]>([]);
+  const [ruleStatusesFilter, setRuleStatusesFilter] = useState<RuleStatus[]>([]);
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
@@ -108,6 +110,7 @@ export function RulesPage() {
   const { rulesState, setRulesState, reload, noData, initialLoad } = useFetchRules({
     searchText,
     ruleLastResponseFilter,
+    ruleStatusesFilter,
     typesFilter,
     page,
     setPage,
@@ -335,6 +338,12 @@ export function RulesPage() {
               selectedStatuses={ruleLastResponseFilter}
               onChange={(ids: string[]) => setRuleLastResponseFilter(ids)}
             />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {triggersActionsUi.getRuleStatusFilter({
+              selectedStatuses: ruleStatusesFilter,
+              onChange: setRuleStatusesFilter,
+            })}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
