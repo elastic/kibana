@@ -12,11 +12,11 @@ import expect from '@kbn/expect';
 import fetch from 'node-fetch';
 import { getUrl } from '@kbn/test';
 import moment from 'moment';
-import { FtrService } from '../ftr_provider_context';
 import { asyncForEach } from '@kbn/std';
 import { HttpConnection } from '@elastic/elasticsearch';
 import request from 'superagent';
 import cheerio from 'cheerio';
+import { FtrService } from '../ftr_provider_context';
 
 interface NavigateProps {
   appConfig: {};
@@ -322,7 +322,6 @@ export class CommonPageObject extends FtrService {
     //   const response = request.head('some url');
     //   this.log.debug(`${myUrl} response: ${response}`);
     // });
-
 
     // const bodyEl = await this.find.byCssSelector('body');
     // const $ = await bodyEl.parseDomContent();
