@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import { FIELD_TYPES, FormSchema } from '../../shared_imports';
+import { withSpan } from '@kbn/apm-utils';
 
-export const formSchema: FormSchema = {
-  agents: {
-    type: FIELD_TYPES.MULTI_SELECT,
-  },
-  query: {
-    type: FIELD_TYPES.TEXTAREA,
-    validations: [],
-  },
-};
+export const withPackageSpan = <T>(stepName: string, func: () => Promise<T>) =>
+  withSpan({ name: stepName, type: 'package' }, func);
