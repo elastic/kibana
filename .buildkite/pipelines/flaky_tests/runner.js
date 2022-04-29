@@ -64,7 +64,7 @@ function getTestSuitesFromJson(json) {
     fail(`JSON test config must be an array`);
   }
 
-  /** @type {Array<{ key: string; count: number } | { ftrConfig: string; count: number }>} */
+  /** @type {Array<{ type: 'group', key: string; count: number } | { type: 'ftrConfig', ftrConfig: string; count: number }>} */
   const testSuites = [];
   for (const item of parsed) {
     if (typeof item !== 'object' || item === null) {
@@ -76,8 +76,17 @@ function getTestSuitesFromJson(json) {
       fail(`testSuite.count must be a number`);
     }
 
-    const ftrConfig = item.ftrConfig;
-    if (typeof ftrConfig === 'string') {
+    const type = item.type;
+    if (type !== 'ftrConfig' && type !== 'group') {
+      fail(`testSuite.type must be either "ftrConfig" or "group"`);
+    }
+
+    if (item.type === 'ftrConfig') {
+      const ftrConfig = item.ftrConfig;
+      if (typeof ftrConfig !== 'string') {
+        fail(`testSuite.ftrConfig must be a string`);
+      }
+
       testSuites.push({
         ftrConfig,
         count,
@@ -136,7 +145,7 @@ for (const testSuite of testSuites) {
       steps.push({
         command: `.buildkite/scripts/steps/test/ftr_configs.sh`,
         env: {
-          configs: testSuite.ftrConfig,
+          FTR_CONFIG: testSuite.ftrConfig,
         },
         label: 'FTR Configs',
         parallelism: testSuite.count,
