@@ -5,26 +5,10 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UserAuthenticationsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/users/authentications';
-import { sourceFieldsMap, hostFieldsMap } from '../../../../../../../common/ecs/ecs_fields';
-
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
-import { reduceFields } from '../../../../../../utils/build_query/reduce_fields';
-
 import { authenticationsFields } from '../helpers';
-import { extendMap } from '../../../../../../../common/ecs/ecs_fields/extend_map';
-
-export const auditdFieldsMap: Readonly<Record<string, string>> = {
-  latest: '@timestamp',
-  'lastSuccess.timestamp': 'lastSuccess.@timestamp',
-  'lastFailure.timestamp': 'lastFailure.@timestamp',
-  ...{ ...extendMap('lastSuccess', sourceFieldsMap) },
-  ...{ ...extendMap('lastSuccess', hostFieldsMap) },
-  ...{ ...extendMap('lastFailure', sourceFieldsMap) },
-  ...{ ...extendMap('lastFailure', hostFieldsMap) },
-};
 
 export const buildQuery = ({
   filterQuery,
@@ -32,13 +16,7 @@ export const buildQuery = ({
   timerange: { from, to },
   pagination: { querySize },
   defaultIndex,
-  docValueFields,
 }: UserAuthenticationsRequestOptions) => {
-  const esFields = reduceFields(authenticationsFields, {
-    ...hostFieldsMap,
-    ...sourceFieldsMap,
-  }) as string[];
-
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     { term: { 'event.category': 'authentication' } },
@@ -52,13 +30,13 @@ export const buildQuery = ({
       },
     },
   ];
+  const queryFields = authenticationsFields.filter((field) => field !== 'timestamp');
 
   const dslQuery = {
     allow_no_indices: true,
     index: defaultIndex,
     ignore_unavailable: true,
     body: {
-      ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
         stack_by_count: {
           cardinality: {
@@ -85,7 +63,7 @@ export const buildQuery = ({
                 lastFailure: {
                   top_hits: {
                     size: 1,
-                    _source: esFields,
+                    _source: false,
                     sort: [{ '@timestamp': { order: 'desc' as const } }],
                   },
                 },
@@ -101,7 +79,7 @@ export const buildQuery = ({
                 lastSuccess: {
                   top_hits: {
                     size: 1,
-                    _source: esFields,
+                    _source: false,
                     sort: [{ '@timestamp': { order: 'desc' as const } }],
                   },
                 },
@@ -116,6 +94,14 @@ export const buildQuery = ({
         },
       },
       size: 0,
+      _source: false,
+      fields: [
+        ...queryFields,
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
     },
     track_total_hits: false,
   };

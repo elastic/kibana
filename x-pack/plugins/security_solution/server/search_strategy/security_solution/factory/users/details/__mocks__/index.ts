@@ -12,12 +12,6 @@ import { UserDetailsRequestOptions } from '../../../../../../../common/search_st
 
 export const mockOptions: UserDetailsRequestOptions = {
   defaultIndex: ['test_indices*'],
-  docValueFields: [
-    {
-      field: '@timestamp',
-      format: 'date_time',
-    },
-  ],
   factoryQueryType: UsersQueries.details,
   filterQuery:
     '{"bool":{"must":[],"filter":[{"match_all":{}},{"match_phrase":{"user.name":{"query":"test_user"}}}],"should":[],"must_not":[]}}',
