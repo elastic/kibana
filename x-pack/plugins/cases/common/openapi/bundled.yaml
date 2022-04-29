@@ -1,5 +1,4 @@
 openapi: 3.0.1
-tags: []
 info:
   title: Cases
   description: OpenAPI schema for Cases endpoints
@@ -9,13 +8,20 @@ info:
   license:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
+tags:
+  - name: cases
+  - name: kibana
 servers:
   - url: http://localhost:5601
     description: local
 paths:
   /api/cases:
     post:
-      description: Creates a case.
+      description: >
+        Creates a case. You must have all privileges for the **Cases** feature
+        in the **Management**, **Observability**, or **Security** section of the
+        Kibana feature privileges, depending on the owner of the case you're
+        creating.
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
       requestBody:
@@ -159,19 +165,243 @@ paths:
           content:
             application/json; charset=utf-8:
               schema:
-                type: string
-              examples: {}
+                type: object
+                properties:
+                  closed_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+                    example: null
+                  closed_by:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                      full_name:
+                        type: string
+                      username:
+                        type: string
+                    nullable: true
+                    example: null
+                  comments:
+                    type: array
+                    items:
+                      type: string
+                    example: []
+                  connector:
+                    type: object
+                    properties:
+                      fields:
+                        description: >-
+                          An object containing the connector fields. To create a
+                          case without a connector, specify null. If you want to
+                          omit any individual field, specify null as its value.
+                        nullable: true
+                        type: object
+                        properties:
+                          caseId:
+                            description: The case identifier for Swimlane connectors.
+                            type: string
+                          category:
+                            description: >-
+                              The category of the incident for ServiceNow ITSM
+                              and ServiceNow SecOps connectors.
+                            type: string
+                          destIp:
+                            description: >-
+                              A comma-separated list of destination IPs for
+                              ServiceNow SecOps connectors.
+                            type: string
+                          impact:
+                            description: >-
+                              The effect an incident had on business for
+                              ServiceNow ITSM connectors.
+                            type: string
+                          issueType:
+                            description: The type of issue for Jira connectors.
+                            type: string
+                          issueTypes:
+                            description: The type of incident for IBM Resilient connectors.
+                            type: array
+                            items:
+                              type: number
+                          malwareHash:
+                            description: >-
+                              A comma-separated list of malware hashes for
+                              ServiceNow SecOps connectors.
+                            type: string
+                          malwareUrl:
+                            description: >-
+                              A comma-separated list of malware URLs for
+                              ServiceNow SecOps connectors.
+                            type: string
+                          parent:
+                            description: >-
+                              The key of the parent issue, when the issue type
+                              is sub-task for Jira connectors.
+                            type: string
+                          priority:
+                            description: >-
+                              The priority of the issue for Jira and ServiceNow
+                              SecOps connectors.
+                            type: string
+                          severity:
+                            description: >-
+                              The severity of the incident for ServiceNow ITSM
+                              connectors.
+                            type: string
+                          severityCode:
+                            description: >-
+                              The severity code of the incident for IBM
+                              Resilient connectors.
+                            type: number
+                          sourceIp:
+                            description: >-
+                              A comma-separated list of source IPs for
+                              ServiceNow SecOps connectors.
+                            type: string
+                          subcategory:
+                            description: >-
+                              The subcategory of the incident for ServiceNow
+                              ITSM connectors.
+                            type: string
+                          urgency:
+                            description: >-
+                              The extent to which the incident resolution can be
+                              delayed for ServiceNow ITSM connectors.
+                            type: string
+                        required:
+                          - fields
+                          - id
+                          - name
+                          - type
+                      id:
+                        description: >-
+                          The identifier for the connector. To create a case
+                          without a connector, use `none`.
+                        type: string
+                      name:
+                        description: >-
+                          The name of the connector. To create a case without a
+                          connector, use `none`.
+                        type: string
+                      type:
+                        $ref: '#/components/schemas/connector_types'
+                  created_at:
+                    type: string
+                    format: date-time
+                    example: '2022-05-13T09:16:17.416Z'
+                  created_by:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: ahunley@imf.usa.gov
+                      full_name:
+                        type: string
+                        example: Alan Hunley
+                      username:
+                        type: string
+                        example: ahunley
+                  description:
+                    type: string
+                    example: >-
+                      James Bond clicked on a highly suspicious email banner
+                      advertising cheap holidays for underpaid civil servants.
+                      Operation bubblegum is active. Repeat - operation
+                      bubblegum is now active
+                  external_service:
+                    type: object
+                    properties:
+                      connector_id:
+                        type: string
+                      connector_name:
+                        type: string
+                      external_id:
+                        type: string
+                      external_title:
+                        type: string
+                      external_url:
+                        type: string
+                      pushed_at:
+                        type: string
+                        format: date-time
+                      pushed_by:
+                        type: object
+                        properties:
+                          email:
+                            type: string
+                          full_name:
+                            type: string
+                          username:
+                            type: string
+                        nullable: true
+                        example: null
+                  id:
+                    type: string
+                    example: 66b9aa00-94fa-11ea-9f74-e7e108796192
+                  owner:
+                    $ref: '#/components/schemas/owners'
+                  settings:
+                    type: object
+                    properties:
+                      syncAlerts:
+                        type: boolean
+                        example: true
+                  status:
+                    $ref: '#/components/schemas/status'
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - phishing
+                      - social engineering
+                      - bubblegum
+                  title:
+                    type: string
+                    example: This case will self-destruct in 5 seconds
+                  totalAlerts:
+                    type: integer
+                    example: 0
+                  totalComment:
+                    type: integer
+                    example: 0
+                  updated_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+                    example: null
+                  updated_by:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                      full_name:
+                        type: string
+                      username:
+                        type: string
+                    nullable: true
+                    example: null
+                  version:
+                    type: string
+                    example: WzUzMiwxXQ==
       servers:
         - url: https://localhost:5601
     delete:
-      description: Deletes one or more cases.
+      description: >
+        Deletes one or more cases. You must have all privileges for the
+        **Cases** feature in the **Management**, **Observability**, or
+        **Security** section of the Kibana feature privileges, depending on the
+        owner of the cases you're deleting.
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - name: ids
           description: >-
-            The cases that you want to removed. All non-ASCII characters must be
-            URL encoded.
+            The cases that you want to removed. To retrieve case IDs, use the
+            find cases API. All non-ASCII characters must be URL encoded.
           in: query
+          required: true
           schema:
             type: string
           example: '%5B%22d4e7abb0-b462-11ec-9a8d-698504725a43%22%5D'
@@ -181,7 +411,11 @@ paths:
       servers:
         - url: https://localhost:5601
     patch:
-      description: Updates one or more cases.
+      description: >
+        Updates one or more cases. You must have all privileges for the
+        **Cases** feature in the **Management**, **Observability**, or
+        **Security** section of the Kibana feature privileges, depending on the
+        owner of the case you're updating.
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
       requestBody:
@@ -327,385 +561,17 @@ paths:
               schema:
                 type: string
               examples: {}
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
-  /api/cases/_find:
-    get:
-      description: Retrieves a paginated subset of cases.
-      parameters:
-        - $ref: '#/components/parameters/default_search_operator'
-        - $ref: '#/components/parameters/fields'
-        - $ref: '#/components/parameters/from'
-        - $ref: '#/components/parameters/owner'
-        - $ref: '#/components/parameters/page'
-        - $ref: '#/components/parameters/per_page'
-        - $ref: '#/components/parameters/reporters'
-        - $ref: '#/components/parameters/search'
-        - $ref: '#/components/parameters/search_fields'
-        - $ref: '#/components/parameters/sort_field'
-        - $ref: '#/components/parameters/sort_order'
-        - $ref: '#/components/parameters/status'
-        - $ref: '#/components/parameters/tags'
-        - $ref: '#/components/parameters/to'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json; charset=utf-8:
-              schema:
-                type: string
-            examples: {}
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
-  /api/cases/configure/connectors/_find:
-    get:
-      description: >-
-        Retrieves information about connectors. In particular, only the
-        connectors that are supported for use in cases are returned.
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json; charset=utf-8:
-              schema:
-                type: string
-            examples: {}
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
-  /api/cases/status:
-    get:
-      description: Returns the number of cases that are open, closed, and in progress.
-      deprecated: true
-      parameters:
-        - in: query
-          name: owner
-          description: >-
-            A filter to limit the retrieved case statistics to a specific set of
-            applications. If this parameter is omitted, the response contains
-            all cases that the user has access to read.
-          schema:
-            oneOf:
-              - $ref: '#/components/schemas/owners'
-              - type: array
-                items:
-                  $ref: '#/components/schemas/owners'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json; charset=utf-8:
-              schema:
-                type: string
-            examples: {}
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
-  /api/cases/tags:
-    get:
-      description: Aggregates and returns a list of case tags.
-      parameters:
-        - in: query
-          name: owner
-          description: >-
-            A filter to limit the retrieved case statistics to a specific set of
-            applications. If this parameter is omitted, the response contains
-            tags from all cases that the user has access to read.
-          schema:
-            oneOf:
-              - $ref: '#/components/schemas/owners'
-              - type: array
-                items:
-                  $ref: '#/components/schemas/owners'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json; charset=utf-8:
-              schema:
-                type: string
-            examples: {}
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
-  /api/cases/{caseId}:
-    get:
-      description: Retrieves a specified case.
-      parameters:
-        - $ref: '#/components/parameters/case_id'
-        - in: query
-          name: includeComments
-          description: Determines whether case comments are returned.
-          deprecated: true
-          schema:
-            type: boolean
-            default: true
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json; charset=utf-8:
-              schema:
-                type: string
-            examples: {}
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
-  /api/cases/{caseId}/comments:
-    post:
-      description: Adds a comment to a case.
-      parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
-        - $ref: '#/components/parameters/case_id'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                alertId:
-                  description: >-
-                    The alert identifier. It is required only when `type` is
-                    `alert`. This functionality is in technical preview and may
-                    be changed or removed in a future release. Elastic will
-                    apply best effort to fix any issues, but features in
-                    technical preview are not subject to the support SLA of
-                    official GA features.
-                  type: string
-                comment:
-                  description: The new comment. It is required only when `type` is `user`.
-                  type: string
-                index:
-                  description: >-
-                    The alert index. It is required only when `type` is `alert`.
-                    This functionality is in technical preview and may be
-                    changed or removed in a future release. Elastic will apply
-                    best effort to fix any issues, but features in technical
-                    preview are not subject to the support SLA of official GA
-                    features.
-                  type: string
-                owner:
-                  $ref: '#/components/schemas/owners'
-                rule:
-                  description: >-
-                    The rule that is associated with the alert.  It is required
-                    only when type is alert. This functionality is in technical
-                    preview and may be changed or removed in a future release.
-                    Elastic will apply best effort to fix any issues, but
-                    features in technical preview are not subject to the support
-                    SLA of official GA features.
-                  type: object
-                  properties:
-                    id:
-                      description: The rule identifier.
-                      type: string
-                    name:
-                      description: The rule name.
-                      type: string
-                type:
-                  $ref: '#/components/schemas/comment_types'
-              required:
-                - owner
-                - type
-            examples:
-              '0':
-                value: |
-                  {
-
-                    "type": "user",
-
-                    "owner": "cases",
-
-                    "comment": "That is nothing - Ethan Hunt answered a targeted
-                      social media campaign promoting phishy pension schemes to IMF
-                      operatives."
-
-                  }
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json; charset=utf-8:
-              schema:
-                type: string
-              examples: {}
-      servers:
-        - url: https://localhost:5601
-    patch:
-      description: Updates a comment in a case.
-      parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
-        - $ref: '#/components/parameters/case_id'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                alertId:
-                  description: >-
-                    The alert identifier. It is required only when `type` is
-                    `alert`. This functionality is in technical preview and may
-                    be changed or removed in a future release. Elastic will
-                    apply best effort to fix any issues, but features in
-                    technical preview are not subject to the support SLA of
-                    official GA features.
-                  type: string
-                comment:
-                  description: The new comment. It is required only when `type` is `user`.
-                  type: string
-                id:
-                  description: The identifier for the comment.
-                  type: string
-                index:
-                  description: >-
-                    The alert index. It is required only when `type` is `alert`.
-                    This functionality is in technical preview and may be
-                    changed or removed in a future release. Elastic will apply
-                    best effort to fix any issues, but features in technical
-                    preview are not subject to the support SLA of official GA
-                    features.
-                  type: string
-                owner:
-                  $ref: '#/components/schemas/owners'
-                rule:
-                  description: >-
-                    The rule that is associated with the alert.  It is required
-                    only when type is alert. This functionality is in technical
-                    preview and may be changed or removed in a future release.
-                    Elastic will apply best effort to fix any issues, but
-                    features in technical preview are not subject to the support
-                    SLA of official GA features.
-                  type: object
-                  properties:
-                    id:
-                      description: The rule identifier.
-                      type: string
-                    name:
-                      description: The rule name.
-                      type: string
-                type:
-                  $ref: '#/components/schemas/comment_types'
-                version:
-                  description: The current version of the comment.
-                  type: string
-              required:
-                - id
-                - owner
-                - type
-                - version
-            examples:
-              '0':
-                value: |-
-                  {
-                          "id": "c7740680-b5e9-11ec-b141-0fdb20a7f9a9",
-                           "version": "WzI2NiwzXQ==",
-                           "type": "user",
-                            "comment": "Updated comment",
-                            "owner": "cases"
-                      }
-                  '1':
-                    value: |
-                      {
-                      "type": "user",
-                      "owner": "cases",
-                      "comment": "no2."
-                  }
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json; charset=utf-8:
-              schema:
-                type: string
-              examples: {}
-      servers:
-        - url: https://localhost:5601
-    delete:
-      description: Deletes all comments from a case.
-      parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
-        - $ref: '#/components/parameters/case_id'
-      responses:
-        '204':
-          description: Indicates a successful call.
-      servers:
-        - url: https://localhost:5601
-    get:
-      description: Retrieves all the comments from a case.
-      deprecated: true
-      parameters:
-        - $ref: '#/components/parameters/case_id'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json; charset=utf-8:
-              schema:
-                type: string
-            examples: {}
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
-  /api/cases/{caseId}/comments/{commentId}:
-    delete:
-      description: Deletes a comment from a case.
-      parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
-        - $ref: '#/components/parameters/case_id'
-        - $ref: '#/components/parameters/comment_id'
-      responses:
-        '204':
-          description: Indicates a successful call.
-      servers:
-        - url: https://localhost:5601
-    get:
-      description: Retrieves a comment from a case.
-      parameters:
-        - $ref: '#/components/parameters/case_id'
-        - $ref: '#/components/parameters/comment_id'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json; charset=utf-8:
-              schema:
-                type: string
-            examples: {}
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
-  /api/cases/{caseId}/user_actions:
-    get:
-      description: Returns all user activity for the specified case.
-      deprecated: true
-      parameters:
-        - $ref: '#/components/parameters/case_id'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json; charset=utf-8:
-              schema:
-                type: string
-            examples: {}
       servers:
         - url: https://localhost:5601
     servers:
       - url: https://localhost:5601
   /s/{spaceId}/api/cases:
     post:
-      description: Creates a case.
+      description: >
+        Creates a case. You must have all privileges for the **Cases** feature
+        in the **Management**, **Observability**, or **Security** section of the
+        Kibana feature privileges, depending on the owner of the case you're
+        creating.
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/space_id'
@@ -850,12 +716,235 @@ paths:
           content:
             application/json; charset=utf-8:
               schema:
-                type: string
-              examples: {}
+                type: object
+                properties:
+                  closed_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+                    example: null
+                  closed_by:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                      full_name:
+                        type: string
+                      username:
+                        type: string
+                    nullable: true
+                    example: null
+                  comments:
+                    type: array
+                    items:
+                      type: string
+                    example: []
+                  connector:
+                    type: object
+                    properties:
+                      fields:
+                        description: >-
+                          An object containing the connector fields. To create a
+                          case without a connector, specify null. If you want to
+                          omit any individual field, specify null as its value.
+                        nullable: true
+                        type: object
+                        properties:
+                          caseId:
+                            description: The case identifier for Swimlane connectors.
+                            type: string
+                          category:
+                            description: >-
+                              The category of the incident for ServiceNow ITSM
+                              and ServiceNow SecOps connectors.
+                            type: string
+                          destIp:
+                            description: >-
+                              A comma-separated list of destination IPs for
+                              ServiceNow SecOps connectors.
+                            type: string
+                          impact:
+                            description: >-
+                              The effect an incident had on business for
+                              ServiceNow ITSM connectors.
+                            type: string
+                          issueType:
+                            description: The type of issue for Jira connectors.
+                            type: string
+                          issueTypes:
+                            description: The type of incident for IBM Resilient connectors.
+                            type: array
+                            items:
+                              type: number
+                          malwareHash:
+                            description: >-
+                              A comma-separated list of malware hashes for
+                              ServiceNow SecOps connectors.
+                            type: string
+                          malwareUrl:
+                            description: >-
+                              A comma-separated list of malware URLs for
+                              ServiceNow SecOps connectors.
+                            type: string
+                          parent:
+                            description: >-
+                              The key of the parent issue, when the issue type
+                              is sub-task for Jira connectors.
+                            type: string
+                          priority:
+                            description: >-
+                              The priority of the issue for Jira and ServiceNow
+                              SecOps connectors.
+                            type: string
+                          severity:
+                            description: >-
+                              The severity of the incident for ServiceNow ITSM
+                              connectors.
+                            type: string
+                          severityCode:
+                            description: >-
+                              The severity code of the incident for IBM
+                              Resilient connectors.
+                            type: number
+                          sourceIp:
+                            description: >-
+                              A comma-separated list of source IPs for
+                              ServiceNow SecOps connectors.
+                            type: string
+                          subcategory:
+                            description: >-
+                              The subcategory of the incident for ServiceNow
+                              ITSM connectors.
+                            type: string
+                          urgency:
+                            description: >-
+                              The extent to which the incident resolution can be
+                              delayed for ServiceNow ITSM connectors.
+                            type: string
+                        required:
+                          - fields
+                          - id
+                          - name
+                          - type
+                      id:
+                        description: >-
+                          The identifier for the connector. To create a case
+                          without a connector, use `none`.
+                        type: string
+                      name:
+                        description: >-
+                          The name of the connector. To create a case without a
+                          connector, use `none`.
+                        type: string
+                      type:
+                        $ref: '#/components/schemas/connector_types'
+                  created_at:
+                    type: string
+                    format: date-time
+                    example: '2022-05-13T09:16:17.416Z'
+                  created_by:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                        example: ahunley@imf.usa.gov
+                      full_name:
+                        type: string
+                        example: Alan Hunley
+                      username:
+                        type: string
+                        example: ahunley
+                  description:
+                    type: string
+                    example: >-
+                      James Bond clicked on a highly suspicious email banner
+                      advertising cheap holidays for underpaid civil servants.
+                      Operation bubblegum is active. Repeat - operation
+                      bubblegum is now active
+                  external_service:
+                    type: object
+                    properties:
+                      connector_id:
+                        type: string
+                      connector_name:
+                        type: string
+                      external_id:
+                        type: string
+                      external_title:
+                        type: string
+                      external_url:
+                        type: string
+                      pushed_at:
+                        type: string
+                        format: date-time
+                      pushed_by:
+                        type: object
+                        properties:
+                          email:
+                            type: string
+                          full_name:
+                            type: string
+                          username:
+                            type: string
+                        nullable: true
+                        example: null
+                  id:
+                    type: string
+                    example: 66b9aa00-94fa-11ea-9f74-e7e108796192
+                  owner:
+                    $ref: '#/components/schemas/owners'
+                  settings:
+                    type: object
+                    properties:
+                      syncAlerts:
+                        type: boolean
+                        example: true
+                  status:
+                    $ref: '#/components/schemas/status'
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - phishing
+                      - social engineering
+                      - bubblegum
+                  title:
+                    type: string
+                    example: This case will self-destruct in 5 seconds
+                  totalAlerts:
+                    type: integer
+                    example: 0
+                  totalComment:
+                    type: integer
+                    example: 0
+                  updated_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+                    example: null
+                  updated_by:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                      full_name:
+                        type: string
+                      username:
+                        type: string
+                    nullable: true
+                    example: null
+                  version:
+                    type: string
+                    example: WzUzMiwxXQ==
       servers:
         - url: https://localhost:5601
     delete:
-      description: Deletes one or more cases.
+      description: >
+        Deletes one or more cases. You must have all privileges for the
+        **Cases** feature in the **Management**, **Observability**, or
+        **Security** section of the Kibana feature privileges, depending on the
+        owner of the cases you're deleting.
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/space_id'
@@ -864,6 +953,7 @@ paths:
             The cases that you want to removed. All non-ASCII characters must be
             URL encoded.
           in: query
+          required: true
           schema:
             type: string
           example: '%5B%22d4e7abb0-b462-11ec-9a8d-698504725a43%22%5D'
@@ -873,7 +963,11 @@ paths:
       servers:
         - url: https://localhost:5601
     patch:
-      description: Updates one or more cases.
+      description: >
+        Updates one or more cases. You must have all privileges for the
+        **Cases** feature in the **Management**, **Observability**, or
+        **Security** section of the Kibana feature privileges, depending on the
+        owner of the case you're updating.
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/space_id'
@@ -1020,391 +1114,6 @@ paths:
               schema:
                 type: string
               examples: {}
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
-  /s/{spaceId}/api/cases/_find:
-    get:
-      description: Retrieves a paginated subset of cases.
-      parameters:
-        - $ref: '#/components/parameters/space_id'
-        - $ref: '#/components/parameters/default_search_operator'
-        - $ref: '#/components/parameters/fields'
-        - $ref: '#/components/parameters/from'
-        - $ref: '#/components/parameters/owner'
-        - $ref: '#/components/parameters/page'
-        - $ref: '#/components/parameters/per_page'
-        - $ref: '#/components/parameters/reporters'
-        - $ref: '#/components/parameters/search'
-        - $ref: '#/components/parameters/search_fields'
-        - $ref: '#/components/parameters/sort_field'
-        - $ref: '#/components/parameters/sort_order'
-        - $ref: '#/components/parameters/status'
-        - $ref: '#/components/parameters/tags'
-        - $ref: '#/components/parameters/to'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json; charset=utf-8:
-              schema:
-                type: string
-              examples: {}
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
-  /s/{spaceId}/api/cases/configure/connectors/_find:
-    get:
-      description: >-
-        Retrieves information about connectors. In particular, only the
-        connectors that are supported for use in cases are returned.
-      parameters:
-        - $ref: '#/components/parameters/space_id'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json; charset=utf-8:
-              schema:
-                type: string
-            examples: {}
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
-  /s/{spaceId}/api/cases/status:
-    get:
-      description: Returns the number of cases that are open, closed, and in progress.
-      deprecated: true
-      parameters:
-        - $ref: '#/components/parameters/space_id'
-        - in: query
-          name: owner
-          description: >-
-            A filter to limit the retrieved case statistics to a specific set of
-            applications. If this parameter is omitted, the response contains
-            all cases that the user has access to read.
-          schema:
-            oneOf:
-              - $ref: '#/components/schemas/owners'
-              - type: array
-                items:
-                  $ref: '#/components/schemas/owners'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json; charset=utf-8:
-              schema:
-                type: string
-            examples: {}
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
-  /s/{spaceId}/api/cases/tags:
-    get:
-      description: Aggregates and returns a list of case tags.
-      parameters:
-        - $ref: '#/components/parameters/space_id'
-        - in: query
-          name: owner
-          description: >-
-            A filter to limit the retrieved case statistics to a specific set of
-            applications. If this parameter is omitted, the response contains
-            tags from all cases that the user has access to read.
-          schema:
-            oneOf:
-              - $ref: '#/components/schemas/owners'
-              - type: array
-                items:
-                  $ref: '#/components/schemas/owners'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json; charset=utf-8:
-              schema:
-                type: string
-            examples: {}
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
-  /s/{spaceId}/api/cases/{caseId}:
-    get:
-      description: Retrieves a specified case.
-      parameters:
-        - $ref: '#/components/parameters/case_id'
-        - $ref: '#/components/parameters/space_id'
-        - in: query
-          name: includeComments
-          description: Determines whether case comments are returned.
-          deprecated: true
-          schema:
-            type: boolean
-            default: true
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json; charset=utf-8:
-              schema:
-                type: string
-            examples: {}
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
-  /s/{spaceId}/api/cases/{caseId}/comments:
-    post:
-      description: Adds a comment to a case.
-      parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
-        - $ref: '#/components/parameters/case_id'
-        - $ref: '#/components/parameters/space_id'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                alertId:
-                  description: >-
-                    The alert identifier. It is required only when `type` is
-                    `alert`. This functionality is in technical preview and may
-                    be changed or removed in a future release. Elastic will
-                    apply best effort to fix any issues, but features in
-                    technical preview are not subject to the support SLA of
-                    official GA features.
-                  type: string
-                comment:
-                  description: The new comment. It is required only when `type` is `user`.
-                  type: string
-                index:
-                  description: >-
-                    The alert index. It is required only when `type` is `alert`.
-                    This functionality is in technical preview and may be
-                    changed or removed in a future release. Elastic will apply
-                    best effort to fix any issues, but features in technical
-                    preview are not subject to the support SLA of official GA
-                    features.
-                  type: string
-                owner:
-                  $ref: '#/components/schemas/owners'
-                rule:
-                  description: >-
-                    The rule that is associated with the alert.  It is required
-                    only when type is alert. This functionality is in technical
-                    preview and may be changed or removed in a future release.
-                    Elastic will apply best effort to fix any issues, but
-                    features in technical preview are not subject to the support
-                    SLA of official GA features.
-                  type: object
-                  properties:
-                    id:
-                      description: The rule identifier.
-                      type: string
-                    name:
-                      description: The rule name.
-                      type: string
-                type:
-                  $ref: '#/components/schemas/comment_types'
-              required:
-                - owner
-                - type
-            examples:
-              '0':
-                value: |
-                  {
-
-                    "type": "user",
-
-                    "owner": "cases",
-
-                    "comment": "That is nothing - Ethan Hunt answered a targeted
-                      social media campaign promoting phishy pension schemes to IMF
-                      operatives."
-
-                  }
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json; charset=utf-8:
-              schema:
-                type: string
-              examples: {}
-      servers:
-        - url: https://localhost:5601
-    patch:
-      description: Updates a comment in a case.
-      parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
-        - $ref: '#/components/parameters/case_id'
-        - $ref: '#/components/parameters/space_id'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                alertId:
-                  description: >-
-                    The alert identifier. It is required only when `type` is
-                    `alert`. This functionality is in technical preview and may
-                    be changed or removed in a future release. Elastic will
-                    apply best effort to fix any issues, but features in
-                    technical preview are not subject to the support SLA of
-                    official GA features.
-                  type: string
-                comment:
-                  description: The new comment. It is required only when `type` is `user`.
-                  type: string
-                id:
-                  description: The identifier for the comment.
-                  type: string
-                index:
-                  description: >-
-                    The alert index. It is required only when `type` is `alert`.
-                    This functionality is in technical preview and may be
-                    changed or removed in a future release. Elastic will apply
-                    best effort to fix any issues, but features in technical
-                    preview are not subject to the support SLA of official GA
-                    features.
-                  type: string
-                owner:
-                  $ref: '#/components/schemas/owners'
-                rule:
-                  description: >-
-                    The rule that is associated with the alert.  It is required
-                    only when type is alert. This functionality is in technical
-                    preview and may be changed or removed in a future release.
-                    Elastic will apply best effort to fix any issues, but
-                    features in technical preview are not subject to the support
-                    SLA of official GA features.
-                  type: object
-                  properties:
-                    id:
-                      description: The rule identifier.
-                      type: string
-                    name:
-                      description: The rule name.
-                      type: string
-                type:
-                  $ref: '#/components/schemas/comment_types'
-                version:
-                  description: The current version of the comment.
-                  type: string
-              required:
-                - id
-                - owner
-                - type
-                - version
-            examples:
-              '0':
-                value: |-
-                  {
-                          "id": "c7740680-b5e9-11ec-b141-0fdb20a7f9a9",
-                           "version": "WzI2NiwzXQ==",
-                           "type": "user",
-                            "comment": "Updated comment",
-                            "owner": "cases"
-                      }
-                  '1':
-                    value: |
-                      {
-                      "type": "user",
-                      "owner": "cases",
-                      "comment": "no2."
-                  }
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json; charset=utf-8:
-              schema:
-                type: string
-              examples: {}
-      servers:
-        - url: https://localhost:5601
-    delete:
-      description: Deletes all comments from a case.
-      parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
-        - $ref: '#/components/parameters/case_id'
-        - $ref: '#/components/parameters/space_id'
-      responses:
-        '204':
-          description: Indicates a successful call.
-      servers:
-        - url: https://localhost:5601
-    get:
-      description: Retrieves all the comments from a case.
-      deprecated: true
-      parameters:
-        - $ref: '#/components/parameters/case_id'
-        - $ref: '#/components/parameters/space_id'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json; charset=utf-8:
-              schema:
-                type: string
-            examples: {}
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
-  /s/{spaceId}/api/cases/{caseId}/comments/{commentId}:
-    delete:
-      description: Deletes a comment from a case.
-      parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
-        - $ref: '#/components/parameters/space_id'
-        - $ref: '#/components/parameters/case_id'
-        - $ref: '#/components/parameters/comment_id'
-      responses:
-        '204':
-          description: Indicates a successful call.
-      servers:
-        - url: https://localhost:5601
-    get:
-      description: Retrieves a comment from a case.
-      parameters:
-        - $ref: '#/components/parameters/case_id'
-        - $ref: '#/components/parameters/comment_id'
-        - $ref: '#/components/parameters/space_id'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json; charset=utf-8:
-              schema:
-                type: string
-            examples: {}
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
-  /s/{spaceId}/api/cases/{caseId}/user_actions:
-    get:
-      description: Returns all user activity for the specified case.
-      deprecated: true
-      parameters:
-        - $ref: '#/components/parameters/case_id'
-        - $ref: '#/components/parameters/space_id'
-      responses:
-        '200':
-          description: Indicates a successful call.
-          content:
-            application/json; charset=utf-8:
-              schema:
-                type: string
-            examples: {}
       servers:
         - url: https://localhost:5601
     servers:
@@ -1421,161 +1130,6 @@ components:
       in: header
       name: kbn-xsrf
       required: true
-    default_search_operator:
-      in: query
-      name: defaultSearchOperator
-      description: The default operator to use for the simple_query_string.
-      schema:
-        type: string
-        default: OR
-      example: OR
-    fields:
-      in: query
-      name: fields
-      description: The fields in the entity to return in the response.
-      schema:
-        type: array
-        items:
-          type: string
-    from:
-      in: query
-      name: from
-      description: >-
-        Returns only cases that were created after a specific date. The date
-        must be specified as a KQL data range or date match expression.
-      schema:
-        type: string
-      example: now-1d
-    owner:
-      in: query
-      name: owner
-      description: >-
-        A filter to limit the retrieved cases to a specific set of applications.
-        Valid values are:cases, observability, and securitySolution. If this
-        parameter is omitted, the response contains all cases that the user has
-        access to read.
-      schema:
-        oneOf:
-          - $ref: '#/components/schemas/owners'
-          - type: array
-            items:
-              $ref: '#/components/schemas/owners'
-      example: cases
-    page:
-      in: query
-      name: page
-      description: The page number to return.
-      schema:
-        type: integer
-        default: 1
-      example: 1
-    per_page:
-      in: query
-      name: perPage
-      description: The number of rules to return per page.
-      schema:
-        type: integer
-        default: 20
-      example: 20
-    reporters:
-      in: query
-      name: reporters
-      description: Filters the returned cases by the user name of the reporter.
-      schema:
-        oneOf:
-          - type: string
-          - type: array
-            items:
-              type: string
-      example: elastic
-    search:
-      in: query
-      name: search
-      description: >-
-        An Elasticsearch simple_query_string query that filters the objects in
-        the response.
-      schema:
-        type: string
-      example: '%2A'
-    search_fields:
-      in: query
-      name: searchFields
-      description: The fields to perform the simple_query_string parsed query against.
-      schema:
-        oneOf:
-          - type: string
-          - type: array
-            items:
-              type: string
-    sort_field:
-      in: query
-      name: sortField
-      description: Determines which field is used to sort the results.
-      schema:
-        type: string
-        enum:
-          - createdAt
-          - updatedAt
-        default: createdAt
-      example: updatedAt
-    sort_order:
-      in: query
-      name: sortOrder
-      description: Determines the sort order.
-      schema:
-        type: string
-        enum:
-          - asc
-          - desc
-        default: desc
-      example: asc
-    status:
-      in: query
-      name: status
-      description: Filters the returned cases by state.
-      schema:
-        type: string
-        enum:
-          - closed
-          - in-progress
-          - open
-      example: open
-    tags:
-      in: query
-      name: tags
-      description: Filters the returned cases by tags.
-      schema:
-        oneOf:
-          - type: string
-          - type: array
-            items:
-              type: string
-      example: phishing
-    to:
-      in: query
-      name: to
-      description: >-
-        Returns only cases that were created before a specific date. The date
-        must be specified as a KQL data range or date match expression.
-      schema:
-        type: string
-      example: now%2B1d
-    case_id:
-      in: path
-      name: caseId
-      description: An identifier for the case.
-      required: true
-      schema:
-        type: string
-        example: a18b38a0-71b0-11ea-a0b2-c51ea50a58e2
-    comment_id:
-      in: path
-      name: commentId
-      description: An identifier for the comment.
-      required: true
-      schema:
-        type: string
-        example: 71ec1870-725b-11ea-a0b2-c51ea50a58e2
     space_id:
       in: path
       name: spaceId
@@ -1609,11 +1163,5 @@ components:
         - closed
         - in-progress
         - open
-    comment_types:
-      type: string
-      description: The type of comment.
-      enum:
-        - alert
-        - user
 security:
   - basicAuth: []

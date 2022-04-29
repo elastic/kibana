@@ -1,5 +1,7 @@
 post:
-  description: Creates a case.
+  description: >
+    Creates a case.
+    You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're creating.
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
   requestBody:
@@ -46,18 +48,22 @@ post:
       content:
          application/json; charset=utf-8:
           schema:
-            type: string
-          examples: {}
+            type: object
+            properties:
+              $ref: '../components/schemas/case_properties.yaml'
   servers:
      - url: https://localhost:5601
 
 delete:
-  description: Deletes one or more cases.
+  description: >
+    Deletes one or more cases.
+    You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
     - name: ids
-      description: The cases that you want to removed. All non-ASCII characters must be URL encoded.
+      description: The cases that you want to removed. To retrieve case IDs, use the find cases API. All non-ASCII characters must be URL encoded.
       in: query
+      required: true
       schema:
         type: string
       example: '%5B%22d4e7abb0-b462-11ec-9a8d-698504725a43%22%5D'
@@ -68,7 +74,9 @@ delete:
     - url: https://localhost:5601
 
 patch:
-  description: Updates one or more cases.
+  description: >
+    Updates one or more cases.
+    You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating.
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
   requestBody:
