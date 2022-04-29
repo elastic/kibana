@@ -1,5 +1,4 @@
 openapi: 3.0.1
-tags: []
 info:
   title: Cases
   description: OpenAPI schema for Cases endpoints
@@ -9,6 +8,9 @@ info:
   license:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
+tags:
+  - name: cases
+  - name: kibana
 servers:
   - url: 'http://localhost:5601'
     description: local
