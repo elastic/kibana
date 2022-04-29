@@ -97,7 +97,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(apiResponse.body.attributes).eql({
           ...monitors[0],
           revision: 1,
-          secrets: formatSecrets(monitors[0]).secrets,
         });
       });
 

@@ -12,7 +12,6 @@ import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monitor';
 import { getMonitorNotFoundResponse } from './service_errors';
-import { normalizeSecrets } from '../../lib/synthetics_service/utils/secrets';
 
 export const getSyntheticsMonitorRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
@@ -31,12 +30,11 @@ export const getSyntheticsMonitorRoute: UMRestApiRouteFactory = (libs: UMServerL
     const { monitorId } = request.params;
     const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
     try {
-      const monitorWithSecrets = await libs.requests.getSyntheticsMonitor({
+      return await libs.requests.getSyntheticsMonitor({
         monitorId,
         encryptedSavedObjectsClient,
         savedObjectsClient,
       });
-      return normalizeSecrets(monitorWithSecrets);
     } catch (getErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
         return getMonitorNotFoundResponse(response, monitorId);
