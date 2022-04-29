@@ -57,8 +57,8 @@ describe('Span links', () => {
       it('shows span links badge with incoming links only', () => {
         cy.visit(
           getTransactionDetailsPageUrl({
-            serviceName: 'synth-banana',
-            transactionName: 'GET /banana 🍌',
+            serviceName: 'service-B',
+            transactionName: 'GET /service_B',
           })
         );
         cy.contains('15 Span links');
@@ -71,8 +71,8 @@ describe('Span links', () => {
       it('shows span links badge with incoming and outgoing links only', () => {
         cy.visit(
           getTransactionDetailsPageUrl({
-            serviceName: 'synth-apple',
-            transactionName: 'GET /apple 🍏',
+            serviceName: 'service-A',
+            transactionName: 'GET /service_A',
           })
         );
         cy.contains('17 Span links');
@@ -87,8 +87,8 @@ describe('Span links', () => {
       it('selects incoming links by default and no outgoing links are available', () => {
         cy.visit(
           getTransactionDetailsPageUrl({
-            serviceName: 'synth-banana',
-            transactionName: 'GET /banana 🍌',
+            serviceName: 'service-B',
+            transactionName: 'GET /service_B',
             waterfallItemId: '0000000000000062',
           })
         );
@@ -106,8 +106,8 @@ describe('Span links', () => {
       it('shows unknown service name for external links', () => {
         cy.visit(
           getTransactionDetailsPageUrl({
-            serviceName: 'synth-apple',
-            transactionName: 'GET /apple 🍏',
+            serviceName: 'service-A',
+            transactionName: 'GET /service_A',
             waterfallItemId: '0000000000000002',
           })
         );
@@ -127,8 +127,8 @@ describe('Span links', () => {
       it('shows outgoing links', () => {
         cy.visit(
           getTransactionDetailsPageUrl({
-            serviceName: 'synth-apple',
-            transactionName: 'GET /apple 🍏',
+            serviceName: 'service-A',
+            transactionName: 'GET /service_A',
             waterfallItemId: '0000000000000002',
           })
         );
@@ -140,8 +140,8 @@ describe('Span links', () => {
         cy.get('[data-test-subj="spanLinkTypeSelect"]').select(
           'Outgoing links (15)'
         );
-        cy.contains('synth-banana');
-        cy.contains('get_banana_🍌');
+        cy.contains('service-B');
+        cy.contains('get_service_B');
         cy.contains('900 ms');
       });
     });

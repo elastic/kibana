@@ -43,21 +43,21 @@ export async function generateSpanLinksData({
   const externalSpanLinks = generateExternalSpanLinks();
 
   const instanceJava = apm
-    .service('synth-apple', 'production', 'java')
+    .service('service-A', 'production', 'java')
     .instance('instance-a');
 
-  const appleEvents = timerange(from, to)
+  const serviceAEvents = timerange(from, to)
     .interval('1m')
     .rate(1)
     .generator((timestamp) => {
       return instanceJava
-        .transaction('GET /apple 🍏')
+        .transaction('GET /service_A')
         .timestamp(timestamp)
         .duration(1000)
         .success()
         .children(
           instanceJava
-            .span('get_green_apple_🍏', 'db', 'elasticsearch')
+            .span('get_service_A', 'db', 'elasticsearch')
             .defaults({ 'span.links': externalSpanLinks })
             .timestamp(timestamp + 50)
             .duration(900)
@@ -65,32 +65,34 @@ export async function generateSpanLinksData({
         );
     });
 
-  const appleEventsAsArray = appleEvents.toArray();
-  const bananaIncomingSpanLinks = getSpanLinksFromEvents(appleEventsAsArray);
+  const serviceAEventsAsArray = serviceAEvents.toArray();
+  const serviceBIncomingSpanLinks = getSpanLinksFromEvents(
+    serviceAEventsAsArray
+  );
 
   const instanceRuby = apm
-    .service('synth-banana', 'production', 'ruby')
+    .service('service-B', 'production', 'ruby')
     .instance('instance-b');
 
-  const outgoingEvents = timerange(from, to)
+  const serviceBEvents = timerange(from, to)
     .interval('1m')
     .rate(1)
     .generator((timestamp) => {
       return instanceRuby
-        .transaction('GET /banana 🍌')
+        .transaction('GET /service_B')
         .timestamp(timestamp)
         .duration(1000)
         .success()
         .children(
           instanceRuby
-            .span('get_banana_🍌', 'resource', 'css')
-            .defaults({ 'span.links': bananaIncomingSpanLinks })
+            .span('get_service_B', 'resource', 'css')
+            .defaults({ 'span.links': serviceBIncomingSpanLinks })
             .timestamp(timestamp + 50)
             .duration(900)
             .success()
         );
     });
   await synthtrace.index(
-    new EntityArrayIterable(appleEventsAsArray).merge(outgoingEvents)
+    new EntityArrayIterable(serviceAEventsAsArray).merge(serviceBEvents)
   );
 }
