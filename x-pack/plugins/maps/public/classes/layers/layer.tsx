@@ -52,6 +52,7 @@ export interface ILayer {
   supportsElasticsearchFilters(): boolean;
   supportsFitToBounds(): Promise<boolean>;
   getAttributions(): Promise<Attribution[]>;
+  getColorTheme(): string | null;
   getLabel(): string;
   hasLegendDetails(): Promise<boolean>;
   renderLegendDetails(): ReactElement<any> | null;
@@ -102,6 +103,7 @@ export interface ILayer {
   isPreviewLayer: () => boolean;
   areLabelsOnTop: () => boolean;
   supportsLabelsOnTop: () => boolean;
+  supportsColorTheme: () => boolean;
   isFittable(): Promise<boolean>;
   isIncludeInFitToBounds(): boolean;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
@@ -144,6 +146,7 @@ export class AbstractLayer implements ILayer {
       minZoom: _.get(options, 'minZoom', MIN_ZOOM),
       maxZoom: _.get(options, 'maxZoom', MAX_ZOOM),
       alpha: _.get(options, 'alpha', 0.75),
+      colorTheme: _.get(options, 'colorTheme'),
       visible: _.get(options, 'visible', true),
       style: _.get(options, 'style', null),
       includeInFitToBounds:
@@ -251,6 +254,10 @@ export class AbstractLayer implements ILayer {
 
   getCurrentStyle(): IStyle {
     throw new Error('Should implement AbstractLayer#getCurrentStyle');
+  }
+
+  getColorTheme(): string | null {
+    return this._descriptor.colorTheme ?? null;
   }
 
   getLabel(): string {
@@ -465,6 +472,10 @@ export class AbstractLayer implements ILayer {
   }
 
   supportsLabelsOnTop(): boolean {
+    return false;
+  }
+
+  supportsColorTheme(): boolean {
     return false;
   }
 

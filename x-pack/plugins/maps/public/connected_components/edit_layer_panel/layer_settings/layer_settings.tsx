@@ -7,6 +7,7 @@
 
 import React, { ChangeEvent, Fragment } from 'react';
 import {
+  EuiColorPicker,
   EuiTitle,
   EuiPanel,
   EuiFormRow,
@@ -29,6 +30,7 @@ export interface Props {
   layer: ILayer;
   clearLayerAttribution: (layerId: string) => void;
   setLayerAttribution: (id: string, attribution: Attribution) => void;
+  updateColorTheme: (layerId: string, color: string) => void;
   updateLabel: (layerId: string, label: string) => void;
   updateMinZoom: (layerId: string, minZoom: number) => void;
   updateMaxZoom: (layerId: string, maxZoom: number) => void;
@@ -47,6 +49,10 @@ export function LayerSettings(props: Props) {
     const label = event.target.value;
     props.updateLabel(layerId, label);
   };
+
+  const onColorThemeChange = (color: string) => {
+    props.updateColorTheme(layerId, color);
+  }
 
   const onZoomChange = (value: [string, string]) => {
     props.updateMinZoom(layerId, Math.max(minVisibilityZoom, parseInt(value[0], 10)));
@@ -155,6 +161,27 @@ export function LayerSettings(props: Props) {
     );
   };
 
+  const renderColorPicker = () => {
+    if (!props.layer.supportsColorTheme()) {
+      return null;
+    }
+
+    return (
+      <EuiFormRow
+        display="columnCompressed"
+        label="Color theme"
+        helpText="Apply a color theme to the basemap"
+      >
+      <EuiColorPicker
+        color={props.layer.getColorTheme()}
+        mode='default'
+        onChange={onColorThemeChange}
+      />
+
+      </EuiFormRow>
+    )
+  }
+
   return (
     <Fragment>
       <EuiPanel>
@@ -172,6 +199,7 @@ export function LayerSettings(props: Props) {
         {renderZoomSliders()}
         <AlphaSlider alpha={props.layer.getAlpha()} onChange={onAlphaChange} />
         {renderShowLabelsOnTop()}
+        {renderColorPicker()}
         <AttributionFormRow layer={props.layer} onChange={onAttributionChange} />
         {renderIncludeInFitToBounds()}
       </EuiPanel>

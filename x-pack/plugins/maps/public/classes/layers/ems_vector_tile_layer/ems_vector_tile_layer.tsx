@@ -6,6 +6,7 @@
  */
 
 import type { Map as MbMap, LayerSpecification, StyleSpecification } from '@kbn/mapbox-gl';
+import { TMSService } from '@elastic/ems-client';
 import _ from 'lodash';
 // @ts-expect-error
 import { RGBAImage } from './image_utils';
@@ -379,6 +380,16 @@ export class EmsVectorTileLayer extends AbstractLayer {
     return [];
   }
 
+  _setColorTheme(mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) {
+    const theme = this.getColorTheme();
+    if (theme !== null) {
+      const properties = TMSService.transformColorProperties(mbLayer, theme);
+      for (const { property, color } of properties) {
+        mbMap.setPaintProperty(mbLayerId, property, color);
+      }
+    }
+  }
+
   _setOpacityForType(mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) {
     this._getOpacityProps(mbLayer.type).forEach((opacityProp) => {
       const mbPaint = mbLayer.paint as { [key: string]: unknown } | undefined;
@@ -414,6 +425,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
       this.syncVisibilityWithMb(mbMap, mbLayerId);
       this._setLayerZoomRange(mbMap, mbLayer, mbLayerId);
       this._setOpacityForType(mbMap, mbLayer, mbLayerId);
+      this._setColorTheme(mbMap, mbLayer, mbLayerId);
     });
   }
 
@@ -422,6 +434,10 @@ export class EmsVectorTileLayer extends AbstractLayer {
   }
 
   supportsLabelsOnTop() {
+    return true;
+  }
+
+  supportsColorTheme(): boolean {
     return true;
   }
 

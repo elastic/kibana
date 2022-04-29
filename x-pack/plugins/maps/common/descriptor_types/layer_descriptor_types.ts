@@ -54,6 +54,7 @@ export type LayerDescriptor = {
   alpha?: number;
   attribution?: Attribution;
   id: string;
+  colorTheme?: string;
   label?: string | null;
   areLabelsOnTop?: boolean;
   minZoom?: number;
