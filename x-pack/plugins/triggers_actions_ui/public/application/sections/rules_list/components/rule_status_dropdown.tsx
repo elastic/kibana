@@ -159,15 +159,13 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
     isEnabled && isSnoozed ? (
       <EuiToolTip
         content={
-          rule.snoozeSchedule
+          rule.muteAll
             ? INDEFINITELY
             : moment(getRuleSnoozeEndTime(rule) as Date).format(SNOOZE_END_TIME_FORMAT)
         }
       >
         <EuiText color="subdued" size="xs">
-          {rule.snoozeSchedule
-            ? INDEFINITELY
-            : moment(getRuleSnoozeEndTime(rule) as Date).fromNow(true)}
+          {rule.muteAll ? INDEFINITELY : moment(getRuleSnoozeEndTime(rule) as Date).fromNow(true)}
         </EuiText>
       </EuiToolTip>
     ) : null;
