@@ -58,7 +58,7 @@ interface LiveQueryFormProps {
   formType?: FormType;
   enabled?: boolean;
   hideAgentsField?: boolean;
-  hideFullscreen?: boolean;
+  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
 }
 
 const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
@@ -69,7 +69,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   formType = 'steps',
   enabled = true,
   hideAgentsField = false,
-  hideFullscreen = false,
+  addToTimeline,
 }) => {
   const permissions = useKibana().services.application.capabilities.osquery;
   const { http } = useKibana().services;
@@ -386,10 +386,10 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           actionId={actionId}
           endDate={data?.actions[0].expiration}
           agentIds={agentIds}
-          hideFullscreen={hideFullscreen}
+          addToTimeline={addToTimeline}
         />
       ) : null,
-    [actionId, agentIds, data?.actions, hideFullscreen]
+    [actionId, agentIds, data?.actions, addToTimeline]
   );
 
   useEffect(() => {
@@ -428,6 +428,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       </Form>
       {showSavedQueryFlyout ? (
         <SavedQueryFlyout
+          isExternal={!!addToTimeline}
           onClose={handleCloseSaveQueryFlout}
           defaultValue={flyoutFormDefaultValue}
         />

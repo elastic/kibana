@@ -18,6 +18,8 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiIconTip,
+  EuiDataGridCellValueElementProps,
+  EuiDataGridControlColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -46,7 +48,7 @@ interface ResultsTableComponentProps {
   agentIds?: string[];
   endDate?: string;
   startDate?: string;
-  hideFullscreen?: boolean;
+  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
@@ -54,7 +56,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   agentIds,
   startDate,
   endDate,
-  hideFullscreen,
+  addToTimeline,
 }) => {
   const [isLive, setIsLive] = useState(true);
   const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
@@ -305,10 +307,30 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allResultsData?.columns.length, ecsMappingColumns, getHeaderDisplay]);
 
+  const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
+    const data = allResultsData?.edges;
+    if (addToTimeline && data) {
+      return [
+        {
+          id: 'timeline',
+          width: 38,
+          headerCellRender: () => null,
+          rowCellRender: (actionProps: EuiDataGridCellValueElementProps) => {
+            const eventId = data[actionProps.rowIndex]._id;
+
+            return addToTimeline({ query: ['_id', eventId], isIcon: true });
+          },
+        },
+      ];
+    }
+
+    return [];
+  }, [addToTimeline, allResultsData?.edges]);
+
   const toolbarVisibility = useMemo(
     () => ({
       showDisplaySelector: false,
-      showFullScreenSelector: !hideFullscreen,
+      showFullScreenSelector: !addToTimeline,
       additionalControls: (
         <>
           <ViewResultsInDiscoverAction
@@ -323,10 +345,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             endDate={endDate}
             startDate={startDate}
           />
+          {addToTimeline && addToTimeline({ query: ['action_id', actionId] })}
         </>
       ),
     }),
-    [actionId, endDate, startDate, hideFullscreen]
+    [actionId, addToTimeline, endDate, startDate]
   );
 
   useEffect(
@@ -399,6 +422,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             columnVisibility={columnVisibility}
             rowCount={allResultsData?.totalCount ?? 0}
             renderCellValue={renderCellValue}
+            leadingControlColumns={leadingControlColumns}
             sorting={tableSorting}
             pagination={tablePagination}
             height="500px"
