@@ -13,7 +13,6 @@ exports[`TOCEntry is rendered 1`] = `
       displayName="layer 1"
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
-      isFeatureEditorOpenForLayer={false}
       layer={
         Object {
           "getDisplayName": [Function],
@@ -96,7 +95,6 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
       displayName="layer 1"
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
-      isFeatureEditorOpenForLayer={false}
       layer={
         Object {
           "getDisplayName": [Function],
@@ -179,7 +177,6 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
       displayName="layer 1"
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
-      isFeatureEditorOpenForLayer={false}
       layer={
         Object {
           "getDisplayName": [Function],
@@ -262,7 +259,6 @@ exports[`TOCEntry props isReadOnly 1`] = `
       displayName="layer 1"
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
-      isFeatureEditorOpenForLayer={false}
       layer={
         Object {
           "getDisplayName": [Function],
@@ -330,7 +326,6 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
       displayName="layer 1"
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
-      isFeatureEditorOpenForLayer={false}
       layer={
         Object {
           "getDisplayName": [Function],
