@@ -70,18 +70,24 @@ export type CommandExecutionComponent = ComponentType<{
    * if the command has already been executed or if it's a new instance.
    */
   store: Immutable<Record<string, unknown>>;
-  /** Sets the `meta` data above */
-  setMeta: (meta: Record<string, unknown>) => void;
-  /** The status of the command execution */
+  /** Sets the `store` data above */
+  setStore: (meta: Record<string, unknown>) => void;
+  /**
+   * The status of the command execution.
+   * Note that the console's UI will show the command as "busy" while the status here is
+   * `pending`. Ensure that once the action processing completes, that this is set to
+   * either `success` or `error`.
+   */
   status: 'pending' | 'success' | 'error';
   /** Set the status of the command execution  */
   setStatus: (status: 'pending' | 'success' | 'error') => void;
 }>;
 
 export interface CommandServiceInterface {
+  /**
+   * Returns the list of commands that will be available in the console for execution
+   */
   getCommandList(): CommandDefinition[];
-
-  executeCommand(command: Command): Promise<{ result: ReactNode }>;
 
   /**
    * If defined, then the `help` builtin command will display this output instead of the default one

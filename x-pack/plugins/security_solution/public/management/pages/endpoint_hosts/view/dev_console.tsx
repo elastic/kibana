@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiCode,
@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { useIsMounted } from '../../../components/hooks/use_is_mounted';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useUrlParams } from '../../../components/hooks/use_url_params';
 import {
@@ -34,62 +35,85 @@ class DevCommandService implements CommandServiceInterface {
       {
         name: 'cmd1',
         about: 'Runs cmd1',
-      },
-      {
-        name: 'get-file',
-        about: 'retrieve a file from the endpoint',
-        args: {
-          file: {
-            required: true,
-            allowMultiples: false,
-            about: 'the file path for the file to be retrieved',
-          },
+        Component: ({ command, setStatus }) => {
+          const isMounted = useIsMounted();
+
+          const [response, setResponse] = useState<null | ReactElement>(null);
+
+          useEffect(() => {
+            (async () => {
+              await delay();
+              if (!isMounted) return;
+
+              setStatus('success');
+              setResponse(
+                <div>
+                  <div>{`${command.commandDefinition.name}`}</div>
+                  <div>{`command input: ${command.input}`}</div>
+                  <EuiCode>{JSON.stringify(command.args, null, 2)}</EuiCode>
+                </div>
+              );
+            })();
+          }, [command.args, command.commandDefinition.name, command.input, isMounted, setStatus]);
+
+          return response;
         },
       },
-      {
-        name: 'cmd2',
-        about: 'runs cmd 2',
-        args: {
-          file: {
-            required: true,
-            allowMultiples: false,
-            about: 'Includes file in the run',
-            validate: () => {
-              return true;
-            },
-          },
-          bad: {
-            required: false,
-            allowMultiples: false,
-            about: 'will fail validation',
-            validate: () => 'This is a bad value',
-          },
-        },
-      },
-      {
-        name: 'cmd-long-delay',
-        about: 'runs cmd 2',
-      },
+      // {
+      //   name: 'get-file',
+      //   about: 'retrieve a file from the endpoint',
+      //   args: {
+      //     file: {
+      //       required: true,
+      //       allowMultiples: false,
+      //       about: 'the file path for the file to be retrieved',
+      //     },
+      //   },
+      // },
+      // {
+      //   name: 'cmd2',
+      //   about: 'runs cmd 2',
+      //   args: {
+      //     file: {
+      //       required: true,
+      //       allowMultiples: false,
+      //       about: 'Includes file in the run',
+      //       validate: () => {
+      //         return true;
+      //       },
+      //     },
+      //     bad: {
+      //       required: false,
+      //       allowMultiples: false,
+      //       about: 'will fail validation',
+      //       validate: () => 'This is a bad value',
+      //     },
+      //   },
+      // },
+      // {
+      //   name: 'cmd-long-delay',
+      //   about: 'runs cmd 2',
+      // },
     ];
   }
 
-  async executeCommand(command: Command): Promise<{ result: React.ReactNode }> {
-    await delay();
-
-    if (command.commandDefinition.name === 'cmd-long-delay') {
-      await delay(20000);
-    }
-
-    return {
-      result: (
-        <div>
-          <div>{`${command.commandDefinition.name}`}</div>
-          <div>{`command input: ${command.input}`}</div>
-          <EuiCode>{JSON.stringify(command.args, null, 2)}</EuiCode>
-        </div>
-      ),
-    };
-  }
+  // async executeCommand(command: Command): Promise<{ result: React.ReactNode }> {
+  //   await delay();
+  //
+  //   if (command.commandDefinition.name === 'cmd-long-delay') {
+  //     await delay(20000);
+  //   }
+  //
+  //   return {
+  //     result: (
+  //       <div>
+  //         <div>{`${command.commandDefinition.name}`}</div>
+  //         <div>{`command input: ${command.input}`}</div>
+  //         <EuiCode>{JSON.stringify(command.args, null, 2)}</EuiCode>
+  //       </div>
+  //     ),
+  //   };
+  // }
 }
 
 const RunningConsole = memo<{ registeredConsole: RegisteredConsoleClient }>(
