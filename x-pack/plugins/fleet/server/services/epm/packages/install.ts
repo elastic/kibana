@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import apm from 'elastic-apm-node';
 import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import type Boom from '@hapi/boom';
@@ -250,6 +251,10 @@ async function installPackageFromRegistry({
   // TODO: change epm API to /packageName/version so we don't need to do this
   const { pkgName, pkgVersion } = Registry.splitPkgKey(pkgkey);
 
+  // Workaround apm issue with async spans: https://github.com/elastic/apm-agent-nodejs/issues/2611
+  await Promise.resolve();
+  const span = apm.startSpan(`Install package from registry ${pkgName}@${pkgVersion}`, 'package');
+
   // if an error happens during getInstallType, report that we don't know
   let installType: InstallType = 'unknown';
 
@@ -259,6 +264,12 @@ async function installPackageFromRegistry({
     // get the currently installed package
     const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
     installType = getInstallType({ pkgVersion, installedPkg });
+
+    span?.addLabels({
+      packageName: pkgName,
+      packageVersion: pkgVersion,
+      installType,
+    });
 
     // get latest package version
     const latestPackage = await Registry.fetchFindLatestPackageOrThrow(pkgName, {
@@ -326,7 +337,7 @@ async function installPackageFromRegistry({
 
     // try installing the package, if there was an error, call error handler and rethrow
     // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
-    return _installPackage({
+    return await _installPackage({
       savedObjectsClient,
       savedObjectsImporter,
       esClient,
@@ -377,6 +388,8 @@ async function installPackageFromRegistry({
       installType,
       installSource: 'registry',
     };
+  } finally {
+    span?.end();
   }
 }
 
@@ -395,6 +408,10 @@ async function installPackageByUpload({
   contentType,
   spaceId,
 }: InstallUploadedArchiveParams): Promise<InstallResult> {
+  // Workaround apm issue with async spans: https://github.com/elastic/apm-agent-nodejs/issues/2611
+  await Promise.resolve();
+  const span = apm.startSpan(`Install package from upload`, 'package');
+
   const logger = appContextService.getLogger();
   // if an error happens during getInstallType, report that we don't know
   let installType: InstallType = 'unknown';
@@ -408,6 +425,12 @@ async function installPackageByUpload({
     });
 
     installType = getInstallType({ pkgVersion: packageInfo.version, installedPkg });
+
+    span?.addLabels({
+      packageName: packageInfo.name,
+      packageVersion: packageInfo.version,
+      installType,
+    });
 
     telemetryEvent.packageName = packageInfo.name;
     telemetryEvent.newVersion = packageInfo.version;
@@ -434,7 +457,7 @@ async function installPackageByUpload({
       .createImporter(savedObjectsClient);
 
     // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
-    return _installPackage({
+    return await _installPackage({
       savedObjectsClient,
       savedObjectsImporter,
       esClient,
@@ -466,6 +489,8 @@ async function installPackageByUpload({
       errorMessage: e.message,
     });
     return { error: e, installType, installSource: 'upload' };
+  } finally {
+    span?.end();
   }
 }
 
