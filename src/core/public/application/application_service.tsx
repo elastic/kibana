@@ -7,7 +7,14 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, firstValueFrom, Observable, Subject, Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  firstValueFrom,
+  Observable,
+  Subject,
+  Subscription,
+  combineLatest,
+} from 'rxjs';
 import { map, shareReplay, takeUntil, distinctUntilChanged, filter, take } from 'rxjs/operators';
 import { createBrowserHistory, History } from 'history';
 
@@ -16,7 +23,7 @@ import { HttpSetup, HttpStart } from '../http';
 import { OverlayStart } from '../overlays';
 import { PluginOpaqueId } from '../plugins';
 import type { ThemeServiceStart } from '../theme';
-import type { InjectedMetadataStart, RegisteredApplication } from '../injected_metadata';
+import type { InjectedMetadataStart } from '../injected_metadata';
 import { AppRouter } from './ui';
 import { Capabilities, CapabilitiesService } from './capabilities';
 import {
@@ -99,8 +106,8 @@ interface AppInternalState {
  * @internal
  */
 export class ApplicationService {
-  private readonly apps = new Map<string, App<any>>();
-  private readonly mounters = new Map<string, Mounter>();
+  private readonly apps$ = new BehaviorSubject<Map<string, App<any>>>(new Map());
+  private readonly mounters$ = new BehaviorSubject<Map<string, Mounter>>(new Map());
   private readonly capabilities = new CapabilitiesService();
   private readonly appInternalStates = new Map<string, AppInternalState>();
   private currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
@@ -108,7 +115,6 @@ export class ApplicationService {
   private readonly statusUpdaters$ = new BehaviorSubject<Map<symbol, AppUpdaterWrapper>>(new Map());
   private readonly subscriptions: Subscription[] = [];
   private stop$ = new Subject<void>();
-  private registrationClosed = false;
   private history?: History<any>;
   private navigate?: (url: string, state: unknown, replace: boolean) => void;
   private openInNewTab?: (url: string) => void;
@@ -166,15 +172,13 @@ export class ApplicationService {
     };
 
     const validateApp = (app: App<unknown>) => {
-      if (this.registrationClosed) {
-        throw new Error(`Applications cannot be registered after "setup"`);
-      } else if (!applicationIdRegexp.test(app.id)) {
+      if (!applicationIdRegexp.test(app.id)) {
         throw new Error(
           `Invalid application id: it can only be composed of alphanum chars, '-' and '_'`
         );
-      } else if (this.apps.has(app.id)) {
+      } else if (this.apps$.value.has(app.id)) {
         throw new Error(`An application is already registered with the id "${app.id}"`);
-      } else if (findMounter(this.mounters, app.appRoute)) {
+      } else if (findMounter(this.mounters$.value, app.appRoute)) {
         throw new Error(`An application is already registered with the appRoute "${app.appRoute}"`);
       } else if (basename && app.appRoute!.startsWith(`${basename}/`)) {
         throw new Error('Cannot register an application route that includes HTTP base path');
@@ -188,22 +192,27 @@ export class ApplicationService {
         validateApp(app);
 
         const { updater$, ...appProps } = app;
-        this.apps.set(app.id, {
+        this.apps$.value.set(app.id, {
           ...appProps,
           status: app.status ?? AppStatus.accessible,
           navLinkStatus: app.navLinkStatus ?? AppNavLinkStatus.default,
           deepLinks: populateDeepLinkDefaults(appProps.deepLinks),
         });
+        // TODO: not the cleanest way, but it should work
+        this.apps$.next(this.apps$.value);
+
         if (updater$) {
           registerStatusUpdater(app.id, updater$);
         }
-        this.mounters.set(app.id, {
+        this.mounters$.value.set(app.id, {
           appRoute: app.appRoute!,
           appBasePath: basePath.prepend(app.appRoute!),
           exactRoute: app.exactRoute ?? false,
           mount: wrapMount(plugin, app),
           unmountBeforeMounting: false,
         });
+        // TODO: not the cleanest way, but it should work
+        this.mounters$.next(this.mounters$.value);
       },
       registerAppUpdater: (appUpdater$: Observable<AppUpdater>) =>
         registerStatusUpdater(allApplicationsFilter, appUpdater$),
@@ -225,16 +234,38 @@ export class ApplicationService {
     const httpLoadingCount$ = new BehaviorSubject(0);
     http.addLoadingCountSource(httpLoadingCount$);
 
-    this.registrationClosed = true;
     window.addEventListener('beforeunload', this.onBeforeUnload);
 
+    // TODO: find a way to update capabilities
+    const { capabilities } = await this.capabilities.start({
+      appIds: [],
+      http,
+    });
+    /*
     const { capabilities } = await this.capabilities.start({
       appIds: [...this.mounters.keys()],
       http,
     });
     const availableMounters = filterAvailable(this.mounters, capabilities);
     const availableApps = filterAvailable(this.apps, capabilities);
+    */
 
+    const availableMounters$ = this.mounters$;
+
+    const applications$ = new BehaviorSubject(this.apps$.value);
+    combineLatest([this.apps$, this.statusUpdaters$])
+      .pipe(
+        map(([apps, statuses]) => {
+          return new Map(
+            [...apps].map(([id, app]) => [id, updateStatus(app, [...statuses.values()])])
+          );
+        })
+      )
+      .subscribe((apps) => {
+        applications$.next(apps);
+      });
+
+    /*
     const applications$ = new BehaviorSubject(availableApps);
     this.statusUpdaters$
       .pipe(
@@ -248,6 +279,7 @@ export class ApplicationService {
         })
       )
       .subscribe((apps) => applications$.next(apps));
+     */
 
     const applicationStatuses$ = applications$.pipe(
       map((apps) => new Map([...apps.entries()].map(([id, app]) => [id, app.status!]))),
@@ -269,6 +301,8 @@ export class ApplicationService {
       const navigatingToSameApp = currentAppId === appId;
       const shouldNavigate =
         navigatingToSameApp || skipAppLeave ? true : await this.shouldNavigate(overlays, appId);
+
+      // TODO: load plugin bundles
 
       const targetApp = applications$.value.get(appId);
 
@@ -355,7 +389,7 @@ export class ApplicationService {
           <AppRouter
             history={this.history}
             theme$={theme.theme$}
-            mounters={availableMounters}
+            mounters$={availableMounters$}
             appStatuses$={applicationStatuses$}
             setAppLeaveHandler={this.setAppLeaveHandler}
             setAppActionMenu={this.setAppActionMenu}

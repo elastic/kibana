@@ -20,7 +20,7 @@ import { AppLazyLoader } from './app_lazy_loader';
 import { ScopedHistory } from '../scoped_history';
 
 interface Props {
-  mounters: Map<string, Mounter>;
+  mounters$: Observable<Map<string, Mounter>>;
   history: History;
   theme$: Observable<CoreTheme>;
   appStatuses$: Observable<Map<string, AppStatus>>;
@@ -36,7 +36,7 @@ interface Params {
 
 export const AppRouter: FunctionComponent<Props> = ({
   history,
-  mounters,
+  mounters$,
   theme$,
   setAppLeaveHandler,
   setAppActionMenu,
@@ -45,6 +45,7 @@ export const AppRouter: FunctionComponent<Props> = ({
   ensureDependenciesLoaded,
 }) => {
   const appStatuses = useObservable(appStatuses$, new Map());
+  const mounters = useObservable(mounters$, new Map());
   const createScopedHistory = useMemo(
     () => (appPath: string) => new ScopedHistory(history, appPath),
     [history]
