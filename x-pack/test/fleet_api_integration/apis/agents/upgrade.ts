@@ -25,7 +25,7 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('fleet upgrade', () => {
+  describe('Agents upgrade', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');

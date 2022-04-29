@@ -7,15 +7,29 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
+
 import semverCoerce from 'semver/functions/coerce';
+import semverGt from 'semver/functions/gt';
 
 import type { PostAgentUpgradeResponse, PostBulkAgentUpgradeResponse } from '../../../common/types';
 import type { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema } from '../../types';
 import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
 import { defaultIngestErrorHandler } from '../../errors';
+import { SO_SEARCH_LIMIT } from '../../../common';
 import { isAgentUpgradeable } from '../../../common/services';
-import { getAgentById } from '../../services/agents';
+import { getAgentById, getAgentsByKuery } from '../../services/agents';
+import {
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  AGENTS_PREFIX,
+} from '../../constants';
+
+import { agentPolicyService } from '../../services/agent_policy';
+import { getMaxVersion } from '../../../common/services/get_max_version';
+
+import { packagePolicyService } from '../../services/package_policy';
 
 export const postAgentUpgradeHandler: RequestHandler<
   TypeOf<typeof PostAgentUpgradeRequestSchema.params>,
@@ -28,7 +42,7 @@ export const postAgentUpgradeHandler: RequestHandler<
   const { version, source_uri: sourceUri, force } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
   try {
-    checkVersionIsSame(version, kibanaVersion);
+    checkKibanaVersion(version, kibanaVersion, true);
     checkSourceUriAllowed(sourceUri);
   } catch (err) {
     return response.customError({
@@ -84,8 +98,9 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
   const { version, source_uri: sourceUri, agents, force } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
   try {
-    checkVersionIsSame(version, kibanaVersion);
+    checkKibanaVersion(version, kibanaVersion, false);
     checkSourceUriAllowed(sourceUri);
+    checkFleetServerVersion(version, soClient, esClient);
   } catch (err) {
     return response.customError({
       statusCode: 400,
@@ -118,18 +133,30 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
   }
 };
 
-export const checkVersionIsSame = (version: string, kibanaVersion: string) => {
+export const checkKibanaVersion = (
+  version: string,
+  kibanaVersion: string,
+  shouldBeSame: boolean
+) => {
   // get version number only in case "-SNAPSHOT" is in it
   const kibanaVersionNumber = semverCoerce(kibanaVersion)?.version;
   if (!kibanaVersionNumber) throw new Error(`kibanaVersion ${kibanaVersionNumber} is not valid`);
   const versionToUpgradeNumber = semverCoerce(version)?.version;
   if (!versionToUpgradeNumber)
     throw new Error(`version to upgrade ${versionToUpgradeNumber} is not valid`);
-  // temporarily only allow upgrading to the same version as the installed kibana version
-  if (kibanaVersionNumber !== versionToUpgradeNumber)
-    throw new Error(
-      `cannot upgrade agent to ${versionToUpgradeNumber} because it is different than the installed kibana version ${kibanaVersionNumber}`
-    );
+
+  if (shouldBeSame) {
+    // only allow upgrading to the same version as the installed kibana version
+    if (kibanaVersionNumber !== versionToUpgradeNumber)
+      throw new Error(
+        `cannot upgrade agent to ${versionToUpgradeNumber} because it is different than the installed kibana version ${kibanaVersionNumber}`
+      );
+  } else {
+    if (semverGt(version, kibanaVersion))
+      throw new Error(
+        `cannot upgrade agent to ${versionToUpgradeNumber} because it is bigger than the installed kibana version ${kibanaVersionNumber}`
+      );
+  }
 };
 
 const checkSourceUriAllowed = (sourceUri?: string) => {
@@ -138,4 +165,40 @@ const checkSourceUriAllowed = (sourceUri?: string) => {
       `source_uri is not allowed or recommended in production. Set xpack.fleet.developer.allowAgentUpgradeSourceUri in kibana.yml to true.`
     );
   }
+};
+
+const checkFleetServerVersion = async (
+  versionToUpgradeNumber: string,
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient
+) => {
+  const packagePolicyData = await packagePolicyService.list(soClient, {
+    perPage: SO_SEARCH_LIMIT,
+    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: fleet_server`,
+  });
+  const fleetServerIds = packagePolicyData?.items.map((item) => item.id);
+
+  const agentPolicies = await agentPolicyService.list(soClient, {
+    kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies:${fleetServerIds
+      .map((id) => `"${id}"`)
+      .join(' or ')}`,
+    perPage: SO_SEARCH_LIMIT,
+    withPackagePolicies: true,
+  });
+  const agentPoliciesIds = agentPolicies.items?.map((item) => item.id);
+
+  const { agents } = await getAgentsByKuery(esClient, {
+    showInactive: false,
+    perPage: SO_SEARCH_LIMIT,
+    kuery: `${AGENTS_PREFIX}.policy_id:${agentPoliciesIds.map((id) => `"${id}"`).join(' or ')}`,
+  });
+
+  const agentVersions = agents.map((agent) => agent.local_metadata.elastic.agent.version);
+
+  const fleetServerVersion = getMaxVersion(agentVersions);
+
+  if (semverGt(versionToUpgradeNumber, fleetServerVersion))
+    throw new Error(
+      `cannot upgrade agent to ${versionToUpgradeNumber} because it is bigger than the latest fleet server version ${fleetServerVersion}`
+    );
 };
