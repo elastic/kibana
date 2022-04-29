@@ -28,7 +28,6 @@ import {
   combineErrorMessages,
 } from '../helpers';
 import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
-import { HelpPopover, HelpPopoverButton } from '../../../help_popover';
 import type { OperationDefinition, ParamEditorProps } from '..';
 import { getDisallowedPreviousShiftMessage } from '../../../time_shift_utils';
 
@@ -129,7 +128,10 @@ export const movingAverageOperation: OperationDefinition<
       getDisallowedPreviousShiftMessage(layer, columnId),
     ]);
   },
-  getHelpMessage: () => <MovingAveragePopup />,
+  helpComponent: () => <MovingAveragePopup />,
+  helpComponentTitle: i18n.translate('xpack.lens.indexPattern.movingAverage.titleHelp', {
+    defaultMessage: 'How moving average works',
+  }),
   getDisabledStatus(indexPattern, layer, layerType) {
     const opName = i18n.translate('xpack.lens.indexPattern.movingAverage', {
       defaultMessage: 'Moving average',
@@ -217,27 +219,8 @@ function MovingAverageParamEditor({
 }
 
 const MovingAveragePopup = () => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   return (
-    <HelpPopover
-      anchorPosition="upCenter"
-      button={
-        <HelpPopoverButton
-          onClick={() => {
-            setIsPopoverOpen(!isPopoverOpen);
-          }}
-        >
-          {i18n.translate('xpack.lens.indexPattern.movingAverage.helpText', {
-            defaultMessage: 'How it works',
-          })}
-        </HelpPopoverButton>
-      }
-      closePopover={() => setIsPopoverOpen(false)}
-      isOpen={isPopoverOpen}
-      title={i18n.translate('xpack.lens.indexPattern.movingAverage.titleHelp', {
-        defaultMessage: 'How moving average works',
-      })}
-    >
+    <>
       <p>
         <FormattedMessage
           id="xpack.lens.indexPattern.movingAverage.basicExplanation"
@@ -291,6 +274,6 @@ const MovingAveragePopup = () => {
           defaultMessage="The first moving average value starts at the second item."
         />
       </p>
-    </HelpPopover>
+    </>
   );
 };
