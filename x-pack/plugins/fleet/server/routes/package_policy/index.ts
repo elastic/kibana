@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { CreatePackagePolicyRequest } from '../../../common';
-
 import { PACKAGE_POLICY_API_ROUTES } from '../../constants';
 import {
   GetPackagePoliciesRequestSchema,
@@ -18,7 +16,6 @@ import {
   DryRunPackagePoliciesRequestSchema,
 } from '../../types';
 import type { FleetAuthzRouter } from '../security';
-import { authzHandlerWrapper } from '../security';
 
 import {
   getPackagePoliciesHandler,
@@ -60,26 +57,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     {
       path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
       validate: CreatePackagePolicyRequestSchema,
-      fleetAuthz: {
-        integrations: { writeIntegrationPolicies: true },
-      },
     },
-    authzHandlerWrapper(
-      {
-        fleetAuthz: {
-          integrations: { writeIntegrationPolicies: true },
-        },
-        fleetPackageAuthz: {
-          managePackagePolicy: true,
-          getPackageFromRequest: (req: any) => {
-            return (req as CreatePackagePolicyRequest).body.package?.name;
-          },
-          executePackageAction: true,
-          packageActions: ['isolate_host'],
-        },
-      },
-      createPackagePolicyHandler
-    )
+    createPackagePolicyHandler
   );
 
   // Update
