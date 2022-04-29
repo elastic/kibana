@@ -402,15 +402,15 @@ export class EmsVectorTileLayer extends AbstractLayer {
   _setLanguage(mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) {
     const locale = this.getLocale();
     let textProperty;
-    if (locale !== null) {
-      if (locale === 'autoselect') {
-        textProperty = TMSService.transformLanguageProperty(mbLayer, i18n.getLocale());
-      } else {
-        textProperty = TMSService.transformLanguageProperty(mbLayer, locale);
-      }
-        if (textProperty !== undefined) {
-          mbMap.setLayoutProperty(mbLayerId, 'text-field', textProperty);
-      }
+    if (locale === null || locale === 'default') {
+      return;
+    } else if (locale === 'autoselect') {
+      textProperty = TMSService.transformLanguageProperty(mbLayer, i18n.getLocale());
+    } else {
+      textProperty = TMSService.transformLanguageProperty(mbLayer, locale);
+    }
+    if (textProperty !== undefined) {
+      mbMap.setLayoutProperty(mbLayerId, 'text-field', textProperty);
     }
   }
 
