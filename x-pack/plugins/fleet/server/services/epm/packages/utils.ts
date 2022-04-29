@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export type { FormattedNerResponse, NerResponse } from './ner_inference';
-export { NerInference } from './ner_inference';
-export { getNerOutputComponent } from './ner_output';
+import { withSpan } from '@kbn/apm-utils';
+
+export const withPackageSpan = <T>(stepName: string, func: () => Promise<T>) =>
+  withSpan({ name: stepName, type: 'package' }, func);
