@@ -6,7 +6,6 @@
  */
 
 import sinon from 'sinon';
-import { DateTime } from 'luxon';
 import { RRule } from 'rrule';
 import { isRuleSnoozed } from './is_rule_snoozed';
 
