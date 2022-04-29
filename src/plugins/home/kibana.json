@@ -4,9 +4,10 @@
     "name": "Kibana Core",
     "githubTeam": "kibana-core"
   },
-  "version": "kibana",
+  "version": "8.3.0",
   "server": true,
   "ui": true,
+  "upgradable": false,
   "requiredPlugins": ["dataViews", "share", "urlForwarding"],
   "optionalPlugins": ["usageCollection", "customIntegrations"],
   "requiredBundles": ["kibanaReact"]

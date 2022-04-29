@@ -7,7 +7,7 @@
  */
 
 import { from, merge } from 'rxjs';
-import { catchError, filter, map, mergeMap, concatMap, shareReplay, toArray } from 'rxjs/operators';
+import { catchError, map, mergeMap, concatMap, shareReplay, toArray, filter } from 'rxjs/operators';
 import { CoreContext } from '../../core_context';
 import { Logger } from '../../logging';
 import { PluginWrapper } from '../plugin';
@@ -52,6 +52,12 @@ export function discover(
         const pb = typeof b === 'string' ? b : b.path;
         return pa < pb ? -1 : pa > pb ? 1 : 0;
       });
+    }),
+    filter((value) => {
+      return ![
+        '/Users/bamieh/Bamieh/elastic/kibana/src/plugins/home_8_3_0',
+        '/Users/bamieh/Bamieh/elastic/kibana/src/plugins/console_8_3_0',
+      ].some(p => p === value)
     }),
     concatMap((pluginPathOrError) => {
       return typeof pluginPathOrError === 'string'

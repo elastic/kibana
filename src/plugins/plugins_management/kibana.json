@@ -1,0 +1,14 @@
+{
+  "id": "pluginsManagement",
+  "owner": {
+    "name": "Kibana Core",
+    "githubTeam": "kibana-core"
+  },
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["management", "data", "dataViews"],
+  "optionalPlugins": ["home", "savedObjectsTaggingOss"],
+  "extraPublicDirs": ["public/lib"],
+  "requiredBundles": ["kibanaReact"]
+}

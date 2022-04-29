@@ -25,6 +25,7 @@ import {
   PrebootPlugin,
 } from './types';
 import { CorePreboot, CoreSetup, CoreStart } from '..';
+import { requireIsolate } from './plugin_loader';
 
 const OSS_PATH_REGEX = /[\/|\\]src[\/|\\]plugins[\/|\\]/; // Matches src/plugins directory on POSIX and Windows
 const XPACK_PATH_REGEX = /[\/|\\]x-pack[\/|\\]plugins[\/|\\]/; // Matches x-pack/plugins directory on POSIX and Windows
@@ -56,10 +57,12 @@ export class PluginWrapper<
   private readonly log: Logger;
   private readonly initializerContext: PluginInitializerContext;
 
-  private instance?:
+  private instance?: 
     | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
     | PrebootPlugin<TSetup, TPluginsSetup>
-    | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+    | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
+
+  private isolateTeardown?: () => Promise<void>;
 
   private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
   public readonly startDependencies = firstValueFrom(this.startDependencies$);
@@ -101,9 +104,16 @@ export class PluginWrapper<
     this.instance = this.createPluginInstance();
 
     if (this.isPrebootPluginInstance(this.instance)) {
+      if (this.manifest.upgradable) {
+        console.log('running preboot')
+      }
       return this.instance.setup(setupContext as CorePreboot, plugins);
     }
-
+    if (this.manifest.upgradable) {
+      console.log('running setup')
+    }
+    
+    console.log('running setup FOR ', this.manifest.id)
     return this.instance.setup(setupContext as CoreSetup, plugins);
   }
 
@@ -119,6 +129,9 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
     }
 
+    if (this.manifest.upgradable) {
+      console.log('running start!')
+    }
     if (this.isPrebootPluginInstance(this.instance)) {
       throw new Error(`Plugin "${this.name}" is a preboot plugin and cannot be started.`);
     }
@@ -147,6 +160,11 @@ export class PluginWrapper<
       await this.instance.stop();
     }
 
+    if (typeof this.isolateTeardown === 'function') {
+      await this.isolateTeardown();
+    }
+    
+    this.isolateTeardown = undefined;
     this.instance = undefined;
   }
 
@@ -172,9 +190,29 @@ export class PluginWrapper<
 
   private createPluginInstance() {
     this.log.debug('Initializing plugin');
+    let isolatePath: string;
+    let activeVersion: string;
+    if (this.manifest.upgradable) {
+      activeVersion = this.manifest.version.replace(/\./g, '_');
+      isolatePath = join(this.path, '..', `${this.manifest.id}_${activeVersion}`);
+      // isolatePath = join(this.path)
+    }
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const pluginDefinition = require(join(this.path, 'server'));
+    const isolateInstance = this.manifest.upgradable?
+      requireIsolate<
+        | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
+        | PrebootPlugin<TSetup, TPluginsSetup>
+        | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
+      >(join(isolatePath!, 'server')) :
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      { isolateModule: require(join(this.path, 'server')), isolateTeardown: undefined };
+
+    if (this.manifest.upgradable) {
+      console.log('isolateInstance::', isolateInstance);
+    }
+        
+    const { isolateModule: pluginDefinition, isolateTeardown } = isolateInstance;
+    this.isolateTeardown = isolateTeardown;
     if (!('plugin' in pluginDefinition)) {
       throw new Error(`Plugin "${this.name}" does not export "plugin" definition (${this.path}).`);
     }
@@ -187,6 +225,7 @@ export class PluginWrapper<
     }
 
     const instance = initializer(this.initializerContext);
+
     if (!instance || typeof instance !== 'object') {
       throw new Error(
         `Initializer for plugin "${
@@ -197,6 +236,10 @@ export class PluginWrapper<
 
     if (typeof instance.setup !== 'function') {
       throw new Error(`Instance of plugin "${this.name}" does not define "setup" function.`);
+    }
+
+    if (this.manifest.upgradable) {
+      console.log('instance complete::');
     }
 
     return instance;

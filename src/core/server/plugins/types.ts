@@ -265,6 +265,11 @@ export interface PluginManifest {
    * configured, etc.) Default is false.
    */
   readonly enabledOnAnonymousPages?: boolean;
+
+  /**
+   * Specifies whether this plugin is upgradable via the plugins manager. Default is false.
+   */
+   readonly upgradable?: boolean;
 }
 
 /**

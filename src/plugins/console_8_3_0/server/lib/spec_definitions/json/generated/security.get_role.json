@@ -1,0 +1,12 @@
+{
+  "security.get_role": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_security/role/{name}",
+      "_security/role"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-get-role.html"
+  }
+}

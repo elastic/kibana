@@ -27,7 +27,7 @@ export async function findUsedDependencies(listedPkgDependencies: any, baseDir: 
     ],
     {
       cwd: baseDir,
-      ignore: ['**/public/**'],
+      ignore: ['**/public/**', 'src/core/server/plugins/plugin_loader.ts'],
       absolute: true,
     }
   );
@@ -39,6 +39,7 @@ export async function findUsedDependencies(listedPkgDependencies: any, baseDir: 
   const usedDeps = [
     // TODO: remove this once we get rid off @kbn/ui-framework, for now it isn't detectable as "used" so we hard code it
     '@kbn/ui-framework',
+    'synchronous-worker',
     // find all the node modules we actually use on the server, including the peerDependencies of our used node_modules which are used within those deps
     ...(await findUsedNodeModules({
       resolver,

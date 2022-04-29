@@ -4104,6 +4104,13 @@
   resolved "https://registry.yarnpkg.com/@protobufjs/utf8/-/utf8-1.1.0.tgz#a777360b5b39a1a2e5106f8e858f2fd2d060c570"
   integrity sha1-p3c2C1s5oaLlEG+OhY8v0tBgxXA=
 
+"@rauschma/stringio@^1.4.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@rauschma/stringio/-/stringio-1.4.0.tgz#0b667bea726652a10a48dfc1dadc89e0ec51e269"
+  integrity sha512-3uor2f/MXZkmX5RJf8r+OC3WvZVzpSme0yyL0rQDPEnatE02qRcqwEwnsgpgriEck0S/n4vWtUd6tTtrJwk45Q==
+  dependencies:
+    "@types/node" "^10.0.3"
+
 "@reach/router@^1.3.4":
   version "1.3.4"
   resolved "https://registry.yarnpkg.com/@reach/router/-/router-1.3.4.tgz#d2574b19370a70c80480ed91f3da840136d10f8c"
@@ -6558,7 +6565,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*", "@types/node@12.20.24", "@types/node@16.11.7", "@types/node@>= 8", "@types/node@>=8.9.0", "@types/node@^10.1.0", "@types/node@^14.0.10", "@types/node@^14.14.31":
+"@types/node@*", "@types/node@12.20.24", "@types/node@16.11.7", "@types/node@>= 8", "@types/node@>=8.9.0", "@types/node@^10.0.3", "@types/node@^10.1.0", "@types/node@^14.0.10", "@types/node@^14.14.31", "@types/node@^16.4.13":
   version "16.11.7"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.7.tgz#36820945061326978c42a01e56b61cd223dfdc42"
   integrity sha512-QB5D2sqfSjCmTuWcBWyJ+/44bcjO7VbjSbOE0ucoVbAsSNQc4Lt6QkgkVXkTDwkL4z/beecZNDvVX15D4P8Jbw==
@@ -9106,6 +9113,13 @@ binary-search@^1.3.3:
   version "1.3.6"
   resolved "https://registry.yarnpkg.com/binary-search/-/binary-search-1.3.6.tgz#e32426016a0c5092f0f3598836a1c7da3560565c"
   integrity sha512-nbE1WxOTTrUWIfsfZ4aHGYu5DOuNkbxGokjV6Z2kxfJK3uaAb8zNK1muzOeipoLHZjInT4Br88BHpzevc681xA==
+
+bindings@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/bindings/-/bindings-1.5.0.tgz#10353c9e945334bc0511a6d90b38fbc7c9c504df"
+  integrity sha512-p2q/t/mhvuOj/UeLlV6566GD/guowlr0hHxClI0W9m7MWYkL1F0hLo+0Aexs9HSPCtR1SXQ0TD3MMKrXZajbiQ==
+  dependencies:
+    file-uri-to-path "1.0.0"
 
 bitmap-sdf@^1.0.3:
   version "1.0.3"
@@ -14525,6 +14539,11 @@ file-type@^9.0.0:
   version "9.0.0"
   resolved "https://registry.yarnpkg.com/file-type/-/file-type-9.0.0.tgz#a68d5ad07f486414dfb2c8866f73161946714a18"
   integrity sha512-Qe/5NJrgIOlwijpq3B7BEpzPFcgzggOTagZmkXQY4LA6bsXKTUstK7Wp12lEJ/mLKTpvIZxmIuRcLYWT6ov9lw==
+
+file-uri-to-path@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/file-uri-to-path/-/file-uri-to-path-1.0.0.tgz#553a7b8446ff6f684359c445f1e37a05dacc33dd"
+  integrity sha512-0Zt+s3L7Vf1biwWZ29aARiVYLx7iMGnEUl9x33fbB/j3jR81u/O2LbqK+Bm1CDSNDKVtJ/YjwY7TUd5SkeLQLw==
 
 filelist@^1.0.1:
   version "1.0.1"
@@ -21042,6 +21061,14 @@ node-sass@6.0.1:
     stdout-stream "^1.4.0"
     "true-case-path" "^1.0.2"
 
+node-ts@^5.1.2:
+  version "5.1.2"
+  resolved "https://registry.yarnpkg.com/node-ts/-/node-ts-5.1.2.tgz#4e1fa51e87506e042c7ea2b1e465684a79532274"
+  integrity sha512-ihRzS31ZbknFzXFkF4j9R3HJV1cRPTjyYzeRaEFyXv5DhWKGD+QNTJ+My5WiOc0kozEPjwRBsKh+g92hPyTNnQ==
+  dependencies:
+    "@rauschma/stringio" "^1.4.0"
+    "@types/node" "^16.4.13"
+
 nodemailer@^6.6.2:
   version "6.6.2"
   resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-6.6.2.tgz#e184c9ed5bee245a3e0bcabc7255866385757114"
@@ -27449,6 +27476,13 @@ symbol.prototype.description@^1.0.0:
   integrity sha512-I9mrbZ5M96s7QeJDv95toF1svkUjeBybe8ydhY7foPaBmr0SPJMFupArmMkDrOKTTj0sJVr+nvQNxWLziQ7nDQ==
   dependencies:
     has-symbols "^1.0.0"
+
+synchronous-worker@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/synchronous-worker/-/synchronous-worker-1.0.4.tgz#adc8e6635a92352bdb957765980aa72ef56a9aa4"
+  integrity sha512-dAi0Ww2ukuKpPcExPt4c4doKgtGpg1b+CFqt3LH3muW8ywADrggVTDyYC0wsnwAxWcxe2yIVm2dYdE+EDzQDGA==
+  dependencies:
+    bindings "^1.5.0"
 
 syntax-error@^1.1.1:
   version "1.4.0"

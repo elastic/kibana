@@ -17,6 +17,7 @@ import {
 } from './config';
 import { CoreApp } from './core_app';
 import { I18nService } from './i18n';
+import { PluginsManagementService } from './plugins_management'
 import { ElasticsearchService } from './elasticsearch';
 import { HttpService } from './http';
 import { HttpResourcesService } from './http_resources';
@@ -81,6 +82,7 @@ export class Server {
   private readonly coreApp: CoreApp;
   private readonly coreUsageData: CoreUsageDataService;
   private readonly i18n: I18nService;
+  private readonly pluginsManagment: PluginsManagementService;
   private readonly deprecations: DeprecationsService;
   private readonly executionContext: ExecutionContextService;
   private readonly prebootService: PrebootService;
@@ -125,6 +127,7 @@ export class Server {
     this.executionContext = new ExecutionContextService(core);
     this.prebootService = new PrebootService(core);
     this.docLinks = new DocLinksService(core);
+    this.pluginsManagment = new PluginsManagementService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
@@ -270,6 +273,7 @@ export class Server {
     });
 
     const loggingSetup = this.logging.setup();
+    const pluginsManagmentSetup = this.pluginsManagment.setup({ http: httpSetup, plugins: this.plugins });
 
     const coreSetup: InternalCoreSetup = {
       analytics: analyticsSetup,
@@ -290,6 +294,7 @@ export class Server {
       metrics: metricsSetup,
       deprecations: deprecationsSetup,
       coreUsageData: coreUsageDataSetup,
+      pluginsManagment: pluginsManagmentSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -329,6 +334,7 @@ export class Server {
       savedObjects: savedObjectsStart,
       exposedConfigsToUsage: this.plugins.getExposedPluginConfigsToUsage(),
     });
+    const pluginsManagmentStart = this.pluginsManagment.start();
 
     this.status.start();
 
@@ -344,6 +350,7 @@ export class Server {
       uiSettings: uiSettingsStart,
       coreUsageData: coreUsageDataStart,
       deprecations: deprecationsStart,
+      pluginsManagment: pluginsManagmentStart,
     };
 
     await this.plugins.start(this.coreStart);
@@ -367,6 +374,7 @@ export class Server {
     await this.metrics.stop();
     await this.status.stop();
     await this.logging.stop();
+    this.pluginsManagment.stop()
     this.deprecations.stop();
   }
 

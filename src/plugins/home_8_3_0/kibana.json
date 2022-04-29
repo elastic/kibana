@@ -1,0 +1,14 @@
+{
+  "id": "home",
+  "owner": {
+    "name": "Kibana Core",
+    "githubTeam": "kibana-core"
+  },
+  "version": "8.3.0",
+  "server": false,
+  "ui": false,
+  "upgradable": true,
+  "requiredPlugins": ["dataViews", "share", "urlForwarding"],
+  "optionalPlugins": ["usageCollection", "customIntegrations"],
+  "requiredBundles": ["kibanaReact"]
+}
