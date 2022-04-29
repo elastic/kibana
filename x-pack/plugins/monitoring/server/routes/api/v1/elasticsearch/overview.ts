@@ -5,35 +5,34 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { prefixIndexPatternWithCcs } from '../../../../../common/ccs_utils';
+import { CCS_REMOTE_PATTERN } from '../../../../../common/constants';
+import {
+  postElasticsearchOverviewRequestParamsRT,
+  postElasticsearchOverviewRequestPayloadRT,
+  postElasticsearchOverviewResponsePayloadRT,
+} from '../../../../../common/http_api/elasticsearch';
 import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
 import { getClusterStatus } from '../../../../lib/cluster/get_cluster_status';
-import { getLastRecovery } from '../../../../lib/elasticsearch/get_last_recovery';
+import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { getMetrics } from '../../../../lib/details/get_metrics';
-import { handleError } from '../../../../lib/errors/handle_error';
-import { prefixIndexPatternWithCcs } from '../../../../../common/ccs_utils';
-import { metricSet } from './metric_set_overview';
-import { getLogs } from '../../../../lib/logs';
+import { getLastRecovery } from '../../../../lib/elasticsearch/get_last_recovery';
 import { getIndicesUnassignedShardStats } from '../../../../lib/elasticsearch/shards/get_indices_unassigned_shard_stats';
-import { CCS_REMOTE_PATTERN } from '../../../../../common/constants';
+import { handleError } from '../../../../lib/errors/handle_error';
+import { getLogs } from '../../../../lib/logs';
+import { MonitoringCore } from '../../../../types';
+import { metricSet } from './metric_set_overview';
 
-export function esOverviewRoute(server) {
+export function esOverviewRoute(server: MonitoringCore) {
+  const validateParams = createValidationFunction(postElasticsearchOverviewRequestParamsRT);
+  const validateBody = createValidationFunction(postElasticsearchOverviewRequestPayloadRT);
+
   server.route({
-    method: 'POST',
+    method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/elasticsearch',
-    config: {
-      validate: {
-        params: schema.object({
-          clusterUuid: schema.string(),
-        }),
-        body: schema.object({
-          ccs: schema.maybe(schema.string()),
-          timeRange: schema.object({
-            min: schema.string(),
-            max: schema.string(),
-          }),
-        }),
-      },
+    validate: {
+      params: validateParams,
+      body: validateBody,
     },
     async handler(req) {
       const config = server.config;
@@ -43,9 +42,7 @@ export function esOverviewRoute(server) {
         config.ui.logs.index,
         CCS_REMOTE_PATTERN
       );
-
-      const start = req.payload.timeRange.min;
-      const end = req.payload.timeRange.max;
+      const { min: start, max: end } = req.payload.timeRange;
 
       try {
         const [clusterStats, metrics, shardActivity, logs] = await Promise.all([
@@ -63,7 +60,7 @@ export function esOverviewRoute(server) {
           logs,
           shardActivity,
         };
-        return result;
+        return postElasticsearchOverviewResponsePayloadRT.encode(result);
       } catch (err) {
         throw handleError(err, req);
       }
