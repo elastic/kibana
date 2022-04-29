@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { apm, EntityArrayIterable, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -22,19 +23,35 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = new Date('2022-01-01T00:00:00.000Z').getTime();
   const end = new Date('2022-01-01T00:15:00.000Z').getTime() - 1;
 
-  async function getSpanDetails({ spanLinks, kuery }: { spanLinks: SpanLinks; kuery: string }) {
+  async function getIncomingSpanDetails({
+    kuery,
+    traceId,
+    spanId,
+  }: {
+    kuery: string;
+    traceId: string;
+    spanId: string;
+  }) {
     return await apmApiClient.readUser({
-      endpoint: 'POST /internal/apm/span_links/details',
-      params: { query: { kuery }, body: { spanLinks: JSON.stringify(spanLinks) } },
+      endpoint: 'GET /internal/apm/span_links/outgoing',
+      params: {
+        query: {
+          kuery,
+          traceId,
+          spanId,
+          start: new Date(start).toISOString(),
+          end: new Date(end).toISOString(),
+        },
+      },
     });
   }
 
   registry.when(
-    'Span links dont exist',
+    'Outgoing span links dont exist',
     { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
     () => {
       it('handles empty state', async () => {
-        const response = await getSpanDetails({ spanLinks: [], kuery: '' });
+        const response = await getIncomingSpanDetails({ kuery: '', traceId: 'foo', spanId: 'bar' });
         expect(response.status).to.be(200);
         expect(response.body.spanLinksDetails).to.be.empty();
       });
@@ -42,35 +59,36 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   registry.when(
-    'contains span links',
+    'contains outgoing span links',
     { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
     () => {
       let externalSpanLinks: SpanLinks;
-      let appleIncomingSpanLinks: SpanLinks;
+      let serviceBTraceId: string;
+      let serviceBTransactionId: string;
       before(async () => {
-        const kiwiEventsAsArray = generateIncomeEventsSpanLinks().toArray();
-        externalSpanLinks = generateExternalSpanLinks(3);
-        appleIncomingSpanLinks = [
-          ...externalSpanLinks,
-          ...getSpanLinksFromEvents(kiwiEventsAsArray),
-        ];
+        const serviceBAsArray = generateIncomeEventsSpanLinks().toArray();
+        const transaction = serviceBAsArray.slice(0, 1)[0];
+        serviceBTraceId = transaction['trace.id']!;
+        serviceBTransactionId = transaction['transaction.id']!;
 
-        const instanceJava = apm
-          .service('synth-apple', 'production', 'java')
-          .instance('instance-b');
-        const appleEvents = timerange(start, end)
+        externalSpanLinks = generateExternalSpanLinks(3);
+
+        const instanceJava = apm.service('service-A', 'production', 'java').instance('instance-a');
+        const serviceAEvents = timerange(start, end)
           .interval('1m')
           .rate(1)
           .generator((timestamp) => {
             return instanceJava
-              .transaction('GET /apple 🍏')
+              .transaction('GET /service_A')
+              .defaults({
+                'span.links': [...externalSpanLinks, ...getSpanLinksFromEvents(serviceBAsArray)],
+              })
               .timestamp(timestamp)
               .duration(1000)
               .success()
               .children(
                 instanceJava
-                  .span('get_green_apple_🍏', 'db', 'elasticsearch')
-                  .defaults({ 'span.links': appleIncomingSpanLinks })
+                  .span('get_service_A', 'db', 'elasticsearch')
                   .timestamp(timestamp + 50)
                   .duration(900)
                   .success()
@@ -78,43 +96,39 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
         await synthtraceEsClient.index(
-          new EntityArrayIterable(kiwiEventsAsArray).merge(appleEvents)
+          new EntityArrayIterable(serviceBAsArray).merge(serviceAEvents)
         );
       });
 
       after(() => synthtraceEsClient.clean());
 
-      describe('should span links details', async () => {
-        let spanLinksDetails: Awaited<ReturnType<typeof getSpanDetails>>['body'];
+      describe('should have span links details', async () => {
+        let spanLinksDetails: Awaited<ReturnType<typeof getIncomingSpanDetails>>['body'];
         before(async () => {
-          const response = await getSpanDetails({
-            spanLinks: appleIncomingSpanLinks,
+          const response = await getIncomingSpanDetails({
             kuery: '',
+            traceId: serviceBTraceId,
+            spanId: serviceBTransactionId,
           });
           expect(response.status).to.eql(200);
           spanLinksDetails = response.body;
         });
 
-        it('returns kiwi service as incoming span links', () => {
+        it('returns service-A as outgoing span links', () => {
           expect(
-            spanLinksDetails.spanLinksDetails.filter((item) => item.serviceName === 'synth-kiwi')
+            spanLinksDetails.spanLinksDetails.filter((item) => item.serviceName === 'service-A')
               .length
           ).to.be.greaterThan(0);
-        });
-
-        it('returns same order of span links requested', () => {
-          expect(
-            spanLinksDetails.spanLinksDetails.map((item) => `${item.traceId}:${item.spanId}`)
-          ).to.be.eql(appleIncomingSpanLinks.map((item) => `${item.trace?.id}:${item.span.id}`));
         });
       });
 
       describe('with kuery', async () => {
-        let spanLinksDetails: Awaited<ReturnType<typeof getSpanDetails>>['body'];
+        let spanLinksDetails: Awaited<ReturnType<typeof getIncomingSpanDetails>>['body'];
         before(async () => {
-          const response = await getSpanDetails({
-            spanLinks: appleIncomingSpanLinks,
-            kuery: 'serviceName: "synth-kiwi"',
+          const response = await getIncomingSpanDetails({
+            traceId: serviceBTraceId,
+            spanId: serviceBTransactionId,
+            kuery: 'service-A',
           });
           expect(response.status).to.eql(200);
           spanLinksDetails = response.body;

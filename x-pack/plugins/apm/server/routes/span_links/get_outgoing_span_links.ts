@@ -13,6 +13,7 @@ import {
   SPAN_LINKS_TRACE_ID,
   SPAN_LINKS_SPAN_ID,
   TRACE_ID,
+  TRANSACTION_ID,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import type { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
@@ -41,7 +42,7 @@ async function fetchOutgoingSpans({
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
-    _source: [SPAN_LINKS, TRACE_ID, SPAN_ID, PROCESSOR_EVENT],
+    _source: [SPAN_LINKS, TRACE_ID, SPAN_ID, PROCESSOR_EVENT, TRANSACTION_ID],
     body: {
       size: 1000,
       query: {

@@ -35,6 +35,7 @@ export async function getIncomingSpanLinks({
         bool: {
           filter: [
             { term: { [TRACE_ID]: traceId } },
+            { exists: { field: SPAN_LINKS } },
             {
               bool: {
                 should: [

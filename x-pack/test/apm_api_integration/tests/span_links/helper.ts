@@ -12,19 +12,19 @@ export function generateIncomeEventsSpanLinks() {
     new Date('2021-12-30T00:00:00.000Z'),
     new Date('2021-12-30T00:15:00.000Z')
   );
-  const instanceGo = apm.service('synth-kiwi', 'production', 'go').instance('instance-a');
+  const instanceGo = apm.service('service-B', 'production', 'go').instance('instance-a');
   const events = range
     .interval('1m')
     .rate(1)
     .generator((timestamp) => {
       return instanceGo
-        .transaction('GET /kiwi 🥝')
+        .transaction('GET /service_B')
         .timestamp(timestamp)
         .duration(1000)
         .success()
         .children(
           instanceGo
-            .span('get_kiwi_🥝', 'external', 'http')
+            .span('get_service_B', 'external', 'http')
             .timestamp(timestamp + 50)
             .duration(100)
             .success()
@@ -45,7 +45,7 @@ export type SpanLinks = ReturnType<typeof getSpanLinksFromEvents>;
 export function getSpanLinksFromEvents(events: ApmFields[]) {
   return events
     .map((event) => {
-      const spanId = event['span.id'];
+      const spanId = event['span.id'] || event['transaction.id'];
       return spanId ? { span: { id: spanId }, trace: { id: event['trace.id'] } } : undefined;
     })
     .filter((_) => _) as Array<{ span: { id: string }; trace?: { id: string } }>;
