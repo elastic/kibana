@@ -97,7 +97,7 @@ export const App = ({
             <navigation.ui.TopNavMenu
               appName={'Example'}
               showSearchBar={true}
-              indexPatterns={[dataView]}
+              dataViews={[dataView]}
               useDefaultBehaviors={true}
               showSaveQuery={true}
             />

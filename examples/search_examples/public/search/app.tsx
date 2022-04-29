@@ -512,7 +512,7 @@ export const SearchExamplesApp = ({
             appName={PLUGIN_ID}
             showSearchBar={true}
             useDefaultBehaviors={true}
-            indexPatterns={dataView ? [dataView] : undefined}
+            dataViews={dataView ? [dataView] : undefined}
           />
           <EuiFlexGrid columns={4}>
             <EuiFlexItem>

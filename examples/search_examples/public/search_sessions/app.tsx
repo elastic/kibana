@@ -278,7 +278,7 @@ export const SearchSessionsExampleApp = ({
                 appName={PLUGIN_ID}
                 showSearchBar={true}
                 useDefaultBehaviors={true}
-                indexPatterns={dataView ? [dataView] : undefined}
+                dataViews={dataView ? [dataView] : undefined}
                 onQuerySubmit={reset}
               />
               <EuiFlexGroup justifyContent={'flexStart'}>
