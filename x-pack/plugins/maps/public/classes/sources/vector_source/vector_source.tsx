@@ -42,6 +42,7 @@ export interface BoundsRequestMeta {
   sourceQuery?: Query;
   timeFilters: TimeRange;
   timeslice?: Timeslice;
+  isFeatureEditorOpenForLayer: boolean;
   joinKeyFilter?: Filter;
 }
 

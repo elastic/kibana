@@ -11,7 +11,6 @@ exports[`TOCEntry is rendered 1`] = `
   >
     <Connect(TOCEntryActionsPopover)
       displayName="layer 1"
-      editModeActiveForLayer={false}
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
       layer={
@@ -94,7 +93,6 @@ exports[`TOCEntry props Should shade background when not selected layer 1`] = `
   >
     <Connect(TOCEntryActionsPopover)
       displayName="layer 1"
-      editModeActiveForLayer={false}
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
       layer={
@@ -177,7 +175,6 @@ exports[`TOCEntry props Should shade background when selected layer 1`] = `
   >
     <Connect(TOCEntryActionsPopover)
       displayName="layer 1"
-      editModeActiveForLayer={false}
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
       layer={
@@ -260,7 +257,6 @@ exports[`TOCEntry props isReadOnly 1`] = `
   >
     <Connect(TOCEntryActionsPopover)
       displayName="layer 1"
-      editModeActiveForLayer={false}
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
       layer={
@@ -328,7 +324,6 @@ exports[`TOCEntry props should display layer details when isLegendDetailsOpen is
   >
     <Connect(TOCEntryActionsPopover)
       displayName="layer 1"
-      editModeActiveForLayer={false}
       escapedDisplayName="layer_1"
       isEditButtonDisabled={false}
       layer={
