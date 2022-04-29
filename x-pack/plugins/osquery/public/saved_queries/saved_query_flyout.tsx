@@ -17,12 +17,12 @@ import {
   EuiButtonEmpty,
   EuiButton,
 } from '@elastic/eui';
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Form } from '../shared_imports';
 import { useSavedQueryForm } from './form/use_saved_query_form';
-import { SavedQueryForm, SavedQueryFormRefObject } from './form';
+import { SavedQueryForm } from './form';
 import { useCreateSavedQuery } from './use_create_saved_query';
 
 interface AddQueryFlyoutProps {
@@ -38,7 +38,6 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
   onClose,
   isExternal,
 }) => {
-  const savedQueryFormRef = useRef<SavedQueryFormRefObject>(null);
   const createSavedQueryMutation = useCreateSavedQuery({ withRedirect: false });
 
   const handleSubmit = useCallback(
@@ -48,7 +47,6 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
 
   const { form } = useSavedQueryForm({
     defaultValue,
-    savedQueryFormRef,
     handleSubmit,
   });
   const { submit, isSubmitting } = form;
@@ -74,7 +72,7 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <Form form={form}>
-            <SavedQueryForm ref={savedQueryFormRef} />
+            <SavedQueryForm />
           </Form>
         </EuiFlyoutBody>
         <EuiFlyoutFooter>

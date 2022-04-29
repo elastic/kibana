@@ -8,6 +8,7 @@
 import { EuiErrorBoundary, EuiLoadingContent, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { QueryClientProvider } from 'react-query';
+import { CoreStart } from '@kbn/core/public';
 import {
   AGENT_STATUS_ERROR,
   EMPTY_PROMPT,
@@ -22,16 +23,19 @@ import { queryClient } from '../../query_client';
 import { OsqueryIcon } from '../../components/osquery_icon';
 import { KibanaThemeProvider } from '../../shared_imports';
 import { useIsOsqueryAvailable } from './use_is_osquery_available';
+import { StartPlugins } from '../../types';
 
 interface OsqueryActionProps {
   agentId?: string;
   formType: 'steps' | 'simple';
+  hideAgentsField?: boolean;
   addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
 }
 
 const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
   agentId,
   formType = 'simple',
+  hideAgentsField,
   addToTimeline,
 }) => {
   const permissions = useKibana().services.application.capabilities.osquery;
@@ -103,18 +107,37 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
     );
   }
 
-  return <LiveQuery formType={formType} agentId={agentId} addToTimeline={addToTimeline} />;
+  return (
+    <LiveQuery
+      formType={formType}
+      agentId={agentId}
+      hideAgentsField={hideAgentsField}
+      addToTimeline={addToTimeline}
+    />
+  );
 };
 
 export const OsqueryAction = React.memo(OsqueryActionComponent);
 
-// @ts-expect-error update types
-const OsqueryActionWrapperComponent = ({ services, agentId, formType, addToTimeline }) => (
+type OsqueryActionWrapperProps = { services: CoreStart & StartPlugins } & OsqueryActionProps;
+
+const OsqueryActionWrapperComponent: React.FC<OsqueryActionWrapperProps> = ({
+  services,
+  agentId,
+  formType,
+  hideAgentsField = false,
+  addToTimeline,
+}) => (
   <KibanaThemeProvider theme$={services.theme.theme$}>
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
         <QueryClientProvider client={queryClient}>
-          <OsqueryAction agentId={agentId} formType={formType} addToTimeline={addToTimeline} />
+          <OsqueryAction
+            agentId={agentId}
+            formType={formType}
+            hideAgentsField={hideAgentsField}
+            addToTimeline={addToTimeline}
+          />
         </QueryClientProvider>
       </EuiErrorBoundary>
     </KibanaContextProvider>
