@@ -255,6 +255,9 @@ describe('test transform install', () => {
             },
           ],
         },
+        {
+          refresh: false,
+        },
       ],
       [
         'epm-packages',
@@ -362,6 +365,9 @@ describe('test transform install', () => {
           installed_es: [
             { id: 'endpoint.metadata_current-default-0.16.0-dev.0', type: 'transform' },
           ],
+        },
+        {
+          refresh: false,
         },
       ],
     ]);
@@ -585,6 +591,9 @@ describe('test transform install', () => {
           installed_es: [
             { id: 'endpoint.metadata_current-default-0.16.0-dev.0', type: 'transform' },
           ],
+        },
+        {
+          refresh: false,
         },
       ],
     ]);
