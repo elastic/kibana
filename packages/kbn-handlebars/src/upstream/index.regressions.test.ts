@@ -5,7 +5,6 @@
  * See `packages/kbn-handlebars/LICENSE` for more information.
  */
 
-import { HelperOptions } from '..';
 import { expectTemplate } from '../__jest__/test_bench';
 
 describe('Regressions', () => {
@@ -99,10 +98,10 @@ describe('Regressions', () => {
       '{{#inverse}} {{#blk}} Unexpected {{/blk}} {{else}} {{#blk}} Expected {{/blk}} {{/inverse}}';
 
     const helpers = {
-      blk(block: HelperOptions) {
+      blk(block: Handlebars.HelperOptions) {
         return block.fn('');
       },
-      inverse(block: HelperOptions) {
+      inverse(block: Handlebars.HelperOptions) {
         return block.inverse('');
       },
     };

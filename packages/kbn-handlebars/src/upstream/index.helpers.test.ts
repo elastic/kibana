@@ -5,7 +5,7 @@
  * See `packages/kbn-handlebars/LICENSE` for more information.
  */
 
-import Handlebars, { HelperOptions } from '..';
+import Handlebars from '..';
 import { expectTemplate } from '../__jest__/test_bench';
 
 beforeEach(() => {
@@ -173,7 +173,7 @@ describe('helpers', () => {
   });
 
   it('block helper should have context in this', () => {
-    function link(this: any, options: HelperOptions) {
+    function link(this: any, options: Handlebars.HelperOptions) {
       return '<a href="/people/' + this.id + '">' + options.fn(this) + '</a>';
     }
 
@@ -228,7 +228,7 @@ describe('helpers', () => {
 
   it('block helper inverted sections', () => {
     const string = "{{#list people}}{{name}}{{^}}<em>Nobody's here</em>{{/list}}";
-    function list(this: any, context: any, options: HelperOptions) {
+    function list(this: any, context: any, options: Handlebars.HelperOptions) {
       if (context.length > 0) {
         let out = '<ul>';
         for (let i = 0, j = context.length; i < j; i++) {
@@ -498,7 +498,7 @@ describe('helpers', () => {
     });
 
     it('helpers can take an optional hash with booleans', () => {
-      function goodbye(options: HelperOptions) {
+      function goodbye(options: Handlebars.HelperOptions) {
         if (options.hash.print === true) {
           return 'GOODBYE ' + options.hash.cruel + ' ' + options.hash.world;
         } else if (options.hash.print === false) {
@@ -550,7 +550,7 @@ describe('helpers', () => {
     });
 
     it('block helpers can take an optional hash with booleans', () => {
-      function goodbye(this: any, options: HelperOptions) {
+      function goodbye(this: any, options: Handlebars.HelperOptions) {
         if (options.hash.print === true) {
           return 'GOODBYE ' + options.hash.cruel + ' ' + options.fn(this);
         } else if (options.hash.print === false) {

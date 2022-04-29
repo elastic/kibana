@@ -5,7 +5,7 @@
  * See `packages/kbn-handlebars/LICENSE` for more information.
  */
 
-import Handlebars, { HelperOptions } from '..';
+import Handlebars from '..';
 import { expectTemplate } from '../__jest__/test_bench';
 
 describe('subexpressions', () => {
@@ -102,9 +102,9 @@ describe('subexpressions', () => {
   });
 
   it('provides each nested helper invocation its own options hash', () => {
-    let lastOptions: HelperOptions;
+    let lastOptions: Handlebars.HelperOptions;
     const helpers = {
-      equal(x: any, y: any, options: HelperOptions) {
+      equal(x: any, y: any, options: Handlebars.HelperOptions) {
         if (!options || options === lastOptions) {
           throw new Error('options hash was reused');
         }

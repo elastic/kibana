@@ -53,8 +53,6 @@ export declare namespace ExtendedHandlebars {
 // eslint-disable-next-line import/no-default-export
 export default Handlebars;
 
-export type { HelperDelegate, HelperOptions } from 'handlebars';
-
 export function create(): typeof Handlebars {
   const SandboxedHandlebars = originalCreate.call(Handlebars) as typeof Handlebars;
   // When creating new Handlebars environments, ensure the custom compileAST function is present in the new environment as well

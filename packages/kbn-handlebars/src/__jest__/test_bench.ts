@@ -3,7 +3,7 @@
  * See `packages/kbn-handlebars/LICENSE` for more information.
  */
 
-import Handlebars, { HelperDelegate, ExtendedCompileOptions, ExtendedRuntimeOptions } from '..';
+import Handlebars, { ExtendedCompileOptions, ExtendedRuntimeOptions } from '..';
 
 declare global {
   var kbnHandlebarsEnv: typeof Handlebars | null; // eslint-disable-line no-var
@@ -24,7 +24,7 @@ class HandlebarsTestBench {
   private options: TestOptions;
   private compileOptions?: ExtendedCompileOptions;
   private runtimeOptions?: ExtendedRuntimeOptions;
-  private helpers: { [key: string]: HelperDelegate | undefined } = {};
+  private helpers: { [key: string]: Handlebars.HelperDelegate | undefined } = {};
   private input: any = {};
 
   constructor(template: string, options: TestOptions = {}) {
@@ -47,12 +47,12 @@ class HandlebarsTestBench {
     return this;
   }
 
-  withHelper(name: string, helper?: HelperDelegate) {
+  withHelper(name: string, helper?: Handlebars.HelperDelegate) {
     this.helpers[name] = helper;
     return this;
   }
 
-  withHelpers(helperFunctions: { [key: string]: HelperDelegate }) {
+  withHelpers(helperFunctions: { [key: string]: Handlebars.HelperDelegate }) {
     for (const [name, helper] of Object.entries(helperFunctions)) {
       this.withHelper(name, helper);
     }

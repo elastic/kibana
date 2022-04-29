@@ -5,7 +5,7 @@
  * See `packages/kbn-handlebars/LICENSE` for more information.
  */
 
-import Handlebars, { HelperOptions } from '..';
+import Handlebars from '..';
 import { expectTemplate } from '../__jest__/test_bench';
 
 describe('data', () => {
@@ -30,7 +30,7 @@ describe('data', () => {
     global.kbnHandlebarsEnv = Handlebars.create();
     const helpers = Handlebars.createFrame(kbnHandlebarsEnv!.helpers);
 
-    helpers.let = function (options: HelperOptions) {
+    helpers.let = function (options: Handlebars.HelperOptions) {
       const frame = Handlebars.createFrame(options.data);
 
       for (const prop in options.hash) {
