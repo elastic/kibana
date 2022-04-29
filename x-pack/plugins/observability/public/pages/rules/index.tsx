@@ -206,7 +206,7 @@ export function RulesPage() {
           <ExecutionStatus
             executionStatus={item.executionStatus}
             item={item}
-            licenseType={ruleTypeIndex.get(item.ruleTypeId)?.minimumLicenseRequired}
+            licenseType={ruleTypeIndex.get(item.ruleTypeId)?.minimumLicenseRequired!}
           />
         ),
       },
