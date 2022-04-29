@@ -12,7 +12,12 @@ import uuid from 'uuid';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
-import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import {
+  IEvent,
+  SAVED_OBJECT_REL_PRIMARY,
+  millisToNanos,
+  nanosToMillis,
+} from '@kbn/event-log-plugin/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { createExecutionHandler, ExecutionHandler } from './create_execution_handler';
 import { Alert, createAlertFactory } from '../alert';
@@ -803,9 +808,7 @@ export class TaskRunner<
 
     // Copy duration into execution status if available
     if (null != event.event?.duration) {
-      executionStatus.lastDuration = Math.round(
-        Number(BigInt(event.event?.duration) / BigInt(Millis2Nanos))
-      );
+      executionStatus.lastDuration = nanosToMillis(event.event?.duration);
       monitoringHistory.duration = executionStatus.lastDuration;
     }
 
@@ -1066,8 +1069,7 @@ function trackAlertDurations<
       : currentAlerts[id].getState();
     const durationInMs =
       new Date(currentTime).valueOf() - new Date(state.start as string).valueOf();
-    const durationInNanoStr = durationInMs !== 0 ? `${durationInMs}000000` : '0';
-    const duration = state.start ? durationInNanoStr : undefined;
+    const duration = state.start ? millisToNanos(durationInMs) : undefined;
     currentAlerts[id].replaceState({
       ...state,
       ...(state.start ? { start: state.start } : {}),
@@ -1080,8 +1082,7 @@ function trackAlertDurations<
     const state = recoveredAlerts[id].getState();
     const durationInMs =
       new Date(currentTime).valueOf() - new Date(state.start as string).valueOf();
-    const durationInNanoStr = durationInMs !== 0 ? `${durationInMs}000000` : '0';
-    const duration = state.start ? durationInNanoStr : undefined;
+    const duration = state.start ? millisToNanos(durationInMs) : undefined;
     recoveredAlerts[id].replaceState({
       ...state,
       ...(duration ? { duration } : {}),

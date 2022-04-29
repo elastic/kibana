@@ -7,6 +7,6 @@
 
 const ONE_MILLION = BigInt(1000 * 1000);
 
-export function nanosToMillis(nanos: string): number {
+export function nanosToMillis(nanos: string | number): number {
   return Number(BigInt(nanos) / ONE_MILLION);
 }

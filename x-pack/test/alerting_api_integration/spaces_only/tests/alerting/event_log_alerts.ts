@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { Spaces } from '../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover, getEventLog } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -126,7 +126,7 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
             expect(
               new Date(instanceEvents[i]?.event?.end!).valueOf() -
                 new Date(instanceEvents[i]?.event?.start!).valueOf()
-            ).to.equal(Number(BigInt(instanceEvents[i]?.event?.duration!) / BigInt(1000000)));
+            ).to.equal(nanosToMillis(instanceEvents[i]?.event?.duration!));
             break;
         }
       }

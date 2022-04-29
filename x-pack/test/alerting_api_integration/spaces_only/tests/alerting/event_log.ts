@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import uuid from 'uuid';
-import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { Spaces } from '../../scenarios';
 import {
   getUrlPrefix,
@@ -17,8 +17,6 @@ import {
   ESTestIndexTool,
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-
-const NANOS_IN_MILLIS = BigInt(1000 * 1000);
 
 // eslint-disable-next-line import/no-default-export
 export default function eventLogTests({ getService }: FtrProviderContext) {
@@ -869,9 +867,7 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
     if (shouldHaveEventEnd !== false) {
       expect(eventEnd).to.be.ok();
 
-      const durationDiff = Math.abs(
-        Math.round(Number(BigInt(duration!) / NANOS_IN_MILLIS)) - (eventEnd - eventStart)
-      );
+      const durationDiff = Math.abs(nanosToMillis(duration!) - (eventEnd - eventStart));
 
       // account for rounding errors
       expect(durationDiff < 1).to.equal(true);
