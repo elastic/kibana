@@ -10,9 +10,9 @@ import { useCallback, useMemo, useReducer, useRef } from 'react';
 
 import { debounce } from 'lodash';
 
-import { IHttpFetchError, ResponseErrorBody } from 'src/core/public';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 
-import type { DataView } from '../../../../../../data_views/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 import type { WindowParameters } from '../chart/get_window_parameters';
 

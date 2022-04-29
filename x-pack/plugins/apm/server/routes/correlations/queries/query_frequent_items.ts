@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from 'src/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { CorrelationsParams } from '../../../../common/correlations/types';
 
-import { fetchSpikeAnalysisFrequentItems } from './index';
+import { fetchSpikeAnalysisFrequentItems } from '.';
 
 export const fetchFrequentItems = async (
   esClient: ElasticsearchClient,

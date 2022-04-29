@@ -6,7 +6,7 @@
  */
 import { uniqBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { SPIKE_ANALYSIS_THRESHOLD } from '../../../../common/correlations/constants';
 import { CorrelationsParams } from '../../../../common/correlations/types';
 import {

@@ -9,15 +9,15 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import { useDiscoverServices } from '../../../../utils/use_discover_services';
-import { DataViewField, DataView, Query } from '../../../../../../data/common';
+import { DataViewField, DataView, Query } from '@kbn/data-plugin/common';
 import {
   EmbeddableInput,
   EmbeddableOutput,
   ErrorEmbeddable,
   IEmbeddable,
   isErrorEmbeddable,
-} from '../../../../../../embeddable/public';
+} from '@kbn/embeddable-plugin/public';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { SPIKE_ANALSIS_LOADED } from './constants';
 import type { SavedSearch } from '../../../../services/saved_searches';
 import type { GetStateReturn } from '../../services/discover_state';

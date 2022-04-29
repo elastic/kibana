@@ -50,7 +50,7 @@ import { useAnnotationsContext } from '../../../context/annotations/use_annotati
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { useChangePointDetection } from '../../../components/app/correlations/use_change_point_detection';
+import { useChangePointDetection } from '../../app/correlations/use_change_point_detection';
 import { useTheme } from '../../../hooks/use_theme';
 import { unit } from '../../../utils/style';
 import { ChartContainer } from './chart_container';
@@ -58,8 +58,8 @@ import { getChartAnomalyTimeseries } from './helper/get_chart_anomaly_timeseries
 import { isTimeseriesEmpty, onBrushEnd } from './helper/helper';
 import { getTimeZone } from './helper/timezone';
 
-import { CorrelationsTable } from '../../../components/app/correlations/correlations_table';
-import { getFailedTransactionsCorrelationImpactLabel } from '../../../components/app/correlations/utils/get_failed_transactions_correlation_impact_label';
+import { CorrelationsTable } from '../../app/correlations/correlations_table';
+import { getFailedTransactionsCorrelationImpactLabel } from '../../app/correlations/utils/get_failed_transactions_correlation_impact_label';
 import { ImpactBar } from '../impact_bar';
 import { createHref, push } from '../links/url_helpers';
 

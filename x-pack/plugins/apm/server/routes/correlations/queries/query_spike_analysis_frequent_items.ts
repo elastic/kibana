@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { CorrelationsParams } from '../../../../common/correlations/types';
 import { FrequentItems } from '../../../../common/correlations/change_point/types';
 import { getQueryWithParams } from './get_query_with_params';
