@@ -29450,7 +29450,6 @@
     "xpack.triggersActionsUI.sections.rulesList.ruleStatusActive": "アクティブ",
     "xpack.triggersActionsUI.sections.rulesList.ruleStatusDropdownMenuLabel": "ルールステータスまたはスヌーズを変更",
     "xpack.triggersActionsUI.sections.rulesList.ruleStatusError": "エラー",
-    "xpack.triggersActionsUI.sections.rulesList.ruleStatusFilterLabel": "前回の応答",
     "xpack.triggersActionsUI.sections.rulesList.ruleStatusLicenseError": "ライセンスエラー",
     "xpack.triggersActionsUI.sections.rulesList.ruleStatusOk": "OK",
     "xpack.triggersActionsUI.sections.rulesList.ruleStatusPending": "保留中",
