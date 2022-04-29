@@ -47,6 +47,7 @@ import { RULES_BREADCRUMB_TEXT } from '../rules/translations';
 import { PageTitle, ItemTitleRuleSummary, ItemValueRuleSummary, Actions } from './components';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchRuleSummary } from '../../hooks/use_fetch_rule_summary';
+import { useFetchLast24hAlerts } from '../../hooks/use_fetch_last24h_alerts';
 import { getColorStatusBased } from './utils';
 import { hasExecuteActionsCapability, hasAllPrivilege } from './config';
 
@@ -62,12 +63,26 @@ export function RuleDetailsPage() {
   const { ruleId } = useParams<RuleDetailsPathParams>();
   const { ObservabilityPageTemplate } = usePluginContext();
   const { isLoadingRule, rule, ruleType, errorRule, reloadRule } = useFetchRule({ ruleId, http });
+  const [features, setFeatures] = useState<string>('');
+  const { last24hAlerts, isLoadingLast24hAlerts, errorLast24hAlerts } = useFetchLast24hAlerts({
+    http,
+    features,
+  });
   const { isLoadingRuleSummary, ruleSummary, errorRuleSummary, reloadRuleSummary } =
     useFetchRuleSummary({ ruleId, http });
+
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
   const [isRuleEditPopoverOpen, setIsRuleEditPopoverOpen] = useState(false);
 
   const [alerts, setAlerts] = useState<AlertListItem[]>([]);
+
+  useEffect(() => {
+    if (ruleType && rule) {
+      if (rule.consumer === 'alerts' && ruleType.producer) {
+        setFeatures(ruleType.producer);
+      } else setFeatures(rule.consumer);
+    }
+  }, [ruleType, rule]);
 
   useEffect(() => {
     if (!errorRuleSummary && ruleSummary?.alerts) {
@@ -77,7 +92,7 @@ export function RuleDetailsPage() {
         .sort((leftAlert, rightAlert) => leftAlert.sortPriority - rightAlert.sortPriority);
       setAlerts(sortedAlerts);
     }
-  }, [ruleSummary, errorRuleSummary, http, rule]);
+  }, [ruleSummary, errorRuleSummary, http, rule, ruleType]);
 
   useBreadcrumbs([
     {
@@ -135,10 +150,6 @@ export function RuleDetailsPage() {
     (ruleTypeRegistry.has(rule.ruleTypeId)
       ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
       : false);
-
-  console.log('rule', rule);
-  console.log('ruleSummary', ruleSummary);
-  console.log('errorRule', errorRule);
 
   const getRuleConditionsWording = () => (
     <>
