@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   PartitionLayout,
@@ -43,8 +44,6 @@ export function StorageExplorer() {
   const chartTheme = useChartTheme();
   const groupedPalette = euiPaletteColorBlind({
     rotations: 3,
-    order: 'group',
-    sortBy: 'natural',
   });
 
   const { data, status } = useFetcher(
@@ -214,27 +213,32 @@ export function StorageExplorer() {
         </h2>
       </EuiTitle>
 
-      <Chart size={{ height: 240 }}>
-        <Settings theme={chartTheme} showLegend legendMaxDepth={1} />
-        <Partition
-          id="treemap"
-          data={items}
-          layout={PartitionLayout.treemap}
-          valueAccessor={(d) => d.size ?? 0}
-          valueGetter="percent"
-          topGroove={0}
-          layers={[
-            {
-              groupByRollup: (d: Datum) => d.serviceName,
-              shape: {
-                fillColor: (d) =>
-                  groupedPalette[d.parent.sortIndex * 3 + d.sortIndex],
-              },
-            },
-          ]}
-        />
-      </Chart>
-      <EuiSpacer size="m" />
+      {items && !isEmpty(items) && (
+        <>
+          <Chart size={{ height: 240 }}>
+            <Settings theme={chartTheme} />
+            <Partition
+              id="storage_explorer_treemap"
+              data={items}
+              layout={PartitionLayout.treemap}
+              valueAccessor={(d) => d.size ?? 0}
+              valueFormatter={(d: number) =>
+                asDynamicBytes(d) || NOT_AVAILABLE_LABEL
+              }
+              layers={[
+                {
+                  groupByRollup: (d: Datum) => d.serviceName,
+                  shape: {
+                    fillColor: (d) =>
+                      groupedPalette[d.parent.sortIndex * 3 + d.sortIndex],
+                  },
+                },
+              ]}
+            />
+          </Chart>
+          <EuiSpacer size="m" />
+        </>
+      )}
 
       <EuiInMemoryTable
         tableCaption={i18n.translate(
