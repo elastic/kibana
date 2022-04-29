@@ -15,7 +15,14 @@ import {
   EuiFormLabel,
   EuiToolTip,
   EuiText,
+  EuiButtonIcon,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiBasicTable,
+  EuiPanel,
+  EuiLink,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { IndexPatternDimensionEditorProps } from './dimension_panel';
 import type { OperationSupportMatrix } from './operation_support';
 import type { GenericIndexPatternColumn } from '../indexpattern';
@@ -228,6 +235,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const [filterByOpenInitially, setFilterByOpenInitally] = useState(false);
   const [timeShiftedFocused, setTimeShiftFocused] = useState(false);
+  const [isPopoverOpen, setPopoverOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
+
+  const onHelpClick = () => setIsHelpOpen((prevIsHelpOpen) => !prevIsHelpOpen);
+  const closeHelp = () => setIsHelpOpen(false);
 
   // Operations are compatible if they match inputs. They are always compatible in
   // the empty state. Field-based operations are not compatible with field-less operations.
@@ -446,6 +458,73 @@ export function DimensionEditor(props: DimensionEditorProps) {
     ...services,
   };
 
+  const helpButton = <EuiButtonIcon onClick={onHelpClick} iconType="documentation" />;
+
+  const columnsSidebar = [
+    {
+      field: 'function',
+      name: 'Function',
+      width: '100px',
+    },
+    {
+      field: 'description',
+      name: 'Description',
+    },
+  ];
+
+  const items = [
+    {
+      id: 0,
+      function: 'Average',
+      description: 'The sum of all values divided by the total number of values.',
+    },
+    {
+      id: 1,
+      function: 'Count',
+      description: 'The number of all documents.',
+    },
+    {
+      id: 2,
+      function: 'Counter rate',
+      description: 'The number of all values, divided by time.',
+    },
+    {
+      id: 3,
+      function: 'Cumulative sum',
+      description: 'The sum of all values as they grow over time.',
+    },
+    {
+      id: 4,
+      function: 'Date histogram',
+      description: 'Date or date range values distributed into intervals.',
+    },
+    {
+      id: 5,
+      function: 'Differences',
+      description: 'The change, or difference, between the values in subsequent intervals.',
+    },
+    {
+      id: 6,
+      function: 'Filters',
+      description: 'Divides values into predefined subsets.',
+    },
+    {
+      id: 7,
+      function: 'Intervals',
+      description: 'Buckets values along defined numeric ranges.',
+    },
+    {
+      id: 8,
+      function: 'Last value',
+      description: 'The last value in an ordered set of values.',
+    },
+    {
+      id: 9,
+      function: 'Maximum',
+      description: 'The top value.',
+    },
+  ];
+
   const quickFunctions = (
     <>
       <div className="lnsIndexPatternDimensionEditor__section lnsIndexPatternDimensionEditor__section--padded lnsIndexPatternDimensionEditor__section--shaded">
@@ -453,6 +532,59 @@ export function DimensionEditor(props: DimensionEditorProps) {
           {i18n.translate('xpack.lens.indexPattern.functionsLabel', {
             defaultMessage: 'Functions',
           })}
+
+          <EuiPopover
+            anchorPosition="rightUp"
+            button={helpButton}
+            isOpen={isHelpOpen}
+            display="inlineBlock"
+            panelPaddingSize="none"
+            className="dscFieldTypesHelp__popover"
+            panelClassName="dscFieldTypesHelp__panel"
+            closePopover={closeHelp}
+            initialFocus="#dscFieldTypesHelpBasicTableId"
+          >
+            <EuiPopoverTitle paddingSize="s">
+              {i18n.translate('lns.quickFunctions.popoverTitle', {
+                defaultMessage: 'Quick functions',
+              })}
+            </EuiPopoverTitle>
+            <EuiPanel
+              className="eui-yScroll"
+              style={{ maxHeight: '40vh' }}
+              color="transparent"
+              paddingSize="s"
+            >
+              <EuiBasicTable
+                id="dscFieldTypesHelpBasicTableId"
+                style={{ width: 350 }}
+                tableCaption={i18n.translate('lns.quickFunctions.tableTitle', {
+                  defaultMessage: 'Description of functions',
+                })}
+                items={items}
+                compressed={true}
+                rowHeader="firstName"
+                columns={columnsSidebar}
+                responsive={false}
+              />
+            </EuiPanel>
+            <EuiPanel color="transparent" paddingSize="s">
+              <EuiText color="subdued" size="xs">
+                <p>
+                  {i18n.translate('discover.fieldTypesPopover.learnMoreText', {
+                    defaultMessage: 'Learn more about',
+                  })}
+                  &nbsp;
+                  <EuiLink href="www.google.com">
+                    <FormattedMessage
+                      id="discover.fieldTypesPopover.learnMoreLink"
+                      defaultMessage="functions."
+                    />
+                  </EuiLink>
+                </p>
+              </EuiText>
+            </EuiPanel>
+          </EuiPopover>
         </EuiFormLabel>
         <EuiSpacer size="s" />
         <EuiListGroup
