@@ -30,6 +30,7 @@ export type {
   RuleTypeParams,
   AsApiContract,
   RuleTableItem,
+  AlertsTableConfigurationRegistryContract,
 } from './types';
 
 export {
