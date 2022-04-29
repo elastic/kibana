@@ -76,6 +76,9 @@ export function autoHistogramSumCountOnGroupByField(
           // of matched documents. This is not equal to the ordering by sum of Count field,
           // but it's a good-enough approximation given the distribution of Count.
           size: topNItems,
+          // 'execution_hint: map' skips the slow building of ordinals that we don't need.
+          // Especially with high cardinality fields, this setting speeds up the aggregation.
+          execution_hint: 'map',
         },
         aggs: {
           count: {
