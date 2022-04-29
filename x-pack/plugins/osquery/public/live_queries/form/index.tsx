@@ -62,7 +62,7 @@ interface LiveQueryFormProps {
   ecsMappingField?: boolean;
   formType?: FormType;
   enabled?: boolean;
-  isExternal?: true;
+  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
 }
 
 const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
@@ -73,7 +73,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   ecsMappingField = true,
   formType = 'steps',
   enabled = true,
-  isExternal,
+  addToTimeline,
 }) => {
   const ecsFieldRef = useRef<ECSMappingEditorFieldRef>();
   const permissions = useKibana().services.application.capabilities.osquery;
@@ -393,10 +393,10 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           actionId={actionId}
           endDate={data?.actions[0].expiration}
           agentIds={agentIds}
-          isExternal={isExternal}
+          addToTimeline={addToTimeline}
         />
       ) : null,
-    [actionId, agentIds, data?.actions, isExternal]
+    [actionId, agentIds, data?.actions, addToTimeline]
   );
 
   const formSteps: EuiContainedStepProps[] = useMemo(
@@ -467,7 +467,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       </Form>
       {showSavedQueryFlyout ? (
         <SavedQueryFlyout
-          isExternal={isExternal}
+          isExternal={!!addToTimeline}
           onClose={handleCloseSaveQueryFlout}
           defaultValue={flyoutFormDefaultValue}
         />

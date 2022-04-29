@@ -28,7 +28,7 @@ import { useCreateSavedQuery } from './use_create_saved_query';
 interface AddQueryFlyoutProps {
   defaultValue: unknown;
   onClose: () => void;
-  isExternal?: true;
+  isExternal?: boolean;
 }
 
 const additionalZIndexStyle = { style: 'z-index: 6000' };
@@ -60,7 +60,7 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
         ownFocus
         onClose={onClose}
         aria-labelledby="flyoutTitle"
-        maskProps={isExternal && additionalZIndexStyle} // For an edge case to display above the alerts flyout
+        maskProps={isExternal ? additionalZIndexStyle : undefined} // For an edge case to display above the alerts flyout
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">

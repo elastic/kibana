@@ -28,7 +28,7 @@ interface LiveQueryProps {
   ecsMappingField?: boolean;
   enabled?: boolean;
   formType?: 'steps' | 'simple';
-  isExternal?: true;
+  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
 }
 
 const LiveQueryComponent: React.FC<LiveQueryProps> = ({
@@ -45,7 +45,7 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   ecsMappingField,
   formType,
   enabled,
-  isExternal,
+  addToTimeline,
 }) => {
   const { data: hasActionResultsPrivileges, isLoading } = useActionResultsPrivileges();
 
@@ -115,7 +115,7 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
       onSuccess={onSuccess}
       formType={formType}
       enabled={enabled}
-      isExternal={isExternal}
+      addToTimeline={addToTimeline}
     />
   );
 };

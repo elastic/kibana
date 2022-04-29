@@ -78,35 +78,27 @@ describe('Osquery Action', () => {
     spyOsquery();
     mockKibana();
 
-    const { getByText } = renderWithContext(
-      <OsqueryAction agentId={'test'} formType={'steps'} isExternal={true} />
-    );
+    const { getByText } = renderWithContext(<OsqueryAction agentId={'test'} formType={'steps'} />);
     expect(getByText(EMPTY_PROMPT)).toBeInTheDocument();
   });
   it('should return empty prompt when no agentId', async () => {
     spyOsquery();
     mockKibana();
 
-    const { getByText } = renderWithContext(
-      <OsqueryAction agentId={''} formType={'steps'} isExternal={true} />
-    );
+    const { getByText } = renderWithContext(<OsqueryAction agentId={''} formType={'steps'} />);
     expect(getByText(EMPTY_PROMPT)).toBeInTheDocument();
   });
   it('should return permission denied when agentFetched and agentData available', async () => {
     spyOsquery({ agentData: {} });
     mockKibana();
 
-    const { getByText } = renderWithContext(
-      <OsqueryAction agentId={'test'} formType={'steps'} isExternal={true} />
-    );
+    const { getByText } = renderWithContext(<OsqueryAction agentId={'test'} formType={'steps'} />);
     expect(getByText(PERMISSION_DENIED)).toBeInTheDocument();
   });
   it('should return agent status error when permissions are ok and agent status is wrong', async () => {
     spyOsquery({ agentData: {} });
     mockKibana(properPermissions);
-    const { getByText } = renderWithContext(
-      <OsqueryAction agentId={'test'} formType={'steps'} isExternal={true} />
-    );
+    const { getByText } = renderWithContext(<OsqueryAction agentId={'test'} formType={'steps'} />);
     expect(getByText(AGENT_STATUS_ERROR)).toBeInTheDocument();
   });
   it('should return permission denied if just one permission (runSavedQueries) is available', async () => {
@@ -116,9 +108,7 @@ describe('Osquery Action', () => {
         runSavedQueries: true,
       },
     });
-    const { getByText } = renderWithContext(
-      <OsqueryAction agentId={'test'} formType={'steps'} isExternal={true} />
-    );
+    const { getByText } = renderWithContext(<OsqueryAction agentId={'test'} formType={'steps'} />);
     expect(getByText(PERMISSION_DENIED)).toBeInTheDocument();
   });
   it('should return permission denied if just one permission (readSavedQueries) is available', async () => {
@@ -128,9 +118,7 @@ describe('Osquery Action', () => {
         readSavedQueries: true,
       },
     });
-    const { getByText } = renderWithContext(
-      <OsqueryAction agentId={'test'} formType={'steps'} isExternal={true} />
-    );
+    const { getByText } = renderWithContext(<OsqueryAction agentId={'test'} formType={'steps'} />);
     expect(getByText(PERMISSION_DENIED)).toBeInTheDocument();
   });
   it('should return permission denied if no writeLiveQueries', async () => {
@@ -140,9 +128,7 @@ describe('Osquery Action', () => {
         writeLiveQueries: true,
       },
     });
-    const { getByText } = renderWithContext(
-      <OsqueryAction agentId={'test'} formType={'steps'} isExternal={true} />
-    );
+    const { getByText } = renderWithContext(<OsqueryAction agentId={'test'} formType={'steps'} />);
     expect(getByText(AGENT_STATUS_ERROR)).toBeInTheDocument();
   });
   it('should return not available prompt if osquery is not available', async () => {
@@ -152,9 +138,7 @@ describe('Osquery Action', () => {
         writeLiveQueries: true,
       },
     });
-    const { getByText } = renderWithContext(
-      <OsqueryAction agentId={'test'} formType={'steps'} isExternal={true} />
-    );
+    const { getByText } = renderWithContext(<OsqueryAction agentId={'test'} formType={'steps'} />);
     expect(getByText(NOT_AVAILABLE)).toBeInTheDocument();
   });
   it('should not return any errors when all data is ok', async () => {
@@ -162,7 +146,7 @@ describe('Osquery Action', () => {
     mockKibana(properPermissions);
 
     const { queryByText } = renderWithContext(
-      <OsqueryAction agentId={'test'} formType={'steps'} isExternal={true} />
+      <OsqueryAction agentId={'test'} formType={'steps'} />
     );
     expect(queryByText(EMPTY_PROMPT)).not.toBeInTheDocument();
     expect(queryByText(PERMISSION_DENIED)).not.toBeInTheDocument();
