@@ -732,7 +732,7 @@ export const formattedSearchStrategyResponse = {
                       lastFailure: {
                         top_hits: {
                           size: 1,
-                          fields: [],
+                          _source: false,
                           sort: [{ '@timestamp': { order: 'desc' } }],
                         },
                       },
@@ -744,7 +744,7 @@ export const formattedSearchStrategyResponse = {
                       lastSuccess: {
                         top_hits: {
                           size: 1,
-                          fields: [],
+                          _source: false,
                           sort: [{ '@timestamp': { order: 'desc' } }],
                         },
                       },
@@ -771,6 +771,16 @@ export const formattedSearchStrategyResponse = {
               },
             },
             size: 0,
+            _source: false,
+            fields: [
+              'source.ip',
+              'host.id',
+              'host.name',
+              {
+                field: '@timestamp',
+                format: 'strict_date_optional_time',
+              },
+            ],
           },
           track_total_hits: false,
         },
@@ -791,7 +801,7 @@ export const formattedSearchStrategyResponse = {
           host: { id: ['ce1d3c9b-a815-4643-9641-ada0f2c00609'], name: ['siem-windows'] },
         },
       },
-      cursor: { value: '', tiebreaker: null },
+      cursor: { value: undefined, tiebreaker: null },
     },
     {
       node: {
@@ -805,13 +815,13 @@ export const formattedSearchStrategyResponse = {
           host: { id: ['aa7ca589f1b8220002f2fc61c64cfbf1'], name: ['siem-kibana'] },
         },
       },
-      cursor: { value: '', tiebreaker: null },
+      cursor: { value: undefined, tiebreaker: null },
     },
     {
       node: {
         failures: 23,
         successes: 0,
-        _id: 'admin+23',
+        _id: 'ZfxZWXQBc39KFIJbLN5U',
         stackedValue: ['admin'],
         lastFailure: {
           timestamp: ['2020-09-04T13:40:46.000Z'],
@@ -819,13 +829,13 @@ export const formattedSearchStrategyResponse = {
           host: { id: ['aa7ca589f1b8220002f2fc61c64cfbf1'], name: ['siem-kibana'] },
         },
       },
-      cursor: { value: '', tiebreaker: null },
+      cursor: { value: undefined, tiebreaker: null },
     },
     {
       node: {
         failures: 21,
         successes: 0,
-        _id: 'user+21',
+        _id: 'M_xLWXQBc39KFIJbY7Cb',
         stackedValue: ['user'],
         lastFailure: {
           timestamp: ['2020-09-04T13:25:43.000Z'],
@@ -833,13 +843,13 @@ export const formattedSearchStrategyResponse = {
           host: { name: ['bastion00.siem.estc.dev'] },
         },
       },
-      cursor: { value: '', tiebreaker: null },
+      cursor: { value: undefined, tiebreaker: null },
     },
     {
       node: {
         failures: 18,
         successes: 0,
-        _id: 'ubuntu+18',
+        _id: 'nPxKWXQBc39KFIJb7q4w',
         stackedValue: ['ubuntu'],
         lastFailure: {
           timestamp: ['2020-09-04T13:25:07.000Z'],
@@ -847,13 +857,13 @@ export const formattedSearchStrategyResponse = {
           host: { name: ['bastion00.siem.estc.dev'] },
         },
       },
-      cursor: { value: '', tiebreaker: null },
+      cursor: { value: undefined, tiebreaker: null },
     },
     {
       node: {
         failures: 17,
         successes: 0,
-        _id: 'odoo+17',
+        _id: 'mPsfWXQBc39KFIJbI8HI',
         stackedValue: ['odoo'],
         lastFailure: {
           timestamp: ['2020-09-04T12:26:36.000Z'],
@@ -861,13 +871,13 @@ export const formattedSearchStrategyResponse = {
           host: { id: ['aa7ca589f1b8220002f2fc61c64cfbf1'], name: ['siem-kibana'] },
         },
       },
-      cursor: { value: '', tiebreaker: null },
+      cursor: { value: undefined, tiebreaker: null },
     },
     {
       node: {
         failures: 17,
         successes: 0,
-        _id: 'pi+17',
+        _id: 'aaToWHQBA6bGZw2uR-St',
         stackedValue: ['pi'],
         lastFailure: {
           timestamp: ['2020-09-04T11:37:22.000Z'],
@@ -875,13 +885,13 @@ export const formattedSearchStrategyResponse = {
           host: { name: ['bastion00.siem.estc.dev'] },
         },
       },
-      cursor: { value: '', tiebreaker: null },
+      cursor: { value: undefined, tiebreaker: null },
     },
     {
       node: {
         failures: 14,
         successes: 0,
-        _id: 'demo+14',
+        _id: 'VaP_V3QBA6bGZw2upUbg',
         stackedValue: ['demo'],
         lastFailure: {
           timestamp: ['2020-09-04T07:23:22.000Z'],
@@ -889,13 +899,13 @@ export const formattedSearchStrategyResponse = {
           host: { name: ['bastion00.siem.estc.dev'] },
         },
       },
-      cursor: { value: '', tiebreaker: null },
+      cursor: { value: undefined, tiebreaker: null },
     },
     {
       node: {
         failures: 13,
         successes: 0,
-        _id: 'git+13',
+        _id: 'PqYfWXQBA6bGZw2uIhVU',
         stackedValue: ['git'],
         lastFailure: {
           timestamp: ['2020-09-04T11:20:26.000Z'],
@@ -903,13 +913,13 @@ export const formattedSearchStrategyResponse = {
           host: { id: ['aa7ca589f1b8220002f2fc61c64cfbf1'], name: ['siem-kibana'] },
         },
       },
-      cursor: { value: '', tiebreaker: null },
+      cursor: { value: undefined, tiebreaker: null },
     },
     {
       node: {
         failures: 13,
         successes: 0,
-        _id: 'webadmin+13',
+        _id: 'iMABWHQBB-gskclyitP-',
         stackedValue: ['webadmin'],
         lastFailure: {
           timestamp: ['2020-09-04T07:25:28.000Z'],
@@ -917,7 +927,7 @@ export const formattedSearchStrategyResponse = {
           host: { name: ['bastion00.siem.estc.dev'] },
         },
       },
-      cursor: { value: '', tiebreaker: null },
+      cursor: { value: undefined, tiebreaker: null },
     },
   ],
   totalCount: 188,
