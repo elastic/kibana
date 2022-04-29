@@ -145,7 +145,7 @@ async function _deleteExistingData(
   }
 
   // unenroll all the agents enroled in this policies
-  const { agents } = await getAgentsByKuery(esClient, {
+  const { agents } = await getAgentsByKuery(soClient, esClient, {
     showInactive: false,
     perPage: SO_SEARCH_LIMIT,
     kuery: existingPolicies.map((policy) => `policy_id:"${policy.id}"`).join(' or '),
