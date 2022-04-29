@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { isValidKuery } from '../../query_bar/query_bar';
 import * as labels from '../translations';
-import { useIndexPattern } from '../../../../hooks';
+import { useUptimeDataView } from '../../../../hooks';
 
 interface Props {
   query: string;
@@ -19,7 +19,7 @@ interface Props {
 }
 
 export const AlertQueryBar = ({ query = '', onChange }: Props) => {
-  const indexPattern = useIndexPattern();
+  const dataView = useUptimeDataView();
 
   const [inputVal, setInputVal] = useState<string>(query);
 
@@ -31,7 +31,7 @@ export const AlertQueryBar = ({ query = '', onChange }: Props) => {
   return (
     <EuiFlexItem grow={1} style={{ flexBasis: 485 }}>
       <QueryStringInput
-        indexPatterns={indexPattern ? [indexPattern] : []}
+        indexPatterns={dataView ? [dataView] : []}
         iconType="search"
         isClearable={true}
         onChange={(queryN) => {
@@ -46,11 +46,11 @@ export const AlertQueryBar = ({ query = '', onChange }: Props) => {
         }}
         query={{ query: inputVal, language: 'kuery' }}
         aria-label={labels.ALERT_KUERY_BAR_ARIA}
-        dataTestSubj="xpack.uptime.alerts.monitorStatus.filterBar"
+        dataTestSubj="xpack.synthetics.alerts.monitorStatus.filterBar"
         autoSubmit={true}
         disableLanguageSwitcher={true}
         isInvalid={!!(inputVal && !query)}
-        placeholder={i18n.translate('xpack.uptime.alerts.searchPlaceholder.kql', {
+        placeholder={i18n.translate('xpack.synthetics.alerts.searchPlaceholder.kql', {
           defaultMessage: 'Filter using kql syntax',
         })}
       />

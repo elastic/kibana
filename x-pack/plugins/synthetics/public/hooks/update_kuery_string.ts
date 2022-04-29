@@ -6,7 +6,7 @@
  */
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import type { IndexPattern } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';
 
 const getKueryString = (urlFilters: string, excludedFilters?: string): string => {
@@ -42,7 +42,7 @@ const getKueryString = (urlFilters: string, excludedFilters?: string): string =>
 };
 
 export const generateUpdatedKueryString = (
-  indexPattern: IndexPattern | null,
+  dataView: DataView | null,
   filterQueryString = '',
   urlFilters: string,
   excludedFilters?: string
@@ -55,10 +55,10 @@ export const generateUpdatedKueryString = (
   // this try catch is necessary to evaluate user input in kuery bar,
   // this error will be actually shown in UI for user to see
   try {
-    if ((filterQueryString || urlFilters || excludedFilters) && indexPattern) {
+    if ((filterQueryString || urlFilters || excludedFilters) && dataView) {
       const ast = fromKueryExpression(combinedFilterString);
 
-      const elasticsearchQuery = toElasticsearchQuery(ast, indexPattern);
+      const elasticsearchQuery = toElasticsearchQuery(ast, dataView);
 
       esFilters = JSON.stringify(elasticsearchQuery);
     }
