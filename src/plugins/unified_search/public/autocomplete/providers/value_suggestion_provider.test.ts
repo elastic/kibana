@@ -182,11 +182,10 @@ describe('FieldSuggestions', () => {
         useTimeRange: false,
       });
 
-      const customDataView = {
-        ...stubDataView,
+      const customDataView = Object.assign({}, stubDataView, {
         title: 'customDataView',
         useTimeRange: false,
-      };
+      });
 
       await getValueSuggestions({
         indexPattern: customDataView,

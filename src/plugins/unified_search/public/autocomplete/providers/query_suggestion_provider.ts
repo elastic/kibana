@@ -7,7 +7,6 @@
  */
 
 import type { ValueSuggestionsMethod } from '@kbn/data-plugin/common';
-// import type { IIndexPattern } from '@kbn/data-plugin/common';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 
 export enum QuerySuggestionTypes {

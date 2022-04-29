@@ -9,8 +9,8 @@
 import type { CoreSetup } from '@kbn/core/public';
 import dateMath from '@kbn/datemath';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import type { IIndexPattern, ValueSuggestionsMethod } from '@kbn/data-plugin/common';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
+import type { ValueSuggestionsMethod } from '@kbn/data-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { TimefilterSetup } from '@kbn/data-plugin/public';
 import { memoize } from 'lodash';
 import type { AutocompleteUsageCollector } from '../collectors';
@@ -18,7 +18,7 @@ import type { AutocompleteUsageCollector } from '../collectors';
 export type ValueSuggestionsGetFn = (args: ValueSuggestionsGetFnArgs) => Promise<any[]>;
 
 interface ValueSuggestionsGetFnArgs {
-  indexPattern: IIndexPattern;
+  indexPattern: DataView;
   field: DataViewField;
   query: string;
   useTimeRange?: boolean;
@@ -27,7 +27,7 @@ interface ValueSuggestionsGetFnArgs {
   method?: ValueSuggestionsMethod;
 }
 
-const getAutocompleteTimefilter = ({ timefilter }: TimefilterSetup, dataView: IIndexPattern) => {
+const getAutocompleteTimefilter = ({ timefilter }: TimefilterSetup, dataView: DataView) => {
   const timeRange = timefilter.getTime();
 
   // Use a rounded timerange so that memoizing works properly

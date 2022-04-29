@@ -9,6 +9,8 @@ import React, { memo, useState, useEffect, useCallback } from 'react';
 import { EuiPopover, EuiFilterButton, EuiFilterSelectItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import type { DataView } from '@kbn/data-views-plugin/public';
+
 import { useStartServices } from '../../../../../hooks';
 
 import { ORDERED_FILTER_LOG_LEVELS, AGENT_LOG_INDEX_PATTERN, LOG_LEVEL_FIELD } from './constants';
@@ -44,7 +46,7 @@ export const LogLevelFilter: React.FunctionComponent<{
           indexPattern: {
             title: AGENT_LOG_INDEX_PATTERN,
             fields: [LOG_LEVEL_FIELD],
-          },
+          } as DataView,
           field: LOG_LEVEL_FIELD,
           query: '',
         });

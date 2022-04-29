@@ -9,6 +9,8 @@ import React, { memo, useState, useEffect, useCallback } from 'react';
 import { EuiPopover, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import type { DataView } from '@kbn/data-views-plugin/public';
+
 import { useStartServices } from '../../../../../hooks';
 
 import { AGENT_LOG_INDEX_PATTERN, DATASET_FIELD, AGENT_DATASET } from './constants';
@@ -33,7 +35,7 @@ export const DatasetFilter: React.FunctionComponent<{
           indexPattern: {
             title: AGENT_LOG_INDEX_PATTERN,
             fields: [DATASET_FIELD],
-          },
+          } as DataView,
           field: DATASET_FIELD,
           query: '',
         });
