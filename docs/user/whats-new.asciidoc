@@ -135,7 +135,7 @@ image::images/highlights-maps-custom-icon-2.png[custom phone icon added to a map
 and actions for a user-defined duration. You'll never miss an
 action because you forgot to unmute a rule while handling problems that arose
 unexpectedly or during known downtimes. For more information, check
-<<controlling-rules>>.
+{kibana-ref}/create-and-manage-rules.html#controlling-rules[Snooze and disable rules].
 
 [role="screenshot"]
 image::images/highlights-alerting-snooze.png["UI for enabling snooze mode"]
