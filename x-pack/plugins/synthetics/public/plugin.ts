@@ -233,11 +233,7 @@ export class UptimePlugin
       title: PLUGIN.SYNTHETICS,
       category: DEFAULT_APP_CATEGORIES.observability,
       keywords: appKeywords,
-      deepLinks: [
-        { id: 'Down monitors', title: 'Down monitors', path: '/?statusFilter=down' },
-        { id: 'Certificates', title: 'TLS Certificates', path: '/certificates' },
-        { id: 'Settings', title: 'Settings', path: '/settings' },
-      ],
+      deepLinks: [],
       mount: async (params: AppMountParameters) => {
         const [coreStart, corePlugins] = await core.getStartServices();
 
