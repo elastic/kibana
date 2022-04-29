@@ -26,10 +26,14 @@ import { useIsOsqueryAvailable } from './use_is_osquery_available';
 interface OsqueryActionProps {
   agentId?: string;
   formType: 'steps' | 'simple';
-  isExternal?: true;
+  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
 }
 
-const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ agentId, formType = 'simple' }) => {
+const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({
+  agentId,
+  formType = 'simple',
+  addToTimeline,
+}) => {
   const permissions = useKibana().services.application.capabilities.osquery;
 
   const emptyPrompt = useMemo(
@@ -99,18 +103,18 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ agentId, formTyp
     );
   }
 
-  return <LiveQuery formType={formType} agentId={agentId} isExternal={true} />;
+  return <LiveQuery formType={formType} agentId={agentId} addToTimeline={addToTimeline} />;
 };
 
 export const OsqueryAction = React.memo(OsqueryActionComponent);
 
 // @ts-expect-error update types
-const OsqueryActionWrapperComponent = ({ services, agentId, formType, isExternal }) => (
+const OsqueryActionWrapperComponent = ({ services, agentId, formType, addToTimeline }) => (
   <KibanaThemeProvider theme$={services.theme.theme$}>
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
         <QueryClientProvider client={queryClient}>
-          <OsqueryAction agentId={agentId} formType={formType} isExternal={isExternal} />
+          <OsqueryAction agentId={agentId} formType={formType} addToTimeline={addToTimeline} />
         </QueryClientProvider>
       </EuiErrorBoundary>
     </KibanaContextProvider>
