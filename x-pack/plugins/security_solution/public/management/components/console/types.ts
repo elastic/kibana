@@ -5,13 +5,24 @@
  * 2.0.
  */
 
-import { ReactNode } from 'react';
-import { CommonProps } from '@elastic/eui';
-import { ParsedArgData, ParsedCommandInput } from './service/parsed_command_input';
+import type { ReactNode, ComponentType } from 'react';
+import type { CommonProps } from '@elastic/eui';
+import { Immutable } from '../../../../common/endpoint/types';
+import type { ParsedArgData, ParsedCommandInput } from './service/parsed_command_input';
 
 export interface CommandDefinition {
   name: string;
   about: string;
+  /**
+   * The Component that will be used to render the Command
+   */
+  Component: CommandExecutionComponent;
+  /**
+   * A store for any data needed when the command is executed.
+   * The entire `CommandDefinition` is passed along to the component
+   * that will handle it, so this data will be available there
+   */
+  meta?: Record<string, unknown>;
   validator?: () => Promise<boolean>;
   /** If all args are optional, but at least one must be defined, set to true */
   mustHaveArgs?: boolean;
@@ -45,6 +56,27 @@ export interface Command {
   /** The command defined associated with this user command */
   commandDefinition: CommandDefinition;
 }
+
+/**
+ * The component that will handle the Command execution and display the result.
+ */
+export type CommandExecutionComponent = ComponentType<{
+  command: Immutable<Command>;
+  /**
+   * A data store for the command execution to store data in, if needed.
+   * Because the Console could be closed/opened several times, which will cause this component
+   * to be `mounted`/`unmounted` several times, this data store will be beneficial for
+   * persisting data (ex. API response with IDs) that the command can use to determine
+   * if the command has already been executed or if it's a new instance.
+   */
+  store: Immutable<Record<string, unknown>>;
+  /** Sets the `meta` data above */
+  setMeta: (meta: Record<string, unknown>) => void;
+  /** The status of the command execution */
+  status: 'pending' | 'success' | 'error';
+  /** Set the status of the command execution  */
+  setStatus: (status: 'pending' | 'success' | 'error') => void;
+}>;
 
 export interface CommandServiceInterface {
   getCommandList(): CommandDefinition[];
