@@ -14,6 +14,7 @@ import {
   DataStream,
   ScheduleUnit,
 } from '../../../../common/runtime_types/monitor_management';
+import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 
 import type { TelemetryEventsSender } from '../../../lib/telemetry/sender';
 import { createMockTelemetryEventsSender } from '../../../lib/telemetry/__mocks__';
@@ -42,6 +43,7 @@ const testConfig: SavedObject<SyntheticsMonitor> = {
   updated_at: '2011-10-05T14:48:00.000Z',
   id,
   attributes: {
+    ...DEFAULT_FIELDS[DataStream.BROWSER],
     [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
     [ConfigKey.LOCATIONS]: [
       {
@@ -103,39 +105,43 @@ describe('monitor upgrade telemetry helpers', () => {
   });
 
   it.each([
-    [ConfigKey.SOURCE_INLINE, 'recorder', true],
-    [ConfigKey.SOURCE_INLINE, 'inline', false],
-    [ConfigKey.SOURCE_ZIP_URL, 'zip', false],
-  ])('handles formatting scriptType for browser monitors', (config, scriptType, isRecorder) => {
-    const actual = formatTelemetryEvent({
-      monitor: createTestConfig({
-        [config]: 'test',
-        [ConfigKey.METADATA]: {
-          script_source: {
-            is_generated_script: isRecorder,
+    [ConfigKey.IS_PUSH_MONITOR, 'push', false, true],
+    [ConfigKey.SOURCE_INLINE, 'recorder', true, 'test'],
+    [ConfigKey.SOURCE_INLINE, 'inline', false, 'test'],
+    [ConfigKey.SOURCE_ZIP_URL, 'zip', false, 'test'],
+  ])(
+    'handles formatting scriptType for browser monitors',
+    (config, scriptType, isRecorder, content) => {
+      const actual = formatTelemetryEvent({
+        monitor: createTestConfig({
+          [config]: content,
+          [ConfigKey.METADATA]: {
+            script_source: {
+              is_generated_script: isRecorder,
+            },
           },
-        },
-      }),
-      kibanaVersion,
-      errors,
-    });
-    expect(actual).toEqual({
-      stackVersion: kibanaVersion,
-      configId: sha256.create().update(testConfig.id).hex(),
-      locations: ['us_central', 'other'],
-      locationsCount: 2,
-      monitorNameLength: testConfig.attributes[ConfigKey.NAME].length,
-      updatedAt: testConfig.updated_at,
-      type: testConfig.attributes[ConfigKey.MONITOR_TYPE],
-      scriptType,
-      monitorInterval: 180000,
-      lastUpdatedAt: undefined,
-      deletedAt: undefined,
-      errors,
-      durationSinceLastUpdated: undefined,
-      revision: 1,
-    });
-  });
+        }),
+        kibanaVersion,
+        errors,
+      });
+      expect(actual).toEqual({
+        stackVersion: kibanaVersion,
+        configId: sha256.create().update(testConfig.id).hex(),
+        locations: ['us_central', 'other'],
+        locationsCount: 2,
+        monitorNameLength: testConfig.attributes[ConfigKey.NAME].length,
+        updatedAt: testConfig.updated_at,
+        type: testConfig.attributes[ConfigKey.MONITOR_TYPE],
+        scriptType,
+        monitorInterval: 180000,
+        lastUpdatedAt: undefined,
+        deletedAt: undefined,
+        errors,
+        durationSinceLastUpdated: undefined,
+        revision: 1,
+      });
+    }
+  );
 
   it('handles formatting update events', () => {
     const actual = formatTelemetryUpdateEvent(

@@ -134,17 +134,20 @@ export function formatTelemetryDeleteEvent(
 
 function getScriptType(
   attributes: Partial<MonitorFields>
-): 'inline' | 'recorder' | 'zip' | undefined {
-  if (attributes[ConfigKey.SOURCE_ZIP_URL]) {
-    return 'zip';
-  } else if (
-    attributes[ConfigKey.SOURCE_INLINE] &&
-    attributes[ConfigKey.METADATA]?.script_source?.is_generated_script
-  ) {
-    return 'recorder';
-  } else if (attributes[ConfigKey.SOURCE_INLINE]) {
-    return 'inline';
+): 'inline' | 'recorder' | 'zip' | 'push' | undefined {
+  switch (true) {
+    case Boolean(attributes[ConfigKey.SOURCE_ZIP_URL]):
+      return 'zip';
+    case Boolean(
+      attributes[ConfigKey.SOURCE_INLINE] &&
+        attributes[ConfigKey.METADATA]?.script_source?.is_generated_script
+    ):
+      return 'recorder';
+    case Boolean(attributes[ConfigKey.SOURCE_INLINE]):
+      return 'inline';
+    case Boolean(attributes[ConfigKey.IS_PUSH_MONITOR]):
+      return 'push';
+    default:
+      return undefined;
   }
-
-  return undefined;
 }
