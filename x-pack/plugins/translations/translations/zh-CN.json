@@ -22809,7 +22809,6 @@
     "xpack.reporting.listing.infoPanel.contentTypeInfo": "内容类型",
     "xpack.reporting.listing.infoPanel.cpuInfo": "CPU 使用",
     "xpack.reporting.listing.infoPanel.createdAtInfo": "创建于",
-<<<<<<< HEAD
     "xpack.reporting.listing.infoPanel.csvRows": "CSV 行",
     "xpack.reporting.listing.infoPanel.dimensionsInfoHeight": "高（像素）",
     "xpack.reporting.listing.infoPanel.dimensionsInfoWidth": "宽（像素）",
@@ -22818,18 +22817,13 @@
     "xpack.reporting.listing.infoPanel.notApplicableLabel": "不可用",
     "xpack.reporting.listing.infoPanel.outputSectionTitle": "输出",
     "xpack.reporting.listing.infoPanel.pdfPagesInfo": "页面计数",
-=======
->>>>>>> d213263ea33 ([Reporting] Reporting info panel touch ups (#120617))
     "xpack.reporting.listing.infoPanel.processedByInfo": "处理者",
     "xpack.reporting.listing.infoPanel.sizeInfo": "大小（字节）",
     "xpack.reporting.listing.infoPanel.space": "Kibana 工作区",
     "xpack.reporting.listing.infoPanel.startedAtInfo": "启动时间",
     "xpack.reporting.listing.infoPanel.statusInfo": "状态",
     "xpack.reporting.listing.infoPanel.timeoutInfo": "超时",
-<<<<<<< HEAD
     "xpack.reporting.listing.infoPanel.timestampSectionTitle": "时间戳",
-=======
->>>>>>> d213263ea33 ([Reporting] Reporting info panel touch ups (#120617))
     "xpack.reporting.listing.infoPanel.tzInfo": "时区",
     "xpack.reporting.listing.infoPanel.unknownLabel": "未知",
     "xpack.reporting.listing.reports.ilmPolicyLinkText": "编辑报告 ILM 策略",
@@ -22848,12 +22842,9 @@
     "xpack.reporting.listing.table.downloadReportDescription": "在新选项卡中下载此报告。",
     "xpack.reporting.listing.table.loadingReportsDescription": "正在载入报告",
     "xpack.reporting.listing.table.noCreatedReportsDescription": "未创建任何报告",
-<<<<<<< HEAD
     "xpack.reporting.listing.table.noTitleLabel": "未命名",
     "xpack.reporting.listing.table.openInKibanaAppDescription": "打开生成此报告的 Kibana 应用。",
     "xpack.reporting.listing.table.openInKibanaAppLabel": "在 Kibana 中打开",
-=======
->>>>>>> d213263ea33 ([Reporting] Reporting info panel touch ups (#120617))
     "xpack.reporting.listing.table.reportInfoAndErrorButtonTooltip": "查看报告信息和错误消息。",
     "xpack.reporting.listing.table.reportInfoAndWarningsButtonTooltip": "查看报告信息和警告。",
     "xpack.reporting.listing.table.reportInfoButtonTooltip": "查看报告信息。",

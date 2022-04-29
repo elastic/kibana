@@ -22777,7 +22777,6 @@
     "xpack.reporting.listing.infoPanel.contentTypeInfo": "コンテンツタイプ",
     "xpack.reporting.listing.infoPanel.cpuInfo": "CPU 使用状況",
     "xpack.reporting.listing.infoPanel.createdAtInfo": "作成日時：",
-<<<<<<< HEAD
     "xpack.reporting.listing.infoPanel.csvRows": "CSV行",
     "xpack.reporting.listing.infoPanel.dimensionsInfoHeight": "ピクセル単位の高さ",
     "xpack.reporting.listing.infoPanel.dimensionsInfoWidth": "ピクセル単位の幅",
@@ -22786,18 +22785,13 @@
     "xpack.reporting.listing.infoPanel.notApplicableLabel": "N/A",
     "xpack.reporting.listing.infoPanel.outputSectionTitle": "アウトプット",
     "xpack.reporting.listing.infoPanel.pdfPagesInfo": "ページ数",
-=======
->>>>>>> d213263ea33 ([Reporting] Reporting info panel touch ups (#120617))
     "xpack.reporting.listing.infoPanel.processedByInfo": "処理方法",
     "xpack.reporting.listing.infoPanel.sizeInfo": "サイズ（バイト）",
     "xpack.reporting.listing.infoPanel.space": "Kibanaスペース",
     "xpack.reporting.listing.infoPanel.startedAtInfo": "開始日時",
     "xpack.reporting.listing.infoPanel.statusInfo": "ステータス",
     "xpack.reporting.listing.infoPanel.timeoutInfo": "タイムアウト（ms）",
-<<<<<<< HEAD
     "xpack.reporting.listing.infoPanel.timestampSectionTitle": "タイムスタンプ",
-=======
->>>>>>> d213263ea33 ([Reporting] Reporting info panel touch ups (#120617))
     "xpack.reporting.listing.infoPanel.tzInfo": "タイムゾーン",
     "xpack.reporting.listing.infoPanel.unknownLabel": "不明",
     "xpack.reporting.listing.reports.ilmPolicyLinkText": "レポートILMポリシーを編集",
@@ -22816,12 +22810,9 @@
     "xpack.reporting.listing.table.downloadReportDescription": "このレポートを新しいタブでダウンロードします。",
     "xpack.reporting.listing.table.loadingReportsDescription": "レポートを読み込み中です",
     "xpack.reporting.listing.table.noCreatedReportsDescription": "レポートが作成されていません",
-<<<<<<< HEAD
     "xpack.reporting.listing.table.noTitleLabel": "無題",
     "xpack.reporting.listing.table.openInKibanaAppDescription": "このレポートが生成されたKibanaアプリを開きます。",
     "xpack.reporting.listing.table.openInKibanaAppLabel": "Kibanaで開く",
-=======
->>>>>>> d213263ea33 ([Reporting] Reporting info panel touch ups (#120617))
     "xpack.reporting.listing.table.reportInfoAndErrorButtonTooltip": "レポート情報とエラーメッセージを参照してください。",
     "xpack.reporting.listing.table.reportInfoAndWarningsButtonTooltip": "レポート情報と警告を参照してください。",
     "xpack.reporting.listing.table.reportInfoButtonTooltip": "レポート情報を参照してください。",
