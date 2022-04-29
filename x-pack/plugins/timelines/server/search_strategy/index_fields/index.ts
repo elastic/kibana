@@ -272,7 +272,7 @@ export const formatFirstFields = async (
         responsesFieldSpec.reduce(
           (accumulator: IndexField[], fieldSpec: FieldSpec[], indexesAliasId: number) => {
             const indexesAliasIdx = responsesFieldSpec.length > 1 ? indexesAliasId : null;
-            [...missingFields, ...fieldSpec].forEach((index) => {
+            missingFields.concat(fieldSpec).forEach((index) => {
               const item = createFieldItem(beatFields, indexesAlias, index, indexesAliasIdx);
               const alreadyExistingIndexField = indexFieldNameHash[item.name];
               if (alreadyExistingIndexField != null) {
@@ -281,7 +281,7 @@ export const formatFirstFields = async (
                   accumulator[alreadyExistingIndexField].description = item.description;
                 }
                 accumulator[alreadyExistingIndexField].indexes = Array.from(
-                  new Set([...existingIndexField.indexes, ...item.indexes])
+                  new Set(existingIndexField.indexes.concat(item.indexes))
                 );
                 return;
               }
