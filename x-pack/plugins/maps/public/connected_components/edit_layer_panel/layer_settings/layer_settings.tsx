@@ -7,6 +7,7 @@
 
 import React, { ChangeEvent, Fragment } from 'react';
 import {
+  EuiColorPicker,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiTitle,
@@ -32,6 +33,7 @@ export interface Props {
   layer: ILayer;
   clearLayerAttribution: (layerId: string) => void;
   setLayerAttribution: (id: string, attribution: Attribution) => void;
+  updateColorTheme: (layerId: string, color: string) => void;
   updateLabel: (layerId: string, label: string) => void;
   updateLocale: (layerId: string, locale: string) => void;
   updateMinZoom: (layerId: string, minZoom: number) => void;
@@ -56,6 +58,10 @@ export function LayerSettings(props: Props) {
     const { key } = options[0];
     if (key) props.updateLocale(layerId, key);
   };
+
+  const onColorThemeChange = (color: string) => {
+    props.updateColorTheme(layerId, color);
+  }
 
   const onZoomChange = (value: [string, string]) => {
     props.updateMinZoom(layerId, Math.max(minVisibilityZoom, parseInt(value[0], 10)));
@@ -169,12 +175,29 @@ export function LayerSettings(props: Props) {
       return null;
     }
 
-    const supportedLanguages = Object.entries(TMSService.SupportedLanguages).map(([key, { label }]) => {
-      const i18nLabel = i18n.translate(`xpack.maps.source.emsTile.basemapLabel${key}`, {
+    const options = [
+      {
+        key: 'default',
+        label: i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageDefault', {
+          defaultMessage: 'Default',
+        }),
+        value: '',
+      },
+      {
+        key: 'autoselect',
+        label: i18n.translate('xpack.maps.layerPanel.settingsPanel.labelLanguageAutoselect', {
+          defaultMessage: 'Autoselect based on locale in Kibana settings',
+        }),
+        value: 'autoselect',
+      }
+    ];
+
+    options.push(...Object.entries(TMSService.SupportedLanguages).map(([key, { label, omtCode }]) => {
+      const i18nLabel = i18n.translate(`xpack.maps.layerPanel.settingsPanel.labelLanguage${key}`, {
         defaultMessage: label,
       });
-      return { key, label: i18nLabel };
-    });
+      return { key, label: i18nLabel, value: omtCode };
+    }));
 
     return (
       <EuiFormRow
@@ -184,14 +207,35 @@ export function LayerSettings(props: Props) {
         helpText="Display labels in a different language"
       >
         <EuiComboBox
-          options={supportedLanguages}
+          options={options}
           singleSelection={{ asPlainText: true }}
-          selectedOptions={supportedLanguages.filter(({ key }) => key === props.layer.getLocale())}
+          selectedOptions={options.filter(({ key }) => key === props.layer.getLocale())}
           onChange={onLocaleChange}
         />
       </EuiFormRow>
     );
   };
+
+  const renderColorPicker = () => {
+    if (!props.layer.supportsColorTheme()) {
+      return null;
+    }
+
+    return (
+      <EuiFormRow
+        display="columnCompressed"
+        label="Color theme"
+        helpText="Apply a color theme to the basemap"
+      >
+      <EuiColorPicker
+        color={props.layer.getColorTheme()}
+        mode='default'
+        onChange={onColorThemeChange}
+      />
+
+      </EuiFormRow>
+    )
+  }
 
   return (
     <Fragment>
@@ -211,6 +255,7 @@ export function LayerSettings(props: Props) {
         <AlphaSlider alpha={props.layer.getAlpha()} onChange={onAlphaChange} />
         {renderShowLabelsOnTop()}
         {renderShowLocaleSelector()}
+        {renderColorPicker()}
         <AttributionFormRow layer={props.layer} onChange={onAttributionChange} />
         {renderIncludeInFitToBounds()}
       </EuiPanel>

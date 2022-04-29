@@ -376,6 +376,16 @@ export class EmsVectorTileLayer extends AbstractLayer {
     return [];
   }
 
+  _setColorTheme(mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) {
+    const theme = this.getColorTheme();
+    if (theme !== null) {
+      const properties = TMSService.transformColorProperties(mbLayer, theme);
+      for (const { property, color } of properties) {
+        mbMap.setPaintProperty(mbLayerId, property, color);
+      }
+    }
+  }
+
   _setOpacityForType(mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) {
     this._getOpacityProps(mbLayer.type).forEach((opacityProp) => {
       const mbPaint = mbLayer.paint as { [key: string]: unknown } | undefined;
@@ -422,6 +432,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
       this._setLayerZoomRange(mbMap, mbLayer, mbLayerId);
       this._setOpacityForType(mbMap, mbLayer, mbLayerId);
       this._setLanguage(mbMap, mbLayer, mbLayerId);
+      this._setColorTheme(mbMap, mbLayer, mbLayerId);
     });
   }
 
@@ -434,6 +445,10 @@ export class EmsVectorTileLayer extends AbstractLayer {
   }
 
   supportsLabelLocales(): boolean {
+    return true;
+  }
+
+  supportsColorTheme(): boolean {
     return true;
   }
 
