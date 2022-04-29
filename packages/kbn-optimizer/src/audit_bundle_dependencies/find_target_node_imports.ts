@@ -14,6 +14,14 @@ import { REPO_ROOT } from '@kbn/utils';
 import { OptimizerConfig } from '../optimizer';
 import { parseStats } from './parse_stats';
 
+/**
+ * Analyzes the bundle dependencies to find any imports using the `@kbn/<package_name>/target_node` build target.
+ *
+ * We should aim for those packages to be imported using the `@kbn/<package_name>/target_web` build because it's optimized
+ * for browser compatibility.
+ *
+ * This utility also helps identify when code that should only run in the server is leaked into the browser.
+ */
 export async function runFindTargetNodeImportsCli() {
   run(async ({ log }) => {
     const config = OptimizerConfig.create({
