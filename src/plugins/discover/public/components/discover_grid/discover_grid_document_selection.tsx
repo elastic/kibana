@@ -51,7 +51,7 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
   return (
     <EuiCheckbox
       id={id}
-      label=""
+      aria-label="select document"
       checked={checked}
       data-test-subj={`dscGridSelectDoc-${id}`}
       onChange={() => {
