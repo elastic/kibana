@@ -30,14 +30,13 @@ export const convertPackQueriesToSO = (queries) =>
 export const convertSOQueriesToPack = (queries, removeMultiLines?: boolean) =>
   reduce(
     queries,
-    (acc, value, key) => {
-      const index = value.id ? value.id : key;
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    (acc, { id: queryId, ecs_mapping, query, ...rest }, key) => {
+      const index = queryId ? queryId : key;
       acc[index] = {
-        ...value,
-        query: removeMultiLines
-          ? value.query.replaceAll('\n', ' ').replaceAll('  ', ' ')
-          : value.query,
-        ecs_mapping: convertECSMappingToObject(value.ecs_mapping),
+        ...rest,
+        query: removeMultiLines ? query.replaceAll('\n', ' ').replaceAll('  ', ' ') : query,
+        ecs_mapping: convertECSMappingToObject(ecs_mapping),
       };
 
       return acc;
