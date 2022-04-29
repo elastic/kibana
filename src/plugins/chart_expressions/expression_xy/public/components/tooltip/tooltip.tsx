@@ -14,11 +14,16 @@ import {
   getMetaFromSeriesId,
   LayersAccessorsTitles,
   LayersFieldFormats,
-} from '../helpers';
+} from '../../helpers';
+import { XDomain } from '../x_domain';
+import { EndzoneTooltipHeader } from './endzone_tooltip_header';
+import { TooltipData, TooltipRow } from './tooltip_row';
+import { isEndzoneBucket } from './utils';
 
 import './tooltip.scss';
 
 type Props = TooltipInfo & {
+  xDomain?: XDomain;
   fieldFormats: LayersFieldFormats;
   titles: LayersAccessorsTitles;
   formatFactory: FormatFactory;
@@ -29,25 +34,6 @@ type Props = TooltipInfo & {
   };
 };
 
-interface TooltipData {
-  label: string;
-  value: string;
-}
-
-export const TooltipRow: FC<TooltipData> = ({ label, value }) => {
-  return label && value ? (
-    <tr>
-      <td className="detailedTooltip__label">
-        <div className="detailedTooltip__labelContainer">{label}</div>
-      </td>
-
-      <td className="detailedTooltip__value">
-        <div className="detailedTooltip__valueContainer">{value}</div>
-      </td>
-    </tr>
-  ) : null;
-};
-
 export const Tooltip: FC<Props> = ({
   header,
   values,
@@ -56,6 +42,7 @@ export const Tooltip: FC<Props> = ({
   formatFactory,
   formattedDatatables,
   splitAccessors,
+  xDomain,
 }) => {
   const pickedValue = values.find(({ isHighlighted }) => isHighlighted);
 
@@ -69,8 +56,9 @@ export const Tooltip: FC<Props> = ({
   const { formattedColumns } = formattedDatatables[layerId];
   const layerTitles = titles[layerId];
   const layerFormats = fieldFormats[layerId];
+  let headerFormatter;
   if (header && xAccessor) {
-    const headerFormatter = formattedColumns[xAccessor]
+    headerFormatter = formattedColumns[xAccessor]
       ? null
       : formatFactory(layerFormats.xAccessors[xAccessor]);
     data.push({
@@ -121,8 +109,15 @@ export const Tooltip: FC<Props> = ({
     <TooltipRow {...tooltipRow} key={`${tooltipRow.label}-${tooltipRow.value}-${index}`} />
   ));
 
+  const renderEndzoneTooltip = header ? isEndzoneBucket(header?.value, xDomain) : false;
+
   return (
     <div className="detailedTooltip">
+      {renderEndzoneTooltip && (
+        <div className="detailedTooltip__header">
+          <EndzoneTooltipHeader />
+        </div>
+      )}
       <table>
         <tbody>{tooltipRows}</tbody>
       </table>

@@ -65,6 +65,7 @@ import { DataLayers } from './data_layers';
 import { Tooltip } from './tooltip';
 
 import './xy_chart.scss';
+import { TooltipHeader } from './tooltip';
 
 declare global {
   interface Window {
@@ -558,7 +559,13 @@ export function XYChart({
         baseTheme={chartBaseTheme}
         tooltip={{
           boundary: document.getElementById('app-fixed-viewport') ?? undefined,
-          headerFormatter: (d) => safeXAccessorLabelRenderer(d.value),
+          headerFormatter: ({ value }) => (
+            <TooltipHeader
+              value={value}
+              formatter={safeXAccessorLabelRenderer}
+              xDomain={rawXDomain}
+            />
+          ),
           customTooltip: ({ header, values }) => (
             <Tooltip
               header={header}
@@ -567,7 +574,11 @@ export function XYChart({
               fieldFormats={fieldFormats}
               formatFactory={formatFactory}
               formattedDatatables={formattedDatatables}
-              splitAccessors={{ splitColumnAccessor: splitColumnId, splitRowAccessor: splitRowId }}
+              splitAccessors={{
+                splitColumnAccessor: splitColumnId,
+                splitRowAccessor: splitRowId,
+              }}
+              xDomain={isTimeViz ? rawXDomain : undefined}
             />
           ),
         }}
