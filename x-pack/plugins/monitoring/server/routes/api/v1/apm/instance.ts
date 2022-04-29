@@ -19,12 +19,15 @@ import { MonitoringCore } from '../../../../types';
 import { metricSet } from './metric_set_instance';
 
 export function apmInstanceRoute(server: MonitoringCore) {
+  const validateParams = createValidationFunction(postApmInstanceRequestParamsRT);
+  const validateBody = createValidationFunction(postApmInstanceRequestPayloadRT);
+
   server.route({
     method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/apm/{apmUuid}',
     validate: {
-      params: createValidationFunction(postApmInstanceRequestParamsRT),
-      body: createValidationFunction(postApmInstanceRequestPayloadRT),
+      params: validateParams,
+      body: validateBody,
     },
     async handler(req) {
       const apmUuid = req.params.apmUuid;
