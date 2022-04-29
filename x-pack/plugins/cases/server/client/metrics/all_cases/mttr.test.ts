@@ -74,4 +74,87 @@ describe('MTTR', () => {
 
     expect(await handler.compute()).toEqual({ mttr: 5 });
   });
+
+  it('passes the query options correctly', async () => {
+    caseService.executeAggregations.mockResolvedValue({ mttr: { value: 5 } });
+    const handler = new MTTR({
+      ...constructorOptions,
+      from: '2022-04-28T15:18:00.000Z',
+      to: '2022-04-28T15:22:00.000Z',
+      owner: 'cases',
+    });
+
+    handler.setupFeature('mttr');
+    await handler.compute();
+
+    expect(caseService.executeAggregations.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "aggregationBuilders": Array [
+          AverageDuration {},
+        ],
+        "options": Object {
+          "filter": Object {
+            "arguments": Array [
+              Object {
+                "arguments": Array [
+                  Object {
+                    "arguments": Array [
+                      Object {
+                        "type": "literal",
+                        "value": "cases.attributes.created_at",
+                      },
+                      "gte",
+                      Object {
+                        "type": "literal",
+                        "value": "2022-04-28T15:18:00.000Z",
+                      },
+                    ],
+                    "function": "range",
+                    "type": "function",
+                  },
+                  Object {
+                    "arguments": Array [
+                      Object {
+                        "type": "literal",
+                        "value": "cases.attributes.created_at",
+                      },
+                      "lte",
+                      Object {
+                        "type": "literal",
+                        "value": "2022-04-28T15:22:00.000Z",
+                      },
+                    ],
+                    "function": "range",
+                    "type": "function",
+                  },
+                ],
+                "function": "and",
+                "type": "function",
+              },
+              Object {
+                "arguments": Array [
+                  Object {
+                    "type": "literal",
+                    "value": "cases.attributes.owner",
+                  },
+                  Object {
+                    "type": "literal",
+                    "value": "cases",
+                  },
+                  Object {
+                    "type": "literal",
+                    "value": false,
+                  },
+                ],
+                "function": "is",
+                "type": "function",
+              },
+            ],
+            "function": "and",
+            "type": "function",
+          },
+        },
+      }
+    `);
+  });
 });

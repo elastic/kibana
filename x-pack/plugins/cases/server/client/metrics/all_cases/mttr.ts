@@ -26,7 +26,7 @@ export class MTTR extends AllCasesAggregationHandler {
 
     try {
       const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
-        Operations.getCaseMetrics
+        Operations.getCasesMetrics
       );
 
       const caseQueryOptions = constructQueryOptions({

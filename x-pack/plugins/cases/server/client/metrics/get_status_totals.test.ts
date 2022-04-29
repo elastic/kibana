@@ -6,10 +6,10 @@
  */
 
 import { CasesClientMock } from '../mocks';
-import { getCasesMetrics } from './get_cases_metrics';
+import { getStatusTotalsByType } from './get_status_totals';
 import { createMockClientArgs, createMockClient } from './test_utils/client';
 
-describe('getCasesMetrics', () => {
+describe('getStatusTotalsByType', () => {
   let client: CasesClientMock;
   let mockServices: ReturnType<typeof createMockClientArgs>['mockServices'];
   let clientArgs: ReturnType<typeof createMockClientArgs>['clientArgs'];
@@ -27,31 +27,35 @@ describe('getCasesMetrics', () => {
 
   describe('MTTR', () => {
     beforeEach(() => {
-      mockServices.caseService.executeAggregations.mockResolvedValue({ mttr: { value: 5 } });
+      mockServices.caseService.getCaseStatusStats.mockResolvedValue({
+        open: 1,
+        'in-progress': 2,
+        closed: 1,
+      });
     });
 
-    it('returns the mttr metric', async () => {
-      const metrics = await getCasesMetrics({ features: ['mttr'] }, client, clientArgs);
-      expect(metrics).toEqual({ mttr: 5 });
+    it('returns the status correctly', async () => {
+      const metrics = await getStatusTotalsByType({}, clientArgs);
+      expect(metrics).toEqual({
+        count_closed_cases: 1,
+        count_in_progress_cases: 2,
+        count_open_cases: 1,
+      });
     });
 
     it('calls the executeAggregations correctly', async () => {
-      await getCasesMetrics(
+      await getStatusTotalsByType(
         {
-          features: ['mttr'],
           from: '2022-04-28T15:18:00.000Z',
           to: '2022-04-28T15:22:00.000Z',
           owner: 'cases',
         },
-        client,
         clientArgs
       );
-      expect(mockServices.caseService.executeAggregations.mock.calls[0][0]).toMatchInlineSnapshot(`
+
+      expect(mockServices.caseService.getCaseStatusStats.mock.calls[0][0]).toMatchInlineSnapshot(`
         Object {
-          "aggregationBuilders": Array [
-            AverageDuration {},
-          ],
-          "options": Object {
+          "searchOptions": Object {
             "filter": Object {
               "arguments": Array [
                 Object {
@@ -112,6 +116,7 @@ describe('getCasesMetrics', () => {
               "function": "and",
               "type": "function",
             },
+            "sortField": "created_at",
           },
         }
       `);
