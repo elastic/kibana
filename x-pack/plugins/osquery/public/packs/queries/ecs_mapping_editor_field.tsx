@@ -864,11 +864,12 @@ export const ECSMappingEditorField = React.memo(
           return currentValue;
         }
 
+        const oneLineQuery = query.replaceAll('\n', ' ').replaceAll('  ', ' ');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let ast: Record<string, any> | undefined;
 
         try {
-          ast = sqlParser.parse(query)?.value;
+          ast = sqlParser.parse(oneLineQuery)?.value;
         } catch (e) {
           return currentValue;
         }
