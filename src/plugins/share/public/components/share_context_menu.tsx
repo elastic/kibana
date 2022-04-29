@@ -36,26 +36,42 @@ export interface ShareContextMenuProps {
 
 export class ShareContextMenu extends Component<ShareContextMenuProps> {
   public render() {
-    const { panels, initialPanelId } = this.getPanels();
+    const panels = this.getPanels();
     return (
       <I18nProvider>
-        <EuiContextMenu
-          initialPanelId={initialPanelId}
-          panels={panels}
-          data-test-subj="shareContextMenu"
-        />
+        <EuiContextMenu initialPanelId={0} panels={panels} data-test-subj="shareContextMenu" />
       </I18nProvider>
     );
   }
 
   private getPanels = () => {
-    const panels: EuiContextMenuPanelDescriptor[] = [];
-    const menuItems: ShareContextMenuPanelItem[] = [];
+    const topLevelMenu: EuiContextMenuPanelDescriptor[] = [
+      {
+        id: 0,
+        title: i18n.translate('share.contextMenuTitle', {
+          defaultMessage: 'Share the {objectType}',
+          values: {
+            objectType: this.props.objectType,
+          },
+        }),
+        items: [],
+      },
+    ];
+    let menuItems: ShareContextMenuPanelItem[] = [];
 
+    /** Get link **/
+    menuItems.push({
+      name: i18n.translate('share.contextMenu.permalinksLabel', {
+        defaultMessage: 'Get link',
+      }),
+      icon: 'link',
+      panel: 'permaLinksPanel',
+      sortOrder: 0,
+    });
     const permalinkPanel = {
-      id: panels.length + 1,
+      id: 'permaLinksPanel',
       title: i18n.translate('share.contextMenu.permalinkPanelTitle', {
-        defaultMessage: 'Permalink',
+        defaultMessage: 'Get link',
       }),
       content: (
         <UrlPanelContent
@@ -69,21 +85,51 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
         />
       ),
     };
-    menuItems.push({
-      name: i18n.translate('share.contextMenu.permalinksLabel', {
-        defaultMessage: 'Permalinks',
-      }),
-      icon: 'link',
-      panel: permalinkPanel.id,
-      sortOrder: 0,
-    });
-    panels.push(permalinkPanel);
+    topLevelMenu.push(permalinkPanel);
 
+    /** Export **/
+    if (this.props.shareMenuItems.length > 1) {
+      menuItems.push({
+        name: i18n.translate('share.contextMenu.exportLabel', {
+          defaultMessage: 'Export',
+        }),
+        icon: 'exportAction',
+        panel: 'exportActionPanel',
+        sortOrder: 2,
+      });
+      const exportPanel = {
+        id: 'exportActionPanel',
+        title: i18n.translate('share.contextMenu.exportPanelTitle', {
+          defaultMessage: 'Export',
+        }),
+        items: [] as ShareContextMenuPanelItem[],
+      };
+      this.props.shareMenuItems.forEach(({ shareMenuItem, panel }) => {
+        exportPanel.items.push({ ...shareMenuItem, panel: panel.id });
+        topLevelMenu.push(panel);
+      });
+      topLevelMenu.push(exportPanel);
+    } else {
+      const { shareMenuItem, panel } = this.props.shareMenuItems[0];
+      menuItems.push({ ...shareMenuItem, panel: panel.id });
+      topLevelMenu.push(panel);
+    }
+
+    /** Embed code **/
     if (this.props.allowEmbed) {
+      menuItems.push({
+        name: i18n.translate('share.contextMenu.embedCodeLabel', {
+          defaultMessage: 'Embed code',
+        }),
+        icon: 'console',
+        panel: 'embedCodePanel',
+        sortOrder: 1,
+      });
+
       const embedPanel = {
-        id: panels.length + 1,
+        id: 'embedCodePanel',
         title: i18n.translate('share.contextMenu.embedCodePanelTitle', {
-          defaultMessage: 'Embed Code',
+          defaultMessage: 'Embed code',
         }),
         content: (
           <UrlPanelContent
@@ -99,65 +145,33 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
           />
         ),
       };
-      panels.push(embedPanel);
-      menuItems.push({
-        name: i18n.translate('share.contextMenu.embedCodeLabel', {
-          defaultMessage: 'Embed code',
-        }),
-        icon: 'console',
-        panel: embedPanel.id,
-        sortOrder: 0,
-      });
+      topLevelMenu.push(embedPanel);
     }
-
-    this.props.shareMenuItems.forEach(({ shareMenuItem, panel }) => {
-      const panelId = panels.length + 1;
-      panels.push({
-        ...panel,
-        id: panelId,
-      });
-      menuItems.push({
-        ...shareMenuItem,
-        panel: panelId,
-      });
-    });
 
     if (menuItems.length > 1) {
-      const topLevelMenuPanel = {
-        id: panels.length + 1,
-        title: i18n.translate('share.contextMenuTitle', {
-          defaultMessage: 'Share this {objectType}',
-          values: {
-            objectType: this.props.objectType,
-          },
-        }),
-        items: menuItems
-          // Sorts ascending on sort order first and then ascending on name
-          .sort((a, b) => {
-            const aSortOrder = a.sortOrder || 0;
-            const bSortOrder = b.sortOrder || 0;
-            if (aSortOrder > bSortOrder) {
-              return 1;
-            }
-            if (aSortOrder < bSortOrder) {
-              return -1;
-            }
-            if (a.name.toLowerCase().localeCompare(b.name.toLowerCase()) > 0) {
-              return 1;
-            }
-            return -1;
-          })
-          .map((menuItem) => {
-            menuItem['data-test-subj'] = `sharePanel-${menuItem.name.replace(' ', '')}`;
-            delete menuItem.sortOrder;
-            return menuItem;
-          }),
-      };
-      panels.push(topLevelMenuPanel);
+      // Sorts ascending on sort order first and then ascending on name
+      menuItems = menuItems.sort((a, b) => {
+        const aSortOrder = a.sortOrder || 0;
+        const bSortOrder = b.sortOrder || 0;
+        if (aSortOrder > bSortOrder) {
+          return 1;
+        }
+        if (aSortOrder < bSortOrder) {
+          return -1;
+        }
+        if (a.name.toLowerCase().localeCompare(b.name.toLowerCase()) > 0) {
+          return 1;
+        }
+        return -1;
+      });
     }
+    menuItems.map((menuItem) => {
+      menuItem['data-test-subj'] = `sharePanel-${menuItem.name.replace(' ', '')}`;
+      delete menuItem.sortOrder;
+      return menuItem;
+    });
+    topLevelMenu[0].items = menuItems;
 
-    const lastPanelIndex = panels.length - 1;
-    const initialPanelId = panels[lastPanelIndex].id;
-    return { panels, initialPanelId };
+    return topLevelMenu;
   };
 }
