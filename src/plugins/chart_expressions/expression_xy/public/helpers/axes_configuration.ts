@@ -37,7 +37,7 @@ export function isFormatterCompatible(
   formatter1: SerializedFieldFormat,
   formatter2: SerializedFieldFormat
 ) {
-  return formatter1.id === formatter2.id;
+  return formatter1?.id === formatter2?.id;
 }
 
 export function groupAxesByType(

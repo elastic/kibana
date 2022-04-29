@@ -240,7 +240,11 @@ describe('axes_configuration', () => {
   const fieldFormats: LayersFieldFormats = {
     first: {
       xAccessors: { c: { id: 'number', params: {} } },
-      yAccessors: { yAccessorId: { id: 'number', params: {} } },
+      yAccessors: {
+        yAccessorId: { id: 'number', params: {} },
+        yAccessorId3: { id: 'currency', params: {} },
+        yAccessorId4: { id: 'currency', params: {} },
+      },
       splitSeriesAccessors: { d: { id: 'number', params: {} } },
       splitColumnAccessors: {},
       splitRowAccessors: {},
@@ -321,8 +325,8 @@ describe('axes_configuration', () => {
     expect(groups[0].series[1].accessor).toEqual('yAccessorId4');
     expect(groups[1].position).toEqual('right');
     expect(groups[1].series[0].accessor).toEqual('yAccessorId');
-    expect(formatFactory).toHaveBeenCalledWith({ id: 'number' });
-    expect(formatFactory).toHaveBeenCalledWith({ id: 'currency' });
+    expect(formatFactory).toHaveBeenCalledWith({ id: 'number', params: {} });
+    expect(formatFactory).toHaveBeenCalledWith({ id: 'currency', params: {} });
   });
 
   it('should create one formatter per series group', () => {
@@ -340,7 +344,7 @@ describe('axes_configuration', () => {
       fieldFormats
     );
     expect(formatFactory).toHaveBeenCalledTimes(2);
-    expect(formatFactory).toHaveBeenCalledWith({ id: 'number' });
-    expect(formatFactory).toHaveBeenCalledWith({ id: 'currency' });
+    expect(formatFactory).toHaveBeenCalledWith({ id: 'number', params: {} });
+    expect(formatFactory).toHaveBeenCalledWith({ id: 'currency', params: {} });
   });
 });
