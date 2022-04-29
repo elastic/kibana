@@ -79,12 +79,12 @@ export async function getDocCountPerProcessorEvent({
   );
 
   const serviceStats = response.aggregations?.services.buckets.map((bucket) => {
-    const service = bucket.key as string;
-    const numberOfDocs = bucket.doc_count;
+    const serviceName = bucket.key as string;
+    const totalServiceDocs = bucket.doc_count;
     const environments = bucket.environments.buckets.map(
       ({ key }) => key as string
     );
-    const numberOfDocsPerProcessorEvent = bucket.processor_event.buckets.reduce(
+    const docsPerProcessorEvent = bucket.processor_event.buckets.reduce(
       (
         acc: Record<Exclude<ProcessorEvent, ProcessorEvent.profile>, number>,
         { key, doc_count: docCount }
@@ -101,10 +101,13 @@ export async function getDocCountPerProcessorEvent({
     );
 
     return {
-      service,
-      numberOfDocs,
+      serviceName,
       environments,
-      ...numberOfDocsPerProcessorEvent,
+      totalServiceDocs,
+      transactionDocs: docsPerProcessorEvent.transaction,
+      spanDocs: docsPerProcessorEvent.span,
+      metricDocs: docsPerProcessorEvent.metric,
+      errorDocs: docsPerProcessorEvent.error,
     };
   });
 

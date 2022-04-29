@@ -64,7 +64,7 @@ export function StorageExplorer() {
 
   const columns: Array<EuiBasicTableColumn<StorageExplorerItem>> = [
     {
-      field: 'service',
+      field: 'serviceName',
       name: i18n.translate(
         'xpack.apm.settings.storageExplorer.table.serviceColumnName',
         {
@@ -109,7 +109,7 @@ export function StorageExplorer() {
       sortable: true,
     },
     {
-      field: 'transaction',
+      field: 'transactionDocs',
       name: i18n.translate(
         'xpack.apm.settings.storageExplorer.table.transactionsColumnName',
         {
@@ -119,7 +119,7 @@ export function StorageExplorer() {
       sortable: true,
     },
     {
-      field: 'span',
+      field: 'spanDocs',
       name: i18n.translate(
         'xpack.apm.settings.storageExplorer.table.spansColumnName',
         {
@@ -129,7 +129,7 @@ export function StorageExplorer() {
       sortable: true,
     },
     {
-      field: 'error',
+      field: 'errorDocs',
       name: i18n.translate(
         'xpack.apm.settings.storageExplorer.table.errorsColumnName',
         {
@@ -139,7 +139,7 @@ export function StorageExplorer() {
       sortable: true,
     },
     {
-      field: 'metric',
+      field: 'metricDocs',
       name: i18n.translate(
         'xpack.apm.settings.storageExplorer.table.metricsColumnName',
         {
@@ -225,7 +225,7 @@ export function StorageExplorer() {
           topGroove={0}
           layers={[
             {
-              groupByRollup: (d: Datum) => d.service,
+              groupByRollup: (d: Datum) => d.serviceName,
               shape: {
                 fillColor: (d) =>
                   groupedPalette[d.parent.sortIndex * 3 + d.sortIndex],

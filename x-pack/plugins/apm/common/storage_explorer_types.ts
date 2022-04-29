@@ -8,14 +8,14 @@
 import * as t from 'io-ts';
 
 export interface StorageExplorerItem {
-  service: string;
+  serviceName: string;
   environments: string[];
+  transactionDocs: number;
+  spanDocs: number;
+  errorDocs: number;
+  metricDocs: number;
   size?: number;
   sampling: number;
-  transaction: number;
-  span: number;
-  error: number;
-  metric: number;
 }
 
 export enum IndexLifecyclePhase {
