@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
   getServiceNowConnector,
+  getServiceNowOAuthConnector,
   getJiraConnector,
   getResilientConnector,
   createConnector,
@@ -31,6 +32,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should return the correct connectors', async () => {
       const snConnector = await createConnector({ supertest, req: getServiceNowConnector() });
+      const snOAuthConnector = await createConnector({
+        supertest,
+        req: getServiceNowOAuthConnector(),
+      });
       const emailConnector = await createConnector({ supertest, req: getEmailConnector() });
       const jiraConnector = await createConnector({ supertest, req: getJiraConnector() });
       const resilientConnector = await createConnector({ supertest, req: getResilientConnector() });
@@ -38,13 +43,15 @@ export default ({ getService }: FtrProviderContext): void => {
 
       actionsRemover.add('default', sir.id, 'action', 'actions');
       actionsRemover.add('default', snConnector.id, 'action', 'actions');
+      actionsRemover.add('default', snOAuthConnector.id, 'action', 'actions');
       actionsRemover.add('default', emailConnector.id, 'action', 'actions');
       actionsRemover.add('default', jiraConnector.id, 'action', 'actions');
       actionsRemover.add('default', resilientConnector.id, 'action', 'actions');
 
       const connectors = await getCaseConnectors({ supertest });
+      const sortedConnectors = connectors.sort((a, b) => a.name.localeCompare(b.name));
 
-      expect(connectors).to.eql([
+      expect(sortedConnectors).to.eql([
         {
           id: jiraConnector.id,
           actionTypeId: '.jira',
@@ -90,6 +97,27 @@ export default ({ getService }: FtrProviderContext): void => {
           config: {
             apiUrl: 'http://some.non.existent.com',
             usesTableApi: false,
+            isOAuth: false,
+            clientId: null,
+            jwtKeyId: null,
+            userIdentifierValue: null,
+          },
+          isPreconfigured: false,
+          isDeprecated: false,
+          isMissingSecrets: false,
+          referencedByCount: 0,
+        },
+        {
+          id: snOAuthConnector.id,
+          actionTypeId: '.servicenow',
+          name: 'ServiceNow OAuth Connector',
+          config: {
+            apiUrl: 'http://some.non.existent.com',
+            usesTableApi: false,
+            isOAuth: true,
+            clientId: 'abc',
+            userIdentifierValue: 'elastic',
+            jwtKeyId: 'def',
           },
           isPreconfigured: false,
           isDeprecated: false,
@@ -99,10 +127,14 @@ export default ({ getService }: FtrProviderContext): void => {
         {
           id: sir.id,
           actionTypeId: '.servicenow-sir',
-          name: 'ServiceNow Connector',
+          name: 'ServiceNow SIR Connector',
           config: {
             apiUrl: 'http://some.non.existent.com',
             usesTableApi: false,
+            isOAuth: false,
+            clientId: null,
+            jwtKeyId: null,
+            userIdentifierValue: null,
           },
           isPreconfigured: false,
           isDeprecated: false,
