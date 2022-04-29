@@ -36,6 +36,7 @@ import {
   usePermissionCheck,
 } from '../../../../hooks';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
+import { ExperimentalFeaturesService } from '../../../../services';
 import { useGetPackageInfoByKey, useLink, useAgentPolicyContext } from '../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 import type { DetailViewPanelName, PackageInfo } from '../../../../types';
@@ -106,7 +107,9 @@ export function Detail() {
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
   const services = useStartServices();
-  const isCloud = !!services?.cloud?.cloudId;
+  const isCloud = true || !!services?.cloud?.cloudId; // TODO: Remove true|| before PR
+  const { addIntegrationStepsPage: isExperimentalAddIntegrationPageEnabled } =
+    ExperimentalFeaturesService.get();
   const agentPolicyIdFromContext = getAgentPolicyId();
 
   // Package info state
@@ -270,6 +273,7 @@ export function Detail() {
         currentPath,
         integration,
         isCloud,
+        isExperimentalAddIntegrationPageEnabled,
         pkgkey,
       });
 
@@ -281,6 +285,7 @@ export function Detail() {
       history,
       integration,
       isCloud,
+      isExperimentalAddIntegrationPageEnabled,
       pathname,
       pkgkey,
       search,
