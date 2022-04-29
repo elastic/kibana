@@ -53,8 +53,7 @@ describe('Alerts timeline', () => {
       loadDetectionsPage(ROLES.platform_engineer);
     });
 
-    // TODO: Passes locally, but fails on CI, need to investigate flake...
-    it.skip('should allow a user with crud privileges to attach alerts to cases', () => {
+    it('should allow a user with crud privileges to attach alerts to cases', () => {
       expandFirstAlertActions();
       cy.get(ATTACH_ALERT_TO_CASE_BUTTON).first().should('not.be.disabled');
     });

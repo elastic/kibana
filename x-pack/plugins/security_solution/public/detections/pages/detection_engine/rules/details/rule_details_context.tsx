@@ -209,7 +209,6 @@ export const useRuleDetailsContext = (): RuleDetailsContextType => {
     ruleDetailsContext,
     'useRuleDetailsContext should be used inside RuleDetailsContextProvider'
   );
-
   return ruleDetailsContext;
 };
 

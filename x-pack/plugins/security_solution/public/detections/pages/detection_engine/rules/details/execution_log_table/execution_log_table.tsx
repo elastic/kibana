@@ -426,7 +426,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         </UtilityBarSection>
         <UtilityBarSection>
           <UtilityBarGroup>
-            <UtilityBarText dataTestSubj="executionsShowing">
+            <UtilityBarText dataTestSubj="lastUpdated">
               {timelines.getLastUpdated({
                 showUpdating: isLoading || isFetching,
                 updatedAt: dataUpdatedAt,

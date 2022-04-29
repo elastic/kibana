@@ -16,7 +16,7 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { fetchRuleExecutionEvents } from './api';
 import * as i18n from './translations';
 
-interface UseRuleExecutionEventsArgs {
+export interface UseRuleExecutionEventsArgs {
   ruleId: string;
   start: string;
   end: string;
