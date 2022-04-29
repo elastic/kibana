@@ -28770,7 +28770,6 @@
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.passwordTextFieldLabel": "Mot de passe",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.prioritySelectFieldLabel": "Priorité",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.reenterValuesLabel": "Vous devrez vous authentifier chaque fois que vous modifierez le connecteur.",
-    "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.rememberValuesLabel": "Mémorisez ces valeurs. Vous devrez les entrer à nouveau chaque fois que vous modifierez le connecteur.",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredApiUrlTextField": "L'URL est requise.",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredPasswordTextField": "Le mot de passe est requis.",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredSeverityTextField": "La sévérité est requise.",

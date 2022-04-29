@@ -28947,7 +28947,6 @@
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.passwordTextFieldLabel": "パスワード",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.prioritySelectFieldLabel": "優先度",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.reenterValuesLabel": "コネクターを編集するたびに認証する必要があります。",
-    "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.rememberValuesLabel": "これらの値を覚えておいてください。コネクターを編集するたびに再入力する必要があります。",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredApiUrlTextField": "URL が必要です。",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredPasswordTextField": "パスワードが必要です。",
     "xpack.triggersActionsUI.components.builtinActionTypes.servicenow.requiredSeverityTextField": "重要度は必須です。",
