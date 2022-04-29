@@ -368,6 +368,10 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}>
    * Component rendered as inline help
    */
   helpComponent?: React.ComponentType<{}>;
+  /**
+   * Title for the help component
+   */
+  helpComponentTitle?: string;
 }
 
 interface BaseBuildColumnArgs {

@@ -333,6 +333,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     <WrappingHelpPopover
                       button={e.target as HTMLElement}
                       isOpen={true}
+                      title={operationDefinitionMap[operationType].helpComponentTitle}
                       closePopover={() => {
                         if (helpPopoverContainer.current) {
                           ReactDOM.unmountComponentAtNode(helpPopoverContainer.current);
@@ -351,8 +352,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   helpPopoverContainer.current = null;
                 }
               },
-              alwaysShow: true,
-              iconType: 'help',
+              iconType: 'documentation',
               iconSize: 's',
               'aria-label': i18n.translate('xpack.lens.indexPattern.helpLabel', {
                 defaultMessage: 'Function help',

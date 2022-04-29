@@ -129,6 +129,9 @@ export const movingAverageOperation: OperationDefinition<
     ]);
   },
   helpComponent: () => <MovingAveragePopup />,
+  helpComponentTitle: i18n.translate('xpack.lens.indexPattern.movingAverage.titleHelp', {
+    defaultMessage: 'How moving average works',
+  }),
   getDisabledStatus(indexPattern, layer, layerType) {
     const opName = i18n.translate('xpack.lens.indexPattern.movingAverage', {
       defaultMessage: 'Moving average',

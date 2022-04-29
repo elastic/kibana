@@ -464,6 +464,9 @@ export const dateHistogramOperation: OperationDefinition<
       </>
     );
   },
+  helpComponentTitle: i18n.translate('xpack.lens.indexPattern.dateHistogram.titleHelp', {
+    defaultMessage: 'How auto date histogram works',
+  }),
   helpComponent() {
     const infiniteBound = i18n.translate('xpack.lens.indexPattern.dateHistogram.moreThanYear', {
       defaultMessage: 'More than a year',
