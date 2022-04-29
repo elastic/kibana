@@ -228,7 +228,6 @@ const RuleAdd = ({
   return (
     <EuiPortal>
       <EuiFlyout
-        data-test-subj="addRuleFlyout"
         onClose={checkForChangesAndCloseFlyout}
         aria-labelledby="flyoutRuleAddTitle"
         size="m"
