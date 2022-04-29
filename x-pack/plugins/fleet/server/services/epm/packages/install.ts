@@ -337,7 +337,7 @@ async function installPackageFromRegistry({
 
     // try installing the package, if there was an error, call error handler and rethrow
     // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
-    return _installPackage({
+    return await _installPackage({
       savedObjectsClient,
       savedObjectsImporter,
       esClient,
@@ -457,7 +457,7 @@ async function installPackageByUpload({
       .createImporter(savedObjectsClient);
 
     // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
-    return _installPackage({
+    return await _installPackage({
       savedObjectsClient,
       savedObjectsImporter,
       esClient,
