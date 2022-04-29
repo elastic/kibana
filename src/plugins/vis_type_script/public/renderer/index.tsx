@@ -47,6 +47,15 @@ const getSandboxDocument = (script: string, dependencies: string[], nonce: strin
             searchSql: (payload, options) => {
               return  endpoint.call.sqlSearch(payload, options);
             },
+            addFilter: (query, index, alias) => {
+              return endpoint.call.addFilter(query, index, alias);
+            },
+            removeFilter: (query, index) => {
+              return endpoint.call.removeFilter(query, index);
+            },
+            removeAllFilters: () => {
+              endpoint.call.removeAllFilters();
+            },
             subscribeToResize: (fn) => {
               onResize = fn;
             },
@@ -118,6 +127,16 @@ export const ScriptRenderer: React.FunctionComponent<{
       ): Promise<SQLSearchResponse> => {
         return kibanaApi.sqlSearch(payload, options);
       },
+      addFilter: (query: any, indexName?: string, alias?: string) => {
+        return kibanaApi.addFilter(query, indexName, alias);
+      },
+      removeFilter: (query: any, indexName?: string) => {
+        return kibanaApi.removeFilter(query, indexName);
+      },
+      removeAllFilters: () => {
+        kibanaApi.removeAllFilters();
+      },
+      setTimeRange: () => {},
     });
 
     return () => {

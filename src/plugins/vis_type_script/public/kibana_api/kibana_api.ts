@@ -15,6 +15,8 @@ import {
   SqlSearchStrategyResponse,
 } from '@kbn/data-plugin/common';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { buildQueryFilter, compareFilters, Filter } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { VisSearchContext } from '../types';
 
 export interface VisTypeScriptKibanaApiDeps {
@@ -115,5 +117,80 @@ export class VisTypeScriptKibanaApi {
     );
 
     return response.rawResponse;
+  }
+
+  async addFilter(query: any, index?: string, alias?: string) {
+    const dataViewId = await this.getDataViewIdWithDefault(index);
+    const newFilter = buildQueryFilter(query, dataViewId, alias);
+
+    if (!!this.findMatchingFilter(newFilter)) return;
+
+    this.deps.data.query.filterManager.addFilters(newFilter);
+  }
+
+  /**
+   * Removes a filter matching the query and index if one exists
+   * @param {object} query Elastic Query DSL snippet, as used in the query DSL editor
+   * @param {string} [index] as defined in Kibana, or default if missing
+   */
+  async removeFilter(query: any, index?: string) {
+    const indexId = await this.getDataViewIdWithDefault(index);
+    const filterToRemove = buildQueryFilter(query, indexId);
+
+    const existingFilter = this.findMatchingFilter(filterToRemove);
+
+    if (!existingFilter) return;
+
+    this.deps.data.query.filterManager.removeFilter(existingFilter);
+  }
+
+  /**
+   * Removes all filters
+   */
+  removeAllFilters() {
+    this.deps.data.query.filterManager.removeAll();
+  }
+
+  findMatchingFilter(filter: Filter) {
+    const currentFilters = this.deps.data.query.filterManager.getFilters();
+    return currentFilters.find((existing: Filter) => compareFilters(existing, filter));
+  }
+
+  /**
+   * Find data view by its title, if not given, gets it from spec or a defaults one
+   * @param {string} [index]
+   * @returns {Promise<string>} data view id
+   */
+  async getDataViewIdWithDefault(index?: string): Promise<string> {
+    const dataViews = this.deps.data.dataViews;
+    let idxObj;
+
+    if (index) {
+      [idxObj] = await dataViews.find(index);
+      if (!idxObj) {
+        throw new Error(
+          i18n.translate('visTypeVega.vegaParser.baseView.indexNotFoundErrorMessage', {
+            defaultMessage: 'Index {index} not found',
+            values: { index: `"${index}"` },
+          })
+        );
+      }
+    } else {
+      if (!idxObj) {
+        const defaultIdx = await dataViews.getDefault();
+
+        if (defaultIdx) {
+          idxObj = defaultIdx;
+        } else {
+          throw new Error(
+            i18n.translate('visTypeVega.vegaParser.baseView.unableToFindDefaultIndexErrorMessage', {
+              defaultMessage: 'Unable to find default index',
+            })
+          );
+        }
+      }
+    }
+
+    return idxObj.id as string;
   }
 }
