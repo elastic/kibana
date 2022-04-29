@@ -97,6 +97,7 @@ export function OverviewPage({ routeParams }: Props) {
   const refetch = useRef<() => void>();
 
   const [isGuidedSetupTourVisible, setGuidedSetupTourVisible] = useState(false);
+  const hideGuidedSetupTour = useCallback(() => setGuidedSetupTourVisible(false), []);
   const { isGuidedSetupProgressDismissed } = useGuidedSetupProgress();
 
   const bucketSize = useMemo(
@@ -116,9 +117,9 @@ export function OverviewPage({ routeParams }: Props) {
     if (isGuidedSetupProgressDismissed) {
       trackMetric({ metric: 'guided_setup_view_details_after_dismiss' });
     }
-
+    hideGuidedSetupTour();
     setIsFlyoutVisible(true);
-  }, [trackMetric, isGuidedSetupProgressDismissed]);
+  }, [trackMetric, isGuidedSetupProgressDismissed, hideGuidedSetupTour]);
 
   const onTimeRangeRefresh = useCallback(() => {
     return refetch.current && refetch.current();
@@ -166,6 +167,7 @@ export function OverviewPage({ routeParams }: Props) {
               children: (
                 <PageHeader
                   showTour={isGuidedSetupTourVisible}
+                  onTourDismiss={hideGuidedSetupTour}
                   handleGuidedSetupClick={handleGuidedSetupClick}
                   onTimeRangeRefresh={onTimeRangeRefresh}
                 />
@@ -272,18 +274,17 @@ export function OverviewPage({ routeParams }: Props) {
 
 interface PageHeaderProps {
   showTour?: boolean;
+  onTourDismiss: () => void;
   handleGuidedSetupClick: () => void;
   onTimeRangeRefresh: () => void;
 }
 
 function PageHeader({
   showTour = false,
+  onTourDismiss,
   handleGuidedSetupClick,
   onTimeRangeRefresh,
 }: PageHeaderProps) {
-  const [isTourVisible, setIsTourVisible] = useState(true);
-  const closeTour = useCallback(() => setIsTourVisible(false), []);
-
   const { relativeStart, relativeEnd, refreshInterval, refreshPaused } = useDatePickerContext();
   return (
     <EuiFlexGroup wrap gutterSize="s" justifyContent="flexEnd">
@@ -303,7 +304,7 @@ function PageHeader({
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ alignItems: 'flex-end' }}>
         <EuiTourStep
-          isStepOpen={showTour && isTourVisible}
+          isStepOpen={showTour}
           title={i18n.translate('xpack.observability.overview.guidedSetupTourTitle', {
             defaultMessage: 'Guided setup is always available',
           })}
@@ -318,9 +319,9 @@ function PageHeader({
           step={1}
           stepsTotal={1}
           maxWidth={400}
-          onFinish={closeTour}
+          onFinish={onTourDismiss}
           footerAction={
-            <EuiButtonEmpty color="text" flush="right" size="xs" onClick={closeTour}>
+            <EuiButtonEmpty color="text" flush="right" size="xs" onClick={onTourDismiss}>
               <FormattedMessage
                 id="xpack.observability.overview.guidedSetupTourDismissButton"
                 defaultMessage="Dismiss"
