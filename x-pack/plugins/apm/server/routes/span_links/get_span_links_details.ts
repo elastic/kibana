@@ -22,24 +22,11 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { Environment } from '../../../common/environment_rt';
 import { ProcessorEvent } from '../../../common/processor_event';
+import { SpanLinkDetails } from '../../../common/span_links';
 import { SpanLinks } from '../../../typings/es_schemas/raw/fields/span_links';
 import { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
-import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { Setup } from '../../lib/helpers/setup_request';
-
-export interface SpanLinkDetails {
-  traceId: string;
-  spanId: string;
-  agentName?: AgentName;
-  serviceName?: string;
-  spanName?: string;
-  duration?: number;
-  spanSubtype?: string;
-  spanType?: string;
-  environment?: Environment;
-  transactionId?: string;
-}
 
 async function fetchSpanLinksDetails({
   setup,
@@ -164,14 +151,14 @@ export async function getSpanLinksDetails({
     {}
   );
 
-  // When kuery is set, returns only the items found in the query
+  // When kuery is set, returns only the items found in the uery
   if (!isEmpty(kuery)) {
     return Object.values(spanLinksDetailsMap);
   }
 
   // It's important to keep the original order of the span links,
   // so loops trough the original list merging external links and links with details.
-  // external links are links that the details were not found in the query above.
+  // external links are links that the details were not found in the ES query.
   return spanLinks.map((item) => {
     const key = `${item.trace.id}:${item.span.id}`;
     const details = spanLinksDetailsMap[key];

@@ -23,7 +23,6 @@ import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
-import { SpanLinks as SpanLinksType } from '../../../../../../../../typings/es_schemas/raw/fields/span_links';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { DiscoverSpanLink } from '../../../../../../shared/links/discover_links/discover_span_link';
@@ -38,6 +37,7 @@ import { TimestampTooltip } from '../../../../../../shared/timestamp_tooltip';
 import { SyncBadge } from '../badge/sync_badge';
 import { FailureBadge } from '../failure_badge';
 import { ResponsiveFlyout } from '../responsive_flyout';
+import { SpanLinksSize } from '../waterfall_helpers/waterfall_helpers';
 import { SpanDatabase } from './span_db';
 import { StickySpanProperties } from './sticky_span_properties';
 
@@ -88,7 +88,7 @@ interface Props {
   parentTransaction?: Transaction;
   totalDuration?: number;
   onClose: () => void;
-  outgoingSpanLinks?: SpanLinksType;
+  spanLinksSize: SpanLinksSize;
 }
 
 export function SpanFlyout({
@@ -96,7 +96,7 @@ export function SpanFlyout({
   parentTransaction,
   totalDuration,
   onClose,
-  outgoingSpanLinks,
+  spanLinksSize,
 }: Props) {
   if (!span) {
     return null;
@@ -111,10 +111,10 @@ export function SpanFlyout({
   const spanHttpUrl = span.url?.original || span.span?.http?.url?.original;
   const spanHttpMethod = span.http?.request?.method || span.span?.http?.method;
 
-  const incomingSpanLinks = span.span?.links;
   const spanLinksTabContent = getSpanLinksTabContent({
-    incomingSpanLinks,
-    outgoingSpanLinks,
+    spanLinksSize,
+    traceId: span.trace.id,
+    spanId: span.span.id,
   });
 
   return (

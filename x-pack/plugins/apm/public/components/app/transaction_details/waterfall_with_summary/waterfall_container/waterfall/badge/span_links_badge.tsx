@@ -7,41 +7,33 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { SpanLinksSize } from '../waterfall_helpers/waterfall_helpers';
 
-interface Props {
-  incomingSpanLinksSize?: number;
-  outgoingSpanLinksSize?: number;
-}
-
-export function SpanLinksBadge({
-  incomingSpanLinksSize = 0,
-  outgoingSpanLinksSize = 0,
-}: Props) {
-  const totalSize = incomingSpanLinksSize + outgoingSpanLinksSize;
-
-  if (!totalSize) {
+export function SpanLinksBadge({ outgoing, incoming }: SpanLinksSize) {
+  if (!outgoing && !incoming) {
     return null;
   }
 
+  const total = outgoing + incoming;
   return (
     <EuiToolTip
       title={i18n.translate('xpack.apm.waterfall.spanLinks.tooltip.title', {
         defaultMessage:
-          '{totalSize} {totalSize, plural, one {Span link} other {Span links}} found',
-        values: { totalSize },
+          '{total} {total, plural, one {Span link} other {Span links}} found',
+        values: { total },
       })}
       content={
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem>
             {i18n.translate('xpack.apm.waterfall.spanLinks.tooltip.incoming', {
-              defaultMessage: '{incomingSpanLinksSize} incoming',
-              values: { incomingSpanLinksSize },
+              defaultMessage: '{incoming} incoming',
+              values: { incoming },
             })}
           </EuiFlexItem>
           <EuiFlexItem>
             {i18n.translate('xpack.apm.waterfall.spanLinks.tooltip.outgoing', {
-              defaultMessage: '{outgoingSpanLinksSize} outgoing',
-              values: { outgoingSpanLinksSize },
+              defaultMessage: '{outgoing} outgoing',
+              values: { outgoing },
             })}
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -50,8 +42,8 @@ export function SpanLinksBadge({
       <EuiBadge data-test-subj="spanLinksBadge">
         {i18n.translate('xpack.apm.waterfall.spanLinks.badge', {
           defaultMessage:
-            '{totalSize} {totalSize, plural, one {Span link} other {Span links}}',
-          values: { totalSize },
+            '{total} {total, plural, one {Span link} other {Span links}}',
+          values: { total },
         })}
       </EuiBadge>
     </EuiToolTip>

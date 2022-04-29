@@ -6,7 +6,6 @@
  */
 
 import * as t from 'io-ts';
-import moment from 'moment';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getTraceItems } from './get_trace_items';
 import { getTopTracesPrimaryStats } from './get_top_traces_primary_stats';
@@ -20,8 +19,6 @@ import {
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
 import { getRootTransactionByTraceId } from '../transactions/get_transaction_by_trace';
 import { getTransaction } from '../transactions/get_transaction';
-import { getOutgoingSpanLinks } from '../span_links/get_outgoing_span_links';
-import type { SpanLinks } from '../../../typings/es_schemas/raw/fields/span_links';
 
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces',
@@ -85,24 +82,14 @@ const tracesByIdRoute = createApmServerRoute({
     errorDocs: Array<
       import('./../../../typings/es_schemas/ui/apm_error').APMError
     >;
-    outgoingSpanLinks: Record<string, SpanLinks>;
+    outgoingSpanLinksSizeMap: Record<string, number>;
   }> => {
     const setup = await setupRequest(resources);
     const { params } = resources;
     const { traceId } = params.path;
     const { start, end } = params.query;
 
-    const [traceItems, outgoingSpanLinks] = await Promise.all([
-      getTraceItems(traceId, setup, start, end),
-      getOutgoingSpanLinks({
-        traceId,
-        setup,
-        start: moment(start).subtract(4, 'days').valueOf(),
-        end: moment(end).add(4, 'days').valueOf(),
-      }),
-    ]);
-
-    return { ...traceItems, outgoingSpanLinks };
+    return getTraceItems(traceId, setup, start, end);
   },
 });
 

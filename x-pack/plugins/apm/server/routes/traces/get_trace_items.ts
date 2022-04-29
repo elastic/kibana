@@ -19,6 +19,7 @@ import {
   ERROR_LOG_LEVEL,
 } from '../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../lib/helpers/setup_request';
+import { getOutgoingSpanLinksSizeMap } from '../span_links/get_outgoing_span_links';
 
 export async function getTraceItems(
   traceId: string,
@@ -74,12 +75,21 @@ export async function getTraceItems(
     },
   });
 
-  const errorResponse = await errorResponsePromise;
-  const traceResponse = await traceResponsePromise;
+  const [errorResponse, traceResponse, outgoingSpanLinksSizeMap] =
+    await Promise.all([
+      errorResponsePromise,
+      traceResponsePromise,
+      getOutgoingSpanLinksSizeMap({ traceId, setup, start, end }),
+    ]);
 
   const exceedsMax = traceResponse.hits.total.value > maxTraceItems;
   const traceDocs = traceResponse.hits.hits.map((hit) => hit._source);
   const errorDocs = errorResponse.hits.hits.map((hit) => hit._source);
 
-  return { exceedsMax, traceDocs, errorDocs };
+  return {
+    exceedsMax,
+    traceDocs,
+    errorDocs,
+    outgoingSpanLinksSizeMap,
+  };
 }

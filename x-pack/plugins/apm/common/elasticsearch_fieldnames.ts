@@ -76,6 +76,7 @@ export const SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM =
 
 export const SPAN_LINKS = 'span.links';
 export const SPAN_LINKS_TRACE_ID = 'span.links.trace.id';
+export const SPAN_LINKS_SPAN_ID = 'span.links.span.id';
 
 // Parent ID for a transaction or span
 export const PARENT_ID = 'parent.id';

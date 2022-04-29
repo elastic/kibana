@@ -48,13 +48,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         exceedsMax: false,
         traceDocs: [],
         errorDocs: [],
-        outgoingSpanLinks: {},
+        outgoingSpanLinksSizeMap: {},
       });
     });
   });
 
   registry.when('Trace exists', { config: 'basic', archives: ['apm_mappings_only_8.0.0'] }, () => {
-    let appleServiceTraceId: string;
+    let serviceATraceId: string;
     before(async () => {
       const instanceJava = apm.service('synth-apple', 'production', 'java').instance('instance-b');
       const events = timerange(start, end)
@@ -82,7 +82,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ];
         });
       const entities = events.toArray();
-      appleServiceTraceId = entities.slice(0, 1)[0]['trace.id']!;
+      serviceATraceId = entities.slice(0, 1)[0]['trace.id']!;
 
       await synthtraceEsClient.index(new EntityArrayIterable(entities));
     });
@@ -93,7 +93,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let traces: Awaited<ReturnType<typeof fetchTraces>>['body'];
       before(async () => {
         const response = await fetchTraces({
-          traceId: appleServiceTraceId,
+          traceId: serviceATraceId,
           query: { start: new Date(start).toISOString(), end: new Date(end).toISOString() },
         });
         expect(response.status).to.eql(200);
@@ -126,74 +126,69 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Trace with span links',
     { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
     () => {
-      let bananaServiceTraceId: string;
-      let appleServiceTraceId: string;
+      let serviceATraceId: string;
+      let serviceBTraceId: string;
       before(async () => {
-        const externalSpanLinks = generateExternalSpanLinks(3);
-        const externalTransactionSpanLinks = generateExternalSpanLinks(3);
-
-        const instanceJava = apm
-          .service('synth-apple', 'production', 'java')
-          .instance('instance-b');
-        const appleEvents = timerange(start, end)
+        const instanceJava = apm.service('Service-A', 'production', 'java').instance('instance-a');
+        const serviceAEvents = timerange(start, end)
           .interval('1m')
           .rate(1)
           .generator((timestamp) => {
             return instanceJava
-              .transaction('GET /apple 🍏')
-              .defaults({
-                'span.links': externalTransactionSpanLinks,
-              })
+              .transaction('GET /service_A')
               .timestamp(timestamp)
               .duration(1000)
               .success()
               .children(
                 instanceJava
-                  .span('get_green_apple_🍏', 'db', 'elasticsearch')
-                  .defaults({ 'span.links': externalSpanLinks })
+                  .span('get_service_A', 'db', 'elasticsearch')
+                  .defaults({ 'span.links': generateExternalSpanLinks(3) })
                   .timestamp(timestamp + 50)
                   .duration(900)
                   .success()
               );
           });
 
-        const appleEventsAsArray = appleEvents.toArray();
-        appleServiceTraceId = appleEventsAsArray.slice(0, 1)[0]['trace.id']!;
-        const bananaIncomingSpanLinks = getSpanLinksFromEvents(appleEventsAsArray);
+        const serviceAEventsAsArray = serviceAEvents.toArray();
+        serviceATraceId = serviceAEventsAsArray.slice(0, 1)[0]['trace.id']!;
+        const serviceASpanLinks = getSpanLinksFromEvents(serviceAEventsAsArray);
 
         const instanceRuby = apm
           .service('synth-banana', 'production', 'ruby')
           .instance('instance-c');
-        const outgoingEvents = timerange(start, end)
+        const serviceB = timerange(start, end)
           .interval('1m')
           .rate(1)
           .generator((timestamp) => {
             return instanceRuby
-              .transaction('GET /banana 🍌')
+              .transaction('GET /service_B')
               .timestamp(timestamp)
               .duration(1000)
               .success()
               .children(
-                instanceJava
-                  .span('get_banana_🍌', 'resource', 'css')
-                  .defaults({ 'span.links': bananaIncomingSpanLinks })
+                instanceRuby
+                  .span('get_service_B', 'resource', 'css')
+                  .defaults({ 'span.links': serviceASpanLinks })
                   .timestamp(timestamp + 50)
                   .duration(900)
                   .success()
               );
           });
 
-        bananaServiceTraceId = outgoingEvents.toArray().slice(0, 1)[0]['trace.id']!;
+        serviceBTraceId = serviceB.toArray().slice(0, 1)[0]['trace.id']!;
 
         await synthtraceEsClient.index(
-          new EntityArrayIterable(appleEventsAsArray).merge(outgoingEvents)
+          new EntityArrayIterable(serviceAEventsAsArray).merge(serviceB)
         );
       });
+
+      after(() => synthtraceEsClient.clean());
+
       describe('should not return outgoing links ', async () => {
         let traces: Awaited<ReturnType<typeof fetchTraces>>['body'];
         before(async () => {
           const response = await fetchTraces({
-            traceId: bananaServiceTraceId,
+            traceId: serviceBTraceId,
             query: {
               start: new Date(start).toISOString(),
               end: new Date(end).toISOString(),
@@ -203,7 +198,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           traces = response.body;
         });
         it('returns empty outgoing links', () => {
-          expect(traces.outgoingSpanLinks).to.be.empty();
+          expect(traces.outgoingSpanLinksSizeMap).to.be.empty();
         });
       });
 
@@ -211,7 +206,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         let traces: Awaited<ReturnType<typeof fetchTraces>>['body'];
         before(async () => {
           const response = await fetchTraces({
-            traceId: appleServiceTraceId,
+            traceId: serviceATraceId,
             query: {
               start: new Date(start).toISOString(),
               end: new Date(end).toISOString(),
@@ -221,7 +216,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           traces = response.body;
         });
         it('return outgoing links', () => {
-          expect(traces.outgoingSpanLinks).not.to.be.empty();
+          expect(traces.outgoingSpanLinksSizeMap).not.to.be.empty();
         });
       });
     }

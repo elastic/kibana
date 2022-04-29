@@ -13,64 +13,73 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
-import type { SpanLinks as SpanLinksType } from '../../../../typings/es_schemas/raw/fields/span_links';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../hooks/use_time_range';
+import { SpanLinksSize } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import { KueryBar } from '../kuery_bar';
 import { SpanLinksCallout } from './span_links_callout';
 import { SpanLinksTable } from './span_links_table';
 
 interface Props {
-  spanLinks: {
-    incoming?: SpanLinksType;
-    outgoing?: SpanLinksType;
-  };
+  spanLinksSize: SpanLinksSize;
+  traceId: string;
+  spanId: string;
 }
 
 type LinkType = 'incoming' | 'outgoing';
 
-export function SpanLinks({ spanLinks }: Props) {
-  const [selectedLinkType, setSelectedLinkType] = useState<LinkType>(
-    spanLinks.incoming?.length ? 'incoming' : 'outgoing'
-  );
-  const [kuery, setKuery] = useState('');
+export function SpanLinks({ spanLinksSize, traceId, spanId }: Props) {
+  const {
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/services/{serviceName}/transactions/view');
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const currentLinks = useMemo(
-    () => spanLinks[selectedLinkType] || [],
-    [selectedLinkType, spanLinks]
+  const [selectedLinkType, setSelectedLinkType] = useState<LinkType>(
+    spanLinksSize.incoming ? 'incoming' : 'outgoing'
   );
+
+  const [kuery, setKuery] = useState('');
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (currentLinks && currentLinks.length) {
-        return callApmApi('POST /internal/apm/span_links/details', {
+      if (selectedLinkType === 'incoming') {
+        return callApmApi('GET /internal/apm/span_links/incoming', {
           params: {
-            query: { kuery },
-            body: { spanLinks: JSON.stringify(currentLinks) },
+            query: { kuery, traceId, spanId },
           },
         });
       }
+      return callApmApi('GET /internal/apm/span_links/outgoing', {
+        params: {
+          query: { kuery, traceId, spanId, start, end },
+        },
+      });
     },
-    [currentLinks, kuery]
+    [selectedLinkType, kuery, traceId, spanId, start, end]
   );
 
-  const selectOptions: EuiSelectOption[] = [
-    {
-      value: 'incoming',
-      text: i18n.translate('xpack.apm.spanLinks.combo.incomingLinks', {
-        defaultMessage: 'Incoming links ({incomingLinksSize})',
-        values: { incomingLinksSize: spanLinks.incoming?.length || 0 },
-      }),
-      disabled: !spanLinks.incoming?.length,
-    },
-    {
-      value: 'outgoing',
-      text: i18n.translate('xpack.apm.spanLinks.combo.outgoingLinks', {
-        defaultMessage: 'Outgoing links ({outgoingLinksSize})',
-        values: { outgoingLinksSize: spanLinks.outgoing?.length || 0 },
-      }),
-      disabled: !spanLinks.outgoing?.length,
-    },
-  ];
+  const selectOptions: EuiSelectOption[] = useMemo(
+    () => [
+      {
+        value: 'incoming',
+        text: i18n.translate('xpack.apm.spanLinks.combo.incomingLinks', {
+          defaultMessage: 'Incoming links ({incomingLinksSize})',
+          values: { incomingLinksSize: spanLinksSize.incoming },
+        }),
+        disabled: !spanLinksSize.incoming,
+      },
+      {
+        value: 'outgoing',
+        text: i18n.translate('xpack.apm.spanLinks.combo.outgoingLinks', {
+          defaultMessage: 'Outgoing links ({outgoingLinksSize})',
+          values: { outgoingLinksSize: spanLinksSize.outgoing },
+        }),
+        disabled: !spanLinksSize.outgoing,
+      },
+    ],
+    [spanLinksSize]
+  );
 
   if (
     !data ||
@@ -78,12 +87,7 @@ export function SpanLinks({ spanLinks }: Props) {
     status === FETCH_STATUS.NOT_INITIATED
   ) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-        }}
-      >
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
         <EuiLoadingSpinner />
       </div>
     );

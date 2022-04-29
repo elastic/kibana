@@ -6,7 +6,6 @@
  */
 import { apm, EntityArrayIterable, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
-import { shuffle } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   generateExternalSpanLinks,
@@ -51,10 +50,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       before(async () => {
         const kiwiEventsAsArray = generateIncomeEventsSpanLinks().toArray();
         externalSpanLinks = generateExternalSpanLinks(3);
-        appleIncomingSpanLinks = shuffle([
+        appleIncomingSpanLinks = [
           ...externalSpanLinks,
           ...getSpanLinksFromEvents(kiwiEventsAsArray),
-        ]);
+        ];
 
         const instanceJava = apm
           .service('synth-apple', 'production', 'java')

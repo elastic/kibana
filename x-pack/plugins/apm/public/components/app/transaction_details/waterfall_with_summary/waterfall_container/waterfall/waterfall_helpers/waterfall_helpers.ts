@@ -11,7 +11,6 @@ import type { APIReturnType } from '../../../../../../../services/rest/create_ca
 import type { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
 import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
-import type { SpanLinks } from '../../../../../../../../typings/es_schemas/raw/fields/span_links';
 import { ProcessorEvent } from '../../../../../../../../common/processor_event';
 
 type TraceAPIResponse = APIReturnType<'GET /internal/apm/traces/{traceId}'>;
@@ -21,6 +20,11 @@ interface IWaterfallGroup {
 }
 
 const ROOT_ID = 'root';
+
+export interface SpanLinksSize {
+  incoming: number;
+  outgoing: number;
+}
 
 export enum WaterfallLegendType {
   ServiceName = 'serviceName',
@@ -50,7 +54,7 @@ interface IWaterfallSpanItemBase<TDocument, TDoctype>
    */
   duration: number;
   legendValues: Record<WaterfallLegendType, string>;
-  outgoingSpanLinks?: SpanLinks;
+  spanLinksSize: SpanLinksSize;
 }
 
 interface IWaterfallItemBase<TDocument, TDoctype> {
@@ -105,7 +109,7 @@ function getLegendValues(transactionOrSpan: Transaction | Span) {
 
 function getTransactionItem(
   transaction: Transaction,
-  outgoingSpanLinks: SpanLinks
+  outgoingSpanLinksSize: number = 0
 ): IWaterfallTransaction {
   return {
     docType: 'transaction',
@@ -117,11 +121,17 @@ function getTransactionItem(
     skew: 0,
     legendValues: getLegendValues(transaction),
     color: '',
-    outgoingSpanLinks,
+    spanLinksSize: {
+      outgoing: outgoingSpanLinksSize,
+      incoming: transaction.span?.links?.length ?? 0,
+    },
   };
 }
 
-function getSpanItem(span: Span, outgoingSpanLinks: SpanLinks): IWaterfallSpan {
+function getSpanItem(
+  span: Span,
+  outgoingSpanLinksSize: number = 0
+): IWaterfallSpan {
   return {
     docType: 'span',
     doc: span,
@@ -132,7 +142,10 @@ function getSpanItem(span: Span, outgoingSpanLinks: SpanLinks): IWaterfallSpan {
     skew: 0,
     legendValues: getLegendValues(span),
     color: '',
-    outgoingSpanLinks,
+    spanLinksSize: {
+      outgoing: outgoingSpanLinksSize,
+      incoming: span.span.links?.length ?? 0,
+    },
   };
 }
 
@@ -276,20 +289,20 @@ const getWaterfallDuration = (waterfallItems: IWaterfallItem[]) =>
 
 const getWaterfallItems = (
   items: TraceAPIResponse['traceDocs'],
-  outgoingSpanLinks: TraceAPIResponse['outgoingSpanLinks']
+  outgoingSpanLinksSizeMap: TraceAPIResponse['outgoingSpanLinksSizeMap']
 ) =>
   items.map((item) => {
     const docType: 'span' | 'transaction' = item.processor.event;
     switch (docType) {
       case 'span': {
         const span = item as Span;
-        return getSpanItem(span, outgoingSpanLinks[span.span.id]);
+        return getSpanItem(span, outgoingSpanLinksSizeMap[span.span.id]);
       }
       case 'transaction':
         const transaction = item as Transaction;
         return getTransactionItem(
           transaction,
-          outgoingSpanLinks[transaction.transaction.id]
+          outgoingSpanLinksSizeMap[transaction.transaction.id]
         );
     }
   });
@@ -415,7 +428,7 @@ export function getWaterfall(
 
   const waterfallItems: IWaterfallSpanOrTransaction[] = getWaterfallItems(
     apiResponse.traceDocs,
-    apiResponse.outgoingSpanLinks
+    apiResponse.outgoingSpanLinksSizeMap
   );
 
   const childrenByParentId = getChildrenGroupedByParentId(

@@ -19,20 +19,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { SpanLinkDetails } from '../../../../common/span_links';
 import { asDuration } from '../../../../common/utils/formatters';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
-import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { ServiceLink } from '../service_link';
 import { getSpanIcon } from '../span_icon/get_span_icon';
 
-type SpanLinksDetails =
-  APIReturnType<'POST /internal/apm/span_links/details'>['spanLinksDetails'];
-
-type SpanLinkDetails = SpanLinksDetails[0];
-
 interface Props {
-  items: SpanLinksDetails;
+  items: SpanLinkDetails[];
 }
 
 export function SpanLinksTable({ items }: Props) {

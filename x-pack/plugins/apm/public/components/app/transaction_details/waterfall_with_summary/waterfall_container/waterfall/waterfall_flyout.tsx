@@ -45,7 +45,7 @@ export function WaterfallFlyout({
           span={currentItem.doc}
           parentTransaction={parentTransaction}
           onClose={() => toggleFlyout({ history })}
-          outgoingSpanLinks={currentItem.outgoingSpanLinks}
+          spanLinksSize={currentItem.spanLinksSize}
         />
       );
     case 'transaction':
@@ -57,7 +57,7 @@ export function WaterfallFlyout({
             waterfall.rootTransaction?.transaction.duration.us
           }
           errorCount={waterfall.getErrorCount(currentItem.id)}
-          outgoingSpanLinks={currentItem.outgoingSpanLinks}
+          spanLinksSize={currentItem.spanLinksSize}
         />
       );
     default:

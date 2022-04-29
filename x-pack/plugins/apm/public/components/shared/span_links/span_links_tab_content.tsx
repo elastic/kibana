@@ -8,16 +8,20 @@ import React from 'react';
 import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SpanLinks } from '.';
-import { SpanLinks as SpanLinksType } from '../../../../typings/es_schemas/raw/fields/span_links';
+import { SpanLinksSize } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
+
+interface Props {
+  spanLinksSize: SpanLinksSize;
+  traceId: string;
+  spanId: string;
+}
 
 export function getSpanLinksTabContent({
-  incomingSpanLinks,
-  outgoingSpanLinks,
-}: {
-  incomingSpanLinks?: SpanLinksType;
-  outgoingSpanLinks?: SpanLinksType;
-}) {
-  if (!incomingSpanLinks?.length && !outgoingSpanLinks?.length) {
+  spanLinksSize,
+  traceId,
+  spanId,
+}: Props) {
+  if (!spanLinksSize.incoming && !spanLinksSize.outgoing) {
     return;
   }
 
@@ -33,17 +37,16 @@ export function getSpanLinksTabContent({
     ),
     append: (
       <EuiNotificationBadge color="subdued">
-        {(incomingSpanLinks?.length || 0) + (outgoingSpanLinks?.length || 0)}
+        {spanLinksSize.incoming + spanLinksSize.outgoing}
       </EuiNotificationBadge>
     ),
     content: (
       <>
         <EuiSpacer size="m" />
         <SpanLinks
-          spanLinks={{
-            incoming: incomingSpanLinks,
-            outgoing: outgoingSpanLinks,
-          }}
+          spanLinksSize={spanLinksSize}
+          traceId={traceId}
+          spanId={spanId}
         />
       </>
     ),

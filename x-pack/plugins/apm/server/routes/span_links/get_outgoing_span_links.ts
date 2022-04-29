@@ -5,31 +5,38 @@
  * 2.0.
  */
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { Setup } from '../../lib/helpers/setup_request';
+import moment from 'moment';
 import {
+  PROCESSOR_EVENT,
+  SPAN_ID,
   SPAN_LINKS,
   SPAN_LINKS_TRACE_ID,
+  SPAN_LINKS_SPAN_ID,
   TRACE_ID,
-  SPAN_ID,
-  PROCESSOR_EVENT,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
-import type { SpanLinks } from '../../../typings/es_schemas/raw/fields/span_links';
 import type { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
 import type { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
+import { Setup } from '../../lib/helpers/setup_request';
 
-export async function getOutgoingSpanLinks({
+async function fetchOutgoingSpans({
   traceId,
   setup,
   start,
   end,
+  spanId,
 }: {
   traceId: string;
   setup: Setup;
   start: number;
   end: number;
-}): Promise<Record<string, SpanLinks>> {
+  spanId?: string;
+}) {
   const { apmEventClient } = setup;
+
+  const startWithBuffer = moment(start).subtract(4, 'days').valueOf();
+  const endWithBuffer = moment(end).add(4, 'days').valueOf();
+
   const response = await apmEventClient.search('get_outgoing_span_links', {
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
@@ -40,33 +47,81 @@ export async function getOutgoingSpanLinks({
       query: {
         bool: {
           filter: [
+            ...rangeQuery(startWithBuffer, endWithBuffer),
             { term: { [SPAN_LINKS_TRACE_ID]: traceId } },
-            ...rangeQuery(start, end),
+            ...(spanId ? [{ term: { [SPAN_LINKS_SPAN_ID]: spanId } }] : []),
           ],
         },
       },
     },
   });
 
-  return response.hits.hits.reduce<Record<string, SpanLinks>>(
-    (acc, { _source: item }) => {
-      const id =
-        item.processor.event === ProcessorEvent.transaction
-          ? (item as TransactionRaw).transaction?.id
-          : (item as SpanRaw).span.id;
+  return response.hits.hits;
+}
 
-      const spanLink = {
-        trace: { id: item.trace.id },
-        span: { id },
-      };
-      item.span?.links?.forEach((link) => {
-        acc[link.span.id] = [
-          ...(acc[link.span.id] || []),
-          spanLink,
-        ] as SpanLinks;
+function getSpanId(source: TransactionRaw | SpanRaw) {
+  return source.processor.event === ProcessorEvent.span
+    ? (source as SpanRaw).span.id
+    : (source as TransactionRaw).transaction?.id;
+}
+
+export async function getOutgoingSpanLinksSizeMap({
+  traceId,
+  setup,
+  start,
+  end,
+}: {
+  traceId: string;
+  setup: Setup;
+  start: number;
+  end: number;
+}) {
+  const outgoingSpans = await fetchOutgoingSpans({
+    traceId,
+    setup,
+    start,
+    end,
+  });
+
+  return outgoingSpans.reduce<Record<string, number>>(
+    (acc, { _source: source }) => {
+      source.span?.links?.forEach((link) => {
+        // Ignores span links that don't belong to this trace
+        if (link.trace.id === traceId) {
+          acc[link.span.id] = (acc[link.span.id] || 0) + 1;
+        }
       });
       return acc;
     },
     {}
   );
+}
+
+export async function getOutgoingSpanLinks({
+  traceId,
+  setup,
+  start,
+  end,
+  spanId,
+}: {
+  traceId: string;
+  setup: Setup;
+  start: number;
+  end: number;
+  spanId: string;
+}) {
+  const outgoingSpan = await fetchOutgoingSpans({
+    traceId,
+    spanId,
+    setup,
+    start,
+    end,
+  });
+
+  return outgoingSpan.map(({ _source: source }) => {
+    return {
+      trace: { id: source.trace.id },
+      span: { id: getSpanId(source) },
+    };
+  });
 }

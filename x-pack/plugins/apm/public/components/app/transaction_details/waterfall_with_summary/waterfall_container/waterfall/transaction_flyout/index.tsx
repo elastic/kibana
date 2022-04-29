@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { SpanLinks as SpanLinksType } from '../../../../../../../../typings/es_schemas/raw/fields/span_links';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { TransactionMetadata } from '../../../../../../shared/metadata_table/transaction_metadata';
 import { getSpanLinksTabContent } from '../../../../../../shared/span_links/span_links_tab_content';
@@ -26,6 +25,7 @@ import { TransactionSummary } from '../../../../../../shared/summary/transaction
 import { TransactionActionMenu } from '../../../../../../shared/transaction_action_menu/transaction_action_menu';
 import { FlyoutTopLevelProperties } from '../flyout_top_level_properties';
 import { ResponsiveFlyout } from '../responsive_flyout';
+import { SpanLinksSize } from '../waterfall_helpers/waterfall_helpers';
 import { DroppedSpansWarning } from './dropped_spans_warning';
 
 interface Props {
@@ -33,7 +33,7 @@ interface Props {
   transaction?: Transaction;
   errorCount?: number;
   rootTransactionDuration?: number;
-  outgoingSpanLinks?: SpanLinksType;
+  spanLinksSize: SpanLinksSize;
 }
 
 export function TransactionFlyout({
@@ -41,16 +41,16 @@ export function TransactionFlyout({
   onClose,
   errorCount = 0,
   rootTransactionDuration,
-  outgoingSpanLinks,
+  spanLinksSize,
 }: Props) {
   if (!transactionDoc) {
     return null;
   }
 
-  const incomingSpanLinks = transactionDoc.span?.links;
   const spanLinksTabContent = getSpanLinksTabContent({
-    incomingSpanLinks,
-    outgoingSpanLinks,
+    spanLinksSize,
+    traceId: transactionDoc.trace.id,
+    spanId: transactionDoc.transaction.id,
   });
 
   return (
