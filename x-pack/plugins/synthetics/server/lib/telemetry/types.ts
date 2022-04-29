@@ -17,7 +17,7 @@ export interface MonitorUpdateEvent {
   monitorInterval: number;
   locations: string[];
   locationsCount: number;
-  scriptType?: 'inline' | 'recorder' | 'zip';
+  scriptType?: 'inline' | 'recorder' | 'zip' | 'push';
   revision?: number;
   errors?: ServiceLocationErrors;
   configId: string;
