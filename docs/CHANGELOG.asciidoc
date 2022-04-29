@@ -111,9 +111,9 @@ Monitoring::
 
 [float]
 [[fixes-v7.17.4]]
-=== Bug Fixes
-Alerting::
-Revert back the support of preconfigured connectors for Cases that was mistakenly removed in 7.17.0 {kibana-pull}130372[#130372]
+=== Bug fixes
+Cases::
+Revert back the support of preconfigured connectors for Cases {kibana-pull}130372[#130372]
 
 Observability::
 Resolves a bug where "mark as.." for a single alert would redirect to security solution route {kibana-pull}130609[#130609]
