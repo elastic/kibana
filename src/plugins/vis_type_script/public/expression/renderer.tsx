@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { IExternalUrl } from '@kbn/core/public';
+import { IExternalUrl, IUiSettingsClient } from '@kbn/core/public';
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -26,6 +26,7 @@ export const scriptVisRenderer: (
   // TODO: not sure if this is correct way of passing deps to vis renderer
   getDeps: () => Promise<{
     data: DataPublicPluginStart;
+    uiSettingsClient: IUiSettingsClient;
     validateUrl: IExternalUrl['validateUrl'];
     nonce: string;
   }>
@@ -41,9 +42,13 @@ export const scriptVisRenderer: (
       unmountComponentAtNode(domNode);
     });
 
+    // hack to always force re-render the iframe to pick up the latest state and to react on "refresh"
+    const keyToForceRerenderScript = Date.now();
+
     render(
       <VisualizationContainer className="scriptVis" handlers={handlers}>
         <ScriptRenderer
+          key={keyToForceRerenderScript}
           script={visParams.script}
           scriptDependencyUrls={visParams.scriptDependencyUrls}
           styleDependencyUrls={visParams.styleDependencyUrls}

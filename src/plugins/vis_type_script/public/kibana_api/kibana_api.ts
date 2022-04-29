@@ -10,17 +10,21 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { lastValueFrom } from 'rxjs';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
+  getEsQueryConfig,
+  getTime,
   SQL_SEARCH_STRATEGY,
   SqlSearchStrategyRequest,
   SqlSearchStrategyResponse,
 } from '@kbn/data-plugin/common';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { buildQueryFilter, compareFilters, Filter } from '@kbn/es-query';
+import { buildQueryFilter, compareFilters, Filter, buildEsQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { IUiSettingsClient } from '@kbn/core/public';
 import { VisSearchContext } from '../types';
 
 export interface VisTypeScriptKibanaApiDeps {
   data: DataPublicPluginStart;
+  uiSettingsClient: IUiSettingsClient;
 }
 
 export interface ESSearchOptions {
@@ -37,6 +41,7 @@ const allowedESSearchRequestKeys = [
   'q',
   'sort',
   'from',
+  'size',
 ] as const;
 export type ESSearchRequest = Pick<
   estypes.SearchRequest,
@@ -80,15 +85,21 @@ export class VisTypeScriptKibanaApi {
   ) {}
 
   async esSearch(
-    payload: ESSearchRequest,
-    { useKibanaContext = true }: ESSearchOptions = { useKibanaContext: true }
+    payload: ESSearchRequest = {},
+    { useKibanaContext = true, timeField }: ESSearchOptions = { useKibanaContext: true }
   ): Promise<ESSearchResponse> {
     payload = sanitizeRequest(payload, [...allowedESSearchRequestKeys]);
 
     if (useKibanaContext) {
-      // TODO: adjust request based on this.visSearchContext
-      // eslint-disable-next-line no-console
-      console.log(this.visSearchContext);
+      const esQuery = this.buildEsQuery({ timeField });
+
+      // TODO: is there a better way to merge queries?
+      if (!payload.query) payload.query = {};
+      if (!payload.query.bool) payload.query.bool = {};
+      if (payload.query.bool.must && !Array.isArray(payload.query.bool.must))
+        payload.query.bool.must = [payload.query.bool.must];
+      if (!payload.query.bool.must) payload.query.bool.must = [];
+      payload.query.bool.must.push(esQuery);
     }
 
     const response = await lastValueFrom(
@@ -98,15 +109,21 @@ export class VisTypeScriptKibanaApi {
   }
 
   async sqlSearch(
-    payload: SQLSearchRequest,
-    { useKibanaContext = true }: ESSearchOptions = { useKibanaContext: true }
+    payload: SQLSearchRequest = {},
+    { useKibanaContext = true, timeField }: ESSearchOptions = { useKibanaContext: true }
   ): Promise<SQLSearchResponse> {
     payload = sanitizeRequest(payload, [...allowedSQLSearchRequestKeys]);
 
     if (useKibanaContext) {
-      // TODO: adjust request based on this.visSearchContext
-      // eslint-disable-next-line no-console
-      console.log(this.visSearchContext);
+      const esQuery = this.buildEsQuery({ timeField });
+
+      // TODO: is there a better way to merge queries?
+      if (!payload.filter) payload.filter = {};
+      if (!payload.filter.bool) payload.filter.bool = {};
+      if (payload.filter.bool.must && !Array.isArray(payload.filter.bool.must))
+        payload.filter.bool.must = [payload.filter.bool.must];
+      if (!payload.filter.bool.must) payload.filter.bool.must = [];
+      payload.filter.bool.must.push(esQuery);
     }
 
     const response = await lastValueFrom(
@@ -192,5 +209,43 @@ export class VisTypeScriptKibanaApi {
     }
 
     return idxObj.id as string;
+  }
+
+  /**
+   * Builds es query for the search request using current this.visSearchContext
+   * @param timeField
+   * @private
+   */
+  private buildEsQuery({ timeField }: { timeField?: string }) {
+    // TODO: add getNow() and getSearchSessionId()
+    const query = this.visSearchContext.query ?? [];
+    const filters = [...(this.visSearchContext.filters ?? [])];
+    if (this.visSearchContext.timeRange && timeField) {
+      // TODO: what is a proper way to build a filter from a time range without a data view?
+      const stubDataView = {
+        id: undefined,
+        title: '',
+        fields: [{ type: 'date', name: timeField }],
+      };
+
+      const timeFilter = getTime(stubDataView, this.visSearchContext.timeRange, {
+        fieldName: timeField,
+      });
+      if (timeFilter) {
+        // TODO: when we inside the viz editor there is already a time filter?
+        // on top of the default data view and default time field.
+        // who to handle this?
+        filters.push(timeFilter);
+      }
+    }
+
+    const esQuery = buildEsQuery(
+      undefined,
+      query,
+      filters,
+      getEsQueryConfig(this.deps.uiSettingsClient)
+    );
+
+    return esQuery;
   }
 }

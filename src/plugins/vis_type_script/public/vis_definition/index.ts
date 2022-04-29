@@ -59,5 +59,5 @@ export const getScriptVisDefinition: (
     enableAutoApply: true,
     defaultSize: DefaultEditorSize.LARGE,
   },
-  requiresSearch: true,
+  options: {},
 });
