@@ -129,7 +129,7 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
       const embedPanel = {
         id: 'embedCodePanel',
         title: i18n.translate('share.contextMenu.embedCodePanelTitle', {
-          defaultMessage: 'Embed Code',
+          defaultMessage: 'Embed code',
         }),
         content: (
           <UrlPanelContent

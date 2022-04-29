@@ -43,7 +43,7 @@ const strings = {
     }),
   getShareWebsiteTitle: () =>
     i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareWebsiteTitle', {
-      defaultMessage: 'Share on a website',
+      defaultMessage: 'Embed code',
     }),
   getShareWorkpadMessage: () =>
     i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareWorkpadMessage', {
@@ -82,17 +82,17 @@ export const ShareMenu = ({ ReportingComponent, onExport }: Props) => {
         title: strings.getShareWorkpadMessage(),
         items: [
           {
-            name: strings.getExportTitle(),
-            icon: <EuiIcon type="exportAction" size="m" />,
-            panel: 1,
-          },
-          {
             name: strings.getShareWebsiteTitle(),
-            icon: <EuiIcon type="globe" size="m" />,
+            icon: <EuiIcon type="console" size="m" />,
             onClick: () => {
               setShowFlyout(true);
               closePopover();
             },
+          },
+          {
+            name: strings.getExportTitle(),
+            icon: <EuiIcon type="exportAction" size="m" />,
+            panel: 1,
           },
         ],
       },
