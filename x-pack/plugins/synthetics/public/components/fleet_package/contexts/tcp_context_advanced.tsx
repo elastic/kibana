@@ -6,7 +6,8 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { TCPAdvancedFields, ConfigKey } from '../types';
+import { TCPAdvancedFields } from '../types';
+import { DEFAULT_TCP_ADVANCED_FIELDS } from '../../../../common/constants/monitor_defaults';
 
 interface TCPAdvancedFieldsContext {
   setFields: React.Dispatch<React.SetStateAction<TCPAdvancedFields>>;
@@ -19,12 +20,7 @@ interface TCPAdvancedFieldsContextProvider {
   defaultValues?: TCPAdvancedFields;
 }
 
-export const initialValues: TCPAdvancedFields = {
-  [ConfigKey.PROXY_URL]: '',
-  [ConfigKey.PROXY_USE_LOCAL_RESOLVER]: false,
-  [ConfigKey.RESPONSE_RECEIVE_CHECK]: '',
-  [ConfigKey.REQUEST_SEND_CHECK]: '',
-};
+export const initialValues: TCPAdvancedFields = DEFAULT_TCP_ADVANCED_FIELDS;
 
 const defaultContext: TCPAdvancedFieldsContext = {
   setFields: (_fields: React.SetStateAction<TCPAdvancedFields>) => {
