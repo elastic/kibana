@@ -115,28 +115,6 @@ const provideSuggestions = (
         range: wordRange,
       },
       {
-        label: 'searchSql',
-        kind: monacoEditor.languages.CompletionItemKind.Method,
-        documentation: {
-          value: 'Runs an Elasticsearch SQL query',
-          isTrusted: true,
-        },
-        insertText: 'searchSql({\n\tquery: "$0"\n})',
-        insertTextRules: monacoEditor.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-        range: wordRange,
-      },
-      {
-        label: 'searchSql',
-        kind: monacoEditor.languages.CompletionItemKind.Method,
-        documentation: {
-          value: 'Runs an Elasticsearch SQL query',
-          isTrusted: true,
-        },
-        insertText: 'searchSql({\n\tquery: "$0"\n})',
-        insertTextRules: monacoEditor.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-        range: wordRange,
-      },
-      {
         label: 'subscribeToResize',
         kind: monacoEditor.languages.CompletionItemKind.Method,
         documentation: {
