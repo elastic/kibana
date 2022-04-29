@@ -74,6 +74,23 @@ export interface DetailPanelProcessLeader {
   executable: string;
 }
 
+export interface DetailPanelHost {
+  architecture: string;
+  hostname: string;
+  id: string;
+  ip: string;
+  mac: string;
+  name: string;
+  os: {
+    family: string;
+    full: string;
+    kernel: string;
+    name: string;
+    platform: string;
+    version: string;
+  };
+}
+
 export interface SessionViewStart {
   getSessionView: (props: SessionViewDeps) => JSX.Element;
 }
