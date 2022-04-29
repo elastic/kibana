@@ -11,7 +11,7 @@ import { BrowserFields, ConfigKey } from '../../../../common/runtime_types/monit
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 
 const throttlingFormatter: Formatter = (fields) => {
-  if (!fields[ConfigKey.IS_THROTTLING_ENABLED]) return 'false';
+  if (!fields[ConfigKey.IS_THROTTLING_ENABLED]) return false;
 
   const getThrottlingValue = (v: string | undefined, suffix: 'd' | 'u' | 'l') =>
     v !== '' && v !== undefined ? `${v}${suffix}` : null;
