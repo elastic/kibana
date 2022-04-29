@@ -20,12 +20,15 @@ import { MonitoringCore } from '../../../../types';
 import { metricSet } from './metric_set_overview';
 
 export function beatsOverviewRoute(server: MonitoringCore) {
+  const validateParams = createValidationFunction(postBeatsOverviewRequestParamsRT);
+  const validateBody = createValidationFunction(postBeatsOverviewRequestPayloadRT);
+
   server.route({
     method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/beats',
     validate: {
-      params: createValidationFunction(postBeatsOverviewRequestParamsRT),
-      body: createValidationFunction(postBeatsOverviewRequestPayloadRT),
+      params: validateParams,
+      body: validateBody,
     },
     async handler(req) {
       const config = server.config;
