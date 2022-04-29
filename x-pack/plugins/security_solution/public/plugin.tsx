@@ -300,6 +300,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
+        landingPages: new subPluginClasses.LandingPages(),
       };
     }
     return this._subPlugins;
@@ -325,6 +326,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       network: subPlugins.network.start(storage),
       timelines: subPlugins.timelines.start(),
       management: subPlugins.management.start(core, plugins),
+      landingPages: subPlugins.landingPages.start(),
     };
   }
   /**
