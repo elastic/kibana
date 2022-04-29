@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const DRILLDOWN_TO_PIE_CHART_NAME = 'Go to pie chart dashboard';
 const DRILLDOWN_TO_AREA_CHART_NAME = 'Go to area chart dashboard';

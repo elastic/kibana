@@ -8,8 +8,13 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Reporting', function () {
-    loadTestFile(require.resolve('./screenshots'));
-    loadTestFile(require.resolve('./download_csv'));
+  describe('dashboard', function () {
+    describe('', function () {
+      this.tags('ciGroup19');
+      loadTestFile(require.resolve('./feature_controls'));
+      loadTestFile(require.resolve('./preserve_url'));
+      loadTestFile(require.resolve('./reporting'));
+      loadTestFile(require.resolve('./drilldowns'));
+    });
   });
 }
