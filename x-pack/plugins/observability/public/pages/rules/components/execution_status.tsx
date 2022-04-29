@@ -59,7 +59,7 @@ export function ExecutionStatus({ executionStatus, item, licenseType }: Executio
             }
           >
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.rulesList.fixLicenseLink"
+              id="xpack.observability.rules.rulesTable.fixLicenseLink"
               defaultMessage="Fix"
             />
           </EuiButtonEmpty>
