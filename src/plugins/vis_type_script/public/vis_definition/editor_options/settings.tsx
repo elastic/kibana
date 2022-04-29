@@ -64,13 +64,42 @@ const DependencyUrl = ({
 };
 
 function SettingsOptions({
-  stateParams: { dependencyUrls },
+  stateParams: { scriptDependencyUrls, styleDependencyUrls },
   setValue,
   validateUrl,
 }: VisEditorOptionsProps<VisParams> & { validateUrl: IExternalUrl['validateUrl'] }) {
-  const setDependencyUrls = (newDependencyUrls: string[]) =>
-    setValue('dependencyUrls', newDependencyUrls);
+  return (
+    <EuiPanel paddingSize="s">
+      <EuiTitle size="xs">
+        <h2>Script Dependencies</h2>
+      </EuiTitle>
+      <DependencyUrlList
+        dependencyUrls={scriptDependencyUrls}
+        validateUrl={validateUrl}
+        setDependencyUrls={(urls) => setValue('scriptDependencyUrls', urls)}
+      />
+      <EuiSpacer size="l" />
+      <EuiTitle size="xs">
+        <h2>Style Dependencies</h2>
+      </EuiTitle>
+      <DependencyUrlList
+        dependencyUrls={styleDependencyUrls}
+        validateUrl={validateUrl}
+        setDependencyUrls={(urls) => setValue('styleDependencyUrls', urls)}
+      />
+    </EuiPanel>
+  );
+}
 
+function DependencyUrlList({
+  dependencyUrls,
+  setDependencyUrls,
+  validateUrl,
+}: {
+  dependencyUrls: string[];
+  setDependencyUrls: (deps: string[]) => void;
+  validateUrl: IExternalUrl['validateUrl'];
+}) {
   const updateNthDependency = (n: number, newValue: string) => {
     const newDependencies = [...dependencyUrls];
     newDependencies[n] = newValue;
@@ -94,10 +123,7 @@ function SettingsOptions({
   };
 
   return (
-    <EuiPanel paddingSize="s">
-      <EuiTitle size="xs">
-        <h2>Dependencies</h2>
-      </EuiTitle>
+    <>
       <EuiForm component="form">
         {dependencyUrls.map((url: string, index: number) => (
           <DependencyUrl
@@ -112,7 +138,7 @@ function SettingsOptions({
       <EuiButton size="s" fullWidth iconType="listAdd" onClick={addDependency}>
         Add dependency
       </EuiButton>
-    </EuiPanel>
+    </>
   );
 }
 

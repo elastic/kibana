@@ -45,7 +45,8 @@ export const scriptVisRenderer: (
       <VisualizationContainer className="scriptVis" handlers={handlers}>
         <ScriptRenderer
           script={visParams.script}
-          dependencyUrls={visParams.dependencyUrls}
+          scriptDependencyUrls={visParams.scriptDependencyUrls}
+          styleDependencyUrls={visParams.styleDependencyUrls}
           kibanaApi={visTypeScriptKibanaApi}
           validateUrl={deps.validateUrl}
           nonce={deps.nonce}

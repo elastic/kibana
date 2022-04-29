@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { createEndpoint, fromIframe } from '@remote-ui/rpc';
 
 import './index.scss';
@@ -23,13 +23,19 @@ import {
 
 export const KIBANA_API_CONSTANT_NAME = 'KIBANA';
 
-const getSandboxDocument = (script: string, dependencies: string[], nonce: string) => {
+const getSandboxDocument = (
+  script: string,
+  scriptDependencies: string[],
+  styleDependencies: string[],
+  nonce: string
+) => {
   return `
     <!DOCTYPE html>
     <html>
       <head>
-        <meta http-equiv="content-security-policy" content="default-src none; script-src 'nonce-${nonce}'">
-        ${dependencies
+        <meta http-equiv="content-security-policy" content="default-src none; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'">
+        ${styleDependencies.map((dep) => `<style nonce=${nonce}>${dep}</style>`).join('')}
+        ${scriptDependencies
           .map((dependency) => `<script nonce="${nonce}">${dependency}</script>`)
           .join('')}
         <script nonce="${nonce}" type="module">
@@ -90,19 +96,22 @@ const loadDependencies = (urls: string[]) => {
 
 export const ScriptRenderer: React.FunctionComponent<{
   script: string;
-  dependencyUrls: string[];
+  scriptDependencyUrls: string[];
+  styleDependencyUrls: string[];
   kibanaApi: VisTypeScriptKibanaApi;
   validateUrl: IExternalUrl['validateUrl'];
   nonce: string;
 }> = ({
   script: visualizationScript,
-  dependencyUrls,
+  scriptDependencyUrls,
+  styleDependencyUrls,
   kibanaApi,
   validateUrl,
   nonce,
 }: {
   script: string;
-  dependencyUrls: string[];
+  scriptDependencyUrls: string[];
+  styleDependencyUrls: string[];
   kibanaApi: VisTypeScriptKibanaApi;
   validateUrl: IExternalUrl['validateUrl'];
   nonce: string;
@@ -144,17 +153,29 @@ export const ScriptRenderer: React.FunctionComponent<{
     };
   }, [kibanaApi]);
 
-  const [dependencies, setDependencies] = useState<string[]>([]);
+  const onlyValidUrls = useCallback(
+    (urls: string[]) => urls.filter((url) => validateUrl(url) !== null),
+    [validateUrl]
+  );
+
+  const [scriptDependencies, setScriptDependencies] = useState<string[]>([]);
+  const [styleDependencies, setStyleDependencies] = useState<string[]>([]);
 
   useEffect(() => {
-    loadDependencies(dependencyUrls.filter((url) => validateUrl(url) !== null)).then(
-      (deps: string[]) => setDependencies(deps)
+    loadDependencies(onlyValidUrls(scriptDependencyUrls)).then((deps: string[]) =>
+      setScriptDependencies(deps)
     );
-  }, [dependencyUrls, validateUrl]);
+  }, [scriptDependencyUrls, onlyValidUrls, validateUrl]);
+
+  useEffect(() => {
+    loadDependencies(onlyValidUrls(styleDependencyUrls)).then((deps: string[]) =>
+      setStyleDependencies(deps)
+    );
+  }, [scriptDependencyUrls, onlyValidUrls, validateUrl, styleDependencyUrls]);
 
   const sandboxDocument = useMemo(
-    () => getSandboxDocument(visualizationScript, dependencies, nonce),
-    [visualizationScript, dependencies, nonce]
+    () => getSandboxDocument(visualizationScript, scriptDependencies, styleDependencies, nonce),
+    [visualizationScript, scriptDependencies, styleDependencies, nonce]
   );
 
   return (

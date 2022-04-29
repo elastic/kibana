@@ -35,7 +35,8 @@ export const getScriptVisDefinition: (
   visConfig: {
     defaults: {
       script: DEFAULT_VIS,
-      dependencyUrls: ['https://unpkg.com/d3@3.4.0/d3.min.js'],
+      scriptDependencyUrls: ['https://unpkg.com/d3@3.4.0/d3.min.js'],
+      styleDependencyUrls: [],
     },
   },
   editorConfig: {
