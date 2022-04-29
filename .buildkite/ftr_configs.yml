@@ -108,7 +108,10 @@ enabled:
   - x-pack/test/functional/apps/license_management/config.ts
   - x-pack/test/functional/apps/logstash/config.ts
   - x-pack/test/functional/apps/management/config.ts
-  - x-pack/test/functional/apps/maps/config.ts
+  - x-pack/test/functional/apps/maps/group1/config.ts
+  - x-pack/test/functional/apps/maps/group2/config.ts
+  - x-pack/test/functional/apps/maps/group3/config.ts
+  - x-pack/test/functional/apps/maps/group4/config.ts
   - x-pack/test/functional/apps/ml/group1/config.ts
   - x-pack/test/functional/apps/ml/group2/config.ts
   - x-pack/test/functional/apps/ml/group3/config.ts
