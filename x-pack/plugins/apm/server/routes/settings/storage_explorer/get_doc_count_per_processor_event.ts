@@ -14,6 +14,7 @@ import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
   TIER,
+  TRANSACTION_SAMPLED,
 } from '../../../../common/elasticsearch_fieldnames';
 import {
   IndexLifecyclePhase,
@@ -70,6 +71,14 @@ export async function getDocCountPerProcessorEvent({
                   field: PROCESSOR_EVENT,
                   size: 10,
                 },
+                aggs: {
+                  sampled_transactions: {
+                    terms: {
+                      field: TRANSACTION_SAMPLED,
+                      size: 10,
+                    },
+                  },
+                },
               },
             },
           },
@@ -84,6 +93,11 @@ export async function getDocCountPerProcessorEvent({
     const environments = bucket.environments.buckets.map(
       ({ key }) => key as string
     );
+
+    const sampledTransactionDocs = bucket.processor_event.buckets.find(
+      (x) => x.key === 'transaction'
+    )?.sampled_transactions.buckets[0].doc_count;
+
     const docsPerProcessorEvent = bucket.processor_event.buckets.reduce(
       (
         acc: Record<Exclude<ProcessorEvent, ProcessorEvent.profile>, number>,
@@ -104,6 +118,7 @@ export async function getDocCountPerProcessorEvent({
       serviceName,
       environments,
       totalServiceDocs,
+      sampledTransactionDocs,
       transactionDocs: docsPerProcessorEvent.transaction,
       spanDocs: docsPerProcessorEvent.span,
       metricDocs: docsPerProcessorEvent.metric,

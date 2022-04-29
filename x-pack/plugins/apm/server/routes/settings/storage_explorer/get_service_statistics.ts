@@ -18,20 +18,21 @@ export function getServiceStatistics({
   totalSizeInBytes?: number;
 }) {
   const serviceStatistics = docCountPerProcessorEvent.map(
-    ({ serviceName, totalServiceDocs, transactionDocs, ...rest }) => {
+    ({ serviceName, totalServiceDocs, sampledTransactionDocs, ...rest }) => {
       const size =
         totalSizeInBytes && totalApmDocs
           ? (totalServiceDocs / totalApmDocs) * totalSizeInBytes
           : undefined;
 
-      const sampling = totalTransactionsPerService[serviceName]
-        ? transactionDocs / totalTransactionsPerService[serviceName]
-        : 0;
+      const sampling =
+        sampledTransactionDocs && totalTransactionsPerService[serviceName]
+          ? sampledTransactionDocs / totalTransactionsPerService[serviceName]
+          : 0;
 
       return {
         ...rest,
         serviceName,
-        transactionDocs,
+        sampledTransactionDocs,
         size,
         sampling,
       };
