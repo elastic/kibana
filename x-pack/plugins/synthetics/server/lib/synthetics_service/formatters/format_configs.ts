@@ -17,6 +17,7 @@ const UI_KEYS_TO_SKIP = [
   ConfigKey.IS_THROTTLING_ENABLED,
   ConfigKey.LOCATIONS,
   ConfigKey.REVISION,
+  ConfigKey.IS_PUSH_MONITOR,
   'secrets',
 ];
 
@@ -45,6 +46,7 @@ export const formatMonitorConfig = (configKeys: ConfigKey[], config: Partial<Mon
     const hbKey = key as YamlKeys;
     const configKey = uiToHeartbeatKeyMap[hbKey];
     formattedMonitor[hbKey] = formattedMonitor[configKey];
+    console.warn(formattedMonitor[hbKey]);
     delete formattedMonitor[configKey];
   });
 

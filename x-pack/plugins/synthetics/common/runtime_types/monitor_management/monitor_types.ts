@@ -201,6 +201,8 @@ export type ThrottlingConfigKey = t.TypeOf<typeof ThrottlingConfigKeyCodec>;
 
 export const EncryptedBrowserSimpleFieldsCodec = t.intersection([
   t.interface({
+    [ConfigKey.CUSTOM_ID]: t.string,
+    [ConfigKey.IS_PUSH_MONITOR]: t.boolean,
     [ConfigKey.METADATA]: MetadataCodec,
     [ConfigKey.SOURCE_ZIP_URL]: t.string,
     [ConfigKey.SOURCE_ZIP_FOLDER]: t.string,
@@ -214,6 +216,7 @@ export const EncryptedBrowserSimpleFieldsCodec = t.intersection([
 export const BrowserSensitiveSimpleFieldsCodec = t.intersection([
   t.interface({
     [ConfigKey.SOURCE_INLINE]: t.string,
+    [ConfigKey.SOURCE_PUSH]: t.string,
     [ConfigKey.SOURCE_ZIP_USERNAME]: t.string,
     [ConfigKey.SOURCE_ZIP_PASSWORD]: t.string,
     [ConfigKey.PARAMS]: t.string,

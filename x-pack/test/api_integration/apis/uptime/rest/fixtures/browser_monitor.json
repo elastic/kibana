@@ -1,6 +1,7 @@
 {
   "type": "browser",
   "enabled": true,
+  "custom_id": "",
   "schedule": {
     "number": "3",
     "unit": "m"
@@ -25,6 +26,8 @@
   "source.zip_url.folder": "",
   "source.zip_url.proxy_url": "",
   "source.inline.script": "step(\"Visit /users api route\", async () => {\\n  const response = await page.goto('https://nextjs-test-synthetics.vercel.app/api/users');\\n  expect(response.status()).toEqual(200);\\n});",
+  "source.push.content": "",
+  "is_push_monitor": false,
   "params": "",
   "screenshots": "on",
   "synthetics_args": [],

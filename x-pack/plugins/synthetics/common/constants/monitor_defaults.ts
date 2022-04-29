@@ -58,10 +58,8 @@ export const DEFAULT_BROWSER_ADVANCED_FIELDS: BrowserAdvancedFields = {
 
 export const DEFAULT_BROWSER_SIMPLE_FIELDS: BrowserSimpleFields = {
   ...DEFAULT_COMMON_FIELDS,
-  [ConfigKey.SCHEDULE]: {
-    unit: ScheduleUnit.MINUTES,
-    number: '10',
-  },
+  [ConfigKey.CUSTOM_ID]: '',
+  [ConfigKey.IS_PUSH_MONITOR]: false,
   [ConfigKey.METADATA]: {
     script_source: {
       is_generated_script: false,
@@ -70,21 +68,26 @@ export const DEFAULT_BROWSER_SIMPLE_FIELDS: BrowserSimpleFields = {
     is_zip_url_tls_enabled: false,
   },
   [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
+  [ConfigKey.PARAMS]: '',
+  [ConfigKey.PORT]: undefined,
+  [ConfigKey.SCHEDULE]: {
+    unit: ScheduleUnit.MINUTES,
+    number: '10',
+  },
   [ConfigKey.SOURCE_INLINE]: '',
+  [ConfigKey.SOURCE_PUSH]: '',
   [ConfigKey.SOURCE_ZIP_URL]: '',
   [ConfigKey.SOURCE_ZIP_USERNAME]: '',
   [ConfigKey.SOURCE_ZIP_PASSWORD]: '',
   [ConfigKey.SOURCE_ZIP_FOLDER]: '',
   [ConfigKey.SOURCE_ZIP_PROXY_URL]: '',
-  [ConfigKey.PARAMS]: '',
   [ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: undefined,
   [ConfigKey.ZIP_URL_TLS_CERTIFICATE]: undefined,
   [ConfigKey.ZIP_URL_TLS_KEY]: undefined,
   [ConfigKey.ZIP_URL_TLS_KEY_PASSPHRASE]: undefined,
   [ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]: undefined,
   [ConfigKey.ZIP_URL_TLS_VERSION]: undefined,
-  [ConfigKey.URLS]: undefined,
-  [ConfigKey.PORT]: undefined,
+  [ConfigKey.URLS]: '',
 };
 
 export const DEFAULT_HTTP_SIMPLE_FIELDS: HTTPSimpleFields = {
