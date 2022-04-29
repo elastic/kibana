@@ -15,7 +15,6 @@ import {
   SERVICE_ENVIRONMENT,
   TIER,
 } from '../../../../common/elasticsearch_fieldnames';
-import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   IndexLifecyclePhase,
   indexLifeCyclePhaseToDataTier,
@@ -23,11 +22,9 @@ import {
 
 export async function getDocCountPerProcessorEvent({
   setup,
-  environment,
   indexLifecyclePhase,
 }: {
   setup: Setup;
-  environment: string;
   indexLifecyclePhase: IndexLifecyclePhase;
 }) {
   const { apmEventClient } = setup;
@@ -48,7 +45,6 @@ export async function getDocCountPerProcessorEvent({
         query: {
           bool: {
             filter: [
-              ...environmentQuery(environment),
               ...termQuery(
                 TIER,
                 indexLifeCyclePhaseToDataTier[indexLifecyclePhase]

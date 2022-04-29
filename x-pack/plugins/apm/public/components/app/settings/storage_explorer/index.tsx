@@ -26,7 +26,6 @@ import {
 import { useChartTheme } from '@kbn/observability-plugin/public';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
-import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import {
   StorageExplorerItem,
   IndexLifecyclePhase,
@@ -41,8 +40,6 @@ export function StorageExplorer() {
     IndexLifecyclePhase.Hot
   );
 
-  const environment = ENVIRONMENT_ALL.value;
-
   const chartTheme = useChartTheme();
   const groupedPalette = euiPaletteColorBlind({
     rotations: 3,
@@ -55,13 +52,12 @@ export function StorageExplorer() {
       return callApmApi('GET /internal/apm/storage_explorer', {
         params: {
           query: {
-            environment,
             indexLifecyclePhase,
           },
         },
       });
     },
-    [environment, indexLifecyclePhase]
+    [indexLifecyclePhase]
   );
 
   const items: StorageExplorerItem[] = data?.serviceStatistics ?? [];

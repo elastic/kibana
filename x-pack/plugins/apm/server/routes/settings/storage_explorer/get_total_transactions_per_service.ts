@@ -15,7 +15,6 @@ import {
   SERVICE_NAME,
   TIER,
 } from '../../../../common/elasticsearch_fieldnames';
-import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   IndexLifecyclePhase,
   indexLifeCyclePhaseToDataTier,
@@ -23,12 +22,10 @@ import {
 
 export async function getTotalTransactionsPerService({
   setup,
-  environment,
   searchAggregatedTransactions,
   indexLifecyclePhase,
 }: {
   setup: Setup;
-  environment: string;
   searchAggregatedTransactions: boolean;
   indexLifecyclePhase: IndexLifecyclePhase;
 }) {
@@ -47,7 +44,6 @@ export async function getTotalTransactionsPerService({
         query: {
           bool: {
             filter: [
-              ...environmentQuery(environment),
               ...getDocumentTypeFilterForTransactions(
                 searchAggregatedTransactions
               ),

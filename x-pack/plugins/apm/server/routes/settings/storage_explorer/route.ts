@@ -11,7 +11,6 @@ import { getIndicesStats } from './get_indices_stats';
 import { getSearchAggregatedTransactions } from '../../../lib/helpers/transactions';
 import { setupRequest } from '../../../lib/helpers/setup_request';
 import { getDocCountPerProcessorEvent } from './get_doc_count_per_processor_event';
-import { environmentRt } from '../../default_api_types';
 import {
   StorageExplorerItem,
   indexLifecyclePhaseRt,
@@ -23,7 +22,7 @@ const storageExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_explorer',
   options: { tags: ['access:apm'] },
   params: t.type({
-    query: t.intersection([environmentRt, indexLifecyclePhaseRt]),
+    query: indexLifecyclePhaseRt,
   }),
   handler: async (
     resources
@@ -34,7 +33,7 @@ const storageExplorerRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { params, context } = resources;
     const {
-      query: { environment, indexLifecyclePhase },
+      query: { indexLifecyclePhase },
     } = params;
 
     const searchAggregatedTransactions = await getSearchAggregatedTransactions({
@@ -47,13 +46,11 @@ const storageExplorerRoute = createApmServerRoute({
       await Promise.all([
         getDocCountPerProcessorEvent({
           setup,
-          environment,
           indexLifecyclePhase,
         }),
         getIndicesStats({ context, setup, indexLifecyclePhase }),
         getTotalTransactionsPerService({
           setup,
-          environment,
           searchAggregatedTransactions,
           indexLifecyclePhase,
         }),
