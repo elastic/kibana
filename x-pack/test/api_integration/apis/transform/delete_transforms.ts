@@ -38,6 +38,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('single transform deletion', function () {
+      this.meta('suiteFoo');
       const transformId = 'transform-test-delete';
       const destinationIndex = generateDestIndex(transformId);
 
@@ -51,6 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should delete transform by transformId', async () => {
+        this.meta('testFoo');
         const reqBody: DeleteTransformsRequestSchema = {
           transformsInfo: [{ id: transformId, state: TRANSFORM_STATE.STOPPED }],
         };

@@ -23,6 +23,7 @@ export interface Suite {
   eachTest: (cb: (test: Test) => void) => void;
   root: boolean;
   suiteTag: string;
+  _meta?: string;
 }
 
 export interface Test {
@@ -32,6 +33,7 @@ export interface Test {
   parent?: Suite;
   isPassed: () => boolean;
   pending?: boolean;
+  _meta?: string;
 }
 
 export interface Runner extends EventEmitter {

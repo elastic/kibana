@@ -20,5 +20,7 @@ declare module 'mocha' {
      * @param semver any valid semver range, like ">=8"
      */
     onlyEsVersion(semver: string): void;
+
+    meta(meta: string): void;
   }
 }
