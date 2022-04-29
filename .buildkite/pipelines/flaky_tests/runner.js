@@ -147,14 +147,13 @@ for (const testSuite of testSuites) {
         env: {
           FTR_CONFIG: testSuite.ftrConfig,
         },
-        label: 'FTR Configs',
+        label: `FTR Config: ${testSuite.ftrConfig}`,
         parallelism: testSuite.count,
         agents: {
           queue: 'n2-4-spot-2',
         },
         depends_on: 'build',
         timeout_in_minutes: 150,
-        key: 'ftr-configs',
         retry: {
           automatic: [
             { exit_status: '-1', limit: 3 },
