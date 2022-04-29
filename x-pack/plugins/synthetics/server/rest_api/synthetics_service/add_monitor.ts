@@ -17,6 +17,7 @@ import { syntheticsMonitorType } from '../../lib/saved_objects/synthetics_monito
 import { validateMonitor } from './monitor_validation';
 import { sendTelemetryEvents, formatTelemetryEvent } from './telemetry/monitor_upgrade_sender';
 import { formatSecrets } from '../../lib/synthetics_service/utils/secrets';
+import type { UptimeServerSetup } from '../../lib/adapters/framework';
 
 export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
   method: 'POST',
@@ -43,22 +44,7 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
         })
       );
 
-    const { syntheticsService } = server;
-
-    const errors = await syntheticsService.addConfig({
-      ...monitor,
-      id: newMonitor.id,
-      fields: {
-        config_id: newMonitor.id,
-      },
-      fields_under_root: true,
-    });
-
-    sendTelemetryEvents(
-      server.logger,
-      server.telemetry,
-      formatTelemetryEvent({ monitor: newMonitor, errors, kibanaVersion: server.kibanaVersion })
-    );
+    const errors = await syncNewMonitor({ monitor, monitorSavedObject: newMonitor, server });
 
     if (errors && errors.length > 0) {
       return response.ok({
@@ -69,3 +55,34 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
     return response.ok({ body: newMonitor });
   },
 });
+
+export const syncNewMonitor = async ({
+  monitor,
+  monitorSavedObject,
+  server,
+}: {
+  monitor: SyntheticsMonitor;
+  monitorSavedObject: SavedObject<EncryptedSyntheticsMonitor>;
+  server: UptimeServerSetup;
+}) => {
+  const errors = await server.syntheticsService.addConfig({
+    ...monitor,
+    id: monitorSavedObject.id,
+    fields: {
+      config_id: monitorSavedObject.id,
+    },
+    fields_under_root: true,
+  });
+
+  sendTelemetryEvents(
+    server.logger,
+    server.telemetry,
+    formatTelemetryEvent({
+      monitor: monitorSavedObject,
+      errors,
+      kibanaVersion: server.kibanaVersion,
+    })
+  );
+
+  return errors;
+};
