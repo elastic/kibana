@@ -35,7 +35,6 @@ export const config: PluginConfigDescriptor = {
       alertingExperience: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
       rules: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
       cases: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
-      overviewNext: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
     }),
   }),
 };
