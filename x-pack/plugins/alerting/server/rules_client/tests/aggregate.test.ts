@@ -182,7 +182,7 @@ describe('aggregate()', () => {
           },
           snoozed: {
             date_range: {
-              field: 'alert.attributes.snoozeEndTime',
+              field: 'alert.attributes.snoozeSchedule.startTime',
               format: 'strict_date_time',
               ranges: [{ from: 'now' }],
             },
