@@ -314,6 +314,7 @@ export class CommonPageObject extends FtrService {
       urls.add(url);
       const response = await request.head(url);
       this.log.debug(`${url} response: ${response.status}`);
+      expect(response.status).to.be(200);
     });
     // console.log(urls);
     // await asyncForEach(urls, async (myUrl) => {
