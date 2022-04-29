@@ -7,6 +7,6 @@
 
 import * as rt from 'io-ts';
 
-export const postElasticsearchSettingsCollectionEnabledResponsePayloadRT = rt.type({
+export const putElasticsearchSettingsCollectionEnabledResponsePayloadRT = rt.type({
   // TODO: add payload entries
 });

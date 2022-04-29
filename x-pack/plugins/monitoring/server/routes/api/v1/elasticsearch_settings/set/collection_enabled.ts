@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { postElasticsearchSettingsCollectionEnabledResponsePayloadRT } from '../../../../../../common/http_api/elasticsearch_settings';
+import { putElasticsearchSettingsCollectionEnabledResponsePayloadRT } from '../../../../../../common/http_api/elasticsearch_settings';
 import { setCollectionEnabled } from '../../../../../lib/elasticsearch_settings';
 import { handleSettingsError } from '../../../../../lib/errors';
 import { MonitoringCore } from '../../../../../types';
@@ -21,7 +21,7 @@ export function setCollectionEnabledRoute(server: MonitoringCore) {
     async handler(req) {
       try {
         const response = await setCollectionEnabled(req);
-        return postElasticsearchSettingsCollectionEnabledResponsePayloadRT.encode(response);
+        return putElasticsearchSettingsCollectionEnabledResponsePayloadRT.encode(response);
       } catch (err) {
         throw handleSettingsError(err);
       }

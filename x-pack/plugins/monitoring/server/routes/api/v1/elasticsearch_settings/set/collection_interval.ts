@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { postElasticsearchSettingsCollectionIntervalResponsePayloadRT } from '../../../../../../common/http_api/elasticsearch_settings';
+import { putElasticsearchSettingsCollectionIntervalResponsePayloadRT } from '../../../../../../common/http_api/elasticsearch_settings';
 import { setCollectionInterval } from '../../../../../lib/elasticsearch_settings';
 import { handleSettingsError } from '../../../../../lib/errors';
 import { MonitoringCore } from '../../../../../types';
@@ -21,7 +21,7 @@ export function setCollectionIntervalRoute(server: MonitoringCore) {
     async handler(req) {
       try {
         const response = await setCollectionInterval(req);
-        return postElasticsearchSettingsCollectionIntervalResponsePayloadRT.encode(response);
+        return putElasticsearchSettingsCollectionIntervalResponsePayloadRT.encode(response);
       } catch (err) {
         throw handleSettingsError(err);
       }
