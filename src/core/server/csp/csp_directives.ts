@@ -134,6 +134,7 @@ const keywordTokens = [
   'strict-dynamic',
   'report-sample',
   'unsafe-inline',
+  'unsafe-eval',
   'unsafe-hashes',
   'unsafe-allow-redirects',
 ];
