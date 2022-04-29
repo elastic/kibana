@@ -11,6 +11,9 @@ import { observabilityFeatureId } from '../../common';
 import { columns as alertO11yColumns } from '../pages/alerts/containers/alerts_table_t_grid/alerts_table_t_grid';
 
 const registerAlertsTableConfiguration = (registry: AlertsTableConfigurationRegistryContract) => {
+  if (registry.has(observabilityFeatureId)) {
+    return;
+  }
   registry.register({
     id: observabilityFeatureId,
     columns: alertO11yColumns,
