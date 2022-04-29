@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux';
 
 import { AlertSummaryRow } from '../helpers';
 import { inputsActions } from '../../../store/inputs';
-import { showTimeline, updateProviders } from '../../../../timelines/store/timeline/actions';
+import { updateProviders } from '../../../../timelines/store/timeline/actions';
 import { sourcererActions } from '../../../store/actions';
 import { SourcererScopeName } from '../../../store/sourcerer/model';
 import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
@@ -63,11 +63,6 @@ const AddToTimelineCell = React.memo<AlertSummaryRow['description']>(
         );
         // Lock the time range by default
         dispatch(inputsActions.removeGlobalLinkTo());
-        // Show the timeline
-        showTimeline({
-          id: TimelineId.active,
-          show: true,
-        });
       }
     }, [dispatch, clearTimeline, actionCellConfig]);
 
