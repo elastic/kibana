@@ -40,9 +40,22 @@ for x in functional jest; do
   echo "### Ingesting coverage for ${x}"
   COVERAGE_SUMMARY_FILE=target/kibana-coverage/${x}-combined/coverage-summary.json
   # running in background to speed up ingestion
-  CI_STATS_DISABLED=true node scripts/ingest_coverage.js --path ${COVERAGE_SUMMARY_FILE} --vcsInfoPath ./VCS_INFO.txt --teamAssignmentsPath $TEAM_ASSIGN_PATH &
+  COVERAGE_PEEK=true \
+  COVERAGE_PEEK_SIZE=4 \
+  CI_STATS_DISABLED=true \
+  node scripts/ingest_coverage.js \
+  --path ${COVERAGE_SUMMARY_FILE} \
+  --vcsInfoPath ./VCS_INFO.txt \
+  --teamAssignmentsPath $TEAM_ASSIGN_PATH > ${x}-ingestion.txt &
 done
 wait
 
-echo "###  Ingesting Code Coverage - Complete"
+for x in functional jest; do
+  echo "### ${x}-ingestion.txt Contents:"
+  cat ${x}-ingestion.txt
+  echo ""
+done
+
+
+echo "### Ingesting Code Coverage - Complete"
 echo ""
