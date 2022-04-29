@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KQL_INPUT, REFRESH_BUTTON } from '../screens/security_header';
+import { KQL_INPUT, REFRESH_BUTTON, REFRESH_ICON } from '../screens/security_header';
 
 export const clearSearchBar = () => {
   cy.get(KQL_INPUT).clear().type('{enter}');
@@ -22,6 +22,8 @@ export const navigateFromHeaderTo = (page: string) => {
 
 export const refreshPage = () => {
   cy.get(REFRESH_BUTTON)
+    .get(REFRESH_ICON)
+    .first()
     .click({ force: true })
-    .should('not.have.attr', 'aria-label', 'Needs updating');
+    .should('not.have.text', 'Updating');
 };

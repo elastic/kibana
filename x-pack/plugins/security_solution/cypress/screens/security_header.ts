@@ -31,6 +31,8 @@ export const OVERVIEW = '[data-test-subj="navigation-overview"]';
 
 export const REFRESH_BUTTON = '[data-test-subj="querySubmitButton"]';
 
+export const REFRESH_ICON = '.euiButton__text';
+
 export const TIMELINES = '[data-test-subj="navigation-timelines"]';
 
 export const LOADING_INDICATOR = '[data-test-subj="globalLoadingIndicator"]';
