@@ -4557,19 +4557,6 @@
         }
       }
     },
-    "search-session": {
-      "properties": {
-        "transientCount": {
-          "type": "long"
-        },
-        "persistedCount": {
-          "type": "long"
-        },
-        "totalCount": {
-          "type": "long"
-        }
-      }
-    },
     "discoverEnhanced": {
       "properties": {
         "exploreDataInChartActionEnabled": {
