@@ -26,7 +26,7 @@ type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
 
 const BottomContentWrapper = styled(EuiFlexGroup)`
   ${({ theme }) => `
-    padding: ${theme.eui.ruleMargins.marginSmall} 0;
+    padding: ${theme.eui.euiSizeM} 0;
   `}
 `;
 
