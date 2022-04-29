@@ -182,7 +182,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.maps.showMapsInspectorAdapter (boolean)',
         'xpack.observability.unsafe.alertingExperience.enabled (boolean)',
         'xpack.observability.unsafe.cases.enabled (boolean)',
-        'xpack.observability.unsafe.overviewNext.enabled (boolean)',
         'xpack.observability.unsafe.rules.enabled (boolean)',
         'xpack.osquery.actionEnabled (boolean)',
         'xpack.osquery.packs (boolean)',
