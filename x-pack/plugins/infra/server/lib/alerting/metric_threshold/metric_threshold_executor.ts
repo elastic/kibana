@@ -251,6 +251,22 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         });
       }
     }
+
+    const { getRecoveredAlerts } = services.alertFactory.done();
+    const recoveredAlerts = getRecoveredAlerts();
+    for (const alert of recoveredAlerts) {
+      const recoveredAlertId = alert.getId();
+      const viewInAppUrl = getViewInAppUrl(libs.basePath, LINK_TO_METRICS_EXPLORER);
+      const context = {
+        group: recoveredAlertId,
+        timestamp: startedAt.toISOString(),
+        viewInAppUrl,
+        threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
+        metric: mapToConditionsLookup(criteria, (c) => c.metric),
+      };
+      alert.setContext(context);
+    }
+
     return { groups, groupBy: params.groupBy, filterQuery: params.filterQuery };
   });
 
