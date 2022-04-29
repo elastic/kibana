@@ -338,6 +338,7 @@ export const RulesList: React.FunctionComponent = () => {
         typesFilter,
         actionTypesFilter,
         ruleExecutionStatusesFilter,
+        ruleStatusesFilter,
       });
       if (rulesAggs?.ruleExecutionStatus) {
         setRulesStatusesTotal(rulesAggs.ruleExecutionStatus);
