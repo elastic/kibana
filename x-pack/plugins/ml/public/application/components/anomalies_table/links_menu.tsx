@@ -73,14 +73,17 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     services: { data, share, application },
   } = kibana;
 
-  const getMapsLink = async (anomaly: any) => {
+  const getMapsLink = async (anomaly: AnomaliesTableRecord) => {
     const initialLayers = getInitialAnomaliesLayers(anomaly.jobId);
+    const anomalyBucketStart = moment(anomaly.time).toISOString();
+    const timeRange = data.query.timefilter.timefilter.getTime();
+    // Set 'from' in timeRange to start bucket time for the specific anomaly
+    timeRange.from = anomalyBucketStart;
 
     const locator = share.url.locators.get(MAPS_APP_LOCATOR);
     const location = await locator?.getLocation({
       initialLayers,
-      timeRange: data.query.timefilter.timefilter.getTime(),
-      // {from: '2022-04-14T00:04:19.000Z', to: '2022-04-28T21:46:05.000Z'}
+      timeRange,
     });
     return location;
   };
