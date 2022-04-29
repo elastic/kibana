@@ -412,6 +412,7 @@ export interface ElasticsearchIndexRecoveryShard {
 export interface ElasticsearchMetricbeatNode {
   name?: string;
   stats?: ElasticsearchNodeStats;
+  master: boolean;
 }
 
 export interface ElasticsearchMetricbeatSource {
