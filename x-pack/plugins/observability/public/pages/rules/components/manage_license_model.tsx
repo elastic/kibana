@@ -22,20 +22,20 @@ export function ManageLicenseModal({ licenseType, ruleTypeId, onConfirm, onCance
   const licenseRequired = capitalize(licenseType);
   return (
     <EuiConfirmModal
-      title={i18n.translate('xpack.triggersActionsUI.sections.manageLicense.manageLicenseTitle', {
+      title={i18n.translate('xpack.observability.rules.manageLicense.manageLicenseTitle', {
         defaultMessage: '{licenseRequired} license required',
         values: { licenseRequired },
       })}
       onCancel={onCancel}
       onConfirm={onConfirm}
       confirmButtonText={i18n.translate(
-        'xpack.triggersActionsUI.sections.manageLicense.manageLicenseConfirmButtonText',
+        'xpack.observability.rules.manageLicense.manageLicenseConfirmButtonText',
         {
           defaultMessage: 'Manage license',
         }
       )}
       cancelButtonText={i18n.translate(
-        'xpack.triggersActionsUI.sections.manageLicense.manageLicenseCancelButtonText',
+        'xpack.observability.rules.manageLicense.manageLicenseCancelButtonText',
         {
           defaultMessage: 'Cancel',
         }
@@ -45,7 +45,7 @@ export function ManageLicenseModal({ licenseType, ruleTypeId, onConfirm, onCance
     >
       <p>
         <FormattedMessage
-          id="xpack.triggersActionsUI.sections.manageLicense.manageLicenseMessage"
+          id="xpack.observability.rules.manageLicense.manageLicenseMessage"
           defaultMessage="Rule type {ruleTypeId} is disabled because it requires a {licenseRequired} license. Continue to License Management to view upgrade options."
           values={{ ruleTypeId, licenseRequired }}
         />
