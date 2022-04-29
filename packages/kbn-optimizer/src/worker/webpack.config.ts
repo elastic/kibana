@@ -231,7 +231,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           },
         },
         {
-          test: /\.mp4$/,
+          test: /\.(mp4|vtt)$/,
           use: {
             loader: 'file-loader',
           },

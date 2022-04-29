@@ -25,6 +25,7 @@ import { ManageData } from './manage_data';
 import { SolutionsSection } from './solutions_section';
 import { Welcome } from './welcome';
 import testVideo from './GettingToKnowKibana.mp4';
+import testVideoCaptions from './GettingToKnowKibana.vtt';
 
 const KEY_ENABLE_WELCOME = 'home:welcome:show';
 
@@ -145,7 +146,6 @@ export class Home extends Component<HomeProps, State> {
     const showModal = () => this.setState({ isModalOpen: true });
 
     let modal;
-
     if (this.state.isModalOpen) {
       modal = (
         <EuiModal onClose={closeModal}>
@@ -153,6 +153,12 @@ export class Home extends Component<HomeProps, State> {
             <EuiSpacer size="m" />
             <video width="650px" height="auto" controls autoPlay>
               <source src={testVideo} type={testVideo.type} />
+              <track
+                src={testVideoCaptions}
+                kind="captions"
+                srcLang="en"
+                label="english_captions"
+              />
               Your browser does not support the video tag.
             </video>
           </EuiModalBody>

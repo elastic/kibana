@@ -35,3 +35,9 @@ declare module '*.mp4' {
   // eslint-disable-next-line import/no-default-export
   export default src;
 }
+
+declare module '*.vtt' {
+  const content: string;
+  // eslint-disable-next-line import/no-default-export
+  export default content;
+}

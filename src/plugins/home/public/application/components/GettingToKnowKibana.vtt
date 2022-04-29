@@ -1,0 +1,179 @@
+WEBVTT
+
+1
+00:00:04.201 --> 00:00:07.635
+In this video, you will learn how to get started
+with Kibana.
+
+2
+00:00:07.635 --> 00:00:11.459
+You will learn how to access Kibana and get
+familiar with the Kibana user interface.
+
+3
+00:00:12.535 --> 00:00:18.349
+Once you have created a deployment in the Elastic Cloud
+console, you can access Kibana by clicking Continue.
+
+4
+00:00:18.349 --> 00:00:23.458
+To get started with Kibana, use one of the
+sample data sets that ship with Kibana.
+
+5
+00:00:23.458 --> 00:00:30.000
+To add the sample web log data set, for example,
+click Try sample data, followed by Add data.
+
+6
+00:00:30.000 --> 00:00:36.245
+This action loads the sample data into Elasticsearch
+and creates dashboards so you can explore the data.
+
+7
+00:00:36.245 --> 00:00:39.119
+Let’s get familiar with the Kibana interface.
+
+8
+00:00:39.119 --> 00:00:42.858
+Click the Elastic logo return to the Kibana
+home page.
+
+9
+00:00:42.858 --> 00:00:47.157
+The Kibana home page provides easy access
+to the Elastic Enterprise Search,
+
+10
+00:00:47.157 --> 00:00:53.250
+Elastic Observability, and Elastic Security solutions,
+as well as everything you need to start analyzing
+
+11
+00:00:53.250 --> 00:00:54.686
+and visualizing your data.
+
+12
+00:00:54.686 --> 00:00:58.620
+Clicking Enterprise Search will bring you
+to a page that helps you set up Elastic App
+
+13
+00:00:58.620 --> 00:01:00.813
+Search and Workplace Search.
+
+14
+00:01:00.813 --> 00:01:05.360
+You can use App Search to add search capabilities
+to your websites and apps.
+
+15
+00:01:05.360 --> 00:01:09.680
+Workplace Search makes all of your teams’
+content findable by unifying your content
+
+16
+00:01:09.680 --> 00:01:10.970
+in one place.
+
+17
+00:01:10.970 --> 00:01:15.370
+To return to the Kibana home page, just click
+the Elastic logo again.
+
+18
+00:01:15.370 --> 00:01:20.920
+Elastic Observability enables you to visualize
+logs, monitor applications and services with
+
+19
+00:01:20.920 --> 00:01:24.703
+APM, and track metrics and system uptime.
+
+20
+00:01:24.703 --> 00:01:29.860
+Elastic Security provides apps for detection,
+alerting, and real-time analysis of security
+
+21
+00:01:29.860 --> 00:01:31.239
+events in your data.
+
+22
+00:01:31.239 --> 00:01:37.219
+You can access all of Kibana's features via
+the main menu, by clicking the menu icon in the top left.
+
+23
+00:01:37.219 --> 00:01:43.653
+You can find the three solutions here: Elastic
+Enterprise Search, Observability, and Security.
+
+24
+00:01:43.653 --> 00:01:47.642
+Under Analytics, you’ll find the tools to
+analyze and visualize your data.
+
+25
+00:01:47.642 --> 00:01:52.292
+You can search and drill into the most relevant
+data using Discover.
+
+26
+00:01:52.292 --> 00:01:57.784
+Dashboard enables you to create a collection
+of charts and graphs about one or multiple data sets.
+
+27
+00:01:57.784 --> 00:02:01.371
+You can then explore the data using filters
+and queries.
+
+28
+00:02:01.371 --> 00:02:08.049
+Dashboard is also where you can start a new chart
+or graph by creating a blank dashboard and adding a panel.
+
+29
+00:02:08.049 --> 00:02:12.099
+Canvas empowers you to create interactive
+infographics from your live data.
+
+30
+00:02:13.864 --> 00:02:16.399
+Maps enable you to analyze your geo data.
+
+31
+00:02:18.955 --> 00:02:23.650
+Machine Learning gives you access to the anomaly
+detection and data analysis features that
+
+32
+00:02:23.650 --> 00:02:26.000
+are powered by machine learning.
+
+33
+00:02:26.000 --> 00:02:30.459
+Graph allows you to discover significant relationships
+in your data.
+
+34
+00:02:30.459 --> 00:02:33.540
+Stack Management enables you to manage your
+deployment.
+
+35
+00:02:33.540 --> 00:02:39.401
+Here, you can ingest and manage your data,
+set up alerting and reporting, and manage access.
+
+36
+00:02:39.401 --> 00:02:44.099
+And finally, if you're looking for something,
+use the search field at the top of the screen.
+
+37
+00:02:46.200 --> 00:02:48.674
+Thanks for watching this short introduction
+to Kibana.
+
