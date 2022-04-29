@@ -58,9 +58,6 @@ export const getScriptVisDefinition: (
     enableAutoApply: true,
     defaultSize: DefaultEditorSize.LARGE,
   },
-  options: {
-    showTimePicker: false,
-    showFilterBar: false,
-  },
+  options: {},
   inspectorAdapters: {},
 });

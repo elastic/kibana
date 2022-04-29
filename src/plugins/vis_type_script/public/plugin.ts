@@ -47,6 +47,7 @@ export class ScriptVisPlugin
       scriptVisRenderer(() =>
         core.getStartServices().then(([coreStart, plugins]) => ({
           data: plugins.data,
+          uiSettingsClient: coreStart.uiSettings,
           validateUrl,
           nonce: core.injectedMetadata.getCsp().nonce,
         }))

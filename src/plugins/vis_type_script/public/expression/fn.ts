@@ -56,7 +56,7 @@ export const createScriptVisFn = (): ScriptVisExpressionFunctionDefinition => ({
         visSearchContext: {
           timeRange: input?.timeRange,
           query: input?.query,
-          filter: input?.filters,
+          filters: input?.filters,
         },
       },
     };
