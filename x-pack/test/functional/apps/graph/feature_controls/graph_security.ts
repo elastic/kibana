@@ -67,7 +67,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows graph navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link) => link.text)).to.eql(['Graph']);
+        expect(navLinks.map((link) => link.text)).to.eql(['GraphFAIL']);
       });
 
       it('landing page shows "Create new graph" button', async () => {
