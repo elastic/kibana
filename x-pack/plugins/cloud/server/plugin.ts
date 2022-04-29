@@ -15,6 +15,7 @@ import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from './utils';
 import { registerFullstoryRoute } from './routes/fullstory';
 import { registerChatRoute } from './routes/chat';
+import { readInstanceSizeMb } from './env';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
@@ -25,6 +26,7 @@ export interface CloudSetup {
   cloudId?: string;
   deploymentId?: string;
   isCloudEnabled: boolean;
+  instanceSizeMb?: number;
   apm: {
     url?: string;
     secretToken?: string;
@@ -42,7 +44,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     this.isDev = this.context.env.mode.dev;
   }
 
-  public setup(core: CoreSetup, { usageCollection, security }: PluginsSetup) {
+  public setup(core: CoreSetup, { usageCollection, security }: PluginsSetup): CloudSetup {
     this.logger.debug('Setting up Cloud plugin');
     const isCloudEnabled = getIsCloudEnabled(this.config.id);
     registerCloudDeploymentIdAnalyticsContext(core.analytics, this.config.id);
@@ -66,6 +68,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
     return {
       cloudId: this.config.id,
+      instanceSizeMb: readInstanceSizeMb(),
       deploymentId: parseDeploymentIdFromDeploymentUrl(this.config.deployment_url),
       isCloudEnabled,
       apm: {
