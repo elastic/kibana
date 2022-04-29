@@ -2391,6 +2391,6 @@ function parseDate(dateString: string | undefined, propertyName: string, default
 
 function clearUnscheduledSnooze(attributes: { snoozeSchedule?: RuleSnooze }) {
   return attributes.snoozeSchedule
-    ? attributes.snoozeSchedule.filter((s) => typeof s.id === 'undefined')
+    ? attributes.snoozeSchedule.filter((s) => typeof s.id !== 'undefined')
     : [];
 }

@@ -16,6 +16,7 @@ import {
   BASE_ALERTING_API_PATH,
   INTERNAL_BASE_ALERTING_API_PATH,
   SanitizedRule,
+  getRuleSnoozeEndTime,
 } from '../types';
 
 const paramSchema = schema.object({
@@ -62,6 +63,9 @@ const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
     params,
     connector_type_id: actionTypeId,
   })),
+  ...(snoozeSchedule != null
+    ? { is_snoozed_until: getRuleSnoozeEndTime({ snoozeSchedule, muteAll })?.toISOString() }
+    : {}),
 });
 
 interface BuildGetRulesRouteParams {

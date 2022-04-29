@@ -17,6 +17,7 @@ import {
   AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
   INTERNAL_BASE_ALERTING_API_PATH,
+  getRuleSnoozeEndTime,
 } from '../types';
 import { trackLegacyTerminology } from './lib/track_legacy_terminology';
 
@@ -111,6 +112,9 @@ const rewriteBodyRes: RewriteResponseCase<FindResult<RuleTypeParams>> = ({
           params,
           connector_type_id: actionTypeId,
         })),
+        ...(snoozeSchedule != null
+          ? { is_snoozed_until: getRuleSnoozeEndTime({ snoozeSchedule, muteAll })?.toISOString() }
+          : {}),
       })
     ),
   };

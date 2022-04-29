@@ -112,7 +112,9 @@ export interface Rule<Params extends RuleTypeParams = never> {
   snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
 }
 
-export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<Rule<Params>, 'apiKey'>;
+export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<Rule<Params>, 'apiKey'> & {
+  isSnoozedUntil?: string | null;
+};
 export type ResolvedSanitizedRule<Params extends RuleTypeParams = never> = SanitizedRule<Params> &
   Omit<SavedObjectsResolveResponse, 'saved_object'>;
 
