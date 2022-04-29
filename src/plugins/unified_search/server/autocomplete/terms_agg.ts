@@ -11,7 +11,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { type IFieldType, getFieldSubtypeNested } from '@kbn/data-plugin/common';
 import { get, map } from 'lodash';
 import type { ConfigSchema } from '../../config';
-import { findIndexPatternById as findDataViewById, getFieldByName } from '../data_views';
+import { findIndexPatternById, getFieldByName } from '../data_views';
 
 export async function termsAggSuggestions(
   config: ConfigSchema,
@@ -30,7 +30,7 @@ export async function termsAggSuggestions(
   };
 
   if (!field?.name && !field?.type) {
-    const dataView = await findDataViewById(savedObjectsClient, index);
+    const dataView = await findIndexPatternById(savedObjectsClient, index);
 
     field = dataView && getFieldByName(fieldName, dataView);
   }

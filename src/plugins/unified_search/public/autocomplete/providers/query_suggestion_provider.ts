@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ValueSuggestionsMethod } from '@kbn/data-plugin/common';
+import type { ValueSuggestionsMethod } from '@kbn/data-plugin/common';
 import type { IIndexPattern } from '@kbn/data-plugin/common';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 

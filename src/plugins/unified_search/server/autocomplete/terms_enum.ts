@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { IFieldType } from '@kbn/data-plugin/common';
 import type { ConfigSchema } from '../../config';
-import { findIndexPatternById as findDataViewById, getFieldByName } from '../data_views';
+import { findIndexPatternById, getFieldByName } from '../data_views';
 
 export async function termsEnumSuggestions(
   config: ConfigSchema,
@@ -25,7 +25,7 @@ export async function termsEnumSuggestions(
 ) {
   const { tiers } = config.autocomplete.valueSuggestions;
   if (!field?.name && !field?.type) {
-    const dataView = await findDataViewById(savedObjectsClient, index);
+    const dataView = await findIndexPatternById(savedObjectsClient, index);
     field = dataView && getFieldByName(fieldName, dataView);
   }
 

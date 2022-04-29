@@ -17,7 +17,7 @@ import SearchBar from './search_bar';
 const startMock = coreMock.createStart();
 
 import { mount } from 'enzyme';
-import { IIndexPattern } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 const mockTimeHistory = {
   get: () => {
@@ -67,7 +67,7 @@ const mockDataView = {
       searchable: true,
     },
   ],
-} as IIndexPattern;
+} as DataView;
 
 const kqlQuery = {
   query: 'response:200',
