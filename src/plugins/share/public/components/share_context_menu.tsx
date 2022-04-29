@@ -109,7 +109,7 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
         topLevelMenu.push(panel);
       });
       topLevelMenu.push(exportPanel);
-    } else {
+    } else if (this.props.shareMenuItems.length === 1) {
       const { shareMenuItem, panel } = this.props.shareMenuItems[0];
       menuItems.push({ ...shareMenuItem, panel: panel.id });
       topLevelMenu.push(panel);
