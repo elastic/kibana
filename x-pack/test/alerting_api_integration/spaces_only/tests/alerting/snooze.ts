@@ -74,7 +74,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
         .set('kbn-xsrf', 'foo')
         .expect(200);
-      expect(updatedAlert.snooze_end_time).to.eql(FUTURE_SNOOZE_TIME);
+      expect(updatedAlert.snooze_schedule).to.eql(FUTURE_SNOOZE_TIME);
       expect(updatedAlert.mute_all).to.eql(false);
       // Ensure AAD isn't broken
       await checkAAD({
@@ -126,7 +126,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
         .set('kbn-xsrf', 'foo')
         .expect(200);
-      expect(updatedAlert.snooze_end_time).to.eql(null);
+      expect(updatedAlert.snooze_schedule).to.eql(null);
       expect(updatedAlert.mute_all).to.eql(true);
       // Ensure AAD isn't broken
       await checkAAD({
