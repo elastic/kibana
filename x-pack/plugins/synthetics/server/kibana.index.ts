@@ -44,7 +44,7 @@ export const initServerWithKibana = (
     name: PLUGIN.NAME,
     order: 1000,
     category: DEFAULT_APP_CATEGORIES.observability,
-    app: ['uptime', 'kibana'],
+    app: ['uptime', 'kibana', 'synthetics'],
     catalogue: ['uptime'],
     management: {
       insightsAndAlerting: ['triggersActions'],
@@ -52,7 +52,7 @@ export const initServerWithKibana = (
     alerting: UPTIME_RULE_TYPES,
     privileges: {
       all: {
-        app: ['uptime', 'kibana'],
+        app: ['uptime', 'kibana', 'synthetics'],
         catalogue: ['uptime'],
         api: ['uptime-read', 'uptime-write', 'lists-all'],
         savedObject: {
@@ -73,7 +73,7 @@ export const initServerWithKibana = (
         ui: ['save', 'configureSettings', 'show', 'alerting:save'],
       },
       read: {
-        app: ['uptime', 'kibana'],
+        app: ['uptime', 'kibana', 'synthetics'],
         catalogue: ['uptime'],
         api: ['uptime-read', 'lists-read'],
         savedObject: {
