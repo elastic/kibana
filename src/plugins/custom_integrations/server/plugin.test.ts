@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import {CustomIntegrationsPlugin} from './plugin';
+import { CustomIntegrationsPlugin } from './plugin';
 
-import {coreMock} from '@kbn/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 
 describe('CustomIntegrationsPlugin', () => {
-  beforeEach(() => {
-  });
+  beforeEach(() => {});
 
   describe('setup', () => {
     let mockCoreSetup: ReturnType<typeof coreMock.createSetup>;
@@ -41,7 +40,7 @@ describe('CustomIntegrationsPlugin', () => {
           uiInternalPath:
             'https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/branch/introduction.html',
           isBeta: false,
-          icons: [{type: 'svg', src: undefined}],
+          icons: [{ type: 'svg', src: undefined }],
           categories: ['elastic_stack', 'custom', 'language_client'],
         },
         {
@@ -53,7 +52,7 @@ describe('CustomIntegrationsPlugin', () => {
           uiInternalPath:
             'https://www.elastic.co/guide/en/elasticsearch/client/ruby-api/branch/ruby_client.html',
           isBeta: false,
-          icons: [{type: 'svg', src: undefined}],
+          icons: [{ type: 'svg', src: undefined }],
           categories: ['elastic_stack', 'custom', 'language_client'],
         },
         {
@@ -65,7 +64,7 @@ describe('CustomIntegrationsPlugin', () => {
           uiInternalPath:
             'https://www.elastic.co/guide/en/elasticsearch/client/go-api/branch/overview.html',
           isBeta: false,
-          icons: [{type: 'svg', src: undefined}],
+          icons: [{ type: 'svg', src: undefined }],
           categories: ['elastic_stack', 'custom', 'language_client'],
         },
         {
@@ -77,7 +76,7 @@ describe('CustomIntegrationsPlugin', () => {
           uiInternalPath:
             'https://www.elastic.co/guide/en/elasticsearch/client/net-api/branch/index.html',
           isBeta: false,
-          icons: [{type: 'svg', src: undefined}],
+          icons: [{ type: 'svg', src: undefined }],
           categories: ['elastic_stack', 'custom', 'language_client'],
         },
         {
@@ -89,7 +88,7 @@ describe('CustomIntegrationsPlugin', () => {
           uiInternalPath:
             'https://www.elastic.co/guide/en/elasticsearch/client/php-api/branch/index.html',
           isBeta: false,
-          icons: [{type: 'svg', src: undefined}],
+          icons: [{ type: 'svg', src: undefined }],
           categories: ['elastic_stack', 'custom', 'language_client'],
         },
         {
@@ -101,7 +100,7 @@ describe('CustomIntegrationsPlugin', () => {
           uiInternalPath:
             'https://www.elastic.co/guide/en/elasticsearch/client/perl-api/branch/index.html',
           isBeta: false,
-          icons: [{type: 'svg', src: undefined}],
+          icons: [{ type: 'svg', src: undefined }],
           categories: ['elastic_stack', 'custom', 'language_client'],
         },
         {
@@ -113,7 +112,7 @@ describe('CustomIntegrationsPlugin', () => {
           uiInternalPath:
             'https://www.elastic.co/guide/en/elasticsearch/client/python-api/branch/index.html',
           isBeta: false,
-          icons: [{type: 'svg', src: undefined}],
+          icons: [{ type: 'svg', src: undefined }],
           categories: ['elastic_stack', 'custom', 'language_client'],
         },
         {
@@ -125,7 +124,7 @@ describe('CustomIntegrationsPlugin', () => {
           uiInternalPath:
             'https://www.elastic.co/guide/en/elasticsearch/client/rust-api/branch/index.html',
           isBeta: false,
-          icons: [{type: 'svg', src: undefined}],
+          icons: [{ type: 'svg', src: undefined }],
           categories: ['elastic_stack', 'custom', 'language_client'],
         },
         {
@@ -137,7 +136,7 @@ describe('CustomIntegrationsPlugin', () => {
           uiInternalPath:
             'https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/branch/index.html',
           isBeta: false,
-          icons: [{type: 'svg', src: undefined}],
+          icons: [{ type: 'svg', src: undefined }],
           categories: ['elastic_stack', 'custom', 'language_client'],
         },
         {
@@ -150,7 +149,7 @@ describe('CustomIntegrationsPlugin', () => {
           uiInternalPath:
             'https://github.com/elastic/elastic-serverless-forwarder/blob/main/docs/README-AWS.md',
           isBeta: false,
-          icons: [{type: 'svg'}],
+          icons: [{ type: 'svg' }],
           categories: ['aws', 'custom'],
         },
       ]);
