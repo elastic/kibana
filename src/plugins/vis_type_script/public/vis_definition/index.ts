@@ -59,5 +59,4 @@ export const getScriptVisDefinition: (
     defaultSize: DefaultEditorSize.LARGE,
   },
   options: {},
-  inspectorAdapters: {},
 });
