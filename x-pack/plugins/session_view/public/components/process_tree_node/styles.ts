@@ -15,9 +15,16 @@ interface StylesDeps {
   hasAlerts: boolean;
   hasInvestigatedAlert: boolean;
   isSelected: boolean;
+  isSessionLeader: boolean;
 }
 
-export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }: StylesDeps) => {
+export const useStyles = ({
+  depth,
+  hasAlerts,
+  hasInvestigatedAlert,
+  isSelected,
+  isSessionLeader,
+}: StylesDeps) => {
   const { euiTheme, euiVars } = useEuiTheme();
 
   const cached = useMemo(() => {
@@ -82,6 +89,7 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
       cursor: 'pointer',
       position: 'relative',
       padding: `${size.xs} 0px`,
+      marginBottom: isSessionLeader ? size.s : '0px',
       '&:hover:before': {
         backgroundColor: hoverColor,
         transform: `translateY(-${size.xs})`,
@@ -118,7 +126,7 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
     const workingDir: CSSObject = {
       color: colors.successText,
       fontFamily: font.familyCode,
-      fontWeight: font.weight.medium,
+      fontWeight: font.weight.regular,
       paddingLeft: size.s,
       paddingRight: size.xxs,
     };
@@ -150,7 +158,7 @@ export const useStyles = ({ depth, hasAlerts, hasInvestigatedAlert, isSelected }
       alertDetails,
       icon,
     };
-  }, [depth, euiTheme, hasAlerts, hasInvestigatedAlert, isSelected, euiVars]);
+  }, [depth, euiTheme, hasAlerts, hasInvestigatedAlert, isSelected, euiVars, isSessionLeader]);
 
   return cached;
 };
