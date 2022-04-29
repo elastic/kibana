@@ -159,7 +159,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('saveRuleButton');
       const toastTitle = await pageObjects.common.closeToast();
-      expect(toastTitle).to.eql(`Rule "${alertName}" was created`);
+      expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
       const searchResultAfterSave = searchResultsAfterSave[0];
@@ -209,7 +209,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('saveRuleButton');
       const toastTitle = await pageObjects.common.closeToast();
-      expect(toastTitle).to.eql(`Rule "${alertName}" was created`);
+      expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
       const searchResultAfterSave = searchResultsAfterSave[0];
@@ -240,7 +240,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.missingOrFail('confirmRuleSaveModal');
 
       const toastTitle = await pageObjects.common.closeToast();
-      expect(toastTitle).to.eql(`Rule "${alertName}" was created`);
+      expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await new Promise((resolve) => setTimeout(resolve, 1000));
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();

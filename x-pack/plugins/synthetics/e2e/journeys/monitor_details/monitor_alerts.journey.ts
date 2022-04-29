@@ -82,7 +82,7 @@ journey('MonitorAlerts', async ({ page, params }: { page: Page; params: any }) =
   step('save anomaly detection alert', async () => {
     await page.click(byTestId('saveRuleButton'));
     await page.click(byTestId('confirmModalConfirmButton'));
-    await page.waitForSelector(`text=Rule "${alertId}" was created`);
+    await page.waitForSelector(`text=Created rule "${alertId}"`);
   });
 
   step('disable anomaly detection alert', async () => {
