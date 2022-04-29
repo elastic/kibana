@@ -8,7 +8,8 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { type IFieldType, getFieldSubtypeNested } from '@kbn/data-plugin/common';
+import { getFieldSubtypeNested } from '@kbn/data-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { get, map } from 'lodash';
 import type { ConfigSchema } from '../../config';
 import { findIndexPatternById, getFieldByName } from '../data_views';
@@ -21,7 +22,7 @@ export async function termsAggSuggestions(
   fieldName: string,
   query: string,
   filters?: estypes.QueryDslQueryContainer[],
-  field?: IFieldType,
+  field?: DataViewField,
   abortSignal?: AbortSignal
 ) {
   const autocompleteSearchOptions = {
@@ -54,11 +55,11 @@ export async function termsAggSuggestions(
 async function getBody(
   // eslint-disable-next-line @typescript-eslint/naming-convention
   { timeout, terminate_after }: Record<string, any>,
-  field: IFieldType | string,
+  field: DataViewField | string,
   query: string,
   filters: estypes.QueryDslQueryContainer[] = []
 ) {
-  const isFieldObject = (f: any): f is IFieldType => Boolean(f && f.name);
+  const isFieldObject = (f: any): f is DataViewField => Boolean(f && f.name);
 
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
   const getEscapedQuery = (q: string = '') =>

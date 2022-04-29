@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { IFieldType, indexPatterns } from '@kbn/data-plugin/public';
-// import type { DataViewField } from '@kbn/data-views-plugin/public';
+import { indexPatterns } from '@kbn/data-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { flatten } from 'lodash';
 import { sortPrefixFirst } from './sort_prefix_first';
 import { type QuerySuggestionField, QuerySuggestionTypes } from '../query_suggestion_provider';
 import type { KqlQuerySuggestionProvider } from './types';
 
-const keywordComparator = (first: IFieldType, second: IFieldType) => {
+const keywordComparator = (first: DataViewField, second: DataViewField) => {
   const extensions = ['raw', 'keyword'];
   if (extensions.map((ext) => `${first.name}.${ext}`).includes(second.name)) {
     return 1;

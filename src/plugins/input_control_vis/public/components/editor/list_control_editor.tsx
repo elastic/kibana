@@ -11,7 +11,7 @@ import React, { PureComponent, ComponentType } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiFieldNumber, EuiSwitch, EuiSelect } from '@elastic/eui';
 
-import { IndexPatternSelectProps } from '@kbn/unified-search-plugin/public';
+import { DataViewSelectProps } from '@kbn/unified-search-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';
@@ -22,7 +22,7 @@ interface ListControlEditorState {
   isLoadingFieldType: boolean;
   isStringField: boolean;
   prevFieldName: string;
-  IndexPatternSelect: ComponentType<IndexPatternSelectProps> | null;
+  IndexPatternSelect: ComponentType<DataViewSelectProps> | null;
 }
 
 interface ListControlEditorProps {

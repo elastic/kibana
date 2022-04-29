@@ -11,7 +11,7 @@ import React, { Component, Fragment, ComponentType } from 'react';
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { IndexPatternSelectProps } from '@kbn/unified-search-plugin/public';
+import { DataViewSelectProps } from '@kbn/unified-search-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';
@@ -33,7 +33,7 @@ interface RangeControlEditorProps {
 }
 
 interface RangeControlEditorState {
-  IndexPatternSelect: ComponentType<IndexPatternSelectProps> | null;
+  IndexPatternSelect: ComponentType<DataViewSelectProps> | null;
 }
 
 function filterField(field: DataViewField) {

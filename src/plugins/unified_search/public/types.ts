@@ -12,7 +12,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { AutocompleteSetup, AutocompleteStart } from './autocomplete';
-import type { IndexPatternSelectProps, StatefulSearchBarProps } from '.';
+import type { DataViewSelectProps, StatefulSearchBarProps } from '.';
 
 export interface UnifiedSearchSetupDependencies {
   uiActions: UiActionsSetup;
@@ -35,7 +35,7 @@ export interface UnifiedSearchStartDependencies {
  * Unified search plugin prewired UI components
  */
 interface UnifiedSearchPublicPluginStartUi {
-  IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
+  IndexPatternSelect: React.ComponentType<DataViewSelectProps>;
   SearchBar: React.ComponentType<StatefulSearchBarProps>;
 }
 

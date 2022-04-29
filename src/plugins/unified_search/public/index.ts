@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type { DataViewSelectProps as IndexPatternSelectProps } from './data_view_select';
+export type { DataViewSelectProps } from './data_view_select';
 import type { PluginInitializerContext } from '@kbn/core/public';
 import type { ConfigSchema } from '../config';
 export type { QueryStringInputProps } from './query_string_input';
