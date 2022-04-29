@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export const BASE_EVENT_LOG_API_PATH = '/internal/event_log';
-export { millisToNanos, nanosToMillis } from './lib';
+const ONE_MILLION = BigInt(1000 * 1000);
+
+export function nanosToMillis(nanos: string): number {
+  return Number(BigInt(nanos) / ONE_MILLION);
+}
