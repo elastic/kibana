@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiI18n } from '@elastic/eui';
 import React from 'react';
 
 export const CustomFooter = ({ onSkip, onNext }: { onSkip: () => void; onNext: () => void }) => {
@@ -14,12 +14,12 @@ export const CustomFooter = ({ onSkip, onNext }: { onSkip: () => void; onNext: (
     <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty color="text" size="xs" onClick={onSkip}>
-          Skip tour
+          {EuiI18n({ token: 'core.euiTourStep.skipTour', default: 'Skip tour' })}
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton size="s" color="success" onClick={onNext}>
-          Next
+          {EuiI18n({ token: 'core.euiTourStep.nextStep', default: 'Next' })}
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>

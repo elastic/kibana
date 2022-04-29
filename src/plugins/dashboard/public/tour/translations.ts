@@ -16,8 +16,7 @@ export const DashboardTourStrings = {
       }),
     getDescription: () =>
       i18n.translate('dashboard.tour.viewMode.firstStep.description', {
-        defaultMessage:
-          'Build maps, charts, gauges, and other visualizations that best display your data.',
+        defaultMessage: 'Start editing here.',
       }),
   },
   editModeTour: {

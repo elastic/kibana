@@ -22,7 +22,6 @@ import { EmbeddableRenderer, ViewMode } from '../services/embeddable';
 import { DashboardTopNav, isCompleteDashboardAppState } from './top_nav/dashboard_top_nav';
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../types';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
-import { DashboardEditTour, DashboardViewTour } from '../tour';
 export interface DashboardAppProps {
   history: History;
   savedDashboardId?: string;
@@ -107,12 +106,9 @@ export function DashboardApp({
     };
   }, [data.search.session]);
 
-  const [printMode, editMode] = useMemo(() => {
+  const [printMode] = useMemo(() => {
     const latestDashboardState = dashboardAppState.getLatestDashboardState?.();
-    return [
-      latestDashboardState?.viewMode === ViewMode.PRINT,
-      latestDashboardState?.viewMode === ViewMode.EDIT,
-    ];
+    return [latestDashboardState?.viewMode === ViewMode.PRINT];
   }, [dashboardAppState]);
 
   useEffect(() => {
@@ -123,13 +119,6 @@ export function DashboardApp({
     <>
       {isCompleteDashboardAppState(dashboardAppState) && (
         <>
-          {editMode && (
-            <DashboardEditTour
-              panelCount={
-                Object.keys(dashboardAppState.dashboardContainer?.getInput().panels ?? {}).length
-              }
-            />
-          )}
           {!printMode && (
             <>
               <DashboardTopNav
