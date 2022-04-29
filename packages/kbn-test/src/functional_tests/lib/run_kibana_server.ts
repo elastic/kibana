@@ -79,7 +79,7 @@ function collectCliArgs(config: Config, installDir?: string, extraKbnOpts: strin
     serverArgs,
     (args) => (installDir ? args.filter((a: string) => a !== '--oss') : args),
     (args) => (installDir ? [...buildArgs, ...args] : [KIBANA_EXEC_PATH, ...sourceArgs, ...args]),
-    (args) => [...args, extraKbnOpts]
+    (args) => args.concat(extraKbnOpts)
   );
 }
 
