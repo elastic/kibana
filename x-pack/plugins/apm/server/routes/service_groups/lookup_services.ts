@@ -14,7 +14,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup } from '../../lib/helpers/setup_request';
-import { MAX_NUMBER_OF_SERVICES_IN_GROUP } from '../../../common/service_groups';
+import { MAX_NUMBER_OF_SERVICE_GROUPS } from '../../../common/service_groups';
 
 export async function lookupServices({
   setup,
@@ -49,7 +49,7 @@ export async function lookupServices({
         services: {
           terms: {
             field: SERVICE_NAME,
-            size: MAX_NUMBER_OF_SERVICES_IN_GROUP,
+            size: MAX_NUMBER_OF_SERVICE_GROUPS,
           },
           aggs: {
             environments: {

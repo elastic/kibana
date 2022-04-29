@@ -126,7 +126,7 @@ Array [
               },
               "terms": Object {
                 "field": "service.name",
-                "size": 50,
+                "size": 500,
               },
             },
           },
@@ -186,7 +186,7 @@ Array [
               },
               "terms": Object {
                 "field": "service.name",
-                "size": 50,
+                "size": 500,
               },
             },
           },
