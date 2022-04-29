@@ -72,7 +72,7 @@ export interface RuntimeFieldSubField extends FieldConfiguration {
  */
 export interface IIndexPattern extends DataViewBase {
   title: string;
-  fields: IFieldType[];
+  fields: DataViewField[];
   /**
    * Type is used for identifying rollup indices, otherwise left undefined
    */

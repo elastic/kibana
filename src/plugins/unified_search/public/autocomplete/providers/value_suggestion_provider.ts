@@ -9,7 +9,8 @@
 import type { CoreSetup } from '@kbn/core/public';
 import dateMath from '@kbn/datemath';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import type { IIndexPattern, IFieldType, ValueSuggestionsMethod } from '@kbn/data-plugin/common';
+import type { IIndexPattern, ValueSuggestionsMethod } from '@kbn/data-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { TimefilterSetup } from '@kbn/data-plugin/public';
 import { memoize } from 'lodash';
 import type { AutocompleteUsageCollector } from '../collectors';
@@ -18,7 +19,7 @@ export type ValueSuggestionsGetFn = (args: ValueSuggestionsGetFnArgs) => Promise
 
 interface ValueSuggestionsGetFnArgs {
   indexPattern: IIndexPattern;
-  field: IFieldType;
+  field: DataViewField;
   query: string;
   useTimeRange?: boolean;
   boolFilter?: any[];
@@ -46,7 +47,7 @@ export const setupValueSuggestionProvider = (
     usageCollector,
   }: { timefilter: TimefilterSetup; usageCollector?: AutocompleteUsageCollector }
 ): ValueSuggestionsGetFn => {
-  function resolver(title: string, field: IFieldType, query: string, filters: any[]) {
+  function resolver(title: string, field: DataViewField, query: string, filters: any[]) {
     // Only cache results for a minute
     const ttl = Math.floor(Date.now() / 1000 / 60);
     return [ttl, query, title, field.name, JSON.stringify(filters)].join('|');
@@ -55,7 +56,7 @@ export const setupValueSuggestionProvider = (
   const requestSuggestions = memoize(
     <T = unknown>(
       index: string,
-      field: IFieldType,
+      field: DataViewField,
       query: string,
       filters: any = [],
       signal?: AbortSignal,

@@ -8,7 +8,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import type { IFieldType } from '@kbn/data-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { ConfigSchema } from '../../config';
 import { findIndexPatternById, getFieldByName } from '../data_views';
 
@@ -20,7 +20,7 @@ export async function termsEnumSuggestions(
   fieldName: string,
   query: string,
   filters?: estypes.QueryDslQueryContainer[],
-  field?: IFieldType,
+  field?: DataViewField,
   abortSignal?: AbortSignal
 ) {
   const { tiers } = config.autocomplete.valueSuggestions;

@@ -7,6 +7,7 @@
  */
 
 import { IFieldType, indexPatterns } from '@kbn/data-plugin/public';
+// import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { flatten } from 'lodash';
 import { sortPrefixFirst } from './sort_prefix_first';
 import { type QuerySuggestionField, QuerySuggestionTypes } from '../query_suggestion_provider';

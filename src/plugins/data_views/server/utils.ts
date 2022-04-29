@@ -7,13 +7,18 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
-import { DATA_VIEW_SAVED_OBJECT_TYPE, DataViewAttributes, SavedObject, FieldSpec } from '../common';
+import {
+  DATA_VIEW_SAVED_OBJECT_TYPE,
+  DataViewAttributes,
+  SavedObject,
+  DataViewField,
+} from '../common';
 
 export const getFieldByName = (
   fieldName: string,
   indexPattern: SavedObject<DataViewAttributes>
-): FieldSpec | undefined => {
-  const fields: FieldSpec[] = indexPattern && JSON.parse(indexPattern.attributes.fields);
+): DataViewField | undefined => {
+  const fields: DataViewField[] = indexPattern && JSON.parse(indexPattern.attributes.fields);
   const field = fields && fields.find((f) => f.name === fieldName);
 
   return field;

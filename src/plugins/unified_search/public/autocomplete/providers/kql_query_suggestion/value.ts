@@ -8,7 +8,7 @@
 
 import { flatten } from 'lodash';
 import type { CoreSetup } from '@kbn/core/public';
-import type { IFieldType, IIndexPattern } from '@kbn/data-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { escapeQuotes } from './lib/escape_kuery';
 import type { KqlQuerySuggestionProvider } from './types';
 import type { UnifiedSearchPublicPluginStart } from '../../../types';
@@ -36,7 +36,7 @@ export const setupGetValueSuggestions: KqlQuerySuggestionProvider = (
   ): Promise<QuerySuggestion[]> => {
     const fullFieldName = nestedPath ? `${nestedPath}.${fieldName}` : fieldName;
 
-    const dataViewFieldEntries: Array<[IIndexPattern, IFieldType]> = [];
+    const dataViewFieldEntries: Array<[DataView, DataViewField]> = [];
     dataViews.forEach((dataView) => {
       dataView.fields
         .filter((field) => field.name === fullFieldName)

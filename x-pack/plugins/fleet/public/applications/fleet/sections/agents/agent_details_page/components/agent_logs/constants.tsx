@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { DataViewField } from '@kbn/data-views-plugin/public';
+
 import type { AgentLogsState } from './agent_logs';
 
 export const AGENT_LOG_INDEX_PATTERN = 'logs-elastic_agent-*,logs-elastic_agent.*-*';
@@ -24,12 +26,12 @@ export const DATASET_FIELD = {
   name: 'data_stream.dataset',
   type: 'string',
   aggregatable: true,
-};
+} as DataViewField;
 export const LOG_LEVEL_FIELD = {
   name: 'log.level',
   type: 'string',
   aggregatable: true,
-};
+} as DataViewField;
 export const DEFAULT_DATE_RANGE = {
   start: 'now-1d',
   end: 'now',
