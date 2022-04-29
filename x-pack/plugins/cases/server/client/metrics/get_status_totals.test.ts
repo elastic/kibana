@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import { CasesClientMock } from '../mocks';
 import { getStatusTotalsByType } from './get_status_totals';
-import { createMockClientArgs, createMockClient } from './test_utils/client';
+import { createMockClientArgs } from './test_utils/client';
 
 describe('getStatusTotalsByType', () => {
-  let client: CasesClientMock;
   let mockServices: ReturnType<typeof createMockClientArgs>['mockServices'];
   let clientArgs: ReturnType<typeof createMockClientArgs>['clientArgs'];
 
   beforeEach(() => {
-    client = createMockClient();
     ({ mockServices, clientArgs } = createMockClientArgs());
 
     jest.clearAllMocks();
