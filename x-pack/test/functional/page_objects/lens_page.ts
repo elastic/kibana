@@ -737,7 +737,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async openChartSwitchPopover() {
-      if (await testSubjects.exists('lnsChartSwitchList')) {
+      if (await testSubjects.exists('lnsChartSwitchList', { timeout: 50 })) {
         return;
       }
       await retry.try(async () => {
@@ -906,7 +906,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
-    async getCurrentChartDebugState() {
+    async getCurrentChartDebugState(visType: string) {
+      await this.waitForVisualization(visType);
       return await elasticChart.getChartDebugData('lnsWorkspace');
     },
 

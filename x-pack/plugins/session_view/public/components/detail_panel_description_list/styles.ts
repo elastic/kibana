@@ -20,14 +20,14 @@ export const useStyles = () => {
     const tabListTitle = {
       width: '40%',
       display: 'flex',
-      alignItems: 'center',
+      alignItems: 'baseline',
       marginTop: '0px',
     };
 
     const tabListDescription = {
       width: '60%',
       display: 'flex',
-      alignItems: 'center',
+      alignItems: 'baseline',
       marginTop: '0px',
     };
 
