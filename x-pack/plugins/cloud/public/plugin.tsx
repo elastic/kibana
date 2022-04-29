@@ -257,6 +257,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     // Keep this import async so that we do not load any FullStory code into the browser when it is disabled.
     const { FullStoryShipper } = await import('@kbn/analytics-shippers-fullstory');
     analytics.registerShipper(FullStoryShipper, {
+      eventTypesAllowlist: ['Loaded Kibana'],
       fullStoryOrgId,
       // Load an Elastic-internally audited script. Ideally, it should be hosted on a CDN.
       scriptUrl: basePath.prepend(

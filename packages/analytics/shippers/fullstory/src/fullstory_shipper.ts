@@ -18,23 +18,34 @@ import { getParsedVersion } from './get_parsed_version';
 import { formatPayload } from './format_payload';
 import { loadSnippet } from './load_snippet';
 
-export type FullStoryShipperConfig = FullStorySnippetConfig;
+/**
+ * FullStory shipper configuration.
+ */
+export interface FullStoryShipperConfig extends FullStorySnippetConfig {
+  /**
+   * FullStory's custom events rate limit is very aggressive.
+   * If this setting is provided, it'll only send the event types specified in this list.
+   */
+  eventTypesAllowlist?: string[];
+}
 
 /**
- * FullStory's custom events rate limit is very aggressive. We'll only send some allowed events.
+ * FullStory shipper.
  */
-const CUSTOM_EVENT_TYPES_ALLOWLIST = ['Loaded Kibana'];
-
 export class FullStoryShipper implements IShipper {
+  /** Shipper's unique name */
   public static shipperName = 'FullStory';
+
   private readonly fullStoryApi: FullStoryApi;
   private lastUserId: string | undefined;
+  private readonly eventTypesAllowlist?: string[];
 
   constructor(
-    config: FullStoryShipperConfig,
+    { eventTypesAllowlist, ...config }: FullStoryShipperConfig,
     private readonly initContext: AnalyticsClientInitContext
   ) {
     this.fullStoryApi = loadSnippet(config);
+    this.eventTypesAllowlist = eventTypesAllowlist;
   }
 
   public extendContext(newContext: EventContext): void {
@@ -93,7 +104,7 @@ export class FullStoryShipper implements IShipper {
   public reportEvents(events: Event[]): void {
     this.initContext.logger.debug(`Reporting ${events.length} events to FS`);
     events
-      .filter((event) => CUSTOM_EVENT_TYPES_ALLOWLIST.includes(event.event_type))
+      .filter((event) => this.eventTypesAllowlist?.includes(event.event_type) ?? true)
       .forEach((event) => {
         // We only read event.properties and discard the rest because the context is already sent in the other APIs.
         this.fullStoryApi.event(event.event_type, formatPayload(event.properties));
