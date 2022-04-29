@@ -6,8 +6,8 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { HTTPSimpleFields, ConfigKey, DataStream } from '../types';
-import { defaultValues as commonDefaultValues } from '../common/default_values';
+import { HTTPSimpleFields } from '../types';
+import { DEFAULT_HTTP_SIMPLE_FIELDS } from '../../../../common/constants/monitor_defaults';
 
 interface HTTPSimpleFieldsContext {
   setFields: React.Dispatch<React.SetStateAction<HTTPSimpleFields>>;
@@ -20,15 +20,7 @@ interface HTTPSimpleFieldsContextProvider {
   defaultValues?: HTTPSimpleFields;
 }
 
-export const initialValues: HTTPSimpleFields = {
-  ...commonDefaultValues,
-  [ConfigKey.METADATA]: {
-    is_tls_enabled: false,
-  },
-  [ConfigKey.URLS]: '',
-  [ConfigKey.MAX_REDIRECTS]: '0',
-  [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
-};
+export const initialValues: HTTPSimpleFields = DEFAULT_HTTP_SIMPLE_FIELDS;
 
 const defaultContext: HTTPSimpleFieldsContext = {
   setFields: (_fields: React.SetStateAction<HTTPSimpleFields>) => {
