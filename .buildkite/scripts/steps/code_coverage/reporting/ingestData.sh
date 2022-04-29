@@ -42,13 +42,13 @@ for x in functional jest; do
   head -50 ${COVERAGE_SUMMARY_FILE}
   # running in background to speed up ingestion
   COVERAGE_PEEK=true \
-  COVERAGE_PEEK_SIZE=4 \
-  CI_STATS_DISABLED=true \
-  node scripts/ingest_coverage.js \
-  --verbose
-  --path ${COVERAGE_SUMMARY_FILE} \
-  --vcsInfoPath ./VCS_INFO.txt \
-  --teamAssignmentsPath $TEAM_ASSIGN_PATH > ${x}-ingestion.txt &
+    COVERAGE_PEEK_SIZE=4 \
+    CI_STATS_DISABLED=true \
+    node scripts/ingest_coverage.js \
+      --verbose \
+      --path ${COVERAGE_SUMMARY_FILE} \
+      --vcsInfoPath ./VCS_INFO.txt \
+      --teamAssignmentsPath $TEAM_ASSIGN_PATH > ${x}-ingestion.txt &
 done
 wait
 
