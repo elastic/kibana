@@ -54,7 +54,7 @@ import {
 import { createSecurityRuleTypeWrapper } from '../../rule_types/create_security_rule_type_wrapper';
 import { RULE_PREVIEW_INVOCATION_COUNT } from '../../../../../common/detection_engine/constants';
 import { RuleExecutionContext, StatusChangeArgs } from '../../rule_execution_log';
-import { wrapSearchSourceFetch } from './utils/wrap_search_source_fetch';
+import { wrapSearchSourceClient } from './utils/wrap_search_source_client';
 
 const PREVIEW_TIMEOUT_SECONDS = 60;
 
@@ -243,10 +243,10 @@ export const previewRulesRoute = async (
                   abortController,
                   scopedClusterClient: coreContext.elasticsearch.client,
                 }),
-                searchSourceUtils: {
+                searchSourceClient: wrapSearchSourceClient({
+                  abortController,
                   searchSourceClient,
-                  wrappedFetch: wrapSearchSourceFetch(abortController),
-                },
+                }),
                 uiSettingsClient: coreContext.uiSettings.client,
               },
               spaceId,

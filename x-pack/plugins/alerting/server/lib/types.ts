@@ -8,6 +8,7 @@
 import * as t from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
 import { Rule } from '../types';
+import { RuleRunMetrics } from './rule_run_metrics_store';
 
 // represents a Date from an ISO string
 export const DateFromString = new t.Type<Date, string, unknown>(
@@ -33,3 +34,8 @@ export interface LogSearchMetricsOpts {
   esSearchDuration: number;
   totalSearchDuration: number;
 }
+
+export type SearchMetrics = Pick<
+  RuleRunMetrics,
+  'numSearches' | 'totalSearchDurationMs' | 'esSearchDurationMs'
+>;

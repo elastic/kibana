@@ -7,10 +7,6 @@
 import { buildRangeFilter, Filter } from '@kbn/es-query';
 import { Logger } from '@kbn/core/server';
 import {
-  AggregationsAggregate,
-  SearchResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
   getTime,
   ISearchSource,
   ISearchStartSearchSource,
@@ -18,24 +14,16 @@ import {
 } from '@kbn/data-plugin/common';
 import { OnlySearchSourceAlertParams } from '../types';
 
-interface SearchSourceUtils {
-  searchSourceClient: ISearchStartSearchSource;
-  wrappedFetch: (
-    searchSource: ISearchSource
-  ) => Promise<SearchResponse<unknown, Record<string, AggregationsAggregate>>>;
-}
-
 export async function fetchSearchSourceQuery(
   alertId: string,
   params: OnlySearchSourceAlertParams,
   latestTimestamp: string | undefined,
   services: {
     logger: Logger;
-    searchSourceUtils: SearchSourceUtils;
+    searchSourceClient: ISearchStartSearchSource;
   }
 ) {
-  const { logger, searchSourceUtils } = services;
-  const { searchSourceClient, wrappedFetch } = searchSourceUtils;
+  const { logger, searchSourceClient } = services;
 
   const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
 
@@ -51,7 +39,7 @@ export async function fetchSearchSourceQuery(
     )}`
   );
 
-  const searchResult = await wrappedFetch(searchSource);
+  const searchResult = await searchSource.fetch();
 
   return {
     numMatches: Number(searchResult.hits.total),

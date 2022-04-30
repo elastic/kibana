@@ -11,11 +11,7 @@ import type {
   SavedObjectReference,
   IUiSettingsClient,
 } from '@kbn/core/server';
-import {
-  AggregationsAggregate,
-  SearchResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ISearchSource, ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import {
   IScopedClusterClient,
@@ -77,12 +73,7 @@ export interface RuleExecutorServices<
   InstanceContext extends AlertInstanceContext = AlertInstanceContext,
   ActionGroupIds extends string = never
 > {
-  searchSourceUtils: {
-    searchSourceClient: ISearchStartSearchSource;
-    wrappedFetch: (
-      searchSource: ISearchSource
-    ) => Promise<SearchResponse<unknown, Record<string, AggregationsAggregate>>>;
-  };
+  searchSourceClient: ISearchStartSearchSource;
   savedObjectsClient: SavedObjectsClientContract;
   uiSettingsClient: IUiSettingsClient;
   scopedClusterClient: IScopedClusterClient;

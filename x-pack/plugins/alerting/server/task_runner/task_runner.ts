@@ -74,8 +74,7 @@ import {
 import { createWrappedScopedClusterClientFactory } from '../lib/wrap_scoped_cluster_client';
 import { IExecutionStatusAndMetrics } from '../lib/rule_execution_status';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
-import { wrapSearchSourceFetch } from '../lib/wrap_search_source_fetch';
-import { mergeSearchMetrics } from '../lib/merge_search_metrics';
+import { wrapSearchSourceClient } from '../lib/wrap_search_source_client';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -370,15 +369,14 @@ export class TaskRunner<
     };
     const scopedClusterClient = this.context.elasticsearch.client.asScoped(fakeRequest);
     const wrappedScopedClusterClient = createWrappedScopedClusterClientFactory({
-      scopedClusterClient,
       ...wrappedClientOptions,
+      scopedClusterClient,
     });
-    const wrappedSearchSourceFetch = wrapSearchSourceFetch(wrappedClientOptions);
     const searchSourceClient = await this.context.data.search.searchSource.asScoped(fakeRequest);
-    const searchSourceUtils = {
+    const wrappedSearchSourceClient = wrapSearchSourceClient({
+      ...wrappedClientOptions,
       searchSourceClient,
-      wrappedFetch: wrappedSearchSourceFetch.fetch,
-    };
+    });
 
     let updatedRuleTypeState: void | Record<string, unknown>;
     try {
@@ -401,7 +399,7 @@ export class TaskRunner<
           executionId: this.executionId,
           services: {
             savedObjectsClient,
-            searchSourceUtils,
+            searchSourceClient: wrappedSearchSourceClient.searchSourceClient,
             uiSettingsClient: this.context.uiSettings.asScopedToClient(savedObjectsClient),
             scopedClusterClient: wrappedScopedClusterClient.client(),
             alertFactory: createAlertFactory<
@@ -463,10 +461,12 @@ export class TaskRunner<
       name: rule.name,
     };
 
-    const searchMetrics = mergeSearchMetrics(
-      wrappedScopedClusterClient.getMetrics(),
-      wrappedSearchSourceFetch.getMetrics()
-    );
+    const scopedClusterClientMetrics = wrappedScopedClusterClient.getMetrics();
+    const searchSourceClientMetrics = wrappedSearchSourceClient.getMetrics();
+    const searchMetrics =
+      scopedClusterClientMetrics.numSearches !== 0
+        ? scopedClusterClientMetrics
+        : searchSourceClientMetrics;
     const ruleRunMetricsStore = new RuleRunMetricsStore();
 
     ruleRunMetricsStore.setNumSearches(searchMetrics.numSearches);

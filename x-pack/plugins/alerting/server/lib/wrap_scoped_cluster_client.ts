@@ -22,13 +22,9 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { Rule } from '../types';
-import { RuleRunMetrics } from './rule_run_metrics_store';
+import { SearchMetrics } from './types';
 
 type RuleInfo = Pick<Rule, 'name' | 'alertTypeId' | 'id'> & { spaceId: string };
-type SearchMetrics = Pick<
-  RuleRunMetrics,
-  'numSearches' | 'totalSearchDurationMs' | 'esSearchDurationMs'
->;
 
 interface WrapScopedClusterClientFactoryOpts {
   scopedClusterClient: IScopedClusterClient;
@@ -50,12 +46,6 @@ interface LogSearchMetricsOpts {
   totalSearchDuration: number;
 }
 type LogSearchMetricsFn = (metrics: LogSearchMetricsOpts) => void;
-
-export interface ScopedClusterClientMetrics {
-  esSearchDurationMs: number;
-  totalSearchDurationMs: number;
-  numSearches: number;
-}
 
 export function createWrappedScopedClusterClientFactory(opts: WrapScopedClusterClientFactoryOpts) {
   let numSearches: number = 0;
