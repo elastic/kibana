@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { capitalize, sortBy } from 'lodash';
 import {
   EuiButton,
@@ -30,6 +30,8 @@ import {
   unsnoozeRule,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { RuleExecutionStatus, ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { useHistory } from 'react-router-dom';
+import { RouteParams } from '../../routes';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useKibana } from '../../utils/kibana_react';
@@ -71,7 +73,11 @@ import {
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 const ENTER_KEY = 13;
 
-export function RulesPage() {
+interface RulesPageProps {
+  routeParams: RouteParams<'/alerts/rules'>;
+}
+
+export function RulesPage({ routeParams }: RulesPageProps) {
   const { ObservabilityPageTemplate, kibanaFeatures } = usePluginContext();
   const {
     http,
@@ -80,9 +86,13 @@ export function RulesPage() {
     application: { capabilities },
     notifications: { toasts },
   } = useKibana().services;
+  const history = useHistory();
   const documentationLink = docLinks.links.observability.createAlerts;
   const ruleTypeRegistry = triggersActionsUi.ruleTypeRegistry;
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
+  const searchParams = new URLSearchParams(history.location.search);
+  const defaultSearchParams = searchParams.getAll('executionStatus');
+  // const [nextSearchParams, setNextSearchParams] = useState<string[]>(defaultSearchParams);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
   const [sort, setSort] = useState<EuiTableSortingType<RuleTableItem>['sort']>({
     field: 'name',
@@ -90,7 +100,8 @@ export function RulesPage() {
   });
   const [inputText, setInputText] = useState<string | undefined>();
   const [searchText, setSearchText] = useState<string | undefined>();
-  const [ruleLastResponseFilter, setRuleLastResponseFilter] = useState<string[]>([]);
+  const [ruleLastResponseFilter, setRuleLastResponseFilter] =
+    useState<string[]>(defaultSearchParams);
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
@@ -280,6 +291,34 @@ export function RulesPage() {
     []
   );
 
+  const setExecutionStatusFilter = useCallback(
+    (ids: string[]) => {
+      const nextSearchParams = new URLSearchParams(history.location.search);
+      const prev = nextSearchParams.getAll('executionStatus');
+      const filteredIds = ids;
+      ids.forEach((id) => {
+        const isPreviouslyChecked = prev.includes(id);
+        if (!isPreviouslyChecked) {
+          filteredIds.concat(id);
+        } else {
+          filteredIds.filter((val) => {
+            return val !== id;
+          });
+        }
+      });
+      nextSearchParams.delete('executionStatus');
+      for (const value of filteredIds) {
+        nextSearchParams.append('executionStatus', value);
+      }
+      history.push({
+        ...history.location,
+        search: nextSearchParams.toString(),
+      });
+      setRuleLastResponseFilter(filteredIds);
+    },
+    [history]
+  );
+
   const getRulesTable = () => {
     if (noData && !rulesState.isLoading) {
       return authorizedToCreateAnyRules ? (
@@ -294,6 +333,10 @@ export function RulesPage() {
     if (initialLoad) {
       return <CenterJustifiedSpinner />;
     }
+
+    // const nextSearchParams = new URLSearchParams(history.location.search);
+    // const xx = [...nextSearchParams.getAll('executionStatus')] || [];
+    // console.log(xx, '!!');
     return (
       <>
         <EuiFlexGroup>
@@ -332,7 +375,7 @@ export function RulesPage() {
             <LastResponseFilter
               key="rule-lastResponse-filter"
               selectedStatuses={ruleLastResponseFilter}
-              onChange={(ids: string[]) => setRuleLastResponseFilter(ids)}
+              onChange={setExecutionStatusFilter}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
