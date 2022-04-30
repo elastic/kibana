@@ -1,5 +1,3 @@
-env:
-  KIBANA_BUILD_ID: 90f87af9-d1f7-417d-a5e8-dad76f9b0af5
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
