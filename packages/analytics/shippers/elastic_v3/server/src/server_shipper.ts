@@ -42,6 +42,7 @@ const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 const HOUR = 60 * MINUTE;
 const KIB = 1024;
+const MAX_NUMBER_OF_EVENTS_IN_INTERNAL_QUEUE = 1000;
 
 export class ElasticV3ServerShipper implements IShipper {
   public static shipperName = 'elastic_v3_server';
@@ -54,6 +55,8 @@ export class ElasticV3ServerShipper implements IShipper {
 
   private readonly internalQueue: Event[] = [];
   private readonly shutdown$ = new Subject<void>();
+
+  private readonly url: string;
 
   private lastBatchSent = Date.now();
 
@@ -74,6 +77,10 @@ export class ElasticV3ServerShipper implements IShipper {
     private readonly options: ElasticV3ShipperOptions,
     private readonly initContext: AnalyticsClientInitContext
   ) {
+    this.url = buildUrl({
+      sendTo: options.sendTo ?? initContext.sendTo,
+      channelName: options.channelName,
+    });
     this.setInternalSubscriber();
     this.checkConnectivity();
   }
@@ -103,12 +110,12 @@ export class ElasticV3ServerShipper implements IShipper {
       return;
     }
 
-    const freeSpace = 1000 - this.internalQueue.length;
+    const freeSpace = MAX_NUMBER_OF_EVENTS_IN_INTERNAL_QUEUE - this.internalQueue.length;
 
     // As per design, we only want store up-to 1000 events at a time. Drop anything that goes beyond that limit
     if (freeSpace < events.length) {
-      const droppedEvents = events.slice(-(events.length - freeSpace));
-      events.length = freeSpace;
+      const toDrop = events.length - freeSpace;
+      const droppedEvents = events.splice(-toDrop, toDrop);
       this.reportTelemetryCounters(droppedEvents, {
         type: TelemetryCounterType.dropped,
         code: 'queue_full',
@@ -137,12 +144,12 @@ export class ElasticV3ServerShipper implements IShipper {
         takeWhile(() => this.shutdown$.isStopped === false),
         filter(() => this.isOptedIn === true && this.firstTimeOffline !== null),
         concatMap(async () => {
-          const { ok } = await fetch(buildUrl(this.initContext.sendTo, this.options.channelName), {
+          const { ok } = await fetch(this.url, {
             method: 'OPTIONS',
           });
 
           if (!ok) {
-            throw new Error('Failed to connect to Elastic');
+            throw new Error(`Failed to connect to ${this.url}`);
           }
 
           this.firstTimeOffline = null;
@@ -261,15 +268,12 @@ export class ElasticV3ServerShipper implements IShipper {
   }
 
   private async makeRequest(events: Event[]): Promise<string> {
-    const { status, text, ok } = await fetch(
-      buildUrl(this.initContext.sendTo, this.options.channelName),
-      {
-        method: 'POST',
-        body: eventsToNDJSON(events),
-        headers: buildHeaders(this.clusterUuid, this.options.version, this.licenseId),
-        ...(this.options.debug && { query: { debug: true } }),
-      }
-    );
+    const { status, text, ok } = await fetch(this.url, {
+      method: 'POST',
+      body: eventsToNDJSON(events),
+      headers: buildHeaders(this.clusterUuid, this.options.version, this.licenseId),
+      ...(this.options.debug && { query: { debug: true } }),
+    });
 
     if (this.options.debug) {
       this.initContext.logger.debug(

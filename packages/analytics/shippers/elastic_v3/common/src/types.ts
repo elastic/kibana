@@ -19,6 +19,10 @@ export interface ElasticV3ShipperOptions {
    */
   version: string;
   /**
+   * Provide it to override the Analytics client's default configuration.
+   */
+  sendTo?: 'staging' | 'production';
+  /**
    * Should show debug information about the requests it makes to the V3 API.
    */
   debug?: boolean;

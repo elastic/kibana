@@ -10,13 +10,13 @@ import { buildUrl } from './build_url';
 
 describe('buildUrl', () => {
   test('returns production URL', () => {
-    expect(buildUrl('production', 'test-channel')).toBe(
+    expect(buildUrl({ sendTo: 'production', channelName: 'test-channel' })).toBe(
       'https://telemetry.elastic.co/v3/send/test-channel'
     );
   });
 
   test('returns staging URL', () => {
-    expect(buildUrl('staging', 'test-channel')).toBe(
+    expect(buildUrl({ sendTo: 'staging', channelName: 'test-channel' })).toBe(
       'https://telemetry-staging.elastic.co/v3/send/test-channel'
     );
   });

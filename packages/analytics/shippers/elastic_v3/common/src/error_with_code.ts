@@ -7,7 +7,7 @@
  */
 
 export class ErrorWithCode extends Error {
-  constructor(message: string, public code: string) {
+  constructor(message: string, public readonly code: string) {
     super(message);
   }
 }

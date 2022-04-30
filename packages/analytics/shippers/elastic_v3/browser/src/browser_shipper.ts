@@ -30,6 +30,7 @@ export class ElasticV3BrowserShipper implements IShipper {
     this.telemetryCounter$,
     ElasticV3BrowserShipper.shipperName
   );
+  private readonly url: string;
 
   private readonly internalQueue$ = new Subject<Event>();
 
@@ -42,6 +43,10 @@ export class ElasticV3BrowserShipper implements IShipper {
     private readonly initContext: AnalyticsClientInitContext
   ) {
     this.setUpInternalQueueSubscriber();
+    this.url = buildUrl({
+      sendTo: options.sendTo ?? initContext.sendTo,
+      channelName: options.channelName,
+    });
   }
 
   public extendContext(newContext: EventContext) {
@@ -92,17 +97,14 @@ export class ElasticV3BrowserShipper implements IShipper {
   }
 
   private async makeRequest(events: Event[]): Promise<string> {
-    const { status, text, ok } = await fetch(
-      buildUrl(this.initContext.sendTo, this.options.channelName),
-      {
-        method: 'POST',
-        body: eventsToNDJSON(events),
-        headers: buildHeaders(this.clusterUuid, this.options.version, this.licenseId),
-        ...(this.options.debug && { query: { debug: true } }),
-        // Allow the request to outlive the page in case the tab is closed
-        keepalive: true,
-      }
-    );
+    const { status, text, ok } = await fetch(this.url, {
+      method: 'POST',
+      body: eventsToNDJSON(events),
+      headers: buildHeaders(this.clusterUuid, this.options.version, this.licenseId),
+      ...(this.options.debug && { query: { debug: true } }),
+      // Allow the request to outlive the page in case the tab is closed
+      keepalive: true,
+    });
 
     if (this.options.debug) {
       this.initContext.logger.debug(

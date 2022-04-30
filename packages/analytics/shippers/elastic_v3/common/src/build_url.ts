@@ -11,7 +11,13 @@
  * @param sendTo Whether to send it to production or staging.
  * @param channelName The name of the channel to send the data to.
  */
-export function buildUrl(sendTo: 'production' | 'staging', channelName: string): string {
+export function buildUrl({
+  sendTo,
+  channelName,
+}: {
+  sendTo: 'production' | 'staging';
+  channelName: string;
+}): string {
   const baseUrl =
     sendTo === 'production'
       ? 'https://telemetry.elastic.co'
