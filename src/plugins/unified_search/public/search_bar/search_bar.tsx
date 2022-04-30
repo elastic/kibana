@@ -209,24 +209,27 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     );
   }
 
+  private checkDataViewExistsAndHasAnyElement(dataViews: DataView[] | undefined): boolean {
+    return dataViews !== undefined && dataViews.length > 0;
+  }
+
   /*
    * This Function is here to show the toggle in saved query form
    * in case you the date range (from/to)
    */
   private shouldRenderTimeFilterInSavedQueryForm(): boolean {
     const { dateRangeFrom, dateRangeTo, showDatePicker, indexPatterns } = this.props;
-    let hasTimeFieldName: boolean = false;
+    const defaultCheck: boolean =
+      showDatePicker ||
+      (!showDatePicker && dateRangeFrom !== undefined && dateRangeTo !== undefined);
 
-    if (indexPatterns !== undefined) {
-      const currentIndexPattern = indexPatterns[0];
-      hasTimeFieldName = Boolean(currentIndexPattern.timeFieldName);
+    if (this.checkDataViewExistsAndHasAnyElement(indexPatterns)) {
+      const currentDataView = indexPatterns![0];
+      const hasTimeFieldName = Boolean(currentDataView.timeFieldName);
+      return hasTimeFieldName && defaultCheck;
+    } else {
+      return defaultCheck;
     }
-
-    return (
-      hasTimeFieldName &&
-      (showDatePicker ||
-        (!showDatePicker && dateRangeFrom !== undefined && dateRangeTo !== undefined))
-    );
   }
 
   public onSave = async (savedQueryMeta: SavedQueryMeta, saveAsNew = false) => {
