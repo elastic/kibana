@@ -27,7 +27,7 @@ interface Props {
   onCancel: () => void;
   allSources: MatchedItem[];
   loadSources: () => void;
-  skipNoDataViewsPrompt?: boolean;
+  showEmptyPrompt?: boolean;
 }
 
 export function isUserDataIndex(source: MatchedItem) {
@@ -51,7 +51,7 @@ export const EmptyPrompts: FC<Props> = ({
   onCancel,
   children,
   loadSources,
-  skipNoDataViewsPrompt,
+  showEmptyPrompt,
 }) => {
   const {
     services: { docLinks, application, http, searchClient, dataViews },
@@ -100,7 +100,7 @@ export const EmptyPrompts: FC<Props> = ({
           <PromptFooter onCancel={onCancel} />
         </>
       );
-    } else if (!skipNoDataViewsPrompt) {
+    } else if (showEmptyPrompt) {
       // first time
       return (
         <>
