@@ -89,7 +89,13 @@ export class EndpointConsoleService implements ConsoleServiceInterface {
       {
         name: 'terminate-process',
         about: 'Terminate a running process on the host machine',
-        args: undefined,
+        args: {
+          pid: {
+            about: 'The process id to be terminted',
+            required: true,
+            allowMultiples: false,
+          },
+        },
       },
     ];
   }
@@ -131,7 +137,13 @@ export class EndpointConsoleService implements ConsoleServiceInterface {
       }
     );
 
-    const policyResponse = (await this.fetchPolicyResponse()).policy_response;
+    const policyResponse = await (async () => {
+      try {
+        return (await this.fetchPolicyResponse()).policy_response;
+      } catch (e) {
+        //
+      }
+    })();
 
     if (policyResponse) {
       // @ts-ignore

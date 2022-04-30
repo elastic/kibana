@@ -110,7 +110,7 @@ export const RunningConsoleManagementProvider = memo(({ children }) => {
                 </h1>
               </EuiModalHeaderTitle>
             </EuiModalHeader>
-            <EuiModalBody>{console}</EuiModalBody>
+            <EuiModalBody style={{ height: '50vh' }}>{console}</EuiModalBody>
             <EuiModalFooter>
               <EuiButton onClick={() => closeConsole(id)}>{'Terminate session'}</EuiButton>
               <EuiButton onClick={() => hideConsole(id)} fill>
@@ -123,7 +123,7 @@ export const RunningConsoleManagementProvider = memo(({ children }) => {
     }
 
     return dialogs;
-  }, [consoles, hideConsole]);
+  }, [closeConsole, consoles, hideConsole]);
 
   return (
     <RunningConsoleManagementContext.Provider value={consoleManagement}>
