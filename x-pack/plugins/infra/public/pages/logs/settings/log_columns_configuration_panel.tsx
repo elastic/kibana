@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
 import { DragHandleProps, DropResult } from '../../../../../observability/public';
 import {
@@ -141,10 +141,10 @@ const LogColumnConfigurationPanel: React.FunctionComponent<{
   dragHandleProps: DragHandleProps;
   onRemove: (logColumnConfiguration: LogColumnConfiguration) => void;
 }> = ({ logColumnConfiguration, dragHandleProps, onRemove }) => {
-  const removeColumn = useCallback(() => onRemove(logColumnConfiguration), [
-    logColumnConfiguration,
-    onRemove,
-  ]);
+  const removeColumn = useCallback(
+    () => onRemove(logColumnConfiguration),
+    [logColumnConfiguration, onRemove]
+  );
 
   return (
     <>

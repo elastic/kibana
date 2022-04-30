@@ -15,7 +15,7 @@ import realHits from '../../../../../__fixtures__/real_hits.js';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
-import { IndexPatternAttributes } from '../../../../../../../data/common';
+import { flattenHit, IndexPatternAttributes } from '../../../../../../../data/common';
 import { SavedObject } from '../../../../../../../../core/types';
 import {
   DiscoverSidebarResponsive,
@@ -24,10 +24,11 @@ import {
 import { DiscoverServices } from '../../../../../build_services';
 import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
 import { FetchStatus } from '../../../../types';
-import { DataDocuments$ } from '../../services/use_saved_search';
+import { AvailableFields$, DataDocuments$ } from '../../services/use_saved_search';
 import { stubLogstashIndexPattern } from '../../../../../../../data/common/stubs';
+import { VIEW_MODE } from '../view_mode_toggle';
 
-const mockServices = ({
+const mockServices = {
   history: () => ({
     location: {
       search: '',
@@ -48,7 +49,7 @@ const mockServices = ({
       }
     },
   },
-} as unknown) as DiscoverServices;
+} as unknown as DiscoverServices;
 
 const mockfieldCounts: Record<string, number> = {};
 const mockCalcFieldCounts = jest.fn(() => {
@@ -72,9 +73,9 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
   const indexPattern = stubLogstashIndexPattern;
 
   // @ts-expect-error _.each() is passing additional args to flattenHit
-  const hits = (each(cloneDeep(realHits), indexPattern.flattenHit) as Array<
+  const hits = each(cloneDeep(realHits), (hit) => flattenHit(hit, indexPattern)) as Array<
     Record<string, unknown>
-  >) as ElasticSearchHit[];
+  > as ElasticSearchHit[];
 
   const indexPatternList = [
     { id: '0', attributes: { title: 'b' } } as SavedObject<IndexPatternAttributes>,
@@ -83,7 +84,7 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
   ];
 
   for (const hit of hits) {
-    for (const key of Object.keys(indexPattern.flattenHit(hit))) {
+    for (const key of Object.keys(flattenHit(hit, indexPattern))) {
       mockfieldCounts[key] = (mockfieldCounts[key] || 0) + 1;
     }
   }
@@ -93,6 +94,10 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
       fetchStatus: FetchStatus.COMPLETE,
       result: hits as ElasticSearchHit[],
     }) as DataDocuments$,
+    availableFields$: new BehaviorSubject({
+      fetchStatus: FetchStatus.COMPLETE,
+      fields: [] as string[],
+    }) as AvailableFields$,
     indexPatternList,
     onChangeIndexPattern: jest.fn(),
     onAddFilter: jest.fn(),
@@ -103,6 +108,8 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     state: {},
     trackUiMetric: jest.fn(),
     onEditRuntimeField: jest.fn(),
+    viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+    onDataViewCreated: jest.fn(),
   };
 }
 

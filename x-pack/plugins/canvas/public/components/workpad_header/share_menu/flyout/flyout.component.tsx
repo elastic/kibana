@@ -22,7 +22,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CanvasRenderedWorkpad } from '../../../../../shareable_runtime/types';
 import { useDownloadRenderedWorkpad } from '../../../hooks';
@@ -108,9 +108,10 @@ export const ShareWebsiteFlyout: FC<Props> = ({
 }) => {
   const notifyService = useNotifyService();
 
-  const onCopy = useCallback(() => notifyService.info(strings.getCopyShareConfigMessage()), [
-    notifyService,
-  ]);
+  const onCopy = useCallback(
+    () => notifyService.info(strings.getCopyShareConfigMessage()),
+    [notifyService]
+  );
 
   const downloadRenderedWorkpad = useDownloadRenderedWorkpad();
   const downloadRuntime = useDownloadRuntime();

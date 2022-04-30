@@ -12,42 +12,45 @@ import { execSync } from 'child_process';
 // deep import to avoid loading the whole package
 import { getDataPath } from '@kbn/utils';
 import { readFileSync } from 'fs';
-import { ApmAgentConfig } from './types';
+import type { AgentConfigOptions } from 'elastic-apm-node';
+import type { AgentConfigOptions as RUMAgentConfigOptions } from '@elastic/apm-rum';
 
 // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html
-const DEFAULT_CONFIG: ApmAgentConfig = {
+const DEFAULT_CONFIG: AgentConfigOptions = {
   active: false,
   environment: 'development',
   logUncaughtExceptions: true,
   globalLabels: {},
 };
 
-const CENTRALIZED_SERVICE_BASE_CONFIG: ApmAgentConfig = {
-  serverUrl: 'https://38b80fbd79fb4c91bae06b4642d4d093.apm.us-east-1.aws.cloud.es.io',
+const CENTRALIZED_SERVICE_BASE_CONFIG: AgentConfigOptions | RUMAgentConfigOptions = {
+  serverUrl: 'https://kibana-cloud-apm.apm.us-east-1.aws.found.io',
 
   // The secretToken below is intended to be hardcoded in this file even though
   // it makes it public. This is not a security/privacy issue. Normally we'd
   // instead disable the need for a secretToken in the APM Server config where
   // the data is transmitted to, but due to how it's being hosted, it's easier,
   // for now, to simply leave it in.
-  secretToken: 'ZQHYvrmXEx04ozge8F',
+  secretToken: 'JpBCcOQxN81D5yucs2',
 
+  breakdownMetrics: true,
+  captureSpanStackTraces: false,
   centralConfig: false,
   metricsInterval: '30s',
-  captureSpanStackTraces: false,
+  propagateTracestate: true,
   transactionSampleRate: 1.0,
-  breakdownMetrics: true,
 };
 
-const CENTRALIZED_SERVICE_DIST_CONFIG: ApmAgentConfig = {
-  metricsInterval: '120s',
+const CENTRALIZED_SERVICE_DIST_CONFIG: AgentConfigOptions = {
+  breakdownMetrics: false,
   captureBody: 'off',
   captureHeaders: false,
-  breakdownMetrics: false,
+  metricsInterval: '120s',
+  transactionSampleRate: 0.1,
 };
 
 export class ApmConfiguration {
-  private baseConfig?: ApmAgentConfig;
+  private baseConfig?: AgentConfigOptions;
   private kibanaVersion: string;
   private pkgBuild: Record<string, any>;
 
@@ -62,7 +65,7 @@ export class ApmConfiguration {
     this.pkgBuild = build;
   }
 
-  public getConfig(serviceName: string): ApmAgentConfig {
+  public getConfig(serviceName: string): AgentConfigOptions {
     return {
       ...this.getBaseConfig(),
       serviceName,
@@ -107,8 +110,8 @@ export class ApmConfiguration {
   /**
    * Override some config values when specific environment variables are used
    */
-  private getConfigFromEnv(): ApmAgentConfig {
-    const config: ApmAgentConfig = {};
+  private getConfigFromEnv(): AgentConfigOptions {
+    const config: AgentConfigOptions = {};
 
     if (process.env.ELASTIC_APM_ACTIVE === 'true') {
       config.active = true;
@@ -142,7 +145,7 @@ export class ApmConfiguration {
    * Get the elastic.apm configuration from the --config file, supersedes the
    * default config.
    */
-  private getConfigFromKibanaConfig(): ApmAgentConfig {
+  private getConfigFromKibanaConfig(): AgentConfigOptions {
     return this.rawKibanaConfig?.elastic?.apm ?? {};
   }
 
@@ -150,7 +153,7 @@ export class ApmConfiguration {
    * Get the configuration from the apm.dev.js file, supersedes config
    * from the --config file, disabled when running the distributable
    */
-  private getDevConfig(): ApmAgentConfig {
+  private getDevConfig(): AgentConfigOptions {
     if (this.isDistributable) {
       return {};
     }
@@ -167,7 +170,7 @@ export class ApmConfiguration {
    * Determine the Kibana UUID, initialized the value of `globalLabels.kibana_uuid`
    * when the UUID can be determined.
    */
-  private getUuidConfig(): ApmAgentConfig {
+  private getUuidConfig(): AgentConfigOptions {
     // try to access the `server.uuid` value from the config file first.
     // if not manually defined, we will then read the value from the `{DATA_FOLDER}/uuid` file.
     // note that as the file is created by the platform AFTER apm init, the file
@@ -207,7 +210,7 @@ export class ApmConfiguration {
    * When running Kibana with ELASTIC_APM_ENVIRONMENT=ci we attempt to grab
    * some environment variables we populate in CI related to the build under test
    */
-  private getCiConfig(): ApmAgentConfig {
+  private getCiConfig(): AgentConfigOptions {
     if (process.env.ELASTIC_APM_ENVIRONMENT !== 'ci') {
       return {};
     }
@@ -215,10 +218,12 @@ export class ApmConfiguration {
     return {
       globalLabels: {
         branch: process.env.GIT_BRANCH || '',
-        targetBranch: process.env.PR_TARGET_BRANCH || '',
-        ciBuildNumber: process.env.BUILD_NUMBER || '',
-        isPr: process.env.GITHUB_PR_NUMBER ? true : false,
-        prId: process.env.GITHUB_PR_NUMBER || '',
+        targetBranch: process.env.GITHUB_PR_TARGET_BRANCH || '',
+        ciBuildNumber: process.env.BUILDKITE_BUILD_NUMBER || '',
+        ciBuildId: process.env.BUILDKITE_BUILD_ID || '',
+        ciBuildJobId: process.env.BUILDKITE_JOB_ID || '',
+        isPr: process.env.BUILDKITE_PULL_REQUEST ? true : false,
+        prId: process.env.BUILDKITE_PULL_REQUEST || '',
       },
     };
   }

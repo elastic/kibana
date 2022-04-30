@@ -12,7 +12,7 @@ import { PluginStartContract as FeaturesPluginStart } from '../../../features/se
 import { AuthFilterHelpers, GetSpaceFn, OwnerEntity } from './types';
 import { getOwnersFilter } from './utils';
 import { AuthorizationAuditLogger, OperationDetails } from '.';
-import { createCaseError } from '../common';
+import { createCaseError } from '../common/error';
 
 /**
  * This class handles ensuring that the user making a request has the correct permissions
@@ -204,9 +204,7 @@ export class Authorization {
     };
   }
 
-  private async getAuthorizedOwners(
-    operations: OperationDetails[]
-  ): Promise<{
+  private async getAuthorizedOwners(operations: OperationDetails[]): Promise<{
     username?: string;
     hasAllRequested: boolean;
     authorizedOwners: string[];

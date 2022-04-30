@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiToolTip, IconType } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
+import type { IconType, ToolTipPositions } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -23,12 +24,13 @@ export interface DefaultDraggableType {
   id: string;
   isDraggable?: boolean;
   field: string;
-  value?: string | null;
+  value?: string | number | null;
   name?: string | null;
   queryValue?: string | null;
   children?: React.ReactNode;
   timelineId?: string;
   tooltipContent?: React.ReactNode;
+  tooltipPosition?: ToolTipPositions;
 }
 
 /**
@@ -60,11 +62,13 @@ export const Content = React.memo<{
   children?: React.ReactNode;
   field: string;
   tooltipContent?: React.ReactNode;
-  value?: string | null;
-}>(({ children, field, tooltipContent, value }) =>
+  tooltipPosition?: ToolTipPositions;
+  value?: string | number | null;
+}>(({ children, field, tooltipContent, tooltipPosition, value }) =>
   !tooltipContentIsExplicitlyNull(tooltipContent) ? (
     <EuiToolTip
       data-test-subj={`${field}-tooltip`}
+      position={tooltipPosition}
       content={getDefaultWhenTooltipIsUnspecified({ tooltipContent, field })}
     >
       <>{children ? children : value}</>
@@ -88,6 +92,7 @@ Content.displayName = 'Content';
  * @param children - defaults to displaying `value`, this allows an arbitrary visualization to be displayed in lieu of the default behavior
  * @param tooltipContent - defaults to displaying `field`, pass `null` to
  * prevent a tooltip from being displayed, or pass arbitrary content
+ * @param tooltipPosition - defaults to eui's default tooltip position
  * @param queryValue - defaults to `value`, this query overrides the `queryMatch.value` used by the `DataProvider` that represents the data
  * @param hideTopN - defaults to `false`, when true, the option to aggregate this field will be hidden
  */
@@ -102,6 +107,7 @@ export const DefaultDraggable = React.memo<DefaultDraggableType>(
     children,
     timelineId,
     tooltipContent,
+    tooltipPosition,
     queryValue,
   }) => {
     const dataProviderProp: DataProvider = useMemo(
@@ -109,7 +115,7 @@ export const DefaultDraggable = React.memo<DefaultDraggableType>(
         and: [],
         enabled: true,
         id: escapeDataProviderId(id),
-        name: name ? name : value ?? '',
+        name: name ? name : value?.toString() ?? '',
         excluded: false,
         kqlQuery: '',
         queryMatch: {
@@ -128,11 +134,16 @@ export const DefaultDraggable = React.memo<DefaultDraggableType>(
             <Provider dataProvider={dataProvider} />
           </DragEffects>
         ) : (
-          <Content field={field} tooltipContent={tooltipContent} value={value}>
+          <Content
+            field={field}
+            tooltipContent={tooltipContent}
+            tooltipPosition={tooltipPosition}
+            value={value}
+          >
             {children}
           </Content>
         ),
-      [children, field, tooltipContent, value]
+      [children, field, tooltipContent, tooltipPosition, value]
     );
 
     if (value == null) return null;

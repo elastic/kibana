@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useRef } from 'react';
+import React, { useCallback, useState, useContext } from 'react';
 import { HoverActions } from '../../hover_actions';
 import { useActionCellDataProvider } from './use_action_cell_data_provider';
 import { EventFieldsData, FieldsData } from '../types';
-import { useGetTimelineId } from '../../drag_and_drop/use_get_timeline_id_from_dom';
 import { ColumnHeaderOptions } from '../../../../../common/types/timeline';
 import { BrowserField } from '../../../containers/source';
+import { TimelineContext } from '../../../../../../timelines/public';
 
 interface Props {
   contextId: string;
   data: FieldsData | EventFieldsData;
+  applyWidthAndPadding?: boolean;
   disabled?: boolean;
   eventId: string;
   fieldFromBrowserField?: BrowserField;
@@ -29,6 +30,7 @@ interface Props {
 
 export const ActionCell: React.FC<Props> = React.memo(
   ({
+    applyWidthAndPadding = true,
     contextId,
     data,
     eventId,
@@ -52,12 +54,9 @@ export const ActionCell: React.FC<Props> = React.memo(
       values,
     });
 
-    const draggableRef = useRef<HTMLDivElement | null>(null);
     const [showTopN, setShowTopN] = useState<boolean>(false);
-    const [goGetTimelineId, setGoGetTimelineId] = useState(false);
-    const timelineIdFind = useGetTimelineId(draggableRef, goGetTimelineId);
+    const { timelineId: timelineIdFind } = useContext(TimelineContext);
     const [hoverActionsOwnFocus] = useState<boolean>(false);
-
     const toggleTopN = useCallback(() => {
       setShowTopN((prevShowTopN) => {
         const newShowTopN = !prevShowTopN;
@@ -71,12 +70,12 @@ export const ActionCell: React.FC<Props> = React.memo(
 
     return (
       <HoverActions
+        applyWidthAndPadding={applyWidthAndPadding}
         closeTopN={closeTopN}
         dataType={data.type}
         dataProvider={actionCellConfig?.dataProvider}
         enableOverflowButton={true}
         field={data.field}
-        goGetTimelineId={setGoGetTimelineId}
         isObjectArray={data.isObjectArray}
         onFilterAdded={onFilterAdded}
         ownFocus={hoverActionsOwnFocus}

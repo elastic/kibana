@@ -5,18 +5,24 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
+import { useTheme } from '../../../../../../hooks/use_theme';
 import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { isRumAgentName } from '../../../../../../../common/agent_name';
-import { TRACE_ID } from '../../../../../../../common/elasticsearch_fieldnames';
+import {
+  TRACE_ID,
+  TRANSACTION_ID,
+} from '../../../../../../../common/elasticsearch_fieldnames';
 import { asDuration } from '../../../../../../../common/utils/formatters';
 import { Margins } from '../../../../../shared/charts/Timeline';
-import { ErrorOverviewLink } from '../../../../../shared/Links/apm/ErrorOverviewLink';
-import { ErrorCount } from '../../ErrorCount';
+import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
 import { SyncBadge } from './sync_badge';
 import { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
+import { FailureBadge } from './failure_badge';
+import { useApmRouter } from '../../../../../../hooks/use_apm_router';
+import { useApmParams } from '../../../../../../hooks/use_apm_params';
 
 type ItemType = 'transaction' | 'span' | 'error';
 
@@ -24,6 +30,7 @@ interface IContainerStyleProps {
   type: ItemType;
   timelineMargins: Margins;
   isSelected: boolean;
+  hasToggle: boolean;
 }
 
 interface IBarStyleProps {
@@ -38,7 +45,10 @@ const Container = euiStyled.div<IContainerStyleProps>`
   padding-top: ${({ theme }) => theme.eui.paddingSizes.s};
   padding-bottom: ${({ theme }) => theme.eui.euiSizeM};
   margin-right: ${(props) => props.timelineMargins.right}px;
-  margin-left: ${(props) => props.timelineMargins.left}px;
+  margin-left: ${(props) =>
+    props.hasToggle
+      ? props.timelineMargins.left - 30 // fix margin if there is a toggle
+      : props.timelineMargins.left}px ;
   background-color: ${({ isSelected, theme }) =>
     isSelected ? theme.eui.euiColorLightestShade : 'initial'};
   cursor: pointer;
@@ -62,6 +72,7 @@ const ItemText = euiStyled.span`
   display: flex;
   align-items: center;
   height: ${({ theme }) => theme.eui.euiSizeL};
+  max-width: 100%;
 
   /* add margin to all direct descendants */
   & > * {
@@ -74,6 +85,7 @@ interface IWaterfallItemProps {
   timelineMargins: Margins;
   totalDuration?: number;
   item: IWaterfallSpanOrTransaction;
+  hasToggle: boolean;
   color: string;
   isSelected: boolean;
   errorCount: number;
@@ -155,7 +167,11 @@ function NameLabel({ item }: { item: IWaterfallSpanOrTransaction }) {
             : '';
         name = `${item.doc.span.composite.count}${compositePrefix} ${name}`;
       }
-      return <EuiText size="s">{name}</EuiText>;
+      return (
+        <EuiText style={{ overflow: 'hidden' }} size="s">
+          <TruncateWithTooltip content={name} text={name} />
+        </EuiText>
+      );
     case 'transaction':
       return (
         <EuiTitle size="xxs">
@@ -169,6 +185,7 @@ export function WaterfallItem({
   timelineMargins,
   totalDuration,
   item,
+  hasToggle,
   color,
   isSelected,
   errorCount,
@@ -181,15 +198,6 @@ export function WaterfallItem({
   const width = (item.duration / totalDuration) * 100;
   const left = ((item.offset + item.skew) / totalDuration) * 100;
 
-  const tooltipContent = i18n.translate(
-    'xpack.apm.transactionDetails.errorsOverviewLinkTooltip',
-    {
-      values: { errorCount },
-      defaultMessage:
-        '{errorCount, plural, one {View 1 related error} other {View # related errors}}',
-    }
-  );
-
   const isCompositeSpan = item.docType === 'span' && item.doc.span.composite;
   const itemBarStyle = getItemBarStyle(item, color, width, left);
 
@@ -198,6 +206,7 @@ export function WaterfallItem({
       type={item.docType}
       timelineMargins={timelineMargins}
       isSelected={isSelected}
+      hasToggle={hasToggle}
       onClick={(e: React.MouseEvent) => {
         e.stopPropagation();
         onClick();
@@ -216,25 +225,54 @@ export function WaterfallItem({
         </SpanActionToolTip>
         <HttpStatusCode item={item} />
         <NameLabel item={item} />
-        {errorCount > 0 && item.docType === 'transaction' ? (
-          <ErrorOverviewLink
-            serviceName={item.doc.service.name}
-            query={{
-              kuery: `${TRACE_ID} : "${item.doc.trace.id}" and transaction.id : "${item.doc.transaction.id}"`,
-            }}
-            color="danger"
-            style={{ textDecoration: 'none' }}
-          >
-            <EuiToolTip content={tooltipContent}>
-              <ErrorCount count={errorCount} />
-            </EuiToolTip>
-          </ErrorOverviewLink>
-        ) : null}
+
         <Duration item={item} />
+        <RelatedErrors item={item} errorCount={errorCount} />
         {item.docType === 'span' && <SyncBadge sync={item.doc.span.sync} />}
       </ItemText>
     </Container>
   );
+}
+
+function RelatedErrors({
+  item,
+  errorCount,
+}: {
+  item: IWaterfallSpanOrTransaction;
+  errorCount: number;
+}) {
+  const apmRouter = useApmRouter();
+  const theme = useTheme();
+  const { query } = useApmParams('/services/{serviceName}/transactions/view');
+
+  const href = apmRouter.link(`/services/{serviceName}/errors`, {
+    path: { serviceName: item.doc.service.name },
+    query: {
+      ...query,
+      kuery: `${TRACE_ID} : "${item.doc.trace.id}" and ${TRANSACTION_ID} : "${item.doc.transaction?.id}"`,
+    },
+  });
+
+  if (errorCount > 0) {
+    return (
+      // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+      <div onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+        <EuiBadge
+          href={href}
+          color={theme.eui.euiColorDanger}
+          iconType="arrowRight"
+        >
+          {i18n.translate('xpack.apm.waterfall.errorCount', {
+            defaultMessage:
+              '{errorCount, plural, one {View related error} other {View # related errors}}',
+            values: { errorCount },
+          })}
+        </EuiBadge>
+      </div>
+    );
+  }
+
+  return <FailureBadge outcome={item.doc.event?.outcome} />;
 }
 
 function getItemBarStyle(

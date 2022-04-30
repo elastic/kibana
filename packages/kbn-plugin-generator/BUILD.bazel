@@ -51,7 +51,7 @@ RUNTIME_DEPS = [
 
 TYPES_DEPS = [
   "//packages/kbn-utils",
-  "//packages/kbn-dev-utils",
+  "//packages/kbn-dev-utils:npm_module_types",
   "@npm//del",
   "@npm//execa",
   "@npm//globby",
@@ -85,10 +85,8 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  source_map = True,
   root_dir = "src",
   tsconfig = ":tsconfig",
 )

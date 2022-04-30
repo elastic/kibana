@@ -585,6 +585,28 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.kernel.fileaccess',
+    first_supported_version: '7.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.fileaccess',
+      {
+        defaultMessage:
+          'Report limited file access (read) events. Paths are not user-configurable. Default value is true.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.kernel.registryaccess',
+    first_supported_version: '7.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.registryaccess',
+      {
+        defaultMessage:
+          'Report limited registry access (queryvalue, savekey) events. Paths are not user-configurable. Default value is true.',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.diagnostic.enabled',
     first_supported_version: '7.11',
     documentation: i18n.translate(
@@ -721,6 +743,80 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Attempt to identify and extract PE metadata from injected shellcode, including Authenticode signatures and version resource information. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.memory_protection.memory_scan_collect_sample',
+    first_supported_version: '7.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.memory_protection.memory_scan_collect_sample',
+      {
+        defaultMessage:
+          'Collect 4MB of memory surrounding detected malicious memory regions. Default: false. Enabling this value may significantly increase the amount of data stored in Elasticsearch.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.memory_protection.memory_scan',
+    first_supported_version: '7.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.memory_protection.memory_scan',
+      {
+        defaultMessage:
+          'Enable scanning for malicious memory regions as a part of memory protection. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.memory_protection.memory_scan_collect_sample',
+    first_supported_version: '7.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.memory_protection.memory_scan_collect_sample',
+      {
+        defaultMessage:
+          'Collect 4MB of memory surrounding detected malicious memory regions. Default: false. Enabling this value may significantly increase the amount of data stored in Elasticsearch.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.memory_protection.memory_scan',
+    first_supported_version: '7.16',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.memory_protection.memory_scan',
+      {
+        defaultMessage:
+          'Enable scanning for malicious memory regions as a part of memory protection. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.artifacts.user.ca_cert',
+    first_supported_version: '7.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.user.ca_cert',
+      {
+        defaultMessage: 'PEM-encoded certificate for Fleet Server certificate authority.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.artifacts.user.ca_cert',
+    first_supported_version: '7.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.user.ca_cert',
+      {
+        defaultMessage: 'PEM-encoded certificate for Fleet Server certificate authority.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.artifacts.user.ca_cert',
+    first_supported_version: '7.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.user.ca_cert',
+      {
+        defaultMessage: 'PEM-encoded certificate for Fleet Server certificate authority.',
       }
     ),
   },

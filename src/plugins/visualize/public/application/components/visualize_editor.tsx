@@ -27,6 +27,7 @@ import { VisualizeConstants } from '../..';
 export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const { id: visualizationIdFromUrl } = useParams<{ id: string }>();
   const [originatingApp, setOriginatingApp] = useState<string>();
+  const [originatingPath, setOriginatingPath] = useState<string>();
   const [embeddableIdValue, setEmbeddableId] = useState<string>();
   const { services } = useKibana<VisualizeServices>();
   const [eventEmitter] = useState(new EventEmitter());
@@ -57,8 +58,12 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
 
   useEffect(() => {
     const { stateTransferService, data } = services;
-    const { originatingApp: value, searchSessionId, embeddableId } =
-      stateTransferService.getIncomingEditorState(VisualizeConstants.APP_ID) || {};
+    const {
+      originatingApp: value,
+      searchSessionId,
+      embeddableId,
+      originatingPath: pathValue,
+    } = stateTransferService.getIncomingEditorState(VisualizeConstants.APP_ID) || {};
 
     if (searchSessionId) {
       data.search.session.continue(searchSessionId);
@@ -68,6 +73,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
 
     setEmbeddableId(embeddableId);
     setOriginatingApp(value);
+    setOriginatingPath(pathValue);
   }, [services]);
 
   useEffect(() => {
@@ -88,6 +94,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
       isEmbeddableRendered={isEmbeddableRendered}
       originatingApp={originatingApp}
       setOriginatingApp={setOriginatingApp}
+      originatingPath={originatingPath}
       visualizationIdFromUrl={visualizationIdFromUrl}
       setHasUnsavedChanges={setHasUnsavedChanges}
       visEditorRef={visEditorRef}

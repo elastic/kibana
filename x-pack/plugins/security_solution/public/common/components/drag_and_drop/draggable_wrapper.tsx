@@ -85,6 +85,10 @@ export const ProviderContentWrapper = styled.span`
   > span.euiToolTipAnchor {
     display: block; /* allow EuiTooltip content to be truncatable */
   }
+
+  > span.euiToolTipAnchor.eui-textTruncate {
+    display: inline-block; /* do not override display when a tooltip is truncated via eui-textTruncate */
+  }
 `;
 
 type RenderFunctionProp = (
@@ -95,10 +99,8 @@ type RenderFunctionProp = (
 
 interface Props {
   dataProvider: DataProvider;
-  disabled?: boolean;
   hideTopN?: boolean;
   isDraggable?: boolean;
-  inline?: boolean;
   render: RenderFunctionProp;
   timelineId?: string;
   truncate?: boolean;

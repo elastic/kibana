@@ -5,30 +5,34 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import {
-  getSetupModeState,
-  initSetupModeState,
-  updateSetupModeData,
-  disableElasticsearchInternalCollection,
-  toggleSetupMode,
-  setSetupModeMenuItem,
-} from '../../lib/setup_mode';
-import { Flyout } from '../metricbeat_migration/flyout';
 import {
   EuiBottomBar,
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTextColor,
   EuiIcon,
   EuiSpacer,
+  EuiTextColor,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { Fragment } from 'react';
+import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { GlobalStateContext } from '../../application/contexts/global_state_context';
+import { useRequestErrorHandler } from '../../application/hooks/use_request_error_handler';
+import {
+  disableElasticsearchInternalCollection,
+  getSetupModeState,
+  initSetupModeState,
+  markSetupModeSupported,
+  markSetupModeUnsupported,
+  toggleSetupMode,
+  updateSetupModeData,
+} from '../../lib/setup_mode';
+import { Flyout } from '../metricbeat_migration/flyout';
+import { SetupModeExitButton } from '../setup_mode/exit_button';
 import { findNewUuid } from './lib/find_new_uuid';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 
-export class SetupModeRenderer extends React.Component {
+export class WrappedSetupModeRenderer extends React.Component {
+  globalState;
   state = {
     renderState: false,
     isFlyoutOpen: false,
@@ -38,9 +42,12 @@ export class SetupModeRenderer extends React.Component {
   };
 
   UNSAFE_componentWillMount() {
-    const { scope, injector } = this.props;
-    initSetupModeState(scope, injector, (_oldData) => {
+    this.globalState = this.context;
+    const { kibana, onHttpError } = this.props;
+    markSetupModeSupported();
+    initSetupModeState(this.globalState, kibana.services.http, onHttpError, (_oldData) => {
       const newState = { renderState: true };
+
       const { productName } = this.props;
       if (!productName) {
         this.setState(newState);
@@ -64,7 +71,10 @@ export class SetupModeRenderer extends React.Component {
 
       this.setState(newState);
     });
-    setSetupModeMenuItem();
+  }
+
+  componentWillUnmount() {
+    markSetupModeUnsupported();
   }
 
   reset() {
@@ -149,18 +159,7 @@ export class SetupModeRenderer extends React.Component {
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    color="danger"
-                    fill
-                    iconType="flag"
-                    iconSide="right"
-                    size="s"
-                    onClick={() => toggleSetupMode(false)}
-                  >
-                    {i18n.translate('xpack.monitoring.setupMode.exit', {
-                      defaultMessage: `Exit setup mode`,
-                    })}
-                  </EuiButton>
+                  <SetupModeExitButton exitSetupMode={() => toggleSetupMode(false)} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -207,3 +206,13 @@ export class SetupModeRenderer extends React.Component {
     });
   }
 }
+
+function withErrorHandler(Component) {
+  return function WrappedComponent(props) {
+    const handleRequestError = useRequestErrorHandler();
+    return <Component {...props} onHttpError={handleRequestError} />;
+  };
+}
+
+WrappedSetupModeRenderer.contextType = GlobalStateContext;
+export const SetupModeRenderer = withKibana(withErrorHandler(WrappedSetupModeRenderer));

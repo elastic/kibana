@@ -7,7 +7,7 @@
 
 import { getOr } from 'lodash/fp';
 
-import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 import {
   FactoryQueryTypes,
   MatrixHistogramRequestOptions,
@@ -28,6 +28,7 @@ import {
 } from './authentications';
 import { dnsMatrixHistogramConfig } from './dns';
 import { eventsMatrixHistogramConfig } from './events';
+import { previewMatrixHistogramConfig } from './preview';
 
 const matrixHistogramConfig: MatrixHistogramDataConfig = {
   [MatrixHistogramType.alerts]: alertsMatrixHistogramConfig,
@@ -36,6 +37,7 @@ const matrixHistogramConfig: MatrixHistogramDataConfig = {
   [MatrixHistogramType.authenticationsEntities]: authenticationsMatrixHistogramEntitiesConfig,
   [MatrixHistogramType.dns]: dnsMatrixHistogramConfig,
   [MatrixHistogramType.events]: eventsMatrixHistogramConfig,
+  [MatrixHistogramType.preview]: previewMatrixHistogramConfig,
 };
 
 export const matrixHistogram: SecuritySolutionFactory<typeof MatrixHistogramQuery> = {

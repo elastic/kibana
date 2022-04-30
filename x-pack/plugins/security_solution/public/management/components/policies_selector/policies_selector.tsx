@@ -20,7 +20,7 @@ import {
   FilterChecked,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ImmutableArray, PolicyData } from '../../../../common/endpoint/types';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
@@ -135,7 +135,7 @@ export const PoliciesSelector = memo<PoliciesSelectorProps>(
     const dropdownItems = useMemo(
       () =>
         itemsList.map((item, index) =>
-          item.name.match(new RegExp(query, 'i')) ? (
+          item.name.toLowerCase().includes(query.toLowerCase()) ? (
             <EuiFilterSelectItem
               checked={item.checked}
               key={index}

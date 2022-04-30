@@ -29,7 +29,7 @@ export * from './helpers';
 
 export const createTimelinesRoute = (
   router: SecuritySolutionPluginRouter,
-  config: ConfigType,
+  _: ConfigType,
   security: SetupPlugins['security']
 ) => {
   router.post(
@@ -49,13 +49,8 @@ export const createTimelinesRoute = (
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
 
         const { timelineId, timeline, version } = request.body;
-        const {
-          templateTimelineId,
-          templateTimelineVersion,
-          timelineType,
-          title,
-          status,
-        } = timeline;
+        const { templateTimelineId, templateTimelineVersion, timelineType, title, status } =
+          timeline;
         const compareTimelinesStatus = new CompareTimelinesStatus({
           status,
           title,

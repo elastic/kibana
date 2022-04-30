@@ -10,7 +10,7 @@ import { Datatable } from '../../../../../../src/plugins/expressions/common';
 import { createMockExecutionContext } from '../../../../../../src/plugins/expressions/common/mocks';
 
 describe('rename_columns', () => {
-  it('should rename columns of a given datatable', () => {
+  it('should rename columns of a given datatable', async () => {
     const input: Datatable = {
       type: 'datatable',
       columns: [
@@ -36,7 +36,7 @@ describe('rename_columns', () => {
       },
     };
 
-    const result = renameColumns.fn(
+    const result = await renameColumns.fn(
       input,
       { idMap: JSON.stringify(idMap) },
       createMockExecutionContext()
@@ -83,7 +83,7 @@ describe('rename_columns', () => {
     `);
   });
 
-  it('should keep columns which are not mapped', () => {
+  it('should keep columns which are not mapped', async () => {
     const input: Datatable = {
       type: 'datatable',
       columns: [
@@ -102,7 +102,7 @@ describe('rename_columns', () => {
       b: { id: 'c', label: 'Catamaran' },
     };
 
-    const result = renameColumns.fn(
+    const result = await renameColumns.fn(
       input,
       { idMap: JSON.stringify(idMap) },
       createMockExecutionContext()
@@ -149,7 +149,7 @@ describe('rename_columns', () => {
     `);
   });
 
-  it('should rename date histograms', () => {
+  it('should rename date histograms', async () => {
     const input: Datatable = {
       type: 'datatable',
       columns: [
@@ -168,7 +168,7 @@ describe('rename_columns', () => {
       b: { id: 'c', label: 'Apple', operationType: 'date_histogram', sourceField: 'banana' },
     };
 
-    const result = renameColumns.fn(
+    const result = await renameColumns.fn(
       input,
       { idMap: JSON.stringify(idMap) },
       createMockExecutionContext()

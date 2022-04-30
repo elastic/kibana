@@ -13,7 +13,7 @@ import {
   EuiLoadingSpinner,
   EuiButton,
 } from '@elastic/eui';
-import { FormattedMessage, FormattedTime, FormattedRelative } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedTime, FormattedRelative } from '@kbn/i18n-react';
 import * as React from 'react';
 import { Unit } from '@elastic/datemath';
 

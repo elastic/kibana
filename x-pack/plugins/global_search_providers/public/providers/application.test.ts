@@ -246,9 +246,9 @@ describe('applicationResultProvider', () => {
 
         // test scheduler doesnt play well with promises. need to workaround by passing
         // an observable instead. Behavior with promise is asserted in previous tests of the suite
-        const applicationPromise = (hot('a', {
+        const applicationPromise = hot('a', {
           a: application,
-        }) as unknown) as Promise<ApplicationStart>;
+        }) as unknown as Promise<ApplicationStart>;
 
         const provider = createApplicationResultProvider(applicationPromise);
 
@@ -271,9 +271,9 @@ describe('applicationResultProvider', () => {
 
         // test scheduler doesnt play well with promises. need to workaround by passing
         // an observable instead. Behavior with promise is asserted in previous tests of the suite
-        const applicationPromise = (hot('a', {
+        const applicationPromise = hot('a', {
           a: application,
-        }) as unknown) as Promise<ApplicationStart>;
+        }) as unknown as Promise<ApplicationStart>;
 
         const provider = createApplicationResultProvider(applicationPromise);
 

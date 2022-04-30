@@ -19,7 +19,7 @@ const getFirstFocusable = (el: HTMLElement | null) => {
   if (!firstFocusable) {
     return null;
   }
-  return (firstFocusable as unknown) as { focus: () => void };
+  return firstFocusable as unknown as { focus: () => void };
 };
 
 type RefsById = Record<string, HTMLElement | null>;

@@ -77,7 +77,7 @@ describe('PieVisualization component', () => {
         onClickValue: jest.fn(),
         chartsThemeService,
         paletteService: chartPluginMock.createPaletteRegistry(),
-        renderMode: 'display' as const,
+        renderMode: 'view' as const,
         syncColors: false,
       };
     }
@@ -147,7 +147,7 @@ describe('PieVisualization component', () => {
       );
 
       (component.find(Partition).prop('layers')![1].shape!.fillColor as NodeColorAccessor)(
-        ({
+        {
           dataName: 'third',
           depth: 2,
           parent: {
@@ -173,7 +173,7 @@ describe('PieVisualization component', () => {
           },
           value: 41,
           sortIndex: 2,
-        } as unknown) as ShapeTreeNode,
+        } as unknown as ShapeTreeNode,
         0,
         [] as HierarchyOfArrays
       );
@@ -302,12 +302,13 @@ describe('PieVisualization component', () => {
       `);
     });
 
-    test('does not set click listener on noInteractivity render mode', () => {
+    test('does not set click listener and legend actions on non-interactive mode', () => {
       const defaultArgs = getDefaultArgs();
       const component = shallow(
-        <PieComponent args={{ ...args }} {...defaultArgs} renderMode="noInteractivity" />
+        <PieComponent args={{ ...args }} {...defaultArgs} interactive={false} />
       );
       expect(component.find(Settings).first().prop('onElementClick')).toBeUndefined();
+      expect(component.find(Settings).first().prop('legendAction')).toBeUndefined();
     });
 
     test('it renders the empty placeholder when metric contains only falsy data', () => {

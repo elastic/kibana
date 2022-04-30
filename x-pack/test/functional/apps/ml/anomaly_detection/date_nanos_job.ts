@@ -57,7 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
       jobSource: 'ft_event_rate_gen_trend_nanos',
       jobId: `event_rate_nanos_count_1_${Date.now()}`,
       jobDescription:
-        'Create advanced job based on the event rate dataset with a date_nanos time field, 30m bucketspan and count',
+        'Create advanced job based on the event rate dataset with a date_nanos time field, 1d bucketspan and count',
       jobGroups: ['automated', 'event-rate', 'date-nanos'],
       pickFieldsConfig: {
         detectors: [
@@ -69,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
         ],
         summaryCountField: 'count',
         influencers: [],
-        bucketSpan: '30m',
+        bucketSpan: '1d',
         memoryLimit: '10mb',
       } as PickFieldsConfig,
       datafeedConfig: {} as DatafeedConfig,
@@ -94,7 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
           out_of_order_timestamp_count: '0',
           empty_bucket_count: '0',
           sparse_bucket_count: '0',
-          bucket_count: '17,520',
+          bucket_count: '365',
           earliest_record_timestamp: '2015-01-01 00:10:00',
           latest_record_timestamp: '2016-01-01 00:00:00',
           input_record_count: '105,120',
@@ -108,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
           total_partition_field_count: '2',
           bucket_allocation_failures_count: '0',
           memory_status: 'ok',
-          timestamp: '2015-12-31 23:30:00',
+          timestamp: '2015-12-31 00:00:00',
         },
       },
     },
@@ -128,6 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_event_rate_gen_trend_nanos');
     });
 
     for (const testData of testDataList) {
@@ -312,7 +313,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep(
             'job creation displays the created job in the job list'
           );
-          await ml.jobTable.refreshJobList();
           await ml.jobTable.filterWithSearchString(testData.jobId, 1);
 
           await ml.testExecution.logTestStep(

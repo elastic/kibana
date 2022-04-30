@@ -7,19 +7,23 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { AlertCluster, AlertVersions } from '../../../common/types/alerts';
 import { ElasticsearchSource, ElasticsearchResponse } from '../../../common/types/es';
+import { createDatasetFilter } from './create_dataset_query_filter';
 
 export async function fetchElasticsearchVersions(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
   index: string,
-  size: number
+  size: number,
+  filterQuery?: string
 ): Promise<AlertVersions[]> {
   const params = {
     index,
     filter_path: [
       'hits.hits._source.cluster_stats.nodes.versions',
+      'hits.hits._source.elasticsearch.cluster.stats.nodes.versions',
       'hits.hits._index',
       'hits.hits._source.cluster_uuid',
+      'hits.hits._source.elasticsearch.cluster.id',
     ],
     body: {
       size: clusters.length,
@@ -39,11 +43,7 @@ export async function fetchElasticsearchVersions(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-            {
-              term: {
-                type: 'cluster_stats',
-              },
-            },
+            createDatasetFilter('cluster_stats', 'cluster_stats', 'elasticsearch.cluster_stats'),
             {
               range: {
                 timestamp: {
@@ -60,13 +60,25 @@ export async function fetchElasticsearchVersions(
     },
   };
 
+  try {
+    if (filterQuery) {
+      const filterQueryObject = JSON.parse(filterQuery);
+      params.body.query.bool.filter.push(filterQueryObject);
+    }
+  } catch (e) {
+    // meh
+  }
+
   const result = await esClient.search<ElasticsearchSource>(params);
   const response: ElasticsearchResponse = result.body as ElasticsearchResponse;
   return (response.hits?.hits ?? []).map((hit) => {
-    const versions = hit._source!.cluster_stats?.nodes?.versions ?? [];
+    const versions =
+      hit._source!.cluster_stats?.nodes?.versions ??
+      hit._source!.elasticsearch?.cluster?.stats?.nodes?.versions ??
+      [];
     return {
       versions,
-      clusterUuid: hit._source!.cluster_uuid,
+      clusterUuid: hit._source!.elasticsearch?.cluster?.id || hit._source!.cluster_uuid,
       ccs: hit._index.includes(':') ? hit._index.split(':')[0] : undefined,
     };
   });

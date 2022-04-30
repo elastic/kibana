@@ -8,7 +8,7 @@
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ApplicationStart } from 'src/core/public';
 
 interface Props {

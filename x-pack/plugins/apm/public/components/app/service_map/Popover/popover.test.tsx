@@ -14,12 +14,12 @@ const { Backend, ExternalsList, Resource, Service } = composeStories(stories);
 
 describe('Popover', () => {
   describe('with backend data', () => {
-    it('renders a backend link', async () => {
+    it('renders a dependency link', async () => {
       render(<Backend />);
 
       await waitFor(() => {
         expect(
-          screen.getByRole('link', { name: /backend details/i })
+          screen.getByRole('link', { name: /Dependency Details/i })
         ).toBeInTheDocument();
       });
     });

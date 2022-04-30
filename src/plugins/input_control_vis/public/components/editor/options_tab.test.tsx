@@ -17,7 +17,7 @@ describe('OptionsTab', () => {
   let props: OptionsTabProps;
 
   beforeEach(() => {
-    props = ({
+    props = {
       vis: {} as Vis,
       stateParams: {
         updateFiltersOnChange: false,
@@ -25,7 +25,7 @@ describe('OptionsTab', () => {
         pinFilters: false,
       },
       setValue: jest.fn(),
-    } as unknown) as OptionsTabProps;
+    } as unknown as OptionsTabProps;
   });
 
   it('should renders OptionsTab', () => {

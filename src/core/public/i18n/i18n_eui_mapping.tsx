@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTokensObject } from '@elastic/eui';
 
 interface EuiValues {
@@ -64,10 +64,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       }),
     'euiBasicTable.tablePagination': ({ tableCaption }: EuiValues) =>
       i18n.translate('core.euiBasicTable.tablePagination', {
-        defaultMessage: 'Pagination for preceding table: {tableCaption}',
+        defaultMessage: 'Pagination for table: {tableCaption}',
         values: { tableCaption },
         description: 'Screen reader text to describe the pagination controls',
       }),
+    'euiBasicTable.noItemsMessage': i18n.translate('core.euiBasicTable.noItemsMessage', {
+      defaultMessage: 'No items found',
+    }),
     'euiBottomBar.customScreenReaderAnnouncement': ({ landmarkHeading }: EuiValues) =>
       i18n.translate('core.euiBottomBar.customScreenReaderAnnouncement', {
         defaultMessage:
@@ -218,11 +221,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColumnActions.hideColumn': i18n.translate('core.euiColumnActions.hideColumn', {
       defaultMessage: 'Hide column',
     }),
-    'euiColumnActions.sort': ({ schemaLabel }: EuiValues) =>
-      i18n.translate('core.euiColumnActions.sort', {
-        defaultMessage: 'Sort {schemaLabel}',
-        values: { schemaLabel },
-      }),
+    'euiColumnActions.sort': ({ schemaLabel }: EuiValues) => (
+      <FormattedMessage
+        id="core.euiColumnActions.sort"
+        defaultMessage="Sort {schemaLabel}"
+        values={{ schemaLabel }}
+      />
+    ),
     'euiColumnActions.moveLeft': i18n.translate('core.euiColumnActions.moveLeft', {
       defaultMessage: 'Move left',
     }),
@@ -272,9 +277,11 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColumnSorting.button': i18n.translate('core.euiColumnSorting.button', {
       defaultMessage: 'Sort fields',
     }),
-    'euiColumnSorting.buttonActive': i18n.translate('core.euiColumnSorting.buttonActive', {
-      defaultMessage: 'fields sorted',
-    }),
+    'euiColumnSorting.buttonActive': ({ numberOfSortedFields }: EuiValues) =>
+      i18n.translate('core.euiColumnSorting.buttonActive', {
+        defaultMessage: '{numberOfSortedFields, plural, one {# field} other {# fields}} sorted',
+        values: { numberOfSortedFields },
+      }),
     'euiColumnSortingDraggable.activeSortLabel': ({ display }: EuiValues) =>
       i18n.translate('core.euiColumnSortingDraggable.activeSortLabel', {
         defaultMessage: '{display} is sorting this data grid',
@@ -514,16 +521,26 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiFilePicker.clearSelectedFiles': i18n.translate('core.euiFilePicker.clearSelectedFiles', {
       defaultMessage: 'Clear selected files',
     }),
-    'euiFilePicker.filesSelected': i18n.translate('core.euiFilePicker.filesSelected', {
-      defaultMessage: 'files selected',
+    'euiFilePicker.filesSelected': ({ fileCount }: EuiValues) =>
+      i18n.translate('core.euiFilePicker.filesSelected', {
+        defaultMessage: '{fileCount} files selected',
+        values: { fileCount },
+      }),
+    'euiFilePicker.promptText': i18n.translate('core.euiFilePicker.promptText', {
+      defaultMessage: 'Select or drag and drop a file',
     }),
     'euiFilePicker.removeSelected': i18n.translate('core.euiFilePicker.removeSelected', {
       defaultMessage: 'Remove',
     }),
-    'euiFilterButton.filterBadge': ({ count, hasActiveFilters }: EuiValues) =>
-      i18n.translate('core.euiFilterButton.filterBadge', {
-        defaultMessage: '{count} {hasActiveFilters} filters',
-        values: { count, hasActiveFilters: hasActiveFilters ? 'active' : 'available' },
+    'euiFilterButton.filterBadgeActiveAriaLabel': ({ count }: EuiValues) =>
+      i18n.translate('core.euiFilterButton.filterBadgeActiveAriaLabel', {
+        defaultMessage: '{count} active filters',
+        values: { count },
+      }),
+    'euiFilterButton.filterBadgeAvailableAriaLabel': ({ count }: EuiValues) =>
+      i18n.translate('core.euiFilterButton.filterBadgeAvailableAriaLabel', {
+        defaultMessage: '{count} available filters',
+        values: { count },
       }),
     'euiFlyout.closeAriaLabel': i18n.translate('core.euiFlyout.closeAriaLabel', {
       defaultMessage: 'Close this dialog',
@@ -620,17 +637,29 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Syntax help',
       }
     ),
-    'euiMarkdownEditorFooter.descriptionPrefix': i18n.translate(
-      'core.euiMarkdownEditorFooter.descriptionPrefix',
+    'euiMarkdownEditorFooter.mdSyntaxLink': i18n.translate(
+      'core.euiMarkdownEditorFooter.mdSyntaxLink',
+      {
+        defaultMessage: 'GitHub flavored markdown',
+      }
+    ),
+    'euiMarkdownEditorFooter.syntaxModalDescriptionPrefix': i18n.translate(
+      'core.euiMarkdownEditorFooter.syntaxModalDescriptionPrefix',
       {
         defaultMessage: 'This editor uses',
       }
     ),
-    'euiMarkdownEditorFooter.descriptionSuffix': i18n.translate(
-      'core.euiMarkdownEditorFooter.descriptionSuffix',
+    'euiMarkdownEditorFooter.syntaxModalDescriptionSuffix': i18n.translate(
+      'core.euiMarkdownEditorFooter.syntaxModalDescriptionSuffix',
       {
         defaultMessage:
           'You can also utilize these additional syntax plugins to add rich content to your text.',
+      }
+    ),
+    'euiMarkdownEditorFooter.syntaxPopoverDescription': i18n.translate(
+      'core.euiMarkdownEditorFooter.syntaxPopoverDescription',
+      {
+        defaultMessage: 'This editor uses',
       }
     ),
     'euiMarkdownEditorToolbar.editor': i18n.translate('core.euiMarkdownEditorToolbar.editor', {
@@ -831,6 +860,9 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     }),
     'euiRelativeTab.numberInputLabel': i18n.translate('core.euiRelativeTab.numberInputLabel', {
       defaultMessage: 'Time span amount',
+    }),
+    'euiRelativeTab.dateInputError': i18n.translate('core.euiRelativeTab.dateInputError', {
+      defaultMessage: 'Must be a valid range',
     }),
     'euiResizableButton.horizontalResizerAriaLabel': i18n.translate(
       'core.euiResizableButton.horizontalResizerAriaLabel',

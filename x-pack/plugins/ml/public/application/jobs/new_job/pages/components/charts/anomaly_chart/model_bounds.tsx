@@ -41,10 +41,10 @@ export const ModelBounds: FC<Props> = ({ modelData }) => {
       yAccessors={['modelUpper']}
       y0Accessors={['modelLower']}
       data={model}
-      stackAccessors={['time']}
       curve={CurveType.CURVE_MONOTONE_X}
       areaSeriesStyle={areaSeriesStyle}
       color={MODEL_COLOR}
+      timeZone="local"
     />
   );
 };

@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-
 import {
   AreaSeries,
   CurveType,
@@ -22,10 +21,11 @@ import {
 } from '@elastic/charts';
 
 import { DatatableRow } from '../../../../expressions/public';
-import { METRIC_TYPES } from '../../../../data/public';
 
 import { ChartType } from '../../common';
-import { SeriesParam, VisConfig } from '../types';
+import { SeriesParam, VisConfig, Aspect } from '../types';
+import { isValidSeriesForDimension } from './accessors';
+import { computePercentageData } from './compute_percentage_data';
 
 /**
  * Matches vislib curve to elastic charts
@@ -68,8 +68,33 @@ export const renderAllSeries = (
   timeZone: string,
   xAccessor: Accessor | AccessorFn,
   splitSeriesAccessors: Array<Accessor | AccessorFn>
-) =>
-  seriesParams.map(
+) => {
+  let percentageModeComputedData: DatatableRow[] = [];
+  yAxes.forEach((yAxis) => {
+    const scale = yAxis.scale;
+    // find the series that are positioned on this axis
+    const series = seriesParams.filter((seriesParam) => seriesParam.valueAxis === yAxis.groupId);
+    const yAspects: Aspect[] = [];
+    series.forEach((seriesParam) => {
+      const aggId = seriesParam.data.id;
+      const accessorsInSeries = aspects.y.filter((aspect) => aspect.aggId === aggId);
+      yAspects.push(...accessorsInSeries);
+    });
+    const yAccessors = yAspects.map((aspect) => {
+      return aspect.accessor;
+    }) as string[];
+    if (scale.mode === 'percentage') {
+      const splitChartAccessor = aspects.splitColumn?.accessor || aspects.splitRow?.accessor;
+      percentageModeComputedData = computePercentageData(
+        data,
+        xAccessor,
+        yAccessors,
+        splitChartAccessor
+      );
+    }
+  });
+
+  return seriesParams.map(
     ({
       show,
       valueAxis: groupId,
@@ -82,17 +107,7 @@ export const renderAllSeries = (
       interpolate,
       type,
     }) => {
-      const yAspects = aspects.y.filter(({ aggId, aggType, accessor }) => {
-        if (
-          aggType === METRIC_TYPES.PERCENTILES ||
-          aggType === METRIC_TYPES.PERCENTILE_RANKS ||
-          aggType === METRIC_TYPES.STD_DEV
-        ) {
-          return aggId?.includes(paramId) && accessor !== null;
-        } else {
-          return aggId === paramId && accessor !== null;
-        }
-      });
+      const yAspects = aspects.y.filter((aspect) => isValidSeriesForDimension(paramId, aspect));
       if (!show || !yAspects.length) {
         return null;
       }
@@ -100,7 +115,9 @@ export const renderAllSeries = (
 
       const id = `${type}-${yAccessors[0]}`;
       const yAxisScale = yAxes.find(({ groupId: axisGroupId }) => axisGroupId === groupId)?.scale;
-      const isStacked = mode === 'stacked' || yAxisScale?.mode === 'percentage';
+
+      const isStacked = mode === 'stacked';
+
       const stackMode = yAxisScale?.mode === 'normal' ? undefined : yAxisScale?.mode;
       // needed to seperate stacked and non-stacked bars into unique pseudo groups
       const pseudoGroupId = isStacked ? `__pseudo_stacked_group-${groupId}__` : groupId;
@@ -123,7 +140,9 @@ export const renderAllSeries = (
               xAccessor={xAccessor}
               yAccessors={yAccessors}
               splitSeriesAccessors={splitSeriesAccessors}
-              data={data}
+              data={
+                !isStacked && yAxisScale?.mode === 'percentage' ? percentageModeComputedData : data
+              }
               timeZone={timeZone}
               stackAccessors={isStacked ? ['__any_value__'] : undefined}
               enableHistogramMode={enableHistogramMode}
@@ -163,7 +182,9 @@ export const renderAllSeries = (
               markSizeAccessor={markSizeAccessor}
               markFormat={aspects.z?.formatter}
               splitSeriesAccessors={splitSeriesAccessors}
-              data={data}
+              data={
+                !isStacked && yAxisScale?.mode === 'percentage' ? percentageModeComputedData : data
+              }
               stackAccessors={isStacked ? ['__any_value__'] : undefined}
               displayValueSettings={{
                 showValueLabel,
@@ -193,3 +214,4 @@ export const renderAllSeries = (
       }
     }
   );
+};

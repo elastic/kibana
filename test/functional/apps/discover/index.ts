@@ -51,5 +51,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_runtime_fields_editor'));
     loadTestFile(require.resolve('./_huge_fields'));
     loadTestFile(require.resolve('./_date_nested'));
+    loadTestFile(require.resolve('./_search_on_page_load'));
+    loadTestFile(require.resolve('./_chart_hidden'));
+    loadTestFile(require.resolve('./_context_encoded_url_param'));
   });
 }

@@ -130,11 +130,22 @@ export function MachineLearningNavigationProvider({
       await this.navigateToArea('~mlMainTab & ~dataFrameAnalytics', 'mlPageDataFrameAnalytics');
     },
 
+    async navigateToModelManagement() {
+      await this.navigateToArea('~mlMainTab & ~modelManagement', 'mlPageModelManagement');
+    },
+
     async navigateToTrainedModels() {
       await this.navigateToMl();
-      await this.navigateToDataFrameAnalytics();
+      await this.navigateToModelManagement();
       await testSubjects.click('mlTrainedModelsTab');
       await testSubjects.existOrFail('mlModelsTableContainer');
+    },
+
+    async navigateToModelManagementNodeList() {
+      await this.navigateToMl();
+      await this.navigateToModelManagement();
+      await testSubjects.click('mlNodesOverviewTab');
+      await testSubjects.existOrFail('mlNodesTableContainer');
     },
 
     async navigateToDataVisualizer() {
@@ -210,6 +221,13 @@ export function MachineLearningNavigationProvider({
         await testSubjects.click('toggleNavButton');
       }
       await testSubjects.existOrFail('collapsibleNav');
+    },
+
+    async closeKibanaNav() {
+      if (await testSubjects.exists('collapsibleNav')) {
+        await testSubjects.click('toggleNavButton');
+      }
+      await testSubjects.missingOrFail('collapsibleNav');
     },
 
     async assertKibanaNavMLEntryExists() {

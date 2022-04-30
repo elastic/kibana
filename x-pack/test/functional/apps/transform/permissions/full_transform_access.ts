@@ -20,6 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await transform.securityUI.logout();
       });
 
@@ -67,6 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
         await transform.api.deleteIndices(transformConfigWithPivot.dest.index);
         await transform.api.cleanTransformIndices();
+        await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
       });
 
       it('should display elements in the Transform list page correctly', async () => {
@@ -158,10 +160,7 @@ export default function ({ getService }: FtrProviderContext) {
           'should have the retention policy inputs enabled'
         );
         await transform.editFlyout.openTransformEditAccordionRetentionPolicySettings();
-        await transform.editFlyout.assertTransformEditFlyoutInputEnabled(
-          'RetentionPolicyField',
-          true
-        );
+        await transform.editFlyout.assertTransformEditFlyoutRetentionPolicyFieldSelectEnabled(true);
         await transform.editFlyout.assertTransformEditFlyoutInputEnabled(
           'RetentionPolicyMaxAge',
           true

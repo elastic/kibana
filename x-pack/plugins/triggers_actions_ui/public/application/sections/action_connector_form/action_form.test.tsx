@@ -222,7 +222,7 @@ describe('action_form', () => {
       ]);
       actionTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.get.mockReturnValue(actionType);
-      const initialAlert = ({
+      const initialAlert = {
         name: 'test',
         params: {},
         consumer: 'alerts',
@@ -246,7 +246,7 @@ describe('action_form', () => {
         muteAll: false,
         enabled: false,
         mutedInstanceIds: [],
-      } as unknown) as Alert;
+      } as unknown as Alert;
 
       const defaultActionMessage = 'Alert [{{context.metadata.name}}] has exceeded the threshold';
       const wrapper = mountWithIntl(
@@ -484,8 +484,9 @@ describe('action_form', () => {
       );
       actionOption.first().simulate('click');
       const combobox = wrapper.find(`[data-test-subj="selectActionConnector-${actionType.id}"]`);
-      const numConnectors = allActions.filter((action) => action.actionTypeId === actionType.id)
-        .length;
+      const numConnectors = allActions.filter(
+        (action) => action.actionTypeId === actionType.id
+      ).length;
       const numConnectorsWithMissingSecrets = allActions.filter(
         (action) => action.actionTypeId === actionType.id && action.isMissingSecrets
       ).length;

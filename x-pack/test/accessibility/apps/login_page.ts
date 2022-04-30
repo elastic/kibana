@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'security']);
 
+  // Failing: See https://github.com/elastic/kibana/issues/96372
   describe('Security', () => {
     describe('Login Page', () => {
       before(async () => {
@@ -26,6 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       afterEach(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
       });
 

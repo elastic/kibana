@@ -7,7 +7,7 @@
 
 import React, { useState, useCallback, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButton, EuiPageHeader } from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 
@@ -196,22 +196,21 @@ export const TemplateForm = ({
   };
 
   const buildTemplateObject = useCallback(
-    (initialTemplate: TemplateDeserialized) => (
-      wizardData: WizardContent
-    ): TemplateDeserialized => {
-      const outputTemplate = {
-        ...wizardData.logistics,
-        _kbnMeta: initialTemplate._kbnMeta,
-        composedOf: wizardData.components,
-        template: {
-          settings: wizardData.settings,
-          mappings: wizardData.mappings,
-          aliases: wizardData.aliases,
-        },
-      };
+    (initialTemplate: TemplateDeserialized) =>
+      (wizardData: WizardContent): TemplateDeserialized => {
+        const outputTemplate = {
+          ...wizardData.logistics,
+          _kbnMeta: initialTemplate._kbnMeta,
+          composedOf: wizardData.components,
+          template: {
+            settings: wizardData.settings,
+            mappings: wizardData.mappings,
+            aliases: wizardData.aliases,
+          },
+        };
 
-      return cleanupTemplateObject(outputTemplate);
-    },
+        return cleanupTemplateObject(outputTemplate);
+      },
     []
   );
 

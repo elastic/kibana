@@ -25,7 +25,7 @@ export const stringEnum = <T>(enumObj: T, enumName = 'enum') =>
       Object.values(enumObj).includes(u)
         ? runtimeTypes.success(u as T[keyof T])
         : runtimeTypes.failure(u, c),
-    (a) => (a as unknown) as string
+    (a) => a as unknown as string
   );
 
 /**

@@ -58,6 +58,7 @@ describe('lens_merge_tables', () => {
     const adapters: DefaultInspectorAdapters = {
       tables: new TablesAdapter(),
       requests: {} as never,
+      expression: {} as never,
     };
     mergeTables.fn(null, { layerIds: ['first', 'second'], tables: [sampleTable1, sampleTable2] }, {
       inspectorAdapters: adapters,

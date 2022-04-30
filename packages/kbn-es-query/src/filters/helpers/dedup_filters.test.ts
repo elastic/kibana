@@ -28,7 +28,7 @@ describe('filter manager utilities', () => {
           indexPattern,
           ''
         ),
-        buildQueryFilter({ match: { _term: { query: 'apache', type: 'phrase' } } }, 'index', ''),
+        buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
       ];
       const filters: Filter[] = [
         buildRangeFilter(
@@ -37,7 +37,7 @@ describe('filter manager utilities', () => {
           indexPattern,
           ''
         ),
-        buildQueryFilter({ match: { _term: { query: 'apache', type: 'phrase' } } }, 'index', ''),
+        buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
       ];
       const results = dedupFilters(existing, filters);
 
@@ -54,11 +54,7 @@ describe('filter manager utilities', () => {
           ''
         ),
         {
-          ...buildQueryFilter(
-            { match: { _term: { query: 'apache', type: 'phrase' } } },
-            'index1',
-            ''
-          ),
+          ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index1', ''),
           meta: { disabled: true, negate: false, alias: null },
         },
       ];
@@ -69,7 +65,7 @@ describe('filter manager utilities', () => {
           indexPattern,
           ''
         ),
-        buildQueryFilter({ match: { _term: { query: 'apache', type: 'phrase' } } }, 'index1', ''),
+        buildQueryFilter({ query_string: { query: 'apache' } }, 'index1', ''),
       ];
       const results = dedupFilters(existing, filters);
 
@@ -86,11 +82,7 @@ describe('filter manager utilities', () => {
           ''
         ),
         {
-          ...buildQueryFilter(
-            { match: { _term: { query: 'apache', type: 'phrase' } } },
-            'index',
-            ''
-          ),
+          ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
           $state: { store: FilterStateStore.APP_STATE },
         },
       ];
@@ -102,11 +94,7 @@ describe('filter manager utilities', () => {
           ''
         ),
         {
-          ...buildQueryFilter(
-            { match: { _term: { query: 'apache', type: 'phrase' } } },
-            'index',
-            ''
-          ),
+          ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
           $state: { store: FilterStateStore.GLOBAL_STATE },
         },
       ];

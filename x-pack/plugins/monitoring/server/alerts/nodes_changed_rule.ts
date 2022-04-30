@@ -105,7 +105,7 @@ export class NodesChangedRule extends BaseRule {
     params: CommonAlertParams,
     esClient: ElasticsearchClient,
     clusters: AlertCluster[],
-    availableCcs: string[]
+    availableCcs: boolean
   ): Promise<AlertData[]> {
     let esIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_ELASTICSEARCH);
     if (availableCcs) {
@@ -114,7 +114,8 @@ export class NodesChangedRule extends BaseRule {
     const nodesFromClusterStats = await fetchNodesFromClusterStats(
       esClient,
       clusters,
-      esIndexPattern
+      esIndexPattern,
+      params.filterQuery
     );
     return nodesFromClusterStats.map((nodes) => {
       const { removed, added, restarted } = getNodeStates(nodes);

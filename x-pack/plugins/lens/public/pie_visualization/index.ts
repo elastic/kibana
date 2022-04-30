@@ -24,17 +24,13 @@ export interface PieVisualizationPluginStartPlugins {
 }
 
 export class PieVisualization {
-  constructor() {}
-
   setup(
     core: CoreSetup,
     { expressions, formatFactory, editorFrame, charts }: PieVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
-      const { getPieVisualization, pie, getPieRenderer } = await import('../async_services');
+      const { getPieVisualization, getPieRenderer } = await import('../async_services');
       const palettes = await charts.palettes.getPalettes();
-
-      expressions.registerFunction(() => pie);
 
       expressions.registerRenderer(
         getPieRenderer({

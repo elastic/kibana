@@ -67,11 +67,7 @@ export const EventRateChart: FC<Props> = ({
         <Chart>
           {showAxis === true && <Axes />}
 
-          {onBrushEnd === undefined ? (
-            <Settings tooltip={TooltipType.None} theme={theme} />
-          ) : (
-            <Settings tooltip={TooltipType.None} onBrushEnd={onBrushEnd} theme={theme} />
-          )}
+          <Settings tooltip={TooltipType.None} onBrushEnd={onBrushEnd} theme={theme} />
 
           {overlayRanges &&
             overlayRanges.map((range, i) => (
@@ -94,6 +90,7 @@ export const EventRateChart: FC<Props> = ({
             yAccessors={['value']}
             data={eventRateChartData}
             color={barColor}
+            timeZone="local"
           />
         </Chart>
       </LoadingWrapper>

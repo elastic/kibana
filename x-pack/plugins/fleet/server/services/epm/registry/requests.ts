@@ -88,16 +88,19 @@ function isSystemError(error: FailedAttemptErrors): boolean {
 }
 
 export function getFetchOptions(targetUrl: string): RequestInit | undefined {
+  const options: RequestInit = {
+    headers: {
+      'User-Agent': `Kibana/${appContextService.getKibanaVersion()} node-fetch`,
+    },
+  };
   const proxyUrl = getRegistryProxyUrl();
   if (!proxyUrl) {
-    return undefined;
+    return options;
   }
 
   const logger = appContextService.getLogger();
   logger.debug(`Using ${proxyUrl} as proxy for ${targetUrl}`);
 
-  return {
-    // @ts-expect-error The types exposed by 'HttpsProxyAgent' isn't up to date with 'Agent'
-    agent: getProxyAgent({ proxyUrl, targetUrl }),
-  };
+  options.agent = getProxyAgent({ proxyUrl, targetUrl });
+  return options;
 }

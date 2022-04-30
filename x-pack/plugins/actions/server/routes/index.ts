@@ -6,6 +6,7 @@
  */
 
 import { IRouter } from 'kibana/server';
+import { UsageCounter } from 'src/plugins/usage_collection/server';
 import { ILicenseState } from '../lib';
 import { ActionsRequestHandlerContext } from '../types';
 import { createActionRoute } from './create';
@@ -15,13 +16,15 @@ import { getActionRoute } from './get';
 import { getAllActionRoute } from './get_all';
 import { connectorTypesRoute } from './connector_types';
 import { updateActionRoute } from './update';
+import { getWellKnownEmailServiceRoute } from './get_well_known_email_service';
 import { defineLegacyRoutes } from './legacy';
 
 export function defineRoutes(
   router: IRouter<ActionsRequestHandlerContext>,
-  licenseState: ILicenseState
+  licenseState: ILicenseState,
+  usageCounter?: UsageCounter
 ) {
-  defineLegacyRoutes(router, licenseState);
+  defineLegacyRoutes(router, licenseState, usageCounter);
 
   createActionRoute(router, licenseState);
   deleteActionRoute(router, licenseState);
@@ -30,4 +33,6 @@ export function defineRoutes(
   updateActionRoute(router, licenseState);
   connectorTypesRoute(router, licenseState);
   executeActionRoute(router, licenseState);
+
+  getWellKnownEmailServiceRoute(router, licenseState);
 }

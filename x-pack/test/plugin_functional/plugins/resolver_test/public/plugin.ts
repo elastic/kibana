@@ -23,7 +23,8 @@ export class ResolverTestPlugin
       ResolverTestPluginStart,
       ResolverTestPluginSetupDependencies,
       ResolverTestPluginStartDependencies
-    > {
+    >
+{
   public setup(
     core: CoreSetup<ResolverTestPluginStartDependencies, ResolverTestPluginStart>,
     setupDependencies: ResolverTestPluginSetupDependencies

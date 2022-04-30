@@ -12,7 +12,7 @@ import Url from 'url';
 import { RunWithCommands, createFlagError, Flags } from '@kbn/dev-utils';
 import { KbnClient } from './kbn_client';
 
-import { readConfigFile } from './functional_test_runner';
+import { readConfigFile, EsVersion } from './functional_test_runner';
 
 function getSinglePositionalArg(flags: Flags) {
   const positional = flags._;
@@ -50,14 +50,15 @@ export function runKbnArchiverCli() {
         --kibana-url       set the url that kibana can be reached at, uses the "servers.kibana" setting from --config by default
       `,
     },
-    async extendContext({ log, flags }) {
+    async extendContext({ log, flags, statsMeta }) {
       let config;
       if (flags.config) {
         if (typeof flags.config !== 'string') {
           throw createFlagError('expected --config to be a string');
         }
 
-        config = await readConfigFile(log, Path.resolve(flags.config));
+        config = await readConfigFile(log, EsVersion.getDefault(), Path.resolve(flags.config));
+        statsMeta.set('ftrConfigPath', flags.config);
       }
 
       let kibanaUrl;
@@ -81,6 +82,8 @@ export function runKbnArchiverCli() {
       if (!(space === undefined || typeof space === 'string')) {
         throw createFlagError('--space must be a string');
       }
+
+      statsMeta.set('kbnArchiverArg', getSinglePositionalArg(flags));
 
       return {
         space,

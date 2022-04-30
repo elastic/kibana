@@ -17,7 +17,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ModuleJobUI } from '../page';
 import { SETUP_RESULTS_WIDTH } from './module_jobs';
 import { tabColor } from '../../../../../../common/util/group_color_utils';
@@ -173,10 +173,10 @@ export const JobItem: FC<JobItemProps> = memo(
   }
 );
 
-function getDatafeedStartedIcon({
-  awaitingMlNodeAllocation,
-  success,
-}: DatafeedResponse): { type: string; color: string } {
+function getDatafeedStartedIcon({ awaitingMlNodeAllocation, success }: DatafeedResponse): {
+  type: string;
+  color: string;
+} {
   if (awaitingMlNodeAllocation === true) {
     return { type: 'alert', color: 'warning' };
   }

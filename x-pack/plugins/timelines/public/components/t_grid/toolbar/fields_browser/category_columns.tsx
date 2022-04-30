@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -29,7 +27,8 @@ import {
 import * as i18n from './translations';
 import { tGridSelectors } from '../../../../store/t_grid';
 import { getColumnsWithTimestamp } from '../../../utils/helpers';
-import type { OnUpdateColumns, BrowserFields } from '../../../../../common';
+import type { BrowserFields } from '../../../../../common/search_strategy';
+import type { OnUpdateColumns } from '../../../../../common/types';
 
 const CategoryName = styled.span<{ bold: boolean }>`
   .euiText {

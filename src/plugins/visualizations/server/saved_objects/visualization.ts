@@ -12,16 +12,14 @@ import { visualizationSavedObjectTypeMigrations } from '../migrations/visualizat
 export const visualizationSavedObjectType: SavedObjectsType = {
   name: 'visualization',
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
     icon: 'visualizeApp',
     defaultSearchField: 'title',
     importableAndExportable: true,
     getTitle(obj) {
       return obj.attributes.title;
-    },
-    getEditUrl(obj) {
-      return `/management/kibana/objects/savedVisualizations/${encodeURIComponent(obj.id)}`;
     },
     getInAppUrl(obj) {
       return {

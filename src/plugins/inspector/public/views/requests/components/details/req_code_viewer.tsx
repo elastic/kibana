@@ -6,11 +6,16 @@
  * Side Public License, v 1.
  */
 
+// We want to allow both right-clicking to open in a new tab and clicking through
+// the "Open in Console" link. We could use `RedirectAppLinks` at the top level
+// but that inserts a div which messes up the layout of the inspector.
+/* eslint-disable @elastic/eui/href-or-on-click */
+
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
 import { compressToEncodedURIComponent } from 'lz-string';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { CodeEditor, useKibana } from '../../../../../../kibana_react/public';
 import { InspectorPluginStartDeps } from '../../../../plugin';
 
@@ -23,8 +28,8 @@ const copyToClipboardLabel = i18n.translate('inspector.requests.copyToClipboardL
   defaultMessage: 'Copy to clipboard',
 });
 
-const openInDevToolsLabel = i18n.translate('inspector.requests.openInDevToolsLabel', {
-  defaultMessage: 'Open in Dev Tools',
+const openInConsoleLabel = i18n.translate('inspector.requests.openInConsoleLabel', {
+  defaultMessage: 'Open in Console',
 });
 
 /**
@@ -32,12 +37,20 @@ const openInDevToolsLabel = i18n.translate('inspector.requests.openInDevToolsLab
  */
 export const RequestCodeViewer = ({ indexPattern, json }: RequestCodeViewerProps) => {
   const { services } = useKibana<InspectorPluginStartDeps>();
-  const canShowDevTools = services.application?.capabilities?.dev_tools.show;
+
+  const navigateToUrl = services.application?.navigateToUrl;
   const devToolsDataUri = compressToEncodedURIComponent(`GET ${indexPattern}/_search\n${json}`);
-  const devToolsHref = services.share.url.locators
+  const consoleHref = services.share.url.locators
     .get('CONSOLE_APP_LOCATOR')
     ?.useUrl({ loadFrom: `data:text/plain,${devToolsDataUri}` });
+  // Check if both the Dev Tools UI and the Console UI are enabled.
+  const canShowDevTools =
+    services.application?.capabilities?.dev_tools.show && consoleHref !== undefined;
   const shouldShowDevToolsLink = !!(indexPattern && canShowDevTools);
+  const handleDevToolsLinkClick = useCallback(
+    () => consoleHref && navigateToUrl && navigateToUrl(consoleHref),
+    [consoleHref, navigateToUrl]
+  );
 
   return (
     <EuiFlexGroup
@@ -68,10 +81,11 @@ export const RequestCodeViewer = ({ indexPattern, json }: RequestCodeViewerProps
               size="xs"
               flush="right"
               iconType="wrench"
-              href={devToolsHref}
-              data-test-subj="inspectorRequestOpenInDevToolsButton"
+              href={consoleHref}
+              onClick={handleDevToolsLinkClick}
+              data-test-subj="inspectorRequestOpenInConsoleButton"
             >
-              {openInDevToolsLabel}
+              {openInConsoleLabel}
             </EuiButtonEmpty>
           )}
         </div>

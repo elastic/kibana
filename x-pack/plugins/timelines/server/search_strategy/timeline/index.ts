@@ -32,16 +32,19 @@ import {
   ENHANCED_ES_SEARCH_STRATEGY,
   ISearchOptions,
 } from '../../../../../../src/plugins/data/common';
+import { AuditLogger, SecurityPluginSetup } from '../../../../security/server';
+import { AlertAuditAction, alertAuditEvent } from '../../../../rule_registry/server';
 
 export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTypes>(
   data: PluginStart,
-  alerting: AlertingPluginStartContract
+  alerting: AlertingPluginStartContract,
+  security?: SecurityPluginSetup
 ): ISearchStrategy<TimelineStrategyRequestType<T>, TimelineStrategyResponseType<T>> => {
   const esAsInternal = data.search.searchAsInternalUser;
   const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
-
   return {
     search: (request, options, deps) => {
+      const securityAuditLogger = security?.audit.asScoped(deps.request);
       const factoryQueryType = request.factoryQueryType;
       const entityType = request.entityType;
 
@@ -59,6 +62,7 @@ export const timelineSearchStrategyProvider = <T extends TimelineFactoryQueryTyp
           deps,
           queryFactory,
           alerting,
+          auditLogger: securityAuditLogger,
         });
       } else {
         return timelineSearchStrategy({ es, request, options, deps, queryFactory });
@@ -104,6 +108,7 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   deps,
   queryFactory,
   alerting,
+  auditLogger,
 }: {
   es: ISearchStrategy;
   request: TimelineStrategyRequestType<T>;
@@ -111,9 +116,8 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
   deps: SearchStrategyDependencies;
   alerting: AlertingPluginStartContract;
   queryFactory: TimelineFactory<T>;
+  auditLogger: AuditLogger | undefined;
 }) => {
-  // Based on what solution alerts you want to see, figures out what corresponding
-  // index to query (ex: siem --> .alerts-security.alerts)
   const indices = request.defaultIndex ?? request.indexType;
   const requestWithAlertsIndices = { ...request, defaultIndex: indices, indexName: indices };
 
@@ -133,17 +137,46 @@ const timelineAlertsSearchStrategy = <T extends TimelineFactoryQueryTypes>({
 
   return from(getAuthFilter()).pipe(
     mergeMap(({ filter }) => {
-      const dsl = queryFactory.buildDsl({ ...requestWithAlertsIndices, authFilter: filter });
+      const dsl = queryFactory.buildDsl({
+        ...requestWithAlertsIndices,
+        authFilter: filter,
+      });
       return es.search({ ...requestWithAlertsIndices, params: dsl }, options, deps);
     }),
     map((response) => {
+      const rawResponse = shimHitsTotal(response.rawResponse, options);
+      // Do we have to loop over each hit? Yes.
+      // ecs auditLogger requires that we log each alert independently
+      if (auditLogger != null) {
+        rawResponse.hits?.hits?.forEach((hit) => {
+          auditLogger.log(
+            alertAuditEvent({
+              action: AlertAuditAction.FIND,
+              id: hit._id,
+              outcome: 'success',
+            })
+          );
+        });
+      }
+
       return {
         ...response,
-        rawResponse: shimHitsTotal(response.rawResponse, options),
+        rawResponse,
       };
     }),
     mergeMap((esSearchRes) => queryFactory.parse(requestWithAlertsIndices, esSearchRes)),
     catchError((err) => {
+      // check if auth error, if yes, write to ecs logger
+      if (auditLogger != null && err?.output?.statusCode === 403) {
+        auditLogger.log(
+          alertAuditEvent({
+            action: AlertAuditAction.FIND,
+            outcome: 'failure',
+            error: err,
+          })
+        );
+      }
+
       throw err;
     })
   );

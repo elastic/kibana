@@ -141,9 +141,9 @@
             "signature": [
               {
                 "pluginId": "charts",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibChartsPluginApi",
-                "section": "def-public.Labels",
+                "section": "def-common.Labels",
                 "text": "Labels"
               }
             ],
@@ -231,9 +231,9 @@
               "Partial<",
               {
                 "pluginId": "charts",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibChartsPluginApi",
-                "section": "def-public.Style",
+                "section": "def-common.Style",
                 "text": "Style"
               },
               "> | undefined"
@@ -658,7 +658,7 @@
             "section": "def-public.ValidationVisOptionsProps",
             "text": "ValidationVisOptionsProps"
           },
-          "<T, E> extends ",
+          "<T> extends ",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -714,19 +714,6 @@
               }
             ],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "visTypeXy",
-            "id": "def-public.ValidationVisOptionsProps.extraProps",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "extraProps",
-            "description": [],
-            "signature": [
-              "E | undefined"
-            ],
-            "path": "src/plugins/vis_types/xy/public/editor/components/common/validation_wrapper.tsx",
-            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -840,20 +827,6 @@
       },
       {
         "parentPluginId": "visTypeXy",
-        "id": "def-public.LEGACY_CHARTS_LIBRARY",
-        "type": "string",
-        "tags": [],
-        "label": "LEGACY_CHARTS_LIBRARY",
-        "description": [],
-        "signature": [
-          "\"visualization:visualize:legacyChartsLibrary\""
-        ],
-        "path": "src/plugins/vis_types/xy/common/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visTypeXy",
         "id": "def-public.XyVisType",
         "type": "Type",
         "tags": [],
@@ -862,143 +835,21 @@
           "\nType of xy visualizations"
         ],
         "signature": [
-          "\"horizontal_bar\" | ",
           {
             "pluginId": "visTypeXy",
             "scope": "common",
             "docId": "kibVisTypeXyPluginApi",
             "section": "def-common.ChartType",
             "text": "ChartType"
-          }
+          },
+          " | \"horizontal_bar\""
         ],
         "path": "src/plugins/vis_types/xy/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       }
     ],
-    "objects": [
-      {
-        "parentPluginId": "visTypeXy",
-        "id": "def-public.xyVisTypes",
-        "type": "Object",
-        "tags": [],
-        "label": "xyVisTypes",
-        "description": [],
-        "path": "src/plugins/vis_types/xy/public/vis_types/index.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "visTypeXy",
-            "id": "def-public.xyVisTypes.area",
-            "type": "Function",
-            "tags": [],
-            "label": "area",
-            "description": [],
-            "signature": [
-              "(showElasticChartsOptions?: boolean) => ",
-              "XyVisTypeDefinition"
-            ],
-            "path": "src/plugins/vis_types/xy/public/vis_types/index.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "visTypeXy",
-                "id": "def-public.showElasticChartsOptions",
-                "type": "boolean",
-                "tags": [],
-                "label": "showElasticChartsOptions",
-                "description": [],
-                "path": "src/plugins/vis_types/xy/public/vis_types/area.ts",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "visTypeXy",
-            "id": "def-public.xyVisTypes.line",
-            "type": "Function",
-            "tags": [],
-            "label": "line",
-            "description": [],
-            "signature": [
-              "(showElasticChartsOptions?: boolean) => ",
-              "XyVisTypeDefinition"
-            ],
-            "path": "src/plugins/vis_types/xy/public/vis_types/index.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "visTypeXy",
-                "id": "def-public.showElasticChartsOptions",
-                "type": "boolean",
-                "tags": [],
-                "label": "showElasticChartsOptions",
-                "description": [],
-                "path": "src/plugins/vis_types/xy/public/vis_types/line.ts",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "visTypeXy",
-            "id": "def-public.xyVisTypes.histogram",
-            "type": "Function",
-            "tags": [],
-            "label": "histogram",
-            "description": [],
-            "signature": [
-              "(showElasticChartsOptions?: boolean) => ",
-              "XyVisTypeDefinition"
-            ],
-            "path": "src/plugins/vis_types/xy/public/vis_types/index.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "visTypeXy",
-                "id": "def-public.showElasticChartsOptions",
-                "type": "boolean",
-                "tags": [],
-                "label": "showElasticChartsOptions",
-                "description": [],
-                "path": "src/plugins/vis_types/xy/public/vis_types/histogram.ts",
-                "deprecated": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "visTypeXy",
-            "id": "def-public.xyVisTypes.horizontalBar",
-            "type": "Function",
-            "tags": [],
-            "label": "horizontalBar",
-            "description": [],
-            "signature": [
-              "(showElasticChartsOptions?: boolean) => ",
-              "XyVisTypeDefinition"
-            ],
-            "path": "src/plugins/vis_types/xy/public/vis_types/index.ts",
-            "deprecated": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "visTypeXy",
-                "id": "def-public.showElasticChartsOptions",
-                "type": "boolean",
-                "tags": [],
-                "label": "showElasticChartsOptions",
-                "description": [],
-                "path": "src/plugins/vis_types/xy/public/vis_types/horizontal_bar.ts",
-                "deprecated": false
-              }
-            ]
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "objects": [],
     "setup": {
       "parentPluginId": "visTypeXy",
       "id": "def-public.VisTypeXyPluginSetup",
@@ -1043,20 +894,6 @@
     "misc": [
       {
         "parentPluginId": "visTypeXy",
-        "id": "def-common.LEGACY_CHARTS_LIBRARY",
-        "type": "string",
-        "tags": [],
-        "label": "LEGACY_CHARTS_LIBRARY",
-        "description": [],
-        "signature": [
-          "\"visualization:visualize:legacyChartsLibrary\""
-        ],
-        "path": "src/plugins/vis_types/xy/common/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visTypeXy",
         "id": "def-common.XyVisType",
         "type": "Type",
         "tags": [],
@@ -1065,14 +902,14 @@
           "\nType of xy visualizations"
         ],
         "signature": [
-          "\"horizontal_bar\" | ",
           {
             "pluginId": "visTypeXy",
             "scope": "common",
             "docId": "kibVisTypeXyPluginApi",
             "section": "def-common.ChartType",
             "text": "ChartType"
-          }
+          },
+          " | \"horizontal_bar\""
         ],
         "path": "src/plugins/vis_types/xy/common/index.ts",
         "deprecated": false,

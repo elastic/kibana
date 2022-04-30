@@ -13,171 +13,203 @@ import { getSpaceIdForBeatsTutorial } from './get_space_id_for_beats_tutorial';
 import { Platform, TutorialContext } from '../../services/tutorials/lib/tutorials_registry_types';
 import { cloudPasswordAndResetLink } from './cloud_instructions';
 
-export const createFunctionbeatInstructions = (context?: TutorialContext) => ({
-  INSTALL: {
-    OSX: {
-      title: i18n.translate('home.tutorials.common.functionbeatInstructions.install.osxTitle', {
-        defaultMessage: 'Download and install Functionbeat',
-      }),
-      textPre: i18n.translate('home.tutorials.common.functionbeatInstructions.install.osxTextPre', {
-        defaultMessage: 'First time using Functionbeat? See the [Quick Start]({link}).',
-        values: {
-          link: '{config.docs.beats.functionbeat}/functionbeat-installation-configuration.html',
-        },
-      }),
-      commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/functionbeat/functionbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
-        'tar xzvf functionbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
-        'cd functionbeat-{config.kibana.version}-darwin-x86_64/',
-      ],
-    },
-    LINUX: {
-      title: i18n.translate('home.tutorials.common.functionbeatInstructions.install.linuxTitle', {
-        defaultMessage: 'Download and install Functionbeat',
-      }),
-      textPre: i18n.translate(
-        'home.tutorials.common.functionbeatInstructions.install.linuxTextPre',
-        {
-          defaultMessage: 'First time using Functionbeat? See the [Quick Start]({link}).',
-          values: {
-            link: '{config.docs.beats.functionbeat}/functionbeat-installation-configuration.html',
-          },
-        }
-      ),
-      commands: [
-        'curl -L -O https://artifacts.elastic.co/downloads/beats/functionbeat/functionbeat-{config.kibana.version}-linux-x86_64.tar.gz',
-        'tar xzvf functionbeat-{config.kibana.version}-linux-x86_64.tar.gz',
-        'cd functionbeat-{config.kibana.version}-linux-x86_64/',
-      ],
-    },
-    WINDOWS: {
-      title: i18n.translate('home.tutorials.common.functionbeatInstructions.install.windowsTitle', {
-        defaultMessage: 'Download and install Functionbeat',
-      }),
-      textPre: i18n.translate(
-        'home.tutorials.common.functionbeatInstructions.install.windowsTextPre',
-        {
-          defaultMessage:
-            'First time using Functionbeat? See the [Quick Start]({functionbeatLink}).\n\
+export const createFunctionbeatInstructions = (context: TutorialContext) => {
+  const SSL_DOC_URL = `https://www.elastic.co/guide/en/beats/functionbeat/${context.kibanaBranch}/configuration-ssl.html#ca-sha256`;
+
+  return {
+    INSTALL: {
+      OSX: {
+        title: i18n.translate('home.tutorials.common.functionbeatInstructions.install.osxTitle', {
+          defaultMessage: 'Download and install Functionbeat',
+        }),
+        textPre: i18n.translate(
+          'home.tutorials.common.functionbeatInstructions.install.osxTextPre',
+          {
+            defaultMessage: 'First time using Functionbeat? See the [Quick Start]({link}).',
+            values: {
+              link: '{config.docs.beats.functionbeat}/functionbeat-installation-configuration.html',
+            },
+          }
+        ),
+        commands: [
+          'curl -L -O https://artifacts.elastic.co/downloads/beats/functionbeat/functionbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
+          'tar xzvf functionbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
+          'cd functionbeat-{config.kibana.version}-darwin-x86_64/',
+        ],
+      },
+      LINUX: {
+        title: i18n.translate('home.tutorials.common.functionbeatInstructions.install.linuxTitle', {
+          defaultMessage: 'Download and install Functionbeat',
+        }),
+        textPre: i18n.translate(
+          'home.tutorials.common.functionbeatInstructions.install.linuxTextPre',
+          {
+            defaultMessage: 'First time using Functionbeat? See the [Quick Start]({link}).',
+            values: {
+              link: '{config.docs.beats.functionbeat}/functionbeat-installation-configuration.html',
+            },
+          }
+        ),
+        commands: [
+          'curl -L -O https://artifacts.elastic.co/downloads/beats/functionbeat/functionbeat-{config.kibana.version}-linux-x86_64.tar.gz',
+          'tar xzvf functionbeat-{config.kibana.version}-linux-x86_64.tar.gz',
+          'cd functionbeat-{config.kibana.version}-linux-x86_64/',
+        ],
+      },
+      WINDOWS: {
+        title: i18n.translate(
+          'home.tutorials.common.functionbeatInstructions.install.windowsTitle',
+          {
+            defaultMessage: 'Download and install Functionbeat',
+          }
+        ),
+        textPre: i18n.translate(
+          'home.tutorials.common.functionbeatInstructions.install.windowsTextPre',
+          {
+            defaultMessage:
+              'First time using Functionbeat? See the [Quick Start]({functionbeatLink}).\n\
  1. Download the Functionbeat Windows zip file from the [Download]({elasticLink}) page.\n\
  2. Extract the contents of the zip file into {folderPath}.\n\
  3. Rename the {directoryName} directory to `Functionbeat`.\n\
  4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select \
 **Run As Administrator**). If you are running Windows XP, you might need to download and install PowerShell.\n\
  5. From the PowerShell prompt, go to the Functionbeat directory:',
-          values: {
-            directoryName: '`functionbeat-{config.kibana.version}-windows`',
-            folderPath: '`C:\\Program Files`',
-            functionbeatLink:
-              '{config.docs.beats.functionbeat}/functionbeat-installation-configuration.html',
-            elasticLink: 'https://www.elastic.co/downloads/beats/functionbeat',
-          },
-        }
-      ),
-      commands: ['cd "C:\\Program Files\\Functionbeat"'],
+            values: {
+              directoryName: '`functionbeat-{config.kibana.version}-windows`',
+              folderPath: '`C:\\Program Files`',
+              functionbeatLink:
+                '{config.docs.beats.functionbeat}/functionbeat-installation-configuration.html',
+              elasticLink: 'https://www.elastic.co/downloads/beats/functionbeat',
+            },
+          }
+        ),
+        commands: ['cd "C:\\Program Files\\Functionbeat"'],
+      },
     },
-  },
-  DEPLOY: {
-    OSX_LINUX: {
-      title: i18n.translate('home.tutorials.common.functionbeatInstructions.deploy.osxTitle', {
-        defaultMessage: 'Deploy Functionbeat to AWS Lambda',
-      }),
-      textPre: i18n.translate('home.tutorials.common.functionbeatInstructions.deploy.osxTextPre', {
-        defaultMessage:
-          'This installs Functionbeat as a Lambda function.\
+    DEPLOY: {
+      OSX_LINUX: {
+        title: i18n.translate('home.tutorials.common.functionbeatInstructions.deploy.osxTitle', {
+          defaultMessage: 'Deploy Functionbeat to AWS Lambda',
+        }),
+        textPre: i18n.translate(
+          'home.tutorials.common.functionbeatInstructions.deploy.osxTextPre',
+          {
+            defaultMessage:
+              'This installs Functionbeat as a Lambda function.\
 The `setup` command checks the Elasticsearch configuration and loads the \
 Kibana index pattern. It is normally safe to omit this command.',
-      }),
-      commands: ['./functionbeat setup', './functionbeat deploy fn-cloudwatch-logs'],
-    },
-    WINDOWS: {
-      title: i18n.translate('home.tutorials.common.functionbeatInstructions.deploy.windowsTitle', {
-        defaultMessage: 'Deploy Functionbeat to AWS Lambda',
-      }),
-      textPre: i18n.translate(
-        'home.tutorials.common.functionbeatInstructions.deploy.windowsTextPre',
-        {
-          defaultMessage:
-            'This installs Functionbeat as a Lambda function.\
+          }
+        ),
+        commands: ['./functionbeat setup', './functionbeat deploy fn-cloudwatch-logs'],
+      },
+      WINDOWS: {
+        title: i18n.translate(
+          'home.tutorials.common.functionbeatInstructions.deploy.windowsTitle',
+          {
+            defaultMessage: 'Deploy Functionbeat to AWS Lambda',
+          }
+        ),
+        textPre: i18n.translate(
+          'home.tutorials.common.functionbeatInstructions.deploy.windowsTextPre',
+          {
+            defaultMessage:
+              'This installs Functionbeat as a Lambda function.\
 The `setup` command checks the Elasticsearch configuration and loads the \
 Kibana index pattern. It is normally safe to omit this command.',
-        }
-      ),
-      commands: ['.\\functionbeat.exe setup', '.\\functionbeat.exe deploy fn-cloudwatch-logs'],
+          }
+        ),
+        commands: ['.\\functionbeat.exe setup', '.\\functionbeat.exe deploy fn-cloudwatch-logs'],
+      },
     },
-  },
-  CONFIG: {
-    OSX_LINUX: {
-      title: i18n.translate('home.tutorials.common.functionbeatInstructions.config.osxTitle', {
-        defaultMessage: 'Configure the Elastic cluster',
-      }),
-      textPre: i18n.translate('home.tutorials.common.functionbeatInstructions.config.osxTextPre', {
-        defaultMessage: 'Modify {path} to set the connection information:',
-        values: {
-          path: '`functionbeat.yml`',
-        },
-      }),
-      commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
-        '  username: "elastic"',
-        '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
-        getSpaceIdForBeatsTutorial(context),
-      ],
-      textPost: i18n.translate(
-        'home.tutorials.common.functionbeatInstructions.config.osxTextPost',
-        {
-          defaultMessage:
-            'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
-          values: {
-            passwordTemplate: '`<password>`',
-            esUrlTemplate: '`<es_url>`',
-            kibanaUrlTemplate: '`<kibana_url>`',
-          },
-        }
-      ),
+    CONFIG: {
+      OSX_LINUX: {
+        title: i18n.translate('home.tutorials.common.functionbeatInstructions.config.osxTitle', {
+          defaultMessage: 'Configure the Elastic cluster',
+        }),
+        textPre: i18n.translate(
+          'home.tutorials.common.functionbeatInstructions.config.osxTextPre',
+          {
+            defaultMessage: 'Modify {path} to set the connection information:',
+            values: {
+              path: '`functionbeat.yml`',
+            },
+          }
+        ),
+        commands: [
+          'output.elasticsearch:',
+          '  hosts: ["<es_url>"]',
+          '  username: "elastic"',
+          '  password: "<password>"',
+          "  # If using Elasticsearch's default certificate",
+          '  ssl.ca_trusted_fingerprint: "<es cert fingerprint>"',
+          'setup.kibana:',
+          '  host: "<kibana_url>"',
+          getSpaceIdForBeatsTutorial(context),
+        ],
+        textPost: i18n.translate(
+          'home.tutorials.common.functionbeatInstructions.config.osxTextPostMarkdown',
+          {
+            defaultMessage:
+              'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of \
+              Elasticsearch, and {kibanaUrlTemplate} is the URL of Kibana. To [configure SSL]({configureSslUrl}) with the \
+              default certificate generated by Elasticsearch, add its fingerprint in {esCertFingerprintTemplate}.',
+            values: {
+              passwordTemplate: '`<password>`',
+              esUrlTemplate: '`<es_url>`',
+              kibanaUrlTemplate: '`<kibana_url>`',
+              configureSslUrl: SSL_DOC_URL,
+              esCertFingerprintTemplate: '`<es cert fingerprint>`',
+            },
+          }
+        ),
+      },
+      WINDOWS: {
+        title: i18n.translate(
+          'home.tutorials.common.functionbeatInstructions.config.windowsTitle',
+          {
+            defaultMessage: 'Edit the configuration',
+          }
+        ),
+        textPre: i18n.translate(
+          'home.tutorials.common.functionbeatInstructions.config.windowsTextPre',
+          {
+            defaultMessage: 'Modify {path} to set the connection information:',
+            values: {
+              path: '`C:\\Program Files\\Functionbeat\\functionbeat.yml`',
+            },
+          }
+        ),
+        commands: [
+          'output.elasticsearch:',
+          '  hosts: ["<es_url>"]',
+          '  username: "elastic"',
+          '  password: "<password>"',
+          "  # If using Elasticsearch's default certificate",
+          '  ssl.ca_trusted_fingerprint: "<es cert fingerprint>"',
+          'setup.kibana:',
+          '  host: "<kibana_url>"',
+          getSpaceIdForBeatsTutorial(context),
+        ],
+        textPost: i18n.translate(
+          'home.tutorials.common.functionbeatInstructions.config.windowsTextPostMarkdown',
+          {
+            defaultMessage:
+              'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of \
+              Elasticsearch, and {kibanaUrlTemplate} is the URL of Kibana. To [configure SSL]({configureSslUrl}) with the \
+              default certificate generated by Elasticsearch, add its fingerprint in {esCertFingerprintTemplate}.',
+            values: {
+              passwordTemplate: '`<password>`',
+              esUrlTemplate: '`<es_url>`',
+              kibanaUrlTemplate: '`<kibana_url>`',
+              configureSslUrl: SSL_DOC_URL,
+              esCertFingerprintTemplate: '`<es cert fingerprint>`',
+            },
+          }
+        ),
+      },
     },
-    WINDOWS: {
-      title: i18n.translate('home.tutorials.common.functionbeatInstructions.config.windowsTitle', {
-        defaultMessage: 'Edit the configuration',
-      }),
-      textPre: i18n.translate(
-        'home.tutorials.common.functionbeatInstructions.config.windowsTextPre',
-        {
-          defaultMessage: 'Modify {path} to set the connection information:',
-          values: {
-            path: '`C:\\Program Files\\Functionbeat\\functionbeat.yml`',
-          },
-        }
-      ),
-      commands: [
-        'output.elasticsearch:',
-        '  hosts: ["<es_url>"]',
-        '  username: "elastic"',
-        '  password: "<password>"',
-        'setup.kibana:',
-        '  host: "<kibana_url>"',
-        getSpaceIdForBeatsTutorial(context),
-      ],
-      textPost: i18n.translate(
-        'home.tutorials.common.functionbeatInstructions.config.windowsTextPost',
-        {
-          defaultMessage:
-            'Where {passwordTemplate} is the password of the `elastic` user, {esUrlTemplate} is the URL of Elasticsearch, \
-and {kibanaUrlTemplate} is the URL of Kibana.',
-          values: {
-            passwordTemplate: '`<password>`',
-            esUrlTemplate: '`<es_url>`',
-            kibanaUrlTemplate: '`<kibana_url>`',
-          },
-        }
-      ),
-    },
-  },
-});
+  };
+};
 
 export const createFunctionbeatCloudInstructions = () => ({
   CONFIG: {
@@ -336,7 +368,7 @@ export function functionbeatStatusCheck() {
   };
 }
 
-export function onPremInstructions(platforms: Platform[], context?: TutorialContext) {
+export function onPremInstructions(platforms: Platform[], context: TutorialContext) {
   const FUNCTIONBEAT_INSTRUCTIONS = createFunctionbeatInstructions(context);
 
   return {
@@ -386,10 +418,10 @@ export function onPremInstructions(platforms: Platform[], context?: TutorialCont
   };
 }
 
-export function onPremCloudInstructions() {
+export function onPremCloudInstructions(context: TutorialContext) {
   const TRYCLOUD_OPTION1 = createTrycloudOption1();
   const TRYCLOUD_OPTION2 = createTrycloudOption2();
-  const FUNCTIONBEAT_INSTRUCTIONS = createFunctionbeatInstructions();
+  const FUNCTIONBEAT_INSTRUCTIONS = createFunctionbeatInstructions(context);
 
   return {
     instructionSets: [
@@ -444,8 +476,8 @@ export function onPremCloudInstructions() {
   };
 }
 
-export function cloudInstructions() {
-  const FUNCTIONBEAT_INSTRUCTIONS = createFunctionbeatInstructions();
+export function cloudInstructions(context: TutorialContext) {
+  const FUNCTIONBEAT_INSTRUCTIONS = createFunctionbeatInstructions(context);
   const FUNCTIONBEAT_CLOUD_INSTRUCTIONS = createFunctionbeatCloudInstructions();
 
   return {

@@ -17,7 +17,7 @@ import { Tags } from './tags';
 import { Connector } from './connector';
 import * as i18n from './translations';
 import { SyncAlertsToggle } from './sync_alerts_toggle';
-import { ActionConnector } from '../../../common';
+import { ActionConnector } from '../../../common/api';
 
 interface ContainerProps {
   big?: boolean;
@@ -53,7 +53,6 @@ export const CreateCaseForm: React.FC<Props> = React.memo(
     withSteps = true,
   }) => {
     const { isSubmitting } = useFormContext();
-
     const firstStep = useMemo(
       () => ({
         title: i18n.STEP_ONE_TITLE,

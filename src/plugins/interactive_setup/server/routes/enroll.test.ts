@@ -13,7 +13,14 @@ import type { IRouter, RequestHandler, RequestHandlerContext, RouteConfig } from
 import { kibanaResponseFactory } from 'src/core/server';
 import { httpServerMock } from 'src/core/server/mocks';
 
-import { ElasticsearchConnectionStatus } from '../../common';
+import {
+  ElasticsearchConnectionStatus,
+  ERROR_ELASTICSEARCH_CONNECTION_CONFIGURED,
+  ERROR_ENROLL_FAILURE,
+  ERROR_KIBANA_CONFIG_FAILURE,
+  ERROR_KIBANA_CONFIG_NOT_WRITABLE,
+  ERROR_OUTSIDE_PREBOOT_STAGE,
+} from '../../common';
 import { interactiveSetupMock } from '../mocks';
 import { defineEnrollRoutes } from './enroll';
 import { routeDefinitionParamsMock } from './index.mock';
@@ -26,7 +33,7 @@ describe('Enroll routes', () => {
     mockRouteParams = routeDefinitionParamsMock.create();
     router = mockRouteParams.router;
 
-    mockContext = ({} as unknown) as RequestHandlerContext;
+    mockContext = {} as unknown as RequestHandlerContext;
 
     defineEnrollRoutes(mockRouteParams);
   });
@@ -95,18 +102,55 @@ describe('Enroll routes', () => {
       );
 
       expect(
-        bodySchema.validate(
-          bodySchema.validate({
-            apiKey: 'some-key',
-            hosts: ['https://localhost:9200'],
-            caFingerprint: 'a'.repeat(64),
-          })
-        )
-      ).toEqual({
-        apiKey: 'some-key',
-        hosts: ['https://localhost:9200'],
-        caFingerprint: 'a'.repeat(64),
+        bodySchema.validate({
+          apiKey: 'some-key',
+          hosts: ['https://localhost:9200'],
+          caFingerprint: 'a'.repeat(64),
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "apiKey": "some-key",
+          "caFingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "hosts": Array [
+            "https://localhost:9200",
+          ],
+        }
+      `);
+      expect(
+        bodySchema.validate({
+          apiKey: 'some-key',
+          hosts: ['https://localhost:9200'],
+          caFingerprint: 'a'.repeat(64),
+          code: '123456',
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "apiKey": "some-key",
+          "caFingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "code": "123456",
+          "hosts": Array [
+            "https://localhost:9200",
+          ],
+        }
+      `);
+    });
+
+    it('fails if verification code is invalid.', async () => {
+      mockRouteParams.verificationCode.verify.mockReturnValue(false);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        body: { apiKey: 'some-key', hosts: ['host1', 'host2'], caFingerprint: 'deadbeef' },
       });
+
+      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual(
+        expect.objectContaining({
+          status: 403,
+        })
+      );
+
+      expect(mockRouteParams.elasticsearch.enroll).not.toHaveBeenCalled();
+      expect(mockRouteParams.kibanaConfigWriter.writeConfig).not.toHaveBeenCalled();
+      expect(mockRouteParams.preboot.completeSetup).not.toHaveBeenCalled();
     });
 
     it('fails if setup is not on hold.', async () => {
@@ -116,11 +160,17 @@ describe('Enroll routes', () => {
         body: { apiKey: 'some-key', hosts: ['host1', 'host2'], caFingerprint: 'deadbeef' },
       });
 
-      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual({
-        status: 400,
-        options: { body: 'Cannot process request outside of preboot stage.' },
-        payload: 'Cannot process request outside of preboot stage.',
-      });
+      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual(
+        expect.objectContaining({
+          status: 400,
+          payload: {
+            attributes: {
+              type: ERROR_OUTSIDE_PREBOOT_STAGE,
+            },
+            message: 'Cannot process request outside of preboot stage.',
+          },
+        })
+      );
 
       expect(mockRouteParams.elasticsearch.enroll).not.toHaveBeenCalled();
       expect(mockRouteParams.kibanaConfigWriter.writeConfig).not.toHaveBeenCalled();
@@ -137,19 +187,15 @@ describe('Enroll routes', () => {
         body: { apiKey: 'some-key', hosts: ['host1', 'host2'], caFingerprint: 'deadbeef' },
       });
 
-      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual({
-        status: 400,
-        options: {
-          body: {
+      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual(
+        expect.objectContaining({
+          status: 400,
+          payload: {
             message: 'Elasticsearch connection is already configured.',
-            attributes: { type: 'elasticsearch_connection_configured' },
+            attributes: { type: ERROR_ELASTICSEARCH_CONNECTION_CONFIGURED },
           },
-        },
-        payload: {
-          message: 'Elasticsearch connection is already configured.',
-          attributes: { type: 'elasticsearch_connection_configured' },
-        },
-      });
+        })
+      );
 
       expect(mockRouteParams.elasticsearch.enroll).not.toHaveBeenCalled();
       expect(mockRouteParams.kibanaConfigWriter.writeConfig).not.toHaveBeenCalled();
@@ -167,20 +213,15 @@ describe('Enroll routes', () => {
         body: { apiKey: 'some-key', hosts: ['host1', 'host2'], caFingerprint: 'deadbeef' },
       });
 
-      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual({
-        status: 500,
-        options: {
-          body: {
+      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual(
+        expect.objectContaining({
+          status: 500,
+          payload: {
             message: 'Kibana process does not have enough permissions to write to config file.',
-            attributes: { type: 'kibana_config_not_writable' },
+            attributes: { type: ERROR_KIBANA_CONFIG_NOT_WRITABLE },
           },
-          statusCode: 500,
-        },
-        payload: {
-          message: 'Kibana process does not have enough permissions to write to config file.',
-          attributes: { type: 'kibana_config_not_writable' },
-        },
-      });
+        })
+      );
 
       expect(mockRouteParams.elasticsearch.enroll).not.toHaveBeenCalled();
       expect(mockRouteParams.kibanaConfigWriter.writeConfig).not.toHaveBeenCalled();
@@ -206,14 +247,12 @@ describe('Enroll routes', () => {
         body: { apiKey: 'some-key', hosts: ['host1', 'host2'], caFingerprint: 'deadbeef' },
       });
 
-      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual({
-        status: 500,
-        options: {
-          body: { message: 'Failed to enroll.', attributes: { type: 'enroll_failure' } },
-          statusCode: 500,
-        },
-        payload: { message: 'Failed to enroll.', attributes: { type: 'enroll_failure' } },
-      });
+      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual(
+        expect.objectContaining({
+          status: 500,
+          payload: { message: 'Failed to enroll.', attributes: { type: ERROR_ENROLL_FAILURE } },
+        })
+      );
 
       expect(mockRouteParams.elasticsearch.enroll).toHaveBeenCalledTimes(1);
       expect(mockRouteParams.kibanaConfigWriter.writeConfig).not.toHaveBeenCalled();
@@ -239,20 +278,15 @@ describe('Enroll routes', () => {
         body: { apiKey: 'some-key', hosts: ['host1', 'host2'], caFingerprint: 'deadbeef' },
       });
 
-      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual({
-        status: 500,
-        options: {
-          body: {
+      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual(
+        expect.objectContaining({
+          status: 500,
+          payload: {
             message: 'Failed to save configuration.',
-            attributes: { type: 'kibana_config_failure' },
+            attributes: { type: ERROR_KIBANA_CONFIG_FAILURE },
           },
-          statusCode: 500,
-        },
-        payload: {
-          message: 'Failed to save configuration.',
-          attributes: { type: 'kibana_config_failure' },
-        },
-      });
+        })
+      );
 
       expect(mockRouteParams.elasticsearch.enroll).toHaveBeenCalledTimes(1);
       expect(mockRouteParams.kibanaConfigWriter.writeConfig).toHaveBeenCalledTimes(1);
@@ -276,11 +310,12 @@ describe('Enroll routes', () => {
         body: { apiKey: 'some-key', hosts: ['host1', 'host2'], caFingerprint: 'deadbeef' },
       });
 
-      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual({
-        status: 204,
-        options: {},
-        payload: undefined,
-      });
+      await expect(routeHandler(mockContext, mockRequest, kibanaResponseFactory)).resolves.toEqual(
+        expect.objectContaining({
+          status: 204,
+          payload: undefined,
+        })
+      );
 
       expect(mockRouteParams.elasticsearch.enroll).toHaveBeenCalledTimes(1);
       expect(mockRouteParams.elasticsearch.enroll).toHaveBeenCalledWith({

@@ -24,9 +24,9 @@ describe('CustomLinkList', () => {
       url: 'http://elastic.co?service.name={{service.name}}',
     },
   ] as CustomLink[];
-  const transaction = ({
+  const transaction = {
     service: { name: 'foo.bar' },
-  } as unknown) as Transaction;
+  } as unknown as Transaction;
   it('shows links', () => {
     const component = render(
       <CustomLinkList customLinks={customLinks} transaction={transaction} />

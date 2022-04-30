@@ -7,6 +7,7 @@
 
 import { isEqual, uniqBy } from 'lodash';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
 import type {
   ExecutionContextSearch,
@@ -54,12 +55,23 @@ import {
 
 import { IndexPatternsContract } from '../../../../../src/plugins/data/public';
 import { getEditPath, DOC_TYPE, PLUGIN_ID } from '../../common';
-import { IBasePath } from '../../../../../src/core/public';
+import type { IBasePath, KibanaExecutionContext } from '../../../../../src/core/public';
 import { LensAttributeService } from '../lens_attribute_service';
 import type { ErrorMessage } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
+import { SharingSavedObjectProps } from '../types';
+import type { SpacesPluginStart } from '../../../spaces/public';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
+
+export interface LensUnwrapMetaInfo {
+  sharingSavedObjectProps?: SharingSavedObjectProps;
+}
+
+export interface LensUnwrapResult {
+  attributes: LensSavedObjectAttributes;
+  metaInfo?: LensUnwrapMetaInfo;
+}
 
 interface LensBaseEmbeddableInput extends EmbeddableInput {
   filters?: Filter[];
@@ -100,11 +112,13 @@ export interface LensEmbeddableDeps {
   getTriggerCompatibleActions?: UiActionsStart['getTriggerCompatibleActions'];
   capabilities: { canSaveVisualizations: boolean; canSaveDashboards: boolean };
   usageCollection?: UsageCollectionSetup;
+  spaces?: SpacesPluginStart;
 }
 
 export class Embeddable
   extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput>
-  implements ReferenceOrValueEmbeddable<LensByValueInput, LensByReferenceInput> {
+  implements ReferenceOrValueEmbeddable<LensByValueInput, LensByReferenceInput>
+{
   type = DOC_TYPE;
 
   deferEmbeddableLoad = true;
@@ -252,25 +266,51 @@ export class Embeddable
     return this.lensInspector.adapters;
   }
 
+  private maybeAddConflictError(
+    errors?: ErrorMessage[],
+    sharingSavedObjectProps?: SharingSavedObjectProps
+  ) {
+    const ret = [...(errors || [])];
+
+    if (sharingSavedObjectProps?.outcome === 'conflict' && !!this.deps.spaces) {
+      ret.push({
+        shortMessage: i18n.translate('xpack.lens.embeddable.legacyURLConflict.shortMessage', {
+          defaultMessage: `You've encountered a URL conflict`,
+        }),
+        longMessage: (
+          <this.deps.spaces.ui.components.getEmbeddableLegacyUrlConflict
+            targetType={DOC_TYPE}
+            sourceId={sharingSavedObjectProps.sourceId!}
+          />
+        ),
+      });
+    }
+
+    return ret?.length ? ret : undefined;
+  }
+
   async initializeSavedVis(input: LensEmbeddableInput) {
-    const attributes:
-      | LensSavedObjectAttributes
-      | false = await this.deps.attributeService.unwrapAttributes(input).catch((e: Error) => {
-      this.onFatalError(e);
-      return false;
-    });
-    if (!attributes || this.isDestroyed) {
+    const unwrapResult: LensUnwrapResult | false = await this.deps.attributeService
+      .unwrapAttributes(input)
+      .catch((e: Error) => {
+        this.onFatalError(e);
+        return false;
+      });
+    if (!unwrapResult || this.isDestroyed) {
       return;
     }
+
+    const { metaInfo, attributes } = unwrapResult;
+
     this.savedVis = {
       ...attributes,
       type: this.type,
       savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
     };
     const { ast, errors } = await this.deps.documentToExpression(this.savedVis);
-    this.errors = errors;
+    this.errors = this.maybeAddConflictError(errors, metaInfo?.sharingSavedObjectProps);
     this.expression = ast ? toExpression(ast) : null;
-    if (errors) {
+    if (this.errors) {
       this.logError('validation');
     }
     await this.initializeOutput();
@@ -324,14 +364,24 @@ export class Embeddable
       this.input.onLoad(true);
     }
 
-    const executionContext = {
+    this.domNode.setAttribute('data-shared-item', '');
+
+    this.renderComplete.dispatchInProgress();
+
+    const parentContext = this.input.executionContext;
+    const child: KibanaExecutionContext = {
       type: 'lens',
       name: this.savedVis.visualizationType ?? '',
       id: this.id,
       description: this.savedVis.title || this.input.title || '',
       url: this.output.editUrl,
-      parent: this.input.executionContext,
     };
+    const executionContext = parentContext
+      ? {
+          ...parentContext,
+          child,
+        }
+      : child;
 
     const input = this.getInput();
 
@@ -346,6 +396,7 @@ export class Embeddable
         searchSessionId={this.externalSearchContext.searchSessionId}
         handleEvent={this.handleEvent}
         onData$={this.updateActiveData}
+        interactive={!input.disableTriggers}
         renderMode={input.renderMode}
         syncColors={input.syncColors}
         hasCompatibleActions={this.hasCompatibleActions}
@@ -439,7 +490,7 @@ export class Embeddable
         true
       );
       if (this.input.onTableRowClick) {
-        this.input.onTableRowClick((event.data as unknown) as LensTableRowContextMenuEvent['data']);
+        this.input.onTableRowClick(event.data as unknown as LensTableRowContextMenuEvent['data']);
       }
     }
   };
@@ -505,16 +556,14 @@ export class Embeddable
   };
 
   public getInputAsRefType = async (): Promise<LensByReferenceInput> => {
-    const input = this.deps.attributeService.getExplicitInputFromEmbeddable(this);
-    return this.deps.attributeService.getInputAsRefType(input, {
+    return this.deps.attributeService.getInputAsRefType(this.getExplicitInput(), {
       showSaveModal: true,
       saveModalTitle: this.getTitle(),
     });
   };
 
   public getInputAsValueType = async (): Promise<LensByValueInput> => {
-    const input = this.deps.attributeService.getExplicitInputFromEmbeddable(this);
-    return this.deps.attributeService.getInputAsValueType(input);
+    return this.deps.attributeService.getInputAsValueType(this.getExplicitInput());
   };
 
   // same API as Visualize

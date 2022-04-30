@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
 
-      expect(response.body).to.eql({
+      expect(response).to.eql({
         foo: {
           all: { created: true },
           read: { created: true },
@@ -62,7 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
 
-      expect(updateResponse.body).to.eql({
+      expect(updateResponse).to.eql({
         foo: {
           other: { created: true },
           read: { created: false },
@@ -70,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       const retrievedPrivilege = await es.security.getPrivileges({ application });
-      expect(retrievedPrivilege.body).to.eql({
+      expect(retrievedPrivilege).to.eql({
         foo: {
           // "all" is maintained even though the subsequent update did not specify this privilege
           all: {

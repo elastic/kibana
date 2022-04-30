@@ -16,6 +16,7 @@ import React, {
   useRef,
   FunctionComponent,
 } from 'react';
+import { renderToString } from 'react-dom/server';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
@@ -107,8 +108,10 @@ const defaultParams: Params = {
   format: null,
 };
 
-export const defaultValueFormatter = (value: unknown) =>
-  `<span>${typeof value === 'object' ? JSON.stringify(value) : value ?? '-'}</span>`;
+export const defaultValueFormatter = (value: unknown) => {
+  const content = typeof value === 'object' ? JSON.stringify(value) : value ?? '-';
+  return renderToString(<>{content}</>);
+};
 
 export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   const previewCount = useRef(0);
@@ -159,12 +162,11 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   const [pinnedFields, setPinnedFields] = useState<{ [key: string]: boolean }>({});
 
   const { documents, currentIdx } = clusterData;
-  const currentDocument: EsDocument | undefined = useMemo(() => documents[currentIdx], [
-    documents,
-    currentIdx,
-  ]);
+  const currentDocument: EsDocument | undefined = useMemo(
+    () => documents[currentIdx],
+    [documents, currentIdx]
+  );
 
-  const currentDocIndex = currentDocument?._index;
   const currentDocId: string = currentDocument?._id ?? '';
   const totalDocs = documents.length;
   const { name, document, script, format, type } = params;
@@ -180,9 +182,9 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
       return false;
     }
 
-    const allParamsDefined = (['type', 'script', 'index', 'document'] as Array<
-      keyof Params
-    >).every((key) => Boolean(params[key]));
+    const allParamsDefined = (['type', 'script', 'index', 'document'] as Array<keyof Params>).every(
+      (key) => Boolean(params[key])
+    );
 
     if (!allParamsDefined) {
       return false;
@@ -331,10 +333,11 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
     const currentApiCall = ++previewCount.current;
 
     const response = await getFieldPreview({
-      index: currentDocIndex,
+      index: indexPattern.title,
       document: params.document!,
       context: `${params.type!}_field` as FieldPreviewContext,
       script: params.script!,
+      documentId: currentDocId,
     });
 
     if (currentApiCall !== previewCount.current) {
@@ -382,11 +385,11 @@ export const FieldPreviewProvider: FunctionComponent = ({ children }) => {
   }, [
     needToUpdatePreview,
     params,
-    currentDocIndex,
     currentDocId,
     getFieldPreview,
     notifications.toasts,
     valueFormatter,
+    indexPattern.title,
   ]);
 
   const goToNextDoc = useCallback(() => {

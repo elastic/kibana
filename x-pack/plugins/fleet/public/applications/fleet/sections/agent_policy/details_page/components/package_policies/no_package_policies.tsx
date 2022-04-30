@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
 import { useCapabilities, useStartServices } from '../../../../../hooks';
@@ -39,7 +39,7 @@ export const NoPackagePolicies = memo<{ policyId: string }>(({ policyId }) => {
           fill
           onClick={() =>
             application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
-              path: pagePathGetters.integrations_all()[1],
+              path: pagePathGetters.integrations_all({})[1],
               state: { forAgentPolicyId: policyId },
             })
           }

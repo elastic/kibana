@@ -25,15 +25,27 @@ export { runTests, startServers } from './functional_tests/tasks';
 // @internal
 export { KIBANA_ROOT } from './functional_tests/lib/paths';
 
-export {
-  esTestConfig,
-  createTestEsCluster,
+export type {
   CreateTestEsClusterOptions,
   EsTestCluster,
   ICluster,
+  EsClientForTestingOptions,
+} from './es';
+export {
+  esTestConfig,
+  createTestEsCluster,
+  convertToKibanaClient,
+  createEsClientForTesting,
+  createEsClientForFtrConfig,
 } from './es';
 
-export { kbnTestConfig, kibanaServerTestUser, kibanaTestUser, adminTestUser } from './kbn';
+export {
+  kbnTestConfig,
+  kibanaServerTestUser,
+  kibanaTestUser,
+  adminTestUser,
+  systemIndicesSuperuser,
+} from './kbn';
 
 export { readConfigFile } from './functional_test_runner/lib/config/read_config_file';
 

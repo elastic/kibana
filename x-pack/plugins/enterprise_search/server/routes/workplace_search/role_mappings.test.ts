@@ -15,14 +15,14 @@ import {
 } from './role_mappings';
 
 describe('role mappings routes', () => {
-  describe('POST /api/workplace_search/org/role_mappings/enable_role_based_access', () => {
+  describe('POST /internal/workplace_search/org/role_mappings/enable_role_based_access', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/workplace_search/org/role_mappings/enable_role_based_access',
+        path: '/internal/workplace_search/org/role_mappings/enable_role_based_access',
       });
 
       registerOrgEnableRoleMappingsRoute({
@@ -38,14 +38,14 @@ describe('role mappings routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/org/role_mappings', () => {
+  describe('GET /internal/workplace_search/org/role_mappings', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/org/role_mappings',
+        path: '/internal/workplace_search/org/role_mappings',
       });
 
       registerOrgRoleMappingsRoute({
@@ -61,14 +61,14 @@ describe('role mappings routes', () => {
     });
   });
 
-  describe('POST /api/workplace_search/org/role_mappings', () => {
+  describe('POST /internal/workplace_search/org/role_mappings', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/workplace_search/org/role_mappings',
+        path: '/internal/workplace_search/org/role_mappings',
       });
 
       registerOrgRoleMappingsRoute({
@@ -84,14 +84,14 @@ describe('role mappings routes', () => {
     });
   });
 
-  describe('PUT /api/workplace_search/org/role_mappings/{id}', () => {
+  describe('PUT /internal/workplace_search/org/role_mappings/{id}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path: '/api/workplace_search/org/role_mappings/{id}',
+        path: '/internal/workplace_search/org/role_mappings/{id}',
       });
 
       registerOrgRoleMappingRoute({
@@ -107,14 +107,14 @@ describe('role mappings routes', () => {
     });
   });
 
-  describe('DELETE /api/workplace_search/org/role_mappings/{id}', () => {
+  describe('DELETE /internal/workplace_search/org/role_mappings/{id}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'delete',
-        path: '/api/workplace_search/org/role_mappings/{id}',
+        path: '/internal/workplace_search/org/role_mappings/{id}',
       });
 
       registerOrgRoleMappingRoute({
@@ -130,14 +130,14 @@ describe('role mappings routes', () => {
     });
   });
 
-  describe('POST /api/workplace_search/org/single_user_role_mapping', () => {
+  describe('POST /internal/workplace_search/org/single_user_role_mapping', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/workplace_search/org/single_user_role_mapping',
+        path: '/internal/workplace_search/org/single_user_role_mapping',
       });
 
       registerOrgUserRoute({

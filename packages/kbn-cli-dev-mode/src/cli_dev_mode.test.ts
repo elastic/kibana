@@ -8,11 +8,9 @@
 
 import Path from 'path';
 import * as Rx from 'rxjs';
-import {
-  REPO_ROOT,
-  createAbsolutePathSerializer,
-  createAnyInstanceSerializer,
-} from '@kbn/dev-utils';
+import { createAbsolutePathSerializer, createAnyInstanceSerializer } from '@kbn/dev-utils';
+
+import { REPO_ROOT } from '@kbn/utils';
 
 import { TestLog } from './log';
 import { CliDevMode, SomeCliArgs } from './cli_dev_mode';
@@ -74,7 +72,6 @@ const createCliArgs = (parts: Partial<SomeCliArgs> = {}): SomeCliArgs => ({
   runExamples: false,
   watch: true,
   silent: false,
-  quiet: false,
   ...parts,
 });
 

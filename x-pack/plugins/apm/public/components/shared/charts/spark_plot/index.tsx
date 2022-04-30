@@ -40,6 +40,8 @@ function hasValidTimeseries(
   return !!series?.some((point) => point.y !== null);
 }
 
+const flexGroupStyle = { overflow: 'hidden' };
+
 export function SparkPlot({
   color,
   series,
@@ -80,11 +82,15 @@ export function SparkPlot({
 
   return (
     <EuiFlexGroup
-      justifyContent="spaceBetween"
+      justifyContent="flexEnd"
       gutterSize="xs"
       responsive={false}
       alignItems="flexEnd"
+      style={flexGroupStyle}
     >
+      <EuiFlexItem grow={false} style={{ whiteSpace: 'nowrap' }}>
+        {valueLabel}
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {hasValidTimeseries(series) ? (
           <Chart size={chartSize}>
@@ -100,6 +106,7 @@ export function SparkPlot({
               xAccessor={'x'}
               yAccessors={['y']}
               data={series}
+              timeZone="local"
               color={colorValue}
               curve={CurveType.CURVE_MONOTONE_X}
             />
@@ -111,6 +118,7 @@ export function SparkPlot({
                 xAccessor={'x'}
                 yAccessors={['y']}
                 data={comparisonSeries}
+                timeZone="local"
                 color={theme.eui.euiColorLightestShade}
                 curve={CurveType.CURVE_MONOTONE_X}
               />
@@ -128,9 +136,6 @@ export function SparkPlot({
             <EuiIcon type="visLine" color={theme.eui.euiColorMediumShade} />
           </div>
         )}
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ whiteSpace: 'nowrap' }}>
-        {valueLabel}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

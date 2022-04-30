@@ -10,17 +10,6 @@
   position: relative;
   transition: transform $euiAnimSpeedNormal ease-in-out, background $euiAnimSpeedNormal ease-in-out;
 
-  @include kbnThemeStyle($theme: 'v7') {
-    // Overrides the .euiPanel default border
-    // sass-lint:disable-block no-important
-    border: none !important;
-
-    // Overrides the .euiPanel--hasShadow
-    &.euiPanel.euiPanel--hasShadow {
-      @include euiBottomShadowLarge;
-    }
-  }
-
   .euiButtonIcon:not(.euiButtonIcon--fill) {
     color: $euiTextColor !important;
   }

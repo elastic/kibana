@@ -49,27 +49,11 @@ describe('getGlyphUrl', () => {
       });
     });
 
-    describe('EMS proxy enabled', () => {
-      beforeAll(() => {
-        require('./kibana_services').getEMSSettings = () => {
-          return {
-            ...MOCK_EMS_SETTINGS,
-            isProxyElasticMapsServiceInMaps: () => true,
-          };
-        };
-      });
-
-      test('should return proxied EMS fonts URL', async () => {
-        expect(getGlyphUrl()).toBe('http://localhost/api/maps/ems/tiles/fonts/{fontstack}/{range}');
-      });
-    });
-
     describe('EMS proxy disabled', () => {
       beforeAll(() => {
         require('./kibana_services').getEMSSettings = () => {
           return {
             ...MOCK_EMS_SETTINGS,
-            isProxyElasticMapsServiceInMaps: () => false,
           };
         };
       });

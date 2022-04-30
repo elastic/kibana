@@ -164,7 +164,6 @@ exports[`<CodeEditor /> is rendered 1`] = `
     >
       <span
         className="euiToolTipAnchor euiToolTipAnchor--displayBlock"
-        onKeyUp={[Function]}
         onMouseOut={[Function]}
         onMouseOver={[Function]}
       >
@@ -200,6 +199,7 @@ exports[`<CodeEditor /> is rendered 1`] = `
           "renderLineHighlight": "none",
           "scrollBeyondLastLine": false,
           "scrollbar": Object {
+            "alwaysConsumeMouseWheel": false,
             "useShadows": false,
           },
           "wordBasedSuggestions": false,

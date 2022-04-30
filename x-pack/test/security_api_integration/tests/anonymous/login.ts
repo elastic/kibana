@@ -33,9 +33,9 @@ export default function ({ getService }: FtrProviderContext) {
     expect(cookie.maxAge).to.be(0);
   }
 
-  const isElasticsearchAnonymousAccessEnabled = (config.get(
-    'esTestCluster.serverArgs'
-  ) as string[]).some((setting) => setting.startsWith('xpack.security.authc.anonymous'));
+  const isElasticsearchAnonymousAccessEnabled = (
+    config.get('esTestCluster.serverArgs') as string[]
+  ).some((setting) => setting.startsWith('xpack.security.authc.anonymous'));
 
   describe('Anonymous authentication', () => {
     if (!isElasticsearchAnonymousAccessEnabled) {

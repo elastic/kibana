@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, EuiIconTip } from '@elastic/eui';
 import { SortOrder } from './helpers';
 import { DocViewTableScoreSortWarning } from './score_sort_warning';
 
@@ -18,6 +18,8 @@ interface Props {
   displayName?: string;
   isRemoveable: boolean;
   isSortable: boolean;
+  isTimeColumn: boolean;
+  customLabel?: string;
   name: string;
   onChangeSortOrder?: (sortOrder: SortOrder[]) => void;
   onMoveColumn?: (name: string, idx: number) => void;
@@ -54,6 +56,8 @@ export function TableHeaderColumn({
   displayName,
   isRemoveable,
   isSortable,
+  isTimeColumn,
+  customLabel,
   name,
   onChangeSortOrder,
   onMoveColumn,
@@ -64,6 +68,14 @@ export function TableHeaderColumn({
   const curSortWithoutCol = sortOrder.filter((pair) => pair[0] !== name);
   const curColSort = sortOrder.find((pair) => pair[0] === name);
   const curColSortDir = (curColSort && curColSort[1]) || '';
+
+  const timeAriaLabel = i18n.translate(
+    'discover.docTable.tableHeader.timeFieldIconTooltipAriaLabel',
+    { defaultMessage: 'Primary time field.' }
+  );
+  const timeTooltip = i18n.translate('discover.docTable.tableHeader.timeFieldIconTooltip', {
+    defaultMessage: 'This field represents the time that events occurred.',
+  });
 
   // If this is the _score column, and _score is not one of the columns inside the sort, show a
   // warning that the _score will not be retrieved from Elasticsearch
@@ -183,7 +195,15 @@ export function TableHeaderColumn({
     <th data-test-subj="docTableHeaderField">
       <span data-test-subj={`docTableHeader-${name}`} className="kbnDocTableHeader__actions">
         {showScoreSortWarning && <DocViewTableScoreSortWarning />}
-        {displayName}
+        {customLabel ?? displayName}
+        {isTimeColumn && (
+          <EuiIconTip
+            key="time-icon"
+            type="clock"
+            aria-label={timeAriaLabel}
+            content={timeTooltip}
+          />
+        )}
         {buttons
           .filter((button) => button.active)
           .map((button, idx) => (

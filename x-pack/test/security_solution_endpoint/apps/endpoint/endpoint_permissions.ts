@@ -20,8 +20,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const endpointTestResources = getService('endpointTestResources');
   const policyTestResources = getService('policyTestResources');
 
-  // failing ES promotion: https://github.com/elastic/kibana/issues/110309
-  describe.skip('Endpoint permissions:', () => {
+  describe('Endpoint permissions:', () => {
     let indexedData: IndexedHostsAndAlertsResponse;
 
     before(async () => {
@@ -51,6 +50,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         after(async () => {
           // Log the user back out
+          // NOTE: Logout needs to happen before anything else to avoid flaky behavior
           await PageObjects.security.forceLogout();
 
           // delete role/user

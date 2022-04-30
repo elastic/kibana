@@ -27,7 +27,6 @@ import {
   SORT_RULES_BTN,
   EXPORT_ACTION_BTN,
   EDIT_RULE_ACTION_BTN,
-  NEXT_BTN,
   RULE_AUTO_REFRESH_IDLE_MODAL,
   RULE_AUTO_REFRESH_IDLE_MODAL_CONTINUE,
   rowsPerPageSelector,
@@ -41,10 +40,16 @@ import {
   RULES_DELETE_CONFIRMATION_MODAL,
   ACTIVATE_RULE_BULK_BTN,
   DEACTIVATE_RULE_BULK_BTN,
-  EXPORT_RULE_BULK_BTN,
   RULE_DETAILS_DELETE_BTN,
+  RULE_IMPORT_MODAL_BUTTON,
+  RULE_IMPORT_MODAL,
+  INPUT_FILE,
+  TOASTER,
+  RULE_IMPORT_OVERWRITE_CHECKBOX,
+  RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX,
 } from '../screens/alerts_detection_rules';
-import { ALL_ACTIONS, DELETE_RULE } from '../screens/rule_details';
+import { ALL_ACTIONS } from '../screens/rule_details';
+import { LOADING_INDICATOR } from '../screens/security_header';
 
 export const activateRule = (rulePosition: number) => {
   cy.get(RULE_SWITCH).eq(rulePosition).click({ force: true });
@@ -71,15 +76,13 @@ export const duplicateFirstRule = () => {
  * flake.
  */
 export const duplicateRuleFromMenu = () => {
-  cy.get(ALL_ACTIONS).should('be.visible');
-  cy.root()
-    .pipe(($el) => {
-      $el.find(ALL_ACTIONS).trigger('click');
-      return $el.find(DUPLICATE_RULE_MENU_PANEL_BTN);
-    })
-    .should(($el) => expect($el).to.be.visible);
+  const click = ($el: Cypress.ObjectLike) => cy.wrap($el).click({ force: true });
+  cy.get(LOADING_INDICATOR).should('not.exist');
+  cy.get(ALL_ACTIONS).pipe(click);
+  cy.get(DUPLICATE_RULE_MENU_PANEL_BTN).should('be.visible');
+
   // Because of a fade effect and fast clicking this can produce more than one click
-  cy.get(DUPLICATE_RULE_MENU_PANEL_BTN).pipe(($el) => $el.trigger('click'));
+  cy.get(DUPLICATE_RULE_MENU_PANEL_BTN).pipe(click);
 };
 
 /**
@@ -96,11 +99,6 @@ export const checkDuplicatedRule = () => {
 export const deleteFirstRule = () => {
   cy.get(COLLAPSED_ACTION_BTN).first().click({ force: true });
   cy.get(DELETE_RULE_ACTION_BTN).click();
-};
-
-export const deleteRule = () => {
-  cy.get(ALL_ACTIONS).click();
-  cy.get(DELETE_RULE).click();
 };
 
 export const deleteSelectedRules = () => {
@@ -138,11 +136,6 @@ export const deactivateSelectedRules = () => {
   cy.get(DEACTIVATE_RULE_BULK_BTN).click();
 };
 
-export const exportSelectedRules = () => {
-  cy.get(BULK_ACTIONS_BTN).click({ force: true });
-  cy.get(EXPORT_RULE_BULK_BTN).click();
-};
-
 export const exportFirstRule = () => {
   cy.get(COLLAPSED_ACTION_BTN).first().click({ force: true });
   cy.get(EXPORT_ACTION_BTN).click();
@@ -160,6 +153,10 @@ export const goToCreateNewRule = () => {
 
 export const goToRuleDetails = () => {
   cy.get(RULE_NAME).first().click({ force: true });
+};
+
+export const goToTheRuleDetailsOf = (ruleName: string) => {
+  cy.get(RULE_NAME).contains(ruleName).click();
 };
 
 export const loadPrebuiltDetectionRules = () => {
@@ -213,11 +210,6 @@ export const waitForRulesTableToBeLoaded = () => {
 export const waitForRulesTableToBeRefreshed = () => {
   cy.get(RULES_TABLE_REFRESH_INDICATOR).should('exist');
   cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
-};
-
-export const waitForRulesTableToBeAutoRefreshed = () => {
-  cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('exist');
-  cy.get(RULES_TABLE_AUTOREFRESH_INDICATOR).should('not.exist');
 };
 
 export const waitForPrebuiltDetectionRulesToBeLoaded = () => {
@@ -275,8 +267,50 @@ export const goToPage = (pageNumber: number) => {
   waitForRulesTableToBeRefreshed();
 };
 
-export const goToNextPage = () => {
-  cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
-  cy.get(NEXT_BTN).click({ force: true });
-  waitForRulesTableToBeRefreshed();
+export const importRules = (rulesFile: string) => {
+  cy.get(RULE_IMPORT_MODAL).click();
+  cy.get(INPUT_FILE).should('exist');
+  cy.get(INPUT_FILE).trigger('click', { force: true }).attachFile(rulesFile).trigger('change');
+  cy.get(RULE_IMPORT_MODAL_BUTTON).last().click({ force: true });
+  cy.get(INPUT_FILE).should('not.exist');
+};
+
+export const getRulesImportExportToast = (headers: string[]) => {
+  cy.get(TOASTER)
+    .should('exist')
+    .then(($els) => {
+      const arrayOfText = Cypress.$.makeArray($els).map((el) => el.innerText);
+
+      return headers.reduce((areAllIncluded, header) => {
+        const isContained = arrayOfText.includes(header);
+        if (!areAllIncluded) {
+          return false;
+        } else {
+          return isContained;
+        }
+      }, true);
+    })
+    .should('be.true');
+};
+
+export const selectOverwriteRulesImport = () => {
+  cy.get(RULE_IMPORT_OVERWRITE_CHECKBOX)
+    .pipe(($el) => $el.trigger('click'))
+    .should('be.checked');
+};
+
+export const selectOverwriteExceptionsRulesImport = () => {
+  cy.get(RULE_IMPORT_OVERWRITE_EXCEPTIONS_CHECKBOX)
+    .pipe(($el) => $el.trigger('click'))
+    .should('be.checked');
+};
+
+export const importRulesWithOverwriteAll = (rulesFile: string) => {
+  cy.get(RULE_IMPORT_MODAL).click();
+  cy.get(INPUT_FILE).should('exist');
+  cy.get(INPUT_FILE).trigger('click', { force: true }).attachFile(rulesFile).trigger('change');
+  selectOverwriteRulesImport();
+  selectOverwriteExceptionsRulesImport();
+  cy.get(RULE_IMPORT_MODAL_BUTTON).last().click({ force: true });
+  cy.get(INPUT_FILE).should('not.exist');
 };

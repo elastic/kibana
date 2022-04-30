@@ -11,7 +11,7 @@ import React from 'react';
 import { History } from 'history';
 import { Provider } from 'react-redux';
 import { first } from 'rxjs/operators';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { parse, ParsedQuery } from 'query-string';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Switch, Route, RouteComponentProps, HashRouter, Redirect } from 'react-router-dom';
@@ -84,6 +84,7 @@ export async function mountApp({
     savedObjectsTaggingOss,
     visualizations,
     presentationUtil,
+    screenshotMode,
   } = pluginsStart;
 
   const activeSpaceId =
@@ -108,13 +109,14 @@ export async function mountApp({
     embeddable: embeddableStart,
     uiSettings: coreStart.uiSettings,
     scopedHistory: () => scopedHistory,
+    screenshotModeService: screenshotMode,
     indexPatterns: dataStart.indexPatterns,
     savedQueryService: dataStart.query.savedQueries,
     savedObjectsClient: coreStart.savedObjects.client,
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
     savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
-    allowByValueEmbeddables: initializerContext.config.get<DashboardFeatureFlagConfig>()
-      .allowByValueEmbeddables,
+    allowByValueEmbeddables:
+      initializerContext.config.get<DashboardFeatureFlagConfig>().allowByValueEmbeddables,
     dashboardCapabilities: {
       show: Boolean(coreStart.application.capabilities.dashboard.show),
       saveQuery: Boolean(coreStart.application.capabilities.dashboard.saveQuery),
@@ -129,6 +131,7 @@ export async function mountApp({
       core.notifications.toasts,
       activeSpaceId || 'default'
     ),
+    spacesService: spacesApi,
   };
 
   const getUrlStateStorage = (history: RouteComponentProps['history']) =>

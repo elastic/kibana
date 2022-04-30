@@ -7,10 +7,11 @@
 
 import expect from '@kbn/expect';
 import nodeDetailFixture from './fixtures/node_detail';
+import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const { setup, tearDown } = getLifecycleMethods(getService);
 
   describe('node detail mb', function () {
     // TODO: https://github.com/elastic/stack-monitoring/issues/31
@@ -24,11 +25,11 @@ export default function ({ getService }) {
     };
 
     before('load archive', () => {
-      return esArchiver.load(archive);
+      return setup(archive);
     });
 
     after('unload archive', () => {
-      return esArchiver.unload(archive);
+      return tearDown();
     });
 
     it('should summarize node with metrics', async () => {

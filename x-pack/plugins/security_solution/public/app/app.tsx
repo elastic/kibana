@@ -11,6 +11,7 @@ import { Store, Action } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { EuiErrorBoundary } from '@elastic/eui';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { AppLeaveHandler, AppMountParameters } from '../../../../../src/core/public';
 
 import { ManageUserInfo } from '../detections/components/user_info';
@@ -24,7 +25,7 @@ import { State } from '../common/store';
 import { StartServices } from '../types';
 import { PageRouter } from './routes';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
-import { UserPrivilegesProvider } from '../common/components/user_privileges';
+import { UserPrivilegesProvider } from '../common/components/user_privileges/user_privileges_context';
 
 interface StartAppComponent {
   children: React.ReactNode;
@@ -33,6 +34,8 @@ interface StartAppComponent {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   store: Store<State, Action>;
 }
+
+const queryClient = new QueryClient();
 
 const StartAppComponent: FC<StartAppComponent> = ({
   children,
@@ -56,13 +59,15 @@ const StartAppComponent: FC<StartAppComponent> = ({
               <MlCapabilitiesProvider>
                 <UserPrivilegesProvider kibanaCapabilities={capabilities}>
                   <ManageUserInfo>
-                    <PageRouter
-                      history={history}
-                      onAppLeave={onAppLeave}
-                      setHeaderActionMenu={setHeaderActionMenu}
-                    >
-                      {children}
-                    </PageRouter>
+                    <QueryClientProvider client={queryClient}>
+                      <PageRouter
+                        history={history}
+                        onAppLeave={onAppLeave}
+                        setHeaderActionMenu={setHeaderActionMenu}
+                      >
+                        {children}
+                      </PageRouter>
+                    </QueryClientProvider>
                   </ManageUserInfo>
                 </UserPrivilegesProvider>
               </MlCapabilitiesProvider>

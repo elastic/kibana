@@ -19,9 +19,10 @@ const StyledEuiBetaBadge = styled(EuiBetaBadge)`
 
 StyledEuiBetaBadge.displayName = 'StyledEuiBetaBadge';
 
-const Badge = (styled(EuiBadge)`
+const Badge = styled(EuiBadge)`
   letter-spacing: 0;
-` as unknown) as typeof EuiBadge;
+  margin-left: 10px;
+` as unknown as typeof EuiBadge;
 Badge.displayName = 'Badge';
 
 const Header = styled.h1`

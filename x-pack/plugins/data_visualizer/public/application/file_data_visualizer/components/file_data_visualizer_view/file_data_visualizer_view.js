@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
@@ -295,12 +295,7 @@ export class FileDataVisualizerView extends Component {
       <div>
         {mode === MODE.READ && (
           <>
-            {!loading && !loaded && (
-              <AboutPanel
-                onFilePickerChange={this.onFilePickerChange}
-                disabled={!fileCouldNotBeReadPermissionError}
-              />
-            )}
+            {!loading && !loaded && <AboutPanel onFilePickerChange={this.onFilePickerChange} />}
 
             {loading && <LoadingPanel />}
 
@@ -373,6 +368,7 @@ export class FileDataVisualizerView extends Component {
               savedObjectsClient={this.savedObjectsClient}
               fileUpload={this.props.fileUpload}
               resultsLinks={this.props.resultsLinks}
+              capabilities={this.props.capabilities}
             />
 
             {bottomBarVisible && (

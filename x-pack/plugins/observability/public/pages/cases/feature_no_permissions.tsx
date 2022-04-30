@@ -29,7 +29,7 @@ export const CaseFeatureNoPermissions = React.memo(() => {
     <EmptyPage
       actions={actions}
       message={i18n.CASES_FEATURE_NO_PERMISSIONS_MSG}
-      data-test-subj="no_feature_permissions"
+      data-test-subj="noFeaturePermissions"
       title={i18n.CASES_FEATURE_NO_PERMISSIONS_TITLE}
     />
   );

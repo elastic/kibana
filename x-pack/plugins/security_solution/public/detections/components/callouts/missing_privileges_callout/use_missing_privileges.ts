@@ -40,14 +40,18 @@ export interface MissingPrivileges {
 }
 
 export const useMissingPrivileges = (): MissingPrivileges => {
-  const { listPrivileges } = useUserPrivileges();
+  const { detectionEnginePrivileges, listPrivileges } = useUserPrivileges();
   const [{ canUserCRUD }] = useUserData();
 
   return useMemo<MissingPrivileges>(() => {
     const featurePrivileges: MissingFeaturePrivileges[] = [];
     const indexPrivileges: MissingIndexPrivileges[] = [];
 
-    if (canUserCRUD == null || listPrivileges.result == null) {
+    if (
+      canUserCRUD == null ||
+      listPrivileges.result == null ||
+      detectionEnginePrivileges.result == null
+    ) {
       /**
        * Do not check privileges till we get all the data. That helps to reduce
        * subsequent layout shift while loading and skip unneeded re-renders.
@@ -72,9 +76,16 @@ export const useMissingPrivileges = (): MissingPrivileges => {
       indexPrivileges.push(missingListsPrivileges);
     }
 
+    const missingDetectionPrivileges = getMissingIndexPrivileges(
+      detectionEnginePrivileges.result.index
+    );
+    if (missingDetectionPrivileges) {
+      indexPrivileges.push(missingDetectionPrivileges);
+    }
+
     return {
       featurePrivileges,
       indexPrivileges,
     };
-  }, [canUserCRUD, listPrivileges]);
+  }, [canUserCRUD, listPrivileges, detectionEnginePrivileges]);
 };

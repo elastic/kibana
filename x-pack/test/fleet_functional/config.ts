@@ -29,10 +29,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     kbnTestServer: {
       ...xpackFunctionalConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.fleet.enabled=true',
-      ],
+      serverArgs: [...xpackFunctionalConfig.get('kbnTestServer.serverArgs')],
     },
     layout: {
       fixedHeaderHeight: 200,

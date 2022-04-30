@@ -5,35 +5,56 @@
  * 2.0.
  */
 
-import { buildCommonReasonMessage } from './reason_formatters';
-import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
+import { buildReasonMessageUtil } from './reason_formatters';
 import { SignalSourceHit } from './types';
 
 describe('reason_formatter', () => {
-  let rule: RulesSchema;
+  let name: string;
+  let severity: string;
   let mergedDoc: SignalSourceHit;
   beforeAll(() => {
-    rule = {
-      name: 'What is in a name',
-      risk_score: 9000,
-      severity: 'medium',
-    } as RulesSchema; // Cast here as all fields aren't required
+    name = 'my-rule';
+    severity = 'medium';
     mergedDoc = {
-      _index: 'some-index',
-      _id: 'some-id',
+      _index: 'index-1',
+      _id: 'id-1',
       fields: {
-        'host.name': ['party host'],
-        'user.name': ['ferris bueller'],
+        'destination.address': ['9.99.99.9'],
+        'destination.port': ['6789'],
+        'event.category': ['test'],
+        'file.name': ['sample'],
+        'host.name': ['host'],
+        'process.name': ['doingThings.exe'],
+        'process.parent.name': ['didThings.exe'],
+        'source.address': ['1.11.11.1'],
+        'source.port': ['1234'],
+        'user.name': ['test-user'],
         '@timestamp': '2021-08-11T02:28:59.101Z',
       },
     };
   });
 
-  describe('buildCommonReasonMessage', () => {
+  describe('buildReasonMessageUtil', () => {
     describe('when rule and mergedDoc are provided', () => {
       it('should return the full reason message', () => {
-        expect(buildCommonReasonMessage({ rule, mergedDoc })).toEqual(
-          'Alert What is in a name created with a medium severity and risk score of 9000 by ferris bueller on party host.'
+        expect(buildReasonMessageUtil({ name, severity, mergedDoc })).toMatchInlineSnapshot(
+          `"test event with process doingThings.exe, parent process didThings.exe, file sample, source 1.11.11.1:1234, destination 9.99.99.9:6789, by test-user on host created medium alert my-rule."`
+        );
+      });
+    });
+    describe('when event category contains multiple items', () => {
+      it('should return the reason message with all categories showing', () => {
+        const updatedMergedDoc = {
+          ...mergedDoc,
+          fields: {
+            ...mergedDoc.fields,
+            'event.category': ['item one', 'item two'],
+          },
+        };
+        expect(
+          buildReasonMessageUtil({ name, severity, mergedDoc: updatedMergedDoc })
+        ).toMatchInlineSnapshot(
+          `"item one, item two event with process doingThings.exe, parent process didThings.exe, file sample, source 1.11.11.1:1234, destination 9.99.99.9:6789, by test-user on host created medium alert my-rule."`
         );
       });
     });
@@ -46,8 +67,10 @@ describe('reason_formatter', () => {
             'host.name': ['-'],
           },
         };
-        expect(buildCommonReasonMessage({ rule, mergedDoc: updatedMergedDoc })).toEqual(
-          'Alert What is in a name created with a medium severity and risk score of 9000 by ferris bueller.'
+        expect(
+          buildReasonMessageUtil({ name, severity, mergedDoc: updatedMergedDoc })
+        ).toMatchInlineSnapshot(
+          `"test event with process doingThings.exe, parent process didThings.exe, file sample, source 1.11.11.1:1234, destination 9.99.99.9:6789, by test-user created medium alert my-rule."`
         );
       });
     });
@@ -60,16 +83,110 @@ describe('reason_formatter', () => {
             'user.name': ['-'],
           },
         };
-        expect(buildCommonReasonMessage({ rule, mergedDoc: updatedMergedDoc })).toEqual(
-          'Alert What is in a name created with a medium severity and risk score of 9000 on party host.'
+        expect(
+          buildReasonMessageUtil({ name, severity, mergedDoc: updatedMergedDoc })
+        ).toMatchInlineSnapshot(
+          `"test event with process doingThings.exe, parent process didThings.exe, file sample, source 1.11.11.1:1234, destination 9.99.99.9:6789, on host created medium alert my-rule."`
         );
+      });
+    });
+    describe('when rule and mergedDoc are provided, but destination details are missing', () => {
+      it('should return the reason message without the destination port', () => {
+        const noDestinationPortDoc = {
+          ...mergedDoc,
+          fields: {
+            ...mergedDoc.fields,
+            'destination.port': ['-'],
+          },
+        };
+        expect(
+          buildReasonMessageUtil({ name, severity, mergedDoc: noDestinationPortDoc })
+        ).toMatchInlineSnapshot(
+          `"test event with process doingThings.exe, parent process didThings.exe, file sample, source 1.11.11.1:1234, destination 9.99.99.9 by test-user on host created medium alert my-rule."`
+        );
+      });
+      it('should return the reason message without destination details', () => {
+        const noDestinationPortDoc = {
+          ...mergedDoc,
+          fields: {
+            ...mergedDoc.fields,
+            'destination.address': ['-'],
+            'destination.port': ['-'],
+          },
+        };
+        expect(
+          buildReasonMessageUtil({ name, severity, mergedDoc: noDestinationPortDoc })
+        ).toMatchInlineSnapshot(
+          `"test event with process doingThings.exe, parent process didThings.exe, file sample, source 1.11.11.1:1234, by test-user on host created medium alert my-rule."`
+        );
+      });
+    });
+    describe('when rule and mergedDoc are provided, but source details are missing', () => {
+      it('should return the reason message without the source port', () => {
+        const noSourcePortDoc = {
+          ...mergedDoc,
+          fields: {
+            ...mergedDoc.fields,
+            'source.port': ['-'],
+          },
+        };
+        expect(
+          buildReasonMessageUtil({ name, severity, mergedDoc: noSourcePortDoc })
+        ).toMatchInlineSnapshot(
+          `"test event with process doingThings.exe, parent process didThings.exe, file sample, source 1.11.11.1 destination 9.99.99.9:6789, by test-user on host created medium alert my-rule."`
+        );
+      });
+      it('should return the reason message without source details', () => {
+        const noSourcePortDoc = {
+          ...mergedDoc,
+          fields: {
+            ...mergedDoc.fields,
+            'source.address': ['-'],
+            'source.port': ['-'],
+          },
+        };
+        expect(
+          buildReasonMessageUtil({ name, severity, mergedDoc: noSourcePortDoc })
+        ).toMatchInlineSnapshot(
+          `"test event with process doingThings.exe, parent process didThings.exe, file sample, destination 9.99.99.9:6789, by test-user on host created medium alert my-rule."`
+        );
+      });
+    });
+    describe('when rule and mergedDoc are provided, but process details missing', () => {
+      it('should return the reason message without process details', () => {
+        const updatedMergedDoc = {
+          ...mergedDoc,
+          fields: {
+            ...mergedDoc.fields,
+            'process.name': ['-'],
+            'process.parent.name': ['-'],
+          },
+        };
+        expect(
+          buildReasonMessageUtil({ name, severity, mergedDoc: updatedMergedDoc })
+        ).toMatchInlineSnapshot(
+          `"test event with file sample, source 1.11.11.1:1234, destination 9.99.99.9:6789, by test-user on host created medium alert my-rule."`
+        );
+      });
+    });
+    describe('when rule and mergedDoc are provided without any fields of interest', () => {
+      it('should return the full reason message', () => {
+        const updatedMergedDoc = {
+          ...mergedDoc,
+          fields: {
+            'event.category': ['test'],
+            'user.name': ['test-user'],
+            '@timestamp': '2021-08-11T02:28:59.101Z',
+          },
+        };
+        expect(
+          buildReasonMessageUtil({ name, severity, mergedDoc: updatedMergedDoc })
+        ).toMatchInlineSnapshot(`"test event by test-user created medium alert my-rule."`);
       });
     });
     describe('when only rule is provided', () => {
       it('should return the reason message without host name or user name', () => {
-        expect(buildCommonReasonMessage({ rule })).toEqual(
-          'Alert What is in a name created with a medium severity and risk score of 9000.'
-        );
+        expect(buildReasonMessageUtil({ name, severity })).toMatchInlineSnapshot(`""`);
       });
     });
   });

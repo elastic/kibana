@@ -13,12 +13,12 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useRef } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { Form } from '../../../shared_imports';
-import { SavedQueryForm } from '../../../saved_queries/form';
+import { SavedQueryForm, SavedQueryFormRefObject } from '../../../saved_queries/form';
 import { useSavedQueryForm } from '../../../saved_queries/form/use_saved_query_form';
 
 interface NewSavedQueryFormProps {
@@ -30,16 +30,19 @@ const NewSavedQueryFormComponent: React.FC<NewSavedQueryFormProps> = ({
   defaultValue,
   handleSubmit,
 }) => {
+  const savedQueryFormRef = useRef<SavedQueryFormRefObject>(null);
   const savedQueryListProps = useRouterNavigate('saved_queries');
 
   const { form } = useSavedQueryForm({
     defaultValue,
+    savedQueryFormRef,
     handleSubmit,
   });
+  const { submit, isSubmitting, isValid } = form;
 
   return (
     <Form form={form}>
-      <SavedQueryForm />
+      <SavedQueryForm ref={savedQueryFormRef} hasPlayground isValid={isValid} />
       <EuiBottomBar>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
@@ -54,12 +57,12 @@ const NewSavedQueryFormComponent: React.FC<NewSavedQueryFormProps> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  // isLoading={isLoading}
+                  isLoading={isSubmitting}
                   color="primary"
                   fill
                   size="m"
                   iconType="save"
-                  onClick={form.submit}
+                  onClick={submit}
                 >
                   <FormattedMessage
                     id="xpack.osquery.addSavedQuery.form.saveQueryButtonLabel"

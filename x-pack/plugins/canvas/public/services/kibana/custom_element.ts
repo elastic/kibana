@@ -25,8 +25,8 @@ export const customElementServiceFactory: CanvasCustomElementServiceFactory = ({
     create: (customElement) => http.post(apiPath, { body: JSON.stringify(customElement) }),
     get: (customElementId) =>
       http
-        .get(`${apiPath}/${customElementId}`)
-        .then(({ data: element }: { data: CustomElement }) => element),
+        .get<{ data: CustomElement }>(`${apiPath}/${customElementId}`)
+        .then(({ data: element }) => element),
     update: (id, element) => http.put(`${apiPath}/${id}`, { body: JSON.stringify(element) }),
     remove: (id) => http.delete(`${apiPath}/${id}`),
     find: async (name) => {

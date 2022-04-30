@@ -9,7 +9,6 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/s
 
 import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
-import { installIndexPatterns } from '../kibana/index_pattern/install';
 
 import type { InstallResult } from '../../../types';
 
@@ -21,12 +20,14 @@ interface BulkInstallPackagesParams {
   packagesToInstall: Array<string | { name: string; version: string }>;
   esClient: ElasticsearchClient;
   force?: boolean;
+  spaceId: string;
 }
 
 export async function bulkInstallPackages({
   savedObjectsClient,
   packagesToInstall,
   esClient,
+  spaceId,
   force,
 }: BulkInstallPackagesParams): Promise<BulkInstallResponse[]> {
   const logger = appContextService.getLogger();
@@ -71,7 +72,7 @@ export async function bulkInstallPackages({
           esClient,
           pkgkey: Registry.pkgToPkgKey(pkgKeyProps),
           installSource,
-          skipPostInstall: true,
+          spaceId,
           force,
         });
         if (installResult.error) {
@@ -91,19 +92,6 @@ export async function bulkInstallPackages({
       return { name: packageName, error: result.reason };
     })
   );
-
-  // only install index patterns if we completed install for any package-version for the
-  // first time, aka fresh installs or upgrades
-  if (
-    bulkInstallResults.find(
-      (result) =>
-        result.status === 'fulfilled' &&
-        !result.value.result?.error &&
-        result.value.result?.status === 'installed'
-    )
-  ) {
-    await installIndexPatterns({ savedObjectsClient, esClient, installSource });
-  }
 
   return bulkInstallResults.map((result, index) => {
     const packageName = getNameFromPackagesToInstall(packagesToInstall, index);

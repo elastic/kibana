@@ -27,7 +27,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { FlashMessages } from '../../../shared/flash_messages';
 import { Loading } from '../../../shared/loading';
@@ -48,9 +48,8 @@ import { OAuthAuthorizeLogic } from './oauth_authorize_logic';
 
 export const OAuthAuthorize: React.FC = () => {
   const { search } = useLocation() as Location;
-  const { initializeOAuthPreAuth, allowOAuthAuthorization, denyOAuthAuthorization } = useActions(
-    OAuthAuthorizeLogic
-  );
+  const { initializeOAuthPreAuth, allowOAuthAuthorization, denyOAuthAuthorization } =
+    useActions(OAuthAuthorizeLogic);
 
   const { buttonLoading, dataLoading, cachedPreAuth, hasError } = useValues(OAuthAuthorizeLogic);
 

@@ -13,7 +13,8 @@ export function createTaskManagerUsageCollector(
   usageCollection: UsageCollectionSetup,
   monitoringStats$: Observable<MonitoredHealth>,
   ephemeralTasksEnabled: boolean,
-  ephemeralRequestCapacity: number
+  ephemeralRequestCapacity: number,
+  excludeTaskTypes: string[]
 ) {
   let lastMonitoredHealth: MonitoredHealth | null = null;
   monitoringStats$.subscribe((health) => {
@@ -50,6 +51,16 @@ export function createTaskManagerUsageCollector(
             p99: lastMonitoredHealth?.stats.ephemeral?.value.executionsPerCycle.p99 ?? 0,
           },
         },
+        task_type_exclusion: excludeTaskTypes,
+        failed_tasks: Object.entries(lastMonitoredHealth?.stats.workload?.value.task_types!).reduce(
+          (numb, [key, val]) => {
+            if (val.status.failed !== undefined) {
+              numb += val.status.failed;
+            }
+            return numb;
+          },
+          0
+        ),
       };
     },
     schema: {
@@ -76,6 +87,8 @@ export function createTaskManagerUsageCollector(
           p99: { type: 'long' },
         },
       },
+      task_type_exclusion: { type: 'array', items: { type: 'keyword' } },
+      failed_tasks: { type: 'long' },
     },
   });
 }
@@ -84,13 +97,15 @@ export function registerTaskManagerUsageCollector(
   usageCollection: UsageCollectionSetup,
   monitoringStats$: Observable<MonitoredHealth>,
   ephemeralTasksEnabled: boolean,
-  ephemeralRequestCapacity: number
+  ephemeralRequestCapacity: number,
+  excludeTaskTypes: string[]
 ) {
   const collector = createTaskManagerUsageCollector(
     usageCollection,
     monitoringStats$,
     ephemeralTasksEnabled,
-    ephemeralRequestCapacity
+    ephemeralRequestCapacity,
+    excludeTaskTypes
   );
   usageCollection.registerCollector(collector);
 }

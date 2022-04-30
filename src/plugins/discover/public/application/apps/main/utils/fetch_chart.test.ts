@@ -14,7 +14,8 @@ import { ReduxLikeStateContainer } from '../../../../../../kibana_utils/common';
 import { AppState } from '../services/discover_state';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { calculateBounds, IKibanaSearchResponse } from '../../../../../../data/common';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { AvailableFields$ } from '../services/use_saved_search';
 
 function getDataSubjects() {
   return {
@@ -22,6 +23,9 @@ function getDataSubjects() {
     documents$: new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED }),
     totalHits$: new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED }),
     charts$: new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED }),
+    availableFields$: new BehaviorSubject({
+      fetchStatus: FetchStatus.UNINITIALIZED,
+    }) as AvailableFields$,
   };
 }
 
@@ -89,7 +93,7 @@ describe('test fetchCharts', () => {
     subjects.totalHits$.subscribe((value) => stateArrHits.push(value.fetchStatus));
 
     savedSearchMockWithTimeField.searchSource.fetch$ = () =>
-      of(({
+      of({
         id: 'Fjk5bndxTHJWU2FldVRVQ0tYR0VqOFEcRWtWNDhOdG5SUzJYcFhONVVZVTBJQToxMDMwOQ==',
         rawResponse: {
           took: 2,
@@ -113,7 +117,7 @@ describe('test fetchCharts', () => {
         total: 1,
         loaded: 1,
         isRestored: false,
-      } as unknown) as IKibanaSearchResponse<estypes.SearchResponse<unknown>>);
+      } as unknown as IKibanaSearchResponse<estypes.SearchResponse<unknown>>);
 
     fetchChart(subjects, savedSearchMockWithTimeField.searchSource, deps).subscribe({
       complete: () => {

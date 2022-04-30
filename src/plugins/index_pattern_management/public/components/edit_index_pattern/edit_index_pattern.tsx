@@ -19,7 +19,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { IndexPattern, IndexPatternField } from '../../../../../plugins/data/public';
 import { useKibana } from '../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../types';
@@ -49,19 +49,24 @@ const confirmModalOptionsDelete = {
   confirmButtonText: i18n.translate('indexPatternManagement.editIndexPattern.deleteButton', {
     defaultMessage: 'Delete',
   }),
-  title: i18n.translate('indexPatternManagement.editIndexPattern.deleteHeader', {
-    defaultMessage: 'Delete index pattern?',
+  title: i18n.translate('indexPatternManagement.editDataView.deleteHeader', {
+    defaultMessage: 'Delete data view?',
   }),
 };
 
+const securityDataView = i18n.translate(
+  'indexPatternManagement.editIndexPattern.badge.securityDataViewTitle',
+  {
+    defaultMessage: 'Security Data View',
+  }
+);
+
+const securitySolution = 'security-solution';
+
 export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
-    const {
-      uiSettings,
-      overlays,
-      chrome,
-      data,
-    } = useKibana<IndexPatternManagmentContext>().services;
+    const { application, uiSettings, overlays, chrome, data } =
+      useKibana<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<IndexPatternField[]>(indexPattern.getNonScriptedFields());
     const [conflictedFields, setConflictedFields] = useState<IndexPatternField[]>(
       indexPattern.fields.getAll().filter((field) => field.type === 'conflict')
@@ -88,7 +93,7 @@ export const EditIndexPattern = withRouter(
     const removePattern = () => {
       async function doRemove() {
         if (indexPattern.id === defaultIndex) {
-          const indexPatterns = await data.indexPatterns.getIdsWithTitle();
+          const indexPatterns = await data.dataViews.getIdsWithTitle();
           uiSettings.remove('defaultIndex');
           const otherPatterns = filter(indexPatterns, (pattern) => {
             return pattern.id !== indexPattern.id;
@@ -99,7 +104,7 @@ export const EditIndexPattern = withRouter(
           }
         }
         if (indexPattern.id) {
-          Promise.resolve(data.indexPatterns.delete(indexPattern.id)).then(function () {
+          Promise.resolve(data.dataViews.delete(indexPattern.id)).then(function () {
             history.push('');
           });
         }
@@ -129,8 +134,8 @@ export const EditIndexPattern = withRouter(
       }
     );
 
-    const headingAriaLabel = i18n.translate('indexPatternManagement.editIndexPattern.detailsAria', {
-      defaultMessage: 'Index pattern details',
+    const headingAriaLabel = i18n.translate('indexPatternManagement.editDataView.detailsAria', {
+      defaultMessage: 'Data view details',
     });
 
     chrome.docTitle.change(indexPattern.title);
@@ -138,19 +143,26 @@ export const EditIndexPattern = withRouter(
     const showTagsSection = Boolean(indexPattern.timeFieldName || (tags && tags.length > 0));
     const kibana = useKibana();
     const docsUrl = kibana.services.docLinks!.links.elasticsearch.mapping;
+    const userEditPermission = !!application?.capabilities?.indexPatterns?.save;
+
     return (
       <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
         <IndexHeader
           indexPattern={indexPattern}
           setDefault={setDefaultPattern}
-          deleteIndexPatternClick={removePattern}
+          {...(userEditPermission ? { deleteIndexPatternClick: removePattern } : {})}
           defaultIndex={defaultIndex}
         >
           {showTagsSection && (
-            <EuiFlexGroup wrap>
+            <EuiFlexGroup wrap gutterSize="s">
               {Boolean(indexPattern.timeFieldName) && (
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="warning">{timeFilterHeader}</EuiBadge>
+                </EuiFlexItem>
+              )}
+              {indexPattern.id && indexPattern.id.indexOf(securitySolution) === 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge>{securityDataView}</EuiBadge>
                 </EuiFlexItem>
               )}
               {tags.map((tag: any) => (

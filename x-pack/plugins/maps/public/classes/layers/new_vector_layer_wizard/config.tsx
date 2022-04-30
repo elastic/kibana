@@ -11,7 +11,7 @@ import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_re
 import { NewVectorLayerEditor } from './wizard';
 import { DrawLayerIcon } from '../../layers/icons/draw_layer_icon';
 import { getFileUpload } from '../../../kibana_services';
-import { LAYER_WIZARD_CATEGORY } from '../../../../common';
+import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 
 const ADD_VECTOR_DRAWING_LAYER = 'ADD_VECTOR_DRAWING_LAYER';
 
@@ -22,7 +22,7 @@ export const newVectorLayerWizardConfig: LayerWizard = {
   }),
   disabledReason: i18n.translate('xpack.maps.newVectorLayerWizard.disabledDesc', {
     defaultMessage:
-      'Unable to create index, you are missing the Kibana privilege "Index Pattern Management".',
+      'Unable to create index, you are missing the Kibana privilege "Data View Management".',
   }),
   getIsDisabled: async () => {
     const hasImportPermission = await getFileUpload().hasImportPermission({

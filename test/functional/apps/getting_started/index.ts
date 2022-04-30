@@ -23,7 +23,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     describe('new charts library', function () {
       before(async () => {
         await kibanaServer.uiSettings.update({
-          'visualization:visualize:legacyChartsLibrary': false,
           'visualization:visualize:legacyPieChartsLibrary': false,
         });
         await browser.refresh();
@@ -31,7 +30,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
       after(async () => {
         await kibanaServer.uiSettings.update({
-          'visualization:visualize:legacyChartsLibrary': true,
           'visualization:visualize:legacyPieChartsLibrary': true,
         });
         await browser.refresh();

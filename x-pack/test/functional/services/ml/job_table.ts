@@ -20,6 +20,27 @@ import {
 
 export type MlADJobTable = ProvidedType<typeof MachineLearningJobTableProvider>;
 
+export interface DiscoverUrlConfig {
+  label: string;
+  indexPattern: string;
+  queryEntityFieldNames: string[];
+  timeRange: TimeRangeType;
+  timeRangeInterval?: string;
+}
+
+export interface DashboardUrlConfig {
+  label: string;
+  dashboardName: string;
+  queryEntityFieldNames: string[];
+  timeRange: TimeRangeType;
+  timeRangeInterval?: string;
+}
+
+export interface OtherUrlConfig {
+  label: string;
+  url: string;
+}
+
 export function MachineLearningJobTableProvider(
   { getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI,
@@ -218,6 +239,7 @@ export function MachineLearningJobTableProvider(
 
     public async filterWithSearchString(filter: string, expectedRowCount: number = 1) {
       await this.waitForJobsToLoad();
+      await this.refreshJobList();
       const searchBar = await testSubjects.find('mlJobListSearchBar');
       const searchBarInput = await searchBar.findByTagName('input');
       await searchBarInput.clearValueWithKeyboard();
@@ -234,13 +256,17 @@ export function MachineLearningJobTableProvider(
     }
 
     public async assertJobRowFields(jobId: string, expectedRow: object) {
-      await this.refreshJobList();
-      const rows = await this.parseJobTable();
-      const jobRow = rows.filter((row) => row.id === jobId)[0];
-      expect(jobRow).to.eql(
-        expectedRow,
-        `Expected job row to be '${JSON.stringify(expectedRow)}' (got '${JSON.stringify(jobRow)}')`
-      );
+      await retry.tryForTime(5000, async () => {
+        await this.refreshJobList();
+        const rows = await this.parseJobTable();
+        const jobRow = rows.filter((row) => row.id === jobId)[0];
+        expect(jobRow).to.eql(
+          expectedRow,
+          `Expected job row to be '${JSON.stringify(expectedRow)}' (got '${JSON.stringify(
+            jobRow
+          )}')`
+        );
+      });
     }
 
     public async assertJobRowDetailsCounts(
@@ -367,6 +393,16 @@ export function MachineLearningJobTableProvider(
       await this.ensureJobActionsMenuOpen(jobId);
       await testSubjects.click('mlActionButtonCloneJob');
       await testSubjects.existOrFail('~mlPageJobWizard');
+    }
+
+    public async clickCloneJobActionWhenNoDataViewExists(jobId: string) {
+      await this.ensureJobActionsMenuOpen(jobId);
+      await testSubjects.click('mlActionButtonCloneJob');
+      await this.assertNoDataViewForCloneJobWarningToastExist();
+    }
+
+    public async assertNoDataViewForCloneJobWarningToastExist() {
+      await testSubjects.existOrFail('mlCloneJobNoDataViewExistsWarningToast', { timeout: 5000 });
     }
 
     public async clickEditJobAction(jobId: string) {
@@ -550,21 +586,19 @@ export function MachineLearningJobTableProvider(
       await testSubjects.existOrFail('mlJobCustomUrlForm');
     }
 
-    public async addDiscoverCustomUrl(
-      jobId: string,
-      customUrl: {
-        label: string;
-        indexPattern: string;
-        queryEntityFieldNames: string[];
-        timeRange: TimeRangeType;
-        timeRangeInterval?: string;
-      }
-    ) {
-      await this.openEditCustomUrlsForJobTab(jobId);
-
+    public async getExistingCustomUrlCount(): Promise<number> {
       const existingCustomUrls = await testSubjects.findAll('mlJobEditCustomUrlItemLabel');
+      return existingCustomUrls.length;
+    }
 
-      // Fill-in the form
+    public async saveCustomUrl(expectedLabel: string, expectedIndex: number) {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click('mlJobAddCustomUrl');
+        await customUrls.assertCustomUrlLabel(expectedIndex, expectedLabel);
+      });
+    }
+
+    public async fillInDiscoverUrlForm(customUrl: DiscoverUrlConfig) {
       await this.clickOpenCustomUrlEditor();
       await customUrls.setCustomUrlLabel(customUrl.label);
       await mlCommonUI.selectRadioGroupValue(
@@ -583,31 +617,9 @@ export function MachineLearningJobTableProvider(
       if (customUrl.timeRange === TIME_RANGE_TYPE.INTERVAL) {
         await customUrls.setCustomUrlTimeRangeInterval(customUrl.timeRangeInterval!);
       }
-
-      // Save custom URL
-      await testSubjects.click('mlJobAddCustomUrl');
-      const expectedIndex = existingCustomUrls.length;
-      await customUrls.assertCustomUrlLabel(expectedIndex, customUrl.label);
-
-      // Save the job
-      await this.saveEditJobFlyoutChanges();
     }
 
-    public async addDashboardCustomUrl(
-      jobId: string,
-      customUrl: {
-        label: string;
-        dashboardName: string;
-        queryEntityFieldNames: string[];
-        timeRange: TimeRangeType;
-        timeRangeInterval?: string;
-      }
-    ) {
-      await this.openEditCustomUrlsForJobTab(jobId);
-
-      const existingCustomUrls = await testSubjects.findAll('mlJobEditCustomUrlItemLabel');
-
-      // Fill-in the form
+    public async fillInDashboardUrlForm(customUrl: DashboardUrlConfig) {
       await this.clickOpenCustomUrlEditor();
       await customUrls.setCustomUrlLabel(customUrl.label);
       await mlCommonUI.selectRadioGroupValue(
@@ -626,31 +638,52 @@ export function MachineLearningJobTableProvider(
       if (customUrl.timeRange === TIME_RANGE_TYPE.INTERVAL) {
         await customUrls.setCustomUrlTimeRangeInterval(customUrl.timeRangeInterval!);
       }
+    }
 
-      // Save custom URL
-      await testSubjects.click('mlJobAddCustomUrl');
-      const expectedIndex = existingCustomUrls.length;
-      await customUrls.assertCustomUrlLabel(expectedIndex, customUrl.label);
+    public async fillInOtherUrlForm(customUrl: OtherUrlConfig) {
+      await this.clickOpenCustomUrlEditor();
+      await customUrls.setCustomUrlLabel(customUrl.label);
+      await mlCommonUI.selectRadioGroupValue(`mlJobCustomUrlLinkToTypeInput`, URL_TYPE.OTHER);
+      await customUrls.setCustomUrlOtherTypeUrl(customUrl.url);
+    }
+
+    public async addDiscoverCustomUrl(jobId: string, customUrl: DiscoverUrlConfig) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.closeEditJobFlyout();
+        await this.openEditCustomUrlsForJobTab(jobId);
+        const existingCustomUrlCount = await this.getExistingCustomUrlCount();
+
+        await this.fillInDiscoverUrlForm(customUrl);
+        await this.saveCustomUrl(customUrl.label, existingCustomUrlCount);
+      });
 
       // Save the job
       await this.saveEditJobFlyoutChanges();
     }
 
-    public async addOtherTypeCustomUrl(jobId: string, customUrl: { label: string; url: string }) {
-      await this.openEditCustomUrlsForJobTab(jobId);
+    public async addDashboardCustomUrl(jobId: string, customUrl: DashboardUrlConfig) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.closeEditJobFlyout();
+        await this.openEditCustomUrlsForJobTab(jobId);
+        const existingCustomUrlCount = await this.getExistingCustomUrlCount();
 
-      const existingCustomUrls = await testSubjects.findAll('mlJobEditCustomUrlItemLabel');
+        await this.fillInDashboardUrlForm(customUrl);
+        await this.saveCustomUrl(customUrl.label, existingCustomUrlCount);
+      });
 
-      // Fill-in the form
-      await this.clickOpenCustomUrlEditor();
-      await customUrls.setCustomUrlLabel(customUrl.label);
-      await mlCommonUI.selectRadioGroupValue(`mlJobCustomUrlLinkToTypeInput`, URL_TYPE.OTHER);
-      await customUrls.setCustomUrlOtherTypeUrl(customUrl.url);
+      // Save the job
+      await this.saveEditJobFlyoutChanges();
+    }
 
-      // Save custom URL
-      await testSubjects.click('mlJobAddCustomUrl');
-      const expectedIndex = existingCustomUrls.length;
-      await customUrls.assertCustomUrlLabel(expectedIndex, customUrl.label);
+    public async addOtherTypeCustomUrl(jobId: string, customUrl: OtherUrlConfig) {
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.closeEditJobFlyout();
+        await this.openEditCustomUrlsForJobTab(jobId);
+        const existingCustomUrlCount = await this.getExistingCustomUrlCount();
+
+        await this.fillInOtherUrlForm(customUrl);
+        await this.saveCustomUrl(customUrl.label, existingCustomUrlCount);
+      });
 
       // Save the job
       await this.saveEditJobFlyoutChanges();

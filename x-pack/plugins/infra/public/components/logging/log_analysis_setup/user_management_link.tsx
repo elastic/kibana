@@ -6,7 +6,7 @@
  */
 
 import { EuiButton, EuiButtonProps } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useLinkProps } from '../../../hooks/use_link_props';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';

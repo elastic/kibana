@@ -189,8 +189,9 @@ If you configured the monitoring cluster to use encrypted communications, you
 must access it via HTTPS. For example, use a `hosts` setting like
 `https://es-mon-1:9200`.
 
-IMPORTANT: The {es} {monitor-features} use ingest pipelines, therefore the
-cluster that stores the monitoring data must have at least one ingest node.
+IMPORTANT: The {es} {monitor-features} use ingest pipelines. The
+cluster that stores the monitoring data must have at least one node with the
+`ingest` role.
 
 If the {es} {security-features} are enabled on the monitoring cluster, you
 must provide a valid user ID and password so that {metricbeat} can send metrics

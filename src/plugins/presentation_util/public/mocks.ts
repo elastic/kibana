@@ -10,13 +10,18 @@ import { CoreStart } from 'kibana/public';
 import { PresentationUtilPluginStart } from './types';
 import { pluginServices } from './services';
 import { registry } from './services/kibana';
+import { registerExpressionsLanguage } from '.';
 
 const createStartContract = (coreStart: CoreStart): PresentationUtilPluginStart => {
-  pluginServices.setRegistry(registry.start({ coreStart, startPlugins: {} as any }));
+  pluginServices.setRegistry(
+    registry.start({ coreStart, startPlugins: { dataViews: {}, data: {} } as any })
+  );
 
   const startContract: PresentationUtilPluginStart = {
     ContextProvider: pluginServices.getContextProvider(),
     labsService: pluginServices.getServices().labs,
+    controlsService: pluginServices.getServices().controls,
+    registerExpressionsLanguage,
   };
   return startContract;
 };

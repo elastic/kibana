@@ -115,6 +115,7 @@ test('successfully executes', async () => {
         Object {
           "event": Object {
             "action": "execute-start",
+            "kind": "action",
           },
           "kibana": Object {
             "saved_objects": Array [
@@ -134,6 +135,7 @@ test('successfully executes', async () => {
         Object {
           "event": Object {
             "action": "execute",
+            "kind": "action",
             "outcome": "success",
           },
           "kibana": Object {
@@ -187,10 +189,12 @@ test('successfully executes as a task', async () => {
 
   const scheduleDelay = 10000; // milliseconds
   const scheduled = new Date(Date.now() - scheduleDelay);
+  const attempts = 1;
   await actionExecutor.execute({
     ...executeParams,
     taskInfo: {
       scheduled,
+      attempts,
     },
   });
 
@@ -268,6 +272,45 @@ test('throws an error when config is invalid', async () => {
     status: 'error',
     retry: false,
     message: `error validating action type config: [param1]: expected value of type [string] but got [undefined]`,
+  });
+});
+
+test('throws an error when connector is invalid', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: 'test',
+    name: 'Test',
+    minimumLicenseRequired: 'basic',
+    validate: {
+      connector: () => {
+        return 'error';
+      },
+    },
+    executor: jest.fn(),
+  };
+  const actionSavedObject = {
+    id: '1',
+    type: 'action',
+    attributes: {
+      actionTypeId: 'test',
+    },
+    references: [],
+  };
+  const actionResult = {
+    id: actionSavedObject.id,
+    name: actionSavedObject.id,
+    actionTypeId: actionSavedObject.attributes.actionTypeId,
+    isPreconfigured: false,
+  };
+  actionsClient.get.mockResolvedValueOnce(actionResult);
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+
+  const result = await actionExecutor.execute(executeParams);
+  expect(result).toEqual({
+    actionId: '1',
+    status: 'error',
+    retry: false,
+    message: `error validating action type connector: config must be defined`,
   });
 });
 
@@ -468,6 +511,34 @@ test('logs a warning when alert executor returns invalid status', async () => {
   expect(loggerMock.warn).toBeCalledWith(
     'action execution failure: test:1: action-1: returned unexpected result "invalid-status"'
   );
+});
+
+test('writes to event log for execute timeout', async () => {
+  setupActionExecutorMock();
+
+  await actionExecutor.logCancellation({
+    actionId: 'action1',
+    relatedSavedObjects: [],
+    request: {} as KibanaRequest,
+  });
+  expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+  expect(eventLogger.logEvent.mock.calls[0][0]).toMatchObject({
+    event: {
+      action: 'execute-timeout',
+    },
+    kibana: {
+      saved_objects: [
+        {
+          rel: 'primary',
+          type: 'action',
+          id: 'action1',
+          type_id: 'test',
+          namespace: 'some-namespace',
+        },
+      ],
+    },
+    message: `action: test:action1: 'action-1' execution cancelled due to timeout - exceeded default timeout of "5m"`,
+  });
 });
 
 test('writes to event log for execute and execute start', async () => {

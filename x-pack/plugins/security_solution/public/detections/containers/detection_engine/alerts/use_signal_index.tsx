@@ -7,7 +7,6 @@
 
 import { useEffect, useState } from 'react';
 import { isSecurityAppError } from '@kbn/securitysolution-t-grid';
-import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
 
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -52,15 +51,10 @@ export const useSignalIndex = (): ReturnSignalIndex => {
         setLoading(true);
         const signal = await getSignalIndex({ signal: abortCtrl.signal });
 
-        // TODO: Once we are past experimental phase we can update `getSignalIndex` to return the space-aware DEFAULT_ALERTS_INDEX
-        const signalIndices = ruleRegistryEnabled
-          ? `${DEFAULT_ALERTS_INDEX},${signal.name}`
-          : signal.name;
-
         if (isSubscribed && signal != null) {
           setSignalIndex({
             signalIndexExists: true,
-            signalIndexName: signalIndices,
+            signalIndexName: signal.name,
             signalIndexMappingOutdated: signal.index_mapping_outdated,
             createDeSignalIndex: createIndex,
           });

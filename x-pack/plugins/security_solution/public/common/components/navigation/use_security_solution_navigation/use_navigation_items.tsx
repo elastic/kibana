@@ -7,15 +7,15 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiSideNavItemType } from '@elastic/eui/src/components/side_nav/side_nav_types';
-import { useGetUserAlertsPermissions } from '@kbn/alerts';
 
 import { securityNavGroup } from '../../../../app/home/home_navigations';
 import { getSearch } from '../helpers';
 import { PrimaryNavigationItemsProps } from './types';
-import { useGetUserCasesPermissions, useKibana } from '../../../lib/kibana';
+import { useKibana } from '../../../lib/kibana/kibana_react';
+import { useGetUserCasesPermissions } from '../../../lib/kibana';
 import { useNavigation } from '../../../lib/kibana/hooks';
 import { NavTab } from '../types';
-import { SERVER_APP_ID } from '../../../../../common/constants';
+import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pages/host_isolation_exceptions/view/hooks';
 
 export const usePrimaryNavigationItems = ({
   navTabs,
@@ -63,35 +63,54 @@ export const usePrimaryNavigationItems = ({
 };
 
 function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
-  const uiCapabilities = useKibana().services.application.capabilities;
   const hasCasesReadPermissions = useGetUserCasesPermissions()?.read;
-  const hasAlertsReadPermissions = useGetUserAlertsPermissions(uiCapabilities, SERVER_APP_ID);
+  const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
+  const uiCapabilities = useKibana().services.application.capabilities;
   return useMemo(
-    () => [
-      {
-        id: 'main',
-        name: '',
-        items: [navTabs.overview],
-      },
-      {
-        ...securityNavGroup.detect,
-        items: hasAlertsReadPermissions.read
-          ? [navTabs.alerts, navTabs.rules, navTabs.exceptions]
-          : [navTabs.rules, navTabs.exceptions],
-      },
-      {
-        ...securityNavGroup.explore,
-        items: [navTabs.hosts, navTabs.network, ...(navTabs.ueba != null ? [navTabs.ueba] : [])],
-      },
-      {
-        ...securityNavGroup.investigate,
-        items: hasCasesReadPermissions ? [navTabs.timelines, navTabs.case] : [navTabs.timelines],
-      },
-      {
-        ...securityNavGroup.manage,
-        items: [navTabs.endpoints, navTabs.trusted_apps, navTabs.event_filters],
-      },
-    ],
-    [navTabs, hasCasesReadPermissions, hasAlertsReadPermissions]
+    () =>
+      uiCapabilities.siem.show
+        ? [
+            {
+              id: 'main',
+              name: '',
+              items: [navTabs.overview],
+            },
+            {
+              ...securityNavGroup.detect,
+              items: [navTabs.alerts, navTabs.rules, navTabs.exceptions],
+            },
+            {
+              ...securityNavGroup.explore,
+              items: [
+                navTabs.hosts,
+                navTabs.network,
+                ...(navTabs.ueba != null ? [navTabs.ueba] : []),
+              ],
+            },
+            {
+              ...securityNavGroup.investigate,
+              items: hasCasesReadPermissions
+                ? [navTabs.timelines, navTabs.case]
+                : [navTabs.timelines],
+            },
+            {
+              ...securityNavGroup.manage,
+              items: [
+                navTabs.endpoints,
+                navTabs.trusted_apps,
+                navTabs.event_filters,
+                ...(canSeeHostIsolationExceptions ? [navTabs.host_isolation_exceptions] : []),
+              ],
+            },
+          ]
+        : hasCasesReadPermissions
+        ? [
+            {
+              ...securityNavGroup.investigate,
+              items: [navTabs.case],
+            },
+          ]
+        : [],
+    [uiCapabilities.siem.show, navTabs, hasCasesReadPermissions, canSeeHostIsolationExceptions]
   );
 }

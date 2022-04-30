@@ -66,9 +66,9 @@ describe('GET privileges', () => {
         query: includeActions ? { includeActions: 'true' } : undefined,
         headers,
       });
-      const mockContext = ({
+      const mockContext = {
         licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
-      } as unknown) as SecurityRequestHandlerContext;
+      } as unknown as SecurityRequestHandlerContext;
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
       expect(response.status).toBe(asserts.statusCode);

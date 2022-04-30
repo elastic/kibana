@@ -33,7 +33,7 @@ import {
 } from '@kbn/securitysolution-list-utils';
 import { IndexPatternBase } from '@kbn/es-query';
 
-import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
+import type { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
 import { AndOrBadge } from '../and_or_badge';
 
 import { BuilderExceptionListItemComponent } from './exception_item_renderer';
@@ -81,6 +81,7 @@ export interface ExceptionBuilderProps {
   isAndDisabled: boolean;
   isNestedDisabled: boolean;
   isOrDisabled: boolean;
+  isOrHidden?: boolean;
   listId: string;
   listNamespaceType: NamespaceType;
   listType: ExceptionListType;
@@ -103,6 +104,7 @@ export const ExceptionBuilderComponent = ({
   isAndDisabled,
   isNestedDisabled,
   isOrDisabled,
+  isOrHidden = false,
   listId,
   listNamespaceType,
   listType,
@@ -433,6 +435,7 @@ export const ExceptionBuilderComponent = ({
           <EuiFlexItem grow={1}>
             <BuilderLogicButtons
               isOrDisabled={isOrDisabled ? isOrDisabled : disableOr}
+              isOrHidden={isOrHidden}
               isAndDisabled={isAndDisabled ? isAndDisabled : disableAnd}
               isNestedDisabled={isNestedDisabled ? isNestedDisabled : disableNested}
               isNested={addNested}

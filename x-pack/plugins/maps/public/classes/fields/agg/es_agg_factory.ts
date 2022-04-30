@@ -18,8 +18,7 @@ import { PercentileAggField } from './percentile_agg_field';
 export function esAggFieldsFactory(
   aggDescriptor: AggDescriptor,
   source: IESAggSource,
-  origin: FIELD_ORIGIN,
-  canReadFromGeoJson: boolean = true
+  origin: FIELD_ORIGIN
 ): IESAggField[] {
   let aggField;
   if (aggDescriptor.type === AGG_TYPE.COUNT) {
@@ -27,7 +26,6 @@ export function esAggFieldsFactory(
       label: aggDescriptor.label,
       source,
       origin,
-      canReadFromGeoJson,
     });
   } else if (aggDescriptor.type === AGG_TYPE.PERCENTILE) {
     aggField = new PercentileAggField({
@@ -42,7 +40,6 @@ export function esAggFieldsFactory(
           : DEFAULT_PERCENTILE,
       source,
       origin,
-      canReadFromGeoJson,
     });
   } else {
     aggField = new AggField({
@@ -54,14 +51,13 @@ export function esAggFieldsFactory(
       aggType: aggDescriptor.type,
       source,
       origin,
-      canReadFromGeoJson,
     });
   }
 
   const aggFields: IESAggField[] = [aggField];
 
   if ('field' in aggDescriptor && aggDescriptor.type === AGG_TYPE.TERMS) {
-    aggFields.push(new TopTermPercentageField(aggField, canReadFromGeoJson));
+    aggFields.push(new TopTermPercentageField(aggField));
   }
 
   return aggFields;

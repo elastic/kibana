@@ -42,7 +42,7 @@ const txtBetaActionFactoryLabel = i18n.translate(
 const txtBetaActionFactoryTooltip = i18n.translate(
   'xpack.uiActionsEnhanced.components.DrilldownForm.betaActionTooltip',
   {
-    defaultMessage: `This action is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features. Please help us by reporting any bugs or providing other feedback.`,
+    defaultMessage: `This action is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features. Please help us by reporting bugs or providing other feedback.`,
   }
 );
 

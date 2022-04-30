@@ -15,10 +15,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'header', 'dashboard', 'visChart']);
   const dashboardPanelActions = getService('dashboardPanelActions');
   const queryBar = getService('queryBar');
+  const elasticChart = getService('elasticChart');
+  const xyChartSelector = 'visTypeXyChart';
+
+  const enableNewChartLibraryDebug = async () => {
+    await elasticChart.setNewChartUiDebugFlag();
+    await queryBar.submitQuery();
+  };
 
   describe('dashboard with async search', () => {
     before(async function () {
-      const { body } = await es.info();
+      const body = await es.info();
       if (!body.version.number.includes('SNAPSHOT')) {
         log.debug('Skipping because this build does not have the required shard_delay agg');
         this.skip();
@@ -30,7 +37,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.missingOrFail('embeddableErrorLabel');
-      const data = await PageObjects.visChart.getBarChartData('Sum of bytes');
+      await enableNewChartLibraryDebug();
+      const data = await PageObjects.visChart.getBarChartData(xyChartSelector, 'Sum of bytes');
       expect(data.length).to.be(5);
     });
 
@@ -39,7 +47,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.loadSavedDashboard('Delayed 5s');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.missingOrFail('embeddableErrorLabel');
-      const data = await PageObjects.visChart.getBarChartData('');
+      await enableNewChartLibraryDebug();
+      const data = await PageObjects.visChart.getBarChartData(xyChartSelector, 'Sum of bytes');
       expect(data.length).to.be(5);
     });
 

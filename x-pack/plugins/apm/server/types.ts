@@ -16,7 +16,6 @@ import {
   PluginStart as DataPluginStart,
 } from '../../../../src/plugins/data/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
-import { APMOSSPluginSetup } from '../../../../src/plugins/apm_oss/server';
 import {
   HomeServerPluginSetup,
   HomeServerPluginStart,
@@ -48,7 +47,7 @@ import {
   FleetStartContract as FleetPluginStart,
 } from '../../fleet/server';
 import { APMConfig } from '.';
-import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
+import { getApmIndices } from './routes/settings/apm_indices/get_apm_indices';
 import { createApmEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
 import { ApmPluginRequestHandlerContext } from './routes/typings';
 
@@ -70,10 +69,6 @@ interface DependencyMap {
   spaces: {
     setup: SpacesPluginSetup;
     start: SpacesPluginStart;
-  };
-  apmOss: {
-    setup: APMOSSPluginSetup;
-    start: undefined;
   };
   home: {
     setup: HomeServerPluginSetup;
@@ -135,7 +130,6 @@ interface DependencyMap {
 
 const requiredDependencies = [
   'features',
-  'apmOss',
   'data',
   'licensing',
   'triggersActionsUi',

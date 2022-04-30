@@ -13,7 +13,7 @@ import {
   EuiTextColor,
   EuiToolTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { LogEntry } from '../../../../common/log_entry';
@@ -25,10 +25,8 @@ import { LogStream } from '../../../components/log_stream';
 const MODAL_MARGIN = 25;
 
 export const PageViewLogInContext: React.FC = () => {
-  const [
-    { contextEntry, startTimestamp, endTimestamp, sourceId },
-    { setContextEntry },
-  ] = useContext(ViewLogInContext.Context);
+  const [{ contextEntry, startTimestamp, endTimestamp, sourceId }, { setContextEntry }] =
+    useContext(ViewLogInContext.Context);
   const closeModal = useCallback(() => setContextEntry(undefined), [setContextEntry]);
   const { width: vw, height: vh } = useViewportDimensions();
 

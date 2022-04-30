@@ -56,7 +56,7 @@ export const PARTICIPANTS = i18n.translate('xpack.observability.cases.caseView.p
 });
 
 export const CREATE_TITLE = i18n.translate('xpack.observability.cases.caseView.create', {
-  defaultMessage: 'Create new case',
+  defaultMessage: 'Create case',
 });
 
 export const DESCRIPTION = i18n.translate('xpack.observability.cases.caseView.description', {
@@ -90,10 +90,6 @@ export const EDIT = i18n.translate('xpack.observability.cases.caseView.edit', {
 
 export const OPTIONAL = i18n.translate('xpack.observability.cases.caseView.optional', {
   defaultMessage: 'Optional',
-});
-
-export const PAGE_TITLE = i18n.translate('xpack.observability.cases.pageTitle', {
-  defaultMessage: 'Cases',
 });
 
 export const CREATE_CASE = i18n.translate('xpack.observability.cases.caseView.createCase', {

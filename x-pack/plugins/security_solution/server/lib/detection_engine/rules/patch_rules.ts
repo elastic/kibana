@@ -37,6 +37,7 @@ class PatchError extends Error {
 
 export const patchRules = async ({
   rulesClient,
+  savedObjectsClient,
   author,
   buildingBlockType,
   ruleStatusClient,
@@ -70,6 +71,7 @@ export const patchRules = async ({
   threshold,
   threatFilters,
   threatIndex,
+  threatIndicatorPath,
   threatQuery,
   threatMapping,
   threatLanguage,
@@ -80,6 +82,7 @@ export const patchRules = async ({
   to,
   type,
   references,
+  namespace,
   note,
   version,
   exceptionsList,
@@ -121,6 +124,7 @@ export const patchRules = async ({
     threshold,
     threatFilters,
     threatIndex,
+    threatIndicatorPath,
     threatQuery,
     threatMapping,
     threatLanguage,
@@ -131,6 +135,7 @@ export const patchRules = async ({
     type,
     references,
     version,
+    namespace,
     note,
     exceptionsList,
     anomalyThreshold,
@@ -167,6 +172,7 @@ export const patchRules = async ({
       threshold: threshold ? normalizeThresholdObject(threshold) : undefined,
       threatFilters,
       threatIndex,
+      threatIndicatorPath,
       threatQuery,
       threatMapping,
       threatLanguage,
@@ -176,6 +182,7 @@ export const patchRules = async ({
       to,
       type,
       references,
+      namespace,
       note,
       version: calculatedVersion,
       exceptionsList,
@@ -188,14 +195,14 @@ export const patchRules = async ({
 
   const newRule = {
     tags: addTags(tags ?? rule.tags, rule.params.ruleId, rule.params.immutable),
-    throttle: throttle !== undefined ? transformToAlertThrottle(throttle) : rule.throttle,
-    notifyWhen: throttle !== undefined ? transformToNotifyWhen(throttle) : rule.notifyWhen,
     name: calculateName({ updatedName: name, originalName: rule.name }),
     schedule: {
       interval: calculateInterval(interval, rule.schedule.interval),
     },
-    actions: actions?.map(transformRuleToAlertAction) ?? rule.actions,
     params: removeUndefined(nextParams),
+    actions: actions?.map(transformRuleToAlertAction) ?? rule.actions,
+    throttle: throttle !== undefined ? transformToAlertThrottle(throttle) : rule.throttle,
+    notifyWhen: throttle !== undefined ? transformToNotifyWhen(throttle) : rule.notifyWhen,
   };
 
   const [validated, errors] = validate(newRule, internalRuleUpdate);
@@ -215,7 +222,7 @@ export const patchRules = async ({
   if (rule.enabled && enabled === false) {
     await rulesClient.disable({ id: rule.id });
   } else if (!rule.enabled && enabled === true) {
-    await enableRule({ rule, rulesClient, ruleStatusClient, spaceId });
+    await enableRule({ rule, rulesClient });
   } else {
     // enabled is null or undefined and we do not touch the rule
   }

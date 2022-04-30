@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
+import { asyncForEach } from '@kbn/std';
 
 import { Transforms } from '../modules/types';
 import type { Logger } from '../../../../../src/core/server';
@@ -35,7 +36,7 @@ export const uninstallTransforms = async ({
   suffix,
   transforms,
 }: UninstallTransformsOptions): Promise<void> => {
-  transforms.forEach(async (transform) => {
+  await asyncForEach(transforms, async (transform) => {
     const { id } = transform;
     const computedId = computeTransformId({ id, prefix, suffix });
     const exists = await getTransformExists(esClient, computedId);

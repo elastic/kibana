@@ -21,7 +21,7 @@ import {
 import type { FunctionComponent, RefObject } from 'react';
 import React, { useEffect } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useHtmlId } from './use_html_id';
 

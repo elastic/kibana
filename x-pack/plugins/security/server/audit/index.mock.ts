@@ -6,17 +6,6 @@
  */
 
 import type { AuditService } from './audit_service';
-import type { SecurityAuditLogger } from './security_audit_logger';
-
-export const securityAuditLoggerMock = {
-  create() {
-    return ({
-      savedObjectsAuthorizationFailure: jest.fn(),
-      savedObjectsAuthorizationSuccess: jest.fn(),
-      accessAgreementAcknowledged: jest.fn(),
-    } as unknown) as jest.Mocked<SecurityAuditLogger>;
-  },
-};
 
 export const auditServiceMock = {
   create() {
@@ -25,6 +14,9 @@ export const auditServiceMock = {
       asScoped: jest.fn().mockReturnValue({
         log: jest.fn(),
       }),
+      withoutRequest: {
+        log: jest.fn(),
+      },
     } as jest.Mocked<ReturnType<AuditService['setup']>>;
   },
 };

@@ -77,7 +77,7 @@ export default {
       } else {
         window.localStorage.removeItem('apm.dataStreamsMigrationStatus');
       }
-      const coreMock = ({
+      const coreMock = {
         http: {
           basePath: { prepend: () => {} },
           get: () => {
@@ -90,7 +90,7 @@ export default {
           },
         },
         uiSettings: { get: () => '' },
-      } as unknown) as CoreStart;
+      } as unknown as CoreStart;
 
       createCallApmApi(coreMock);
 

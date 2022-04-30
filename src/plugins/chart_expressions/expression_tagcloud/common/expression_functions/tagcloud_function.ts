@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { prepareLogTable, Dimension } from '../../../../visualizations/common/prepare_log_table';
-import { TagCloudVisParams } from '../types';
+import { TagCloudRendererParams } from '../types';
 import { ExpressionTagcloudFunction } from '../types';
 import { EXPRESSION_NAME } from '../constants';
 
@@ -110,9 +110,9 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
         help: argHelp.showLabel,
       },
       palette: {
-        types: ['string'],
+        types: ['palette', 'system_palette'],
         help: argHelp.palette,
-        default: 'default',
+        default: '{palette}',
       },
       metric: {
         types: ['vis_dimension'],
@@ -125,7 +125,7 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
       },
     },
     fn(input, args, handlers) {
-      const visParams = {
+      const visParams: TagCloudRendererParams = {
         scale: args.scale,
         orientation: args.orientation,
         minFontSize: args.minFontSize,
@@ -135,11 +135,8 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
         ...(args.bucket && {
           bucket: args.bucket,
         }),
-        palette: {
-          type: 'palette',
-          name: args.palette,
-        },
-      } as TagCloudVisParams;
+        palette: args.palette,
+      };
 
       if (handlers?.inspectorAdapters?.tables) {
         const argsTable: Dimension[] = [[[args.metric], dimension.tagSize]];

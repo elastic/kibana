@@ -20,13 +20,8 @@ const isStringEmpty = (str: string | null): boolean => {
 
 export const validateRestore = (restoreSettings: RestoreSettings): RestoreValidation => {
   const i18n = textService.i18n;
-  const {
-    indices,
-    renamePattern,
-    renameReplacement,
-    indexSettings,
-    ignoreIndexSettings,
-  } = restoreSettings;
+  const { indices, renamePattern, renameReplacement, indexSettings, ignoreIndexSettings } =
+    restoreSettings;
 
   const validation: RestoreValidation = {
     isValid: true,

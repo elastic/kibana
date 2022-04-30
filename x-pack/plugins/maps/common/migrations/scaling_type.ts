@@ -24,7 +24,13 @@ export function migrateUseTopHitsToScalingType({
     return attributes;
   }
 
-  const layerList: LayerDescriptor[] = JSON.parse(attributes.layerListJSON);
+  let layerList: LayerDescriptor[] = [];
+  try {
+    layerList = JSON.parse(attributes.layerListJSON);
+  } catch (e) {
+    throw new Error('Unable to parse attribute layerListJSON');
+  }
+
   layerList.forEach((layerDescriptor: LayerDescriptor) => {
     if (isEsDocumentSource(layerDescriptor)) {
       const sourceDescriptor = layerDescriptor.sourceDescriptor as ESSearchSourceDescriptor;

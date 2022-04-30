@@ -18,6 +18,9 @@ Array [
                   Object {
                     "field": "transaction.type",
                   },
+                  Object {
+                    "field": "agent.name",
+                  },
                 ],
                 "sort": Object {
                   "@timestamp": "desc",
@@ -58,8 +61,8 @@ Array [
               "range": Object {
                 "@timestamp": Object {
                   "format": "epoch_millis",
-                  "gte": 1528113600000,
-                  "lte": 1528977600000,
+                  "gte": 0,
+                  "lte": 50000,
                 },
               },
             },
@@ -124,8 +127,8 @@ Array [
               "range": Object {
                 "@timestamp": Object {
                   "format": "epoch_millis",
-                  "gte": 1528113600000,
-                  "lte": 1528977600000,
+                  "gte": 0,
+                  "lte": 50000,
                 },
               },
             },
@@ -190,8 +193,8 @@ Array [
               "range": Object {
                 "@timestamp": Object {
                   "format": "epoch_millis",
-                  "gte": 1528113600000,
-                  "lte": 1528977600000,
+                  "gte": 0,
+                  "lte": 50000,
                 },
               },
             },
@@ -228,6 +231,9 @@ Array [
                   Object {
                     "field": "transaction.type",
                   },
+                  Object {
+                    "field": "agent.name",
+                  },
                 ],
                 "sort": Object {
                   "@timestamp": "desc",
@@ -263,8 +269,8 @@ Array [
               "range": Object {
                 "@timestamp": Object {
                   "format": "epoch_millis",
-                  "gte": 1528113600000,
-                  "lte": 1528977600000,
+                  "gte": 0,
+                  "lte": 50000,
                 },
               },
             },
@@ -325,8 +331,8 @@ Array [
               "range": Object {
                 "@timestamp": Object {
                   "format": "epoch_millis",
-                  "gte": 1528113600000,
-                  "lte": 1528977600000,
+                  "gte": 0,
+                  "lte": 50000,
                 },
               },
             },
@@ -387,8 +393,8 @@ Array [
               "range": Object {
                 "@timestamp": Object {
                   "format": "epoch_millis",
-                  "gte": 1528113600000,
-                  "lte": 1528977600000,
+                  "gte": 0,
+                  "lte": 50000,
                 },
               },
             },

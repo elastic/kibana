@@ -11,6 +11,7 @@ export * from './hook_wrapper';
 export * from './index_pattern';
 export * from './mock_detail_item';
 export * from './mock_detection_alerts';
+export * from './mock_detection_alerts_aad';
 export * from './mock_ecs';
 export * from './mock_local_storage';
 export * from './mock_timeline_data';

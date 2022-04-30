@@ -1,9 +1,9 @@
-# Ingest Node Pipelines UI
+# Ingest Pipelines UI
 
 ## Summary
-The `ingest_pipelines` plugin provides Kibana support for [Elasticsearch's ingest nodes](https://www.elastic.co/guide/en/elasticsearch/reference/master/ingest.html). Please refer to the Elasticsearch documentation for more details.
+The `ingest_pipelines` plugin provides Kibana support for [Elasticsearch's ingest pipelines](https://www.elastic.co/guide/en/elasticsearch/reference/master/ingest.html).
 
-This plugin allows Kibana to create, edit, clone and delete ingest node pipelines. It also provides support to simulate a pipeline.
+This plugin allows Kibana to create, edit, clone and delete ingest pipelines. It also provides support to simulate a pipeline.
 
 It requires a Basic license and the following cluster privileges: `manage_pipeline` and `cluster:monitor/nodes/info`.
 
@@ -11,9 +11,9 @@ It requires a Basic license and the following cluster privileges: `manage_pipeli
 
 ## Development
 
-A new app called Ingest Node Pipelines is registered in the Management section and follows a typical CRUD UI pattern. The client-side portion of this app lives in [public/application](public/application) and uses endpoints registered in [server/routes/api](server/routes/api). For more information on the pipeline processors editor component, check out the [component readme](public/application/components/pipeline_processors_editor/README.md).
+A new app called Ingest Pipelines is registered in the Management section and follows a typical CRUD UI pattern. The client-side portion of this app lives in [public/application](public/application) and uses endpoints registered in [server/routes/api](server/routes/api). For more information on the pipeline processors editor component, check out the [component readme](public/application/components/pipeline_processors_editor/README.md).
 
-See the [kibana contributing guide](https://github.com/elastic/kibana/blob/master/CONTRIBUTING.md) for instructions on setting up your development environment.
+See the [kibana contributing guide](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md) for instructions on setting up your development environment.
 
 ### Test coverage
 
@@ -25,7 +25,7 @@ The app has the following test coverage:
 
 ### Quick steps for manual testing
 
-You can run the following request in Console to create an ingest node pipeline:
+You can run the following request in Console to create an ingest pipeline:
 
 ```
 PUT _ingest/pipeline/test_pipeline
@@ -73,7 +73,7 @@ PUT _ingest/pipeline/test_pipeline
 }
 ```
 
-Then, go to the Ingest Node Pipelines UI to edit, delete, clone, or view details of the pipeline.
+Then, go to the Ingest Pipelines UI to edit, delete, clone, or view details of the pipeline.
 
 To simulate a pipeline, go to the "Edit" page of your pipeline. Click the "Add documents" link under the "Processors" section. You may add the following sample documents to test the pipeline: 
 

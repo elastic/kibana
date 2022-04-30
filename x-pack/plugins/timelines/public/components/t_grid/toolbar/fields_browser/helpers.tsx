@@ -13,9 +13,9 @@ import {
   elementOrChildrenHasFocus,
   skipFocusInContainerTo,
   stopPropagationAndPreventDefault,
-} from '../../../../../public';
+} from '../../../../../common/utils/accessibility';
 import { TimelineId } from '../../../../../public/types';
-import type { BrowserField, BrowserFields } from '../../../../../common';
+import type { BrowserField, BrowserFields } from '../../../../../common/search_strategy';
 import { defaultHeaders } from '../../../../store/t_grid/defaults';
 import { DEFAULT_CATEGORY_NAME } from '../../body/column_headers/default_headers';
 
@@ -97,6 +97,7 @@ export const filterBrowserFieldsByFieldName = ({
         fields: filter(
           (f) => f.name != null && f.name.includes(trimmedSubstring),
           browserFields[categoryId].fields
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         ).reduce((filtered, field) => ({ ...filtered, [field.name!]: field }), {}),
       },
     }),
@@ -423,8 +424,8 @@ export const onFieldsBrowserTabPressed = ({
   }
 };
 
-export const CountBadge = (styled(EuiBadge)`
+export const CountBadge = styled(EuiBadge)`
   margin-left: 5px;
-` as unknown) as typeof EuiBadge;
+` as unknown as typeof EuiBadge;
 
 CountBadge.displayName = 'CountBadge';

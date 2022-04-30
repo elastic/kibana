@@ -7,10 +7,11 @@
  */
 
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
+import { SemVer } from 'semver';
 
 import { ProxyConfigCollection } from './lib';
 import { SpecDefinitionsService, EsLegacyConfigService } from './services';
-import { ConfigType } from './config';
+import { ConsoleConfig, ConsoleConfig7x } from './config';
 
 import { registerRoutes } from './routes';
 
@@ -23,21 +24,28 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
 
   esLegacyConfigService = new EsLegacyConfigService();
 
-  constructor(private readonly ctx: PluginInitializerContext<ConfigType>) {
+  constructor(private readonly ctx: PluginInitializerContext<ConsoleConfig | ConsoleConfig7x>) {
     this.log = this.ctx.logger.get();
   }
 
-  setup({ http, capabilities, getStartServices, elasticsearch }: CoreSetup) {
+  setup({ http, capabilities, elasticsearch }: CoreSetup) {
     capabilities.registerProvider(() => ({
       dev_tools: {
         show: true,
         save: true,
       },
     }));
-
+    const kibanaVersion = new SemVer(this.ctx.env.packageInfo.version);
     const config = this.ctx.config.get();
     const globalConfig = this.ctx.config.legacy.get();
-    const proxyPathFilters = config.proxyFilter.map((str: string) => new RegExp(str));
+
+    let pathFilters: RegExp[] | undefined;
+    let proxyConfigCollection: ProxyConfigCollection | undefined;
+    if (kibanaVersion.major < 8) {
+      // "pathFilters" and "proxyConfig" are only used in 7.x
+      pathFilters = (config as ConsoleConfig7x).proxyFilter.map((str: string) => new RegExp(str));
+      proxyConfigCollection = new ProxyConfigCollection((config as ConsoleConfig7x).proxyConfig);
+    }
 
     this.esLegacyConfigService.setup(elasticsearch.legacy.config$);
 
@@ -51,7 +59,6 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
         specDefinitionService: this.specDefinitionsService,
       },
       proxy: {
-        proxyConfigCollection: new ProxyConfigCollection(config.proxyConfig),
         readLegacyESConfig: async (): Promise<ESConfigForProxy> => {
           const legacyConfig = await this.esLegacyConfigService.readConfig();
           return {
@@ -59,8 +66,11 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
             ...legacyConfig,
           };
         },
-        pathFilters: proxyPathFilters,
+        // Deprecated settings (only used in 7.x):
+        proxyConfigCollection,
+        pathFilters,
       },
+      kibanaVersion,
     });
 
     return {

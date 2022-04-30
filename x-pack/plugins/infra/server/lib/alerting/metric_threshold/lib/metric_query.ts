@@ -5,13 +5,11 @@
  * 2.0.
  */
 
+import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
+import { TIMESTAMP_FIELD } from '../../../../../common/constants';
 import { networkTraffic } from '../../../../../common/inventory_models/shared/metrics/snapshot/network_traffic';
-import { MetricExpressionParams, Aggregators } from '../types';
-import { getIntervalInSeconds } from '../../../../utils/get_interval_in_seconds';
-import { createPercentileAggregation } from './create_percentile_aggregation';
 import { calculateDateHistogramOffset } from '../../../metrics/lib/calculate_date_histogram_offset';
-
-const COMPOSITE_RESULTS_PER_PAGE = 100;
+import { createPercentileAggregation } from './create_percentile_aggregation';
 
 const getParsedFilterQuery: (filterQuery: string | undefined) => Record<string, any> | null = (
   filterQuery
@@ -22,8 +20,8 @@ const getParsedFilterQuery: (filterQuery: string | undefined) => Record<string, 
 
 export const getElasticsearchMetricQuery = (
   { metric, aggType, timeUnit, timeSize }: MetricExpressionParams,
-  timefield: string,
   timeframe: { start: number; end: number },
+  compositeSize: number,
   groupBy?: string | string[],
   filterQuery?: string
 ) => {
@@ -34,12 +32,8 @@ export const getElasticsearchMetricQuery = (
     throw new Error('Can only aggregate without a metric if using the document count aggregator');
   }
   const interval = `${timeSize}${timeUnit}`;
-  const intervalAsSeconds = getIntervalInSeconds(interval);
-  const intervalAsMS = intervalAsSeconds * 1000;
   const to = timeframe.end;
   const from = timeframe.start;
-
-  const deliveryDelay = 60 * 1000; // INFO: This allows us to account for any delay ES has in indexing the most recent data.
 
   const aggregations =
     aggType === Aggregators.COUNT
@@ -61,9 +55,9 @@ export const getElasticsearchMetricQuery = (
       ? {
           aggregatedIntervals: {
             date_histogram: {
-              field: timefield,
+              field: TIMESTAMP_FIELD,
               fixed_interval: interval,
-              offset: calculateDateHistogramOffset({ from, to, interval, field: timefield }),
+              offset: calculateDateHistogramOffset({ from, to, interval }),
               extended_bounds: {
                 min: from,
                 max: to,
@@ -72,27 +66,13 @@ export const getElasticsearchMetricQuery = (
             aggregations,
           },
         }
-      : {
-          aggregatedIntervals: {
-            date_range: {
-              field: timefield,
-              // Generate an array of buckets, starting at `from` and ending at `to`
-              // This is usually only necessary for alert previews or rate aggs. Most alert evaluations
-              // will generate only one bucket from this logic.
-              ranges: Array.from(Array(Math.floor((to - from) / intervalAsMS)), (_, i) => ({
-                from: from + intervalAsMS * i - deliveryDelay,
-                to: from + intervalAsMS * (i + 1) - deliveryDelay,
-              })),
-            },
-            aggregations,
-          },
-        };
+      : aggregations;
 
   const aggs = groupBy
     ? {
         groupings: {
           composite: {
-            size: COMPOSITE_RESULTS_PER_PAGE,
+            size: compositeSize,
             sources: Array.isArray(groupBy)
               ? groupBy.map((field, index) => ({
                   [`groupBy${index}`]: {
@@ -139,6 +119,7 @@ export const getElasticsearchMetricQuery = (
   const parsedFilterQuery = getParsedFilterQuery(filterQuery);
 
   return {
+    track_total_hits: true,
     query: {
       bool: {
         filter: [

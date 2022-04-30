@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { waitFor, render } from '@testing-library/react';
 
 import { AlertSummaryView } from './alert_summary_view';
 import { mockAlertDetailsData } from './__mocks__';
@@ -14,8 +14,8 @@ import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { useRuleWithFallback } from '../../../detections/containers/detection_engine/rules/use_rule_with_fallback';
 
 import { TestProviders, TestProvidersComponent } from '../../mock';
+import { TimelineId } from '../../../../common/types';
 import { mockBrowserFields } from '../../containers/source/mock';
-import { useMountAppended } from '../../utils/use_mount_appended';
 
 jest.mock('../../lib/kibana');
 
@@ -33,8 +33,6 @@ const props = {
 };
 
 describe('AlertSummaryView', () => {
-  const mount = useMountAppended();
-
   beforeEach(() => {
     jest.clearAllMocks();
     (useRuleWithFallback as jest.Mock).mockReturnValue({
@@ -44,23 +42,30 @@ describe('AlertSummaryView', () => {
     });
   });
   test('render correct items', () => {
-    const wrapper = mount(
+    const { getByTestId } = render(
       <TestProviders>
         <AlertSummaryView {...props} />
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="summary-view"]').exists()).toEqual(true);
+    expect(getByTestId('summary-view')).toBeInTheDocument();
   });
 
-  test('render investigation guide', async () => {
-    const wrapper = mount(
+  test('it renders the action cell by default', () => {
+    const { getAllByTestId } = render(
       <TestProviders>
         <AlertSummaryView {...props} />
       </TestProviders>
     );
-    await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="summary-view-guide"]').exists()).toEqual(true);
-    });
+    expect(getAllByTestId('hover-actions-filter-for').length).toBeGreaterThan(0);
+  });
+
+  test('it does NOT render the action cell for the active timeline', () => {
+    const { queryAllByTestId } = render(
+      <TestProviders>
+        <AlertSummaryView {...props} timelineId={TimelineId.active} />
+      </TestProviders>
+    );
+    expect(queryAllByTestId('hover-actions-filter-for').length).toEqual(0);
   });
 
   test("render no investigation guide if it doesn't exist", async () => {
@@ -69,16 +74,16 @@ describe('AlertSummaryView', () => {
         note: null,
       },
     });
-    const wrapper = mount(
+    const { queryByTestId } = render(
       <TestProviders>
         <AlertSummaryView {...props} />
       </TestProviders>
     );
     await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="summary-view-guide"]').exists()).toEqual(false);
+      expect(queryByTestId('summary-view-guide')).not.toBeInTheDocument();
     });
   });
-  test('Memory event code renders additional summary rows', () => {
+  test.skip('Memory event code renders additional summary rows', () => {
     const renderProps = {
       ...props,
       data: mockAlertDetailsData.map((item) => {
@@ -86,21 +91,21 @@ describe('AlertSummaryView', () => {
           return {
             category: 'event',
             field: 'event.code',
-            values: ['malicious_thread'],
-            originalValue: ['malicious_thread'],
+            values: ['shellcode_thread'],
+            originalValue: ['shellcode_thread'],
           };
         }
         return item;
       }) as TimelineEventsDetailsItem[],
     };
-    const wrapper = mount(
+    const { container } = render(
       <TestProvidersComponent>
         <AlertSummaryView {...renderProps} />
       </TestProvidersComponent>
     );
-    expect(wrapper.find('div[data-test-subj="summary-view"]').render()).toMatchSnapshot();
+    expect(container.querySelector('div[data-test-subj="summary-view"]')).toMatchSnapshot();
   });
-  test('Behavior event code renders additional summary rows', () => {
+  test.skip('Behavior event code renders additional summary rows', () => {
     const renderProps = {
       ...props,
       data: mockAlertDetailsData.map((item) => {
@@ -115,11 +120,213 @@ describe('AlertSummaryView', () => {
         return item;
       }) as TimelineEventsDetailsItem[],
     };
-    const wrapper = mount(
+    const { container } = render(
       <TestProvidersComponent>
         <AlertSummaryView {...renderProps} />
       </TestProvidersComponent>
     );
-    expect(wrapper.find('div[data-test-subj="summary-view"]').render()).toMatchSnapshot();
+    expect(container.querySelector('div[data-test-subj="summary-view"]')).toMatchSnapshot();
+  });
+
+  test('Threshold events have special fields', () => {
+    const enhancedData = [
+      ...mockAlertDetailsData.map((item) => {
+        if (item.category === 'kibana' && item.field === 'kibana.alert.rule.type') {
+          return {
+            ...item,
+            values: ['threshold'],
+            originalValue: ['threshold'],
+          };
+        }
+        return item;
+      }),
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.count',
+        values: [9001],
+        originalValue: [9001],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.terms.value',
+        values: ['host-23084y2', '3084hf3n84p8934r8h'],
+        originalValue: ['host-23084y2', '3084hf3n84p8934r8h'],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.terms.field',
+        values: ['host.name', 'host.id'],
+        originalValue: ['host.name', 'host.id'],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.cardinality.field',
+        values: ['host.name'],
+        originalValue: ['host.name'],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.cardinality.value',
+        values: [9001],
+        originalValue: [9001],
+      },
+    ] as TimelineEventsDetailsItem[];
+    const renderProps = {
+      ...props,
+      data: enhancedData,
+    };
+    const { getByText } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+
+    [
+      'Threshold Count',
+      'host.name [threshold]',
+      'host.id [threshold]',
+      'Threshold Cardinality',
+      'count(host.name) >= 9001',
+    ].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
+  });
+
+  test('Threshold fields are not shown when data is malformated', () => {
+    const enhancedData = [
+      ...mockAlertDetailsData.map((item) => {
+        if (item.category === 'kibana' && item.field === 'kibana.alert.rule.type') {
+          return {
+            ...item,
+            values: ['threshold'],
+            originalValue: ['threshold'],
+          };
+        }
+        return item;
+      }),
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.count',
+        values: [9001],
+        originalValue: [9001],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.terms.field',
+        // This would be expected to have two entries
+        values: ['host.id'],
+        originalValue: ['host.id'],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.terms.value',
+        values: ['host-23084y2', '3084hf3n84p8934r8h'],
+        originalValue: ['host-23084y2', '3084hf3n84p8934r8h'],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.cardinality.field',
+        values: ['host.name'],
+        originalValue: ['host.name'],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.cardinality.value',
+        // This would be expected to have one entry
+        values: [],
+        originalValue: [],
+      },
+    ] as TimelineEventsDetailsItem[];
+    const renderProps = {
+      ...props,
+      data: enhancedData,
+    };
+    const { getByText } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+
+    ['Threshold Count'].forEach((fieldId) => {
+      expect(getByText(fieldId));
+    });
+
+    [
+      'host.name [threshold]',
+      'host.id [threshold]',
+      'Threshold Cardinality',
+      'count(host.name) >= 9001',
+    ].forEach((fieldText) => {
+      expect(() => getByText(fieldText)).toThrow();
+    });
+  });
+
+  test('Threshold fields are not shown when data is partially missing', () => {
+    const enhancedData = [
+      ...mockAlertDetailsData.map((item) => {
+        if (item.category === 'kibana' && item.field === 'kibana.alert.rule.type') {
+          return {
+            ...item,
+            values: ['threshold'],
+            originalValue: ['threshold'],
+          };
+        }
+        return item;
+      }),
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.terms.field',
+        // This would be expected to have two entries
+        values: ['host.id'],
+        originalValue: ['host.id'],
+      },
+      {
+        category: 'kibana',
+        field: 'kibana.alert.threshold_result.cardinality.field',
+        values: ['host.name'],
+        originalValue: ['host.name'],
+      },
+    ] as TimelineEventsDetailsItem[];
+    const renderProps = {
+      ...props,
+      data: enhancedData,
+    };
+    const { getByText } = render(
+      <TestProvidersComponent>
+        <AlertSummaryView {...renderProps} />
+      </TestProvidersComponent>
+    );
+
+    //  The `value` fields are missing here, so the enriched field info cannot be calculated correctly
+    ['host.id [threshold]', 'Threshold Cardinality', 'count(host.name) >= 9001'].forEach(
+      (fieldText) => {
+        expect(() => getByText(fieldText)).toThrow();
+      }
+    );
+  });
+
+  test("doesn't render empty fields", () => {
+    const renderProps = {
+      ...props,
+      data: mockAlertDetailsData.map((item) => {
+        if (item.category === 'kibana' && item.field === 'kibana.alert.rule.name') {
+          return {
+            category: 'kibana',
+            field: 'kibana.alert.rule.name',
+            values: undefined,
+            originalValue: undefined,
+          };
+        }
+        return item;
+      }) as TimelineEventsDetailsItem[],
+    };
+
+    const { queryByTestId } = render(
+      <TestProviders>
+        <AlertSummaryView {...renderProps} />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('event-field-kibana.alert.rule.name')).not.toBeInTheDocument();
   });
 });

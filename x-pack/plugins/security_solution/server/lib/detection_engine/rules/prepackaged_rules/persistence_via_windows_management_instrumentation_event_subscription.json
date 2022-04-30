@@ -35,12 +35,19 @@
         {
           "id": "T1546",
           "name": "Event Triggered Execution",
-          "reference": "https://attack.mitre.org/techniques/T1546/"
+          "reference": "https://attack.mitre.org/techniques/T1546/",
+          "subtechnique": [
+            {
+              "id": "T1546.003",
+              "name": "Windows Management Instrumentation Event Subscription",
+              "reference": "https://attack.mitre.org/techniques/T1546/003/"
+            }
+          ]
         }
       ]
     }
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }

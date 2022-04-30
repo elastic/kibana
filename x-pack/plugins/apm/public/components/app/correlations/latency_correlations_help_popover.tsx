@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { HelpPopover, HelpPopoverButton } from '../help_popover/help_popover';
 
 export function LatencyCorrelationsHelpPopover() {
@@ -39,7 +39,7 @@ export function LatencyCorrelationsHelpPopover() {
       <p>
         <FormattedMessage
           id="xpack.apm.correlations.latencyPopoverChartExplanation"
-          defaultMessage="The latency distribution chart visualizes the overall latency of the transactions in the service. When you hover over attributes in the table, their latency distribution is added to the chart."
+          defaultMessage="The latency distribution chart visualizes the overall latency of the transactions in the transaction group. When you hover over attributes in the table, their latency distribution is added to the chart."
         />
       </p>
       <p>

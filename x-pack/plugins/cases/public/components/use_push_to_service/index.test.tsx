@@ -12,7 +12,7 @@ import { render, screen } from '@testing-library/react';
 import '../../common/mock/match_media';
 import { usePushToService, ReturnUsePushToService, UsePushToService } from '.';
 import { TestProviders } from '../../common/mock';
-import { CaseStatuses, ConnectorTypes } from '../../../common';
+import { CaseStatuses, ConnectorTypes } from '../../../common/api';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { basicPush, actionLicenses } from '../../containers/mock';
 import { useGetActionLicense } from '../../containers/use_get_action_license';

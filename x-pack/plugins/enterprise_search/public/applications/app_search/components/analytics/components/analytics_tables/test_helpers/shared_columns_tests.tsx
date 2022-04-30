@@ -49,7 +49,7 @@ export const runActionColumnTests = (wrapper: ReactWrapper) => {
       await nextTick();
 
       expect(http.get).toHaveBeenCalledWith(
-        '/api/app_search/engines/some-engine/curations/find_or_create',
+        '/internal/app_search/engines/some-engine/curations/find_or_create',
         {
           query: { query: 'some search' },
         }
@@ -63,7 +63,7 @@ export const runActionColumnTests = (wrapper: ReactWrapper) => {
       await nextTick();
 
       expect(http.get).toHaveBeenCalledWith(
-        '/api/app_search/engines/some-engine/curations/find_or_create',
+        '/internal/app_search/engines/some-engine/curations/find_or_create',
         {
           query: { query: '""' },
         }

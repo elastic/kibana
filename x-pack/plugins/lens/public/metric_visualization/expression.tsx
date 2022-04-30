@@ -6,7 +6,7 @@
  */
 
 import './expression.scss';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type {
@@ -19,9 +19,7 @@ import { EmptyPlaceholder } from '../shared_components';
 import { LensIconChartMetric } from '../assets/chart_metric';
 import type { FormatFactory } from '../../common';
 import type { MetricChartProps } from '../../common/expressions';
-
-export { metricChart } from '../../common/expressions';
-export type { MetricState, MetricConfig } from '../../common/expressions';
+export type { MetricChartProps, MetricState, MetricConfig } from '../../common/expressions';
 
 export const getMetricChartRenderer = (
   formatFactory: FormatFactory
@@ -91,7 +89,7 @@ export function MetricChart({
       reportDescription={description}
       className="lnsMetricExpression__container"
     >
-      <AutoScale>
+      <AutoScale key={value}>
         <div data-test-subj="lns_metric_value" style={{ fontSize: '60pt', fontWeight: 600 }}>
           {value}
         </div>

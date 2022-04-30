@@ -8,9 +8,9 @@
 import { schema } from '@kbn/config-schema';
 import { runtimeMappingsSchema } from './runtime_mappings_schema';
 
-export const indexPatternTitleSchema = schema.object({
-  /** Title of the index pattern for which to return stats. */
-  indexPatternTitle: schema.string(),
+export const indexPatternSchema = schema.object({
+  /** Pattern of index or indices for which to return stats. */
+  indexPattern: schema.string(),
 });
 
 export const dataVisualizerFieldHistogramsSchema = schema.object({

@@ -84,7 +84,7 @@ interface SettingsValues {
   iconButtonLoading: boolean;
 }
 
-const imageRoute = '/api/workplace_search/org/settings/upload_images';
+const imageRoute = '/internal/workplace_search/org/settings/upload_images';
 
 export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>({
   actions: {
@@ -197,10 +197,10 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
   listeners: ({ actions, values }) => ({
     initializeSettings: async () => {
       const { http } = HttpLogic.values;
-      const route = '/api/workplace_search/org/settings';
+      const route = '/internal/workplace_search/org/settings';
 
       try {
-        const response = await http.get(route);
+        const response = await http.get<SettingsServerProps>(route);
         actions.setServerProps(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -208,10 +208,10 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
     },
     initializeConnectors: async () => {
       const { http } = HttpLogic.values;
-      const route = '/api/workplace_search/org/settings/connectors';
+      const route = '/internal/workplace_search/org/settings/connectors';
 
       try {
-        const response = await http.get(route);
+        const response = await http.get<Connector[]>(route);
         actions.onInitializeConnectors(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -220,12 +220,14 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
     updateOrgName: async () => {
       clearFlashMessages();
       const { http } = HttpLogic.values;
-      const route = '/api/workplace_search/org/settings/customize';
+      const route = '/internal/workplace_search/org/settings/customize';
       const { orgNameInputValue: name } = values;
       const body = JSON.stringify({ name });
 
       try {
-        const response = await http.put(route, { body });
+        const response = await http.put<{
+          organizationName: string;
+        }>(route, { body });
         actions.setUpdatedName(response);
         flashSuccessToast(ORG_UPDATED_MESSAGE);
         AppLogic.actions.setOrgName(name);
@@ -240,7 +242,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       const body = JSON.stringify({ logo });
 
       try {
-        const response = await http.put(imageRoute, { body });
+        const response = await http.put<{ logo: string | null }>(imageRoute, { body });
         actions.setLogo(response.logo);
         flashSuccessToast(ORG_UPDATED_MESSAGE);
       } catch (e) {
@@ -255,7 +257,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       const body = JSON.stringify({ icon });
 
       try {
-        const response = await http.put(imageRoute, { body });
+        const response = await http.put<{ icon: string | null }>(imageRoute, { body });
         actions.setIcon(response.icon);
         flashSuccessToast(ORG_UPDATED_MESSAGE);
       } catch (e) {
@@ -265,7 +267,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
     },
     updateOauthApplication: async () => {
       const { http } = HttpLogic.values;
-      const route = '/api/workplace_search/org/settings/oauth_application';
+      const route = '/internal/workplace_search/org/settings/oauth_application';
       const oauthApplication = values.oauthApplication || ({} as IOauthApplication);
       const { name, redirectUri, confidential } = oauthApplication;
       const body = JSON.stringify({
@@ -275,7 +277,9 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       clearFlashMessages();
 
       try {
-        const response = await http.put(route, { body });
+        const response = await http.put<{
+          oauthApplication: IOauthApplication;
+        }>(route, { body });
         actions.setUpdatedOauthApplication(response);
         flashSuccessToast(OAUTH_APP_UPDATED_MESSAGE);
       } catch (e) {
@@ -284,7 +288,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
     },
     deleteSourceConfig: async ({ serviceType, name }) => {
       const { http } = HttpLogic.values;
-      const route = `/api/workplace_search/org/settings/connectors/${serviceType}`;
+      const route = `/internal/workplace_search/org/settings/connectors/${serviceType}`;
 
       try {
         await http.delete(route);

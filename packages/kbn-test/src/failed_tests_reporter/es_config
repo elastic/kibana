@@ -1,0 +1,153 @@
+PUT _ilm/policy/test-failures-policy
+{
+  "policy": {
+    "phases": {
+      "hot": {
+        "actions": {
+          "rollover": {
+            "max_primary_shard_size": "50gb"
+          }
+        }
+      },
+      "warm": {
+        "min_age": "30d",
+        "actions": {
+          "shrink": {
+            "number_of_shards": 1
+          },
+          "forcemerge": {
+            "max_num_segments": 1
+          }
+        }
+      },
+      "cold": {
+        "min_age": "60d",
+        "actions": {
+          "searchable_snapshot": {
+            "snapshot_repository": "found-snapshots"
+          }
+        }
+      },
+      "frozen": {
+        "min_age": "90d",
+        "actions": {
+          "searchable_snapshot": {
+            "snapshot_repository": "found-snapshots"
+          }
+        }
+      },
+      "delete": {
+        "min_age": "735d",
+        "actions": {
+          "delete": {}
+        }
+      }
+    }
+  }
+}
+
+# Creates a component template for mappings
+PUT _component_template/test-failures-mappings
+{
+  "template": {
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date",
+          "format": "date_optional_time||epoch_millis"
+        },
+        "build": {
+          "properties": {
+            "id": {
+              "type": "keyword",
+              "ignore_above": 256
+            },
+            "jobId": {
+              "type": "keyword",
+              "ignore_above": 256
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "url": {
+              "type": "keyword"
+            }
+          }
+        },
+        "failure": {
+          "properties": {
+            "classname": {
+              "type": "keyword",
+              "ignore_above": 256,
+              "fields": {
+                "text": {
+                  "type": "text"
+                }
+              }
+            },
+            "failure": {
+              "type": "keyword",
+              "ignore_above": 256,
+              "fields": {
+                "text": {
+                  "type": "text"
+                }
+              }
+            },
+            "likelyIrrelevant": {
+              "type": "boolean"
+            },
+            "name": {
+              "type": "keyword",
+              "fields": {
+                "text": {
+                  "type": "text"
+                }
+              }
+            },
+            "system-out": {
+              "type": "match_only_text"
+            },
+            "time": {
+              "type": "double"
+            }
+          }
+        },
+        "git": {
+          "properties": {
+            "branch": {
+              "type": "keyword",
+              "ignore_above": 256
+            },
+            "commit": {
+              "type": "keyword",
+              "ignore_above": 256
+            },
+            "repo": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+# Creates a component template for index settings
+PUT _component_template/test-failures-settings
+{
+  "template": {
+    "settings": {
+      "index.lifecycle.name": "test-failures-policy"
+    }
+  }
+}
+
+PUT _index_template/test-failures-index-template
+{
+  "index_patterns": ["test-failures*"],
+  "data_stream": { },
+  "composed_of": [ "test-failures-mappings", "test-failures-settings" ],
+  "priority": 500
+}

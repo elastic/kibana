@@ -122,7 +122,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('index pattern deletion', function indexDelete() {
       before(function () {
-        const expectedAlertText = 'Delete index pattern?';
+        const expectedAlertText = 'Delete data view?';
         return PageObjects.settings.removeIndexPattern().then(function (alertText) {
           expect(alertText).to.be(expectedAlertText);
         });
@@ -133,7 +133,7 @@ export default function ({ getService, getPageObjects }) {
         return retry.try(function tryingForTime() {
           return browser.getCurrentUrl().then(function (currentUrl) {
             log.debug('currentUrl = ' + currentUrl);
-            expect(currentUrl).to.contain('management/kibana/indexPatterns');
+            expect(currentUrl).to.contain('management/kibana/dataViews');
           });
         });
       });

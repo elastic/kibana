@@ -13,14 +13,14 @@ import { EuiButton } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { CrawlerOverviewLogic } from '../../crawler_overview_logic';
+import { CrawlerLogic } from '../../crawler_logic';
 import { CrawlerStatus } from '../../types';
 
 import { StopCrawlPopoverContextMenu } from './stop_crawl_popover_context_menu';
 
 export const CrawlerStatusIndicator: React.FC = () => {
-  const { domains, mostRecentCrawlRequestStatus } = useValues(CrawlerOverviewLogic);
-  const { startCrawl, stopCrawl } = useActions(CrawlerOverviewLogic);
+  const { domains, mostRecentCrawlRequestStatus } = useValues(CrawlerLogic);
+  const { startCrawl, stopCrawl } = useActions(CrawlerLogic);
 
   const disabledButton = (
     <EuiButton disabled>

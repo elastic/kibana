@@ -180,7 +180,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
           sort: [{ record_score: { order: 'desc' } }],
         },
       },
-      []
+      jobIds
     );
 
     const tableData: {
@@ -311,7 +311,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       },
     };
 
-    const { body } = await mlClient.anomalySearch(query, []);
+    const { body } = await mlClient.anomalySearch(query, jobIds);
     const maxScore = get(body, ['aggregations', 'max_score', 'value'], null);
 
     return { maxScore };
@@ -375,7 +375,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
           },
         },
       },
-      []
+      jobIds
     );
 
     const bucketsByJobId: Array<{ key: string; maxTimestamp: { value?: number } }> = get(
@@ -406,7 +406,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
           },
         },
       },
-      []
+      [jobId]
     );
 
     const examplesByCategoryId: { [key: string]: any } = {};
@@ -443,7 +443,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
           },
         },
       },
-      []
+      [jobId]
     );
 
     const definition = { categoryId, terms: null, regex: null, examples: [] };
@@ -492,7 +492,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
           },
         },
       },
-      []
+      [jobId]
     );
     return body ? body.hits.hits.map((r) => r._source) : [];
   }
@@ -583,7 +583,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
             aggs,
           },
         },
-        []
+        jobIds
       );
       if (fieldToBucket === JOB_ID) {
         finalResults = {
@@ -746,6 +746,8 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
             x1: endTimestamp,
           },
           details: annotation.annotation,
+          // Added for custom RectAnnotation tooltip with formatted timestamp
+          header: timestamp,
         });
       }
     });

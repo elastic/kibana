@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
@@ -221,6 +221,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
         const { jobId } = request.params;
         const { body } = await mlClient.updateJob({
           job_id: jobId,
+          // @ts-expect-error MlDetector is not compatible
           body: request.body,
         });
         return response.ok({
@@ -680,7 +681,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup AnomalyDetectors
    *
-   * @api {post} /api/ml/anomaly_detectors/:jobId/model_snapshots/:snapshotId/_update update model snapshot by snapshot ID
+   * @api {post} /api/ml/anomaly_detectors/:jobId/model_snapshots/:snapshotId/_update Update model snapshot by snapshot ID
    * @apiName UpdateModelSnapshotsById
    * @apiDescription Updates the model snapshot for the specified snapshot ID
    *

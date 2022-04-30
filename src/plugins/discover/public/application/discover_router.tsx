@@ -9,6 +9,7 @@
 import { Redirect, Route, Router, Switch } from 'react-router-dom';
 import React from 'react';
 import { History } from 'history';
+import { EuiErrorBoundary } from '@elastic/eui';
 import { KibanaContextProvider } from '../../../kibana_react/public';
 import { ContextAppRoute } from './apps/context';
 import { SingleDocRoute } from './apps/doc';
@@ -23,30 +24,32 @@ export const discoverRouter = (services: DiscoverServices, history: History) => 
     history,
   };
   return (
-    <Router history={history} data-test-subj="discover-react-router">
-      <KibanaContextProvider services={services}>
-        <Switch>
-          <Route
-            path="/context/:indexPatternId/:id"
-            children={<ContextAppRoute services={services} />}
-          />
-          <Route
-            path="/doc/:indexPattern/:index/:type"
-            render={(props) => (
-              <Redirect
-                to={`/doc/${props.match.params.indexPattern}/${props.match.params.index}`}
-              />
-            )}
-          />
-          <Route
-            path="/doc/:indexPatternId/:index"
-            children={<SingleDocRoute services={services} />}
-          />
-          <Route path="/view/:id" children={<DiscoverMainRoute {...mainRouteProps} />} />
-          <Route path="/" exact children={<DiscoverMainRoute {...mainRouteProps} />} />
-          <NotFoundRoute services={services} />
-        </Switch>
-      </KibanaContextProvider>
-    </Router>
+    <KibanaContextProvider services={services}>
+      <EuiErrorBoundary>
+        <Router history={history} data-test-subj="discover-react-router">
+          <Switch>
+            <Route
+              path="/context/:indexPatternId/:id"
+              children={<ContextAppRoute services={services} />}
+            />
+            <Route
+              path="/doc/:indexPattern/:index/:type"
+              render={(props) => (
+                <Redirect
+                  to={`/doc/${props.match.params.indexPattern}/${props.match.params.index}`}
+                />
+              )}
+            />
+            <Route
+              path="/doc/:indexPatternId/:index"
+              children={<SingleDocRoute services={services} />}
+            />
+            <Route path="/view/:id" children={<DiscoverMainRoute {...mainRouteProps} />} />
+            <Route path="/" exact children={<DiscoverMainRoute {...mainRouteProps} />} />
+            <NotFoundRoute services={services} />
+          </Switch>
+        </Router>
+      </EuiErrorBoundary>
+    </KibanaContextProvider>
   );
 };

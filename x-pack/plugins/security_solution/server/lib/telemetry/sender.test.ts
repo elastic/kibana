@@ -6,7 +6,7 @@
  */
 
 /* eslint-disable dot-notation */
-import { TelemetryEventsSender, copyAllowlistedFields, getV3UrlFromV2 } from './sender';
+import { TelemetryEventsSender } from './sender';
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
 import { URL } from 'url';
@@ -36,6 +36,11 @@ describe('TelemetryEventsSender', () => {
           event: {
             kind: 'alert',
           },
+          dns: {
+            question: {
+              name: 'test-dns',
+            },
+          },
           agent: {
             name: 'test',
           },
@@ -63,6 +68,7 @@ describe('TelemetryEventsSender', () => {
               malware_signature: {
                 key1: 'X',
               },
+              header_bytes: 'data in here',
               quarantine_result: true,
               quarantine_message: 'this file is bad',
               something_else: 'nope',
@@ -79,7 +85,9 @@ describe('TelemetryEventsSender', () => {
             nope: 'nope',
             executable: null, // null fields are never allowlisted
             working_directory: '/some/usr/dir',
+            entity_id: 'some_entity_id',
           },
+          Responses: '{ "result": 0 }', // >= 7.15
           Target: {
             process: {
               name: 'bar.exe',
@@ -89,6 +97,9 @@ describe('TelemetryEventsSender', () => {
               },
             },
           },
+          threat: {
+            ignored_object: true, // this field is not allowlisted
+          },
         },
       ];
 
@@ -97,6 +108,11 @@ describe('TelemetryEventsSender', () => {
         {
           event: {
             kind: 'alert',
+          },
+          dns: {
+            question: {
+              name: 'test-dns',
+            },
           },
           agent: {
             name: 'test',
@@ -117,6 +133,7 @@ describe('TelemetryEventsSender', () => {
                 key1: 'X',
                 key2: 'Y',
               },
+              header_bytes: 'data in here',
               malware_classification: {
                 key1: 'X',
               },
@@ -135,7 +152,9 @@ describe('TelemetryEventsSender', () => {
           process: {
             name: 'foo.exe',
             working_directory: '/some/usr/dir',
+            entity_id: 'some_entity_id',
           },
+          Responses: '{ "result": 0 }',
           Target: {
             process: {
               name: 'bar.exe',
@@ -175,12 +194,6 @@ describe('TelemetryEventsSender', () => {
         getTelemetryUrl: jest.fn(async () => new URL('https://telemetry.elastic.co')),
       };
       sender['telemetryUsageCounter'] = telemetryUsageCounter;
-      sender['fetchClusterInfo'] = jest.fn(async () => {
-        return {
-          cluster_name: 'test',
-          cluster_uuid: 'test-uuid',
-        };
-      });
       sender['sendEvents'] = jest.fn(async () => {
         sender['telemetryUsageCounter']?.incrementCounter({
           counterName: 'test_counter',
@@ -221,139 +234,31 @@ describe('TelemetryEventsSender', () => {
   });
 });
 
-describe('allowlistEventFields', () => {
-  const allowlist = {
-    a: true,
-    b: true,
-    c: {
-      d: true,
-    },
-  };
-
-  it('filters top level', () => {
-    const event = {
-      a: 'a',
-      a1: 'a1',
-      b: 'b',
-      b1: 'b1',
-    };
-    expect(copyAllowlistedFields(allowlist, event)).toStrictEqual({
-      a: 'a',
-      b: 'b',
-    });
-  });
-
-  it('filters nested', () => {
-    const event = {
-      a: {
-        a1: 'a1',
-      },
-      a1: 'a1',
-      b: {
-        b1: 'b1',
-      },
-      b1: 'b1',
-      c: {
-        d: 'd',
-        e: 'e',
-        f: 'f',
-      },
-    };
-    expect(copyAllowlistedFields(allowlist, event)).toStrictEqual({
-      a: {
-        a1: 'a1',
-      },
-      b: {
-        b1: 'b1',
-      },
-      c: {
-        d: 'd',
-      },
-    });
-  });
-
-  it('filters arrays of objects', () => {
-    const event = {
-      a: [
-        {
-          a1: 'a1',
-        },
-      ],
-      b: {
-        b1: 'b1',
-      },
-      c: [
-        {
-          d: 'd1',
-          e: 'e1',
-          f: 'f1',
-        },
-        {
-          d: 'd2',
-          e: 'e2',
-          f: 'f2',
-        },
-        {
-          d: 'd3',
-          e: 'e3',
-          f: 'f3',
-        },
-      ],
-    };
-    expect(copyAllowlistedFields(allowlist, event)).toStrictEqual({
-      a: [
-        {
-          a1: 'a1',
-        },
-      ],
-      b: {
-        b1: 'b1',
-      },
-      c: [
-        {
-          d: 'd1',
-        },
-        {
-          d: 'd2',
-        },
-        {
-          d: 'd3',
-        },
-      ],
-    });
-  });
-
-  it("doesn't create empty objects", () => {
-    const event = {
-      a: 'a',
-      b: 'b',
-      c: {
-        e: 'e',
-      },
-    };
-    expect(copyAllowlistedFields(allowlist, event)).toStrictEqual({
-      a: 'a',
-      b: 'b',
-    });
-  });
-});
-
 describe('getV3UrlFromV2', () => {
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+  });
+
   it('should return prod url', () => {
-    expect(getV3UrlFromV2('https://telemetry.elastic.co/xpack/v2/send', 'alerts-endpoint')).toBe(
-      'https://telemetry.elastic.co/v3/send/alerts-endpoint'
-    );
+    const sender = new TelemetryEventsSender(logger);
+    expect(
+      sender.getV3UrlFromV2('https://telemetry.elastic.co/xpack/v2/send', 'alerts-endpoint')
+    ).toBe('https://telemetry.elastic.co/v3/send/alerts-endpoint');
   });
 
   it('should return staging url', () => {
+    const sender = new TelemetryEventsSender(logger);
     expect(
-      getV3UrlFromV2('https://telemetry-staging.elastic.co/xpack/v2/send', 'alerts-endpoint')
+      sender.getV3UrlFromV2('https://telemetry-staging.elastic.co/xpack/v2/send', 'alerts-endpoint')
     ).toBe('https://telemetry-staging.elastic.co/v3-dev/send/alerts-endpoint');
   });
 
   it('should support ports and auth', () => {
+    const sender = new TelemetryEventsSender(logger);
     expect(
-      getV3UrlFromV2('http://user:pass@myproxy.local:1337/xpack/v2/send', 'alerts-endpoint')
+      sender.getV3UrlFromV2('http://user:pass@myproxy.local:1337/xpack/v2/send', 'alerts-endpoint')
     ).toBe('http://user:pass@myproxy.local:1337/v3/send/alerts-endpoint');
   });
 });

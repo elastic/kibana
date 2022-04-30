@@ -14,9 +14,9 @@ static createIndexAliasNotFoundError(alias: string): DecoratedError;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  alias | <code>string</code> |  |
+|  alias | string |  |
 
 <b>Returns:</b>
 
-`DecoratedError`
+DecoratedError
 

@@ -41,7 +41,7 @@ export function useServiceAlertsFetcher({
       }
 
       return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/alerts',
+        endpoint: 'GET /internal/apm/services/{serviceName}/alerts',
         params: {
           path: {
             serviceName,

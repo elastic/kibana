@@ -30,7 +30,8 @@ interface SetupDeps {
 }
 
 export class DashboardPlugin
-  implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps> {
+  implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps>
+{
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

@@ -32,21 +32,17 @@ export function APMPolicyForm({
   isCloudPolicy,
   updateAPMPolicy,
 }: Props) {
-  const {
-    apmSettings,
-    rumSettings,
-    tlsSettings,
-    agentAuthorizationSettings,
-  } = useMemo(() => {
-    return {
-      apmSettings: getApmSettings({ isCloudPolicy }),
-      rumSettings: getRUMSettings(),
-      tlsSettings: getTLSSettings(),
-      agentAuthorizationSettings: getAgentAuthorizationSettings({
-        isCloudPolicy,
-      }),
-    };
-  }, [isCloudPolicy]);
+  const { apmSettings, rumSettings, tlsSettings, agentAuthorizationSettings } =
+    useMemo(() => {
+      return {
+        apmSettings: getApmSettings({ isCloudPolicy }),
+        rumSettings: getRUMSettings(),
+        tlsSettings: getTLSSettings(),
+        agentAuthorizationSettings: getAgentAuthorizationSettings({
+          isCloudPolicy,
+        }),
+      };
+    }, [isCloudPolicy]);
 
   function handleFormChange(key: string, value: any) {
     // Merge new key/value with the rest of fields

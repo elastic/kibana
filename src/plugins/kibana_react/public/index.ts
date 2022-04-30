@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/109898
+/* eslint-disable @kbn/eslint/no_export_all */
+
 export * from './code_editor';
 export * from './url_template_editor';
 export * from './exit_full_screen_button';
@@ -20,7 +23,8 @@ export * from './toolbar_button';
 export * from './split_panel';
 export * from './react_router_navigate';
 export * from './page_template';
-export { ValidatedDualRange, Value } from './validated_range';
+export type { Value } from './validated_range';
+export { ValidatedDualRange } from './validated_range';
 export * from './notifications';
 export { Markdown, MarkdownSimple } from './markdown';
 export { reactToUiComponent, uiToReactComponent } from './adapters';

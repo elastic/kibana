@@ -241,6 +241,11 @@ export function MachineLearningCommonUIProvider({
       channelTolerance = 10,
       valueTolerance = 10
     ) {
+      if (process.env.TEST_CLOUD) {
+        log.warning('Not running color assertions in cloud');
+        return;
+      }
+
       await retry.tryForTime(30 * 1000, async () => {
         await testSubjects.existOrFail(dataTestSubj);
 
@@ -303,6 +308,10 @@ export function MachineLearningCommonUIProvider({
       await PageObjects.spaceSelector.openSpacesNav();
       await PageObjects.spaceSelector.goToSpecificSpace(spaceId);
       await PageObjects.spaceSelector.expectHomePage(spaceId);
+    },
+
+    async waitForDatePickerIndicatorLoaded() {
+      await testSubjects.waitForEnabled('superDatePickerApplyTimeButton');
     },
   };
 }

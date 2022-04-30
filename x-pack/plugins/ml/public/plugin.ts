@@ -46,6 +46,10 @@ import type { DataVisualizerPluginStart } from '../../data_visualizer/public';
 import type { PluginSetupContract as AlertingSetup } from '../../alerting/public';
 import { registerManagementSection } from './application/management';
 import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
+import type {
+  FieldFormatsSetup,
+  FieldFormatsStart,
+} from '../../../../src/plugins/field_formats/public';
 
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
@@ -57,6 +61,7 @@ export interface MlStartDependencies {
   maps?: MapsStartApi;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
   dataVisualizer: DataVisualizerPluginStart;
+  fieldFormats: FieldFormatsStart;
 }
 
 export interface MlSetupDependencies {
@@ -72,6 +77,7 @@ export interface MlSetupDependencies {
   triggersActionsUi?: TriggersAndActionsUIPublicPluginSetup;
   alerting?: AlertingSetup;
   usageCollection?: UsageCollectionSetup;
+  fieldFormats: FieldFormatsSetup;
 }
 
 export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
@@ -116,6 +122,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             triggersActionsUi: pluginsStart.triggersActionsUi,
             dataVisualizer: pluginsStart.dataVisualizer,
             usageCollection: pluginsSetup.usageCollection,
+            fieldFormats: pluginsStart.fieldFormats,
           },
           params
         );
@@ -151,12 +158,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
       // register various ML plugin features which require a full license
       // note including registerFeature in register_helper would cause the page bundle size to increase significantly
-      const {
-        registerEmbeddables,
-        registerMlUiActions,
-        registerSearchLinks,
-        registerMlAlerts,
-      } = await import('./register_helper');
+      const { registerEmbeddables, registerMlUiActions, registerSearchLinks, registerMlAlerts } =
+        await import('./register_helper');
 
       const mlEnabled = isMlEnabled(license);
       const fullLicense = isFullLicense(license);

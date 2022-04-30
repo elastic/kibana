@@ -13,11 +13,11 @@ import { EuiCallOut } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { CrawlerOverviewLogic } from '../crawler_overview_logic';
+import { CrawlerLogic } from '../crawler_logic';
 import { CrawlerStatus } from '../types';
 
 export const CrawlerStatusBanner: React.FC = () => {
-  const { mostRecentCrawlRequestStatus } = useValues(CrawlerOverviewLogic);
+  const { mostRecentCrawlRequestStatus } = useValues(CrawlerLogic);
   if (
     mostRecentCrawlRequestStatus === CrawlerStatus.Running ||
     mostRecentCrawlRequestStatus === CrawlerStatus.Starting ||

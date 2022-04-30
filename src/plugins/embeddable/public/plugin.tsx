@@ -36,6 +36,7 @@ import {
   IEmbeddable,
   EmbeddablePanel,
   SavedObjectEmbeddableInput,
+  EmbeddableContainerContext,
 } from './lib';
 import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
 import { EmbeddableStateTransfer } from './lib/state_transfer';
@@ -43,7 +44,7 @@ import { Storage } from '../../kibana_utils/public';
 import { migrateToLatest, PersistableStateService } from '../../kibana_utils/common';
 import { ATTRIBUTE_SERVICE_KEY, AttributeService } from './lib/attribute_service';
 import { AttributeServiceOptions } from './lib/attribute_service/attribute_service';
-import { EmbeddableStateWithType } from '../common/types';
+import { EmbeddableStateWithType, CommonEmbeddableStartContract } from '../common/types';
 import {
   getExtractFunction,
   getInjectFunction,
@@ -90,20 +91,23 @@ export interface EmbeddableStart extends PersistableStateService<EmbeddableState
     V extends EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: A } = EmbeddableInput & {
       [ATTRIBUTE_SERVICE_KEY]: A;
     },
-    R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
+    R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
+    M extends unknown = unknown
   >(
     type: string,
-    options: AttributeServiceOptions<A>
-  ) => AttributeService<A, V, R>;
+    options: AttributeServiceOptions<A, M>
+  ) => AttributeService<A, V, R, M>;
 }
 
-export type EmbeddablePanelHOC = React.FC<{ embeddable: IEmbeddable; hideHeader?: boolean }>;
+export type EmbeddablePanelHOC = React.FC<{
+  embeddable: IEmbeddable;
+  hideHeader?: boolean;
+  containerContext?: EmbeddableContainerContext;
+}>;
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
-  private readonly embeddableFactoryDefinitions: Map<
-    string,
-    EmbeddableFactoryDefinition
-  > = new Map();
+  private readonly embeddableFactoryDefinitions: Map<string, EmbeddableFactoryDefinition> =
+    new Map();
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
   private readonly enhancements: EnhancementsRegistry = new Map();
   private customEmbeddableFactoryProvider?: EmbeddableFactoryProvider;
@@ -155,30 +159,37 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     );
     this.isRegistryReady = true;
 
-    const getEmbeddablePanelHoc = () => ({
-      embeddable,
-      hideHeader,
-    }: {
-      embeddable: IEmbeddable;
-      hideHeader?: boolean;
-    }) => (
-      <EmbeddablePanel
-        hideHeader={hideHeader}
-        embeddable={embeddable}
-        stateTransfer={this.stateTransferService}
-        getActions={uiActions.getTriggerCompatibleActions}
-        getEmbeddableFactory={this.getEmbeddableFactory}
-        getAllEmbeddableFactories={this.getEmbeddableFactories}
-        overlays={core.overlays}
-        notifications={core.notifications}
-        application={core.application}
-        inspector={inspector}
-        SavedObjectFinder={getSavedObjectFinder(core.savedObjects, core.uiSettings)}
-      />
-    );
+    const getEmbeddablePanelHoc =
+      () =>
+      ({
+        embeddable,
+        hideHeader,
+        containerContext,
+      }: {
+        embeddable: IEmbeddable;
+        hideHeader?: boolean;
+        containerContext?: EmbeddableContainerContext;
+      }) =>
+        (
+          <EmbeddablePanel
+            hideHeader={hideHeader}
+            embeddable={embeddable}
+            stateTransfer={this.stateTransferService}
+            getActions={uiActions.getTriggerCompatibleActions}
+            getEmbeddableFactory={this.getEmbeddableFactory}
+            getAllEmbeddableFactories={this.getEmbeddableFactories}
+            overlays={core.overlays}
+            notifications={core.notifications}
+            application={core.application}
+            inspector={inspector}
+            SavedObjectFinder={getSavedObjectFinder(core.savedObjects, core.uiSettings)}
+            containerContext={containerContext}
+          />
+        );
 
-    const commonContract = {
-      getEmbeddableFactory: this.getEmbeddableFactory,
+    const commonContract: CommonEmbeddableStartContract = {
+      getEmbeddableFactory: this
+        .getEmbeddableFactory as unknown as CommonEmbeddableStartContract['getEmbeddableFactory'],
       getEnhancement: this.getEnhancement,
     };
 

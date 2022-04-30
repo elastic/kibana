@@ -66,7 +66,7 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
       return;
     }
 
-    const { dispose } = monaco.languages.registerCompletionItemProvider(HandlebarsLang.ID, {
+    const { dispose } = monaco.languages.registerCompletionItemProvider(HandlebarsLang, {
       triggerCharacters: ['{', '/', '?', '&', '='],
       provideCompletionItems(model, position, context, token) {
         const { lineNumber } = position;
@@ -124,7 +124,7 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
   return (
     <div className={'urlTemplateEditor__container'} onKeyDown={handleKeyDown}>
       <Editor
-        languageId={HandlebarsLang.ID}
+        languageId={HandlebarsLang}
         height={height}
         value={value}
         onChange={onChange}

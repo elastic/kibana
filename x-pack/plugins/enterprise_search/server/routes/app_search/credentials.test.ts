@@ -10,14 +10,14 @@ import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks_
 import { registerCredentialsRoutes } from './credentials';
 
 describe('credentials routes', () => {
-  describe('GET /api/app_search/credentials', () => {
+  describe('GET /internal/app_search/credentials', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/credentials',
+        path: '/internal/app_search/credentials',
       });
 
       registerCredentialsRoutes({
@@ -50,14 +50,14 @@ describe('credentials routes', () => {
     });
   });
 
-  describe('POST /api/app_search/credentials', () => {
+  describe('POST /internal/app_search/credentials', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/app_search/credentials',
+        path: '/internal/app_search/credentials',
       });
 
       registerCredentialsRoutes({
@@ -162,14 +162,14 @@ describe('credentials routes', () => {
     });
   });
 
-  describe('GET /api/app_search/credentials/details', () => {
+  describe('GET /internal/app_search/credentials/details', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/credentials/details',
+        path: '/internal/app_search/credentials/details',
       });
 
       registerCredentialsRoutes({
@@ -185,14 +185,14 @@ describe('credentials routes', () => {
     });
   });
 
-  describe('PUT /api/app_search/credentials/{name}', () => {
+  describe('PUT /internal/app_search/credentials/{name}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path: '/api/app_search/credentials/{name}',
+        path: '/internal/app_search/credentials/{name}',
       });
 
       registerCredentialsRoutes({
@@ -297,14 +297,14 @@ describe('credentials routes', () => {
     });
   });
 
-  describe('DELETE /api/app_search/credentials/{name}', () => {
+  describe('DELETE /internal/app_search/credentials/{name}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'delete',
-        path: '/api/app_search/credentials/{name}',
+        path: '/internal/app_search/credentials/{name}',
       });
 
       registerCredentialsRoutes({

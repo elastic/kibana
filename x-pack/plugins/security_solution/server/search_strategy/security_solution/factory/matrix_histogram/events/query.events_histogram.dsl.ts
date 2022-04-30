@@ -23,6 +23,7 @@ export const buildEventsHistogramQuery = ({
   stackByField = 'event.action',
   threshold,
   includeMissingData = true,
+  runtimeMappings,
 }: MatrixHistogramRequestOptions) => {
   const [queryFilterFirstClause, ...queryFilterClauses] = createQueryFilterClauses(filterQuery);
   const stackByIpField =
@@ -152,8 +153,8 @@ export const buildEventsHistogramQuery = ({
 
   const dslQuery = {
     index: defaultIndex,
-    allowNoIndices: true,
-    ignoreUnavailable: true,
+    allow_no_indices: true,
+    ignore_unavailable: true,
     track_total_hits: true,
     body: {
       aggregations: getHistogramAggregation(),
@@ -162,6 +163,7 @@ export const buildEventsHistogramQuery = ({
           filter,
         },
       },
+      runtime_mappings: runtimeMappings,
       size: 0,
     },
   };

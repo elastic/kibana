@@ -28,7 +28,7 @@ import {
   EuiText,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
@@ -277,7 +277,12 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
               showOverlappingTicks={true}
               tickFormat={dateFormatter}
             />
-            <Axis domain={{ max: maxY }} id="left" title={aggLabel} position={Position.Left} />
+            <Axis
+              domain={{ max: maxY, min: NaN }}
+              id="left"
+              title={aggLabel}
+              position={Position.Left}
+            />
             {alertVisualizationDataKeys.map((key: string) => {
               return (
                 <LineSeries

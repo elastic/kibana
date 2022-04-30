@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { useUpdateKueryString } from '../../../../hooks';
-import { useIndexPattern } from '../../query_bar/use_index_pattern';
+import { useIndexPattern, generateUpdatedKueryString } from '../../../../hooks';
 import { useFetcher } from '../../../../../../observability/public';
 import { fetchSnapshotCount } from '../../../../state/api';
 
@@ -16,9 +15,9 @@ export const useSnapShotCount = ({ query, filters }: { query: string; filters: [
       ? ''
       : JSON.stringify(Array.from(Object.entries(filters)));
 
-  const { index_pattern: indexPattern } = useIndexPattern();
+  const indexPattern = useIndexPattern();
 
-  const [esKuery, error] = useUpdateKueryString(indexPattern, query, parsedFilters);
+  const [esKuery, error] = generateUpdatedKueryString(indexPattern, query, parsedFilters);
 
   const { data, loading } = useFetcher(
     () =>

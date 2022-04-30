@@ -49,14 +49,14 @@ const mockDataPoints = [
   },
 ];
 
-const mockEmbeddable = ({
+const mockEmbeddable = {
   getInput: () => ({
     filters: [],
     timeRange: { from: 'now-15m', to: 'now' },
     query: { query: 'test', language: 'kuery' },
   }),
   getOutput: () => ({}),
-} as unknown) as IEmbeddable;
+} as unknown as IEmbeddable;
 
 const mockNavigateToUrl = jest.fn(() => Promise.resolve());
 
@@ -262,7 +262,7 @@ describe('UrlDrilldown', () => {
         indexPatterns: [{ id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' }],
       }
     );
-    const data: any = {
+    const data = {
       data: [
         createPoint({ field: 'field0', value: 'value0' }),
         createPoint({ field: 'field1', value: 'value1' }),

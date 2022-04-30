@@ -9,7 +9,7 @@
 import React from 'react';
 import rison from 'rison-node';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -27,7 +27,7 @@ const SEARCH_OBJECT_TYPE = 'search';
 
 interface OpenSearchPanelProps {
   onClose: () => void;
-  makeUrl: (id: string) => string;
+  onOpenSavedSearch: (id: string) => void;
 }
 
 export function OpenSearchPanel(props: OpenSearchPanelProps) {
@@ -70,7 +70,7 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
             },
           ]}
           onChoose={(id) => {
-            window.location.assign(props.makeUrl(id));
+            props.onOpenSavedSearch(id);
             props.onClose();
           }}
           uiSettings={uiSettings}

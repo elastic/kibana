@@ -22,7 +22,7 @@ import { DashboardConstants } from './dashboard_constants';
  */
 const getSerializableRecord: <O>(o: O) => O & SerializableRecord = flow(JSON.stringify, JSON.parse);
 
-const cleanEmptyKeys = (stateObj: Record<string, unknown>) => {
+export const cleanEmptyKeys = (stateObj: Record<string, unknown>) => {
   Object.keys(stateObj).forEach((key) => {
     if (stateObj[key] === undefined) {
       delete stateObj[key];
@@ -128,6 +128,7 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
       ...restParams
     } = params;
     const useHash = paramsUseHash ?? this.deps.useHashedUrl;
+
     const hash = dashboardId ? `view/${dashboardId}` : `create`;
 
     const getSavedFiltersFromDestinationDashboardIfNeeded = async (): Promise<Filter[]> => {

@@ -8,4 +8,5 @@
 export interface Url {
   domain?: string;
   full: string;
+  original?: string;
 }

@@ -13,8 +13,7 @@ import { Document } from '../persistence';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { DateRange } from '../../common';
 import { LensAppServices } from '../app_plugin/types';
-import { DatasourceMap, VisualizationMap } from '../types';
-
+import { DatasourceMap, VisualizationMap, SharingSavedObjectProps } from '../types';
 export interface VisualizationState {
   activeId: string | null;
   state: unknown;
@@ -44,11 +43,10 @@ export interface LensAppState extends EditorFrameState {
   savedQuery?: SavedQuery;
   searchSessionId: string;
   resolvedDateRange: DateRange;
+  sharingSavedObjectProps?: Omit<SharingSavedObjectProps, 'sourceId'>;
 }
 
-export type DispatchSetState = (
-  state: Partial<LensAppState>
-) => {
+export type DispatchSetState = (state: Partial<LensAppState>) => {
   payload: Partial<LensAppState>;
   type: string;
 };

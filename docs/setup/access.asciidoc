@@ -16,7 +16,7 @@ If you are using a self-managed deployment, access {kib} through the web applica
 
 . Point your web browser to the machine where you are running {kib} and specify the port number. For example, `localhost:5601` or `http://YOURDOMAIN.com:5601`.
 +
-To remotely connect to {kib}, set <server-host,server.host>> to a non-loopback address.
+To remotely connect to {kib}, set <<server-host,server.host>> to a non-loopback address.
 
 . Log on to your account.
 
@@ -37,4 +37,21 @@ image::images/kibana-status-page-7_14_0.png[Kibana server status page]
 
 For JSON-formatted server status details, use the `localhost:5601/api/status` API endpoint. 
 
+[float]
+[[not-ready]]
+=== {kib} not ready
+
+If you receive an error that the {kib} `server is not ready`, check the following:
+
+* The {es} connectivity: 
++
+[source,sh]
+----
+`curl -XGET elasticsearch_ip_or_hostname:9200/`
+----
+* The {kib} logs:
+** Linux, DEB or RPM package: `/var/log/kibana/kibana.log`
+** Linux, tar.gz package: `$KIBANA_HOME/log/kibana.log`
+** Windows: `$KIBANA_HOME\log\kibana.log`
+* The health status of `.kibana*` indices
 

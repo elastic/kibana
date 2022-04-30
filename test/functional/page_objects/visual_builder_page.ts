@@ -30,7 +30,6 @@ export class VisualBuilderPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly comboBox = this.ctx.getService('comboBox');
   private readonly elasticChart = this.ctx.getService('elasticChart');
-  private readonly kibanaServer = this.ctx.getService('kibanaServer');
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
@@ -158,6 +157,7 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async getMarkdownText(): Promise<string> {
+    await this.visChart.waitForVisualizationRenderingStabilized();
     const el = await this.find.byCssSelector('.tvbVis');
     const text = await el.getVisibleText();
     return text;
@@ -271,20 +271,22 @@ export class VisualBuilderPageObject extends FtrService {
   /**
    * change the data formatter for template in an `options` label tab
    *
-   * @param formatter - typeof formatter which you can use for presenting data. By default kibana show `Number` formatter
+   * @param formatter - typeof formatter which you can use for presenting data. By default kibana show `Default` formatter
    */
   public async changeDataFormatter(
-    formatter: 'Bytes' | 'Number' | 'Percent' | 'Duration' | 'Custom'
+    formatter: 'default' | 'bytes' | 'number' | 'percent' | 'duration' | 'custom'
   ) {
-    const formatterEl = await this.testSubjects.find('tsvbDataFormatPicker');
-    await this.comboBox.setElement(formatterEl, formatter, { clickWithMouse: true });
+    await this.testSubjects.click('tsvbDataFormatPicker');
+    await this.testSubjects.click(`tsvbDataFormatPicker-${formatter}`);
+    await this.visChart.waitForVisualizationRenderingStabilized();
   }
 
   public async setDrilldownUrl(value: string) {
     const drilldownEl = await this.testSubjects.find('drilldownUrl');
 
     await drilldownEl.clearValue();
-    await drilldownEl.type(value);
+    await drilldownEl.type(value, { charByChar: true });
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   /**
@@ -305,16 +307,16 @@ export class VisualBuilderPageObject extends FtrService {
   }) {
     if (from) {
       await this.retry.try(async () => {
-        const fromCombobox = await this.find.byCssSelector('[id$="from-row"] .euiComboBox');
-        await this.comboBox.setElement(fromCombobox, from, { clickWithMouse: true });
+        await this.comboBox.set('dataFormatPickerDurationFrom', from);
       });
     }
     if (to) {
-      const toCombobox = await this.find.byCssSelector('[id$="to-row"] .euiComboBox');
-      await this.comboBox.setElement(toCombobox, to, { clickWithMouse: true });
+      await this.retry.try(async () => {
+        await this.comboBox.set('dataFormatPickerDurationTo', to);
+      });
     }
     if (decimalPlaces) {
-      const decimalPlacesInput = await this.find.byCssSelector('[id$="decimal"]');
+      const decimalPlacesInput = await this.testSubjects.find('dataFormatPickerDurationDecimal');
       await decimalPlacesInput.type(decimalPlaces);
     }
   }
@@ -443,6 +445,7 @@ export class VisualBuilderPageObject extends FtrService {
    * @memberof VisualBuilderPage
    */
   public async getViewTable(): Promise<string> {
+    await this.visChart.waitForVisualizationRenderingStabilized();
     const tableView = await this.testSubjects.find('tableView', 20000);
     return await tableView.getVisibleText();
   }
@@ -502,12 +505,39 @@ export class VisualBuilderPageObject extends FtrService {
     return await annotationTooltipDetails.getVisibleText();
   }
 
+  public async toggleIndexPatternSelectionModePopover(shouldOpen: boolean) {
+    await this.retry.try(async () => {
+      const isPopoverOpened = await this.testSubjects.exists(
+        'switchIndexPatternSelectionModePopoverContent'
+      );
+      if ((shouldOpen && !isPopoverOpened) || (!shouldOpen && isPopoverOpened)) {
+        await this.testSubjects.click('switchIndexPatternSelectionModePopoverButton');
+      }
+      if (shouldOpen) {
+        await this.testSubjects.existOrFail('switchIndexPatternSelectionModePopoverContent');
+      } else {
+        await this.testSubjects.missingOrFail('switchIndexPatternSelectionModePopoverContent');
+      }
+    });
+  }
+
   public async switchIndexPatternSelectionMode(useKibanaIndices: boolean) {
-    await this.testSubjects.click('switchIndexPatternSelectionModePopover');
+    await this.toggleIndexPatternSelectionModePopover(true);
     await this.testSubjects.setEuiSwitch(
       'switchIndexPatternSelectionMode',
       useKibanaIndices ? 'check' : 'uncheck'
     );
+    await this.toggleIndexPatternSelectionModePopover(false);
+  }
+
+  public async checkIndexPatternSelectionModeSwitchIsEnabled() {
+    await this.toggleIndexPatternSelectionModePopover(true);
+    let isEnabled;
+    await this.testSubjects.retry.tryForTime(2000, async () => {
+      isEnabled = await this.testSubjects.isEnabled('switchIndexPatternSelectionMode');
+    });
+    await this.toggleIndexPatternSelectionModePopover(false);
+    return isEnabled;
   }
 
   public async setIndexPatternValue(value: string, useKibanaIndices?: boolean) {
@@ -634,7 +664,10 @@ export class VisualBuilderPageObject extends FtrService {
   public async setBackgroundColor(colorHex: string): Promise<void> {
     await this.clickColorPicker();
     await this.checkColorPickerPopUpIsPresent();
-    await this.find.setValue('.euiColorPicker input', colorHex);
+    await this.testSubjects.setValue('euiColorPickerInput_top', colorHex, {
+      clearWithKeyboard: true,
+      typeCharByChar: true,
+    });
     await this.clickColorPicker();
     await this.visChart.waitForVisualizationRenderingStabilized();
   }
@@ -647,7 +680,10 @@ export class VisualBuilderPageObject extends FtrService {
   public async setColorPickerValue(colorHex: string, nth: number = 0): Promise<void> {
     await this.clickColorPicker(nth);
     await this.checkColorPickerPopUpIsPresent();
-    await this.find.setValue('.euiColorPicker input', colorHex);
+    await this.testSubjects.setValue('euiColorPickerInput_top', colorHex, {
+      clearWithKeyboard: true,
+      typeCharByChar: true,
+    });
     await this.clickColorPicker(nth);
     await this.visChart.waitForVisualizationRenderingStabilized();
   }
@@ -842,10 +878,11 @@ export class VisualBuilderPageObject extends FtrService {
     await optionInput.type(query);
   }
 
+  public async clickSeriesLegendItem(name: string) {
+    await this.find.clickByCssSelector(`[data-ech-series-name="${name}"] .echLegendItem__label`);
+  }
+
   public async toggleNewChartsLibraryWithDebug(enabled: boolean) {
-    await this.kibanaServer.uiSettings.update({
-      'visualization:visualize:legacyChartsLibrary': !enabled,
-    });
     await this.elasticChart.setNewChartUiDebugFlag(enabled);
   }
 
@@ -875,5 +912,15 @@ export class VisualBuilderPageObject extends FtrService {
   public async getAreaChartData(chartData?: DebugState, nth: number = 0) {
     const areas = (await this.getChartItems(chartData)) as DebugState['areas'];
     return areas?.[nth]?.lines.y1.points.map(({ x, y }) => [x, y]);
+  }
+
+  public async getVisualizeError() {
+    const visError = await this.testSubjects.find(`visualization-error`);
+    const errorSpans = await visError.findAllByClassName('euiText--extraSmall');
+    return await errorSpans[0].getVisibleText();
+  }
+
+  public async checkInvalidAggComponentIsPresent() {
+    await this.testSubjects.existOrFail(`invalid_agg`);
   }
 }

@@ -1,0 +1,4 @@
+{
+  "main": "../target_node/to_boolean_rt",
+  "types": "../target_types/to_boolean_rt"
+}

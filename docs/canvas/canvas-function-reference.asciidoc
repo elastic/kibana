@@ -980,7 +980,7 @@ Default: `"-_index:.kibana"`
 
 |`index`
 |`string`
-|An index or index pattern. For example, `"logstash-*"`.
+|An index or {data-source}. For example, `"logstash-*"`.
 
 Default: `"_all"`
 |===
@@ -1020,7 +1020,7 @@ filters
   palette={palette "#7ECAE3" "#003A4D" gradient=true}
 | render
 ----
-This retrieves the first 10000 documents data from the `kibana_sample_data_ecommerce` index sorted by `order_date` in ascending order, and only requests the `customer_gender`, `taxful_total_price`, and `order_date` fields.
+This retrieves the first 10000 documents data from the `kibana_sample_data_ecommerce` {data-source} sorted by `order_date` in ascending order, and only requests the `customer_gender`, `taxful_total_price`, and `order_date` fields.
 
 *Accepts:* `filter`
 
@@ -1048,7 +1048,7 @@ Default: `1000`
 
 |`index`
 |`string`
-|An index or index pattern. For example, `"logstash-*"`.
+|An index or {data-source}. For example, `"logstash-*"`.
 
 Default: `"_all"`
 

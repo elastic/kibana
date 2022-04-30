@@ -22,7 +22,8 @@ import {
   fillEmptySeverityMappings,
 } from './helpers';
 import { mockRuleWithEverything, mockRule } from './all/__mocks__/mock';
-import { esFilters } from '../../../../../../../../src/plugins/data/public';
+import { FilterStateStore } from '@kbn/es-query';
+
 import { Rule } from '../../../containers/detection_engine/rules';
 import {
   AboutStepRule,
@@ -60,7 +61,7 @@ describe('rule helpers', () => {
           filters: [
             {
               $state: {
-                store: esFilters.FilterStateStore.GLOBAL_STATE,
+                store: FilterStateStore.GLOBAL_STATE,
               },
               meta: {
                 alias: null,

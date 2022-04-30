@@ -26,6 +26,14 @@ export class EMSFileField extends AbstractField implements IField {
     this._source = source;
   }
 
+  supportsFieldMetaFromEs(): boolean {
+    return false;
+  }
+
+  supportsFieldMetaFromLocalData(): boolean {
+    return true;
+  }
+
   getSource(): IVectorSource {
     return this._source;
   }

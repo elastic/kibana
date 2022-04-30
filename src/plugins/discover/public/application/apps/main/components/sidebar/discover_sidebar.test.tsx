@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { each, cloneDeep } from 'lodash';
+import { cloneDeep, each } from 'lodash';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-expect-error
@@ -15,13 +15,17 @@ import realHits from '../../../../../__fixtures__/real_hits.js';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { DiscoverSidebarProps } from './discover_sidebar';
-import { IndexPatternAttributes } from '../../../../../../../data/common';
+import { flattenHit, IndexPatternAttributes } from '../../../../../../../data/common';
 import { SavedObject } from '../../../../../../../../core/types';
 import { getDefaultFieldFilter } from './lib/field_filter';
-import { DiscoverSidebar } from './discover_sidebar';
+import { DiscoverSidebarComponent as DiscoverSidebar } from './discover_sidebar';
 import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
 import { discoverServiceMock as mockDiscoverServices } from '../../../../../__mocks__/services';
 import { stubLogstashIndexPattern } from '../../../../../../../data/common/stubs';
+import { VIEW_MODE } from '../view_mode_toggle';
+import { BehaviorSubject } from 'rxjs';
+import { AvailableFields$ } from '../../services/use_saved_search';
+import { FetchStatus } from '../../../../types';
 
 jest.mock('../../../../../kibana_services', () => ({
   getServices: () => mockDiscoverServices,
@@ -31,9 +35,9 @@ function getCompProps(): DiscoverSidebarProps {
   const indexPattern = stubLogstashIndexPattern;
 
   // @ts-expect-error _.each() is passing additional args to flattenHit
-  const hits = (each(cloneDeep(realHits), indexPattern.flattenHit) as Array<
+  const hits = each(cloneDeep(realHits), indexPattern.flattenHit) as Array<
     Record<string, unknown>
-  >) as ElasticSearchHit[];
+  > as ElasticSearchHit[];
 
   const indexPatternList = [
     { id: '0', attributes: { title: 'b' } } as SavedObject<IndexPatternAttributes>,
@@ -44,10 +48,15 @@ function getCompProps(): DiscoverSidebarProps {
   const fieldCounts: Record<string, number> = {};
 
   for (const hit of hits) {
-    for (const key of Object.keys(indexPattern.flattenHit(hit))) {
+    for (const key of Object.keys(flattenHit(hit, indexPattern))) {
       fieldCounts[key] = (fieldCounts[key] || 0) + 1;
     }
   }
+  const availableFields$ = new BehaviorSubject({
+    fetchStatus: FetchStatus.COMPLETE,
+    fields: [] as string[],
+  }) as AvailableFields$;
+
   return {
     columns: ['extension'],
     fieldCounts,
@@ -65,6 +74,9 @@ function getCompProps(): DiscoverSidebarProps {
     setFieldFilter: jest.fn(),
     onEditRuntimeField: jest.fn(),
     editField: jest.fn(),
+    viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+    onDataViewCreated: jest.fn(),
+    availableFields$,
   };
 }
 

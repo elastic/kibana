@@ -60,6 +60,13 @@ export const validateJobSchema = schema.object({
   }),
 });
 
+export const validateDatafeedPreviewSchema = schema.object({
+  job: schema.object({
+    ...anomalyDetectionJobSchema,
+    datafeed_config: datafeedConfigSchema,
+  }),
+});
+
 export const validateCardinalitySchema = schema.object({
   ...anomalyDetectionJobSchema,
   datafeed_config: datafeedConfigSchema,

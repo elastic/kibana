@@ -10,7 +10,7 @@ import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { orderBy } from 'lodash';
 import React, { ReactNode, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 
 // TODO: this should really be imported from EUI
@@ -43,7 +43,12 @@ interface Props<T> {
   ) => T[];
   pagination?: boolean;
   isLoading?: boolean;
+  error?: boolean;
+  tableLayout?: 'auto' | 'fixed';
 }
+
+const PAGE_SIZE_OPTIONS = [10, 25, 50];
+const INITIAL_PAGE_SIZE = 25;
 
 function defaultSortFn<T extends any>(
   items: T[],
@@ -59,15 +64,17 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
     items,
     columns,
     initialPageIndex = 0,
-    initialPageSize = 10,
+    initialPageSize = INITIAL_PAGE_SIZE,
     initialSortField = props.columns[0]?.field || '',
     initialSortDirection = 'asc',
-    hidePerPageOptions = true,
+    hidePerPageOptions = false,
     noItemsMessage,
     sortItems = true,
     sortFn = defaultSortFn,
     pagination = true,
     isLoading = false,
+    error = false,
+    tableLayout,
   } = props;
 
   const {
@@ -77,7 +84,7 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
       sortField = initialSortField,
       sortDirection = initialSortDirection,
     },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
   const renderedItems = useMemo(() => {
     const sortedItems = sortItems
@@ -124,21 +131,32 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
       totalItemCount: items.length,
       pageIndex: page,
       pageSize,
+      pageSizeOptions: PAGE_SIZE_OPTIONS,
     };
   }, [hidePerPageOptions, items, page, pageSize, pagination]);
+
+  const showNoItemsMessage = useMemo(() => {
+    return isLoading
+      ? i18n.translate('xpack.apm.managedTable.loadingDescription', {
+          defaultMessage: 'Loading…',
+        })
+      : noItemsMessage;
+  }, [isLoading, noItemsMessage]);
 
   return (
     <EuiBasicTable
       loading={isLoading}
-      noItemsMessage={
-        isLoading
-          ? i18n.translate('xpack.apm.managedTable.loading', {
-              defaultMessage: 'Loading...',
+      tableLayout={tableLayout}
+      error={
+        error
+          ? i18n.translate('xpack.apm.managedTable.errorMessage', {
+              defaultMessage: 'Failed to fetch',
             })
-          : noItemsMessage
+          : ''
       }
+      noItemsMessage={showNoItemsMessage}
       items={renderedItems}
-      columns={(columns as unknown) as Array<EuiBasicTableColumn<T>>} // EuiBasicTableColumn is stricter than ITableColumn
+      columns={columns as unknown as Array<EuiBasicTableColumn<T>>} // EuiBasicTableColumn is stricter than ITableColumn
       sorting={sort}
       onChange={onTableChange}
       {...(paginationProps ? { pagination: paginationProps } : {})}

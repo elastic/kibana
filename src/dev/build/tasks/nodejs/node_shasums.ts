@@ -6,29 +6,22 @@
  * Side Public License, v 1.
  */
 
-import axios from 'axios';
 import { ToolingLog } from '@kbn/dev-utils';
+import { downloadToString } from '../../lib/download';
 
 export async function getNodeShasums(log: ToolingLog, nodeVersion: string) {
   const url = `https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v${nodeVersion}/SHASUMS256.txt`;
 
   log.debug('Downloading shasum values for node version', nodeVersion, 'from', url);
 
-  const { status, data } = await axios.get(url);
+  const checksum = await downloadToString({ log, url, expectStatus: 200 });
 
-  if (status !== 200) {
-    throw new Error(`${url} failed with a ${status} response`);
-  }
+  return checksum.split('\n').reduce((acc: Record<string, string>, line: string) => {
+    const [sha, platform] = line.split('  ');
 
-  return data
-    .toString('utf8')
-    .split('\n')
-    .reduce((acc: Record<string, string>, line: string) => {
-      const [sha, platform] = line.split('  ');
-
-      return {
-        ...acc,
-        [platform]: sha,
-      };
-    }, {});
+    return {
+      ...acc,
+      [platform]: sha,
+    };
+  }, {});
 }

@@ -5,52 +5,72 @@
  * 2.0.
  */
 import React, { useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-
 import {
   EuiTabbedContent,
   EuiFormRow,
   EuiFieldText,
   EuiFieldPassword,
   EuiSpacer,
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { OptionalLabel } from '../optional_label';
 import { CodeEditor } from '../code_editor';
+import { ScriptRecorderFields } from './script_recorder_fields';
+import { ZipUrlTLSFields } from './zip_url_tls_fields';
 import { MonacoEditorLangId } from '../types';
 
 enum SourceType {
   INLINE = 'syntheticsBrowserInlineConfig',
+  SCRIPT_RECORDER = 'syntheticsBrowserScriptRecorderConfig',
   ZIP = 'syntheticsBrowserZipURLConfig',
 }
 
 interface SourceConfig {
   zipUrl: string;
+  proxyUrl: string;
   folder: string;
   username: string;
   password: string;
   inlineScript: string;
   params: string;
+  isGeneratedScript?: boolean;
+  fileName?: string;
 }
 
 interface Props {
   onChange: (sourceConfig: SourceConfig) => void;
-  defaultConfig: SourceConfig;
+  defaultConfig?: SourceConfig;
 }
 
-const defaultValues = {
+export const defaultValues = {
   zipUrl: '',
+  proxyUrl: '',
   folder: '',
   username: '',
   password: '',
   inlineScript: '',
   params: '',
+  isGeneratedScript: false,
+  fileName: '',
+};
+
+const getDefaultTab = (defaultConfig: SourceConfig) => {
+  if (defaultConfig.inlineScript && defaultConfig.isGeneratedScript) {
+    return SourceType.SCRIPT_RECORDER;
+  } else if (defaultConfig.inlineScript) {
+    return SourceType.INLINE;
+  }
+
+  return SourceType.ZIP;
 };
 
 export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) => {
-  const [sourceType, setSourceType] = useState<SourceType>(
-    defaultConfig.inlineScript ? SourceType.INLINE : SourceType.ZIP
-  );
+  const [sourceType, setSourceType] = useState<SourceType>(getDefaultTab(defaultConfig));
   const [config, setConfig] = useState<SourceConfig>(defaultConfig);
 
   useEffect(() => {
@@ -68,6 +88,7 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
     {
       id: 'syntheticsBrowserZipURLConfig',
       name: zipUrlLabel,
+      'data-test-subj': `syntheticsSourceTab__zipUrl`,
       content: (
         <>
           <EuiSpacer size="m" />
@@ -92,6 +113,31 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
                 setConfig((prevConfig) => ({ ...prevConfig, zipUrl: value }))
               }
               value={config.zipUrl}
+              data-test-subj="syntheticsBrowserZipUrl"
+            />
+          </EuiFormRow>
+          <ZipUrlTLSFields />
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.brower.proxyURL.label"
+                defaultMessage="Proxy Zip URL"
+              />
+            }
+            labelAppend={<OptionalLabel />}
+            helpText={
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.http.helpText"
+                defaultMessage="HTTP proxy for Zip URL."
+              />
+            }
+          >
+            <EuiFieldText
+              onChange={({ target: { value } }) =>
+                setConfig((prevConfig) => ({ ...prevConfig, proxyUrl: value }))
+              }
+              value={config.proxyUrl}
+              data-test-subj="syntheticsBrowserZipUrlProxy"
             />
           </EuiFormRow>
           <EuiFormRow
@@ -114,6 +160,7 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
                 setConfig((prevConfig) => ({ ...prevConfig, folder: value }))
               }
               value={config.folder}
+              data-test-subj="syntheticsBrowserZipUrlFolder"
             />
           </EuiFormRow>
           <EuiFormRow
@@ -142,6 +189,7 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
               languageId={MonacoEditorLangId.JSON}
               onChange={(code) => setConfig((prevConfig) => ({ ...prevConfig, params: code }))}
               value={config.params}
+              data-test-subj="syntheticsBrowserZipUrlParams"
             />
           </EuiFormRow>
           <EuiFormRow
@@ -164,6 +212,7 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
                 setConfig((prevConfig) => ({ ...prevConfig, username: value }))
               }
               value={config.username}
+              data-test-subj="syntheticsBrowserZipUrlUsername"
             />
           </EuiFormRow>
           <EuiFormRow
@@ -186,6 +235,7 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
                 setConfig((prevConfig) => ({ ...prevConfig, password: value }))
               }
               value={config.password}
+              data-test-subj="syntheticsBrowserZipUrlPassword"
             />
           </EuiFormRow>
         </>
@@ -199,6 +249,7 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
           defaultMessage="Inline script"
         />
       ),
+      'data-test-subj': `syntheticsSourceTab__inline`,
       content: (
         <EuiFormRow
           isInvalid={!config.inlineScript}
@@ -230,6 +281,52 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
         </EuiFormRow>
       ),
     },
+    {
+      id: 'syntheticsBrowserScriptRecorderConfig',
+      name: (
+        <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.browser.scriptRecorder.label"
+              defaultMessage="Script recorder"
+            />
+          </EuiFlexItem>
+          <StyledBetaBadgeWrapper grow={false}>
+            <EuiBetaBadge
+              label={i18n.translate(
+                'xpack.uptime.createPackagePolicy.stepConfigure.browser.scriptRecorder.experimentalLabel',
+                {
+                  defaultMessage: 'Tech preview',
+                }
+              )}
+              iconType="beaker"
+              tooltipContent={i18n.translate(
+                'xpack.uptime.createPackagePolicy.stepConfigure.browser.scriptRecorder.experimentalTooltip',
+                {
+                  defaultMessage:
+                    'Preview the quickest way to create Elastic Synthetics monitoring scripts with our Elastic Synthetics Recorder',
+                }
+              )}
+            />
+          </StyledBetaBadgeWrapper>
+        </EuiFlexGroup>
+      ),
+      'data-test-subj': 'syntheticsSourceTab__scriptRecorder',
+      content: (
+        <ScriptRecorderFields
+          onChange={({ scriptText, fileName }) =>
+            setConfig((prevConfig) => ({
+              ...prevConfig,
+              inlineScript: scriptText,
+              isGeneratedScript: true,
+              fileName,
+            }))
+          }
+          script={config.inlineScript}
+          fileName={config.fileName}
+        />
+      ),
+    },
   ];
 
   return (
@@ -238,11 +335,17 @@ export const SourceField = ({ onChange, defaultConfig = defaultValues }: Props) 
       initialSelectedTab={tabs.find((tab) => tab.id === sourceType)}
       autoFocus="selected"
       onTabClick={(tab) => {
-        setSourceType(tab.id as SourceType);
         if (tab.id !== sourceType) {
           setConfig(defaultValues);
         }
+        setSourceType(tab.id as SourceType);
       }}
     />
   );
 };
+
+const StyledBetaBadgeWrapper = styled(EuiFlexItem)`
+  .euiToolTipAnchor {
+    display: flex;
+  }
+`;

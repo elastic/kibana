@@ -115,219 +115,124 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
     ]
   }
 >
-  <EuiSteps
-    steps={
-      Array [
-        Object {
-          "children": <React.Fragment>
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="spaceBetween"
-            >
-              <EuiFlexItem>
-                <EuiText>
-                  <p>
-                    Imports index pattern, visualizations and pre-defined dashboards.
-                  </p>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem
-                grow={false}
-              >
-                <EuiButton
-                  data-test-subj="loadSavedObjects"
-                  isLoading={false}
-                  onClick={[Function]}
-                >
-                  Load Kibana objects
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer
-              size="s"
-            />
-            <EuiCallOut
-              color="warning"
-              data-test-subj="loadSavedObjects_failed"
-              title="Request failed, Error: simulated bulkRequest error"
-            />
-          </React.Fragment>,
-          "key": "installStep",
-          "status": "incomplete",
-          "title": "Load Kibana objects",
-        },
-      ]
-    }
+  <EuiTitle
+    size="m"
+  >
+    <h2
+      className="euiTitle euiTitle--medium"
+    >
+      Load Kibana objects
+    </h2>
+  </EuiTitle>
+  <EuiFlexGroup
+    alignItems="center"
+    justifyContent="spaceBetween"
   >
     <div
-      className="euiSteps"
+      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
-      <EuiStep
-        headingElement="p"
-        key="installStep"
-        status="incomplete"
-        step={1}
-        title="Load Kibana objects"
+      <EuiFlexItem>
+        <div
+          className="euiFlexItem"
+        >
+          <EuiText>
+            <div
+              className="euiText euiText--medium"
+            >
+              <p>
+                Imports index pattern, visualizations and pre-defined dashboards.
+              </p>
+            </div>
+          </EuiText>
+        </div>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
       >
         <div
-          className="euiStep"
+          className="euiFlexItem euiFlexItem--flexGrowZero"
         >
-          <div
-            className="euiStep__titleWrapper"
+          <EuiButton
+            data-test-subj="loadSavedObjects"
+            isLoading={false}
+            onClick={[Function]}
           >
-            <EuiStepNumber
-              className="euiStep__circle"
-              isHollow={true}
-              number={1}
-              status="incomplete"
-              titleSize="s"
+            <EuiButtonDisplay
+              baseClassName="euiButton"
+              data-test-subj="loadSavedObjects"
+              disabled={false}
+              element="button"
+              isDisabled={false}
+              isLoading={false}
+              onClick={[Function]}
+              type="button"
             >
-              <span
-                className="euiStepNumber euiStepNumber--incomplete euiStepNumber-isHollow euiStep__circle"
+              <button
+                className="euiButton euiButton--primary"
+                data-test-subj="loadSavedObjects"
+                disabled={false}
+                onClick={[Function]}
+                style={
+                  Object {
+                    "minWidth": undefined,
+                  }
+                }
+                type="button"
               >
-                <EuiScreenReaderOnly>
+                <EuiButtonContent
+                  className="euiButton__content"
+                  iconSide="left"
+                  isLoading={false}
+                  textProps={
+                    Object {
+                      "className": "euiButton__text",
+                    }
+                  }
+                >
                   <span
-                    className="euiScreenReaderOnly"
+                    className="euiButtonContent euiButton__content"
                   >
-                    Step 1 is incomplete
-                  </span>
-                </EuiScreenReaderOnly>
-                <span
-                  aria-hidden="true"
-                  className="euiStepNumber__number"
-                >
-                  1
-                </span>
-              </span>
-            </EuiStepNumber>
-            <EuiTitle
-              className="euiStep__title"
-              size="s"
-            >
-              <p
-                className="euiTitle euiTitle--small euiStep__title"
-              >
-                Load Kibana objects
-              </p>
-            </EuiTitle>
-          </div>
-          <div
-            className="euiStep__content"
-          >
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="spaceBetween"
-            >
-              <div
-                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
-              >
-                <EuiFlexItem>
-                  <div
-                    className="euiFlexItem"
-                  >
-                    <EuiText>
-                      <div
-                        className="euiText euiText--medium"
-                      >
-                        <p>
-                          Imports index pattern, visualizations and pre-defined dashboards.
-                        </p>
-                      </div>
-                    </EuiText>
-                  </div>
-                </EuiFlexItem>
-                <EuiFlexItem
-                  grow={false}
-                >
-                  <div
-                    className="euiFlexItem euiFlexItem--flexGrowZero"
-                  >
-                    <EuiButton
-                      data-test-subj="loadSavedObjects"
-                      isLoading={false}
-                      onClick={[Function]}
+                    <span
+                      className="euiButton__text"
                     >
-                      <EuiButtonDisplay
-                        baseClassName="euiButton"
-                        data-test-subj="loadSavedObjects"
-                        disabled={false}
-                        element="button"
-                        isDisabled={false}
-                        isLoading={false}
-                        onClick={[Function]}
-                        type="button"
-                      >
-                        <button
-                          className="euiButton euiButton--primary"
-                          data-test-subj="loadSavedObjects"
-                          disabled={false}
-                          onClick={[Function]}
-                          style={
-                            Object {
-                              "minWidth": undefined,
-                            }
-                          }
-                          type="button"
-                        >
-                          <EuiButtonContent
-                            className="euiButton__content"
-                            iconSide="left"
-                            isLoading={false}
-                            textProps={
-                              Object {
-                                "className": "euiButton__text",
-                              }
-                            }
-                          >
-                            <span
-                              className="euiButtonContent euiButton__content"
-                            >
-                              <span
-                                className="euiButton__text"
-                              >
-                                Load Kibana objects
-                              </span>
-                            </span>
-                          </EuiButtonContent>
-                        </button>
-                      </EuiButtonDisplay>
-                    </EuiButton>
-                  </div>
-                </EuiFlexItem>
-              </div>
-            </EuiFlexGroup>
-            <EuiSpacer
-              size="s"
-            >
-              <div
-                className="euiSpacer euiSpacer--s"
-              />
-            </EuiSpacer>
-            <EuiCallOut
-              color="warning"
-              data-test-subj="loadSavedObjects_failed"
-              title="Request failed, Error: simulated bulkRequest error"
-            >
-              <div
-                className="euiCallOut euiCallOut--warning"
-                data-test-subj="loadSavedObjects_failed"
-              >
-                <div
-                  className="euiCallOutHeader"
-                >
-                  <span
-                    className="euiCallOutHeader__title"
-                  >
-                    Request failed, Error: simulated bulkRequest error
+                      Load Kibana objects
+                    </span>
                   </span>
-                </div>
-              </div>
-            </EuiCallOut>
-          </div>
+                </EuiButtonContent>
+              </button>
+            </EuiButtonDisplay>
+          </EuiButton>
         </div>
-      </EuiStep>
+      </EuiFlexItem>
     </div>
-  </EuiSteps>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="s"
+  >
+    <div
+      className="euiSpacer euiSpacer--s"
+    />
+  </EuiSpacer>
+  <EuiCallOut
+    color="warning"
+    data-test-subj="loadSavedObjects_failed"
+    title="Request failed, Error: simulated bulkRequest error"
+  >
+    <div
+      className="euiCallOut euiCallOut--warning"
+      data-test-subj="loadSavedObjects_failed"
+    >
+      <div
+        className="euiCallOutHeader"
+      >
+        <span
+          className="euiCallOutHeader__title"
+        >
+          Request failed, Error: simulated bulkRequest error
+        </span>
+      </div>
+    </div>
+  </EuiCallOut>
 </SavedObjectsInstallerUi>
 `;
 
@@ -446,260 +351,161 @@ exports[`bulkCreate should display success message when bulkCreate is successful
     ]
   }
 >
-  <EuiSteps
-    steps={
-      Array [
-        Object {
-          "children": <React.Fragment>
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="spaceBetween"
-            >
-              <EuiFlexItem>
-                <EuiText>
-                  <p>
-                    Imports index pattern, visualizations and pre-defined dashboards.
-                  </p>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem
-                grow={false}
-              >
-                <EuiButton
-                  data-test-subj="loadSavedObjects"
-                  isLoading={false}
-                  onClick={[Function]}
-                >
-                  Load Kibana objects
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer
-              size="s"
-            />
-            <EuiCallOut
-              color="success"
-              data-test-subj="loadSavedObjects_success"
-              title="1 saved objects successfully added"
-            />
-          </React.Fragment>,
-          "key": "installStep",
-          "status": "complete",
-          "title": "Load Kibana objects",
-        },
-      ]
-    }
+  <EuiTitle
+    size="m"
+  >
+    <h2
+      className="euiTitle euiTitle--medium"
+    >
+      Load Kibana objects
+    </h2>
+  </EuiTitle>
+  <EuiFlexGroup
+    alignItems="center"
+    justifyContent="spaceBetween"
   >
     <div
-      className="euiSteps"
+      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
-      <EuiStep
-        headingElement="p"
-        key="installStep"
-        status="complete"
-        step={1}
-        title="Load Kibana objects"
+      <EuiFlexItem>
+        <div
+          className="euiFlexItem"
+        >
+          <EuiText>
+            <div
+              className="euiText euiText--medium"
+            >
+              <p>
+                Imports index pattern, visualizations and pre-defined dashboards.
+              </p>
+            </div>
+          </EuiText>
+        </div>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
       >
         <div
-          className="euiStep"
+          className="euiFlexItem euiFlexItem--flexGrowZero"
         >
-          <div
-            className="euiStep__titleWrapper"
+          <EuiButton
+            data-test-subj="loadSavedObjects"
+            isLoading={false}
+            onClick={[Function]}
           >
-            <EuiStepNumber
-              className="euiStep__circle"
-              isHollow={false}
-              number={1}
-              status="complete"
-              titleSize="s"
+            <EuiButtonDisplay
+              baseClassName="euiButton"
+              data-test-subj="loadSavedObjects"
+              disabled={false}
+              element="button"
+              isDisabled={false}
+              isLoading={false}
+              onClick={[Function]}
+              type="button"
             >
-              <span
-                className="euiStepNumber euiStepNumber--complete euiStep__circle"
+              <button
+                className="euiButton euiButton--primary"
+                data-test-subj="loadSavedObjects"
+                disabled={false}
+                onClick={[Function]}
+                style={
+                  Object {
+                    "minWidth": undefined,
+                  }
+                }
+                type="button"
               >
-                <EuiIcon
-                  aria-label="Step 1 is complete"
-                  className="euiStepNumber__icon"
-                  size="m"
-                  type="check"
+                <EuiButtonContent
+                  className="euiButton__content"
+                  iconSide="left"
+                  isLoading={false}
+                  textProps={
+                    Object {
+                      "className": "euiButton__text",
+                    }
+                  }
                 >
                   <span
-                    aria-label="Step 1 is complete"
-                    className="euiStepNumber__icon"
-                    data-euiicon-type="check"
-                    size="m"
-                  />
-                </EuiIcon>
-              </span>
-            </EuiStepNumber>
-            <EuiTitle
-              className="euiStep__title"
-              size="s"
-            >
-              <p
-                className="euiTitle euiTitle--small euiStep__title"
-              >
-                Load Kibana objects
-              </p>
-            </EuiTitle>
-          </div>
-          <div
-            className="euiStep__content"
-          >
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="spaceBetween"
-            >
-              <div
-                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
-              >
-                <EuiFlexItem>
-                  <div
-                    className="euiFlexItem"
+                    className="euiButtonContent euiButton__content"
                   >
-                    <EuiText>
-                      <div
-                        className="euiText euiText--medium"
-                      >
-                        <p>
-                          Imports index pattern, visualizations and pre-defined dashboards.
-                        </p>
-                      </div>
-                    </EuiText>
-                  </div>
-                </EuiFlexItem>
-                <EuiFlexItem
-                  grow={false}
-                >
-                  <div
-                    className="euiFlexItem euiFlexItem--flexGrowZero"
-                  >
-                    <EuiButton
-                      data-test-subj="loadSavedObjects"
-                      isLoading={false}
-                      onClick={[Function]}
+                    <span
+                      className="euiButton__text"
                     >
-                      <EuiButtonDisplay
-                        baseClassName="euiButton"
-                        data-test-subj="loadSavedObjects"
-                        disabled={false}
-                        element="button"
-                        isDisabled={false}
-                        isLoading={false}
-                        onClick={[Function]}
-                        type="button"
-                      >
-                        <button
-                          className="euiButton euiButton--primary"
-                          data-test-subj="loadSavedObjects"
-                          disabled={false}
-                          onClick={[Function]}
-                          style={
-                            Object {
-                              "minWidth": undefined,
-                            }
-                          }
-                          type="button"
-                        >
-                          <EuiButtonContent
-                            className="euiButton__content"
-                            iconSide="left"
-                            isLoading={false}
-                            textProps={
-                              Object {
-                                "className": "euiButton__text",
-                              }
-                            }
-                          >
-                            <span
-                              className="euiButtonContent euiButton__content"
-                            >
-                              <span
-                                className="euiButton__text"
-                              >
-                                Load Kibana objects
-                              </span>
-                            </span>
-                          </EuiButtonContent>
-                        </button>
-                      </EuiButtonDisplay>
-                    </EuiButton>
-                  </div>
-                </EuiFlexItem>
-              </div>
-            </EuiFlexGroup>
-            <EuiSpacer
-              size="s"
-            >
-              <div
-                className="euiSpacer euiSpacer--s"
-              />
-            </EuiSpacer>
-            <EuiCallOut
-              color="success"
-              data-test-subj="loadSavedObjects_success"
-              title="1 saved objects successfully added"
-            >
-              <div
-                className="euiCallOut euiCallOut--success"
-                data-test-subj="loadSavedObjects_success"
-              >
-                <div
-                  className="euiCallOutHeader"
-                >
-                  <span
-                    className="euiCallOutHeader__title"
-                  >
-                    1 saved objects successfully added
+                      Load Kibana objects
+                    </span>
                   </span>
-                </div>
-              </div>
-            </EuiCallOut>
-          </div>
+                </EuiButtonContent>
+              </button>
+            </EuiButtonDisplay>
+          </EuiButton>
         </div>
-      </EuiStep>
+      </EuiFlexItem>
     </div>
-  </EuiSteps>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="s"
+  >
+    <div
+      className="euiSpacer euiSpacer--s"
+    />
+  </EuiSpacer>
+  <EuiCallOut
+    color="success"
+    data-test-subj="loadSavedObjects_success"
+    title="1 saved objects successfully added"
+  >
+    <div
+      className="euiCallOut euiCallOut--success"
+      data-test-subj="loadSavedObjects_success"
+    >
+      <div
+        className="euiCallOutHeader"
+      >
+        <span
+          className="euiCallOutHeader__title"
+        >
+          1 saved objects successfully added
+        </span>
+      </div>
+    </div>
+  </EuiCallOut>
 </SavedObjectsInstallerUi>
 `;
 
 exports[`renders 1`] = `
-<EuiSteps
-  steps={
-    Array [
-      Object {
-        "children": <React.Fragment>
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="spaceBetween"
-          >
-            <EuiFlexItem>
-              <EuiText>
-                <p>
-                  Imports index pattern, visualizations and pre-defined dashboards.
-                </p>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiButton
-                data-test-subj="loadSavedObjects"
-                isLoading={false}
-                onClick={[Function]}
-              >
-                Load Kibana objects
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer
-            size="s"
-          />
-        </React.Fragment>,
-        "key": "installStep",
-        "status": "incomplete",
-        "title": "Load Kibana objects",
-      },
-    ]
-  }
-/>
+<Fragment>
+  <EuiTitle
+    size="m"
+  >
+    <h2>
+      Load Kibana objects
+    </h2>
+  </EuiTitle>
+  <EuiFlexGroup
+    alignItems="center"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem>
+      <EuiText>
+        <p>
+          Imports index pattern, visualizations and pre-defined dashboards.
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButton
+        data-test-subj="loadSavedObjects"
+        isLoading={false}
+        onClick={[Function]}
+      >
+        Load Kibana objects
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="s"
+  />
+</Fragment>
 `;

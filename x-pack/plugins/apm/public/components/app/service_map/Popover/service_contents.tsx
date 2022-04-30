@@ -7,7 +7,12 @@
 
 /* eslint-disable @elastic/eui/href-or-on-click */
 
-import { EuiButton, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useApmParams } from '../../../../hooks/use_apm_params';
@@ -47,7 +52,7 @@ export function ServiceContents({
     (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/service-map/service/{serviceName}',
+          endpoint: 'GET /internal/apm/service-map/service/{serviceName}',
           params: {
             path: { serviceName },
             query: { environment, start, end },
@@ -63,12 +68,12 @@ export function ServiceContents({
 
   const isLoading = status === FETCH_STATUS.LOADING;
 
-  const detailsUrl = apmRouter.link('/services/:serviceName', {
+  const detailsUrl = apmRouter.link('/services/{serviceName}', {
     path: { serviceName },
     query: { rangeFrom, rangeTo, environment, kuery },
   });
 
-  const focusUrl = apmRouter.link('/services/:serviceName/service-map', {
+  const focusUrl = apmRouter.link('/services/{serviceName}/service-map', {
     path: { serviceName },
     query: { rangeFrom, rangeTo, environment, kuery },
   });
@@ -89,6 +94,7 @@ export function ServiceContents({
         )}
         <StatsList data={data} isLoading={isLoading} />
       </EuiFlexItem>
+      <EuiSpacer size="s" />
       <EuiFlexItem>
         <EuiButton href={detailsUrl} fill={true}>
           {i18n.translate('xpack.apm.serviceMap.serviceDetailsButtonText', {

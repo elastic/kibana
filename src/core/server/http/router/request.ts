@@ -9,8 +9,8 @@
 import { URL } from 'url';
 import uuid from 'uuid';
 import { Request, RouteOptionsApp, RequestApplicationState, RouteOptions } from '@hapi/hapi';
-import { Observable, fromEvent, merge } from 'rxjs';
-import { shareReplay, first, takeUntil } from 'rxjs/operators';
+import { Observable, fromEvent } from 'rxjs';
+import { shareReplay, first, filter } from 'rxjs/operators';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { deepFreeze } from '@kbn/std';
 
@@ -133,6 +133,7 @@ export class KibanaRequest<
     const body = routeValidator.getBody(req.payload, 'request body');
     return { query, params, body };
   }
+
   /**
    * A identifier to identify this request.
    *
@@ -202,10 +203,7 @@ export class KibanaRequest<
 
     this.url = request.url;
     this.headers = deepFreeze({ ...request.headers });
-    this.isSystemRequest =
-      request.headers['kbn-system-request'] === 'true' ||
-      // Remove support for `kbn-system-api` in 8.x. Used only by legacy platform.
-      request.headers['kbn-system-api'] === 'true';
+    this.isSystemRequest = request.headers['kbn-system-request'] === 'true';
 
     // prevent Symbol exposure via Object.getOwnPropertySymbols()
     Object.defineProperty(this, requestSymbol, {
@@ -224,13 +222,9 @@ export class KibanaRequest<
   }
 
   private getEvents(request: Request): KibanaRequestEvents {
-    const finish$ = merge(
-      fromEvent(request.raw.res, 'finish'), // Response has been sent
-      fromEvent(request.raw.req, 'close') // connection was closed
-    ).pipe(shareReplay(1), first());
-
-    const aborted$ = fromEvent<void>(request.raw.req, 'aborted').pipe(first(), takeUntil(finish$));
-    const completed$ = merge<void, void>(finish$, aborted$).pipe(shareReplay(1), first());
+    const completed$ = fromEvent<void>(request.raw.res, 'close').pipe(shareReplay(1), first());
+    // the response's underlying connection was terminated prematurely
+    const aborted$ = completed$.pipe(filter(() => !isCompleted(request)));
 
     return {
       aborted$,
@@ -240,13 +234,18 @@ export class KibanaRequest<
 
   private getRouteInfo(request: Request): KibanaRequestRoute<Method> {
     const method = request.method as Method;
-    const { parse, maxBytes, allow, output, timeout: payloadTimeout } =
-      request.route.settings.payload || {};
+    const {
+      parse,
+      maxBytes,
+      allow,
+      output,
+      timeout: payloadTimeout,
+    } = request.route.settings.payload || {};
 
     // net.Socket#timeout isn't documented, yet, and isn't part of the types... https://github.com/nodejs/node/pull/34543
     // the socket is also undefined when using @hapi/shot, or when a "fake request" is used
     const socketTimeout = (request.raw.req.socket as any)?.timeout;
-    const options = ({
+    const options = {
       authRequired: this.getAuthRequired(request),
       // TypeScript note: Casting to `RouterOptions` to fix the following error:
       //
@@ -271,7 +270,7 @@ export class KibanaRequest<
             accepts: allow,
             output: output as typeof validBodyOutput[number], // We do not support all the HAPI-supported outputs and TS complains
           },
-    } as unknown) as KibanaRequestRouteOptions<Method>; // TS does not understand this is OK so I'm enforced to do this enforced casting
+    } as unknown as KibanaRequestRouteOptions<Method>; // TS does not understand this is OK so I'm enforced to do this enforced casting
 
     return {
       path: request.path,
@@ -336,4 +335,8 @@ function isRequest(request: any): request is LegacyRequest {
  */
 export function isRealRequest(request: unknown): request is KibanaRequest | LegacyRequest {
   return isKibanaRequest(request) || isRequest(request);
+}
+
+function isCompleted(request: Request) {
+  return request.raw.res.writableFinished;
 }

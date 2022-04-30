@@ -7,11 +7,10 @@
 
 export * from './monitor';
 export * from './monitor_list';
-export * from './overview_filters';
 export * from './snapshot';
 export * from './monitor_status';
 export * from './dynamic_settings';
-export * from './index_pattern';
 export * from './index_status';
 export * from './ping';
 export * from './monitor_duration';
+export * from './monitor_management';

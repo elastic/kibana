@@ -6,21 +6,22 @@
  */
 
 import { Action } from 'redux';
+import { EuiSuperDatePickerRecentRange } from '@elastic/eui';
+import type { DataViewBase } from '@kbn/es-query';
 import {
-  HostResultList,
   HostInfo,
   GetHostPolicyResponse,
   HostIsolationRequestBody,
   ISOLATION_ACTIONS,
+  MetadataListResponse,
 } from '../../../../../common/endpoint/types';
 import { ServerApiError } from '../../../../common/types';
 import { GetPolicyListResponse } from '../../policy/types';
 import { EndpointState } from '../types';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 export interface ServerReturnedEndpointList {
   type: 'serverReturnedEndpointList';
-  payload: HostResultList;
+  payload: MetadataListResponse;
 }
 
 export interface ServerFailedToReturnEndpointList {
@@ -95,7 +96,7 @@ export interface ServerReturnedEndpointExistValue {
 
 export interface ServerReturnedMetadataPatterns {
   type: 'serverReturnedMetadataPatterns';
-  payload: IIndexPattern[];
+  payload: DataViewBase[];
 }
 
 export interface ServerFailedToReturnMetadataPatterns {
@@ -161,9 +162,21 @@ export interface EndpointDetailsActivityLogUpdatePaging {
     disabled?: boolean;
     page: number;
     pageSize: number;
-    startDate?: string;
-    endDate?: string;
+    startDate: string;
+    endDate: string;
   };
+}
+
+export interface UserUpdatedActivityLogRefreshOptions {
+  type: 'userUpdatedActivityLogRefreshOptions';
+  payload: {
+    autoRefreshOptions: { enabled: boolean; duration: number };
+  };
+}
+
+export interface UserUpdatedActivityLogRecentlyUsedDateRanges {
+  type: 'userUpdatedActivityLogRecentlyUsedDateRanges';
+  payload: EuiSuperDatePickerRecentRange[];
 }
 
 export interface EndpointDetailsLoad {
@@ -194,6 +207,8 @@ export type EndpointAction =
   | EndpointDetailsActivityLogUpdatePaging
   | EndpointDetailsActivityLogUpdateIsInvalidDateRange
   | EndpointDetailsActivityLogChanged
+  | UserUpdatedActivityLogRefreshOptions
+  | UserUpdatedActivityLogRecentlyUsedDateRanges
   | EndpointDetailsLoad
   | ServerReturnedEndpointPolicyResponse
   | ServerFailedToReturnEndpointPolicyResponse

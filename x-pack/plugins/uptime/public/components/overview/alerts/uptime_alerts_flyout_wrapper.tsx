@@ -25,9 +25,10 @@ export const UptimeAlertsFlyoutWrapperComponent = ({
   setAlertFlyoutVisibility,
 }: Props) => {
   const { triggersActionsUi } = useKibana<KibanaDeps>().services;
-  const onCloseAlertFlyout = useCallback(() => setAlertFlyoutVisibility(false), [
-    setAlertFlyoutVisibility,
-  ]);
+  const onCloseAlertFlyout = useCallback(
+    () => setAlertFlyoutVisibility(false),
+    [setAlertFlyoutVisibility]
+  );
   const AddAlertFlyout = useMemo(
     () =>
       triggersActionsUi.getAddAlertFlyout({

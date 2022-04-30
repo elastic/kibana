@@ -16,7 +16,7 @@ import {
 import React, { Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { FailedImport, ProcessedImportResponse } from '../lib';
 import type { ImportRetry } from '../types';
@@ -38,13 +38,8 @@ const isResolvableError = ({ error: { type } }: FailedImport) =>
 const isUnresolvableError = (failure: FailedImport) => !isResolvableError(failure);
 
 export const CopyToSpaceFlyoutFooter = (props: Props) => {
-  const {
-    copyInProgress,
-    conflictResolutionInProgress,
-    initialCopyFinished,
-    copyResult,
-    retries,
-  } = props;
+  const { copyInProgress, conflictResolutionInProgress, initialCopyFinished, copyResult, retries } =
+    props;
 
   let summarizedResults = {
     successCount: 0,

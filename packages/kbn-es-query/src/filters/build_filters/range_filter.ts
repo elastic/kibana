@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { map, reduce, mapValues, has, get, keys, pickBy } from 'lodash';
 import type { Filter, FilterMeta } from './types';
 import type { IndexPatternBase, IndexPatternFieldBase } from '../../es_query';
@@ -60,14 +60,18 @@ export type RangeFilterMeta = FilterMeta & {
 
 export type ScriptedRangeFilter = Filter & {
   meta: RangeFilterMeta;
-  script: {
-    script: estypes.InlineScript;
+  query: {
+    script: {
+      script: estypes.InlineScript;
+    };
   };
 };
 
 export type MatchAllRangeFilter = Filter & {
   meta: RangeFilterMeta;
-  match_all: estypes.QueryDslQueryContainer['match_all'];
+  query: {
+    match_all: estypes.QueryDslQueryContainer['match_all'];
+  };
 };
 
 /**
@@ -75,7 +79,9 @@ export type MatchAllRangeFilter = Filter & {
  */
 export type RangeFilter = Filter & {
   meta: RangeFilterMeta;
-  range: { [key: string]: RangeFilterParams };
+  query: {
+    range: { [key: string]: RangeFilterParams };
+  };
 };
 
 /**
@@ -84,7 +90,7 @@ export type RangeFilter = Filter & {
  *
  * @public
  */
-export const isRangeFilter = (filter?: Filter): filter is RangeFilter => has(filter, 'range');
+export const isRangeFilter = (filter?: Filter): filter is RangeFilter => has(filter, 'query.range');
 
 /**
  *
@@ -94,7 +100,7 @@ export const isRangeFilter = (filter?: Filter): filter is RangeFilter => has(fil
  * @public
  */
 export const isScriptedRangeFilter = (filter: Filter): filter is ScriptedRangeFilter => {
-  const params: RangeFilterParams = get(filter, 'script.script.params', {});
+  const params: RangeFilterParams = get(filter, 'query.script.script.params', {});
 
   return hasRangeKeys(params);
 };
@@ -103,7 +109,7 @@ export const isScriptedRangeFilter = (filter: Filter): filter is ScriptedRangeFi
  * @internal
  */
 export const getRangeFilterField = (filter: RangeFilter) => {
-  return filter.range && Object.keys(filter.range)[0];
+  return filter.query.range && Object.keys(filter.query.range)[0];
 };
 
 const formatValue = (params: any[]) =>
@@ -154,14 +160,14 @@ export const buildRangeFilter = (
   };
 
   if (totalInfinite === OPERANDS_IN_RANGE) {
-    return { meta, match_all: {} } as MatchAllRangeFilter;
+    return { meta, query: { match_all: {} } } as MatchAllRangeFilter;
   } else if (field.scripted) {
     const scr = getRangeScript(field, params);
     // TODO: type mismatch enforced
     scr.script.params.value = formatValue(scr.script.params as any);
-    return { meta, script: scr } as ScriptedRangeFilter;
+    return { meta, query: { script: scr } } as ScriptedRangeFilter;
   } else {
-    return { meta, range: { [field.name]: params } } as RangeFilter;
+    return { meta, query: { range: { [field.name]: params } } } as RangeFilter;
   }
 };
 

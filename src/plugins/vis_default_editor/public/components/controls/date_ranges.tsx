@@ -22,7 +22,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import dateMath from '@elastic/datemath';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { isEqual, omit } from 'lodash';
 import useMount from 'react-use/lib/useMount';
@@ -74,10 +74,10 @@ function DateRangesParamEditor({
     [setValue]
   );
 
-  const onAddRange = useCallback(() => updateRanges([...ranges, { id: generateId() }]), [
-    ranges,
-    updateRanges,
-  ]);
+  const onAddRange = useCallback(
+    () => updateRanges([...ranges, { id: generateId() }]),
+    [ranges, updateRanges]
+  );
 
   useMount(() => {
     // set up an initial range when there is no default range

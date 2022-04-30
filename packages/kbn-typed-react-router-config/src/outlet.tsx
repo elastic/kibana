@@ -5,9 +5,24 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useCurrentRoute } from './use_current_route';
+import React, { createContext, useContext } from 'react';
+
+const OutletContext = createContext<{ element?: React.ReactElement } | undefined>(undefined);
+
+export function OutletContextProvider({
+  element,
+  children,
+}: {
+  element: React.ReactElement;
+  children: React.ReactNode;
+}) {
+  return <OutletContext.Provider value={{ element }}>{children}</OutletContext.Provider>;
+}
 
 export function Outlet() {
-  const { element } = useCurrentRoute();
-  return element;
+  const outletContext = useContext(OutletContext);
+  if (!outletContext) {
+    throw new Error('Outlet context not available');
+  }
+  return outletContext.element || null;
 }

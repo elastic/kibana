@@ -14,7 +14,8 @@ export const CreateEmptyDirsAndFiles: Task = {
   async run(config, log, build) {
     await Promise.all([
       mkdirp(build.resolvePath('plugins')),
-      mkdirp(build.resolvePath('data/optimize')),
+      mkdirp(build.resolvePath('data')),
+      mkdirp(build.resolvePath('logs')),
     ]);
   },
 };

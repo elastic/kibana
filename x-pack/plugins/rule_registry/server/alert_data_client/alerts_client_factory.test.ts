@@ -13,8 +13,7 @@ import { loggingSystemMock } from 'src/core/server/mocks';
 import { securityMock } from '../../../security/server/mocks';
 import { AuditLogger } from '../../../security/server';
 import { alertingAuthorizationMock } from '../../../alerting/server/authorization/alerting_authorization.mock';
-import { ruleDataPluginServiceMock } from '../rule_data_plugin_service/rule_data_plugin_service.mock';
-import { RuleDataPluginService } from '../rule_data_plugin_service';
+import { ruleDataServiceMock } from '../rule_data_plugin_service/rule_data_plugin_service.mock';
 
 jest.mock('./alerts_client');
 
@@ -26,10 +25,10 @@ const alertsClientFactoryParams: AlertsClientFactoryProps = {
   getAlertingAuthorization: (_: KibanaRequest) => alertingAuthMock,
   securityPluginSetup,
   esClient: {} as ElasticsearchClient,
-  ruleDataService: (ruleDataPluginServiceMock.create() as unknown) as RuleDataPluginService,
+  ruleDataService: ruleDataServiceMock.create(),
 };
 
-const fakeRequest = ({
+const fakeRequest = {
   app: {},
   headers: {},
   getBasePath: () => '',
@@ -43,7 +42,7 @@ const fakeRequest = ({
       url: '/',
     },
   },
-} as unknown) as Request;
+} as unknown as Request;
 
 const auditLogger = {
   log: jest.fn(),

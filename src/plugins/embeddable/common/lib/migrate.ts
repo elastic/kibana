@@ -38,7 +38,7 @@ export const getMigrateFunction = (embeddables: CommonEmbeddableStartContract) =
       const migratedEnhancement = enhancementDefinition?.migrations?.[version]
         ? enhancementDefinition.migrations[version](enhancements[key] as SerializableRecord)
         : enhancements[key];
-      (updatedInput.enhancements! as Record<string, any>)[key] = migratedEnhancement;
+      (updatedInput.enhancements! as Record<string, {}>)[key] = migratedEnhancement;
     });
 
     return updatedInput;

@@ -7,7 +7,8 @@
 
 import _ from 'lodash';
 import { FeatureCollection, Feature } from 'geojson';
-import { FEATURE_ID_PROPERTY_NAME } from '../../../../common/constants';
+
+export const GEOJSON_FEATURE_ID_PROPERTY_NAME = '__kbn__feature_id__';
 
 let idCounter = 0;
 
@@ -43,7 +44,7 @@ export function assignFeatureIds(featureCollection: FeatureCollection): FeatureC
       geometry: feature.geometry, // do not copy geometry, this object can be massive
       properties: {
         // preserve feature id provided by source so features can be referenced across fetches
-        [FEATURE_ID_PROPERTY_NAME]: feature.id == null ? numericId : feature.id,
+        [GEOJSON_FEATURE_ID_PROPERTY_NAME]: feature.id == null ? numericId : feature.id,
         // create new object for properties so original is not polluted with kibana internal props
         ...feature.properties,
       },

@@ -37,8 +37,8 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-config-schema",
-  "//packages/kbn-crypto",
+  "//packages/kbn-config-schema:npm_module_types",
+  "//packages/kbn-crypto:npm_module_types",
   "@npm//@hapi/hapi",
   "@npm//@hapi/hoek",
   "@npm//joi",
@@ -71,10 +71,8 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  source_map = True,
   root_dir = "src",
   tsconfig = ":tsconfig",
 )

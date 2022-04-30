@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { SavedObjectsFindResponse, SavedObject, Logger } from 'kibana/server';
+import { SavedObjectsFindResponse, SavedObject } from 'kibana/server';
 
 import {
   ActionConnector,
@@ -15,23 +15,36 @@ import {
   CaseStatuses,
   ExternalServiceResponse,
   CaseType,
-  ENABLE_CASE_CONNECTOR,
   CasesConfigureAttributes,
   CaseAttributes,
-} from '../../../common';
+  OWNER_FIELD,
+} from '../../../common/api';
+import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 
 import { createIncident, getCommentContextFromAttributes } from './utils';
-import {
-  AlertInfo,
-  createCaseError,
-  flattenCaseSavedObject,
-  getAlertInfoFromComments,
-} from '../../common';
+import { createCaseError } from '../../common/error';
+import { flattenCaseSavedObject, getAlertInfoFromComments } from '../../common/utils';
 import { CasesClient, CasesClientArgs, CasesClientInternal } from '..';
 import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
-import { CasesClientGetAlertsResponse } from '../alerts/types';
+import { buildFilter } from '../utils';
+
+/**
+ * Returns true if the case should be closed based on the configuration settings and whether the case
+ * is a collection. Collections are not closable because we aren't allowing their status to be changed.
+ * In the future we could allow push to close all the sub cases of a collection but that's not currently supported.
+ */
+function shouldCloseByPush(
+  configureSettings: SavedObjectsFindResponse<CasesConfigureAttributes>,
+  caseInfo: SavedObject<CaseAttributes>
+): boolean {
+  return (
+    configureSettings.total > 0 &&
+    configureSettings.saved_objects[0].attributes.closure_type === 'close-by-pushing' &&
+    caseInfo.attributes.type !== CaseType.collection
+  );
+}
 
 /**
  * Parameters for pushing a case to an external system
@@ -96,7 +109,9 @@ export const push = async (
 
     const alertsInfo = getAlertInfoFromComments(theCase?.comments);
 
-    const alerts = await getAlertsCatchErrors({ casesClientInternal, alertsInfo, logger });
+    const alerts = await casesClientInternal.alerts.get({
+      alertsInfo,
+    });
 
     const getMappingsResponse = await casesClientInternal.configuration.getMappings({
       connector: theCase.connector,
@@ -136,13 +151,20 @@ export const push = async (
 
     /* End of push to external service */
 
+    const ownerFilter = buildFilter({
+      filters: theCase.owner,
+      field: OWNER_FIELD,
+      operator: 'or',
+      type: Operations.findConfigurations.savedObjectType,
+    });
+
     /* Start of update case with push information */
     const [myCase, myCaseConfigure, comments] = await Promise.all([
       caseService.getCase({
         unsecuredSavedObjectsClient,
         id: caseId,
       }),
-      caseConfigureService.find({ unsecuredSavedObjectsClient }),
+      caseConfigureService.find({ unsecuredSavedObjectsClient, options: { filter: ownerFilter } }),
       caseService.getAllCaseComments({
         unsecuredSavedObjectsClient,
         id: caseId,
@@ -229,7 +251,7 @@ export const push = async (
             actionBy: { username, full_name, email },
             caseId,
             fields: ['pushed'],
-            newValue: JSON.stringify(externalService),
+            newValue: externalService,
             owner: myCase.attributes.owner,
           }),
         ],
@@ -266,38 +288,3 @@ export const push = async (
     throw createCaseError({ message: `Failed to push case: ${error}`, error, logger });
   }
 };
-
-async function getAlertsCatchErrors({
-  casesClientInternal,
-  alertsInfo,
-  logger,
-}: {
-  casesClientInternal: CasesClientInternal;
-  alertsInfo: AlertInfo[];
-  logger: Logger;
-}): Promise<CasesClientGetAlertsResponse> {
-  try {
-    return await casesClientInternal.alerts.get({
-      alertsInfo,
-    });
-  } catch (error) {
-    logger.error(`Failed to retrieve alerts during push: ${error}`);
-    return [];
-  }
-}
-
-/**
- * Returns true if the case should be closed based on the configuration settings and whether the case
- * is a collection. Collections are not closable because we aren't allowing their status to be changed.
- * In the future we could allow push to close all the sub cases of a collection but that's not currently supported.
- */
-function shouldCloseByPush(
-  configureSettings: SavedObjectsFindResponse<CasesConfigureAttributes>,
-  caseInfo: SavedObject<CaseAttributes>
-): boolean {
-  return (
-    configureSettings.total > 0 &&
-    configureSettings.saved_objects[0].attributes.closure_type === 'close-by-pushing' &&
-    caseInfo.attributes.type !== CaseType.collection
-  );
-}

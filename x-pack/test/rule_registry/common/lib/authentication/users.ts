@@ -174,21 +174,6 @@ export const obsSecReadSpacesAll: User = {
 };
 
 /**
- * These users are for the security_only tests because most of them have access to the default space instead of 'space1'
- */
-export const usersDefaultSpace = [
-  superUser,
-  secOnlySpacesAll,
-  secOnlyReadSpacesAll,
-  obsOnlySpacesAll,
-  obsOnlyReadSpacesAll,
-  obsSecSpacesAll,
-  obsSecReadSpacesAll,
-  globalRead,
-  noKibanaPrivileges,
-];
-
-/**
  * Trial users with trial roles
  */
 

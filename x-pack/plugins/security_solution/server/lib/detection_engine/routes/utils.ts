@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { has, snakeCase } from 'lodash/fp';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { SanitizedAlert } from '../../../../../alerting/common';
@@ -19,6 +18,7 @@ import { RulesClient } from '../../../../../alerting/server';
 import { RuleStatusResponse, IRuleStatusSOAttributes } from '../rules/types';
 
 import { RuleParams } from '../schemas/rule_schemas';
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 
 export interface OutputError {
   message: string;
@@ -100,84 +100,14 @@ export const isImportRegular = (
   return !has('error', importRuleResponse) && has('status_code', importRuleResponse);
 };
 
-export interface ImportSuccessError {
-  success: boolean;
-  success_count: number;
-  errors: BulkError[];
-}
-
-export const createSuccessObject = (
-  existingImportSuccessError: ImportSuccessError
-): ImportSuccessError => {
-  return {
-    success_count: existingImportSuccessError.success_count + 1,
-    success: existingImportSuccessError.success,
-    errors: existingImportSuccessError.errors,
-  };
-};
-
-export const createImportErrorObject = ({
-  ruleId,
-  statusCode,
-  message,
-  existingImportSuccessError,
-}: {
-  ruleId: string;
-  statusCode: number;
-  message: string;
-  existingImportSuccessError: ImportSuccessError;
-}): ImportSuccessError => {
-  return {
-    success: false,
-    errors: [
-      ...existingImportSuccessError.errors,
-      createBulkErrorObject({
-        ruleId,
-        statusCode,
-        message,
-      }),
-    ],
-    success_count: existingImportSuccessError.success_count,
-  };
-};
-
-export const transformImportError = (
-  ruleId: string,
-  err: Error & { statusCode?: number },
-  existingImportSuccessError: ImportSuccessError
-): ImportSuccessError => {
-  if (Boom.isBoom(err)) {
-    return createImportErrorObject({
-      ruleId,
-      statusCode: err.output.statusCode,
-      message: err.message,
-      existingImportSuccessError,
-    });
-  } else if (err instanceof BadRequestError) {
-    return createImportErrorObject({
-      ruleId,
-      statusCode: 400,
-      message: err.message,
-      existingImportSuccessError,
-    });
-  } else {
-    return createImportErrorObject({
-      ruleId,
-      statusCode: err.statusCode ?? 500,
-      message: err.message,
-      existingImportSuccessError,
-    });
-  }
-};
-
 export const transformBulkError = (
   ruleId: string,
   err: Error & { statusCode?: number }
 ): BulkError => {
-  if (Boom.isBoom(err)) {
+  if (err instanceof CustomHttpRequestError) {
     return createBulkErrorObject({
       ruleId,
-      statusCode: err.output.statusCode,
+      statusCode: err.statusCode ?? 400,
       message: err.message,
     });
   } else if (err instanceof BadRequestError) {
@@ -200,16 +130,15 @@ interface Schema {
   validate: (input: any) => { value: any; error?: Error };
 }
 
-export const buildRouteValidation = <T>(schema: Schema): RouteValidationFunction<T> => (
-  payload: T,
-  { ok, badRequest }
-) => {
-  const { value, error } = schema.validate(payload);
-  if (error) {
-    return badRequest(error.message);
-  }
-  return ok(value);
-};
+export const buildRouteValidation =
+  <T>(schema: Schema): RouteValidationFunction<T> =>
+  (payload: T, { ok, badRequest }) => {
+    const { value, error } = schema.validate(payload);
+    if (error) {
+      return badRequest(error.message);
+    }
+    return ok(value);
+  };
 
 const statusToErrorMessage = (statusCode: number) => {
   switch (statusCode) {
@@ -309,7 +238,7 @@ export const getFailingRules = async (
   try {
     const errorRules = await Promise.all(
       ids.map(async (id) =>
-        rulesClient.get({
+        rulesClient.resolve({
           id,
         })
       )
@@ -325,9 +254,9 @@ export const getFailingRules = async (
         };
       }, {});
   } catch (exc) {
-    if (Boom.isBoom(exc)) {
+    if (exc instanceof CustomHttpRequestError) {
       throw exc;
     }
-    throw new Error(`Failed to get executionStatus with RulesClient: ${exc.message}`);
+    throw new Error(`Failed to get executionStatus with RulesClient: ${(exc as Error).message}`);
   }
 };

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React from 'react';
+import { flatten } from 'lodash';
+
 import {
   AnnotationDomainType,
   AreaSeries,
@@ -30,31 +32,28 @@ import { i18n } from '@kbn/i18n';
 import { useChartTheme } from '../../../../../../observability/public';
 
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import { HistogramItem } from '../../../../../common/search_strategies/correlations/types';
+import type { HistogramItem } from '../../../../../common/correlations/types';
+import { DEFAULT_PERCENTILE_THRESHOLD } from '../../../../../common/correlations/constants';
 
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 
-import { ChartContainer, ChartContainerProps } from '../chart_container';
+import { ChartContainer } from '../chart_container';
 
-export type TransactionDistributionChartLoadingState = Pick<
-  ChartContainerProps,
-  'hasData' | 'status'
->;
-
-export type OnHasData = (hasData: boolean) => void;
+export interface TransactionDistributionChartData {
+  id: string;
+  histogram: HistogramItem[];
+  areaSeriesColor: string;
+}
 
 interface TransactionDistributionChartProps {
-  field?: string;
-  value?: string;
-  histogram?: HistogramItem[];
+  data: TransactionDistributionChartData[];
+  hasData: boolean;
   markerCurrentTransaction?: number;
   markerValue: number;
-  markerPercentile: number;
-  overallHistogram?: HistogramItem[];
   onChartSelection?: BrushEndListener;
-  onHasData?: OnHasData;
   selection?: [number, number];
+  status: FETCH_STATUS;
 }
 
 const getAnnotationsStyle = (color = 'gray'): LineAnnotationStyle => ({
@@ -72,29 +71,21 @@ const getAnnotationsStyle = (color = 'gray'): LineAnnotationStyle => ({
   },
 });
 
+// TODO Revisit this approach since it actually manipulates the numbers
+// showing in the chart and its tooltips.
 const CHART_PLACEHOLDER_VALUE = 0.0001;
 
 // Elastic charts will show any lone bin (i.e. a populated bin followed by empty bin)
 // as a circular marker instead of a bar
 // This provides a workaround by making the next bin not empty
-export const replaceHistogramDotsWithBars = (
-  originalHistogram: HistogramItem[] | undefined
-) => {
-  if (originalHistogram === undefined) return;
-  const histogram = [...originalHistogram];
-  {
-    for (let i = 0; i < histogram.length - 1; i++) {
-      if (
-        histogram[i].doc_count > 0 &&
-        histogram[i].doc_count !== CHART_PLACEHOLDER_VALUE &&
-        histogram[i + 1].doc_count === 0
-      ) {
-        histogram[i + 1].doc_count = CHART_PLACEHOLDER_VALUE;
-      }
+// TODO Find a way to get rid of this workaround since it alters original values of the data.
+export const replaceHistogramDotsWithBars = (histogramItems: HistogramItem[]) =>
+  histogramItems.reduce((histogramItem, _, i) => {
+    if (histogramItem[i].doc_count === 0) {
+      histogramItem[i].doc_count = CHART_PLACEHOLDER_VALUE;
     }
-    return histogram;
-  }
-};
+    return histogramItem;
+  }, histogramItems);
 
 // Create and call a duration formatter for every value since the durations for the
 // x axis might have a wide range of values e.g. from low milliseconds to large seconds.
@@ -103,24 +94,17 @@ const xAxisTickFormat: TickFormatter<number> = (d) =>
   getDurationFormatter(d, 0.9999)(d).formatted;
 
 export function TransactionDistributionChart({
-  field: fieldName,
-  value: fieldValue,
-  histogram: originalHistogram,
+  data,
+  hasData,
   markerCurrentTransaction,
   markerValue,
-  markerPercentile,
-  overallHistogram,
   onChartSelection,
-  onHasData,
   selection,
+  status,
 }: TransactionDistributionChartProps) {
   const chartTheme = useChartTheme();
   const euiTheme = useTheme();
-
-  const patchedOverallHistogram = useMemo(
-    () => replaceHistogramDotsWithBars(overallHistogram),
-    [overallHistogram]
-  );
+  const markerPercentile = DEFAULT_PERCENTILE_THRESHOLD;
 
   const annotationsDataValues: LineAnnotationDatum[] = [
     {
@@ -139,14 +123,14 @@ export function TransactionDistributionChart({
 
   // This will create y axis ticks for 1, 10, 100, 1000 ...
   const yMax =
-    Math.max(...(overallHistogram ?? []).map((d) => d.doc_count)) ?? 0;
-  const yTicks = Math.ceil(Math.log10(yMax));
+    Math.max(
+      ...flatten(data.map((d) => d.histogram)).map((d) => d.doc_count)
+    ) ?? 0;
+  const yTicks = Math.max(1, Math.ceil(Math.log10(yMax)));
   const yAxisDomain = {
-    min: 0.9,
+    min: 0.5,
     max: Math.pow(10, yTicks),
   };
-
-  const histogram = replaceHistogramDotsWithBars(originalHistogram);
 
   const selectionAnnotation =
     selection !== undefined
@@ -163,34 +147,12 @@ export function TransactionDistributionChart({
         ]
       : undefined;
 
-  const chartLoadingState: TransactionDistributionChartLoadingState = useMemo(
-    () => ({
-      hasData:
-        Array.isArray(patchedOverallHistogram) &&
-        patchedOverallHistogram.length > 0,
-      status: Array.isArray(patchedOverallHistogram)
-        ? FETCH_STATUS.SUCCESS
-        : FETCH_STATUS.LOADING,
-    }),
-    [patchedOverallHistogram]
-  );
-
-  useEffect(() => {
-    if (onHasData) {
-      onHasData(chartLoadingState.hasData);
-    }
-  }, [chartLoadingState, onHasData]);
-
   return (
     <div
       data-test-subj="apmCorrelationsChart"
       style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
     >
-      <ChartContainer
-        height={250}
-        hasData={chartLoadingState.hasData}
-        status={chartLoadingState.status}
-      >
+      <ChartContainer height={250} hasData={hasData} status={status}>
         <Chart>
           <Settings
             rotation={0}
@@ -201,7 +163,7 @@ export function TransactionDistributionChart({
               },
               areaSeriesStyle: {
                 line: {
-                  visible: false,
+                  visible: true,
                 },
               },
               axes: {
@@ -216,7 +178,7 @@ export function TransactionDistributionChart({
                 },
               },
             }}
-            showLegend
+            showLegend={true}
             legendPosition={Position.Bottom}
             onBrushEnd={onChartSelection}
           />
@@ -268,7 +230,10 @@ export function TransactionDistributionChart({
           />
           <Axis
             id="x-axis"
-            title=""
+            title={i18n.translate(
+              'xpack.apm.transactionDistribution.chart.latencyLabel',
+              { defaultMessage: 'Latency' }
+            )}
             position={Position.Bottom}
             tickFormat={xAxisTickFormat}
             gridLine={{ visible: false }}
@@ -278,41 +243,34 @@ export function TransactionDistributionChart({
             domain={yAxisDomain}
             title={i18n.translate(
               'xpack.apm.transactionDistribution.chart.numberOfTransactionsLabel',
-              { defaultMessage: '# transactions' }
+              { defaultMessage: 'Transactions' }
             )}
             position={Position.Left}
             ticks={yTicks}
             gridLine={{ visible: true }}
           />
-          <AreaSeries
-            id={i18n.translate(
-              'xpack.apm.transactionDistribution.chart.allTransactionsLabel',
-              { defaultMessage: 'All transactions' }
-            )}
-            xScaleType={ScaleType.Log}
-            yScaleType={ScaleType.Log}
-            data={patchedOverallHistogram ?? []}
-            curve={CurveType.CURVE_STEP_AFTER}
-            xAccessor="key"
-            yAccessors={['doc_count']}
-            color={euiTheme.eui.euiColorVis1}
-            fit="lookahead"
-          />
-          {Array.isArray(histogram) &&
-            fieldName !== undefined &&
-            fieldValue !== undefined && (
-              <AreaSeries
-                // id is used as the label for the legend
-                id={`${fieldName}:${fieldValue}`}
-                xScaleType={ScaleType.Log}
-                yScaleType={ScaleType.Log}
-                data={histogram}
-                curve={CurveType.CURVE_STEP_AFTER}
-                xAccessor="key"
-                yAccessors={['doc_count']}
-                color={euiTheme.eui.euiColorVis2}
-              />
-            )}
+          {data.map((d, i) => (
+            <AreaSeries
+              key={d.id}
+              id={d.id}
+              xScaleType={ScaleType.Log}
+              yScaleType={ScaleType.Log}
+              data={replaceHistogramDotsWithBars(d.histogram)}
+              curve={CurveType.CURVE_STEP_AFTER}
+              xAccessor="key"
+              yAccessors={['doc_count']}
+              color={d.areaSeriesColor}
+              fit="lookahead"
+              // To make the area appear without the orphaned points technique,
+              // we changed the original data to replace values of 0 with 0.0001.
+              // To show the correct values again in tooltips, we use a custom tickFormat to round values.
+              // We can safely do this because all transaction values above 0 are without decimal points anyway.
+              // An update for Elastic Charts is in the works to be able to customize the above "fit"
+              // attribute. Once that is available we can get rid of the full workaround.
+              // Elastic Charts issue: https://github.com/elastic/elastic-charts/issues/1489
+              tickFormat={(p) => `${Math.round(p)}`}
+            />
+          ))}
         </Chart>
       </ChartContainer>
     </div>

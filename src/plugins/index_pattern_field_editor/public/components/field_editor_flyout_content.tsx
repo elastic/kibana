@@ -8,7 +8,7 @@
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiTitle,
   EuiFlexGroup,
@@ -240,7 +240,7 @@ const FieldEditorFlyoutContentComponent = ({
                 <p>
                   <FormattedMessage
                     id="indexPatternFieldEditor.editor.flyoutEditFieldSubtitle"
-                    defaultMessage="Index pattern: {patternName}"
+                    defaultMessage="Data view: {patternName}"
                     values={{
                       patternName: <i>{indexPattern.title}</i>,
                     }}

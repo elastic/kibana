@@ -8,7 +8,10 @@
 import { CoreStart, HttpSetup, IUiSettingsClient, AppMountParameters } from 'kibana/public';
 import { Observable } from 'rxjs';
 import { HttpRequestInit } from '../../../../src/core/public';
-import { MonitoringStartPluginDependencies } from './types';
+import {
+  MonitoringStartPluginDependencies,
+  LegacyMonitoringStartPluginDependencies,
+} from './types';
 import { TriggersAndActionsUIPublicPluginStart } from '../../triggers_actions_ui/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { TypeRegistry } from '../../triggers_actions_ui/public/application/type_registry';
@@ -37,14 +40,9 @@ export interface KFetchKibanaOptions {
   prependBasePath?: boolean;
 }
 
-const angularNoop = () => {
-  throw new Error('Angular has been removed.');
-};
-
 export interface IShims {
   toastNotifications: CoreStart['notifications']['toasts'];
   capabilities: CoreStart['application']['capabilities'];
-  getAngularInjector: typeof angularNoop | (() => angular.auto.IInjectorService);
   getBasePath: () => string;
   getInjected: (name: string, defaultValue?: unknown) => unknown;
   breadcrumbs: {
@@ -73,23 +71,17 @@ export interface IShims {
 export class Legacy {
   private static _shims: IShims;
 
-  public static init(
-    {
-      core,
-      data,
-      isCloud,
-      triggersActionsUi,
-      usageCollection,
-      appMountParameters,
-    }: MonitoringStartPluginDependencies,
-    ngInjector?: angular.auto.IInjectorService
-  ) {
+  public static init({
+    core,
+    data,
+    isCloud,
+    triggersActionsUi,
+    usageCollection,
+    appMountParameters,
+  }: LegacyMonitoringStartPluginDependencies) {
     this._shims = {
       toastNotifications: core.notifications.toasts,
       capabilities: core.application.capabilities,
-      getAngularInjector: ngInjector
-        ? (): angular.auto.IInjectorService => ngInjector
-        : angularNoop,
       getBasePath: (): string => core.http.basePath.get(),
       getInjected: (name: string, defaultValue?: unknown): string | unknown =>
         core.injectedMetadata.getInjectedVar(name, defaultValue),

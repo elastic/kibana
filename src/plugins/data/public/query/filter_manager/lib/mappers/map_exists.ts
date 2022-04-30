@@ -14,7 +14,7 @@ export const mapExists = (filter: Filter) => {
     return {
       type: FILTERS.EXISTS,
       value: FILTERS.EXISTS,
-      key: get(filter, 'exists.field'),
+      key: get(filter, 'query.exists.field'),
     };
   }
   throw filter;

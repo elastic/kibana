@@ -29,6 +29,7 @@ import {
   LOADING_SPINNER,
   EXCEPTION_ITEM_CONTAINER,
   ADD_EXCEPTIONS_BTN,
+  EXCEPTION_FIELD_LIST,
 } from '../../screens/exceptions';
 
 import { ALERTS_URL } from '../../urls/navigation';
@@ -193,6 +194,15 @@ describe('Exceptions modal', () => {
       .find(FIELD_INPUT)
       .eq(1)
       .should('have.text', '@timestamp');
+
+    closeExceptionBuilderModal();
+  });
+
+  it('Contains custom index fields', () => {
+    cy.get(ADD_EXCEPTIONS_BTN).click({ force: true });
+
+    cy.get(FIELD_INPUT).eq(0).click({ force: true });
+    cy.get(EXCEPTION_FIELD_LIST).contains('unique_value.test');
 
     closeExceptionBuilderModal();
   });

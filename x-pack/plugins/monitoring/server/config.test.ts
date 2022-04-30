@@ -31,16 +31,12 @@ describe('config schema', () => {
           "interval": "10s",
         },
         "cluster_alerts": Object {
-          "allowedSpaces": Array [
-            "default",
-          ],
           "email_notifications": Object {
             "email_address": "",
             "enabled": true,
           },
           "enabled": true,
         },
-        "enabled": true,
         "kibana": Object {
           "collection": Object {
             "enabled": true,
@@ -107,7 +103,6 @@ describe('config schema', () => {
             "index": "metricbeat-*",
           },
           "min_interval_seconds": 10,
-          "render_react_app": false,
           "show_license_expiration": true,
         },
       }

@@ -25,7 +25,7 @@ import {
 import { FieldsData } from './types';
 
 import * as i18n from './translations';
-import { ColumnHeaderOptions } from '../../../../common';
+import { ColumnHeaderOptions } from '../../../../common/types';
 
 /**
  * Defines the behavior of the search input that appears above the table of data
@@ -59,6 +59,7 @@ export interface AlertSummaryRow {
   description: {
     data: FieldsData;
     eventId: string;
+    isDraggable?: boolean;
     fieldFromBrowserField?: BrowserField;
     linkValue: string | undefined;
     timelineId: string;
@@ -126,7 +127,7 @@ export const getColumnsWithTimestamp = ({
 export const getExampleText = (example: string | number | null | undefined): string =>
   !isEmpty(example) ? `Example: ${example}` : '';
 
-export const getIconFromType = (type: string | null) => {
+export const getIconFromType = (type: string | null | undefined) => {
   switch (type) {
     case 'string': // fall through
     case 'keyword':

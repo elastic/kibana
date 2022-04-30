@@ -1,10 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AlertSummaryView Behavior event code renders additional summary rows 1`] = `
-.c1 {
-  line-height: 1.7rem;
-}
-
 .c0 .euiTableHeaderCell,
 .c0 .euiTableRowCell {
   border: none;
@@ -24,6 +20,10 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
   opacity: 1;
 }
 
+.c1 {
+  line-height: 1.7rem;
+}
+
 .c2 {
   min-width: 138px;
   padding: 0 8px;
@@ -33,28 +33,24 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
   display: flex;
 }
 
-.c2:focus-within .timelines__hoverActionButton,
-.c2:focus-within .securitySolution__hoverActionButton {
+.c3:focus-within .timelines__hoverActionButton,
+.c3:focus-within .securitySolution__hoverActionButton {
   opacity: 1;
 }
 
-.c2:hover .timelines__hoverActionButton,
-.c2:hover .securitySolution__hoverActionButton {
+.c3:hover .timelines__hoverActionButton,
+.c3:hover .securitySolution__hoverActionButton {
   opacity: 1;
 }
 
-.c2 .timelines__hoverActionButton,
-.c2 .securitySolution__hoverActionButton {
+.c3 .timelines__hoverActionButton,
+.c3 .securitySolution__hoverActionButton {
   opacity: 0;
 }
 
-.c2 .timelines__hoverActionButton:focus,
-.c2 .securitySolution__hoverActionButton:focus {
+.c3 .timelines__hoverActionButton:focus,
+.c3 .securitySolution__hoverActionButton:focus {
   opacity: 1;
-}
-
-.c3 {
-  padding: 4px 0;
 }
 
 <div
@@ -90,7 +86,6 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
             class="euiTableHeaderCell"
             data-test-subj="tableHeaderCell_title_0"
             role="columnheader"
-            scope="col"
             style="width: 220px;"
           >
             <span
@@ -105,7 +100,6 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
             class="euiTableHeaderCell"
             data-test-subj="tableHeaderCell_description_1"
             role="columnheader"
-            scope="col"
           >
             <span
               class="euiTableCellContent"
@@ -141,23 +135,42 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-kibana.alert.workflow_status"
+              >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero eventFieldsTable__fieldValue"
                 >
-                  open
+                  <button
+                    class="euiLink euiLink--primary"
+                    data-test-subj="host-details-button"
+                    type="button"
+                  >
+<<<<<<< HEAD
+                    open
+                  </div>
+=======
+                    <span
+                      class="c2"
+                      data-test-subj="draggable-truncatable-content"
+                    >
+                      windows-native
+                    </span>
+                  </button>
+>>>>>>> 7f7dbbb3cc0 ([SecuritySolution][Timeline] Clean removed runtime fields (#122976))
                 </div>
               </div>
               <div
                 data-eui="EuiFocusTrap"
               >
                 <div
-                  class="c2"
+                  class="c3"
                 >
                   <p
                     class="euiScreenReaderOnly"
                   >
-                    You are in a dialog, containing options for field signal.status. Press tab to navigate options. Press escape to exit.
+                    You are in a dialog, containing options for field kibana.alert.workflow_status. Press tab to navigate options. Press escape to exit.
                   </p>
                   <div
                     data-test-subj="hover-actions-filter-for"
@@ -170,10 +183,17 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
                     Filter out button
                   </div>
                   <div
-                    data-test-subj="more-actions-signal.status"
-                    field="signal.status"
+<<<<<<< HEAD
+                    data-test-subj="more-actions-kibana.alert.workflow_status"
+                    field="kibana.alert.workflow_status"
                     items="[object Object],[object Object]"
                     value="open"
+=======
+                    data-test-subj="more-actions-host.name"
+                    field="host.name"
+                    items="[object Object],[object Object],[object Object]"
+                    value="windows-native"
+>>>>>>> 7f7dbbb3cc0 ([SecuritySolution][Timeline] Clean removed runtime fields (#122976))
                   >
                     Overflow button
                   </div>
@@ -205,12 +225,15 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-@timestamp"
+              >
                 <div
-                  class="eventFieldsTable__fieldValue"
+                  class="euiFlexItem euiFlexItem--flexGrowZero eventFieldsTable__fieldValue"
                 >
                   <span
-                    class="euiToolTipAnchor"
+                    class="euiToolTipAnchor eui-textTruncate eui-alignMiddle"
                   >
                     Nov 25, 2020 @ 15:42:39.417
                   </span>
@@ -273,23 +296,35 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-kibana.alert.rule.name"
+              >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero eventFieldsTable__fieldValue"
                 >
-                  xxx
+                  <span
+                    data-test-subj="formatted-field-user.name"
+                  >
+<<<<<<< HEAD
+                    xxx
+                  </div>
+=======
+                    administrator
+                  </span>
+>>>>>>> 7f7dbbb3cc0 ([SecuritySolution][Timeline] Clean removed runtime fields (#122976))
                 </div>
               </div>
               <div
                 data-eui="EuiFocusTrap"
               >
                 <div
-                  class="c2"
+                  class="c3"
                 >
                   <p
                     class="euiScreenReaderOnly"
                   >
-                    You are in a dialog, containing options for field signal.rule.name. Press tab to navigate options. Press escape to exit.
+                    You are in a dialog, containing options for field kibana.alert.rule.name. Press tab to navigate options. Press escape to exit.
                   </p>
                   <div
                     data-test-subj="hover-actions-filter-for"
@@ -302,10 +337,17 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
                     Filter out button
                   </div>
                   <div
-                    data-test-subj="more-actions-signal.rule.name"
-                    field="signal.rule.name"
-                    items="[object Object],[object Object]"
+<<<<<<< HEAD
+                    data-test-subj="more-actions-kibana.alert.rule.name"
+                    field="kibana.alert.rule.name"
+                    items="[object Object]"
                     value="xxx"
+=======
+                    data-test-subj="more-actions-user.name"
+                    field="user.name"
+                    items="[object Object],[object Object],[object Object]"
+                    value="administrator"
+>>>>>>> 7f7dbbb3cc0 ([SecuritySolution][Timeline] Clean removed runtime fields (#122976))
                   >
                     Overflow button
                   </div>
@@ -337,23 +379,30 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-kibana.alert.severity"
+              >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  low
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    low
+                  </div>
                 </div>
               </div>
               <div
                 data-eui="EuiFocusTrap"
               >
                 <div
-                  class="c2"
+                  class="c3"
                 >
                   <p
                     class="euiScreenReaderOnly"
                   >
-                    You are in a dialog, containing options for field signal.rule.severity. Press tab to navigate options. Press escape to exit.
+                    You are in a dialog, containing options for field kibana.alert.severity. Press tab to navigate options. Press escape to exit.
                   </p>
                   <div
                     data-test-subj="hover-actions-filter-for"
@@ -366,9 +415,9 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
                     Filter out button
                   </div>
                   <div
-                    data-test-subj="more-actions-signal.rule.severity"
-                    field="signal.rule.severity"
-                    items="[object Object],[object Object]"
+                    data-test-subj="more-actions-kibana.alert.severity"
+                    field="kibana.alert.severity"
+                    items="[object Object]"
                     value="low"
                   >
                     Overflow button
@@ -378,9 +427,108 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
             </div>
           </td>
         </tr>
+<<<<<<< HEAD
         <tr
           class="euiTableRow"
         >
+=======
+      </tbody>
+    </table>
+  </div>
+</div>
+`;
+
+exports[`AlertSummaryView Memory event code renders additional summary rows 1`] = `
+.c0 .euiTableHeaderCell,
+.c0 .euiTableRowCell {
+  border: none;
+}
+
+.c0 .euiTableHeaderCell .euiTableCellContent {
+  padding: 0;
+}
+
+.c0 .flyoutOverviewDescription .hoverActions-active .timelines__hoverActionButton,
+.c0 .flyoutOverviewDescription .hoverActions-active .securitySolution__hoverActionButton {
+  opacity: 1;
+}
+
+.c0 .flyoutOverviewDescription:hover .timelines__hoverActionButton,
+.c0 .flyoutOverviewDescription:hover .securitySolution__hoverActionButton {
+  opacity: 1;
+}
+
+.c1 {
+  line-height: 1.7rem;
+}
+
+.c2,
+.c2 * {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.c3 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.c3:focus-within .timelines__hoverActionButton,
+.c3:focus-within .securitySolution__hoverActionButton {
+  opacity: 1;
+}
+
+.c3:hover .timelines__hoverActionButton,
+.c3:hover .securitySolution__hoverActionButton {
+  opacity: 1;
+}
+
+.c3 .timelines__hoverActionButton,
+.c3 .securitySolution__hoverActionButton {
+  opacity: 0;
+}
+
+.c3 .timelines__hoverActionButton:focus,
+.c3 .securitySolution__hoverActionButton:focus {
+  opacity: 1;
+}
+
+<div
+  class="euiBasicTable c0"
+  data-test-subj="summary-view"
+>
+  <div>
+    <div
+      class="euiTableHeaderMobile"
+    >
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        />
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        />
+      </div>
+    </div>
+    <table
+      class="euiTable euiTable--compressed euiTable--responsive"
+      id="__table_generated-id"
+      tabindex="-1"
+    >
+      <caption
+        class="euiScreenReaderOnly euiTableCaption"
+      />
+      <thead>
+        <tr>
+>>>>>>> 7f7dbbb3cc0 ([SecuritySolution][Timeline] Clean removed runtime fields (#122976))
           <td
             class="euiTableRowCell"
             style="width: 220px;"
@@ -401,11 +549,18 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-kibana.alert.risk_score"
+              >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  21
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    21
+                  </div>
                 </div>
               </div>
               <div
@@ -417,7 +572,7 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
                   <p
                     class="euiScreenReaderOnly"
                   >
-                    You are in a dialog, containing options for field signal.rule.risk_score. Press tab to navigate options. Press escape to exit.
+                    You are in a dialog, containing options for field kibana.alert.risk_score. Press tab to navigate options. Press escape to exit.
                   </p>
                   <div
                     data-test-subj="hover-actions-filter-for"
@@ -430,9 +585,9 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
                     Filter out button
                   </div>
                   <div
-                    data-test-subj="more-actions-signal.rule.risk_score"
-                    field="signal.rule.risk_score"
-                    items="[object Object],[object Object]"
+                    data-test-subj="more-actions-kibana.alert.risk_score"
+                    field="kibana.alert.risk_score"
+                    items="[object Object]"
                     value="21"
                   >
                     Overflow button
@@ -465,11 +620,18 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-host.name"
+              >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  windows-native
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    windows-native
+                  </div>
                 </div>
               </div>
               <div
@@ -529,11 +691,18 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-user.name"
+              >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  administrator
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    administrator
+                  </div>
                 </div>
               </div>
               <div
@@ -593,9 +762,12 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-source.ip"
+              >
                 <div
-                  class="eventFieldsTable__fieldValue"
+                  class="euiFlexItem euiFlexItem--flexGrowZero eventFieldsTable__fieldValue"
                 >
                   <span
                     class="euiToolTipAnchor"
@@ -634,167 +806,12 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
                   <div
                     data-test-subj="more-actions-source.ip"
                     field="source.ip"
-                    items="[object Object]"
+                    items="[object Object],[object Object]"
                     value="185.156.74.3"
                   >
                     Overflow button
                   </div>
                 </div>
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow"
-        >
-          <td
-            class="euiTableRowCell"
-            style="width: 220px;"
-          >
-            <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
-            >
-              <h5
-                class="c1 euiTitle euiTitle--xxxsmall"
-              >
-                destination.ip
-              </h5>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell"
-          >
-            <div
-              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
-            >
-              <div
-                class="c3"
-              >
-                —
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow"
-        >
-          <td
-            class="euiTableRowCell"
-            style="width: 220px;"
-          >
-            <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
-            >
-              <h5
-                class="c1 euiTitle euiTitle--xxxsmall"
-              >
-                Threshold Count
-              </h5>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell"
-          >
-            <div
-              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
-            >
-              <div
-                class="c3"
-              >
-                —
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow"
-        >
-          <td
-            class="euiTableRowCell"
-            style="width: 220px;"
-          >
-            <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
-            >
-              <h5
-                class="c1 euiTitle euiTitle--xxxsmall"
-              >
-                Threshold Terms
-              </h5>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell"
-          >
-            <div
-              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
-            >
-              <div
-                class="c3"
-              >
-                —
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow"
-        >
-          <td
-            class="euiTableRowCell"
-            style="width: 220px;"
-          >
-            <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
-            >
-              <h5
-                class="c1 euiTitle euiTitle--xxxsmall"
-              >
-                Threshold Cardinality
-              </h5>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell"
-          >
-            <div
-              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
-            >
-              <div
-                class="c3"
-              >
-                —
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow"
-        >
-          <td
-            class="euiTableRowCell"
-            style="width: 220px;"
-          >
-            <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
-            >
-              <h5
-                class="c1 euiTitle euiTitle--xxxsmall"
-              >
-                Rule description
-              </h5>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell"
-          >
-            <div
-              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
-            >
-              <div
-                class="c3"
-              >
-                —
               </div>
             </div>
           </td>
@@ -806,10 +823,6 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
 `;
 
 exports[`AlertSummaryView Memory event code renders additional summary rows 1`] = `
-.c1 {
-  line-height: 1.7rem;
-}
-
 .c0 .euiTableHeaderCell,
 .c0 .euiTableRowCell {
   border: none;
@@ -827,6 +840,10 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
 .c0 .flyoutOverviewDescription:hover .timelines__hoverActionButton,
 .c0 .flyoutOverviewDescription:hover .securitySolution__hoverActionButton {
   opacity: 1;
+}
+
+.c1 {
+  line-height: 1.7rem;
 }
 
 .c2 {
@@ -856,10 +873,6 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
 .c2 .timelines__hoverActionButton:focus,
 .c2 .securitySolution__hoverActionButton:focus {
   opacity: 1;
-}
-
-.c3 {
-  padding: 4px 0;
 }
 
 <div
@@ -895,7 +908,6 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             class="euiTableHeaderCell"
             data-test-subj="tableHeaderCell_title_0"
             role="columnheader"
-            scope="col"
             style="width: 220px;"
           >
             <span
@@ -910,7 +922,6 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             class="euiTableHeaderCell"
             data-test-subj="tableHeaderCell_description_1"
             role="columnheader"
-            scope="col"
           >
             <span
               class="euiTableCellContent"
@@ -946,11 +957,18 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-kibana.alert.workflow_status"
+              >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  open
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    open
+                  </div>
                 </div>
               </div>
               <div
@@ -962,7 +980,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                   <p
                     class="euiScreenReaderOnly"
                   >
-                    You are in a dialog, containing options for field signal.status. Press tab to navigate options. Press escape to exit.
+                    You are in a dialog, containing options for field kibana.alert.workflow_status. Press tab to navigate options. Press escape to exit.
                   </p>
                   <div
                     data-test-subj="hover-actions-filter-for"
@@ -975,8 +993,8 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                     Filter out button
                   </div>
                   <div
-                    data-test-subj="more-actions-signal.status"
-                    field="signal.status"
+                    data-test-subj="more-actions-kibana.alert.workflow_status"
+                    field="kibana.alert.workflow_status"
                     items="[object Object],[object Object]"
                     value="open"
                   >
@@ -1010,12 +1028,15 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-@timestamp"
+              >
                 <div
-                  class="eventFieldsTable__fieldValue"
+                  class="euiFlexItem euiFlexItem--flexGrowZero eventFieldsTable__fieldValue"
                 >
                   <span
-                    class="euiToolTipAnchor"
+                    class="euiToolTipAnchor eui-textTruncate eui-alignMiddle"
                   >
                     Nov 25, 2020 @ 15:42:39.417
                   </span>
@@ -1078,11 +1099,18 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-kibana.alert.rule.name"
+              >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  xxx
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    xxx
+                  </div>
                 </div>
               </div>
               <div
@@ -1094,7 +1122,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                   <p
                     class="euiScreenReaderOnly"
                   >
-                    You are in a dialog, containing options for field signal.rule.name. Press tab to navigate options. Press escape to exit.
+                    You are in a dialog, containing options for field kibana.alert.rule.name. Press tab to navigate options. Press escape to exit.
                   </p>
                   <div
                     data-test-subj="hover-actions-filter-for"
@@ -1107,9 +1135,9 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                     Filter out button
                   </div>
                   <div
-                    data-test-subj="more-actions-signal.rule.name"
-                    field="signal.rule.name"
-                    items="[object Object],[object Object]"
+                    data-test-subj="more-actions-kibana.alert.rule.name"
+                    field="kibana.alert.rule.name"
+                    items="[object Object]"
                     value="xxx"
                   >
                     Overflow button
@@ -1142,11 +1170,18 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-kibana.alert.severity"
+              >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  low
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    low
+                  </div>
                 </div>
               </div>
               <div
@@ -1158,7 +1193,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                   <p
                     class="euiScreenReaderOnly"
                   >
-                    You are in a dialog, containing options for field signal.rule.severity. Press tab to navigate options. Press escape to exit.
+                    You are in a dialog, containing options for field kibana.alert.severity. Press tab to navigate options. Press escape to exit.
                   </p>
                   <div
                     data-test-subj="hover-actions-filter-for"
@@ -1171,9 +1206,9 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                     Filter out button
                   </div>
                   <div
-                    data-test-subj="more-actions-signal.rule.severity"
-                    field="signal.rule.severity"
-                    items="[object Object],[object Object]"
+                    data-test-subj="more-actions-kibana.alert.severity"
+                    field="kibana.alert.severity"
+                    items="[object Object]"
                     value="low"
                   >
                     Overflow button
@@ -1206,11 +1241,18 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-kibana.alert.risk_score"
+              >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
-                  21
+                  <div
+                    class="euiText euiText--extraSmall"
+                  >
+                    21
+                  </div>
                 </div>
               </div>
               <div
@@ -1222,7 +1264,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                   <p
                     class="euiScreenReaderOnly"
                   >
-                    You are in a dialog, containing options for field signal.rule.risk_score. Press tab to navigate options. Press escape to exit.
+                    You are in a dialog, containing options for field kibana.alert.risk_score. Press tab to navigate options. Press escape to exit.
                   </p>
                   <div
                     data-test-subj="hover-actions-filter-for"
@@ -1235,9 +1277,9 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                     Filter out button
                   </div>
                   <div
-                    data-test-subj="more-actions-signal.rule.risk_score"
-                    field="signal.rule.risk_score"
-                    items="[object Object],[object Object]"
+                    data-test-subj="more-actions-kibana.alert.risk_score"
+                    field="kibana.alert.risk_score"
+                    items="[object Object]"
                     value="21"
                   >
                     Overflow button
@@ -1270,18 +1312,32 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-host.name"
+              >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero eventFieldsTable__fieldValue"
                 >
-                  windows-native
+                  <button
+                    class="euiLink euiLink--primary"
+                    data-test-subj="host-details-button"
+                    type="button"
+                  >
+                    <span
+                      class="c2"
+                      data-test-subj="draggable-truncatable-content"
+                    >
+                      windows-native
+                    </span>
+                  </button>
                 </div>
               </div>
               <div
                 data-eui="EuiFocusTrap"
               >
                 <div
-                  class="c2"
+                  class="c3"
                 >
                   <p
                     class="euiScreenReaderOnly"
@@ -1301,7 +1357,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                   <div
                     data-test-subj="more-actions-host.name"
                     field="host.name"
-                    items="[object Object]"
+                    items="[object Object],[object Object],[object Object]"
                     value="windows-native"
                   >
                     Overflow button
@@ -1334,18 +1390,25 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-user.name"
+              >
                 <div
-                  class="euiText euiText--extraSmall"
+                  class="euiFlexItem euiFlexItem--flexGrowZero eventFieldsTable__fieldValue"
                 >
-                  administrator
+                  <span
+                    data-test-subj="formatted-field-user.name"
+                  >
+                    administrator
+                  </span>
                 </div>
               </div>
               <div
                 data-eui="EuiFocusTrap"
               >
                 <div
-                  class="c2"
+                  class="c3"
                 >
                   <p
                     class="euiScreenReaderOnly"
@@ -1365,7 +1428,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                   <div
                     data-test-subj="more-actions-user.name"
                     field="user.name"
-                    items="[object Object]"
+                    items="[object Object],[object Object],[object Object]"
                     value="administrator"
                   >
                     Overflow button
@@ -1398,9 +1461,12 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
             <div
               class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
             >
-              <div>
+              <div
+                class="euiFlexGroup euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                data-test-subj="event-field-source.ip"
+              >
                 <div
-                  class="eventFieldsTable__fieldValue"
+                  class="euiFlexItem euiFlexItem--flexGrowZero eventFieldsTable__fieldValue"
                 >
                   <span
                     class="euiToolTipAnchor"
@@ -1419,7 +1485,7 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                 data-eui="EuiFocusTrap"
               >
                 <div
-                  class="c2"
+                  class="c3"
                 >
                   <p
                     class="euiScreenReaderOnly"
@@ -1439,198 +1505,12 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
                   <div
                     data-test-subj="more-actions-source.ip"
                     field="source.ip"
-                    items="[object Object]"
+                    items="[object Object],[object Object]"
                     value="185.156.74.3"
                   >
                     Overflow button
                   </div>
                 </div>
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow"
-        >
-          <td
-            class="euiTableRowCell"
-            style="width: 220px;"
-          >
-            <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
-            >
-              <h5
-                class="c1 euiTitle euiTitle--xxxsmall"
-              >
-                destination.ip
-              </h5>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell"
-          >
-            <div
-              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
-            >
-              <div
-                class="c3"
-              >
-                —
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow"
-        >
-          <td
-            class="euiTableRowCell"
-            style="width: 220px;"
-          >
-            <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
-            >
-              <h5
-                class="c1 euiTitle euiTitle--xxxsmall"
-              >
-                Threshold Count
-              </h5>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell"
-          >
-            <div
-              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
-            >
-              <div
-                class="c3"
-              >
-                —
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow"
-        >
-          <td
-            class="euiTableRowCell"
-            style="width: 220px;"
-          >
-            <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
-            >
-              <h5
-                class="c1 euiTitle euiTitle--xxxsmall"
-              >
-                Threshold Terms
-              </h5>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell"
-          >
-            <div
-              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
-            >
-              <div
-                class="c3"
-              >
-                —
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow"
-        >
-          <td
-            class="euiTableRowCell"
-            style="width: 220px;"
-          >
-            <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
-            >
-              <h5
-                class="c1 euiTitle euiTitle--xxxsmall"
-              >
-                Threshold Cardinality
-              </h5>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell"
-          >
-            <div
-              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
-            >
-              <div
-                class="c3"
-              >
-                —
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow"
-        >
-          <td
-            class="euiTableRowCell"
-            style="width: 220px;"
-          >
-            <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
-            >
-              <h5
-                class="c1 euiTitle euiTitle--xxxsmall"
-              >
-                Rule name
-              </h5>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell"
-          >
-            <div
-              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
-            >
-              <div
-                class="c3"
-              >
-                —
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr
-          class="euiTableRow"
-        >
-          <td
-            class="euiTableRowCell"
-            style="width: 220px;"
-          >
-            <div
-              class="euiTableCellContent euiTableCellContent--overflowingContent"
-            >
-              <h5
-                class="c1 euiTitle euiTitle--xxxsmall"
-              >
-                Import Hash
-              </h5>
-            </div>
-          </td>
-          <td
-            class="euiTableRowCell"
-          >
-            <div
-              class="euiTableCellContent flyoutOverviewDescription euiTableCellContent--overflowingContent"
-            >
-              <div
-                class="c3"
-              >
-                —
               </div>
             </div>
           </td>

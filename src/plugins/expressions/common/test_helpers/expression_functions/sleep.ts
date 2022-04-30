@@ -8,7 +8,7 @@
 
 import { ExpressionFunctionDefinition } from '../../expression_functions';
 
-export const sleep: ExpressionFunctionDefinition<'sleep', any, { time: number }, any> = {
+export const sleep: ExpressionFunctionDefinition<'sleep', unknown, { time: number }, unknown> = {
   name: 'sleep',
   args: {
     time: {

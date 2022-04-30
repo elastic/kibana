@@ -10,13 +10,10 @@ import { AlertCluster, IndexShardSizeStats } from '../../../common/types/alerts'
 import { ElasticsearchIndexStats, ElasticsearchResponseHit } from '../../../common/types/es';
 import { ESGlobPatterns, RegExPatterns } from '../../../common/es_glob_patterns';
 import { Globals } from '../../static_globals';
+import { createDatasetFilter } from './create_dataset_query_filter';
 
-interface SourceNode {
-  name: string;
-  uuid: string;
-}
 type TopHitType = ElasticsearchResponseHit & {
-  _source: { index_stats?: Partial<ElasticsearchIndexStats>; source_node?: SourceNode };
+  _source: { index_stats?: Partial<ElasticsearchIndexStats> };
 };
 
 const memoizedIndexPatterns = (globPatterns: string) => {
@@ -35,7 +32,8 @@ export async function fetchIndexShardSize(
   index: string,
   threshold: number,
   shardIndexPatterns: string,
-  size: number
+  size: number,
+  filterQuery?: string
 ): Promise<IndexShardSizeStats[]> {
   const params = {
     index,
@@ -44,12 +42,8 @@ export async function fetchIndexShardSize(
       size: 0,
       query: {
         bool: {
-          must: [
-            {
-              match: {
-                type: 'index_stats',
-              },
-            },
+          filter: [
+            createDatasetFilter('index_stats', 'index', 'elasticsearch.index'),
             {
               range: {
                 timestamp: {
@@ -89,8 +83,8 @@ export async function fetchIndexShardSize(
                         '_index',
                         'index_stats.shards.primaries',
                         'index_stats.primaries.store.size_in_bytes',
-                        'source_node.name',
-                        'source_node.uuid',
+                        'elasticsearch.index.shards.primaries',
+                        'elasticsearch.index.primaries.store.size_in_bytes',
                       ],
                     },
                     size: 1,
@@ -103,6 +97,15 @@ export async function fetchIndexShardSize(
       },
     },
   };
+
+  try {
+    if (filterQuery) {
+      const filterQueryObject = JSON.parse(filterQuery);
+      params.body.query.bool.filter.push(filterQueryObject);
+    }
+  } catch (e) {
+    // meh
+  }
 
   const { body: response } = await esClient.search(params);
   // @ts-expect-error declare aggegations type explicitly
@@ -123,12 +126,10 @@ export async function fetchIndexShardSize(
       if (!topHit || !ESGlobPatterns.isValid(shardIndex, validIndexPatterns)) {
         continue;
       }
-      const {
-        _index: monitoringIndexName,
-        _source: { source_node: sourceNode, index_stats: indexStats },
-      } = topHit;
+      const { _index: monitoringIndexName, _source } = topHit;
+      const indexStats = _source.index_stats || _source.elasticsearch?.index;
 
-      if (!indexStats || !indexStats.primaries || !sourceNode) {
+      if (!indexStats || !indexStats.primaries) {
         continue;
       }
 
@@ -141,7 +142,6 @@ export async function fetchIndexShardSize(
        * We can only calculate the average primary shard size at this point, since we don't have
        * data (in .monitoring-es* indices) to give us individual shards. This might change in the future
        */
-      const { name: nodeName, uuid: nodeId } = sourceNode;
       const avgShardSize = primaryShardSizeBytes / totalPrimaryShards;
       if (avgShardSize < thresholdBytes) {
         continue;
@@ -151,8 +151,6 @@ export async function fetchIndexShardSize(
         shardIndex,
         shardSize,
         clusterUuid,
-        nodeName,
-        nodeId,
         ccs: monitoringIndexName.includes(':') ? monitoringIndexName.split(':')[0] : undefined,
       });
     }

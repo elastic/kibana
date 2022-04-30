@@ -6,14 +6,17 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
-import styled from 'styled-components';
 import {
-  Case,
-  CaseStatusWithAllStatus,
-  CommentRequestAlertType,
-  SubCase,
-} from '../../../../common';
+  EuiButton,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+} from '@elastic/eui';
+import styled from 'styled-components';
+import { Case, CaseStatusWithAllStatus, SubCase } from '../../../../common/ui';
+import { CommentRequestAlertType } from '../../../../common/api';
 import { CasesNavigation } from '../../links';
 import * as i18n from '../../../common/translations';
 import { AllCasesGeneric } from '../all_cases_generic';
@@ -76,6 +79,11 @@ const AllCasesSelectorModalComponent: React.FC<AllCasesSelectorModalProps> = ({
           updateCase={updateCase}
         />
       </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButton color="text" onClick={closeModal}>
+          {i18n.CANCEL}
+        </EuiButton>
+      </EuiModalFooter>
     </Modal>
   ) : null;
 };

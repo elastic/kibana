@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { IRouter } from 'src/core/server';
-
 import { PLUGIN_ID, PACKAGE_POLICY_API_ROUTES } from '../../constants';
+import type { FleetRouter } from '../../types/request_context';
 import {
   GetPackagePoliciesRequestSchema,
   GetOnePackagePolicyRequestSchema,
@@ -15,6 +14,7 @@ import {
   UpdatePackagePolicyRequestSchema,
   DeletePackagePoliciesRequestSchema,
   UpgradePackagePoliciesRequestSchema,
+  DryRunPackagePoliciesRequestSchema,
 } from '../../types';
 
 import {
@@ -24,9 +24,10 @@ import {
   updatePackagePolicyHandler,
   deletePackagePolicyHandler,
   upgradePackagePolicyHandler,
+  dryRunUpgradePackagePolicyHandler,
 } from './handlers';
 
-export const registerRoutes = (router: IRouter) => {
+export const registerRoutes = (router: FleetRouter) => {
   // List
   router.get(
     {
@@ -85,5 +86,15 @@ export const registerRoutes = (router: IRouter) => {
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     upgradePackagePolicyHandler
+  );
+
+  // Upgrade - DryRun
+  router.post(
+    {
+      path: PACKAGE_POLICY_API_ROUTES.DRYRUN_PATTERN,
+      validate: DryRunPackagePoliciesRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    dryRunUpgradePackagePolicyHandler
   );
 };

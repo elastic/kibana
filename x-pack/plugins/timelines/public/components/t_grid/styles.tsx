@@ -270,13 +270,13 @@ export const EventsTrData = styled.div.attrs(({ className = '' }) => ({
 const TIMELINE_EVENT_DETAILS_OFFSET = 40;
 
 interface WidthProp {
-  width?: number;
+  width: number;
 }
 
 export const EventsTrSupplementContainer = styled.div.attrs<WidthProp>(({ width }) => ({
   role: 'dialog',
   style: {
-    width: `${width! - TIMELINE_EVENT_DETAILS_OFFSET}px`,
+    width: `${width - TIMELINE_EVENT_DETAILS_OFFSET}px`,
   },
 }))<WidthProp>``;
 
@@ -458,6 +458,13 @@ export const HideShowContainer = styled.div.attrs<{ $isVisible: boolean }>(
     },
   })
 )<{ $isVisible: boolean }>``;
+
+export const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible?: boolean }>`
+  overflow: hidden;
+  margin: 0;
+  min-height: 490px;
+  display: ${({ $visible = true }) => ($visible ? 'flex' : 'none')};
+`;
 
 export const UpdatedFlexGroup = styled(EuiFlexGroup)`
   position: absolute;

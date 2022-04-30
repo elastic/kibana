@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 
 import {
@@ -160,22 +160,21 @@ export const ComponentTemplateForm = ({
   };
 
   const buildComponentTemplateObject = useCallback(
-    (initialTemplate: ComponentTemplateDeserialized) => (
-      wizardData: WizardContent
-    ): ComponentTemplateDeserialized => {
-      const outputComponentTemplate = {
-        ...initialTemplate,
-        name: wizardData.logistics.name,
-        version: wizardData.logistics.version,
-        _meta: wizardData.logistics._meta,
-        template: {
-          settings: wizardData.settings,
-          mappings: wizardData.mappings,
-          aliases: wizardData.aliases,
-        },
-      };
-      return cleanupComponentTemplateObject(outputComponentTemplate);
-    },
+    (initialTemplate: ComponentTemplateDeserialized) =>
+      (wizardData: WizardContent): ComponentTemplateDeserialized => {
+        const outputComponentTemplate = {
+          ...initialTemplate,
+          name: wizardData.logistics.name,
+          version: wizardData.logistics.version,
+          _meta: wizardData.logistics._meta,
+          template: {
+            settings: wizardData.settings,
+            mappings: wizardData.mappings,
+            aliases: wizardData.aliases,
+          },
+        };
+        return cleanupComponentTemplateObject(outputComponentTemplate);
+      },
     []
   );
 

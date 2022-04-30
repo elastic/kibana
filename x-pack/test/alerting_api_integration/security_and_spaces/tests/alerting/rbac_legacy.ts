@@ -10,6 +10,7 @@ import { UserAtSpaceScenarios, Superuser } from '../../scenarios';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { ESTestIndexTool, getUrlPrefix, ObjectRemover, AlertUtils } from '../../../common/lib';
 import { setupSpacesAndUsers } from '..';
+import { SavedObjectsUtils } from '../../../../../../src/core/server/saved_objects';
 
 // eslint-disable-next-line import/no-default-export
 export default function alertTests({ getService }: FtrProviderContext) {
@@ -20,13 +21,38 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
-  const MIGRATED_ACTION_ID = '17f38826-5a8d-4a76-975a-b496e7fffe0b';
+  const MIGRATED_ACTION_ID = SavedObjectsUtils.getConvertedObjectId(
+    'space1',
+    'action',
+    '17f38826-5a8d-4a76-975a-b496e7fffe0b'
+  );
+
   const MIGRATED_ALERT_ID: Record<string, string> = {
-    space_1_all_alerts_none_actions: '6ee9630a-a20e-44af-9465-217a3717d2ab',
-    space_1_all_with_restricted_fixture: '5cc59319-74ee-4edc-8646-a79ea91067cd',
-    space_1_all: 'd41a6abb-b93b-46df-a80a-926221ea847c',
-    global_read: '362e362b-a137-4aa2-9434-43e3d0d84a34',
-    superuser: 'b384be60-ec53-4b26-857e-0253ee55b277',
+    space_1_all_alerts_none_actions: SavedObjectsUtils.getConvertedObjectId(
+      'space1',
+      'alert',
+      '6ee9630a-a20e-44af-9465-217a3717d2ab'
+    ),
+    space_1_all_with_restricted_fixture: SavedObjectsUtils.getConvertedObjectId(
+      'space1',
+      'alert',
+      '5cc59319-74ee-4edc-8646-a79ea91067cd'
+    ),
+    space_1_all: SavedObjectsUtils.getConvertedObjectId(
+      'space1',
+      'alert',
+      'd41a6abb-b93b-46df-a80a-926221ea847c'
+    ),
+    global_read: SavedObjectsUtils.getConvertedObjectId(
+      'space1',
+      'alert',
+      '362e362b-a137-4aa2-9434-43e3d0d84a34'
+    ),
+    superuser: SavedObjectsUtils.getConvertedObjectId(
+      'space1',
+      'alert',
+      'b384be60-ec53-4b26-857e-0253ee55b277'
+    ),
   };
 
   describe('alerts', () => {
@@ -104,9 +130,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
               // attempt to update alert as user with no Alerts privileges - as it is no longer a legacy alert
               // this should fail, as the user doesn't have the `updateApiKey` privilege for Alerts
-              const failedUpdateKeyDueToAlertsPrivilegesResponse = await alertUtils.getUpdateApiKeyRequest(
-                migratedAlertId
-              );
+              const failedUpdateKeyDueToAlertsPrivilegesResponse =
+                await alertUtils.getUpdateApiKeyRequest(migratedAlertId);
 
               expect(failedUpdateKeyDueToAlertsPrivilegesResponse.statusCode).to.eql(403);
               expect(failedUpdateKeyDueToAlertsPrivilegesResponse.body).to.eql({
@@ -128,9 +153,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
               // attempt to update alert as user with no Actions privileges - as it is no longer a legacy alert
               // this should fail, as the user doesn't have the `execute` privilege for Actions
-              const failedUpdateKeyDueToActionsPrivilegesResponse = await alertUtils.getUpdateApiKeyRequest(
-                migratedAlertId
-              );
+              const failedUpdateKeyDueToActionsPrivilegesResponse =
+                await alertUtils.getUpdateApiKeyRequest(migratedAlertId);
 
               expect(failedUpdateKeyDueToActionsPrivilegesResponse.statusCode).to.eql(403);
               expect(failedUpdateKeyDueToActionsPrivilegesResponse.body).to.eql({
@@ -202,13 +226,19 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
           async function ensureAlertIsRunning() {
             // ensure the alert still runs and that it can schedule actions
-            const numberOfAlertExecutions = (
-              await esTestIndexTool.search('alert:test.always-firing', reference)
-            ).body.hits.total.value;
+            const alwaysFiringResponse = await esTestIndexTool.search(
+              'alert:test.always-firing',
+              reference
+            );
+            // @ts-expect-error doesnt handle total: number
+            const numberOfAlertExecutions = alwaysFiringResponse.body.hits.total.value;
 
-            const numberOfActionExecutions = (
-              await esTestIndexTool.search('action:test.index-record', reference)
-            ).body.hits.total.value;
+            const indexRecordResponse = await esTestIndexTool.search(
+              'action:test.index-record',
+              reference
+            );
+            // @ts-expect-error doesnt handle total: number
+            const numberOfActionExecutions = indexRecordResponse.body.hits.total.value;
 
             // wait for alert to execute and for its action to be scheduled and run
             await retry.try(async () => {
@@ -222,9 +252,11 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 reference
               );
 
+              // @ts-expect-error doesnt handle total: number
               expect(alertSearchResult.body.hits.total.value).to.be.greaterThan(
                 numberOfAlertExecutions
               );
+              // @ts-expect-error doesnt handle total: number
               expect(actionSearchResult.body.hits.total.value).to.be.greaterThan(
                 numberOfActionExecutions
               );

@@ -94,13 +94,14 @@ describe('getCerts', () => {
 
     const result = await getCerts({
       uptimeEsClient,
-      index: 1,
+      pageIndex: 1,
       from: 'now-2d',
       to: 'now+1h',
       search: 'my_common_name',
       size: 30,
       sortBy: 'not_after',
       direction: 'desc',
+      notValidAfter: 'now+100d',
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
@@ -184,6 +185,20 @@ describe('getCerts', () => {
                         },
                       },
                     },
+                    Object {
+                      "bool": Object {
+                        "minimum_should_match": 1,
+                        "should": Array [
+                          Object {
+                            "range": Object {
+                              "tls.certificate_not_valid_after": Object {
+                                "lte": "now+100d",
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
                   ],
                   "minimum_should_match": 1,
                   "should": Array [
@@ -212,7 +227,7 @@ describe('getCerts', () => {
                 },
               ],
             },
-            "index": "heartbeat-8*,synthetics-*",
+            "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
           },
         ],
       ]

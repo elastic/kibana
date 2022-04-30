@@ -25,6 +25,7 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../../context/breadcrumbs/use_breadcrumb';
+import { ServiceAnomalyTimeseriesContextProvider } from '../../../../context/service_anomaly_timeseries/service_anomaly_timeseries_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -57,7 +58,9 @@ interface Props {
 export function ApmServiceTemplate(props: Props) {
   return (
     <ApmServiceContextProvider>
-      <TemplateWithContext {...props} />
+      <ServiceAnomalyTimeseriesContextProvider>
+        <TemplateWithContext {...props} />
+      </ServiceAnomalyTimeseriesContextProvider>
     </ApmServiceContextProvider>
   );
 }
@@ -72,7 +75,7 @@ function TemplateWithContext({
     path: { serviceName },
     query,
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/services/:serviceName/*');
+  } = useApmParams('/services/{serviceName}/*');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -82,7 +85,7 @@ function TemplateWithContext({
 
   useBreadcrumb({
     title,
-    href: router.link(`/services/:serviceName/${selectedTab}` as const, {
+    href: router.link(`/services/{serviceName}/${selectedTab}` as const, {
       path: { serviceName },
       query,
     }),
@@ -162,7 +165,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   const {
     path: { serviceName },
     query: queryFromUrl,
-  } = useApmParams(`/services/:serviceName/${selectedTab}` as const);
+  } = useApmParams(`/services/{serviceName}/${selectedTab}` as const);
 
   const query = omit(
     queryFromUrl,
@@ -175,7 +178,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   const tabs: Tab[] = [
     {
       key: 'overview',
-      href: router.link('/services/:serviceName/overview', {
+      href: router.link('/services/{serviceName}/overview', {
         path: { serviceName },
         query,
       }),
@@ -185,7 +188,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     },
     {
       key: 'transactions',
-      href: router.link('/services/:serviceName/transactions', {
+      href: router.link('/services/{serviceName}/transactions', {
         path: { serviceName },
         query,
       }),
@@ -195,7 +198,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     },
     {
       key: 'dependencies',
-      href: router.link('/services/:serviceName/dependencies', {
+      href: router.link('/services/{serviceName}/dependencies', {
         path: { serviceName },
         query,
       }),
@@ -207,7 +210,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     },
     {
       key: 'errors',
-      href: router.link('/services/:serviceName/errors', {
+      href: router.link('/services/{serviceName}/errors', {
         path: { serviceName },
         query,
       }),
@@ -217,7 +220,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     },
     {
       key: 'metrics',
-      href: router.link('/services/:serviceName/metrics', {
+      href: router.link('/services/{serviceName}/metrics', {
         path: { serviceName },
         query,
       }),
@@ -228,7 +231,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     },
     {
       key: 'nodes',
-      href: router.link('/services/:serviceName/nodes', {
+      href: router.link('/services/{serviceName}/nodes', {
         path: { serviceName },
         query,
       }),
@@ -239,7 +242,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     },
     {
       key: 'service-map',
-      href: router.link('/services/:serviceName/service-map', {
+      href: router.link('/services/{serviceName}/service-map', {
         path: { serviceName },
         query,
       }),
@@ -249,7 +252,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     },
     {
       key: 'logs',
-      href: router.link('/services/:serviceName/logs', {
+      href: router.link('/services/{serviceName}/logs', {
         path: { serviceName },
         query,
       }),
@@ -261,7 +264,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     },
     {
       key: 'profiling',
-      href: router.link('/services/:serviceName/profiling', {
+      href: router.link('/services/{serviceName}/profiling', {
         path: {
           serviceName,
         },

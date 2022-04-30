@@ -16,9 +16,11 @@ import {
   EuiCheckbox,
   EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import themeDark from '@elastic/eui/dist/eui_theme_dark.json';
-import themeLight from '@elastic/eui/dist/eui_theme_light.json';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  euiLightVars as themeLight,
+  euiDarkVars as themeDark,
+} from '@kbn/ui-shared-deps-src/theme';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { DiscoverGridContext } from './discover_grid_context';
 
@@ -31,9 +33,8 @@ export const getDocId = (doc: ElasticSearchHit & { _routing?: string }) => {
   return [doc._index, doc._id, routing].join('::');
 };
 export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueElementProps) => {
-  const { selectedDocs, expanded, rows, isDarkMode, setSelectedDocs } = useContext(
-    DiscoverGridContext
-  );
+  const { selectedDocs, expanded, rows, isDarkMode, setSelectedDocs } =
+    useContext(DiscoverGridContext);
   const doc = useMemo(() => rows[rowIndex], [rows, rowIndex]);
   const id = useMemo(() => getDocId(doc), [doc]);
   const checked = useMemo(() => selectedDocs.includes(id), [selectedDocs, id]);

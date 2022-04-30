@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Filter } from '../../../../../../src/plugins/data/public';
+import type { Filter } from '@kbn/es-query';
 
 export const getAdditionalScreenReaderOnlyContext = ({
   field,

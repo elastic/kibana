@@ -14,7 +14,7 @@ import type {
   ElasticsearchClient,
 } from 'kibana/server';
 import type Boom from '@hapi/boom';
-import { ElasticsearchClientError, ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { LicenseFeature, ILicense } from '../../licensing/server';
 import type {
@@ -28,6 +28,7 @@ import {
   PluginSetupContract as AlertingPluginSetupContract,
 } from '../../alerting/server';
 import { InfraPluginSetup, InfraRequestHandlerContext } from '../../infra/server';
+import { PluginSetupContract as AlertingPluginSetup } from '../../alerting/server';
 import { LicensingPluginStart } from '../../licensing/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
@@ -80,6 +81,7 @@ export interface RouteDependencies {
   router: IRouter<RequestHandlerContextMonitoringPlugin>;
   licenseService: MonitoringLicenseService;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
+  alerting?: AlertingPluginSetup;
   logger: Logger;
 }
 
@@ -142,9 +144,7 @@ export interface LegacyServer {
       };
     };
     elasticsearch: {
-      getCluster: (
-        name: string
-      ) => {
+      getCluster: (name: string) => {
         callWithRequest: (req: any, endpoint: string, params: any) => Promise<any>;
       };
     };
@@ -182,4 +182,78 @@ export interface ClusterSettingsReasonResponse {
   };
 }
 
-export type ErrorTypes = Error | Boom.Boom | ResponseError | ElasticsearchClientError;
+export type ErrorTypes = Error | Boom.Boom | errors.ResponseError | errors.ElasticsearchClientError;
+
+export type Pipeline = {
+  id: string;
+  nodeIds: string[];
+} & {
+  [key in PipelineMetricKey]?: number;
+};
+
+export type PipelineMetricKey =
+  | 'logstash_cluster_pipeline_throughput'
+  | 'logstash_cluster_pipeline_node_count'
+  | 'logstash_node_pipeline_node_count'
+  | 'logstash_node_pipeline_throughput';
+
+export type PipelineThroughputMetricKey =
+  | 'logstash_cluster_pipeline_throughput'
+  | 'logstash_node_pipeline_throughput';
+
+export type PipelineNodeCountMetricKey =
+  | 'logstash_cluster_pipeline_node_count'
+  | 'logstash_node_pipeline_node_count';
+
+export interface PipelineWithMetrics {
+  id: string;
+  metrics: {
+    logstash_cluster_pipeline_throughput?: PipelineMetricsProcessed;
+    logstash_cluster_pipeline_node_count?: PipelineMetricsProcessed;
+    logstash_node_pipeline_throughput?: PipelineMetricsProcessed;
+    logstash_node_pipeline_node_count?: PipelineMetricsProcessed;
+  };
+}
+
+export interface PipelineResponse {
+  id: string;
+  latestThroughput: number | null;
+  latestNodesCount: number | null;
+  metrics: {
+    nodesCount?: PipelineMetricsProcessed;
+    throughput?: PipelineMetricsProcessed;
+  };
+}
+export interface PipelinesResponse {
+  pipelines: PipelineResponse[];
+  totalPipelineCount: number;
+}
+export interface PipelineMetrics {
+  bucket_size: string;
+  timeRange: {
+    min: number;
+    max: number;
+  };
+  metric: {
+    app: string;
+    field: string;
+    label: string;
+    description: string;
+    units: string;
+    format: string;
+    hasCalculation: boolean;
+    isDerivative: boolean;
+  };
+}
+export type PipelineMetricsRes = PipelineMetrics & {
+  data: Array<[number, { [key: string]: number }]>;
+};
+export type PipelineMetricsProcessed = PipelineMetrics & {
+  data: Array<Array<null | number>>;
+};
+
+export interface PipelineVersion {
+  firstSeen: number;
+  lastSeen: number;
+  hash: string;
+}

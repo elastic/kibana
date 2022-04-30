@@ -11,7 +11,7 @@ import { History } from 'history';
 import { getState } from './discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../../build_services';
-import { SavedSearch } from '../../../../saved_searches';
+import { SavedSearch, getSavedSearch } from '../../../../saved_searches';
 import { loadIndexPattern } from '../utils/resolve_index_pattern';
 import { useSavedSearch as useSavedSearchData } from './use_saved_search';
 import {
@@ -34,7 +34,7 @@ export function useDiscoverState({
   savedSearch: SavedSearch;
   history: History;
 }) {
-  const { uiSettings: config, data, filterManager, indexPatterns } = services;
+  const { uiSettings: config, data, filterManager, indexPatterns, storage } = services;
   const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
   const { timefilter } = data.query.timefilter;
 
@@ -53,13 +53,14 @@ export function useDiscoverState({
             config,
             data,
             savedSearch,
+            storage,
           }),
         storeInSessionStorage: config.get('state:storeInSessionStorage'),
         history,
         toasts: services.core.notifications.toasts,
         uiSettings: config,
       }),
-    [config, data, history, savedSearch, services.core.notifications.toasts]
+    [config, data, history, savedSearch, services.core.notifications.toasts, storage]
   );
 
   const { appStateContainer } = stateContainer;
@@ -94,8 +95,14 @@ export function useDiscoverState({
     useNewFieldsApi,
   });
 
+  /**
+   * Sync URL state with local app state on saved search load
+   * or dataView / savedSearch switch
+   */
   useEffect(() => {
     const stopSync = stateContainer.initializeAndSync(indexPattern, filterManager, data);
+    setState(stateContainer.appStateContainer.getState());
+
     return () => stopSync();
   }, [stateContainer, filterManager, data, indexPattern]);
 
@@ -147,17 +154,24 @@ export function useDiscoverState({
    */
   const resetSavedSearch = useCallback(
     async (id?: string) => {
-      const newSavedSearch = await services.getSavedSearchById(id);
-      newSavedSearch.searchSource.setField('index', indexPattern);
+      const newSavedSearch = await getSavedSearch(id, {
+        search: services.data.search,
+        savedObjectsClient: services.core.savedObjects.client,
+        spaces: services.spaces,
+      });
+
+      const newIndexPattern = newSavedSearch.searchSource.getField('index') || indexPattern;
+      newSavedSearch.searchSource.setField('index', newIndexPattern);
       const newAppState = getStateDefaults({
         config,
         data,
         savedSearch: newSavedSearch,
+        storage,
       });
       await stateContainer.replaceUrlAppState(newAppState);
       setState(newAppState);
     },
-    [services, indexPattern, config, data, stateContainer]
+    [services, indexPattern, config, data, storage, stateContainer]
   );
 
   /**
@@ -193,31 +207,14 @@ export function useDiscoverState({
     [refetch$, searchSessionManager]
   );
 
-  useEffect(() => {
-    if (!savedSearch || !savedSearch.id) {
-      return;
-    }
-    // handling pushing to state of a persisted saved object
-    const newAppState = getStateDefaults({
-      config,
-      data,
-      savedSearch,
-    });
-    stateContainer.replaceUrlAppState(newAppState);
-    setState(newAppState);
-  }, [config, data, savedSearch, reset, stateContainer]);
-
   /**
-   * Initial data fetching, also triggered when index pattern changes
+   * Trigger data fetching on indexPattern or savedSearch changes
    */
   useEffect(() => {
-    if (!indexPattern) {
-      return;
-    }
-    if (initialFetchStatus === FetchStatus.LOADING) {
+    if (indexPattern) {
       refetch$.next();
     }
-  }, [initialFetchStatus, refetch$, indexPattern]);
+  }, [initialFetchStatus, refetch$, indexPattern, savedSearch.id]);
 
   return {
     data$,
@@ -228,7 +225,6 @@ export function useDiscoverState({
     onChangeIndexPattern,
     onUpdateQuery,
     searchSource,
-    setState,
     state,
     stateContainer,
   };

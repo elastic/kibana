@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import apm from 'elastic-apm-node';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
 import type { Request } from '@hapi/hapi';
@@ -49,15 +49,17 @@ import {
   AlertInstanceContext,
   WithoutReservedActionGroups,
 } from '../../common';
-import { NormalizedAlertType } from '../rule_type_registry';
+import { NormalizedAlertType, UntypedNormalizedAlertType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
+import {
+  createAlertEventLogRecordObject,
+  Event,
+} from '../lib/create_alert_event_log_record_object';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
-
-type Event = Exclude<IEvent, undefined>;
 
 interface AlertTaskRunResult {
   state: AlertTaskState;
@@ -135,7 +137,7 @@ export class TaskRunner<
 
     const path = addSpaceIdToPath('/', spaceId);
 
-    const fakeRequest = KibanaRequest.from(({
+    const fakeRequest = KibanaRequest.from({
       headers: requestHeaders,
       path: '/',
       route: { settings: {} },
@@ -147,7 +149,7 @@ export class TaskRunner<
           url: '/',
         },
       },
-    } as unknown) as Request);
+    } as unknown as Request);
 
     this.context.basePathService.set(fakeRequest, path);
 
@@ -377,40 +379,35 @@ export class TaskRunner<
         alertLabel,
       });
 
-      const instancesToExecute =
-        notifyWhen === 'onActionGroupChange'
-          ? Object.entries(instancesWithScheduledActions).filter(
-              ([alertInstanceName, alertInstance]: [
-                string,
-                AlertInstance<InstanceState, InstanceContext>
-              ]) => {
-                const shouldExecuteAction = alertInstance.scheduledActionGroupOrSubgroupHasChanged();
-                if (!shouldExecuteAction) {
-                  this.logger.debug(
-                    `skipping scheduling of actions for '${alertInstanceName}' in alert ${alertLabel}: instance is active but action group has not changed`
-                  );
-                }
-                return shouldExecuteAction;
-              }
-            )
-          : Object.entries(instancesWithScheduledActions).filter(
-              ([alertInstanceName, alertInstance]: [
-                string,
-                AlertInstance<InstanceState, InstanceContext>
-              ]) => {
-                const throttled = alertInstance.isThrottled(throttle);
-                const muted = mutedInstanceIdsSet.has(alertInstanceName);
-                const shouldExecuteAction = !throttled && !muted;
-                if (!shouldExecuteAction) {
-                  this.logger.debug(
-                    `skipping scheduling of actions for '${alertInstanceName}' in alert ${alertLabel}: instance is ${
-                      muted ? 'muted' : 'throttled'
-                    }`
-                  );
-                }
-                return shouldExecuteAction;
-              }
+      const instancesToExecute = Object.entries(instancesWithScheduledActions).filter(
+        ([alertInstanceName, alertInstance]: [
+          string,
+          AlertInstance<InstanceState, InstanceContext>
+        ]) => {
+          const throttled = alertInstance.isThrottled(throttle);
+          const muted = mutedInstanceIdsSet.has(alertInstanceName);
+          let shouldExecuteAction = true;
+
+          if (throttled || muted) {
+            shouldExecuteAction = false;
+            this.logger.debug(
+              `skipping scheduling of actions for '${alertInstanceName}' in alert ${alertLabel}: instance is ${
+                muted ? 'muted' : 'throttled'
+              }`
             );
+          } else if (
+            notifyWhen === 'onActionGroupChange' &&
+            !alertInstance.scheduledActionGroupOrSubgroupHasChanged()
+          ) {
+            shouldExecuteAction = false;
+            this.logger.debug(
+              `skipping scheduling of actions for '${alertInstanceName}' in alert ${alertLabel}: instance is active but action group has not changed`
+            );
+          }
+
+          return shouldExecuteAction;
+        }
+      );
 
       await Promise.all(
         instancesToExecute.map(
@@ -480,6 +477,17 @@ export class TaskRunner<
     // Ensure API key is still valid and user has access
     try {
       alert = await rulesClient.get({ id: alertId });
+
+      if (apm.currentTransaction) {
+        apm.currentTransaction.name = `Execute Alerting Rule: "${alert.name}"`;
+        apm.currentTransaction.addLabels({
+          alerting_rule_consumer: alert.consumer,
+          alerting_rule_name: alert.name,
+          alerting_rule_tags: alert.tags.join(', '),
+          alerting_rule_type_id: alert.alertTypeId,
+          alerting_rule_params: JSON.stringify(alert.params),
+        });
+      }
     } catch (err) {
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Read, err);
     }
@@ -509,6 +517,13 @@ export class TaskRunner<
       schedule: taskSchedule,
     } = this.taskInstance;
 
+    if (apm.currentTransaction) {
+      apm.currentTransaction.name = `Execute Alerting Rule`;
+      apm.currentTransaction.addLabels({
+        alerting_rule_id: alertId,
+      });
+    }
+
     const runDate = new Date();
     const runDateString = runDate.toISOString();
     this.logger.debug(`executing alert ${this.alertType.id}:${alertId} at ${runDateString}`);
@@ -516,37 +531,26 @@ export class TaskRunner<
     const namespace = this.context.spaceIdToNamespace(spaceId);
     const eventLogger = this.context.eventLogger;
     const scheduleDelay = runDate.getTime() - this.taskInstance.runAt.getTime();
-    const event: IEvent = {
-      // explicitly set execute timestamp so it will be before other events
-      // generated here (new-instance, schedule-action, etc)
-      '@timestamp': runDateString,
-      event: {
-        action: EVENT_LOG_ACTIONS.execute,
-        kind: 'alert',
-        category: [this.alertType.producer],
+
+    const event = createAlertEventLogRecordObject({
+      timestamp: runDateString,
+      ruleId: alertId,
+      ruleType: this.alertType as UntypedNormalizedAlertType,
+      action: EVENT_LOG_ACTIONS.execute,
+      namespace,
+      task: {
+        scheduled: this.taskInstance.runAt.toISOString(),
+        scheduleDelay: Millis2Nanos * scheduleDelay,
       },
-      kibana: {
-        saved_objects: [
-          {
-            rel: SAVED_OBJECT_REL_PRIMARY,
-            type: 'alert',
-            id: alertId,
-            type_id: this.alertType.id,
-            namespace,
-          },
-        ],
-        task: {
-          scheduled: this.taskInstance.runAt.toISOString(),
-          schedule_delay: Millis2Nanos * scheduleDelay,
+      savedObjects: [
+        {
+          id: alertId,
+          type: 'alert',
+          typeId: this.alertType.id,
+          relation: SAVED_OBJECT_REL_PRIMARY,
         },
-      },
-      rule: {
-        id: alertId,
-        license: this.alertType.minimumLicenseRequired,
-        category: this.alertType.id,
-        ruleset: this.alertType.producer,
-      },
-    };
+      ],
+    });
 
     eventLogger.startTiming(event);
 
@@ -575,6 +579,14 @@ export class TaskRunner<
       executionStatus.lastExecutionDate = new Date(event.event.start);
     }
 
+    if (apm.currentTransaction) {
+      if (executionStatus.status === 'ok' || executionStatus.status === 'active') {
+        apm.currentTransaction.setOutcome('success');
+      } else if (executionStatus.status === 'error' || executionStatus.status === 'unknown') {
+        apm.currentTransaction.setOutcome('failure');
+      }
+    }
+
     this.logger.debug(
       `alertExecutionStatus for ${this.alertType.id}:${alertId}: ${JSON.stringify(executionStatus)}`
     );
@@ -583,6 +595,11 @@ export class TaskRunner<
     event.kibana = event.kibana || {};
     event.kibana.alerting = event.kibana.alerting || {};
     event.kibana.alerting.status = executionStatus.status;
+
+    // Copy duration into execution status if available
+    if (null != event.event?.duration) {
+      executionStatus.lastDuration = Math.round(event.event?.duration / Millis2Nanos);
+    }
 
     // if executionStatus indicates an error, fill in fields in
     // event from it
@@ -751,6 +768,12 @@ function generateNewAndRecoveredInstanceEvents<
   const currentAlertInstanceIds = Object.keys(currentAlertInstances);
   const recoveredAlertInstanceIds = Object.keys(recoveredAlertInstances);
   const newIds = without(currentAlertInstanceIds, ...originalAlertInstanceIds);
+
+  if (apm.currentTransaction) {
+    apm.currentTransaction.addLabels({
+      alerting_new_alerts: newIds.length,
+    });
+  }
 
   for (const id of recoveredAlertInstanceIds) {
     const { group: actionGroup, subgroup: actionSubgroup } =
@@ -932,6 +955,14 @@ function logActiveAndRecoveredInstances<
   const { logger, activeAlertInstances, recoveredAlertInstances, alertLabel } = params;
   const activeInstanceIds = Object.keys(activeAlertInstances);
   const recoveredInstanceIds = Object.keys(recoveredAlertInstances);
+
+  if (apm.currentTransaction) {
+    apm.currentTransaction.addLabels({
+      alerting_active_alerts: activeInstanceIds.length,
+      alerting_recovered_alerts: recoveredInstanceIds.length,
+    });
+  }
+
   if (activeInstanceIds.length > 0) {
     logger.debug(
       `alert ${alertLabel} has ${activeInstanceIds.length} active alert instances: ${JSON.stringify(

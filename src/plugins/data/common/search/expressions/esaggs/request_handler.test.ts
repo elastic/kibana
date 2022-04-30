@@ -9,12 +9,12 @@
 import { from } from 'rxjs';
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import type { Filter } from '../../../es_query';
-import type { IndexPattern } from '../../../index_patterns';
+import type { IndexPattern } from '../../..';
 import type { IAggConfigs } from '../../aggs';
 import type { ISearchSource } from '../../search_source';
 import { searchSourceCommonMock, searchSourceInstanceMock } from '../../search_source/mocks';
 
-import { handleRequest, RequestHandlerParams } from './request_handler';
+import { handleRequest } from './request_handler';
 
 jest.mock('../../tabify', () => ({
   tabifyAggResponse: jest.fn(),
@@ -25,7 +25,7 @@ import { of } from 'rxjs';
 import { toArray } from 'rxjs/operators';
 
 describe('esaggs expression function - public', () => {
-  let mockParams: MockedKeys<RequestHandlerParams>;
+  let mockParams: MockedKeys<Parameters<typeof handleRequest>[0]>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -37,17 +37,17 @@ describe('esaggs expression function - public', () => {
     );
 
     mockParams = {
-      abortSignal: (jest.fn() as unknown) as jest.Mocked<AbortSignal>,
-      aggs: ({
+      abortSignal: jest.fn() as unknown as jest.Mocked<AbortSignal>,
+      aggs: {
         aggs: [{ type: { name: 'terms', postFlightRequest: jest.fn().mockResolvedValue({}) } }],
         setTimeRange: jest.fn(),
         toDsl: jest.fn().mockReturnValue({ aggs: {} }),
         onSearchRequestStart: jest.fn(),
         setTimeFields: jest.fn(),
         setForceNow: jest.fn(),
-      } as unknown) as jest.Mocked<IAggConfigs>,
+      } as unknown as jest.Mocked<IAggConfigs>,
       filters: undefined,
-      indexPattern: ({ id: 'logstash-*' } as unknown) as jest.Mocked<IndexPattern>,
+      indexPattern: { id: 'logstash-*' } as unknown as jest.Mocked<IndexPattern>,
       inspectorAdapters: {},
       partialRows: false,
       query: undefined,

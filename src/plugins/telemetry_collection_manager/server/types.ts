@@ -21,13 +21,11 @@ export interface TelemetryCollectionManagerPluginSetup {
   ) => void;
   getOptInStats: TelemetryCollectionManagerPlugin['getOptInStats'];
   getStats: TelemetryCollectionManagerPlugin['getStats'];
-  areAllCollectorsReady: TelemetryCollectionManagerPlugin['areAllCollectorsReady'];
 }
 
 export interface TelemetryCollectionManagerPluginStart {
   getOptInStats: TelemetryCollectionManagerPlugin['getOptInStats'];
   getStats: TelemetryCollectionManagerPlugin['getStats'];
-  areAllCollectorsReady: TelemetryCollectionManagerPlugin['areAllCollectorsReady'];
 }
 
 export interface TelemetryOptInStats {
@@ -37,6 +35,7 @@ export interface TelemetryOptInStats {
 
 export interface BaseStatsGetterConfig {
   unencrypted: boolean;
+  refreshCache?: boolean;
   request?: KibanaRequest;
 }
 
@@ -58,6 +57,12 @@ export interface StatsCollectionConfig {
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
   kibanaRequest: KibanaRequest | undefined; // intentionally `| undefined` to enforce providing the parameter
+  refreshCache: boolean;
+}
+
+export interface CacheDetails {
+  updatedAt: string;
+  fetchedAt: string;
 }
 
 export interface BasicStatsPayload {
@@ -71,7 +76,13 @@ export interface BasicStatsPayload {
 }
 
 export interface UsageStatsPayload extends BasicStatsPayload {
+  cacheDetails: CacheDetails;
   collectionSource: string;
+}
+
+export interface OptInStatsPayload {
+  cluster_uuid: string;
+  opt_in_status: boolean;
 }
 
 export interface StatsCollectionContext {

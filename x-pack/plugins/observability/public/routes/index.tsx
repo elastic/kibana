@@ -7,17 +7,17 @@
 
 import * as t from 'io-ts';
 import React from 'react';
-import { alertWorkflowStatusRt } from '../../common/typings';
-import { ExploratoryViewPage } from '../components/shared/exploratory_view';
-import { AlertsPage } from '../pages/alerts';
+
 import { AllCasesPage } from '../pages/cases/all_cases';
 import { CaseDetailsPage } from '../pages/cases/case_details';
 import { ConfigureCasesPage } from '../pages/cases/configure_cases';
 import { CreateCasePage } from '../pages/cases/create_case';
+import { AlertsPage } from '../pages/alerts/containers/alerts_page';
 import { HomePage } from '../pages/home';
 import { LandingPage } from '../pages/landing';
 import { OverviewPage } from '../pages/overview';
 import { jsonRt } from './json_rt';
+import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -85,23 +85,16 @@ export const routes = {
     },
   },
   '/alerts': {
-    handler: (routeParams: any) => {
-      return <AlertsPage routeParams={routeParams} />;
-    },
-    params: {
-      query: t.partial({
-        rangeFrom: t.string,
-        rangeTo: t.string,
-        kuery: t.string,
-        workflowStatus: alertWorkflowStatusRt,
-        refreshPaused: jsonRt.pipe(t.boolean),
-        refreshInterval: jsonRt.pipe(t.number),
-      }),
-    },
-  },
-  '/exploratory-view': {
     handler: () => {
-      return <ExploratoryViewPage />;
+      return <AlertsPage />;
+    },
+    params: {
+      // Technically gets a '_a' param by using Kibana URL state sync helpers
+    },
+  },
+  '/exploratory-view/': {
+    handler: () => {
+      return <ObservabilityExploratoryView />;
     },
     params: {
       query: t.partial({
@@ -112,18 +105,4 @@ export const routes = {
       }),
     },
   },
-  // enable this to test multi series architecture
-  // '/exploratory-view/multi': {
-  //   handler: () => {
-  //     return <ExploratoryViewPage multiSeries={true} />;
-  //   },
-  //   params: {
-  //     query: t.partial({
-  //       rangeFrom: t.string,
-  //       rangeTo: t.string,
-  //       refreshPaused: jsonRt.pipe(t.boolean),
-  //       refreshInterval: jsonRt.pipe(t.number),
-  //     }),
-  //   },
-  // },
 };

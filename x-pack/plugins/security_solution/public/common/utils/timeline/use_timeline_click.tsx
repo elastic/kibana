@@ -11,16 +11,18 @@ import {
   dispatchUpdateTimeline,
   queryTimelineById,
 } from '../../../timelines/components/open_timeline/helpers';
+import { TimelineErrorCallback } from '../../../timelines/components/open_timeline/types';
 import { updateIsLoading as dispatchUpdateIsLoading } from '../../../timelines/store/timeline/actions';
 
 export const useTimelineClick = () => {
   const dispatch = useDispatch();
 
   const handleTimelineClick = useCallback(
-    (timelineId: string, graphEventId?: string) => {
+    (timelineId: string, onError: TimelineErrorCallback, graphEventId?: string) => {
       queryTimelineById({
         graphEventId,
         timelineId,
+        onError,
         updateIsLoading: ({
           id: currentTimelineId,
           isLoading,

@@ -54,6 +54,7 @@ const createStartContractMock = () => {
     getCustomNavLink$: jest.fn(),
     setCustomNavLink: jest.fn(),
     setHeaderBanner: jest.fn(),
+    hasHeaderBanner$: jest.fn(),
     getBodyClasses$: jest.fn(),
   };
   startContract.navLinks.getAll.mockReturnValue([]);
@@ -65,6 +66,7 @@ const createStartContractMock = () => {
   startContract.getHelpExtension$.mockReturnValue(new BehaviorSubject(undefined));
   startContract.getIsNavDrawerLocked$.mockReturnValue(new BehaviorSubject(false));
   startContract.getBodyClasses$.mockReturnValue(new BehaviorSubject([]));
+  startContract.hasHeaderBanner$.mockReturnValue(new BehaviorSubject(false));
   return startContract;
 };
 

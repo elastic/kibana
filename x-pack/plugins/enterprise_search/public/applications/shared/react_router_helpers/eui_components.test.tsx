@@ -16,9 +16,23 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiLink, EuiButton, EuiButtonEmpty, EuiPanel, EuiCard } from '@elastic/eui';
+import {
+  EuiLink,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiListGroupItem,
+  EuiPanel,
+  EuiCard,
+} from '@elastic/eui';
 
-import { EuiLinkTo, EuiButtonTo, EuiButtonEmptyTo, EuiPanelTo, EuiCardTo } from './eui_components';
+import {
+  EuiLinkTo,
+  EuiButtonTo,
+  EuiButtonEmptyTo,
+  EuiListGroupItemTo,
+  EuiPanelTo,
+  EuiCardTo,
+} from './eui_components';
 
 describe('React Router EUI component helpers', () => {
   it('renders an EuiLink', () => {
@@ -37,6 +51,13 @@ describe('React Router EUI component helpers', () => {
     const wrapper = shallow(<EuiButtonEmptyTo to="/" />);
 
     expect(wrapper.find(EuiButtonEmpty)).toHaveLength(1);
+  });
+
+  it('renders an EuiListGroupItem', () => {
+    const wrapper = shallow(<EuiListGroupItemTo to="/" label="foo" />);
+
+    expect(wrapper.find(EuiListGroupItem)).toHaveLength(1);
+    expect(wrapper.find(EuiListGroupItem).prop('label')).toEqual('foo');
   });
 
   it('renders an EuiPanel', () => {

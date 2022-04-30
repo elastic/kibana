@@ -6,7 +6,7 @@
  */
 
 import { EuiPortal, EuiTabs, EuiTab, EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { EuiOutsideClickDetector } from '@elastic/eui';
@@ -50,9 +50,10 @@ export const NodeContextPopover = ({
   const inventoryModel = findInventoryModel(nodeType);
   const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
   const uiCapabilities = useKibana().services.application?.capabilities;
-  const canCreateAlerts = useMemo(() => Boolean(uiCapabilities?.infrastructure?.save), [
-    uiCapabilities,
-  ]);
+  const canCreateAlerts = useMemo(
+    () => Boolean(uiCapabilities?.infrastructure?.save),
+    [uiCapabilities]
+  );
 
   const tabs = useMemo(() => {
     return tabConfigs.map((m) => {

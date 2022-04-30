@@ -81,7 +81,7 @@ import {
   EndpointAlertCriteria,
 } from './generic_row_renderer';
 import * as i18n from './translations';
-import { RowRenderer } from '../../../../../../../common';
+import { RowRenderer } from '../../../../../../../common/types';
 
 jest.mock('../../../../../../common/lib/kibana');
 
@@ -89,7 +89,6 @@ jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });

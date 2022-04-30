@@ -19,14 +19,14 @@ describe('callApi', () => {
   let core: CoreMock;
 
   beforeEach(() => {
-    core = ({
+    core = {
       http: {
         get: jest.fn().mockReturnValue({
           my_key: 'hello_world',
         }),
       },
       uiSettings: { get: () => false }, // disable `observability:enableInspectEsQueries` setting
-    } as unknown) as CoreMock;
+    } as unknown as CoreMock;
   });
 
   afterEach(() => {
@@ -41,11 +41,14 @@ describe('callApi', () => {
     });
 
     it('should add debug param for APM endpoints', async () => {
-      await callApi(core, { pathname: `/api/apm/status/server` });
+      await callApi(core, { pathname: `/internal/apm/status/server` });
 
-      expect(core.http.get).toHaveBeenCalledWith('/api/apm/status/server', {
-        query: { _inspect: true },
-      });
+      expect(core.http.get).toHaveBeenCalledWith(
+        '/internal/apm/status/server',
+        {
+          query: { _inspect: true },
+        }
+      );
     });
 
     it('should not add debug param for non-APM endpoints', async () => {

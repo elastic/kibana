@@ -39,6 +39,7 @@ import { useTableSettings } from './use_table_settings';
 import { RefreshAnalyticsListButton } from '../refresh_analytics_list_button';
 import { ListingPageUrlState } from '../../../../../../../common/types/common';
 import { JobsAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
+import { useRefresh } from '../../../../../routing/use_refresh';
 
 const filters: EuiSearchBarProps['filters'] = [
   {
@@ -119,6 +120,8 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   const [errorMessage, setErrorMessage] = useState<any>(undefined);
   const [jobsAwaitingNodeCount, setJobsAwaitingNodeCount] = useState(0);
 
+  const refreshObs = useRefresh();
+
   const disabled =
     !checkPermission('canCreateDataFrameAnalytics') ||
     !checkPermission('canStartStopDataFrameAnalytics');
@@ -172,6 +175,13 @@ export const DataFrameAnalyticsList: FC<Props> = ({
       onRefresh: getAnalyticsCallback,
     },
     isManagementTable
+  );
+
+  useEffect(
+    function updateOnTimerRefresh() {
+      getAnalyticsCallback();
+    },
+    [refreshObs]
   );
 
   const { columns, modals } = useColumns(

@@ -15,7 +15,10 @@ describe('saved object migrations and embeddable migrations', () => {
     const savedObjectMigrationVersions = Object.keys(savedObjectMigrations).filter((version) => {
       return semverGte(version, '7.13.0');
     });
-    const embeddableMigrationVersions = Object.keys(embeddableMigrations);
+    const embeddableMigrationVersions = Object.keys(embeddableMigrations).filter((key) => {
+      // filter out embeddable only migration keys
+      return !['8.0.1'].includes(key);
+    });
     expect(savedObjectMigrationVersions.sort()).toEqual(embeddableMigrationVersions.sort());
   });
 });

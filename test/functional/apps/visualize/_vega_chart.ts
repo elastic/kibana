@@ -41,8 +41,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const browser = getService('browser');
 
-  // SKIPPED: https://github.com/elastic/kibana/issues/106352
-  describe.skip('vega chart in visualize app', () => {
+  describe('vega chart in visualize app', () => {
     before(async () => {
       await PageObjects.visualize.initTests();
       log.debug('navigateToApp visualize');
@@ -132,9 +131,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('should set the default query name if not given in the schema', async () => {
-          const requests = await inspector.getRequestNames();
+          const singleExampleRequest = await inspector.hasSingleRequest();
+          const selectedExampleRequest = await inspector.getSelectedOption();
 
-          expect(requests).to.be('Unnamed request #0');
+          expect(singleExampleRequest).to.be(true);
+          expect(selectedExampleRequest).to.equal('Unnamed request #0');
         });
 
         it('should log the request statistic', async () => {

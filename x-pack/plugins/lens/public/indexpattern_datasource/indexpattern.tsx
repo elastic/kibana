@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { CoreStart, SavedObjectReference } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
@@ -42,9 +42,9 @@ import {
   getDatasourceSuggestionsForVisualizeField,
 } from './indexpattern_suggestions';
 
-import { isDraggedField, normalizeOperationDataType } from './utils';
+import { isColumnInvalid, isDraggedField, normalizeOperationDataType } from './utils';
 import { LayerPanel } from './layerpanel';
-import { IndexPatternColumn, getErrorMessages } from './operations';
+import { IndexPatternColumn, getErrorMessages, insertNewColumn } from './operations';
 import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState } from './types';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
@@ -58,7 +58,8 @@ import { GeoFieldWorkspacePanel } from '../editor_frame_service/editor_frame/wor
 import { DraggingIdentifier } from '../drag_drop';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 
-export { OperationType, IndexPatternColumn, deleteColumn } from './operations';
+export type { OperationType, IndexPatternColumn } from './operations';
+export { deleteColumn } from './operations';
 
 export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: string): Operation {
   const { dataType, label, isBucketed, scale } = column;
@@ -70,19 +71,13 @@ export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: stri
   };
 }
 
-export {
-  CounterRateArgs,
-  ExpressionFunctionCounterRate,
-  counterRate,
-} from '../../common/expressions';
-export { FormatColumnArgs, supportedFormats, formatColumn } from '../../common/expressions';
+export type { FormatColumnArgs, TimeScaleArgs, CounterRateArgs } from '../../common/expressions';
+
 export {
   getSuffixFormatter,
   unitSuffixesLong,
   suffixFormatterId,
 } from '../../common/suffix_formatter';
-export { getTimeScale, TimeScaleArgs } from '../../common/expressions';
-export { renameColumns } from '../../common/expressions';
 
 export function getIndexPatternDatasource({
   core,
@@ -104,8 +99,8 @@ export function getIndexPatternDatasource({
   const uiSettings = core.uiSettings;
   const onIndexPatternLoadError = (err: Error) =>
     core.notifications.toasts.addError(err, {
-      title: i18n.translate('xpack.lens.indexPattern.indexPatternLoadError', {
-        defaultMessage: 'Error loading index pattern',
+      title: i18n.translate('xpack.lens.indexPattern.dataViewLoadError', {
+        defaultMessage: 'Error loading data view',
       }),
     });
 
@@ -198,6 +193,27 @@ export function getIndexPatternDatasource({
       });
     },
 
+    initializeDimension(state, layerId, { columnId, groupId, label, dataType, staticValue }) {
+      const indexPattern = state.indexPatterns[state.layers[layerId]?.indexPatternId];
+      if (staticValue == null) {
+        return state;
+      }
+      return mergeLayer({
+        state,
+        layerId,
+        newLayer: insertNewColumn({
+          layer: state.layers[layerId],
+          op: 'static_value',
+          columnId,
+          field: undefined,
+          indexPattern,
+          visualizationGroups: [],
+          initialParams: { params: { value: staticValue } },
+          targetGroup: groupId,
+        }),
+      });
+    },
+
     toExpression: (state, layerId) => toExpression(state, layerId, uiSettings),
 
     renderDataPanel(
@@ -251,6 +267,12 @@ export function getIndexPatternDatasource({
       });
 
       return columnLabelMap;
+    },
+
+    isValidColumn: (state: IndexPatternPrivateState, layerId: string, columnId: string) => {
+      const layer = state.layers[layerId];
+
+      return !isColumnInvalid(layer, columnId, state.indexPatterns[layer.indexPatternId]);
     },
 
     renderDimensionTrigger: (
@@ -410,9 +432,14 @@ export function getIndexPatternDatasource({
         },
       };
     },
-    getDatasourceSuggestionsForField(state, draggedField) {
+    getDatasourceSuggestionsForField(state, draggedField, filterLayers) {
       return isDraggedField(draggedField)
-        ? getDatasourceSuggestionsForField(state, draggedField.indexPatternId, draggedField.field)
+        ? getDatasourceSuggestionsForField(
+            state,
+            draggedField.indexPatternId,
+            draggedField.field,
+            filterLayers
+          )
         : [];
     },
     getDatasourceSuggestionsFromCurrentState,
@@ -424,21 +451,23 @@ export function getIndexPatternDatasource({
       }
 
       // Forward the indexpattern as well, as it is required by some operationType checks
-      const layerErrors = Object.entries(state.layers).map(([layerId, layer]) =>
-        (
-          getErrorMessages(
-            layer,
-            state.indexPatterns[layer.indexPatternId],
-            state,
-            layerId,
-            core
-          ) ?? []
-        ).map((message) => ({
-          shortMessage: '', // Not displayed currently
-          longMessage: typeof message === 'string' ? message : message.message,
-          fixAction: typeof message === 'object' ? message.fixAction : undefined,
-        }))
-      );
+      const layerErrors = Object.entries(state.layers)
+        .filter(([_, layer]) => !!state.indexPatterns[layer.indexPatternId])
+        .map(([layerId, layer]) =>
+          (
+            getErrorMessages(
+              layer,
+              state.indexPatterns[layer.indexPatternId],
+              state,
+              layerId,
+              core
+            ) ?? []
+          ).map((message) => ({
+            shortMessage: '', // Not displayed currently
+            longMessage: typeof message === 'string' ? message : message.message,
+            fixAction: typeof message === 'object' ? message.fixAction : undefined,
+          }))
+        );
 
       // Single layer case, no need to explain more
       if (layerErrors.length <= 1) {

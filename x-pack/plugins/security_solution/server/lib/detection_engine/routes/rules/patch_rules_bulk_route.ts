@@ -24,10 +24,12 @@ import { transformValidateBulkError } from './validate';
 import { patchRules } from '../../rules/patch_rules';
 import { readRules } from '../../rules/read_rules';
 import { PartialFilter } from '../../types';
+import { legacyMigrate } from '../../rules/utils';
 
 export const patchRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml']
+  ml: SetupPlugins['ml'],
+  isRuleRegistryEnabled: boolean
 ) => {
   router.patch(
     {
@@ -96,6 +98,7 @@ export const patchRulesBulkRoute = (
             threshold,
             threat_filters: threatFilters,
             threat_index: threatIndex,
+            threat_indicator_path: threatIndicatorPath,
             threat_query: threatQuery,
             threat_mapping: threatMapping,
             threat_language: threatLanguage,
@@ -121,15 +124,27 @@ export const patchRulesBulkRoute = (
               throwHttpError(await mlAuthz.validateRuleType(type));
             }
 
-            const existingRule = await readRules({ rulesClient, ruleId, id });
+            const existingRule = await readRules({
+              isRuleRegistryEnabled,
+              rulesClient,
+              ruleId,
+              id,
+            });
             if (existingRule?.params.type) {
               // reject an unauthorized modification of an ML rule
               throwHttpError(await mlAuthz.validateRuleType(existingRule?.params.type));
             }
 
-            const rule = await patchRules({
-              rule: existingRule,
+            const migratedRule = await legacyMigrate({
               rulesClient,
+              savedObjectsClient,
+              rule: existingRule,
+            });
+
+            const rule = await patchRules({
+              rule: migratedRule,
+              rulesClient,
+              savedObjectsClient,
               author,
               buildingBlockType,
               description,
@@ -164,6 +179,7 @@ export const patchRulesBulkRoute = (
               threshold,
               threatFilters,
               threatIndex,
+              threatIndicatorPath,
               threatQuery,
               threatMapping,
               threatLanguage,
@@ -180,12 +196,11 @@ export const patchRulesBulkRoute = (
               exceptionsList,
             });
             if (rule != null && rule.enabled != null && rule.name != null) {
-              const ruleStatuses = await ruleStatusClient.find({
-                logsCount: 1,
+              const ruleStatus = await ruleStatusClient.getCurrentStatus({
                 ruleId: rule.id,
                 spaceId: context.securitySolution.getSpaceId(),
               });
-              return transformValidateBulkError(rule.id, rule, ruleStatuses);
+              return transformValidateBulkError(rule.id, rule, ruleStatus, isRuleRegistryEnabled);
             } else {
               return getIdBulkError({ id, ruleId });
             }

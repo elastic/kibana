@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectReference } from 'kibana/server';
-import { noneConnectorId } from '../../common';
+import { noneConnectorId } from '../../common/api';
 
 interface Reference {
   soReference?: SavedObjectReference;

@@ -10,6 +10,7 @@ import { format } from './itsm_format';
 
 describe('ITSM formatter', () => {
   const theCase = {
+    id: 'case-id',
     connector: {
       fields: { severity: '2', urgency: '2', impact: '2', category: 'software', subcategory: 'os' },
     },
@@ -17,7 +18,11 @@ describe('ITSM formatter', () => {
 
   it('it formats correctly', async () => {
     const res = await format(theCase, []);
-    expect(res).toEqual(theCase.connector.fields);
+    expect(res).toEqual({
+      ...theCase.connector.fields,
+      correlation_display: 'Elastic Case',
+      correlation_id: 'case-id',
+    });
   });
 
   it('it formats correctly when fields do not exist ', async () => {
@@ -29,6 +34,8 @@ describe('ITSM formatter', () => {
       impact: null,
       category: null,
       subcategory: null,
+      correlation_display: 'Elastic Case',
+      correlation_id: null,
     });
   });
 });

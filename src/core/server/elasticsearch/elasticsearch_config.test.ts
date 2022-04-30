@@ -318,20 +318,11 @@ describe('throws when config is invalid', () => {
 });
 
 describe('deprecations', () => {
-  it('logs a warning if elasticsearch.username is set to "elastic"', () => {
-    const { messages } = applyElasticsearchDeprecations({ username: 'elastic' });
-    expect(messages).toMatchInlineSnapshot(`
-      Array [
-        "Setting [${CONFIG_PATH}.username] to \\"elastic\\" is deprecated. You should use the \\"kibana_system\\" user instead.",
-      ]
-    `);
-  });
-
   it('logs a warning if elasticsearch.username is set to "kibana"', () => {
     const { messages } = applyElasticsearchDeprecations({ username: 'kibana' });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting [${CONFIG_PATH}.username] to \\"kibana\\" is deprecated. You should use the \\"kibana_system\\" user instead.",
+        "Kibana is configured to authenticate to Elasticsearch with the \\"kibana\\" user. Use a service account token instead.",
       ]
     `);
   });
@@ -350,7 +341,7 @@ describe('deprecations', () => {
     const { messages } = applyElasticsearchDeprecations({ ssl: { key: '' } });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting [${CONFIG_PATH}.ssl.key] without [${CONFIG_PATH}.ssl.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.",
+        "Use both \\"elasticsearch.ssl.key\\" and \\"elasticsearch.ssl.certificate\\" to enable Kibana to use Mutual TLS authentication with Elasticsearch.",
       ]
     `);
   });
@@ -359,7 +350,7 @@ describe('deprecations', () => {
     const { messages } = applyElasticsearchDeprecations({ ssl: { certificate: '' } });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Setting [${CONFIG_PATH}.ssl.certificate] without [${CONFIG_PATH}.ssl.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.",
+        "Use both \\"elasticsearch.ssl.certificate\\" and \\"elasticsearch.ssl.key\\" to enable Kibana to use Mutual TLS authentication with Elasticsearch.",
       ]
     `);
   });
@@ -370,19 +361,17 @@ describe('deprecations', () => {
   });
 });
 
-test('#username throws if equal to "elastic", only while running from source', () => {
+test('#username throws if equal to "elastic"', () => {
   const obj = {
     username: 'elastic',
   };
-  expect(() => config.schema.validate(obj, { dist: false })).toThrowErrorMatchingInlineSnapshot(
-    `"[username]: value of \\"elastic\\" is forbidden. This is a superuser account that can obfuscate privilege-related issues. You should use the \\"kibana_system\\" user instead."`
-  );
-  expect(() => config.schema.validate(obj, { dist: true })).not.toThrow();
+
+  expect(() => config.schema.validate(obj)).toThrow('[username]: value of "elastic" is forbidden');
 });
 
 test('serviceAccountToken throws if username is also set', () => {
   const obj = {
-    username: 'elastic',
+    username: 'kibana',
     serviceAccountToken: 'abc123',
   };
 

@@ -50,7 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
         allow_lazy_open: false,
         groups: [],
       } as Job,
-      datafeedConfig: ({
+      datafeedConfig: {
         datafeed_id: `datafeed-fq_supported_aggs_${ts}`,
         job_id: `fq_supported_aggs_${ts}`,
         chunking_config: {
@@ -99,7 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
         delayed_data_check_config: {
           enabled: true,
         },
-      } as unknown) as Datafeed,
+      } as unknown as Datafeed,
     },
     {
       suiteTitle: 'supported job with scripted field',
@@ -136,7 +136,7 @@ export default function ({ getService }: FtrProviderContext) {
         allow_lazy_open: false,
         groups: [],
       } as Job,
-      datafeedConfig: ({
+      datafeedConfig: {
         chunking_config: {
           mode: 'auto',
         },
@@ -171,7 +171,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         job_id: `fq_supported_script_${ts}`,
         datafeed_id: `datafeed-fq_supported_script_${ts}`,
-      } as unknown) as Datafeed,
+      } as unknown as Datafeed,
     },
   ];
 
@@ -212,7 +212,7 @@ export default function ({ getService }: FtrProviderContext) {
         allow_lazy_open: false,
         groups: [],
       } as Job,
-      datafeedConfig: ({
+      datafeedConfig: {
         datafeed_id: `datafeed-fq_unsupported_aggs_${ts}`,
         job_id: `fq_unsupported_aggs_${ts}`,
         chunking_config: {
@@ -279,7 +279,7 @@ export default function ({ getService }: FtrProviderContext) {
         delayed_data_check_config: {
           enabled: true,
         },
-      } as unknown) as Datafeed,
+      } as unknown as Datafeed,
     },
     {
       suiteTitle: 'unsupported job with partition by of a scripted field',
@@ -317,7 +317,7 @@ export default function ({ getService }: FtrProviderContext) {
         allow_lazy_open: false,
         groups: [],
       } as Job,
-      datafeedConfig: ({
+      datafeedConfig: {
         chunking_config: {
           mode: 'auto',
         },
@@ -359,7 +359,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         job_id: `fq_unsupported_script_${ts}`,
         datafeed_id: `datafeed-fq_unsupported_script_${ts}`,
-      } as unknown) as Datafeed,
+      } as unknown as Datafeed,
     },
   ];
 
@@ -376,6 +376,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteIndexPatternByTitle('ft_ecommerce');
     });
     for (const testData of supportedTestSuites) {
       describe(testData.suiteTitle, function () {
@@ -394,7 +396,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep(
             'check that the single metric viewer button is enabled'
           );
-          await ml.jobTable.waitForJobsToLoad();
           await ml.jobTable.filterWithSearchString(testData.jobConfig.job_id, 1);
 
           await ml.jobTable.assertJobActionSingleMetricViewerButtonEnabled(
@@ -440,7 +441,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep(
             'check that the single metric viewer button is disabled'
           );
-          await ml.jobTable.waitForJobsToLoad();
           await ml.jobTable.filterWithSearchString(testData.jobConfig.job_id, 1);
 
           await ml.jobTable.assertJobActionSingleMetricViewerButtonEnabled(

@@ -6,7 +6,7 @@
  */
 
 import { EcsEventType, KibanaRequest } from 'kibana/server';
-import { KueryNode } from 'src/plugins/data/common';
+import type { KueryNode } from '@kbn/es-query';
 import { Space } from '../../../spaces/server';
 
 /**
@@ -28,6 +28,7 @@ export type GetSpaceFn = (request: KibanaRequest) => Promise<Space | undefined>;
  */
 export enum ReadOperations {
   GetCase = 'getCase',
+  ResolveCase = 'resolveCase',
   FindCases = 'findCases',
   GetCaseIDsByAlertID = 'getCaseIDsByAlertID',
   GetCaseStatuses = 'getCaseStatuses',

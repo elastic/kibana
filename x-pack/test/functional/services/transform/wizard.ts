@@ -22,9 +22,11 @@ export type HistogramCharts = Array<{
 export function TransformWizardProvider({ getService, getPageObjects }: FtrProviderContext) {
   const aceEditor = getService('aceEditor');
   const canvasElement = getService('canvasElement');
+  const log = getService('log');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
+  const ml = getService('ml');
   const PageObjects = getPageObjects(['discover', 'timePicker']);
 
   return {
@@ -106,7 +108,6 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       // To determine row and column of a cell, we're utilizing the screen reader
       // help text, which enumerates the rows and columns 1-based.
       const cells = $.findTestSubjects('dataGridRowCell')
-        .find('.euiDataGridRowCell__truncate')
         .toArray()
         .map((cell) => {
           const cellText = $(cell).text();
@@ -130,7 +131,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       column: number,
       expectedColumnValues: string[]
     ) {
-      await retry.tryForTime(2000, async () => {
+      await retry.tryForTime(20 * 1000, async () => {
         // get a 2D array of rows and cell values
         // only parse columns up to the one we want to assert
         const rows = await this.parseEuiDataGrid(tableSubj, column + 1);
@@ -152,7 +153,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertEuiDataGridColumnValuesNotEmpty(tableSubj: string, column: number) {
-      await retry.tryForTime(2000, async () => {
+      await retry.tryForTime(20 * 1000, async () => {
         // get a 2D array of rows and cell values
         // only parse columns up to the one we want to assert
         const rows = await this.parseEuiDataGrid(tableSubj, column + 1);
@@ -171,7 +172,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertIndexPreview(columns: number, expectedNumberOfRows: number) {
-      await retry.tryForTime(2000, async () => {
+      await retry.tryForTime(20 * 1000, async () => {
         // get a 2D array of rows and cell values
         // only parse the first column as this is sufficient to get assert the row count
         const rowsData = await this.parseEuiDataGrid('transformIndexPreview', 1);
@@ -241,6 +242,11 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertIndexPreviewHistogramCharts(expectedHistogramCharts: HistogramCharts) {
+      if (process.env.TEST_CLOUD) {
+        log.warning('Not running color assertions in cloud');
+        return;
+      }
+
       // For each chart, get the content of each header cell and assert
       // the legend text and column id and if the chart should be present or not.
       await retry.tryForTime(5000, async () => {
@@ -674,7 +680,9 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async setTransformId(transformId: string) {
-      await testSubjects.setValue('transformIdInput', transformId, { clearWithKeyboard: true });
+      await ml.commonUI.setValueWithChecks('transformIdInput', transformId, {
+        clearWithKeyboard: true,
+      });
       await this.assertTransformIdValue(transformId);
     },
 
@@ -694,7 +702,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async setTransformDescription(transformDescription: string) {
-      await testSubjects.setValue('transformDescriptionInput', transformDescription, {
+      await ml.commonUI.setValueWithChecks('transformDescriptionInput', transformDescription, {
         clearWithKeyboard: true,
       });
       await this.assertTransformDescriptionValue(transformDescription);
@@ -716,7 +724,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async setDestinationIndex(destinationIndex: string) {
-      await testSubjects.setValue('transformDestinationIndexInput', destinationIndex, {
+      await ml.commonUI.setValueWithChecks('transformDestinationIndexInput', destinationIndex, {
         clearWithKeyboard: true,
       });
       await this.assertDestinationIndexValue(destinationIndex);
@@ -732,7 +740,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
         'true';
       expect(actualCheckState).to.eql(
         expectedCheckState,
-        `Create index pattern switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+        `Create data view switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
       );
     },
 
@@ -747,6 +755,57 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       expect(actualCheckState).to.eql(
         expectedCheckState,
         `Continuous mode switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async assertRetentionPolicySwitchExists() {
+      await testSubjects.existOrFail(`transformRetentionPolicySwitch`, { allowHidden: true });
+    },
+
+    async assertRetentionPolicySwitchCheckState(expectedCheckState: boolean) {
+      const actualCheckState =
+        (await testSubjects.getAttribute('transformRetentionPolicySwitch', 'aria-checked')) ===
+        'true';
+      expect(actualCheckState).to.eql(
+        expectedCheckState,
+        `Retention policy switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async assertRetentionPolicyFieldSelectExists() {
+      await testSubjects.existOrFail(`transformRetentionPolicyDateFieldSelect`, {
+        allowHidden: true,
+      });
+    },
+
+    async assertRetentionPolicyFieldSelectValue(expectedValue: string) {
+      await testSubjects.existOrFail(`transformRetentionPolicyDateFieldSelect`, {
+        timeout: 1000,
+      });
+      const actualValue = await testSubjects.getAttribute(
+        'transformRetentionPolicyDateFieldSelect',
+        'value'
+      );
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Retention policy field option value should be '${expectedValue}' (got '${actualValue}')`
+      );
+    },
+
+    async assertRetentionPolicyMaxAgeInputExists() {
+      await testSubjects.existOrFail(`transformRetentionPolicyMaxAgeInput`, {
+        allowHidden: true,
+      });
+    },
+
+    async assertRetentionsPolicyMaxAgeValue(expectedValue: string) {
+      const actualValue = await testSubjects.getAttribute(
+        'transformRetentionPolicyMaxAgeInput',
+        'value'
+      );
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Transform retention policy max age input text should be '${expectedValue}' (got '${actualValue}')`
       );
     },
 

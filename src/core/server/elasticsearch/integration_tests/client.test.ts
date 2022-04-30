@@ -38,27 +38,19 @@ describe('elasticsearch clients', () => {
 
   it('does not return deprecation warning when x-elastic-product-origin header is set', async () => {
     // Header should be automatically set by Core
-    const resp1 = await kibanaServer.coreStart.elasticsearch.client.asInternalUser.indices.getSettings(
-      { index: '.kibana' }
-    );
+    const resp1 =
+      await kibanaServer.coreStart.elasticsearch.client.asInternalUser.indices.getSettings({
+        index: '.kibana',
+      });
     expect(resp1.headers).not.toHaveProperty('warning');
 
     // Also test setting it explicitly
-    const resp2 = await kibanaServer.coreStart.elasticsearch.client.asInternalUser.indices.getSettings(
-      { index: '.kibana' },
-      { headers: { 'x-elastic-product-origin': 'kibana' } }
-    );
+    const resp2 =
+      await kibanaServer.coreStart.elasticsearch.client.asInternalUser.indices.getSettings(
+        { index: '.kibana' },
+        { headers: { 'x-elastic-product-origin': 'kibana' } }
+      );
     expect(resp2.headers).not.toHaveProperty('warning');
-  });
-
-  it('returns deprecation warning when x-elastic-product-orign header is not set', async () => {
-    const resp = await kibanaServer.coreStart.elasticsearch.client.asInternalUser.indices.getSettings(
-      { index: '.kibana' },
-      { headers: { 'x-elastic-product-origin': null } }
-    );
-
-    expect(resp.headers).toHaveProperty('warning');
-    expect(resp.headers!.warning).toMatch('system indices');
   });
 });
 
@@ -96,8 +88,8 @@ describe('fake elasticsearch', () => {
 
   test('should return unknown product when it cannot perform the Product check (503 response)', async () => {
     const resp = await supertest(kibanaHttpServer).get('/api/status').expect(503);
-    expect(resp.body.status.overall.state).toBe('red');
-    expect(resp.body.status.statuses[0].message).toBe(
+    expect(resp.body.status.overall.level).toBe('critical');
+    expect(resp.body.status.core.elasticsearch.summary).toBe(
       'Unable to retrieve version information from Elasticsearch nodes. The client noticed that the server is not Elasticsearch and we do not support this unknown product.'
     );
   });

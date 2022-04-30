@@ -13,7 +13,7 @@ import {
   SavedObjectReference,
 } from 'kibana/server';
 import { flatMap, uniqWith, isEmpty, xorWith } from 'lodash';
-import { AlertInfo } from '.';
+import { AlertInfo } from './types';
 import { LensServerPluginSetup } from '../../../lens/server';
 
 import {
@@ -32,12 +32,12 @@ import {
   CommentsResponse,
   CommentType,
   ConnectorTypes,
-  ENABLE_CASE_CONNECTOR,
   SubCaseAttributes,
   SubCaseResponse,
   SubCasesFindResponse,
   User,
-} from '../../common';
+} from '../../common/api';
+import { ENABLE_CASE_CONNECTOR } from '../../common/constants';
 import { UpdateAlertRequest } from '../client/alerts/types';
 import {
   parseCommentString,

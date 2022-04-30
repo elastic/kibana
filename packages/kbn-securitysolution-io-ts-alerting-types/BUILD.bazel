@@ -55,7 +55,7 @@ jsts_transpiler(
   name = "target_web",
   srcs = SRCS,
   build_pkg_name = package_name(),
-  config_file = ".babelrc.browser"
+  web = True,
 )
 
 ts_config(
@@ -73,11 +73,9 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
   root_dir = "src",
-  source_map = True,
   tsconfig = ":tsconfig",
 )
 

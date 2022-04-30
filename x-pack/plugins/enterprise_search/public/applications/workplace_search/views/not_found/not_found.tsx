@@ -12,7 +12,7 @@ import { PageTemplateProps } from '../../../shared/layout';
 import { NotFoundPrompt } from '../../../shared/not_found';
 import { SendWorkplaceSearchTelemetry } from '../../../shared/telemetry';
 import { WorkplaceSearchPageTemplate, PersonalDashboardLayout } from '../../components/layout';
-import { PERSONAL_SOURCES_PATH } from '../../routes';
+import { PRIVATE_SOURCES_PATH } from '../../routes';
 
 interface Props {
   isOrganization?: boolean;
@@ -25,7 +25,7 @@ export const NotFound: React.FC<Props> = ({ isOrganization = true, pageChrome = 
     <Layout pageChrome={[...pageChrome, '404']} template="centeredContent">
       <SendWorkplaceSearchTelemetry action="error" metric="not_found" />
       <NotFoundPrompt
-        backToLink={!isOrganization ? PERSONAL_SOURCES_PATH : '/'}
+        backToLink={!isOrganization ? PRIVATE_SOURCES_PATH : '/'}
         productSupportUrl={WORKPLACE_SEARCH_PLUGIN.SUPPORT_URL}
       />
     </Layout>

@@ -5,28 +5,36 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React, { memo, useCallback } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiAccordion,
   EuiSelect,
+  EuiFieldText,
+  EuiCheckbox,
   EuiFormRow,
   EuiDescribedFormGroup,
   EuiSpacer,
 } from '@elastic/eui';
 import { ComboBox } from '../combo_box';
 
-import { useBrowserAdvancedFieldsContext } from '../contexts';
+import { useBrowserAdvancedFieldsContext, useBrowserSimpleFieldsContext } from '../contexts';
 
-import { ConfigKeys, ScreenshotOption } from '../types';
+import { ConfigKey, Validation, ScreenshotOption } from '../types';
 
 import { OptionalLabel } from '../optional_label';
+import { ThrottlingFields } from './throttling_fields';
 
-export const BrowserAdvancedFields = () => {
+interface Props {
+  validate: Validation;
+}
+
+export const BrowserAdvancedFields = memo<Props>(({ validate }) => {
   const { fields, setFields } = useBrowserAdvancedFieldsContext();
+  const { fields: simpleFields } = useBrowserSimpleFieldsContext();
 
   const handleInputChange = useCallback(
-    ({ value, configKey }: { value: unknown; configKey: ConfigKeys }) => {
+    ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
       setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
     },
     [setFields]
@@ -39,6 +47,75 @@ export const BrowserAdvancedFields = () => {
       data-test-subj="syntheticsBrowserAdvancedFieldsAccordion"
     >
       <EuiSpacer size="m" />
+      {simpleFields[ConfigKey.SOURCE_ZIP_URL] && (
+        <EuiDescribedFormGroup
+          title={
+            <h4>
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.filtering.title"
+                defaultMessage="Selective tests"
+              />
+            </h4>
+          }
+          description={
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.filtering.description"
+              defaultMessage="Use these options to apply the selected monitor settings to a subset of the tests in your suite. Only the configured subset will be run by this monitor."
+            />
+          }
+        >
+          <EuiSpacer size="s" />
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.journeyFiltersMatch.label"
+                defaultMessage="Filter match"
+              />
+            }
+            labelAppend={<OptionalLabel />}
+            helpText={
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.journeyFiltersMatch.helpText"
+                defaultMessage="Run only journeys with a name that matches the provided glob with this monitor."
+              />
+            }
+          >
+            <EuiFieldText
+              value={fields[ConfigKey.JOURNEY_FILTERS_MATCH]}
+              onChange={(event) =>
+                handleInputChange({
+                  value: event.target.value,
+                  configKey: ConfigKey.JOURNEY_FILTERS_MATCH,
+                })
+              }
+              data-test-subj="syntheticsBrowserJourneyFiltersMatch"
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.journeyFiltersTags.label"
+                defaultMessage="Filter tags"
+              />
+            }
+            labelAppend={<OptionalLabel />}
+            helpText={
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.journeyFiltersTags.helpText"
+                defaultMessage="Run only journeys with the given tags with this monitor."
+              />
+            }
+          >
+            <ComboBox
+              selectedOptions={fields[ConfigKey.JOURNEY_FILTERS_TAGS]}
+              onChange={(value) =>
+                handleInputChange({ value, configKey: ConfigKey.JOURNEY_FILTERS_TAGS })
+              }
+              data-test-subj="syntheticsBrowserJourneyFiltersTags"
+            />
+          </EuiFormRow>
+        </EuiDescribedFormGroup>
+      )}
       <EuiDescribedFormGroup
         title={
           <h4>
@@ -57,6 +134,35 @@ export const BrowserAdvancedFields = () => {
       >
         <EuiSpacer size="s" />
         <EuiFormRow
+          helpText={
+            <>
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.ignoreHttpsErrors.helpText"
+                defaultMessage="Set this option to true to disable TLS/SSL validation in the synthetics browser. This is useful for testing sites that use self-signed certs."
+              />
+            </>
+          }
+          data-test-subj="syntheticsBrowserIgnoreHttpsErrors"
+        >
+          <EuiCheckbox
+            id="syntheticsBrowserIgnoreHttpsErrorsCheckbox"
+            checked={fields[ConfigKey.IGNORE_HTTPS_ERRORS]}
+            label={
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.ignoreHttpsErrors.label"
+                defaultMessage="Ignore HTTPS errors"
+              />
+            }
+            onChange={(event) =>
+              handleInputChange({
+                value: event.target.checked,
+                configKey: ConfigKey.IGNORE_HTTPS_ERRORS,
+              })
+            }
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
           label={
             <FormattedMessage
               id="xpack.uptime.createPackagePolicy.stepConfigure.browserAdvancedSettings.screenshots.label"
@@ -73,11 +179,11 @@ export const BrowserAdvancedFields = () => {
         >
           <EuiSelect
             options={requestMethodOptions}
-            value={fields[ConfigKeys.SCREENSHOTS]}
+            value={fields[ConfigKey.SCREENSHOTS]}
             onChange={(event) =>
               handleInputChange({
                 value: event.target.value,
-                configKey: ConfigKeys.SCREENSHOTS,
+                configKey: ConfigKey.SCREENSHOTS,
               })
             }
             data-test-subj="syntheticsBrowserScreenshots"
@@ -99,17 +205,17 @@ export const BrowserAdvancedFields = () => {
           }
         >
           <ComboBox
-            selectedOptions={fields[ConfigKeys.SYNTHETICS_ARGS]}
-            onChange={(value) =>
-              handleInputChange({ value, configKey: ConfigKeys.SYNTHETICS_ARGS })
-            }
+            selectedOptions={fields[ConfigKey.SYNTHETICS_ARGS]}
+            onChange={(value) => handleInputChange({ value, configKey: ConfigKey.SYNTHETICS_ARGS })}
             data-test-subj="syntheticsBrowserSyntheticsArgs"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
+
+      <ThrottlingFields validate={validate} />
     </EuiAccordion>
   );
-};
+});
 
 const requestMethodOptions = Object.values(ScreenshotOption).map((option) => ({
   value: option,

@@ -6,7 +6,7 @@
  */
 
 import { forbidden, unauthorized } from '@hapi/boom';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import { isAuthError, handleAuthError } from './auth_errors';
 
 describe('Error handling for 401/403 errors', () => {
@@ -59,7 +59,7 @@ describe('Error handling for 401/403 errors', () => {
 
   describe('Elasticsearch errors', () => {
     it('handles Forbidden error defined by ElasticsearchJS', () => {
-      const err = new ResponseError({
+      const err = new errors.ResponseError({
         statusCode: 401,
         body: {
           error: {
@@ -91,7 +91,7 @@ describe('Error handling for 401/403 errors', () => {
     });
 
     it('handles Unauthorized error defined by ElasticsearchJS', () => {
-      const err = new ResponseError({
+      const err = new errors.ResponseError({
         statusCode: 403,
         body: {
           error: {

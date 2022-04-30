@@ -26,7 +26,7 @@ import {
 } from '../../common/search';
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors';
-import { IScopedSearchSessionsClient, ISearchSessionService } from './session';
+import type { IScopedSearchSessionsClient, ISearchSessionService } from './session';
 
 export interface SearchEnhancements {
   sessionService: ISearchSessionService;
@@ -35,7 +35,7 @@ export interface SearchEnhancements {
 export interface SearchStrategyDependencies {
   savedObjectsClient: SavedObjectsClientContract;
   esClient: IScopedClusterClient;
-  uiSettingsClient: IUiSettingsClient;
+  uiSettingsClient: Pick<IUiSettingsClient, 'get'>;
   searchSessionsClient: IScopedSearchSessionsClient;
   request: KibanaRequest;
 }
@@ -123,9 +123,6 @@ export interface ISearchStart<
 
 export type SearchRequestHandlerContext = IScopedSearchClient;
 
-/**
- * @internal
- */
 export interface DataRequestHandlerContext extends RequestHandlerContext {
   search: SearchRequestHandlerContext;
 }

@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 
 import styled from 'styled-components';
-import { stopPropagationAndPreventDefault } from '../../../../common';
+import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
 import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
 import { getAdditionalScreenReaderOnlyContext } from '../utils';
 import { HoverActionComponentProps } from './types';
@@ -97,6 +97,7 @@ const OverflowButton: React.FC<OverflowButtonProps> = React.memo(
           closePopover={closePopOver}
           panelPaddingSize="none"
           panelClassName="withHoverActions__popover"
+          repositionOnScroll={true}
           anchorPosition="downLeft"
         >
           <StyledEuiContextMenuPanel items={items} />

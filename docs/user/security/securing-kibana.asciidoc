@@ -5,42 +5,25 @@
 <titleabbrev>Configure security</titleabbrev>
 ++++
 
-{kib} users have to log in when {stack-security-features} are enabled on your
-cluster. You configure roles for your {kib} users to control what data those
-users can access.
+When you start {es} for the first time, {stack-security-features} are enabled on
+your cluster and TLS is configured automatically. The security configuration
+process generates a password for the `elastic` user and an enrollment token for
+{kib}.
+{ref}/configuring-stack-security.html[Start the {stack} with security enabled]
+and then enroll {kib} as part of the configuration process.
 
-Most requests made through {kib} to {es} are authenticated by using the
-credentials of the logged-in user. There are, however, a few internal requests
-that the {kib} server needs to make to the {es} cluster. For this reason, you
-must configure credentials for the {kib} server to use for those requests.
+You can then log in to {kib} as the `elastic` user to create additional roles
+and users.
 
-With {security-features} enabled, if you load a {kib} dashboard that accesses
-data in an index that you are not authorized to view, you get an error that
-indicates the index does not exist. The {security-features} do not currently
-provide a way to control which users can load which dashboards.
+NOTE: When a user is not authorized to view data in an index (such as an {es}
+index), the entire index will be inaccessible and not display in {kib}.
 
-To use {kib} with {security-features}:
+[discrete]
+[[security-configure-settings]]
+=== Configure security settings
 
-. {ref}/configuring-security.html[Configure security in {es}].
-
-. Configure {kib} to use the appropriate built-in user.
-+
---
-Update the following settings in the `kibana.yml` configuration
-file:
-
-[source,yaml]
------------------------------------------------
-elasticsearch.username: "kibana_system"
-elasticsearch.password: "kibanapassword"
------------------------------------------------
-
-The {kib} server submits requests as this user to access the cluster monitoring
-APIs and the `.kibana` index. The server does _not_ need access to user indices.
-
-NOTE: The password for the built-in `kibana_system` user is typically set as part of the security configuration process on {es}. For more
-information, see {ref}/built-in-users.html[Built-in users].
---
+Set an encryption key so that sessions are not invalidated. You can optionally
+configure additional security settings and authentication.
 
 . Set the `xpack.security.encryptionKey` property in the `kibana.yml`
 configuration file. You can use any text string that is 32 characters or longer
@@ -48,36 +31,33 @@ as the encryption key.
 +
 --
 [source,yaml]
---------------------------------------------------------------------------------
+----
 xpack.security.encryptionKey: "something_at_least_32_characters"
---------------------------------------------------------------------------------
+----
 
 For more information, see <<security-settings-kb,Security settings in {kib}>>.
 --
 
-. Configure {kib}'s session expiration settings. Set both the idle timeout and lifespan settings:
-+
---
-[source,yaml]
---------------------------------------------------------------------------------
-xpack.security.session.idleTimeout: "1h"
-xpack.security.session.lifespan: "30d"
---------------------------------------------------------------------------------
-
-For more information, see <<xpack-security-session-management, Session management in {kib}>>.
---
-
-. Optional: <<configuring-tls,Configure {kib} to encrypt communications>>.
+. Optional: <<xpack-security-session-management,Configure {kib}'s session expiration settings>>.
 
 . Optional: <<elasticsearch-mutual-tls,Configure {kib} to authenticate to {es} with a client certificate>>.
 
 . Restart {kib}.
 
-. Temporarily log in to {kib} using the built-in `elastic` superuser so you can create new users and assign roles. If you are running {kib}
-locally, go to `https://localhost:5601` to view the login page.
+[discrete]
+[[security-create-roles]]
+=== Create roles and users
+Configure roles for your {kib} users to control what data those users can
+access.
+
+. Temporarily log in to {kib} using the built-in `elastic` superuser so you can
+create new users and assign roles. If you are running {kib} locally, go to
+`https://localhost:5601` to view the login page.
 +
-NOTE: The password for the built-in `elastic` user is typically set as part of the security configuration process on {es}. For more
-information, see {ref}/built-in-users.html[Built-in users].
+NOTE: The password for the built-in `elastic` user is generated as part of the
+security configuration process on {es}. If you need to reset the password for
+the `elastic` user or other built-in users, run the
+{ref}/reset-password.html[`elasticsearch-reset-password`] tool.
 
 . [[kibana-roles]]Create roles and users to grant access to {kib}.
 +
@@ -108,7 +88,7 @@ TIP: For more information on Basic Authentication and additional methods of auth
 TIP: You can define as many different roles for your {kib} users as you need.
 
 For example, create roles that have `read` and `view_index_metadata` privileges
-on specific index patterns. For more information, see
+on specific data views. For more information, see
 {ref}/authorization.html[User authorization].
 
 --
@@ -120,7 +100,6 @@ NOTE: This must be a user who has been assigned <<kibana-privileges, Kibana priv
 `kibana_system` user) should only be used internally by the {kib} server.
 
 include::authentication/index.asciidoc[]
-include::securing-communications/index.asciidoc[]
 include::securing-communications/elasticsearch-mutual-tls.asciidoc[]
 include::audit-logging.asciidoc[]
 include::access-agreement.asciidoc[]

@@ -11,41 +11,44 @@ import { getThreatList, getThreatListCount } from './get_threat_list';
 import { CreateThreatSignalsOptions } from './types';
 import { createThreatSignal } from './create_threat_signal';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
-import { combineConcurrentResults } from './utils';
+import { buildExecutionIntervalValidator, combineConcurrentResults } from './utils';
 import { buildThreatEnrichment } from './build_threat_enrichment';
 
 export const createThreatSignals = async ({
-  tuple,
-  threatMapping,
-  query,
-  inputIndex,
-  type,
-  filters,
-  language,
-  savedId,
-  services,
+  alertId,
+  buildRuleMessage,
+  bulkCreate,
+  completeRule,
+  concurrentSearches,
+  eventsTelemetry,
   exceptionItems,
+  filters,
+  inputIndex,
+  itemsPerSearch,
+  language,
   listClient,
   logger,
-  eventsTelemetry,
-  alertId,
   outputIndex,
-  ruleSO,
+  query,
+  savedId,
   searchAfterSize,
+  services,
   threatFilters,
-  threatQuery,
-  threatLanguage,
-  buildRuleMessage,
   threatIndex,
   threatIndicatorPath,
-  concurrentSearches,
-  itemsPerSearch,
-  bulkCreate,
+  threatLanguage,
+  threatMapping,
+  threatQuery,
+  tuple,
+  type,
   wrapHits,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
-  const params = ruleSO.attributes.params;
+  const params = completeRule.ruleParams;
   logger.debug(buildRuleMessage('Indicator matching rule starting'));
   const perPage = concurrentSearches * itemsPerSearch;
+  const verifyExecutionCanProceed = buildExecutionIntervalValidator(
+    completeRule.ruleConfig.schedule.interval
+  );
 
   let results: SearchAfterAndBulkCreateReturnType = {
     success: true,
@@ -99,33 +102,34 @@ export const createThreatSignals = async ({
   });
 
   while (threatList.hits.hits.length !== 0) {
+    verifyExecutionCanProceed();
     const chunks = chunk(itemsPerSearch, threatList.hits.hits);
     logger.debug(buildRuleMessage(`${chunks.length} concurrent indicator searches are starting.`));
     const concurrentSearchesPerformed = chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(
       (slicedChunk) =>
         createThreatSignal({
-          tuple,
-          threatEnrichment,
-          threatMapping,
-          query,
-          inputIndex,
-          type,
-          filters,
-          language,
-          savedId,
-          services,
+          alertId,
+          buildRuleMessage,
+          bulkCreate,
+          completeRule,
+          currentResult: results,
+          currentThreatList: slicedChunk,
+          eventsTelemetry,
           exceptionItems,
+          filters,
+          inputIndex,
+          language,
           listClient,
           logger,
-          eventsTelemetry,
-          alertId,
           outputIndex,
-          ruleSO,
+          query,
+          savedId,
           searchAfterSize,
-          buildRuleMessage,
-          currentThreatList: slicedChunk,
-          currentResult: results,
-          bulkCreate,
+          services,
+          threatEnrichment,
+          threatMapping,
+          tuple,
+          type,
           wrapHits,
         })
     );

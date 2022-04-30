@@ -8,7 +8,7 @@
 import { addBasePath } from './add_base_path';
 import { MonitorSummary } from '../../../../common/runtime_types';
 
-export const getApmHref = (
+export const getLegacyApmHref = (
   summary: MonitorSummary,
   basePath: string,
   dateRangeStart: string,

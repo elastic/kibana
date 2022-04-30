@@ -11,7 +11,7 @@ import { DurationFormat } from 'src/plugins/field_formats/common';
 
 import { EuiFieldNumber, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { DefaultFormatEditor, defaultState, FormatEditorState } from '../default/default';
 
@@ -105,7 +105,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
           <EuiSelect
             data-test-subj={'durationEditorInputFormat'}
             value={formatParams.inputFormat}
-            options={format.type.inputFormats.map((fmt: InputFormat) => {
+            options={(format.type as typeof DurationFormat).inputFormats.map((fmt: InputFormat) => {
               return {
                 value: fmt.kind,
                 text: fmt.text,
@@ -129,12 +129,14 @@ export class DurationFormatEditor extends DefaultFormatEditor<
           <EuiSelect
             data-test-subj={'durationEditorOutputFormat'}
             value={formatParams.outputFormat}
-            options={format.type.outputFormats.map((fmt: OutputFormat) => {
-              return {
-                value: fmt.method,
-                text: fmt.text,
-              };
-            })}
+            options={(format.type as typeof DurationFormat).outputFormats.map(
+              (fmt: OutputFormat) => {
+                return {
+                  value: fmt.method,
+                  text: fmt.text,
+                };
+              }
+            )}
             onChange={(e) => {
               this.onChange({ outputFormat: e.target.value });
             }}

@@ -7,7 +7,7 @@
  */
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.9/ecs-agent.html
+ * https://www.elastic.co/guide/en/ecs/master/ecs-agent.html
  *
  * @internal
  */

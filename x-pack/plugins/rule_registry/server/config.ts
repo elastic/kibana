@@ -6,15 +6,23 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginConfigDescriptor } from 'src/core/server';
 
-export const config = {
+export const config: PluginConfigDescriptor = {
+  deprecations: ({ deprecate, unused }) => [unused('unsafe.indexUpgrade.enabled')],
   schema: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
     write: schema.object({
+      disabledRegistrationContexts: schema.arrayOf(schema.string(), { defaultValue: [] }),
       enabled: schema.boolean({ defaultValue: true }),
+      cache: schema.object({
+        enabled: schema.boolean({ defaultValue: true }),
+      }),
     }),
     unsafe: schema.object({
       legacyMultiTenancy: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+      }),
+      indexUpgrade: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
       }),
     }),
@@ -24,4 +32,3 @@ export const config = {
 export type RuleRegistryPluginConfig = TypeOf<typeof config.schema>;
 
 export const INDEX_PREFIX = '.alerts' as const;
-export const INDEX_PREFIX_FOR_BACKING_INDICES = '.internal.alerts' as const;

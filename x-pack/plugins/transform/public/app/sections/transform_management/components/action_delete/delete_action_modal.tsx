@@ -29,6 +29,7 @@ export const DeleteActionModal: FC<DeleteAction> = ({
   toggleDeleteIndex,
   toggleDeleteIndexPattern,
   userCanDeleteIndex,
+  userCanDeleteDataView,
 }) => {
   const isBulkAction = items.length > 1;
 
@@ -67,13 +68,14 @@ export const DeleteActionModal: FC<DeleteAction> = ({
             <EuiSwitch
               data-test-subj="transformBulkDeleteIndexPatternSwitch"
               label={i18n.translate(
-                'xpack.transform.actionDeleteTransform.bulkDeleteDestIndexPatternTitle',
+                'xpack.transform.actionDeleteTransform.bulkDeleteDestDataViewTitle',
                 {
-                  defaultMessage: 'Delete destination index patterns',
+                  defaultMessage: 'Delete destination data views',
                 }
               )}
               checked={deleteIndexPattern}
               onChange={toggleDeleteIndexPattern}
+              disabled={userCanDeleteDataView === false}
             />
           }
         </EuiFlexItem>
@@ -106,14 +108,15 @@ export const DeleteActionModal: FC<DeleteAction> = ({
             <EuiSwitch
               data-test-subj="transformDeleteIndexPatternSwitch"
               label={i18n.translate(
-                'xpack.transform.actionDeleteTransform.deleteDestIndexPatternTitle',
+                'xpack.transform.actionDeleteTransform.deleteDestDataViewTitle',
                 {
-                  defaultMessage: 'Delete index pattern {destinationIndex}',
+                  defaultMessage: 'Delete data view {destinationIndex}',
                   values: { destinationIndex: items[0] && items[0].config.dest.index },
                 }
               )}
               checked={deleteIndexPattern}
               onChange={toggleDeleteIndexPattern}
+              disabled={userCanDeleteDataView === false}
             />
           </EuiFlexItem>
         )}

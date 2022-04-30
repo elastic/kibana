@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 
-export type UnauthorizedError = ResponseError & {
+/** @public */
+export type UnauthorizedError = errors.ResponseError & {
   statusCode: 401;
 };
 
-export function isResponseError(error: unknown): error is ResponseError {
-  return error instanceof ResponseError;
+export function isResponseError(error: unknown): error is errors.ResponseError {
+  return error instanceof errors.ResponseError;
 }
 
 export function isUnauthorizedError(error: unknown): error is UnauthorizedError {

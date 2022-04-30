@@ -11,6 +11,7 @@ Error to return when the validation is not successful.
 ```typescript
 export declare class RouteValidationError extends SchemaTypeError 
 ```
+<b>Extends:</b> SchemaTypeError
 
 ## Constructors
 

@@ -12,6 +12,7 @@ import {
   EuiCommentList,
   EuiCommentProps,
 } from '@elastic/eui';
+
 import classNames from 'classnames';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
@@ -24,18 +25,17 @@ import * as i18n from './translations';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { useCurrentUser } from '../../common/lib/kibana';
 import { AddComment } from '../add_comment';
+import { Case, UseFetchAlertData } from '../../../common/ui/types';
+import { CaseUserActions } from '../../../common/ui';
 import {
   ActionConnector,
   ActionsCommentRequestRt,
   AlertCommentRequestRt,
-  Case,
-  CaseUserActions,
   CommentType,
   ContextTypeUserRt,
-  Ecs,
-} from '../../../common';
+} from '../../../common/api';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
-import { parseString } from '../../containers/utils';
+import { parseStringAsExternalService } from '../../common/user_actions';
 import { OnUpdateFields } from '../case_view';
 import {
   getConnectorLabelTitle,
@@ -48,6 +48,9 @@ import {
   RuleDetailsNavigation,
   ActionsNavigation,
   getActionAttachment,
+  getNonEmptyField,
+  getRuleId,
+  getRuleName,
 } from './helpers';
 import { UserActionAvatar } from './user_action_avatar';
 import { UserActionMarkdown } from './user_action_markdown';
@@ -74,7 +77,7 @@ export interface UserActionTreeProps {
   renderInvestigateInTimelineActionComponent?: (alertIds: string[]) => JSX.Element;
   statusActionButton: JSX.Element | null;
   updateCase: (newCase: Case) => void;
-  useFetchAlertData: (alertIds: string[]) => [boolean, Record<string, Ecs>];
+  useFetchAlertData: UseFetchAlertData;
   userCanCrud: boolean;
 }
 
@@ -150,7 +153,11 @@ export const UserActionTree = React.memo(
     useFetchAlertData,
     userCanCrud,
   }: UserActionTreeProps) => {
-    const { detailName: caseId, commentId, subCaseId } = useParams<{
+    const {
+      detailName: caseId,
+      commentId,
+      subCaseId,
+    } = useParams<{
       detailName: string;
       commentId?: string;
       subCaseId?: string;
@@ -162,16 +169,15 @@ export const UserActionTree = React.memo(
     const currentUser = useCurrentUser();
     const [manageMarkdownEditIds, setManageMarkdownEditIds] = useState<string[]>([]);
     const commentRefs = useRef<Record<string, any>>({});
-    const {
-      clearDraftComment,
-      draftComment,
-      hasIncomingLensState,
-      openLensModal,
-    } = useLensDraftComment();
+    const { clearDraftComment, draftComment, hasIncomingLensState, openLensModal } =
+      useLensDraftComment();
 
-    const [loadingAlertData, manualAlertsData] = useFetchAlertData(
-      getManualAlertIdsWithNoRuleId(caseData.comments)
+    const alertIdsWithoutRuleInfo = useMemo(
+      () => getManualAlertIdsWithNoRuleId(caseData.comments),
+      [caseData.comments]
     );
+
+    const [loadingAlertData, manualAlertsData] = useFetchAlertData(alertIdsWithoutRuleInfo);
 
     const handleManageMarkdownEditId = useCallback(
       (id: string) => {
@@ -226,10 +232,8 @@ export const UserActionTree = React.memo(
 
     const handleManageQuote = useCallback(
       (quote: string) => {
-        const addCarrots = quote.replace(new RegExp('\r?\n', 'g'), '  \n> ');
-
         if (commentRefs.current[NEW_ID]) {
-          commentRefs.current[NEW_ID].addQuote(`> ${addCarrots} \n`);
+          commentRefs.current[NEW_ID].addQuote(quote);
         }
 
         handleOutlineComment('add-comment');
@@ -405,27 +409,16 @@ export const UserActionTree = React.memo(
                 isRight(AlertCommentRequestRt.decode(comment)) &&
                 comment.type === CommentType.alert
               ) {
-                // TODO: clean this up
-                const alertId = Array.isArray(comment.alertId)
-                  ? comment.alertId.length > 0
-                    ? comment.alertId[0]
-                    : ''
-                  : comment.alertId;
+                const alertId = getNonEmptyField(comment.alertId);
+                const alertIndex = getNonEmptyField(comment.index);
 
-                const alertIndex = Array.isArray(comment.index)
-                  ? comment.index.length > 0
-                    ? comment.index[0]
-                    : ''
-                  : comment.index;
-
-                if (isEmpty(alertId)) {
+                if (!alertId || !alertIndex) {
                   return comments;
                 }
 
-                const ruleId =
-                  comment?.rule?.id ?? manualAlertsData[alertId]?.signal?.rule?.id?.[0] ?? null;
-                const ruleName =
-                  comment?.rule?.name ?? manualAlertsData[alertId]?.signal?.rule?.name?.[0] ?? null;
+                const alertField: unknown | undefined = manualAlertsData[alertId];
+                const ruleId = getRuleId(comment, alertField);
+                const ruleName = getRuleName(comment, alertField);
 
                 return [
                   ...comments,
@@ -512,10 +505,14 @@ export const UserActionTree = React.memo(
 
             // Pushed information
             if (action.actionField.length === 1 && action.actionField[0] === 'pushed') {
-              const parsedValue = parseString(`${action.newValue}`);
+              const parsedExternalService = parseStringAsExternalService(
+                action.newValConnectorId,
+                action.newValue
+              );
+
               const { firstPush, parsedConnectorId, parsedConnectorName } = getPushInfo(
                 caseServices,
-                parsedValue,
+                parsedExternalService,
                 index
               );
 

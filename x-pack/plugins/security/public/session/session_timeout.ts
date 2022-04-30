@@ -24,9 +24,10 @@ import {
   SESSION_GRACE_PERIOD_MS,
   SESSION_ROUTE,
 } from '../../common/constants';
+import { LogoutReason } from '../../common/types';
 import type { SessionInfo } from '../../common/types';
 import { createSessionExpirationToast } from './session_expiration_toast';
-import type { ISessionExpired } from './session_expired';
+import type { SessionExpired } from './session_expired';
 
 export interface SessionState extends Pick<SessionInfo, 'expiresInMs' | 'canBeExtended'> {
   lastExtensionTime: number;
@@ -37,6 +38,7 @@ export class SessionTimeout {
 
   private isVisible = document.visibilityState !== 'hidden';
   private isFetchingSessionInfo = false;
+  private consecutiveErrorCount = 0;
   private snoozedWarningState?: SessionState;
 
   private sessionState$ = new BehaviorSubject<SessionState>({
@@ -58,7 +60,7 @@ export class SessionTimeout {
 
   constructor(
     private notifications: NotificationsSetup,
-    private sessionExpired: ISessionExpired,
+    private sessionExpired: Pick<SessionExpired, 'logout'>,
     private http: HttpSetup,
     private tenant: string
   ) {}
@@ -168,7 +170,10 @@ export class SessionTimeout {
       const fetchSessionInMs = showWarningInMs - SESSION_CHECK_MS;
 
       // Schedule logout when session is about to expire
-      this.stopLogoutTimer = startTimer(() => this.sessionExpired.logout(), logoutInMs);
+      this.stopLogoutTimer = startTimer(
+        () => this.sessionExpired.logout(LogoutReason.SESSION_EXPIRED),
+        logoutInMs
+      );
 
       // Hide warning if session has been extended
       if (showWarningInMs > 0) {
@@ -214,7 +219,8 @@ export class SessionTimeout {
     return (
       !this.isFetchingSessionInfo &&
       !this.warningToast &&
-      Date.now() > lastExtensionTime + SESSION_EXTENSION_THROTTLE_MS
+      Date.now() >
+        lastExtensionTime + SESSION_EXTENSION_THROTTLE_MS * Math.exp(this.consecutiveErrorCount)
     );
   }
 
@@ -225,6 +231,7 @@ export class SessionTimeout {
         method: extend ? 'POST' : 'GET',
         asSystemRequest: !extend,
       });
+      this.consecutiveErrorCount = 0;
       if (sessionInfo) {
         const { expiresInMs, canBeExtended } = sessionInfo;
         const nextState: SessionState = {
@@ -239,7 +246,7 @@ export class SessionTimeout {
         return nextState;
       }
     } catch (error) {
-      // ignore
+      this.consecutiveErrorCount++;
     } finally {
       this.isFetchingSessionInfo = false;
     }

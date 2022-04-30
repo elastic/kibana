@@ -21,10 +21,12 @@ import { ChromeService } from './chrome_service';
 import { getAppInfo } from '../application/utils';
 
 class FakeApp implements App {
-  public title = `${this.id} App`;
+  public title: string;
   public mount = () => () => {};
 
-  constructor(public id: string, public chromeless?: boolean) {}
+  constructor(public id: string, public chromeless?: boolean) {
+    this.title = `${this.id} App`;
+  }
 }
 
 const store = new Map();
@@ -387,6 +389,19 @@ describe('start', () => {
                 undefined,
               ]
             `);
+    });
+  });
+
+  describe('header banner', () => {
+    it('updates/emits the state of the header banner', async () => {
+      const { chrome, service } = await start();
+      const promise = chrome.hasHeaderBanner$().pipe(toArray()).toPromise();
+
+      chrome.setHeaderBanner({ content: () => () => undefined });
+      chrome.setHeaderBanner(undefined);
+      service.stop();
+
+      await expect(promise).resolves.toEqual([false, true, false]);
     });
   });
 

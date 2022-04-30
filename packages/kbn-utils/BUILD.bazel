@@ -31,7 +31,7 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-config-schema",
+  "//packages/kbn-config-schema:npm_module_types",
   "@npm//load-json-file",
   "@npm//tslib",
   "@npm//@types/jest",
@@ -59,10 +59,8 @@ ts_project(
   srcs = SRCS,
   deps = TYPES_DEPS,
   declaration = True,
-  declaration_map = True,
   emit_declaration_only = True,
   out_dir = "target_types",
-  source_map = True,
   root_dir = "src",
   tsconfig = ":tsconfig",
 )

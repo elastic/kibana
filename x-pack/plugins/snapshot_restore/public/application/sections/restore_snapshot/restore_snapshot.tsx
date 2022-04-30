@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiPageContentBody, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 
@@ -40,10 +40,11 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
   const [snapshotDetails, setSnapshotDetails] = useState<SnapshotDetails | {}>({});
 
   // Load snapshot
-  const { error: snapshotError, isLoading: loadingSnapshot, data: snapshotData } = useLoadSnapshot(
-    repositoryName,
-    snapshotId
-  );
+  const {
+    error: snapshotError,
+    isLoading: loadingSnapshot,
+    data: snapshotData,
+  } = useLoadSnapshot(repositoryName, snapshotId);
 
   // Update repository state when data is loaded
   useEffect(() => {

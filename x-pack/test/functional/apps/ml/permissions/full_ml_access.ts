@@ -32,6 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           after(async () => {
+            // NOTE: Logout needs to happen before anything else to avoid flaky behavior
             await ml.securityUI.logout();
           });
 
@@ -143,10 +144,13 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await ml.api.cleanMlIndices();
         await ml.api.deleteIndices(`user-${dfaJobId}`);
         await ml.api.deleteCalendar(calendarId);
         await ml.api.deleteFilter(filterId);
+        await ml.api.cleanMlIndices();
+        await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+        await ml.testResources.deleteIndexPatternByTitle('ft_ihp_outlier');
+        await ml.testResources.deleteIndexPatternByTitle(ecIndexPattern);
       });
 
       for (const testUser of testUsers) {
@@ -156,6 +160,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           after(async () => {
+            // NOTE: Logout needs to happen before anything else to avoid flaky behavior
             await ml.securityUI.logout();
           });
 
@@ -237,11 +242,11 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.testExecution.logTestStep(
               'should display the forecast modal with enabled run button'
             );
-            await ml.singleMetricViewer.assertForecastButtonExists();
-            await ml.singleMetricViewer.assertForecastButtonEnabled(true);
-            await ml.singleMetricViewer.openForecastModal();
-            await ml.singleMetricViewer.assertForecastModalRunButtonEnabled(true);
-            await ml.singleMetricViewer.closeForecastModal();
+            await ml.forecast.assertForecastButtonExists();
+            await ml.forecast.assertForecastButtonEnabled(true);
+            await ml.forecast.openForecastModal();
+            await ml.forecast.assertForecastModalRunButtonEnabled(true);
+            await ml.forecast.closeForecastModal();
           });
 
           it('should display elements on Anomaly Explorer page correctly', async () => {
@@ -331,7 +336,7 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.dataVisualizer.assertUploadFileButtonEnabled(true);
 
             await ml.testExecution.logTestStep(
-              'should display the "select index pattern" card with enabled button'
+              'should display the "select data view" card with enabled button'
             );
             await ml.dataVisualizer.assertDataVisualizerIndexDataCardExists();
             await ml.dataVisualizer.assertSelectIndexButtonEnabled(true);

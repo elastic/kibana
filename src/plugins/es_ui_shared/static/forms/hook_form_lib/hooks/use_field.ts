@@ -40,7 +40,7 @@ export const useField = <T, FormType = FormData, I = T>(
   const {
     type = FIELD_TYPES.TEXT,
     defaultValue = '', // The value to use a fallback mecanism when no initial value is passed
-    initialValue = config.defaultValue ?? (('' as unknown) as I), // The value explicitly passed
+    initialValue = config.defaultValue ?? ('' as unknown as I), // The value explicitly passed
     isIncludedInOutput = true,
     label = '',
     labelAppend = '',
@@ -203,7 +203,7 @@ export const useField = <T, FormType = FormData, I = T>(
         formData: any;
         value: I;
         onlyBlocking: boolean;
-        validationTypeToValidate?: string;
+        validationTypeToValidate: string;
       },
       clearFieldErrors: FieldHook['clearErrors']
     ): ValidationError[] | Promise<ValidationError[]> => {
@@ -224,10 +224,7 @@ export const useField = <T, FormType = FormData, I = T>(
         type: validationType,
         isBlocking,
       }: ValidationConfig<FormType, string, I>) => {
-        if (
-          typeof validationTypeToValidate !== 'undefined' &&
-          validationType !== validationTypeToValidate
-        ) {
+        if (validationType !== undefined && validationType !== validationTypeToValidate) {
           return true;
         }
 
@@ -364,7 +361,7 @@ export const useField = <T, FormType = FormData, I = T>(
   // ----------------------------------
   const serializeValue: FieldHook<T, I>['__serializeValue'] = useCallback(
     (internalValue: I = value) => {
-      return serializer ? serializer(internalValue) : ((internalValue as unknown) as T);
+      return serializer ? serializer(internalValue) : (internalValue as unknown as T);
     },
     [serializer, value]
   );
@@ -384,7 +381,7 @@ export const useField = <T, FormType = FormData, I = T>(
       const {
         formData = __getFormData$().value,
         value: valueToValidate = value,
-        validationType,
+        validationType = VALIDATION_TYPES.FIELD,
         onlyBlocking = false,
       } = validationData;
 
@@ -463,7 +460,7 @@ export const useField = <T, FormType = FormData, I = T>(
         ? event.target.checked
         : event.target.value;
 
-      setValue((newValue as unknown) as I);
+      setValue(newValue as unknown as I);
     },
     [setValue]
   );
@@ -504,18 +501,20 @@ export const useField = <T, FormType = FormData, I = T>(
       const { resetValue = true, defaultValue: updatedDefaultValue } = resetOptions;
 
       setPristine(true);
-      setIsModified(false);
-      setValidating(false);
-      setIsChangingValue(false);
-      setIsValidated(false);
-      setStateErrors([]);
 
-      if (resetValue) {
-        hasBeenReset.current = true;
-        const newValue = deserializeValue(updatedDefaultValue ?? defaultValue);
-        // updateStateIfMounted('value', newValue);
-        setValue(newValue);
-        return newValue;
+      if (isMounted.current) {
+        setIsModified(false);
+        setValidating(false);
+        setIsChangingValue(false);
+        setIsValidated(false);
+        setStateErrors([]);
+
+        if (resetValue) {
+          hasBeenReset.current = true;
+          const newValue = deserializeValue(updatedDefaultValue ?? defaultValue);
+          setValue(newValue);
+          return newValue;
+        }
       }
     },
     [deserializeValue, defaultValue, setValue, setStateErrors]

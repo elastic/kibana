@@ -10,6 +10,13 @@ import { resolve } from 'path';
 import { services } from './services';
 import { pageObjects } from './page_objects';
 
+// Docker image to use for Fleet API integration tests.
+// This hash comes from the latest successful build of the Snapshot Distribution of the Package Registry, for
+// example: https://beats-ci.elastic.co/blue/organizations/jenkins/Ingest-manager%2Fpackage-storage/detail/snapshot/74/pipeline/257#step-302-log-1.
+// It should be updated any time there is a new Docker image published for the Snapshot Distribution of the Package Registry.
+export const dockerImage =
+  'docker.elastic.co/package-registry/distribution:ffcbe0ba25b9bae09a671249cbb1b25af0aa1994';
+
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
 export default async function ({ readConfigFile }) {
@@ -32,7 +39,6 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/discover'),
       resolve(__dirname, './apps/security'),
       resolve(__dirname, './apps/spaces'),
-      resolve(__dirname, './apps/lens'),
       resolve(__dirname, './apps/logstash'),
       resolve(__dirname, './apps/grok_debugger'),
       resolve(__dirname, './apps/infra'),
@@ -40,7 +46,6 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/rollup_job'),
       resolve(__dirname, './apps/maps'),
       resolve(__dirname, './apps/status_page'),
-      resolve(__dirname, './apps/timelion'),
       resolve(__dirname, './apps/upgrade_assistant'),
       resolve(__dirname, './apps/visualize'),
       resolve(__dirname, './apps/uptime'),
@@ -58,8 +63,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/transform'),
       resolve(__dirname, './apps/reporting_management'),
       resolve(__dirname, './apps/management'),
-      resolve(__dirname, './apps/reporting'),
-      resolve(__dirname, './apps/observability'),
+      resolve(__dirname, './apps/lens'), // smokescreen tests cause flakiness in other tests
 
       // This license_management file must be last because it is destructive.
       resolve(__dirname, './apps/license_management'),
@@ -84,23 +88,16 @@ export default async function ({ readConfigFile }) {
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
         '--xpack.maps.showMapsInspectorAdapter=true',
         '--xpack.maps.preserveDrawingBuffer=true',
-        '--xpack.reporting.roles.enabled=false', // use the non-deprecated access control model for Reporting
-        '--xpack.reporting.queue.pollInterval=3000', // make it explicitly the default
-        '--xpack.reporting.csv.maxSizeBytes=2850', // small-ish limit for cutting off a 1999 byte report
-        '--usageCollection.maximumWaitTimeForAllCollectorsInS=1',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled=true',
-        '--timelion.ui.enabled=true',
-        '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects
-        '--xpack.observability.unsafe.cases.enabled=true',
+        '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects,
       ],
     },
     uiSettings: {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
-        'visualization:visualize:legacyChartsLibrary': true,
         'visualization:visualize:legacyPieChartsLibrary': true,
       },
     },
@@ -207,6 +204,9 @@ export default async function ({ readConfigFile }) {
       securitySolution: {
         pathname: '/app/security',
       },
+      observability: {
+        pathname: '/app/observability',
+      },
     },
 
     // choose where screenshots should be saved
@@ -219,6 +219,11 @@ export default async function ({ readConfigFile }) {
     },
     security: {
       roles: {
+        test_monitoring: {
+          elasticsearch: {
+            cluster: ['monitor'],
+          },
+        },
         test_logstash_reader: {
           elasticsearch: {
             cluster: [],
@@ -238,8 +243,8 @@ export default async function ({ readConfigFile }) {
           kibana: [
             {
               feature: {
-                canvas: ['minimal_all'],
-                visualize: ['minimal_all'],
+                canvas: ['all'],
+                visualize: ['all'],
               },
               spaces: ['*'],
             },
@@ -486,7 +491,7 @@ export default async function ({ readConfigFile }) {
           },
         },
 
-        //Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965
+        // Kibana feature privilege isn't specific to advancedSetting. It can be anything. https://github.com/elastic/kibana/issues/35965
         test_api_keys: {
           elasticsearch: {
             cluster: ['manage_security', 'manage_api_key'],
@@ -517,6 +522,14 @@ export default async function ({ readConfigFile }) {
           elasticsearch: {
             cluster: ['manage_ilm'],
           },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['default'],
+            },
+          ],
         },
 
         index_management_user: {
@@ -524,11 +537,38 @@ export default async function ({ readConfigFile }) {
             cluster: ['monitor', 'manage_index_templates'],
             indices: [
               {
-                names: ['geo_shapes*'],
+                names: ['*'],
                 privileges: ['all'],
               },
             ],
           },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        // https://www.elastic.co/guide/en/elasticsearch/reference/master/snapshots-register-repository.html#snapshot-repo-prereqs
+        snapshot_restore_user: {
+          elasticsearch: {
+            cluster: [
+              'monitor',
+              'manage_slm',
+              'cluster:admin/snapshot',
+              'cluster:admin/repository',
+            ],
+          },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
         },
 
         ingest_pipelines_user: {
@@ -560,6 +600,27 @@ export default async function ({ readConfigFile }) {
         remote_clusters_user: {
           elasticsearch: {
             cluster: ['manage'],
+          },
+        },
+
+        global_alerts_logs_all_else_read: {
+          kibana: [
+            {
+              feature: {
+                apm: ['read'],
+                logs: ['all'],
+                infrastructure: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+          elasticsearch: {
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['all'],
+              },
+            ],
           },
         },
       },

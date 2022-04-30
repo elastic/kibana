@@ -5,69 +5,37 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
+import { LogMeta, SavedObjectMigrationContext } from '../../../../../../src/core/server';
 
-import { noneConnectorId } from '../../../common';
-import { SavedObjectReference } from '../../../../../../src/core/server';
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
-import {
-  getNoneCaseConnector,
-  CONNECTOR_ID_REFERENCE_NAME,
-  PUSH_CONNECTOR_ID_REFERENCE_NAME,
-} from '../../common';
-
-export const transformConnectorIdToReference = (connector?: {
-  id?: string;
-}): { transformedConnector: Record<string, unknown>; references: SavedObjectReference[] } => {
-  const { id: connectorId, ...restConnector } = connector ?? {};
-
-  const references = createConnectorReference(
-    connectorId,
-    ACTION_SAVED_OBJECT_TYPE,
-    CONNECTOR_ID_REFERENCE_NAME
-  );
-
-  const { id: ignoreNoneId, ...restNoneConnector } = getNoneCaseConnector();
-  const connectorFieldsToReturn =
-    connector && references.length > 0 ? restConnector : restNoneConnector;
-
-  return {
-    transformedConnector: {
-      connector: connectorFieldsToReturn,
-    },
-    references,
+interface MigrationLogMeta extends LogMeta {
+  migrations: {
+    [x: string]: {
+      id: string;
+    };
   };
-};
+}
 
-const createConnectorReference = (
-  id: string | null | undefined,
-  type: string,
-  name: string
-): SavedObjectReference[] => {
-  return id && id !== noneConnectorId
-    ? [
-        {
+export function logError({
+  id,
+  context,
+  error,
+  docType,
+  docKey,
+}: {
+  id: string;
+  context: SavedObjectMigrationContext;
+  error: Error;
+  docType: string;
+  docKey: string;
+}) {
+  context.log.error<MigrationLogMeta>(
+    `Failed to migrate ${docType} with doc id: ${id} version: ${context.migrationVersion} error: ${error.message}`,
+    {
+      migrations: {
+        [docKey]: {
           id,
-          type,
-          name,
         },
-      ]
-    : [];
-};
-
-export const transformPushConnectorIdToReference = (
-  external_service?: { connector_id?: string | null } | null
-): { transformedPushConnector: Record<string, unknown>; references: SavedObjectReference[] } => {
-  const { connector_id: pushConnectorId, ...restExternalService } = external_service ?? {};
-
-  const references = createConnectorReference(
-    pushConnectorId,
-    ACTION_SAVED_OBJECT_TYPE,
-    PUSH_CONNECTOR_ID_REFERENCE_NAME
+      },
+    }
   );
-
-  return {
-    transformedPushConnector: { external_service: external_service ? restExternalService : null },
-    references,
-  };
-};
+}

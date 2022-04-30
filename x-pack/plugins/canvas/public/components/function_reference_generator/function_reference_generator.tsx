@@ -9,15 +9,16 @@ import React, { FC } from 'react';
 import { ExpressionFunction } from 'src/plugins/expressions';
 import { EuiButtonEmpty } from '@elastic/eui';
 import copy from 'copy-to-clipboard';
-import { useNotifyService } from '../../services';
+import { CanvasPluginServices } from '../../services';
+
 import { generateFunctionReference } from './generate_function_reference';
 
 interface Props {
   functionRegistry: Record<string, ExpressionFunction>;
+  notifyService: CanvasPluginServices['notify'];
 }
 
-export const FunctionReferenceGenerator: FC<Props> = ({ functionRegistry }) => {
-  const notifyService = useNotifyService();
+export const FunctionReferenceGenerator: FC<Props> = ({ functionRegistry, notifyService }) => {
   const functionDefinitions = Object.values(functionRegistry);
 
   const copyDocs = () => {

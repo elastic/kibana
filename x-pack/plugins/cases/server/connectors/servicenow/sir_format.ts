@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { get } from 'lodash/fp';
-import { ConnectorServiceNowSIRTypeFields } from '../../../common';
+import { ConnectorServiceNowSIRTypeFields } from '../../../common/api';
 import { ServiceNowSIRFormat, SirFieldKey, AlertFieldMappingAndValues } from './types';
 
 export const format: ServiceNowSIRFormat = (theCase, alerts) => {
@@ -32,11 +32,11 @@ export const format: ServiceNowSIRFormat = (theCase, alerts) => {
     malware_url: new Set(),
   };
 
-  let sirFields: Record<SirFieldKey, string | null> = {
-    dest_ip: null,
-    source_ip: null,
-    malware_hash: null,
-    malware_url: null,
+  let sirFields: Record<SirFieldKey, string[]> = {
+    dest_ip: [],
+    source_ip: [],
+    malware_hash: [],
+    malware_url: [],
   };
 
   const fieldsToAdd = (Object.keys(alertFieldMapping) as SirFieldKey[]).filter(
@@ -44,25 +44,22 @@ export const format: ServiceNowSIRFormat = (theCase, alerts) => {
   );
 
   if (fieldsToAdd.length > 0) {
-    sirFields = alerts
-      .filter((alert) => !alert.error && alert.source != null)
-      .reduce<Record<SirFieldKey, string | null>>((acc, alert) => {
-        fieldsToAdd.forEach((alertField) => {
-          const field = get(alertFieldMapping[alertField].alertPath, alert.source);
-          if (field && !manageDuplicate[alertFieldMapping[alertField].sirFieldKey].has(field)) {
-            manageDuplicate[alertFieldMapping[alertField].sirFieldKey].add(field);
-            acc = {
-              ...acc,
-              [alertFieldMapping[alertField].sirFieldKey]: `${
-                acc[alertFieldMapping[alertField].sirFieldKey] != null
-                  ? `${acc[alertFieldMapping[alertField].sirFieldKey]},${field}`
-                  : field
-              }`,
-            };
-          }
-        });
-        return acc;
-      }, sirFields);
+    sirFields = alerts.reduce<Record<SirFieldKey, string[]>>((acc, alert) => {
+      fieldsToAdd.forEach((alertField) => {
+        const field = get(alertFieldMapping[alertField].alertPath, alert);
+        if (field && !manageDuplicate[alertFieldMapping[alertField].sirFieldKey].has(field)) {
+          manageDuplicate[alertFieldMapping[alertField].sirFieldKey].add(field);
+          acc = {
+            ...acc,
+            [alertFieldMapping[alertField].sirFieldKey]: [
+              ...acc[alertFieldMapping[alertField].sirFieldKey],
+              field,
+            ],
+          };
+        }
+      });
+      return acc;
+    }, sirFields);
   }
 
   return {
@@ -70,5 +67,7 @@ export const format: ServiceNowSIRFormat = (theCase, alerts) => {
     category,
     subcategory,
     priority,
+    correlation_id: theCase.id ?? null,
+    correlation_display: 'Elastic Case',
   };
 };

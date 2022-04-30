@@ -5,31 +5,28 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
 import uuid from 'uuid';
 import { EuiCallOut } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { TransactionOverviewLink } from '../Links/apm/transaction_overview_link';
-import { TableFetchWrapper } from '../table_fetch_wrapper';
 import { getTimeRangeComparison } from '../time_comparison/get_time_range_comparison';
 import { OverviewTableContainer } from '../overview_table_container';
 import { getColumns } from './get_columns';
 import { ElasticDocsLink } from '../Links/ElasticDocsLink';
+import { useBreakpoints } from '../../../hooks/use_breakpoints';
+import { ManagedTable } from '../managed_table';
 
-type ApiResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics'>;
+type ApiResponse =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
 interface InitialState {
   requestId: string;
@@ -57,7 +54,9 @@ const DEFAULT_SORT = {
 
 interface Props {
   hideViewTransactionsLink?: boolean;
+  isSingleColumn?: boolean;
   numberOfTransactionsPerPage?: number;
+  hidePerPageOptions?: boolean;
   showAggregationAccurateCallout?: boolean;
   environment: string;
   fixedHeight?: boolean;
@@ -69,14 +68,16 @@ interface Props {
 export function TransactionsTable({
   fixedHeight = false,
   hideViewTransactionsLink = false,
+  isSingleColumn = true,
   numberOfTransactionsPerPage = 5,
+  hidePerPageOptions = false,
   showAggregationAccurateCallout = false,
   environment,
   kuery,
   start,
   end,
 }: Props) {
-  const [tableOptions, setTableOptions] = useState<{
+  const [tableOptions] = useState<{
     pageIndex: number;
     sort: {
       direction: SortDirection;
@@ -87,13 +88,17 @@ export function TransactionsTable({
     sort: DEFAULT_SORT,
   });
 
+  // SparkPlots should be hidden if we're in two-column view and size XL (1200px)
+  const { isXl } = useBreakpoints();
+  const shouldShowSparkPlots = isSingleColumn || !isXl;
+
   const { pageIndex, sort } = tableOptions;
   const { direction, field } = sort;
 
   const { transactionType, serviceName } = useApmServiceContext();
   const {
     urlParams: { latencyAggregationType, comparisonType, comparisonEnabled },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
   const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
     start,
@@ -109,7 +114,7 @@ export function TransactionsTable({
       }
       return callApmApi({
         endpoint:
-          'GET /api/apm/services/{serviceName}/transactions/groups/main_statistics',
+          'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
         params: {
           path: { serviceName },
           query: {
@@ -182,7 +187,7 @@ export function TransactionsTable({
       ) {
         return callApmApi({
           endpoint:
-            'GET /api/apm/services/{serviceName}/transactions/groups/detailed_statistics',
+            'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics',
           params: {
             path: { serviceName },
             query: {
@@ -214,16 +219,12 @@ export function TransactionsTable({
     latencyAggregationType,
     transactionGroupDetailedStatistics,
     comparisonEnabled,
+    shouldShowSparkPlots,
+    comparisonType,
   });
 
   const isLoading = status === FETCH_STATUS.LOADING;
-
-  const pagination = {
-    pageIndex,
-    pageSize: numberOfTransactionsPerPage,
-    totalItemCount: transactionGroupsTotalItems,
-    hidePerPageOptions: true,
-  };
+  const isNotInitiated = status === FETCH_STATUS.NOT_INITIATED;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -293,45 +294,32 @@ export function TransactionsTable({
       )}
       <EuiFlexItem>
         <EuiFlexItem>
-          <TableFetchWrapper status={status}>
-            <OverviewTableContainer
-              fixedHeight={fixedHeight}
-              isEmptyAndLoading={transactionGroupsTotalItems === 0 && isLoading}
-            >
-              <EuiBasicTable
-                noItemsMessage={
-                  isLoading
-                    ? i18n.translate('xpack.apm.transactionsTable.loading', {
-                        defaultMessage: 'Loading...',
-                      })
-                    : i18n.translate('xpack.apm.transactionsTable.noResults', {
-                        defaultMessage: 'No transaction groups found',
-                      })
-                }
-                loading={isLoading}
-                items={transactionGroups}
-                columns={columns}
-                pagination={pagination}
-                sorting={{ sort: { field, direction } }}
-                onChange={(newTableOptions: {
-                  page?: {
-                    index: number;
-                  };
-                  sort?: { field: string; direction: SortDirection };
-                }) => {
-                  setTableOptions({
-                    pageIndex: newTableOptions.page?.index ?? 0,
-                    sort: newTableOptions.sort
-                      ? {
-                          field: newTableOptions.sort.field as SortField,
-                          direction: newTableOptions.sort.direction,
-                        }
-                      : DEFAULT_SORT,
-                  });
-                }}
-              />
-            </OverviewTableContainer>
-          </TableFetchWrapper>
+          <OverviewTableContainer
+            fixedHeight={fixedHeight}
+            isEmptyAndNotInitiated={
+              transactionGroupsTotalItems === 0 && isNotInitiated
+            }
+          >
+            <ManagedTable
+              isLoading={isLoading}
+              error={status === FETCH_STATUS.FAILURE}
+              columns={columns}
+              items={transactionGroups}
+              initialSortField="impact"
+              initialSortDirection="desc"
+              initialPageSize={numberOfTransactionsPerPage}
+              noItemsMessage={
+                isLoading
+                  ? i18n.translate('xpack.apm.transactionsTable.loading', {
+                      defaultMessage: 'Loading...',
+                    })
+                  : i18n.translate('xpack.apm.transactionsTable.noResults', {
+                      defaultMessage: 'No transaction groups found',
+                    })
+              }
+              hidePerPageOptions={hidePerPageOptions}
+            />
+          </OverviewTableContainer>
         </EuiFlexItem>
       </EuiFlexItem>
     </EuiFlexGroup>

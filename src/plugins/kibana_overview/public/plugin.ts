@@ -34,7 +34,8 @@ export class KibanaOverviewPlugin
       KibanaOverviewPluginStart,
       AppPluginSetupDependencies,
       AppPluginStartDependencies
-    > {
+    >
+{
   public setup(
     core: CoreSetup<AppPluginStartDependencies>,
     { home, usageCollection }: AppPluginSetupDependencies

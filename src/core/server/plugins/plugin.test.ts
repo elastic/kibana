@@ -8,7 +8,7 @@
 
 import { join } from 'path';
 import { BehaviorSubject } from 'rxjs';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { schema } from '@kbn/config-schema';
 
 import { Env } from '../config';

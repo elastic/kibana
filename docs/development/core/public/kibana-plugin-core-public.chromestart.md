@@ -22,7 +22,6 @@ How to add a recently accessed item to the sidebar:
 
 ```ts
 core.chrome.recentlyAccessed.add('/app/map/1234', 'Map 1234', '1234');
-
 ```
 
 ## Example 2
@@ -34,17 +33,16 @@ core.chrome.setHelpExtension(elem => {
   ReactDOM.render(<MyHelpComponent />, elem);
   return () => ReactDOM.unmountComponentAtNode(elem);
 });
-
 ```
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [docTitle](./kibana-plugin-core-public.chromestart.doctitle.md) | <code>ChromeDocTitle</code> | APIs for accessing and updating the document title. |
-|  [navControls](./kibana-plugin-core-public.chromestart.navcontrols.md) | <code>ChromeNavControls</code> | [APIs](./kibana-plugin-core-public.chromenavcontrols.md) for registering new controls to be displayed in the navigation bar. |
-|  [navLinks](./kibana-plugin-core-public.chromestart.navlinks.md) | <code>ChromeNavLinks</code> | [APIs](./kibana-plugin-core-public.chromenavlinks.md) for manipulating nav links. |
-|  [recentlyAccessed](./kibana-plugin-core-public.chromestart.recentlyaccessed.md) | <code>ChromeRecentlyAccessed</code> | [APIs](./kibana-plugin-core-public.chromerecentlyaccessed.md) for recently accessed history. |
+|  [docTitle](./kibana-plugin-core-public.chromestart.doctitle.md) | ChromeDocTitle | APIs for accessing and updating the document title. |
+|  [navControls](./kibana-plugin-core-public.chromestart.navcontrols.md) | ChromeNavControls | [APIs](./kibana-plugin-core-public.chromenavcontrols.md) for registering new controls to be displayed in the navigation bar. |
+|  [navLinks](./kibana-plugin-core-public.chromestart.navlinks.md) | ChromeNavLinks | [APIs](./kibana-plugin-core-public.chromenavlinks.md) for manipulating nav links. |
+|  [recentlyAccessed](./kibana-plugin-core-public.chromestart.recentlyaccessed.md) | ChromeRecentlyAccessed | [APIs](./kibana-plugin-core-public.chromerecentlyaccessed.md) for recently accessed history. |
 
 ## Methods
 
@@ -57,6 +55,7 @@ core.chrome.setHelpExtension(elem => {
 |  [getHelpExtension$()](./kibana-plugin-core-public.chromestart.gethelpextension_.md) | Get an observable of the current custom help conttent |
 |  [getIsNavDrawerLocked$()](./kibana-plugin-core-public.chromestart.getisnavdrawerlocked_.md) | Get an observable of the current locked state of the nav drawer. |
 |  [getIsVisible$()](./kibana-plugin-core-public.chromestart.getisvisible_.md) | Get an observable of the current visibility state of the chrome. |
+|  [hasHeaderBanner$()](./kibana-plugin-core-public.chromestart.hasheaderbanner_.md) | Get an observable of the current header banner presence state. |
 |  [setBadge(badge)](./kibana-plugin-core-public.chromestart.setbadge.md) | Override the current badge |
 |  [setBreadcrumbs(newBreadcrumbs)](./kibana-plugin-core-public.chromestart.setbreadcrumbs.md) | Override the current set of breadcrumbs |
 |  [setBreadcrumbsAppendExtension(breadcrumbsAppendExtension)](./kibana-plugin-core-public.chromestart.setbreadcrumbsappendextension.md) | Mount an element next to the last breadcrumb |

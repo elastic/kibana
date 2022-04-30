@@ -22,9 +22,10 @@ import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../containers/index';
 import { useTimelineEventsDetails } from '../../../containers/details/index';
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
 import { Direction } from '../../../../../common/search_strategy';
+import * as helpers from '../helpers';
 
 jest.mock('../../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
@@ -33,11 +34,13 @@ jest.mock('../../../containers/details/index', () => ({
   useTimelineEventsDetails: jest.fn(),
 }));
 jest.mock('../body/events/index', () => ({
-  // eslint-disable-next-line react/display-name
   Events: () => <></>,
 }));
 
 jest.mock('../../../../common/containers/sourcerer');
+jest.mock('../../../../common/containers/sourcerer/use_signal_helpers', () => ({
+  useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
+}));
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
@@ -102,13 +105,12 @@ describe('Timeline', () => {
     ]);
     (useTimelineEventsDetails as jest.Mock).mockReturnValue([false, {}]);
 
-    (useSourcererScope as jest.Mock).mockReturnValue(mockSourcererScope);
+    (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
 
     props = {
       columns: defaultHeaders,
       dataProviders: mockDataProviders,
       end: endDate,
-      eventType: 'all',
       expandedDetail: {},
       filters: [],
       timelineId: TimelineId.test,
@@ -116,7 +118,7 @@ describe('Timeline', () => {
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
       kqlMode: 'search' as QueryTabContentComponentProps['kqlMode'],
-      kqlQueryExpression: '',
+      kqlQueryExpression: ' ',
       onEventClosed: jest.fn(),
       renderCellValue: DefaultCellRenderer,
       rowRenderers: defaultRowRenderers,
@@ -126,13 +128,33 @@ describe('Timeline', () => {
       start: startDate,
       status: TimelineStatus.active,
       timerangeKind: 'absolute',
-      updateEventTypeAndIndexesName: jest.fn(),
       activeTab: TimelineTabs.query,
       show: true,
     };
   });
 
   describe('rendering', () => {
+    let spyCombineQueries: jest.SpyInstance;
+
+    beforeEach(() => {
+      spyCombineQueries = jest.spyOn(helpers, 'combineQueries');
+    });
+    afterEach(() => {
+      spyCombineQueries.mockClear();
+    });
+
+    test('should trim kqlQueryExpression', () => {
+      mount(
+        <TestProviders>
+          <QueryTabContentComponent {...props} />
+        </TestProviders>
+      );
+
+      expect(spyCombineQueries.mock.calls[0][0].kqlQuery.query).toEqual(
+        props.kqlQueryExpression.trim()
+      );
+    });
+
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
         <TestProviders>
@@ -166,12 +188,13 @@ describe('Timeline', () => {
     });
 
     test('it does render the timeline table when the source is loading with no events', () => {
-      (useSourcererScope as jest.Mock).mockReturnValue({
+      (useSourcererDataView as jest.Mock).mockReturnValue({
         browserFields: {},
         docValueFields: [],
         loading: true,
         indexPattern: {},
         selectedPatterns: [],
+        missingPatterns: [],
       });
       const wrapper = mount(
         <TestProviders>

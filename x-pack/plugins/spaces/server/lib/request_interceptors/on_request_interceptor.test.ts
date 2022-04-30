@@ -82,10 +82,11 @@ describe.skip('onRequestInterceptor', () => {
     await root.preboot();
     const { http, elasticsearch } = await root.setup();
     // Mock esNodesCompatibility$ to prevent `root.start()` from blocking on ES version check
-    elasticsearch.esNodesCompatibility$ = elasticsearchServiceMock.createInternalSetup().esNodesCompatibility$;
+    elasticsearch.esNodesCompatibility$ =
+      elasticsearchServiceMock.createInternalSetup().esNodesCompatibility$;
 
     initSpacesOnRequestInterceptor({
-      http: (http as unknown) as CoreSetup['http'],
+      http: http as unknown as CoreSetup['http'],
     });
 
     const router = http.createRouter('/');

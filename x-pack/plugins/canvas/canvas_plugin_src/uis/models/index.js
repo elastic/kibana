@@ -7,5 +7,6 @@
 
 import { pointseries } from './point_series';
 import { math } from './math';
+import { tagcloud } from './tagcloud';
 
-export const modelSpecs = [pointseries, math];
+export const modelSpecs = [pointseries, math, tagcloud];

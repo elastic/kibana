@@ -118,6 +118,103 @@ describe('successful migrations', () => {
       });
     });
   });
+
+  describe('7.16.0', () => {
+    test('set service config property for .email connectors if service is undefined', () => {
+      const migration716 = getActionsMigrations(encryptedSavedObjectsSetup)['7.16.0'];
+      const action = getMockDataForEmail({ config: { service: undefined } });
+      const migratedAction = migration716(action, context);
+      expect(migratedAction.attributes.config).toEqual({
+        service: 'other',
+      });
+      expect(migratedAction).toEqual({
+        ...action,
+        attributes: {
+          ...action.attributes,
+          config: {
+            service: 'other',
+          },
+        },
+      });
+    });
+
+    test('set service config property for .email connectors if service is null', () => {
+      const migration716 = getActionsMigrations(encryptedSavedObjectsSetup)['7.16.0'];
+      const action = getMockDataForEmail({ config: { service: null } });
+      const migratedAction = migration716(action, context);
+      expect(migratedAction.attributes.config).toEqual({
+        service: 'other',
+      });
+      expect(migratedAction).toEqual({
+        ...action,
+        attributes: {
+          ...action.attributes,
+          config: {
+            service: 'other',
+          },
+        },
+      });
+    });
+
+    test('skips migrating .email connectors if service is defined, even if value is nonsense', () => {
+      const migration716 = getActionsMigrations(encryptedSavedObjectsSetup)['7.16.0'];
+      const action = getMockDataForEmail({ config: { service: 'gobbledygook' } });
+      const migratedAction = migration716(action, context);
+      expect(migratedAction.attributes.config).toEqual({
+        service: 'gobbledygook',
+      });
+      expect(migratedAction).toEqual(action);
+    });
+
+    test('set usesTableApi config property for .servicenow', () => {
+      const migration716 = getActionsMigrations(encryptedSavedObjectsSetup)['7.16.0'];
+      const action = getMockDataForServiceNow();
+      const migratedAction = migration716(action, context);
+
+      expect(migratedAction).toEqual({
+        ...action,
+        attributes: {
+          ...action.attributes,
+          config: {
+            apiUrl: 'https://example.com',
+            usesTableApi: true,
+          },
+        },
+      });
+    });
+
+    test('set usesTableApi config property for .servicenow-sir', () => {
+      const migration716 = getActionsMigrations(encryptedSavedObjectsSetup)['7.16.0'];
+      const action = getMockDataForServiceNow({ actionTypeId: '.servicenow-sir' });
+      const migratedAction = migration716(action, context);
+
+      expect(migratedAction).toEqual({
+        ...action,
+        attributes: {
+          ...action.attributes,
+          config: {
+            apiUrl: 'https://example.com',
+            usesTableApi: true,
+          },
+        },
+      });
+    });
+
+    test('it does not set usesTableApi config for other connectors', () => {
+      const migration716 = getActionsMigrations(encryptedSavedObjectsSetup)['7.16.0'];
+      const action = getMockData();
+      const migratedAction = migration716(action, context);
+      expect(migratedAction).toEqual(action);
+    });
+  });
+
+  describe('8.0.0', () => {
+    test('no op migration for rules SO', () => {
+      const migration800 = getActionsMigrations(encryptedSavedObjectsSetup)['8.0.0'];
+      const action = getMockData({});
+      expect(migration800(action, context)).toEqual(action);
+    });
+  });
 });
 
 describe('handles errors during migrations', () => {
@@ -244,6 +341,22 @@ function getMockData(
       actionTypeId: '123',
       config: {},
       secrets: {},
+      ...overwrites,
+    },
+    id: uuid.v4(),
+    type: 'action',
+  };
+}
+
+function getMockDataForServiceNow(
+  overwrites: Record<string, unknown> = {}
+): SavedObjectUnsanitizedDoc<Omit<RawAction, 'isMissingSecrets'>> {
+  return {
+    attributes: {
+      name: 'abc',
+      actionTypeId: '.servicenow',
+      config: { apiUrl: 'https://example.com' },
+      secrets: { user: 'test', password: '123' },
       ...overwrites,
     },
     id: uuid.v4(),

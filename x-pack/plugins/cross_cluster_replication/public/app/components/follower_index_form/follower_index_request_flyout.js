@@ -6,7 +6,7 @@
  */
 
 import React, { PureComponent } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import PropTypes from 'prop-types';
 
 import {

@@ -31,6 +31,8 @@ export const images = {
   dropbox,
   github,
   githubEnterpriseServer: github,
+  githubViaApp: github,
+  githubEnterpriseServerViaApp: github,
   gmail,
   googleDrive,
   jira,

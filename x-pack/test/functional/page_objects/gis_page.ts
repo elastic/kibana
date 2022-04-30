@@ -148,13 +148,13 @@ export class GisPageObject extends FtrService {
     await this.renderable.waitForRender();
   }
 
-  async saveMap(name: string, redirectToOrigin = true, tags?: string[]) {
+  async saveMap(name: string, redirectToOrigin = true, saveAsNew = true, tags?: string[]) {
     await this.testSubjects.click('mapSaveButton');
     await this.testSubjects.setValue('savedObjectTitle', name);
     await this.visualize.setSaveModalValues(name, {
       addToDashboard: false,
       redirectToOrigin,
-      saveAsNew: true,
+      saveAsNew,
     });
     if (tags) {
       await this.testSubjects.click('savedObjectTagSelector');
@@ -164,6 +164,7 @@ export class GisPageObject extends FtrService {
       await this.testSubjects.click('savedObjectTitle');
     }
     await this.testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   async clickSaveAndReturnButton() {
@@ -285,12 +286,26 @@ export class GisPageObject extends FtrService {
     await this.testSubjects.click('layerVisibilityToggleButton');
   }
 
+  async openLegend() {
+    const isOpen = await this.testSubjects.exists('mapLayerTOC');
+    if (isOpen === false) {
+      await this.testSubjects.click('mapExpandLayerControlButton');
+      await this.testSubjects.existOrFail('mapLayerTOC');
+    }
+  }
+
   async closeLegend() {
     const isOpen = await this.testSubjects.exists('mapLayerTOC');
     if (isOpen) {
       await this.testSubjects.click('mapToggleLegendButton');
       await this.testSubjects.waitForDeleted('mapLayerTOC');
     }
+  }
+
+  async clickFitToData() {
+    this.log.debug('Fit to data');
+    await this.testSubjects.click('fitToData');
+    await this.waitForMapPanAndZoom();
   }
 
   async clickFitToBounds(layerName: string) {
@@ -521,7 +536,7 @@ export class GisPageObject extends FtrService {
   }
 
   async selectEMSBoundariesSource() {
-    this.log.debug(`Select EMS boundaries source`);
+    this.log.debug(`Select Elastic Maps Service boundaries source`);
     await this.testSubjects.click('emsBoundaries');
   }
 

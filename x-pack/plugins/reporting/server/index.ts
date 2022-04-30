@@ -13,10 +13,10 @@ export const plugin = (initContext: PluginInitializerContext<ReportingConfigType
   new ReportingPlugin(initContext);
 
 export { config } from './config';
-export { ReportingConfig } from './config/config';
+export type { ReportingConfig } from './config/config';
 // internal imports
 export { ReportingCore } from './core';
-export {
+export type {
   ReportingSetup,
   ReportingSetupDeps as PluginSetup,
   ReportingStartDeps as PluginStart,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
 
 import {
@@ -48,14 +48,8 @@ export class EditFlyout extends Component {
   };
 
   render() {
-    const {
-      isFlyoutVisible,
-      closeEditFlyout,
-      setOverrides,
-      overrides,
-      originalSettings,
-      fields,
-    } = this.props;
+    const { isFlyoutVisible, closeEditFlyout, setOverrides, overrides, originalSettings, fields } =
+      this.props;
 
     return (
       <React.Fragment>

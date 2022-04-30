@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import type { IInterpreterRenderHandlers } from '../../../../../src/plugins/expressions';
@@ -16,8 +16,6 @@ import { LENS_HEATMAP_RENDERER } from './constants';
 import type { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plugins/charts/public';
 import { HeatmapChartReportable } from './chart_component';
 import type { HeatmapExpressionProps } from './types';
-
-export { heatmapGridConfig, heatmapLegendConfig, heatmap } from '../../common/expressions';
 
 export const getHeatmapRenderer = (dependencies: {
   formatFactory: FormatFactory;

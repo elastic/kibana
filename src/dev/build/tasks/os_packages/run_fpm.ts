@@ -113,6 +113,8 @@ export async function runFpm(
     '--exclude',
     `usr/share/kibana/data`,
     '--exclude',
+    `usr/share/kibana/logs`,
+    '--exclude',
     'run/kibana/.gitempty',
 
     // flags specific to the package we are building, supplied by tasks below
@@ -123,10 +125,14 @@ export async function runFpm(
     `${resolveWithTrailingSlash(fromBuild('.'))}=/usr/share/kibana/`,
 
     // copy the config directory to /etc/kibana
+    `${config.resolveFromRepo('build/os_packages/config/kibana.yml')}=/etc/kibana/kibana.yml`,
     `${resolveWithTrailingSlash(fromBuild('config'))}=/etc/kibana/`,
 
     // copy the data directory at /var/lib/kibana
     `${resolveWithTrailingSlash(fromBuild('data'))}=/var/lib/kibana/`,
+
+    // copy the logs directory at /var/log/kibana
+    `${resolveWithTrailingSlash(fromBuild('logs'))}=/var/log/kibana/`,
 
     // copy package configurations
     `${resolveWithTrailingSlash(__dirname, 'service_templates/systemd/')}=/`,

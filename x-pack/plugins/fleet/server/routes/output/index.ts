@@ -9,12 +9,20 @@ import type { IRouter } from 'src/core/server';
 
 import { PLUGIN_ID, OUTPUT_API_ROUTES } from '../../constants';
 import {
+  DeleteOutputRequestSchema,
   GetOneOutputRequestSchema,
   GetOutputsRequestSchema,
+  PostOutputRequestSchema,
   PutOutputRequestSchema,
 } from '../../types';
 
-import { getOneOuputHandler, getOutputsHandler, putOuputHandler } from './handler';
+import {
+  deleteOutputHandler,
+  getOneOuputHandler,
+  getOutputsHandler,
+  postOuputHandler,
+  putOuputHandler,
+} from './handler';
 
 export const registerRoutes = (router: IRouter) => {
   router.get(
@@ -37,8 +45,26 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: OUTPUT_API_ROUTES.UPDATE_PATTERN,
       validate: PutOutputRequestSchema,
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     putOuputHandler
+  );
+
+  router.post(
+    {
+      path: OUTPUT_API_ROUTES.CREATE_PATTERN,
+      validate: PostOutputRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    postOuputHandler
+  );
+
+  router.delete(
+    {
+      path: OUTPUT_API_ROUTES.DELETE_PATTERN,
+      validate: DeleteOutputRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    deleteOutputHandler
   );
 };

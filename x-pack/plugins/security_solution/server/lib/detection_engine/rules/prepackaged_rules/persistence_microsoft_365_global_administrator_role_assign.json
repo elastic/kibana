@@ -1,0 +1,57 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "In Azure Active Directory (Azure AD), permissions to manage resources are assigned using Roles. The Global Administrator is a role that enables users to have access to all administrative features in Azure AD and services that use Azure Active Directory identities like the Microsoft 365 Defender portal, the Microsoft 365 compliance center, Exchange, SharePoint Online, and Skype for Business Online. Attackers can add users as Global Administrators to maintain access and manage all subscriptions and their settings and resources.",
+  "from": "now-25m",
+  "index": [
+    "filebeat-*",
+    "logs-o365*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License v2",
+  "name": "Microsoft 365 Global Administrator Role Assigned",
+  "note": "## Config\n\nThe Office 365 Logs Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+  "query": "event.dataset:o365.audit and event.code:\"AzureActiveDirectory\" and event.action:\"Add member to role.\" and\no365.audit.ModifiedProperties.Role_DisplayName.NewValue:\"Global Administrator\"\n",
+  "references": [
+    "https://docs.microsoft.com/en-us/azure/active-directory/roles/permissions-reference#global-administrator"
+  ],
+  "risk_score": 47,
+  "rule_id": "88671231-6626-4e1b-abb7-6e361a171fbb",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "Microsoft 365",
+    "Continuous Monitoring",
+    "SecOps",
+    "Identity and Access"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0003",
+        "name": "Persistence",
+        "reference": "https://attack.mitre.org/tactics/TA0003/"
+      },
+      "technique": [
+        {
+          "id": "T1098",
+          "name": "Account Manipulation",
+          "reference": "https://attack.mitre.org/techniques/T1098/",
+          "subtechnique": [
+            {
+              "id": "T1098.003",
+              "name": "Add Office 365 Global Administrator Role",
+              "reference": "https://attack.mitre.org/techniques/T1098/003/"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "timestamp_override": "event.ingested",
+  "type": "query",
+  "version": 1
+}

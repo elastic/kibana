@@ -11,7 +11,7 @@ import { takeUntil } from 'rxjs/operators';
 import { ITagsCache } from '../../../../../../src/plugins/saved_objects_tagging_oss/public';
 import { Tag, TagAttributes } from '../../../common/types';
 
-export { ITagsCache };
+export type { ITagsCache };
 
 export interface ITagsChangeListener {
   onDelete: (id: string) => void;

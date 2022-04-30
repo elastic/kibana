@@ -6,10 +6,16 @@
  */
 
 import React, { FC, ReactNode, useMemo } from 'react';
-import { EuiBasicTable, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { Axis, BarSeries, Chart, Settings } from '@elastic/charts';
+import {
+  EuiBasicTable,
+  EuiSpacer,
+  RIGHT_ALIGNMENT,
+  LEFT_ALIGNMENT,
+  HorizontalAlignment,
+} from '@elastic/eui';
+import { Axis, BarSeries, Chart, Settings, ScaleType } from '@elastic/charts';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
@@ -18,6 +24,7 @@ import { roundToDecimalPlace } from '../../../utils';
 import { useDataVizChartTheme } from '../../hooks';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
+import { ExpandedRowPanel } from './expanded_row_panel';
 
 function getPercentLabel(value: number): string {
   if (value === 0) {
@@ -35,7 +42,7 @@ function getFormattedValue(value: number, totalCount: number): string {
   return `${value} (${getPercentLabel(percentage)})`;
 }
 
-const BOOLEAN_DISTRIBUTION_CHART_HEIGHT = 100;
+const BOOLEAN_DISTRIBUTION_CHART_HEIGHT = 70;
 
 export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
   const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
@@ -68,14 +75,17 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
   ];
   const summaryTableColumns = [
     {
+      field: 'function',
       name: '',
-      render: (summaryItem: { display: ReactNode }) => summaryItem.display,
-      width: '75px',
+      render: (_: string, summaryItem: { display: ReactNode }) => summaryItem.display,
+      width: '25px',
+      align: LEFT_ALIGNMENT as HorizontalAlignment,
     },
     {
       field: 'value',
       name: '',
       render: (v: string) => <strong>{v}</strong>,
+      align: RIGHT_ALIGNMENT as HorizontalAlignment,
     },
   ];
 
@@ -90,18 +100,18 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
     <ExpandedRowContent dataTestSubj={'dataVisualizerBooleanContent'}>
       <DocumentStatsTable config={config} />
 
-      <EuiFlexItem className={'dataVisualizerSummaryTableWrapper'}>
+      <ExpandedRowPanel className={'dvSummaryTable__wrapper dvPanel__wrapper'}>
         <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
         <EuiBasicTable
-          className={'dataVisualizerSummaryTable'}
+          className={'dvSummaryTable'}
           compressed
           items={summaryTableItems}
           columns={summaryTableColumns}
           tableCaption={summaryTableTitle}
         />
-      </EuiFlexItem>
+      </ExpandedRowPanel>
 
-      <EuiFlexItem>
+      <ExpandedRowPanel className={'dvPanel__wrapper dvPanel--uniform'}>
         <ExpandedRowFieldHeader>
           <FormattedMessage
             id="xpack.dataVisualizer.dataGrid.field.cardBoolean.valuesLabel"
@@ -134,12 +144,12 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
             splitSeriesAccessors={['x']}
             stackAccessors={['x']}
             xAccessor="x"
-            xScaleType="ordinal"
+            xScaleType={ScaleType.Ordinal}
             yAccessors={['count']}
-            yScaleType="linear"
+            yScaleType={ScaleType.Linear}
           />
         </Chart>
-      </EuiFlexItem>
+      </ExpandedRowPanel>
     </ExpandedRowContent>
   );
 };

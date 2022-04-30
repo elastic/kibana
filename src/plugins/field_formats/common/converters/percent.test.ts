@@ -10,9 +10,9 @@ import { PercentFormat } from './percent';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
 
 describe('PercentFormat', () => {
-  const config: Record<string, any> = {};
-
-  config[FORMATS_UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN] = '0,0.[000]%';
+  const config: { [key: string]: string } = {
+    [FORMATS_UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN]: '0,0.[000]%',
+  };
 
   const getConfig = (key: string) => config[key];
 

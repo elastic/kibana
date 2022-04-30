@@ -7,10 +7,10 @@
 
 import moment from 'moment';
 import { CursorPagination } from './types';
-import { parseRelativeDate } from '../../helper';
 import { CursorDirection, SortOrder } from '../../../../common/runtime_types';
 import { UptimeESClient } from '../../lib';
 import { ESFilter } from '../../../../../../../src/core/types/elasticsearch';
+import { parseRelativeDate } from '../../../../common/lib/get_histogram_interval';
 
 export class QueryContext {
   callES: UptimeESClient;
@@ -43,8 +43,8 @@ export class QueryContext {
     this.query = query;
   }
 
-  async search<TParams>(params: TParams) {
-    return this.callES.search(params);
+  async search<TParams>(params: TParams, operationName?: string) {
+    return this.callES.search(params, operationName);
   }
 
   async count(params: any): Promise<any> {

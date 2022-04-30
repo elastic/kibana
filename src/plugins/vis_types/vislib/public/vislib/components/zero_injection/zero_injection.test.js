@@ -17,12 +17,7 @@ import { zeroFillDataArray } from './zero_fill_data_array';
 describe('Vislib Zero Injection Module Test Suite', function () {
   const dateHistogramRowsObj = {
     xAxisOrderedValues: [
-      1418410560000,
-      1418410620000,
-      1418410680000,
-      1418410740000,
-      1418410800000,
-      1418410860000,
+      1418410560000, 1418410620000, 1418410680000, 1418410740000, 1418410800000, 1418410860000,
       1418410920000,
     ],
     series: [

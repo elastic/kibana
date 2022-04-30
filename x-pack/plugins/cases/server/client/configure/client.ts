@@ -30,11 +30,10 @@ import {
   excess,
   GetConfigureFindRequest,
   GetConfigureFindRequestRt,
-  MAX_CONCURRENT_SEARCHES,
-  SUPPORTED_CONNECTORS,
   throwErrors,
-} from '../../../common';
-import { createCaseError } from '../../common';
+} from '../../../common/api';
+import { MAX_CONCURRENT_SEARCHES, SUPPORTED_CONNECTORS } from '../../../common/constants';
+import { createCaseError } from '../../common/error';
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '../types';
 import { getMappings } from './get_mappings';
@@ -144,10 +143,8 @@ async function get(
       fold(throwErrors(Boom.badRequest), identity)
     );
 
-    const {
-      filter: authorizationFilter,
-      ensureSavedObjectsAreAuthorized,
-    } = await authorization.getAuthorizationFilter(Operations.findConfigurations);
+    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
+      await authorization.getAuthorizationFilter(Operations.findConfigurations);
 
     const filter = combineAuthorizedAndOwnerFilter(
       queryParams.owner,
@@ -206,17 +203,10 @@ async function get(
   }
 }
 
-async function getConnectors({
+export async function getConnectors({
   actionsClient,
   logger,
 }: CasesClientArgs): Promise<FindActionResult[]> {
-  const isConnectorSupported = (
-    action: FindActionResult,
-    actionTypes: Record<string, ActionType>
-  ): boolean =>
-    SUPPORTED_CONNECTORS.includes(action.actionTypeId) &&
-    actionTypes[action.actionTypeId]?.enabledInLicense;
-
   try {
     const actionTypes = (await actionsClient.listTypes()).reduce(
       (types, type) => ({ ...types, [type.id]: type }),
@@ -231,19 +221,26 @@ async function getConnectors({
   }
 }
 
+function isConnectorSupported(
+  action: FindActionResult,
+  actionTypes: Record<string, ActionType>
+): boolean {
+  return (
+    SUPPORTED_CONNECTORS.includes(action.actionTypeId) &&
+    actionTypes[action.actionTypeId]?.enabledInLicense &&
+    action.config != null &&
+    !action.isPreconfigured
+  );
+}
+
 async function update(
   configurationId: string,
   req: CasesConfigurePatch,
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<CasesConfigureResponse> {
-  const {
-    caseConfigureService,
-    logger,
-    unsecuredSavedObjectsClient,
-    user,
-    authorization,
-  } = clientArgs;
+  const { caseConfigureService, logger, unsecuredSavedObjectsClient, user, authorization } =
+    clientArgs;
 
   try {
     const request = pipe(
@@ -349,27 +346,20 @@ async function create(
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<CasesConfigureResponse> {
-  const {
-    unsecuredSavedObjectsClient,
-    caseConfigureService,
-    logger,
-    user,
-    authorization,
-  } = clientArgs;
+  const { unsecuredSavedObjectsClient, caseConfigureService, logger, user, authorization } =
+    clientArgs;
   try {
     let error = null;
 
-    const {
-      filter: authorizationFilter,
-      ensureSavedObjectsAreAuthorized,
-    } = await authorization.getAuthorizationFilter(
-      /**
-       * The operation is createConfiguration because the procedure is part of
-       * the create route. The user should have all
-       * permissions to delete the results.
-       */
-      Operations.createConfiguration
-    );
+    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
+      await authorization.getAuthorizationFilter(
+        /**
+         * The operation is createConfiguration because the procedure is part of
+         * the create route. The user should have all
+         * permissions to delete the results.
+         */
+        Operations.createConfiguration
+      );
 
     const filter = combineAuthorizedAndOwnerFilter(
       configuration.owner,

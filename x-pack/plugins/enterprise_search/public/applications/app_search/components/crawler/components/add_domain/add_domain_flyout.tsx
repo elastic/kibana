@@ -64,7 +64,14 @@ export const AddDomainFlyout: React.FC = () => {
                 </h2>
               </EuiTitle>
             </EuiFlyoutHeader>
-            <EuiFlyoutBody banner={<AddDomainFormErrors />}>
+            <EuiFlyoutBody
+              banner={
+                <>
+                  <EuiSpacer size="l" />
+                  <AddDomainFormErrors />
+                </>
+              }
+            >
               <EuiText>
                 {i18n.translate(
                   'xpack.enterpriseSearch.appSearch.crawler.addDomainFlyout.description',

@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo, useCallback } from 'react';
-import { CaseType } from '../../../../common';
+import { CaseType } from '../../../../common/api';
 import {
   useGetCases,
   DEFAULT_QUERY_PARAMS,
@@ -21,7 +21,11 @@ interface ExistingCaseProps {
 }
 
 const ExistingCaseComponent: React.FC<ExistingCaseProps> = ({ onCaseChanged, selectedCase }) => {
-  const { data: cases, loading: isLoadingCases, refetchCases } = useGetCases({
+  const {
+    data: cases,
+    loading: isLoadingCases,
+    refetchCases,
+  } = useGetCases({
     initialQueryParams: DEFAULT_QUERY_PARAMS,
     initialFilterOptions: {
       ...DEFAULT_FILTER_OPTIONS,

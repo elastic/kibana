@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexPattern } from 'src/plugins/data/common/index_patterns/index_patterns';
+import { IndexPattern } from 'src/plugins/data/common';
 import { i18n } from '@kbn/i18n';
 import { AGG_TYPE } from '../../../../common/constants';
 import { IESAggField, CountAggFieldParams } from './agg_field_types';
@@ -31,7 +31,12 @@ export class PercentileAggField extends AggField implements IESAggField {
     this._percentile = params.percentile;
   }
 
-  supportsFieldMeta(): boolean {
+  supportsFieldMetaFromEs(): boolean {
+    return true;
+  }
+
+  supportsFieldMetaFromLocalData(): boolean {
+    // Elasticsearch vector tile search API returns meta tiles for aggregation metrics
     return true;
   }
 

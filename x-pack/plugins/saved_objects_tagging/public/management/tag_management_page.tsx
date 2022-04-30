@@ -74,10 +74,10 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
     fetchTags();
   });
 
-  const createModalOpener = useMemo(() => getCreateModalOpener({ overlays, tagClient }), [
-    overlays,
-    tagClient,
-  ]);
+  const createModalOpener = useMemo(
+    () => getCreateModalOpener({ overlays, tagClient }),
+    [overlays, tagClient]
+  );
 
   const tableActions = useMemo(() => {
     return getTableActions({
@@ -122,7 +122,6 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
         text: i18n.translate('xpack.savedObjectsTagging.management.breadcrumb.index', {
           defaultMessage: 'Tags',
         }),
-        href: '/',
       },
     ]);
   }, [setBreadcrumbs]);

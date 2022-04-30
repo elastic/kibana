@@ -6,7 +6,59 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { TrustedApp } from '../../../common/endpoint/types';
+
+type BaseSearchTypes = string | number | boolean | object;
+export type SearchTypes = BaseSearchTypes | BaseSearchTypes[] | undefined;
+
+// For getting cluster info. Copied from telemetry_collection/get_cluster_info.ts
+export interface ESClusterInfo {
+  cluster_uuid: string;
+  cluster_name: string;
+  version?: {
+    number: string;
+    build_flavor: string;
+    build_type: string;
+    build_hash: string;
+    build_date: string;
+    build_snapshot?: boolean;
+    lucene_version: string;
+    minimum_wire_compatibility_version: string;
+    minimum_index_compatibility_version: string;
+  };
+}
+
+// From https://www.elastic.co/guide/en/elasticsearch/reference/current/get-license.html
+export interface ESLicense {
+  status: string;
+  uid: string;
+  type: string;
+  issue_date?: string;
+  issue_date_in_millis?: number;
+  expiry_date?: string;
+  expirty_date_in_millis?: number;
+  max_nodes?: number;
+  issued_to?: string;
+  issuer?: string;
+  start_date_in_millis?: number;
+}
+
+export interface TelemetryEvent {
+  [key: string]: SearchTypes;
+  '@timestamp'?: string;
+  data_stream?: {
+    [key: string]: SearchTypes;
+    dataset?: string;
+  };
+  cluster_name?: string;
+  cluster_uuid?: string;
+  file?: {
+    [key: string]: SearchTypes;
+    Ext?: {
+      [key: string]: SearchTypes;
+    };
+  };
+  license?: ESLicense;
+}
 
 // EP Policy Response
 
@@ -158,26 +210,55 @@ export interface GetEndpointListResponse {
   per_page: number;
   page: number;
   total: number;
-  data: EndpointExceptionListItem[];
+  data: ExceptionListItem[];
 }
 
 // Telemetry List types
 
-export interface EndpointExceptionListItem {
+export interface ExceptionListItem {
   id: string;
-  version: string;
+  rule_version?: number;
   name: string;
-  description: string;
   created_at: string;
-  created_by: string;
   updated_at: string;
-  updated_by: string;
   entries: object;
   os_types: object;
 }
 
 export interface ListTemplate {
-  trusted_application: TrustedApp[];
-  endpoint_exception: EndpointExceptionListItem[];
-  endpoint_event_filter: EndpointExceptionListItem[];
+  '@timestamp': string;
+  cluster_uuid: string;
+  cluster_name: string;
+  license_id: string | undefined;
+  detection_rule?: TelemetryEvent;
+  endpoint_exception?: TelemetryEvent;
+  endpoint_event_filter?: TelemetryEvent;
+  trusted_application?: TelemetryEvent;
+}
+
+// Detection Rule types
+
+interface ExceptionListEntry {
+  id: string;
+  list_id: string;
+  type: string;
+  namespace_type: string;
+}
+
+interface DetectionRuleParms {
+  ruleId: string;
+  version: number;
+  type: string;
+  exceptionsList: ExceptionListEntry[];
+}
+
+export interface RuleSearchResult {
+  alert: {
+    name: string;
+    enabled: boolean;
+    tags: string[];
+    createdAt: string;
+    updatedAt: string;
+    params: DetectionRuleParms;
+  };
 }

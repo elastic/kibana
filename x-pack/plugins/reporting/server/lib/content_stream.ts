@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Duplex } from 'stream';
 import { defaults, get } from 'lodash';
 import Puid from 'puid';
@@ -22,7 +22,7 @@ import { LevelLogger } from './level_logger';
 const REQUEST_SPAN_SIZE_IN_BYTES = 1024;
 
 type Callback = (error?: Error) => void;
-type SearchRequest = Required<Parameters<ElasticsearchClient['search']>>[0];
+type SearchRequest = estypes.SearchRequest;
 
 interface ContentStreamDocument {
   id: string;
@@ -66,7 +66,9 @@ export class ContentStream extends Duplex {
     return Math.floor(max / 2);
   }
 
-  private buffer = Buffer.from('');
+  private buffers: Buffer[] = [];
+  private bytesBuffered = 0;
+
   private bytesRead = 0;
   private chunksRead = 0;
   private chunksWritten = 0;
@@ -93,11 +95,11 @@ export class ContentStream extends Duplex {
     this.parameters = { encoding };
   }
 
-  private async decode(content: string) {
+  private decode(content: string) {
     return Buffer.from(content, this.parameters.encoding === 'base64' ? 'base64' : undefined);
   }
 
-  private async encode(buffer: Buffer) {
+  private encode(buffer: Buffer) {
     return buffer.toString(this.parameters.encoding === 'base64' ? 'base64' : undefined);
   }
 
@@ -179,28 +181,27 @@ export class ContentStream extends Duplex {
     return this.jobSize != null && this.bytesRead >= this.jobSize;
   }
 
-  async _read() {
-    try {
-      const content = this.chunksRead ? await this.readChunk() : await this.readHead();
-      if (!content) {
-        this.logger.debug(`Chunk is empty.`);
-        this.push(null);
-        return;
-      }
+  _read() {
+    (this.chunksRead ? this.readChunk() : this.readHead())
+      .then((content) => {
+        if (!content) {
+          this.logger.debug(`Chunk is empty.`);
+          this.push(null);
+          return;
+        }
 
-      const buffer = await this.decode(content);
+        const buffer = this.decode(content);
 
-      this.push(buffer);
-      this.chunksRead++;
-      this.bytesRead += buffer.byteLength;
+        this.push(buffer);
+        this.chunksRead++;
+        this.bytesRead += buffer.byteLength;
 
-      if (this.isRead()) {
-        this.logger.debug(`Read ${this.bytesRead} of ${this.jobSize} bytes.`);
-        this.push(null);
-      }
-    } catch (error) {
-      this.destroy(error);
-    }
+        if (this.isRead()) {
+          this.logger.debug(`Read ${this.bytesRead} of ${this.jobSize} bytes.`);
+          this.push(null);
+        }
+      })
+      .catch((err) => this.destroy(err));
   }
 
   private async removeChunks() {
@@ -250,9 +251,44 @@ export class ContentStream extends Duplex {
     });
   }
 
-  private async flush(size = this.buffer.byteLength) {
-    const chunk = this.buffer.slice(0, size);
-    const content = await this.encode(chunk);
+  private async flush(size = this.bytesBuffered) {
+    const buffersToFlush: Buffer[] = [];
+    let bytesToFlush = 0;
+
+    /*
+     Loop over each buffer, keeping track of how many bytes we have added
+     to the array of buffers to be flushed. The array of buffers to be flushed
+     contains buffers by reference, not copies. This avoids putting pressure on
+     the CPU for copying buffers or for gc activity. Please profile performance
+     with a large byte configuration and a large number of records (900k+)
+     before changing this code. Config used at time of writing:
+
+      xpack.reporting:
+        csv.maxSizeBytes: 500000000
+        csv.scroll.size: 1000
+
+     At the moment this can put memory pressure on Kibana. Up to 1,1 GB in a dev
+     build. It is not recommended to have overly large max size bytes but we
+     need this code to be as performant as possible.
+    */
+    while (this.buffers.length) {
+      const remainder = size - bytesToFlush;
+      if (remainder <= 0) {
+        break;
+      }
+      const buffer = this.buffers.shift()!;
+      const chunkedBuffer = buffer.slice(0, remainder);
+      buffersToFlush.push(chunkedBuffer);
+      bytesToFlush += chunkedBuffer.byteLength;
+
+      if (buffer.byteLength > remainder) {
+        this.buffers.unshift(buffer.slice(remainder));
+      }
+    }
+
+    // We call Buffer.concat with the fewest number of buffers possible
+    const chunk = Buffer.concat(buffersToFlush);
+    const content = this.encode(chunk);
 
     if (!this.chunksWritten) {
       await this.removeChunks();
@@ -266,35 +302,31 @@ export class ContentStream extends Duplex {
     }
 
     this.bytesWritten += chunk.byteLength;
-    this.buffer = this.buffer.slice(size);
+    this.bytesBuffered -= bytesToFlush;
   }
 
-  async _write(chunk: Buffer | string, encoding: BufferEncoding, callback: Callback) {
-    this.buffer = Buffer.concat([
-      this.buffer,
-      Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding),
-    ]);
+  private async flushAllFullChunks() {
+    const maxChunkSize = await this.getMaxChunkSize();
 
-    try {
-      const maxChunkSize = await this.getMaxChunkSize();
-
-      while (this.buffer.byteLength >= maxChunkSize) {
-        await this.flush(maxChunkSize);
-      }
-
-      callback();
-    } catch (error) {
-      callback(error);
+    while (this.bytesBuffered >= maxChunkSize && this.buffers.length) {
+      await this.flush(maxChunkSize);
     }
   }
 
-  async _final(callback: Callback) {
-    try {
-      await this.flush();
-      callback();
-    } catch (error) {
-      callback(error);
-    }
+  _write(chunk: Buffer | string, encoding: BufferEncoding, callback: Callback) {
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding);
+    this.bytesBuffered += buffer.byteLength;
+    this.buffers.push(buffer);
+
+    this.flushAllFullChunks()
+      .then(() => callback())
+      .catch(callback);
+  }
+
+  _final(callback: Callback) {
+    this.flush()
+      .then(() => callback())
+      .catch(callback);
   }
 
   getSeqNo(): number | undefined {

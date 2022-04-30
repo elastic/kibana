@@ -113,12 +113,10 @@ describe('Policy-Changing license watcher', () => {
     // mock a Policy with a higher-tiered feature enabled
     packagePolicySvcMock.list.mockResolvedValueOnce({
       items: [
-        MockPPWithEndpointPolicy(
-          (pc: PolicyConfig): PolicyConfig => {
-            pc.windows.popup.malware.message = CustomMessage;
-            return pc;
-          }
-        ),
+        MockPPWithEndpointPolicy((pc: PolicyConfig): PolicyConfig => {
+          pc.windows.popup.malware.message = CustomMessage;
+          return pc;
+        }),
       ],
       total: 1,
       page: 1,
@@ -132,7 +130,7 @@ describe('Policy-Changing license watcher', () => {
 
     expect(packagePolicySvcMock.update).toHaveBeenCalled();
     expect(
-      packagePolicySvcMock.update.mock.calls[0][3].inputs[0].config!.policy.value.windows.popup
+      packagePolicySvcMock.update.mock.calls[0][3].inputs[0].config?.policy.value.windows.popup
         .malware.message
     ).not.toEqual(CustomMessage);
   });

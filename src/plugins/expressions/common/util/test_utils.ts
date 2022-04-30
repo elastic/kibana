@@ -14,7 +14,7 @@ export const createMockContext = () => {
     getSearchSessionId: () => undefined,
     types: {},
     variables: {},
-    abortSignal: {} as any,
-    inspectorAdapters: {} as any,
+    abortSignal: {},
+    inspectorAdapters: {},
   } as ExecutionContext;
 };

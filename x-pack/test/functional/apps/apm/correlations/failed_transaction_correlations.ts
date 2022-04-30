@@ -135,7 +135,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const apmFailedTransactionsCorrelationsTabTitle = await testSubjects.getVisibleText(
             'apmFailedTransactionsCorrelationsTabTitle'
           );
-          expect(apmFailedTransactionsCorrelationsTabTitle).to.be('Failed transactions');
+          expect(apmFailedTransactionsCorrelationsTabTitle).to.be(
+            'Failed transactions latency distribution'
+          );
 
           // Assert that the data fully loaded to 100%
           const apmFailedTransactionsCorrelationsProgressTitle = await testSubjects.getVisibleText(

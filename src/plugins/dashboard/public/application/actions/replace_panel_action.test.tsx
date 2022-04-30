@@ -7,7 +7,7 @@
  */
 
 import { ReplacePanelAction } from './replace_panel_action';
-import { DashboardContainer } from '../embeddable';
+import { DashboardContainer } from '../embeddable/dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 
 import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
@@ -22,6 +22,7 @@ import {
   ContactCardEmbeddableOutput,
 } from '../../services/embeddable_test_samples';
 import { getStubPluginServices } from '../../../../presentation_util/public';
+import { screenshotModePluginMock } from '../../../../screenshot_mode/public/mocks';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(
@@ -48,6 +49,7 @@ beforeEach(async () => {
     uiSettings: uiSettingsServiceMock.createStartContract(),
     http: coreStart.http,
     presentationUtil: getStubPluginServices(),
+    screenshotMode: screenshotModePluginMock.createSetupContract(),
   };
   const input = getSampleDashboardInput({
     panels: {

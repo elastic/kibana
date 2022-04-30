@@ -7,8 +7,9 @@
 
 import { head } from 'lodash/fp';
 import React from 'react';
+import type { Filter } from '@kbn/es-query';
 
-import { ColumnHeaderOptions } from '../../../../../../common';
+import { ColumnHeaderOptions } from '../../../../../../common/types';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { ColumnRenderer } from './column_renderer';
@@ -21,8 +22,8 @@ export const dataExistsAtColumn = (columnName: string, data: TimelineNonEcsData[
 export const plainColumnRenderer: ColumnRenderer = {
   isInstance: (columnName: string, data: TimelineNonEcsData[]) =>
     dataExistsAtColumn(columnName, data),
-
   renderColumn: ({
+    asPlainText,
     columnName,
     eventId,
     field,
@@ -32,9 +33,11 @@ export const plainColumnRenderer: ColumnRenderer = {
     values,
     linkValues,
   }: {
+    asPlainText?: boolean;
     columnName: string;
     eventId: string;
     field: ColumnHeaderOptions;
+    globalFilters?: Filter[];
     isDraggable?: boolean;
     timelineId: string;
     truncate?: boolean;
@@ -44,16 +47,17 @@ export const plainColumnRenderer: ColumnRenderer = {
     values != null
       ? values.map((value, i) => (
           <FormattedFieldValue
-            key={`plain-column-renderer-formatted-field-value-${timelineId}-${columnName}-${eventId}-${field.id}-${value}-${i}`}
+            asPlainText={asPlainText}
             contextId={`plain-column-renderer-formatted-field-value-${timelineId}`}
             eventId={eventId}
             fieldFormat={field.format || ''}
             fieldName={columnName}
             fieldType={field.type || ''}
             isDraggable={isDraggable}
-            value={parseValue(value)}
-            truncate={truncate}
+            key={`plain-column-renderer-formatted-field-value-${timelineId}-${columnName}-${eventId}-${field.id}-${value}-${i}`}
             linkValue={head(linkValues)}
+            truncate={truncate}
+            value={parseValue(value)}
           />
         ))
       : getEmptyTagValue(),

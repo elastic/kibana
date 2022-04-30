@@ -41,8 +41,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
-  authorization: (authorization as unknown) as AlertingAuthorization,
-  actionsAuthorization: (actionsAuthorization as unknown) as ActionsAuthorization,
+  authorization: authorization as unknown as AlertingAuthorization,
+  actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
   getUserName: jest.fn(),
@@ -210,8 +210,10 @@ function expectSuccess(
 
 // tests to run when the method is expected to fail
 function expectConflict(success: boolean, err: Error, method: 'update' | 'create' = 'update') {
-  const conflictErrorMessage = SavedObjectsErrorHelpers.createConflictError('alert', MockAlertId)
-    .message;
+  const conflictErrorMessage = SavedObjectsErrorHelpers.createConflictError(
+    'alert',
+    MockAlertId
+  ).message;
 
   expect(`${err}`).toBe(`Error: ${conflictErrorMessage}`);
   expect(success).toBe(false);
@@ -321,6 +323,22 @@ beforeEach(() => {
     ownerId: null,
     taskType: 'task-type',
     params: {},
+  });
+
+  taskManager.get.mockResolvedValue({
+    id: 'task-123',
+    taskType: 'alerting:123',
+    scheduledAt: new Date(),
+    attempts: 1,
+    status: TaskStatus.Idle,
+    runAt: new Date(),
+    startedAt: null,
+    retryAt: null,
+    state: {},
+    params: {
+      alertId: '1',
+    },
+    ownerId: null,
   });
 
   const actionsClient = actionsClientMock.create();

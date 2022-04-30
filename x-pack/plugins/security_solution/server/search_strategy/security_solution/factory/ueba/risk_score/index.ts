@@ -8,14 +8,14 @@
 import { getOr } from 'lodash/fp';
 import { SecuritySolutionFactory } from '../../types';
 import {
+  UebaQueries,
   RiskScoreEdges,
   RiskScoreRequestOptions,
   RiskScoreStrategyResponse,
-  UebaQueries,
-} from '../../../../../../common';
+} from '../../../../../../common/search_strategy';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import { buildRiskScoreQuery } from './query.risk_score.dsl';
-import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import { formatRiskScoreData } from './helpers';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 

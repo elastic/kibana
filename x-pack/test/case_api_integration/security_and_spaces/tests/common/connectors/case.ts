@@ -31,6 +31,7 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const log = getService('log');
 
   describe('case_connector', () => {
     let createdActionId = '';
@@ -708,21 +709,21 @@ export default ({ getService }: FtrProviderContext): void => {
       describe('adding alerts using a connector', () => {
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
-          await createSignalsIndex(supertest);
+          await createSignalsIndex(supertest, log);
         });
 
         afterEach(async () => {
-          await deleteSignalsIndex(supertest);
-          await deleteAllAlerts(supertest);
+          await deleteSignalsIndex(supertest, log);
+          await deleteAllAlerts(supertest, log);
           await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
 
         it('should add a comment of type alert', async () => {
           const rule = getRuleForSignalTesting(['auditbeat-*']);
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signals = await getSignalsByIds(supertest, [id]);
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signals = await getSignalsByIds(supertest, log, [id]);
           const alert = signals.hits.hits[0];
 
           const { body: createdAction } = await supertest

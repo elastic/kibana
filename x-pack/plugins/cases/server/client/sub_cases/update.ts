@@ -16,15 +16,13 @@ import {
   Logger,
 } from 'kibana/server';
 
-import { nodeBuilder } from '../../../../../../src/plugins/data/common';
+import { nodeBuilder } from '@kbn/es-query';
 import { CasesService } from '../../services';
 import {
-  CASE_COMMENT_SAVED_OBJECT,
   CaseStatuses,
   CommentAttributes,
   CommentType,
   excess,
-  SUB_CASE_SAVED_OBJECT,
   SubCaseAttributes,
   SubCasePatchRequest,
   SubCaseResponse,
@@ -35,15 +33,16 @@ import {
   throwErrors,
   User,
   CaseAttributes,
-} from '../../../common';
+} from '../../../common/api';
+import { CASE_COMMENT_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
 import { getCaseToUpdate } from '../utils';
 import { buildSubCaseUserActions } from '../../services/user_actions/helpers';
+import { createCaseError } from '../../common/error';
 import {
   createAlertUpdateRequest,
-  createCaseError,
   isCommentRequestTypeAlertOrGenAlert,
   flattenSubCaseSavedObject,
-} from '../../common';
+} from '../../common/utils';
 import { UpdateAlertRequest } from '../../client/alerts/types';
 import { CasesClientArgs } from '../types';
 import { CasesClientInternal } from '../client_internal';
@@ -246,9 +245,7 @@ async function updateAlerts({
       []
     );
 
-    await casesClientInternal.alerts.updateStatus({
-      alerts: alertsToUpdate,
-    });
+    await casesClientInternal.alerts.updateStatus({ alerts: alertsToUpdate });
   } catch (error) {
     throw createCaseError({
       message: `Failed to update alert status while updating sub cases: ${JSON.stringify(
@@ -357,6 +354,14 @@ export async function update({
       );
     });
 
+    await updateAlerts({
+      caseService,
+      unsecuredSavedObjectsClient,
+      casesClientInternal,
+      subCasesToSync: subCasesToSyncAlertsFor,
+      logger: clientArgs.logger,
+    });
+
     const returnUpdatedSubCases = updatedCases.saved_objects.reduce<SubCaseResponse[]>(
       (acc, updatedSO) => {
         const originalSubCase = subCasesMap.get(updatedSO.id);
@@ -386,15 +391,6 @@ export async function update({
         actionDate: updatedAt,
         actionBy: user,
       }),
-    });
-
-    // attempt to update the status of the alerts after creating all the user actions just in case it fails
-    await updateAlerts({
-      caseService,
-      unsecuredSavedObjectsClient,
-      casesClientInternal,
-      subCasesToSync: subCasesToSyncAlertsFor,
-      logger: clientArgs.logger,
     });
 
     return SubCasesResponseRt.encode(returnUpdatedSubCases);

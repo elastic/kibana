@@ -18,7 +18,7 @@ import styled from 'styled-components';
 
 import { CasesTableUtilityBar } from './utility_bar';
 import { CasesNavigation, LinkButton } from '../links';
-import { AllCases, Case, FilterOptions } from '../../../common';
+import { AllCases, Case, FilterOptions } from '../../../common/ui/types';
 import * as i18n from './translations';
 
 interface CasesTableProps {
@@ -136,7 +136,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
                   iconType="plusInCircle"
                   data-test-subj="cases-table-add-case"
                 >
-                  {i18n.ADD_NEW_CASE}
+                  {i18n.CREATE_TITLE}
                 </LinkButton>
               )
             }

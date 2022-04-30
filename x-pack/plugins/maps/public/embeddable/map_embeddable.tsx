@@ -9,14 +9,18 @@ import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import React from 'react';
 import { Provider } from 'react-redux';
+import fastIsEqual from 'fast-deep-equal';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import {
   Embeddable,
   IContainer,
   ReferenceOrValueEmbeddable,
+  genericEmbeddableInputIsEqual,
   VALUE_CLICK_TRIGGER,
+  omitGenericEmbeddableInput,
 } from '../../../../../src/plugins/embeddable/public';
 import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
 import {
@@ -66,6 +70,7 @@ import {
   getCoreI18n,
   getHttp,
   getChartsPaletteServiceGetColor,
+  getSpacesApi,
   getSearchService,
 } from '../kibana_services';
 import { LayerDescriptor, MapExtent } from '../../common/descriptor_types';
@@ -94,7 +99,8 @@ function getIsRestore(searchSessionId?: string) {
 
 export class MapEmbeddable
   extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput>
-  implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput> {
+  implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput>
+{
   type = MAP_SAVED_OBJECT_TYPE;
   deferEmbeddableLoad = true;
 
@@ -207,16 +213,26 @@ export class MapEmbeddable
   }
 
   public async getInputAsRefType(): Promise<MapByReferenceInput> {
-    const input = getMapAttributeService().getExplicitInputFromEmbeddable(this);
-    return getMapAttributeService().getInputAsRefType(input, {
+    return getMapAttributeService().getInputAsRefType(this.getExplicitInput(), {
       showSaveModal: true,
       saveModalTitle: this.getTitle(),
     });
   }
 
+  public async getExplicitInputIsEqual(
+    lastExplicitInput: Partial<MapByValueInput | MapByReferenceInput>
+  ): Promise<boolean> {
+    const currentExplicitInput = this.getExplicitInput();
+    if (!genericEmbeddableInputIsEqual(lastExplicitInput, currentExplicitInput)) return false;
+
+    // generic embeddable input is equal, now we compare map specific input elements, ignoring 'mapBuffer'.
+    const lastMapInput = omitGenericEmbeddableInput(_.omit(lastExplicitInput, 'mapBuffer'));
+    const currentMapInput = omitGenericEmbeddableInput(_.omit(currentExplicitInput, 'mapBuffer'));
+    return fastIsEqual(lastMapInput, currentMapInput);
+  }
+
   public async getInputAsValueType(): Promise<MapByValueInput> {
-    const input = getMapAttributeService().getExplicitInputFromEmbeddable(this);
-    return getMapAttributeService().getInputAsValueType(input);
+    return getMapAttributeService().getInputAsValueType(this.getExplicitInput());
   }
 
   public getDescription() {
@@ -352,23 +368,39 @@ export class MapEmbeddable
       return;
     }
 
-    const I18nContext = getCoreI18n().Context;
+    const sharingSavedObjectProps = this._savedMap.getSharingSavedObjectProps();
+    const spaces = getSpacesApi();
+    const content =
+      sharingSavedObjectProps && spaces && sharingSavedObjectProps?.outcome === 'conflict' ? (
+        <div className="mapEmbeddedError">
+          <EuiEmptyPrompt
+            iconType="alert"
+            iconColor="danger"
+            data-test-subj="embeddable-maps-failure"
+            body={spaces.ui.components.getEmbeddableLegacyUrlConflict({
+              targetType: MAP_SAVED_OBJECT_TYPE,
+              sourceId: sharingSavedObjectProps.sourceId!,
+            })}
+          />
+        </div>
+      ) : (
+        <MapContainer
+          onSingleValueTrigger={this.onSingleValueTrigger}
+          addFilters={this.input.hideFilterActions ? null : this.addFilters}
+          getFilterActions={this.getFilterActions}
+          getActionContext={this.getActionContext}
+          renderTooltipContent={this._renderTooltipContent}
+          title={this.getTitle()}
+          description={this.getDescription()}
+          waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(this._savedMap.getStore())}
+          isSharable={this._isSharable}
+        />
+      );
 
+    const I18nContext = getCoreI18n().Context;
     render(
       <Provider store={this._savedMap.getStore()}>
-        <I18nContext>
-          <MapContainer
-            onSingleValueTrigger={this.onSingleValueTrigger}
-            addFilters={this.input.hideFilterActions ? null : this.addFilters}
-            getFilterActions={this.getFilterActions}
-            getActionContext={this.getActionContext}
-            renderTooltipContent={this._renderTooltipContent}
-            title={this.getTitle()}
-            description={this.getDescription()}
-            waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(this._savedMap.getStore())}
-            isSharable={this._isSharable}
-          />
-        </I18nContext>
+        <I18nContext>{content}</I18nContext>
       </Provider>,
       this._domNode
     );

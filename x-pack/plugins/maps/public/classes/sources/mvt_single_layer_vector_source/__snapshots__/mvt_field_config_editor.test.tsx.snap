@@ -5,7 +5,6 @@ exports[`should render error for dupes 1`] = `
   <EuiFlexGroup
     alignItems="center"
     gutterSize="xs"
-    key="0"
   >
     <EuiFlexItem>
       <EuiFieldText
@@ -88,7 +87,6 @@ exports[`should render error for dupes 1`] = `
   <EuiFlexGroup
     alignItems="center"
     gutterSize="xs"
-    key="1"
   >
     <EuiFlexItem>
       <EuiFieldText
@@ -196,7 +194,6 @@ exports[`should render error for empty name 1`] = `
   <EuiFlexGroup
     alignItems="center"
     gutterSize="xs"
-    key="0"
   >
     <EuiFlexItem>
       <EuiFieldText
@@ -304,7 +301,6 @@ exports[`should render field editor 1`] = `
   <EuiFlexGroup
     alignItems="center"
     gutterSize="xs"
-    key="0"
   >
     <EuiFlexItem>
       <EuiFieldText
@@ -387,7 +383,6 @@ exports[`should render field editor 1`] = `
   <EuiFlexGroup
     alignItems="center"
     gutterSize="xs"
-    key="1"
   >
     <EuiFlexItem>
       <EuiFieldText

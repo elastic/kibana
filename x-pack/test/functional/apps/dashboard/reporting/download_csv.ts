@@ -17,12 +17,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
-  const kibanaServer = getService('kibanaServer');
+  const reporting = getService('reporting');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const filterBar = getService('filterBar');
   const find = getService('find');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['reporting', 'common', 'dashboard', 'timePicker']);
-  const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
+  const PageObjects = getPageObjects([
+    'reporting',
+    'common',
+    'dashboard',
+    'timePicker',
+    'discover',
+  ]);
+
+  const navigateToDashboardApp = async () => {
+    log.debug('in navigateToDashboardApp');
+    await PageObjects.common.navigateToApp('dashboard');
+    await retry.tryForTime(10000, async () => {
+      expect(await PageObjects.dashboard.onDashboardLandingPage()).to.be(true);
+    });
+  };
 
   const getCsvPath = (name: string) =>
     path.resolve(REPO_ROOT, `target/functional-tests/downloads/${name}.csv`);
@@ -66,19 +80,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
     });
 
-    describe('E-Commerce Data', () => {
+    describe('Default Saved Search Data', () => {
+      const dashboardAllDataHiddenTitles = 'Ecom Dashboard Hidden Panel Titles';
+      const dashboardPeriodOf2DaysData = 'Ecom Dashboard - 3 Day Period';
+
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
-        await kibanaServer.importExport.load(ecommerceSOPath);
+        await reporting.initEcommerce();
+        await navigateToDashboardApp();
       });
+
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
-        await kibanaServer.importExport.unload(ecommerceSOPath);
+        await reporting.teardownEcommerce();
       });
 
       it('Download CSV export of a saved search panel', async function () {
-        await PageObjects.common.navigateToApp('dashboard');
-        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
+        await PageObjects.dashboard.loadSavedDashboard(dashboardPeriodOf2DaysData);
         await clickActionsMenu('EcommerceData');
         await clickDownloadCsv();
 
@@ -87,11 +103,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Downloads a filtered CSV export of a saved search panel', async function () {
-        await PageObjects.common.navigateToApp('dashboard');
-        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard');
+        await PageObjects.dashboard.loadSavedDashboard(dashboardPeriodOf2DaysData);
 
         // add a filter
-        await filterBar.addFilter('currency', 'is', 'EUR');
+        await filterBar.addFilter('category', 'is', `Men's Shoes`);
 
         await clickActionsMenu('EcommerceData');
         await clickDownloadCsv();
@@ -101,8 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Gets the correct filename if panel titles are hidden', async () => {
-        await PageObjects.common.navigateToApp('dashboard');
-        await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard Hidden Panel Titles');
+        await PageObjects.dashboard.loadSavedDashboard(dashboardAllDataHiddenTitles);
         const savedSearchPanel = await find.byCssSelector(
           '[data-test-embeddable-id="94eab06f-60ac-4a85-b771-3a8ed475c9bb"]'
         ); // panel title is hidden
@@ -116,28 +130,65 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Field Formatters and Scripted Fields', () => {
+    describe('Filtered Saved Search', () => {
+      const TEST_SEARCH_TITLE = 'Customer Betty';
+      const TEST_DASHBOARD_TITLE = 'Filtered Search Data';
+      const setTimeRange = async () => {
+        const fromTime = 'Jun 20, 2019 @ 23:56:51.374';
+        const toTime = 'Jun 25, 2019 @ 16:18:51.821';
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      };
+
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/hugedata');
+        await reporting.initEcommerce();
+        await navigateToDashboardApp();
+        log.info(`Creating empty dashboard`);
+        await PageObjects.dashboard.clickNewDashboard();
+        await setTimeRange();
+        log.info(`Adding "${TEST_SEARCH_TITLE}" to dashboard`);
+        await dashboardAddPanel.addSavedSearch(TEST_SEARCH_TITLE);
+        await PageObjects.dashboard.saveDashboard(TEST_DASHBOARD_TITLE);
       });
+
       after(async () => {
+        await reporting.teardownEcommerce();
+        await esArchiver.emptyKibanaIndex();
+      });
+
+      it('Downloads filtered Discover saved search report', async () => {
+        await clickActionsMenu(TEST_SEARCH_TITLE.replace(/ /g, ''));
+        await clickDownloadCsv();
+
+        const csvFile = await getDownload(getCsvPath(TEST_SEARCH_TITLE));
+        expectSnapshot(csvFile).toMatch();
+      });
+    });
+
+    describe('Field Formatters and Scripted Fields', () => {
+      const dashboardWithScriptedFieldsSearch = 'names dashboard';
+
+      before(async () => {
+        await reporting.initLogs();
+        await esArchiver.load('x-pack/test/functional/es_archives/reporting/hugedata');
+
+        await navigateToDashboardApp();
+        await PageObjects.dashboard.loadSavedDashboard(dashboardWithScriptedFieldsSearch);
+        await PageObjects.timePicker.setAbsoluteRange(
+          'Nov 26, 1981 @ 21:54:15.526',
+          'Mar 5, 1982 @ 18:17:44.821'
+        );
+
+        await PageObjects.common.sleep(1000);
+        await filterBar.addFilter('name.keyword', 'is', 'Fethany');
+        await PageObjects.common.sleep(1000);
+      });
+
+      after(async () => {
+        await reporting.teardownLogs();
         await esArchiver.unload('x-pack/test/functional/es_archives/reporting/hugedata');
       });
 
       it('Download CSV export of a saved search panel', async () => {
-        await PageObjects.common.navigateToApp('dashboard');
-        await PageObjects.dashboard.loadSavedDashboard('names dashboard');
-        await PageObjects.timePicker.setAbsoluteRange(
-          'Jan 01, 1980 @ 00:00:00.000',
-          'Dec 31, 1984 @ 23:59:59.000'
-        );
-
-        await PageObjects.common.sleep(1000);
-
-        await filterBar.addFilter('name.keyword', 'is', 'Fethany');
-
-        await PageObjects.common.sleep(1000);
-
         await clickActionsMenu('namessearch');
         await clickDownloadCsv();
 

@@ -11,6 +11,7 @@ import { BehaviorSubject, throwError as throwErrorRx } from 'rxjs';
 import { RequestAdapter } from '../../../../../../inspector';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
+import { AvailableFields$ } from '../services/use_saved_search';
 
 function getDataSubjects() {
   return {
@@ -18,6 +19,9 @@ function getDataSubjects() {
     documents$: new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED }),
     totalHits$: new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED }),
     charts$: new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED }),
+    availableFields$: new BehaviorSubject({
+      fetchStatus: FetchStatus.UNINITIALIZED,
+    }) as AvailableFields$,
   };
 }
 

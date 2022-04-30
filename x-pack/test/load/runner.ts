@@ -28,7 +28,11 @@ if (!Fs.existsSync(gatlingProjectRootPath)) {
   );
 }
 
-const dropEmptyLines = (s: string) => s.split(',').filter((i) => i.length > 0);
+const dropEmptyLines = (s: string) =>
+  s
+    .split(',')
+    .filter((i) => i.length > 0)
+    .map((i) => (i.includes('.') ? i : `branch.${i}`));
 const simulationClasses = dropEmptyLines(simulationEntry);
 const simulationsRootPath = resolve(gatlingProjectRootPath, baseSimulationPath);
 
@@ -53,16 +57,20 @@ export async function GatlingTestRunner({ getService }: FtrProviderContext) {
   const log = getService('log');
 
   await withProcRunner(log, async (procs) => {
-    await procs.run('node build/index.js', {
-      cmd: 'node',
-      args: ['build/index.js'],
-      cwd: puppeteerProjectRootPath,
-      env: {
-        ...process.env,
-      },
-      wait: true,
-    });
     for (let i = 0; i < simulationClasses.length; i++) {
+      await procs.run('node build/index.js', {
+        cmd: 'node',
+        args: [
+          'build/index.js',
+          `--simulation='${simulationClasses[i]}'`,
+          `--config='./config.json'`,
+        ],
+        cwd: puppeteerProjectRootPath,
+        env: {
+          ...process.env,
+        },
+        wait: true,
+      });
       await procs.run('gatling: test', {
         cmd: 'mvn',
         args: [

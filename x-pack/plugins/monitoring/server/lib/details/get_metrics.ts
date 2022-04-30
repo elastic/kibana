@@ -15,12 +15,13 @@ import { LegacyRequest } from '../../types';
 
 type Metric = string | { keys: string | string[]; name: string };
 
+// TODO: Switch to an options object argument here
 export async function getMetrics(
   req: LegacyRequest,
   indexPattern: string,
   metricSet: Metric[] = [],
   filters: Array<Record<string, any>> = [],
-  metricOptions = {},
+  metricOptions: Record<string, any> = {},
   numOfBuckets: number = 0,
   groupBy: string | Record<string, any> | null = null
 ) {

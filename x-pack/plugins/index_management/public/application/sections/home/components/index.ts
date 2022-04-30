@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { FilterListButton, Filters } from './filter_list_button';
+export type { Filters } from './filter_list_button';
+export { FilterListButton } from './filter_list_button';

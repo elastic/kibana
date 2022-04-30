@@ -6,14 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  getBucketIdentifier,
-  buildResultColumns,
-} from '../../../../../../src/plugins/expressions/common';
-import type {
-  ExpressionFunctionDefinition,
-  Datatable,
-} from '../../../../../../src/plugins/expressions/common';
+
+import type { CounterRateExpressionFunction } from './types';
 
 export interface CounterRateArgs {
   by?: string[];
@@ -21,13 +15,6 @@ export interface CounterRateArgs {
   outputColumnId: string;
   outputColumnName?: string;
 }
-
-export type ExpressionFunctionCounterRate = ExpressionFunctionDefinition<
-  'lens_counter_rate',
-  Datatable,
-  CounterRateArgs,
-  Datatable
->;
 
 /**
  * Calculates the counter rate of a specified column in the data table.
@@ -59,7 +46,7 @@ export type ExpressionFunctionCounterRate = ExpressionFunctionDefinition<
  *   before comparison. If the values are objects, the return value of their `toString` method will be used for comparison.
  *   Missing values (`null` and `undefined`) will be treated as empty strings.
  */
-export const counterRate: ExpressionFunctionCounterRate = {
+export const counterRate: CounterRateExpressionFunction = {
   name: 'lens_counter_rate',
   type: 'datatable',
 
@@ -101,46 +88,9 @@ export const counterRate: ExpressionFunctionCounterRate = {
     },
   },
 
-  fn(input, { by, inputColumnId, outputColumnId, outputColumnName }) {
-    const resultColumns = buildResultColumns(
-      input,
-      outputColumnId,
-      inputColumnId,
-      outputColumnName
-    );
-
-    if (!resultColumns) {
-      return input;
-    }
-    const previousValues: Partial<Record<string, number>> = {};
-    return {
-      ...input,
-      columns: resultColumns,
-      rows: input.rows.map((row) => {
-        const newRow = { ...row };
-
-        const bucketIdentifier = getBucketIdentifier(row, by);
-        const previousValue = previousValues[bucketIdentifier];
-        const currentValue = newRow[inputColumnId];
-        if (currentValue != null && previousValue != null) {
-          const currentValueAsNumber = Number(currentValue);
-          if (currentValueAsNumber >= previousValue) {
-            newRow[outputColumnId] = currentValueAsNumber - previousValue;
-          } else {
-            newRow[outputColumnId] = currentValueAsNumber;
-          }
-        } else {
-          newRow[outputColumnId] = undefined;
-        }
-
-        if (currentValue != null) {
-          previousValues[bucketIdentifier] = Number(currentValue);
-        } else {
-          previousValues[bucketIdentifier] = undefined;
-        }
-
-        return newRow;
-      }),
-    };
+  async fn(...args) {
+    /** Build optimization: prevent adding extra code into initial bundle **/
+    const { counterRateFn } = await import('./counter_rate_fn');
+    return counterRateFn(...args);
   },
 };

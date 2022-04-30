@@ -8,6 +8,7 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertMissingData } from '../../../common/types/alerts';
+import { createDatasetFilter } from './create_dataset_query_filter';
 
 interface ClusterBucketESResponse {
   key: string;
@@ -47,7 +48,8 @@ export async function fetchMissingMonitoringData(
   index: string,
   size: number,
   nowInMs: number,
-  startMs: number
+  startMs: number,
+  filterQuery?: string
 ): Promise<AlertMissingData[]> {
   const endMs = nowInMs;
   const params = {
@@ -63,6 +65,7 @@ export async function fetchMissingMonitoringData(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
+            createDatasetFilter('node_stats', 'node_stats', 'elasticsearch.node_stats'),
             {
               range: {
                 timestamp: {
@@ -105,7 +108,7 @@ export async function fetchMissingMonitoringData(
                       },
                     ],
                     _source: {
-                      includes: ['_index', 'source_node.name'],
+                      includes: ['source_node.name', 'elasticsearch.node.name'],
                     },
                   },
                 },
@@ -116,6 +119,15 @@ export async function fetchMissingMonitoringData(
       },
     },
   };
+
+  try {
+    if (filterQuery) {
+      const filterQueryObject = JSON.parse(filterQuery);
+      params.body.query.bool.filter.push(filterQueryObject);
+    }
+  } catch (e) {
+    // meh
+  }
 
   const { body: response } = await esClient.search(params);
   const clusterBuckets = get(
@@ -132,7 +144,10 @@ export async function fetchMissingMonitoringData(
       const nodeId = uuidBucket.key;
       const indexName = get(uuidBucket, `document.hits.hits[0]._index`);
       const differenceInMs = nowInMs - uuidBucket.most_recent.value;
-      const nodeName = get(uuidBucket, `document.hits.hits[0]._source.source_node.name`, nodeId);
+      const nodeName =
+        get(uuidBucket, `document.hits.hits[0]._source.source_node.name`) ||
+        get(uuidBucket, `document.hits.hits[0]._source.elasticsearch.node.name`) ||
+        nodeId;
 
       uniqueList[`${clusterUuid}${nodeId}`] = {
         nodeId,

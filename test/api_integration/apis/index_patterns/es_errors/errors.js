@@ -15,7 +15,7 @@ import {
   createNoMatchingIndicesError,
   isNoMatchingIndicesError,
   convertEsError,
-} from '../../../../../src/plugins/data/server/index_patterns/fetcher/lib/errors';
+} from '../../../../../src/plugins/data_views/server/fetcher/lib/errors';
 
 import { getIndexNotFoundError, getDocNotFoundError } from './lib';
 

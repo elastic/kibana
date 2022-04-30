@@ -18,18 +18,18 @@ import {
   CommentResponseRt,
   CommentsResponse,
   CommentsResponseRt,
-  ENABLE_CASE_CONNECTOR,
   FindQueryParams,
-} from '../../../common';
+} from '../../../common/api';
+import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import {
-  createCaseError,
   checkEnabledCaseConnectorOrThrow,
   defaultSortField,
   transformComments,
   flattenCommentSavedObject,
   flattenCommentSavedObjects,
   getIDsAndIndicesAsArrays,
-} from '../../common';
+} from '../../common/utils';
+import { createCaseError } from '../../common/error';
 import { defaultPage, defaultPerPage } from '../../routes/api';
 import { CasesClientArgs } from '../types';
 import { combineFilters, stringToKueryNode } from '../utils';
@@ -124,10 +124,8 @@ export const getAllAlertsAttachToCase = async (
     includeSubCaseComments: false,
   });
 
-  const {
-    filter: authorizationFilter,
-    ensureSavedObjectsAreAuthorized,
-  } = await authorization.getAuthorizationFilter(Operations.getAlertsAttachedToCase);
+  const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
+    await authorization.getAuthorizationFilter(Operations.getAlertsAttachedToCase);
 
   const alerts = await attachmentService.getAllAlertsAttachToCase({
     unsecuredSavedObjectsClient,
@@ -159,10 +157,8 @@ export async function find(
   try {
     checkEnabledCaseConnectorOrThrow(queryParams?.subCaseId);
 
-    const {
-      filter: authorizationFilter,
-      ensureSavedObjectsAreAuthorized,
-    } = await authorization.getAuthorizationFilter(Operations.findComments);
+    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
+      await authorization.getAuthorizationFilter(Operations.findComments);
 
     const id = queryParams?.subCaseId ?? caseID;
     const associationType = queryParams?.subCaseId ? AssociationType.subCase : AssociationType.case;

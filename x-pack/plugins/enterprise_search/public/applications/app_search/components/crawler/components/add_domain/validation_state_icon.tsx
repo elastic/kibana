@@ -14,7 +14,14 @@ import { CrawlerDomainValidationStepState } from '../../types';
 export const ValidationStateIcon: React.FC<{ state: CrawlerDomainValidationStepState }> = ({
   state,
 }) => {
-  if (state === 'valid') return <EuiIcon color="success" type="checkInCircleFilled" />;
-  if (state === 'invalid') return <EuiIcon color="danger" type="crossInACircleFilled" />;
-  return <EuiLoadingSpinner />;
+  switch (state) {
+    case 'valid':
+      return <EuiIcon color="success" type="check" />;
+    case 'warning':
+      return <EuiIcon color="warning" type="alert" />;
+    case 'invalid':
+      return <EuiIcon color="danger" type="cross" />;
+    default:
+      return <EuiLoadingSpinner />;
+  }
 };

@@ -41,9 +41,10 @@ export const useMappingsStateListener = ({ onChange, value }: Args) => {
   const { fields: mappedFields, runtime: runtimeFields } = value ?? {};
 
   const parsedFieldsDefaultValue = useMemo(() => normalize(mappedFields), [mappedFields]);
-  const parsedRuntimeFieldsDefaultValue = useMemo(() => normalizeRuntimeFields(runtimeFields), [
-    runtimeFields,
-  ]);
+  const parsedRuntimeFieldsDefaultValue = useMemo(
+    () => normalizeRuntimeFields(runtimeFields),
+    [runtimeFields]
+  );
 
   useEffect(() => {
     // If we are creating a new field, but haven't entered any name
@@ -94,17 +95,25 @@ export const useMappingsStateListener = ({ onChange, value }: Args) => {
       validate: async () => {
         const configurationFormValidator =
           state.configuration.submitForm !== undefined
-            ? new Promise(async (resolve) => {
-                const { isValid } = await state.configuration.submitForm!();
-                resolve(isValid);
+            ? new Promise(async (resolve, reject) => {
+                try {
+                  const { isValid } = await state.configuration.submitForm!();
+                  resolve(isValid);
+                } catch (error) {
+                  reject(error);
+                }
               })
             : Promise.resolve(true);
 
         const templatesFormValidator =
           state.templates.submitForm !== undefined
-            ? new Promise(async (resolve) => {
-                const { isValid } = await state.templates.submitForm!();
-                resolve(isValid);
+            ? new Promise(async (resolve, reject) => {
+                try {
+                  const { isValid } = await state.templates.submitForm!();
+                  resolve(isValid);
+                } catch (error) {
+                  reject(error);
+                }
               })
             : Promise.resolve(true);
 

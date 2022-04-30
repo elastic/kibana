@@ -7,14 +7,8 @@
 
 import { CHART_FORMAT_LIMITS } from '../../../../common/constants';
 
-const {
-  EIGHT_MINUTES,
-  FOUR_YEARS,
-  THIRTY_SIX_HOURS,
-  THREE_WEEKS,
-  SIX_MONTHS,
-  NINE_DAYS,
-} = CHART_FORMAT_LIMITS;
+const { EIGHT_MINUTES, FOUR_YEARS, THIRTY_SIX_HOURS, THREE_WEEKS, SIX_MONTHS, NINE_DAYS } =
+  CHART_FORMAT_LIMITS;
 
 /**
  * Any date range that falls between these stops will have the value applied as its label.

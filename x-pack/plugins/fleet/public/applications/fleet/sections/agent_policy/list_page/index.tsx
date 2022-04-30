@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 
 import type { AgentPolicy } from '../../../types';
@@ -78,7 +78,11 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   );
 
   // Fetch agent policies
-  const { isLoading, data: agentPolicyData, resendRequest } = useGetAgentPolicies({
+  const {
+    isLoading,
+    data: agentPolicyData,
+    resendRequest,
+  } = useGetAgentPolicies({
     page: pagination.currentPage,
     perPage: pagination.pageSize,
     sortField: sorting?.field,

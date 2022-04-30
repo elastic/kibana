@@ -16,13 +16,16 @@ import { SessionsClient } from 'src/plugins/data/public/search';
 import { IManagementSectionsPluginsSetup, SessionsConfigSchema } from '..';
 import { SearchSessionsMgmtAPI } from '../lib/api';
 import { AsyncSearchIntroDocumentation } from '../lib/documentation';
-import { LocaleWrapper, mockUrls } from '../__mocks__';
+import { LocaleWrapper } from '../__mocks__';
 import { SearchSessionsMgmtMain } from './main';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { managementPluginMock } from '../../../../../../../src/plugins/management/public/mocks';
+import { SharePluginStart } from '../../../../../../../src/plugins/share/public';
+import { sharePluginMock } from '../../../../../../../src/plugins/share/public/mocks';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
 let mockCoreStart: MockedKeys<CoreStart>;
+let mockShareStart: jest.Mocked<SharePluginStart>;
 let mockPluginsSetup: IManagementSectionsPluginsSetup;
 let mockConfig: SessionsConfigSchema;
 let sessionsClient: SessionsClient;
@@ -32,6 +35,7 @@ describe('Background Search Session Management Main', () => {
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
+    mockShareStart = sharePluginMock.createStartContract();
     mockPluginsSetup = {
       data: dataPluginMock.createSetupContract(),
       management: managementPluginMock.createSetupContract(),
@@ -49,7 +53,7 @@ describe('Background Search Session Management Main', () => {
     sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
 
     api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
-      urls: mockUrls,
+      locators: mockShareStart.url.locators,
       notifications: mockCoreStart.notifications,
       application: mockCoreStart.application,
     });

@@ -28,7 +28,7 @@ const closeButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutCloseBu
 });
 
 const saveButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutSaveButtonLabel', {
-  defaultMessage: 'Create index pattern',
+  defaultMessage: 'Create data view',
 });
 
 export const Footer = ({ onCancel, onSubmit, submitDisabled }: FooterProps) => {

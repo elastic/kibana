@@ -18,7 +18,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { SeriesParam, ValueAxis } from '../../../../types';
 import { ValueAxisOptions } from './value_axis_options';
@@ -32,7 +32,6 @@ export interface ValueAxesPanelProps {
   seriesParams: SeriesParam[];
   valueAxes: ValueAxis[];
   setMultipleValidity: (paramName: string, isValid: boolean) => void;
-  isNewLibrary?: boolean;
 }
 
 function ValueAxesPanel(props: ValueAxesPanelProps) {
@@ -150,7 +149,6 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
               onValueAxisPositionChanged={props.onValueAxisPositionChanged}
               setParamByIndex={props.setParamByIndex}
               setMultipleValidity={props.setMultipleValidity}
-              isNewLibrary={props.isNewLibrary ?? false}
             />
           </>
         </EuiAccordion>

@@ -9,7 +9,7 @@
 import React from 'react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { SwitchOption, TextInputOption } from '../../../../../../vis_default_editor/public';
 import { GaugeOptionsInternalProps } from '../gauge';
 
@@ -48,20 +48,6 @@ function LabelsPanel({ stateParams, setValue, setGaugeValue }: GaugeOptionsInter
         setValue={(paramName, value) =>
           setGaugeValue('style', { ...stateParams.gauge.style, [paramName]: value })
         }
-      />
-
-      <SwitchOption
-        disabled={!stateParams.gauge.labels.show}
-        label={i18n.translate('visTypeVislib.controls.gaugeOptions.displayWarningsLabel', {
-          defaultMessage: 'Display warnings',
-        })}
-        tooltip={i18n.translate('visTypeVislib.controls.gaugeOptions.switchWarningsTooltip', {
-          defaultMessage:
-            'Turns on/off warnings. When turned on, a warning will be shown if not all labels could be displayed.',
-        })}
-        paramName="isDisplayWarning"
-        value={stateParams.isDisplayWarning}
-        setValue={setValue}
       />
     </EuiPanel>
   );

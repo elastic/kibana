@@ -17,6 +17,7 @@ describe('ErrorConnecting', () => {
   it('renders', () => {
     const wrapper = shallow(<ErrorConnecting />);
 
-    expect(wrapper.find(ErrorStatePrompt)).toHaveLength(1);
+    const errorStatePrompt = wrapper.find(ErrorStatePrompt);
+    expect(errorStatePrompt).toHaveLength(1);
   });
 });

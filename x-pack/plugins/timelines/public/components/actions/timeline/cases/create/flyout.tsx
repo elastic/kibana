@@ -6,12 +6,12 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import styled from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 
 import * as i18n from '../translations';
 import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { Case } from '../../../../../../../cases/common';
+import { Case } from '../../../../../../../cases/common/ui/types';
 import type { TimelinesStartServices } from '../../../../../types';
 
 export interface CreateCaseModalProps {
@@ -19,14 +19,32 @@ export interface CreateCaseModalProps {
   onCloseFlyout: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
   useInsertTimeline?: Function;
-  appId: string;
+  owner: string;
+  disableAlerts?: boolean;
 }
 
 const StyledFlyout = styled(EuiFlyout)`
   ${({ theme }) => `
-    z-index: ${theme.eui.euiZModal};
+    z-index: ${theme.eui.euiZLevel5};
   `}
 `;
+
+const maskOverlayClassName = 'create-case-flyout-mask-overlay';
+
+/**
+ * We need to target the mask overlay which is a parent element
+ * of the flyout.
+ * A global style is needed to target a parent element.
+ */
+
+const GlobalStyle = createGlobalStyle<{ theme: { eui: { euiZLevel5: number } } }>`
+  .${maskOverlayClassName} {
+    ${({ theme }) => `
+    z-index: ${theme.eui.euiZLevel5};
+  `}
+  }
+`;
+
 // Adding bottom padding because timeline's
 // bottom bar gonna hide the submit button.
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
@@ -52,7 +70,8 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
   afterCaseCreated,
   onCloseFlyout,
   onSuccess,
-  appId,
+  owner,
+  disableAlerts,
 }) => {
   const { cases } = useKibana<TimelinesStartServices>().services;
   const createCaseProps = useMemo(() => {
@@ -61,20 +80,28 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
       onCancel: onCloseFlyout,
       onSuccess,
       withSteps: false,
-      owner: [appId],
+      owner: [owner],
+      disableAlerts,
     };
-  }, [afterCaseCreated, onCloseFlyout, onSuccess, appId]);
+  }, [afterCaseCreated, onCloseFlyout, onSuccess, owner, disableAlerts]);
   return (
-    <StyledFlyout onClose={onCloseFlyout} data-test-subj="create-case-flyout">
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2>{i18n.CREATE_TITLE}</h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <StyledEuiFlyoutBody>
-        <FormWrapper>{cases.getCreateCase(createCaseProps)}</FormWrapper>
-      </StyledEuiFlyoutBody>
-    </StyledFlyout>
+    <>
+      <GlobalStyle />
+      <StyledFlyout
+        onClose={onCloseFlyout}
+        data-test-subj="create-case-flyout"
+        maskProps={{ className: maskOverlayClassName }}
+      >
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
+            <h2>{i18n.CREATE_TITLE}</h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <StyledEuiFlyoutBody>
+          <FormWrapper>{cases.getCreateCase(createCaseProps)}</FormWrapper>
+        </StyledEuiFlyoutBody>
+      </StyledFlyout>
+    </>
   );
 };
 

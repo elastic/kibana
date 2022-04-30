@@ -8,7 +8,8 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
-import { Query, QueryStringInput } from '../../../../../../../src/plugins/data/public';
+import { Query } from '@kbn/es-query';
+import { QueryStringInput } from '../../../../../../../src/plugins/data/public';
 import { LogCustomizationMenu } from '../../../components/logging/log_customization_menu';
 import { LogDatepicker } from '../../../components/logging/log_datepicker';
 import { LogHighlightsMenu } from '../../../components/logging/log_highlights_menu';
@@ -27,12 +28,8 @@ export const LogsToolbar = () => {
   const { availableTextScales, setTextScale, setTextWrap, textScale, textWrap } = useContext(
     LogViewConfiguration.Context
   );
-  const {
-    filterQueryDraft,
-    isFilterQueryDraftValid,
-    applyLogFilterQuery,
-    setLogFilterQueryDraft,
-  } = useContext(LogFilterState.Context);
+  const { filterQueryDraft, isFilterQueryDraftValid, applyLogFilterQuery, setLogFilterQueryDraft } =
+    useContext(LogFilterState.Context);
   const { setSurroundingLogsId } = useContext(LogFlyout.Context);
 
   const {

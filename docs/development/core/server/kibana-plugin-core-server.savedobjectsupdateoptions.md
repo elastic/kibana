@@ -10,13 +10,14 @@
 ```typescript
 export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedObjectsBaseOptions 
 ```
+<b>Extends:</b> SavedObjectsBaseOptions
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [references](./kibana-plugin-core-server.savedobjectsupdateoptions.references.md) | <code>SavedObjectReference[]</code> | A reference to another saved object. |
-|  [refresh](./kibana-plugin-core-server.savedobjectsupdateoptions.refresh.md) | <code>MutatingOperationRefreshSetting</code> | The Elasticsearch Refresh setting for this operation |
-|  [upsert](./kibana-plugin-core-server.savedobjectsupdateoptions.upsert.md) | <code>Attributes</code> | If specified, will be used to perform an upsert if the document doesn't exist |
-|  [version](./kibana-plugin-core-server.savedobjectsupdateoptions.version.md) | <code>string</code> | An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. |
+|  [references?](./kibana-plugin-core-server.savedobjectsupdateoptions.references.md) | SavedObjectReference\[\] | <i>(Optional)</i> A reference to another saved object. |
+|  [refresh?](./kibana-plugin-core-server.savedobjectsupdateoptions.refresh.md) | MutatingOperationRefreshSetting | <i>(Optional)</i> The Elasticsearch Refresh setting for this operation |
+|  [upsert?](./kibana-plugin-core-server.savedobjectsupdateoptions.upsert.md) | Attributes | <i>(Optional)</i> If specified, will be used to perform an upsert if the document doesn't exist |
+|  [version?](./kibana-plugin-core-server.savedobjectsupdateoptions.version.md) | string | <i>(Optional)</i> An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. |
 

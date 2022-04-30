@@ -10,7 +10,6 @@ import nodeCrypto from '@elastic/node-crypto';
 import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
 
 import type { SecurityPluginSetup } from '../../security/server';
-import { EncryptedSavedObjectsAuditLogger } from './audit';
 import type { ConfigType } from './config';
 import type { CreateEncryptedSavedObjectsMigrationFn } from './create_migration';
 import { getCreateMigration } from './create_migration';
@@ -47,7 +46,8 @@ export interface EncryptedSavedObjectsPluginStart {
  */
 export class EncryptedSavedObjectsPlugin
   implements
-    Plugin<EncryptedSavedObjectsPluginSetup, EncryptedSavedObjectsPluginStart, PluginsSetup> {
+    Plugin<EncryptedSavedObjectsPluginSetup, EncryptedSavedObjectsPluginStart, PluginsSetup>
+{
   private readonly logger: Logger;
   private savedObjectsSetup!: ClientInstanciator;
 
@@ -71,15 +71,11 @@ export class EncryptedSavedObjectsPlugin
     const decryptionOnlyCryptos = config.keyRotation.decryptionOnlyKeys.map((decryptionKey) =>
       nodeCrypto({ encryptionKey: decryptionKey })
     );
-    const auditLogger = new EncryptedSavedObjectsAuditLogger(
-      deps.security?.audit.getLogger('encryptedSavedObjects')
-    );
     const service = Object.freeze(
       new EncryptedSavedObjectsService({
         primaryCrypto,
         decryptionOnlyCryptos,
         logger: this.logger,
-        audit: auditLogger,
       })
     );
 
@@ -115,7 +111,6 @@ export class EncryptedSavedObjectsPlugin
             primaryCrypto,
             decryptionOnlyCryptos,
             logger: this.logger,
-            audit: auditLogger,
           });
           serviceForMigration.registerType(typeRegistration);
           return serviceForMigration;

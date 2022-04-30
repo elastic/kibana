@@ -13,5 +13,5 @@ getBreadcrumbsAppendExtension$(): Observable<ChromeBreadcrumbsAppendExtension | 
 ```
 <b>Returns:</b>
 
-`Observable<ChromeBreadcrumbsAppendExtension | undefined>`
+Observable&lt;ChromeBreadcrumbsAppendExtension \| undefined&gt;
 

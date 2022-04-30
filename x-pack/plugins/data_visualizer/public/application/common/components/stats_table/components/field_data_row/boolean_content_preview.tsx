@@ -37,6 +37,7 @@ export const BooleanContentPreview: FC<FieldDataRowProps> = ({ config }) => {
       chartData={chartData}
       columnType={columnType}
       hideLabel={true}
+      maxChartColumns={10}
     />
   );
 };

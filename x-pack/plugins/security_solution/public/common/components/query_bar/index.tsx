@@ -8,11 +8,9 @@
 import React, { memo, useMemo, useCallback } from 'react';
 import deepEqual from 'fast-deep-equal';
 
+import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import {
-  Filter,
-  IIndexPattern,
   FilterManager,
-  Query,
   TimeHistory,
   TimeRange,
   SavedQuery,
@@ -26,7 +24,7 @@ export interface QueryBarComponentProps {
   dateRangeFrom?: string;
   dateRangeTo?: string;
   hideSavedQuery?: boolean;
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   isLoading?: boolean;
   isRefreshPaused?: boolean;
   filterQuery: Query;

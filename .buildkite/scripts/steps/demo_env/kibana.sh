@@ -2,9 +2,6 @@
 
 set -euo pipefail
 
-export DISABLE_BOOTSTRAP_VALIDATION=true
-export BUILD_TS_REFS_DISABLE=true
-
 .buildkite/scripts/bootstrap.sh
 
 source "$(dirname "${0}")/config.sh"
@@ -12,7 +9,7 @@ source "$(dirname "${0}")/config.sh"
 export KIBANA_IMAGE="gcr.io/elastic-kibana-184716/demo/kibana:$DEPLOYMENT_NAME-$(git rev-parse HEAD)"
 
 echo '--- Build Kibana'
-node scripts/build --debug --docker-images --example-plugins --skip-os-packages --skip-docker-ubi
+node scripts/build --debug --docker-images --example-plugins --skip-docker-ubi
 
 echo '--- Build Docker image with example plugins'
 cd target/example_plugins

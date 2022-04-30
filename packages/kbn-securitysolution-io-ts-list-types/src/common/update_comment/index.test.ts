@@ -19,7 +19,7 @@ import {
 } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
-describe('CommentsUpdate', () => {
+describe('UpdateComment', () => {
   describe('updateComment', () => {
     test('it should pass validation when supplied typical comment update', () => {
       const payload = getUpdateCommentMock();
@@ -105,7 +105,7 @@ describe('CommentsUpdate', () => {
     });
 
     test('it should fail validation when array includes non comments types', () => {
-      const payload = ([1] as unknown) as UpdateCommentsArray;
+      const payload = [1] as unknown as UpdateCommentsArray;
       const decoded = updateCommentsArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 
@@ -136,7 +136,7 @@ describe('CommentsUpdate', () => {
     });
 
     test('it should fail validation when array includes non comments types', () => {
-      const payload = ([1] as unknown) as UpdateCommentsArrayOrUndefined;
+      const payload = [1] as unknown as UpdateCommentsArrayOrUndefined;
       const decoded = updateCommentsArray.decode(payload);
       const message = pipe(decoded, foldLeftRight);
 

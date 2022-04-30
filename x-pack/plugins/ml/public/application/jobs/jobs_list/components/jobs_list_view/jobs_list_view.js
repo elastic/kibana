@@ -6,7 +6,7 @@
  */
 
 import React, { Component } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,7 +18,6 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { isEqual, debounce } from 'lodash';
 
 import { ml } from '../../../../services/ml_api_service';
 import { checkForAutoStartDatafeed, filterJobs, loadFullJob } from '../utils';
@@ -43,11 +42,6 @@ import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/cons
 import { JobListMlAnomalyAlertFlyout } from '../../../../../alerting/ml_alerting_flyout';
 
 let blockingJobsRefreshTimeout = null;
-
-const filterJobsDebounce = debounce((jobsSummaryList, filterClauses, callback) => {
-  const ss = filterJobs(jobsSummaryList, filterClauses);
-  callback(ss);
-}, 500);
 
 // 'isManagementTable' bool prop to determine when to configure table for use in Kibana management page
 export class JobsListView extends Component {
@@ -101,6 +95,7 @@ export class JobsListView extends Component {
 
   componentDidUpdate(prevProps) {
     if (prevProps.lastRefresh !== this.props.lastRefresh) {
+      this.setState({ isRefreshing: true });
       this.refreshJobSummaryList();
     }
   }
@@ -281,19 +276,10 @@ export class JobsListView extends Component {
       return;
     }
 
-    if (this._isFiltersSet === true) {
-      filterJobsDebounce(this.state.jobsSummaryList, filterClauses, (jobsSummaryList) => {
-        this.setState({ filteredJobsSummaryList: jobsSummaryList, filterClauses }, () => {
-          this.refreshSelectedJobs();
-        });
-      });
-    } else {
-      // first use after page load, do not debounce.
-      const filteredJobsSummaryList = filterJobs(this.state.jobsSummaryList, filterClauses);
-      this.setState({ filteredJobsSummaryList, filterClauses }, () => {
-        this.refreshSelectedJobs();
-      });
-    }
+    const filteredJobsSummaryList = filterJobs(this.state.jobsSummaryList, filterClauses);
+    this.setState({ filteredJobsSummaryList, filterClauses }, () => {
+      this.refreshSelectedJobs();
+    });
 
     this._isFiltersSet = true;
   };
@@ -387,9 +373,8 @@ export class JobsListView extends Component {
     }
 
     const { jobs } = await ml.jobs.blockingJobTasks();
-    const blockingJobIds = Object.keys(jobs);
-    const taskListHasChanged =
-      isEqual(blockingJobIds.sort(), this.state.blockingJobIds.sort()) === false;
+    const blockingJobIds = jobs.map((j) => Object.keys(j)[0]).sort();
+    const taskListHasChanged = blockingJobIds.join() !== this.state.blockingJobIds.join();
 
     this.setState({
       blockingJobIds,
@@ -501,7 +486,11 @@ export class JobsListView extends Component {
 
           <NodeAvailableWarning />
           <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />
-          <SavedObjectsWarning jobType="anomaly-detector" />
+          <SavedObjectsWarning
+            jobType="anomaly-detector"
+            onCloseFlyout={this.onRefreshClick}
+            forceRefresh={loading || isRefreshing}
+          />
 
           <UpgradeWarning />
 

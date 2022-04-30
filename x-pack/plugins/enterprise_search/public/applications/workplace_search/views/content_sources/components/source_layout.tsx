@@ -19,12 +19,14 @@ import { NAV } from '../../../constants';
 import { ENT_SEARCH_LICENSE_MANAGEMENT } from '../../../routes';
 
 import {
+  DOWNLOAD_DIAGNOSTIC_BUTTON,
   SOURCE_DISABLED_CALLOUT_TITLE,
   SOURCE_DISABLED_CALLOUT_DESCRIPTION,
   SOURCE_DISABLED_CALLOUT_BUTTON,
 } from '../constants';
 import { SourceLogic } from '../source_logic';
 
+import { DownloadDiagnosticsButton } from './download_diagnostics_button';
 import { SourceInfoCard } from './source_info_card';
 
 export const SourceLayout: React.FC<PageTemplateProps> = ({
@@ -32,7 +34,7 @@ export const SourceLayout: React.FC<PageTemplateProps> = ({
   pageChrome = [],
   ...props
 }) => {
-  const { contentSource, dataLoading } = useValues(SourceLogic);
+  const { contentSource, dataLoading, diagnosticDownloadButtonVisible } = useValues(SourceLogic);
   const { isOrganization } = useValues(AppLogic);
 
   const { name, createdAt, serviceType, isFederatedSource, supportedByLicense } = contentSource;
@@ -61,6 +63,13 @@ export const SourceLayout: React.FC<PageTemplateProps> = ({
     </>
   );
 
+  const downloadDiagnosticButton = (
+    <>
+      <DownloadDiagnosticsButton label={DOWNLOAD_DIAGNOSTIC_BUTTON} />
+      <EuiSpacer size="xl" />
+    </>
+  );
+
   const Layout = isOrganization ? WorkplaceSearchPageTemplate : PersonalDashboardLayout;
 
   return (
@@ -69,6 +78,7 @@ export const SourceLayout: React.FC<PageTemplateProps> = ({
       {...props}
       pageChrome={[NAV.SOURCES, name || '...', ...pageChrome]}
     >
+      {diagnosticDownloadButtonVisible && downloadDiagnosticButton}
       {!supportedByLicense && callout}
       {pageHeader}
       {children}

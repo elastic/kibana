@@ -8,7 +8,7 @@
 
 import { ComponentType } from 'react';
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IndexPattern } from '../../../../data/public';
 
 export type ElasticSearchHit<T = unknown> = estypes.SearchHit<T>;
@@ -32,7 +32,7 @@ export interface DocViewRenderProps {
   columns?: string[];
   filter?: DocViewFilterFn;
   hit: ElasticSearchHit;
-  indexPattern?: IndexPattern;
+  indexPattern: IndexPattern;
   onAddColumn?: (columnName: string) => void;
   onRemoveColumn?: (columnName: string) => void;
 }

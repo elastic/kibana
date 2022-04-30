@@ -10,7 +10,7 @@ import './copy_status_summary_indicator.scss';
 import { EuiBadge, EuiIconTip, EuiLoadingSpinner } from '@elastic/eui';
 import React, { Fragment } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { SpacesDataEntry } from '../../types';
 import type { SummarizedCopyToSpaceResult } from '../lib';
@@ -41,12 +41,8 @@ const renderIcon = (props: Props) => {
     return <EuiLoadingSpinner data-test-subj={getDataTestSubj('loading')} />;
   }
 
-  const {
-    successful,
-    hasUnresolvableErrors,
-    hasMissingReferences,
-    hasConflicts,
-  } = summarizedCopyResult;
+  const { successful, hasUnresolvableErrors, hasMissingReferences, hasConflicts } =
+    summarizedCopyResult;
 
   if (successful) {
     return (

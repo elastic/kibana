@@ -8,17 +8,19 @@
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { Filter, IndexPatternField, IndexPattern, ISearchSource } from 'src/plugins/data/public';
-import { AbstractVectorSource, BoundsFilters } from '../vector_source';
+import type { Query } from 'src/plugins/data/common';
+import { AbstractVectorSource, BoundsRequestMeta } from '../vector_source';
 import {
   getAutocompleteService,
   getIndexPatternService,
   getTimeFilter,
   getSearchService,
 } from '../../../kibana_services';
+import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
 import { createExtentFilter } from '../../../../common/elasticsearch_util';
 import { copyPersistentState } from '../../../reducers/copy_persistent_state';
 import { DataRequestAbortError } from '../../util/data_request';
-import { expandToTileBoundaries } from '../../../../common/geo_tile_utils';
+import { expandToTileBoundaries } from '../../util/geo_tile_utils';
 import { IVectorSource } from '../vector_source';
 import { TimeRange } from '../../../../../../../src/plugins/data/common';
 import {
@@ -26,7 +28,6 @@ import {
   AbstractSourceDescriptor,
   DynamicStylePropertyOptions,
   MapExtent,
-  MapQuery,
   VectorJoinSourceRequestMeta,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
@@ -60,7 +61,7 @@ export interface IESSource extends IVectorSource {
     style: IVectorStyle;
     dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
     registerCancelCallback: (callback: () => void) => void;
-    sourceQuery?: MapQuery;
+    sourceQuery?: Query;
     timeFilters: TimeRange;
     searchSessionId?: string;
   }): Promise<object>;
@@ -88,6 +89,8 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         typeof descriptor.applyGlobalQuery !== 'undefined' ? descriptor.applyGlobalQuery : true,
       applyGlobalTime:
         typeof descriptor.applyGlobalTime !== 'undefined' ? descriptor.applyGlobalTime : true,
+      applyForceRefresh:
+        typeof descriptor.applyForceRefresh !== 'undefined' ? descriptor.applyForceRefresh : true,
     };
   }
 
@@ -108,11 +111,11 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     return this._descriptor.applyGlobalTime;
   }
 
-  isFieldAware(): boolean {
-    return true;
+  getApplyForceRefresh(): boolean {
+    return this._descriptor.applyForceRefresh;
   }
 
-  isRefreshTimerAware(): boolean {
+  isFieldAware(): boolean {
     return true;
   }
 
@@ -197,7 +200,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   async makeSearchSource(
-    searchFilters: VectorSourceRequestMeta | VectorJoinSourceRequestMeta | BoundsFilters,
+    searchFilters: VectorSourceRequestMeta | VectorJoinSourceRequestMeta | BoundsRequestMeta,
     limit: number,
     initialSearchContext?: object
   ): Promise<ISearchSource> {
@@ -253,7 +256,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   async getBoundsForFilters(
-    boundsFilters: BoundsFilters,
+    boundsFilters: BoundsRequestMeta,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null> {
     const searchSource = await this.makeSearchSource(boundsFilters, 0);
@@ -346,12 +349,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       this.indexPattern = await getIndexPatternService().get(this.getIndexPatternId());
       return this.indexPattern;
     } catch (error) {
-      throw new Error(
-        i18n.translate('xpack.maps.source.esSource.noIndexPatternErrorMessage', {
-          defaultMessage: `Unable to find Index pattern for id: {indexPatternId}`,
-          values: { indexPatternId: this.getIndexPatternId() },
-        })
-      );
+      throw new Error(getDataViewNotFoundMessage(this.getIndexPatternId()));
     }
   }
 
@@ -370,7 +368,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     if (!geoField) {
       throw new Error(
         i18n.translate('xpack.maps.source.esSource.noGeoFieldErrorMessage', {
-          defaultMessage: `Index pattern {indexPatternTitle} no longer contains the geo field {geoField}`,
+          defaultMessage: `Data view {indexPatternTitle} no longer contains the geo field {geoField}`,
           values: { indexPatternTitle: indexPattern.title, geoField: this.getGeoFieldName() },
         })
       );
@@ -421,7 +419,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     style: IVectorStyle;
     dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
     registerCancelCallback: (callback: () => void) => void;
-    sourceQuery?: MapQuery;
+    sourceQuery?: Query;
     timeFilters: TimeRange;
     searchSessionId?: string;
   }): Promise<object> {

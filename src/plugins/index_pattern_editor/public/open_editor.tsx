@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { CoreStart, OverlayRef } from 'src/core/public';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import {
   createKibanaReactContext,
@@ -26,69 +26,68 @@ interface Dependencies {
   searchClient: DataPublicPluginStart['search']['search'];
 }
 
-export const getEditorOpener = ({ core, indexPatternService, searchClient }: Dependencies) => (
-  options: IndexPatternEditorProps
-): CloseEditor => {
-  const { uiSettings, overlays, docLinks, notifications, http, application } = core;
-  const {
-    Provider: KibanaReactContextProvider,
-  } = createKibanaReactContext<IndexPatternEditorContext>({
-    uiSettings,
-    docLinks,
-    http,
-    notifications,
-    application,
-    indexPatternService,
-    searchClient,
-  });
+export const getEditorOpener =
+  ({ core, indexPatternService, searchClient }: Dependencies) =>
+  (options: IndexPatternEditorProps): CloseEditor => {
+    const { uiSettings, overlays, docLinks, notifications, http, application } = core;
+    const { Provider: KibanaReactContextProvider } =
+      createKibanaReactContext<IndexPatternEditorContext>({
+        uiSettings,
+        docLinks,
+        http,
+        notifications,
+        application,
+        indexPatternService,
+        searchClient,
+      });
 
-  let overlayRef: OverlayRef | null = null;
+    let overlayRef: OverlayRef | null = null;
 
-  const openEditor = ({
-    onSave,
-    onCancel = () => {},
-    defaultTypeIsRollup = false,
-    requireTimestampField = false,
-  }: IndexPatternEditorProps): CloseEditor => {
-    const closeEditor = () => {
-      if (overlayRef) {
-        overlayRef.close();
-        overlayRef = null;
-      }
+    const openEditor = ({
+      onSave,
+      onCancel = () => {},
+      defaultTypeIsRollup = false,
+      requireTimestampField = false,
+    }: IndexPatternEditorProps): CloseEditor => {
+      const closeEditor = () => {
+        if (overlayRef) {
+          overlayRef.close();
+          overlayRef = null;
+        }
+      };
+
+      const onSaveIndexPattern = (indexPattern: IndexPattern) => {
+        closeEditor();
+
+        if (onSave) {
+          onSave(indexPattern);
+        }
+      };
+
+      overlayRef = overlays.openFlyout(
+        toMountPoint(
+          <KibanaReactContextProvider>
+            <I18nProvider>
+              <IndexPatternEditorLazy
+                onSave={onSaveIndexPattern}
+                onCancel={() => {
+                  closeEditor();
+                  onCancel();
+                }}
+                defaultTypeIsRollup={defaultTypeIsRollup}
+                requireTimestampField={requireTimestampField}
+              />
+            </I18nProvider>
+          </KibanaReactContextProvider>
+        ),
+        {
+          hideCloseButton: true,
+          size: 'l',
+        }
+      );
+
+      return closeEditor;
     };
 
-    const onSaveIndexPattern = (indexPattern: IndexPattern) => {
-      closeEditor();
-
-      if (onSave) {
-        onSave(indexPattern);
-      }
-    };
-
-    overlayRef = overlays.openFlyout(
-      toMountPoint(
-        <KibanaReactContextProvider>
-          <I18nProvider>
-            <IndexPatternEditorLazy
-              onSave={onSaveIndexPattern}
-              onCancel={() => {
-                closeEditor();
-                onCancel();
-              }}
-              defaultTypeIsRollup={defaultTypeIsRollup}
-              requireTimestampField={requireTimestampField}
-            />
-          </I18nProvider>
-        </KibanaReactContextProvider>
-      ),
-      {
-        hideCloseButton: true,
-        size: 'l',
-      }
-    );
-
-    return closeEditor;
+    return openEditor(options);
   };
-
-  return openEditor(options);
-};

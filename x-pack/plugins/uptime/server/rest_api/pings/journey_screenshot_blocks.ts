@@ -10,6 +10,7 @@ import { isRight } from 'fp-ts/lib/Either';
 import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
+import { API_URLS } from '../../../common/constants';
 
 function isStringArray(data: unknown): data is string[] {
   return isRight(t.array(t.string).decode(data));
@@ -17,13 +18,10 @@ function isStringArray(data: unknown): data is string[] {
 
 export const createJourneyScreenshotBlocksRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'POST',
-  path: '/api/uptime/journey/screenshot/block',
+  path: API_URLS.JOURNEY_SCREENSHOT_BLOCKS,
   validate: {
     body: schema.object({
       hashes: schema.arrayOf(schema.string()),
-    }),
-    query: schema.object({
-      _inspect: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({ request, response, uptimeEsClient }) => {

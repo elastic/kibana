@@ -51,7 +51,6 @@ export const TRANSACTION_RESULT = 'transaction.result';
 export const TRANSACTION_NAME = 'transaction.name';
 export const TRANSACTION_ID = 'transaction.id';
 export const TRANSACTION_SAMPLED = 'transaction.sampled';
-export const TRANSACTION_BREAKDOWN_COUNT = 'transaction.breakdown.count';
 export const TRANSACTION_PAGE_URL = 'transaction.page.url';
 // for transaction metrics
 export const TRANSACTION_ROOT = 'transaction.root';
@@ -78,6 +77,7 @@ export const SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM =
 // Parent ID for a transaction or span
 export const PARENT_ID = 'parent.id';
 
+export const ERROR_ID = 'error.id';
 export const ERROR_GROUP_ID = 'error.grouping_key';
 export const ERROR_CULPRIT = 'error.culprit';
 export const ERROR_LOG_LEVEL = 'error.log.level';

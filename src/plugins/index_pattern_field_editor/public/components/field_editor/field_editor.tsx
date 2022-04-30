@@ -8,7 +8,7 @@
 
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash';
 import {
   EuiFlexGroup,
@@ -151,12 +151,8 @@ const formSerializer = (field: FieldFormInternal): Field => {
 };
 
 const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, syntaxError }: Props) => {
-  const {
-    links,
-    namesNotAllowed,
-    existingConcreteFields,
-    fieldTypeToProcess,
-  } = useFieldEditorContext();
+  const { links, namesNotAllowed, existingConcreteFields, fieldTypeToProcess } =
+    useFieldEditorContext();
   const {
     params: { update: updatePreviewParams },
     panel: { setIsVisible: setIsPanelVisible },

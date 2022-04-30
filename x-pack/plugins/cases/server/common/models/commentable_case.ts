@@ -17,7 +17,6 @@ import {
 import { LensServerPluginSetup } from '../../../../lens/server';
 import {
   AssociationType,
-  CASE_SAVED_OBJECT,
   CaseResponse,
   CaseResponseRt,
   CaseSettings,
@@ -27,24 +26,25 @@ import {
   CommentPatchRequest,
   CommentRequest,
   CommentType,
-  MAX_DOCS_PER_PAGE,
-  SUB_CASE_SAVED_OBJECT,
   SubCaseAttributes,
   User,
   CommentRequestUserType,
   CaseAttributes,
-} from '../../../common';
+} from '../../../common/api';
 import {
-  createAlertUpdateRequest,
+  CASE_SAVED_OBJECT,
+  MAX_DOCS_PER_PAGE,
+  SUB_CASE_SAVED_OBJECT,
+} from '../../../common/constants';
+import { AttachmentService, CasesService } from '../../services';
+import { createCaseError } from '../error';
+import {
+  countAlertsForID,
   flattenCommentSavedObjects,
   flattenSubCaseSavedObject,
   transformNewComment,
-} from '..';
-import { AttachmentService, CasesService } from '../../services';
-import { createCaseError } from '../error';
-import { countAlertsForID } from '../index';
-import { CasesClientInternal } from '../../client';
-import { getOrUpdateLensReferences } from '../utils';
+  getOrUpdateLensReferences,
+} from '../utils';
 
 interface UpdateCommentResp {
   comment: SavedObjectsUpdateResponse<CommentAttributes>;
@@ -279,13 +279,11 @@ export class CommentableCase {
     user,
     commentReq,
     id,
-    casesClientInternal,
   }: {
     createdDate: string;
     user: User;
     commentReq: CommentRequest;
     id: string;
-    casesClientInternal: CasesClientInternal;
   }): Promise<NewCommentResp> {
     try {
       if (commentReq.type === CommentType.alert) {
@@ -301,10 +299,6 @@ export class CommentableCase {
       if (commentReq.owner !== this.owner) {
         throw Boom.badRequest('The owner field of the comment must match the case');
       }
-
-      // Let's try to sync the alert's status before creating the attachment, that way if the alert doesn't exist
-      // we'll throw an error early before creating the attachment
-      await this.syncAlertStatus(commentReq, casesClientInternal);
 
       let references = this.buildRefsToCase();
 
@@ -339,26 +333,6 @@ export class CommentableCase {
         message: `Failed creating a comment on a commentable case, sub case id: ${this.subCaseId} case id: ${this.caseId}: ${error}`,
         error,
         logger: this.logger,
-      });
-    }
-  }
-
-  private async syncAlertStatus(
-    commentRequest: CommentRequest,
-    casesClientInternal: CasesClientInternal
-  ) {
-    if (
-      (commentRequest.type === CommentType.alert ||
-        commentRequest.type === CommentType.generatedAlert) &&
-      this.settings.syncAlerts
-    ) {
-      const alertsToUpdate = createAlertUpdateRequest({
-        comment: commentRequest,
-        status: this.status,
-      });
-
-      await casesClientInternal.alerts.updateStatus({
-        alerts: alertsToUpdate,
       });
     }
   }

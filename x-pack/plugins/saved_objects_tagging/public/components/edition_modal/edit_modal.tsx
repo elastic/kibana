@@ -35,12 +35,13 @@ export const EditTagModal: FC<EditTagModalProps> = ({ tag, onSave, onClose, tagC
   const [tagAttributes, setTagAttributes] = useState<TagAttributes>(getAttributes(tag));
 
   const setField = useCallback(
-    <T extends keyof TagAttributes>(field: T) => (value: TagAttributes[T]) => {
-      setTagAttributes((current) => ({
-        ...current,
-        [field]: value,
-      }));
-    },
+    <T extends keyof TagAttributes>(field: T) =>
+      (value: TagAttributes[T]) => {
+        setTagAttributes((current) => ({
+          ...current,
+          [field]: value,
+        }));
+      },
     []
   );
 

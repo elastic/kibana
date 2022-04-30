@@ -7,6 +7,7 @@
 
 import { esArchiverResetKibana } from './es_archiver';
 import { RuleEcs } from '../../common/ecs/rule';
+import { LOADING_INDICATOR } from '../screens/security_header';
 
 const primaryButton = 0;
 
@@ -154,4 +155,25 @@ export const deleteCases = () => {
   });
 };
 
+export const postDataView = (indexPattern: string) => {
+  cy.request({
+    method: 'POST',
+    url: `/api/index_patterns/index_pattern`,
+    body: {
+      index_pattern: {
+        fieldAttrs: '{}',
+        title: indexPattern,
+        timeFieldName: '@timestamp',
+        fields: '{}',
+      },
+    },
+    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+  });
+};
+
 export const scrollToBottom = () => cy.scrollTo('bottom');
+
+export const waitForPageToBeLoaded = () => {
+  cy.get(LOADING_INDICATOR).should('exist');
+  cy.get(LOADING_INDICATOR).should('not.exist');
+};

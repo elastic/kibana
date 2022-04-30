@@ -20,5 +20,9 @@ export function LogEntryRatePageProvider({ getPageObjects, getService }: FtrProv
     async getSetupScreen(): Promise<WebElementWrapper> {
       return await testSubjects.find('logEntryRateSetupPage');
     },
+
+    async getNoDataScreen() {
+      return await testSubjects.find('noDataPage');
+    },
   };
 }

@@ -2,7 +2,7 @@
   "author": [
     "Elastic"
   ],
-  "description": "Identifies execution from a directory masquerading as the Windows Program Files directories. These paths are trusted and usually host trusted third party programs. An adversary may leverage masquerading, along with low privileges to bypass detections whitelisting those folders.",
+  "description": "Identifies execution from a directory masquerading as the Windows Program Files directories. These paths are trusted and usually host trusted third party programs. An adversary may leverage masquerading, along with low privileges to bypass detections allowlisting those folders.",
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
@@ -35,12 +35,19 @@
         {
           "id": "T1036",
           "name": "Masquerading",
-          "reference": "https://attack.mitre.org/techniques/T1036/"
+          "reference": "https://attack.mitre.org/techniques/T1036/",
+          "subtechnique": [
+            {
+              "id": "T1036.005",
+              "name": "Match Legitimate Name or Location",
+              "reference": "https://attack.mitre.org/techniques/T1036/005/"
+            }
+          ]
         }
       ]
     }
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 6
 }

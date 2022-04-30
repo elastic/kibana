@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../common/constants';
 import type { AlertsStackByField } from '../common/types';
 
@@ -14,7 +15,8 @@ export const getAlertsCountQuery = (
   to: string,
   additionalFilters: Array<{
     bool: { filter: unknown[]; should: unknown[]; must_not: unknown[]; must: unknown[] };
-  }> = []
+  }> = [],
+  runtimeMappings?: MappingRuntimeFields
 ) => {
   return {
     size: 0,
@@ -44,5 +46,6 @@ export const getAlertsCountQuery = (
         ],
       },
     },
+    runtime_mappings: runtimeMappings,
   };
 };

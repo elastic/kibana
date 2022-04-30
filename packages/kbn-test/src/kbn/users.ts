@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+// @ts-expect-error no types
+import { SYSTEM_INDICES_SUPERUSER } from '@kbn/es';
+
 const env = process.env;
 
 export const kibanaTestUser = {
@@ -14,11 +17,19 @@ export const kibanaTestUser = {
 };
 
 export const kibanaServerTestUser = {
-  username: env.TEST_KIBANA_SERVER_USER || 'kibana',
+  username: env.TEST_KIBANA_SERVER_USER || 'kibana_system',
   password: env.TEST_KIBANA_SERVER_PASS || 'changeme',
 };
 
 export const adminTestUser = {
   username: env.TEST_ES_USER || 'elastic',
+  password: env.TEST_ES_PASS || 'changeme',
+};
+
+/**
+ * User with higher privileges than regular superuser role for writing to system indices
+ */
+export const systemIndicesSuperuser = {
+  username: SYSTEM_INDICES_SUPERUSER,
   password: env.TEST_ES_PASS || 'changeme',
 };

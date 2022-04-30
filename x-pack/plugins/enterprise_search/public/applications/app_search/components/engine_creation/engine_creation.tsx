@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
+import { useLocation } from 'react-router-dom';
+
+import { Location } from 'history';
 import { useActions, useValues } from 'kea';
 
 import {
@@ -22,6 +25,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 
+import { parseQueryParams } from '../../../shared/query_params';
 import { ENGINES_TITLE } from '../engines';
 import { AppSearchPageTemplate } from '../layout';
 
@@ -39,8 +43,18 @@ import {
 import { EngineCreationLogic } from './engine_creation_logic';
 
 export const EngineCreation: React.FC = () => {
+  const { search } = useLocation() as Location;
+  const { method } = parseQueryParams(search);
+
   const { name, rawName, language, isLoading } = useValues(EngineCreationLogic);
-  const { setLanguage, setRawName, submitEngine } = useActions(EngineCreationLogic);
+  const { setIngestionMethod, setLanguage, setRawName, submitEngine } =
+    useActions(EngineCreationLogic);
+
+  useEffect(() => {
+    if (typeof method === 'string') {
+      setIngestionMethod(method);
+    }
+  }, []);
 
   return (
     <AppSearchPageTemplate

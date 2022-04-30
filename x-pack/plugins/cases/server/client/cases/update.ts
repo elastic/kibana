@@ -12,19 +12,16 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import {
-  Logger,
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
 } from 'kibana/server';
 
-import { nodeBuilder } from '../../../../../../src/plugins/data/common';
+import { nodeBuilder } from '@kbn/es-query';
 
 import {
   AssociationType,
-  CASE_COMMENT_SAVED_OBJECT,
-  CASE_SAVED_OBJECT,
   CasePatchRequest,
   CasesPatchRequest,
   CasesPatchRequestRt,
@@ -34,24 +31,27 @@ import {
   CaseType,
   CommentAttributes,
   CommentType,
-  ENABLE_CASE_CONNECTOR,
   excess,
+  throwErrors,
+  CaseAttributes,
+} from '../../../common/api';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  ENABLE_CASE_CONNECTOR,
   MAX_CONCURRENT_SEARCHES,
   SUB_CASE_SAVED_OBJECT,
-  throwErrors,
   MAX_TITLE_LENGTH,
-  CaseAttributes,
-} from '../../../common';
+} from '../../../common/constants';
 import { buildCaseUserActions } from '../../services/user_actions/helpers';
 import { getCaseToUpdate } from '../utils';
-
+import { createCaseError } from '../../common/error';
 import { CasesService } from '../../services';
 import {
   createAlertUpdateRequest,
-  createCaseError,
   flattenCaseSavedObject,
   isCommentRequestTypeAlertOrGenAlert,
-} from '../../common';
+} from '../../common/utils';
 import { UpdateAlertRequest } from '../alerts/types';
 import { CasesClientInternal } from '../client_internal';
 import { CasesClientArgs } from '..';
@@ -308,14 +308,12 @@ async function updateAlerts({
   caseService,
   unsecuredSavedObjectsClient,
   casesClientInternal,
-  logger,
 }: {
   casesWithSyncSettingChangedToOn: UpdateRequestWithOriginalCase[];
   casesWithStatusChangedAndSynced: UpdateRequestWithOriginalCase[];
   caseService: CasesService;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   casesClientInternal: CasesClientInternal;
-  logger: Logger;
 }) {
   /**
    * It's possible that a case ID can appear multiple times in each array. I'm intentionally placing the status changes
@@ -364,9 +362,7 @@ async function updateAlerts({
     []
   );
 
-  await casesClientInternal.alerts.updateStatus({
-    alerts: alertsToUpdate,
-  });
+  await casesClientInternal.alerts.updateStatus({ alerts: alertsToUpdate });
 }
 
 function partitionPatchRequest(
@@ -567,6 +563,15 @@ export const update = async (
       );
     });
 
+    // Update the alert's status to match any case status or sync settings changes
+    await updateAlerts({
+      casesWithStatusChangedAndSynced,
+      casesWithSyncSettingChangedToOn,
+      caseService,
+      unsecuredSavedObjectsClient,
+      casesClientInternal,
+    });
+
     const returnUpdatedCase = myCases.saved_objects
       .filter((myCase) =>
         updatedCases.saved_objects.some((updatedCase) => updatedCase.id === myCase.id)
@@ -592,17 +597,6 @@ export const update = async (
         actionDate: updatedDt,
         actionBy: { email, full_name, username },
       }),
-    });
-
-    // Update the alert's status to match any case status or sync settings changes
-    // Attempt to do this after creating/changing the other entities just in case it fails
-    await updateAlerts({
-      casesWithStatusChangedAndSynced,
-      casesWithSyncSettingChangedToOn,
-      caseService,
-      unsecuredSavedObjectsClient,
-      casesClientInternal,
-      logger,
     });
 
     return CasesResponseRt.encode(returnUpdatedCase);

@@ -7,6 +7,8 @@
 
 import { setMockValues } from '../../../../__mocks__/kea_logic';
 
+import React from 'react';
+
 jest.mock('../../../../shared/layout', () => ({
   generateNavLink: jest.fn(({ to }) => ({ href: to })),
 }));
@@ -21,9 +23,13 @@ describe('useSourceSubNav', () => {
   });
 
   it('returns EUI nav items', () => {
-    setMockValues({ isOrganization: true, contentSource: { id: '1' } });
+    setMockValues({ isOrganization: true, contentSource: { id: '1', name: 'foo' } });
 
     expect(useSourceSubNav()).toEqual([
+      {
+        id: 'sourceName',
+        name: <strong>foo</strong>,
+      },
       {
         id: 'sourceOverview',
         name: 'Overview',
@@ -43,9 +49,16 @@ describe('useSourceSubNav', () => {
   });
 
   it('returns extra nav items for custom sources', () => {
-    setMockValues({ isOrganization: true, contentSource: { id: '2', serviceType: 'custom' } });
+    setMockValues({
+      isOrganization: true,
+      contentSource: { id: '2', serviceType: 'custom', name: 'foo' },
+    });
 
     expect(useSourceSubNav()).toEqual([
+      {
+        id: 'sourceName',
+        name: <strong>foo</strong>,
+      },
       {
         id: 'sourceOverview',
         name: 'Overview',
@@ -74,10 +87,60 @@ describe('useSourceSubNav', () => {
     ]);
   });
 
-  it('returns nav links to personal dashboard when not on an organization page', () => {
-    setMockValues({ isOrganization: false, contentSource: { id: '3' } });
+  it('returns extra nav items for synchronization', () => {
+    setMockValues({
+      isOrganization: true,
+      contentSource: { id: '2', isIndexedSource: true, name: 'foo', isSyncConfigEnabled: true },
+    });
 
     expect(useSourceSubNav()).toEqual([
+      {
+        id: 'sourceName',
+        name: <strong>foo</strong>,
+      },
+      {
+        id: 'sourceOverview',
+        name: 'Overview',
+        href: '/sources/2',
+      },
+      {
+        id: 'sourceContent',
+        name: 'Content',
+        href: '/sources/2/content',
+      },
+      {
+        id: 'sourceSynchronization',
+        name: 'Synchronization',
+        href: '/sources/2/synchronization',
+        items: [
+          {
+            id: 'sourceSynchronizationFrequency',
+            name: 'Frequency',
+            href: '/sources/2/synchronization/frequency',
+          },
+          {
+            id: 'sourceSynchronizationObjectsAndAssets',
+            name: 'Objects and assets',
+            href: '/sources/2/synchronization/objects_and_assets',
+          },
+        ],
+      },
+      {
+        id: 'sourceSettings',
+        name: 'Settings',
+        href: '/sources/2/settings',
+      },
+    ]);
+  });
+
+  it('returns nav links to personal dashboard when not on an organization page', () => {
+    setMockValues({ isOrganization: false, contentSource: { id: '3', name: 'foo' } });
+
+    expect(useSourceSubNav()).toEqual([
+      {
+        id: 'sourceName',
+        name: <strong>foo</strong>,
+      },
       {
         id: 'sourceOverview',
         name: 'Overview',

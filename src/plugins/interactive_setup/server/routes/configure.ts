@@ -11,7 +11,16 @@ import { first } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '.';
-import { ElasticsearchConnectionStatus } from '../../common';
+import {
+  ElasticsearchConnectionStatus,
+  ERROR_COMPATIBILITY_FAILURE,
+  ERROR_CONFIGURE_FAILURE,
+  ERROR_ELASTICSEARCH_CONNECTION_CONFIGURED,
+  ERROR_KIBANA_CONFIG_FAILURE,
+  ERROR_KIBANA_CONFIG_NOT_WRITABLE,
+  ERROR_OUTSIDE_PREBOOT_STAGE,
+} from '../../common';
+import { CompatibilityError } from '../compatibility_error';
 import type { AuthenticateParameters } from '../elasticsearch_service';
 import { ElasticsearchService } from '../elasticsearch_service';
 import type { WriteConfigParameters } from '../kibana_config_writer';
@@ -21,15 +30,13 @@ export function defineConfigureRoute({
   logger,
   kibanaConfigWriter,
   elasticsearch,
+  verificationCode,
   preboot,
 }: RouteDefinitionParams) {
   router.post(
     {
       path: '/internal/interactive_setup/configure',
       validate: {
-        query: schema.object({
-          code: schema.maybe(schema.string()),
-        }),
         body: schema.object({
           host: schema.uri({ scheme: ['http', 'https'] }),
           username: schema.maybe(
@@ -56,14 +63,24 @@ export function defineConfigureRoute({
             schema.string(),
             schema.never()
           ),
+          code: schema.maybe(schema.string()),
         }),
       },
       options: { authRequired: false },
     },
     async (context, request, response) => {
+      if (!verificationCode.verify(request.body.code)) {
+        return response.forbidden();
+      }
+
       if (!preboot.isSetupOnHold()) {
         logger.error(`Invalid request to [path=${request.url.pathname}] outside of preboot stage`);
-        return response.badRequest({ body: 'Cannot process request outside of preboot stage.' });
+        return response.badRequest({
+          body: {
+            message: 'Cannot process request outside of preboot stage.',
+            attributes: { type: ERROR_OUTSIDE_PREBOOT_STAGE },
+          },
+        });
       }
 
       const connectionStatus = await elasticsearch.connectionStatus$.pipe(first()).toPromise();
@@ -74,7 +91,7 @@ export function defineConfigureRoute({
         return response.badRequest({
           body: {
             message: 'Elasticsearch connection is already configured.',
-            attributes: { type: 'elasticsearch_connection_configured' },
+            attributes: { type: ERROR_ELASTICSEARCH_CONNECTION_CONFIGURED },
           },
         });
       }
@@ -90,7 +107,7 @@ export function defineConfigureRoute({
           statusCode: 500,
           body: {
             message: 'Kibana process does not have enough permissions to write to config file.',
-            attributes: { type: 'kibana_config_not_writable' },
+            attributes: { type: ERROR_KIBANA_CONFIG_NOT_WRITABLE },
           },
         });
       }
@@ -106,12 +123,24 @@ export function defineConfigureRoute({
 
       try {
         await elasticsearch.authenticate(configToWrite);
-      } catch {
+      } catch (error) {
+        if (error instanceof CompatibilityError) {
+          return response.badRequest({
+            body: {
+              message: 'Failed to configure due to version incompatibility.',
+              attributes: {
+                type: ERROR_COMPATIBILITY_FAILURE,
+                elasticsearchVersion: error.elasticsearchVersion,
+                kibanaVersion: error.kibanaVersion,
+              },
+            },
+          });
+        }
         // For security reasons, we shouldn't leak to the user whether Elasticsearch node couldn't process enrollment
         // request or we just couldn't connect to any of the provided hosts.
         return response.customError({
           statusCode: 500,
-          body: { message: 'Failed to configure.', attributes: { type: 'configure_failure' } },
+          body: { message: 'Failed to configure.', attributes: { type: ERROR_CONFIGURE_FAILURE } },
         });
       }
 
@@ -123,7 +152,7 @@ export function defineConfigureRoute({
           statusCode: 500,
           body: {
             message: 'Failed to save configuration.',
-            attributes: { type: 'kibana_config_failure' },
+            attributes: { type: ERROR_KIBANA_CONFIG_FAILURE },
           },
         });
       }

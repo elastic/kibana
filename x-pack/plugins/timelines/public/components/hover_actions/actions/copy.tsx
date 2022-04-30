@@ -10,7 +10,7 @@ import copy from 'copy-to-clipboard';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { stopPropagationAndPreventDefault } from '../../../../common';
+import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
 import { WithCopyToClipboard } from '../../clipboard/with_copy_to_clipboard';
 import { HoverActionComponentProps } from './types';
 import { COPY_TO_CLIPBOARD_BUTTON_CLASS_NAME } from '../../clipboard';
@@ -69,8 +69,8 @@ const CopyButton: React.FC<CopyProps> = React.memo(
       <Component
         aria-label={COPY_TO_CLIPBOARD}
         data-test-subj="copy-to-clipboard"
-        icon="copyClipboard"
-        iconType="copyClipboard"
+        icon="copy"
+        iconType="copy"
         onClick={handleOnClick}
         title={COPY_TO_CLIPBOARD}
       >

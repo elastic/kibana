@@ -14,13 +14,13 @@ import {
   ListOperatorTypeEnum as OperatorTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
-import { fields } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+import type { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
+import { fields } from '../../../../../../../src/plugins/data/common/mocks';
 import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
 
 import { BuilderEntryItem, EntryItemProps } from './entry_renderer';
 
-const mockAutocompleteService = ({
+const mockAutocompleteService = {
   getValueSuggestions: () =>
     new Promise((resolve) => {
       setTimeout(() => {
@@ -54,7 +54,7 @@ const mockAutocompleteService = ({
         ]);
       }, 300);
     }),
-} as unknown) as AutocompleteStart;
+} as unknown as AutocompleteStart;
 
 export default {
   argTypes: {

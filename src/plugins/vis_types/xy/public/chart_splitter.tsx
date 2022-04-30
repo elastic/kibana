@@ -8,11 +8,17 @@
 
 import React from 'react';
 import { Accessor, AccessorFn, GroupBy, GroupBySort, SmallMultiples } from '@elastic/charts';
+import { DatatableColumn } from '../../../expressions/public';
 
 interface ChartSplitterProps {
   splitColumnAccessor?: Accessor | AccessorFn;
   splitRowAccessor?: Accessor | AccessorFn;
-  sort?: GroupBySort;
+  splitDimension?: DatatableColumn;
+}
+
+interface SplitDimensionParams {
+  order?: string;
+  orderBy?: string;
 }
 
 const CHART_SPLITTER_ID = '__chart_splitter__';
@@ -20,9 +26,14 @@ const CHART_SPLITTER_ID = '__chart_splitter__';
 export const ChartSplitter = ({
   splitColumnAccessor,
   splitRowAccessor,
-  sort,
-}: ChartSplitterProps) =>
-  splitColumnAccessor || splitRowAccessor ? (
+  splitDimension,
+}: ChartSplitterProps) => {
+  let sort: GroupBySort = 'alphaDesc';
+  if (splitDimension?.meta?.params?.id === 'terms') {
+    const params = splitDimension?.meta?.sourceParams?.params as SplitDimensionParams;
+    sort = params?.order === 'asc' ? 'alphaAsc' : 'alphaDesc';
+  }
+  return splitColumnAccessor || splitRowAccessor ? (
     <>
       <GroupBy
         id={CHART_SPLITTER_ID}
@@ -35,7 +46,7 @@ export const ChartSplitter = ({
           }
           return spec.id;
         }}
-        sort={sort || 'dataIndex'}
+        sort={sort}
       />
       <SmallMultiples
         splitVertically={splitRowAccessor ? CHART_SPLITTER_ID : undefined}
@@ -43,3 +54,4 @@ export const ChartSplitter = ({
       />
     </>
   ) : null;
+};

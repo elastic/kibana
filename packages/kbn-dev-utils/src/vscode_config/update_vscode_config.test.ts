@@ -22,6 +22,10 @@ const TEST_KEYS: ManagedConfigKey[] = [
       world: [1, 2, 3],
     },
   },
+  {
+    key: 'stringKey',
+    value: 'foo',
+  },
 ];
 
 const run = (json?: string) => updateVscodeConfig(TEST_KEYS, '', json);
@@ -35,7 +39,9 @@ it('updates the passed JSON with the managed settings', () => {
         "hello": true,
         // @managed
         "world": [1, 2, 3]
-      }
+      },
+      // @managed
+      "stringKey": "foo"
     }
 
   `);
@@ -50,7 +56,9 @@ it('initialized empty or undefined json values', () => {
         "hello": true,
         // @managed
         "world": [1, 2, 3]
-      }
+      },
+      // @managed
+      "stringKey": "foo"
     }
 
   `);
@@ -63,14 +71,16 @@ it('initialized empty or undefined json values', () => {
         "hello": true,
         // @managed
         "world": [1, 2, 3]
-      }
+      },
+      // @managed
+      "stringKey": "foo"
     }
 
   `);
 });
 
-it('replaces conflicting managed keys which do not have object values', () => {
-  expect(run(`{ "key": false }`)).toMatchInlineSnapshot(`
+it('replaces conflicting managed keys which do not have matching value types', () => {
+  expect(run(`{ "key": false, "stringKey": { "a": "B" } }`)).toMatchInlineSnapshot(`
     // @managed
     {
       "key": {
@@ -78,7 +88,9 @@ it('replaces conflicting managed keys which do not have object values', () => {
         "hello": true,
         // @managed
         "world": [1, 2, 3]
-      }
+      },
+      // @managed
+      "stringKey": "foo"
     }
 
   `);
@@ -122,7 +134,9 @@ it('persists comments in the original file', () => {
         "hello": true,
         // @managed
         "world": [1, 2, 3]
-      }
+      },
+      // @managed
+      "stringKey": "foo"
     }
 
   `);
@@ -148,7 +162,9 @@ it('overrides old values for managed keys', () => {
         "hello": true,
         // @managed
         "world": [1, 2, 3]
-      }
+      },
+      // @managed
+      "stringKey": "foo"
     }
 
   `);
@@ -176,7 +192,9 @@ it('does not modify properties with leading `// self managed` comment', () => {
       // self managed
       "key": {
         "world": [5]
-      }
+      },
+      // self managed
+      "stringKey": "--"
     }
   `);
 
@@ -186,7 +204,9 @@ it('does not modify properties with leading `// self managed` comment', () => {
       // self managed
       "key": {
         "world": [5]
-      }
+      },
+      // self managed
+      "stringKey": "--"
     }
 
   `);
@@ -210,7 +230,9 @@ it('does not modify child properties with leading `// self managed` comment', ()
         "world": [5],
         // @managed
         "hello": true
-      }
+      },
+      // @managed
+      "stringKey": "foo"
     }
 
   `);
@@ -236,7 +258,9 @@ it('does not modify unknown child properties', () => {
         "world": [5],
         // @managed
         "hello": true
-      }
+      },
+      // @managed
+      "stringKey": "foo"
     }
 
   `);
@@ -262,7 +286,9 @@ it('removes managed properties which are no longer managed', () => {
         "world": [5],
         // @managed
         "hello": true
-      }
+      },
+      // @managed
+      "stringKey": "foo"
     }
 
   `);
@@ -286,7 +312,9 @@ it('wipes out child keys which conflict with newly managed child keys', () => {
         "hello": true,
         // @managed
         "world": [1, 2, 3]
-      }
+      },
+      // @managed
+      "stringKey": "foo"
     }
 
   `);
@@ -308,7 +336,9 @@ it('correctly formats info text when specified', () => {
         "hello": true,
         // @managed
         "world": [1, 2, 3]
-      }
+      },
+      // @managed
+      "stringKey": "foo"
     }
 
   `);
@@ -321,7 +351,10 @@ it('allows "// self managed" comments conflicting with "// @managed" comments to
         // @managed
         // self managed
         "hello": ["world"]
-      }
+      },
+      // @managed
+      // self managed
+      "stringKey": 12345
     }
   `);
 
@@ -333,7 +366,9 @@ it('allows "// self managed" comments conflicting with "// @managed" comments to
         "hello": ["world"],
         // @managed
         "world": [1, 2, 3]
-      }
+      },
+      // self managed
+      "stringKey": 12345
     }
 
   `);

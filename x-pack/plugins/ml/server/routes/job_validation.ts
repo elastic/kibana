@@ -8,19 +8,26 @@
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
-import { AnalysisConfig, Datafeed } from '../../common/types/anomaly_detection_jobs';
+import type { AnalysisConfig, Datafeed } from '../../common/types/anomaly_detection_jobs';
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 import {
   estimateBucketSpanSchema,
   modelMemoryLimitSchema,
   validateCardinalitySchema,
   validateJobSchema,
+  validateDatafeedPreviewSchema,
 } from './schemas/job_validation_schema';
 import { estimateBucketSpanFactory } from '../models/bucket_span_estimator';
 import { calculateModelMemoryLimitProvider } from '../models/calculate_model_memory_limit';
-import { validateJob, validateCardinality } from '../models/job_validation';
+import {
+  validateJob,
+  validateCardinality,
+  validateDatafeedPreview,
+} from '../models/job_validation';
+import { getAuthorizationHeader } from '../lib/request_authorization';
 import type { MlClient } from '../lib/ml_client';
+import { CombinedJob } from '../../common/types/anomaly_detection_jobs';
 
 type CalculateModelMemoryLimitPayload = TypeOf<typeof modelMemoryLimitSchema>;
 
@@ -192,7 +199,44 @@ export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInit
           client,
           mlClient,
           request.body,
+          getAuthorizationHeader(request),
           mlLicense.isSecurityEnabled() === false
+        );
+
+        return response.ok({
+          body: resp,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup DataFeedPreviewValidation
+   *
+   * @api {post} /api/ml/validate/datafeed_preview Validates datafeed preview
+   * @apiName ValidateDataFeedPreview
+   * @apiDescription Validates that the datafeed preview runs successfully and produces results
+   *
+   * @apiSchema (body) validateDatafeedPreviewSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/validate/datafeed_preview',
+      validate: {
+        body: validateDatafeedPreviewSchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateJob'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+      try {
+        const resp = await validateDatafeedPreview(
+          mlClient,
+          getAuthorizationHeader(request),
+          request.body.job as CombinedJob
         );
 
         return response.ok({

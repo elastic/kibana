@@ -123,10 +123,9 @@ export function useAnomalyChartsInputResolver(
             ),
           }).pipe(
             switchMap(({ combinedJobs, anomalyChartRecords }) => {
-              const combinedJobRecords: Record<
-                string,
-                CombinedJob
-              > = (combinedJobs as CombinedJob[]).reduce((acc, job) => {
+              const combinedJobRecords: Record<string, CombinedJob> = (
+                combinedJobs as CombinedJob[]
+              ).reduce((acc, job) => {
                 return { ...acc, [job.job_id]: job };
               }, {});
 

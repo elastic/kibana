@@ -8,11 +8,12 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import _ from 'lodash';
+import { keys, each, cloneDeep, clone, uniq, filter, map } from 'lodash';
 // @ts-expect-error
 import realHits from '../../../../../../__fixtures__/real_hits.js';
 
 import { IndexPattern } from '../../../../../../../../data/public';
+import { flattenHit } from '../../../../../../../../data/common';
 
 // @ts-expect-error
 import { fieldCalculator } from './field_calculator';
@@ -80,7 +81,7 @@ describe('fieldCalculator', function () {
     });
 
     it('should have a a key for value in the array when not grouping array terms', function () {
-      expect(_.keys(groups).length).toBe(3);
+      expect(keys(groups).length).toBe(3);
       expect(groups.foo).toBeInstanceOf(Object);
       expect(groups.bar).toBeInstanceOf(Object);
       expect(groups.baz).toBeInstanceOf(Object);
@@ -100,7 +101,7 @@ describe('fieldCalculator', function () {
       });
 
       it('should group array terms when passed params.grouped', function () {
-        expect(_.keys(groups).length).toBe(4);
+        expect(keys(groups).length).toBe(4);
         expect(groups['foo,bar']).toBeInstanceOf(Object);
       });
 
@@ -120,7 +121,7 @@ describe('fieldCalculator', function () {
     let hits: any;
 
     beforeEach(function () {
-      hits = _.each(_.cloneDeep(realHits), (hit) => indexPattern.flattenHit(hit));
+      hits = each(cloneDeep(realHits), (hit) => flattenHit(hit, indexPattern));
     });
 
     it('Should return an array of values for _source fields', function () {
@@ -131,11 +132,11 @@ describe('fieldCalculator', function () {
       );
       expect(extensions).toBeInstanceOf(Array);
       expect(
-        _.filter(extensions, function (v) {
+        filter(extensions, function (v) {
           return v === 'html';
         }).length
       ).toBe(8);
-      expect(_.uniq(_.clone(extensions)).sort()).toEqual(['gif', 'html', 'php', 'png']);
+      expect(uniq(clone(extensions)).sort()).toEqual(['gif', 'html', 'php', 'png']);
     });
 
     it('Should return an array of values for core meta fields', function () {
@@ -146,11 +147,11 @@ describe('fieldCalculator', function () {
       );
       expect(types).toBeInstanceOf(Array);
       expect(
-        _.filter(types, function (v) {
+        filter(types, function (v) {
           return v === 'apache';
         }).length
       ).toBe(18);
-      expect(_.uniq(_.clone(types)).sort()).toEqual(['apache', 'nginx']);
+      expect(uniq(clone(types)).sort()).toEqual(['apache', 'nginx']);
     });
   });
 
@@ -158,7 +159,7 @@ describe('fieldCalculator', function () {
     let params: { hits: any; field: any; count: number; indexPattern: IndexPattern };
     beforeEach(function () {
       params = {
-        hits: _.cloneDeep(realHits),
+        hits: cloneDeep(realHits),
         field: indexPattern.fields.getByName('extension'),
         count: 3,
         indexPattern,
@@ -170,7 +171,7 @@ describe('fieldCalculator', function () {
       expect(extensions).toBeInstanceOf(Object);
       expect(extensions.buckets).toBeInstanceOf(Array);
       expect(extensions.buckets.length).toBe(3);
-      expect(_.map(extensions.buckets, 'value')).toEqual(['html', 'php', 'gif']);
+      expect(map(extensions.buckets, 'value')).toEqual(['html', 'php', 'gif']);
       expect(extensions.error).toBe(undefined);
     });
 

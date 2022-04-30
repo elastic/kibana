@@ -20,6 +20,8 @@ export interface AlertsPrivelegesState {
   hasIndexUpdateDelete: boolean | null;
   hasIndexMaintenance: boolean | null;
   hasIndexRead: boolean | null;
+  hasKibanaCRUD: boolean;
+  hasKibanaREAD: boolean;
 }
 /**
  * Hook to get user privilege from
@@ -34,8 +36,13 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
     hasIndexWrite: null,
     hasIndexUpdateDelete: null,
     hasIndexMaintenance: null,
+    hasKibanaCRUD: false,
+    hasKibanaREAD: false,
   });
-  const { detectionEnginePrivileges, alertsPrivileges } = useUserPrivileges();
+  const {
+    detectionEnginePrivileges,
+    kibanaSecuritySolutionsPrivileges: { crud: hasKibanaCRUD, read: hasKibanaREAD },
+  } = useUserPrivileges();
 
   useEffect(() => {
     if (detectionEnginePrivileges.error != null) {
@@ -47,9 +54,11 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
         hasIndexWrite: false,
         hasIndexUpdateDelete: false,
         hasIndexMaintenance: false,
+        hasKibanaCRUD,
+        hasKibanaREAD,
       });
     }
-  }, [detectionEnginePrivileges.error]);
+  }, [detectionEnginePrivileges.error, hasKibanaCRUD, hasKibanaREAD]);
 
   useEffect(() => {
     if (detectionEnginePrivileges.result != null) {
@@ -62,13 +71,19 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
           hasEncryptionKey: privilege.has_encryption_key,
           hasIndexManage: privilege.index[indexName].manage && privilege.cluster.manage,
           hasIndexMaintenance: privilege.index[indexName].maintenance,
-          hasIndexRead: alertsPrivileges.read,
-          hasIndexWrite: alertsPrivileges.crud,
+          hasIndexRead: privilege.index[indexName].read,
+          hasIndexWrite:
+            privilege.index[indexName].create ||
+            privilege.index[indexName].create_doc ||
+            privilege.index[indexName].index ||
+            privilege.index[indexName].write,
           hasIndexUpdateDelete: privilege.index[indexName].write,
+          hasKibanaCRUD,
+          hasKibanaREAD,
         });
       }
     }
-  }, [detectionEnginePrivileges.result, alertsPrivileges]);
+  }, [detectionEnginePrivileges.result, hasKibanaCRUD, hasKibanaREAD]);
 
   return { loading: detectionEnginePrivileges.loading, ...privileges };
 };

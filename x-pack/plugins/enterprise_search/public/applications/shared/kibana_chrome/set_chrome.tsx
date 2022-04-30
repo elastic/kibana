@@ -22,7 +22,7 @@ import { enterpriseSearchTitle, appSearchTitle, workplaceSearchTitle } from './g
 
 /**
  * Helpers for setting Kibana chrome (breadcrumbs, doc titles) on React view mount
- * @see https://github.com/elastic/kibana/blob/master/src/core/public/chrome/chrome_service.tsx
+ * @see https://github.com/elastic/kibana/blob/main/src/core/public/chrome/chrome_service.tsx
  *
  * Example usage (don't forget to i18n.translate() page titles!):
  *

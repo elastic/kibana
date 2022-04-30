@@ -78,9 +78,9 @@
             "signature": [
               "{ id?: string | undefined; params?: ",
               {
-                "pluginId": "expressions",
+                "pluginId": "fieldFormats",
                 "scope": "common",
-                "docId": "kibExpressionsPluginApi",
+                "docId": "kibFieldFormatsPluginApi",
                 "section": "def-common.SerializedFieldFormat",
                 "text": "SerializedFieldFormat"
               },

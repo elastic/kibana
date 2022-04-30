@@ -9,10 +9,11 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiFlyout, EuiFlyoutProps } from '@elastic/eui';
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { BrowserFields, DocValueFields } from '../../../common/containers/source';
-import { TimelineTabs } from '../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { EventDetailsPanel } from './event_details';
 import { HostDetailsPanel } from './host_details';
@@ -25,6 +26,7 @@ interface DetailsPanelProps {
   entityType?: EntityType;
   handleOnPanelClosed?: () => void;
   isFlyoutView?: boolean;
+  runtimeMappings: MappingRuntimeFields;
   tabType?: TimelineTabs;
   timelineId: string;
 }
@@ -41,6 +43,7 @@ export const DetailsPanel = React.memo(
     entityType,
     handleOnPanelClosed,
     isFlyoutView,
+    runtimeMappings,
     tabType,
     timelineId,
   }: DetailsPanelProps) => {
@@ -70,6 +73,7 @@ export const DetailsPanel = React.memo(
     let visiblePanel = null; // store in variable to make return statement more readable
     let panelSize: EuiFlyoutProps['size'] = 's';
     const contextID = `${timelineId}-${activeTab}`;
+    const isDraggable = timelineId === TimelineId.active && activeTab === TimelineTabs.query;
     if (currentTabDetail?.panelView === 'eventDetail' && currentTabDetail?.params?.eventId) {
       panelSize = 'm';
       visiblePanel = (
@@ -79,7 +83,9 @@ export const DetailsPanel = React.memo(
           entityType={entityType}
           expandedEvent={currentTabDetail?.params}
           handleOnEventClosed={closePanel}
+          isDraggable={isDraggable}
           isFlyoutView={isFlyoutView}
+          runtimeMappings={runtimeMappings}
           tabType={activeTab}
           timelineId={timelineId}
         />
@@ -92,6 +98,7 @@ export const DetailsPanel = React.memo(
           contextID={contextID}
           expandedHost={currentTabDetail?.params}
           handleOnHostClosed={closePanel}
+          isDraggable={isDraggable}
           isFlyoutView={isFlyoutView}
         />
       );
@@ -103,6 +110,7 @@ export const DetailsPanel = React.memo(
           contextID={contextID}
           expandedNetwork={currentTabDetail?.params}
           handleOnNetworkClosed={closePanel}
+          isDraggable={isDraggable}
           isFlyoutView={isFlyoutView}
         />
       );

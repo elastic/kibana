@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IndexPattern } from '../../../../../../../kibana_services';
+import type { IndexPattern } from 'src/plugins/data/common';
 
 export type SortOrder = [string, string];
 export interface ColumnProps {
@@ -28,7 +28,7 @@ export interface ColumnProps {
 export function getTimeColumn(timeFieldName: string): ColumnProps {
   return {
     name: timeFieldName,
-    displayName: 'Time',
+    displayName: timeFieldName,
     isSortable: true,
     isRemoveable: false,
     colLeftIdx: -1,

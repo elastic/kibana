@@ -49,9 +49,10 @@ export const useChartPreviewData = ({ sourceId, alertParams, buckets }: Options)
     [sourceId, http, alertParams, buckets]
   );
 
-  const isLoading = useMemo(() => getChartPreviewDataRequest.state === 'pending', [
-    getChartPreviewDataRequest.state,
-  ]);
+  const isLoading = useMemo(
+    () => getChartPreviewDataRequest.state === 'pending',
+    [getChartPreviewDataRequest.state]
+  );
 
   return {
     chartPreviewData,

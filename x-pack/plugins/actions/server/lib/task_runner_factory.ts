@@ -22,7 +22,6 @@ import { ActionExecutorContract } from './action_executor';
 import { ExecutorError } from './executor_error';
 import { RunContext } from '../../../task_manager/server';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
-import { ActionTypeDisabledError } from './errors';
 import {
   ActionTaskParams,
   ActionTypeRegistryContract,
@@ -62,7 +61,7 @@ export class TaskRunnerFactory {
     this.taskRunnerContext = taskRunnerContext;
   }
 
-  public create({ taskInstance }: RunContext) {
+  public create({ taskInstance }: RunContext, maxAttempts: number = 1) {
     if (!this.isInitialized) {
       throw new Error('TaskRunnerFactory not initialized');
     }
@@ -78,6 +77,7 @@ export class TaskRunnerFactory {
 
     const taskInfo = {
       scheduled: taskInstance.runAt,
+      attempts: taskInstance.attempts,
     };
 
     return {
@@ -93,58 +93,63 @@ export class TaskRunnerFactory {
           encryptedSavedObjectsClient,
           spaceIdToNamespace
         );
-
-        const requestHeaders: Record<string, string> = {};
-        if (apiKey) {
-          requestHeaders.authorization = `ApiKey ${apiKey}`;
-        }
-
         const path = addSpaceIdToPath('/', spaceId);
 
-        // Since we're using API keys and accessing elasticsearch can only be done
-        // via a request, we're faking one with the proper authorization headers.
-        const fakeRequest = KibanaRequest.from(({
-          headers: requestHeaders,
-          path: '/',
-          route: { settings: {} },
-          url: {
-            href: '/',
-          },
-          raw: {
-            req: {
-              url: '/',
-            },
-          },
-        } as unknown) as Request);
+        const request = getFakeRequest(apiKey);
+        basePathService.set(request, path);
 
-        basePathService.set(fakeRequest, path);
+        // Throwing an executor error means we will attempt to retry the task
+        // TM will treat a task as a failure if `attempts >= maxAttempts`
+        // so we need to handle that here to avoid TM persisting the failed task
+        const isRetryableBasedOnAttempts = taskInfo.attempts < (maxAttempts ?? 1);
+        const willRetryMessage = `and will retry`;
+        const willNotRetryMessage = `and will not retry`;
 
-        let executorResult: ActionTypeExecutorResult<unknown>;
+        let executorResult: ActionTypeExecutorResult<unknown> | undefined;
         try {
           executorResult = await actionExecutor.execute({
             params,
             actionId: actionId as string,
             isEphemeral: !isPersistedActionTask(actionTaskExecutorParams),
-            request: fakeRequest,
+            request,
             ...getSourceFromReferences(references),
             taskInfo,
             relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
           });
         } catch (e) {
-          if (e instanceof ActionTypeDisabledError) {
-            // We'll stop re-trying due to action being forbidden
-            throw new ExecutorError(e.message, {}, false);
+          logger.error(
+            `Action '${actionId}' failed ${
+              isRetryableBasedOnAttempts ? willRetryMessage : willNotRetryMessage
+            }: ${e.message}`
+          );
+          if (isRetryableBasedOnAttempts) {
+            // In order for retry to work, we need to indicate to task manager this task
+            // failed
+            throw new ExecutorError(e.message, {}, true);
           }
-          throw e;
         }
 
-        if (executorResult.status === 'error') {
+        if (
+          executorResult &&
+          executorResult?.status === 'error' &&
+          executorResult?.retry !== undefined &&
+          isRetryableBasedOnAttempts
+        ) {
+          logger.error(
+            `Action '${actionId}' failed ${
+              !!executorResult.retry ? willRetryMessage : willNotRetryMessage
+            }: ${executorResult.message}`
+          );
           // Task manager error handler only kicks in when an error thrown (at this time)
           // So what we have to do is throw when the return status is `error`.
           throw new ExecutorError(
             executorResult.message,
             executorResult.data,
-            executorResult.retry == null ? false : executorResult.retry
+            executorResult.retry as boolean | Date
+          );
+        } else if (executorResult && executorResult?.status === 'error') {
+          logger.error(
+            `Action '${actionId}' failed ${willNotRetryMessage}: ${executorResult.message}`
           );
         }
 
@@ -155,7 +160,7 @@ export class TaskRunnerFactory {
             // We would idealy secure every operation but in order to support clean up of legacy alerts
             // we allow this operation in an unsecured manner
             // Once support for legacy alert RBAC is dropped, this can be secured
-            await getUnsecuredSavedObjectsClient(fakeRequest).delete(
+            await getUnsecuredSavedObjectsClient(request).delete(
               ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
               actionTaskExecutorParams.actionTaskParamsId
             );
@@ -167,8 +172,63 @@ export class TaskRunnerFactory {
           }
         }
       },
+      cancel: async () => {
+        // Write event log entry
+        const actionTaskExecutorParams = taskInstance.params as ActionTaskExecutorParams;
+        const { spaceId } = actionTaskExecutorParams;
+
+        const {
+          attributes: { actionId, apiKey, relatedSavedObjects },
+          references,
+        } = await getActionTaskParams(
+          actionTaskExecutorParams,
+          encryptedSavedObjectsClient,
+          spaceIdToNamespace
+        );
+
+        const request = getFakeRequest(apiKey);
+        const path = addSpaceIdToPath('/', spaceId);
+        basePathService.set(request, path);
+
+        await actionExecutor.logCancellation({
+          actionId,
+          request,
+          relatedSavedObjects: (relatedSavedObjects || []) as RelatedSavedObjects,
+          ...getSourceFromReferences(references),
+        });
+
+        logger.debug(
+          `Cancelling action task for action with id ${actionId} - execution error due to timeout.`
+        );
+        return { state: {} };
+      },
     };
   }
+}
+
+function getFakeRequest(apiKey?: string) {
+  const requestHeaders: Record<string, string> = {};
+  if (apiKey) {
+    requestHeaders.authorization = `ApiKey ${apiKey}`;
+  }
+
+  // Since we're using API keys and accessing elasticsearch can only be done
+  // via a request, we're faking one with the proper authorization headers.
+  const fakeRequest = KibanaRequest.from({
+    headers: requestHeaders,
+    path: '/',
+    route: { settings: {} },
+    url: {
+      href: '/',
+    },
+    raw: {
+      req: {
+        url: '/',
+      },
+    },
+  } as unknown as Request);
+
+  return fakeRequest;
 }
 
 async function getActionTaskParams(
@@ -179,21 +239,20 @@ async function getActionTaskParams(
   const { spaceId } = executorParams;
   const namespace = spaceIdToNamespace(spaceId);
   if (isPersistedActionTask(executorParams)) {
-    const actionTask = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
-      ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-      executorParams.actionTaskParamsId,
-      { namespace }
-    );
+    const actionTask =
+      await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
+        ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+        executorParams.actionTaskParamsId,
+        { namespace }
+      );
 
     const {
       attributes: { relatedSavedObjects },
       references,
     } = actionTask;
 
-    const {
-      actionId,
-      relatedSavedObjects: injectedRelatedSavedObjects,
-    } = injectSavedObjectReferences(references, relatedSavedObjects as RelatedSavedObjects);
+    const { actionId, relatedSavedObjects: injectedRelatedSavedObjects } =
+      injectSavedObjectReferences(references, relatedSavedObjects as RelatedSavedObjects);
 
     return {
       ...actionTask,

@@ -14,36 +14,33 @@ import type { Criteria } from '@elastic/eui/src/components/basic_table/basic_tab
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useUiTracker } from '../../../../../observability/public';
 import { useTheme } from '../../../hooks/use_theme';
-import type { CorrelationsTerm } from '../../../../common/search_strategies/failure_correlations/types';
+import type { FieldValuePair } from '../../../../common/correlations/types';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 
-export type SelectedCorrelationTerm<T extends CorrelationsTerm> = Pick<
-  T,
-  'fieldName' | 'fieldValue'
->;
-
-interface Props<T> {
+interface CorrelationsTableProps<T extends FieldValuePair> {
   significantTerms?: T[];
   status: FETCH_STATUS;
   percentageColumnName?: string;
+  setPinnedSignificantTerm?: (term: T | null) => void;
   setSelectedSignificantTerm: (term: T | null) => void;
-  selectedTerm?: { fieldName: string; fieldValue: string };
+  selectedTerm?: FieldValuePair;
   onFilter?: () => void;
   columns: Array<EuiBasicTableColumn<T>>;
   onTableChange: (c: Criteria<T>) => void;
   sorting?: EuiTableSortingType<T>;
 }
 
-export function CorrelationsTable<T extends CorrelationsTerm>({
+export function CorrelationsTable<T extends FieldValuePair>({
   significantTerms,
   status,
+  setPinnedSignificantTerm,
   setSelectedSignificantTerm,
   columns,
   selectedTerm,
   onTableChange,
   sorting,
-}: Props<T>) {
+}: CorrelationsTableProps<T>) {
   const euiTheme = useTheme();
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const trackSelectSignificantCorrelationTerm = useCallback(
@@ -92,9 +89,15 @@ export function CorrelationsTable<T extends CorrelationsTerm>({
         status === FETCH_STATUS.LOADING ? loadingText : noDataText
       }
       loading={status === FETCH_STATUS.LOADING}
+      error={status === FETCH_STATUS.FAILURE ? errorMessage : ''}
       columns={columns}
       rowProps={(term) => {
         return {
+          onClick: () => {
+            if (setPinnedSignificantTerm) {
+              setPinnedSignificantTerm(term);
+            }
+          },
           onMouseEnter: () => {
             setSelectedSignificantTerm(term);
             trackSelectSignificantCorrelationTerm();
@@ -125,4 +128,9 @@ const loadingText = i18n.translate(
 const noDataText = i18n.translate(
   'xpack.apm.correlations.correlationsTable.noDataText',
   { defaultMessage: 'No data' }
+);
+
+const errorMessage = i18n.translate(
+  'xpack.apm.correlations.correlationsTable.errorMessage',
+  { defaultMessage: 'Failed to fetch' }
 );

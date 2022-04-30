@@ -14,6 +14,7 @@ jest.mock('./tooltip_popover', () => ({
 import sinon from 'sinon';
 import React from 'react';
 import { mount, shallow } from 'enzyme';
+import { Feature } from 'geojson';
 import type { Map as MbMap, MapMouseEvent, MapboxGeoJSONFeature } from '@kbn/mapbox-gl';
 import { TooltipControl } from './tooltip_control';
 import { IVectorLayer } from '../../../classes/layers/vector_layer';
@@ -23,7 +24,7 @@ let featuresAtLocation: MapboxGeoJSONFeature[] = [];
 
 const layerId = 'tfi3f';
 const mbLayerId = 'tfi3f_circle';
-const mockLayer = ({
+const mockLayer = {
   getMbLayerIds: () => {
     return [mbLayerId];
   },
@@ -35,6 +36,12 @@ const mockLayer = ({
   },
   canShowTooltip: () => {
     return true;
+  },
+  getMbTooltipLayerIds: () => {
+    return ['foo', 'bar'];
+  },
+  getFeatureId: (feature: Feature) => {
+    return feature.properties?.__kbn__feature_id__;
   },
   getFeatureById: () => {
     return {
@@ -52,10 +59,10 @@ const mockLayer = ({
       },
     };
   },
-} as unknown) as IVectorLayer;
+} as unknown as IVectorLayer;
 
 const mockMbMapHandlers: { [key: string]: (event?: MapMouseEvent) => void } = {};
-const mockMBMap = ({
+const mockMBMap = {
   on: (eventName: string, callback: (event?: MapMouseEvent) => void) => {
     mockMbMapHandlers[eventName] = callback;
   },
@@ -66,7 +73,7 @@ const mockMBMap = ({
   queryRenderedFeatures: () => {
     return featuresAtLocation;
   },
-} as unknown) as MbMap;
+} as unknown as MbMap;
 
 const defaultProps = {
   mbMap: mockMBMap,
@@ -192,10 +199,10 @@ describe('TooltipControl', () => {
   });
 
   describe('on click', () => {
-    const mockMapMouseEvent = ({
+    const mockMapMouseEvent = {
       point: { x: 0, y: 0 },
       lngLat: { lng: 0, lat: 0 },
-    } as unknown) as MapMouseEvent;
+    } as unknown as MapMouseEvent;
     const openOnClickTooltipStub = sinon.stub();
     const closeOnClickTooltipStub = sinon.stub();
 
@@ -236,7 +243,7 @@ describe('TooltipControl', () => {
     });
 
     test('should set tooltip state when there are features at clicked location and remove duplicate features', () => {
-      const feature = ({
+      const feature = {
         geometry: {
           type: 'Point',
           coordinates: [100, 30],
@@ -247,7 +254,7 @@ describe('TooltipControl', () => {
         properties: {
           __kbn__feature_id__: 1,
         },
-      } as unknown) as MapboxGeoJSONFeature;
+      } as unknown as MapboxGeoJSONFeature;
       featuresAtLocation = [feature, feature];
       mount(
         <TooltipControl

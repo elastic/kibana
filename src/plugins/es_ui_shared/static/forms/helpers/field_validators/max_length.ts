@@ -11,32 +11,34 @@ import { hasMaxLengthString } from '../../../validators/string';
 import { hasMaxLengthArray } from '../../../validators/array';
 import { ERROR_CODE } from './types';
 
-export const maxLengthField = ({
-  length = 0,
-  message,
-}: {
-  length: number;
-  message: string | ((err: Partial<ValidationError>) => string);
-}) => (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
-  const [{ value }] = args;
+export const maxLengthField =
+  ({
+    length = 0,
+    message,
+  }: {
+    length: number;
+    message: string | ((err: Partial<ValidationError>) => string);
+  }) =>
+  (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
+    const [{ value }] = args;
 
-  // Validate for Arrays
-  if (Array.isArray(value)) {
-    return hasMaxLengthArray(length)(value)
+    // Validate for Arrays
+    if (Array.isArray(value)) {
+      return hasMaxLengthArray(length)(value)
+        ? undefined
+        : {
+            code: 'ERR_MAX_LENGTH',
+            length,
+            message: typeof message === 'function' ? message({ length }) : message,
+          };
+    }
+
+    // Validate for Strings
+    return hasMaxLengthString(length)((value as string).trim())
       ? undefined
       : {
           code: 'ERR_MAX_LENGTH',
           length,
           message: typeof message === 'function' ? message({ length }) : message,
         };
-  }
-
-  // Validate for Strings
-  return hasMaxLengthString(length)((value as string).trim())
-    ? undefined
-    : {
-        code: 'ERR_MAX_LENGTH',
-        length,
-        message: typeof message === 'function' ? message({ length }) : message,
-      };
-};
+  };

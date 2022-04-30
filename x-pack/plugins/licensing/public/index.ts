@@ -5,9 +5,20 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'src/core/public';
+import type { PluginInitializerContext } from 'src/core/public';
+
 import { LicensingPlugin } from './plugin';
 
-export * from '../common/types';
-export { LicensingPluginSetup, LicensingPluginStart } from './types';
+export type {
+  LicenseCheckState,
+  LicenseType,
+  LicenseStatus,
+  LicenseFeature,
+  PublicLicense,
+  PublicFeatures,
+  PublicLicenseJSON,
+  LicenseCheck,
+  ILicense,
+} from '../common/types';
+export type { LicensingPluginSetup, LicensingPluginStart } from './types';
 export const plugin = (context: PluginInitializerContext) => new LicensingPlugin(context);

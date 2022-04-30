@@ -558,7 +558,7 @@ export const exportExceptionList = async ({
   signal,
 }: ExportExceptionListProps): Promise<Blob> =>
   http.fetch<Blob>(`${EXCEPTION_LIST_URL}/_export`, {
-    method: 'GET',
+    method: 'POST',
     query: { id, list_id: listId, namespace_type: namespaceType },
     signal,
   });

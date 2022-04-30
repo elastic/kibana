@@ -9,7 +9,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Switch, Route, Redirect, RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { AppMountParameters } from 'kibana/public';
+import type { AppMountParameters } from 'kibana/public';
 import {
   getCoreChrome,
   getCoreI18n,
@@ -77,7 +77,7 @@ export async function renderApp(
   setAppChrome();
 
   function renderMapApp(routeProps: RouteComponentProps<{ savedMapId?: string }>) {
-    const { embeddableId, originatingApp, valueInput } =
+    const { embeddableId, originatingApp, valueInput, originatingPath } =
       stateTransfer.getIncomingEditorState(APP_ID) || {};
 
     let mapEmbeddableInput;
@@ -98,6 +98,9 @@ export async function renderApp(
         setHeaderActionMenu={setHeaderActionMenu}
         stateTransfer={stateTransfer}
         originatingApp={originatingApp}
+        originatingPath={originatingPath}
+        history={history}
+        key={routeProps.match.params.savedMapId ? routeProps.match.params.savedMapId : 'new'}
       />
     );
   }

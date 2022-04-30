@@ -7,10 +7,14 @@
 
 import { isLeft } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { technicalRuleFieldMap } from './assets/field_maps/technical_rule_field_map';
+import {
+  technicalRuleFieldMap,
+  TechnicalRuleFieldMap,
+} from './assets/field_maps/technical_rule_field_map';
 import { runtimeTypeFromFieldMap } from './field_map';
 
-const technicalFieldRuntimeType = runtimeTypeFromFieldMap(technicalRuleFieldMap);
+const technicalFieldRuntimeType =
+  runtimeTypeFromFieldMap<TechnicalRuleFieldMap>(technicalRuleFieldMap);
 
 export const parseTechnicalFields = (input: unknown) => {
   const validate = technicalFieldRuntimeType.decode(input);

@@ -8,7 +8,7 @@
 
 import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { IUiSettingsClient, SavedObjectsStart } from '../../../../../core/public';
 
@@ -71,9 +71,9 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
                 type: 'index-pattern',
                 getIconForSavedObject: () => 'indexPatternApp',
                 name: i18n.translate(
-                  'visualizations.newVisWizard.searchSelection.savedObjectType.indexPattern',
+                  'visualizations.newVisWizard.searchSelection.savedObjectType.dataView',
                   {
-                    defaultMessage: 'Index pattern',
+                    defaultMessage: 'Data view',
                   }
                 ),
               },

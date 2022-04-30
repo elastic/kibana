@@ -6,13 +6,14 @@
  */
 
 import { SavedObjectsType } from 'src/core/server';
-import { CASE_USER_ACTION_SAVED_OBJECT } from '../../common';
+import { CASE_USER_ACTION_SAVED_OBJECT } from '../../common/constants';
 import { userActionsMigrations } from './migrations';
 
 export const caseUserActionSavedObjectType: SavedObjectsType = {
   name: CASE_USER_ACTION_SAVED_OBJECT,
   hidden: true,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
     properties: {
       action_field: {
@@ -49,4 +50,8 @@ export const caseUserActionSavedObjectType: SavedObjectsType = {
     },
   },
   migrations: userActionsMigrations,
+  management: {
+    importableAndExportable: true,
+    visibleInManagement: false,
+  },
 };

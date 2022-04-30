@@ -67,7 +67,7 @@ expect.extend({
       ? () =>
           `${this.utils.matcherHint(matcherName, undefined, undefined, options)}\n\n` +
           `Expected: not ${this.utils.printExpected(expected)}\n${
-            this.utils.stringify(expected) !== this.utils.stringify(received[received.length - 1]!)
+            this.utils.stringify(expected) !== this.utils.stringify(received[received.length - 1])
               ? `Received:     ${this.utils.printReceived(received[received.length - 1])}`
               : ''
           }`
@@ -131,7 +131,7 @@ expect.extend({
       ? () =>
           `${this.utils.matcherHint(matcherName, undefined, undefined, options)}\n\n` +
           `Expected: not ${this.utils.printExpected(expected)}\n${
-            this.utils.stringify(expected) !== this.utils.stringify(received[received.length - 1]!)
+            this.utils.stringify(expected) !== this.utils.stringify(received[received.length - 1])
               ? `Received:     ${this.utils.printReceived(received[received.length - 1])}`
               : ''
           }`

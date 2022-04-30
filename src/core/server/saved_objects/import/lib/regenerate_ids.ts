@@ -8,15 +8,17 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { SavedObject } from '../../types';
+import type { ImportStateMap } from './types';
 
 /**
- * Takes an array of saved objects and returns an importIdMap of randomly-generated new IDs.
+ * Takes an array of saved objects and returns an importStateMap of randomly-generated new IDs.
  *
  * @param objects The saved objects to generate new IDs for.
  */
 export const regenerateIds = (objects: SavedObject[]) => {
-  const importIdMap = objects.reduce((acc, object) => {
-    return acc.set(`${object.type}:${object.id}`, { id: uuidv4(), omitOriginId: true });
-  }, new Map<string, { id: string; omitOriginId?: boolean }>());
-  return importIdMap;
+  const importStateMap: ImportStateMap = new Map();
+  for (const { type, id } of objects) {
+    importStateMap.set(`${type}:${id}`, { destinationId: uuidv4(), omitOriginId: true });
+  }
+  return importStateMap;
 };

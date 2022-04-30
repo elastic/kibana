@@ -7,6 +7,10 @@
 
 export const PLUGIN_ID = 'reporting';
 
+export const REPORTING_TRANSACTION_TYPE = PLUGIN_ID;
+
+export const REPORTING_SYSTEM_INDEX = '.reporting';
+
 export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
   'xpack.reporting.jobCompletionNotifications';
 
@@ -50,12 +54,6 @@ export const UI_SETTINGS_CUSTOM_PDF_LOGO = 'xpackReporting:customPdfLogo';
 export const UI_SETTINGS_CSV_SEPARATOR = 'csv:separator';
 export const UI_SETTINGS_CSV_QUOTE_VALUES = 'csv:quoteValues';
 export const UI_SETTINGS_DATEFORMAT_TZ = 'dateFormat:tz';
-
-export const LAYOUT_TYPES = {
-  CANVAS: 'canvas',
-  PRESERVE_LAYOUT: 'preserve_layout',
-  PRINT: 'print',
-};
 
 // Export Type Definitions
 export const CSV_REPORT_TYPE = 'CSV';
@@ -110,13 +108,11 @@ export const REPORTING_REDIRECT_LOCATOR_STORE_KEY = '__REPORTING_REDIRECT_LOCATO
 /**
  * A way to get the client side route for the reporting redirect app.
  *
- * This route currently expects a job ID and a locator that to use from that job so that it can redirect to the
- * correct page.
- *
- * TODO: Accommodate 'forceNow' value that some visualizations may rely on
+ * TODO: Add a job ID and a locator to use so that we can redirect without expecting state to
+ * be injected to the page
  */
-export const getRedirectAppPathHome = () => {
-  return '/app/management/insightsAndAlerting/reporting/r';
+export const getRedirectAppPath = () => {
+  return '/app/reportingRedirect';
 };
 
 // Statuses

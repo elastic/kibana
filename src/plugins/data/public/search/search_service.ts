@@ -15,7 +15,7 @@ import {
 } from 'src/core/public';
 import { BehaviorSubject } from 'rxjs';
 import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
-import { ISearchSetup, ISearchStart } from './types';
+import type { ISearchSetup, ISearchStart } from './types';
 
 import { handleResponse } from './fetch';
 import {
@@ -39,12 +39,14 @@ import {
   geoPointFunction,
   queryFilterFunction,
   rangeFilterFunction,
+  removeFilterFunction,
+  selectFilterFunction,
   kibanaFilterFunction,
   phraseFilterFunction,
   esRawResponse,
 } from '../../common/search';
 import { AggsService, AggsStartDependencies } from './aggs';
-import { IndexPatternsContract } from '../index_patterns/index_patterns';
+import { IndexPatternsContract } from '..';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { SearchUsageCollector, createUsageCollector } from './collectors';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
@@ -139,6 +141,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerFunction(existsFilterFunction);
     expressions.registerFunction(queryFilterFunction);
     expressions.registerFunction(rangeFilterFunction);
+    expressions.registerFunction(removeFilterFunction);
+    expressions.registerFunction(selectFilterFunction);
     expressions.registerFunction(phraseFilterFunction);
     expressions.registerType(kibanaContext);
 

@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { Wordcloud, Settings } from '@elastic/charts';
+import { Wordcloud, Settings, WordcloudSpec } from '@elastic/charts';
 import { chartPluginMock } from '../../../../charts/public/mocks';
 import type { Datatable } from '../../../../expressions/public';
 import { mount } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import TagCloudChart, { TagCloudChartProps } from './tagcloud_component';
-import { TagCloudVisParams } from '../../common/types';
+import { TagCloudRendererParams } from '../../common/types';
 
-jest.mock('../services', () => ({
+jest.mock('../format_service', () => ({
   getFormatService: jest.fn(() => {
     return {
       deserialize: jest.fn(),
@@ -23,29 +23,34 @@ jest.mock('../services', () => ({
 }));
 
 const palettesRegistry = chartPluginMock.createPaletteRegistry();
-const visData = ({
+const geoDestId = 'geo.dest';
+const countId = 'Count';
+const visData: Datatable = {
+  type: 'datatable',
   columns: [
     {
-      id: 'col-0',
-      name: 'geo.dest: Descending',
+      id: geoDestId,
+      name: `${geoDestId}: Descending`,
+      meta: { type: 'string' },
     },
     {
-      id: 'col-1',
+      id: countId,
       name: 'Count',
+      meta: { type: 'number' },
     },
   ],
   rows: [
-    { 'col-0': 'CN', 'col-1': 26 },
-    { 'col-0': 'IN', 'col-1': 17 },
-    { 'col-0': 'US', 'col-1': 6 },
-    { 'col-0': 'DE', 'col-1': 4 },
-    { 'col-0': 'BR', 'col-1': 3 },
+    { [geoDestId]: 'CN', [countId]: 26 },
+    { [geoDestId]: 'IN', [countId]: 17 },
+    { [geoDestId]: 'US', [countId]: 6 },
+    { [geoDestId]: 'DE', [countId]: 4 },
+    { [geoDestId]: 'BR', [countId]: 3 },
   ],
-} as unknown) as Datatable;
+};
 
-const visParams = {
-  bucket: { accessor: 0, format: {} },
-  metric: { accessor: 1, format: {} },
+const visParams: TagCloudRendererParams = {
+  bucket: { type: 'vis_dimension', accessor: 0, format: { params: {} } },
+  metric: { type: 'vis_dimension', accessor: 1, format: { params: {} } },
   scale: 'linear',
   orientation: 'single',
   palette: {
@@ -55,13 +60,42 @@ const visParams = {
   minFontSize: 12,
   maxFontSize: 70,
   showLabel: true,
-} as TagCloudVisParams;
+};
+
+const formattedData: WordcloudSpec['data'] = [
+  {
+    color: 'black',
+    text: 'CN',
+    weight: 1,
+  },
+  {
+    color: 'black',
+    text: 'IN',
+    weight: 0.6086956521739131,
+  },
+  {
+    color: 'black',
+    text: 'US',
+    weight: 0.13043478260869565,
+  },
+  {
+    color: 'black',
+    text: 'DE',
+    weight: 0.043478260869565216,
+  },
+  {
+    color: 'black',
+    text: 'BR',
+    weight: 0,
+  },
+];
 
 describe('TagCloudChart', function () {
-  let wrapperProps: TagCloudChartProps;
+  let wrapperPropsWithIndexes: TagCloudChartProps;
+  let wrapperPropsWithColumnNames: TagCloudChartProps;
 
   beforeAll(() => {
-    wrapperProps = {
+    wrapperPropsWithIndexes = {
       visData,
       visParams,
       palettesRegistry,
@@ -70,68 +104,77 @@ describe('TagCloudChart', function () {
       syncColors: false,
       visType: 'tagcloud',
     };
+
+    wrapperPropsWithColumnNames = {
+      visData,
+      visParams: {
+        ...visParams,
+        bucket: {
+          type: 'vis_dimension',
+          accessor: {
+            id: geoDestId,
+            name: geoDestId,
+            meta: { type: 'string' },
+          },
+          format: { id: 'string', params: {} },
+        },
+        metric: {
+          type: 'vis_dimension',
+          accessor: {
+            id: countId,
+            name: countId,
+            meta: { type: 'number' },
+          },
+          format: { id: 'number', params: {} },
+        },
+      },
+      palettesRegistry,
+      fireEvent: jest.fn(),
+      renderComplete: jest.fn(),
+      syncColors: false,
+      visType: 'tagcloud',
+    };
   });
 
-  it('renders the Wordcloud component', async () => {
-    const component = mount(<TagCloudChart {...wrapperProps} />);
+  it('renders the Wordcloud component with', async () => {
+    const component = mount(<TagCloudChart {...wrapperPropsWithIndexes} />);
     expect(component.find(Wordcloud).length).toBe(1);
   });
 
   it('renders the label correctly', async () => {
-    const component = mount(<TagCloudChart {...wrapperProps} />);
+    const component = mount(<TagCloudChart {...wrapperPropsWithIndexes} />);
     const label = findTestSubject(component, 'tagCloudLabel');
     expect(label.text()).toEqual('geo.dest: Descending - Count');
   });
 
   it('not renders the label if showLabel setting is off', async () => {
     const newVisParams = { ...visParams, showLabel: false };
-    const newProps = { ...wrapperProps, visParams: newVisParams };
+    const newProps = { ...wrapperPropsWithIndexes, visParams: newVisParams };
     const component = mount(<TagCloudChart {...newProps} />);
     const label = findTestSubject(component, 'tagCloudLabel');
     expect(label.length).toBe(0);
   });
 
-  it('receives the data on the correct format', () => {
-    const component = mount(<TagCloudChart {...wrapperProps} />);
-    expect(component.find(Wordcloud).prop('data')).toStrictEqual([
-      {
-        color: 'black',
-        text: 'CN',
-        weight: 1,
-      },
-      {
-        color: 'black',
-        text: 'IN',
-        weight: 0.6086956521739131,
-      },
-      {
-        color: 'black',
-        text: 'US',
-        weight: 0.13043478260869565,
-      },
-      {
-        color: 'black',
-        text: 'DE',
-        weight: 0.043478260869565216,
-      },
-      {
-        color: 'black',
-        text: 'BR',
-        weight: 0,
-      },
-    ]);
+  it('receives the data in the correct format for bucket and metric accessors of type number', () => {
+    const component = mount(<TagCloudChart {...wrapperPropsWithIndexes} />);
+    expect(component.find(Wordcloud).prop('data')).toStrictEqual(formattedData);
+  });
+
+  it('receives the data in the correct format for bucket and metric accessors of type DatatableColumn', () => {
+    const component = mount(<TagCloudChart {...wrapperPropsWithColumnNames} />);
+    expect(component.find(Wordcloud).prop('data')).toStrictEqual(formattedData);
   });
 
   it('sets the angles correctly', async () => {
-    const newVisParams = { ...visParams, orientation: 'right angled' } as TagCloudVisParams;
-    const newProps = { ...wrapperProps, visParams: newVisParams };
+    const newVisParams: TagCloudRendererParams = { ...visParams, orientation: 'right angled' };
+    const newProps = { ...wrapperPropsWithIndexes, visParams: newVisParams };
     const component = mount(<TagCloudChart {...newProps} />);
     expect(component.find(Wordcloud).prop('endAngle')).toBe(90);
     expect(component.find(Wordcloud).prop('angleCount')).toBe(2);
   });
 
   it('calls filter callback', () => {
-    const component = mount(<TagCloudChart {...wrapperProps} />);
+    const component = mount(<TagCloudChart {...wrapperPropsWithIndexes} />);
     component.find(Settings).prop('onElementClick')!([
       [
         {
@@ -145,6 +188,6 @@ describe('TagCloudChart', function () {
         },
       ],
     ]);
-    expect(wrapperProps.fireEvent).toHaveBeenCalled();
+    expect(wrapperPropsWithIndexes.fireEvent).toHaveBeenCalled();
   });
 });

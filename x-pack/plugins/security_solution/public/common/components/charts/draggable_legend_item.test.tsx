@@ -20,7 +20,6 @@ jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });
@@ -59,5 +58,23 @@ describe('DraggableLegendItem', () => {
     expect(
       wrapper.find(`[data-test-subj="legend-item-${legendItem.dataProviderId}"]`).prop('hideTopN')
     ).toEqual(true);
+  });
+
+  it('renders the empty value label when the value is empty', () => {
+    wrapper = mount(
+      <TestProviders>
+        <DraggableLegendItem legendItem={{ ...legendItem, value: '' }} />
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="value-wrapper-empty"]').first().exists()).toBeTruthy();
+  });
+
+  it('does not render the empty value label when the value is a number', () => {
+    wrapper = mount(
+      <TestProviders>
+        <DraggableLegendItem legendItem={{ ...legendItem, value: 0 }} />
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="value-wrapper-empty"]').first().exists()).toBeFalsy();
   });
 });

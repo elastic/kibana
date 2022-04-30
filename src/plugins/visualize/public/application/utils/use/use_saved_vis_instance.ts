@@ -176,9 +176,6 @@ export const useSavedVisInstance = (
       } else if (state.savedVisInstance?.embeddableHandler) {
         state.savedVisInstance.embeddableHandler.destroy();
       }
-      if (state.savedVisInstance?.savedVis) {
-        state.savedVisInstance.savedVis.destroy();
-      }
     };
   }, [state]);
 

@@ -8,7 +8,8 @@
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { Redirect } from 'react-router-dom';
 import { toMountPoint } from '../../../../../kibana_react/public';
 import { DiscoverServices } from '../../../build_services';
 import { getUrlTracker } from '../../../kibana_services';
@@ -23,28 +24,29 @@ let bannerId: string | undefined;
 
 export function NotFoundRoute(props: NotFoundRouteProps) {
   const { services } = props;
-  const { urlForwarding } = services;
+  const { urlForwarding, core, history } = services;
+  const currentLocation = history().location.pathname;
 
   useEffect(() => {
     const path = window.location.hash.substr(1);
     getUrlTracker().restorePreviousUrl();
-    const { navigated } = urlForwarding.navigateToLegacyKibanaUrl(path);
-    if (!navigated) {
-      urlForwarding.navigateToDefaultApp();
-    }
+    urlForwarding.navigateToLegacyKibanaUrl(path);
 
     const bannerMessage = i18n.translate('discover.noMatchRoute.bannerTitleText', {
       defaultMessage: 'Page not found',
     });
 
-    bannerId = services.core.overlays.banners.replace(
+    bannerId = core.overlays.banners.replace(
       bannerId,
       toMountPoint(
         <EuiCallOut color="warning" iconType="iInCircle" title={bannerMessage}>
-          <p>
+          <p data-test-subj="invalidRouteMessage">
             <FormattedMessage
               id="discover.noMatchRoute.bannerText"
-              defaultMessage="Invalid URL for Discover application."
+              defaultMessage="Discover application doesn't recognize this route: {route}"
+              values={{
+                route: history().location.state.referrer,
+              }}
             />
           </p>
         </EuiCallOut>
@@ -54,10 +56,10 @@ export function NotFoundRoute(props: NotFoundRouteProps) {
     // hide the message after the user has had a chance to acknowledge it -- so it doesn't permanently stick around
     setTimeout(() => {
       if (bannerId) {
-        services.core.overlays.banners.remove(bannerId);
+        core.overlays.banners.remove(bannerId);
       }
     }, 15000);
-  }, [services.core.overlays.banners, services.history, urlForwarding]);
+  }, [core.overlays.banners, history, urlForwarding]);
 
-  return null;
+  return <Redirect to={{ pathname: '/', state: { referrer: currentLocation } }} />;
 }

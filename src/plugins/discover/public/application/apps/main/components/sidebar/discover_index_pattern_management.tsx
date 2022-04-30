@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DiscoverServices } from '../../../../../build_services';
-import { IndexPattern } from '../../../../../../../data/common/index_patterns/index_patterns';
+import { IndexPattern } from '../../../../../../../data/common';
 
 export interface DiscoverIndexPatternManagementProps {
   /**
@@ -35,7 +35,8 @@ export interface DiscoverIndexPatternManagementProps {
 export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManagementProps) {
   const { indexPatternFieldEditor, core } = props.services;
   const { useNewFieldsApi, selectedIndexPattern, editField } = props;
-  const indexPatternFieldEditPermission = indexPatternFieldEditor?.userPermissions.editIndexPattern();
+  const indexPatternFieldEditPermission =
+    indexPatternFieldEditor?.userPermissions.editIndexPattern();
   const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
   const [isAddIndexPatternFieldPopoverOpen, setIsAddIndexPatternFieldPopoverOpen] = useState(false);
 
@@ -62,7 +63,7 @@ export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManage
           iconType="boxesHorizontal"
           data-test-subj="discoverIndexPatternActions"
           aria-label={i18n.translate('discover.fieldChooser.indexPatterns.actionsPopoverLabel', {
-            defaultMessage: 'Index pattern settings',
+            defaultMessage: 'Data view settings',
           })}
           onClick={() => {
             setIsAddIndexPatternFieldPopoverOpen(!isAddIndexPatternFieldPopoverOpen);
@@ -83,7 +84,7 @@ export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManage
             }}
           >
             {i18n.translate('discover.fieldChooser.indexPatterns.addFieldButton', {
-              defaultMessage: 'Add field to index pattern',
+              defaultMessage: 'Add field to data view',
             })}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
@@ -98,7 +99,7 @@ export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManage
             }}
           >
             {i18n.translate('discover.fieldChooser.indexPatterns.manageFieldButton', {
-              defaultMessage: 'Manage index pattern fields',
+              defaultMessage: 'Manage data view fields',
             })}
           </EuiContextMenuItem>,
         ]}

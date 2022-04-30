@@ -205,32 +205,14 @@ export class InfraSources {
   }
 
   private async getStaticDefaultSourceConfiguration() {
-    const staticSourceConfiguration: SourceConfigurationConfigFileProperties['sources']['default'] = pipe(
-      sourceConfigurationConfigFilePropertiesRT.decode(this.libs.config),
-      map(({ sources: { default: defaultConfiguration } }) => defaultConfiguration),
-      fold(constant({}), identity)
-    );
-
-    // NOTE: Legacy logAlias needs converting to a logIndices reference until we can remove
-    // config file sources in 8.0.0.
-    if (staticSourceConfiguration && staticSourceConfiguration.logAlias) {
-      const convertedStaticSourceConfiguration: InfraStaticSourceConfiguration & {
-        logAlias?: string;
-      } = {
-        ...staticSourceConfiguration,
-        logIndices: {
-          type: 'index_name',
-          indexName: staticSourceConfiguration.logAlias,
-        },
-      };
-      delete convertedStaticSourceConfiguration.logAlias;
-      return mergeSourceConfiguration(
-        defaultSourceConfiguration,
-        convertedStaticSourceConfiguration
+    const staticSourceConfiguration: SourceConfigurationConfigFileProperties['sources']['default'] =
+      pipe(
+        sourceConfigurationConfigFilePropertiesRT.decode(this.libs.config),
+        map(({ sources: { default: defaultConfiguration } }) => defaultConfiguration),
+        fold(constant({}), identity)
       );
-    } else {
-      return mergeSourceConfiguration(defaultSourceConfiguration, staticSourceConfiguration);
-    }
+
+    return mergeSourceConfiguration(defaultSourceConfiguration, staticSourceConfiguration);
   }
 
   private async getSavedSourceConfiguration(

@@ -17,14 +17,14 @@ import {
 } from './groups';
 
 describe('groups routes', () => {
-  describe('GET /api/workplace_search/groups', () => {
+  describe('GET /internal/workplace_search/groups', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/groups',
+        path: '/internal/workplace_search/groups',
       });
 
       registerGroupsRoute({
@@ -40,14 +40,14 @@ describe('groups routes', () => {
     });
   });
 
-  describe('POST /api/workplace_search/groups', () => {
+  describe('POST /internal/workplace_search/groups', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/workplace_search/groups',
+        path: '/internal/workplace_search/groups',
       });
 
       registerGroupsRoute({
@@ -74,14 +74,14 @@ describe('groups routes', () => {
     });
   });
 
-  describe('POST /api/workplace_search/groups/search', () => {
+  describe('POST /internal/workplace_search/groups/search', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/workplace_search/groups/search',
+        path: '/internal/workplace_search/groups/search',
       });
 
       registerSearchGroupsRoute({
@@ -128,14 +128,14 @@ describe('groups routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/groups/{id}', () => {
+  describe('GET /internal/workplace_search/groups/{id}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/groups/{id}',
+        path: '/internal/workplace_search/groups/{id}',
       });
 
       registerGroupRoute({
@@ -151,14 +151,14 @@ describe('groups routes', () => {
     });
   });
 
-  describe('PUT /api/workplace_search/groups/{id}', () => {
+  describe('PUT /internal/workplace_search/groups/{id}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path: '/api/workplace_search/groups/{id}',
+        path: '/internal/workplace_search/groups/{id}',
       });
 
       registerGroupRoute({
@@ -187,14 +187,14 @@ describe('groups routes', () => {
     });
   });
 
-  describe('DELETE /api/workplace_search/groups/{id}', () => {
+  describe('DELETE /internal/workplace_search/groups/{id}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'delete',
-        path: '/api/workplace_search/groups/{id}',
+        path: '/internal/workplace_search/groups/{id}',
       });
 
       registerGroupRoute({
@@ -210,14 +210,14 @@ describe('groups routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/groups/{id}/group_users', () => {
+  describe('GET /internal/workplace_search/groups/{id}/group_users', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/groups/{id}/group_users',
+        path: '/internal/workplace_search/groups/{id}/group_users',
       });
 
       registerGroupUsersRoute({
@@ -233,14 +233,14 @@ describe('groups routes', () => {
     });
   });
 
-  describe('POST /api/workplace_search/groups/{id}/share', () => {
+  describe('POST /internal/workplace_search/groups/{id}/share', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/workplace_search/groups/{id}/share',
+        path: '/internal/workplace_search/groups/{id}/share',
       });
 
       registerShareGroupRoute({
@@ -268,14 +268,14 @@ describe('groups routes', () => {
     });
   });
 
-  describe('PUT /api/workplace_search/groups/{id}/boosts', () => {
+  describe('PUT /internal/workplace_search/groups/{id}/boosts', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path: '/api/workplace_search/groups/{id}/boosts',
+        path: '/internal/workplace_search/groups/{id}/boosts',
       });
 
       registerBoostsGroupRoute({

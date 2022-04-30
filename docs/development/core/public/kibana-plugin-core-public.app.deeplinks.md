@@ -44,6 +44,5 @@ core.application.register({
   ],
   mount: () => { ... }
 })
-
 ```
 

@@ -34,6 +34,7 @@ const createSetupContractMock = () => {
     getBounds: jest.fn(),
     calculateBounds: jest.fn(),
     createFilter: jest.fn(),
+    createRelativeFilter: jest.fn(),
     getRefreshIntervalDefaults: jest.fn(),
     getTimeDefaults: jest.fn(),
     getAbsoluteTime: jest.fn(),

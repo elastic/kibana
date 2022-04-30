@@ -87,6 +87,7 @@ export const useGetTransforms = (
           mode:
             typeof config.sync !== 'undefined' ? TRANSFORM_MODE.CONTINUOUS : TRANSFORM_MODE.BATCH,
           stats,
+          alerting_rules: config.alerting_rules,
         });
         return reducedtableRows;
       }, [] as TransformListRow[]);

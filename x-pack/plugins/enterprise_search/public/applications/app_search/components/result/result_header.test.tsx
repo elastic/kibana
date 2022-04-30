@@ -9,6 +9,10 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { EuiBadge } from '@elastic/eui';
+
+import { mountWithIntl } from '../../../test_helpers';
+
 import { ResultActions } from './result_actions';
 import { ResultHeader } from './result_header';
 
@@ -44,6 +48,13 @@ describe('ResultHeader', () => {
     expect(wrapper.find('[data-test-subj="ResultId"]').prop('href')).toEqual(
       '/engines/my-engine/documents/1'
     );
+  });
+
+  it('renders position if one is passed in', () => {
+    const wrapper = mountWithIntl(<ResultHeader {...props} resultPosition={5} />);
+
+    const badge = wrapper.find(EuiBadge);
+    expect(badge.text()).toContain('#5');
   });
 
   describe('score', () => {

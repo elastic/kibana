@@ -14,7 +14,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe('telemetry collectors heartbeat', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/111240
+  describe.skip('telemetry collectors heartbeat', () => {
     before('generating data', async () => {
       await getService('esArchiver').load('x-pack/test/functional/es_archives/uptime/blank');
 

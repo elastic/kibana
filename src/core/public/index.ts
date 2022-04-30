@@ -103,6 +103,8 @@ export type {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkCreateOptions,
+  SavedObjectsBulkResolveObject,
+  SavedObjectsBulkResolveResponse,
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
   SavedObjectsCreateOptions,
@@ -155,6 +157,7 @@ export type {
   IAnonymousPaths,
   IExternalUrl,
   IHttpInterceptController,
+  ResponseErrorBody,
   IHttpFetchError,
   IHttpResponseInterceptorOverrides,
 } from './http';

@@ -13,7 +13,6 @@
 
 import apm from 'elastic-apm-node';
 import { withSpan } from '@kbn/apm-utils';
-import { performance } from 'perf_hooks';
 import { identity, defaults, flow } from 'lodash';
 import {
   Logger,
@@ -59,6 +58,10 @@ import { isUnrecoverableError } from './errors';
 
 const defaultBackoffPerFailure = 5 * 60 * 1000;
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
+
+export const TASK_MANAGER_RUN_TRANSACTION_TYPE = 'task-run';
+export const TASK_MANAGER_TRANSACTION_TYPE = 'task-manager';
+export const TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING = 'mark-task-as-running';
 
 export interface TaskRunner {
   isExpired: boolean;
@@ -257,7 +260,7 @@ export class TaskManagerRunner implements TaskRunner {
     }
     this.logger.debug(`Running task ${this}`);
 
-    const apmTrans = apm.startTransaction(this.taskType, 'taskManager run', {
+    const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
       childOf: this.instance.task.traceparent,
     });
 
@@ -313,9 +316,12 @@ export class TaskManagerRunner implements TaskRunner {
         }`
       );
     }
-    performance.mark('markTaskAsRunning_start');
 
-    const apmTrans = apm.startTransaction('taskManager', 'taskManager markTaskAsRunning');
+    const apmTrans = apm.startTransaction(
+      TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
+      TASK_MANAGER_TRANSACTION_TYPE
+    );
+    apmTrans?.addLabels({ entityId: this.taskType });
 
     const now = new Date();
     try {
@@ -361,9 +367,8 @@ export class TaskManagerRunner implements TaskRunner {
         })) as ConcreteTaskInstanceWithStartedAt
       );
 
-      const timeUntilClaimExpiresAfterUpdate = howManyMsUntilOwnershipClaimExpires(
-        ownershipClaimedUntil
-      );
+      const timeUntilClaimExpiresAfterUpdate =
+        howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil);
       if (timeUntilClaimExpiresAfterUpdate < 0) {
         this.logger.debug(
           `[Task Runner] Task ${id} ran after ownership expired (${Math.abs(
@@ -373,12 +378,10 @@ export class TaskManagerRunner implements TaskRunner {
       }
 
       if (apmTrans) apmTrans.end('success');
-      performanceStopMarkingTaskAsRunning();
       this.onTaskEvent(asTaskMarkRunningEvent(this.id, asOk(this.instance.task)));
       return true;
     } catch (error) {
       if (apmTrans) apmTrans.end('failure');
-      performanceStopMarkingTaskAsRunning();
       this.onTaskEvent(asTaskMarkRunningEvent(this.id, asErr(error)));
       if (!SavedObjectsErrorHelpers.isConflictError(error)) {
         if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
@@ -404,6 +407,7 @@ export class TaskManagerRunner implements TaskRunner {
   public async cancel() {
     const { task } = this;
     if (task?.cancel) {
+      // it will cause the task state of "running" to be cleared
       this.task = undefined;
       return task.cancel();
     }
@@ -616,15 +620,6 @@ function sanitizeInstance(instance: ConcreteTaskInstance): ConcreteTaskInstance 
 
 function howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil: Date | null): number {
   return ownershipClaimedUntil ? ownershipClaimedUntil.getTime() - Date.now() : 0;
-}
-
-function performanceStopMarkingTaskAsRunning() {
-  performance.mark('markTaskAsRunning_stop');
-  performance.measure(
-    'taskRunner.markTaskAsRunning',
-    'markTaskAsRunning_start',
-    'markTaskAsRunning_stop'
-  );
 }
 
 // A type that extracts the Instance type out of TaskRunningStage

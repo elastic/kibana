@@ -7,8 +7,9 @@
  */
 
 import { stubIndexPattern, stubFields } from '../../stubs';
-import { TimefilterSetup } from '../../query';
-import { setupValueSuggestionProvider, ValueSuggestionsGetFn } from './value_suggestion_provider';
+import type { TimefilterSetup } from '../../query';
+import { setupValueSuggestionProvider } from './value_suggestion_provider';
+import type { ValueSuggestionsGetFn } from './value_suggestion_provider';
 import { IUiSettingsClient, CoreSetup } from 'kibana/public';
 import { UI_SETTINGS } from '../../../common';
 
@@ -24,7 +25,7 @@ describe('FieldSuggestions', () => {
     http = { fetch: jest.fn().mockResolvedValue([]) };
 
     getValueSuggestions = setupValueSuggestionProvider({ http, uiSettings } as CoreSetup, {
-      timefilter: ({
+      timefilter: {
         timefilter: {
           createFilter: () => {
             return {
@@ -38,7 +39,7 @@ describe('FieldSuggestions', () => {
             };
           },
         },
-      } as unknown) as TimefilterSetup,
+      } as unknown as TimefilterSetup,
     });
   });
 

@@ -11,6 +11,7 @@ import { act, cleanup } from '@testing-library/react';
 
 import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from '../../../../constants';
 import type {
+  CheckPermissionsResponse,
   GetAgentPoliciesResponse,
   GetFleetStatusResponse,
   GetInfoResponse,
@@ -23,6 +24,7 @@ import type {
 } from '../../../../../../../common/types/models';
 import {
   agentPolicyRouteService,
+  appRoutesService,
   epmRouteService,
   fleetSetupRouteService,
   packagePolicyRouteService,
@@ -73,7 +75,7 @@ describe('when on integration detail', () => {
   describe('and the package is not installed', () => {
     beforeEach(() => {
       const unInstalledPackage = mockedApi.responseProvider.epmGetInfo();
-      unInstalledPackage.response.status = 'not_installed';
+      unInstalledPackage.item.status = 'not_installed';
       mockedApi.responseProvider.epmGetInfo.mockReturnValue(unInstalledPackage);
       render();
     });
@@ -241,38 +243,6 @@ describe('when on integration detail', () => {
         'http://localhost/mock/app/integrations/edit-integration/e8a37031-2907-44f6-89d2-98bd493f60dc'
       );
     });
-
-    it('should NOT show link for agent count if it is zero', async () => {
-      await mockedApi.waitForApi();
-      const firstRowAgentCount = renderResult.getAllByTestId('rowAgentCount')[0];
-      expect(firstRowAgentCount.textContent).toEqual('0');
-      expect(firstRowAgentCount.tagName).not.toEqual('A');
-    });
-
-    it('should show add agent button if agent count is zero', async () => {
-      await mockedApi.waitForApi();
-      const firstRowAgentCount = renderResult.getAllByTestId('rowAgentCount')[0];
-      expect(firstRowAgentCount.textContent).toEqual('0');
-
-      const addAgentButton = renderResult.getAllByTestId('addAgentButton')[0];
-      expect(addAgentButton).not.toBeNull();
-    });
-
-    it('should show link for agent count if greater than zero', async () => {
-      await mockedApi.waitForApi();
-      const secondRowAgentCount = renderResult.getAllByTestId('rowAgentCount')[1];
-      expect(secondRowAgentCount.textContent).toEqual('100');
-      expect(secondRowAgentCount.tagName).toEqual('A');
-    });
-
-    it('should NOT show add agent button if agent count is greater than zero', async () => {
-      await mockedApi.waitForApi();
-      const secondRowAgentCount = renderResult.getAllByTestId('rowAgentCount')[1];
-      expect(secondRowAgentCount.textContent).toEqual('100');
-
-      const addAgentButton = renderResult.getAllByTestId('addAgentButton')[1];
-      expect(addAgentButton).toBeUndefined();
-    });
   });
 });
 
@@ -292,6 +262,7 @@ interface EpmPackageDetailsResponseProvidersMock {
   fleetSetup: jest.MockedFunction<() => GetFleetStatusResponse>;
   packagePolicyList: jest.MockedFunction<() => GetPackagePoliciesResponse>;
   agentPolicyList: jest.MockedFunction<() => GetAgentPoliciesResponse>;
+  appCheckPermissions: jest.MockedFunction<() => CheckPermissionsResponse>;
 }
 
 const mockApiCalls = (
@@ -312,7 +283,7 @@ const mockApiCalls = (
 
   // @ts-ignore
   const epmPackageResponse: GetInfoResponse = {
-    response: {
+    item: {
       name: 'nginx',
       title: 'Nginx',
       version: '0.3.7',
@@ -772,6 +743,10 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
     },
   };
 
+  const appCheckPermissionsResponse: CheckPermissionsResponse = {
+    success: true,
+  };
+
   const mockedApiInterface: MockedApi<EpmPackageDetailsResponseProvidersMock> = {
     waitForApi() {
       return new Promise((resolve) => {
@@ -789,12 +764,13 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
       fleetSetup: jest.fn().mockReturnValue(agentsSetupResponse),
       packagePolicyList: jest.fn().mockReturnValue(packagePoliciesResponse),
       agentPolicyList: jest.fn().mockReturnValue(agentPoliciesResponse),
+      appCheckPermissions: jest.fn().mockReturnValue(appCheckPermissionsResponse),
     },
   };
 
   http.get.mockImplementation(async (path: any) => {
     if (typeof path === 'string') {
-      if (path === epmRouteService.getInfoPath(`nginx-0.3.7`)) {
+      if (path === epmRouteService.getInfoPath(`nginx`, `0.3.7`)) {
         markApiCallAsHandled();
         return mockedApiInterface.responseProvider.epmGetInfo();
       }
@@ -822,6 +798,11 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
       if (path === epmRouteService.getStatsPath('nginx')) {
         markApiCallAsHandled();
         return mockedApiInterface.responseProvider.epmGetStats();
+      }
+
+      if (path === appRoutesService.getCheckPermissionsPath()) {
+        markApiCallAsHandled();
+        return mockedApiInterface.responseProvider.appCheckPermissions();
       }
 
       const err = new Error(`API [GET ${path}] is not MOCKED!`);

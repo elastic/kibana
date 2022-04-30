@@ -73,9 +73,6 @@ The API returns the following:
         "indexPatterns": [
           "read"
         ],
-        "timelion": [
-          "all"
-        ],
         "graph": [
           "all"
         ],

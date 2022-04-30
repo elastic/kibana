@@ -59,6 +59,7 @@ export interface ExplorerState {
   viewBySwimlaneOptions: string[];
   swimlaneLimit?: number;
   swimLaneSeverity?: number;
+  showCharts: boolean;
 }
 
 function getDefaultIndexPattern() {
@@ -70,12 +71,10 @@ export function getExplorerDefaultState(): ExplorerState {
     overallAnnotations: {
       error: undefined,
       annotationsData: [],
-      aggregations: {},
     },
     annotations: {
       error: undefined,
       annotationsData: [],
-      aggregations: {},
     },
     anomalyChartsDataLoading: true,
     chartsData: getDefaultChartsData(),
@@ -112,5 +111,6 @@ export function getExplorerDefaultState(): ExplorerState {
     viewByPerPage: SWIM_LANE_DEFAULT_PAGE_SIZE,
     viewByFromPage: 1,
     swimlaneLimit: undefined,
+    showCharts: true,
   };
 }

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import SemVer from 'semver/classes/semver';
 
 import {
   NormalizedField,
@@ -32,9 +33,10 @@ const getDefaultToggleValue = (param: ParameterName, field: FieldType) => {
 
 interface Props {
   field: NormalizedField;
+  kibanaVersion: SemVer;
 }
 
-export const RangeType = ({ field }: Props) => {
+export const RangeType = ({ field, kibanaVersion }: Props) => {
   return (
     <>
       <BasicParametersSection>
@@ -67,7 +69,10 @@ export const RangeType = ({ field }: Props) => {
 
         <MetaParameter defaultToggleValue={getDefaultToggleValue('meta', field.source)} />
 
-        <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
+        {/* The "boost" parameter is deprecated since 8.x */}
+        {kibanaVersion.major < 8 && (
+          <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
+        )}
       </AdvancedParametersSection>
     </>
   );

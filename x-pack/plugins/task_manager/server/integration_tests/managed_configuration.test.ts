@@ -16,7 +16,8 @@ import { TaskManagerPlugin, TaskManagerStartContract } from '../plugin';
 import { coreMock } from '../../../../../src/core/server/mocks';
 import { TaskManagerConfig } from '../config';
 
-describe('managed configuration', () => {
+// FAILING: https://github.com/elastic/kibana/issues/120269
+describe.skip('managed configuration', () => {
   let taskManagerStart: TaskManagerStartContract;
   let logger: Logger;
 
@@ -29,9 +30,7 @@ describe('managed configuration', () => {
     clock = sinon.useFakeTimers();
 
     const context = coreMock.createPluginInitializerContext<TaskManagerConfig>({
-      enabled: true,
       max_workers: 10,
-      index: 'foo',
       max_attempts: 9,
       poll_interval: 3000,
       version_conflict_threshold: 80,
@@ -54,6 +53,9 @@ describe('managed configuration', () => {
       ephemeral_tasks: {
         enabled: true,
         request_capacity: 10,
+      },
+      unsafe: {
+        exclude_task_types: [],
       },
     });
     logger = context.logger.get('taskManager');

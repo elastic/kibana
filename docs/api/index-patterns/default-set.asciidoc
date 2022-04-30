@@ -4,6 +4,8 @@
 <titleabbrev>Set default index pattern</titleabbrev>
 ++++
 
+deprecated::[8.0.0,Use <<data-views-api-default-set>> instead.]
+
 experimental[] Set a default index pattern ID. Kibana UI will use default index pattern unless user picks a different one. 
 The API doesn't validate if given `index_pattern_id` is a valid id. 
 

@@ -51,13 +51,6 @@ jest.mock('@elastic/eui/packages/react-datepicker', () => {
 // @ts-expect-error Portal mocks are notoriously difficult to type
 ReactDOM.createPortal = jest.fn((element) => element);
 
-// Mock the EUI HTML ID Generator so elements have a predictable ID in snapshots
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
-  return {
-    htmlIdGenerator: () => () => `generated-id`,
-  };
-});
-
 // To be resolved by EUI team.
 // https://github.com/elastic/eui/issues/3712
 jest.mock('@elastic/eui/lib/components/overlay_mask/overlay_mask', () => {
@@ -78,6 +71,11 @@ jest.mock(
 import { EuiObserver } from '@elastic/eui/test-env/components/observer/observer';
 jest.mock('@elastic/eui/test-env/components/observer/observer');
 EuiObserver.mockImplementation(() => 'EuiObserver');
+
+import { ExpressionInput } from '../../../../src/plugins/presentation_util/public/components/expression_input';
+jest.mock('../../../../src/plugins/presentation_util/public/components/expression_input');
+// @ts-expect-error
+ExpressionInput.mockImplementation(() => 'ExpressionInput');
 
 // @ts-expect-error untyped library
 import Dropzone from 'react-dropzone';

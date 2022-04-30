@@ -8,9 +8,13 @@
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
 import { render } from '../../lib/helper/rtl_helpers';
-import { TLSFields, TLSRole } from './tls_fields';
-import { ConfigKeys, VerificationMode } from './types';
-import { TLSFieldsContextProvider, defaultTLSFields as defaultValues } from './contexts';
+import { TLSFields } from './tls_fields';
+import { ConfigKey, VerificationMode } from './types';
+import {
+  TLSFieldsContextProvider,
+  PolicyConfigContextProvider,
+  defaultTLSFields as defaultValues,
+} from './contexts';
 
 // ensures that fields appropriately match to their label
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
@@ -18,17 +22,13 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 }));
 
 describe('<TLSFields />', () => {
-  const WrappedComponent = ({
-    tlsRole = TLSRole.CLIENT,
-    isEnabled = true,
-  }: {
-    tlsRole?: TLSRole;
-    isEnabled?: boolean;
-  }) => {
+  const WrappedComponent = ({ isEnabled = true }: { isEnabled?: boolean }) => {
     return (
-      <TLSFieldsContextProvider defaultValues={defaultValues}>
-        <TLSFields tlsRole={tlsRole} isEnabled={isEnabled} />
-      </TLSFieldsContextProvider>
+      <PolicyConfigContextProvider defaultIsTLSEnabled={isEnabled}>
+        <TLSFieldsContextProvider defaultValues={defaultValues}>
+          <TLSFields />
+        </TLSFieldsContextProvider>
+      </PolicyConfigContextProvider>
     );
   };
   it('renders TLSFields', () => {
@@ -42,15 +42,6 @@ describe('<TLSFields />', () => {
     expect(getByLabelText('Verification mode')).toBeInTheDocument();
   });
 
-  it('handles role', () => {
-    const { getByLabelText, rerender } = render(<WrappedComponent tlsRole={TLSRole.SERVER} />);
-
-    expect(getByLabelText('Server certificate')).toBeInTheDocument();
-    expect(getByLabelText('Server key')).toBeInTheDocument();
-
-    rerender(<WrappedComponent tlsRole={TLSRole.CLIENT} />);
-  });
-
   it('updates fields and calls onChange', async () => {
     const { getByLabelText } = render(<WrappedComponent />);
 
@@ -61,31 +52,31 @@ describe('<TLSFields />', () => {
     const verificationMode = getByLabelText('Verification mode') as HTMLInputElement;
 
     const newValues = {
-      [ConfigKeys.TLS_CERTIFICATE]: 'sampleClientCertificate',
-      [ConfigKeys.TLS_KEY]: 'sampleClientKey',
-      [ConfigKeys.TLS_KEY_PASSPHRASE]: 'sampleClientKeyPassphrase',
-      [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: 'sampleCertificateAuthorities',
-      [ConfigKeys.TLS_VERIFICATION_MODE]: VerificationMode.NONE,
+      [ConfigKey.TLS_CERTIFICATE]: 'sampleClientCertificate',
+      [ConfigKey.TLS_KEY]: 'sampleClientKey',
+      [ConfigKey.TLS_KEY_PASSPHRASE]: 'sampleClientKeyPassphrase',
+      [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: 'sampleCertificateAuthorities',
+      [ConfigKey.TLS_VERIFICATION_MODE]: VerificationMode.NONE,
     };
 
     fireEvent.change(clientCertificate, {
-      target: { value: newValues[ConfigKeys.TLS_CERTIFICATE] },
+      target: { value: newValues[ConfigKey.TLS_CERTIFICATE] },
     });
-    fireEvent.change(clientKey, { target: { value: newValues[ConfigKeys.TLS_KEY] } });
+    fireEvent.change(clientKey, { target: { value: newValues[ConfigKey.TLS_KEY] } });
     fireEvent.change(clientKeyPassphrase, {
-      target: { value: newValues[ConfigKeys.TLS_KEY_PASSPHRASE] },
+      target: { value: newValues[ConfigKey.TLS_KEY_PASSPHRASE] },
     });
     fireEvent.change(certificateAuthorities, {
-      target: { value: newValues[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES] },
+      target: { value: newValues[ConfigKey.TLS_CERTIFICATE_AUTHORITIES] },
     });
     fireEvent.change(verificationMode, {
-      target: { value: newValues[ConfigKeys.TLS_VERIFICATION_MODE] },
+      target: { value: newValues[ConfigKey.TLS_VERIFICATION_MODE] },
     });
 
-    expect(clientCertificate.value).toEqual(newValues[ConfigKeys.TLS_CERTIFICATE]);
-    expect(clientKey.value).toEqual(newValues[ConfigKeys.TLS_KEY]);
-    expect(certificateAuthorities.value).toEqual(newValues[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]);
-    expect(verificationMode.value).toEqual(newValues[ConfigKeys.TLS_VERIFICATION_MODE]);
+    expect(clientCertificate.value).toEqual(newValues[ConfigKey.TLS_CERTIFICATE]);
+    expect(clientKey.value).toEqual(newValues[ConfigKey.TLS_KEY]);
+    expect(certificateAuthorities.value).toEqual(newValues[ConfigKey.TLS_CERTIFICATE_AUTHORITIES]);
+    expect(verificationMode.value).toEqual(newValues[ConfigKey.TLS_VERIFICATION_MODE]);
   });
 
   it('shows warning when verification mode is set to none', () => {

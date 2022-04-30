@@ -9,13 +9,13 @@
 import React, { Fragment } from 'react';
 import { EuiCode, EuiIcon, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../../../types';
 
 export const ScriptingSyntax = () => {
-  const docLinksScriptedFields = useKibana<IndexPatternManagmentContext>().services.docLinks?.links
-    .scriptedFields;
+  const docLinksScriptedFields =
+    useKibana<IndexPatternManagmentContext>().services.docLinks?.links.scriptedFields;
   return (
     <Fragment>
       <EuiSpacer />

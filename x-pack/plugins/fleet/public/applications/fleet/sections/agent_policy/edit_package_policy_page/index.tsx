@@ -8,7 +8,8 @@
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { safeLoad } from 'js-yaml';
 import {
   EuiButtonEmpty,
   EuiButton,
@@ -24,6 +25,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiTitle,
+  EuiErrorBoundary,
 } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -39,10 +41,12 @@ import {
   sendGetOneAgentPolicy,
   sendGetOnePackagePolicy,
   sendGetPackageInfoByKey,
-  sendUpgradePackagePolicy,
   sendUpgradePackagePolicyDryRun,
 } from '../../../hooks';
-import { useBreadcrumbs as useIntegrationsBreadcrumbs } from '../../../../integrations/hooks';
+import {
+  useBreadcrumbs as useIntegrationsBreadcrumbs,
+  useGetOnePackagePolicy,
+} from '../../../../integrations/hooks';
 import { Loading, Error, ExtensionWrapper } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
 import { CreatePackagePolicyPageLayout } from '../create_package_policy_page/components';
@@ -61,19 +65,37 @@ import type {
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { pkgKeyFromPackageInfo, storedPackagePoliciesToAgentInputs } from '../../../services';
 
+import { hasUpgradeAvailable } from './utils';
+
 export const EditPackagePolicyPage = memo(() => {
   const {
     params: { packagePolicyId },
   } = useRouteMatch<{ policyId: string; packagePolicyId: string }>();
 
-  return <EditPackagePolicyForm packagePolicyId={packagePolicyId} />;
+  const packagePolicy = useGetOnePackagePolicy(packagePolicyId);
+
+  const extensionView = useUIExtension(
+    packagePolicy.data?.item?.package?.name ?? '',
+    'package-policy-edit'
+  );
+
+  return (
+    <EditPackagePolicyForm
+      packagePolicyId={packagePolicyId}
+      // If an extension opts in to this `useLatestPackageVersion` flag, we want to display
+      // the edit form in an "upgrade" state regardless of whether the user intended to
+      // "edit" their policy or "upgrade" it. This ensures the new policy generated will be
+      // set to use the latest version of the package, not its current version.
+      forceUpgrade={extensionView?.useLatestPackageVersion}
+    />
+  );
 });
 
 export const EditPackagePolicyForm = memo<{
   packagePolicyId: string;
-  isUpgrade?: boolean;
+  forceUpgrade?: boolean;
   from?: EditPackagePolicyFrom;
-}>(({ packagePolicyId, isUpgrade = false, from = 'edit' }) => {
+}>(({ packagePolicyId, forceUpgrade = false, from = 'edit' }) => {
   const { application, notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
@@ -95,10 +117,17 @@ export const EditPackagePolicyForm = memo<{
     inputs: [],
     version: '',
   });
-  const [originalPackagePolicy, setOriginalPackagePolicy] = useState<
-    GetOnePackagePolicyResponse['item']
-  >();
+  const [originalPackagePolicy, setOriginalPackagePolicy] =
+    useState<GetOnePackagePolicyResponse['item']>();
   const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse>();
+
+  const [isUpgrade, setIsUpgrade] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (forceUpgrade) {
+      setIsUpgrade(true);
+    }
+  }, [forceUpgrade]);
 
   const policyId = agentPolicy?.id ?? '';
 
@@ -108,10 +137,8 @@ export const EditPackagePolicyForm = memo<{
       setIsLoadingData(true);
       setLoadingError(undefined);
       try {
-        const {
-          data: packagePolicyData,
-          error: packagePolicyError,
-        } = await sendGetOnePackagePolicy(packagePolicyId);
+        const { data: packagePolicyData, error: packagePolicyError } =
+          await sendGetOnePackagePolicy(packagePolicyId);
 
         if (packagePolicyError) {
           throw packagePolicyError;
@@ -129,11 +156,24 @@ export const EditPackagePolicyForm = memo<{
           setAgentPolicy(agentPolicyData.item);
         }
 
-        const { data: upgradePackagePolicyDryRunData } = await sendUpgradePackagePolicyDryRun([
-          packagePolicyId,
-        ]);
+        const { data: upgradePackagePolicyDryRunData, error: upgradePackagePolicyDryRunError } =
+          await sendUpgradePackagePolicyDryRun([packagePolicyId]);
 
-        if (upgradePackagePolicyDryRunData) {
+        if (upgradePackagePolicyDryRunError) {
+          throw upgradePackagePolicyDryRunError;
+        }
+
+        const hasUpgrade = upgradePackagePolicyDryRunData
+          ? hasUpgradeAvailable(upgradePackagePolicyDryRunData)
+          : false;
+
+        // If the dry run data doesn't indicate a difference in version numbers, flip the form back
+        // to its non-upgrade state, even if we were initially set to the upgrade view
+        if (!hasUpgrade) {
+          setIsUpgrade(false);
+        }
+
+        if (upgradePackagePolicyDryRunData && hasUpgrade) {
           setDryRunData(upgradePackagePolicyDryRunData);
         }
 
@@ -170,7 +210,24 @@ export const EditPackagePolicyForm = memo<{
             ...restOfPackagePolicy,
             inputs: baseInputs.map((input: any) => {
               // Remove `compiled_input` from all input info, we assign this after saving
-              const { streams, compiled_input: compiledInput, ...restOfInput } = input;
+              const { streams, compiled_input: compiledInput, vars, ...restOfInput } = input;
+              let basePolicyInputVars: any =
+                isUpgrade &&
+                basePolicy.inputs.find(
+                  (i) => i.type === input.type && i.policy_template === input.policy_template
+                )?.vars;
+              let newVars = vars;
+              if (basePolicyInputVars && vars) {
+                // merging vars from dry run with updated ones
+                basePolicyInputVars = Object.keys(vars).reduce(
+                  (acc, curr) => ({ ...acc, [curr]: basePolicyInputVars[curr] }),
+                  {}
+                );
+                newVars = {
+                  ...vars,
+                  ...basePolicyInputVars,
+                };
+              }
               return {
                 ...restOfInput,
                 streams: streams.map((stream: any) => {
@@ -178,6 +235,7 @@ export const EditPackagePolicyForm = memo<{
                   const { compiled_stream, ...restOfStream } = stream;
                   return restOfStream;
                 }),
+                vars: newVars,
               };
             }),
             package: basePackage,
@@ -196,13 +254,25 @@ export const EditPackagePolicyForm = memo<{
             }
 
             const { data: packageData } = await sendGetPackageInfoByKey(
-              pkgKeyFromPackageInfo(_packageInfo!)
+              _packageInfo!.name,
+              _packageInfo!.version
             );
 
-            if (packageData?.response) {
-              setPackageInfo(packageData.response);
-              setValidationResults(validatePackagePolicy(newPackagePolicy, packageData.response));
-              setFormState('VALID');
+            if (packageData?.item) {
+              setPackageInfo(packageData.item);
+
+              const newValidationResults = validatePackagePolicy(
+                newPackagePolicy,
+                packageData.item,
+                safeLoad
+              );
+              setValidationResults(newValidationResults);
+
+              if (validationHasErrors(newValidationResults)) {
+                setFormState('INVALID');
+              } else {
+                setFormState('VALID');
+              }
             }
           }
         }
@@ -239,7 +309,8 @@ export const EditPackagePolicyForm = memo<{
       if (packageInfo) {
         const newValidationResult = validatePackagePolicy(
           newPackagePolicy || packagePolicy,
-          packageInfo
+          packageInfo,
+          safeLoad
         );
         setValidationResults(newValidationResult);
         // eslint-disable-next-line no-console
@@ -254,6 +325,7 @@ export const EditPackagePolicyForm = memo<{
   // Update package policy method
   const updatePackagePolicy = useCallback(
     (updatedFields: Partial<UpdatePackagePolicy>) => {
+      setIsEdited(true);
       const newPackagePolicy = {
         ...packagePolicy,
         ...updatedFields,
@@ -268,6 +340,8 @@ export const EditPackagePolicyForm = memo<{
         : false;
       if (!hasValidationErrors) {
         setFormState('VALID');
+      } else {
+        setFormState('INVALID');
       }
     },
     [packagePolicy, updatePackagePolicyValidation]
@@ -314,10 +388,12 @@ export const EditPackagePolicyForm = memo<{
   }, [from, getHref, packageInfo, policyId]);
 
   // Save package policy
+  const [isEdited, setIsEdited] = useState(false);
   const [formState, setFormState] = useState<PackagePolicyFormState>('INVALID');
   const savePackagePolicy = async () => {
     setFormState('LOADING');
-    const result = await sendUpdatePackagePolicy(packagePolicyId, packagePolicy);
+    const { elasticsearch, ...restPackagePolicy } = packagePolicy; // ignore 'elasticsearch' property since it fails route validation
+    const result = await sendUpdatePackagePolicy(packagePolicyId, restPackagePolicy);
     setFormState('SUBMITTED');
     return result;
   };
@@ -334,29 +410,6 @@ export const EditPackagePolicyForm = memo<{
 
     const { error } = await savePackagePolicy();
     if (!error) {
-      if (isUpgrade) {
-        const { error: upgradeError } = await sendUpgradePackagePolicy([packagePolicyId]);
-
-        if (upgradeError) {
-          notifications.toasts.addError(upgradeError, {
-            title: i18n.translate('xpack.fleet.upgradePackagePolicy.failedNotificationTitle', {
-              defaultMessage: 'Error upgrading {packagePolicyName}',
-              values: {
-                packagePolicyName: packagePolicy.name,
-              },
-            }),
-            toastMessage: i18n.translate(
-              'xpack.fleet.editPackagePolicy.failedConflictNotificationMessage',
-              {
-                defaultMessage: `Data is out of date. Refresh the page to get the latest policy.`,
-              }
-            ),
-          });
-
-          return;
-        }
-      }
-
       application.navigateToUrl(successRedirectPath);
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.fleet.editPackagePolicy.updatedNotificationTitle', {
@@ -415,7 +468,7 @@ export const EditPackagePolicyForm = memo<{
   const [selectedTab, setSelectedTab] = useState(0);
 
   const layoutProps = {
-    from,
+    from: extensionView?.useLatestPackageVersion && isUpgrade ? 'upgrade-from-extension' : from,
     cancelUrl,
     agentPolicy,
     packageInfo,
@@ -453,6 +506,7 @@ export const EditPackagePolicyForm = memo<{
               updatePackagePolicy={updatePackagePolicy}
               validationResults={validationResults!}
               submitAttempted={formState === 'INVALID'}
+              isUpdate={true}
             />
           )}
 
@@ -506,93 +560,103 @@ export const EditPackagePolicyForm = memo<{
 
   return (
     <CreatePackagePolicyPageLayout {...layoutProps} data-test-subj="editPackagePolicy">
-      {isLoadingData ? (
-        <Loading />
-      ) : loadingError || !agentPolicy || !packageInfo ? (
-        <Error
-          title={
-            <FormattedMessage
-              id="xpack.fleet.editPackagePolicy.errorLoadingDataTitle"
-              defaultMessage="Error loading data"
-            />
-          }
-          error={
-            loadingError ||
-            i18n.translate('xpack.fleet.editPackagePolicy.errorLoadingDataMessage', {
-              defaultMessage: 'There was an error loading this integration information',
-            })
-          }
-        />
-      ) : (
-        <>
-          <Breadcrumb
-            agentPolicyName={agentPolicy.name}
-            from={from}
-            packagePolicyName={packagePolicy.name}
-            pkgkey={pkgKeyFromPackageInfo(packageInfo)}
-            pkgTitle={packageInfo.title}
-            policyId={policyId}
+      <EuiErrorBoundary>
+        {isLoadingData ? (
+          <Loading />
+        ) : loadingError || !agentPolicy || !packageInfo ? (
+          <Error
+            title={
+              <FormattedMessage
+                id="xpack.fleet.editPackagePolicy.errorLoadingDataTitle"
+                defaultMessage="Error loading data"
+              />
+            }
+            error={
+              loadingError ||
+              i18n.translate('xpack.fleet.editPackagePolicy.errorLoadingDataMessage', {
+                defaultMessage: 'There was an error loading this integration information',
+              })
+            }
           />
-          {formState === 'CONFIRM' && (
-            <ConfirmDeployAgentPolicyModal
-              agentCount={agentCount}
-              agentPolicy={agentPolicy}
-              onConfirm={onSubmit}
-              onCancel={() => setFormState('VALID')}
+        ) : (
+          <>
+            <Breadcrumb
+              agentPolicyName={agentPolicy.name}
+              from={from}
+              packagePolicyName={packagePolicy.name}
+              pkgkey={pkgKeyFromPackageInfo(packageInfo)}
+              pkgTitle={packageInfo.title}
+              policyId={policyId}
             />
-          )}
-          {isUpgrade && dryRunData && (
-            <>
-              <UpgradeStatusCallout dryRunData={dryRunData} />
-              <EuiSpacer size="xxl" />
-            </>
-          )}
-          {configurePackage}
-          {/* Extra space to accomodate the EuiBottomBar height */}
-          <EuiSpacer size="xxl" />
-          <EuiSpacer size="xxl" />
-          <EuiBottomBar>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem grow={false}>
-                {agentPolicy && packageInfo && formState === 'INVALID' ? (
-                  <FormattedMessage
-                    id="xpack.fleet.createPackagePolicy.errorOnSaveText"
-                    defaultMessage="Your integration policy has errors. Please fix them before saving."
-                  />
-                ) : null}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty color="ghost" href={cancelUrl}>
-                      <FormattedMessage
-                        id="xpack.fleet.editPackagePolicy.cancelButton"
-                        defaultMessage="Cancel"
-                      />
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      onClick={onSubmit}
-                      isLoading={formState === 'LOADING'}
-                      disabled={formState !== 'VALID'}
-                      iconType="save"
-                      color="primary"
-                      fill
-                      data-test-subj="saveIntegration"
-                    >
-                      <FormattedMessage
-                        id="xpack.fleet.editPackagePolicy.saveButton"
-                        defaultMessage="Save integration"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiBottomBar>
-        </>
-      )}
+            {formState === 'CONFIRM' && (
+              <ConfirmDeployAgentPolicyModal
+                agentCount={agentCount}
+                agentPolicy={agentPolicy}
+                onConfirm={onSubmit}
+                onCancel={() => setFormState('VALID')}
+              />
+            )}
+            {isUpgrade && dryRunData && (
+              <>
+                <UpgradeStatusCallout dryRunData={dryRunData} />
+                <EuiSpacer size="xxl" />
+              </>
+            )}
+            {configurePackage}
+            {/* Extra space to accomodate the EuiBottomBar height */}
+            <EuiSpacer size="xxl" />
+            <EuiSpacer size="xxl" />
+            <EuiBottomBar>
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  {agentPolicy && packageInfo && formState === 'INVALID' ? (
+                    <FormattedMessage
+                      id="xpack.fleet.createPackagePolicy.errorOnSaveText"
+                      defaultMessage="Your integration policy has errors. Please fix them before saving."
+                    />
+                  ) : null}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty color="ghost" href={cancelUrl}>
+                        <FormattedMessage
+                          id="xpack.fleet.editPackagePolicy.cancelButton"
+                          defaultMessage="Cancel"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        onClick={onSubmit}
+                        isLoading={formState === 'LOADING'}
+                        // Allow to save only if the package policy is upgraded or had been edited
+                        disabled={formState !== 'VALID' || (!isEdited && !isUpgrade)}
+                        iconType="save"
+                        color="primary"
+                        fill
+                        data-test-subj="saveIntegration"
+                      >
+                        {isUpgrade ? (
+                          <FormattedMessage
+                            id="xpack.fleet.editPackagePolicy.upgradeButton"
+                            defaultMessage="Upgrade integration"
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.fleet.editPackagePolicy.saveButton"
+                            defaultMessage="Save integration"
+                          />
+                        )}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiBottomBar>
+          </>
+        )}
+      </EuiErrorBoundary>
     </CreatePackagePolicyPageLayout>
   );
 });
@@ -647,6 +711,12 @@ const UpgradeBreadcrumb: React.FunctionComponent<{
   return null;
 };
 
+const FlyoutBody = styled(EuiFlyoutBody)`
+  .euiFlyoutBody__overflowContent {
+    padding: 0;
+  }
+`;
+
 const UpgradeStatusCallout: React.FunctionComponent<{
   dryRunData: UpgradePackagePolicyDryRunResponse;
 }> = ({ dryRunData }) => {
@@ -660,12 +730,6 @@ const UpgradeStatusCallout: React.FunctionComponent<{
 
   const [currentPackagePolicy, proposedUpgradePackagePolicy] = dryRunData[0].diff || [];
 
-  const FlyoutBody = styled(EuiFlyoutBody)`
-    .euiFlyoutBody__overflowContent {
-      padding: 0;
-    }
-  `;
-
   return (
     <>
       {isPreviousVersionFlyoutOpen && currentPackagePolicy && (
@@ -676,7 +740,7 @@ const UpgradeStatusCallout: React.FunctionComponent<{
                 <h2 id="FleetPackagePolicyPreviousVersionFlyoutTitle">
                   <FormattedMessage
                     id="xpack.fleet.upgradePackagePolicy.previousVersionFlyout.title"
-                    defaultMessage="'{name}' package policy"
+                    defaultMessage="'{name}' integration policy"
                     values={{ name: currentPackagePolicy?.name }}
                   />
                 </h2>
@@ -722,7 +786,7 @@ const UpgradeStatusCallout: React.FunctionComponent<{
         >
           <FormattedMessage
             id="xpack.fleet.upgradePackagePolicy.statusCallout.errorContent"
-            defaultMessage="This integration has conflicting fields from version {currentVersion} to {upgradeVersion} Review the configuration and save to perform upgrade. You may reference your {previousConfigurationLink} for comparison."
+            defaultMessage="This integration has conflicting fields from version {currentVersion} to {upgradeVersion} Review the configuration and save to perform the upgrade. You may reference your {previousConfigurationLink} for comparison."
             values={{
               currentVersion: currentPackagePolicy?.package?.version,
               upgradeVersion: proposedUpgradePackagePolicy?.package?.version,

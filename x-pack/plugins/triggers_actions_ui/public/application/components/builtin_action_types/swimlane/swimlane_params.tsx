@@ -23,19 +23,17 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
   const { incident, comments } = useMemo(
     () =>
       actionParams.subActionParams ??
-      (({
+      ({
         incident: {},
         comments: [],
-      } as unknown) as SwimlaneActionParams['subActionParams']),
+      } as unknown as SwimlaneActionParams['subActionParams']),
     [actionParams.subActionParams]
   );
 
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
 
-  const {
-    mappings,
-    connectorType,
-  } = ((actionConnector as unknown) as SwimlaneActionConnector).config;
+  const { mappings, connectorType } = (actionConnector as unknown as SwimlaneActionConnector)
+    .config;
   const { hasAlertId, hasRuleName, hasComments, hasSeverity } = useMemo(
     () => ({
       hasAlertId: mappings.alertIdConfig != null,
@@ -79,9 +77,7 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
 
   const editComment = useCallback(
     (key, value) => {
-      if (value.length > 0) {
-        editSubActionProperty(key, [{ commentId: '1', comment: value }]);
-      }
+      editSubActionProperty(key, [{ commentId: '1', comment: value }]);
     },
     [editSubActionProperty]
   );

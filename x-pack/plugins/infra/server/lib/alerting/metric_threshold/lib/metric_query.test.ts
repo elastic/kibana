@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { MetricExpressionParams } from '../types';
-import { getElasticsearchMetricQuery } from './metric_query';
 import moment from 'moment';
+import { MetricExpressionParams } from '../../../../../common/alerting/metrics';
+import { getElasticsearchMetricQuery } from './metric_query';
 
 describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
   const expressionParams = {
@@ -17,7 +17,6 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     timeSize: 1,
   } as MetricExpressionParams;
 
-  const timefield = '@timestamp';
   const groupBy = 'host.doggoname';
   const timeframe = {
     start: moment().subtract(5, 'minutes').valueOf(),
@@ -25,7 +24,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
   };
 
   describe('when passed no filterQuery', () => {
-    const searchBody = getElasticsearchMetricQuery(expressionParams, timefield, timeframe, groupBy);
+    const searchBody = getElasticsearchMetricQuery(expressionParams, timeframe, 100, groupBy);
     test('includes a range filter', () => {
       expect(
         searchBody.query.bool.filter.find((filter) => filter.hasOwnProperty('range'))
@@ -47,8 +46,8 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
 
     const searchBody = getElasticsearchMetricQuery(
       expressionParams,
-      timefield,
       timeframe,
+      100,
       groupBy,
       filterQuery
     );
@@ -62,32 +61,6 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       expect(searchBody.query.bool.filter).toMatchObject(
         expect.arrayContaining([{ exists: { field: 'system.is.a.good.puppy.dog' } }])
       );
-    });
-  });
-
-  describe('when passed a timeframe of 1 hour', () => {
-    const testTimeframe = {
-      start: moment().subtract(1, 'hour').valueOf(),
-      end: moment().valueOf(),
-    };
-    const searchBodyWithoutGroupBy = getElasticsearchMetricQuery(
-      expressionParams,
-      timefield,
-      testTimeframe
-    );
-    const searchBodyWithGroupBy = getElasticsearchMetricQuery(
-      expressionParams,
-      timefield,
-      testTimeframe,
-      groupBy
-    );
-    test("generates 1 hour's worth of buckets", () => {
-      // @ts-ignore
-      expect(searchBodyWithoutGroupBy.aggs.aggregatedIntervals.date_range.ranges.length).toBe(60);
-      expect(
-        // @ts-ignore
-        searchBodyWithGroupBy.aggs.groupings.aggs.aggregatedIntervals.date_range.ranges.length
-      ).toBe(60);
     });
   });
 });

@@ -34,7 +34,7 @@ describe('createSessionRestorationDataProvider', () => {
       (mockDataPlugin.search.session.getSessionId as jest.Mock).mockImplementation(
         () => searchSessionId
       );
-      const { initialState, restoreState } = await searchSessionInfoProvider.getUrlGeneratorData();
+      const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
       expect(initialState.searchSessionId).toBeUndefined();
       expect(restoreState.searchSessionId).toBe(searchSessionId);
     });
@@ -48,13 +48,13 @@ describe('createSessionRestorationDataProvider', () => {
       (mockDataPlugin.query.timefilter.timefilter.getAbsoluteTime as jest.Mock).mockImplementation(
         () => absoluteTime
       );
-      const { initialState, restoreState } = await searchSessionInfoProvider.getUrlGeneratorData();
+      const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
       expect(initialState.timeRange).toBe(relativeTime);
       expect(restoreState.timeRange).toBe(absoluteTime);
     });
 
     test('restoreState has refreshInterval paused', async () => {
-      const { initialState, restoreState } = await searchSessionInfoProvider.getUrlGeneratorData();
+      const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
       expect(initialState.refreshInterval).toBeUndefined();
       expect(restoreState.refreshInterval?.pause).toBe(true);
     });

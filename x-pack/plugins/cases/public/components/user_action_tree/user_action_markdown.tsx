@@ -49,11 +49,12 @@ export const UserActionMarkdown = forwardRef<UserActionMarkdownRefObject, UserAc
 
     const handleSaveAction = useCallback(async () => {
       const { isValid, data } = await submit();
-      if (isValid) {
+
+      if (isValid && data.content !== content) {
         onSaveContent(data.content);
       }
       onChangeEditable(id);
-    }, [id, onChangeEditable, onSaveContent, submit]);
+    }, [content, id, onChangeEditable, onSaveContent, submit]);
 
     const setComment = useCallback(
       (newComment) => {
@@ -112,7 +113,7 @@ export const UserActionMarkdown = forwardRef<UserActionMarkdownRefObject, UserAc
         />
       </Form>
     ) : (
-      <ContentWrapper data-test-subj="user-action-markdown">
+      <ContentWrapper className={'eui-xScroll'} data-test-subj="user-action-markdown">
         <MarkdownRenderer>{content}</MarkdownRenderer>
       </ContentWrapper>
     );

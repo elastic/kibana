@@ -17,9 +17,7 @@ import { OsqueryFactory } from '../../types';
 import { buildActionDetailsQuery } from './query.action_details.dsl';
 
 export const actionDetails: OsqueryFactory<OsqueryQueries.actionDetails> = {
-  buildDsl: (options: ActionDetailsRequestOptions) => {
-    return buildActionDetailsQuery(options);
-  },
+  buildDsl: (options: ActionDetailsRequestOptions) => buildActionDetailsQuery(options),
   parse: async (
     options: ActionDetailsRequestOptions,
     response: IEsSearchResponse<unknown>

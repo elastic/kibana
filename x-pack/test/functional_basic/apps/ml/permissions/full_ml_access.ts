@@ -20,7 +20,9 @@ export default function ({ getService }: FtrProviderContext) {
     { user: USER.ML_POWERUSER_SPACES, discoverAvailable: false },
   ];
 
-  describe('for user with full ML access', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/124413
+  // FLAKY: https://github.com/elastic/kibana/issues/122838
+  describe.skip('for user with full ML access', function () {
     for (const testUser of testUsers) {
       describe(`(${testUser.user})`, function () {
         const ecIndexPattern = 'ft_module_sample_ecommerce';
@@ -53,6 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         after(async () => {
+          // NOTE: Logout needs to happen before anything else to avoid flaky behavior
           await ml.securityUI.logout();
         });
 

@@ -28,13 +28,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await esArchiver.unload(archive);
     });
 
-    describe('navigation to monitor page', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/119770
+    describe.skip('navigation to monitor page', () => {
       before(async () => {
         await uptime.loadDataAndGoToMonitorPage(dateStart, dateEnd, monitorId);
       });
 
       it('should select the ping list location filter', async () => {
-        await uptimeService.common.selectFilterItem('location', 'mpls');
+        await uptimeService.common.selectFilterItem('Location', 'mpls');
       });
 
       it('should set the status filter', async () => {

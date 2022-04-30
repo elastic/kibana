@@ -8,8 +8,10 @@
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DiscoverServices } from '../../../build_services';
-import { ContextApp } from '../../components/context_app/context_app';
+import { ContextApp } from './context_app';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useIndexPattern } from '../../helpers/use_index_pattern';
@@ -31,6 +33,7 @@ export function ContextAppRoute(props: ContextAppProps) {
   const { chrome } = services;
 
   const { indexPatternId, id } = useParams<ContextUrlParams>();
+  const anchorId = decodeURIComponent(id);
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -43,11 +46,33 @@ export function ContextAppRoute(props: ContextAppProps) {
     ]);
   }, [chrome]);
 
-  const indexPattern = useIndexPattern(services.indexPatterns, indexPatternId);
+  const { indexPattern, error } = useIndexPattern(services.indexPatterns, indexPatternId);
+
+  if (error) {
+    return (
+      <EuiEmptyPrompt
+        iconType="alert"
+        iconColor="danger"
+        title={
+          <FormattedMessage
+            id="discover.singleDocRoute.errorTitle"
+            defaultMessage="An error occured"
+          />
+        }
+        body={
+          <FormattedMessage
+            id="discover.singleDocRoute.errorMessage"
+            defaultMessage="No matching index pattern for id {indexPatternId}"
+            values={{ indexPatternId }}
+          />
+        }
+      />
+    );
+  }
 
   if (!indexPattern) {
     return <LoadingIndicator />;
   }
 
-  return <ContextApp indexPatternId={indexPatternId} anchorId={id} indexPattern={indexPattern} />;
+  return <ContextApp anchorId={anchorId} indexPattern={indexPattern} />;
 }

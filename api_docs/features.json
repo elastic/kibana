@@ -888,11 +888,29 @@
                 "description": [],
                 "signature": [
                   "Readonly<{ id: string; management?: Readonly<{ [x: string]: ",
-                  "RecursiveReadonlyArray",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "server",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-server.RecursiveReadonlyArray",
+                    "text": "RecursiveReadonlyArray"
+                  },
                   "<string>; }> | undefined; catalogue?: ",
-                  "RecursiveReadonlyArray",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "server",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-server.RecursiveReadonlyArray",
+                    "text": "RecursiveReadonlyArray"
+                  },
                   "<string> | undefined; privileges: ",
-                  "RecursiveReadonlyArray",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "server",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-server.RecursiveReadonlyArray",
+                    "text": "RecursiveReadonlyArray"
+                  },
                   "<",
                   {
                     "pluginId": "features",
@@ -928,7 +946,13 @@
             "label": "catalogue",
             "description": [],
             "signature": [
-              "RecursiveReadonlyArray",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.RecursiveReadonlyArray",
+                "text": "RecursiveReadonlyArray"
+              },
               "<string> | undefined"
             ],
             "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
@@ -943,7 +967,13 @@
             "description": [],
             "signature": [
               "Readonly<{ [x: string]: ",
-              "RecursiveReadonlyArray",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.RecursiveReadonlyArray",
+                "text": "RecursiveReadonlyArray"
+              },
               "<string>; }> | undefined"
             ],
             "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
@@ -957,7 +987,13 @@
             "label": "privileges",
             "description": [],
             "signature": [
-              "RecursiveReadonlyArray",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.RecursiveReadonlyArray",
+                "text": "RecursiveReadonlyArray"
+              },
               "<",
               {
                 "pluginId": "features",
@@ -2049,7 +2085,7 @@
             "children": [
               {
                 "parentPluginId": "features",
-                "id": "def-server.feature",
+                "id": "def-server.PluginSetupContract.featurePrivilegeIterator.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "feature",
@@ -2068,7 +2104,7 @@
               },
               {
                 "parentPluginId": "features",
-                "id": "def-server.options",
+                "id": "def-server.PluginSetupContract.featurePrivilegeIterator.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -2115,7 +2151,7 @@
             "children": [
               {
                 "parentPluginId": "features",
-                "id": "def-server.feature",
+                "id": "def-server.PluginSetupContract.subFeaturePrivilegeIterator.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "feature",
@@ -2134,7 +2170,7 @@
               },
               {
                 "parentPluginId": "features",
-                "id": "def-server.licenseHasAtLeast",
+                "id": "def-server.PluginSetupContract.subFeaturePrivilegeIterator.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "licenseHasAtLeast",
@@ -2148,7 +2184,7 @@
                 "children": [
                   {
                     "parentPluginId": "features",
-                    "id": "def-server.licenseType",
+                    "id": "def-server.PluginSetupContract.subFeaturePrivilegeIterator.$2.$1",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "licenseType",
@@ -2279,11 +2315,29 @@
                 "description": [],
                 "signature": [
                   "Readonly<{ id: string; management?: Readonly<{ [x: string]: ",
-                  "RecursiveReadonlyArray",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "server",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-server.RecursiveReadonlyArray",
+                    "text": "RecursiveReadonlyArray"
+                  },
                   "<string>; }> | undefined; catalogue?: ",
-                  "RecursiveReadonlyArray",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "server",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-server.RecursiveReadonlyArray",
+                    "text": "RecursiveReadonlyArray"
+                  },
                   "<string> | undefined; privileges: ",
-                  "RecursiveReadonlyArray",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "server",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-server.RecursiveReadonlyArray",
+                    "text": "RecursiveReadonlyArray"
+                  },
                   "<",
                   {
                     "pluginId": "features",
@@ -2319,7 +2373,13 @@
             "label": "catalogue",
             "description": [],
             "signature": [
-              "RecursiveReadonlyArray",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.RecursiveReadonlyArray",
+                "text": "RecursiveReadonlyArray"
+              },
               "<string> | undefined"
             ],
             "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
@@ -2334,7 +2394,13 @@
             "description": [],
             "signature": [
               "Readonly<{ [x: string]: ",
-              "RecursiveReadonlyArray",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.RecursiveReadonlyArray",
+                "text": "RecursiveReadonlyArray"
+              },
               "<string>; }> | undefined"
             ],
             "path": "x-pack/plugins/features/common/elasticsearch_feature.ts",
@@ -2348,7 +2414,13 @@
             "label": "privileges",
             "description": [],
             "signature": [
-              "RecursiveReadonlyArray",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "server",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-server.RecursiveReadonlyArray",
+                "text": "RecursiveReadonlyArray"
+              },
               "<",
               {
                 "pluginId": "features",

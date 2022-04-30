@@ -39,7 +39,7 @@ export const putSettingsHandler: RequestHandler<
   TypeOf<typeof PutSettingsRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
 
   try {

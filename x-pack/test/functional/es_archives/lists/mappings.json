@@ -71,7 +71,6 @@
           "namespace": "2f4316de49999235636386fe51dc06c1",
           "cases-user-actions": "32277330ec6b721abe3b846cfd939a71",
           "ingest-package-policies": "48e8bd97e488008e21c0b5a2367b83ad",
-          "timelion-sheet": "9a2a2748877c7a7b582fef201ab1d4cf",
           "siem-ui-timeline-pinned-event": "20638091112f0e14f0e443d512301c29",
           "config": "c63748b75f39d0c54de12d12c1ccbc20",
           "tsvb-validation-telemetry": "3a37ef6c8700ae6fc97d5c7da00e9215",
@@ -197,27 +196,23 @@
         },
         "apm-indices": {
           "properties": {
-            "apm_oss": {
-              "properties": {
-                "errorIndices": {
-                  "type": "keyword"
-                },
-                "metricsIndices": {
-                  "type": "keyword"
-                },
-                "onboardingIndices": {
-                  "type": "keyword"
-                },
-                "sourcemapIndices": {
-                  "type": "keyword"
-                },
-                "spanIndices": {
-                  "type": "keyword"
-                },
-                "transactionIndices": {
-                  "type": "keyword"
-                }
-              }
+            "error": {
+              "type": "keyword"
+            },
+            "metric": {
+              "type": "keyword"
+            },
+            "onboarding": {
+              "type": "keyword"
+            },
+            "sourcemap": {
+              "type": "keyword"
+            },
+            "span": {
+              "type": "keyword"
+            },
+            "transaction": {
+              "type": "keyword"
             }
           }
         },
@@ -2262,47 +2257,6 @@
             },
             "userHasSeenNotice": {
               "type": "boolean"
-            }
-          }
-        },
-        "timelion-sheet": {
-          "properties": {
-            "description": {
-              "type": "text"
-            },
-            "hits": {
-              "type": "integer"
-            },
-            "kibanaSavedObjectMeta": {
-              "properties": {
-                "searchSourceJSON": {
-                  "type": "text"
-                }
-              }
-            },
-            "timelion_chart_height": {
-              "type": "integer"
-            },
-            "timelion_columns": {
-              "type": "integer"
-            },
-            "timelion_interval": {
-              "type": "keyword"
-            },
-            "timelion_other_interval": {
-              "type": "keyword"
-            },
-            "timelion_rows": {
-              "type": "integer"
-            },
-            "timelion_sheet": {
-              "type": "text"
-            },
-            "title": {
-              "type": "text"
-            },
-            "version": {
-              "type": "integer"
             }
           }
         },

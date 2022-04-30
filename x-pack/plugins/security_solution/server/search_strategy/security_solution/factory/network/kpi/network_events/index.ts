@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
 import {
   NetworkKpiQueries,
   NetworkKpiNetworkEventsStrategyResponse,
@@ -35,22 +35,23 @@ export const networkKpiNetworkEvents: SecuritySolutionFactory<NetworkKpiQueries.
   },
 };
 
-export const networkKpiNetworkEventsEntities: SecuritySolutionFactory<NetworkKpiQueries.networkEvents> = {
-  buildDsl: (options: NetworkKpiNetworkEventsRequestOptions) =>
-    buildNetworkEventsQueryEntities(options),
-  parse: async (
-    options: NetworkKpiNetworkEventsRequestOptions,
-    response: IEsSearchResponse<unknown>
-  ): Promise<NetworkKpiNetworkEventsStrategyResponse> => {
-    const inspect = {
-      dsl: [inspectStringifyObject(buildNetworkEventsQueryEntities(options))],
-    };
+export const networkKpiNetworkEventsEntities: SecuritySolutionFactory<NetworkKpiQueries.networkEvents> =
+  {
+    buildDsl: (options: NetworkKpiNetworkEventsRequestOptions) =>
+      buildNetworkEventsQueryEntities(options),
+    parse: async (
+      options: NetworkKpiNetworkEventsRequestOptions,
+      response: IEsSearchResponse<unknown>
+    ): Promise<NetworkKpiNetworkEventsStrategyResponse> => {
+      const inspect = {
+        dsl: [inspectStringifyObject(buildNetworkEventsQueryEntities(options))],
+      };
 
-    return {
-      ...response,
-      inspect,
-      // @ts-expect-error code doesn't handle TotalHits
-      networkEvents: response.rawResponse.aggregations?.events?.value ?? null,
-    };
-  },
-};
+      return {
+        ...response,
+        inspect,
+        // @ts-expect-error code doesn't handle TotalHits
+        networkEvents: response.rawResponse.aggregations?.events?.value ?? null,
+      };
+    },
+  };

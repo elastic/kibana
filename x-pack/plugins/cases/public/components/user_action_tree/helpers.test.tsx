@@ -8,16 +8,19 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { CaseStatuses } from '../../../common';
+import { CaseStatuses, CommentRequestAlertType, ConnectorTypes } from '../../../common/api';
 import { basicPush, getUserAction } from '../../containers/mock';
 import {
   getLabelTitle,
   getPushedServiceLabelTitle,
   getConnectorLabelTitle,
   toStringArray,
+  getRuleId,
+  getRuleName,
 } from './helpers';
 import { connectorsMock } from '../../containers/configure/mock';
 import * as i18n from './translations';
+import { Ecs } from '../../containers/types';
 
 describe('User action tree helpers', () => {
   const connectors = connectorsMock;
@@ -129,7 +132,7 @@ describe('User action tree helpers', () => {
       `${i18n.PUSHED_NEW_INCIDENT} ${basicPush.connectorName}`
     );
     expect(wrapper.find(`[data-test-subj="pushed-value"]`).first().prop('href')).toEqual(
-      JSON.parse(action.newValue).external_url
+      JSON.parse(action.newValue!).external_url
     );
   });
 
@@ -142,50 +145,74 @@ describe('User action tree helpers', () => {
       `${i18n.UPDATE_INCIDENT} ${basicPush.connectorName}`
     );
     expect(wrapper.find(`[data-test-subj="pushed-value"]`).first().prop('href')).toEqual(
-      JSON.parse(action.newValue).external_url
+      JSON.parse(action.newValue!).external_url
     );
   });
 
-  it('label title generated for update connector - change connector', () => {
-    const action = {
-      ...getUserAction(['connector'], 'update'),
-      oldValue: JSON.stringify({ id: 'servicenow-1' }),
-      newValue: JSON.stringify({ id: 'resilient-2' }),
-    };
-    const result: string | JSX.Element = getConnectorLabelTitle({
-      action,
-      connectors,
+  describe('getConnectorLabelTitle', () => {
+    it('returns an empty string when the encoded old value is null', () => {
+      const result = getConnectorLabelTitle({
+        action: getUserAction(['connector'], 'update', { oldValue: null }),
+        connectors,
+      });
+
+      expect(result).toEqual('');
     });
 
-    expect(result).toEqual('selected My Connector 2 as incident management system');
-  });
+    it('returns an empty string when the encoded new value is null', () => {
+      const result = getConnectorLabelTitle({
+        action: getUserAction(['connector'], 'update', { newValue: null }),
+        connectors,
+      });
 
-  it('label title generated for update connector - change connector to none', () => {
-    const action = {
-      ...getUserAction(['connector'], 'update'),
-      oldValue: JSON.stringify({ id: 'servicenow-1' }),
-      newValue: JSON.stringify({ id: 'none' }),
-    };
-    const result: string | JSX.Element = getConnectorLabelTitle({
-      action,
-      connectors,
+      expect(result).toEqual('');
     });
 
-    expect(result).toEqual('removed external incident management system');
-  });
+    it('returns the change connector label', () => {
+      const result: string | JSX.Element = getConnectorLabelTitle({
+        action: getUserAction(['connector'], 'update', {
+          oldValue: JSON.stringify({
+            type: ConnectorTypes.serviceNowITSM,
+            name: 'a',
+            fields: null,
+          }),
+          oldValConnectorId: 'servicenow-1',
+          newValue: JSON.stringify({ type: ConnectorTypes.resilient, name: 'a', fields: null }),
+          newValConnectorId: 'resilient-2',
+        }),
+        connectors,
+      });
 
-  it('label title generated for update connector - field change', () => {
-    const action = {
-      ...getUserAction(['connector'], 'update'),
-      oldValue: JSON.stringify({ id: 'servicenow-1' }),
-      newValue: JSON.stringify({ id: 'servicenow-1' }),
-    };
-    const result: string | JSX.Element = getConnectorLabelTitle({
-      action,
-      connectors,
+      expect(result).toEqual('selected My Connector 2 as incident management system');
     });
 
-    expect(result).toEqual('changed connector field');
+    it('returns the removed connector label', () => {
+      const result: string | JSX.Element = getConnectorLabelTitle({
+        action: getUserAction(['connector'], 'update', {
+          oldValue: JSON.stringify({ type: ConnectorTypes.serviceNowITSM, name: '', fields: null }),
+          oldValConnectorId: 'servicenow-1',
+          newValue: JSON.stringify({ type: ConnectorTypes.none, name: '', fields: null }),
+          newValConnectorId: 'none',
+        }),
+        connectors,
+      });
+
+      expect(result).toEqual('removed external incident management system');
+    });
+
+    it('returns the connector fields changed label', () => {
+      const result: string | JSX.Element = getConnectorLabelTitle({
+        action: getUserAction(['connector'], 'update', {
+          oldValue: JSON.stringify({ type: ConnectorTypes.serviceNowITSM, name: '', fields: null }),
+          oldValConnectorId: 'servicenow-1',
+          newValue: JSON.stringify({ type: ConnectorTypes.serviceNowITSM, name: '', fields: null }),
+          newValConnectorId: 'servicenow-1',
+        }),
+        connectors,
+      });
+
+      expect(result).toEqual('changed connector field');
+    });
   });
 
   describe('toStringArray', () => {
@@ -219,6 +246,133 @@ describe('User action tree helpers', () => {
       const value = 100n;
       const res = toStringArray(value);
       expect(res).toEqual(['100']);
+    });
+  });
+
+  describe('rule getters', () => {
+    describe.each([
+      ['getRuleId', getRuleId],
+      ['getRuleName', getRuleName],
+    ])('%s null checks', (name, funcToExec) => {
+      it('returns null if the comment field is an empty string', () => {
+        const comment = {
+          rule: {
+            id: '',
+            name: '',
+          },
+        } as unknown as CommentRequestAlertType;
+
+        expect(funcToExec(comment)).toBeNull();
+      });
+
+      it('returns null if the comment field is an empty string in an array', () => {
+        const comment = {
+          rule: {
+            id: [''],
+            name: [''],
+          },
+        } as unknown as CommentRequestAlertType;
+
+        expect(funcToExec(comment)).toBeNull();
+      });
+
+      it('returns null if the comment does not have a rule field', () => {
+        const comment = {} as unknown as CommentRequestAlertType;
+
+        expect(funcToExec(comment)).toBeNull();
+      });
+
+      it('returns null if the signals and alert field is an empty string', () => {
+        const comment = {} as unknown as CommentRequestAlertType;
+        const alert = {
+          signal: { rule: { id: '', name: '' } },
+          kibana: { alert: { rule: { uuid: '', name: '' } } },
+        } as unknown as Ecs;
+
+        expect(funcToExec(comment, alert)).toBeNull();
+      });
+    });
+
+    describe.each([
+      ['getRuleId', getRuleId, '1'],
+      ['getRuleName', getRuleName, 'Rule name1'],
+    ])('%s', (name, funcToExec, expectedResult) => {
+      it('returns the first entry in the comment field', () => {
+        const comment = {
+          rule: {
+            id: ['1', '2'],
+            name: ['Rule name1', 'Rule name2'],
+          },
+        } as unknown as CommentRequestAlertType;
+
+        expect(funcToExec(comment)).toEqual(expectedResult);
+      });
+
+      it('returns signal field', () => {
+        const comment = {} as unknown as CommentRequestAlertType;
+        const alert = { signal: { rule: { id: '1', name: 'Rule name1' } } } as unknown as Ecs;
+
+        expect(funcToExec(comment, alert)).toEqual(expectedResult);
+      });
+
+      it('returns kibana alert field', () => {
+        const comment = {} as unknown as CommentRequestAlertType;
+        const alert = {
+          kibana: { alert: { rule: { uuid: '1', name: 'Rule name1' } } },
+        } as unknown as Ecs;
+
+        expect(funcToExec(comment, alert)).toEqual(expectedResult);
+      });
+
+      it('returns signal field even when kibana alert field is defined', () => {
+        const comment = {} as unknown as CommentRequestAlertType;
+        const alert = {
+          signal: { rule: { id: '1', name: 'Rule name1' } },
+          kibana: { alert: { rule: { uuid: 'rule id1', name: 'other rule name1' } } },
+        } as unknown as Ecs;
+
+        expect(funcToExec(comment, alert)).toEqual(expectedResult);
+      });
+
+      it('returns the first entry in the signals field', () => {
+        const comment = {} as unknown as CommentRequestAlertType;
+        const alert = {
+          signal: { rule: { id: '1', name: 'Rule name1' } },
+          kibana: { alert: { rule: { uuid: 'rule id1', name: 'other rule name1' } } },
+        } as unknown as Ecs;
+
+        expect(funcToExec(comment, alert)).toEqual(expectedResult);
+      });
+
+      it('returns the alert field if the signals field is an empty string', () => {
+        const comment = {} as unknown as CommentRequestAlertType;
+        const alert = {
+          signal: { rule: { id: '', name: '' } },
+          kibana: { alert: { rule: { uuid: '1', name: 'Rule name1' } } },
+        } as unknown as Ecs;
+
+        expect(funcToExec(comment, alert)).toEqual(expectedResult);
+      });
+
+      it('returns the alert field if the signals field is an empty string in an array', () => {
+        const comment = {} as unknown as CommentRequestAlertType;
+        const alert = {
+          signal: { rule: { id: [''], name: [''] } },
+          kibana: { alert: { rule: { uuid: '1', name: 'Rule name1' } } },
+        } as unknown as Ecs;
+
+        expect(funcToExec(comment, alert)).toEqual(expectedResult);
+      });
+
+      it('returns the alert field first item if the signals field is an empty string in an array', () => {
+        const comment = {} as unknown as CommentRequestAlertType;
+        const alert = {
+          signal: { rule: { id: [''], name: [''] } },
+          kibana: { alert: { rule: { uuid: ['1', '2'], name: ['Rule name1', 'Rule name2'] } } },
+        } as unknown as Ecs;
+
+        expect(funcToExec(comment, alert)).toEqual(expectedResult);
+      });
     });
   });
 });

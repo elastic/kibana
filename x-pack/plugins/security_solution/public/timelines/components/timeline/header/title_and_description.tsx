@@ -137,9 +137,10 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
       [showWarning, status, timelineType]
     );
 
-    const calloutMessage = useMemo(() => i18n.UNSAVED_TIMELINE_WARNING(timelineType), [
-      timelineType,
-    ]);
+    const calloutMessage = useMemo(
+      () => i18n.UNSAVED_TIMELINE_WARNING(timelineType),
+      [timelineType]
+    );
 
     const descriptionLabel = useMemo(() => `${i18n.TIMELINE_DESCRIPTION} (${i18n.OPTIONAL})`, []);
 

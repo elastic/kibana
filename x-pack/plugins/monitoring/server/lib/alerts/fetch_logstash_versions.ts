@@ -7,6 +7,7 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertVersions } from '../../../common/types/alerts';
+import { createDatasetFilter } from './create_dataset_query_filter';
 
 interface ESAggResponse {
   key: string;
@@ -16,7 +17,8 @@ export async function fetchLogstashVersions(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
   index: string,
-  size: number
+  size: number,
+  filterQuery?: string
 ): Promise<AlertVersions[]> {
   const params = {
     index,
@@ -31,11 +33,7 @@ export async function fetchLogstashVersions(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-            {
-              term: {
-                type: 'logstash_stats',
-              },
-            },
+            createDatasetFilter('logstash_stats', 'node_stats', 'logstash.node_stats'),
             {
               range: {
                 timestamp: {
@@ -88,6 +86,15 @@ export async function fetchLogstashVersions(
       },
     },
   };
+
+  try {
+    if (filterQuery) {
+      const filterQueryObject = JSON.parse(filterQuery);
+      params.body.query.bool.filter.push(filterQueryObject);
+    }
+  } catch (e) {
+    // meh
+  }
 
   const { body: response } = await esClient.search(params);
   const indexName = get(response, 'aggregations.index.buckets[0].key', '');

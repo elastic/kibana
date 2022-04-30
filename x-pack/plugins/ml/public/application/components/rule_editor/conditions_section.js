@@ -15,7 +15,7 @@ import React from 'react';
 import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
 import { ConditionExpression } from './condition_expression';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export function ConditionsSection({
   isEnabled,

@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import type {
-  ApiResponse,
+  TransportResult,
   TransportRequestOptions,
   TransportRequestParams,
-  TransportRequestPromise,
-} from '@elastic/elasticsearch/lib/Transport';
+} from '@elastic/elasticsearch';
 
 /**
  * Client used to query the elasticsearch cluster.
@@ -21,13 +20,13 @@ import type {
  */
 export type ElasticsearchClient = Omit<
   KibanaClient,
-  'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close'
+  'connectionPool' | 'transport' | 'serializer' | 'extend' | 'child' | 'close' | 'diagnostic'
 > & {
   transport: {
-    request(
+    request<TResponse = unknown>(
       params: TransportRequestParams,
       options?: TransportRequestOptions
-    ): TransportRequestPromise<ApiResponse>;
+    ): Promise<TransportResult<TResponse>>;
   };
 };
 
@@ -132,4 +131,11 @@ export interface DeleteDocumentResponse {
   error?: {
     type: string;
   };
+}
+
+/**
+ * @public
+ */
+export interface ElasticsearchErrorDetails {
+  error?: { type: string; reason?: string };
 }

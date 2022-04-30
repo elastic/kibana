@@ -7,12 +7,8 @@
 
 import { EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import {
-  DetectionsRequirementsLink,
-  SecuritySolutionRequirementsLink,
-} from '../../../../common/components/links_to_docs';
 import {
   DEFAULT_ITEMS_INDEX,
   DEFAULT_LISTS_INDEX,
@@ -21,6 +17,10 @@ import {
 } from '../../../../../common/constants';
 import { CommaSeparatedValues } from './comma_separated_values';
 import { MissingPrivileges } from './use_missing_privileges';
+import {
+  DetectionsRequirementsLink,
+  SecuritySolutionRequirementsLink,
+} from '../../../../common/components/links_to_docs';
 
 export const MISSING_PRIVILEGES_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageTitle',
@@ -46,13 +46,13 @@ const CANNOT_EDIT_LISTS = i18n.translate(
 const CANNOT_EDIT_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.cannotEditAlerts',
   {
-    defaultMessage: 'Without these privileges, you cannot open or close alerts.',
+    defaultMessage: 'Without these privileges, you cannot view or change status of alerts.',
   }
 );
 
 export const missingPrivilegesCallOutBody = ({
   indexPrivileges,
-  featurePrivileges,
+  featurePrivileges = [],
 }: MissingPrivileges) => (
   <FormattedMessage
     id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.messageDetail"

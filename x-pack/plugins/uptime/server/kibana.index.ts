@@ -11,8 +11,8 @@ import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { PLUGIN } from '../common/constants/plugin';
 import { compose } from './lib/compose/kibana';
 import { initUptimeServer } from './uptime_server';
-import { UptimeCorePlugins, UptimeCoreSetup } from './lib/adapters/framework';
-import { umDynamicSettings } from './lib/saved_objects';
+import { UptimeCorePluginsSetup, UptimeServerSetup } from './lib/adapters/framework';
+import { umDynamicSettings } from './lib/saved_objects/uptime_settings';
 import { UptimeRuleRegistry } from './plugin';
 
 export interface KibanaRouteOptions {
@@ -28,8 +28,8 @@ export interface KibanaServer extends Server {
 }
 
 export const initServerWithKibana = (
-  server: UptimeCoreSetup,
-  plugins: UptimeCorePlugins,
+  server: UptimeServerSetup,
+  plugins: UptimeCorePluginsSetup,
   ruleRegistry: UptimeRuleRegistry,
   logger: Logger
 ) => {
@@ -46,22 +46,37 @@ export const initServerWithKibana = (
     management: {
       insightsAndAlerting: ['triggersActions'],
     },
-    alerting: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
+    alerting: [
+      'xpack.uptime.alerts.tls',
+      'xpack.uptime.alerts.tlsCertificate',
+      'xpack.uptime.alerts.monitorStatus',
+      'xpack.uptime.alerts.durationAnomaly',
+    ],
     privileges: {
       all: {
         app: ['uptime', 'kibana'],
         catalogue: ['uptime'],
         api: ['uptime-read', 'uptime-write', 'lists-all'],
         savedObject: {
-          all: [umDynamicSettings.name, 'alert'],
+          all: [umDynamicSettings.name],
           read: [],
         },
         alerting: {
           rule: {
-            all: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
+            all: [
+              'xpack.uptime.alerts.tls',
+              'xpack.uptime.alerts.tlsCertificate',
+              'xpack.uptime.alerts.monitorStatus',
+              'xpack.uptime.alerts.durationAnomaly',
+            ],
           },
           alert: {
-            all: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
+            all: [
+              'xpack.uptime.alerts.tls',
+              'xpack.uptime.alerts.tlsCertificate',
+              'xpack.uptime.alerts.monitorStatus',
+              'xpack.uptime.alerts.durationAnomaly',
+            ],
           },
         },
         management: {
@@ -74,15 +89,25 @@ export const initServerWithKibana = (
         catalogue: ['uptime'],
         api: ['uptime-read', 'lists-read'],
         savedObject: {
-          all: ['alert'],
+          all: [],
           read: [umDynamicSettings.name],
         },
         alerting: {
           rule: {
-            read: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
+            read: [
+              'xpack.uptime.alerts.tls',
+              'xpack.uptime.alerts.tlsCertificate',
+              'xpack.uptime.alerts.monitorStatus',
+              'xpack.uptime.alerts.durationAnomaly',
+            ],
           },
           alert: {
-            read: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
+            read: [
+              'xpack.uptime.alerts.tls',
+              'xpack.uptime.alerts.tlsCertificate',
+              'xpack.uptime.alerts.monitorStatus',
+              'xpack.uptime.alerts.durationAnomaly',
+            ],
           },
         },
         management: {

@@ -34,7 +34,7 @@ describe('When using the EndpointAgentStatus component', () => {
     (KibanaServices.get as jest.Mock).mockReturnValue(mockedContext.startServices);
     httpMocks = endpointPageHttpMock(mockedContext.coreStart.http);
     waitForAction = mockedContext.middlewareSpy.waitForAction;
-    endpointMeta = httpMocks.responseProvider.metadataList().hosts[0].metadata;
+    endpointMeta = httpMocks.responseProvider.metadataList().data[0].metadata;
     render = async (props: EndpointAgentStatusProps) => {
       renderResult = mockedContext.render(<EndpointAgentStatus {...props} />);
       return renderResult;
@@ -61,7 +61,8 @@ describe('When using the EndpointAgentStatus component', () => {
   describe.skip('and host is isolated or pending isolation', () => {
     beforeEach(async () => {
       // Ensure pending action api sets pending action for the test endpoint metadata
-      const pendingActionsResponseProvider = httpMocks.responseProvider.pendingActions.getMockImplementation();
+      const pendingActionsResponseProvider =
+        httpMocks.responseProvider.pendingActions.getMockImplementation();
       httpMocks.responseProvider.pendingActions.mockImplementation((...args) => {
         const response = pendingActionsResponseProvider!(...args);
         response.data.some((pendingAction) => {

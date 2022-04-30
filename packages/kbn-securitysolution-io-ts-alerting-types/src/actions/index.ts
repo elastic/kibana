@@ -29,6 +29,8 @@ export const action = t.exact(
   })
 );
 
+export type Action = t.TypeOf<typeof action>;
+
 export const actions = t.array(action);
 export type Actions = t.TypeOf<typeof actions>;
 

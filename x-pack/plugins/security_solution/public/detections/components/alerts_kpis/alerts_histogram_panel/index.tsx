@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Position } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiTitleSize } from '@elastic/eui';
 import numeral from '@elastic/numeral';
@@ -13,13 +14,14 @@ import styled from 'styled-components';
 import { isEmpty } from 'lodash/fp';
 import uuid from 'uuid';
 
+import { Filter, buildEsQuery, Query } from '@kbn/es-query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../../common/constants';
+import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../../common/constants';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import type { LegendItem } from '../../../../common/components/charts/draggable_legend_item';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { HeaderSection } from '../../../../common/components/header_section';
-import { Filter, esQuery, Query } from '../../../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { getDetectionEngineUrl, useFormatUrl } from '../../../../common/components/link_to';
 import { defaultLegendColors } from '../../../../common/components/matrix_histogram/utils';
@@ -43,7 +45,6 @@ import type { AlertsStackByField } from '../common/types';
 import { KpiPanel, StackBySelect } from '../common/components';
 
 import { useInspectButton } from '../common/hooks';
-import { fetchQueryRuleRegistryAlerts } from '../../../containers/detection_engine/alerts/api';
 
 const defaultTotalAlertsObj: AlertsTotal = {
   value: 0,
@@ -64,16 +65,19 @@ interface AlertsHistogramPanelProps {
   headerChildren?: React.ReactNode;
   /** Override all defaults, and only display this field */
   onlyField?: AlertsStackByField;
+  paddingSize?: 's' | 'm' | 'l' | 'none';
   titleSize?: EuiTitleSize;
   query?: Query;
   legendPosition?: Position;
   signalIndexName: string | null;
+  showLegend?: boolean;
   showLinkToAlerts?: boolean;
   showTotalAlertsCount?: boolean;
   showStackBy?: boolean;
   timelineId?: string;
   title?: string;
   updateDateRange: UpdateDateRange;
+  runtimeMappings?: MappingRuntimeFields;
 }
 
 const NO_LEGEND_DATA: LegendItem[] = [];
@@ -86,9 +90,11 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     filters,
     headerChildren,
     onlyField,
+    paddingSize = 'm',
     query,
     legendPosition = 'right',
     signalIndexName,
+    showLegend = true,
     showLinkToAlerts = false,
     showTotalAlertsCount = false,
     showStackBy = true,
@@ -96,8 +102,9 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     title = i18n.HISTOGRAM_HEADER,
     updateDateRange,
     titleSize = 'm',
+    runtimeMappings,
   }) => {
-    const { to, from, deleteQuery, setQuery } = useGlobalTime();
+    const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
 
     // create a unique, but stable (across re-renders) query id
     const uniqueQueryId = useMemo(() => `${DETECTIONS_HISTOGRAM_ID}-${uuid.v4()}`, []);
@@ -117,16 +124,13 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       request,
       refetch,
     } = useQueryAlerts<{}, AlertsAggregation>({
-      fetchMethod: fetchQueryRuleRegistryAlerts,
-      query: {
-        index: signalIndexName,
-        ...getAlertsHistogramQuery(
-          selectedStackByOption,
-          from,
-          to,
-          buildCombinedQueries(combinedQueries)
-        ),
-      },
+      query: getAlertsHistogramQuery(
+        selectedStackByOption,
+        from,
+        to,
+        buildCombinedQueries(combinedQueries),
+        runtimeMappings
+      ),
       indexName: signalIndexName,
     });
 
@@ -148,7 +152,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     const goToDetectionEngine = useCallback(
       (ev) => {
         ev.preventDefault();
-        navigateToApp(APP_ID, {
+        navigateToApp(APP_UI_ID, {
           deepLinkId: SecurityPageName.alerts,
           path: getDetectionEngineUrl(urlSearch),
         });
@@ -159,7 +163,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
 
     const legendItems: LegendItem[] = useMemo(
       () =>
-        alertsData?.aggregations?.alertsByGrouping?.buckets != null
+        showLegend && alertsData?.aggregations?.alertsByGrouping?.buckets != null
           ? alertsData.aggregations.alertsByGrouping.buckets.map((bucket, i) => ({
               color: i < defaultLegendColors.length ? defaultLegendColors[i] : undefined,
               dataProviderId: escapeDataProviderId(
@@ -170,7 +174,12 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
               value: bucket.key,
             }))
           : NO_LEGEND_DATA,
-      [alertsData, selectedStackByOption, timelineId]
+      [
+        alertsData?.aggregations?.alertsByGrouping.buckets,
+        selectedStackByOption,
+        showLegend,
+        timelineId,
+      ]
     );
 
     useEffect(() => {
@@ -210,12 +219,12 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
         if (combinedQueries != null) {
           converted = parseCombinedQueries(combinedQueries);
         } else {
-          converted = esQuery.buildEsQuery(
+          converted = buildEsQuery(
             undefined,
             query != null ? [query] : [],
             filters?.filter((f) => f.meta.disabled === false) ?? [],
             {
-              ...esQuery.getEsQueryConfig(kibana.services.uiSettings),
+              ...getEsQueryConfig(kibana.services.uiSettings),
               dateFormatTZ: undefined,
             }
           );
@@ -226,15 +235,18 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
             selectedStackByOption,
             from,
             to,
-            !isEmpty(converted) ? [converted] : []
+            !isEmpty(converted) ? [converted] : [],
+            runtimeMappings
           )
         );
       } catch (e) {
         setIsInspectDisabled(true);
-        setAlertsQuery(getAlertsHistogramQuery(selectedStackByOption, from, to, []));
+        setAlertsQuery(
+          getAlertsHistogramQuery(selectedStackByOption, from, to, [], runtimeMappings)
+        );
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedStackByOption, from, to, query, filters, combinedQueries]);
+    }, [selectedStackByOption, from, to, query, filters, combinedQueries, runtimeMappings]);
 
     const linkButton = useMemo(() => {
       if (showLinkToAlerts) {
@@ -252,14 +264,14 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       }
     }, [showLinkToAlerts, goToDetectionEngine, formatUrl]);
 
-    const titleText = useMemo(() => (onlyField == null ? title : i18n.TOP(onlyField)), [
-      onlyField,
-      title,
-    ]);
+    const titleText = useMemo(
+      () => (onlyField == null ? title : i18n.TOP(onlyField)),
+      [onlyField, title]
+    );
 
     return (
       <InspectButtonContainer data-test-subj="alerts-histogram-panel" show={!isInitialLoading}>
-        <KpiPanel height={PANEL_HEIGHT} hasBorder>
+        <KpiPanel height={PANEL_HEIGHT} hasBorder paddingSize={paddingSize}>
           <HeaderSection
             id={uniqueQueryId}
             title={titleText}
@@ -293,6 +305,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
               legendPosition={legendPosition}
               loading={isLoadingAlerts}
               to={to}
+              showLegend={showLegend}
               updateDateRange={updateDateRange}
             />
           )}

@@ -29,6 +29,7 @@ export class TimePickerPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly header = this.ctx.getPageObject('header');
+  private readonly common = this.ctx.getPageObject('common');
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
 
   private readonly quickSelectTimeMenuToggle = this.ctx.getService('menuToggle').create({
@@ -116,25 +117,41 @@ export class TimePickerPageObject extends FtrService {
   public async setAbsoluteRange(fromTime: string, toTime: string) {
     this.log.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
     await this.showStartEndTimes();
+    let panel!: WebElementWrapper;
 
     // set to time
-    await this.testSubjects.click('superDatePickerendDatePopoverButton');
-    let panel = await this.getTimePickerPanel();
-    await this.testSubjects.click('superDatePickerAbsoluteTab');
-    await this.testSubjects.click('superDatePickerAbsoluteDateInput');
-    await this.inputValue('superDatePickerAbsoluteDateInput', toTime);
-    await this.browser.pressKeys(this.browser.keys.ESCAPE); // close popover because sometimes browser can't find start input
+    await this.retry.waitFor(`endDate is set to ${toTime}`, async () => {
+      await this.testSubjects.click('superDatePickerendDatePopoverButton');
+      panel = await this.getTimePickerPanel();
+      await this.testSubjects.click('superDatePickerAbsoluteTab');
+      await this.testSubjects.click('superDatePickerAbsoluteDateInput');
+      await this.inputValue('superDatePickerAbsoluteDateInput', toTime);
+      await this.browser.pressKeys(this.browser.keys.ESCAPE); // close popover because sometimes browser can't find start input
+      const actualToTime = await this.testSubjects.getVisibleText(
+        'superDatePickerendDatePopoverButton'
+      );
+      this.log.debug(`Validating 'endDate' - expected: '${toTime}, actual: ${actualToTime}'`);
+      return toTime === actualToTime;
+    });
 
     // set from time
-    await this.testSubjects.click('superDatePickerstartDatePopoverButton');
-    await this.waitPanelIsGone(panel);
-    panel = await this.getTimePickerPanel();
-    await this.testSubjects.click('superDatePickerAbsoluteTab');
-    await this.testSubjects.click('superDatePickerAbsoluteDateInput');
-    await this.inputValue('superDatePickerAbsoluteDateInput', fromTime);
-    await this.browser.pressKeys(this.browser.keys.ESCAPE);
+    await this.retry.waitFor(`startDate is set to ${fromTime}`, async () => {
+      await this.testSubjects.click('superDatePickerstartDatePopoverButton');
+      await this.waitPanelIsGone(panel);
+      panel = await this.getTimePickerPanel();
+      await this.testSubjects.click('superDatePickerAbsoluteTab');
+      await this.testSubjects.click('superDatePickerAbsoluteDateInput');
+      await this.inputValue('superDatePickerAbsoluteDateInput', fromTime);
+      await this.browser.pressKeys(this.browser.keys.ESCAPE);
+      const actualFromTime = await this.testSubjects.getVisibleText(
+        'superDatePickerstartDatePopoverButton'
+      );
+      this.log.debug(`Validating 'startDate' - expected: '${fromTime}, actual: ${actualFromTime}'`);
+      return fromTime === actualFromTime;
+    });
 
     await this.retry.waitFor('Timepicker popover to close', async () => {
+      await this.browser.pressKeys(this.browser.keys.ESCAPE);
       return !(await this.testSubjects.exists('superDatePickerAbsoluteDateInput'));
     });
 
@@ -223,6 +240,9 @@ export class TimePickerPageObject extends FtrService {
     const panel = await this.getTimePickerPanel();
     await this.testSubjects.click('superDatePickerAbsoluteTab');
     const end = await this.testSubjects.getAttribute('superDatePickerAbsoluteDateInput', 'value');
+
+    // Wait until closing popover again to avoid https://github.com/elastic/eui/issues/5619
+    await this.common.sleep(2000);
 
     // get from time
     await this.testSubjects.click('superDatePickerstartDatePopoverButton');

@@ -8,6 +8,11 @@
 export type AlertStatusValues = 'OK' | 'Active' | 'Error';
 export type AlertInstanceStatusValues = 'OK' | 'Active';
 
+export interface ExecutionDuration {
+  average: number;
+  valuesWithTimestamp: Record<string, number>;
+}
+
 export interface AlertInstanceSummary {
   id: string;
   name: string;
@@ -23,6 +28,7 @@ export interface AlertInstanceSummary {
   lastRun?: string;
   errorMessages: Array<{ date: string; message: string }>;
   instances: Record<string, AlertInstanceStatus>;
+  executionDuration: ExecutionDuration;
 }
 
 export interface AlertInstanceStatus {

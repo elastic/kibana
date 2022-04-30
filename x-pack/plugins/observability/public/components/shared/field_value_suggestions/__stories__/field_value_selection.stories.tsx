@@ -6,7 +6,7 @@
  */
 
 import React, { ComponentType, useEffect, useState } from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Observable } from 'rxjs';
 import { CoreStart } from 'src/core/public';
 import { text } from '@storybook/addon-knobs';
@@ -19,9 +19,9 @@ const values = [
   { label: 'apm server', count: 2 },
 ];
 
-const KibanaReactContext = createKibanaReactContext(({
+const KibanaReactContext = createKibanaReactContext({
   uiSettings: { get: () => {}, get$: () => new Observable() },
-} as unknown) as Partial<CoreStart>);
+} as unknown as Partial<CoreStart>);
 
 export default {
   title: 'app/Shared/FieldValueSuggestions',

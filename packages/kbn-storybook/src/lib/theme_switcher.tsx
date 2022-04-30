@@ -9,7 +9,10 @@
 import React from 'react';
 import { Icons, IconButton, TooltipLinkList, WithTooltip } from '@storybook/components';
 import { useGlobals } from '@storybook/api';
-import { Link } from '@storybook/components/dist/tooltip/TooltipLinkList';
+
+type PropsOf<T extends React.FC<any>> = T extends React.FC<infer P> ? P : never;
+type ArrayItem<T extends any[]> = T extends Array<infer I> ? I : never;
+type Link = ArrayItem<PropsOf<typeof TooltipLinkList>['links']>;
 
 const defaultTheme = 'v8.light';
 
@@ -22,27 +25,27 @@ export function ThemeSwitcher() {
   }
 
   function Menu({ onHide }: { onHide: () => void }) {
-    const links: Link[] = [
+    const links = [
       {
         id: 'v8.light',
-        title: 'Amsterdam: Light',
+        title: 'Light',
       },
       {
         id: 'v8.dark',
-        title: 'Amsterdam: Dark',
+        title: 'Dark',
       },
-      { id: 'v7.light', title: 'Light' },
-      { id: 'v7.dark', title: 'Dark' },
-    ].map((link) => ({
-      ...link,
-      onClick: (_event, item) => {
-        if (item.id !== selectedTheme) {
-          updateGlobals({ euiTheme: item.id });
-        }
-        onHide();
-      },
-      active: selectedTheme === link.id,
-    }));
+    ].map(
+      (link): Link => ({
+        ...link,
+        onClick: (_event, item) => {
+          if (item.id !== selectedTheme) {
+            updateGlobals({ euiTheme: item.id });
+          }
+          onHide();
+        },
+        active: selectedTheme === link.id,
+      })
+    );
 
     return <TooltipLinkList links={links} />;
   }

@@ -10,7 +10,7 @@ import { waitFor } from '@testing-library/react';
 
 import { FormattedIp } from './index';
 import { TestProviders } from '../../../common/mock';
-import { TimelineId, TimelineTabs } from '../../../../common';
+import { TimelineId, TimelineTabs } from '../../../../common/types';
 import { StatefulEventContext } from '../../../../../timelines/public';
 import { timelineActions } from '../../store/timeline';
 import { activeTimeline } from '../../containers/active_timeline_context';
@@ -40,8 +40,18 @@ jest.mock('../../../common/components/drag_and_drop/draggable_wrapper', () => {
   const original = jest.requireActual('../../../common/components/drag_and_drop/draggable_wrapper');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     DraggableWrapper: () => <div data-test-subj="DraggableWrapper" />,
+  };
+});
+
+jest.mock('../../store/timeline', () => {
+  const original = jest.requireActual('../../store/timeline');
+  return {
+    ...original,
+    timelineActions: {
+      ...original.timelineActions,
+      toggleDetailPanel: jest.fn(),
+    },
   };
 });
 
@@ -54,16 +64,13 @@ describe('FormattedIp', () => {
     fieldName: 'host.ip',
   };
 
-  let toggleDetailPanel: jest.SpyInstance;
   let toggleExpandedDetail: jest.SpyInstance;
 
   beforeAll(() => {
-    toggleDetailPanel = jest.spyOn(timelineActions, 'toggleDetailPanel');
     toggleExpandedDetail = jest.spyOn(activeTimeline, 'toggleExpandedDetail');
   });
 
   afterEach(() => {
-    toggleDetailPanel.mockClear();
     toggleExpandedDetail.mockClear();
   });
   test('should render ip address', () => {
@@ -99,7 +106,7 @@ describe('FormattedIp', () => {
 
     wrapper.find('[data-test-subj="network-details"]').first().simulate('click');
     await waitFor(() => {
-      expect(toggleDetailPanel).not.toHaveBeenCalled();
+      expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
       expect(toggleExpandedDetail).not.toHaveBeenCalled();
     });
   });
@@ -121,7 +128,7 @@ describe('FormattedIp', () => {
 
     wrapper.find('[data-test-subj="network-details"]').first().simulate('click');
     await waitFor(() => {
-      expect(toggleDetailPanel).toHaveBeenCalledWith({
+      expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
         panelView: 'networkDetail',
         params: {
           flowTarget: 'source',
@@ -177,7 +184,7 @@ describe('FormattedIp', () => {
 
     wrapper.find('[data-test-subj="network-details"]').first().simulate('click');
     await waitFor(() => {
-      expect(toggleDetailPanel).toHaveBeenCalledWith({
+      expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
         panelView: 'networkDetail',
         params: {
           flowTarget: 'source',

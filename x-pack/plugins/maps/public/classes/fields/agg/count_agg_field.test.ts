@@ -9,7 +9,7 @@ import { CountAggField } from './count_agg_field';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
 import { IESAggSource } from '../../sources/es_agg_source';
 
-const mockEsAggSource = ({} as unknown) as IESAggSource;
+const mockEsAggSource = {} as unknown as IESAggSource;
 
 const defaultParams = {
   label: 'my agg field',
@@ -18,9 +18,9 @@ const defaultParams = {
   origin: FIELD_ORIGIN.SOURCE,
 };
 
-describe('supportsFieldMeta', () => {
+describe('supportsFieldMetaFromEs', () => {
   test('Counting aggregations should not support field meta', () => {
     const countMetric = new CountAggField({ ...defaultParams });
-    expect(countMetric.supportsFieldMeta()).toBe(false);
+    expect(countMetric.supportsFieldMetaFromEs()).toBe(false);
   });
 });

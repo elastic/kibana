@@ -7,6 +7,7 @@
 
 import type { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
 import { i18n } from '@kbn/i18n';
+import { asyncMap } from '@kbn/std';
 import { getIndexPatternService } from './kibana_services';
 import { indexPatterns } from '../../../../src/plugins/data/public';
 import { ES_GEO_FIELD_TYPE, ES_GEO_FIELD_TYPES } from '../common/constants';
@@ -32,18 +33,17 @@ export function getGeoTileAggNotSupportedReason(field: IndexPatternField): strin
 export async function getIndexPatternsFromIds(
   indexPatternIds: string[] = []
 ): Promise<IndexPattern[]> {
-  const promises: IndexPattern[] = [];
-  indexPatternIds.forEach(async (indexPatternId) => {
+  const results = await asyncMap(indexPatternIds, async (indexPatternId) => {
     try {
-      // @ts-ignore
-      promises.push(getIndexPatternService().get(indexPatternId));
+      return (await getIndexPatternService().get(indexPatternId)) as IndexPattern;
     } catch (error) {
       // Unable to load index pattern, better to not throw error so map can render
       // Error will be surfaced by layer since it too will be unable to locate the index pattern
       return null;
     }
   });
-  return await Promise.all(promises);
+
+  return results.filter((r): r is IndexPattern => r !== null);
 }
 
 export function getTermsFields(fields: IndexPatternField[]): IndexPatternField[] {
@@ -98,7 +98,6 @@ export function supportsGeoTileAgg(field?: IndexPatternField): boolean {
 export function getSourceFields(fields: IndexPatternField[]): IndexPatternField[] {
   return fields.filter((field) => {
     // Multi fields are not stored in _source and only exist in index.
-    const isMultiField = field.subType && field.subType.multi;
-    return !isMultiField && !indexPatterns.isNestedField(field);
+    return !field.isSubtypeMulti() && !field.isSubtypeNested();
   });
 }

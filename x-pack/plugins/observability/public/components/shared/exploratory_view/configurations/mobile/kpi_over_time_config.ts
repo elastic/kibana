@@ -6,11 +6,19 @@
  */
 
 import { ConfigProps, SeriesConfig } from '../../types';
-import { FieldLabels, OPERATION_COLUMN, RECORDS_FIELD, REPORT_METRIC_FIELD } from '../constants';
+import {
+  FieldLabels,
+  LABEL_FIELDS_FILTER,
+  OPERATION_COLUMN,
+  RECORDS_FIELD,
+  REPORT_METRIC_FIELD,
+  ReportTypes,
+} from '../constants';
 import { buildPhrasesFilter } from '../utils';
 import {
   METRIC_SYSTEM_CPU_USAGE,
   METRIC_SYSTEM_MEMORY_USAGE,
+  PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_DURATION,
@@ -26,7 +34,7 @@ import { MobileFields } from './mobile_fields';
 
 export function getMobileKPIConfig({ indexPattern }: ConfigProps): SeriesConfig {
   return {
-    reportType: 'kpi-over-time',
+    reportType: ReportTypes.KPI,
     defaultSeriesType: 'line',
     seriesTypes: ['line', 'bar', 'area'],
     xAxisColumn: {
@@ -39,7 +47,7 @@ export function getMobileKPIConfig({ indexPattern }: ConfigProps): SeriesConfig 
       },
     ],
     hasOperationType: true,
-    filterFields: Object.keys(MobileFields),
+    filterFields: [...Object.keys(MobileFields), LABEL_FIELDS_FILTER],
     breakdownFields: Object.keys(MobileFields),
     baseFilters: [
       ...buildPhrasesFilter('agent.name', ['iOS/swift', 'open-telemetry/swift'], indexPattern),
@@ -67,7 +75,7 @@ export function getMobileKPIConfig({ indexPattern }: ConfigProps): SeriesConfig 
         columnFilters: [
           {
             language: 'kuery',
-            query: `processor.event: transaction`,
+            query: `${PROCESSOR_EVENT}: transaction`,
           },
         ],
         timeScale: 'm',
@@ -77,12 +85,24 @@ export function getMobileKPIConfig({ indexPattern }: ConfigProps): SeriesConfig 
         field: METRIC_SYSTEM_MEMORY_USAGE,
         id: METRIC_SYSTEM_MEMORY_USAGE,
         columnType: OPERATION_COLUMN,
+        columnFilters: [
+          {
+            language: 'kuery',
+            query: `${PROCESSOR_EVENT}: metric`,
+          },
+        ],
       },
       {
         label: CPU_USAGE,
         field: METRIC_SYSTEM_CPU_USAGE,
         id: METRIC_SYSTEM_CPU_USAGE,
         columnType: OPERATION_COLUMN,
+        columnFilters: [
+          {
+            language: 'kuery',
+            query: `${PROCESSOR_EVENT}: metric`,
+          },
+        ],
       },
     ],
   };

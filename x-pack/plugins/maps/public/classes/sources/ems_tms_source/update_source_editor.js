@@ -7,7 +7,7 @@
 
 import React, { Fragment } from 'react';
 import { EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { TileServiceSelect } from './tile_service_select';
 
 export function UpdateSourceEditor({ onChange, config }) {

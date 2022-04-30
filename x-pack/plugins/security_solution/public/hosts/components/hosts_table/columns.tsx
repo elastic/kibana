@@ -90,7 +90,13 @@ export const getHostsColumns = (): HostsTableColumns => [
   },
   {
     field: 'node.host.os.name',
-    name: i18n.OS,
+    name: (
+      <EuiToolTip content={i18n.OS_LAST_SEEN_TOOLTIP}>
+        <>
+          {i18n.OS} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+        </>
+      </EuiToolTip>
+    ),
     truncateText: false,
     hideForMobile: false,
     sortable: false,

@@ -6,8 +6,16 @@
  */
 import { HttpSetup } from 'kibana/public';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
-import { AlertInstanceSummary } from '../../../types';
-import { RewriteRequestCase } from '../../../../../actions/common';
+import { AlertInstanceSummary, ExecutionDuration } from '../../../types';
+import { RewriteRequestCase, AsApiContract } from '../../../../../actions/common';
+
+const transformExecutionDuration: RewriteRequestCase<ExecutionDuration> = ({
+  values_with_timestamp: valuesWithTimestamp,
+  ...rest
+}) => ({
+  valuesWithTimestamp,
+  ...rest,
+});
 
 const rewriteBodyRes: RewriteRequestCase<AlertInstanceSummary> = ({
   alerts,
@@ -17,6 +25,7 @@ const rewriteBodyRes: RewriteRequestCase<AlertInstanceSummary> = ({
   status_end_date: statusEndDate,
   error_messages: errorMessages,
   last_run: lastRun,
+  execution_duration: executionDuration,
   ...rest
 }: any) => ({
   ...rest,
@@ -27,6 +36,7 @@ const rewriteBodyRes: RewriteRequestCase<AlertInstanceSummary> = ({
   errorMessages,
   lastRun,
   instances: alerts,
+  executionDuration: executionDuration ? transformExecutionDuration(executionDuration) : undefined,
 });
 
 export async function loadAlertInstanceSummary({
@@ -36,7 +46,7 @@ export async function loadAlertInstanceSummary({
   http: HttpSetup;
   alertId: string;
 }): Promise<AlertInstanceSummary> {
-  const res = await http.get(
+  const res = await http.get<AsApiContract<AlertInstanceSummary>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(alertId)}/_alert_summary`
   );
   return rewriteBodyRes(res);

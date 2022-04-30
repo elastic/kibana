@@ -8,8 +8,10 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import moment from 'moment-timezone';
-import { waitFor } from '@testing-library/react';
+import { waitFor, render, screen } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
+import { waitForComponentToUpdate } from '../../common/test_utils';
+import userEvent from '@testing-library/user-event';
 
 import '../../common/mock/match_media';
 import { TestProviders } from '../../common/mock';
@@ -20,7 +22,9 @@ import {
   connectorsMock,
 } from '../../containers/mock';
 
-import { CaseStatuses, CaseType, SECURITY_SOLUTION_OWNER, StatusAll } from '../../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { StatusAll } from '../../../common/ui/types';
+import { CaseStatuses, CaseType } from '../../../common/api';
 import { getEmptyTagValue } from '../empty_value';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { useGetCases } from '../../containers/use_get_cases';
@@ -32,8 +36,8 @@ import { useKibana } from '../../common/lib/kibana';
 import { AllCasesGeneric as AllCases } from './all_cases_generic';
 import { AllCasesProps } from '.';
 import { CasesColumns, GetCasesColumn, useCasesColumns } from './columns';
-import { actionTypeRegistryMock } from '../../../../triggers_actions_ui/public/application/action_type_registry.mock';
 import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mocks';
+import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 
 jest.mock('../../containers/use_bulk_update_case');
 jest.mock('../../containers/use_delete_cases');
@@ -144,18 +148,14 @@ describe('AllCasesGeneric', () => {
     filterStatus: CaseStatuses.open,
     handleIsLoading: jest.fn(),
     isLoadingCases: [],
-    showActions: true,
+    isSelectorView: false,
     userCanCrud: true,
   };
 
-  const { createMockActionTypeModel } = actionTypeRegistryMock;
+  const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
 
   beforeAll(() => {
-    connectorsMock.forEach((connector) =>
-      useKibanaMock().services.triggersActionsUi.actionTypeRegistry.register(
-        createMockActionTypeModel({ id: connector.actionTypeId, iconClass: 'logoSecurity' })
-      )
-    );
+    registerConnectorsToMockActionRegistry(actionTypeRegistry, connectorsMock);
   });
 
   beforeEach(() => {
@@ -192,7 +192,7 @@ describe('AllCasesGeneric', () => {
         wrapper.find(`span[data-test-subj="case-table-column-tags-0"]`).first().prop('title')
       ).toEqual(useGetCasesMockState.data.cases[0].tags[0]);
       expect(wrapper.find(`[data-test-subj="case-table-column-createdBy"]`).first().text()).toEqual(
-        useGetCasesMockState.data.cases[0].createdBy.fullName
+        useGetCasesMockState.data.cases[0].createdBy.username
       );
       expect(
         wrapper
@@ -377,7 +377,7 @@ describe('AllCasesGeneric', () => {
         isLoadingCases: [],
         filterStatus: CaseStatuses.open,
         handleIsLoading: jest.fn(),
-        showActions: false,
+        isSelectorView: true,
         userCanCrud: true,
       })
     );
@@ -748,7 +748,7 @@ describe('AllCasesGeneric', () => {
         />
       </TestProviders>
     );
-    wrapper.find('[data-test-subj="cases-table-row-1"]').first().simulate('click');
+    wrapper.find('[data-test-subj="cases-table-row-select-1"]').first().simulate('click');
     await waitFor(() => {
       expect(onRowClick).toHaveBeenCalledWith({
         closedAt: null,
@@ -925,5 +925,97 @@ describe('AllCasesGeneric', () => {
         wrapper.find('[data-test-subj="configure-case-button"]').first().prop('isDisabled')
       ).toBeFalsy();
     });
+  });
+
+  it('should not render status when isSelectorView=true', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCases {...defaultAllCasesProps} isSelectorView={true} />
+      </TestProviders>
+    );
+
+    const { result } = renderHook<GetCasesColumn, CasesColumns[]>(() =>
+      useCasesColumns({
+        ...defaultColumnArgs,
+        isSelectorView: true,
+      })
+    );
+
+    expect(result.current.find((i) => i.name === 'Status')).toBeFalsy();
+
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="cases-table"]').exists()).toBeTruthy();
+    });
+
+    expect(wrapper.find('[data-test-subj="case-view-status-dropdown"]').exists()).toBeFalsy();
+  });
+
+  it('should deselect cases when refreshing', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      selectedCases: [],
+    });
+
+    render(
+      <TestProviders>
+        <AllCases {...defaultAllCasesProps} />
+      </TestProviders>
+    );
+
+    userEvent.click(screen.getByTestId('checkboxSelectAll'));
+    const checkboxes = await screen.findAllByRole('checkbox');
+
+    for (const checkbox of checkboxes) {
+      expect(checkbox).toBeChecked();
+    }
+
+    userEvent.click(screen.getByText('Refresh'));
+    for (const checkbox of checkboxes) {
+      expect(checkbox).not.toBeChecked();
+    }
+
+    waitForComponentToUpdate();
+  });
+
+  it('should deselect cases when changing filters', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      selectedCases: [],
+    });
+
+    const { rerender } = render(
+      <TestProviders>
+        <AllCases {...defaultAllCasesProps} />
+      </TestProviders>
+    );
+
+    /** Something really weird is going on and we have to rerender
+     * to get the correct html output. Not sure why.
+     *
+     * If you run the test alone the rerender is not needed.
+     * If you run the test along with the above test
+     * then you need the rerender
+     */
+    rerender(
+      <TestProviders>
+        <AllCases {...defaultAllCasesProps} />
+      </TestProviders>
+    );
+
+    userEvent.click(screen.getByTestId('checkboxSelectAll'));
+    const checkboxes = await screen.findAllByRole('checkbox');
+
+    for (const checkbox of checkboxes) {
+      expect(checkbox).toBeChecked();
+    }
+
+    userEvent.click(screen.getByTestId('case-status-filter'));
+    userEvent.click(screen.getByTestId('case-status-filter-closed'));
+
+    for (const checkbox of checkboxes) {
+      expect(checkbox).not.toBeChecked();
+    }
+
+    waitForComponentToUpdate();
   });
 });

@@ -18,26 +18,20 @@ interface IndexHeaderProps {
   deleteIndexPatternClick?: () => void;
 }
 
-const setDefaultAriaLabel = i18n.translate(
-  'indexPatternManagement.editIndexPattern.setDefaultAria',
-  {
-    defaultMessage: 'Set as default index.',
-  }
-);
-
-const setDefaultTooltip = i18n.translate(
-  'indexPatternManagement.editIndexPattern.setDefaultTooltip',
-  {
-    defaultMessage: 'Set as default index.',
-  }
-);
-
-const removeAriaLabel = i18n.translate('indexPatternManagement.editIndexPattern.removeAria', {
-  defaultMessage: 'Remove index pattern.',
+const setDefaultAriaLabel = i18n.translate('indexPatternManagement.editDataView.setDefaultAria', {
+  defaultMessage: 'Set as default data view.',
 });
 
-const removeTooltip = i18n.translate('indexPatternManagement.editIndexPattern.removeTooltip', {
-  defaultMessage: 'Remove index pattern.',
+const setDefaultTooltip = i18n.translate('indexPatternManagement.editDataView.setDefaultTooltip', {
+  defaultMessage: 'Set as default data view.',
+});
+
+const removeAriaLabel = i18n.translate('indexPatternManagement.editDataView.removeAria', {
+  defaultMessage: 'Delete data view.',
+});
+
+const removeTooltip = i18n.translate('indexPatternManagement.editDataView.removeTooltip', {
+  defaultMessage: 'Delete data view.',
 });
 
 export const IndexHeader: React.FC<IndexHeaderProps> = ({

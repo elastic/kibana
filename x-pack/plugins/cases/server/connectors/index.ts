@@ -12,7 +12,7 @@ import {
   ContextTypeAlertSchemaType,
 } from './types';
 import { getActionType as getCaseConnector } from './case';
-import { CommentRequest, CommentType } from '../../common';
+import { CommentRequest, CommentType } from '../../common/api';
 
 export * from './types';
 export { transformConnectorComment } from './case';

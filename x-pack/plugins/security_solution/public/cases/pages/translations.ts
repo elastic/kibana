@@ -64,7 +64,7 @@ export const CREATE_BC_TITLE = i18n.translate('xpack.securitySolution.cases.case
 });
 
 export const CREATE_TITLE = i18n.translate('xpack.securitySolution.cases.caseView.create', {
-  defaultMessage: 'Create new case',
+  defaultMessage: 'Create case',
 });
 
 export const DESCRIPTION = i18n.translate('xpack.securitySolution.cases.caseView.description', {

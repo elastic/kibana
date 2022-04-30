@@ -7,7 +7,7 @@
 
 import React, { useCallback, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiSelect, EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import { PivotAggsConfigTopMetrics, TopMetricsAggConfig } from '../types';
 import { PivotConfigurationContext } from '../../../../pivot_configuration/pivot_configuration';

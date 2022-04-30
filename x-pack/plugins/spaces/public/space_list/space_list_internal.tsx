@@ -17,7 +17,7 @@ import type { ReactNode } from 'react';
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import { getSpaceAvatarComponent } from '../space_avatar';
@@ -60,8 +60,9 @@ export const SpaceListInternal = ({
   }
 
   const isSharedToAllSpaces = namespaces.includes(ALL_SPACES_ID);
-  const unauthorizedSpacesCount = namespaces.filter((namespace) => namespace === UNKNOWN_SPACE)
-    .length;
+  const unauthorizedSpacesCount = namespaces.filter(
+    (namespace) => namespace === UNKNOWN_SPACE
+  ).length;
   let displayedSpaces: SpaceTarget[];
   let button: ReactNode = null;
 

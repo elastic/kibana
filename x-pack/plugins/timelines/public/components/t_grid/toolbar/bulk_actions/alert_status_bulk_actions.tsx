@@ -13,7 +13,7 @@ import type {
   SetEventsDeleted,
   OnUpdateAlertStatusSuccess,
   OnUpdateAlertStatusError,
-} from '../../../../../common';
+} from '../../../../../common/types';
 import type { Refetch } from '../../../../store/t_grid/inputs';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../../store/t_grid';
 import { BulkActions } from './';
@@ -23,7 +23,7 @@ interface OwnProps {
   id: string;
   totalItems: number;
   filterStatus?: AlertStatus;
-  query: string;
+  query?: string;
   indexName: string;
   onActionSuccess?: OnUpdateAlertStatusSuccess;
   onActionFailure?: OnUpdateAlertStatusError;
@@ -120,12 +120,12 @@ export const AlertStatusBulkActionsComponent = React.memo<StatefulAlertStatusBul
       setEventsDeleted,
       onUpdateSuccess,
       onUpdateFailure,
+      timelineId: id,
     });
 
     return (
       <BulkActions
         data-test-subj="bulk-actions"
-        timelineId={id}
         selectedCount={Object.keys(selectedEventIds).length}
         totalItems={totalItems}
         showClearSelection={showClearSelection}

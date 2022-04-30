@@ -8,7 +8,7 @@
 
 import ReactDOM from 'react-dom/server';
 import { formatRow, formatTopLevelObject } from './row_formatter';
-import { IndexPattern } from '../../../../../../../../data/common/index_patterns/index_patterns';
+import { IndexPattern } from '../../../../../../../../data/common';
 import { fieldFormatsMock } from '../../../../../../../../field_formats/common/mocks';
 import { setServices } from '../../../../../../kibana_services';
 import { DiscoverServices } from '../../../../../../build_services';
@@ -17,6 +17,7 @@ import { stubbedSavedObjectIndexPattern } from '../../../../../../../../data/com
 describe('Row formatter', () => {
   const hit = {
     _id: 'a',
+    _index: 'foo',
     _type: 'doc',
     _score: 1,
     _source: {
@@ -39,7 +40,7 @@ describe('Row formatter', () => {
       spec: { id, type, version, timeFieldName, fields: JSON.parse(fields), title },
       fieldFormats: fieldFormatsMock,
       shortDotsEnable: false,
-      metaFields: [],
+      metaFields: ['_id', '_type', '_score'],
     });
   };
 
@@ -47,27 +48,16 @@ describe('Row formatter', () => {
 
   const fieldsToShow = indexPattern.fields.getAll().map((fld) => fld.name);
 
-  // Realistic response with alphabetical insertion order
-  const formatHitReturnValue = {
-    also: 'with \\&quot;quotes\\&quot; or &#39;single qoutes&#39;',
-    foo: 'bar',
-    number: '42',
-    hello: '&lt;h1&gt;World&lt;/h1&gt;',
-    _id: 'a',
-    _type: 'doc',
-    _score: 1,
-  };
-
-  const formatHitMock = jest.fn().mockReturnValue(formatHitReturnValue);
-
   beforeEach(() => {
-    // @ts-expect-error
-    indexPattern.formatHit = formatHitMock;
-    setServices(({
+    setServices({
       uiSettings: {
         get: () => 100,
       },
-    } as unknown) as DiscoverServices);
+      fieldFormats: {
+        getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
+        getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+      },
+    } as unknown as DiscoverServices);
   });
 
   it('formats document properly', () => {
@@ -77,31 +67,31 @@ describe('Row formatter', () => {
           Array [
             Array [
               "also",
-              "with \\\\&quot;quotes\\\\&quot; or &#39;single qoutes&#39;",
+              "with \\"quotes\\" or 'single quotes'",
             ],
             Array [
               "foo",
               "bar",
             ],
             Array [
-              "number",
-              "42",
+              "hello",
+              "<h1>World</h1>",
             ],
             Array [
-              "hello",
-              "&lt;h1&gt;World&lt;/h1&gt;",
+              "number",
+              42,
             ],
             Array [
               "_id",
               "a",
             ],
             Array [
-              "_type",
-              "doc",
-            ],
-            Array [
               "_score",
               1,
+            ],
+            Array [
+              "_type",
+              "doc",
             ],
           ]
         }
@@ -110,18 +100,46 @@ describe('Row formatter', () => {
   });
 
   it('limits number of rendered items', () => {
-    setServices(({
+    setServices({
       uiSettings: {
         get: () => 1,
       },
-    } as unknown) as DiscoverServices);
+      fieldFormats: {
+        getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
+        getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+      },
+    } as unknown as DiscoverServices);
     expect(formatRow(hit, indexPattern, [])).toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
           Array [
             Array [
               "also",
-              "with \\\\&quot;quotes\\\\&quot; or &#39;single qoutes&#39;",
+              "with \\"quotes\\" or 'single quotes'",
+            ],
+            Array [
+              "foo",
+              "bar",
+            ],
+            Array [
+              "hello",
+              "<h1>World</h1>",
+            ],
+            Array [
+              "number",
+              42,
+            ],
+            Array [
+              "_id",
+              "a",
+            ],
+            Array [
+              "_score",
+              1,
+            ],
+            Array [
+              "_type",
+              "doc",
             ],
           ]
         }
@@ -130,18 +148,18 @@ describe('Row formatter', () => {
   });
 
   it('formats document with highlighted fields first', () => {
-    expect(formatRow({ ...hit, highlight: { number: '42' } }, indexPattern, fieldsToShow))
+    expect(formatRow({ ...hit, highlight: { number: ['42'] } }, indexPattern, fieldsToShow))
       .toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
           Array [
             Array [
               "number",
-              "42",
+              42,
             ],
             Array [
               "also",
-              "with \\\\&quot;quotes\\\\&quot; or &#39;single qoutes&#39;",
+              "with \\"quotes\\" or 'single quotes'",
             ],
             Array [
               "foo",
@@ -149,19 +167,19 @@ describe('Row formatter', () => {
             ],
             Array [
               "hello",
-              "&lt;h1&gt;World&lt;/h1&gt;",
+              "<h1>World</h1>",
             ],
             Array [
               "_id",
               "a",
             ],
             Array [
-              "_type",
-              "doc",
-            ],
-            Array [
               "_score",
               1,
+            ],
+            Array [
+              "_type",
+              "doc",
             ],
           ]
         }

@@ -6,12 +6,17 @@
  * Side Public License, v 1.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { Fragment } from 'react';
+import type { IndexPattern } from 'src/plugins/data/common';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../../../../../../common';
-import { getServices, IndexPattern } from '../../../../../../kibana_services';
+import { getServices } from '../../../../../../kibana_services';
+import { formatHit } from '../../../../../helpers/format_hit';
+
+import './row_formatter.scss';
 
 interface Props {
-  defPairs: Array<[string, unknown]>;
+  defPairs: Array<[string, string]>;
 }
 const TemplateComponent = ({ defPairs }: Props) => {
   return (
@@ -20,8 +25,9 @@ const TemplateComponent = ({ defPairs }: Props) => {
         <Fragment key={idx}>
           <dt>{pair[0]}:</dt>
           <dd
-            // We  can dangerously set HTML here because this content is guaranteed to have been run through a valid field formatter first.
-            dangerouslySetInnerHTML={{ __html: `${pair[1]}` }} // eslint-disable-line react/no-danger
+            className="rowFormatter__value"
+            // eslint-disable-next-line react/no-danger
+            dangerouslySetInnerHTML={{ __html: pair[1] }}
           />{' '}
         </Fragment>
       ))}
@@ -30,30 +36,12 @@ const TemplateComponent = ({ defPairs }: Props) => {
 };
 
 export const formatRow = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  hit: Record<string, any>,
+  hit: estypes.SearchHit,
   indexPattern: IndexPattern,
   fieldsToShow: string[]
 ) => {
-  const highlights = hit?.highlight ?? {};
-  // Keys are sorted in the hits object
-  const formatted = indexPattern.formatHit(hit);
-  const fields = indexPattern.fields;
-  const highlightPairs: Array<[string, unknown]> = [];
-  const sourcePairs: Array<[string, unknown]> = [];
-  Object.entries(formatted).forEach(([key, val]) => {
-    const displayKey = fields.getByName ? fields.getByName(key)?.displayName : undefined;
-    const pairs = highlights[key] ? highlightPairs : sourcePairs;
-    if (displayKey) {
-      if (fieldsToShow.includes(displayKey)) {
-        pairs.push([displayKey, val]);
-      }
-    } else {
-      pairs.push([key, val]);
-    }
-  });
-  const maxEntries = getServices().uiSettings.get(MAX_DOC_FIELDS_DISPLAYED);
-  return <TemplateComponent defPairs={[...highlightPairs, ...sourcePairs].slice(0, maxEntries)} />;
+  const pairs = formatHit(hit, indexPattern, fieldsToShow);
+  return <TemplateComponent defPairs={pairs} />;
 };
 
 export const formatTopLevelObject = (
@@ -64,15 +52,15 @@ export const formatTopLevelObject = (
   indexPattern: IndexPattern
 ) => {
   const highlights = row.highlight ?? {};
-  const highlightPairs: Array<[string, unknown]> = [];
-  const sourcePairs: Array<[string, unknown]> = [];
+  const highlightPairs: Array<[string, string]> = [];
+  const sourcePairs: Array<[string, string]> = [];
   const sorted = Object.entries(fields).sort(([keyA], [keyB]) => keyA.localeCompare(keyB));
   sorted.forEach(([key, values]) => {
     const field = indexPattern.getFieldByName(key);
     const displayKey = fields.getByName ? fields.getByName(key)?.displayName : undefined;
     const formatter = field
       ? indexPattern.getFormatterForField(field)
-      : { convert: (v: string, ...rest: unknown[]) => String(v) };
+      : { convert: (v: unknown, ...rest: unknown[]) => String(v) };
     if (!values.map) return;
     const formatted = values
       .map((val: unknown) =>

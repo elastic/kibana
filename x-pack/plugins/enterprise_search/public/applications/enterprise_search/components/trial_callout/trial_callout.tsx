@@ -11,7 +11,7 @@ import { useValues } from 'kea';
 import moment from 'moment';
 
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { LicensingLogic } from '../../../shared/licensing';
 

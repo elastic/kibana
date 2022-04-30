@@ -67,9 +67,8 @@ export const EngineRouter: React.FC = () => {
 
   const { engineName: engineNameFromUrl } = useParams() as { engineName: string };
   const { engineName, dataLoading, engineNotFound, isMetaEngine } = useValues(EngineLogic);
-  const { setEngineName, initializeEngine, pollEmptyEngine, stopPolling, clearEngine } = useActions(
-    EngineLogic
-  );
+  const { setEngineName, initializeEngine, pollEmptyEngine, stopPolling, clearEngine } =
+    useActions(EngineLogic);
 
   useEffect(() => {
     setEngineName(engineNameFromUrl);

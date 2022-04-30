@@ -26,6 +26,7 @@ const names = ['series', 'columns', 'rows', 'stackedSeries'];
 let mockedHTMLElementClientSizes;
 let mockedSVGElementGetBBox;
 let mockedSVGElementGetComputedTextLength;
+let mockWidth;
 
 dataArray.forEach(function (data, i) {
   describe('Vislib Vis Test Suite for ' + names[i] + ' Data', function () {
@@ -35,16 +36,30 @@ dataArray.forEach(function (data, i) {
     let mockUiState;
     let secondVis;
     let numberOfCharts;
+    let config;
 
     beforeAll(() => {
       mockedHTMLElementClientSizes = setHTMLElementClientSizes(512, 512);
       mockedSVGElementGetBBox = setSVGElementGetBBox(100);
       mockedSVGElementGetComputedTextLength = setSVGElementGetComputedTextLength(100);
+      mockWidth = jest.spyOn($.prototype, 'width').mockReturnValue(900);
     });
 
     beforeEach(() => {
-      vis = getVis();
-      secondVis = getVis();
+      config = {
+        type: 'heatmap',
+        addLegend: true,
+        addTooltip: true,
+        colorsNumber: 4,
+        colorSchema: 'Greens',
+        setColorRange: false,
+        percentageMode: true,
+        percentageFormatPattern: '0.0%',
+        invertColors: false,
+        colorsRange: [],
+      };
+      vis = getVis(config);
+      secondVis = getVis(config);
       mockUiState = getMockUiState();
     });
 
@@ -57,6 +72,7 @@ dataArray.forEach(function (data, i) {
       mockedHTMLElementClientSizes.mockRestore();
       mockedSVGElementGetBBox.mockRestore();
       mockedSVGElementGetComputedTextLength.mockRestore();
+      mockWidth.mockRestore();
     });
 
     describe('render Method', function () {

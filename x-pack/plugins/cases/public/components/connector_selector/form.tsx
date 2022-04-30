@@ -12,7 +12,7 @@ import styled from 'styled-components';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../common/shared_imports';
 import { ConnectorsDropdown } from '../configure_cases/connectors_dropdown';
-import { ActionConnector } from '../../../common';
+import { ActionConnector } from '../../../common/api';
 
 interface ConnectorSelectorProps {
   connectors: ActionConnector[];

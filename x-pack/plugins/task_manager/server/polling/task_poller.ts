@@ -9,8 +9,6 @@
  * This module contains the logic for polling the task manager index for new work.
  */
 
-import { performance } from 'perf_hooks';
-import { after } from 'lodash';
 import { Subject, merge, of, Observable, combineLatest, timer } from 'rxjs';
 import { mapTo, filter, scan, concatMap, tap, catchError, switchMap } from 'rxjs/operators';
 
@@ -113,7 +111,6 @@ export function createTaskPoller<T, H>({
     // take as many argumented calls as we have capacity for and call `work` with
     // those arguments. If the queue is empty this will still trigger work to be done
     concatMap(async (set: Set<T>) => {
-      closeSleepPerf();
       return mapResult<H, Error, Result<H, PollingError<T>>>(
         await promiseResult<H, Error>(
           timeoutPromiseAfter<H, Error>(
@@ -126,7 +123,6 @@ export function createTaskPoller<T, H>({
         (err: Error) => asPollingError<T>(err, PollingErrorType.WorkError)
       );
     }),
-    tap(openSleepPerf),
     // catch errors during polling for work
     catchError((err: Error) => of(asPollingError<T>(err, PollingErrorType.WorkError)))
   );
@@ -177,13 +173,3 @@ export class PollingError<T> extends Error {
     this.data = data;
   }
 }
-
-const openSleepPerf = () => {
-  performance.mark('TaskPoller.sleep');
-};
-// we only want to close after an open has been called, as we're counting the time *between* work cycles
-// so we'll ignore the first call to `closeSleepPerf` but we will run every subsequent call
-const closeSleepPerf = after(2, () => {
-  performance.mark('TaskPoller.poll');
-  performance.measure('TaskPoller.sleepDuration', 'TaskPoller.sleep', 'TaskPoller.poll');
-});

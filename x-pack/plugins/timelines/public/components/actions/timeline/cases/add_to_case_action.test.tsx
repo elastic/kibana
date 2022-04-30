@@ -11,7 +11,7 @@ import { TestProviders, mockGetAllCasesSelectorModal } from '../../../../mock';
 import { AddToCaseAction } from './add_to_case_action';
 import { SECURITY_SOLUTION_OWNER } from '../../../../../../cases/common';
 import { AddToCaseActionButton } from './add_to_case_action_button';
-import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { ALERT_RULE_UUID } from '@kbn/rule-data-utils/technical_field_names';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
@@ -35,7 +35,8 @@ describe('AddToCaseAction', () => {
       crud: true,
       read: true,
     },
-    appId: 'securitySolution',
+    appId: 'securitySolutionUI',
+    owner: 'securitySolution',
     onClose: () => null,
   };
 

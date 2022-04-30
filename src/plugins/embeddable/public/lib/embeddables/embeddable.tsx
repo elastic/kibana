@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep, isEqual } from 'lodash';
+import fastIsEqual from 'fast-deep-equal';
+import { cloneDeep } from 'lodash';
 import * as Rx from 'rxjs';
 import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs/operators';
@@ -15,15 +16,16 @@ import { Adapters } from '../types';
 import { IContainer } from '../containers';
 import { EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { EmbeddableInput, ViewMode } from '../../../common/types';
+import { genericEmbeddableInputIsEqual, omitGenericEmbeddableInput } from './diff_embeddable_input';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;
 }
-
 export abstract class Embeddable<
   TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
   TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput
-> implements IEmbeddable<TEmbeddableInput, TEmbeddableOutput> {
+> implements IEmbeddable<TEmbeddableInput, TEmbeddableOutput>
+{
   static runtimeId: number = 0;
 
   public readonly runtimeId = Embeddable.runtimeId++;
@@ -110,7 +112,7 @@ export abstract class Embeddable<
    * Merges input$ and output$ streams and debounces emit till next macro-task.
    * Could be useful to batch reactions to input$ and output$ updates that happen separately but synchronously.
    * In case corresponding state change triggered `reload` this stream is guarantied to emit later,
-   * which allows to skip any state handling in case `reload` already handled it.
+   * which allows to skip state handling in case `reload` already handled it.
    */
   public getUpdated$(): Readonly<Rx.Observable<TEmbeddableInput | TEmbeddableOutput>> {
     return merge(this.getInput$().pipe(skip(1)), this.getOutput$().pipe(skip(1))).pipe(
@@ -128,6 +130,33 @@ export abstract class Embeddable<
 
   public getOutput(): Readonly<TEmbeddableOutput> {
     return this.output;
+  }
+
+  public async getExplicitInputIsEqual(
+    lastExplicitInput: Partial<TEmbeddableInput>
+  ): Promise<boolean> {
+    const currentExplicitInput = this.getExplicitInput();
+    return (
+      genericEmbeddableInputIsEqual(lastExplicitInput, currentExplicitInput) &&
+      fastIsEqual(
+        omitGenericEmbeddableInput(lastExplicitInput),
+        omitGenericEmbeddableInput(currentExplicitInput)
+      )
+    );
+  }
+
+  public getExplicitInput() {
+    const root = this.getRoot();
+    if (root.getIsContainer()) {
+      return (
+        (root.getInput().panels?.[this.id]?.explicitInput as TEmbeddableInput) ?? this.getInput()
+      );
+    }
+    return this.getInput();
+  }
+
+  public getPersistableInput() {
+    return this.getExplicitInput();
   }
 
   public getInput(): Readonly<TEmbeddableInput> {
@@ -183,7 +212,7 @@ export abstract class Embeddable<
 
   /**
    * Called when this embeddable is no longer used, this should be the place for
-   * implementors to add any additional clean up tasks, like unmounting and unsubscribing.
+   * implementors to add additional clean up tasks, like un-mounting and unsubscribing.
    */
   public destroy(): void {
     this.destroyed = true;
@@ -212,7 +241,7 @@ export abstract class Embeddable<
       ...this.output,
       ...outputChanges,
     };
-    if (!isEqual(this.output, newOutput)) {
+    if (!fastIsEqual(this.output, newOutput)) {
       this.output = newOutput;
       this.output$.next(this.output);
     }
@@ -229,7 +258,7 @@ export abstract class Embeddable<
   }
 
   private onResetInput(newInput: TEmbeddableInput) {
-    if (!isEqual(this.input, newInput)) {
+    if (!fastIsEqual(this.input, newInput)) {
       const oldLastReloadRequestTime = this.input.lastReloadRequestTime;
       this.input = newInput;
       this.input$.next(newInput);

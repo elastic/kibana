@@ -9,22 +9,9 @@
 import type { CoreSetup } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
-import type { SerializableRecord } from '@kbn/utility-types';
 import { migrateToLatest } from '../../../../kibana_utils/common';
 import type { UrlService } from '../../../common/url_service';
-import { render } from './render';
-import { parseSearchParams } from './util/parse_search_params';
-
-export interface RedirectOptions {
-  /** Locator ID. */
-  id: string;
-
-  /** Kibana version when locator params where generated. */
-  version: string;
-
-  /** Locator params. */
-  params: unknown & SerializableRecord;
-}
+import { parseSearchParams, RedirectOptions } from '../../../common/url_service/locators/redirect';
 
 export interface RedirectManagerDependencies {
   url: UrlService;
@@ -40,7 +27,8 @@ export class RedirectManager {
       id: 'r',
       title: 'Redirect endpoint',
       chromeless: true,
-      mount: (params) => {
+      mount: async (params) => {
+        const { render } = await import('./render');
         const unmount = render(params.element, { manager: this });
         this.onMount(params.history.location.search);
         return () => {
@@ -78,7 +66,9 @@ export class RedirectManager {
     });
 
     locator
-      .navigate(migratedParams)
+      .navigate(migratedParams, {
+        replace: true, // We do not want the redirect app URL to appear in browser navigation history
+      })
       .then()
       .catch((error) => {
         // eslint-disable-next-line no-console

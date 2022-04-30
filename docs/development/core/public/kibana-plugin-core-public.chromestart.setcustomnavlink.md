@@ -16,9 +16,9 @@ setCustomNavLink(newCustomNavLink?: Partial<ChromeNavLink>): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  newCustomNavLink | <code>Partial&lt;ChromeNavLink&gt;</code> |  |
+|  newCustomNavLink | Partial&lt;ChromeNavLink&gt; |  |
 
 <b>Returns:</b>
 
-`void`
+void
 

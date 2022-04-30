@@ -11,7 +11,7 @@ import * as i18n from '../case_view/translations';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { PropertyActions } from '../property_actions';
-import { Case } from '../../../common';
+import { Case } from '../../../common/ui/types';
 import { CaseService } from '../../containers/use_get_case_user_actions';
 import { CasesNavigation } from '../links';
 
@@ -27,12 +27,8 @@ const ActionsComponent: React.FC<CaseViewActions> = ({
   currentExternalIncident,
 }) => {
   // Delete case
-  const {
-    handleToggleModal,
-    handleOnDeleteConfirm,
-    isDeleted,
-    isDisplayConfirmDeleteModal,
-  } = useDeleteCases();
+  const { handleToggleModal, handleOnDeleteConfirm, isDeleted, isDisplayConfirmDeleteModal } =
+    useDeleteCases();
 
   const propertyActions = useMemo(
     () => [

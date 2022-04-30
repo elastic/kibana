@@ -6,3 +6,4 @@
  */
 
 export const SAVED_QUERIES_ID = 'savedQueryList';
+export const SAVED_QUERY_ID = 'savedQuery';

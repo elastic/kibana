@@ -10,7 +10,7 @@ import { createMemoryHistory } from 'history';
 import React, { ReactNode } from 'react';
 import { of } from 'rxjs';
 
-import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { CoreStart } from 'kibana/public';
 import { merge } from 'lodash';
@@ -18,7 +18,7 @@ import { dataPluginMock } from 'src/plugins/data/public/mocks';
 import type { IKibanaSearchResponse } from 'src/plugins/data/public';
 import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
 import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
-import type { SearchServiceRawResponse } from '../../../../common/search_strategies/correlations/types';
+import type { LatencyCorrelationsResponse } from '../../../../common/correlations/latency_correlations/types';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
@@ -34,7 +34,7 @@ function Wrapper({
   dataSearchResponse,
 }: {
   children?: ReactNode;
-  dataSearchResponse: IKibanaSearchResponse<SearchServiceRawResponse>;
+  dataSearchResponse: IKibanaSearchResponse<LatencyCorrelationsResponse>;
 }) {
   const mockDataSearch = jest.fn(() => of(dataSearchResponse));
 
@@ -58,12 +58,16 @@ function Wrapper({
 
   history.replace({
     pathname: '/services/the-service-name/transactions/view',
-    search: fromQuery({ transactionName: 'the-transaction-name' }),
+    search: fromQuery({
+      transactionName: 'the-transaction-name',
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
+    }),
   });
 
-  const mockPluginContext = (merge({}, mockApmPluginContextValue, {
+  const mockPluginContext = merge({}, mockApmPluginContextValue, {
     core: { http: { get: httpGet } },
-  }) as unknown) as ApmPluginContextValue;
+  }) as unknown as ApmPluginContextValue;
 
   return (
     <IntlProvider locale="en">
@@ -73,14 +77,7 @@ function Wrapper({
             history={history}
             value={mockPluginContext}
           >
-            <MockUrlParamsContextProvider
-              params={{
-                rangeFrom: 'now-15m',
-                rangeTo: 'now',
-                start: 'mystart',
-                end: 'myend',
-              }}
-            >
+            <MockUrlParamsContextProvider>
               {children}
             </MockUrlParamsContextProvider>
           </MockApmPluginContextWrapper>
@@ -97,7 +94,10 @@ describe('correlations', () => {
         <Wrapper
           dataSearchResponse={{
             isRunning: true,
-            rawResponse: { ccsWarning: false, took: 1234, values: [], log: [] },
+            rawResponse: {
+              ccsWarning: false,
+              latencyCorrelations: [],
+            },
           }}
         >
           <LatencyCorrelations onFilter={jest.fn()} />
@@ -115,7 +115,10 @@ describe('correlations', () => {
         <Wrapper
           dataSearchResponse={{
             isRunning: false,
-            rawResponse: { ccsWarning: false, took: 1234, values: [], log: [] },
+            rawResponse: {
+              ccsWarning: false,
+              latencyCorrelations: [],
+            },
           }}
         >
           <LatencyCorrelations onFilter={jest.fn()} />

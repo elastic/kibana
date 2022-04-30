@@ -6,7 +6,6 @@
  */
 
 import { getCerts } from './get_certs';
-import { getFilterBar } from './get_filter_bar';
 import { getUptimeIndexPattern as getIndexPattern } from './get_index_pattern';
 import { getLatestMonitor } from './get_latest_monitor';
 import { getMonitorAvailability } from './get_monitor_availability';
@@ -24,12 +23,11 @@ import { getJourneyScreenshot } from './get_journey_screenshot';
 import { getJourneyDetails } from './get_journey_details';
 import { getNetworkEvents } from './get_network_events';
 import { getJourneyFailedSteps } from './get_journey_failed_steps';
-import { getStepLastSuccessfulStep } from './get_last_successful_step';
+import { getLastSuccessfulCheck } from './get_last_successful_check';
 import { getJourneyScreenshotBlocks } from './get_journey_screenshot_blocks';
 
 export const requests = {
   getCerts,
-  getFilterBar,
   getIndexPattern,
   getLatestMonitor,
   getMonitorAvailability,
@@ -44,7 +42,7 @@ export const requests = {
   getIndexStatus,
   getJourneySteps,
   getJourneyFailedSteps,
-  getStepLastSuccessfulStep,
+  getLastSuccessfulCheck,
   getJourneyScreenshot,
   getJourneyScreenshotBlocks,
   getJourneyDetails,

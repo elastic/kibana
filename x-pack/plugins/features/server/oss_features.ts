@@ -11,13 +11,11 @@ import type { KibanaFeatureConfig, SubFeatureConfig } from '../common';
 
 export interface BuildOSSFeaturesParams {
   savedObjectTypes: string[];
-  includeTimelion: boolean;
   includeReporting: boolean;
 }
 
 export const buildOSSFeatures = ({
   savedObjectTypes,
-  includeTimelion,
   includeReporting,
 }: BuildOSSFeaturesParams): KibanaFeatureConfig[] => {
   return [
@@ -203,7 +201,6 @@ export const buildOSSFeatures = ({
               'index-pattern',
               'search',
               'visualization',
-              'timelion-sheet',
               'canvas-workpad',
               'lens',
               'map',
@@ -221,7 +218,6 @@ export const buildOSSFeatures = ({
               'index-pattern',
               'search',
               'visualization',
-              'timelion-sheet',
               'canvas-workpad',
               'lens',
               'map',
@@ -372,8 +368,8 @@ export const buildOSSFeatures = ({
     },
     {
       id: 'indexPatterns',
-      name: i18n.translate('xpack.features.indexPatternFeatureName', {
-        defaultMessage: 'Index Pattern Management',
+      name: i18n.translate('xpack.features.dataViewFeatureName', {
+        defaultMessage: 'Data View Management',
       }),
       order: 1600,
       category: DEFAULT_APP_CATEGORIES.management,
@@ -450,37 +446,7 @@ export const buildOSSFeatures = ({
         },
       },
     },
-    ...(includeTimelion ? [timelionFeature] : []),
   ] as KibanaFeatureConfig[];
-};
-
-const timelionFeature: KibanaFeatureConfig = {
-  id: 'timelion',
-  name: 'Timelion',
-  order: 350,
-  category: DEFAULT_APP_CATEGORIES.kibana,
-  app: ['timelion', 'kibana'],
-  catalogue: ['timelion'],
-  privileges: {
-    all: {
-      app: ['timelion', 'kibana'],
-      catalogue: ['timelion'],
-      savedObject: {
-        all: ['timelion-sheet'],
-        read: ['index-pattern'],
-      },
-      ui: ['save'],
-    },
-    read: {
-      app: ['timelion', 'kibana'],
-      catalogue: ['timelion'],
-      savedObject: {
-        all: [],
-        read: ['index-pattern', 'timelion-sheet'],
-      },
-      ui: [],
-    },
-  },
 };
 
 const reportingPrivilegeGroupName = i18n.translate(

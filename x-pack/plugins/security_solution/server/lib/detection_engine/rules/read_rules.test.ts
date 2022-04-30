@@ -7,7 +7,11 @@
 
 import { readRules } from './read_rules';
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
-import { getAlertMock, getFindResultWithSingleHit } from '../routes/__mocks__/request_responses';
+import {
+  resolveAlertMock,
+  getAlertMock,
+  getFindResultWithSingleHit,
+} from '../routes/__mocks__/request_responses';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
 export class TestError extends Error {
@@ -21,7 +25,10 @@ export class TestError extends Error {
   public output: { statusCode: number };
 }
 
-describe('read_rules', () => {
+describe.each([
+  ['Legacy', false],
+  ['RAC', true],
+])('read_rules - %s', (_, isRuleRegistryEnabled) => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.restoreAllMocks();
@@ -30,23 +37,27 @@ describe('read_rules', () => {
   describe('readRules', () => {
     test('should return the output from rulesClient if id is set but ruleId is undefined', async () => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
+      rulesClient.resolve.mockResolvedValue(
+        resolveAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+      );
 
       const rule = await readRules({
+        isRuleRegistryEnabled,
         rulesClient,
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         ruleId: undefined,
       });
-      expect(rule).toEqual(getAlertMock(getQueryRuleParams()));
+      expect(rule).toEqual(getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()));
     });
     test('should return null if saved object found by alerts client given id is not alert type', async () => {
       const rulesClient = rulesClientMock.create();
-      const result = getAlertMock(getQueryRuleParams());
+      const result = resolveAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       // @ts-expect-error
       delete result.alertTypeId;
-      rulesClient.get.mockResolvedValue(result);
+      rulesClient.resolve.mockResolvedValue(result);
 
       const rule = await readRules({
+        isRuleRegistryEnabled,
         rulesClient,
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         ruleId: undefined,
@@ -56,11 +67,12 @@ describe('read_rules', () => {
 
     test('should return error if alerts client throws 404 error on get', async () => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.get.mockImplementation(() => {
+      rulesClient.resolve.mockImplementation(() => {
         throw new TestError();
       });
 
       const rule = await readRules({
+        isRuleRegistryEnabled,
         rulesClient,
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         ruleId: undefined,
@@ -70,11 +82,12 @@ describe('read_rules', () => {
 
     test('should return error if alerts client throws error on get', async () => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.get.mockImplementation(() => {
+      rulesClient.resolve.mockImplementation(() => {
         throw new Error('Test error');
       });
       try {
         await readRules({
+          isRuleRegistryEnabled,
           rulesClient,
           id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
           ruleId: undefined,
@@ -86,23 +99,25 @@ describe('read_rules', () => {
 
     test('should return the output from rulesClient if id is undefined but ruleId is set', async () => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
-      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      rulesClient.get.mockResolvedValue(getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()));
+      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
 
       const rule = await readRules({
+        isRuleRegistryEnabled,
         rulesClient,
         id: undefined,
         ruleId: 'rule-1',
       });
-      expect(rule).toEqual(getAlertMock(getQueryRuleParams()));
+      expect(rule).toEqual(getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()));
     });
 
     test('should return null if the output from rulesClient with ruleId set is empty', async () => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
+      rulesClient.get.mockResolvedValue(getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()));
       rulesClient.find.mockResolvedValue({ data: [], page: 0, perPage: 1, total: 0 });
 
       const rule = await readRules({
+        isRuleRegistryEnabled,
         rulesClient,
         id: undefined,
         ruleId: 'rule-1',
@@ -112,23 +127,25 @@ describe('read_rules', () => {
 
     test('should return the output from rulesClient if id is null but ruleId is set', async () => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
-      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      rulesClient.get.mockResolvedValue(getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()));
+      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
 
       const rule = await readRules({
+        isRuleRegistryEnabled,
         rulesClient,
         id: undefined,
         ruleId: 'rule-1',
       });
-      expect(rule).toEqual(getAlertMock(getQueryRuleParams()));
+      expect(rule).toEqual(getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()));
     });
 
     test('should return null if id and ruleId are undefined', async () => {
       const rulesClient = rulesClientMock.create();
-      rulesClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
-      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      rulesClient.get.mockResolvedValue(getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()));
+      rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
 
       const rule = await readRules({
+        isRuleRegistryEnabled,
         rulesClient,
         id: undefined,
         ruleId: undefined,

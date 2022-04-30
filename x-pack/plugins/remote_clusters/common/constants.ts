@@ -20,6 +20,8 @@ export const PLUGIN = {
   },
 };
 
+export const MAJOR_VERSION = '8.0.0';
+
 export const API_BASE_PATH = '/api/remote_clusters';
 
 export const SNIFF_MODE = 'sniff';

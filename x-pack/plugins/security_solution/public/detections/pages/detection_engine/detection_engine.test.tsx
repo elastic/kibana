@@ -19,7 +19,7 @@ import {
 } from '../../../common/mock';
 import { DetectionEnginePage } from './detection_engine';
 import { useUserData } from '../../components/user_info';
-import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { createStore, State } from '../../../common/store';
 import { mockHistory, Router } from '../../../common/mock/router';
 import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
@@ -80,7 +80,7 @@ jest.mock('../../../common/lib/kibana', () => {
         docLinks: {
           links: {
             siem: {
-              gettingStarted: 'link',
+              privileges: 'link',
             },
           },
         },
@@ -107,9 +107,10 @@ describe('DetectionEnginePageComponent', () => {
     (useUserData as jest.Mock).mockReturnValue([
       {
         hasIndexRead: true,
+        canUserREAD: true,
       },
     ]);
-    (useSourcererScope as jest.Mock).mockReturnValue({
+    (useSourcererDataView as jest.Mock).mockReturnValue({
       indicesExist: true,
       indexPattern: {},
     });

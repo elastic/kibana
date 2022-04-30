@@ -21,7 +21,8 @@ import {
 } from './security_response_headers_config';
 
 const validBasePathRegex = /^\/.*[^\/]$/;
-const uuidRegexp = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+export const uuidRegexp =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 const match = (regex: RegExp, errorMsg: string) => (str: string) =>
   regex.test(str) ? undefined : errorMsg;

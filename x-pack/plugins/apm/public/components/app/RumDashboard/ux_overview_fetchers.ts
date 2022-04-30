@@ -21,7 +21,7 @@ export const fetchUxOverviewDate = async ({
   serviceName,
 }: FetchDataParams): Promise<UxFetchDataResponse> => {
   const data = await callApmApi({
-    endpoint: 'GET /api/apm/rum-client/web-core-vitals',
+    endpoint: 'GET /internal/apm/ux/web-core-vitals',
     signal: null,
     params: {
       query: {

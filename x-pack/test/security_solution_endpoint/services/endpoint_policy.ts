@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import uuid from 'uuid';
 import { FtrProviderContext } from '../ftr_provider_context';
 import {
   CreateAgentPolicyRequest,
@@ -23,7 +24,7 @@ import { Immutable } from '../../../plugins/security_solution/common/endpoint/ty
 
 // NOTE: import path below should be the deep path to the actual module - else we get CI errors
 import { pkgKeyFromPackageInfo } from '../../../plugins/fleet/public/services/pkg_key_from_package_info';
-import { EndpointError } from '../../../plugins/security_solution/server';
+import { EndpointError } from '../../../plugins/security_solution/common/endpoint/errors';
 
 const INGEST_API_ROOT = '/api/fleet';
 const INGEST_API_AGENT_POLICIES = `${INGEST_API_ROOT}/agent_policies`;
@@ -47,7 +48,7 @@ export interface PolicyTestResourceInfo {
   /**
    * Information about the endpoint package
    */
-  packageInfo: Immutable<GetPackagesResponse['response'][0]>;
+  packageInfo: Immutable<GetPackagesResponse['items'][0]>;
   /** will clean up (delete) the objects created (Agent Policy + Package Policy) */
   cleanup: () => Promise<void>;
 }
@@ -71,7 +72,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
     // so we'll retrieve a list of packages for a category of Security, and will then find the
     // endpoint package info. in the list. The request is kicked off here, but handled below after
     // Agent Policy creation so that they can be executed concurrently
-    let apiRequest: Promise<GetPackagesResponse['response'][0] | undefined>;
+    let apiRequest: Promise<GetPackagesResponse['items'][0] | undefined>;
 
     return () => {
       if (!apiRequest) {
@@ -93,7 +94,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
             })
             .then((response: { body: GetPackagesResponse }) => {
               const { body: secPackages } = response;
-              const endpointPackageInfo = secPackages.response.find(
+              const endpointPackageInfo = secPackages.items.find(
                 (epmPackage) => epmPackage.name === 'endpoint'
               );
               if (!endpointPackageInfo) {
@@ -123,11 +124,11 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
     /**
      * Retrieves the currently installed endpoint package
      */
-    async getEndpointPackage(): Promise<Immutable<GetPackagesResponse['response'][0]>> {
+    async getEndpointPackage(): Promise<Immutable<GetPackagesResponse['items'][0]>> {
       const endpointPackage = await retrieveEndpointPackageInfo();
 
       if (!endpointPackage) {
-        throw new EndpointError(`endpoint package not instealled`);
+        throw new EndpointError(`endpoint package not installed`);
       }
 
       return endpointPackage;
@@ -161,7 +162,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
       let agentPolicy: CreateAgentPolicyResponse['item'];
       try {
         const newAgentPolicyData: CreateAgentPolicyRequest['body'] = {
-          name: 'East Coast',
+          name: `East Coast ${uuid.v4()}`,
           description: 'East Coast call center',
           namespace: 'default',
         };
@@ -182,7 +183,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
       let packagePolicy: CreatePackagePolicyResponse['item'];
       try {
         const newPackagePolicyData: CreatePackagePolicyRequest['body'] = {
-          name: 'Protect East Coast',
+          name: `Protect East Coast ${uuid.v4()}`,
           description: 'Protect the worlds data - but in the East Coast',
           policy_id: agentPolicy!.id,
           enabled: true,
@@ -206,9 +207,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
             version: endpointPackageInfo?.version ?? '',
           },
         };
-        const {
-          body: createResponse,
-        }: { body: CreatePackagePolicyResponse } = await supertest
+        const { body: createResponse }: { body: CreatePackagePolicyResponse } = await supertest
           .post(INGEST_API_PACKAGE_POLICIES)
           .set('kbn-xsrf', 'xxx')
           .send(newPackagePolicyData)
@@ -261,14 +260,13 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
     async deletePolicyByName(name: string) {
       let packagePolicyList: GetPackagePoliciesResponse['items'];
       try {
-        const {
-          body: packagePoliciesResponse,
-        }: { body: GetPackagePoliciesResponse } = await supertest
-          .get(INGEST_API_PACKAGE_POLICIES)
-          .set('kbn-xsrf', 'xxx')
-          .query({ kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: ${name}` })
-          .send()
-          .expect(200);
+        const { body: packagePoliciesResponse }: { body: GetPackagePoliciesResponse } =
+          await supertest
+            .get(INGEST_API_PACKAGE_POLICIES)
+            .set('kbn-xsrf', 'xxx')
+            .query({ kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: ${name}` })
+            .send()
+            .expect(200);
         packagePolicyList = packagePoliciesResponse.items;
       } catch (error) {
         return logSupertestApiErrorAndThrow(

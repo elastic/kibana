@@ -8,13 +8,15 @@
 import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertDiskUsageNodeStats } from '../../../common/types/alerts';
+import { createDatasetFilter } from './create_dataset_query_filter';
 
 export async function fetchDiskUsageNodeStats(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
   index: string,
   duration: string,
-  size: number
+  size: number,
+  filterQuery?: string
 ): Promise<AlertDiskUsageNodeStats[]> {
   const clustersIds = clusters.map((cluster) => cluster.clusterUuid);
   const params = {
@@ -30,11 +32,7 @@ export async function fetchDiskUsageNodeStats(
                 cluster_uuid: clustersIds,
               },
             },
-            {
-              term: {
-                type: 'node_stats',
-              },
-            },
+            createDatasetFilter('node_stats', 'node_stats', 'elasticsearch.node_stats'),
             {
               range: {
                 timestamp: {
@@ -98,6 +96,15 @@ export async function fetchDiskUsageNodeStats(
       },
     },
   };
+
+  try {
+    if (filterQuery) {
+      const filterQueryObject = JSON.parse(filterQuery);
+      params.body.query.bool.filter.push(filterQueryObject);
+    }
+  } catch (e) {
+    // meh
+  }
 
   const { body: response } = await esClient.search(params);
   const stats: AlertDiskUsageNodeStats[] = [];

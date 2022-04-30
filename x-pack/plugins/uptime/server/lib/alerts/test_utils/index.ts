@@ -7,7 +7,7 @@
 
 import { Logger } from 'kibana/server';
 import { UMServerLibs } from '../../lib';
-import { UptimeCorePlugins, UptimeCoreSetup } from '../../adapters';
+import { UptimeCorePluginsSetup, UptimeServerSetup } from '../../adapters';
 import type { UptimeRouter } from '../../../types';
 import type { IRuleDataClient } from '../../../../../rule_registry/server';
 import { ruleRegistryMocks } from '../../../../../rule_registry/server/mocks';
@@ -27,8 +27,8 @@ export const bootstrapDependencies = (customRequests?: any, customPlugins: any =
   const router = {} as UptimeRouter;
   // these server/libs parameters don't have any functionality, which is fine
   // because we aren't testing them here
-  const server: UptimeCoreSetup = { router };
-  const plugins: UptimeCorePlugins = customPlugins as any;
+  const server = { router, config: {} } as UptimeServerSetup;
+  const plugins: UptimeCorePluginsSetup = customPlugins as any;
   const libs: UMServerLibs = { requests: {} } as UMServerLibs;
   libs.requests = { ...libs.requests, ...customRequests };
   return { server, libs, plugins };
@@ -43,11 +43,11 @@ export const createRuleTypeMocks = (
     certExpirationThreshold: DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold,
   }
 ) => {
-  const loggerMock = ({
+  const loggerMock = {
     debug: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
-  } as unknown) as Logger;
+  } as unknown as Logger;
 
   const scheduleActions = jest.fn();
   const replaceState = jest.fn();

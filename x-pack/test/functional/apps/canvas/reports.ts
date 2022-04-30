@@ -21,17 +21,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Canvas PDF Report Generation', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
-      await security.role.create('test_reporting_user', {
+      await security.role.create('test_canvas_user', {
         elasticsearch: { cluster: [], indices: [], run_as: [] },
         kibana: [
           {
             spaces: ['*'],
             base: [],
-            feature: { canvas: ['minimal_read', 'generate_report'] },
+            feature: { canvas: ['read'] },
           },
         ],
       });
-      await security.testUser.setRoles(['kibana_admin', 'test_reporting_user']);
+      await security.testUser.setRoles([
+        'test_canvas_user',
+        'reporting_user', // NOTE: the built-in role granting full reporting access is deprecated. See xpack.reporting.roles.enabled
+      ]);
       await kibanaServer.importExport.load(archive);
       await browser.setWindowSize(1600, 850);
     });
@@ -44,7 +47,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Print PDF button', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/122137
+    describe.skip('Print PDF button', () => {
       it('downloaded PDF base64 string is correct with borders and logo', async function () {
         // Generating and then comparing reports can take longer than the default 60s timeout
         this.timeout(180000);
@@ -160,7 +164,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           19 0 obj
           <<
           /Type /FontDescriptor
-          /FontName /AZZZZZ+Roboto-Regular
+          /FontName /BZZZZZ+Roboto-Regular
           /Flags 4
           /FontBBox [-681.152344 -270.996094 1181.640625 1047.851563]
           /ItalicAngle 0
@@ -176,7 +180,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           <<
           /Type /Font
           /Subtype /CIDFontType2
-          /BaseFont /AZZZZZ+Roboto-Regular
+          /BaseFont /BZZZZZ+Roboto-Regular
           /CIDSystemInfo <<
           /Registry (Adobe)
           /Ordering (Identity)
@@ -195,7 +199,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           "
         `);
 
-        expect(res.get('content-length')).to.be('20725');
+        const contentLength = parseInt(res.get('content-length'), 10);
+        expect(contentLength >= 20725 && contentLength <= 20726).to.be(true); // contentLength can be between 20725 and 20726
       });
 
       it('downloaded PDF base64 string is correct without borders and logo', async function () {
@@ -227,122 +232,122 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // PDF Header
 
         expectSnapshot(header).toMatchInline(`
-        "
-        9 0 obj
-        <<
-        /Type /ExtGState
-        /ca 1
-        /CA 1
-        >>
-        endobj
-        8 0 obj
-        <<
-        /Type /Page
-        /Parent 1 0 R
-        /MediaBox [0 0 8 8]
-        /Contents 6 0 R
-        /Resources 7 0 R
-        >>
-        endobj
-        7 0 obj
-        <<
-        /ProcSet [/PDF /Text /ImageB /ImageC /ImageI]
-        /ExtGState <<
-        /Gs1 9 0 R
-        >>
-        /XObject <<
-        /I1 5 0 R
-        >>
-        >>
-        endobj
-        6 0 obj
-        <<
-        /Length 45
-        /Filter /FlateDecode
-        >>
-        "
-        `);
+                  "
+                  9 0 obj
+                  <<
+                  /Type /ExtGState
+                  /ca 1
+                  /CA 1
+                  >>
+                  endobj
+                  8 0 obj
+                  <<
+                  /Type /Page
+                  /Parent 1 0 R
+                  /MediaBox [0 0 8 8]
+                  /Contents 6 0 R
+                  /Resources 7 0 R
+                  >>
+                  endobj
+                  7 0 obj
+                  <<
+                  /ProcSet [/PDF /Text /ImageB /ImageC /ImageI]
+                  /ExtGState <<
+                  /Gs1 9 0 R
+                  >>
+                  /XObject <<
+                  /I1 5 0 R
+                  >>
+                  >>
+                  endobj
+                  6 0 obj
+                  <<
+                  /Length 45
+                  /Filter /FlateDecode
+                  >>
+                  "
+                `);
 
         // PDF Contents
 
         expectSnapshot(contents.replace(/D:\d+Z/, 'D:DATESTAMP')).toMatchInline(`
-        "
-        endobj
-        11 0 obj
-        (pdfmake)
-        endobj
-        12 0 obj
-        (pdfmake)
-        endobj
-        13 0 obj
-        (D:DATESTAMP)
-        endobj
-        10 0 obj
-        <<
-        /Producer 11 0 R
-        /Creator 12 0 R
-        /CreationDate 13 0 R
-        >>
-        endobj
-        4 0 obj
-        <<
-        >>
-        endobj
-        3 0 obj
-        <<
-        /Type /Catalog
-        /Pages 1 0 R
-        /Names 2 0 R
-        >>
-        endobj
-        1 0 obj
-        <<
-        /Type /Pages
-        /Count 1
-        /Kids [8 0 R]
-        >>
-        endobj
-        2 0 obj
-        <<
-        /Dests <<
-          /Names [
-        ]
-        >>
-        >>
-        endobj
-        14 0 obj
-        <<
-        /Type /XObject
-        /Subtype /Image
-        /Height 16
-        /Width 16
-        /BitsPerComponent 8
-        /Filter /FlateDecode
-        /ColorSpace /DeviceGray
-        /Decode [0 1]
-        /Length 12
-        >>
-        "
-        `);
+                  "
+                  endobj
+                  11 0 obj
+                  (pdfmake)
+                  endobj
+                  12 0 obj
+                  (pdfmake)
+                  endobj
+                  13 0 obj
+                  (D:DATESTAMP)
+                  endobj
+                  10 0 obj
+                  <<
+                  /Producer 11 0 R
+                  /Creator 12 0 R
+                  /CreationDate 13 0 R
+                  >>
+                  endobj
+                  4 0 obj
+                  <<
+                  >>
+                  endobj
+                  3 0 obj
+                  <<
+                  /Type /Catalog
+                  /Pages 1 0 R
+                  /Names 2 0 R
+                  >>
+                  endobj
+                  1 0 obj
+                  <<
+                  /Type /Pages
+                  /Count 1
+                  /Kids [8 0 R]
+                  >>
+                  endobj
+                  2 0 obj
+                  <<
+                  /Dests <<
+                    /Names [
+                  ]
+                  >>
+                  >>
+                  endobj
+                  14 0 obj
+                  <<
+                  /Type /XObject
+                  /Subtype /Image
+                  /Height 16
+                  /Width 16
+                  /BitsPerComponent 8
+                  /Filter /FlateDecode
+                  /ColorSpace /DeviceGray
+                  /Decode [0 1]
+                  /Length 12
+                  >>
+                  "
+                `);
 
         // PDF Info
         expectSnapshot(info).toMatchInline(`
-        "
-        endobj
-        5 0 obj
-        <<
-        /Type /XObject
-        /Subtype /Image
-        /BitsPerComponent 8
-        /Width 16
-        /Height 16
-        /Filter /FlateDecode
-        /ColorSpace /DeviceRGB
-        /SMask 14 0 R
-        /Length 17
-        >>
-        "
-        `);
+                  "
+                  endobj
+                  5 0 obj
+                  <<
+                  /Type /XObject
+                  /Subtype /Image
+                  /BitsPerComponent 8
+                  /Width 16
+                  /Height 16
+                  /Filter /FlateDecode
+                  /ColorSpace /DeviceRGB
+                  /SMask 14 0 R
+                  /Length 17
+                  >>
+                  "
+                `);
 
         expect(res.get('content-length')).to.be('1598');
       });

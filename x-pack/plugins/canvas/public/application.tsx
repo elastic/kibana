@@ -8,7 +8,7 @@
 import React from 'react';
 import { Store } from 'redux';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
@@ -22,7 +22,6 @@ import { PluginServices } from '../../../../src/plugins/presentation_util/public
 
 import { CanvasStartDeps, CanvasSetupDeps } from './plugin';
 import { App } from './components/app';
-import { registerLanguage } from './lib/monaco_language_def';
 import { SetupRegistries } from './plugin_api';
 import { initRegistries, populateRegistries, destroyRegistries } from './registries';
 import { HelpMenu } from './components/help_menu/help_menu';
@@ -37,6 +36,7 @@ import {
   services,
   LegacyServicesProvider,
   CanvasPluginServices,
+  pluginServices as canvasServices,
 } from './services';
 import { initFunctions } from './functions';
 // @ts-expect-error untyped local
@@ -77,7 +77,7 @@ export const renderApp = ({
           <presentationUtil.ContextProvider>
             <I18nProvider>
               <Provider store={canvasStore}>
-                <App />
+                <App history={params.history} />
               </Provider>
             </I18nProvider>
           </presentationUtil.ContextProvider>
@@ -98,11 +98,10 @@ export const initializeCanvas = async (
   setupPlugins: CanvasSetupDeps,
   startPlugins: CanvasStartDeps,
   registries: SetupRegistries,
-  appUpdater: BehaviorSubject<AppUpdater>,
-  pluginServices: PluginServices<CanvasPluginServices>
+  appUpdater: BehaviorSubject<AppUpdater>
 ) => {
   await startLegacyServices(coreSetup, coreStart, setupPlugins, startPlugins, appUpdater);
-  const { expressions } = pluginServices.getServices();
+  const { expressions } = setupPlugins;
 
   // Adding these functions here instead of in plugin.ts.
   // Some of these functions have deep dependencies into Canvas, which was bulking up the size
@@ -120,8 +119,6 @@ export const initializeCanvas = async (
 
   // Create Store
   const canvasStore = await createStore(coreSetup);
-
-  registerLanguage(Object.values(expressions.getFunctions()));
 
   // Init Registries
   initRegistries();
@@ -152,7 +149,13 @@ export const initializeCanvas = async (
       },
     ],
     content: (domNode) => {
-      ReactDOM.render(<HelpMenu functionRegistry={expressions.getFunctions()} />, domNode);
+      ReactDOM.render(
+        <HelpMenu
+          functionRegistry={expressions.getFunctions()}
+          notifyService={canvasServices.getServices().notify}
+        />,
+        domNode
+      );
       return () => ReactDOM.unmountComponentAtNode(domNode);
     },
   });

@@ -9,7 +9,11 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProviderContext) {
+export function MachineLearningAnomalyExplorerProvider({
+  getPageObject,
+  getService,
+}: FtrProviderContext) {
+  const dashboardPage = getPageObject('dashboard');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
@@ -83,9 +87,16 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
     },
 
     async addAndEditSwimlaneInDashboard(dashboardTitle: string) {
-      await this.filterDashboardSearchWithSearchString(dashboardTitle);
-      await this.selectAllDashboards();
-      await testSubjects.clickWhenNotDisabled('mlAddAndEditDashboardButton');
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.filterDashboardSearchWithSearchString(dashboardTitle);
+        await this.selectAllDashboards();
+        await this.waitForAddAndEditDashboardButtonEnabled();
+        await testSubjects.clickWhenNotDisabled('mlAddAndEditDashboardButton');
+
+        // make sure the dashboard page actually loaded
+        const dashboardItemCount = await dashboardPage.getSharedItemsCount();
+        expect(dashboardItemCount).to.not.eql(undefined);
+      });
       // changing to the dashboard app might take sime time
       const embeddable = await testSubjects.find('mlAnomalySwimlaneEmbeddableWrapper', 30 * 1000);
       const swimlane = await embeddable.findByClassName('mlSwimLaneContainer');
@@ -100,15 +111,31 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
     },
 
     async waitForDashboardsToLoad() {
-      await testSubjects.existOrFail('~mlDashboardSelectionTable', { timeout: 60 * 1000 });
+      await testSubjects.existOrFail('mlDashboardSelectionTable loaded', { timeout: 60 * 1000 });
     },
 
-    async filterDashboardSearchWithSearchString(filter: string) {
-      await this.waitForDashboardsToLoad();
-      const searchBarInput = await testSubjects.find('mlDashboardsSearchBox');
-      await searchBarInput.clearValueWithKeyboard();
-      await searchBarInput.type(filter);
-      await this.assertDashboardSearchInputValue(filter);
+    async waitForAddAndEditDashboardButtonEnabled() {
+      await retry.tryForTime(3000, async () => {
+        const isEnabled = await testSubjects.isEnabled('mlAddAndEditDashboardButton');
+        expect(isEnabled).to.eql(true, 'Button to add and edit dashboard should be enabled');
+      });
+    },
+
+    async filterDashboardSearchWithSearchString(filter: string, expectedRowCount: number = 1) {
+      await retry.tryForTime(20 * 1000, async () => {
+        await this.waitForDashboardsToLoad();
+        const searchBarInput = await testSubjects.find('mlDashboardsSearchBox');
+        await searchBarInput.clearValueWithKeyboard();
+        await searchBarInput.type(filter);
+        await this.assertDashboardSearchInputValue(filter);
+        await this.waitForDashboardsToLoad();
+
+        const dashboardRows = await testSubjects.findAll('~mlDashboardSelectionTableRow', 2000);
+        expect(dashboardRows.length).to.eql(
+          expectedRowCount,
+          `Dashboard table should have ${expectedRowCount} rows, got ${dashboardRows.length}`
+        );
+      });
     },
 
     async assertDashboardSearchInputValue(expectedSearchValue: string) {
@@ -122,9 +149,11 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
 
     async selectAllDashboards() {
       await retry.tryForTime(3000, async () => {
-        await testSubjects.clickWhenNotDisabled('mlDashboardSelectionTable > checkboxSelectAll');
+        await testSubjects.clickWhenNotDisabled(
+          'mlDashboardSelectionTable loaded > checkboxSelectAll'
+        );
         expect(
-          await testSubjects.isChecked('mlDashboardSelectionTable > checkboxSelectAll')
+          await testSubjects.isChecked('mlDashboardSelectionTable loaded > checkboxSelectAll')
         ).to.eql(true, 'Checkbox to select all dashboards should be selected');
       });
     },
@@ -152,6 +181,14 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
         expectedChartsCount,
         `Expect ${expectedChartsCount} charts to appear, got ${actualChartsCount}`
       );
+    },
+
+    async scrollChartsContainerIntoView() {
+      await testSubjects.scrollIntoView('mlExplorerChartsContainer');
+    },
+
+    async scrollMapContainerIntoView() {
+      await testSubjects.scrollIntoView('mlAnomaliesMapContainer');
     },
   };
 }

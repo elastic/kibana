@@ -9,7 +9,6 @@ import { SavedObjectsClient } from '../../../../../src/core/server';
 import type { SpacesPluginSetup } from '../../../spaces/server';
 import type { AuditServiceSetup } from '../audit';
 import type { AuthorizationServiceSetup } from '../authorization';
-import { LegacySpacesAuditLogger } from './legacy_audit_logger';
 import { SecureSpacesClientWrapper } from './secure_spaces_client_wrapper';
 
 interface Deps {
@@ -31,8 +30,6 @@ export const setupSpacesClient = ({ audit, authz, spaces }: Deps) => {
     return savedObjectsStart.createScopedRepository(request, ['space']);
   });
 
-  const spacesAuditLogger = new LegacySpacesAuditLogger(audit.getLogger());
-
   spacesClient.registerClientWrapper(
     (request, baseClient) =>
       new SecureSpacesClientWrapper(
@@ -40,7 +37,6 @@ export const setupSpacesClient = ({ audit, authz, spaces }: Deps) => {
         request,
         authz,
         audit.asScoped(request),
-        spacesAuditLogger,
         SavedObjectsClient.errors
       )
   );

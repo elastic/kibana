@@ -7,7 +7,7 @@
  */
 
 import { AddToLibraryAction } from '.';
-import { DashboardContainer } from '../embeddable';
+import { DashboardContainer } from '../embeddable/dashboard_container';
 import { getSampleDashboardInput } from '../test_helpers';
 
 import { CoreStart } from 'kibana/public';
@@ -15,6 +15,7 @@ import { CoreStart } from 'kibana/public';
 import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 import { getStubPluginServices } from '../../../../presentation_util/public';
+import { screenshotModePluginMock } from '../../../../screenshot_mode/public/mocks';
 
 import {
   EmbeddableInput,
@@ -65,6 +66,7 @@ beforeEach(async () => {
     uiSettings: uiSettingsServiceMock.createStartContract(),
     http: coreStart.http,
     presentationUtil: getStubPluginServices(),
+    screenshotMode: screenshotModePluginMock.createSetupContract(),
   };
 
   container = new DashboardContainer(getSampleDashboardInput(), containerOptions);

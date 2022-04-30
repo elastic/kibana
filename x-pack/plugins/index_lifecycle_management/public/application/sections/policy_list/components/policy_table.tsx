@@ -191,7 +191,9 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
           direction: 'asc',
         },
       }}
-      search={{ box: { incremental: true } }}
+      search={{
+        box: { incremental: true, 'data-test-subj': 'ilmSearchBar' },
+      }}
       tableLayout="auto"
       items={policies}
       columns={columns}

@@ -13,10 +13,8 @@ import $ from 'jquery';
 import { Tooltip } from '../components/tooltip';
 import { Chart } from './_chart';
 import { TimeMarker } from './time_marker';
-import { seriesTypes } from './point_series/series_types';
 import { touchdownTemplate } from '../partials/touchdown_template';
-
-const seriTypes = seriesTypes;
+import { HeatmapChart } from './point_series/heatmap_chart';
 
 /**
  * Line Chart Visualization
@@ -233,9 +231,7 @@ export class PointSeries extends Chart {
         self.series = [];
         _.each(self.chartConfig.series, (seriArgs, i) => {
           if (!seriArgs.show) return;
-          const SeriClass =
-            seriTypes[seriArgs.type || self.handler.visConfig.get('chart.type')] || seriTypes.line;
-          const series = new SeriClass(
+          const series = new HeatmapChart(
             self.handler,
             svg,
             data.series[i],

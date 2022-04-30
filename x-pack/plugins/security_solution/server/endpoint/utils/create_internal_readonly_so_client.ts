@@ -6,7 +6,7 @@
  */
 
 import { KibanaRequest, SavedObjectsClientContract, SavedObjectsServiceStart } from 'kibana/server';
-import { EndpointError } from '../errors';
+import { EndpointError } from '../../../common/endpoint/errors';
 
 type SavedObjectsClientContractKeys = keyof SavedObjectsClientContract;
 
@@ -32,14 +32,14 @@ export class InternalReadonlySoClientMethodNotAllowedError extends EndpointError
 export const createInternalReadonlySoClient = (
   savedObjectsServiceStart: SavedObjectsServiceStart
 ): SavedObjectsClientContract => {
-  const fakeRequest = ({
+  const fakeRequest = {
     headers: {},
     getBasePath: () => '',
     path: '/',
     route: { settings: {} },
     url: { href: {} },
     raw: { req: { url: '/' } },
-  } as unknown) as KibanaRequest;
+  } as unknown as KibanaRequest;
 
   const internalSoClient = savedObjectsServiceStart.getScopedClient(fakeRequest, {
     excludedWrappers: ['security'],

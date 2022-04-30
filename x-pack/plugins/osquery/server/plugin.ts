@@ -7,18 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  AGENT_POLICY_SAVED_OBJECT_TYPE,
-  PACKAGES_SAVED_OBJECT_TYPE,
-} from '../../fleet/common';
-import {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
   Logger,
+  SavedObjectsClient,
   DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/server';
+
 import { createConfig } from './create_config';
 import { OsqueryPluginSetup, OsqueryPluginStart, SetupPlugins, StartPlugins } from './types';
 import { defineRoutes } from './routes';
@@ -29,6 +26,7 @@ import { OsqueryAppContext, OsqueryAppContextService } from './lib/osquery_app_c
 import { ConfigType } from './config';
 import { packSavedObjectType, savedQuerySavedObjectType } from '../common/types';
 import { PLUGIN_ID } from '../common';
+import { getPackagePolicyDeleteCallback } from './lib/fleet_integration';
 
 const registerFeatures = (features: SetupPlugins['features']) => {
   features.registerKibanaFeature({
@@ -47,8 +45,8 @@ const registerFeatures = (features: SetupPlugins['features']) => {
         app: [PLUGIN_ID, 'kibana'],
         catalogue: [PLUGIN_ID],
         savedObject: {
-          all: [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
-          read: [PACKAGES_SAVED_OBJECT_TYPE, AGENT_POLICY_SAVED_OBJECT_TYPE],
+          all: [],
+          read: [],
         },
         ui: ['write'],
       },
@@ -58,11 +56,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
         catalogue: [PLUGIN_ID],
         savedObject: {
           all: [],
-          read: [
-            PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-            PACKAGES_SAVED_OBJECT_TYPE,
-            AGENT_POLICY_SAVED_OBJECT_TYPE,
-          ],
+          read: [],
         },
         ui: ['read'],
       },
@@ -129,6 +123,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
             groupType: 'mutually_exclusive',
             privileges: [
               {
+                api: [`${PLUGIN_ID}-writeSavedQueries`, `${PLUGIN_ID}-readSavedQueries`],
                 id: 'saved_queries_all',
                 includeIn: 'all',
                 name: 'All',
@@ -139,6 +134,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
                 ui: ['writeSavedQueries', 'readSavedQueries'],
               },
               {
+                api: [`${PLUGIN_ID}-readSavedQueries`],
                 id: 'saved_queries_read',
                 includeIn: 'read',
                 name: 'Read',
@@ -153,16 +149,15 @@ const registerFeatures = (features: SetupPlugins['features']) => {
         ],
       },
       {
-        // TODO: Rename it to "Packs" as part of https://github.com/elastic/kibana/pull/107345
-        name: i18n.translate('xpack.osquery.features.scheduledQueryGroupsSubFeatureName', {
-          defaultMessage: 'Scheduled query groups',
+        name: i18n.translate('xpack.osquery.features.packsSubFeatureName', {
+          defaultMessage: 'Packs',
         }),
         privilegeGroups: [
           {
             groupType: 'mutually_exclusive',
             privileges: [
               {
-                api: [`${PLUGIN_ID}-writePacks`],
+                api: [`${PLUGIN_ID}-writePacks`, `${PLUGIN_ID}-readPacks`],
                 id: 'packs_all',
                 includeIn: 'all',
                 name: 'All',
@@ -205,10 +200,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.logger.debug('osquery: Setup');
     const config = createConfig(this.initializerContext);
 
-    if (!config.enabled) {
-      return {};
-    }
-
     registerFeatures(plugins.features);
 
     const router = core.http.createRouter();
@@ -221,7 +212,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       security: plugins.security,
     };
 
-    initSavedObjects(core.savedObjects, osqueryContext);
+    initSavedObjects(core.savedObjects);
     initUsageCollectors({
       core,
       osqueryContext,
@@ -251,6 +242,11 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       registerIngestCallback,
     });
 
+    if (registerIngestCallback) {
+      const client = new SavedObjectsClient(core.savedObjects.createInternalRepository());
+
+      registerIngestCallback('postPackagePolicyDelete', getPackagePolicyDeleteCallback(client));
+    }
     return {};
   }
 

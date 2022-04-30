@@ -11,7 +11,7 @@ import deepEqual from 'fast-deep-equal';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, map, shareReplay } from 'rxjs/operators';
 import { createStateContainer, StateContainer } from '../../../../kibana_utils/public';
-import { SearchSessionSavedObject } from './sessions_client';
+import type { SearchSessionSavedObject } from './sessions_client';
 
 /**
  * Possible state that current session can be in
@@ -152,12 +152,14 @@ export interface SessionPureTransitions<
 }
 
 export const sessionPureTransitions: SessionPureTransitions = {
-  start: (state) => ({ appName }) => ({
-    ...createSessionDefaultState(),
-    sessionId: uuid.v4(),
-    startTime: new Date(),
-    appName,
-  }),
+  start:
+    (state) =>
+    ({ appName }) => ({
+      ...createSessionDefaultState(),
+      sessionId: uuid.v4(),
+      startTime: new Date(),
+      appName,
+    }),
   restore: (state) => (sessionId: string) => ({
     ...createSessionDefaultState(),
     sessionId,

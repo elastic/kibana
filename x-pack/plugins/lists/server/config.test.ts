@@ -84,4 +84,14 @@ describe('config_schema', () => {
       '[importTimeout]: duration cannot be greater than 30 minutes'
     );
   });
+
+  test('it throws if the "maxExceptionsImportSize" value is less than 0', () => {
+    const mock: ConfigType = {
+      ...getConfigMockDecoded(),
+      maxExceptionsImportSize: -1,
+    };
+    expect(() => ConfigSchema.validate(mock)).toThrow(
+      '[maxExceptionsImportSize]: Value must be equal to or greater than [1].'
+    );
+  });
 });

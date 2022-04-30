@@ -10,10 +10,10 @@ import _ from 'lodash';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
+import type { ElasticsearchRole } from '.';
 import { GLOBAL_RESOURCE } from '../../../../../common/constants';
 import { PrivilegeSerializer } from '../../../../authorization/privilege_serializer';
 import { ResourceSerializer } from '../../../../authorization/resource_serializer';
-import type { ElasticsearchRole } from './elasticsearch_role';
 
 /**
  * Elasticsearch specific portion of the role definition.

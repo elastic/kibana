@@ -6,9 +6,9 @@
  */
 import type { SavedObjectsClientContract } from 'kibana/server';
 
-import type { FullAgentPolicyOutputPermissions, RegistryDataStreamPermissions } from '../../common';
+import type { FullAgentPolicyOutputPermissions, RegistryDataStreamPrivileges } from '../../common';
+import { PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES } from '../constants';
 import { getPackageInfo } from '../../server/services/epm/packages';
-
 import type { PackagePolicy } from '../types';
 
 export const DEFAULT_PERMISSIONS = {
@@ -22,7 +22,7 @@ export const DEFAULT_PERMISSIONS = {
         'synthetics-*',
         '.logs-endpoint.diagnostic.collection-*',
       ],
-      privileges: ['auto_configure', 'create_doc'],
+      privileges: PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
     },
   ],
 };
@@ -104,11 +104,15 @@ export async function storedPackagePoliciesToAgentPermissions(
                     return;
                   }
 
-                  const ds = {
+                  const ds: DataStreamMeta = {
                     type: stream.data_stream.type,
                     dataset:
                       stream.compiled_stream?.data_stream?.dataset ?? stream.data_stream.dataset,
                   };
+
+                  if (stream.data_stream.elasticsearch) {
+                    ds.elasticsearch = stream.data_stream.elasticsearch;
+                  }
 
                   dataStreams_.push(ds);
                 });
@@ -117,12 +121,21 @@ export async function storedPackagePoliciesToAgentPermissions(
             });
       }
 
+      let clusterRoleDescriptor = {};
+      const cluster = packagePolicy?.elasticsearch?.privileges?.cluster ?? [];
+      if (cluster.length > 0) {
+        clusterRoleDescriptor = {
+          cluster,
+        };
+      }
+
       return [
         packagePolicy.name,
         {
           indices: dataStreamsForPermissions.map((ds) =>
-            getDataStreamPermissions(ds, packagePolicy.namespace)
+            getDataStreamPrivileges(ds, packagePolicy.namespace)
           ),
+          ...clusterRoleDescriptor,
         },
       ];
     }
@@ -136,10 +149,12 @@ interface DataStreamMeta {
   dataset: string;
   dataset_is_prefix?: boolean;
   hidden?: boolean;
-  permissions?: RegistryDataStreamPermissions;
+  elasticsearch?: {
+    privileges?: RegistryDataStreamPrivileges;
+  };
 }
 
-export function getDataStreamPermissions(dataStream: DataStreamMeta, namespace: string = '*') {
+export function getDataStreamPrivileges(dataStream: DataStreamMeta, namespace: string = '*') {
   let index = `${dataStream.type}-${dataStream.dataset}`;
 
   if (dataStream.dataset_is_prefix) {
@@ -152,8 +167,12 @@ export function getDataStreamPermissions(dataStream: DataStreamMeta, namespace: 
 
   index += `-${namespace}`;
 
+  const privileges = dataStream?.elasticsearch?.privileges?.indices?.length
+    ? dataStream.elasticsearch.privileges.indices
+    : PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES;
+
   return {
     names: [index],
-    privileges: dataStream.permissions?.indices || ['auto_configure', 'create_doc'],
+    privileges,
   };
 }

@@ -26,6 +26,8 @@ interface AdministrationListPageProps {
   subtitle?: React.ReactNode;
   actions?: React.ReactNode;
   restrictWidth?: boolean | number;
+  hasBottomBorder?: boolean;
+  hideHeader?: boolean;
   headerBackComponent?: React.ReactNode;
 }
 
@@ -36,6 +38,8 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
     actions,
     children,
     restrictWidth = false,
+    hasBottomBorder = true,
+    hideHeader = false,
     headerBackComponent,
     ...otherProps
   }) => {
@@ -60,18 +64,43 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
 
     const getTestId = useTestIdGenerator(otherProps['data-test-subj']);
 
+    const pageHeader = useMemo(
+      () =>
+        hideHeader ? (
+          <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
+            <EuiFlexItem grow={false}>
+              {headerBackComponent && <>{headerBackComponent}</>}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          <>
+            <EuiPageHeader
+              pageTitle={header}
+              description={description}
+              bottomBorder={hasBottomBorder}
+              rightSideItems={actions ? [actions] : undefined}
+              restrictWidth={restrictWidth}
+              data-test-subj={getTestId('header')}
+            />
+            <EuiSpacer size="l" />
+          </>
+        ),
+      [
+        actions,
+        description,
+        getTestId,
+        hasBottomBorder,
+        header,
+        headerBackComponent,
+        hideHeader,
+        restrictWidth,
+      ]
+    );
+
     return (
       <div {...otherProps}>
         <RunningConsoles />
-        <EuiPageHeader
-          pageTitle={header}
-          description={description}
-          bottomBorder={true}
-          rightSideItems={[actions]}
-          restrictWidth={restrictWidth}
-          data-test-subj={getTestId('header')}
-        />
-        <EuiSpacer size="l" />
+        {pageHeader}
         <EuiPageContent
           hasBorder={false}
           hasShadow={false}

@@ -17,9 +17,9 @@ let mockCore: ReportingCore;
 const mockReportingConfig = createMockConfigSchema({ roles: { enabled: false } });
 
 const getMockContext = () =>
-  (({
+  ({
     core: coreMock.createRequestHandlerContext(),
-  } as unknown) as ReportingRequestHandlerContext);
+  } as unknown as ReportingRequestHandlerContext);
 
 const getMockRequest = () =>
   ({
@@ -28,11 +28,11 @@ const getMockRequest = () =>
   } as KibanaRequest);
 
 const getMockResponseFactory = () =>
-  (({
+  ({
     ...httpServerMock.createResponseFactory(),
     forbidden: (obj: unknown) => obj,
     unauthorized: (obj: unknown) => obj,
-  } as unknown) as KibanaResponseFactory);
+  } as unknown as KibanaResponseFactory);
 
 describe('authorized_user_pre_routing', function () {
   beforeEach(async () => {
@@ -41,11 +41,11 @@ describe('authorized_user_pre_routing', function () {
 
   it('should return from handler with a "false" user when security plugin is not found', async function () {
     mockCore.getPluginSetupDeps = () =>
-      (({
+      ({
         // @ts-ignore
         ...mockCore.pluginSetupDeps,
         security: undefined, // disable security
-      } as unknown) as ReportingInternalSetup);
+      } as unknown as ReportingInternalSetup);
     const mockResponseFactory = httpServerMock.createResponseFactory() as KibanaResponseFactory;
 
     let handlerCalled = false;
@@ -60,7 +60,7 @@ describe('authorized_user_pre_routing', function () {
 
   it('should return from handler with a "false" user when security is disabled', async function () {
     mockCore.getPluginSetupDeps = () =>
-      (({
+      ({
         // @ts-ignore
         ...mockCore.pluginSetupDeps,
         security: {
@@ -68,7 +68,7 @@ describe('authorized_user_pre_routing', function () {
             isEnabled: () => false,
           },
         }, // disable security
-      } as unknown) as ReportingInternalSetup);
+      } as unknown as ReportingInternalSetup);
     const mockResponseFactory = httpServerMock.createResponseFactory() as KibanaResponseFactory;
 
     let handlerCalled = false;
@@ -83,14 +83,14 @@ describe('authorized_user_pre_routing', function () {
 
   it('should return with 401 when security is enabled and the request is unauthenticated', async function () {
     mockCore.getPluginSetupDeps = () =>
-      (({
+      ({
         // @ts-ignore
         ...mockCore.pluginSetupDeps,
         security: {
           license: { isEnabled: () => true },
           authc: { getCurrentUser: () => null },
         },
-      } as unknown) as ReportingInternalSetup);
+      } as unknown as ReportingInternalSetup);
     const mockHandler = () => {
       throw new Error('Handler callback should not be called');
     };
@@ -115,14 +115,14 @@ describe('authorized_user_pre_routing', function () {
 
     it(`should return with 403 when security is enabled but user doesn't have the allowed role`, async function () {
       mockCore.getPluginSetupDeps = () =>
-        (({
+        ({
           // @ts-ignore
           ...mockCore.pluginSetupDeps,
           security: {
             license: { isEnabled: () => true },
             authc: { getCurrentUser: () => ({ username: 'friendlyuser', roles: ['cowboy'] }) },
           },
-        } as unknown) as ReportingInternalSetup);
+        } as unknown as ReportingInternalSetup);
       const mockResponseFactory = getMockResponseFactory();
 
       const mockHandler = () => {
@@ -139,7 +139,7 @@ describe('authorized_user_pre_routing', function () {
 
     it('should return from handler when security is enabled and user has explicitly allowed role', function (done) {
       mockCore.getPluginSetupDeps = () =>
-        (({
+        ({
           // @ts-ignore
           ...mockCore.pluginSetupDeps,
           security: {
@@ -148,7 +148,7 @@ describe('authorized_user_pre_routing', function () {
               getCurrentUser: () => ({ username: 'friendlyuser', roles: ['reporting_user'] }),
             },
           },
-        } as unknown) as ReportingInternalSetup);
+        } as unknown as ReportingInternalSetup);
       const mockResponseFactory = getMockResponseFactory();
 
       authorizedUserPreRouting(mockCore, (user) => {

@@ -26,6 +26,7 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   MAX_DOC_FIELDS_DISPLAYED,
   SHOW_MULTIFIELDS,
+  SHOW_FIELD_STATISTICS,
 } from '../common';
 
 export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
@@ -33,9 +34,10 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     name: i18n.translate('discover.advancedSettings.defaultColumnsTitle', {
       defaultMessage: 'Default columns',
     }),
-    value: ['_source'],
+    value: [],
     description: i18n.translate('discover.advancedSettings.defaultColumnsText', {
-      defaultMessage: 'Columns displayed by default in the Discovery tab',
+      defaultMessage:
+        'Columns displayed by default in the Discover app. If empty, a summary of the document will be displayed.',
     }),
     category: ['discover'],
     schema: schema.arrayOf(schema.string()),
@@ -79,7 +81,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     type: 'select',
     description: i18n.translate('discover.advancedSettings.sortDefaultOrderText', {
       defaultMessage:
-        'Controls the default sort direction for time based index patterns in the Discover app.',
+        'Controls the default sort direction for time based data views in the Discover app.',
     }),
     category: ['discover'],
     schema: schema.oneOf([schema.literal('desc'), schema.literal('asc')]),
@@ -149,20 +151,20 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     description: i18n.translate('discover.advancedSettings.context.tieBreakerFieldsText', {
       defaultMessage:
         'A comma-separated list of fields to use for tie-breaking between documents that have the same timestamp value. ' +
-        'From this list the first field that is present and sortable in the current index pattern is used.',
+        'From this list the first field that is present and sortable in the current data view is used.',
     }),
     category: ['discover'],
     schema: schema.arrayOf(schema.string()),
   },
   [DOC_TABLE_LEGACY]: {
-    name: i18n.translate('discover.advancedSettings.docTableVersionName', {
-      defaultMessage: 'Use classic table',
+    name: i18n.translate('discover.advancedSettings.disableDocumentExplorer', {
+      defaultMessage: 'Document Explorer or classic view',
     }),
     value: true,
-    description: i18n.translate('discover.advancedSettings.docTableVersionDescription', {
+    description: i18n.translate('discover.advancedSettings.disableDocumentExplorerDescription', {
       defaultMessage:
-        'Discover uses a new table layout that includes better data sorting, drag-and-drop columns, and a full screen view. ' +
-        'Turn on this option to use the classic table. Turn off to use the new table. ',
+        'To use the new Document Explorer instead of the classic view, turn off this option. ' +
+        'The Document Explorer offers better data sorting, resizable columns, and a full screen view.',
     }),
     category: ['discover'],
     schema: schema.boolean(),
@@ -171,13 +173,14 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
       name: 'discover:useLegacyDataGrid',
     },
   },
+
   [MODIFY_COLUMNS_ON_SWITCH]: {
     name: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchTitle', {
-      defaultMessage: 'Modify columns when changing index patterns',
+      defaultMessage: 'Modify columns when changing data views',
     }),
     value: true,
     description: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchText', {
-      defaultMessage: 'Remove columns that are not available in the new index pattern.',
+      defaultMessage: 'Remove columns that are not available in the new data view.',
     }),
     category: ['discover'],
     schema: schema.boolean(),
@@ -199,6 +202,33 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     value: false,
     category: ['discover'],
     schema: schema.boolean(),
+  },
+  [SHOW_FIELD_STATISTICS]: {
+    name: i18n.translate('discover.advancedSettings.discover.showFieldStatistics', {
+      defaultMessage: 'Show field statistics',
+    }),
+    description: i18n.translate(
+      'discover.advancedSettings.discover.showFieldStatisticsDescription',
+      {
+        defaultMessage: `Enable {fieldStatisticsDocs} in Discover to explore the fields in your data. This functionality is in beta and is subject to change. `,
+        values: {
+          fieldStatisticsDocs:
+            `<a href="https://www.elastic.co/guide/en/kibana/current/show-field-statistics.html"
+            target="_blank" rel="noopener">` +
+            i18n.translate('discover.advancedSettings.discover.fieldStatisticsLinkText', {
+              defaultMessage: 'Field statistics view',
+            }) +
+            '</a>',
+        },
+      }
+    ),
+    value: false,
+    category: ['discover'],
+    schema: schema.boolean(),
+    metric: {
+      type: METRIC_TYPE.CLICK,
+      name: 'discover:showFieldStatistics',
+    },
   },
   [SHOW_MULTIFIELDS]: {
     name: i18n.translate('discover.advancedSettings.discover.showMultifields', {

@@ -22,7 +22,7 @@ exports[`Storyshots shareables/Footer/PageControls component 1`] = `
     >
       <button
         aria-label="Previous Page"
-        className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
+        className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
         data-test-subj="pageControlsPrevPage"
         disabled={true}
         onClick={[Function]}
@@ -120,7 +120,7 @@ exports[`Storyshots shareables/Footer/PageControls contextual: austin 1`] = `
     >
       <button
         aria-label="Previous Page"
-        className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
+        className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
         data-test-subj="pageControlsPrevPage"
         disabled={true}
         onClick={[Function]}
@@ -218,7 +218,7 @@ exports[`Storyshots shareables/Footer/PageControls contextual: hello 1`] = `
     >
       <button
         aria-label="Previous Page"
-        className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
+        className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
         data-test-subj="pageControlsPrevPage"
         disabled={true}
         onClick={[Function]}

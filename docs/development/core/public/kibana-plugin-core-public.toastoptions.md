@@ -16,5 +16,5 @@ export interface ToastOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [toastLifeTimeMs](./kibana-plugin-core-public.toastoptions.toastlifetimems.md) | <code>number</code> | How long should the toast remain on screen. |
+|  [toastLifeTimeMs?](./kibana-plugin-core-public.toastoptions.toastlifetimems.md) | number | <i>(Optional)</i> How long should the toast remain on screen. |
 

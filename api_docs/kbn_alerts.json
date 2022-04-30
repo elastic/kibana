@@ -1,0 +1,155 @@
+{
+  "id": "@kbn/alerts",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/alerts",
+        "id": "def-common.AlertsFeatureNoPermissions",
+        "type": "Function",
+        "tags": [],
+        "label": "AlertsFeatureNoPermissions",
+        "description": [],
+        "signature": [
+          "{ ({ documentationUrl, iconType, }: React.PropsWithChildren<AlertsFeatureNoPermissionsProps>): JSX.Element; displayName: string | undefined; }"
+        ],
+        "path": "packages/kbn-alerts/src/features_no_permissions/index.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerts",
+            "id": "def-common.AlertsFeatureNoPermissions.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  documentationUrl,\n  iconType,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<AlertsFeatureNoPermissionsProps>"
+            ],
+            "path": "packages/kbn-alerts/src/features_no_permissions/index.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts",
+        "id": "def-common.useGetUserAlertsPermissions",
+        "type": "Function",
+        "tags": [],
+        "label": "useGetUserAlertsPermissions",
+        "description": [],
+        "signature": [
+          "(uiCapabilities: any, featureId: string) => ",
+          {
+            "pluginId": "@kbn/alerts",
+            "scope": "common",
+            "docId": "kibKbnAlertsPluginApi",
+            "section": "def-common.UseGetUserAlertsPermissionsProps",
+            "text": "UseGetUserAlertsPermissionsProps"
+          }
+        ],
+        "path": "packages/kbn-alerts/src/hooks/use_get_alerts_permissions/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerts",
+            "id": "def-common.useGetUserAlertsPermissions.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "uiCapabilities",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-alerts/src/hooks/use_get_alerts_permissions/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/alerts",
+            "id": "def-common.useGetUserAlertsPermissions.$2",
+            "type": "string",
+            "tags": [],
+            "label": "featureId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-alerts/src/hooks/use_get_alerts_permissions/index.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/alerts",
+        "id": "def-common.UseGetUserAlertsPermissionsProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseGetUserAlertsPermissionsProps",
+        "description": [],
+        "path": "packages/kbn-alerts/src/hooks/use_get_alerts_permissions/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerts",
+            "id": "def-common.UseGetUserAlertsPermissionsProps.crud",
+            "type": "boolean",
+            "tags": [],
+            "label": "crud",
+            "description": [],
+            "path": "packages/kbn-alerts/src/hooks/use_get_alerts_permissions/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts",
+            "id": "def-common.UseGetUserAlertsPermissionsProps.read",
+            "type": "boolean",
+            "tags": [],
+            "label": "read",
+            "description": [],
+            "path": "packages/kbn-alerts/src/hooks/use_get_alerts_permissions/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts",
+            "id": "def-common.UseGetUserAlertsPermissionsProps.loading",
+            "type": "boolean",
+            "tags": [],
+            "label": "loading",
+            "description": [],
+            "path": "packages/kbn-alerts/src/hooks/use_get_alerts_permissions/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

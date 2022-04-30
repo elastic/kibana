@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// TODO: https://github.com/elastic/kibana/issues/110895
+/* eslint-disable @kbn/eslint/no_export_all */
+
 import { AlertsHealth } from './alert';
 
 export * from './alert';
@@ -21,7 +24,7 @@ export * from './parse_duration';
 export interface AlertingFrameworkHealth {
   isSufficientlySecure: boolean;
   hasPermanentEncryptionKey: boolean;
-  alertingFrameworkHeath: AlertsHealth;
+  alertingFrameworkHealth: AlertsHealth;
 }
 
 export const LEGACY_BASE_ALERT_API_PATH = '/api/alerts';

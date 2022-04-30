@@ -13,9 +13,7 @@ import { TaskManagerConfig } from '../config';
 describe('Configuration Statistics Aggregator', () => {
   test('merges the static config with the merged configs', async () => {
     const configuration: TaskManagerConfig = {
-      enabled: true,
       max_workers: 10,
-      index: 'foo',
       max_attempts: 9,
       poll_interval: 6000000,
       version_conflict_threshold: 80,
@@ -39,6 +37,9 @@ describe('Configuration Statistics Aggregator', () => {
         enabled: true,
         request_capacity: 10,
       },
+      unsafe: {
+        exclude_task_types: [],
+      },
     };
 
     const managedConfig = {
@@ -47,62 +48,62 @@ describe('Configuration Statistics Aggregator', () => {
     };
 
     return new Promise<void>(async (resolve, reject) => {
-      createConfigurationAggregator(configuration, managedConfig)
-        .pipe(take(3), bufferCount(3))
-        .subscribe(([initial, updatedWorkers, updatedInterval]) => {
-          expect(initial.value).toEqual({
-            max_workers: 10,
-            poll_interval: 6000000,
-            max_poll_inactivity_cycles: 10,
-            request_capacity: 1000,
-            monitored_aggregated_stats_refresh_rate: 5000,
-            monitored_stats_running_average_window: 50,
-            monitored_task_execution_thresholds: {
-              default: {
-                error_threshold: 90,
-                warn_threshold: 80,
+      try {
+        createConfigurationAggregator(configuration, managedConfig)
+          .pipe(take(3), bufferCount(3))
+          .subscribe(([initial, updatedWorkers, updatedInterval]) => {
+            expect(initial.value).toEqual({
+              max_workers: 10,
+              poll_interval: 6000000,
+              max_poll_inactivity_cycles: 10,
+              request_capacity: 1000,
+              monitored_aggregated_stats_refresh_rate: 5000,
+              monitored_stats_running_average_window: 50,
+              monitored_task_execution_thresholds: {
+                default: {
+                  error_threshold: 90,
+                  warn_threshold: 80,
+                },
+                custom: {},
               },
-              custom: {},
-            },
-          });
-
-          expect(updatedWorkers.value).toEqual({
-            max_workers: 8,
-            poll_interval: 6000000,
-            max_poll_inactivity_cycles: 10,
-            request_capacity: 1000,
-            monitored_aggregated_stats_refresh_rate: 5000,
-            monitored_stats_running_average_window: 50,
-            monitored_task_execution_thresholds: {
-              default: {
-                error_threshold: 90,
-                warn_threshold: 80,
+            });
+            expect(updatedWorkers.value).toEqual({
+              max_workers: 8,
+              poll_interval: 6000000,
+              max_poll_inactivity_cycles: 10,
+              request_capacity: 1000,
+              monitored_aggregated_stats_refresh_rate: 5000,
+              monitored_stats_running_average_window: 50,
+              monitored_task_execution_thresholds: {
+                default: {
+                  error_threshold: 90,
+                  warn_threshold: 80,
+                },
+                custom: {},
               },
-              custom: {},
-            },
-          });
-
-          expect(updatedInterval.value).toEqual({
-            max_workers: 8,
-            poll_interval: 3000,
-            max_poll_inactivity_cycles: 10,
-            request_capacity: 1000,
-            monitored_aggregated_stats_refresh_rate: 5000,
-            monitored_stats_running_average_window: 50,
-            monitored_task_execution_thresholds: {
-              default: {
-                error_threshold: 90,
-                warn_threshold: 80,
+            });
+            expect(updatedInterval.value).toEqual({
+              max_workers: 8,
+              poll_interval: 3000,
+              max_poll_inactivity_cycles: 10,
+              request_capacity: 1000,
+              monitored_aggregated_stats_refresh_rate: 5000,
+              monitored_stats_running_average_window: 50,
+              monitored_task_execution_thresholds: {
+                default: {
+                  error_threshold: 90,
+                  warn_threshold: 80,
+                },
+                custom: {},
               },
-              custom: {},
-            },
-          });
-          resolve();
-        }, reject);
-
-      managedConfig.maxWorkersConfiguration$.next(8);
-
-      managedConfig.pollIntervalConfiguration$.next(3000);
+            });
+            resolve();
+          }, reject);
+        managedConfig.maxWorkersConfiguration$.next(8);
+        managedConfig.pollIntervalConfiguration$.next(3000);
+      } catch (error) {
+        reject(error);
+      }
     });
   });
 });

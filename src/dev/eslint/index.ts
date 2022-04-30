@@ -8,3 +8,4 @@
 
 export { pickFilesToLint } from './pick_files_to_lint';
 export { lintFiles } from './lint_files';
+export { runEslintWithTypes } from './run_eslint_with_types';

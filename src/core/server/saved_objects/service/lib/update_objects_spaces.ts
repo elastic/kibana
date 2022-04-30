@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import pMap from 'p-map';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import intersection from 'lodash/intersection';
 
+import type { Logger } from '../../../logging';
+import type { IndexMapping } from '../../mappings';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { SavedObjectsRawDocSource, SavedObjectsSerializer } from '../../serialization';
 import type {
@@ -22,10 +25,15 @@ import {
   getBulkOperationError,
   getExpectedVersionProperties,
   rawDocExistsInNamespace,
+  Either,
+  isLeft,
+  isRight,
 } from './internal_utils';
 import { DEFAULT_REFRESH_SETTING } from './repository';
 import type { RepositoryEsClient } from './repository_es_client';
-import { isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
+import { ALL_NAMESPACES_STRING } from './utils';
+import type { DeleteLegacyUrlAliasesParams } from './legacy_url_aliases';
+import { deleteLegacyUrlAliases } from './legacy_url_aliases';
 
 /**
  * An object that should have its spaces updated.
@@ -86,24 +94,18 @@ export interface SavedObjectsUpdateObjectsSpacesResponseObject {
   error?: SavedObjectError;
 }
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type Left = { tag: 'Left'; error: SavedObjectsUpdateObjectsSpacesResponseObject };
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type Right = { tag: 'Right'; value: Record<string, any> };
-type Either = Left | Right;
-const isLeft = (either: Either): either is Left => either.tag === 'Left';
-const isRight = (either: Either): either is Right => either.tag === 'Right';
-
 /**
  * Parameters for the updateObjectsSpaces function.
  *
  * @internal
  */
 export interface UpdateObjectsSpacesParams {
+  mappings: IndexMapping;
   registry: ISavedObjectTypeRegistry;
   allowedTypes: string[];
   client: RepositoryEsClient;
   serializer: SavedObjectsSerializer;
+  logger: Logger;
   getIndexForType: (type: string) => string;
   objects: SavedObjectsUpdateObjectsSpacesObject[];
   spacesToAdd: string[];
@@ -111,15 +113,24 @@ export interface UpdateObjectsSpacesParams {
   options?: SavedObjectsUpdateObjectsSpacesOptions;
 }
 
+type ObjectToDeleteAliasesFor = Pick<
+  DeleteLegacyUrlAliasesParams,
+  'type' | 'id' | 'namespaces' | 'deleteBehavior'
+>;
+
+const MAX_CONCURRENT_ALIAS_DELETIONS = 10;
+
 /**
  * Gets all references and transitive references of the given objects. Ignores any object and/or reference that is not a multi-namespace
  * type.
  */
 export async function updateObjectsSpaces({
+  mappings,
   registry,
   allowedTypes,
   client,
   serializer,
+  logger,
   getIndexForType,
   objects,
   spacesToAdd,
@@ -140,14 +151,16 @@ export async function updateObjectsSpaces({
   const { namespace } = options;
 
   let bulkGetRequestIndexCounter = 0;
-  const expectedBulkGetResults: Either[] = objects.map((object) => {
+  const expectedBulkGetResults: Array<
+    Either<SavedObjectsUpdateObjectsSpacesResponseObject, Record<string, any>>
+  > = objects.map((object) => {
     const { type, id, spaces, version } = object;
 
     if (!allowedTypes.includes(type)) {
       const error = errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
       return {
-        tag: 'Left' as 'Left',
-        error: { id, type, spaces: [], error },
+        tag: 'Left',
+        value: { id, type, spaces: [], error },
       };
     }
     if (!registry.isShareable(type)) {
@@ -157,13 +170,13 @@ export async function updateObjectsSpaces({
         )
       );
       return {
-        tag: 'Left' as 'Left',
-        error: { id, type, spaces: [], error },
+        tag: 'Left',
+        value: { id, type, spaces: [], error },
       };
     }
 
     return {
-      tag: 'Right' as 'Right',
+      tag: 'Right',
       value: {
         type,
         id,
@@ -191,98 +204,120 @@ export async function updateObjectsSpaces({
       )
     : undefined;
 
-  // fail fast if we can't verify a 404 response is from Elasticsearch
-  if (
-    bulkGetResponse &&
-    isNotFoundFromUnsupportedServer({
-      statusCode: bulkGetResponse.statusCode,
-      headers: bulkGetResponse.headers,
-    })
-  ) {
-    throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
-  }
   const time = new Date().toISOString();
   let bulkOperationRequestIndexCounter = 0;
   const bulkOperationParams: estypes.BulkOperationContainer[] = [];
-  const expectedBulkOperationResults: Either[] = expectedBulkGetResults.map(
-    (expectedBulkGetResult) => {
-      if (isLeft(expectedBulkGetResult)) {
-        return expectedBulkGetResult;
-      }
+  const objectsToDeleteAliasesFor: ObjectToDeleteAliasesFor[] = [];
+  const expectedBulkOperationResults: Array<
+    Either<
+      SavedObjectsUpdateObjectsSpacesResponseObject,
+      { type: string; id: string; updatedSpaces: string[]; esRequestIndex?: number }
+    >
+  > = expectedBulkGetResults.map((expectedBulkGetResult) => {
+    if (isLeft(expectedBulkGetResult)) {
+      return expectedBulkGetResult;
+    }
 
-      const { id, type, spaces, version, esRequestIndex } = expectedBulkGetResult.value;
+    const { id, type, spaces, version, esRequestIndex } = expectedBulkGetResult.value;
 
-      let currentSpaces: string[] = spaces;
-      let versionProperties;
-      if (esRequestIndex !== undefined) {
-        const doc = bulkGetResponse?.body.docs[esRequestIndex];
-        // @ts-expect-error MultiGetHit._source is optional
-        if (!doc?.found || !rawDocExistsInNamespace(registry, doc, namespace)) {
-          const error = errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
-          return {
-            tag: 'Left' as 'Left',
-            error: { id, type, spaces: [], error },
-          };
-        }
-        currentSpaces = doc._source?.namespaces ?? [];
-        // @ts-expect-error MultiGetHit._source is optional
-        versionProperties = getExpectedVersionProperties(version, doc);
-      } else if (spaces?.length === 0) {
-        // A SOC wrapper attempted to retrieve this object in a pre-flight request and it was not found.
+    let currentSpaces: string[] = spaces;
+    let versionProperties;
+    if (esRequestIndex !== undefined) {
+      const doc = bulkGetResponse?.body.docs[esRequestIndex];
+      // @ts-expect-error MultiGetHit._source is optional
+      if (!doc?.found || !rawDocExistsInNamespace(registry, doc, namespace)) {
         const error = errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
         return {
-          tag: 'Left' as 'Left',
-          error: { id, type, spaces: [], error },
+          tag: 'Left',
+          value: { id, type, spaces: [], error },
         };
-      } else {
-        versionProperties = getExpectedVersionProperties(version);
       }
-
-      const { newSpaces, isUpdateRequired } = getNewSpacesArray(
-        currentSpaces,
-        spacesToAdd,
-        spacesToRemove
-      );
-      const expectedResult = {
-        type,
-        id,
-        newSpaces,
-        ...(isUpdateRequired && { esRequestIndex: bulkOperationRequestIndexCounter++ }),
+      currentSpaces = doc._source?.namespaces ?? [];
+      // @ts-expect-error MultiGetHit._source is optional
+      versionProperties = getExpectedVersionProperties(version, doc);
+    } else if (spaces?.length === 0) {
+      // A SOC wrapper attempted to retrieve this object in a pre-flight request and it was not found.
+      const error = errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
+      return {
+        tag: 'Left',
+        value: { id, type, spaces: [], error },
       };
+    } else {
+      versionProperties = getExpectedVersionProperties(version);
+    }
 
-      if (isUpdateRequired) {
-        const documentMetadata = {
-          _id: serializer.generateRawId(undefined, type, id),
-          _index: getIndexForType(type),
-          ...versionProperties,
-        };
-        if (newSpaces.length) {
-          const documentToSave = { updated_at: time, namespaces: newSpaces };
-          // @ts-expect-error BulkOperation.retry_on_conflict, BulkOperation.routing. BulkOperation.version, and BulkOperation.version_type are optional
-          bulkOperationParams.push({ update: documentMetadata }, { doc: documentToSave });
-        } else {
-          // @ts-expect-error BulkOperation.retry_on_conflict, BulkOperation.routing. BulkOperation.version, and BulkOperation.version_type are optional
-          bulkOperationParams.push({ delete: documentMetadata });
-        }
+    const { updatedSpaces, removedSpaces, isUpdateRequired } = analyzeSpaceChanges(
+      currentSpaces,
+      spacesToAdd,
+      spacesToRemove
+    );
+    const expectedResult = {
+      type,
+      id,
+      updatedSpaces,
+      ...(isUpdateRequired && { esRequestIndex: bulkOperationRequestIndexCounter++ }),
+    };
+
+    if (isUpdateRequired) {
+      const documentMetadata = {
+        _id: serializer.generateRawId(undefined, type, id),
+        _index: getIndexForType(type),
+        ...versionProperties,
+      };
+      if (updatedSpaces.length) {
+        const documentToSave = { updated_at: time, namespaces: updatedSpaces };
+        // @ts-expect-error BulkOperation.retry_on_conflict, BulkOperation.routing. BulkOperation.version, and BulkOperation.version_type are optional
+        bulkOperationParams.push({ update: documentMetadata }, { doc: documentToSave });
+      } else {
+        bulkOperationParams.push({ delete: documentMetadata });
       }
 
-      return { tag: 'Right' as 'Right', value: expectedResult };
+      if (removedSpaces.length && !updatedSpaces.includes(ALL_NAMESPACES_STRING)) {
+        // The object is being removed from at least one space; make sure to delete aliases appropriately
+        objectsToDeleteAliasesFor.push({
+          type,
+          id,
+          ...(removedSpaces.includes(ALL_NAMESPACES_STRING)
+            ? { namespaces: updatedSpaces, deleteBehavior: 'exclusive' }
+            : { namespaces: removedSpaces, deleteBehavior: 'inclusive' }),
+        });
+      }
     }
-  );
+
+    return { tag: 'Right', value: expectedResult };
+  });
 
   const { refresh = DEFAULT_REFRESH_SETTING } = options;
   const bulkOperationResponse = bulkOperationParams.length
     ? await client.bulk({ refresh, body: bulkOperationParams, require_alias: true })
     : undefined;
 
+  // Delete aliases if necessary, ensuring we don't have too many concurrent operations running.
+  const mapper = async ({ type, id, namespaces, deleteBehavior }: ObjectToDeleteAliasesFor) =>
+    deleteLegacyUrlAliases({
+      mappings,
+      registry,
+      client,
+      getIndexForType,
+      type,
+      id,
+      namespaces,
+      deleteBehavior,
+    }).catch((err) => {
+      // The object has already been unshared, but we caught an error when attempting to delete aliases.
+      // A consumer cannot attempt to unshare the object again, so just log the error and swallow it.
+      logger.error(`Unable to delete aliases when unsharing an object: ${err.message}`);
+    });
+  await pMap(objectsToDeleteAliasesFor, mapper, { concurrency: MAX_CONCURRENT_ALIAS_DELETIONS });
+
   return {
     objects: expectedBulkOperationResults.map<SavedObjectsUpdateObjectsSpacesResponseObject>(
       (expectedResult) => {
         if (isLeft(expectedResult)) {
-          return expectedResult.error;
+          return expectedResult.value;
         }
 
-        const { type, id, newSpaces, esRequestIndex } = expectedResult.value;
+        const { type, id, updatedSpaces, esRequestIndex } = expectedResult.value;
         if (esRequestIndex !== undefined) {
           const response = bulkOperationResponse?.body.items[esRequestIndex] ?? {};
           const rawResponse = Object.values(response)[0] as any;
@@ -292,7 +327,7 @@ export async function updateObjectsSpaces({
           }
         }
 
-        return { id, type, spaces: newSpaces };
+        return { id, type, spaces: updatedSpaces };
       }
     ),
   };
@@ -304,17 +339,22 @@ function errorContent(error: DecoratedError) {
 }
 
 /** Gets the remaining spaces for an object after adding new ones and removing old ones. */
-function getNewSpacesArray(
+function analyzeSpaceChanges(
   existingSpaces: string[],
   spacesToAdd: string[],
   spacesToRemove: string[]
 ) {
   const addSet = new Set(spacesToAdd);
   const removeSet = new Set(spacesToRemove);
-  const newSpaces = existingSpaces
+  const removedSpaces: string[] = [];
+  const updatedSpaces = existingSpaces
     .filter((x) => {
       addSet.delete(x);
-      return !removeSet.delete(x);
+      const removed = removeSet.delete(x);
+      if (removed) {
+        removedSpaces.push(x);
+      }
+      return !removed;
     })
     .concat(Array.from(addSet));
 
@@ -322,5 +362,5 @@ function getNewSpacesArray(
   const isAnySpaceRemoved = removeSet.size < spacesToRemove.length;
   const isUpdateRequired = isAnySpaceAdded || isAnySpaceRemoved;
 
-  return { newSpaces, isUpdateRequired };
+  return { updatedSpaces, removedSpaces, isUpdateRequired };
 }

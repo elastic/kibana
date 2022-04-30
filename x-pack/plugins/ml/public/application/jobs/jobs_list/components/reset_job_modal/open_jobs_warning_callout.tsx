@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import type { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
@@ -17,9 +17,10 @@ interface Props {
 }
 
 export const OpenJobsWarningCallout: FC<Props> = ({ jobs }) => {
-  const openJobsCount = useMemo(() => jobs.filter((j) => j.jobState !== JOB_STATE.CLOSED).length, [
-    jobs,
-  ]);
+  const openJobsCount = useMemo(
+    () => jobs.filter((j) => j.jobState !== JOB_STATE.CLOSED).length,
+    [jobs]
+  );
 
   if (openJobsCount === 0) {
     return null;

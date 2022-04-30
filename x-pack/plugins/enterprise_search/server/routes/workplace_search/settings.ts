@@ -17,7 +17,7 @@ export function registerOrgSettingsRoute({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/org/settings',
+      path: '/internal/workplace_search/org/settings',
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -32,7 +32,7 @@ export function registerOrgSettingsCustomizeRoute({
 }: RouteDependencies) {
   router.put(
     {
-      path: '/api/workplace_search/org/settings/customize',
+      path: '/internal/workplace_search/org/settings/customize',
       validate: {
         body: schema.object({
           name: schema.string(),
@@ -51,7 +51,7 @@ export function registerOrgSettingsUploadImagesRoute({
 }: RouteDependencies) {
   router.put(
     {
-      path: '/api/workplace_search/org/settings/upload_images',
+      path: '/internal/workplace_search/org/settings/upload_images',
       validate: {
         body: schema.object({
           logo: schema.maybe(schema.nullable(schema.string())),
@@ -76,7 +76,7 @@ export function registerOrgSettingsOauthApplicationRoute({
 }: RouteDependencies) {
   router.put(
     {
-      path: '/api/workplace_search/org/settings/oauth_application',
+      path: '/internal/workplace_search/org/settings/oauth_application',
       validate: {
         body: schema.object({
           oauth_application: schema.object({

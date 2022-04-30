@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  CasePostRequest,
-  CaseType,
-  ConnectorTypes,
-  SECURITY_SOLUTION_OWNER,
-} from '../../../common';
+import { CasePostRequest, CaseType, ConnectorTypes } from '../../../common/api';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { choices } from '../connectors/mock';
 
 export const sampleTags = ['coke', 'pepsi'];

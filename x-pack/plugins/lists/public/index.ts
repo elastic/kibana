@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export * from './shared_exports';
+export { getExceptionBuilderComponentLazy } from './exceptions/components/builder/index';
+export type { OnChangeProps } from './exceptions/components/builder/index';
 
 import type { PluginInitializerContext } from '../../../../src/core/public';
 

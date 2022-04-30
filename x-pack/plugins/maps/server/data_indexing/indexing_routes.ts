@@ -52,7 +52,8 @@ export function initIndexingRoutes({
       const { index, mappings } = request.body;
       const indexPatternsService = await dataPlugin.indexPatterns.indexPatternsServiceFactory(
         context.core.savedObjects.client,
-        context.core.elasticsearch.client.asCurrentUser
+        context.core.elasticsearch.client.asCurrentUser,
+        request
       );
       const result = await createDocSource(
         index,
@@ -163,19 +164,20 @@ export function initIndexingRoutes({
 
   router.get(
     {
-      path: `${GET_MATCHING_INDEXES_PATH}/{indexPattern}`,
+      path: GET_MATCHING_INDEXES_PATH,
       validate: {
-        params: schema.object({
+        query: schema.object({
           indexPattern: schema.string(),
         }),
       },
     },
     async (context, request, response) => {
-      const result = await getMatchingIndexes(
-        request.params.indexPattern,
-        context.core.elasticsearch.client
+      return await getMatchingIndexes(
+        request.query.indexPattern,
+        context.core.elasticsearch.client,
+        response,
+        logger
       );
-      return response.ok({ body: result });
     }
   );
 
@@ -191,11 +193,10 @@ export function initIndexingRoutes({
     async (context, request, response) => {
       const { index } = request.query;
       try {
-        const {
-          body: mappingsResp,
-        } = await context.core.elasticsearch.client.asCurrentUser.indices.getMapping({
-          index: request.query.index,
-        });
+        const { body: mappingsResp } =
+          await context.core.elasticsearch.client.asCurrentUser.indices.getMapping({
+            index: request.query.index,
+          });
         const isDrawingIndex =
           mappingsResp[index].mappings?._meta?.created_by === MAPS_NEW_VECTOR_LAYER_META_CREATED_BY;
         return response.ok({

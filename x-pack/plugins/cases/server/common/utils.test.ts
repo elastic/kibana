@@ -7,7 +7,7 @@
 
 import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
 import { lensEmbeddableFactory } from '../../../lens/server/embeddable/lens_embeddable_factory';
-import { SECURITY_SOLUTION_OWNER } from '../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import {
   AssociationType,
   CaseResponse,
@@ -769,9 +769,7 @@ describe('common utils', () => {
             },
           ]),
         })
-      ).toEqual(
-        new Map<string, number>([['1', 2]])
-      );
+      ).toEqual(new Map<string, number>([['1', 2]]));
     });
 
     it('returns a map with two entry, 2 alerts, and 0 alerts', () => {

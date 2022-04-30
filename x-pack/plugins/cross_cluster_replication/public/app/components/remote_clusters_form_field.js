@@ -7,7 +7,7 @@
 
 import React, { Fragment, PureComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -213,10 +213,8 @@ export class RemoteClustersFormField extends PureComponent {
 
   renderCurrentRemoteClusterNotConnected = (name, fatal) => {
     const { isEditable, currentUrl } = this.props;
-    const {
-      remoteClusterNotConnectedEditable,
-      remoteClusterNotConnectedNotEditable,
-    } = this.errorMessages;
+    const { remoteClusterNotConnectedEditable, remoteClusterNotConnectedNotEditable } =
+      this.errorMessages;
 
     const { title, description } = isEditable
       ? remoteClusterNotConnectedEditable(name)

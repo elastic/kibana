@@ -6,11 +6,118 @@ Object {
   "isReady": [Function],
   "schema": Object {
     "PNG": Object {
+      "app": Object {
+        "canvas workpad": Object {
+          "type": "long",
+        },
+        "dashboard": Object {
+          "type": "long",
+        },
+        "search": Object {
+          "type": "long",
+        },
+        "visualization": Object {
+          "type": "long",
+        },
+      },
       "available": Object {
         "type": "boolean",
       },
       "deprecated": Object {
         "type": "long",
+      },
+      "layout": Object {
+        "canvas": Object {
+          "type": "long",
+        },
+        "preserve_layout": Object {
+          "type": "long",
+        },
+        "print": Object {
+          "type": "long",
+        },
+      },
+      "sizes": Object {
+        "1.0": Object {
+          "type": "long",
+        },
+        "25.0": Object {
+          "type": "long",
+        },
+        "5.0": Object {
+          "type": "long",
+        },
+        "50.0": Object {
+          "type": "long",
+        },
+        "75.0": Object {
+          "type": "long",
+        },
+        "95.0": Object {
+          "type": "long",
+        },
+        "99.0": Object {
+          "type": "long",
+        },
+      },
+      "total": Object {
+        "type": "long",
+      },
+    },
+    "PNGV2": Object {
+      "app": Object {
+        "canvas workpad": Object {
+          "type": "long",
+        },
+        "dashboard": Object {
+          "type": "long",
+        },
+        "search": Object {
+          "type": "long",
+        },
+        "visualization": Object {
+          "type": "long",
+        },
+      },
+      "available": Object {
+        "type": "boolean",
+      },
+      "deprecated": Object {
+        "type": "long",
+      },
+      "layout": Object {
+        "canvas": Object {
+          "type": "long",
+        },
+        "preserve_layout": Object {
+          "type": "long",
+        },
+        "print": Object {
+          "type": "long",
+        },
+      },
+      "sizes": Object {
+        "1.0": Object {
+          "type": "long",
+        },
+        "25.0": Object {
+          "type": "long",
+        },
+        "5.0": Object {
+          "type": "long",
+        },
+        "50.0": Object {
+          "type": "long",
+        },
+        "75.0": Object {
+          "type": "long",
+        },
+        "95.0": Object {
+          "type": "long",
+        },
+        "99.0": Object {
+          "type": "long",
+        },
       },
       "total": Object {
         "type": "long",
@@ -22,26 +129,178 @@ Object {
     "available": Object {
       "type": "boolean",
     },
-    "browser_type": Object {
-      "type": "keyword",
-    },
     "csv": Object {
+      "app": Object {
+        "canvas workpad": Object {
+          "type": "long",
+        },
+        "dashboard": Object {
+          "type": "long",
+        },
+        "search": Object {
+          "type": "long",
+        },
+        "visualization": Object {
+          "type": "long",
+        },
+      },
       "available": Object {
         "type": "boolean",
       },
       "deprecated": Object {
         "type": "long",
+      },
+      "layout": Object {
+        "canvas": Object {
+          "type": "long",
+        },
+        "preserve_layout": Object {
+          "type": "long",
+        },
+        "print": Object {
+          "type": "long",
+        },
+      },
+      "sizes": Object {
+        "1.0": Object {
+          "type": "long",
+        },
+        "25.0": Object {
+          "type": "long",
+        },
+        "5.0": Object {
+          "type": "long",
+        },
+        "50.0": Object {
+          "type": "long",
+        },
+        "75.0": Object {
+          "type": "long",
+        },
+        "95.0": Object {
+          "type": "long",
+        },
+        "99.0": Object {
+          "type": "long",
+        },
       },
       "total": Object {
         "type": "long",
       },
     },
     "csv_searchsource": Object {
+      "app": Object {
+        "canvas workpad": Object {
+          "type": "long",
+        },
+        "dashboard": Object {
+          "type": "long",
+        },
+        "search": Object {
+          "type": "long",
+        },
+        "visualization": Object {
+          "type": "long",
+        },
+      },
       "available": Object {
         "type": "boolean",
       },
       "deprecated": Object {
         "type": "long",
+      },
+      "layout": Object {
+        "canvas": Object {
+          "type": "long",
+        },
+        "preserve_layout": Object {
+          "type": "long",
+        },
+        "print": Object {
+          "type": "long",
+        },
+      },
+      "sizes": Object {
+        "1.0": Object {
+          "type": "long",
+        },
+        "25.0": Object {
+          "type": "long",
+        },
+        "5.0": Object {
+          "type": "long",
+        },
+        "50.0": Object {
+          "type": "long",
+        },
+        "75.0": Object {
+          "type": "long",
+        },
+        "95.0": Object {
+          "type": "long",
+        },
+        "99.0": Object {
+          "type": "long",
+        },
+      },
+      "total": Object {
+        "type": "long",
+      },
+    },
+    "csv_searchsource_immediate": Object {
+      "app": Object {
+        "canvas workpad": Object {
+          "type": "long",
+        },
+        "dashboard": Object {
+          "type": "long",
+        },
+        "search": Object {
+          "type": "long",
+        },
+        "visualization": Object {
+          "type": "long",
+        },
+      },
+      "available": Object {
+        "type": "boolean",
+      },
+      "deprecated": Object {
+        "type": "long",
+      },
+      "layout": Object {
+        "canvas": Object {
+          "type": "long",
+        },
+        "preserve_layout": Object {
+          "type": "long",
+        },
+        "print": Object {
+          "type": "long",
+        },
+      },
+      "sizes": Object {
+        "1.0": Object {
+          "type": "long",
+        },
+        "25.0": Object {
+          "type": "long",
+        },
+        "5.0": Object {
+          "type": "long",
+        },
+        "50.0": Object {
+          "type": "long",
+        },
+        "75.0": Object {
+          "type": "long",
+        },
+        "95.0": Object {
+          "type": "long",
+        },
+        "99.0": Object {
+          "type": "long",
+        },
       },
       "total": Object {
         "type": "long",
@@ -52,47 +311,14 @@ Object {
     },
     "last7Days": Object {
       "PNG": Object {
-        "available": Object {
-          "type": "boolean",
-        },
-        "deprecated": Object {
-          "type": "long",
-        },
-        "total": Object {
-          "type": "long",
-        },
-      },
-      "_all": Object {
-        "type": "long",
-      },
-      "csv": Object {
-        "available": Object {
-          "type": "boolean",
-        },
-        "deprecated": Object {
-          "type": "long",
-        },
-        "total": Object {
-          "type": "long",
-        },
-      },
-      "csv_searchsource": Object {
-        "available": Object {
-          "type": "boolean",
-        },
-        "deprecated": Object {
-          "type": "long",
-        },
-        "total": Object {
-          "type": "long",
-        },
-      },
-      "printable_pdf": Object {
         "app": Object {
           "canvas workpad": Object {
             "type": "long",
           },
           "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
             "type": "long",
           },
           "visualization": Object {
@@ -106,10 +332,416 @@ Object {
           "type": "long",
         },
         "layout": Object {
+          "canvas": Object {
+            "type": "long",
+          },
           "preserve_layout": Object {
             "type": "long",
           },
           "print": Object {
+            "type": "long",
+          },
+        },
+        "sizes": Object {
+          "1.0": Object {
+            "type": "long",
+          },
+          "25.0": Object {
+            "type": "long",
+          },
+          "5.0": Object {
+            "type": "long",
+          },
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "total": Object {
+          "type": "long",
+        },
+      },
+      "PNGV2": Object {
+        "app": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "available": Object {
+          "type": "boolean",
+        },
+        "deprecated": Object {
+          "type": "long",
+        },
+        "layout": Object {
+          "canvas": Object {
+            "type": "long",
+          },
+          "preserve_layout": Object {
+            "type": "long",
+          },
+          "print": Object {
+            "type": "long",
+          },
+        },
+        "sizes": Object {
+          "1.0": Object {
+            "type": "long",
+          },
+          "25.0": Object {
+            "type": "long",
+          },
+          "5.0": Object {
+            "type": "long",
+          },
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "total": Object {
+          "type": "long",
+        },
+      },
+      "_all": Object {
+        "type": "long",
+      },
+      "csv": Object {
+        "app": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "available": Object {
+          "type": "boolean",
+        },
+        "deprecated": Object {
+          "type": "long",
+        },
+        "layout": Object {
+          "canvas": Object {
+            "type": "long",
+          },
+          "preserve_layout": Object {
+            "type": "long",
+          },
+          "print": Object {
+            "type": "long",
+          },
+        },
+        "sizes": Object {
+          "1.0": Object {
+            "type": "long",
+          },
+          "25.0": Object {
+            "type": "long",
+          },
+          "5.0": Object {
+            "type": "long",
+          },
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "total": Object {
+          "type": "long",
+        },
+      },
+      "csv_searchsource": Object {
+        "app": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "available": Object {
+          "type": "boolean",
+        },
+        "deprecated": Object {
+          "type": "long",
+        },
+        "layout": Object {
+          "canvas": Object {
+            "type": "long",
+          },
+          "preserve_layout": Object {
+            "type": "long",
+          },
+          "print": Object {
+            "type": "long",
+          },
+        },
+        "sizes": Object {
+          "1.0": Object {
+            "type": "long",
+          },
+          "25.0": Object {
+            "type": "long",
+          },
+          "5.0": Object {
+            "type": "long",
+          },
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "total": Object {
+          "type": "long",
+        },
+      },
+      "csv_searchsource_immediate": Object {
+        "app": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "available": Object {
+          "type": "boolean",
+        },
+        "deprecated": Object {
+          "type": "long",
+        },
+        "layout": Object {
+          "canvas": Object {
+            "type": "long",
+          },
+          "preserve_layout": Object {
+            "type": "long",
+          },
+          "print": Object {
+            "type": "long",
+          },
+        },
+        "sizes": Object {
+          "1.0": Object {
+            "type": "long",
+          },
+          "25.0": Object {
+            "type": "long",
+          },
+          "5.0": Object {
+            "type": "long",
+          },
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "total": Object {
+          "type": "long",
+        },
+      },
+      "output_size": Object {
+        "1.0": Object {
+          "type": "long",
+        },
+        "25.0": Object {
+          "type": "long",
+        },
+        "5.0": Object {
+          "type": "long",
+        },
+        "50.0": Object {
+          "type": "long",
+        },
+        "75.0": Object {
+          "type": "long",
+        },
+        "95.0": Object {
+          "type": "long",
+        },
+        "99.0": Object {
+          "type": "long",
+        },
+      },
+      "printable_pdf": Object {
+        "app": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "available": Object {
+          "type": "boolean",
+        },
+        "deprecated": Object {
+          "type": "long",
+        },
+        "layout": Object {
+          "canvas": Object {
+            "type": "long",
+          },
+          "preserve_layout": Object {
+            "type": "long",
+          },
+          "print": Object {
+            "type": "long",
+          },
+        },
+        "sizes": Object {
+          "1.0": Object {
+            "type": "long",
+          },
+          "25.0": Object {
+            "type": "long",
+          },
+          "5.0": Object {
+            "type": "long",
+          },
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
+            "type": "long",
+          },
+        },
+        "total": Object {
+          "type": "long",
+        },
+      },
+      "printable_pdf_v2": Object {
+        "app": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "available": Object {
+          "type": "boolean",
+        },
+        "deprecated": Object {
+          "type": "long",
+        },
+        "layout": Object {
+          "canvas": Object {
+            "type": "long",
+          },
+          "preserve_layout": Object {
+            "type": "long",
+          },
+          "print": Object {
+            "type": "long",
+          },
+        },
+        "sizes": Object {
+          "1.0": Object {
+            "type": "long",
+          },
+          "25.0": Object {
+            "type": "long",
+          },
+          "5.0": Object {
+            "type": "long",
+          },
+          "50.0": Object {
+            "type": "long",
+          },
+          "75.0": Object {
+            "type": "long",
+          },
+          "95.0": Object {
+            "type": "long",
+          },
+          "99.0": Object {
             "type": "long",
           },
         },
@@ -143,6 +775,23 @@ Object {
             "dashboard": Object {
               "type": "long",
             },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "PNGV2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
             "visualization": Object {
               "type": "long",
             },
@@ -152,6 +801,9 @@ Object {
               "type": "long",
             },
             "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
               "type": "long",
             },
             "visualization": Object {
@@ -165,6 +817,23 @@ Object {
             "dashboard": Object {
               "type": "long",
             },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv_searchsource_immediate": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
             "visualization": Object {
               "type": "long",
             },
@@ -174,6 +843,23 @@ Object {
               "type": "long",
             },
             "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "printable_pdf_v2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
               "type": "long",
             },
             "visualization": Object {
@@ -189,6 +875,23 @@ Object {
             "dashboard": Object {
               "type": "long",
             },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "PNGV2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
             "visualization": Object {
               "type": "long",
             },
@@ -198,6 +901,9 @@ Object {
               "type": "long",
             },
             "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
               "type": "long",
             },
             "visualization": Object {
@@ -211,6 +917,23 @@ Object {
             "dashboard": Object {
               "type": "long",
             },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv_searchsource_immediate": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
             "visualization": Object {
               "type": "long",
             },
@@ -220,6 +943,23 @@ Object {
               "type": "long",
             },
             "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "printable_pdf_v2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
               "type": "long",
             },
             "visualization": Object {
@@ -235,6 +975,23 @@ Object {
             "dashboard": Object {
               "type": "long",
             },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "PNGV2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
             "visualization": Object {
               "type": "long",
             },
@@ -244,6 +1001,9 @@ Object {
               "type": "long",
             },
             "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
               "type": "long",
             },
             "visualization": Object {
@@ -257,6 +1017,23 @@ Object {
             "dashboard": Object {
               "type": "long",
             },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv_searchsource_immediate": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
             "visualization": Object {
               "type": "long",
             },
@@ -266,6 +1043,23 @@ Object {
               "type": "long",
             },
             "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "printable_pdf_v2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
               "type": "long",
             },
             "visualization": Object {
@@ -281,6 +1075,23 @@ Object {
             "dashboard": Object {
               "type": "long",
             },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "PNGV2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
             "visualization": Object {
               "type": "long",
             },
@@ -290,6 +1101,9 @@ Object {
               "type": "long",
             },
             "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
               "type": "long",
             },
             "visualization": Object {
@@ -303,6 +1117,23 @@ Object {
             "dashboard": Object {
               "type": "long",
             },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv_searchsource_immediate": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
             "visualization": Object {
               "type": "long",
             },
@@ -312,6 +1143,23 @@ Object {
               "type": "long",
             },
             "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "printable_pdf_v2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
               "type": "long",
             },
             "visualization": Object {
@@ -327,6 +1175,23 @@ Object {
             "dashboard": Object {
               "type": "long",
             },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "PNGV2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
             "visualization": Object {
               "type": "long",
             },
@@ -336,6 +1201,9 @@ Object {
               "type": "long",
             },
             "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
               "type": "long",
             },
             "visualization": Object {
@@ -349,6 +1217,23 @@ Object {
             "dashboard": Object {
               "type": "long",
             },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "csv_searchsource_immediate": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
             "visualization": Object {
               "type": "long",
             },
@@ -360,11 +1245,51 @@ Object {
             "dashboard": Object {
               "type": "long",
             },
+            "search": Object {
+              "type": "long",
+            },
+            "visualization": Object {
+              "type": "long",
+            },
+          },
+          "printable_pdf_v2": Object {
+            "canvas workpad": Object {
+              "type": "long",
+            },
+            "dashboard": Object {
+              "type": "long",
+            },
+            "search": Object {
+              "type": "long",
+            },
             "visualization": Object {
               "type": "long",
             },
           },
         },
+      },
+    },
+    "output_size": Object {
+      "1.0": Object {
+        "type": "long",
+      },
+      "25.0": Object {
+        "type": "long",
+      },
+      "5.0": Object {
+        "type": "long",
+      },
+      "50.0": Object {
+        "type": "long",
+      },
+      "75.0": Object {
+        "type": "long",
+      },
+      "95.0": Object {
+        "type": "long",
+      },
+      "99.0": Object {
+        "type": "long",
       },
     },
     "printable_pdf": Object {
@@ -373,6 +1298,9 @@ Object {
           "type": "long",
         },
         "dashboard": Object {
+          "type": "long",
+        },
+        "search": Object {
           "type": "long",
         },
         "visualization": Object {
@@ -386,10 +1314,95 @@ Object {
         "type": "long",
       },
       "layout": Object {
+        "canvas": Object {
+          "type": "long",
+        },
         "preserve_layout": Object {
           "type": "long",
         },
         "print": Object {
+          "type": "long",
+        },
+      },
+      "sizes": Object {
+        "1.0": Object {
+          "type": "long",
+        },
+        "25.0": Object {
+          "type": "long",
+        },
+        "5.0": Object {
+          "type": "long",
+        },
+        "50.0": Object {
+          "type": "long",
+        },
+        "75.0": Object {
+          "type": "long",
+        },
+        "95.0": Object {
+          "type": "long",
+        },
+        "99.0": Object {
+          "type": "long",
+        },
+      },
+      "total": Object {
+        "type": "long",
+      },
+    },
+    "printable_pdf_v2": Object {
+      "app": Object {
+        "canvas workpad": Object {
+          "type": "long",
+        },
+        "dashboard": Object {
+          "type": "long",
+        },
+        "search": Object {
+          "type": "long",
+        },
+        "visualization": Object {
+          "type": "long",
+        },
+      },
+      "available": Object {
+        "type": "boolean",
+      },
+      "deprecated": Object {
+        "type": "long",
+      },
+      "layout": Object {
+        "canvas": Object {
+          "type": "long",
+        },
+        "preserve_layout": Object {
+          "type": "long",
+        },
+        "print": Object {
+          "type": "long",
+        },
+      },
+      "sizes": Object {
+        "1.0": Object {
+          "type": "long",
+        },
+        "25.0": Object {
+          "type": "long",
+        },
+        "5.0": Object {
+          "type": "long",
+        },
+        "50.0": Object {
+          "type": "long",
+        },
+        "75.0": Object {
+          "type": "long",
+        },
+        "95.0": Object {
+          "type": "long",
+        },
+        "99.0": Object {
           "type": "long",
         },
       },
@@ -423,6 +1436,23 @@ Object {
           "dashboard": Object {
             "type": "long",
           },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "PNGV2": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
           "visualization": Object {
             "type": "long",
           },
@@ -432,6 +1462,9 @@ Object {
             "type": "long",
           },
           "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
             "type": "long",
           },
           "visualization": Object {
@@ -445,6 +1478,23 @@ Object {
           "dashboard": Object {
             "type": "long",
           },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv_searchsource_immediate": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
           "visualization": Object {
             "type": "long",
           },
@@ -454,6 +1504,23 @@ Object {
             "type": "long",
           },
           "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "printable_pdf_v2": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
             "type": "long",
           },
           "visualization": Object {
@@ -469,6 +1536,23 @@ Object {
           "dashboard": Object {
             "type": "long",
           },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "PNGV2": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
           "visualization": Object {
             "type": "long",
           },
@@ -478,6 +1562,9 @@ Object {
             "type": "long",
           },
           "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
             "type": "long",
           },
           "visualization": Object {
@@ -491,6 +1578,23 @@ Object {
           "dashboard": Object {
             "type": "long",
           },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv_searchsource_immediate": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
           "visualization": Object {
             "type": "long",
           },
@@ -500,6 +1604,23 @@ Object {
             "type": "long",
           },
           "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "printable_pdf_v2": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
             "type": "long",
           },
           "visualization": Object {
@@ -515,6 +1636,23 @@ Object {
           "dashboard": Object {
             "type": "long",
           },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "PNGV2": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
           "visualization": Object {
             "type": "long",
           },
@@ -524,6 +1662,9 @@ Object {
             "type": "long",
           },
           "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
             "type": "long",
           },
           "visualization": Object {
@@ -537,6 +1678,23 @@ Object {
           "dashboard": Object {
             "type": "long",
           },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv_searchsource_immediate": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
           "visualization": Object {
             "type": "long",
           },
@@ -546,6 +1704,23 @@ Object {
             "type": "long",
           },
           "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "printable_pdf_v2": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
             "type": "long",
           },
           "visualization": Object {
@@ -561,6 +1736,23 @@ Object {
           "dashboard": Object {
             "type": "long",
           },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "PNGV2": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
           "visualization": Object {
             "type": "long",
           },
@@ -570,6 +1762,9 @@ Object {
             "type": "long",
           },
           "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
             "type": "long",
           },
           "visualization": Object {
@@ -583,6 +1778,23 @@ Object {
           "dashboard": Object {
             "type": "long",
           },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv_searchsource_immediate": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
           "visualization": Object {
             "type": "long",
           },
@@ -592,6 +1804,23 @@ Object {
             "type": "long",
           },
           "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "printable_pdf_v2": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
             "type": "long",
           },
           "visualization": Object {
@@ -607,6 +1836,23 @@ Object {
           "dashboard": Object {
             "type": "long",
           },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "PNGV2": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
           "visualization": Object {
             "type": "long",
           },
@@ -616,6 +1862,9 @@ Object {
             "type": "long",
           },
           "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
             "type": "long",
           },
           "visualization": Object {
@@ -629,6 +1878,23 @@ Object {
           "dashboard": Object {
             "type": "long",
           },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "csv_searchsource_immediate": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
           "visualization": Object {
             "type": "long",
           },
@@ -638,6 +1904,23 @@ Object {
             "type": "long",
           },
           "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
+            "type": "long",
+          },
+          "visualization": Object {
+            "type": "long",
+          },
+        },
+        "printable_pdf_v2": Object {
+          "canvas workpad": Object {
+            "type": "long",
+          },
+          "dashboard": Object {
+            "type": "long",
+          },
+          "search": Object {
             "type": "long",
           },
           "visualization": Object {
@@ -654,49 +1937,202 @@ Object {
 exports[`data modeling usage data with meta.isDeprecated jobTypes 1`] = `
 Object {
   "PNG": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
     "available": true,
     "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "PNGV2": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
     "total": 0,
   },
   "_all": 9,
   "available": true,
-  "browser_type": undefined,
   "csv": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
     "available": true,
     "deprecated": 4,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "output_size": undefined,
     "total": 4,
   },
   "csv_searchsource": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
     "available": true,
     "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "output_size": undefined,
     "total": 5,
+  },
+  "csv_searchsource_immediate": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
   },
   "enabled": true,
   "last7Days": Object {
     "PNG": Object {
-      "available": true,
-      "deprecated": 0,
-      "total": 0,
-    },
-    "_all": 9,
-    "csv": Object {
-      "available": true,
-      "deprecated": 4,
-      "total": 4,
-    },
-    "csv_searchsource": Object {
-      "available": true,
-      "deprecated": 0,
-      "total": 5,
-    },
-    "printable_pdf": Object {
       "app": Object {
+        "canvas workpad": 0,
         "dashboard": 0,
+        "search": 0,
         "visualization": 0,
       },
       "available": true,
       "deprecated": 0,
       "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "PNGV2": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "_all": 9,
+    "csv": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 4,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "output_size": undefined,
+      "total": 4,
+    },
+    "csv_searchsource": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "output_size": undefined,
+      "total": 5,
+    },
+    "csv_searchsource_immediate": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "output_size": undefined,
+    "printable_pdf": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "printable_pdf_v2": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
         "preserve_layout": 0,
         "print": 0,
       },
@@ -717,14 +2153,34 @@ Object {
       },
     },
   },
+  "output_size": undefined,
   "printable_pdf": Object {
     "app": Object {
+      "canvas workpad": 0,
       "dashboard": 0,
+      "search": 0,
       "visualization": 0,
     },
     "available": true,
     "deprecated": 0,
     "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "printable_pdf_v2": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
       "preserve_layout": 0,
       "print": 0,
     },
@@ -750,49 +2206,198 @@ Object {
 exports[`data modeling with empty data 1`] = `
 Object {
   "PNG": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
     "available": true,
     "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "PNGV2": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
     "total": 0,
   },
   "_all": 0,
   "available": true,
-  "browser_type": undefined,
   "csv": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
     "available": true,
     "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
     "total": 0,
   },
   "csv_searchsource": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
     "available": true,
     "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "csv_searchsource_immediate": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
     "total": 0,
   },
   "enabled": true,
   "last7Days": Object {
     "PNG": Object {
-      "available": true,
-      "deprecated": 0,
-      "total": 0,
-    },
-    "_all": 0,
-    "csv": Object {
-      "available": true,
-      "deprecated": 0,
-      "total": 0,
-    },
-    "csv_searchsource": Object {
-      "available": true,
-      "deprecated": 0,
-      "total": 0,
-    },
-    "printable_pdf": Object {
       "app": Object {
+        "canvas workpad": 0,
         "dashboard": 0,
+        "search": 0,
         "visualization": 0,
       },
       "available": true,
       "deprecated": 0,
       "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "PNGV2": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "_all": 0,
+    "csv": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "csv_searchsource": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "csv_searchsource_immediate": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "output_size": undefined,
+    "printable_pdf": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "printable_pdf_v2": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
         "preserve_layout": 0,
         "print": 0,
       },
@@ -804,14 +2409,34 @@ Object {
     },
     "statuses": Object {},
   },
+  "output_size": undefined,
   "printable_pdf": Object {
     "app": Object {
+      "canvas workpad": 0,
       "dashboard": 0,
+      "search": 0,
       "visualization": 0,
     },
     "available": true,
     "deprecated": 0,
     "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "printable_pdf_v2": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
       "preserve_layout": 0,
       "print": 0,
     },
@@ -825,164 +2450,210 @@ Object {
 }
 `;
 
-exports[`data modeling with normal looking usage data 1`] = `
+exports[`data modeling with sparse data 1`] = `
 Object {
   "PNG": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
     "available": true,
     "deprecated": 0,
-    "total": 3,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "output_size": undefined,
+    "total": 1,
   },
-  "_all": 12,
-  "available": true,
-  "browser_type": undefined,
-  "csv": Object {
+  "PNGV2": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
     "available": true,
     "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
     "total": 0,
   },
+  "_all": 4,
+  "available": true,
+  "csv": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 1,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "output_size": undefined,
+    "total": 1,
+  },
   "csv_searchsource": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
     "available": true,
     "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "csv_searchsource_immediate": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
     "total": 0,
   },
   "enabled": true,
   "last7Days": Object {
     "PNG": Object {
-      "available": true,
-      "deprecated": 0,
-      "total": 1,
-    },
-    "_all": 1,
-    "csv": Object {
-      "available": true,
-      "deprecated": 0,
-      "total": 0,
-    },
-    "csv_searchsource": Object {
-      "available": true,
-      "deprecated": 0,
-      "total": 0,
-    },
-    "printable_pdf": Object {
       "app": Object {
+        "canvas workpad": 0,
         "dashboard": 0,
+        "search": 0,
         "visualization": 0,
       },
       "available": true,
       "deprecated": 0,
       "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "output_size": undefined,
+      "total": 1,
+    },
+    "PNGV2": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
         "preserve_layout": 0,
         "print": 0,
       },
       "total": 0,
     },
-    "status": Object {
-      "completed": 0,
-      "completed_with_warnings": 1,
-      "failed": 0,
-    },
-    "statuses": Object {
-      "completed_with_warnings": Object {
-        "PNG": Object {
-          "dashboard": 1,
-        },
-      },
-    },
-  },
-  "printable_pdf": Object {
-    "app": Object {
-      "canvas workpad": 6,
-      "dashboard": 0,
-      "visualization": 3,
-    },
-    "available": true,
-    "deprecated": 0,
-    "layout": Object {
-      "preserve_layout": 9,
-      "print": 0,
-    },
-    "total": 9,
-  },
-  "status": Object {
-    "completed": 10,
-    "completed_with_warnings": 1,
-    "failed": 1,
-  },
-  "statuses": Object {
-    "completed": Object {
-      "PNG": Object {
-        "visualization": 1,
-      },
-      "printable_pdf": Object {
-        "canvas workpad": 6,
-        "visualization": 3,
-      },
-    },
-    "completed_with_warnings": Object {
-      "PNG": Object {
-        "dashboard": 1,
-      },
-    },
-    "failed": Object {
-      "PNG": Object {
-        "dashboard": 1,
-      },
-    },
-  },
-}
-`;
-
-exports[`data modeling with sparse data 1`] = `
-Object {
-  "PNG": Object {
-    "available": true,
-    "deprecated": 0,
-    "total": 1,
-  },
-  "_all": 4,
-  "available": true,
-  "browser_type": undefined,
-  "csv": Object {
-    "available": true,
-    "deprecated": 1,
-    "total": 1,
-  },
-  "csv_searchsource": Object {
-    "available": true,
-    "deprecated": 0,
-    "total": 0,
-  },
-  "enabled": true,
-  "last7Days": Object {
-    "PNG": Object {
-      "available": true,
-      "deprecated": 0,
-      "total": 1,
-    },
     "_all": 4,
     "csv": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
       "available": true,
       "deprecated": 1,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "output_size": undefined,
       "total": 1,
     },
     "csv_searchsource": Object {
-      "available": true,
-      "deprecated": 0,
-      "total": 0,
-    },
-    "printable_pdf": Object {
       "app": Object {
-        "canvas workpad": 1,
-        "dashboard": 1,
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
         "visualization": 0,
       },
       "available": true,
       "deprecated": 0,
       "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "csv_searchsource_immediate": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "output_size": undefined,
+    "printable_pdf": Object {
+      "app": Object {
+        "canvas workpad": 1,
+        "dashboard": 1,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
         "preserve_layout": 2,
         "print": 0,
       },
+      "output_size": undefined,
       "total": 2,
+    },
+    "printable_pdf_v2": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
     },
     "status": Object {
       "completed": 4,
@@ -1001,19 +2672,39 @@ Object {
       },
     },
   },
+  "output_size": undefined,
   "printable_pdf": Object {
     "app": Object {
       "canvas workpad": 1,
       "dashboard": 1,
+      "search": 0,
       "visualization": 0,
     },
     "available": true,
     "deprecated": 0,
     "layout": Object {
+      "canvas": 0,
       "preserve_layout": 2,
       "print": 0,
     },
+    "output_size": undefined,
     "total": 2,
+  },
+  "printable_pdf_v2": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
   },
   "status": Object {
     "completed": 4,
@@ -1027,6 +2718,289 @@ Object {
       "csv": Object {},
       "printable_pdf": Object {
         "canvas workpad": 1,
+        "dashboard": 1,
+      },
+    },
+  },
+}
+`;
+
+exports[`data modeling with usage data from the reporting/archived_reports es archive 1`] = `
+Object {
+  "PNG": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "output_size": undefined,
+    "total": 1,
+  },
+  "PNGV2": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "_all": 11,
+  "available": true,
+  "csv": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 1,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "output_size": undefined,
+    "total": 1,
+  },
+  "csv_searchsource": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "output_size": undefined,
+    "total": 3,
+  },
+  "csv_searchsource_immediate": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "enabled": true,
+  "last7Days": Object {
+    "PNG": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "PNGV2": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "_all": 0,
+    "csv": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "csv_searchsource": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "csv_searchsource_immediate": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "output_size": undefined,
+    "printable_pdf": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "printable_pdf_v2": Object {
+      "app": Object {
+        "canvas workpad": 0,
+        "dashboard": 0,
+        "search": 0,
+        "visualization": 0,
+      },
+      "available": true,
+      "deprecated": 0,
+      "layout": Object {
+        "canvas": 0,
+        "preserve_layout": 0,
+        "print": 0,
+      },
+      "total": 0,
+    },
+    "status": Object {
+      "completed": 0,
+      "failed": 0,
+    },
+    "statuses": Object {},
+  },
+  "output_size": undefined,
+  "printable_pdf": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 6,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 5,
+      "print": 1,
+    },
+    "output_size": undefined,
+    "total": 6,
+  },
+  "printable_pdf_v2": Object {
+    "app": Object {
+      "canvas workpad": 0,
+      "dashboard": 0,
+      "search": 0,
+      "visualization": 0,
+    },
+    "available": true,
+    "deprecated": 0,
+    "layout": Object {
+      "canvas": 0,
+      "preserve_layout": 0,
+      "print": 0,
+    },
+    "total": 0,
+  },
+  "status": Object {
+    "completed": 6,
+    "completed_with_warnings": 2,
+    "failed": 2,
+    "pending": 1,
+  },
+  "statuses": Object {
+    "completed": Object {
+      "csv": Object {
+        "search": 1,
+      },
+      "csv_searchsource": Object {
+        "search": 3,
+      },
+      "printable_pdf": Object {
+        "dashboard": 2,
+      },
+    },
+    "completed_with_warnings": Object {
+      "PNG": Object {
+        "dashboard": 1,
+      },
+      "printable_pdf": Object {
+        "dashboard": 1,
+      },
+    },
+    "failed": Object {
+      "printable_pdf": Object {
+        "dashboard": 2,
+      },
+    },
+    "pending": Object {
+      "printable_pdf": Object {
         "dashboard": 1,
       },
     },

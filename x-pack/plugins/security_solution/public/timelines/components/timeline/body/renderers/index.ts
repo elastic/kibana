@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RowRenderer } from '../../../../../../common';
+import { RowRenderer } from '../../../../../../common/types';
 import { auditdRowRenderers } from './auditd/generic_row_renderer';
 import { ColumnRenderer } from './column_renderer';
 import { emptyColumnRenderer } from './empty_column_renderer';

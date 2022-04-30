@@ -29,9 +29,9 @@ const addWarning = jest.fn();
 const httpGet = jest.fn();
 
 function Wrapper({ children }: { children?: ReactNode }) {
-  const mockPluginContext = (merge({}, mockApmPluginContextValue, {
+  const mockPluginContext = merge({}, mockApmPluginContextValue, {
     core: { http: { get: httpGet }, notifications: { toasts: { addWarning } } },
-  }) as unknown) as ApmPluginContextValue;
+  }) as unknown as ApmPluginContextValue;
 
   return (
     <KibanaReactContext.Provider>
@@ -179,16 +179,14 @@ describe('ServiceIcons', () => {
   });
 
   describe('details', () => {
-    const callApmApi = (apisMockData: Record<string, object>) => ({
-      endpoint,
-    }: {
-      endpoint: string;
-    }) => {
-      return apisMockData[endpoint];
-    };
+    const callApmApi =
+      (apisMockData: Record<string, object>) =>
+      ({ endpoint }: { endpoint: string }) => {
+        return apisMockData[endpoint];
+      };
     it('Shows loading spinner while fetching data', () => {
       const apisMockData = {
-        'GET /api/apm/services/{serviceName}/metadata/icons': {
+        'GET /internal/apm/services/{serviceName}/metadata/icons': {
           data: {
             agentName: 'java',
             containerType: 'Kubernetes',
@@ -197,7 +195,7 @@ describe('ServiceIcons', () => {
           status: fetcherHook.FETCH_STATUS.SUCCESS,
           refetch: jest.fn(),
         },
-        'GET /api/apm/services/{serviceName}/metadata/details': {
+        'GET /internal/apm/services/{serviceName}/metadata/details': {
           data: undefined,
           status: fetcherHook.FETCH_STATUS.LOADING,
           refetch: jest.fn(),
@@ -230,7 +228,7 @@ describe('ServiceIcons', () => {
 
     it('shows service content', () => {
       const apisMockData = {
-        'GET /api/apm/services/{serviceName}/metadata/icons': {
+        'GET /internal/apm/services/{serviceName}/metadata/icons': {
           data: {
             agentName: 'java',
             containerType: 'Kubernetes',
@@ -239,7 +237,7 @@ describe('ServiceIcons', () => {
           status: fetcherHook.FETCH_STATUS.SUCCESS,
           refetch: jest.fn(),
         },
-        'GET /api/apm/services/{serviceName}/metadata/details': {
+        'GET /internal/apm/services/{serviceName}/metadata/details': {
           data: { service: { versions: ['v1.0.0'] } },
           status: fetcherHook.FETCH_STATUS.SUCCESS,
           refetch: jest.fn(),

@@ -8,7 +8,7 @@
 
 import './discover_sidebar.scss';
 import { throttle } from 'lodash';
-import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useState, useMemo, useRef, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiAccordion,
@@ -24,19 +24,23 @@ import {
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 
 import { isEqual, sortBy } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DiscoverField } from './discover_field';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';
 import { FIELDS_LIMIT_SETTING } from '../../../../../../common';
 import { groupFields } from './lib/group_fields';
-import { IndexPatternField } from '../../../../../../../data/public';
+import {
+  IndexPatternField,
+  indexPatterns as indexPatternUtils,
+} from '../../../../../../../data/public';
 import { getDetails } from './lib/get_details';
 import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
 import { ElasticSearchHit } from '../../../../doc_views/doc_views_types';
+import { VIEW_MODE } from '../view_mode_toggle';
 
 /**
  * Default number of available fields displayed and added on scroll
@@ -69,14 +73,18 @@ export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProp
   /**
    * a statistics of the distribution of fields in the given hits
    */
-  fieldCounts: Record<string, number>;
+  fieldCounts?: Record<string, number>;
   /**
    * hits fetched from ES, displayed in the doc table
    */
-  documents: ElasticSearchHit[];
+  documents?: ElasticSearchHit[];
+  /**
+   * Discover view mode
+   */
+  viewMode: VIEW_MODE;
 }
 
-export function DiscoverSidebar({
+export function DiscoverSidebarComponent({
   alwaysShowActionButtons = false,
   columns,
   fieldCounts,
@@ -97,11 +105,13 @@ export function DiscoverSidebar({
   setFieldEditorRef,
   closeFlyout,
   editField,
+  viewMode,
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
 
   const { indexPatternFieldEditor } = services;
-  const indexPatternFieldEditPermission = indexPatternFieldEditor?.userPermissions.editIndexPattern();
+  const indexPatternFieldEditPermission =
+    indexPatternFieldEditor?.userPermissions.editIndexPattern();
   const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
   const [scrollContainer, setScrollContainer] = useState<Element | null>(null);
   const [fieldsToRender, setFieldsToRender] = useState(FIELDS_PER_PAGE);
@@ -109,8 +119,10 @@ export function DiscoverSidebar({
   const availableFieldsContainer = useRef<HTMLUListElement | null>(null);
 
   useEffect(() => {
-    const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
-    setFields(newFields);
+    if (documents) {
+      const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
+      setFields(newFields);
+    }
   }, [selectedIndexPattern, fieldCounts, documents]);
 
   const scrollDimensions = useResizeObserver(scrollContainer);
@@ -129,9 +141,10 @@ export function DiscoverSidebar({
     [documents, columns, selectedIndexPattern]
   );
 
-  const popularLimit = useMemo(() => services.uiSettings.get(FIELDS_LIMIT_SETTING), [
-    services.uiSettings,
-  ]);
+  const popularLimit = useMemo(
+    () => services.uiSettings.get(FIELDS_LIMIT_SETTING),
+    [services.uiSettings]
+  );
 
   const {
     selected: selectedFields,
@@ -198,13 +211,16 @@ export function DiscoverSidebar({
     return result;
   }, [fields]);
 
+  const showFieldStats = useMemo(() => viewMode === VIEW_MODE.DOCUMENT_LEVEL, [viewMode]);
+
   const calculateMultiFields = () => {
     if (!useNewFieldsApi || !fields) {
       return undefined;
     }
     const map = new Map<string, Array<{ field: IndexPatternField; isSelected: boolean }>>();
     fields.forEach((field) => {
-      const parent = field.spec?.subType?.multi?.parent;
+      const subTypeMulti = indexPatternUtils.getFieldSubtypeMulti(field);
+      const parent = subTypeMulti?.multi.parent;
       if (!parent) {
         return;
       }
@@ -265,7 +281,7 @@ export function DiscoverSidebar({
 
   const filterChanged = useMemo(() => isEqual(fieldFilter, getDefaultFieldFilter()), [fieldFilter]);
 
-  if (!selectedIndexPattern || !fields) {
+  if (!selectedIndexPattern) {
     return null;
   }
 
@@ -338,14 +354,13 @@ export function DiscoverSidebar({
               onChange={onChangeFieldSearch}
               value={fieldFilter.name}
               types={fieldTypes}
-              useNewFieldsApi={useNewFieldsApi}
             />
           </form>
         </EuiFlexItem>
         <EuiFlexItem className="eui-yScroll">
           <div
             ref={(el) => {
-              if (el && !el.dataset.dynamicScroll) {
+              if (documents && el && !el.dataset.dynamicScroll) {
                 el.dataset.dynamicScroll = 'true';
                 setScrollContainer(el);
               }
@@ -353,7 +368,7 @@ export function DiscoverSidebar({
             onScroll={throttle(lazyScroll, 100)}
             className="eui-yScroll"
           >
-            {fields.length > 0 && (
+            {Array.isArray(fields) && fields.length > 0 && (
               <div>
                 {selectedFields &&
                 selectedFields.length > 0 &&
@@ -400,6 +415,7 @@ export function DiscoverSidebar({
                                 multiFields={multiFields?.get(field.name)}
                                 onEditField={canEditIndexPatternField ? editField : undefined}
                                 onDeleteField={canEditIndexPatternField ? deleteField : undefined}
+                                showFieldStats={showFieldStats}
                               />
                             </li>
                           );
@@ -459,6 +475,7 @@ export function DiscoverSidebar({
                                 multiFields={multiFields?.get(field.name)}
                                 onEditField={canEditIndexPatternField ? editField : undefined}
                                 onDeleteField={canEditIndexPatternField ? deleteField : undefined}
+                                showFieldStats={showFieldStats}
                               />
                             </li>
                           );
@@ -487,6 +504,7 @@ export function DiscoverSidebar({
                             multiFields={multiFields?.get(field.name)}
                             onEditField={canEditIndexPatternField ? editField : undefined}
                             onDeleteField={canEditIndexPatternField ? deleteField : undefined}
+                            showFieldStats={showFieldStats}
                           />
                         </li>
                       );
@@ -501,3 +519,5 @@ export function DiscoverSidebar({
     </EuiPageSideBar>
   );
 }
+
+export const DiscoverSidebar = memo(DiscoverSidebarComponent);

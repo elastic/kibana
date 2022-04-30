@@ -9,11 +9,13 @@ import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 
 import {
+  EuiCallOut,
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingContent,
   EuiEmptyPrompt,
+  EuiSpacer,
 } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { LogEntry } from './components/log_entry';
@@ -51,9 +53,13 @@ export const EndpointActivityLog = memo(
     const activityLogSize = activityLogData.length;
     const activityLogError = useEndpointSelector(getActivityLogError);
     const dispatch = useDispatch<(action: EndpointAction) => void>();
-    const { page, pageSize, startDate, endDate, disabled: isPagingDisabled } = useEndpointSelector(
-      getActivityLogDataPaging
-    );
+    const {
+      page,
+      pageSize,
+      startDate,
+      endDate,
+      disabled: isPagingDisabled,
+    } = useEndpointSelector(getActivityLogDataPaging);
 
     const hasActiveDateRange = useMemo(() => !!startDate || !!endDate, [startDate, endDate]);
     const showEmptyState = useMemo(
@@ -63,6 +69,18 @@ export const EndpointActivityLog = memo(
     const isShorter = useMemo(
       () => !!(hasActiveDateRange && isPagingDisabled && !activityLogLoading && !activityLogSize),
       [hasActiveDateRange, isPagingDisabled, activityLogLoading, activityLogSize]
+    );
+
+    const doesNotHaveDataAlsoOnRefetch = useMemo(
+      () => !activityLastLogData?.data.length && !activityLogData.length,
+      [activityLastLogData, activityLogData]
+    );
+
+    const showCallout = useMemo(
+      () =>
+        (!isPagingDisabled && activityLogLoaded && !activityLogData.length) ||
+        doesNotHaveDataAlsoOnRefetch,
+      [isPagingDisabled, activityLogLoaded, activityLogData, doesNotHaveDataAlsoOnRefetch]
     );
 
     const loadMoreTrigger = useRef<HTMLInputElement | null>(null);
@@ -114,6 +132,17 @@ export const EndpointActivityLog = memo(
             <>
               <DateRangePicker />
               <EuiFlexItem grow={true}>
+                {showCallout && (
+                  <>
+                    <EuiSpacer size="m" />
+                    <EuiCallOut
+                      data-test-subj="activityLogNoDataCallout"
+                      size="s"
+                      title={i18.ACTIVITY_LOG.LogEntry.dateRangeMessage}
+                      iconType="alert"
+                    />
+                  </>
+                )}
                 {activityLogLoaded &&
                   activityLogData.map((logEntry) => (
                     <LogEntry key={`${logEntry.item.id}`} logEntry={logEntry} />
@@ -125,10 +154,13 @@ export const EndpointActivityLog = memo(
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 {activityLogLoading && <EuiLoadingContent lines={3} />}
-                {(!activityLogLoading || !isPagingDisabled) && (
-                  <LoadMoreTrigger ref={loadMoreTrigger} />
+                {(!activityLogLoading || !isPagingDisabled) && !showCallout && (
+                  <LoadMoreTrigger
+                    data-test-subj="activityLogLoadMoreTrigger"
+                    ref={loadMoreTrigger}
+                  />
                 )}
-                {isPagingDisabled && !activityLogLoading && (
+                {isPagingDisabled && !activityLogLoading && !showCallout && (
                   <EuiText color="subdued" textAlign="center">
                     <p>{i18.ACTIVITY_LOG.LogEntry.endOfLog}</p>
                   </EuiText>

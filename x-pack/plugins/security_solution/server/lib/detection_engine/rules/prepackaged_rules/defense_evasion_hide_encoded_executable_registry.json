@@ -36,11 +36,16 @@
           "id": "T1140",
           "name": "Deobfuscate/Decode Files or Information",
           "reference": "https://attack.mitre.org/techniques/T1140/"
+        },
+        {
+          "id": "T1112",
+          "name": "Modify Registry",
+          "reference": "https://attack.mitre.org/techniques/T1112/"
         }
       ]
     }
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 3
+  "version": 4
 }

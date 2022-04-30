@@ -35,6 +35,7 @@ export enum AlertExecutionStatusErrorReasons {
 export interface AlertExecutionStatus {
   status: AlertExecutionStatuses;
   lastExecutionDate: Date;
+  lastDuration?: number;
   error?: {
     reason: AlertExecutionStatusErrorReasons;
     message: string;
@@ -53,6 +54,8 @@ export interface AlertAction {
 
 export interface AlertAggregations {
   alertExecutionStatus: { [status: string]: number };
+  ruleEnabledStatus: { enabled: number; disabled: number };
+  ruleMutedStatus: { muted: number; unmuted: number };
 }
 
 export interface Alert<Params extends AlertTypeParams = never> {

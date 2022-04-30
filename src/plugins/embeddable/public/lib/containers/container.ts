@@ -7,6 +7,7 @@
  */
 
 import uuid from 'uuid';
+import { isEqual, xor } from 'lodash';
 import { merge, Subscription } from 'rxjs';
 import { startWith, pairwise } from 'rxjs/operators';
 import {
@@ -16,6 +17,7 @@ import {
   ErrorEmbeddable,
   EmbeddableFactory,
   IEmbeddable,
+  isErrorEmbeddable,
 } from '../embeddables';
 import { IContainer, ContainerInput, ContainerOutput, PanelState } from './i_container';
 import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from '../errors';
@@ -30,7 +32,8 @@ export abstract class Container<
     TContainerOutput extends ContainerOutput = ContainerOutput
   >
   extends Embeddable<TContainerInput, TContainerOutput>
-  implements IContainer<TChildInput, TContainerInput, TContainerOutput> {
+  implements IContainer<TChildInput, TContainerInput, TContainerOutput>
+{
   public readonly isContainer: boolean = true;
   public readonly children: {
     [key: string]: IEmbeddable<any, any> | ErrorEmbeddable;
@@ -45,6 +48,7 @@ export abstract class Container<
     parent?: Container
   ) {
     super(input, output, parent);
+    this.getFactory = getFactory; // Currently required for using in storybook due to https://github.com/storybookjs/storybook/issues/13834
     this.subscription = this.getInput$()
       // At each update event, get both the previous and current state
       .pipe(startWith(input), pairwise())
@@ -150,13 +154,13 @@ export abstract class Container<
       explicitFiltered[key] = explicitInput[key];
     });
 
-    return ({
+    return {
       ...containerInput,
       ...explicitFiltered,
       // Typescript has difficulties with inferring this type but it is accurate with all
       // tests I tried. Could probably be revisted with future releases of TS to see if
       // it can accurately infer the type.
-    } as unknown) as TEmbeddableInput;
+    } as unknown as TEmbeddableInput;
   }
 
   public destroy() {
@@ -191,6 +195,32 @@ export abstract class Container<
         }
       });
     });
+  }
+
+  public async getExplicitInputIsEqual(lastInput: TContainerInput) {
+    const { panels: lastPanels, ...restOfLastInput } = lastInput;
+    const { panels: currentPanels, ...restOfCurrentInput } = this.getInput();
+    const otherInputIsEqual = isEqual(restOfLastInput, restOfCurrentInput);
+    if (!otherInputIsEqual) return false;
+
+    const embeddableIdsA = Object.keys(lastPanels);
+    const embeddableIdsB = Object.keys(currentPanels);
+    if (
+      embeddableIdsA.length !== embeddableIdsB.length ||
+      xor(embeddableIdsA, embeddableIdsB).length > 0
+    ) {
+      return false;
+    }
+    // embeddable ids are equal so let's compare individual panels.
+    for (const id of embeddableIdsA) {
+      const currentEmbeddable = await this.untilEmbeddableLoaded(id);
+      const lastPanelInput = lastPanels[id].explicitInput;
+      if (isErrorEmbeddable(currentEmbeddable)) continue;
+      if (!(await currentEmbeddable.getExplicitInputIsEqual(lastPanelInput))) {
+        return false;
+      }
+    }
+    return true;
   }
 
   protected createNewPanelState<
@@ -229,7 +259,7 @@ export abstract class Container<
 
   /**
    * Return state that comes from the container and is passed down to the child. For instance, time range and
-   * filters are common inherited input state. Note that any state stored in `this.input.panels[embeddableId].explicitInput`
+   * filters are common inherited input state. Note that state stored in `this.input.panels[embeddableId].explicitInput`
    * will override inherited input.
    */
   protected abstract getInheritedInput(id: string): TChildInput;
@@ -308,8 +338,7 @@ export abstract class Container<
         throw new EmbeddableFactoryNotFoundError(panel.type);
       }
 
-      // TODO: lets get rid of this distinction with factories, I don't think it will be needed
-      // anymore after this change.
+      // TODO: lets get rid of this distinction with factories, I don't think it will be needed after this change.
       embeddable = isSavedObjectEmbeddableInput(inputForChild)
         ? await factory.createFromSavedObject(inputForChild.savedObjectId, inputForChild, this)
         : await factory.create(inputForChild, this);

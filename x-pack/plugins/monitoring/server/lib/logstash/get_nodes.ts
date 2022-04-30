@@ -6,13 +6,9 @@
  */
 
 import moment from 'moment';
-// @ts-ignore
 import { checkParam } from '../error_missing_required';
-// @ts-ignore
 import { createQuery } from '../create_query';
-// @ts-ignore
 import { calculateAvailability } from '../calculate_availability';
-// @ts-ignore
 import { LogstashMetric } from '../metrics';
 import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
@@ -79,17 +75,20 @@ export async function getNodes(
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
 
+  const filters = [{ exists: { field: 'logstash_stats.logstash.uuid' } }];
+
   const params = {
     index: lsIndexPattern,
     size: config.get('monitoring.ui.max_bucket_size'), // FIXME
     ignore_unavailable: true,
     body: {
       query: createQuery({
+        filters,
         start,
         end,
         clusterUuid,
         metric: LogstashMetric.getMetricFields(),
-        types: ['stats', 'logstash_stats'],
+        types: ['node_stats', 'logstash_stats'],
       }),
       collapse: {
         field: 'logstash_stats.logstash.uuid',

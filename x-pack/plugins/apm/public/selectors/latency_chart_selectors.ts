@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import { Fit } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { rgba } from 'polished';
 import { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
 import { asDuration } from '../../common/utils/formatters';
 import { APMChartSpec, Coordinate } from '../../typings/timeseries';
 import { APIReturnType } from '../services/rest/createCallApmApi';
 
-export type LatencyChartsResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/latency'>;
+export type LatencyChartsResponse =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/latency'>;
 
 export interface LatencyChartData {
   currentPeriod?: APMChartSpec<Coordinate>;
   previousPeriod?: APMChartSpec<Coordinate>;
-  mlJobId?: string;
-  anomalyTimeseries?: { boundaries: APMChartSpec[]; scores: APMChartSpec };
 }
 
 export function getLatencyChartSelector({
@@ -45,11 +42,6 @@ export function getLatencyChartSelector({
     }),
     previousPeriod: getPreviousPeriodTimeseries({
       previousPeriod: latencyChart.previousPeriod,
-      theme,
-    }),
-    mlJobId: latencyChart.anomalyTimeseries?.jobId,
-    anomalyTimeseries: getAnomalyTimeseries({
-      anomalyTimeseries: latencyChart.anomalyTimeseries,
       theme,
     }),
   };
@@ -123,59 +115,4 @@ function getLatencyTimeseries({
       };
     }
   }
-}
-
-function getAnomalyTimeseries({
-  anomalyTimeseries,
-  theme,
-}: {
-  anomalyTimeseries: LatencyChartsResponse['anomalyTimeseries'];
-  theme: EuiTheme;
-}): { boundaries: APMChartSpec[]; scores: APMChartSpec } | undefined {
-  if (!anomalyTimeseries) {
-    return undefined;
-  }
-
-  const boundariesConfigBase = {
-    type: 'area',
-    fit: Fit.Lookahead,
-    hideLegend: true,
-    hideTooltipValue: true,
-    stackAccessors: ['y'],
-    areaSeriesStyle: {
-      point: {
-        opacity: 0,
-      },
-    },
-  };
-
-  const boundaries = [
-    {
-      ...boundariesConfigBase,
-      title: 'anomalyBoundariesLower',
-      data: anomalyTimeseries.anomalyBoundaries.map((coord) => ({
-        x: coord.x,
-        y: coord.y0,
-      })),
-      color: rgba(0, 0, 0, 0),
-    },
-    {
-      ...boundariesConfigBase,
-      title: 'anomalyBoundariesUpper',
-      data: anomalyTimeseries.anomalyBoundaries.map((coord) => ({
-        x: coord.x,
-        y: coord.y - coord.y0,
-      })),
-      color: rgba(theme.eui.euiColorVis1, 0.5),
-    },
-  ];
-
-  const scores = {
-    title: 'anomalyScores',
-    type: 'rectAnnotation',
-    data: anomalyTimeseries.anomalyScore,
-    color: theme.eui.euiColorVis9,
-  };
-
-  return { boundaries, scores };
 }

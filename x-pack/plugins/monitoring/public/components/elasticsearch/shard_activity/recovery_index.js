@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { Snapshot } from './snapshot';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 
 export const RecoveryIndex = (props) => {

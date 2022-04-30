@@ -6,7 +6,7 @@
  */
 
 import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
 import { isEmpty } from 'lodash/fp';
 

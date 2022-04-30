@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 export function TimeoutPrompt({
   isGlobalServiceMap,
@@ -44,11 +44,12 @@ export function TimeoutPrompt({
 }
 
 function ApmSettingsDocLink() {
+  const { docLinks } = useApmPluginContext().core;
   return (
-    <ElasticDocsLink section="/kibana" path="/apm-settings-in-kibana.html">
+    <EuiLink href={docLinks.links.apm.kibanaSettings}>
       {i18n.translate('xpack.apm.serviceMap.timeoutPrompt.docsLink', {
         defaultMessage: 'Learn more about APM settings in the docs',
       })}
-    </ElasticDocsLink>
+    </EuiLink>
   );
 }

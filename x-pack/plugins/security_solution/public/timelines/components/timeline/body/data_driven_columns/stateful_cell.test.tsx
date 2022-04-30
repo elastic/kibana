@@ -18,7 +18,7 @@ import {
 } from '../../../../../../common/types/timeline';
 
 import { StatefulCell } from './stateful_cell';
-import { getMappedNonEcsValue } from '.';
+import { useGetMappedNonEcsValue } from '.';
 
 /**
  * This (test) component implement's `EuiDataGrid`'s `renderCellValue` interface,
@@ -30,14 +30,13 @@ import { getMappedNonEcsValue } from '.';
  * https://codesandbox.io/s/zhxmo
  */
 const RenderCellValue: React.FC<CellValueElementProps> = ({ columnId, data, setCellProps }) => {
+  const value = useGetMappedNonEcsValue({
+    data,
+    fieldName: columnId,
+  });
   useEffect(() => {
     // branching logic that conditionally renders a specific cell green:
     if (columnId === defaultHeaders[0].id) {
-      const value = getMappedNonEcsValue({
-        data,
-        fieldName: columnId,
-      });
-
       if (value?.length) {
         setCellProps({
           style: {
@@ -46,16 +45,9 @@ const RenderCellValue: React.FC<CellValueElementProps> = ({ columnId, data, setC
         });
       }
     }
-  }, [columnId, data, setCellProps]);
+  }, [columnId, data, setCellProps, value]);
 
-  return (
-    <div data-test-subj="renderCellValue">
-      {getMappedNonEcsValue({
-        data,
-        fieldName: columnId,
-      })}
-    </div>
-  );
+  return <div data-test-subj="renderCellValue">{value}</div>;
 };
 
 describe('StatefulCell', () => {

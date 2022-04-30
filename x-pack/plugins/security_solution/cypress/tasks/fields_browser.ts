@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import { drag, drop } from '../tasks/common';
-
 import {
   FIELDS_BROWSER_FILTER_INPUT,
-  FIELDS_BROWSER_DRAGGABLE_HOST_GEO_COUNTRY_NAME_HEADER,
-  FIELDS_BROWSER_HEADER_DROP_AREA,
   FIELDS_BROWSER_HOST_GEO_CITY_NAME_CHECKBOX,
   FIELDS_BROWSER_HOST_GEO_CONTINENT_NAME_CHECKBOX,
   FIELDS_BROWSER_MESSAGE_CHECKBOX,
@@ -35,15 +31,6 @@ export const addsHostGeoContinentNameToTimeline = () => {
   cy.get(FIELDS_BROWSER_HOST_GEO_CONTINENT_NAME_CHECKBOX).check({
     force: true,
   });
-};
-
-export const addsHostGeoCountryNameToTimelineDraggingIt = () => {
-  cy.get(FIELDS_BROWSER_DRAGGABLE_HOST_GEO_COUNTRY_NAME_HEADER).should('exist');
-  cy.get(FIELDS_BROWSER_DRAGGABLE_HOST_GEO_COUNTRY_NAME_HEADER).then((field) => drag(field));
-
-  cy.get(FIELDS_BROWSER_HEADER_DROP_AREA)
-    .first()
-    .then((headersDropArea) => drop(headersDropArea));
 };
 
 export const clearFieldsBrowser = () => {

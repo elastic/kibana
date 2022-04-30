@@ -1,0 +1,9 @@
+[[short-urls-api]]
+== Short URLs APIs
+
+Manage {kib} short URLs.
+
+include::short-urls/create-short-url.asciidoc[]
+include::short-urls/get-short-url.asciidoc[]
+include::short-urls/delete-short-url.asciidoc[]
+include::short-urls/resolve-short-url.asciidoc[]

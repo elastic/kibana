@@ -11,7 +11,7 @@ import {
   waitForAlertsIndexToBeCreated,
   waitForAlertsPanelToBeLoaded,
 } from '../../tasks/alerts';
-import { exportFirstRule } from '../../tasks/alerts_detection_rules';
+import { exportFirstRule, getRulesImportExportToast } from '../../tasks/alerts_detection_rules';
 import { createCustomRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
@@ -35,7 +35,10 @@ describe('Export rules', () => {
     goToManageAlertsDetectionRules();
     exportFirstRule();
     cy.wait('@export').then(({ response }) => {
-      cy.wrap(response!.body).should('eql', expectedExportedRule(this.ruleResponse));
+      cy.wrap(response?.body).should('eql', expectedExportedRule(this.ruleResponse));
+      getRulesImportExportToast([
+        'Successfully exported 1 of 1 rule. Prebuilt rules were excluded from the resulting file.',
+      ]);
     });
   });
 });

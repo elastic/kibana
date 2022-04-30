@@ -49,23 +49,57 @@ test('throws validation error if provided with data over max size', () => {
 });
 
 test('throws validation error if provided with non-image data', () => {
-  const invalidErrorMatcher = /try a different image/;
-
-  expect(() => PdfLogoSchema.validate('')).toThrowError(invalidErrorMatcher);
-  expect(() => PdfLogoSchema.validate(true)).toThrow(invalidErrorMatcher);
-  expect(() => PdfLogoSchema.validate(false)).toThrow(invalidErrorMatcher);
-  expect(() => PdfLogoSchema.validate({})).toThrow(invalidErrorMatcher);
-  expect(() => PdfLogoSchema.validate([])).toThrow(invalidErrorMatcher);
-  expect(() => PdfLogoSchema.validate(0)).toThrow(invalidErrorMatcher);
-  expect(() => PdfLogoSchema.validate(0x00f)).toThrow(invalidErrorMatcher);
+  expect(() => PdfLogoSchema.validate('')).toThrowErrorMatchingInlineSnapshot(`
+    "types that failed validation:
+    - [0]: Sorry, that file will not work. Please try a different image file.
+    - [1]: expected value to equal [null]"
+  `);
+  expect(() => PdfLogoSchema.validate(true)).toThrowErrorMatchingInlineSnapshot(`
+    "types that failed validation:
+    - [0]: expected value of type [string] but got [boolean]
+    - [1]: expected value to equal [null]"
+  `);
+  expect(() => PdfLogoSchema.validate(false)).toThrowErrorMatchingInlineSnapshot(`
+    "types that failed validation:
+    - [0]: expected value of type [string] but got [boolean]
+    - [1]: expected value to equal [null]"
+  `);
+  expect(() => PdfLogoSchema.validate({})).toThrowErrorMatchingInlineSnapshot(`
+    "types that failed validation:
+    - [0]: expected value of type [string] but got [Object]
+    - [1]: expected value to equal [null]"
+  `);
+  expect(() => PdfLogoSchema.validate([])).toThrowErrorMatchingInlineSnapshot(`
+    "types that failed validation:
+    - [0]: expected value of type [string] but got [Array]
+    - [1]: expected value to equal [null]"
+  `);
+  expect(() => PdfLogoSchema.validate(0)).toThrowErrorMatchingInlineSnapshot(`
+    "types that failed validation:
+    - [0]: expected value of type [string] but got [number]
+    - [1]: expected value to equal [null]"
+  `);
+  expect(() => PdfLogoSchema.validate(0x00f)).toThrowErrorMatchingInlineSnapshot(`
+    "types that failed validation:
+    - [0]: expected value of type [string] but got [number]
+    - [1]: expected value to equal [null]"
+  `);
 
   const csvString =
     `data:text/csv;base64,Il9pZCIsIl9pbmRleCIsIl9zY29yZSIsIl90eXBlIiwiZm9vLmJhciIsImZvby5iYXIua2V5d29yZCIKZjY1QU9IZ0J5bFZmWW04W` +
     `TRvb1EsYmVlLDEsIi0iLGJheixiYXoKbks1QU9IZ0J5bFZmWW04WTdZcUcsYmVlLDEsIi0iLGJvbyxib28K`;
-  expect(() => PdfLogoSchema.validate(csvString)).toThrow(invalidErrorMatcher);
+  expect(() => PdfLogoSchema.validate(csvString)).toThrowErrorMatchingInlineSnapshot(`
+    "types that failed validation:
+    - [0]: Sorry, that file will not work. Please try a different image file.
+    - [1]: expected value to equal [null]"
+  `);
 
   const scriptString =
     `data:application/octet-stream;base64,QEVDSE8gT0ZGCldFRUtPRllSLkNPTSB8IEZJTkQgIlRoaXMgaXMiID4gVEVNUC5CQV` +
     `QKRUNITz5USElTLkJBVCBTRVQgV0VFSz0lJTMKQ0FMTCBURU1QLkJBVApERUwgIFRFTVAuQkFUCkRFTCAgVEhJUy5CQVQKRUNITyBXZWVrICVXRUVLJQo=`;
-  expect(() => PdfLogoSchema.validate(scriptString)).toThrow(invalidErrorMatcher);
+  expect(() => PdfLogoSchema.validate(scriptString)).toThrowErrorMatchingInlineSnapshot(`
+    "types that failed validation:
+    - [0]: Sorry, that file will not work. Please try a different image file.
+    - [1]: expected value to equal [null]"
+  `);
 });

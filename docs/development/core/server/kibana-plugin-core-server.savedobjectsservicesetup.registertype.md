@@ -51,6 +51,5 @@ export class Plugin() {
     core.savedObjects.registerType(myType);
   }
 }
-
 ```
 

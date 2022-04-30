@@ -7,7 +7,7 @@
 
 import { EuiButtonEmpty, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { memo, useCallback, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { MalwareProtections } from './policy_forms/protections/malware';
 import { MemoryProtection } from './policy_forms/protections/memory';
@@ -29,14 +29,14 @@ const LOCKED_CARD_RAMSOMWARE_TITLE = i18n.translate(
 const LOCKED_CARD_MEMORY_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.memory',
   {
-    defaultMessage: 'Memory',
+    defaultMessage: 'Memory Threat',
   }
 );
 
 const LOCKED_CARD_BEHAVIOR_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.behavior',
   {
-    defaultMessage: 'Behavior',
+    defaultMessage: 'Malicious Behavior',
   }
 );
 

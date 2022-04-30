@@ -53,7 +53,10 @@ describe('VALUE_CLICK_TRIGGER', () => {
 
   describe('handles undefined, null or missing values', () => {
     test('undefined or missing values are removed from the result scope', () => {
-      const point = createPoint({ field: undefined } as any);
+      const point = createPoint({ field: undefined } as unknown as {
+        field: string;
+        value: string | null | number | boolean;
+      });
       const eventScope = getEventScopeValues({
         data: { data: [point] },
       }) as ValueClickTriggerEventScope;
@@ -87,10 +90,10 @@ describe('ROW_CLICK_TRIGGER', () => {
   });
 
   test('getEventScopeValues() returns correct variables for row click trigger', () => {
-    const context = ({
+    const context = {
       embeddable: {},
       data: rowClickData as any,
-    } as unknown) as RowClickContext;
+    } as unknown as RowClickContext;
     const res = getEventScopeValues(context);
 
     expect(res).toEqual({

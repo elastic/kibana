@@ -10,6 +10,7 @@
 ```typescript
 export declare class SavedObjectsExportError extends Error 
 ```
+<b>Extends:</b> Error
 
 ## Constructors
 
@@ -21,15 +22,15 @@ export declare class SavedObjectsExportError extends Error
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [attributes](./kibana-plugin-core-server.savedobjectsexporterror.attributes.md) |  | <code>Record&lt;string, any&gt; &#124; undefined</code> |  |
-|  [type](./kibana-plugin-core-server.savedobjectsexporterror.type.md) |  | <code>string</code> |  |
+|  [attributes?](./kibana-plugin-core-server.savedobjectsexporterror.attributes.md) |  | Record&lt;string, any&gt; \| undefined | <i>(Optional)</i> |
+|  [type](./kibana-plugin-core-server.savedobjectsexporterror.type.md) |  | string |  |
 
 ## Methods
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
 |  [exportSizeExceeded(limit)](./kibana-plugin-core-server.savedobjectsexporterror.exportsizeexceeded.md) | <code>static</code> |  |
-|  [invalidTransformError(objectKeys)](./kibana-plugin-core-server.savedobjectsexporterror.invalidtransformerror.md) | <code>static</code> | Error returned when a [export tranform](./kibana-plugin-core-server.savedobjectsexporttransform.md) performed an invalid operation during the transform, such as removing objects from the export, or changing an object's type or id. |
+|  [invalidTransformError(objectKeys)](./kibana-plugin-core-server.savedobjectsexporterror.invalidtransformerror.md) | <code>static</code> | Error returned when a [export transform](./kibana-plugin-core-server.savedobjectsexporttransform.md) performed an invalid operation during the transform, such as removing objects from the export, or changing an object's type or id. |
 |  [objectFetchError(objects)](./kibana-plugin-core-server.savedobjectsexporterror.objectfetcherror.md) | <code>static</code> |  |
-|  [objectTransformError(objects, cause)](./kibana-plugin-core-server.savedobjectsexporterror.objecttransformerror.md) | <code>static</code> | Error returned when a [export tranform](./kibana-plugin-core-server.savedobjectsexporttransform.md) threw an error |
+|  [objectTransformError(objects, cause)](./kibana-plugin-core-server.savedobjectsexporterror.objecttransformerror.md) | <code>static</code> | Error returned when a [export transform](./kibana-plugin-core-server.savedobjectsexporttransform.md) threw an error |
 

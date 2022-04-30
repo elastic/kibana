@@ -12,9 +12,9 @@ import {
   ALERT_END,
   ALERT_START,
   ALERT_STATUS,
-  ALERT_STATUS_ACTIVE,
   ALERT_REASON,
-} from '@kbn/rule-data-utils';
+} from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils/alerts_as_data_status';
 
 import { AlertTypeInitializer } from '.';
 import { getMonitorRouteFromMonitorId } from './common';
@@ -37,7 +37,7 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   description,
   iconClass: 'uptimeApp',
   documentationUrl(docLinks) {
-    return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/observability/${docLinks.DOC_LINK_VERSION}/monitor-status-alert.html`;
+    return `${docLinks.links.observability.monitorStatus}`;
   },
   alertParamsExpression: (params: any) => (
     <MonitorStatusAlert core={core} plugins={plugins} params={params} />

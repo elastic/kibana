@@ -5,11 +5,11 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["uiActions", "embeddable", "discover"],
-  "optionalPlugins": ["share", "kibanaLegacy", "usageCollection"],
+  "optionalPlugins": ["share", "usageCollection"],
   "configPath": ["xpack", "discoverEnhanced"],
   "requiredBundles": ["kibanaUtils", "data"],
   "owner": {
-    "name": "Kibana App",
-    "githubTeam": "kibana-app"
+    "name": "Data Discovery",
+    "githubTeam": "kibana-data-discovery"
   }
 }

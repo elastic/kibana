@@ -6,11 +6,13 @@
  */
 
 import React from 'react';
+import uuid from 'uuid/v4';
 import type {
   Map as MbMap,
   AnyLayer as MbLayer,
   GeoJSONSource as MbGeoJSONSource,
 } from '@kbn/mapbox-gl';
+import type { Query } from 'src/plugins/data/common';
 import { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
 import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
@@ -18,18 +20,18 @@ import { i18n } from '@kbn/i18n';
 import { AbstractLayer } from '../layer';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import {
-  FEATURE_ID_PROPERTY_NAME,
+  AGG_TYPE,
   SOURCE_META_DATA_REQUEST_ID,
   SOURCE_FORMATTERS_DATA_REQUEST_ID,
   FEATURE_VISIBLE_PROPERTY_NAME,
   EMPTY_FEATURE_COLLECTION,
-  KBN_METADATA_FEATURE,
   LAYER_TYPE,
   FIELD_ORIGIN,
-  KBN_TOO_MANY_FEATURES_IMAGE_ID,
   FieldFormatter,
+  SOURCE_TYPES,
+  STYLE_TYPE,
   SUPPORTS_FEATURE_EDITING_REQUEST_ID,
-  KBN_IS_TILE_COMPLETE,
+  VECTOR_STYLES,
 } from '../../../../common/constants';
 import { JoinTooltipProperty } from '../../tooltips/join_tooltip_property';
 import { DataRequestAbortError } from '../../util/data_request';
@@ -40,22 +42,24 @@ import {
 } from '../../util/can_skip_fetch';
 import { getFeatureCollectionBounds } from '../../util/get_feature_collection_bounds';
 import {
-  getCentroidFilterExpression,
+  getLabelFilterExpression,
   getFillFilterExpression,
   getLineFilterExpression,
   getPointFilterExpression,
   TimesliceMaskConfig,
 } from '../../util/mb_filter_expressions';
 import {
+  AggDescriptor,
   DynamicStylePropertyOptions,
-  MapFilters,
-  MapQuery,
+  DataFilters,
+  ESTermSourceDescriptor,
+  JoinDescriptor,
   StyleMetaDescriptor,
   Timeslice,
-  VectorJoinSourceRequestMeta,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
   VectorStyleRequestMeta,
+  VectorJoinSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { ISource } from '../../sources/source';
 import { IVectorSource } from '../../sources/vector_source';
@@ -70,6 +74,13 @@ import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { ITermJoinSource } from '../../sources/term_join_source';
 import { addGeoJsonMbSource, getVectorSourceBounds, syncVectorSource } from './utils';
 import { JoinState, performInnerJoins } from './perform_inner_joins';
+import { buildVectorRequestMeta } from '../build_vector_request_meta';
+import { getJoinAggKey } from '../../../../common/get_agg_key';
+import { GEOJSON_FEATURE_ID_PROPERTY_NAME } from './assign_feature_ids';
+
+export function isVectorLayer(layer: ILayer) {
+  return (layer as IVectorLayer).canShowTooltip !== undefined;
+}
 
 export interface VectorLayerArguments {
   source: IVectorSource;
@@ -79,14 +90,23 @@ export interface VectorLayerArguments {
 }
 
 export interface IVectorLayer extends ILayer {
+  /*
+   * IVectorLayer.getMbLayerIds returns a list of mapbox layers assoicated with this layer for identifing features with tooltips.
+   * Must return ILayer.getMbLayerIds or a subset of ILayer.getMbLayerIds.
+   */
+  getMbTooltipLayerIds(): string[];
+
   getFields(): Promise<IField[]>;
   getStyleEditorFields(): Promise<IField[]>;
   getJoins(): InnerJoin[];
+  getJoinsDisabledReason(): string | null;
   getValidJoins(): InnerJoin[];
   getSource(): IVectorSource;
+  getFeatureId(feature: Feature): string | number | undefined;
   getFeatureById(id: string | number): Feature | null;
   getPropertiesForTooltip(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   hasJoins(): boolean;
+  showJoinEditor(): boolean;
   canShowTooltip(): boolean;
   supportsFeatureEditing(): boolean;
   getLeftJoinFields(): Promise<IField[]>;
@@ -102,6 +122,9 @@ export const NO_RESULTS_ICON_AND_TOOLTIPCONTENT = {
   }),
 };
 
+/*
+ * Geojson vector layer
+ */
 export class VectorLayer extends AbstractLayer implements IVectorLayer {
   static type = LAYER_TYPE.VECTOR;
 
@@ -112,8 +135,8 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     options: Partial<VectorLayerDescriptor>,
     mapColors?: string[]
   ): VectorLayerDescriptor {
-    const layerDescriptor = super.createDescriptor(options);
-    layerDescriptor.type = VectorLayer.type;
+    const layerDescriptor = super.createDescriptor(options) as VectorLayerDescriptor;
+    layerDescriptor.type = LAYER_TYPE.VECTOR;
 
     if (!options.style) {
       const styleProperties = VectorStyle.createDefaultStyleProperties(mapColors ? mapColors : []);
@@ -124,7 +147,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       layerDescriptor.joins = [];
     }
 
-    return layerDescriptor as VectorLayerDescriptor;
+    return layerDescriptor;
   }
 
   constructor({
@@ -144,6 +167,62 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       this,
       chartsPaletteServiceGetColor
     );
+  }
+
+  async cloneDescriptor(): Promise<VectorLayerDescriptor> {
+    const clonedDescriptor = (await super.cloneDescriptor()) as VectorLayerDescriptor;
+    if (clonedDescriptor.joins) {
+      clonedDescriptor.joins.forEach((joinDescriptor: JoinDescriptor) => {
+        if (joinDescriptor.right && joinDescriptor.right.type === SOURCE_TYPES.TABLE_SOURCE) {
+          throw new Error(
+            'Cannot clone table-source. Should only be used in MapEmbeddable, not in UX'
+          );
+        }
+        const termSourceDescriptor: ESTermSourceDescriptor =
+          joinDescriptor.right as ESTermSourceDescriptor;
+
+        // todo: must tie this to generic thing
+        const originalJoinId = joinDescriptor.right.id!;
+
+        // right.id is uuid used to track requests in inspector
+        joinDescriptor.right.id = uuid();
+
+        // Update all data driven styling properties using join fields
+        if (clonedDescriptor.style && 'properties' in clonedDescriptor.style) {
+          const metrics =
+            termSourceDescriptor.metrics && termSourceDescriptor.metrics.length
+              ? termSourceDescriptor.metrics
+              : [{ type: AGG_TYPE.COUNT }];
+          metrics.forEach((metricsDescriptor: AggDescriptor) => {
+            const originalJoinKey = getJoinAggKey({
+              aggType: metricsDescriptor.type,
+              aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
+              rightSourceId: originalJoinId,
+            });
+            const newJoinKey = getJoinAggKey({
+              aggType: metricsDescriptor.type,
+              aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
+              rightSourceId: joinDescriptor.right.id!,
+            });
+
+            Object.keys(clonedDescriptor.style.properties).forEach((key) => {
+              const styleProp = clonedDescriptor.style.properties[key as VECTOR_STYLES];
+              if ('type' in styleProp && styleProp.type === STYLE_TYPE.DYNAMIC) {
+                const options = styleProp.options as DynamicStylePropertyOptions;
+                if (
+                  options.field &&
+                  options.field.origin === FIELD_ORIGIN.JOIN &&
+                  options.field.name === originalJoinKey
+                ) {
+                  options.field.name = newJoinKey;
+                }
+              }
+            });
+          });
+        }
+      });
+    }
+    return clonedDescriptor;
   }
 
   getSource(): IVectorSource {
@@ -175,6 +254,10 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return this._joins.slice();
   }
 
+  getJoinsDisabledReason() {
+    return this.getSource().getJoinsDisabledReason();
+  }
+
   getValidJoins() {
     return this.getJoins().filter((join) => {
       return join.hasCompleteConfig();
@@ -189,6 +272,10 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
 
   hasJoins() {
     return this.getValidJoins().length > 0;
+  }
+
+  showJoinEditor(): boolean {
+    return this.getSource().showJoinEditor();
   }
 
   isInitialDataLoadComplete() {
@@ -230,11 +317,8 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     const sourceDataRequest = this.getSourceDataRequest();
-    const {
-      tooltipContent,
-      areResultsTrimmed,
-      isDeprecated,
-    } = this.getSource().getSourceTooltipContent(sourceDataRequest);
+    const { tooltipContent, areResultsTrimmed, isDeprecated } =
+      this.getSource().getSourceTooltipContent(sourceDataRequest);
     return {
       icon: isDeprecated ? (
         <EuiIcon type="alert" color="danger" />
@@ -266,7 +350,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
           layerId: this.getId(),
           syncContext,
           source: this.getSource(),
-          sourceQuery: this.getQuery() as MapQuery,
+          sourceQuery: this.getQuery(),
         });
   }
 
@@ -332,29 +416,31 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     onLoadError,
     registerCancelCallback,
     dataFilters,
+    isForceRefresh,
   }: { join: InnerJoin } & DataRequestContext): Promise<JoinState> {
     const joinSource = join.getRightJoinSource();
     const sourceDataId = join.getSourceDataRequestId();
     const requestToken = Symbol(`layer-join-refresh:${this.getId()} - ${sourceDataId}`);
-    const searchFilters: VectorJoinSourceRequestMeta = {
-      ...dataFilters,
-      fieldNames: joinSource.getFieldNames(),
-      sourceQuery: joinSource.getWhereQuery(),
-      applyGlobalQuery: joinSource.getApplyGlobalQuery(),
-      applyGlobalTime: joinSource.getApplyGlobalTime(),
-      sourceMeta: joinSource.getSyncMeta(),
-    };
-    const prevDataRequest = this.getDataRequest(sourceDataId);
 
+    const joinRequestMeta: VectorJoinSourceRequestMeta = buildVectorRequestMeta(
+      joinSource,
+      joinSource.getFieldNames(),
+      dataFilters,
+      joinSource.getWhereQuery(),
+      isForceRefresh
+    ) as VectorJoinSourceRequestMeta;
+
+    const prevDataRequest = this.getDataRequest(sourceDataId);
     const canSkipFetch = await canSkipSourceUpdate({
       source: joinSource,
       prevDataRequest,
-      nextMeta: searchFilters,
+      nextRequestMeta: joinRequestMeta,
       extentAware: false, // join-sources are term-aggs that are spatially unaware (e.g. ESTermSource/TableSource).
       getUpdateDueToTimeslice: () => {
         return true;
       },
     });
+
     if (canSkipFetch) {
       return {
         dataHasChanged: false,
@@ -364,10 +450,10 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     try {
-      startLoading(sourceDataId, requestToken, searchFilters);
+      startLoading(sourceDataId, requestToken, joinRequestMeta);
       const leftSourceName = await this._source.getDisplayName();
       const propertiesMap = await joinSource.getPropertiesMap(
-        searchFilters,
+        joinRequestMeta,
         leftSourceName,
         join.getLeftField().getName(),
         registerCancelCallback.bind(null, requestToken)
@@ -396,8 +482,9 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return await Promise.all(joinSyncs);
   }
 
-  async _getSearchFilters(
-    dataFilters: MapFilters,
+  async _getVectorSourceRequestMeta(
+    isForceRefresh: boolean,
+    dataFilters: DataFilters,
     source: IVectorSource,
     style: IVectorStyle
   ): Promise<VectorSourceRequestMeta> {
@@ -411,17 +498,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     if (timesliceMaskFieldName) {
       fieldNames.push(timesliceMaskFieldName);
     }
-
-    const sourceQuery = this.getQuery() as MapQuery;
-    return {
-      ...dataFilters,
-      fieldNames: _.uniq(fieldNames).sort(),
-      geogridPrecision: source.getGeoGridPrecision(dataFilters.zoom),
-      sourceQuery: sourceQuery ? sourceQuery : undefined,
-      applyGlobalQuery: source.getApplyGlobalQuery(),
-      applyGlobalTime: source.getApplyGlobalTime(),
-      sourceMeta: source.getSyncMeta(),
-    };
+    return buildVectorRequestMeta(source, fieldNames, dataFilters, this.getQuery(), isForceRefresh);
   }
 
   async _syncSourceStyleMeta(
@@ -429,7 +506,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     source: IVectorSource,
     style: IVectorStyle
   ) {
-    const sourceQuery = this.getQuery() as MapQuery;
+    const sourceQuery = this.getQuery();
     return this._syncStyleMeta({
       source,
       style,
@@ -481,7 +558,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     dataRequestId: string;
     dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
     source: IVectorSource | ITermJoinSource;
-    sourceQuery?: MapQuery;
+    sourceQuery?: Query;
     style: IVectorStyle;
   } & DataRequestContext) {
     if (!source.isESSource() || dynamicStyleProps.length === 0) {
@@ -519,6 +596,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
         timeFilters: nextMeta.timeFilters,
         searchSessionId: dataFilters.searchSessionId,
       });
+
       stopLoading(dataRequestId, requestToken, styleMeta, nextMeta);
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {
@@ -641,7 +719,12 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
         layerId: this.getId(),
         layerName: await this.getDisplayName(source),
         prevDataRequest: this.getSourceDataRequest(),
-        requestMeta: await this._getSearchFilters(syncContext.dataFilters, source, style),
+        requestMeta: await this._getVectorSourceRequestMeta(
+          syncContext.isForceRefresh,
+          syncContext.dataFilters,
+          source,
+          style
+        ),
         syncContext,
         source,
         getUpdateDueToTimeslice: (timeslice?: Timeslice) => {
@@ -699,6 +782,9 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
   }
 
   _getSourceFeatureCollection() {
+    if (this.getSource().isMvt()) {
+      return null;
+    }
     const sourceDataRequest = this.getSourceDataRequest();
     return sourceDataRequest ? (sourceDataRequest.getData() as FeatureCollection) : null;
   }
@@ -734,65 +820,20 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     mvtSourceLayer?: string,
     timesliceMaskConfig?: TimesliceMaskConfig
   ) {
-    const pointLayerId = this._getMbPointLayerId();
-    const symbolLayerId = this._getMbSymbolLayerId();
-    const pointLayer = mbMap.getLayer(pointLayerId);
-    const symbolLayer = mbMap.getLayer(symbolLayerId);
-
-    // Point layers symbolized as circles require 2 mapbox layers because
-    // "circle" layers do not support "text" style properties
-    // Point layers symbolized as icons only contain a single mapbox layer.
-    let markerLayerId;
-    let textLayerId;
-    if (this.getCurrentStyle().arePointsSymbolizedAsCircles()) {
-      markerLayerId = pointLayerId;
-      textLayerId = this._getMbTextLayerId();
-      if (symbolLayer) {
-        mbMap.setLayoutProperty(symbolLayerId, 'visibility', 'none');
-      }
-      this._setMbCircleProperties(mbMap, mvtSourceLayer, timesliceMaskConfig);
-    } else {
-      markerLayerId = symbolLayerId;
-      textLayerId = symbolLayerId;
-      if (pointLayer) {
-        mbMap.setLayoutProperty(pointLayerId, 'visibility', 'none');
-        mbMap.setLayoutProperty(this._getMbTextLayerId(), 'visibility', 'none');
-      }
-      this._setMbSymbolProperties(mbMap, mvtSourceLayer, timesliceMaskConfig);
-    }
-
-    this.syncVisibilityWithMb(mbMap, markerLayerId);
-    mbMap.setLayerZoomRange(markerLayerId, this.getMinZoom(), this.getMaxZoom());
-    if (markerLayerId !== textLayerId) {
-      this.syncVisibilityWithMb(mbMap, textLayerId);
-      mbMap.setLayerZoomRange(textLayerId, this.getMinZoom(), this.getMaxZoom());
-    }
-  }
-
-  _setMbCircleProperties(
-    mbMap: MbMap,
-    mvtSourceLayer?: string,
-    timesliceMaskConfig?: TimesliceMaskConfig
-  ) {
     const sourceId = this.getId();
     const pointLayerId = this._getMbPointLayerId();
-    const pointLayer = mbMap.getLayer(pointLayerId);
-    if (!pointLayer) {
-      const mbLayer: MbLayer = {
-        id: pointLayerId,
-        type: 'circle',
-        source: sourceId,
-        paint: {},
-      };
-
-      if (mvtSourceLayer) {
-        mbLayer['source-layer'] = mvtSourceLayer;
-      }
-      mbMap.addLayer(mbLayer);
-    }
-
+    const symbolLayerId = this._getMbSymbolLayerId();
     const textLayerId = this._getMbTextLayerId();
+    const pointLayer = mbMap.getLayer(pointLayerId);
+    const symbolLayer = mbMap.getLayer(symbolLayerId);
     const textLayer = mbMap.getLayer(textLayerId);
+
+    // Point layers require 2 mapbox layers
+
+    //
+    // Create label layer
+    // label layer - "symbol" layer type for labels. Can not use same layer label and marker layers because of conflicting styling requirements
+    //
     if (!textLayer) {
       const mbLayer: MbLayer = {
         id: textLayerId,
@@ -805,62 +846,78 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       mbMap.addLayer(mbLayer);
     }
 
+    //
+    // Create marker layer
+    // "circle" layer type for points
+    // "symbol" layer type for icons
+    //
+    let markerLayerId;
+    if (this.getCurrentStyle().arePointsSymbolizedAsCircles()) {
+      markerLayerId = pointLayerId;
+      if (!pointLayer) {
+        const mbLayer: MbLayer = {
+          id: pointLayerId,
+          type: 'circle',
+          source: sourceId,
+          paint: {},
+        };
+
+        if (mvtSourceLayer) {
+          mbLayer['source-layer'] = mvtSourceLayer;
+        }
+        mbMap.addLayer(mbLayer, textLayerId);
+      }
+      if (symbolLayer) {
+        mbMap.setLayoutProperty(symbolLayerId, 'visibility', 'none');
+      }
+    } else {
+      markerLayerId = symbolLayerId;
+      if (!symbolLayer) {
+        const mbLayer: MbLayer = {
+          id: symbolLayerId,
+          type: 'symbol',
+          source: sourceId,
+        };
+        if (mvtSourceLayer) {
+          mbLayer['source-layer'] = mvtSourceLayer;
+        }
+        mbMap.addLayer(mbLayer, textLayerId);
+      }
+      if (pointLayer) {
+        mbMap.setLayoutProperty(pointLayerId, 'visibility', 'none');
+      }
+    }
+
     const filterExpr = getPointFilterExpression(this.hasJoins(), timesliceMaskConfig);
-    if (!_.isEqual(filterExpr, mbMap.getFilter(pointLayerId))) {
-      mbMap.setFilter(pointLayerId, filterExpr);
+    if (!_.isEqual(filterExpr, mbMap.getFilter(markerLayerId))) {
+      mbMap.setFilter(markerLayerId, filterExpr);
       mbMap.setFilter(textLayerId, filterExpr);
     }
 
-    this.getCurrentStyle().setMBPaintPropertiesForPoints({
-      alpha: this.getAlpha(),
-      mbMap,
-      pointLayerId,
-    });
+    if (this.getCurrentStyle().arePointsSymbolizedAsCircles()) {
+      this.getCurrentStyle().setMBPaintPropertiesForPoints({
+        alpha: this.getAlpha(),
+        mbMap,
+        pointLayerId: markerLayerId,
+      });
+    } else {
+      this.getCurrentStyle().setMBSymbolPropertiesForPoints({
+        alpha: this.getAlpha(),
+        mbMap,
+        symbolLayerId: markerLayerId,
+      });
+    }
 
     this.getCurrentStyle().setMBPropertiesForLabelText({
       alpha: this.getAlpha(),
       mbMap,
       textLayerId,
     });
-  }
 
-  _setMbSymbolProperties(
-    mbMap: MbMap,
-    mvtSourceLayer?: string,
-    timesliceMaskConfig?: TimesliceMaskConfig
-  ) {
-    const sourceId = this.getId();
-    const symbolLayerId = this._getMbSymbolLayerId();
-    const symbolLayer = mbMap.getLayer(symbolLayerId);
-
-    if (!symbolLayer) {
-      const mbLayer: MbLayer = {
-        id: symbolLayerId,
-        type: 'symbol',
-        source: sourceId,
-      };
-      if (mvtSourceLayer) {
-        mbLayer['source-layer'] = mvtSourceLayer;
-      }
-      mbMap.addLayer(mbLayer);
-    }
-
-    const filterExpr = getPointFilterExpression(this.hasJoins(), timesliceMaskConfig);
-    if (!_.isEqual(filterExpr, mbMap.getFilter(symbolLayerId))) {
-      mbMap.setFilter(symbolLayerId, filterExpr);
-    }
-
-    this.getCurrentStyle().setMBSymbolPropertiesForPoints({
-      alpha: this.getAlpha(),
-      mbMap,
-      symbolLayerId,
-    });
-
-    this.getCurrentStyle().setMBPropertiesForLabelText({
-      alpha: this.getAlpha(),
-      mbMap,
-      textLayerId: symbolLayerId,
-    });
+    this.syncVisibilityWithMb(mbMap, markerLayerId);
+    mbMap.setLayerZoomRange(markerLayerId, this.getMinZoom(), this.getMaxZoom());
+    this.syncVisibilityWithMb(mbMap, textLayerId);
+    mbMap.setLayerZoomRange(textLayerId, this.getMinZoom(), this.getMaxZoom());
   }
 
   _setMbLinePolygonProperties(
@@ -871,7 +928,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     const sourceId = this.getId();
     const fillLayerId = this._getMbPolygonLayerId();
     const lineLayerId = this._getMbLineLayerId();
-    const tooManyFeaturesLayerId = this._getMbTooManyFeaturesLayerId();
 
     const hasJoins = this.hasJoins();
     if (!mbMap.getLayer(fillLayerId)) {
@@ -898,29 +954,6 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       }
       mbMap.addLayer(mbLayer);
     }
-    if (!mbMap.getLayer(tooManyFeaturesLayerId)) {
-      const mbLayer: MbLayer = {
-        id: tooManyFeaturesLayerId,
-        type: 'fill',
-        source: sourceId,
-        paint: {},
-      };
-      if (mvtSourceLayer) {
-        mbLayer['source-layer'] = mvtSourceLayer;
-      }
-      mbMap.addLayer(mbLayer);
-      mbMap.setFilter(tooManyFeaturesLayerId, [
-        'all',
-        ['==', ['get', KBN_METADATA_FEATURE], true],
-        ['==', ['get', KBN_IS_TILE_COMPLETE], false],
-      ]);
-      mbMap.setPaintProperty(
-        tooManyFeaturesLayerId,
-        'fill-pattern',
-        KBN_TOO_MANY_FEATURES_IMAGE_ID
-      );
-      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'fill-opacity', this.getAlpha());
-    }
 
     this.getCurrentStyle().setMBPaintProperties({
       alpha: this.getAlpha(),
@@ -942,21 +975,18 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     if (!_.isEqual(lineFilterExpr, mbMap.getFilter(lineLayerId))) {
       mbMap.setFilter(lineLayerId, lineFilterExpr);
     }
-
-    this.syncVisibilityWithMb(mbMap, tooManyFeaturesLayerId);
-    mbMap.setLayerZoomRange(tooManyFeaturesLayerId, this.getMinZoom(), this.getMaxZoom());
   }
 
-  _setMbCentroidProperties(
+  _setMbLabelProperties(
     mbMap: MbMap,
     mvtSourceLayer?: string,
     timesliceMaskConfig?: TimesliceMaskConfig
   ) {
-    const centroidLayerId = this._getMbCentroidLayerId();
-    const centroidLayer = mbMap.getLayer(centroidLayerId);
-    if (!centroidLayer) {
+    const labelLayerId = this._getMbLabelLayerId();
+    const labelLayer = mbMap.getLayer(labelLayerId);
+    if (!labelLayer) {
       const mbLayer: MbLayer = {
-        id: centroidLayerId,
+        id: labelLayerId,
         type: 'symbol',
         source: this.getId(),
       };
@@ -966,27 +996,32 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
       mbMap.addLayer(mbLayer);
     }
 
-    const filterExpr = getCentroidFilterExpression(this.hasJoins(), timesliceMaskConfig);
-    if (!_.isEqual(filterExpr, mbMap.getFilter(centroidLayerId))) {
-      mbMap.setFilter(centroidLayerId, filterExpr);
+    const isSourceGeoJson = !this.getSource().isMvt();
+    const filterExpr = getLabelFilterExpression(
+      this.hasJoins(),
+      isSourceGeoJson,
+      timesliceMaskConfig
+    );
+    if (!_.isEqual(filterExpr, mbMap.getFilter(labelLayerId))) {
+      mbMap.setFilter(labelLayerId, filterExpr);
     }
 
     this.getCurrentStyle().setMBPropertiesForLabelText({
       alpha: this.getAlpha(),
       mbMap,
-      textLayerId: centroidLayerId,
+      textLayerId: labelLayerId,
     });
 
-    this.syncVisibilityWithMb(mbMap, centroidLayerId);
-    mbMap.setLayerZoomRange(centroidLayerId, this.getMinZoom(), this.getMaxZoom());
+    this.syncVisibilityWithMb(mbMap, labelLayerId);
+    mbMap.setLayerZoomRange(labelLayerId, this.getMinZoom(), this.getMaxZoom());
   }
 
   _syncStylePropertiesWithMb(mbMap: MbMap, timeslice?: Timeslice) {
     const timesliceMaskConfig = this._getTimesliceMaskConfig(timeslice);
     this._setMbPointsProperties(mbMap, undefined, timesliceMaskConfig);
     this._setMbLinePolygonProperties(mbMap, undefined, timesliceMaskConfig);
-    // centroid layers added after polygon layers to ensure they are on top of polygon layers
-    this._setMbCentroidProperties(mbMap, undefined, timesliceMaskConfig);
+    // label layers added after geometry layers to ensure they are on top
+    this._setMbLabelProperties(mbMap, undefined, timesliceMaskConfig);
   }
 
   _getTimesliceMaskConfig(timeslice?: Timeslice): TimesliceMaskConfig | undefined {
@@ -995,9 +1030,9 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     const prevMeta = this.getSourceDataRequest()?.getMeta();
-    return prevMeta !== undefined && prevMeta.timesiceMaskField !== undefined
+    return prevMeta !== undefined && prevMeta.timesliceMaskField !== undefined
       ? {
-          timesiceMaskField: prevMeta.timesiceMaskField,
+          timesliceMaskField: prevMeta.timesliceMaskField,
           timeslice,
         }
       : undefined;
@@ -1017,8 +1052,12 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return this.makeMbLayerId('text');
   }
 
-  _getMbCentroidLayerId() {
-    return this.makeMbLayerId('centroid');
+  // _getMbTextLayerId is labels for Points and MultiPoints
+  // _getMbLabelLayerId is labels for not Points and MultiPoints
+  // _getMbLabelLayerId used to be called _getMbCentroidLayerId
+  // TODO merge textLayer and labelLayer into single layer
+  _getMbLabelLayerId() {
+    return this.makeMbLayerId('label');
   }
 
   _getMbSymbolLayerId() {
@@ -1033,20 +1072,19 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return this.makeMbLayerId('fill');
   }
 
-  _getMbTooManyFeaturesLayerId() {
-    return this.makeMbLayerId('toomanyfeatures');
-  }
-
-  getMbLayerIds() {
+  getMbTooltipLayerIds() {
     return [
       this._getMbPointLayerId(),
       this._getMbTextLayerId(),
-      this._getMbCentroidLayerId(),
+      this._getMbLabelLayerId(),
       this._getMbSymbolLayerId(),
       this._getMbLineLayerId(),
       this._getMbPolygonLayerId(),
-      this._getMbTooManyFeaturesLayerId(),
     ];
+  }
+
+  getMbLayerIds() {
+    return this.getMbTooltipLayerIds();
   }
 
   ownsMbLayerId(mbLayerId: string) {
@@ -1088,6 +1126,10 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     return this.getSource().hasTooltipProperties() || this.getJoins().length > 0;
   }
 
+  getFeatureId(feature: Feature): string | number | undefined {
+    return feature.properties?.[GEOJSON_FEATURE_ID_PROPERTY_NAME];
+  }
+
   getFeatureById(id: string | number) {
     const featureCollection = this._getSourceFeatureCollection();
     if (!featureCollection) {
@@ -1095,7 +1137,7 @@ export class VectorLayer extends AbstractLayer implements IVectorLayer {
     }
 
     const targetFeature = featureCollection.features.find((feature) => {
-      return feature.properties?.[FEATURE_ID_PROPERTY_NAME] === id;
+      return this.getFeatureId(feature) === id;
     });
     return targetFeature ? targetFeature : null;
   }

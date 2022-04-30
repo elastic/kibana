@@ -5,20 +5,12 @@
  * 2.0.
  */
 
+import type { Filter, RangeFilter } from '@kbn/es-query';
 import { EmbeddableToDashboardDrilldown } from './embeddable_to_dashboard_drilldown';
 import { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
 import { savedObjectsServiceMock } from '../../../../../../../src/core/public/mocks';
-import {
-  Filter,
-  FilterStateStore,
-  Query,
-  RangeFilter,
-  TimeRange,
-} from '../../../../../../../src/plugins/data/common';
-import {
-  ApplyGlobalFilterActionContext,
-  esFilters,
-} from '../../../../../../../src/plugins/data/public';
+import { FilterStateStore, Query, TimeRange } from '../../../../../../../src/plugins/data/common';
+import { ApplyGlobalFilterActionContext } from '../../../../../../../src/plugins/data/public';
 import {
   DashboardAppLocatorDefinition,
   DashboardAppLocatorParams,
@@ -90,7 +82,7 @@ describe('.execute() & getHref', () => {
     });
     const getLocationSpy = jest.spyOn(definition, 'getLocation');
     const drilldown = new EmbeddableToDashboardDrilldown({
-      start: ((() => ({
+      start: (() => ({
         core: {
           application: {
             navigateToApp,
@@ -111,7 +103,7 @@ describe('.execute() & getHref', () => {
           },
         },
         self: {},
-      })) as unknown) as StartServicesGetter<
+      })) as unknown as StartServicesGetter<
         Pick<StartDependencies, 'data' | 'uiActionsEnhanced' | 'dashboard'>
       >,
     });
@@ -123,7 +115,7 @@ describe('.execute() & getHref', () => {
       ...config,
     };
 
-    const context = ({
+    const context = {
       filters: filtersFromEvent,
       embeddable: {
         getInput: () => ({
@@ -134,7 +126,7 @@ describe('.execute() & getHref', () => {
         }),
       },
       timeFieldName,
-    } as unknown) as ApplyGlobalFilterActionContext & EnhancedEmbeddableContext;
+    } as unknown as ApplyGlobalFilterActionContext & EnhancedEmbeddableContext;
 
     await drilldown.execute(completeConfig, context);
 
@@ -318,7 +310,7 @@ describe('.execute() & getHref', () => {
 function getFilter(isPinned: boolean, queryKey: string): Filter {
   return {
     $state: {
-      store: isPinned ? esFilters.FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE,
+      store: isPinned ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE,
     },
     meta: {
       index: 'logstash-*',
@@ -349,11 +341,13 @@ function getMockTimeRangeFilter(): RangeFilter {
       negate: false,
       alias: null,
     },
-    range: {
-      order_date: {
-        gte: '2020-03-23T13:10:29.665Z',
-        lt: '2020-03-23T13:10:36.736Z',
-        format: 'strict_date_optional_time',
+    query: {
+      range: {
+        order_date: {
+          gte: '2020-03-23T13:10:29.665Z',
+          lt: '2020-03-23T13:10:36.736Z',
+          format: 'strict_date_optional_time',
+        },
       },
     },
   };

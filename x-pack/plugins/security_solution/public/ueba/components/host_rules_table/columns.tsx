@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import {
   DragEffects,
   DraggableWrapper,
@@ -17,7 +18,7 @@ import { Provider } from '../../../timelines/components/timeline/data_providers/
 import { HostRulesColumns } from './';
 
 import * as i18n from './translations';
-import { HostRulesFields } from '../../../../common';
+import { HostRulesFields } from '../../../../common/search_strategy';
 
 export const getHostRulesColumns = (): HostRulesColumns => [
   {
@@ -38,7 +39,11 @@ export const getHostRulesColumns = (): HostRulesColumns => [
               id,
               name: ruleName,
               kqlQuery: '',
-              queryMatch: { field: 'signal.rule.name', value: ruleName, operator: IS_OPERATOR },
+              queryMatch: {
+                field: 'kibana.alert.rule.name',
+                value: ruleName,
+                operator: IS_OPERATOR,
+              },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -73,7 +78,11 @@ export const getHostRulesColumns = (): HostRulesColumns => [
               id,
               name: ruleType,
               kqlQuery: '',
-              queryMatch: { field: 'signal.rule.type', value: ruleType, operator: IS_OPERATOR },
+              queryMatch: {
+                field: 'kibana.alert.rule.type',
+                value: ruleType,
+                operator: IS_OPERATOR,
+              },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -109,7 +118,7 @@ export const getHostRulesColumns = (): HostRulesColumns => [
               name: `${riskScore}`,
               kqlQuery: '',
               queryMatch: {
-                field: 'signal.rule.risk_score',
+                field: ALERT_RISK_SCORE,
                 value: riskScore,
                 operator: IS_OPERATOR,
               },

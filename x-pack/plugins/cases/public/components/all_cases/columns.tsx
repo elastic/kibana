@@ -10,6 +10,7 @@ import {
   EuiAvatar,
   EuiBadgeGroup,
   EuiBadge,
+  EuiButton,
   EuiLink,
   EuiTableActionsColumnType,
   EuiTableComputedColumnType,
@@ -21,14 +22,14 @@ import {
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 
+import { Case, DeleteCase, SubCase } from '../../../common/ui/types';
 import {
   CaseStatuses,
   CaseType,
-  DeleteCase,
-  Case,
-  SubCase,
+  CommentType,
+  CommentRequestAlertType,
   ActionConnector,
-} from '../../../common';
+} from '../../../common/api';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { CaseDetailsHrefSchema, CaseDetailsLink, CasesNavigation } from '../links';
@@ -43,6 +44,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { StatusContextMenu } from '../case_action_bar/status_context_menu';
 import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
+import { PostComment } from '../../containers/use_post_comment';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -72,9 +74,13 @@ export interface GetCasesColumn {
   handleIsLoading: (a: boolean) => void;
   isLoadingCases: string[];
   refreshCases?: (a?: boolean) => void;
-  showActions: boolean;
+  isSelectorView: boolean;
   userCanCrud: boolean;
   connectors?: ActionConnector[];
+  onRowClick?: (theCase: Case) => void;
+  alertData?: Omit<CommentRequestAlertType, 'type'>;
+  postComment?: (args: PostComment) => Promise<void>;
+  updateCase?: (newCase: Case) => void;
 }
 export const useCasesColumns = ({
   caseDetailsNavigation,
@@ -84,9 +90,13 @@ export const useCasesColumns = ({
   handleIsLoading,
   isLoadingCases,
   refreshCases,
-  showActions,
+  isSelectorView,
   userCanCrud,
   connectors = [],
+  onRowClick,
+  alertData,
+  postComment,
+  updateCase,
 }: GetCasesColumn): CasesColumns[] => {
   // Delete case
   const {
@@ -130,6 +140,25 @@ export const useCasesColumns = ({
         deleteCaseOnClick: toggleDeleteModal,
       }),
     [toggleDeleteModal]
+  );
+
+  const assignCaseAction = useCallback(
+    async (theCase: Case) => {
+      if (alertData != null) {
+        await postComment?.({
+          caseId: theCase.id,
+          data: {
+            type: CommentType.alert,
+            ...alertData,
+          },
+          updateCase,
+        });
+      }
+      if (onRowClick) {
+        onRowClick(theCase);
+      }
+    },
+    [alertData, onRowClick, postComment, updateCase]
   );
 
   useEffect(() => {
@@ -188,7 +217,7 @@ export const useCasesColumns = ({
                 size="s"
               />
               <Spacer data-test-subj="case-table-column-createdBy">
-                {createdBy.fullName ? createdBy.fullName : createdBy.username ?? i18n.UNKNOWN}
+                {createdBy.username ?? i18n.UNKNOWN}
               </Spacer>
             </>
           );
@@ -281,38 +310,66 @@ export const useCasesColumns = ({
         return getEmptyTagValue();
       },
     },
-    {
-      name: i18n.STATUS,
-      render: (theCase: Case) => {
-        if (theCase?.subCases == null || theCase.subCases.length === 0) {
-          if (theCase.status == null || theCase.type === CaseType.collection) {
-            return getEmptyTagValue();
-          }
-          return (
-            <StatusContextMenu
-              currentStatus={theCase.status}
-              disabled={!userCanCrud || isLoadingCases.length > 0}
-              onStatusChanged={(status) =>
-                handleDispatchUpdate({
-                  updateKey: 'status',
-                  updateValue: status,
-                  caseId: theCase.id,
-                  version: theCase.version,
-                })
+    ...(isSelectorView
+      ? [
+          {
+            align: RIGHT_ALIGNMENT,
+            render: (theCase: Case) => {
+              if (theCase.id != null) {
+                return (
+                  <EuiButton
+                    data-test-subj={`cases-table-row-select-${theCase.id}`}
+                    onClick={() => {
+                      assignCaseAction(theCase);
+                    }}
+                    size="s"
+                    fill={true}
+                  >
+                    {i18n.SELECT}
+                  </EuiButton>
+                );
               }
-            />
-          );
-        }
+              return getEmptyTagValue();
+            },
+          },
+        ]
+      : []),
+    ...(!isSelectorView
+      ? [
+          {
+            name: i18n.STATUS,
+            render: (theCase: Case) => {
+              if (theCase?.subCases == null || theCase.subCases.length === 0) {
+                if (theCase.status == null || theCase.type === CaseType.collection) {
+                  return getEmptyTagValue();
+                }
+                return (
+                  <StatusContextMenu
+                    currentStatus={theCase.status}
+                    disabled={!userCanCrud || isLoadingCases.length > 0}
+                    onStatusChanged={(status) =>
+                      handleDispatchUpdate({
+                        updateKey: 'status',
+                        updateValue: status,
+                        caseId: theCase.id,
+                        version: theCase.version,
+                      })
+                    }
+                  />
+                );
+              }
 
-        const badges = getSubCasesStatusCountsBadges(theCase.subCases);
-        return badges.map(({ color, count }, index) => (
-          <EuiBadge key={index} color={color}>
-            {count}
-          </EuiBadge>
-        ));
-      },
-    },
-    ...(showActions
+              const badges = getSubCasesStatusCountsBadges(theCase.subCases);
+              return badges.map(({ color, count }, index) => (
+                <EuiBadge key={index} color={color}>
+                  {count}
+                </EuiBadge>
+              ));
+            },
+          },
+        ]
+      : []),
+    ...(userCanCrud && !isSelectorView
       ? [
           {
             name: (

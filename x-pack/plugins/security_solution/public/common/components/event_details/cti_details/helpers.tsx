@@ -14,7 +14,7 @@ import {
   MATCHED_FIELD,
   MATCHED_ID,
   MATCHED_TYPE,
-  PROVIDER,
+  FEED_NAME,
 } from '../../../../../common/cti/constants';
 import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
 import {
@@ -81,7 +81,7 @@ export const getEnrichmentIdentifiers = (enrichment: CtiEnrichment): CtiEnrichme
   field: getEnrichmentValue(enrichment, MATCHED_FIELD),
   value: getEnrichmentValue(enrichment, MATCHED_ATOMIC),
   type: getEnrichmentValue(enrichment, MATCHED_TYPE),
-  provider: getShimmedIndicatorValue(enrichment, PROVIDER),
+  feedName: getShimmedIndicatorValue(enrichment, FEED_NAME),
 });
 
 const buildEnrichmentId = (enrichment: CtiEnrichment): string => {

@@ -7,11 +7,10 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { mountWithIntl } from '@kbn/test/jest';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { I18nProvider } from '@kbn/i18n/react';
 import { DocViewerTable, DocViewerTableProps } from './table';
-import { indexPatterns, IndexPattern } from '../../../../../data/public';
+import { IndexPattern } from '../../../../../data/public';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 
 jest.mock('../../../kibana_services', () => ({
@@ -28,9 +27,13 @@ import { getServices } from '../../../kibana_services';
       }
     },
   },
+  fieldFormats: {
+    getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
+    getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+  },
 }));
 
-const indexPattern = ({
+const indexPattern = {
   fields: {
     getAll: () => [
       {
@@ -66,22 +69,15 @@ const indexPattern = ({
     ],
   },
   metaFields: ['_index', '_score'],
-  flattenHit: undefined,
-  formatHit: jest.fn((hit) => hit._source),
-} as unknown) as IndexPattern;
+  getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+} as unknown as IndexPattern;
 
 indexPattern.fields.getByName = (name: string) => {
   return indexPattern.fields.getAll().find((field) => field.name === name);
 };
 
-indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);
-
 const mountComponent = (props: DocViewerTableProps) => {
-  return mount(
-    <I18nProvider>
-      <DocViewerTable {...props} />
-    </I18nProvider>
-  );
+  return mountWithIntl(<DocViewerTable {...props} />);
 };
 
 describe('DocViewTable at Discover', () => {
@@ -172,12 +168,14 @@ describe('DocViewTable at Discover', () => {
       expect(rowComponent.length).toBe(1);
     });
 
-    ([
-      'addInclusiveFilterButton',
-      'collapseBtn',
-      'toggleColumnButton',
-      'underscoreWarning',
-    ] as const).forEach((element) => {
+    (
+      [
+        'addInclusiveFilterButton',
+        'collapseBtn',
+        'toggleColumnButton',
+        'underscoreWarning',
+      ] as const
+    ).forEach((element) => {
       const elementExist = check[element];
 
       if (typeof elementExist === 'boolean') {
@@ -271,7 +269,7 @@ describe('DocViewTable at Discover Doc', () => {
 });
 
 describe('DocViewTable at Discover Doc with Fields API', () => {
-  const indexPatterneCommerce = ({
+  const indexPatterneCommerce = {
     fields: {
       getAll: () => [
         {
@@ -364,33 +362,8 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
       ],
     },
     metaFields: ['_index', '_type', '_score', '_id'],
-    flattenHit: jest.fn((hit) => {
-      const result = {} as Record<string, unknown>;
-      Object.keys(hit).forEach((key) => {
-        if (key !== 'fields') {
-          result[key] = hit[key];
-        } else {
-          Object.keys(hit.fields).forEach((field) => {
-            result[field] = hit.fields[field];
-          });
-        }
-      });
-      return result;
-    }),
-    formatHit: jest.fn((hit) => {
-      const result = {} as Record<string, unknown>;
-      Object.keys(hit).forEach((key) => {
-        if (key !== 'fields') {
-          result[key] = hit[key];
-        } else {
-          Object.keys(hit.fields).forEach((field) => {
-            result[field] = hit.fields[field];
-          });
-        }
-      });
-      return result;
-    }),
-  } as unknown) as IndexPattern;
+    getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+  } as unknown as IndexPattern;
 
   indexPatterneCommerce.fields.getByName = (name: string) => {
     return indexPatterneCommerce.fields.getAll().find((field) => field.name === name);

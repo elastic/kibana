@@ -37,7 +37,7 @@ describe('extract_exceptions_list', () => {
   test('logs expect error message if the exceptionsList is undefined', () => {
     extractExceptionsList({
       logger,
-      exceptionsList: (undefined as unknown) as RuleParams['exceptionsList'],
+      exceptionsList: undefined as unknown as RuleParams['exceptionsList'],
     });
     expect(logger.error).toBeCalledWith(
       'Exception list is null when it never should be. This indicates potentially that saved object migrations did not run correctly. Returning empty saved object reference'

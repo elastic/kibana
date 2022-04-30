@@ -92,28 +92,27 @@ export const parseEsError = (
  * This is a temporary solution. In a future work we will have a dedicate
  * ES API to debug the script.
  */
-export const getRuntimeFieldValidator = (
-  index: string,
-  searchService: DataPublicPluginStart['search']
-) => async (runtimeField: EsRuntimeField) => {
-  return await searchService
-    .search({
-      params: {
-        index,
-        body: {
-          runtime_mappings: {
-            temp: runtimeField,
-          },
-          size: 0,
-          query: {
-            match_none: {},
+export const getRuntimeFieldValidator =
+  (index: string, searchService: DataPublicPluginStart['search']) =>
+  async (runtimeField: EsRuntimeField) => {
+    return await searchService
+      .search({
+        params: {
+          index,
+          body: {
+            runtime_mappings: {
+              temp: runtimeField,
+            },
+            size: 0,
+            query: {
+              match_none: {},
+            },
           },
         },
-      },
-    })
-    .toPromise()
-    .then(() => null)
-    .catch((e) => {
-      return parseEsError(e.attributes);
-    });
-};
+      })
+      .toPromise()
+      .then(() => null)
+      .catch((e) => {
+        return parseEsError(e.attributes);
+      });
+  };

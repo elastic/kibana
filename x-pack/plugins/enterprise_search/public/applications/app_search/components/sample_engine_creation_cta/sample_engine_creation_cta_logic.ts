@@ -52,7 +52,7 @@ export const SampleEngineCreationCtaLogic = kea<
       const body = JSON.stringify({ seed_sample_engine: true });
 
       try {
-        await http.post('/api/app_search/onboarding_complete', {
+        await http.post('/internal/app_search/onboarding_complete', {
           body,
         });
         actions.onSampleEngineCreationSuccess();

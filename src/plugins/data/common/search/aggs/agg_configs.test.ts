@@ -11,7 +11,7 @@ import { AggConfig } from './agg_config';
 import { AggConfigs } from './agg_configs';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockAggTypesRegistry } from './test_helpers';
-import { IndexPattern } from '../../index_patterns/';
+import { IndexPattern } from '../..';
 import { stubIndexPattern } from '../../stubs';
 import { IEsSearchResponse } from '..';
 
@@ -360,6 +360,7 @@ describe('AggConfigs', () => {
           "0": Object {
             "range": Object {
               "@timestamp": Object {
+                "format": "strict_date_optional_time",
                 "gte": "2021-05-05T00:00:00.000Z",
                 "lte": "2021-05-10T00:00:00.000Z",
               },
@@ -368,6 +369,7 @@ describe('AggConfigs', () => {
           "86400000": Object {
             "range": Object {
               "@timestamp": Object {
+                "format": "strict_date_optional_time",
                 "gte": "2021-05-04T00:00:00.000Z",
                 "lte": "2021-05-09T00:00:00.000Z",
               },
@@ -627,9 +629,7 @@ describe('AggConfigs', () => {
           },
         },
       };
-      const mergedResponse = ac.postFlightTransform(
-        (response as unknown) as IEsSearchResponse<any>
-      );
+      const mergedResponse = ac.postFlightTransform(response as unknown as IEsSearchResponse<any>);
       expect(mergedResponse.rawResponse).toEqual({
         aggregations: {
           '1': {
@@ -724,9 +724,7 @@ describe('AggConfigs', () => {
           },
         },
       };
-      const mergedResponse = ac.postFlightTransform(
-        (response as unknown) as IEsSearchResponse<any>
-      );
+      const mergedResponse = ac.postFlightTransform(response as unknown as IEsSearchResponse<any>);
       expect(mergedResponse.rawResponse).toEqual({
         aggregations: {
           '1': {

@@ -8,7 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import type { IAggType } from 'src/plugins/data/public';
 import { PaletteRegistry } from 'src/plugins/charts/public';
@@ -18,9 +18,7 @@ import { DatatableComponent } from './components/table_basic';
 
 import type { ILensInterpreterRenderHandlers } from '../types';
 import type { FormatFactory } from '../../common';
-import { DatatableProps } from '../../common/expressions';
-
-export { datatableColumn, getDatatable } from '../../common/expressions';
+import type { DatatableProps } from '../../common/expressions';
 
 export const getDatatableRenderer = (dependencies: {
   formatFactory: FormatFactory;

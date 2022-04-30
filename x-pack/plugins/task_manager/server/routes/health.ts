@@ -62,8 +62,8 @@ export function healthRoute(
   const requiredHotStatsFreshness: number = config.monitored_stats_required_freshness;
 
   function getHealthStatus(monitoredStats: MonitoringStats) {
-    const summarizedStats = summarizeMonitoringStats(monitoredStats, config);
-    const status = calculateHealthStatus(summarizedStats, config);
+    const summarizedStats = summarizeMonitoringStats(logger, monitoredStats, config);
+    const status = calculateHealthStatus(summarizedStats, config, logger);
     const now = Date.now();
     const timestamp = new Date(now).toISOString();
     return { id: taskManagerId, timestamp, status, ...summarizedStats };
@@ -118,9 +118,7 @@ export function withServiceStatus(
   const level =
     monitoredHealth.status === HealthStatus.OK
       ? ServiceStatusLevels.available
-      : monitoredHealth.status === HealthStatus.Warning
-      ? ServiceStatusLevels.degraded
-      : ServiceStatusLevels.unavailable;
+      : ServiceStatusLevels.degraded;
   return [
     monitoredHealth,
     {

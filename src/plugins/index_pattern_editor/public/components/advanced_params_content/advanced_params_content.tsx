@@ -22,7 +22,7 @@ const allowHiddenAriaLabel = i18n.translate('indexPatternEditor.form.allowHidden
 const customIndexPatternIdLabel = i18n.translate(
   'indexPatternEditor.form.customIndexPatternIdLabel',
   {
-    defaultMessage: 'Custom index pattern ID',
+    defaultMessage: 'Custom data view ID',
   }
 );
 

@@ -25,7 +25,7 @@ describe('EndpointList store concerns', () => {
   const loadDataToStore = () => {
     dispatch({
       type: 'serverReturnedEndpointList',
-      payload: mockEndpointResultList({ request_page_size: 1, request_page_index: 1, total: 10 }),
+      payload: mockEndpointResultList({ pageSize: 1, page: 0, total: 10 }),
     });
   };
 
@@ -48,7 +48,14 @@ describe('EndpointList store concerns', () => {
               disabled: false,
               page: 1,
               pageSize: 50,
+              startDate: 'now-1d',
+              endDate: 'now',
               isInvalidDateRange: false,
+              autoRefreshOptions: {
+                enabled: false,
+                duration: DEFAULT_POLL_INTERVAL,
+              },
+              recentlyUsedDateRanges: [],
             },
             logData: { type: 'UninitialisedResourceState' },
           },
@@ -94,8 +101,8 @@ describe('EndpointList store concerns', () => {
 
     test('it handles `serverReturnedEndpointList', () => {
       const payload = mockEndpointResultList({
-        request_page_size: 1,
-        request_page_index: 1,
+        page: 0,
+        pageSize: 1,
         total: 10,
       });
       dispatch({
@@ -104,9 +111,9 @@ describe('EndpointList store concerns', () => {
       });
 
       const currentState = store.getState();
-      expect(currentState.hosts).toEqual(payload.hosts);
-      expect(currentState.pageSize).toEqual(payload.request_page_size);
-      expect(currentState.pageIndex).toEqual(payload.request_page_index);
+      expect(currentState.hosts).toEqual(payload.data);
+      expect(currentState.pageSize).toEqual(payload.pageSize);
+      expect(currentState.pageIndex).toEqual(payload.page);
       expect(currentState.total).toEqual(payload.total);
     });
   });

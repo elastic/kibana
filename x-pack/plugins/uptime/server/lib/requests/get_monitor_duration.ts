@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { LocationDurationLine, MonitorDurationResult } from '../../../common/types';
 import { QUERY, UNNAMED_LOCATION } from '../../../common/constants';

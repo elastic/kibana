@@ -10,7 +10,8 @@ import { mount, ReactWrapper } from 'enzyme';
 import { act, waitFor } from '@testing-library/react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { ConnectorTypes, SECURITY_SOLUTION_OWNER } from '../../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { ConnectorTypes } from '../../../common/api';
 import { useKibana } from '../../common/lib/kibana';
 import { TestProviders } from '../../common/mock';
 import { usePostCase } from '../../containers/use_post_case';
@@ -101,9 +102,11 @@ const fillForm = (wrapper: ReactWrapper) => {
     .simulate('change', { target: { value: sampleData.description } });
 
   act(() => {
-    ((wrapper.find(EuiComboBox).props() as unknown) as {
-      onChange: (a: EuiComboBoxOptionOption[]) => void;
-    }).onChange(sampleTags.map((tag) => ({ label: tag })));
+    (
+      wrapper.find(EuiComboBox).props() as unknown as {
+        onChange: (a: EuiComboBoxOptionOption[]) => void;
+      }
+    ).onChange(sampleTags.map((tag) => ({ label: tag })));
   });
 };
 
@@ -230,6 +233,29 @@ describe('Create case', () => {
 
       fillForm(wrapper);
       wrapper.find('[data-test-subj="caseSyncAlerts"] button').first().simulate('click');
+      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+
+      await waitFor(() =>
+        expect(postCase).toBeCalledWith({ ...sampleData, settings: { syncAlerts: false } })
+      );
+    });
+
+    it('should set sync alerts to false when the sync setting is passed in as false and alerts are disabled', async () => {
+      useConnectorsMock.mockReturnValue({
+        ...sampleConnectorData,
+        connectors: connectorsMock,
+      });
+
+      const wrapper = mount(
+        <TestProviders>
+          <FormContext onSuccess={onFormSubmitSuccess} syncAlertsDefaultValue={false}>
+            <CreateCaseForm {...defaultCreateCaseForm} disableAlerts={true} />
+            <SubmitCaseButton />
+          </FormContext>
+        </TestProviders>
+      );
+
+      fillForm(wrapper);
       wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
 
       await waitFor(() =>
@@ -416,9 +442,11 @@ describe('Create case', () => {
       });
 
       act(() => {
-        ((wrapper.find(EuiComboBox).at(1).props() as unknown) as {
-          onChange: (a: EuiComboBoxOptionOption[]) => void;
-        }).onChange([{ value: '19', label: 'Denial of Service' }]);
+        (
+          wrapper.find(EuiComboBox).at(1).props() as unknown as {
+            onChange: (a: EuiComboBoxOptionOption[]) => void;
+          }
+        ).onChange([{ value: '19', label: 'Denial of Service' }]);
       });
 
       wrapper

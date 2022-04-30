@@ -10,19 +10,29 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { timePicker, visChart, visEditor, visualize } = getPageObjects([
+  const { timePicker, visChart, visEditor, visualize, timelion, common } = getPageObjects([
     'timePicker',
     'visChart',
     'visEditor',
     'visualize',
+    'timelion',
+    'common',
   ]);
+  const security = getService('security');
   const monacoEditor = getService('monacoEditor');
   const kibanaServer = getService('kibanaServer');
   const elasticChart = getService('elasticChart');
   const find = getService('find');
+  const retry = getService('retry');
+  const timelionChartSelector = 'timelionChart';
 
   describe('Timelion visualization', () => {
     before(async () => {
+      await security.testUser.setRoles([
+        'kibana_admin',
+        'long_window_logstash',
+        'test_logstash_reader',
+      ]);
       await kibanaServer.uiSettings.update({
         'timelion:legacyChartsLibrary': false,
       });
@@ -35,13 +45,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     const initVisualization = async (expression: string, interval: string = '12h') => {
       await visEditor.setTimelionInterval(interval);
       await monacoEditor.setCodeEditorValue(expression);
-      await visEditor.clickGo();
+      await visEditor.clickGo(true);
     };
 
     it('should display correct data for specified index pattern and timefield', async () => {
       await initVisualization('.es(index=long-window-logstash-*,timefield=@timestamp)');
 
-      const chartData = await visChart.getAreaChartData('q:* > count');
+      const chartData = await visChart.getAreaChartData('q:* > count', timelionChartSelector);
       expect(chartData).to.eql([3, 5, 2, 6, 1, 6, 1, 7, 0, 0]);
     });
 
@@ -62,10 +72,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         '36h'
       );
 
-      const firstAreaChartData = await visChart.getAreaChartData('q:* > avg(bytes)');
-      const secondAreaChartData = await visChart.getAreaChartData('q:* > min(bytes)');
-      const thirdAreaChartData = await visChart.getAreaChartData('q:* > max(bytes)');
-      const forthAreaChartData = await visChart.getAreaChartData('q:* > cardinality(bytes)');
+      const firstAreaChartData = await visChart.getAreaChartData(
+        'q:* > avg(bytes)',
+        timelionChartSelector
+      );
+      const secondAreaChartData = await visChart.getAreaChartData(
+        'q:* > min(bytes)',
+        timelionChartSelector
+      );
+      const thirdAreaChartData = await visChart.getAreaChartData(
+        'q:* > max(bytes)',
+        timelionChartSelector
+      );
+      const forthAreaChartData = await visChart.getAreaChartData(
+        'q:* > cardinality(bytes)',
+        timelionChartSelector
+      );
 
       expect(firstAreaChartData).to.eql([5732.783676366217, 5721.775973559419]);
       expect(secondAreaChartData).to.eql([0, 0]);
@@ -84,10 +106,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           '.es(*).if(operator=gt,if=200,then=50,else=150).label("condition")'
       );
 
-      const firstAreaChartData = await visChart.getAreaChartData('initial');
-      const secondAreaChartData = await visChart.getAreaChartData('add multiply abs divide');
-      const thirdAreaChartData = await visChart.getAreaChartData('query derivative min sum');
-      const forthAreaChartData = await visChart.getAreaChartData('condition');
+      const firstAreaChartData = await visChart.getAreaChartData('initial', timelionChartSelector);
+      const secondAreaChartData = await visChart.getAreaChartData(
+        'add multiply abs divide',
+        timelionChartSelector
+      );
+      const thirdAreaChartData = await visChart.getAreaChartData(
+        'query derivative min sum',
+        timelionChartSelector
+      );
+      const forthAreaChartData = await visChart.getAreaChartData(
+        'condition',
+        timelionChartSelector
+      );
 
       expect(firstAreaChartData).to.eql(firstAreaExpectedChartData);
       expect(secondAreaChartData).to.eql(firstAreaExpectedChartData);
@@ -112,20 +143,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         '36h'
       );
 
-      const leftAxesCount = await visChart.getAxesCountByPosition('left');
-      const rightAxesCount = await visChart.getAxesCountByPosition('right');
-      const firstAxesLabels = await visChart.getYAxisLabels();
-      const secondAxesLabels = await visChart.getYAxisLabels(1);
-      const thirdAxesLabels = await visChart.getYAxisLabels(2);
-      const firstAreaChartData = await visChart.getAreaChartData('Average Machine RAM amount');
+      const leftAxesCount = await visChart.getAxesCountByPosition('left', timelionChartSelector);
+      const rightAxesCount = await visChart.getAxesCountByPosition('right', timelionChartSelector);
+      const firstAxesLabels = await visChart.getYAxisLabels(timelionChartSelector);
+      const secondAxesLabels = await visChart.getYAxisLabels(timelionChartSelector, 1);
+      const thirdAxesLabels = await visChart.getYAxisLabels(timelionChartSelector, 2);
+      const firstAreaChartData = await visChart.getAreaChartData(
+        'Average Machine RAM amount',
+        timelionChartSelector
+      );
       const secondAreaChartData = await visChart.getAreaChartData(
         'Average Bytes for request',
-        undefined,
+        timelionChartSelector,
         true
       );
       const thirdAreaChartData = await visChart.getAreaChartData(
         'Average Bytes for request with offset',
-        undefined,
+        timelionChartSelector,
         true
       );
 
@@ -134,7 +168,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(firstAreaChartData).to.eql(firstAreaExpectedChartData);
       expect(secondAreaChartData).to.eql(secondAreaExpectedChartData);
       expect(thirdAreaChartData).to.eql(thirdAreaExpectedChartData);
-      expect(firstAxesLabels).to.eql(['12.19GB', '12.2GB', '12.21GB']);
+      expect(firstAxesLabels).to.eql(['12.2GB', '12.21GB']);
       expect(secondAxesLabels).to.eql(['5.59KB', '5.6KB']);
       expect(thirdAxesLabels.toString()).to.be(
         'BYTES_5721,BYTES_5722,BYTES_5723,BYTES_5724,BYTES_5725,BYTES_5726,BYTES_5727,BYTES_5728,BYTES_5729,BYTES_5730,BYTES_5731,BYTES_5732,BYTES_5733'
@@ -144,9 +178,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('should display correct chart data for split expression', async () => {
       await initVisualization('.es(index=logstash-*, split=geo.dest:3)', '1 day');
 
-      const firstAreaChartData = await visChart.getAreaChartData('q:* > geo.dest:CN > count');
-      const secondAreaChartData = await visChart.getAreaChartData('q:* > geo.dest:IN > count');
-      const thirdAreaChartData = await visChart.getAreaChartData('q:* > geo.dest:US > count');
+      const firstAreaChartData = await visChart.getAreaChartData(
+        'q:* > geo.dest:CN > count',
+        timelionChartSelector
+      );
+      const secondAreaChartData = await visChart.getAreaChartData(
+        'q:* > geo.dest:IN > count',
+        timelionChartSelector
+      );
+      const thirdAreaChartData = await visChart.getAreaChartData(
+        'q:* > geo.dest:US > count',
+        timelionChartSelector
+      );
 
       expect(firstAreaChartData).to.eql([0, 905, 910, 850, 0]);
       expect(secondAreaChartData).to.eql([0, 763, 699, 825, 0]);
@@ -156,8 +199,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('should display two areas and one bar chart items', async () => {
       await initVisualization('.es(*), .es(*), .es(*).bars(stack=true)');
 
-      const areasChartsCount = await visChart.getAreaSeriesCount();
-      const barsChartsCount = await visChart.getHistogramSeriesCount();
+      const areasChartsCount = await visChart.getAreaSeriesCount(timelionChartSelector);
+      const barsChartsCount = await visChart.getHistogramSeriesCount(timelionChartSelector);
 
       expect(areasChartsCount).to.be(2);
       expect(barsChartsCount).to.be(1);
@@ -167,7 +210,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should correctly display the legend items names and position', async () => {
         await initVisualization('.es(*).label("first series"), .es(*).label("second series")');
 
-        const legendNames = await visChart.getLegendEntries();
+        const legendNames = await visChart.getLegendEntriesXYCharts(timelionChartSelector);
         const legendElement = await find.byClassName('echLegend');
         const isLegendTopPositioned = await legendElement.elementHasClass('echLegend--top');
         const isLegendLeftPositioned = await legendElement.elementHasClass('echLegend--left');
@@ -193,6 +236,84 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const isLegendElementExists = await find.existsByCssSelector('.echLegend');
         expect(isLegendElementExists).to.be(false);
+      });
+    });
+
+    describe('expression typeahead', () => {
+      it('should display function suggestions', async () => {
+        await monacoEditor.setCodeEditorValue('');
+        await monacoEditor.typeCodeEditorValue('.e', 'timelionCodeEditor');
+        // wait for monaco editor model will be updated with new value
+        await common.sleep(300);
+        let value = await monacoEditor.getCodeEditorValue(0);
+        expect(value).to.eql('.e');
+        const suggestions = await timelion.getSuggestionItemsText();
+        expect(suggestions.length).to.eql(2);
+        expect(suggestions[0].includes('es')).to.eql(true);
+        expect(suggestions[1].includes('elasticsearch')).to.eql(true);
+        await timelion.clickSuggestion(0);
+        // wait for monaco editor model will be updated with new value
+        await common.sleep(300);
+        value = await monacoEditor.getCodeEditorValue(0);
+        expect(value).to.eql('.es()');
+      });
+
+      describe('dynamic suggestions for argument values', () => {
+        describe('.es()', () => {
+          it('should show index pattern suggestions for index argument', async () => {
+            await monacoEditor.setCodeEditorValue('');
+            await monacoEditor.typeCodeEditorValue('.es(index=', 'timelionCodeEditor');
+            // wait for index patterns will be loaded
+            await common.sleep(500);
+            // other suggestions might be shown for a short amount of time - retry until metric suggestions show up
+            await retry.try(async () => {
+              const suggestions = await timelion.getSuggestionItemsText();
+              expect(suggestions[0].includes('log')).to.eql(true);
+            });
+          });
+
+          it('should show field suggestions for timefield argument when index pattern set', async () => {
+            await monacoEditor.setCodeEditorValue('');
+            await monacoEditor.typeCodeEditorValue(
+              '.es(index=logstash-*, timefield=',
+              'timelionCodeEditor'
+            );
+            // other suggestions might be shown for a short amount of time - retry until metric suggestions show up
+            await retry.try(async () => {
+              const suggestions = await timelion.getSuggestionItemsText();
+              expect(suggestions.length).to.eql(4);
+              expect(suggestions[0].includes('@timestamp')).to.eql(true);
+            });
+          });
+
+          it('should show field suggestions for split argument when index pattern set', async () => {
+            await monacoEditor.setCodeEditorValue('');
+            await monacoEditor.typeCodeEditorValue(
+              '.es(index=logstash-*, timefield=@timestamp, split=',
+              'timelionCodeEditor'
+            );
+            // wait for split fields to load
+            await common.sleep(300);
+            // other suggestions might be shown for a short amount of time - retry until metric suggestions show up
+            await retry.try(async () => {
+              const suggestions = await timelion.getSuggestionItemsText();
+
+              expect(suggestions[0].includes('@message.raw')).to.eql(true);
+            });
+          });
+
+          it('should show field suggestions for metric argument when index pattern set', async () => {
+            await monacoEditor.typeCodeEditorValue(
+              '.es(index=logstash-*, timefield=@timestamp, metric=avg:',
+              'timelionCodeEditor'
+            );
+            // other suggestions might be shown for a short amount of time - retry until metric suggestions show up
+            await retry.try(async () => {
+              const suggestions = await timelion.getSuggestionItemsText();
+              expect(suggestions[0].includes('avg:bytes')).to.eql(true);
+            });
+          });
+        });
       });
     });
 
