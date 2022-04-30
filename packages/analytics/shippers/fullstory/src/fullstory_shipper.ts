@@ -40,14 +40,24 @@ export class FullStoryShipper implements IShipper {
   private lastUserId: string | undefined;
   private readonly eventTypesAllowlist?: string[];
 
+  /**
+   * Creates a new instance of the FullStoryShipper.
+   * @param config {@link FullStoryShipperConfig}
+   * @param initContext {@link AnalyticsClientInitContext}
+   */
   constructor(
-    { eventTypesAllowlist, ...config }: FullStoryShipperConfig,
+    config: FullStoryShipperConfig,
     private readonly initContext: AnalyticsClientInitContext
   ) {
-    this.fullStoryApi = loadSnippet(config);
+    const { eventTypesAllowlist, ...snippetConfig } = config;
+    this.fullStoryApi = loadSnippet(snippetConfig);
     this.eventTypesAllowlist = eventTypesAllowlist;
   }
 
+  /**
+   * {@inheritDoc IShipper.extendContext}
+   * @param newContext {@inheritDoc IShipper.extendContext.newContext}
+   */
   public extendContext(newContext: EventContext): void {
     this.initContext.logger.debug(`Received context ${JSON.stringify(newContext)}`);
 
@@ -86,6 +96,10 @@ export class FullStoryShipper implements IShipper {
     }
   }
 
+  /**
+   * {@inheritDoc IShipper.optIn}
+   * @param isOptedIn {@inheritDoc IShipper.optIn.isOptedIn}
+   */
   public optIn(isOptedIn: boolean): void {
     this.initContext.logger.debug(`Setting FS to optIn ${isOptedIn}`);
     // FullStory uses 2 different opt-in methods:
@@ -101,6 +115,10 @@ export class FullStoryShipper implements IShipper {
     }
   }
 
+  /**
+   * {@inheritDoc IShipper.reportEvents}
+   * @param events {@inheritDoc IShipper.reportEvents.events}
+   */
   public reportEvents(events: Event[]): void {
     this.initContext.logger.debug(`Reporting ${events.length} events to FS`);
     events
