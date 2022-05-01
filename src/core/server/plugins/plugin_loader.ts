@@ -20,10 +20,10 @@ export interface IsolateInstance<Module> {
 }
 
 export function requireIsolate<Module>(modulePath: string): IsolateInstance<Module> {
-  const isolate = new SynchronousWorker({
-    sharedEventLoop: true,
-    sharedMicrotaskQueue: true,
-  });
+  // const isolate = new SynchronousWorker({
+  //   sharedEventLoop: true,
+  //   sharedMicrotaskQueue: true,
+  // });
 
   // const req = isolate.createRequire(modulePath);
   // let promise;
@@ -42,7 +42,7 @@ export function requireIsolate<Module>(modulePath: string): IsolateInstance<Modu
   // isolate.globalThis.Error = Error
   // require plugin inside VM isolate
   const isolateModule = require(modulePath);
-  console.log('require.cache::', require.cache)
+  // console.log('require.cache::', require.cache)
 
   // ready to be garbage collected
   // _require = null;
