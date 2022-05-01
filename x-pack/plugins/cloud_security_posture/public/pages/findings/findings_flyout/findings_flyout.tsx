@@ -169,7 +169,7 @@ const getRemediationCards = ({ result, ...rest }: CspFinding): Card[] => [
         : ['', ''],
       [TEXT.EVIDENCE, <CodeBlock>{JSON.stringify(result.evidence, null, 2)}</CodeBlock>],
       [
-        TEXT.TIMESTAMP,
+        TEXT.RULE_EVALUATED_AT,
         <span>{moment(rest['@timestamp']).format('MMMM D, YYYY @ HH:mm:ss.SSS')}</span>,
       ],
     ],
