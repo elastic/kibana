@@ -280,16 +280,19 @@ function AlertsPage() {
             isLoading={ruleStatsLoading}
             data-test-subj="statMuted"
           />,
-          <EuiStat
-            title={ruleStats.error}
-            description={i18n.translate('xpack.observability.alerts.ruleStats.errors', {
-              defaultMessage: 'Errors',
-            })}
-            color="primary"
-            titleSize="xs"
-            isLoading={ruleStatsLoading}
-            data-test-subj="statErrors"
-          />,
+          <EuiButtonEmpty href={`${manageRulesHref}?_a=(lastResponse:!(error))`}>
+            <EuiStat
+              title={ruleStats.error}
+              description={i18n.translate('xpack.observability.alerts.ruleStats.errors', {
+                defaultMessage: 'Errors',
+              })}
+              color="primary"
+              titleColor="primary"
+              titleSize="xs"
+              isLoading={ruleStatsLoading}
+              data-test-subj="statErrors"
+            />
+          </EuiButtonEmpty>,
           <Divider />,
           <EuiButtonEmpty href={manageRulesHref}>
             {i18n.translate('xpack.observability.alerts.manageRulesButtonLabel', {
