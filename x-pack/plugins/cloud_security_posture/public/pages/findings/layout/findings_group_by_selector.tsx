@@ -11,6 +11,7 @@ import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { INTERNAL_FEATURE_FLAGS } from '../../../../common/constants';
 import type { FindingsGroupByKind } from '../types';
+import { findingsNavigation } from '../../../common/navigation/constants';
 
 const getGroupByOptions = (): Array<EuiComboBoxOptionOption<FindingsGroupByKind>> => [
   {
@@ -31,6 +32,18 @@ interface Props {
   type: FindingsGroupByKind;
 }
 
+const getFindingsGroupPath = (opts: Array<EuiComboBoxOptionOption<FindingsGroupByKind>>) => {
+  const [firstOption] = opts;
+
+  switch (firstOption?.value) {
+    case 'resource':
+      return findingsNavigation.findings_by_resource.path;
+    case 'default':
+    default:
+      return findingsNavigation.findings_default.path;
+  }
+};
+
 export const FindingsGroupBySelector = ({ type }: Props) => {
   const groupByOptions = useMemo(getGroupByOptions, []);
   const history = useHistory();
@@ -38,7 +51,7 @@ export const FindingsGroupBySelector = ({ type }: Props) => {
   if (!INTERNAL_FEATURE_FLAGS.showFindingsGroupBy) return null;
 
   const onChange = (options: Array<EuiComboBoxOptionOption<FindingsGroupByKind>>) =>
-    history.push({ pathname: `/findings/${options[0]?.value}` });
+    history.push({ pathname: getFindingsGroupPath(options) });
 
   return (
     <div>
