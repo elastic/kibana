@@ -89,14 +89,10 @@ export const routes = {
     exact: true,
   },
   '/alerts/rules': {
-    handler: (routeParams: any) => {
-      return <RulesPage routeParams={routeParams} />;
+    handler: () => {
+      return <RulesPage />;
     },
-    params: {
-      query: t.partial({
-        executionStatus: t.string,
-      }),
-    },
+    params: {},
     exact: true,
   },
 };

@@ -30,9 +30,9 @@ import {
   unsnoozeRule,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { RuleExecutionStatus, ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { useHistory } from 'react-router-dom';
-import { RouteParams } from '../../routes';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+import { Provider, rulesPageStateContainer, useRulesPageStateContainer } from './state_container';
+
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchRules } from '../../hooks/use_fetch_rules';
@@ -73,11 +73,7 @@ import {
 import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 const ENTER_KEY = 13;
 
-interface RulesPageProps {
-  routeParams: RouteParams<'/alerts/rules'>;
-}
-
-export function RulesPage({ routeParams }: RulesPageProps) {
+function RulesPage() {
   const { ObservabilityPageTemplate, kibanaFeatures } = usePluginContext();
   const {
     http,
@@ -86,13 +82,10 @@ export function RulesPage({ routeParams }: RulesPageProps) {
     application: { capabilities },
     notifications: { toasts },
   } = useKibana().services;
-  const history = useHistory();
+  const { lastResponse, setLastResponse } = useRulesPageStateContainer();
   const documentationLink = docLinks.links.observability.createAlerts;
   const ruleTypeRegistry = triggersActionsUi.ruleTypeRegistry;
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
-  const searchParams = new URLSearchParams(history.location.search);
-  const defaultSearchParams = searchParams.getAll('executionStatus');
-  // const [nextSearchParams, setNextSearchParams] = useState<string[]>(defaultSearchParams);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
   const [sort, setSort] = useState<EuiTableSortingType<RuleTableItem>['sort']>({
     field: 'name',
@@ -100,8 +93,7 @@ export function RulesPage({ routeParams }: RulesPageProps) {
   });
   const [inputText, setInputText] = useState<string | undefined>();
   const [searchText, setSearchText] = useState<string | undefined>();
-  const [ruleLastResponseFilter, setRuleLastResponseFilter] =
-    useState<string[]>(defaultSearchParams);
+  // const [ruleLastResponseFilter, setRuleLastResponseFilter] = useState<string[]>([]);
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
@@ -117,7 +109,7 @@ export function RulesPage({ routeParams }: RulesPageProps) {
 
   const { rulesState, setRulesState, reload, noData, initialLoad } = useFetchRules({
     searchText,
-    ruleLastResponseFilter,
+    ruleLastResponseFilter: lastResponse,
     typesFilter,
     page,
     setPage,
@@ -293,30 +285,9 @@ export function RulesPage({ routeParams }: RulesPageProps) {
 
   const setExecutionStatusFilter = useCallback(
     (ids: string[]) => {
-      const nextSearchParams = new URLSearchParams(history.location.search);
-      const prev = nextSearchParams.getAll('executionStatus');
-      const filteredIds = ids;
-      ids.forEach((id) => {
-        const isPreviouslyChecked = prev.includes(id);
-        if (!isPreviouslyChecked) {
-          filteredIds.concat(id);
-        } else {
-          filteredIds.filter((val) => {
-            return val !== id;
-          });
-        }
-      });
-      nextSearchParams.delete('executionStatus');
-      for (const value of filteredIds) {
-        nextSearchParams.append('executionStatus', value);
-      }
-      history.push({
-        ...history.location,
-        search: nextSearchParams.toString(),
-      });
-      setRuleLastResponseFilter(filteredIds);
+      setLastResponse(ids);
     },
-    [history]
+    [setLastResponse]
   );
 
   const getRulesTable = () => {
@@ -374,7 +345,7 @@ export function RulesPage({ routeParams }: RulesPageProps) {
           <EuiFlexItem grow={false}>
             <LastResponseFilter
               key="rule-lastResponse-filter"
-              selectedStatuses={ruleLastResponseFilter}
+              selectedStatuses={lastResponse}
               onChange={setExecutionStatusFilter}
             />
           </EuiFlexItem>
@@ -500,3 +471,13 @@ export function RulesPage({ routeParams }: RulesPageProps) {
     </ObservabilityPageTemplate>
   );
 }
+
+function WrappedRulesPage() {
+  return (
+    <Provider value={rulesPageStateContainer}>
+      <RulesPage />
+    </Provider>
+  );
+}
+
+export { WrappedRulesPage as RulesPage };
