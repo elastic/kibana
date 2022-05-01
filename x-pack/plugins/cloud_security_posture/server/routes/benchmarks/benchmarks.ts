@@ -20,7 +20,10 @@ import type {
   ListResult,
 } from '@kbn/fleet-plugin/common';
 import { cspRuleAssetSavedObjectType, CspRuleSchema } from '../../../common/schemas/csp_rule';
-import { BENCHMARKS_ROUTE_PATH, CIS_KUBERNETES_PACKAGE_NAME } from '../../../common/constants';
+import {
+  BENCHMARKS_ROUTE_PATH,
+  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+} from '../../../common/constants';
 import {
   BENCHMARK_PACKAGE_POLICY_PREFIX,
   benchmarksInputSchema,
@@ -212,7 +215,7 @@ export const defineGetBenchmarksRoute = (router: CspRouter, cspContext: CspAppCo
         const cspPackagePolicies = await getCspPackagePolicies(
           soClient,
           packagePolicyService,
-          CIS_KUBERNETES_PACKAGE_NAME,
+          CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
           query
         );
 
