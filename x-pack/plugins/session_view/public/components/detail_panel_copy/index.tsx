@@ -13,7 +13,7 @@ import { useStyles } from './styles';
 
 interface DetailPanelCopyDeps {
   children: ReactNode;
-  textToCopy: string | number | undefined;
+  textToCopy: string;
   display?: 'inlineBlock' | 'block' | undefined;
 }
 
@@ -34,7 +34,7 @@ export const DetailPanelCopy = ({
 
   const props: DetailPanelListItemProps = {
     copy: (
-      <EuiCopy textToCopy={dataOrDash(textToCopy).toString()} display={display}>
+      <EuiCopy textToCopy={textToCopy} display={display}>
         {(copy) => (
           <EuiButtonIcon
             css={styles.copyButton}
